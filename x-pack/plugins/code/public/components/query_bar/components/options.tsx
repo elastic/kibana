@@ -51,8 +51,7 @@ export class SearchOptions extends Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (
-      this.props.searchOptions.defaultRepoScopeOn &&
-      !prevProps.searchOptions.defaultRepoScopeOn
+      this.props.searchOptions.defaultRepoScopeOn !== prevProps.searchOptions.defaultRepoScopeOn
     ) {
       this.setState({ defaultRepoScopeOn: this.props.searchOptions.defaultRepoScopeOn });
     }

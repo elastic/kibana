@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
+import { render } from 'react-dom';
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
-import { render } from 'react-dom';
+import { EuiComboBox } from '@elastic/eui';
 import { Datasource, DataType } from '..';
 import { DatasourceDimensionPanelProps, DatasourceDataPanelProps } from '../types';
 import { getIndexPatterns } from './loader';
@@ -19,10 +20,11 @@ interface IndexPatternColumn {
   operationId: string;
   label: string;
   dataType: DataType;
-  isBucketed: false;
+  isBucketed: boolean;
 
   // Private
   operationType: OperationType;
+  sourceField: string;
 }
 
 export interface IndexPattern {
@@ -41,7 +43,7 @@ export interface IndexPatternField {
 }
 
 export interface IndexPatternPersistedState {
-  currentIndexPattern: string;
+  currentIndexPatternId: string;
 
   columnOrder: string[];
   columns: Record<string, IndexPatternColumn>;
@@ -50,6 +52,119 @@ export interface IndexPatternPersistedState {
 export type IndexPatternPrivateState = IndexPatternPersistedState & {
   indexPatterns: Record<string, IndexPattern>;
 };
+
+export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
+  return (
+    <div>
+      Index Pattern Data Source
+      <div>
+        <EuiComboBox
+          data-test-subj="indexPattern-switcher"
+          options={Object.values(props.state.indexPatterns).map(({ title, id }) => ({
+            label: title,
+            value: id,
+          }))}
+          selectedOptions={
+            props.state.currentIndexPatternId
+              ? [
+                  {
+                    label: props.state.indexPatterns[props.state.currentIndexPatternId].title,
+                    value: props.state.indexPatterns[props.state.currentIndexPatternId].id,
+                  },
+                ]
+              : undefined
+          }
+          singleSelection={{ asPlainText: true }}
+          isClearable={false}
+          onChange={choices => {
+            props.setState({
+              ...props.state,
+              currentIndexPatternId: choices[0].value as string,
+            });
+          }}
+        />
+        <div>
+          {props.state.currentIndexPatternId &&
+            props.state.indexPatterns[props.state.currentIndexPatternId].fields.map(field => (
+              <div key={field.name}>{field.name}</div>
+            ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
+  state: IndexPatternPrivateState;
+  setState: (newState: IndexPatternPrivateState) => void;
+};
+
+export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
+  const fields = props.state.indexPatterns[props.state.currentIndexPatternId].fields;
+  const columns: IndexPatternColumn[] = fields.map((field, index) => ({
+    operationId: `${index}`,
+    label: `Value of ${field.name}`,
+    dataType: field.type as DataType,
+    isBucketed: false,
+
+    operationType: 'value' as OperationType,
+    sourceField: field.name,
+  }));
+
+  const filteredColumns = columns.filter(col => {
+    const { operationId, label, dataType, isBucketed } = col;
+
+    return props.filterOperations({
+      id: operationId,
+      label,
+      dataType,
+      isBucketed,
+    });
+  });
+
+  const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
+
+  return (
+    <div>
+      Dimension Panel
+      <EuiComboBox
+        data-test-subj="indexPattern-dimension"
+        options={filteredColumns.map(col => ({
+          label: col.label,
+          value: col.operationId,
+        }))}
+        selectedOptions={
+          selectedColumn
+            ? [
+                {
+                  label: selectedColumn.label,
+                  value: selectedColumn.operationId,
+                },
+              ]
+            : []
+        }
+        singleSelection={{ asPlainText: true }}
+        isClearable={false}
+        onChange={choices => {
+          const column: IndexPatternColumn = columns.find(
+            ({ operationId }) => operationId === choices[0].value
+          )!;
+          const newColumns: IndexPatternPrivateState['columns'] = {
+            ...props.state.columns,
+            [props.columnId]: column,
+          };
+
+          props.setState({
+            ...props.state,
+            columns: newColumns,
+            // Order is not meaningful until we aggregate
+            columnOrder: Object.keys(newColumns),
+          });
+        }}
+      />
+    </div>
+  );
+}
 
 export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
   // Not stateful. State is persisted to the frame
@@ -71,37 +186,35 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
         };
       }
       return {
-        currentIndexPattern: indexPatternObjects ? indexPatternObjects[0].id : '',
+        currentIndexPatternId: indexPatternObjects ? indexPatternObjects[0].id : '',
         indexPatterns,
         columns: {},
         columnOrder: [],
       };
     },
 
-    getPersistableState({ currentIndexPattern, columns, columnOrder }: IndexPatternPrivateState) {
-      return { currentIndexPattern, columns, columnOrder };
+    getPersistableState({ currentIndexPatternId, columns, columnOrder }: IndexPatternPrivateState) {
+      return { currentIndexPatternId, columns, columnOrder };
     },
 
     toExpression(state: IndexPatternPrivateState) {
-      return `${JSON.stringify(state.columns)}`;
+      if (state.columnOrder.length === 0) {
+        return '';
+      }
+
+      const fieldNames = state.columnOrder.map(col => state.columns[col].sourceField);
+      const expression = `esdocs index="${state.currentIndexPatternId}" fields="${fieldNames.join(
+        ', '
+      )}" sort="${fieldNames[0]}, DESC"`;
+
+      return expression;
     },
 
     renderDataPanel(
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
     ) {
-      render(
-        <div>
-          Index Pattern Data Source
-          <div>
-            {props.state.currentIndexPattern &&
-              Object.keys(props.state.indexPatterns).map(key => (
-                <div key={key}>{props.state.indexPatterns[key].title}</div>
-              ))}
-          </div>
-        </div>,
-        domElement
-      );
+      render(<IndexPatternDataPanel {...props} />, domElement);
     },
 
     getPublicAPI(state, setState) {
@@ -111,19 +224,21 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
         },
         getOperationForColumnId: (columnId: string) => {
           const column = state.columns[columnId];
-          if (columnId) {
-            const { dataType, label, isBucketed, operationId } = column;
-            return {
-              id: operationId,
-              label,
-              dataType,
-              isBucketed,
-            };
-          }
-          return null;
+          const { dataType, label, isBucketed, operationId } = column;
+          return {
+            id: operationId,
+            label,
+            dataType,
+            isBucketed,
+          };
         },
 
-        renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {},
+        renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
+          render(
+            <IndexPatternDimensionPanel state={state} setState={setState} {...props} />,
+            domElement
+          );
+        },
 
         removeColumnInTableSpec: (columnId: string) => [],
         moveColumnTo: (columnId: string, targetIndex: number) => {},

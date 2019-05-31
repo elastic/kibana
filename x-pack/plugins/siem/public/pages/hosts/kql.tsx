@@ -36,7 +36,7 @@ export const HostsKql = pure<HostsKqlProps>(({ indexPattern, type }) => (
             loadSuggestions={loadSuggestions}
             onChange={setFilterQueryDraftFromKueryExpression}
             onSubmit={applyFilterQueryFromKueryExpression}
-            placeholder={i18n.KQL_PLACE_HOLDER}
+            placeholder={i18n.KQL_PLACEHOLDER}
             suggestions={suggestions}
             value={filterQueryDraft ? filterQueryDraft.expression : ''}
           />

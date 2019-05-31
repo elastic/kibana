@@ -56,7 +56,7 @@ function getDefaultGroupByConfig(
         aggName,
         dropDownName,
         field: fieldName,
-        interval: '1m',
+        calendar_interval: '1m',
       };
   }
 }

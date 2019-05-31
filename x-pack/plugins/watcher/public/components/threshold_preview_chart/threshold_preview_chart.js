@@ -151,7 +151,7 @@ app.directive('thresholdPreviewChart', function ($injector) {
         return options;
       }
 
-      onPlotHover = (event, pos, item, plot) => {
+      onPlotHover = (event, pos, item, plot) => { // eslint-disable-line no-unused-vars
         if (!Boolean(item)) {
           this.dataPointTooltip = undefined;
           return;

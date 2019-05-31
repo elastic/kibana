@@ -2,9 +2,8 @@
 
 exports[`renders correctly 1`] = `
 <Component
-  actionLabel="Do Something"
-  actionUrl="my/url/from/nowwhere"
-  message="My awesome message"
+  actionPrimaryLabel="Do Something"
+  actionPrimaryUrl="my/url/from/nowwhere"
   title="My Super Title"
 />
 `;

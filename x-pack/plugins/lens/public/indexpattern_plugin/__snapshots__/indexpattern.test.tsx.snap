@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IndexPattern Data Source #getPublicAPI renderDimensionPanel should render a dimension panel 1`] = `
+<div>
+  Dimension Panel
+  <EuiComboBox
+    compressed={false}
+    data-test-subj="indexPattern-dimension"
+    fullWidth={false}
+    isClearable={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "label": "Value of timestamp",
+          "value": "0",
+        },
+        Object {
+          "label": "Value of bytes",
+          "value": "1",
+        },
+        Object {
+          "label": "Value of source",
+          "value": "2",
+        },
+      ]
+    }
+    selectedOptions={Array []}
+    singleSelection={
+      Object {
+        "asPlainText": true,
+      }
+    }
+  />
+</div>
+`;
+
+exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
+<div>
+  Index Pattern Data Source
+  <div>
+    <EuiComboBox
+      compressed={false}
+      data-test-subj="indexPattern-switcher"
+      fullWidth={false}
+      isClearable={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "label": "Fake Index Pattern",
+            "value": "1",
+          },
+          Object {
+            "label": "Fake Rollup Pattern",
+            "value": "2",
+          },
+        ]
+      }
+      selectedOptions={
+        Array [
+          Object {
+            "label": "Fake Index Pattern",
+            "value": "1",
+          },
+        ]
+      }
+      singleSelection={
+        Object {
+          "asPlainText": true,
+        }
+      }
+    />
+    <div>
+      <div
+        key="timestamp"
+      >
+        timestamp
+      </div>
+      <div
+        key="bytes"
+      >
+        bytes
+      </div>
+      <div
+        key="source"
+      >
+        source
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -22,17 +22,17 @@ import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
-import VisEditorVisualization from './vis_editor_visualization';
-import Visualization from './visualization';
-import VisPicker from './vis_picker';
-import PanelConfig from './panel_config';
-import brushHandler from '../lib/create_brush_handler';
+import { VisEditorVisualization } from './vis_editor_visualization';
+import { Visualization } from './visualization';
+import { VisPicker } from './vis_picker';
+import { PanelConfig } from './panel_config';
+import { brushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
-import { extractIndexPatterns } from '../lib/extract_index_patterns';
+import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 
-class VisEditor extends Component {
+export class VisEditor extends Component {
   constructor(props) {
     super(props);
     const { vis } = props;
@@ -198,5 +198,3 @@ VisEditor.propTypes = {
   savedObj: PropTypes.object,
   timeRange: PropTypes.object,
 };
-
-export default VisEditor;

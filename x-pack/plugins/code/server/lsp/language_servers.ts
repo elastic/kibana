@@ -21,7 +21,7 @@ export interface LanguageServerDefinition extends LanguageServer {
 }
 
 export const TYPESCRIPT: LanguageServerDefinition = {
-  name: 'Typescript',
+  name: 'TypeScript',
   builtinWorkspaceFolders: false,
   languages: ['typescript', 'javascript', 'html'],
   launcher: TypescriptServerLauncher,

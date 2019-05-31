@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DatasourcePublicAPI, TableColumn, Visualization, DatasourceSuggestion } from '../../types';
+import { Visualization, DatasourceSuggestion } from '../../types';
 import { Action } from './state_management';
 
 export interface Suggestion {
@@ -16,7 +16,7 @@ export interface Suggestion {
 }
 
 /**
- * This function takes a list of available data tables and a list of viusalization
+ * This function takes a list of available data tables and a list of visualization
  * extensions and creates a ranked list of suggestions which contain a pair of a data table
  * and a visualization.
  *
@@ -27,30 +27,19 @@ export function getSuggestions(
   datasourceTableSuggestions: DatasourceSuggestion[],
   visualizationMap: Record<string, Visualization>,
   activeVisualizationId: string | null,
-  visualizationState: unknown,
-  datasourcePublicAPI: DatasourcePublicAPI
+  visualizationState: unknown
 ): Suggestion[] {
-  const roleMapping = activeVisualizationId
-    ? visualizationMap[activeVisualizationId].getMappingOfTableToRoles(
-        visualizationState,
-        datasourcePublicAPI
-      )
-    : [];
-  const datasourceTableMetas: Record<string, TableColumn[]> = {};
-  datasourceTableSuggestions.map(({ tableColumns }, datasourceSuggestionId) => {
-    datasourceTableMetas[datasourceSuggestionId] = tableColumns;
-  });
+  const datasourceTables = datasourceTableSuggestions.map(({ tableColumns }) => tableColumns);
 
   return (
     Object.entries(visualizationMap)
       .map(([visualizationId, visualization]) => {
         return visualization
           .getSuggestions({
-            tableColumns: datasourceTableMetas,
-            roles: roleMapping,
+            tables: datasourceTables,
             state: visualizationId === activeVisualizationId ? visualizationState : undefined,
           })
-          .map(({ datasourceSuggestionId, ...suggestion }) => ({
+          .map(({ tableIndex: datasourceSuggestionId, ...suggestion }) => ({
             ...suggestion,
             visualizationId,
             datasourceState: datasourceTableSuggestions[datasourceSuggestionId].state,
