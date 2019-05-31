@@ -14,8 +14,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
         id="ip-overview-source.autonomous_system.as_org"
         value="Test Org"
       />
-       
-      /
+       /
       <pure(Component)
         field="source.autonomous_system.asn"
         id="ip-overview-source.autonomous_system.asn"
@@ -229,9 +228,16 @@ exports[`Field Renderers #reputationRenderer it renders correctly against snapsh
   }
 >
   <pure(Component)
+    link="10.10.10.10"
+  >
+    View at virustotal.com
+  </pure(Component)>
+  <pure(Component) />
+  <br />
+  <pure(Component)
     domain="10.10.10.10"
   >
-    View at iana.org
+    View at talosIntelligence.com
   </pure(Component)>
   <pure(Component) />
 </Component>
