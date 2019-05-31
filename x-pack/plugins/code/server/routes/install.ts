@@ -20,7 +20,7 @@ export function installRoute(server: CodeServerRouter, lspService: LspService) {
     languages: def.languages,
     installationType: def.installationType,
     downloadUrl:
-      typeof def.downloadUrl === 'function' ? def.downloadUrl(def, kibanaVersion) : def.downloadUrl,
+      typeof def.downloadUrl === 'function' ? def.downloadUrl(kibanaVersion) : def.downloadUrl,
     pluginName: def.installationPluginName,
   });
 
