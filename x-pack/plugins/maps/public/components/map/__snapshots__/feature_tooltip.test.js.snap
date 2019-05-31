@@ -44,34 +44,30 @@ exports[`FeatureTooltip should show both filter buttons and close button 1`] = `
         Object {
           "description": <div>
             <div
-              className="tooltipLineDescription"
+              className="mapFeatureTooltip__lineDescription"
               dangerouslySetInnerHTML={
                 Object {
                   "__html": "bar",
                 }
               }
             />
-            <div
-              className="tooltipLineDescription"
-            >
-              <EuiButtonIcon
-                aria-label="Filter on property"
-                className="mapFeatureTooltipFilterButton"
-                color="primary"
-                iconSize="m"
-                iconType="plusInCircle"
-                onClick={[Function]}
-                title="Filter on property"
-                type="button"
-              />
-            </div>
+            <EuiButtonIcon
+              aria-label="Filter on property"
+              className="mapFeatureTooltip__filterButton"
+              color="primary"
+              iconSize="m"
+              iconType="plusInCircle"
+              onClick={[Function]}
+              title="Filter on property"
+              type="button"
+            />
           </div>,
           "title": "foo",
         },
         Object {
           "description": <div>
             <div
-              className="tooltipLineDescription"
+              className="mapFeatureTooltip__lineDescription"
               dangerouslySetInnerHTML={
                 Object {
                   "__html": "bar",
@@ -145,34 +141,30 @@ exports[`FeatureTooltip should show only filter button for filterable properties
         Object {
           "description": <div>
             <div
-              className="tooltipLineDescription"
+              className="mapFeatureTooltip__lineDescription"
               dangerouslySetInnerHTML={
                 Object {
                   "__html": "bar",
                 }
               }
             />
-            <div
-              className="tooltipLineDescription"
-            >
-              <EuiButtonIcon
-                aria-label="Filter on property"
-                className="mapFeatureTooltipFilterButton"
-                color="primary"
-                iconSize="m"
-                iconType="plusInCircle"
-                onClick={[Function]}
-                title="Filter on property"
-                type="button"
-              />
-            </div>
+            <EuiButtonIcon
+              aria-label="Filter on property"
+              className="mapFeatureTooltip__filterButton"
+              color="primary"
+              iconSize="m"
+              iconType="plusInCircle"
+              onClick={[Function]}
+              title="Filter on property"
+              type="button"
+            />
           </div>,
           "title": "foo",
         },
         Object {
           "description": <div>
             <div
-              className="tooltipLineDescription"
+              className="mapFeatureTooltip__lineDescription"
               dangerouslySetInnerHTML={
                 Object {
                   "__html": "bar",

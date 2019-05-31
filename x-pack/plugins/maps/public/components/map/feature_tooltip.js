@@ -89,23 +89,21 @@ export class FeatureTooltip extends React.Component {
     }
 
     return (
-      <div className="tooltipLineDescription">
-        <EuiButtonIcon
-          iconType="plusInCircle"
-          title={i18n.translate('xpack.maps.tooltip.filterOnPropertyTitle', {
-            defaultMessage: 'Filter on property'
-          })}
-          onClick={() => {
-            this.props.closeTooltip();
-            const filterAction = tooltipProperty.getFilterAction();
-            filterAction();
-          }}
-          aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
-            defaultMessage: 'Filter on property'
-          })}
-          className="mapFeatureTooltip__filterButton"
-        />
-      </div>
+      <EuiButtonIcon
+        iconType="plusInCircle"
+        title={i18n.translate('xpack.maps.tooltip.filterOnPropertyTitle', {
+          defaultMessage: 'Filter on property'
+        })}
+        onClick={() => {
+          this.props.closeTooltip();
+          const filterAction = tooltipProperty.getFilterAction();
+          filterAction();
+        }}
+        aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
+          defaultMessage: 'Filter on property'
+        })}
+        className="mapFeatureTooltip__filterButton"
+      />
     );
   }
 
