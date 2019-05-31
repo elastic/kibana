@@ -13,8 +13,9 @@ import { escapeRegExp } from '../../../common/lib/escape_reg_exp';
 
 const ELASTIC_LINK = new RegExp(escapeRegExp(ELASTIC_WEBSITE_URL));
 const NON_ELASTIC_EXTERNAL_LINK = new RegExp(
-  `((http|https):\/\/(?!${escapeRegExp(ELASTIC_WEBSITE_URL)})[\w\.\/\-=?#]+)`
+  `(?!${escapeRegExp(ELASTIC_WEBSITE_URL)})((http|https):\\/\\/[\\w\\.\\/\\-=?#]+)`
 );
+
 const md = new Markdown();
 
 md.use(mila, [
