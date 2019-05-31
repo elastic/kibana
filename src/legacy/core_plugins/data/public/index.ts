@@ -88,8 +88,6 @@ export interface DataSetup {
   query: QuerySetup;
 }
 
-export { ExpressionExecutorSetup } from './expression_executor';
-
 /** @public types */
 export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
 
