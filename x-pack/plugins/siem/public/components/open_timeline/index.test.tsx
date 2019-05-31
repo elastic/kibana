@@ -19,8 +19,10 @@ import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 
 const getStateChildComponent = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
-): React.Component<{}, {}, any> =>
+): // eslint-disable-next-line @typescript-eslint/no-explicit-any
+React.Component<{}, {}, any> =>
   wrapper
     .childAt(0)
     .childAt(0)

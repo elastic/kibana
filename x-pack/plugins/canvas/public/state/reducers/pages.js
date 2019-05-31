@@ -12,6 +12,7 @@ import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
 import { getSelectedPageIndex } from '../selectors/workpad';
+import { isGroupId } from '../../components/workpad_page/integration_utils';
 
 const setPageIndex = (workpadState, index) =>
   index < 0 || !workpadState.pages[index] || getSelectedPageIndex(workpadState) === index
@@ -36,8 +37,8 @@ function clonePage(page) {
   return {
     ...page,
     id: getId('page'),
-    groups: newNodes.filter(n => n.position.type === 'group'),
-    elements: newNodes.filter(n => n.position.type !== 'group'),
+    groups: newNodes.filter(n => isGroupId(n.id)),
+    elements: newNodes.filter(n => !isGroupId(n.id)),
   };
 }
 

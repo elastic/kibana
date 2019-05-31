@@ -24,15 +24,15 @@ interface SelectValueProp {
   text: string;
 }
 
-interface SelectOptions extends IndexedArray<SelectValueProp> {
+interface SelectOptions<T> extends IndexedArray<T> {
   byValue: {
-    [key: string]: SelectValueProp;
+    [key: string]: T;
   };
 }
 
-interface SelectParamEditorProps {
+interface SelectParamEditorProps<T = SelectValueProp> {
   aggParam: {
-    options: SelectOptions;
+    options: SelectOptions<T>;
   };
 }
 

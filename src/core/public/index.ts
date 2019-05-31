@@ -49,11 +49,12 @@ import { HttpServiceBase, HttpSetup, HttpStart } from './http';
 import { I18nSetup, I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
+  ErrorToastOptions,
   NotificationsSetup,
+  NotificationsStart,
   Toast,
   ToastInput,
   ToastsApi,
-  NotificationsStart,
 } from './notifications';
 import { OverlayRef, OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
@@ -128,6 +129,7 @@ export {
   HttpServiceBase,
   HttpSetup,
   HttpStart,
+  ErrorToastOptions,
   FatalErrorsSetup,
   FatalErrorInfo,
   Capabilities,
