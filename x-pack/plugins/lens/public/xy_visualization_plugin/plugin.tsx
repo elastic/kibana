@@ -5,13 +5,18 @@
  */
 
 import { Registry } from '@kbn/interpreter/target/common';
+import { CoreSetup } from 'src/core/public';
+import { register } from '@kbn/interpreter/common';
 import { xyVisualization } from './xy_visualization';
 
-// import {
-//   renderersRegistry,
-//   functionsRegistry,
-// } from '../../../../../src/legacy/core_plugins/interpreter/public/registries';
+import {
+  renderersRegistry,
+  functionsRegistry,
+  // @ts-ignore
+} from '../../../../../src/legacy/core_plugins/interpreter/public/registries';
+// @ts-ignore
 import { ExpressionFunction } from '../../../../../src/legacy/core_plugins/interpreter/public';
+import { legendConfig, xConfig, yConfig, xyChart, xyChartRenderer } from './xy_expression';
 
 // TODO these are intermediary types because interpreter is not typed yet
 // They can get replaced by references to the real interfaces as soon as they
@@ -20,13 +25,13 @@ interface RenderHandlers {
   done: () => void;
   onDestroy: (fn: () => void) => void;
 }
-export interface RenderFunction {
+export interface RenderFunction<T = unknown> {
   name: string;
   displayName: string;
   help: string;
   validate: () => void;
   reuseDomNode: boolean;
-  render: (domNode: Element, data: unknown, handlers: RenderHandlers) => void;
+  render: (domNode: Element, data: T, handlers: RenderHandlers) => void;
 }
 
 export interface InterpreterSetup {
@@ -37,10 +42,21 @@ export interface InterpreterSetup {
   >;
 }
 
+export interface XyVisualizationPluginSetupPlugins {
+  interpreter: InterpreterSetup;
+}
+
 class XyVisualizationPlugin {
   constructor() {}
 
-  setup() {
+  setup(_core: CoreSetup | null, { interpreter }: XyVisualizationPluginSetupPlugins) {
+    interpreter.functionsRegistry.register(() => legendConfig);
+    interpreter.functionsRegistry.register(() => xConfig);
+    interpreter.functionsRegistry.register(() => yConfig);
+    interpreter.functionsRegistry.register(() => xyChart);
+
+    interpreter.renderersRegistry.register(() => xyChartRenderer as RenderFunction<unknown>);
+
     return xyVisualization;
   }
 
@@ -49,5 +65,11 @@ class XyVisualizationPlugin {
 
 const plugin = new XyVisualizationPlugin();
 
-export const xyVisualizationSetup = () => plugin.setup();
+export const xyVisualizationSetup = () =>
+  plugin.setup(null, {
+    interpreter: {
+      renderersRegistry,
+      functionsRegistry,
+    },
+  });
 export const xyVisualizationStop = () => plugin.stop();
