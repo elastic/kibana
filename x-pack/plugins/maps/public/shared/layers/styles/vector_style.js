@@ -16,6 +16,7 @@ import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON, DEFAULT_ICON_SIZE } from './vector_constants';
+import { getMakiSymbolAnchor } from './symbol_utils';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -429,15 +430,18 @@ export class VectorStyle extends AbstractStyle {
     return null;
   }
 
+  _isSizeDynamicConfigComplete(styleDescriptor) {
+    return _.has(styleDescriptor, 'options.field.name')
+      && _.has(styleDescriptor, 'options.minSize')
+      && _.has(styleDescriptor, 'options.maxSize');
+  }
+
   _getMbSize(styleDescriptor) {
     if (styleDescriptor.type === VectorStyle.STYLE_TYPE.STATIC) {
       return styleDescriptor.options.size;
     }
 
-    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
-      && _.has(styleDescriptor, 'options.minSize')
-      && _.has(styleDescriptor, 'options.maxSize');
-    if (isDynamicConfigComplete) {
+    if (this._isSizeDynamicConfigComplete(styleDescriptor)) {
       return this._getMbDataDrivenSize({
         fieldName: styleDescriptor.options.field.name,
         minSize: styleDescriptor.options.minSize,
@@ -512,8 +516,8 @@ export class VectorStyle extends AbstractStyle {
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
 
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
-    mbMap.setLayoutProperty(symbolLayerId, 'icon-image', symbolId.split(' ').join('-'));
-
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-image', symbolId);
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
     const color = this._getMBColor(this._descriptor.properties.fillColor);
     // icon-color is only supported on SDF icons.
     mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
@@ -521,7 +525,7 @@ export class VectorStyle extends AbstractStyle {
     const iconSize = this._descriptor.properties.iconSize;
     if (iconSize.type === VectorStyle.STYLE_TYPE.STATIC) {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSize.options.size / DEFAULT_ICON_SIZE);
-    } else {
+    } else if (this._isSizeDynamicConfigComplete(iconSize)) {
       const targetName = VectorStyle.getComputedFieldName(iconSize.options.field.name);
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [

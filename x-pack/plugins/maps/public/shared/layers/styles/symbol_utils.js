@@ -20,12 +20,27 @@ maki.svgArray.forEach(svgString => {
   }
 });
 
-export function getSymbolSvg(symbolId) {
+export function getMakiSymbolSvg(symbolId) {
   if (!SYMBOLS[symbolId]) {
     throw new Error(`Unable to find symbol: ${symbolId}`);
   }
   return SYMBOLS[symbolId];
 }
+
+export function getMakiSymbolAnchor(symbolId) {
+  switch (symbolId) {
+    case 'embassy-11':
+    case 'embassy-15':
+    case 'marker-11':
+    case 'marker-15':
+    case 'marker-stroked-11':
+    case 'marker-stroked-15':
+      return 'bottom';
+    default:
+      return 'center';
+  }
+}
+
 
 export function buildSrcUrl(svgString) {
   const domUrl = window.URL || window.webkitURL || window;
@@ -60,7 +75,7 @@ function addImageToMap(imageUrl, imageId, symbolId, mbMap) {
 export async function loadImage(imageId, symbolId, color, mbMap) {
   let symbolSvg;
   try {
-    symbolSvg = getSymbolSvg(symbolId);
+    symbolSvg = getMakiSymbolSvg(symbolId);
   } catch(error) {
     return;
   }

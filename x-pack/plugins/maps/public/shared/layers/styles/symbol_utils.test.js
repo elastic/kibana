@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSymbolSvg, styleSvg } from './symbol_utils';
+import { getMakiSymbolSvg, styleSvg } from './symbol_utils';
 
-describe('getSymbolSvg', () => {
+describe('getMakiSymbolSvg', () => {
   it('Should load symbol svg', () => {
-    const svgString = getSymbolSvg('aerialway 11');
+    const svgString = getMakiSymbolSvg('aerialway 11');
     expect(svgString.length).toBe(643);
   });
 });

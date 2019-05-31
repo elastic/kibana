@@ -169,7 +169,7 @@ export function initRoutes(server, licenseUid) {
     path: `${SPRITE_PATH}/{path*}`,
     handler: {
       directory: {
-        path: path.join(__dirname, '../public/assets')
+        path: path.join(__dirname, './sprites')
       }
     }
   });
