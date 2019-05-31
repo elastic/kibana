@@ -31,20 +31,6 @@ interface KpiNetworkProps {
 
 const fieldTitleChartMapping: StatItemsProps[] = [
   {
-    key: 'networkEvents',
-    fields: [
-      {
-        key: 'networkEvents',
-        value: null,
-        icon: 'globe',
-        color: euiColorVis1,
-      },
-    ],
-    description: i18n.NETWORK_EVENTS,
-    enableAreaChart: true,
-    grow: 1,
-  },
-  {
     key: 'UniqueIps',
     fields: [
       {
@@ -73,24 +59,16 @@ const fieldTitleChartMapping: StatItemsProps[] = [
 
 const fieldTitleMatrixMapping: StatItemsProps[] = [
   {
-    key: 'uniqueFlowId',
+    key: 'networkEvents',
     fields: [
       {
-        key: 'uniqueFlowId',
+        key: 'networkEvents',
         value: null,
+        color: euiColorVis1,
       },
     ],
-    description: i18n.UNIQUE_ID,
-  },
-  {
-    key: 'activeAgents',
-    fields: [
-      {
-        key: 'activeAgents',
-        value: null,
-      },
-    ],
-    description: i18n.ACTIVE_AGENTS,
+    description: i18n.NETWORK_EVENTS,
+    grow: 1,
   },
   {
     key: 'dnsQueries',
@@ -101,6 +79,16 @@ const fieldTitleMatrixMapping: StatItemsProps[] = [
       },
     ],
     description: i18n.DNS_QUERIES,
+  },
+  {
+    key: 'uniqueFlowId',
+    fields: [
+      {
+        key: 'uniqueFlowId',
+        value: null,
+      },
+    ],
+    description: i18n.UNIQUE_ID,
   },
   {
     key: 'tlsHandshakes',
@@ -147,9 +135,6 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(({ data, loading 
     </FlexGroup>
   ) : (
     <EuiFlexGroup wrap>
-      <EuiFlexItem grow={2}>
-        <KpiNetworkBaseComponent data={data} fieldsMapping={fieldTitleChartMapping} />
-      </EuiFlexItem>
       <EuiFlexItem grow={1}>
         {_chunk(kipsPerRow, fieldTitleMatrixMapping).map((mappingsPerLine, idx) => (
           <React.Fragment key={`kpi-network-row-${idx}`}>
@@ -157,6 +142,9 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(({ data, loading 
             <KpiNetworkBaseComponent data={data} fieldsMapping={mappingsPerLine} />
           </React.Fragment>
         ))}
+      </EuiFlexItem>
+      <EuiFlexItem grow={1}>
+        <KpiNetworkBaseComponent data={data} fieldsMapping={fieldTitleChartMapping} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -20,9 +20,7 @@ export const kpiNetworkSchema = gql`
 
   type KpiNetworkData {
     networkEvents: Float
-    networkEventsHistogram: [KpiNetworkHistogramData!]
     uniqueFlowId: Float
-    activeAgents: Float
     uniqueSourcePrivateIps: Float
     uniqueSourcePrivateIpsHistogram: [KpiNetworkHistogramData!]
     uniqueDestinationPrivateIps: Float

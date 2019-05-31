@@ -25,11 +25,7 @@ export const kpiNetworkQuery = gql`
       id
       KpiNetwork(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {
         networkEvents
-        networkEventsHistogram {
-          ...KpiNetworkChartFields
-        }
         uniqueFlowId
-        activeAgents
         uniqueSourcePrivateIps
         uniqueSourcePrivateIpsHistogram {
           ...KpiNetworkChartFields

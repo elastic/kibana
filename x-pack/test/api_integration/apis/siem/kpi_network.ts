@@ -162,34 +162,7 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
       const expectedResult = {
         __typename: 'KpiNetworkData',
         networkEvents: 6157,
-        networkEventsHistogram: [
-          {
-            key_as_string: '2019-02-09T16:00:00.000Z',
-            doc_count: 1574,
-            count: null,
-            __typename: 'KpiNetworkHistogramData',
-          },
-          {
-            key_as_string: '2019-02-09T19:00:00.000Z',
-            doc_count: 0,
-            count: null,
-            __typename: 'KpiNetworkHistogramData',
-          },
-          {
-            key_as_string: '2019-02-09T22:00:00.000Z',
-            doc_count: 1302,
-            count: null,
-            __typename: 'KpiNetworkHistogramData',
-          },
-          {
-            key_as_string: '2019-02-10T01:00:00.000Z',
-            doc_count: 3281,
-            count: null,
-            __typename: 'KpiNetworkHistogramData',
-          },
-        ],
         uniqueFlowId: 712,
-        activeAgents: 1,
         uniqueSourcePrivateIps: 8,
         uniqueSourcePrivateIpsHistogram: [
           {

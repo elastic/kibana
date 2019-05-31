@@ -63,7 +63,6 @@ export const KpiNetworkQuery = pure<KpiNetworkProps>(
     >
       {({ data, loading, refetch }) => {
         const kpiNetwork = getOr({}, `source.KpiNetwork`, data);
-        const networkEventsHistogram = get('networkEventsHistogram', kpiNetwork);
         const uniqueSourcePrivateIpsHistogram = get('uniqueSourcePrivateIpsHistogram', kpiNetwork);
         const uniqueDestinationPrivateIpsHistogram = get(
           'uniqueDestinationPrivateIpsHistogram',
@@ -73,9 +72,6 @@ export const KpiNetworkQuery = pure<KpiNetworkProps>(
           id,
           kpiNetwork: {
             ...kpiNetwork,
-            networkEventsHistogram: networkEventsHistogram
-              ? formatHistogramData(networkEventsHistogram)
-              : [],
             uniqueSourcePrivateIpsHistogram: uniqueSourcePrivateIpsHistogram
               ? formatHistogramData(uniqueSourcePrivateIpsHistogram)
               : [],

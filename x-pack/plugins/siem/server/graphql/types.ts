@@ -1081,11 +1081,7 @@ export interface UsersItem {
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
-  networkEventsHistogram?: KpiNetworkHistogramData[] | null;
-
   uniqueFlowId?: number | null;
-
-  activeAgents?: number | null;
 
   uniqueSourcePrivateIps?: number | null;
 
@@ -5825,15 +5821,7 @@ export namespace KpiNetworkDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = KpiNetworkData> {
     networkEvents?: NetworkEventsResolver<number | null, TypeParent, Context>;
 
-    networkEventsHistogram?: NetworkEventsHistogramResolver<
-      KpiNetworkHistogramData[] | null,
-      TypeParent,
-      Context
-    >;
-
     uniqueFlowId?: UniqueFlowIdResolver<number | null, TypeParent, Context>;
-
-    activeAgents?: ActiveAgentsResolver<number | null, TypeParent, Context>;
 
     uniqueSourcePrivateIps?: UniqueSourcePrivateIpsResolver<number | null, TypeParent, Context>;
 
@@ -5865,17 +5853,7 @@ export namespace KpiNetworkDataResolvers {
     Parent = KpiNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type NetworkEventsHistogramResolver<
-    R = KpiNetworkHistogramData[] | null,
-    Parent = KpiNetworkData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type UniqueFlowIdResolver<
-    R = number | null,
-    Parent = KpiNetworkData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ActiveAgentsResolver<
     R = number | null,
     Parent = KpiNetworkData,
     Context = SiemContext

@@ -61,31 +61,8 @@ export const mockResponse = {
         hits: [],
       },
       aggregations: {
-        network_events_histogram: {
-          buckets: [
-            {
-              key_as_string: '2019-05-09T23:00:00.000Z',
-              key: 1557442800000,
-              doc_count: 203110,
-            },
-            {
-              key_as_string: '2019-05-10T11:00:00.000Z',
-              key: 1557486000000,
-              doc_count: 522931,
-            },
-            {
-              key_as_string: '2019-05-10T23:00:00.000Z',
-              key: 1557529200000,
-              doc_count: 7065,
-            },
-          ],
-          interval: '12h',
-        },
         unique_flow_id: {
           value: 195415,
-        },
-        active_agents: {
-          value: 8,
         },
       },
       status: 200,
@@ -238,26 +215,8 @@ export const mockResponse = {
 };
 
 export const mockResult = {
-  activeAgents: 8,
   dnsQueries: 10942,
   networkEvents: 733106,
-  networkEventsHistogram: [
-    {
-      key: 1557442800000,
-      key_as_string: '2019-05-09T23:00:00.000Z',
-      doc_count: 203110,
-    },
-    {
-      key: 1557486000000,
-      key_as_string: '2019-05-10T11:00:00.000Z',
-      doc_count: 522931,
-    },
-    {
-      key: 1557529200000,
-      key_as_string: '2019-05-10T23:00:00.000Z',
-      doc_count: 7065,
-    },
-  ],
   tlsHandshakes: 54482,
   uniqueDestinationPrivateIps: 878,
   uniqueDestinationPrivateIpsHistogram: [

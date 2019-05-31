@@ -1052,11 +1052,7 @@ export interface UsersItem {
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
-  networkEventsHistogram?: KpiNetworkHistogramData[] | null;
-
   uniqueFlowId?: number | null;
-
-  activeAgents?: number | null;
 
   uniqueSourcePrivateIps?: number | null;
 
@@ -3016,11 +3012,7 @@ export namespace GetKpiNetworkQuery {
 
     networkEvents?: number | null;
 
-    networkEventsHistogram?: NetworkEventsHistogram[] | null;
-
     uniqueFlowId?: number | null;
-
-    activeAgents?: number | null;
 
     uniqueSourcePrivateIps?: number | null;
 
@@ -3034,8 +3026,6 @@ export namespace GetKpiNetworkQuery {
 
     tlsHandshakes?: number | null;
   };
-
-  export type NetworkEventsHistogram = KpiNetworkChartFields.Fragment;
 
   export type UniqueSourcePrivateIpsHistogram = KpiNetworkChartFields.Fragment;
 

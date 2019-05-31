@@ -49,13 +49,7 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
     );
     return {
       networkEvents: getOr(null, 'responses.0.hits.total.value', response),
-      networkEventsHistogram: getOr(
-        null,
-        'responses.0.aggregations.network_events_histogram.buckets',
-        response
-      ),
       uniqueFlowId: getOr(null, 'responses.0.aggregations.unique_flow_id.value', response),
-      activeAgents: getOr(null, 'responses.0.aggregations.active_agents.value', response),
       uniqueSourcePrivateIps: getOr(
         null,
         'responses.1.aggregations.unique_private_ips.value',

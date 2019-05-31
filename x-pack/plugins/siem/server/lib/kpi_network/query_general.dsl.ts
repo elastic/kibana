@@ -75,17 +75,6 @@ export const buildGeneralQuery = ({
             field: 'network.community_id',
           },
         },
-        active_agents: {
-          cardinality: {
-            field: 'agent.id',
-          },
-        },
-        network_events_histogram: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: '6',
-          },
-        },
       },
       query: {
         bool: {

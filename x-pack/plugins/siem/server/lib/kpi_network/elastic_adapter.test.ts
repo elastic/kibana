@@ -117,9 +117,7 @@ describe('Network Kpi elasticsearch_adapter', () => {
     test('getKpiNetwork - response without data', async () => {
       expect(data).toEqual({
         networkEvents: null,
-        networkEventsHistogram: null,
         uniqueFlowId: null,
-        activeAgents: null,
         uniqueSourcePrivateIps: null,
         uniqueSourcePrivateIpsHistogram: null,
         uniqueDestinationPrivateIps: null,
