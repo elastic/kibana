@@ -46,8 +46,11 @@ export const MonitorBarSeries = ({ dangerColor, downSeries }: MonitorBarSeriesPr
 
   return seriesHasYValues(downSeries) ? (
     <div style={{ height: 50, width: '100%' }}>
-      <Chart renderer="canvas">
-        <Settings tooltipType={TooltipType.VerticalCursor} />
+      <Chart>
+        <Settings
+          xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
+          tooltipType={TooltipType.VerticalCursor}
+        />
         <Axis
           hide
           id={getAxisId('bottom')}

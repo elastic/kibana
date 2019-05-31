@@ -15,6 +15,7 @@ import {
   Position,
   ScaleType,
   timeFormatter,
+  Settings,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useContext } from 'react';
@@ -83,7 +84,8 @@ export const DurationChart = ({
         </h4>
       </EuiTitle>
       <EuiPanel>
-        <Chart className={'story-chart'}>
+        <Chart>
+          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
           <Axis
             id={getAxisId('bottom')}
             position={Position.Bottom}

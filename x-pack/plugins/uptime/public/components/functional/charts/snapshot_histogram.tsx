@@ -13,6 +13,7 @@ import {
   Position,
   ScaleType,
   timeFormatter,
+  Settings,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useContext } from 'react';
@@ -53,7 +54,8 @@ export const SnapshotHistogram = ({
   const upSpecId = getSpecId(upMonitorsId);
   return (
     <Fragment>
-      <Chart renderer="canvas">
+      <Chart>
+        <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
         <Axis
           id={getAxisId(
             i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {
