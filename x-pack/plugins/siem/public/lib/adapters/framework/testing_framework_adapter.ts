@@ -8,6 +8,7 @@ import { AppFrameworkAdapter } from '../../lib';
 
 export class AppTestingFrameworkAdapter implements AppFrameworkAdapter {
   public appState?: object;
+  public bytesFormat?: string;
   public dateFormat?: string;
   public dateFormatTz?: string;
   public kbnVersion?: string;
