@@ -94,7 +94,7 @@ class FilterItemsUi extends Component {
             onChange={(query) => this.handleQueryChange(model, query)}
             appName={'VisEditor'}
             indexPatterns={[indexPatterns]}
-            store={localStorage || {}}
+            store={localStorage}
           />
         </EuiFlexItem>
         <EuiFlexItem>

@@ -142,7 +142,7 @@ class TableSeriesConfigUI extends Component {
                 onChange={this.handleQueryChange}
                 appName={'VisEditor'}
                 indexPatterns={[this.props.indexPatternForQuery]}
-                store={localStorage || {}}
+                store={localStorage}
               />
             </EuiFormRow>
           </EuiFlexItem>

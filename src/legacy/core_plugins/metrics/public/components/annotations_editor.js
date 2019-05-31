@@ -179,7 +179,7 @@ export class AnnotationsEditor extends Component {
                     onChange={query => this.handleQueryChange(model, query)}
                     appName={'VisEditor'}
                     indexPatterns={[model.index_pattern]}
-                    store={localStorage || {}}
+                    store={localStorage}
                     showDatePicker={false}
                   />
                 </EuiFormRow>

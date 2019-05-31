@@ -74,7 +74,7 @@ export const SplitByFilter = props => {
             onChange={handleQueryChange}
             appName={'VisEditor'}
             indexPatterns={[indexPattern]}
-            store={localStorage || {}}
+            store={localStorage}
           />
         </EuiFormRow>
       </EuiFlexItem>

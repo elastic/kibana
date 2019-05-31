@@ -244,7 +244,7 @@ export class TablePanelConfig extends Component {
                     onChange={this.handleQueryChange}
                     appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
-                    store={localStorage || {}}
+                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

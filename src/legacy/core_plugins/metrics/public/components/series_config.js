@@ -83,7 +83,7 @@ export const SeriesConfig = props => {
           onChange={handleQueryChange}
           appName={'VisEditor'}
           indexPatterns={[seriesIndexPattern]}
-          store={localStorage || {}}
+          store={localStorage}
           showDatePicker={false}
         />
       </EuiFormRow>

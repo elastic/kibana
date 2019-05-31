@@ -338,7 +338,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             onChange={handleQueryChange}
             appName={'VisEditor'}
             indexPatterns={[seriesIndexPattern]}
-            store={localStorage || {}}
+            store={localStorage}
           />
 
         </EuiFormRow>
