@@ -18,6 +18,8 @@ import {
   listActionTypesRoute,
 } from './routes';
 
+import { registerBuiltInActionTypes } from './builtin_action_types';
+
 export function init(server: Legacy.Server) {
   const actionsEnabled = server.config().get('xpack.actions.enabled');
 
@@ -37,6 +39,8 @@ export function init(server: Legacy.Server) {
       log: server.log,
     },
   });
+
+  registerBuiltInActionTypes(actionTypeRegistry);
 
   // Routes
   createRoute(server);
