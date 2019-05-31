@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// import { Legacy } from 'kibana';
+import { Legacy } from 'kibana';
 // import { resolve } from 'path';
 
 // eslint-disable-next-line import/no-default-export
@@ -40,10 +40,10 @@ export default function(kibana: any) {
       // ],
       // styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
-    // init(server: Legacy.Server) {
-    //   server.injectUiAppVars('kbn_tp_embeddable_explorer', async () =>
-    //     server.getInjectedUiAppVars('kibana')
-    //   );
-    // },
+    init(server: Legacy.Server) {
+      server.injectUiAppVars('kbn_tp_embeddable_explorer', async () =>
+        server.getInjectedUiAppVars('kibana')
+      );
+    },
   });
 }
