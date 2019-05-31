@@ -904,6 +904,8 @@ export interface IpOverviewData {
 
   destination?: Overview | null;
 
+  host: HostEcsFields;
+
   server?: Overview | null;
 
   source?: Overview | null;
@@ -915,8 +917,6 @@ export interface Overview {
   lastSeen?: Date | null;
 
   autonomousSystem: AutonomousSystem;
-
-  host: HostEcsFields;
 
   geo: GeoEcsFields;
 }
@@ -2767,6 +2767,8 @@ export namespace GetIpOverviewQuery {
     source?: _Source | null;
 
     destination?: Destination | null;
+
+    host: Host;
   };
 
   export type _Source = {
@@ -2779,8 +2781,6 @@ export namespace GetIpOverviewQuery {
     autonomousSystem: AutonomousSystem;
 
     geo: Geo;
-
-    host: Host;
   };
 
   export type AutonomousSystem = {
@@ -2819,36 +2819,6 @@ export namespace GetIpOverviewQuery {
     lon?: ToNumberArray | null;
   };
 
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    architecture?: ToStringArray | null;
-
-    id?: ToStringArray | null;
-
-    ip?: ToStringArray | null;
-
-    mac?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    os?: Os | null;
-
-    type?: ToStringArray | null;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    family?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    platform?: ToStringArray | null;
-
-    version?: ToStringArray | null;
-  };
-
   export type Destination = {
     __typename?: 'Overview';
 
@@ -2859,8 +2829,6 @@ export namespace GetIpOverviewQuery {
     autonomousSystem: _AutonomousSystem;
 
     geo: _Geo;
-
-    host: _Host;
   };
 
   export type _AutonomousSystem = {
@@ -2899,7 +2867,7 @@ export namespace GetIpOverviewQuery {
     lon?: ToNumberArray | null;
   };
 
-  export type _Host = {
+  export type Host = {
     __typename?: 'HostEcsFields';
 
     architecture?: ToStringArray | null;
@@ -2912,12 +2880,12 @@ export namespace GetIpOverviewQuery {
 
     name?: ToStringArray | null;
 
-    os?: _Os | null;
+    os?: Os | null;
 
     type?: ToStringArray | null;
   };
 
-  export type _Os = {
+  export type Os = {
     __typename?: 'OsEcsFields';
 
     family?: ToStringArray | null;
