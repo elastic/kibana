@@ -21,21 +21,18 @@ export class AddLayerPanel extends Component {
   state = {
     sourceType: null,
     layer: null,
-    indexingTriggered: false,
-    indexingSuccess: false,
-    importIndexingReady: false,
-    importView: false,
     panelDescription: i18n.translate('xpack.maps.addLayerPanel.selectSource',
       { defaultMessage: 'Select source' }),
+    importView: false,
   }
 
   _getPanelDescription() {
-    const { sourceType, importView, indexingSuccess } = this.state;
+    const { sourceType, importView } = this.state;
     let panelDescription;
     if (!sourceType) {
       panelDescription = i18n.translate('xpack.maps.addLayerPanel.selectSource',
         { defaultMessage: 'Select source' });
-    } else if (importView && !indexingSuccess) {
+    } else if (importView && !this.props.isIndexingSuccess) {
       panelDescription = i18n.translate('xpack.maps.addLayerPanel.importFile',
         { defaultMessage: 'Import file' });
     } else {
@@ -87,38 +84,31 @@ export class AddLayerPanel extends Component {
   }
 
   _layerAddHandler = () => {
+    const { isIndexingTriggered, setIndexingTriggered, selectLayerAndAdd }
+    = this.props;
     const layerSource = this.state.layer.getSource();
     const boolIndexLayer = layerSource.shouldBeIndexed();
     this.setState({ layer: null });
-    if (boolIndexLayer && !this.state.indexingTriggered) {
-      this.setState({ indexingTriggered: true });
+    if (boolIndexLayer && !isIndexingTriggered) {
+      setIndexingTriggered();
     } else {
-      this.props.selectLayerAndAdd();
+      selectLayerAndAdd();
     }
   }
 
   _renderAddLayerPanel() {
-    if (!this.state.sourceType) {
+    const { sourceType, importView } = this.state;
+    if (!sourceType) {
       return (
         <SourceSelect updateSourceSelection={this._onSourceSelectionChange} />
       );
     }
-    if (this.state.importView) {
+    if (importView) {
       return (
         <ImportEditor
           clearSource={this._clearLayerData}
           previewLayer={source => this._viewLayer(source)}
           addImportLayer={source => this._addImportedLayer(source)}
-          indexingTriggered={this.state.indexingTriggered}
-          onIndexReady={
-            importIndexingReady => this.setState({ importIndexingReady })
-          }
-          importSuccessHandler={
-            () => this.setState({ indexingSuccess: true })
-          }
-          importErrorHandler={
-            () => this.setState({ indexingSuccess: false })
-          }
           onRemove={() => this._clearLayerData({ keepSourceType: true })}
         />
       );
@@ -126,7 +116,7 @@ export class AddLayerPanel extends Component {
     return (
       <SourceEditor
         clearSource={this._clearLayerData}
-        sourceType={this.state.sourceType}
+        sourceType={sourceType}
         previewLayer={source => this._viewLayer(source)}
       />
     );
@@ -137,19 +127,12 @@ export class AddLayerPanel extends Component {
       return null;
     }
 
-    const {
-      indexingTriggered, indexingSuccess, importView, layer,
-      importIndexingReady
-    } = this.state;
+    const { importView, layer } = this.state;
+    const { isIndexingReady, isIndexingSuccess } = this.props;
 
-    let buttonEnabled;
-    if (importView) {
-      const isImportPreviewReady = importView && importIndexingReady;
-      const isImportCompleted = importView && indexingTriggered && indexingSuccess;
-      buttonEnabled = isImportPreviewReady || isImportCompleted;
-    } else {
-      buttonEnabled = !!layer;
-    }
+    const buttonEnabled = importView
+      ? isIndexingReady || isIndexingSuccess
+      : !!layer;
 
     return (
       <FlyoutFooter

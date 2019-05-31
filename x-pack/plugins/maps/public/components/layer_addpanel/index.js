@@ -6,7 +6,8 @@
 
 import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
-import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
+import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE, updateIndexingStage,
+  getIndexingStage, INDEXING_STAGE } from '../../store/ui';
 import { getMapColors } from '../../selectors/map_selectors';
 import { getInspectorAdapters } from '../../store/non_serializable_instances';
 import {
@@ -21,6 +22,9 @@ function mapStateToProps(state = {}) {
     inspectorAdapters: getInspectorAdapters(state),
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     mapColors: getMapColors(state),
+    isIndexingTriggered: getIndexingStage(state) === INDEXING_STAGE.TRIGGERED,
+    isIndexingSuccess: getIndexingStage(state) === INDEXING_STAGE.SUCCESS,
+    isIndexingReady: getIndexingStage(state) === INDEXING_STAGE.READY,
   };
 }
 
@@ -50,6 +54,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(setTransientLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
+    setIndexingTriggered: () => dispatch(updateIndexingStage(INDEXING_STAGE.TRIGGERED)),
   };
 }
 

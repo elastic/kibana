@@ -9,13 +9,23 @@
 import { connect } from 'react-redux';
 import { ImportEditor } from './view';
 import { getInspectorAdapters } from '../../../store/non_serializable_instances';
+import { INDEXING_STAGE, updateIndexingStage, getIndexingStage } from '../../../store/ui';
 
 function mapStateToProps(state = {}) {
   return {
     inspectorAdapters: getInspectorAdapters(state),
+    isIndexingTriggered: getIndexingStage(state) === INDEXING_STAGE.TRIGGERED,
   };
 }
 
-const connectedFlyOut = connect(mapStateToProps)(ImportEditor);
+const mapDispatchToProps = {
+  onIndexReady: indexReady => indexReady
+    ? updateIndexingStage(INDEXING_STAGE.READY)
+    : updateIndexingStage(null),
+  importSuccessHandler: () => updateIndexingStage(INDEXING_STAGE.SUCCESS),
+  importErrorHandler: () => updateIndexingStage(INDEXING_STAGE.ERROR),
+};
+
+const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps)(ImportEditor);
 export { connectedFlyOut as ImportEditor };
 

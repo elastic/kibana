@@ -44,6 +44,7 @@ export class JsonUploadAndParse extends Component {
     isIndexReady: false,
 
     // Progress-tracking state
+    showImportProgress: false,
     currentIndexingStage: INDEXING_STAGE.INDEXING_STARTED,
     indexDataResp: '',
     indexPatternResp: '',
@@ -67,6 +68,9 @@ export class JsonUploadAndParse extends Component {
     this._setSelectedType(this.state);
     this._setIndexReady({ ...this.state, ...this.props });
     this._indexData({ ...this.state, ...this.props });
+    if (this.props.isIndexingTriggered && !this.state.showImportProgress) {
+      this.setState({ showImportProgress: true });
+    }
   }
 
   _setSelectedType = ({ selectedIndexType, indexTypes }) => {
@@ -77,26 +81,26 @@ export class JsonUploadAndParse extends Component {
 
   _setIndexReady = ({
     parsedFile, selectedIndexType, indexName, hasIndexErrors,
-    indexRequestInFlight, onIndexReadyStatusChange
+    indexRequestInFlight, onIndexReady
   }) => {
     const isIndexReady = !!parsedFile && !!selectedIndexType &&
       !!indexName && !hasIndexErrors && !indexRequestInFlight;
     if (isIndexReady !== this.state.isIndexReady) {
       this.setState({ isIndexReady });
-      if (onIndexReadyStatusChange) {
-        onIndexReadyStatusChange(isIndexReady);
+      if (onIndexReady) {
+        onIndexReady(isIndexReady);
       }
     }
   }
 
   _indexData = async ({
     indexedFile, parsedFile, indexRequestInFlight, transformDetails,
-    indexName, appName, selectedIndexType, boolIndexData, isIndexReady,
+    indexName, appName, selectedIndexType, isIndexingTriggered, isIndexReady,
     onIndexingComplete, boolCreateIndexPattern
   }) => {
     // Check index ready
     const filesAreEqual = _.isEqual(indexedFile, parsedFile);
-    if (!boolIndexData || filesAreEqual || !isIndexReady || indexRequestInFlight) {
+    if (!isIndexingTriggered || filesAreEqual || !isIndexReady || indexRequestInFlight) {
       return;
     }
     this.setState({
@@ -189,14 +193,13 @@ export class JsonUploadAndParse extends Component {
   render() {
     const {
       currentIndexingStage, indexDataResp, indexPatternResp, fileRef,
-      indexName, indexTypes
+      indexName, indexTypes, showImportProgress
     } = this.state;
-    const { onFileUpload, onFileRemove, transformDetails, boolIndexData }
-      = this.props;
+    const { onFileUpload, onFileRemove, transformDetails } = this.props;
 
     return (
       <EuiForm>
-        {boolIndexData
+        {showImportProgress
           ? <JsonImportProgress
             importStage={currentIndexingStage}
             indexDataResp={indexDataResp}
@@ -239,13 +242,13 @@ export class JsonUploadAndParse extends Component {
 }
 
 JsonUploadAndParse.defaultProps = {
-  boolIndexData: false,
+  isIndexingTriggered: false,
   boolCreateIndexPattern: true,
 };
 
 JsonUploadAndParse.propTypes = {
   appName: PropTypes.string,
-  boolIndexData: PropTypes.bool,
+  isIndexingTriggered: PropTypes.bool,
   boolCreateIndexPattern: PropTypes.bool,
   transformDetails: PropTypes.oneOfType([
     PropTypes.string,

@@ -14,14 +14,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const ImportEditor = ({
-  clearSource, indexingTriggered, ...props
+  clearSource, isIndexingTriggered, ...props
 }) => {
-  const editorProperties = getEditorProperties({ indexingTriggered, ...props });
+  const editorProperties = getEditorProperties({ isIndexingTriggered, ...props });
   const editor = GeojsonFileSource.renderEditor(editorProperties);
   return (
     <Fragment>
       {
-        indexingTriggered
+        isIndexingTriggered
           ? null
           : (
             <Fragment>
@@ -49,7 +49,7 @@ export const ImportEditor = ({
 
 function getEditorProperties({
   inspectorAdapters, onRemove, previewLayer, addImportLayer,
-  indexingTriggered, onIndexReady, importSuccessHandler, importErrorHandler
+  isIndexingTriggered, onIndexReady, importSuccessHandler, importErrorHandler
 }) {
   return {
     onPreviewSource: previewLayer,
@@ -57,8 +57,8 @@ function getEditorProperties({
     onRemove,
     importSuccessHandler,
     importErrorHandler,
-    boolIndexData: indexingTriggered,
+    isIndexingTriggered,
     addAndViewSource: source => addImportLayer(source),
-    onIndexReadyStatusChange: onIndexReady,
+    onIndexReady,
   };
 }

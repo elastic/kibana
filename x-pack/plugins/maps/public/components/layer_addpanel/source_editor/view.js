@@ -14,7 +14,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SourceEditor = ({
-  clearSource, sourceType, indexingTriggered, inspectorAdapters, previewLayer
+  clearSource, sourceType, isIndexingTriggered, inspectorAdapters, previewLayer
 }) => {
   const editorProperties = {
     onPreviewSource: previewLayer,
@@ -30,7 +30,7 @@ export const SourceEditor = ({
   return (
     <Fragment>
       {
-        indexingTriggered
+        isIndexingTriggered
           ? null
           : (
             <Fragment>

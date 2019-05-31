@@ -13,11 +13,19 @@ export const SET_FILTERABLE = 'IS_FILTERABLE';
 export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
+export const UPDATE_INDEXING_STAGE = 'UPDATE_INDEXING_STAGE';
 
 export const FLYOUT_STATE = {
   NONE: 'NONE',
   LAYER_PANEL: 'LAYER_PANEL',
   ADD_LAYER_WIZARD: 'ADD_LAYER_WIZARD'
+};
+
+export const INDEXING_STAGE = {
+  READY: 'READY',
+  TRIGGERED: 'TRIGGERED',
+  SUCCESS: 'SUCCESS',
+  ERROR: 'ERROR',
 };
 
 export const DEFAULT_IS_LAYER_TOC_OPEN = true;
@@ -31,6 +39,7 @@ const INITIAL_STATE = {
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
   // This also makes for easy read/write access for embeddables.
   openTOCDetails: [],
+  importIndexingStage: null
 };
 
 // Reducer
@@ -67,6 +76,8 @@ export function ui(state = INITIAL_STATE, action) {
           return layerId !== action.layerId;
         })
       };
+    case UPDATE_INDEXING_STAGE:
+      return { ...state, importIndexingStage: action.stage };
     default:
       return state;
   }
@@ -142,6 +153,13 @@ export function hideTOCDetails(layerId) {
   };
 }
 
+export function updateIndexingStage(stage) {
+  return {
+    type: UPDATE_INDEXING_STAGE,
+    stage,
+  };
+}
+
 // Selectors
 export const getFlyoutDisplay = ({ ui }) => ui && ui.flyoutDisplay
   || INITIAL_STATE.flyoutDisplay;
@@ -151,3 +169,4 @@ export const getOpenTOCDetails = ({ ui }) => ui.openTOCDetails;
 export const getIsFullScreen = ({ ui }) => ui.isFullScreen;
 export const getIsReadOnly = ({ ui }) => ui.isReadOnly;
 export const getIsFilterable = ({ ui }) => ui.isFilterable;
+export const getIndexingStage = ({ ui }) => ui.importIndexingStage;

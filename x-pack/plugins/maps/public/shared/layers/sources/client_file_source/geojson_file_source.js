@@ -72,7 +72,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
 
   static renderEditor({
     onPreviewSource, inspectorAdapters, addAndViewSource,
-    boolIndexData, onRemove, onIndexReadyStatusChange,
+    isIndexingTriggered, onRemove, onIndexReady,
     importSuccessHandler, importErrorHandler
   }) {
     return (
@@ -83,7 +83,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
             inspectorAdapters
           )
         }
-        boolIndexData={boolIndexData}
+        isIndexingTriggered={isIndexingTriggered}
         onIndexingComplete={
           GeojsonFileSource.viewIndexedData(
             addAndViewSource,
@@ -93,7 +93,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
           )
         }
         onRemove={onRemove}
-        onIndexReadyStatusChange={onIndexReadyStatusChange}
+        onIndexReady={onIndexReady}
       />
     );
   }

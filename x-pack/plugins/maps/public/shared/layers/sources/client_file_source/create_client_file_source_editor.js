@@ -10,18 +10,18 @@ import { JsonUploadAndParse } from '../../../../../../file_upload/public';
 
 export function ClientFileCreateSourceEditor({
   previewGeojsonFile,
-  boolIndexData = false,
+  isIndexingTriggered = false,
   onIndexingComplete,
   onRemove,
-  onIndexReadyStatusChange,
+  onIndexReady,
 }) {
   return (
     <JsonUploadAndParse
       appName={'Maps'}
-      boolIndexData={boolIndexData}
+      isIndexingTriggered={isIndexingTriggered}
       onFileUpload={previewGeojsonFile}
       onFileRemove={onRemove}
-      onIndexReadyStatusChange={onIndexReadyStatusChange}
+      onIndexReady={onIndexReady}
       transformDetails={'geo'}
       onIndexingComplete={onIndexingComplete}
     />
