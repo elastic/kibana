@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { Role } from '../../../../../../../common/model/role';
+import { Role } from '../../../../../../../common/model';
 import { ClusterPrivileges } from './cluster_privileges';
 
 test('it renders without crashing', () => {
@@ -17,10 +17,7 @@ test('it renders without crashing', () => {
       indices: [],
       run_as: [],
     },
-    kibana: {
-      global: [],
-      space: {},
-    },
+    kibana: [],
   };
 
   const wrapper = shallow(<ClusterPrivileges role={role} onChange={jest.fn()} />);

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import {
   EuiDragDropContext,
@@ -13,6 +14,17 @@ import {
 import { TOCEntry } from './toc_entry';
 
 export class LayerTOC extends React.Component {
+
+  componentWillUnmount() {
+    this._updateDebounced.cancel();
+  }
+
+  shouldComponentUpdate() {
+    this._updateDebounced();
+    return false;
+  }
+
+  _updateDebounced = _.debounce(this.forceUpdate, 100);
 
   _onDragEnd = ({ source, destination }) => {
     // Dragging item out of EuiDroppable results in destination of null
@@ -53,21 +65,30 @@ export class LayerTOC extends React.Component {
         });
     }
 
-    const draggableLayers = reverseLayerList.map((layer, idx) => (
-      <EuiDraggable spacing="none" key={layer.getId()} index={idx} draggableId={layer.getId()} customDragHandle={true}>
-        {(provided) => (
-          <TOCEntry
-            layer={layer}
-            dragHandleProps={provided.dragHandleProps}
-          />
-        )}
-      </EuiDraggable>
-    ));
-
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
         <EuiDroppable droppableId="mapLayerTOC" spacing="none">
-          {draggableLayers}
+          {(provided, snapshot) => (
+            reverseLayerList.map((layer, idx) => (
+              <EuiDraggable
+                spacing="none"
+                key={layer.getId()}
+                index={idx}
+                draggableId={layer.getId()}
+                customDragHandle={true}
+                disableInteractiveElementBlocking // Allows button to be drag handle
+              >
+                {(provided, state) => (
+                  <TOCEntry
+                    layer={layer}
+                    dragHandleProps={provided.dragHandleProps}
+                    isDragging={state.isDragging}
+                    isDraggingOver={snapshot.isDraggingOver}
+                  />
+                )}
+              </EuiDraggable>
+            ))
+          )}
         </EuiDroppable>
       </EuiDragDropContext>
     );

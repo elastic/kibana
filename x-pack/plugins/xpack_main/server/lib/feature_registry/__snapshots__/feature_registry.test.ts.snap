@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FeatureRegistry prevents features from being registered with a catalogue entry of "" 1`] = `"child \\"catalogue\\" fails because [\\"catalogue\\" at position 0 fails because [\\"0\\" is not allowed to be empty]]"`;
+
+exports[`FeatureRegistry prevents features from being registered with a catalogue entry of "contains space" 1`] = `"child \\"catalogue\\" fails because [\\"catalogue\\" at position 0 fails because [\\"0\\" with value \\"contains space\\" fails to match the required pattern: /^[a-zA-Z0-9:_-]+$/]]"`;
+
+exports[`FeatureRegistry prevents features from being registered with a catalogue entry of "contains_invalid()_chars" 1`] = `"child \\"catalogue\\" fails because [\\"catalogue\\" at position 0 fails because [\\"0\\" with value \\"contains_invalid()_chars\\" fails to match the required pattern: /^[a-zA-Z0-9:_-]+$/]]"`;
+
+exports[`FeatureRegistry prevents features from being registered with a management id of "" 1`] = `"child \\"management\\" fails because [child \\"kibana\\" fails because [\\"kibana\\" at position 0 fails because [\\"0\\" is not allowed to be empty]]]"`;
+
+exports[`FeatureRegistry prevents features from being registered with a management id of "contains space" 1`] = `"child \\"management\\" fails because [child \\"kibana\\" fails because [\\"kibana\\" at position 0 fails because [\\"0\\" with value \\"contains space\\" fails to match the required pattern: /^[a-zA-Z0-9:_-]+$/]]]"`;
+
+exports[`FeatureRegistry prevents features from being registered with a management id of "contains_invalid()_chars" 1`] = `"child \\"management\\" fails because [child \\"kibana\\" fails because [\\"kibana\\" at position 0 fails because [\\"0\\" with value \\"contains_invalid()_chars\\" fails to match the required pattern: /^[a-zA-Z0-9:_-]+$/]]]"`;
+
+exports[`FeatureRegistry prevents features from being registered with a navLinkId of "" 1`] = `"child \\"navLinkId\\" fails because [\\"navLinkId\\" is not allowed to be empty]"`;
+
+exports[`FeatureRegistry prevents features from being registered with a navLinkId of "contains space" 1`] = `"child \\"navLinkId\\" fails because [\\"navLinkId\\" with value \\"contains space\\" fails to match the required pattern: /^[a-zA-Z0-9:_-]+$/]"`;
+
+exports[`FeatureRegistry prevents features from being registered with a navLinkId of "contains_invalid()_chars" 1`] = `"child \\"navLinkId\\" fails because [\\"navLinkId\\" with value \\"contains_invalid()_chars\\" fails to match the required pattern: /^[a-zA-Z0-9:_-]+$/]"`;
+
+exports[`FeatureRegistry prevents features from being registered with an ID of "catalogue" 1`] = `"child \\"id\\" fails because [\\"id\\" contains an invalid value]"`;
+
+exports[`FeatureRegistry prevents features from being registered with an ID of "doesn't match valid regex" 1`] = `"child \\"id\\" fails because [\\"id\\" with value \\"doesn't match valid regex\\" fails to match the required pattern: /^[a-zA-Z0-9_-]+$/]"`;
+
+exports[`FeatureRegistry prevents features from being registered with an ID of "management" 1`] = `"child \\"id\\" fails because [\\"id\\" contains an invalid value]"`;
+
+exports[`FeatureRegistry prevents features from being registered with an ID of "navLinks" 1`] = `"child \\"id\\" fails because [\\"id\\" contains an invalid value]"`;

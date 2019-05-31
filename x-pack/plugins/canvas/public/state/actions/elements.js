@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from 'plugins/interpreter/interpreter';
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
 import { set, del } from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
+import { interpretAst } from 'plugins/interpreter/interpreter';
 import { getPages, getNodeById, getNodes, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { notify } from '../../lib/notify';
 import { runInterpreter } from '../../lib/run_interpreter';
 import { subMultitree } from '../../lib/aeroelastic/functional';
-import { selectElement } from './transient';
+import { selectToplevelNodes } from './transient';
 import * as args from './resolved_args';
 
 export function getSiblingContext(state, elementId, checkIndex) {
@@ -221,10 +221,7 @@ export const removeElements = createThunk(
 
     // todo consider doing the group membership collation in aeroelastic, or the Redux reducer, when adding templates
     const allElements = getNodes(state, pageId);
-    const allRoots = rootElementIds.map(id => allElements.find(e => id === e.id));
-    if (allRoots.indexOf(undefined) !== -1) {
-      throw new Error('Some of the elements to be deleted do not exist');
-    }
+    const allRoots = rootElementIds.map(id => allElements.find(e => id === e.id)).filter(d => d);
     const elementIds = subMultitree(e => e.id, e => e.position.parent, allElements, allRoots).map(
       e => e.id
     );
@@ -236,8 +233,8 @@ export const removeElements = createThunk(
     });
 
     const _removeElements = createAction('removeElements', (elementIds, pageId) => ({
-      pageId,
       elementIds,
+      pageId,
     }));
     dispatch(_removeElements(elementIds, pageId));
 
@@ -276,7 +273,8 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
       updatedElement.expression.includes(filter)
     )
   ) {
-    dispatch(setFilter('', elementId, pageId, doRender));
+    const filter = '';
+    dispatch(setFilter(filter, elementId, pageId, doRender));
     // setFilter will trigger a re-render so we can skip the fetch here
   } else if (doRender === true) {
     dispatch(fetchRenderable(updatedElement));
@@ -411,5 +409,5 @@ export const addElement = createThunk('addElement', ({ dispatch }, pageId, eleme
   }
 
   // select the new element
-  dispatch(selectElement(newElement.id));
+  dispatch(selectToplevelNodes([newElement.id]));
 });

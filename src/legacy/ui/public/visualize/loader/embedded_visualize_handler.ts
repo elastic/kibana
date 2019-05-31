@@ -21,6 +21,8 @@ import { EventEmitter } from 'events';
 import { debounce, forEach, get } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 // @ts-ignore untyped dependency
 import { registries } from '../../../../core_plugins/interpreter/public/registries';
 import { Inspector } from '../../inspector';
@@ -46,9 +48,6 @@ import {
 } from './types';
 import { queryGeohashBounds } from './utils';
 
-import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
-
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
   queryFilter: any;
@@ -57,6 +56,7 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
+const DATA_SHARED_ITEM = 'data-shared-item';
 const LOADING_ATTRIBUTE = 'data-loading';
 const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
 
@@ -141,7 +141,9 @@ export class EmbeddedVisualizeHandler {
     });
 
     element.setAttribute(LOADING_ATTRIBUTE, '');
+    element.setAttribute(DATA_SHARED_ITEM, '');
     element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
+
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
     this.autoFetch = autoFetch;

@@ -22,6 +22,8 @@
  * the raw document format as stored in ElasticSearch.
  */
 
+/* eslint-disable @typescript-eslint/camelcase */
+
 import uuid from 'uuid';
 import { SavedObjectsSchema } from '../schema';
 import { decodeVersion, encodeVersion } from '../version';

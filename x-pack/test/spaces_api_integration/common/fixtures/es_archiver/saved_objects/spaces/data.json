@@ -7,6 +7,7 @@
       "space": {
         "_reserved": true,
         "description": "This is the default space",
+        "disabledFeatures": [],
         "name": "Default Space"
       },
       "type": "space",
@@ -24,6 +25,7 @@
     "source": {
       "space": {
         "description": "This is the first test space",
+        "disabledFeatures": [],
         "name": "Space 1"
       },
       "type": "space",
@@ -41,6 +43,7 @@
     "source": {
       "space": {
         "description": "This is the second test space",
+        "disabledFeatures": [],
         "name": "Space 2"
       },
       "type": "space",

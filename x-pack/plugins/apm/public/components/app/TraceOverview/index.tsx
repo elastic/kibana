@@ -4,15 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connect } from 'react-redux';
-import { IReduxState } from '../../../store/rootReducer';
-import { getUrlParams } from '../../../store/urlParams';
-import { TraceOverview as View } from './view';
+import { EuiPanel } from '@elastic/eui';
+import React from 'react';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
+import { loadTraceList } from '../../../services/rest/apm/traces';
+import { TraceList } from './TraceList';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
-function mapStateToProps(state = {} as IReduxState) {
-  return {
-    urlParams: getUrlParams(state)
-  };
+export function TraceOverview() {
+  const { urlParams, uiFilters } = useUrlParams();
+  const { start, end } = urlParams;
+  const { status, data = [] } = useFetcher(
+    () => {
+      if (start && end) {
+        return loadTraceList({ start, end, uiFilters });
+      }
+    },
+    [start, end, uiFilters]
+  );
+
+  return (
+    <EuiPanel>
+      <TraceList items={data} isLoading={status === FETCH_STATUS.LOADING} />
+    </EuiPanel>
+  );
 }
-
-export const TraceOverview = connect(mapStateToProps)(View);

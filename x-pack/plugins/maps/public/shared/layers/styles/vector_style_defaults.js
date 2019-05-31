@@ -5,7 +5,7 @@
  */
 
 import { VectorStyle } from './vector_style';
-import { COLOR_GRADIENTS } from './components/vector/color/color_ramp_select';
+import { COLOR_GRADIENTS } from './color_utils';
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
 

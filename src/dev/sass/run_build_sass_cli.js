@@ -18,23 +18,30 @@
  */
 
 import { run } from '../run';
-import { REPO_ROOT } from  '../constants';
+import { REPO_ROOT } from '../constants';
 import { buildSass } from './build_sass';
 
-run(async ({ log, flags: { kibanaDir } }) => {
-  await buildSass({
-    log,
-    kibanaDir
-  });
-}, {
-  description: 'Simple CLI, useful for building scss files outside of the server',
-  flags: {
-    default: {
-      kibanaDir: REPO_ROOT
-    },
-    string: ['kibanaDir'],
-    help: `
-      --kibanaDir        The root of the Kibana directory to build sass files in.
-    `
+run(
+  async ({ log, flags: { kibanaDir, watch } }) => {
+    await buildSass({
+      log,
+      kibanaDir,
+      watch,
+    });
   },
-});
+  {
+    description: 'Simple CLI, useful for building scss files outside of the server',
+    flags: {
+      default: {
+        kibanaDir: REPO_ROOT,
+        watch: false,
+      },
+      string: ['kibanaDir'],
+      boolean: ['watch'],
+      help: `
+      --kibanaDir        The root of the Kibana directory to build sass files in.
+      --watch            Watch the SASS files and recompile them on save.
+    `,
+    },
+  }
+);

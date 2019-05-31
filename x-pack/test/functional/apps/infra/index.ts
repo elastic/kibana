@@ -6,11 +6,14 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// tslint:disable-next-line:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: KibanaFunctionalTestDefaultProviders) => {
   describe('InfraOps app', function() {
     this.tags('ciGroup7');
 
     loadTestFile(require.resolve('./home_page'));
+    loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./logs_source_configuration'));
+    loadTestFile(require.resolve('./metrics_source_configuration'));
   });
 };

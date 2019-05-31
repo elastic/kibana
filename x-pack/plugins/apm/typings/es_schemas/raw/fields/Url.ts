@@ -5,5 +5,6 @@
  */
 
 export interface Url {
+  domain?: string;
   full: string;
 }

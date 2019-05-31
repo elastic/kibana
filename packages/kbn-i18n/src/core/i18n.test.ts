@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 import * as i18nModule from './i18n';
 
 describe('I18n engine', () => {

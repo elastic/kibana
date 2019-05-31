@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,10 +27,11 @@ import { isValidJson } from '../utils';
 
 function RawJsonParamEditor({
   agg,
+  showValidation,
   value,
-  setValue,
-  isInvalid,
   setValidity,
+  setValue,
+  setTouched,
 }: AggParamEditorProps<string>) {
   const label = (
     <>
@@ -45,6 +46,7 @@ function RawJsonParamEditor({
       />
     </>
   );
+  const isValid = isValidJson(value);
 
   const onChange = (ev: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textValue = ev.target.value;
@@ -52,22 +54,28 @@ function RawJsonParamEditor({
     setValidity(isValidJson(textValue));
   };
 
-  setValidity(isValidJson(value));
+  useEffect(
+    () => {
+      setValidity(isValid);
+    },
+    [isValid]
+  );
 
   return (
     <EuiFormRow
       label={label}
-      isInvalid={isInvalid}
+      isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
       className="visEditorSidebar__aggParamFormRow"
     >
       <EuiTextArea
         id={`visEditorRawJson${agg.id}`}
-        isInvalid={isInvalid}
+        isInvalid={showValidation ? !isValid : false}
         value={value || ''}
         onChange={onChange}
         rows={2}
         fullWidth={true}
+        onBlur={setTouched}
       />
     </EuiFormRow>
   );

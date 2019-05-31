@@ -7,13 +7,13 @@
 import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 import { TestInvoker } from '../../common/lib/types';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getService, loadTestFile }: TestInvoker) {
   const es = getService('es');
   const supertest = getService('supertest');
 
   describe('saved objects security only enabled', function() {
-    this.tags('ciGroup5');
+    this.tags('ciGroup9');
 
     before(async () => {
       await createUsersAndRoles(es, supertest);

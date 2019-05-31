@@ -20,8 +20,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       hasBorder={true}
     >
       <EuiTitle
-        size="l"
-        textTransform="none"
+        size="m"
       >
         <h1
           id="flyoutTitle"
@@ -94,10 +93,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       <EuiSpacer
         size="m"
       />
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <p>
           <FormattedMessage
             defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
@@ -122,10 +118,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
         </p>
       </EuiText>
       <EuiSpacer />
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
+      <EuiTitle>
         <h2>
           <FormattedMessage
             defaultMessage="Action"
@@ -146,10 +139,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       <EuiSpacer
         size="xl"
       />
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
+      <EuiTitle>
         <h2>
           <FormattedMessage
             defaultMessage="Conditions"
@@ -290,8 +280,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       hasBorder={true}
     >
       <EuiTitle
-        size="l"
-        textTransform="none"
+        size="m"
       >
         <h1
           id="flyoutTitle"
@@ -378,10 +367,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       <EuiSpacer
         size="m"
       />
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <p>
           <FormattedMessage
             defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
@@ -406,10 +392,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
         </p>
       </EuiText>
       <EuiSpacer />
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
+      <EuiTitle>
         <h2>
           <FormattedMessage
             defaultMessage="Action"
@@ -430,10 +413,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       <EuiSpacer
         size="xl"
       />
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
+      <EuiTitle>
         <h2>
           <FormattedMessage
             defaultMessage="Conditions"
@@ -574,8 +554,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       hasBorder={true}
     >
       <EuiTitle
-        size="l"
-        textTransform="none"
+        size="m"
       >
         <h1
           id="flyoutTitle"
@@ -648,10 +627,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       <EuiSpacer
         size="m"
       />
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <p>
           <FormattedMessage
             defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
@@ -676,10 +652,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
         </p>
       </EuiText>
       <EuiSpacer />
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
+      <EuiTitle>
         <h2>
           <FormattedMessage
             defaultMessage="Action"
@@ -700,10 +673,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       <EuiSpacer
         size="xl"
       />
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
+      <EuiTitle>
         <h2>
           <FormattedMessage
             defaultMessage="Conditions"
@@ -836,8 +806,7 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
       hasBorder={true}
     >
       <EuiTitle
-        size="l"
-        textTransform="none"
+        size="m"
       >
         <h1
           id="flyoutTitle"

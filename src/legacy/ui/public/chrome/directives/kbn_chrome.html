@@ -18,7 +18,7 @@
 
       <div
         class="application"
-        ng-class="'tab-' + chrome.getFirstPathSegment() + ' ' + chrome.getApplicationClasses()"
+        ng-class="'tab-' + getFirstPathSegment() + ' ' + chrome.getApplicationClasses()"
         ng-view
       ></div>
     </div>

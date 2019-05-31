@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Toast, ToastInput, ToastsSetup } from '../../../../../core/public';
+import { ErrorToastOptions, Toast, ToastInput, ToastsApi } from '../../../../../core/public';
 
 export { Toast, ToastInput };
 
@@ -26,7 +26,7 @@ export class ToastNotifications {
 
   private onChangeCallback?: () => void;
 
-  constructor(private readonly toasts: ToastsSetup) {
+  constructor(private readonly toasts: ToastsApi) {
     toasts.get$().subscribe(list => {
       this.list = list;
 
@@ -45,4 +45,6 @@ export class ToastNotifications {
   public addSuccess = (toastOrTitle: ToastInput) => this.toasts.addSuccess(toastOrTitle);
   public addWarning = (toastOrTitle: ToastInput) => this.toasts.addWarning(toastOrTitle);
   public addDanger = (toastOrTitle: ToastInput) => this.toasts.addDanger(toastOrTitle);
+  public addError = (error: Error, options: ErrorToastOptions) =>
+    this.toasts.addError(error, options);
 }

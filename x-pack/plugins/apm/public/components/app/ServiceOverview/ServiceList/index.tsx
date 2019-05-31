@@ -12,8 +12,9 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
-import { KibanaLink } from '../../../shared/Links/KibanaLink';
+import { APMLink } from '../../../shared/Links/APMLink';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
+import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 
 interface Props {
   items?: ServiceListAPIResponse['items'];
@@ -34,7 +35,7 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = styled(KibanaLink)`
+const AppLink = styled(APMLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -47,14 +48,25 @@ export const SERVICE_COLUMNS: Array<
     name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
       defaultMessage: 'Name'
     }),
-    width: '50%',
+    width: '40%',
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink hash={`/${serviceName}/transactions`}>
+        <AppLink path={`/${serviceName}/transactions`}>
           {formatString(serviceName)}
         </AppLink>
       </EuiToolTip>
+    )
+  },
+  {
+    field: 'environments',
+    name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
+      defaultMessage: 'Environment'
+    }),
+    width: '20%',
+    sortable: true,
+    render: (environments: string[]) => (
+      <EnvironmentBadge environments={environments} />
     )
   },
   {
@@ -116,6 +128,7 @@ export function ServiceList({ items = [], noItemsMessage }: Props) {
       items={items}
       noItemsMessage={noItemsMessage}
       initialSort={{ field: 'serviceName', direction: 'asc' }}
+      initialPageSize={50}
     />
   );
 }

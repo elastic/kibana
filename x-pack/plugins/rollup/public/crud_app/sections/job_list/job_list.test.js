@@ -11,6 +11,15 @@ import { JobList } from './job_list';
 jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
   breadcrumbs: { set: () => {} },
+  getInjected: (key) => {
+    if (key === 'uiCapabilities') {
+      return {
+        navLinks: {},
+        management: {},
+        catalogue: {}
+      };
+    }
+  }
 }));
 
 jest.mock('../../services', () => {
@@ -30,7 +39,7 @@ const defaultProps = {
   isLoading: false
 };
 
-const initTestBed = registerTestBed(JobList, defaultProps, rollupJobsStore);
+const initTestBed = registerTestBed(JobList, { defaultProps, store: rollupJobsStore });
 
 describe('<JobList />', () => {
   it('should render empty prompt when loading is complete and there are no jobs', () => {

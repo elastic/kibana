@@ -21,5 +21,5 @@ import 'plugins/ml/jobs/new_job/simple/components/general_job_details';
 import 'plugins/ml/jobs/new_job/simple/components/enable_model_plot_checkbox';
 import 'plugins/ml/jobs/new_job/simple/components/agg_types_filter';
 import 'plugins/ml/components/job_group_select';
-import 'plugins/ml/components/full_time_range_selector';
+import 'plugins/ml/components/full_time_range_selector/full_time_range_selector_directive';
 import 'plugins/ml/components/field_type_icon';

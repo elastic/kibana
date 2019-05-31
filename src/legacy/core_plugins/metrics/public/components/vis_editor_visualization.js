@@ -22,11 +22,12 @@ import { get, isEqual } from 'lodash';
 import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getInterval, convertIntervalIntoUnit, isIntervalValid, isGteInterval } from './lib/get_interval';
+import { getInterval, convertIntervalIntoUnit, isIntervalValid, isGteInterval, AUTO_INTERVAL } from './lib/get_interval';
+import { PANEL_TYPES } from '../../common/panel_types';
 
 const MIN_CHART_HEIGHT = 250;
 
-class VisEditorVisualization extends Component {
+class VisEditorVisualizationUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -70,7 +71,7 @@ class VisEditorVisualization extends Component {
       timeRange,
       appState,
       savedObj,
-      onDataChange
+      onDataChange,
     } = this.props;
 
     this._handler = loader.embedVisualizationWithSavedObject(this._visEl.current, savedObj, {
@@ -111,34 +112,26 @@ class VisEditorVisualization extends Component {
         };
       });
     }
-  }
+  };
 
   hasShowPanelIntervalValue() {
     const type = get(this.props, 'model.type', '');
+    const interval = get(this.props, 'model.interval', AUTO_INTERVAL);
 
     return [
-      'metric',
-      'top_n',
-      'gauge',
-      'markdown',
-      'table',
-    ].includes(type);
+      PANEL_TYPES.METRIC,
+      PANEL_TYPES.TOP_N,
+      PANEL_TYPES.GAUGE,
+      PANEL_TYPES.MARKDOWN,
+      PANEL_TYPES.TABLE,
+    ].includes(type) && (interval === AUTO_INTERVAL
+      || isGteInterval(interval) || !isIntervalValid(interval));
   }
 
   getFormattedPanelInterval() {
-    const interval = get(this.props, 'model.interval') || 'auto';
-    const isValid = isIntervalValid(interval);
-    const shouldShowActualInterval = interval === 'auto' || isGteInterval(interval);
+    const interval = convertIntervalIntoUnit(this.state.panelInterval, false);
 
-    if (shouldShowActualInterval || !isValid) {
-      const autoInterval = convertIntervalIntoUnit(this.state.panelInterval, false);
-
-      if (autoInterval) {
-        return `${autoInterval.unitValue}${autoInterval.unitString}`;
-      }
-    } else {
-      return interval;
-    }
+    return interval ? `${interval.unitValue}${interval.unitString}` : null;
   }
 
   componentWillUnmount() {
@@ -172,7 +165,7 @@ class VisEditorVisualization extends Component {
       title,
       description,
       onToggleAutoApply,
-      onCommit
+      onCommit,
     } = this.props;
     const style = { height: this.state.height };
 
@@ -236,7 +229,7 @@ class VisEditorVisualization extends Component {
 
         {!autoApply &&
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="play" fill size="s" onClick={onCommit} disabled={!dirty}>
+          <EuiButton iconType="play" fill size="s" onClick={onCommit} disabled={!dirty} data-test-subj="applyBtn">
             <FormattedMessage
               id="tsvb.visEditorVisualization.applyChangesLabel"
               defaultMessage="Apply changes"
@@ -253,10 +246,8 @@ class VisEditorVisualization extends Component {
           style={style}
           className="tvbEditorVisualization"
           data-shared-items-container
-          data-shared-item
           data-title={title}
           data-description={description}
-          data-render-complete="disabled"
           ref={this._visEl}
         />
         <div className="tvbEditor--hideForReporting">
@@ -279,7 +270,7 @@ class VisEditorVisualization extends Component {
   }
 }
 
-VisEditorVisualization.propTypes = {
+VisEditorVisualizationUI.propTypes = {
   model: PropTypes.object,
   onCommit: PropTypes.func,
   uiState: PropTypes.object,
@@ -291,4 +282,4 @@ VisEditorVisualization.propTypes = {
   appState: PropTypes.object,
 };
 
-export default injectI18n(VisEditorVisualization);
+export const VisEditorVisualization = injectI18n(VisEditorVisualizationUI);

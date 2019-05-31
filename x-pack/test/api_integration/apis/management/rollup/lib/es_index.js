@@ -22,17 +22,20 @@ export const initElasticsearchIndicesHelpers = (es) => {
   };
 
   const deleteIndex = (index) => {
-    indicesCreated = indicesCreated.filter(i => i !== index);
-    return es.indices.delete({ index });
+    const indices = Array.isArray(index) ? index : [index];
+    indices.forEach((_index) => {
+      indicesCreated = indicesCreated.filter(i => i !== _index);
+    });
+    return es.indices.delete({ index: indices }, { ignoreUnavailable: true });
   };
 
-  const deleteAllIndices = () => (
-    Promise.all(indicesCreated.map(deleteIndex)).then(() => indicesCreated = [])
+  const deleteAllIndicesCreated = () => (
+    deleteIndex(indicesCreated).then(() => indicesCreated = [])
   );
 
   return ({
     createIndex,
     deleteIndex,
-    deleteAllIndices,
+    deleteAllIndicesCreated,
   });
 };

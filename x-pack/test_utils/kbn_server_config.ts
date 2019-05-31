@@ -10,7 +10,7 @@ type Licenses = 'oss' | 'basic' | 'gold' | 'trial';
 
 export const TestKbnServerConfig = {
   kbn: {
-    plugins: { paths: [resolve(__dirname, '../../node_modules/x-pack')] },
+    plugins: { paths: [resolve(__dirname, '../../x-pack')] },
     xpack: {
       monitoring: {
         tests: {

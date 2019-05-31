@@ -87,7 +87,7 @@
 
   <a
     ng-href="{{field.details.visualizeUrl}}"
-    ng-show="field.visualizable"
+    ng-show="field.visualizable && canVisualize"
     class="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
     data-test-subj="fieldVisualize-{{::field.name}}"
   >

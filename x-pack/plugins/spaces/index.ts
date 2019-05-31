@@ -7,11 +7,11 @@
 import { resolve } from 'path';
 
 import { SavedObjectsService } from 'src/legacy/server/saved_objects';
+import { Request, Server } from 'hapi';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
-import { registerUserProfileCapabilityFactory } from '../xpack_main/server/lib/user_profile_registry';
 import mappings from './mappings.json';
 import { SpacesAuditLogger } from './server/lib/audit_logger';
 import { checkLicense } from './server/lib/check_license';
@@ -21,14 +21,16 @@ import { wrapError } from './server/lib/errors';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { getSpacesUsageCollector } from './server/lib/get_spaces_usage_collector';
+import { migrateToKibana660 } from './server/lib/migrations';
+import { initSpacesRequestInterceptors } from './server/lib/request_inteceptors';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
-import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { SpacesClient } from './server/lib/spaces_client';
 import { createSpacesTutorialContextFactory } from './server/lib/spaces_tutorial_context_factory';
-import { initPublicSpacesApi } from './server/routes/api/public';
-import { initPrivateApis } from './server/routes/api/v1';
+import { toggleUICapabilities } from './server/lib/toggle_ui_capabilities';
+import { initExternalSpacesApi } from './server/routes/api/external';
+import { initInternalApis } from './server/routes/api/v1';
 
-export const spaces = (kibana: any) =>
+export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
     id: 'spaces',
     configPrefix: 'xpack.spaces',
@@ -40,6 +42,14 @@ export const spaces = (kibana: any) =>
         enabled: Joi.boolean().default(true),
         maxSpaces: Joi.number().default(1000),
       }).default();
+    },
+
+    uiCapabilities() {
+      return {
+        spaces: {
+          manage: true,
+        },
+      };
     },
 
     uiExports: {
@@ -57,6 +67,11 @@ export const spaces = (kibana: any) =>
       ],
       hacks: [],
       mappings,
+      migrations: {
+        space: {
+          '6.6.0': migrateToKibana660,
+        },
+      },
       savedObjectSchemas: {
         space: {
           isNamespaceAgnostic: true,
@@ -70,7 +85,11 @@ export const spaces = (kibana: any) =>
           spaceSelectorURL: getSpaceSelectorUrl(server.config()),
         };
       },
-      async replaceInjectedVars(vars: any, request: any, server: any) {
+      async replaceInjectedVars(
+        vars: Record<string, any>,
+        request: Record<string, any>,
+        server: Record<string, any>
+      ) {
         const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
         try {
           vars.activeSpace = {
@@ -87,11 +106,12 @@ export const spaces = (kibana: any) =>
             error: wrapError(e).output.payload,
           };
         }
+
         return vars;
       },
     },
 
-    async init(server: any) {
+    async init(server: Server) {
       const thisPlugin = this;
       const xpackMainPlugin = server.plugins.xpack_main;
 
@@ -100,7 +120,7 @@ export const spaces = (kibana: any) =>
       });
 
       // Register a function that is called whenever the xpack info changes,
-      // to re-compute the license check results for this plugin
+      // to re-compute the license check results for this plugin.
       xpackMainPlugin.info
         .feature(thisPlugin.id)
         .registerLicenseCheckResultsGenerator(checkLicense);
@@ -110,13 +130,15 @@ export const spaces = (kibana: any) =>
 
       const config = server.config();
 
-      const spacesAuditLogger = new SpacesAuditLogger(config, new AuditLogger(server, 'spaces'));
+      const spacesAuditLogger = new SpacesAuditLogger(
+        new AuditLogger(server, 'spaces', config, xpackMainPlugin.info)
+      );
 
       server.expose('spacesClient', {
-        getScopedClient: (request: any) => {
+        getScopedClient: (request: Request) => {
           const adminCluster = server.plugins.elasticsearch.getCluster('admin');
           const { callWithRequest, callWithInternalUser } = adminCluster;
-          const callCluster = (...args: any[]) => callWithRequest(request, ...args);
+          const callCluster = callWithRequest.bind(adminCluster, request);
           const { savedObjects } = server;
           const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
           const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
@@ -142,35 +164,34 @@ export const spaces = (kibana: any) =>
         types,
       } = server.savedObjects as SavedObjectsService;
       addScopedSavedObjectsClientWrapperFactory(
-        Number.MAX_VALUE,
+        Number.MAX_SAFE_INTEGER - 1,
         spacesSavedObjectsClientWrapperFactory(spacesService, types)
       );
 
       server.addScopedTutorialContextFactory(createSpacesTutorialContextFactory(spacesService));
 
-      initPrivateApis(server);
-      initPublicSpacesApi(server);
+      initInternalApis(server);
+      initExternalSpacesApi(server);
 
       initSpacesRequestInterceptors(server);
 
-      registerUserProfileCapabilityFactory(async request => {
-        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
-
-        let manageSecurity = false;
-
-        if (server.plugins.security) {
-          const { showLinks = false } =
-            xpackMainPlugin.info.feature('security').getLicenseCheckResults() || {};
-          manageSecurity = showLinks;
-        }
-
-        return {
-          manageSpaces: await spacesClient.canEnumerateSpaces(),
-          manageSecurity,
-        };
-      });
-
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getSpacesUsageCollector(server));
+
+      server.registerCapabilitiesModifier(async (request, uiCapabilities) => {
+        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+        try {
+          const activeSpace = await getActiveSpace(
+            spacesClient,
+            request.getBasePath(),
+            server.config().get('server.basePath')
+          );
+
+          const features = server.plugins.xpack_main.getFeatures();
+          return toggleUICapabilities(features, uiCapabilities, activeSpace);
+        } catch (e) {
+          return uiCapabilities;
+        }
+      });
     },
   });

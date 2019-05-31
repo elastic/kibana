@@ -19,12 +19,12 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggRow from './agg_row';
-import MetricSelect from './metric_select';
-import AggSelect from './agg_select';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { AggRow } from './agg_row';
+import { MetricSelect } from './metric_select';
+import { AggSelect } from './agg_select';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -114,6 +114,7 @@ const StandardSiblingAggUi = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -128,6 +129,7 @@ const StandardSiblingAggUi = props => {
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}
+            uiRestrictions={props.uiRestrictions}
             onChange={handleSelectChange('type')}
           />
         </EuiFlexItem>
@@ -165,6 +167,7 @@ StandardSiblingAggUi.propTypes = {
   panel: PropTypes.object,
   series: PropTypes.object,
   siblings: PropTypes.array,
+  uiRestrictions: PropTypes.object,
 };
 
 export const StandardSiblingAgg = injectI18n(StandardSiblingAggUi);

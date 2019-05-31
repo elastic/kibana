@@ -9,11 +9,10 @@ import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from '../../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { fontSize } from '../../../../style/variables';
-import { KibanaLink } from '../../../shared/Links/KibanaLink';
-import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
+import { APMLink } from '../../../shared/Links/APMLink';
 
 const LinkLabel = styled.span`
   font-size: ${fontSize};
@@ -52,11 +51,10 @@ export const ErrorCountBadge: React.SFC<Props> = ({
   );
 
   return (
-    <KibanaLink
-      pathname={'/app/apm'}
-      hash={`/${idx(transaction, _ => _.service.name)}/errors`}
+    <APMLink
+      path={`/${idx(transaction, _ => _.service.name)}/errors`}
       query={{
-        kuery: legacyEncodeURIComponent(
+        kuery: encodeURIComponent(
           `trace.id : "${transaction.trace.id}" and transaction.id : "${
             transaction.transaction.id
           }"`
@@ -80,6 +78,6 @@ export const ErrorCountBadge: React.SFC<Props> = ({
       ) : (
         <EuiToolTip content={toolTipContent}>{errorCountBadge}</EuiToolTip>
       )}
-    </KibanaLink>
+    </APMLink>
   );
 };

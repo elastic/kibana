@@ -17,13 +17,15 @@
  * under the License.
  */
 
+import { Url } from 'url';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
 import { filterHeaders, Headers } from './headers';
 import { RouteSchemas } from './route';
 
-export class KibanaRequest<Params, Query, Body> {
+/** @public */
+export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
@@ -68,12 +70,26 @@ export class KibanaRequest<Params, Query, Body> {
   }
 
   public readonly headers: Headers;
+  public readonly path: string;
+  public readonly url: Url;
 
-  constructor(req: Request, readonly params: Params, readonly query: Query, readonly body: Body) {
-    this.headers = req.headers;
+  constructor(
+    private readonly request: Request,
+    readonly params: Params,
+    readonly query: Query,
+    readonly body: Body
+  ) {
+    this.headers = request.headers;
+    this.path = request.path;
+    this.url = request.url;
   }
 
   public getFilteredHeaders(headersToKeep: string[]) {
     return filterHeaders(this.headers, headersToKeep);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  public unstable_getIncomingMessage() {
+    return this.request.raw.req;
   }
 }

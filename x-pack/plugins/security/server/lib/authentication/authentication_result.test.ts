@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
+import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from './authentication_result';
 
 describe('AuthenticationResult', () => {
@@ -44,6 +46,28 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.redirectURL).toBeUndefined();
     });
+
+    it('can provide `challenges` for `401` errors', () => {
+      const failureReason = Boom.unauthorized();
+      const authenticationResult = AuthenticationResult.failed(failureReason, ['Negotiate']);
+
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.notHandled()).toBe(false);
+      expect(authenticationResult.succeeded()).toBe(false);
+      expect(authenticationResult.redirected()).toBe(false);
+
+      expect(authenticationResult.challenges).toEqual(['Negotiate']);
+      expect(authenticationResult.error).toBe(failureReason);
+      expect(authenticationResult.user).toBeUndefined();
+      expect(authenticationResult.state).toBeUndefined();
+      expect(authenticationResult.redirectURL).toBeUndefined();
+    });
+
+    it('can not provide `challenges` for non-`401` errors', () => {
+      expect(() => AuthenticationResult.failed(Boom.badRequest(), ['Negotiate'])).toThrowError(
+        'Challenges can only be provided with `401 Unauthorized` errors.'
+      );
+    });
   });
 
   describe('succeeded', () => {
@@ -54,7 +78,7 @@ describe('AuthenticationResult', () => {
     });
 
     it('correctly produces `succeeded` authentication result without state.', () => {
-      const user = { username: 'user' };
+      const user = { username: 'user' } as AuthenticatedUser;
       const authenticationResult = AuthenticationResult.succeeded(user);
 
       expect(authenticationResult.succeeded()).toBe(true);
@@ -69,7 +93,7 @@ describe('AuthenticationResult', () => {
     });
 
     it('correctly produces `succeeded` authentication result with state.', () => {
-      const user = { username: 'user' };
+      const user = { username: 'user' } as AuthenticatedUser;
       const state = { some: 'state' };
       const authenticationResult = AuthenticationResult.succeeded(user, state);
 
@@ -152,7 +176,7 @@ describe('AuthenticationResult', () => {
     });
 
     it('depends on `state` for `succeeded`.', () => {
-      const mockUser = { username: 'u' };
+      const mockUser = { username: 'u' } as AuthenticatedUser;
       expect(AuthenticationResult.succeeded(mockUser, 'string').shouldUpdateState()).toBe(true);
       expect(AuthenticationResult.succeeded(mockUser, 0).shouldUpdateState()).toBe(true);
       expect(AuthenticationResult.succeeded(mockUser, true).shouldUpdateState()).toBe(true);
@@ -198,7 +222,7 @@ describe('AuthenticationResult', () => {
     });
 
     it('depends on `state` for `succeeded`.', () => {
-      const mockUser = { username: 'u' };
+      const mockUser = { username: 'u' } as AuthenticatedUser;
       expect(AuthenticationResult.succeeded(mockUser, null).shouldClearState()).toBe(true);
 
       expect(AuthenticationResult.succeeded(mockUser).shouldClearState()).toBe(false);

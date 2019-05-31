@@ -8,7 +8,6 @@ import {
   EuiBadge,
   EuiCodeBlock,
   EuiInMemoryTable,
-  EuiLink,
   EuiPanel,
   EuiText,
   EuiTextColor,
@@ -18,15 +17,22 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { ErrorListItem, Ping } from '../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { errorListQuery } from '../../queries';
+import { MonitorPageLink } from './monitor_page_link';
 
 interface ErrorListProps {
-  loading: boolean;
+  linkParameters?: string;
+}
+
+interface ErrorListQueryResult {
   errorList?: ErrorListItem[];
 }
 
-export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
+type Props = UptimeGraphQLQueryProps<ErrorListQueryResult> & ErrorListProps;
+
+export const ErrorListComponent = ({ data, linkParameters, loading }: Props) => (
   <EuiPanel paddingSize="s">
     <EuiTitle size="xs">
       <h5>
@@ -35,7 +41,7 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
     </EuiTitle>
     <EuiInMemoryTable
       loading={loading}
-      items={errorList}
+      items={(data && data.errorList) || undefined}
       columns={[
         {
           field: 'count',
@@ -65,12 +71,25 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
           name: i18n.translate('xpack.uptime.errorList.monitorIdColumnLabel', {
             defaultMessage: 'Monitor ID',
           }),
-          render: (id: string, { name }: ErrorListItem) => (
-            <EuiLink>
-              <Link to={`/monitor/${id}`}>{name || id}</Link>
-            </EuiLink>
+          render: (id: string, { name, location }: ErrorListItem) => (
+            <MonitorPageLink
+              id={id}
+              location={location || undefined}
+              linkParameters={linkParameters}
+            >
+              {name || id}
+            </MonitorPageLink>
           ),
-          width: '25%',
+          width: '12.5%',
+        },
+        {
+          field: 'location',
+          name: i18n.translate('xpack.uptime.errorList.location', {
+            defaultMessage: 'Location',
+            description:
+              "The heading of a column that displays the location of a Heartbeat instance's host machine.",
+          }),
+          width: '12.5%',
         },
         {
           field: 'statusCode',
@@ -101,4 +120,9 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
       pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 50] }}
     />
   </EuiPanel>
+);
+
+export const ErrorList = withUptimeGraphQL<ErrorListQueryResult, ErrorListProps>(
+  ErrorListComponent,
+  errorListQuery
 );

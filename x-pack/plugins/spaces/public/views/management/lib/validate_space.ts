@@ -99,12 +99,17 @@ export class SpaceValidator {
     return valid();
   }
 
+  public validateEnabledFeatures(space: Partial<Space>) {
+    return valid();
+  }
+
   public validateForSave(space: Space) {
     const { isInvalid: isNameInvalid } = this.validateSpaceName(space);
     const { isInvalid: isDescriptionInvalid } = this.validateSpaceDescription(space);
     const { isInvalid: isIdentifierInvalid } = this.validateURLIdentifier(space);
+    const { isInvalid: areFeaturesInvalid } = this.validateEnabledFeatures(space);
 
-    if (isNameInvalid || isDescriptionInvalid || isIdentifierInvalid) {
+    if (isNameInvalid || isDescriptionInvalid || isIdentifierInvalid || areFeaturesInvalid) {
       return invalid();
     }
 

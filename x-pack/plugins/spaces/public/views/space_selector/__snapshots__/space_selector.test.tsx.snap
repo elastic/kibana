@@ -26,7 +26,6 @@ exports[`it renders without crashing 1`] = `
       </span>
       <EuiTitle
         size="l"
-        textTransform="none"
       >
         <h1
           tabIndex={0}
@@ -40,7 +39,6 @@ exports[`it renders without crashing 1`] = `
       </EuiTitle>
       <EuiText
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
@@ -71,8 +69,6 @@ exports[`it renders without crashing 1`] = `
       <EuiSpacer />
       <EuiText
         color="subdued"
-        grow={true}
-        size="m"
         textAlign="center"
       >
         <FormattedMessage

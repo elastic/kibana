@@ -19,11 +19,11 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggSelect from './agg_select';
-import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { AggSelect } from './agg_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -42,7 +42,8 @@ export const Static = props => {
   const defaults = {
     numerator: '*',
     denominator: '*',
-    metric_agg: 'count'
+    metric_agg: 'count',
+    value: '',
   };
 
   const model = { ...defaults, ...props.model };
@@ -55,6 +56,7 @@ export const Static = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -82,7 +84,7 @@ export const Static = props => {
           >
             <EuiFieldNumber
               onChange={handleTextChange('value')}
-              value={Number(model.value)}
+              value={model.value === '' ? '' : Number(model.value)}
               step={0.1}
             />
           </EuiFormRow>

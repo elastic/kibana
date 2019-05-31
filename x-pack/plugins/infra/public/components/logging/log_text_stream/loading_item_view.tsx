@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { EuiButtonEmpty, EuiIcon, EuiProgress, EuiText } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
@@ -112,7 +114,6 @@ interface ProgressEntryProps {
   isLoading: boolean;
 }
 
-// tslint:disable-next-line:max-classes-per-file
 class ProgressEntry extends React.PureComponent<ProgressEntryProps, {}> {
   public render() {
     const { alignment, children, className, color, isLoading } = this.props;

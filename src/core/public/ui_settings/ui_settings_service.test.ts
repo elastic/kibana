@@ -19,19 +19,15 @@
 
 import { MockUiSettingsApi, MockUiSettingsClient } from './ui_settings_service.test.mocks';
 
-import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
-import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { UiSettingsService } from './ui_settings_service';
 
 const httpSetup = httpServiceMock.createSetupContract();
 
 const defaultDeps = {
-  notifications: notificationServiceMock.createSetupContract(),
   http: httpSetup,
   injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
-  basePath: basePathServiceMock.createSetupContract(),
 };
 
 afterEach(() => {

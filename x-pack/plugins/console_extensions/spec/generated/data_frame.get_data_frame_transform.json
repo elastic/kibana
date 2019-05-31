@@ -1,0 +1,16 @@
+{
+  "data_frame.get_data_frame_transform": {
+    "url_params": {
+      "from": 0,
+      "size": 0
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_data_frame/transforms/{transform_id}",
+      "_data_frame/transforms"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-data-frame-transform.html"
+  }
+}

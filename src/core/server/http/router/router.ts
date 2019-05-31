@@ -27,9 +27,11 @@ import { RouteConfig, RouteMethod, RouteSchemas } from './route';
 export interface RouterRoute {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   path: string;
+  authRequired: boolean;
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject>;
 }
 
+/** @public */
 export class Router {
   public routes: Array<Readonly<RouterRoute>> = [];
 
@@ -42,12 +44,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
+    const { path, authRequired = true } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'GET');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
       method: 'GET',
-      path: route.path,
+      path,
+      authRequired,
     });
   }
 
@@ -58,12 +62,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
+    const { path, authRequired = true } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
       method: 'POST',
-      path: route.path,
+      path,
+      authRequired,
     });
   }
 
@@ -74,12 +80,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
+    const { path, authRequired = true } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
       method: 'PUT',
-      path: route.path,
+      path,
+      authRequired,
     });
   }
 
@@ -90,12 +98,14 @@ export class Router {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) {
+    const { path, authRequired = true } = route;
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'DELETE');
     this.routes.push({
       handler: async (req, responseToolkit) =>
         await this.handle(routeSchemas, req, responseToolkit, handler),
       method: 'DELETE',
-      path: route.path,
+      path,
+      authRequired,
     });
   }
 
@@ -170,4 +180,4 @@ export class Router {
 export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
   req: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   createResponse: ResponseFactory
-) => Promise<KibanaResponse<any>>;
+) => KibanaResponse<any> | Promise<KibanaResponse<any>>;

@@ -28,7 +28,9 @@ class PanelActionsStore {
    */
   public initializeFromRegistry(panelActionsRegistry: ContextMenuAction[]) {
     panelActionsRegistry.forEach(panelAction => {
-      this.actions.push(panelAction);
+      if (!this.actions.includes(panelAction)) {
+        this.actions.push(panelAction);
+      }
     });
   }
 }

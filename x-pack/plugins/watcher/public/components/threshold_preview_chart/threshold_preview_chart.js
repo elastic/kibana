@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import 'ui/filters/moment';
+import '../../directives/moment';
 import { isNumber, forEach, merge } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { TimeBuckets } from 'ui/time_buckets';
@@ -151,7 +151,7 @@ app.directive('thresholdPreviewChart', function ($injector) {
         return options;
       }
 
-      onPlotHover = (event, pos, item, plot) => {
+      onPlotHover = (event, pos, item, plot) => { // eslint-disable-line no-unused-vars
         if (!Boolean(item)) {
           this.dataPointTooltip = undefined;
           return;

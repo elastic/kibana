@@ -1,28 +1,28 @@
 /*
-* Licensed to Elasticsearch B.V. under one or more contributor
-* license agreements. See the NOTICE file distributed with
-* this work for additional information regarding copyright
-* ownership. Elasticsearch B.V. licenses this file to you under
-* the Apache License, Version 2.0 (the "License"); you may
-* not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 import _ from 'lodash';
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import { toArray } from 'rxjs/operators';
-import wreck from 'wreck';
+import wreck from '@hapi/wreck';
 
 import { deleteIndex } from './delete_index';
 import { collectUiExports } from '../../../legacy/ui/ui_exports';
@@ -33,10 +33,10 @@ import { findPluginSpecs } from '../../../legacy/plugin_discovery';
  * Load the uiExports for a Kibana instance, only load uiExports from xpack if
  * it is enabled in the Kibana server.
  */
-const getUiExports = async (kibanaUrl) => {
+const getUiExports = async kibanaUrl => {
   const xpackEnabled = await getKibanaPluginEnabled({
     kibanaUrl,
-    pluginId: 'xpack_main'
+    pluginId: 'xpack_main',
   });
 
   const { spec$ } = await findPluginSpecs({
@@ -98,7 +98,7 @@ export async function migrateKibanaIndex({ client, log, kibanaUrl }) {
 
   const server = {
     log: ([logType, messageType], ...args) => log[logType](`[${messageType}] ${args.join(' ')}`),
-    config: () => ({ get: (path) => config[path] }),
+    config: () => ({ get: path => config[path] }),
     plugins: { elasticsearch },
   };
 
@@ -121,7 +121,7 @@ async function loadElasticVersion() {
 export async function isSpacesEnabled({ kibanaUrl }) {
   return await getKibanaPluginEnabled({
     kibanaUrl,
-    pluginId: 'spaces'
+    pluginId: 'spaces',
   });
 }
 
@@ -129,13 +129,14 @@ async function getKibanaPluginEnabled({ pluginId, kibanaUrl }) {
   try {
     const { payload } = await wreck.get('/api/status', {
       baseUrl: kibanaUrl,
-      json: true
+      json: true,
     });
 
-    return payload.status.statuses
-      .some(({ id }) => id.includes(`plugin:${pluginId}@`));
+    return payload.status.statuses.some(({ id }) => id.includes(`plugin:${pluginId}@`));
   } catch (error) {
-    throw new Error(`Unable to fetch Kibana status API response from Kibana at ${kibanaUrl}: ${error}`);
+    throw new Error(
+      `Unable to fetch Kibana status API response from Kibana at ${kibanaUrl}: ${error}`
+    );
   }
 }
 
@@ -150,9 +151,10 @@ export async function createDefaultSpace({ index, client }) {
       space: {
         name: 'Default Space',
         description: 'This is the default space',
-        _reserved: true
-      }
-    }
+        disabledFeatures: [],
+        _reserved: true,
+      },
+    },
   });
 }
 
@@ -166,12 +168,12 @@ export async function createDefaultSpace({ index, client }) {
  */
 async function fetchKibanaIndices(client) {
   const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
-  const isKibanaIndex = (index) => (/^\.kibana(:?_\d*)?$/).test(index);
+  const isKibanaIndex = index => /^\.kibana(:?_\d*)?$/.test(index);
   return kibanaIndices.map(x => x.index).filter(isKibanaIndex);
 }
 
 export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
-  if (!await isSpacesEnabled({ kibanaUrl })) {
+  if (!(await isSpacesEnabled({ kibanaUrl }))) {
     return await deleteKibanaIndices({
       client,
       stats,
@@ -186,18 +188,17 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
         bool: {
           must_not: {
             ids: {
-              type: 'doc',
-              values: ['space:default']
-            }
-          }
-        }
-      }
-    }
+              values: ['space:default'],
+            },
+          },
+        },
+      },
+    },
   });
 
   log.warning(
     `since spaces are enabled, all objects other than the default space were deleted from ` +
-    `.kibana rather than deleting the whole index`
+      `.kibana rather than deleting the whole index`
   );
 
   stats.deletedIndex('.kibana');

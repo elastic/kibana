@@ -13,20 +13,19 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore: path dynamic for kibana
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
-import { InfraKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
-
-import introspectionQueryResultData from '../../graphql/introspection.json';
-import { InfraKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
-import { InfraFrontendLibs } from '../lib';
-
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { HttpLink } from 'apollo-link-http';
 import { withClientState } from 'apollo-link-state';
+import { InfraFrontendLibs } from '../lib';
+import introspectionQueryResultData from '../../graphql/introspection.json';
+import { InfraKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
+import { InfraKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
 
 export function compose(): InfraFrontendLibs {
   const cache = new InMemoryCache({
+    addTypename: false,
     fragmentMatcher: new IntrospectionFragmentMatcher({
       introspectionQueryResultData,
     }),

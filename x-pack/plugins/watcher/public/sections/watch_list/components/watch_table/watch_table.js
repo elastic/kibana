@@ -56,7 +56,7 @@ app.directive('watchTable', function () {
         });
       }
 
-      onAllSelectedChange = (itemId, allSelected) => {
+      onAllSelectedChange = (itemId, allSelected) => { // eslint-disable-line no-unused-vars
         _.forEach(this.editableItems, item => {
           item.selected = allSelected;
         });

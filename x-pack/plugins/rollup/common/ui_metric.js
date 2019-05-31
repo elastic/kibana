@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const UIM_APP_NAME = 'rollup_job_wizard';
+export const UIM_APP_NAME = 'rollup_jobs';
 
 export const UIM_APP_LOAD = 'app_load';
 export const UIM_JOB_CREATE = 'job_create';

@@ -17,21 +17,17 @@
  * under the License.
  */
 
-import * as FunctionalTestRunner from '../../../../../src/functional_test_runner';
+import { FunctionalTestRunner } from '../../../../../src/functional_test_runner';
 import { CliError } from './run_cli';
 
 function createFtr({ configPath, options: { log, bail, grep, updateBaselines, suiteTags } }) {
-  return FunctionalTestRunner.createFunctionalTestRunner({
-    log,
-    configFile: configPath,
-    configOverrides: {
-      mochaOpts: {
-        bail: !!bail,
-        grep,
-      },
-      updateBaselines,
-      suiteTags,
+  return new FunctionalTestRunner(log, configPath, {
+    mochaOpts: {
+      bail: !!bail,
+      grep,
     },
+    updateBaselines,
+    suiteTags,
   });
 }
 

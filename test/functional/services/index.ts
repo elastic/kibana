@@ -18,9 +18,7 @@
  */
 
 import { AppsMenuProvider } from './apps_menu';
-// @ts-ignore not TS yet
 import { BrowserProvider } from './browser';
-// @ts-ignore not TS yet
 import { ComboBoxProvider } from './combo_box';
 import {
   DashboardAddPanelProvider,
@@ -37,7 +35,6 @@ import { EmbeddingProvider } from './embedding';
 import { FailureDebuggingProvider } from './failure_debugging';
 // @ts-ignore not TS yet
 import { FilterBarProvider } from './filter_bar';
-// @ts-ignore not TS yet
 import { FindProvider } from './find';
 // @ts-ignore not TS yet
 import { FlyoutProvider } from './flyout';
@@ -47,18 +44,16 @@ import { GlobalNavProvider } from './global_nav';
 import { InspectorProvider } from './inspector';
 // @ts-ignore not TS yet
 import { QueryBarProvider } from './query_bar';
-// @ts-ignore not TS yet
 import { RemoteProvider } from './remote';
 // @ts-ignore not TS yet
 import { RenderableProvider } from './renderable';
-// @ts-ignore not TS yet
 import { ScreenshotsProvider } from './screenshots';
 // @ts-ignore not TS yet
 import { SnapshotsProvider } from './snapshots';
 // @ts-ignore not TS yet
 import { TableProvider } from './table';
-// @ts-ignore not TS yet
 import { TestSubjectsProvider } from './test_subjects';
+import { ToastsProvider } from './toasts';
 // @ts-ignore not TS yet
 import { PieChartProvider } from './visualizations';
 // @ts-ignore not TS yet
@@ -89,4 +84,5 @@ export const services = {
   inspector: InspectorProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
+  toasts: ToastsProvider,
 };

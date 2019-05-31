@@ -26,9 +26,8 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
     const beatId = request.params.beatId;
     const accessToken = request.headers['kbn-beats-access-token'];
 
-    let beat;
     let configurationBlocks: ConfigurationBlock[];
-    beat = await libs.beats.getById(libs.framework.internalUser, beatId);
+    const beat = await libs.beats.getById(libs.framework.internalUser, beatId);
     if (beat === null) {
       return { error: { message: `Beat "${beatId}" not found`, code: 404 }, success: false };
     }

@@ -27,10 +27,11 @@ export class RemoteClustersProvider extends PureComponent {
       })
     );
     loadRemoteClusters()
+      .then(sortClusterByName)
       .then((remoteClusters) => {
         this.setState({
           isLoading: false,
-          remoteClusters: sortClusterByName(remoteClusters)
+          remoteClusters
         });
       })
       .catch((error) => {

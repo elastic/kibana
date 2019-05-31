@@ -10,21 +10,31 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FilterBar as FilterBarType, MonitorKey } from '../../../common/graphql/types';
 import { UptimeSearchBarQueryChangeHandler } from '../../pages/overview';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { filterBarQuery } from '../../queries';
+import { FilterBarLoading } from './filter_bar_loading';
 import { filterBarSearchSchema } from './search_schema';
 
+interface FilterBarQueryResult {
+  filterBar?: FilterBarType;
+}
+
 interface FilterBarProps {
-  currentQuery?: object;
-  filterBar: FilterBarType;
+  currentQuery?: string;
   updateQuery: UptimeSearchBarQueryChangeHandler;
 }
 
+type Props = FilterBarProps & UptimeGraphQLQueryProps<FilterBarQueryResult>;
+
 const SEARCH_THRESHOLD = 2;
 
-export const FilterBar = ({
-  currentQuery,
-  filterBar: { names, ports, ids, schemes },
-  updateQuery,
-}: FilterBarProps) => {
+export const FilterBarComponent = ({ currentQuery, data, updateQuery }: Props) => {
+  if (!data || !data.filterBar) {
+    return <FilterBarLoading />;
+  }
+  const {
+    filterBar: { ids, locations, names, ports, schemes },
+  } = data;
   // TODO: add a factory function + type for these filter options
   const filters = [
     {
@@ -45,7 +55,16 @@ export const FilterBar = ({
         },
       ],
     },
-    // TODO: add health to this select
+    {
+      type: 'field_value_selection',
+      field: 'observer.geo.name',
+      name: i18n.translate('xpack.uptime.filterBar.options.location.name', {
+        defaultMessage: 'Location',
+        description:
+          'A label applied to a button that lets users filter monitors by their location.',
+      }),
+      options: locations ? locations.map(location => ({ value: location, view: location })) : [],
+    },
     {
       type: 'field_value_selection',
       field: 'monitor.id',
@@ -115,13 +134,20 @@ export const FilterBar = ({
     },
   ];
   return (
-    <EuiSearchBar
-      box={{ incremental: false }}
-      className="euiFlexGroup--gutterSmall"
-      onChange={updateQuery}
-      filters={filters}
-      query={currentQuery}
-      schema={filterBarSearchSchema}
-    />
+    <div data-test-subj="xpack.uptime.filterBar">
+      <EuiSearchBar
+        box={{ incremental: false }}
+        className="euiFlexGroup--gutterSmall"
+        onChange={updateQuery}
+        filters={filters}
+        query={currentQuery}
+        schema={filterBarSearchSchema}
+      />
+    </div>
   );
 };
+
+export const FilterBar = withUptimeGraphQL<FilterBarQueryResult, FilterBarProps>(
+  FilterBarComponent,
+  filterBarQuery
+);

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { uiCapabilities } from './capabilities';
+
 function getUiSettingsClient() {
   return {
     get: key => {
@@ -12,6 +14,8 @@ function getUiSettingsClient() {
           return { from: 'now-15m', to: 'now', mode: 'quick' };
         case 'timepicker:refreshIntervalDefaults':
           return { display: 'Off', pause: false, value: 0 };
+        case 'siem:defaultIndex':
+          return ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
         default:
           throw new Error(`Unexpected config key: ${key}`);
       }
@@ -33,8 +37,12 @@ function getInjected(key) {
       return 'apm*';
     case 'mlEnabled':
       return true;
+    case 'uiCapabilities':
+      return uiCapabilities;
     case 'isCloudEnabled':
       return false;
+    case 'siem:defaultIndex':
+      return ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }

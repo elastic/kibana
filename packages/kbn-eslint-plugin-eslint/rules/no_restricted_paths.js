@@ -51,8 +51,10 @@ function traverseToTopFolder(src, pattern) {
 }
 
 function isSameFolderOrDescendent(src, imported, pattern) {
-  const srcFileFolderRoot = traverseToTopFolder(src, pattern);
-  const importedFileFolderRoot = traverseToTopFolder(imported, pattern);
+  // to allow to exclude file by name in pattern (e.g., !**/index*) we start with file dirname and then traverse
+  const srcFileFolderRoot = traverseToTopFolder(path.dirname(src), pattern);
+  const importedFileFolderRoot = traverseToTopFolder(path.dirname(imported), pattern);
+
   return srcFileFolderRoot === importedFileFolderRoot;
 }
 

@@ -40,10 +40,7 @@ exports[`Form should render normally 1`] = `
     paddingSize="l"
   >
     <EuiForm>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiFlexGroup
           alignItems="baseline"
         >
@@ -61,6 +58,7 @@ exports[`Form should render normally 1`] = `
       />
       <Field
         clear={[Function]}
+        enableSaving={true}
         key="general:test:date"
         save={[Function]}
         setting={
@@ -77,6 +75,7 @@ exports[`Form should render normally 1`] = `
       />
       <Field
         clear={[Function]}
+        enableSaving={true}
         key="setting:test"
         save={[Function]}
         setting={
@@ -102,10 +101,7 @@ exports[`Form should render normally 1`] = `
     paddingSize="l"
   >
     <EuiForm>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiFlexGroup
           alignItems="baseline"
         >
@@ -123,6 +119,7 @@ exports[`Form should render normally 1`] = `
       />
       <Field
         clear={[Function]}
+        enableSaving={true}
         key="dashboard:test:setting"
         save={[Function]}
         setting={
@@ -147,10 +144,7 @@ exports[`Form should render normally 1`] = `
     paddingSize="l"
   >
     <EuiForm>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiFlexGroup
           alignItems="baseline"
         >
@@ -196,6 +190,188 @@ exports[`Form should render normally 1`] = `
       />
       <Field
         clear={[Function]}
+        enableSaving={true}
+        key="xpack:test:setting"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "xpack test setting",
+            "category": Array [
+              "x-pack",
+            ],
+            "description": "bar",
+            "displayName": "X-Pack test setting",
+            "name": "xpack:test:setting",
+          }
+        }
+      />
+    </EuiForm>
+  </EuiPanel>
+  <EuiSpacer
+    size="l"
+  />
+</Fragment>
+`;
+
+exports[`Form should render read-only when saving is disabled 1`] = `
+<Fragment>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="l"
+  >
+    <EuiForm>
+      <EuiText>
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <h2>
+              General
+            </h2>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        enableSaving={false}
+        key="general:test:date"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "general test date",
+            "category": Array [
+              "general",
+            ],
+            "description": "bar",
+            "displayName": "Test date",
+            "name": "general:test:date",
+          }
+        }
+      />
+      <Field
+        clear={[Function]}
+        enableSaving={false}
+        key="setting:test"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "setting test",
+            "category": Array [
+              "general",
+            ],
+            "description": "foo",
+            "displayName": "Test setting",
+            "name": "setting:test",
+          }
+        }
+      />
+    </EuiForm>
+  </EuiPanel>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="l"
+  >
+    <EuiForm>
+      <EuiText>
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <h2>
+              Dashboard
+            </h2>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        enableSaving={false}
+        key="dashboard:test:setting"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "dashboard test setting",
+            "category": Array [
+              "dashboard",
+            ],
+            "displayName": "Dashboard test setting",
+            "name": "dashboard:test:setting",
+          }
+        }
+      />
+    </EuiForm>
+  </EuiPanel>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="l"
+  >
+    <EuiForm>
+      <EuiText>
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <h2>
+              X-pack
+            </h2>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <em>
+              <FormattedMessage
+                defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                id="kbn.management.settings.form.searchResultText"
+                values={
+                  Object {
+                    "clearSearch": <EuiLink
+                      color="primary"
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <em>
+                        <FormattedMessage
+                          defaultMessage="(clear search)"
+                          id="kbn.management.settings.form.clearSearchResultText"
+                          values={Object {}}
+                        />
+                      </em>
+                    </EuiLink>,
+                    "settingsCount": 9,
+                  }
+                }
+              />
+            </em>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        enableSaving={false}
         key="xpack:test:setting"
         save={[Function]}
         setting={

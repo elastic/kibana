@@ -1,6 +1,7 @@
 .canvasDropdownFilter {
   width: 100%;
   font-size: inherit;
+  position: relative;
 
   .canvasDropdownFilter__select {
     background-color: $euiColorEmptyShade;

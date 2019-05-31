@@ -9,15 +9,15 @@ import React, { Component } from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
-import { IUrlParams } from '../../../../../../store/urlParams';
+import { IUrlParams } from '../../../../../../context/UrlParamsContext/types';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
 import {
   APMQueryParams,
   fromQuery,
-  history,
   toQuery
 } from '../../../../../shared/Links/url_helpers';
+import { history } from '../../../../../../utils/history';
 import { AgentMark } from '../get_agent_marks';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';
@@ -87,7 +87,7 @@ export class Waterfall extends Component<Props> {
   };
 
   public getFlyOut = () => {
-    const { waterfall, location, urlParams } = this.props;
+    const { waterfall, urlParams } = this.props;
 
     const currentItem =
       urlParams.waterfallItemId &&
@@ -116,8 +116,6 @@ export class Waterfall extends Component<Props> {
           <TransactionFlyout
             transaction={currentItem.transaction}
             onClose={this.onCloseFlyout}
-            location={location}
-            urlParams={urlParams}
             traceRootDuration={waterfall.traceRootDuration}
             errorCount={currentItem.errorCount}
           />

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get, has, isFunction } from 'lodash';
+import { get, has } from 'lodash';
 import React, { useEffect } from 'react';
 
 import { EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
@@ -29,29 +29,26 @@ import { ComboBoxGroupedOption } from '../default_editor_utils';
 
 interface DefaultEditorAggSelectProps {
   agg: AggConfig;
-  value: AggType;
-  setValue: (aggType: AggType) => void;
   aggTypeOptions: AggType[];
-  isSubAggregation: boolean;
   isSelectInvalid: boolean;
-  setTouched: () => void;
+  isSubAggregation: boolean;
+  value: AggType;
   setValidity: (isValid: boolean) => void;
+  setValue: (aggType: AggType) => void;
+  setTouched: () => void;
 }
 
 function DefaultEditorAggSelect({
-  agg = {},
-  value = { title: '' },
+  agg,
+  value,
   setValue,
-  aggTypeOptions = [],
+  aggTypeOptions,
   isSelectInvalid,
   isSubAggregation,
   setTouched,
   setValidity,
 }: DefaultEditorAggSelectProps) {
-  const isAggTypeDefined = value && Boolean(value.title);
-  const selectedOptions: ComboBoxGroupedOption[] = isAggTypeDefined
-    ? [{ label: value.title, value }]
-    : [];
+  const selectedOptions: ComboBoxGroupedOption[] = value ? [{ label: value.title, value }] : [];
 
   const label = isSubAggregation ? (
     <FormattedMessage
@@ -70,7 +67,7 @@ function DefaultEditorAggSelect({
     aggHelpLink = get(documentationLinks, ['aggs', agg.type.name]);
   }
 
-  const helpLink = isAggTypeDefined && aggHelpLink && (
+  const helpLink = value && aggHelpLink && (
     <EuiLink
       href={aggHelpLink}
       target="_blank"
@@ -80,42 +77,57 @@ function DefaultEditorAggSelect({
       <FormattedMessage
         id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
         defaultMessage="{aggTitle} help"
-        values={{ aggTitle: isAggTypeDefined ? value.title : '' }}
+        values={{ aggTitle: value ? value.title : '' }}
       />
     </EuiLink>
   );
 
+  const errors = [];
+
+  if (!aggTypeOptions.length) {
+    errors.push(
+      i18n.translate('common.ui.vis.defaultEditor.aggSelect.noCompatibleAggsDescription', {
+        defaultMessage: 'The index pattern {indexPatternTitle} does not contain any aggregations.',
+        values: {
+          indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
+        },
+      })
+    );
+    setTouched();
+  }
+
   useEffect(
     () => {
-      if (isFunction(setValidity)) {
-        setValidity(isAggTypeDefined);
-      }
+      // The selector will be invalid when the value is empty.
+      setValidity(!!value);
     },
-    [isAggTypeDefined]
+    [value]
   );
 
   return (
     <EuiFormRow
       label={label}
       labelAppend={helpLink}
+      error={errors}
       isInvalid={isSelectInvalid}
       fullWidth={true}
       className="visEditorAggSelect__formRow"
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {
-          defaultMessage: 'Select an aggregation…',
+          defaultMessage: 'Select an aggregation',
         })}
         id={`visDefaultEditorAggSelect${agg.id}`}
+        isDisabled={!aggTypeOptions.length}
         options={aggTypeOptions}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
+        onBlur={setTouched}
         onChange={options => setValue(get(options, '0.value'))}
         data-test-subj="defaultEditorAggSelect"
         isClearable={false}
         isInvalid={isSelectInvalid}
         fullWidth={true}
-        onBlur={() => setTouched()}
       />
     </EuiFormRow>
   );

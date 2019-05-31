@@ -5,15 +5,17 @@
  */
 
 import { partial } from 'lodash';
+import { API_ROUTE } from '../../../common/lib/constants';
 import { getESFieldTypes } from './get_es_field_types';
 
 // TODO: Error handling, note: esErrors
+
 export function esFields(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
 
   server.route({
     method: 'GET',
-    path: '/api/canvas/es_fields',
+    path: `${API_ROUTE}/es_fields`,
     handler: function(request, h) {
       const { index, fields } = request.query;
       if (!index) {

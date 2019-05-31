@@ -11,8 +11,7 @@ import React from 'react';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraNodeType } from '../../../server/lib/adapters/nodes';
-import { InfraTimerangeInput } from '../../graphql/types';
+import { InfraTimerangeInput, InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
 import { NodeContextMenu } from './node_context_menu';
@@ -76,9 +75,11 @@ export const Node = injectI18n(
           closePopover={this.closePopover}
           options={options}
           timeRange={newTimerange}
+          popoverPosition="upCenter"
         >
           <EuiToolTip position="top" content={`${node.name} | ${value}`}>
             <NodeContainer
+              data-test-subj="nodeContainer"
               style={{ width: squareSize || 0, height: squareSize || 0 }}
               onClick={this.togglePopover}
             >

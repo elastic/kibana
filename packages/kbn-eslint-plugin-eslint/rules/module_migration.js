@@ -17,16 +17,33 @@
  * under the License.
  */
 
+const path = require('path');
+const KIBANA_ROOT = path.resolve(__dirname, '../../..');
+
 function checkModuleNameNode(context, mappings, node) {
   const mapping = mappings.find(
-    mapping => mapping.from === node.value || mapping.from.startsWith(node.value + '/')
+    mapping => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
   );
 
   if (!mapping) {
     return;
   }
 
-  const newSource = node.value.replace(mapping.from, mapping.to);
+  let newSource;
+
+  // support for toRelative added to migrate away from X-Pack being bundled
+  // within node modules. after that migration, this can be removed.
+  if (mapping.toRelative) {
+    const sourceDirectory = path.dirname(context.getFilename());
+    const localModulePath = node.value.replace(new RegExp(`^${mapping.from}\/`), '');
+    const modulePath = path.resolve(KIBANA_ROOT, mapping.toRelative, localModulePath);
+    const relativePath = path.relative(sourceDirectory, modulePath);
+
+    newSource = relativePath.startsWith('.') ? relativePath : `./${relativePath}`;
+  } else {
+    newSource = node.value.replace(mapping.from, mapping.to);
+  }
+
   context.report({
     message: `Imported module "${node.value}" should be "${newSource}"`,
     loc: node.loc,
@@ -51,8 +68,18 @@ module.exports = {
             to: {
               type: 'string',
             },
+            toRelative: {
+              type: 'string',
+            },
           },
-          required: ['from', 'to'],
+          anyOf: [
+            {
+              required: ['from', 'to'],
+            },
+            {
+              required: ['from', 'toRelative'],
+            },
+          ],
           additionalProperties: false,
         },
         default: [],

@@ -4,39 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ActionId,
-  ChangeCallbackFunction,
-  Meta,
-  Payload,
-  State,
-  TypeName,
-  UpdaterFunction,
-} from '.';
+import { ActionId, Payload, State, Store, TypeName, UpdaterFunction } from '.';
 
 let counter = 0 as ActionId;
 
-export const createStore = (
-  initialState: State,
-  updater: UpdaterFunction,
-  onChangeCallback: ChangeCallbackFunction
-) => {
+export const createStore = (initialState: State, updater: UpdaterFunction): Store => {
   let currentState = initialState;
 
-  const getCurrentState = () => currentState;
-
-  const commit = (type: TypeName, payload: Payload, meta: Meta = { silent: false }) => {
-    currentState = updater({
+  const commit = (type: TypeName, payload: Payload) => {
+    return (currentState = updater({
       ...currentState,
       primaryUpdate: {
         type,
         payload: { ...payload, uid: counter++ },
       },
-    });
-    if (!meta.silent) {
-      onChangeCallback({ type, state: currentState }, meta);
-    }
+    }));
   };
 
-  return { getCurrentState, commit };
+  const getCurrentState = () => currentState;
+
+  const setCurrentState = (state: State) => {
+    currentState = state;
+    commit('flush', {});
+  };
+
+  return { getCurrentState, setCurrentState, commit };
 };

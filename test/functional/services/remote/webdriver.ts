@@ -22,8 +22,6 @@ import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
-
-// @ts-ignore types for 4.0 not available yet
 import { Builder, By, Key, logging, until } from 'selenium-webdriver';
 // @ts-ignore types not available
 import chrome from 'selenium-webdriver/chrome';
@@ -37,6 +35,8 @@ import { Executor } from 'selenium-webdriver/lib/http';
 import { getLogger } from 'selenium-webdriver/lib/logging';
 
 import { preventParallelCalls } from './prevent_parallel_calls';
+
+import { Browsers } from './browsers';
 
 const throttleOption = process.env.TEST_THROTTLE_NETWORK;
 const SECOND = 1000;
@@ -57,7 +57,7 @@ Executor.prototype.execute = preventParallelCalls(
 );
 
 let attemptCounter = 0;
-async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | 'firefox') {
+async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
 
@@ -100,7 +100,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | '
     // Only chrome supports this option.
     log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
 
-    session.setNetworkConditions({
+    (session as any).setNetworkConditions({
       offline: false,
       latency: 100, // Additional latency (ms).
       download_throughput: 768 * 1024, // These speeds are in bites per second, not kilobytes.
@@ -115,7 +115,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | '
   return { driver: session, By, Key, until, LegacyActionSequence };
 }
 
-export async function initWebDriver(log: ToolingLog, browserType: 'chrome' | 'firefox') {
+export async function initWebDriver(log: ToolingLog, browserType: Browsers) {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
   logger.addHandler((entry: { message: string }) => {

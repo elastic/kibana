@@ -77,5 +77,5 @@ const metricTests: KbnTestProvider = ({ getService }) => {
   });
 };
 
-// tslint:disable-next-line no-default-export
+// eslint-disable-next-line import/no-default-export
 export default metricTests;
