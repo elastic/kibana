@@ -23,18 +23,18 @@ import { Legacy } from 'kibana';
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    //   require: ['kibana'],
+    require: ['kibana'],
     uiExports: {
       // app: {
       //   title: 'Embeddable Explorer',
       //   order: 1,
       //   main: 'plugins/kbn_tp_embeddable_explorer',
       // },
-      // embeddableActions: [
-      //   'plugins/embeddable_api/__test__/actions/hello_world_action',
-      //   'plugins/embeddable_api/__test__/actions/say_hello_action',
-      //   'plugins/embeddable_api/__test__/actions/send_message_action',
-      // ],
+      embeddableActions: [
+        'plugins/embeddable_api/__test__/actions/hello_world_action',
+        'plugins/embeddable_api/__test__/actions/say_hello_action',
+        'plugins/embeddable_api/__test__/actions/send_message_action',
+      ],
       embeddableFactories: [
         'plugins/embeddable_api/__test__/embeddables/hello_world/hello_world_embeddable_factory',
       ],
