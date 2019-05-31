@@ -7,13 +7,11 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
-import { Visualization, Operation } from '../types';
+import uuid from 'uuid';
 import { getSuggestions } from './xy_suggestions';
-import { XYArgs } from './xy_expression';
-import { NativeRenderer } from '../native_renderer';
-
-export type State = XYArgs;
-export type PersistableState = XYArgs;
+import { XYConfigPanel } from './xy_config_panel';
+import { Visualization } from '../types';
+import { State, PersistableState } from './types';
 
 export const xyVisualization: Visualization<State, PersistableState> = {
   getSuggestions,
@@ -21,55 +19,30 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   initialize(state) {
     return (
       state || {
-        title: 'Empty line chart',
-        legend: { isVisible: true, position: Position.Right },
         seriesType: 'line',
-        splitSeriesAccessors: [],
-        stackAccessors: [],
+        title: 'Empty XY Chart',
+        legend: { isVisible: true, position: Position.Right },
         x: {
-          accessor: '',
+          accessor: uuid.v4(),
           position: Position.Bottom,
           showGridlines: false,
-          title: 'Uknown',
+          title: 'X',
         },
         y: {
-          accessors: [],
+          accessors: [uuid.v4()],
           position: Position.Left,
           showGridlines: false,
-          title: 'Uknown',
+          title: 'Y',
         },
+        splitSeriesAccessors: [],
+        stackAccessors: [],
       }
     );
   },
 
-  getPersistableState(state) {
-    return state;
-  },
+  getPersistableState: state => state,
 
-  renderConfigPanel: (domElement, props) => {
-    render(
-      <div>
-        XY Visualization
-        <NativeRenderer
-          nativeProps={{
-            columnId: 'col1',
-            filterOperations: (op: Operation) => true,
-            suggestedOrder: 1,
-          }}
-          render={props.datasource.renderDimensionPanel}
-        />
-        <NativeRenderer
-          nativeProps={{
-            columnId: 'col2',
-            filterOperations: (op: Operation) => true,
-            suggestedOrder: 2,
-          }}
-          render={props.datasource.renderDimensionPanel}
-        />
-      </div>,
-      domElement
-    );
-  },
+  renderConfigPanel: (domElement, props) => render(<XYConfigPanel {...props} />, domElement),
 
-  toExpression: state => '',
+  toExpression: () => '',
 };

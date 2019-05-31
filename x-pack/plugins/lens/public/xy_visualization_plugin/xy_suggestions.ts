@@ -6,8 +6,8 @@
 
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { XYArgs } from './xy_expression';
 import { SuggestionRequest, VisualizationSuggestion, TableColumn, TableSuggestion } from '../types';
+import { XYArgs } from './types';
 
 /**
  * Generate suggestions for the xy chart.

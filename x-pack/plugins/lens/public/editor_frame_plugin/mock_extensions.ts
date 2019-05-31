@@ -28,6 +28,7 @@ export function createMockDatasource(): DatasourceMock {
     removeColumnInTableSpec: jest.fn(),
     moveColumnTo: jest.fn(),
     duplicateColumn: jest.fn(),
+    generateColumnId: jest.fn(),
   };
 
   return {

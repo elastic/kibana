@@ -5,20 +5,11 @@
  */
 
 import { Position } from '@elastic/charts';
-import {
-  legendConfig,
-  LegendConfig,
-  xConfig,
-  XConfig,
-  YConfig,
-  yConfig,
-  XYArgs,
-  xyChart,
-  XYChart,
-} from './xy_expression';
+import { xyChart, XYChart } from './xy_expression';
 import { KibanaDatatable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
+import { XYArgs, LegendConfig, legendConfig, XConfig, xConfig, YConfig, yConfig } from './types';
 
 function sampleArgs() {
   const data: KibanaDatatable = {

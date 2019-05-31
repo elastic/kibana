@@ -10,6 +10,7 @@ import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
 import { Datasource, DataType } from '..';
+import uuid from 'uuid';
 import { DatasourceDimensionPanelProps, DatasourceDataPanelProps } from '../types';
 import { getIndexPatterns } from './loader';
 
@@ -221,6 +222,10 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       return {
         getTableSpec: () => {
           return state.columnOrder.map(colId => ({ columnId: colId }));
+        },
+        generateColumnId: () => {
+          // TODO: Come up with a more compact form of generating unique column ids
+          return uuid.v4();
         },
         getOperationForColumnId: (columnId: string) => {
           const column = state.columns[columnId];

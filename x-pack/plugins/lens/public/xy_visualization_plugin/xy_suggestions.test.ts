@@ -6,7 +6,7 @@
 
 import { getSuggestions } from './xy_suggestions';
 import { TableColumn, VisualizationSuggestion } from '../types';
-import { XYArgs } from './xy_expression';
+import { XYArgs } from './types';
 
 describe('xy_suggestions', () => {
   function numCol(columnId: string): TableColumn {
