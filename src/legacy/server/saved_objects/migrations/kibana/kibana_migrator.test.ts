@@ -93,6 +93,7 @@ function mockKbnServer({ configValues }: { configValues?: any } = {}) {
     version: '8.2.3',
     ready: jest.fn(async () => undefined),
     uiExports: {
+      savedObjectsManagement: {},
       savedObjectValidations: {},
       savedObjectMigrations: {},
       savedObjectMappings: [
