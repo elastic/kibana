@@ -129,7 +129,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
 
   const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
 
-  function canHandleDrag() {
+  function canHandleDrop() {
     const { dragging } = props.dragDropContext;
     const field = dragging as IndexPatternField;
 
@@ -156,9 +156,8 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
 
   return (
     <ChildDragDropProvider {...props.dragDropContext}>
-      {/* TODO: Determine if drop is really supported */}
       <DragDrop
-        droppable={canHandleDrag()}
+        droppable={canHandleDrop()}
         onDrop={field => {
           const column = columns.find(
             ({ sourceField }) => sourceField === (field as IndexPatternField).name
