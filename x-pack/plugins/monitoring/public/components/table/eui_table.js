@@ -8,8 +8,9 @@ import React from 'react';
 import { get } from 'lodash';
 import {
   EuiInMemoryTable,
-  EuiButton,
-  EuiBadge
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiHealth
 } from '@elastic/eui';
 import { ELASTICSEARCH_CUSTOM_ID } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,6 @@ export class EuiMonitoringTable extends React.PureComponent {
       setupMode,
       uuidField,
       nameField,
-      ipField,
       ...props
     } = this.props;
 
@@ -48,50 +48,83 @@ export class EuiMonitoringTable extends React.PureComponent {
 
     if (setupMode && setupMode.enabled) {
       columns.push({
-        name: 'Migration Status',
+        name: i18n.translate('xpack.monitoring.euiTable.setupStatusTitle', {
+          defaultMessage: 'Setup Status'
+        }),
+        field: uuidField,
+        render: (uuid) => {
+          const list = get(setupMode, 'data.byUuid', {});
+          const status = list[uuid] || {};
+
+          let statusBadge = null;
+          if (status.isInternalCollector) {
+            statusBadge = (
+              <EuiHealth color="danger">
+                {i18n.translate('xpack.monitoring.euiTable.isInternalCollectorLabel', {
+                  defaultMessage: 'Default collection'
+                })}
+              </EuiHealth>
+            );
+          }
+          else if (status.isPartiallyMigrated) {
+            statusBadge = (
+              <EuiHealth color="warning">
+                {i18n.translate('xpack.monitoring.euiTable.isPartiallyMigratedLabel', {
+                  defaultMessage: 'Default collection and Metricbeat collection'
+                })}
+              </EuiHealth>
+            );
+          }
+          else if (status.isFullyMigrated) {
+            statusBadge = (
+              <EuiBadge color="primary">
+                {i18n.translate('xpack.monitoring.euiTable.isFullyMigratedLabel', {
+                  defaultMessage: 'Metricbeat collection'
+                })}
+              </EuiBadge>
+            );
+          }
+          else {
+            statusBadge = i18n.translate('xpack.monitoring.euiTable.migrationStatusUnknown', {
+              defaultMessage: 'N/A'
+            });
+          }
+
+          return statusBadge;
+        }
+      });
+
+      columns.push({
+        name: i18n.translate('xpack.monitoring.euiTable.setupActionTitle', {
+          defaultMessage: 'Setup Action'
+        }),
         field: uuidField,
         render: (uuid, product) => {
           const list = get(setupMode, 'data.byUuid', {});
           const status = list[uuid] || {};
+          const instance = {
+            uuid: get(product, uuidField),
+            name: get(product, nameField),
+          };
 
-          if (setupMode.productName === ELASTICSEARCH_CUSTOM_ID && status.isPartiallyMigrated) {
-            return (
-              <EuiBadge color="warning" iconType="check">
-                {i18n.translate('xpack.monitoring.euiTable.monitoringUsingMetricbeatLabel', {
-                  defaultMessage: 'Monitored using Metricbeat'
-                })}
-              </EuiBadge>
-            );
+          // Migrating from partially to fully for Elasticsearch involves changing a cluster
+          // setting which impacts all nodes in the cluster, which we have a separate callout
+          // for. Since it does not make sense to do this on a per node basis, show nothing here
+          if (status.isPartiallyMigrated && setupMode.productName === ELASTICSEARCH_CUSTOM_ID) {
+            return null;
           }
 
           if (status.isInternalCollector || status.isPartiallyMigrated) {
-            const instance = {
-              uuid: get(product, uuidField),
-              name: get(product, nameField),
-              ip: get(product, ipField)
-            };
             return (
-              <EuiButton color="danger" onClick={() => setupMode.openFlyout(instance)}>
+              <EuiButtonEmpty flush="left" size="s" color="primary" onClick={() => setupMode.openFlyout(instance)}>
                 {i18n.translate('xpack.monitoring.euiTable.migrateButtonLabel', {
                   defaultMessage: 'Migrate'
                 })}
-              </EuiButton>
+              </EuiButtonEmpty>
             );
           }
 
-          if (status.isFullyMigrated) {
-            return (
-              <EuiBadge color="secondary" iconType="check">
-                {i18n.translate('xpack.monitoring.euiTable.migratedStatusLabel', {
-                  defaultMessage: 'Migrated'
-                })}
-              </EuiBadge>
-            );
-          }
-
-          return i18n.translate('xpack.monitoring.euiTable.migrationStatusUnknown', {
-            defaultMessage: 'N/A'
-          });
+          return null;
         }
       });
     }

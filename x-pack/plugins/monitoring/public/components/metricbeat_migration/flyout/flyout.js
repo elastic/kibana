@@ -156,27 +156,45 @@ export class Flyout extends Component {
           autoCheckIntervalInMs: AUTO_CHECK_INTERVAL_IN_MS,
         });
 
+        let calloutTitle = null;
+        if (productName === KIBANA_SYSTEM_ID) {
+          calloutTitle = (
+            <FormattedMessage
+              id="xpack.monitoring.metricbeatMigration.flyout.kibana.migrationDescriptionLabel"
+              defaultMessage="Migrating instance {instance}"
+              values={{
+                instance: (<Monospace>{instance.name}</Monospace>)
+              }}
+            />
+          );
+        }
+        else if (productName === ELASTICSEARCH_CUSTOM_ID) {
+          if (instance) {
+            calloutTitle = (
+              <FormattedMessage
+                id="xpack.monitoring.metricbeatMigration.flyout.elasticsearch.migrationDescriptionLabel"
+                defaultMessage="Migrating node {instance}"
+                values={{
+                  instance: (<Monospace>{instance.name}</Monospace>)
+                }}
+              />
+            );
+          }
+          else {
+            calloutTitle = (
+              <FormattedMessage
+                id="xpack.monitoring.metricbeatMigration.flyout.elasticsearch.migrationDescriptionNoInstanceLabel"
+                defaultMessage="Migrating Elasticsearch nodes"
+              />
+            );
+          }
+        }
+
         return (
           <Fragment>
             <EuiCallOut
               size="s"
-              title={<FormattedMessage
-                id="xpack.monitoring.metricbeatMigration.flyout.migrationDescriptionLabel"
-                defaultMessage="Migrating {instance}"
-                values={{
-                  instance: (
-                    <FormattedMessage
-                      id="xpack.monitoring.metricbeatMigration.flyout.migrationDescriptionInstanceLabel"
-                      defaultMessage="{instanceName} located at {instanceIp}"
-                      values={{
-                        instanceName: (<Monospace>{instance.name}</Monospace>),
-                        instanceIp: (<Monospace>{instance.ip}</Monospace>)
-                      }}
-                    />
-                  )
-                }}
-              />}
-              iconType="pin"
+              title={calloutTitle}
             />
             <EuiSpacer size="l"/>
             <EuiSteps steps={instructionSteps}/>

@@ -227,7 +227,7 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
                 but you need to disable internal collection to finish the migration.`
               })}
             </p>
-            <EuiButton fill color="danger" onClick={() => setupMode.openFlyout()}>
+            <EuiButton onClick={() => setupMode.openFlyout()}>
               {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionMigrationButtonLabel', {
                 defaultMessage: 'Finish migration'
               })}
@@ -257,7 +257,6 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
             setupMode={setupMode}
             uuidField="resolver"
             nameField="name"
-            ipField="transport_address"
             search={{
               box: {
                 incremental: true,

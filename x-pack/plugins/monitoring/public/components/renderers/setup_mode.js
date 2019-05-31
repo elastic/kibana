@@ -28,7 +28,7 @@ export class SetupModeRenderer extends React.Component {
       return null;
     }
 
-    let product = data.byUuid[instance.uuid];
+    let product = instance ? data.byUuid[instance.uuid] : null;
     const isFullyOrPartiallyMigrated = data.totalUniquePartiallyMigratedCount === data.totalUniqueInstanceCount
       || data.totalUniqueFullyMigratedCount === data.totalUniqueInstanceCount;
     if (!product && productName === ELASTICSEARCH_CUSTOM_ID && isFullyOrPartiallyMigrated) {
