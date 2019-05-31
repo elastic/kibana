@@ -277,8 +277,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
   }
 
   const disableSeparateYaxis = model.separate_axis ? false : true;
+
+  const seriesIndexPattern = (props.model.override_index_pattern && props.model.series_index_pattern) ?
+    props.model.series_index_pattern : props.indexPatternForQuery;
+
   return (
-    <div className="tvbAggRow">
+    <div className="tvbAggRow" data-findme="timeSeries/config.js">
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -333,7 +337,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             screenTitle={'TSVBDataOptionsTab'}
             onChange={handleQueryChange}
             appName={'VisEditor'}
-            indexPatterns={[props.indexPatternForQuery]}
+            indexPatterns={[seriesIndexPattern]}
             store={localStorage || {}}
           />
 

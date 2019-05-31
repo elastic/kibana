@@ -50,6 +50,8 @@ export const SeriesConfig = props => {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const htmlId = htmlIdGenerator();
+  const seriesIndexPattern = (props.model.override_index_pattern && props.model.series_index_pattern) ?
+    props.model.series_index_pattern : props.indexPatternForQuery;
   const handleQueryChange = query => {
     props.onChange({ filter: query });
   };
@@ -80,7 +82,7 @@ export const SeriesConfig = props => {
           screenTitle={'TSVBTopNDataOptionsTab'}
           onChange={handleQueryChange}
           appName={'VisEditor'}
-          indexPatterns={[props.indexPatternForQuery]}
+          indexPatterns={[seriesIndexPattern]}
           store={localStorage || {}}
           showDatePicker={false}
         />
