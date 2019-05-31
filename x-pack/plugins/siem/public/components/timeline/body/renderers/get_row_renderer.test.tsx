@@ -32,7 +32,7 @@ describe('get_column_renderer', () => {
       browserFields: mockBrowserFields,
       data: nonSuricata,
       width: 100,
-      children: <span>some child</span>,
+      children: <span>{'some child'}</span>,
     });
 
     const wrapper = shallow(<span>{row}</span>);
@@ -45,7 +45,7 @@ describe('get_column_renderer', () => {
       browserFields: mockBrowserFields,
       data: nonSuricata,
       width: 100,
-      children: <span>some child</span>,
+      children: <span>{'some child'}</span>,
     });
     const wrapper = mount(
       <TestProviders>
@@ -61,7 +61,7 @@ describe('get_column_renderer', () => {
       browserFields: mockBrowserFields,
       data: suricata,
       width: 100,
-      children: <span>some child </span>,
+      children: <span>{'some child '}</span>,
     });
     const wrapper = mount(
       <TestProviders>
