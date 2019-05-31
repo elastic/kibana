@@ -108,7 +108,78 @@ describe('getFilteredQueryAndStatusFilter', () => {
   });
 
   it('handles nested status queries with sibling clauses', () => {
-    filters = `{"bool":{"must":[{"bool":{"must":[{"match":{"monitor.type":{"query":"http","operator":"and"}}},{"match":{"observer.geo.name":{"query":"Philadelphia","operator":"and"}}},{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}},{"bool":{"should":[[{"bool":{"must":[{"match":{"monitor.name":{"query":"test-page","operator":"and"}}}]}},{"bool":{"must":[{"match":{"monitor.name":{"query":"prod-site","operator":"and"}}}]}}]]}}]}}`;
+    filters = `{
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "must": [
+                {
+                  "match": {
+                    "monitor.type": {
+                      "query": "http",
+                      "operator": "and"
+                    }
+                  }
+                },
+                {
+                  "match": {
+                    "observer.geo.name": {
+                      "query": "Philadelphia",
+                      "operator": "and"
+                    }
+                  }
+                },
+                {
+                  "match": {
+                    "monitor.status": {
+                      "query": "down",
+                      "operator": "and"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                [
+                  {
+                    "bool": {
+                      "must": [
+                        {
+                          "match": {
+                            "monitor.name": {
+                              "query": "test-page",
+                              "operator": "and"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "bool": {
+                      "must": [
+                        {
+                          "match": {
+                            "monitor.name": {
+                              "query": "prod-site",
+                              "operator": "and"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }`;
     const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
     expect(result).toMatchSnapshot();
   });
