@@ -44,10 +44,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
-import chrome from 'ui/chrome';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
-const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
 export class TopNPanelConfig extends Component {
 
@@ -71,7 +70,7 @@ export class TopNPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { drilldown_url: '', filter: { query: '', language: uiSettingsQueryLanguage } };
+    const defaults = { drilldown_url: '', filter: { query: '', language: getDefaultQueryLanguage() } };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
     const handleTextChange = createTextHandler(this.props.onChange);
@@ -144,7 +143,7 @@ export class TopNPanelConfig extends Component {
                 >
                   <QueryBarInput
                     query={{
-                      language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
+                      language: model.filter.language ? model.filter.language : getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
                     screenTitle={'TopNPanelConfigQuery'}

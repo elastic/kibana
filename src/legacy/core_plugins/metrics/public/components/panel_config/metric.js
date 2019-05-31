@@ -41,10 +41,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
-import chrome from 'ui/chrome';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
-const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
 export class MetricPanelConfig extends Component {
   constructor(props) {
@@ -67,7 +66,7 @@ export class MetricPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { filter: { query: '', language: uiSettingsQueryLanguage } };
+    const defaults = { filter: { query: '', language: getDefaultQueryLanguage() } };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
     let view;
@@ -117,7 +116,7 @@ export class MetricPanelConfig extends Component {
                 >
                   <QueryBarInput
                     query={{
-                      language: model.filter.language || uiSettingsQueryLanguage,
+                      language: model.filter.language || getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
                     screenTitle={'MetricPanelConfigQuery'}

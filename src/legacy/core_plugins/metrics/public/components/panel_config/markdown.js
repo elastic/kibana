@@ -46,10 +46,9 @@ const lessC = less(window, { env: 'production' });
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
-import chrome from 'ui/chrome';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
-const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
 class MarkdownPanelConfigUi extends Component {
   constructor(props) {
@@ -77,7 +76,7 @@ class MarkdownPanelConfigUi extends Component {
   }
 
   render() {
-    const defaults = { filter: { query: '', language: uiSettingsQueryLanguage } };
+    const defaults = { filter: { query: '', language: getDefaultQueryLanguage() } };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
@@ -150,7 +149,7 @@ class MarkdownPanelConfigUi extends Component {
                 >
                   <QueryBarInput
                     query={{
-                      language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
+                      language: model.filter.language ? model.filter.language : getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
                     screenTitle={'MarkdownPanelConfigQuery'}

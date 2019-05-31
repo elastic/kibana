@@ -41,11 +41,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
-
+import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 const localStorage = new Storage(window.localStorage);
-const uiSettings = chrome.getUiSettingsClient();
-const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 
 export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -328,7 +325,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
         >
           <QueryBarInput
             query={{
-              language: (model.filter && model.filter.language) ? model.filter.language : uiSettingsQueryLanguage,
+              language: (model.filter && model.filter.language) ? model.filter.language : getDefaultQueryLanguage(),
               query: (model.filter && model.filter.query) ? model.filter.query : ''
             }}
             screenTitle={'TSVBDataOptionsTab'}

@@ -45,10 +45,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
-import chrome from 'ui/chrome';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
-const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 export class TablePanelConfig extends Component {
   constructor(props) {
     super(props);
@@ -84,7 +83,7 @@ export class TablePanelConfig extends Component {
     const { selectedTab } = this.state;
     const defaults = {
       drilldown_url: '',
-      filter: { query: '', language: uiSettingsQueryLanguage },
+      filter: { query: '', language: getDefaultQueryLanguage() },
       pivot_label: '',
       pivot_rows: 10,
       pivot_type: '',
@@ -233,7 +232,7 @@ export class TablePanelConfig extends Component {
                 >
                   <QueryBarInput
                     query={{
-                      language: model.filter.language ? model.filter.language : uiSettingsQueryLanguage,
+                      language: model.filter.language ? model.filter.language : getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
                     screenTitle={'TablePanelConfigQuery'}

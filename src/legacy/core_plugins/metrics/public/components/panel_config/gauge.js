@@ -45,10 +45,9 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
-import chrome from 'ui/chrome';
 const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
-const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 
 class GaugePanelConfigUi extends Component {
   constructor(props) {
@@ -78,7 +77,7 @@ class GaugePanelConfigUi extends Component {
     const { intl } = this.props;
     const defaults = {
       gauge_max: '',
-      filter: { query: '', language: uiSettingsQueryLanguage },
+      filter: { query: '', language: getDefaultQueryLanguage() },
       gauge_style: 'circle',
       gauge_inner_width: '',
       gauge_width: ''
@@ -149,7 +148,7 @@ class GaugePanelConfigUi extends Component {
                 >
                   <QueryBarInput
                     query={{
-                      language: model.filter.language || uiSettingsQueryLanguage,
+                      language: model.filter.language || getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
                     screenTitle={'GaugePanelConfigQuery'}

@@ -26,14 +26,12 @@ const { QueryBarInput } = data.query.ui;
 import { Storage } from 'ui/storage';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 const localStorage = new Storage(window.localStorage);
-const uiSettings = chrome.getUiSettingsClient();
-const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 
 export const SplitByFilter = props => {
   const { onChange, uiRestrictions, indexPattern } = props;
-  const defaults = { filter: { language: uiSettingsQueryLanguage, query: '' } };
+  const defaults = { filter: { language: getDefaultQueryLanguage(), query: '' } };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
@@ -64,7 +62,7 @@ export const SplitByFilter = props => {
         >
           <QueryBarInput
             query={{
-              language: model.filter.language || uiSettingsQueryLanguage,
+              language: model.filter.language || getDefaultQueryLanguage(),
               query: model.filter.query || '',
             }}
             screenTitle={'DataMetricsGroupByFilter'}

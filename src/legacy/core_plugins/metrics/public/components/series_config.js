@@ -38,11 +38,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { data } from 'plugins/data';
 import { Storage } from 'ui/storage';
-import chrome from 'ui/chrome';
-
+import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
-const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
 export const SeriesConfig = props => {
   const defaults = { offset_time: '', value_template: '' };
@@ -73,7 +71,7 @@ export const SeriesConfig = props => {
       >
         <QueryBarInput
           query={{
-            language: (model.filter && model.filter.language) ? model.filter.language : uiSettingsQueryLanguage,
+            language: (model.filter && model.filter.language) ? model.filter.language : getDefaultQueryLanguage(),
             query: (model.filter && model.filter.query) ? model.filter.query : ''
           }}
           screenTitle={'TSVBTopNDataOptionsTab'}

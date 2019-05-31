@@ -29,11 +29,8 @@ const { QueryBarInput } = data.query.ui;
 import { Storage } from 'ui/storage';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
-
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 const localStorage = new Storage(window.localStorage);
-const uiSettings = chrome.getUiSettingsClient();
-const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 class FilterItemsUi extends Component {
   constructor(props) {
     super(props);
@@ -64,7 +61,7 @@ class FilterItemsUi extends Component {
     const newFilter = () => ({
       color: this.props.model.color,
       id: uuid.v1(),
-      filter: { language: model.filter.language || uiSettingsQueryLanguage, query: '' },
+      filter: { language: model.filter.language || getDefaultQueryLanguage(), query: '' },
     });
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newFilter);
@@ -85,7 +82,7 @@ class FilterItemsUi extends Component {
         <EuiFlexItem>
           <QueryBarInput
             query={{
-              language: model.filter.language || uiSettingsQueryLanguage,
+              language: model.filter.language || getDefaultQueryLanguage(),
               query: model.filter.query || '',
             }}
             screenTitle={'DataMetricsGroupByFiltersFilter'}

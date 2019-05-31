@@ -30,9 +30,8 @@ import { IconSelect } from './icon_select';
 import { YesNo } from './yes_no';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
-import chrome from 'ui/chrome';
 const { QueryBarInput } = data.query.ui;
-const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
+import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 import {
   htmlIdGenerator,
@@ -90,7 +89,7 @@ export class AnnotationsEditor extends Component {
       fields: '',
       template: '',
       index_pattern: '*',
-      query_string: { query: '', language: uiSettingsQueryLanguage }
+      query_string: { query: '', language: getDefaultQueryLanguage() }
     };
     const model = { ...defaults, ...row };
     const handleChange = (part) => {
@@ -172,7 +171,7 @@ export class AnnotationsEditor extends Component {
                 >
                   <QueryBarInput
                     query={{
-                      language: model.query_string.language || uiSettingsQueryLanguage,
+                      language: model.query_string.language || getDefaultQueryLanguage(),
                       query: model.query_string.query || '',
                     }}
                     screenTitle={'AnnotationsEditor'}
