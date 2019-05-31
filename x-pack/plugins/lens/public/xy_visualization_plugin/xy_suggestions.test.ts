@@ -60,12 +60,19 @@ describe('xy_suggestions', () => {
   }
 
   test('ignores invalid combinations', () => {
+    const unknownCol = () => {
+      const str = strCol('foo');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return { ...str, operation: { ...str.operation, dataType: 'wonkies' } } as any;
+    };
+
     expect(
       getSuggestions({
         tables: [
           { datasourceSuggestionId: 0, isMultiRow: true, columns: [dateCol('a')] },
           { datasourceSuggestionId: 1, isMultiRow: true, columns: [strCol('foo'), strCol('bar')] },
           { datasourceSuggestionId: 2, isMultiRow: false, columns: [strCol('foo'), numCol('bar')] },
+          { datasourceSuggestionId: 3, isMultiRow: true, columns: [unknownCol(), numCol('bar')] },
         ],
       })
     ).toEqual([]);

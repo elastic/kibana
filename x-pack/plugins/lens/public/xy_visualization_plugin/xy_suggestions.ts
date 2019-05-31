@@ -9,6 +9,13 @@ import { Position } from '@elastic/charts';
 import { SuggestionRequest, VisualizationSuggestion, TableColumn, TableSuggestion } from '../types';
 import { XYArgs } from './types';
 
+const columnSortOrder = {
+  date: 0,
+  string: 1,
+  boolean: 2,
+  number: 3,
+};
+
 /**
  * Generate suggestions for the xy chart.
  *
@@ -22,7 +29,11 @@ export function getSuggestions(
       ({ isMultiRow, columns }) =>
         // We only render line charts for multi-row queries. We require at least
         // two columns: one for x and at least one for y, and y columns must be numeric.
-        isMultiRow && columns.length > 1 && columns.find(col => col.operation.dataType === 'number')
+        // We reject any datasource suggestions which have a column of an unknown type.
+        isMultiRow &&
+        columns.length > 1 &&
+        columns.some(col => col.operation.dataType === 'number') &&
+        !columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
     )
     .map(table => getSuggestionForColumns(table));
 }
@@ -46,13 +57,6 @@ function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestio
 // date, string, boolean, then number, in that priority. We then use this
 // order to pluck out the x column, and the split / stack column.
 function prioritizeColumns(columns: TableColumn[]) {
-  const columnSortOrder = {
-    date: 0,
-    string: 1,
-    boolean: 2,
-    number: 3,
-  };
-
   return [...columns].sort(
     (a, b) => columnSortOrder[a.operation.dataType] - columnSortOrder[b.operation.dataType]
   );
