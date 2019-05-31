@@ -36,7 +36,7 @@ describe('AddToKql Component', async () => {
           componentFilterType="hosts"
           type={hostsModel.HostsType.page}
         >
-          <>siem-kibana</>
+          <>{'siem-kibana'}</>
         </AddToKql>
       </TestProviders>
     );
@@ -53,7 +53,7 @@ describe('AddToKql Component', async () => {
           componentFilterType="hosts"
           type={hostsModel.HostsType.page}
         >
-          <>siem-kibana</>
+          <>{'siem-kibana'}</>
         </AddToKql>
       </TestProviders>
     );
@@ -72,7 +72,7 @@ describe('AddToKql Component', async () => {
           componentFilterType="hosts"
           type={hostsModel.HostsType.page}
         >
-          <>siem-kibana</>
+          <>{'siem-kibana'}</>
         </AddToKql>
       </TestProviders>
     );
@@ -125,7 +125,7 @@ describe('AddToKql Component', async () => {
           componentFilterType="network"
           type={networkModel.NetworkType.page}
         >
-          <>siem-kibana</>
+          <>{'siem-kibana'}</>
         </AddToKql>
       </TestProviders>
     );

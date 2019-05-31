@@ -17,32 +17,31 @@
  * under the License.
  */
 
-import { map } from 'lodash';
+import { Filters, Query, TimeRange } from 'ui/visualize';
 
-export const kibanaDatatable = () => ({
-  name: 'kibana_datatable',
+const name = 'kibana_context';
+
+export interface KibanaContext {
+  type: typeof name;
+  query?: Query;
+  filters?: Filters;
+  timeRange?: TimeRange;
+}
+
+export const kibanaContext = () => ({
+  name,
   from: {
-    datatable: context => {
+    null: () => {
       return {
-        type: 'kibana_datatable',
-        rows: context.rows,
-        columns: context.columns.map(column => {
-          return {
-            id: column.name,
-            name: column.name,
-          };
-        }),
+        type: name,
       };
     },
-    pointseries: context => {
-      const columns = map(context.columns, (column, name) => {
-        return { id: name, name, ...column };
-      });
+  },
+  to: {
+    null: () => {
       return {
-        type: 'kibana_datatable',
-        rows: context.rows,
-        columns: columns,
+        type: 'null',
       };
-    }
+    },
   },
 });
