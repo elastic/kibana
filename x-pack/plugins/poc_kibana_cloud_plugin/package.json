@@ -1,0 +1,86 @@
+{
+  "name": "@elastic/poc-cloud-plugin",
+  "description": "POC plugin for both Kibana and Cloud",
+  "version": "0.1.0",
+  "author": "Elastic.co",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "cz": "git-cz",
+    "build:clean": "rm -rf ./dist",
+    "build:ts": "tsc -p ./tsconfig.json",
+    "build": "yarn build:clean && yarn build:ts",
+    "lint": "yarn typecheck:src && tslint -c ./tslint.yaml -p ./tsconfig.json",
+    "lint:fix": "yarn lint --fix",
+    "prettier": "prettier --check --debug-check \"**/*.{ts,tsx}\"",
+    "prettier:fix": "prettier --write \"{,!(node_modules)/}**/*.{ts,tsx}\"",
+    "test": "jest --config jest.config.json",
+    "watch": "yarn test --watch",
+    "format:fix": "yarn prettier:fix && yarn lint:fix",
+    "format:check": "yarn prettier && yarn lint",
+    "style:fix": "yarn typecheck:src && yarn prettier-tslint fix \"{,!(node_modules)/}**/*.{ts,tsx}\"",
+    "semantic-release": "semantic-release",
+    "typecheck:src": "yarn build:ts --noEmit"
+  },
+  "files": [
+    "dist/**/*",
+    "yarn.lock"
+  ],
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "yarn run lint && yarn run test"
+    }
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^7.5.2",
+    "@commitlint/config-conventional": "^7.5.0",
+    "@elastic/eui": "10.4.1",
+    "@semantic-release/changelog": "^3.0.2",
+    "@semantic-release/commit-analyzer": "^6.1.0",
+    "@semantic-release/git": "^7.0.8",
+    "@semantic-release/github": "^5.2.10",
+    "@semantic-release/npm": "^5.1.4",
+    "@semantic-release/release-notes-generator": "^7.1.4",
+    "@types/enzyme": "^3.9.0",
+    "@types/enzyme-adapter-react-16": "^1.0.5",
+    "@types/jest": "^24.0.9",
+    "@types/react": "^16.8.5",
+    "@types/react-dom": "^16.8.2",
+    "commitizen": "^3.0.7",
+    "cz-conventional-changelog": "^2.1.0",
+    "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.10.0",
+    "husky": "^1.3.1",
+    "jest": "^24.1.0",
+    "jest-environment-jsdom-fourteen": "^0.1.0",
+    "prettier": "1.16.4",
+    "prettier-tslint": "^0.4.2",
+    "semantic-release": "^15.13.3",
+    "ts-jest": "^24.0.0",
+    "ts-loader": "^5.3.3",
+    "tslint": "^5.13.0",
+    "tslint-microsoft-contrib": "^6.0.0",
+    "typescript": "^3.3.3333"
+  },
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "react": "^16.8.3",
+    "react-dom": "^16.8.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "engines": {
+    "node": "10.15.2",
+    "yarn": "^1.10.1"
+  }
+}

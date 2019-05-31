@@ -1,0 +1,15 @@
+extends:
+  - tslint:recommended
+  # - tslint-microsoft-contrib
+
+rulesDirectory:
+  # - node_modules/tslint-microsoft-contrib
+
+rules:
+  object-literal-sort-keys: false
+  interface-name: false
+  no-default-export: true
+  no-irregular-whitespace: true
+  no-unused-expression: true
+  quotemark: [true, 'single', 'jsx-double']
+  member-access: [true, 'no-public']
