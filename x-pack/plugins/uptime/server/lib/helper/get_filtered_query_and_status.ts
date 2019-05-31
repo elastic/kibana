@@ -32,13 +32,52 @@ const hasStatusFilter = (filterClause: any): boolean => {
 };
 
 /**
+ * This code will find and return the monitor.status query value from
+ * the supplied object.
+ * @param statusFilter the list of objects containing the status filter.
+ * @example
+ * // returns 'down'
+ * extractQueryValue(JSON.parse(`[
+ * {
+ *   "match": {
+ *     "monitor.type": {
+ *       "query": "http",
+ *       "operator": "and"
+ *     }
+ *   }
+ * },
+ * {
+ *   "match": {
+ *     "observer.geo.name": {
+ *       "query": "Philadelphia",
+ *       "operator": "and"
+ *     }
+ *   }
+ * },
+ * {
+ *   "match": {
+ *     "monitor.status": {
+ *       "query": "down",
+ *       "operator": "and"
+ *     }
+ *   }
+ * }
+ * ]`))
+ */
+const extractQueryValue = (statusFilter: any[]) =>
+  get<string | undefined>(
+    statusFilter.find((clause: any) => get(clause, ['match', 'monitor.status', 'query'])),
+    ['match', 'monitor.status', 'query']
+  );
+
+/**
  * Sometimes the library that generates our ES filters creates a nested filter object that contains
  * a status filter. We won't be able to supporty deeply-nested status in the short term, and our roadmpa
  * plans to deprecate some features that necessitate all this extra logic.
  *
  * In the meantime, we will support top-level status post-processing. To that end, this function will
  * return the status value like we have in previous versions, and handle the additional nested query.
- * @param statusFilter an object potentially containing a status value
+ * @param filterClauses an object potentially containing a status value
  * @example
  * // returns 'down'
  * getStatusClause(JSON.parse(`
@@ -73,29 +112,21 @@ const hasStatusFilter = (filterClause: any): boolean => {
  *   ]
  * `))
  */
-const getStatusClause = (statusFilter: any): string | undefined => {
+const getStatusClause = (filterClauses: any): string | undefined => {
+  if (!Array.isArray(filterClauses)) return undefined;
   // the status clause was not nested
-  if (Array.isArray(statusFilter) && statusFilter.some(c => c.match && c.match['monitor.status'])) {
-    return statusFilter.find(l => l.match['monitor.status']).match['monitor.status'].query;
-  } else if (Array.isArray(statusFilter)) {
-    // the status clause was nested
-    return statusFilter
-      .map(clause =>
-        clause.bool && clause.bool.must && clause.bool.must.length ? clause.bool.must : []
-      )
-      .reduce((prev, cur) => {
-        const statusClause = cur.find((clause: any) =>
-          get(clause, ['match', 'monitor.status', 'query'])
-        );
-        const statusString = get<string | undefined>(statusClause, [
-          'match',
-          'monitor.status',
-          'query',
-        ]);
-        return statusString || prev;
-      }, undefined);
+  if (filterClauses.some(clause => clause.match && clause.match['monitor.status'])) {
+    // search for the status filter and return its query value
+    return extractQueryValue(filterClauses);
   }
-  return undefined;
+  /* 
+    The status clause was nested, map reduce the status query value.
+    There should be only one value, but in the case of multiple this code
+    will choose the last one
+  */
+  return filterClauses
+    .map(clause => get<any>(clause, 'bool.must', []))
+    .reduce((prev, cur) => extractQueryValue(cur) || prev, undefined);
 };
 
 /**
@@ -103,11 +134,10 @@ const getStatusClause = (statusFilter: any): string | undefined => {
  * @param filters the filter string
  */
 const getStatusFilter = (filters: any): string | undefined => {
-  const must = get(filters, 'bool.must', []);
-  if (must && must.length) {
-    const statusFilter = filters.bool.must.filter((filter: any) => hasStatusFilter(filter));
-    return getStatusClause(statusFilter);
-  }
+  const statusFilter = get<any[]>(filters, 'bool.must', []).filter((filter: any) =>
+    hasStatusFilter(filter)
+  );
+  return getStatusClause(statusFilter);
 };
 
 /**
