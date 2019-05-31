@@ -16,6 +16,10 @@ import {
 export const PreferenceFormattedBytes = React.memo<{ value: string | number }>(({ value }) => {
   const config: Partial<AppKibanaFrameworkAdapter> = useContext(KibanaConfigContext);
   return (
-    <>{config && config.bytesFormat ? numeral(value).format(config.bytesFormat) : `${value}b`}</>
+    <>
+      {config.bytesFormat
+        ? numeral(value).format(config.bytesFormat)
+        : numeral(value).format('0,0.[000]b')}
+    </>
   );
 });

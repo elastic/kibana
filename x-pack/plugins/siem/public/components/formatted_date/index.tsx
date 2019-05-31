@@ -21,7 +21,7 @@ export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => {
   const config: Partial<AppKibanaFrameworkAdapter> = useContext(KibanaConfigContext);
   return (
     <>
-      {config && config.dateFormat && config.dateFormatTz && config.timezone
+      {config.dateFormat && config.dateFormatTz && config.timezone
         ? moment
             .tz(value, config.dateFormatTz === 'Browser' ? config.timezone : config.dateFormatTz)
             .format(config.dateFormat)

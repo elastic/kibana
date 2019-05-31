@@ -22,13 +22,13 @@ describe('formatted_bytes', () => {
         expect(toJson(wrapper)).toMatchSnapshot();
       });
 
-      test('it renders bytes to basic format when no configuration exists', () => {
+      test('it renders bytes to hardcoded format when no configuration exists', () => {
         const wrapper = mount(
           <TestProviders mockFramework={{}}>
             <PreferenceFormattedBytes value={bytes} />
           </TestProviders>
         );
-        expect(wrapper.text()).toEqual('2806422b');
+        expect(wrapper.text()).toEqual('2.676MB');
       });
 
       test('it renders bytes according to the default format', () => {
