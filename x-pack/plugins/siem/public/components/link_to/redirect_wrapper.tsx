@@ -5,8 +5,14 @@
  */
 
 import React from 'react';
-import { RedirectWrapper } from './redirect_wrapper';
+import { Redirect } from 'react-router-dom';
+import { scrollToTop } from '../scroll_to_top';
 
-export const RedirectToOverviewPage = () => <RedirectWrapper to={'/overview'} />;
+export interface RedirectWrapperProps {
+  to: string;
+}
 
-export const getOverviewUrl = () => '#/link-to/overview';
+export const RedirectWrapper = ({ to }: RedirectWrapperProps) => {
+  scrollToTop();
+  return <Redirect to={to} />;
+};

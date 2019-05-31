@@ -9127,7 +9127,6 @@
     "xpack.siem.host.details.versionLabel": "バージョン",
     "xpack.siem.hostsTable.firstLastSeenToolTip": "選択された日付範囲に比較して",
     "xpack.siem.hostsTable.firstSeenTitle": "初回の検知",
-    "xpack.siem.hostsTable.helperTooltip": "ホスト表は最後に検知された順に並べられています",
     "xpack.siem.hostsTable.hostsTitle": "ホスト",
     "xpack.siem.hostsTable.lastSeenTitle": "最後の検知",
     "xpack.siem.hostsTable.nameTitle": "名前",
