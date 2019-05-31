@@ -1431,15 +1431,16 @@
     oppsy "2.x.x"
     pumpify "1.3.x"
 
-"@elastic/javascript-typescript-langserver@^0.1.24":
-  version "0.1.24"
-  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.1.24.tgz#afd9ed9817e42743b574579063a9ee59cb3eea34"
-  integrity sha512-WTdJnDBIEeFYHNZeEOAzbsAwwYKPYP2Gl5t2YEhClGRNcMPVNS4+WUWc0iQ0wTW4o0+9SnRNvMpCVAF7NpRWvw==
+"@elastic/javascript-typescript-langserver@^0.1.27":
+  version "0.1.27"
+  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.1.27.tgz#6b9fbb412c94ffffee800ec49f9fcb88c2e33920"
+  integrity sha512-FeU+VfWFmgIDWY6OVii8oTT2cbIBXKWwiB8OodvkORTQDq10EZmrxfsJ1pJfLkQGS8R7rC3pdKcOkAyr7xQBFQ==
   dependencies:
     "@elastic/lsp-extension" "^0.1.1"
     javascript-typescript-langserver "^2.11.3"
     rxjs "^5.5.0"
     typescript "~3.3.3333"
+    yarn "^1.12.3"
 
 "@elastic/lsp-extension@^0.1.1":
   version "0.1.1"
@@ -28273,6 +28274,11 @@ yarn-install@^0.5.1:
     cac "^3.0.3"
     chalk "^1.1.3"
     cross-spawn "^4.0.2"
+
+yarn@^1.12.3:
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.16.0.tgz#5701b58ac555ff91f7b889b7d791b3dc86f8f999"
+  integrity sha512-cfemyGlnWKA1zopUUgebTPf8C4WkPIZ+TJmklwcEAJ4u6oWPtJeAzrsamaGGh/+b1XWe8W51yzAImC4AWbWR1g==
 
 yauzl@2.4.1:
   version "2.4.1"
