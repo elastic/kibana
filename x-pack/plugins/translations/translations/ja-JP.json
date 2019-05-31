@@ -3265,6 +3265,7 @@
     "tsvb.indexPattern.intervalLabel": "間隔",
     "tsvb.indexPattern.searchByDefaultIndex": "デフォルトのインデックスパターンが使用されています。すべてのインデックスにクエリを実行するには * を使用します",
     "tsvb.indexPattern.timeFieldLabel": "時間フィールド",
+    "tsvb.indexPatternLabel": "インデックスパターン",
     "tsvb.kbnVisTypes.metricsDescription": "ビジュアルパイプラインインターフェースを使用して時間数列を作成します",
     "tsvb.kbnVisTypes.metricsTitle": "ビジュアルビルダー",
     "tsvb.markdown.alignOptions.bottomLabel": "一番下",

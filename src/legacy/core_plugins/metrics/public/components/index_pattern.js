@@ -31,7 +31,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiComboBox,
-  EuiTextColor,
   EuiText
 } from '@elastic/eui';
 import { ES_TYPES } from '../../common/es_types';
@@ -49,7 +48,7 @@ const timeRangeOptions = [
   },
 ];
 
-const isEntireTimeRangeEnabled = (model, options, timerange) => timerange && model.time_range === options[0].value;
+const isEntireTimeRangeEnabled = (model, options, timerange) => timerange && model.time_range_mode === options[0].value;
 
 export const IndexPattern = props => {
   const { fields, prefix, timerange } = props;
@@ -65,12 +64,12 @@ export const IndexPattern = props => {
     [indexPatternName]: '*',
     [intervalName]: 'auto',
     [dropBucketName]: 1,
-    time_range: timeRangeOptions[0].value
+    time_range_mode: timeRangeOptions[0].value
   };
 
   const model = { ...defaults, ...props.model };
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
-  const selectedTimeRangeOption = timeRangeOptions.find(({ value }) => model.time_range === value);
+  const selectedTimeRangeOption = timeRangeOptions.find(({ value }) => model.time_range_mode === value);
 
   return (
     <div className="index-pattern">
@@ -86,15 +85,14 @@ export const IndexPattern = props => {
                 placeholder={i18n.translate('tsvb.indexPattern.timeRange.selectTimeRange', { defaultMessage: 'Select' })}
                 options={timeRangeOptions}
                 selectedOptions={selectedTimeRangeOption ? [selectedTimeRangeOption] : []}
-                onChange={handleSelectChange('time_range')}
+                onChange={handleSelectChange('time_range_mode')}
                 singleSelection={{ asPlainText: true }}
                 isDisabled={props.disabled}
               />
             </EuiFormRow>
             <EuiText size="xs" style={{ margin: 0 }}>This setting controls the timespan used for matching documents.&nbsp;
-              <EuiTextColor color="danger">Entire timerange</EuiTextColor> will match all the documents selected in the timepicker.&nbsp;
-              <EuiTextColor color="danger">Last value</EuiTextColor> will match only the documents for the specified interval&nbsp;
-              from the end of the timerange.
+              &quot;Entire timerange&quot; will match all the documents selected in the timepicker.&nbsp;
+              &quot;Last value&quot; will match only the documents for the specified interval from the end of the timerange.
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -104,7 +102,7 @@ export const IndexPattern = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('indexPattern')}
-            label={i18n.translate('tsvb.indexPattern.label', { defaultMessage: 'Index pattern' })}
+            label={i18n.translate('tsvb.indexPatternLabel', { defaultMessage: 'Index pattern' })}
             helpText={isDefaultIndexPatternUsed && i18n.translate('tsvb.indexPattern.searchByDefaultIndex', {
               defaultMessage: 'Default index pattern is used. To query all indexes use *'
             })}
@@ -131,6 +129,7 @@ export const IndexPattern = props => {
               onChange={handleSelectChange(timeFieldName)}
               indexPattern={model[indexPatternName]}
               fields={fields}
+              placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}
             />
           </EuiFormRow>
         </EuiFlexItem>

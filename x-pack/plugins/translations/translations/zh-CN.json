@@ -2819,6 +2819,7 @@
     "tsvb.indexPattern.intervalHelpText": "示例：auto、1m、1d、7d、1y、>=1m",
     "tsvb.indexPattern.intervalLabel": "时间间隔",
     "tsvb.indexPattern.timeFieldLabel": "时间字段",
+    "tsvb.indexPatternLabel": "索引模式",
     "tsvb.kbnVisTypes.metricsDescription": "使用可视化管道界面构建时间序列",
     "tsvb.kbnVisTypes.metricsTitle": "Visual Builder",
     "tsvb.markdown.alignOptions.bottomLabel": "下",
