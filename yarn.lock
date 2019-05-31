@@ -8658,13 +8658,13 @@ continuable-cache@^0.3.1:
   resolved "https://registry.yarnpkg.com/continuable-cache/-/continuable-cache-0.3.1.tgz#bd727a7faed77e71ff3985ac93351a912733ad0f"
   integrity sha1-vXJ6f67XfnH/OYWskzUakSczrQ8=
 
-contra@1.9.1:
-  version "1.9.1"
-  resolved "https://registry.yarnpkg.com/contra/-/contra-1.9.1.tgz#60e498274b3d2d332896d60f82900aefa2ecac8c"
-  integrity sha1-YOSYJ0s9LTMoltYPgpAK76LsrIw=
+contra@1.9.4:
+  version "1.9.4"
+  resolved "https://registry.yarnpkg.com/contra/-/contra-1.9.4.tgz#f53bde42d7e5b5985cae4d99a8d610526de8f28d"
+  integrity sha1-9TveQtfltZhcrk2ZqNYQUm3o8o0=
   dependencies:
     atoa "1.0.0"
-    ticky "1.0.0"
+    ticky "1.0.1"
 
 convert-source-map@1.X, convert-source-map@^1.1.0, convert-source-map@^1.4.0, convert-source-map@^1.5.0:
   version "1.5.1"
@@ -10408,12 +10408,12 @@ dragselect@1.8.1:
   resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-1.8.1.tgz#63f71a6f980f710c87e28b328e175b7afc9e162b"
   integrity sha512-4YbJCcS6zwK8vMX2GiIX3tUrXFSo9a6xmV2z66EIJ8nj+iMHP1o4j0PeFdf5zjfhqVZJi+6zuVKPZInnrTLMbw==
 
-dragula@3.7.0:
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/dragula/-/dragula-3.7.0.tgz#c010ae79be164e4a9cc765b0a8035e44c4896332"
-  integrity sha1-wBCueb4WTkqcx2WwqANeRMSJYzI=
+dragula@3.7.2:
+  version "3.7.2"
+  resolved "https://registry.yarnpkg.com/dragula/-/dragula-3.7.2.tgz#4a35c9d3981ffac1a949c29ca7285058e87393ce"
+  integrity sha1-SjXJ05gf+sGpScKcpyhQWOhzk84=
   dependencies:
-    contra "1.9.1"
+    contra "1.9.4"
     crossvent "1.5.4"
 
 duplexer2@0.0.2, duplexer2@~0.0.2:
@@ -25848,10 +25848,10 @@ thunky@^1.0.2:
   resolved "https://registry.yarnpkg.com/thunky/-/thunky-1.0.2.tgz#a862e018e3fb1ea2ec3fce5d55605cf57f247371"
   integrity sha1-qGLgGOP7HqLsP85dVWBc9X8kc3E=
 
-ticky@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/ticky/-/ticky-1.0.0.tgz#e87f38ee0491ea32f62e8f0567ba9638b29f049c"
-  integrity sha1-6H847gSR6jL2Lo8FZ7qWOLKfBJw=
+ticky@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ticky/-/ticky-1.0.1.tgz#b7cfa71e768f1c9000c497b9151b30947c50e46d"
+  integrity sha1-t8+nHnaPHJAAxJe5FRswlHxQ5G0=
 
 tildify@^1.0.0, tildify@^1.2.0:
   version "1.2.0"
