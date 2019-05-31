@@ -57,10 +57,10 @@ export async function getService(serviceName: string, setup: Setup) {
     };
   }
 
-  const { aggregations } = await client<void, Aggs>('search', params);
+  const { aggregations } = await client.search<void, Aggs>(params);
   const buckets = idx(aggregations, _ => _.types.buckets) || [];
   const types = buckets.map(bucket => bucket.key);
-  const agentName = idx(aggregations, _ => _.agents.buckets[0].key) || '';
+  const agentName = idx(aggregations, _ => _.agents.buckets[0].key);
   return {
     serviceName,
     types,
