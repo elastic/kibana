@@ -11,26 +11,29 @@ import mila from 'markdown-it-link-attributes';
 import { ELASTIC_WEBSITE_URL } from '../../../public/lib/documentation_links';
 import { escapeRegExp } from '../../../common/lib/escape_reg_exp';
 
-const ELASTIC_SITE = new RegExp(escapeRegExp(ELASTIC_WEBSITE_URL));
-const NOT_ELASTIC_SITE = new RegExp(`^((?!${escapeRegExp(ELASTIC_WEBSITE_URL)}).)*$`);
-
+const ELASTIC_LINK = new RegExp(escapeRegExp(ELASTIC_WEBSITE_URL));
+const NON_ELASTIC_EXTERNAL_LINK = new RegExp(
+  `((http|https):\/\/(?!${escapeRegExp(ELASTIC_WEBSITE_URL)})[\w\.\/\-=?#]+)`
+);
 const md = new Markdown();
+
 md.use(mila, [
   {
     // forward referrer information if destination is elastic.co
-    pattern: ELASTIC_SITE,
+    pattern: ELASTIC_LINK,
     attrs: {
       target: '_blank',
       rel: 'noopener',
     },
   },
   {
-    pattern: NOT_ELASTIC_SITE,
+    pattern: NON_ELASTIC_EXTERNAL_LINK,
     attrs: {
       target: '_blank',
       rel: 'noreferrer noopener',
     },
   },
+  // internal links don't receive any attributes
 ]);
 
 export const markdown = () => ({
