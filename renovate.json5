@@ -22,9 +22,6 @@
    */
   labels: [
     'release_note:skip',
-    ':Operations',
-    'chore',
-    'review',
     'renovate',
   ],
 
