@@ -68,18 +68,27 @@ function writeResponseToDisk(response: http.IncomingMessage, filepath: string): 
   );
 }
 
-export async function getZipInfo(key: string): Promise<void | string[]> {
-  const TMP_DIR = os.tmpdir();
-  const zipLocation = path.join(TMP_DIR, `${key}.zip`);
-  const extractedTo = zipLocation.replace('.zip', '');
-  const pattern = path.join(extractedTo, '**');
+const zipLocation = (key: string): string => path.join(os.tmpdir(), `${key}.zip`);
+const extractedZipTo = (key: string): string => zipLocation(key).replace('.zip', '');
 
+async function fetchFiles(key: string): Promise<void> {
+  const response = await fetchZip(key);
+  await writeResponseToDisk(response, zipLocation(key));
+  return decompress(zipLocation(key), os.tmpdir());
+}
+
+async function getOrFetchFiles(key: string): Promise<string[]> {
+  const pattern = path.join(extractedZipTo(key), '**');
+  const files = await globP(pattern);
+  return files.length ? files : fetchFiles(key).then(() => getOrFetchFiles(key));
+}
+
+export async function getZipInfo(key: string): Promise<string[]> {
   return (
-    fetchZip(key)
-      .then(response => writeResponseToDisk(response, zipLocation))
-      .then(() => decompress(zipLocation, TMP_DIR))
-      .then(() => globP(pattern))
+    getOrFetchFiles(key)
       // quick hack to show processing & some info. won't really use/do this
-      .then(files => files.map(filepath => filepath.replace(extractedTo, '')).filter(Boolean))
+      .then(files =>
+        files.map(filepath => filepath.replace(extractedZipTo(key), '')).filter(Boolean)
+      )
   );
 }
