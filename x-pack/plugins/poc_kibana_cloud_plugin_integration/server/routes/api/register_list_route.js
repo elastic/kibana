@@ -3,10 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 
-export const App = () => (
-  <div>
-    <h1>POC Kibana Cloud plugin!</h1>
-  </div>
-);
+export function registerListRoute(server) {
+
+  server.route({
+    path: '/api/some-path',
+    method: 'GET',
+    handler: async (/*request*/) => {
+      return 'todo';
+    },
+    config: {
+      pre: [/* licensePreRouting */]
+    }
+  });
+}
