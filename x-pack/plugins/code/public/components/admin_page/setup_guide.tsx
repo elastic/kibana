@@ -64,7 +64,7 @@ const steps = [
       <EuiText>
         <p>
           You can add a repo to Code by simply providing it's git address. Usually this is the same
-          git address you use to run the "git clone" command. You can find more details about the
+          git address you use to run the "git clone" command You can find more details about the
           formats of git addresses that Code accepts&nbsp;
           <a href={documentationLinks.gitFormat}>here</a>.
         </p>

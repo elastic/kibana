@@ -187,13 +187,13 @@ const LanguageServerInstruction = (props: {
             <h3>Install</h3>
             <ol>
               <li>Stop your kibana Code node.</li>
-              <li>Use the following command to install the {props.name} language server.</li>
+              <li>Use the following command to install the {props.name}{' '} language server.</li>
             </ol>
             <EuiCodeBlock language="shell">{installCode}</EuiCodeBlock>
             <h3>Uninstall</h3>
             <ol>
               <li>Stop your kibana Code node.</li>
-              <li>Use the following command to remove the {props.name} language server.</li>
+              <li>Use the following command to remove the {props.name}{' '} language server.</li>
             </ol>
             <EuiCodeBlock language="shell">
               bin/kibana-plugin remove {props.pluginName}
