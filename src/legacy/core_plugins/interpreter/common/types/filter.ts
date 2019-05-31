@@ -17,12 +17,29 @@
  * under the License.
  */
 
-export const filter = () => ({
-  name: 'filter',
+import { ExpressionType } from '../../types';
+
+const name = 'filter';
+
+/**
+ * Represents an object that is a Filter.
+ */
+export interface Filter {
+  type?: string;
+  value?: string;
+  column?: string;
+  and: Filter[];
+  to?: string;
+  from?: string;
+  query?: string | null;
+}
+
+export const filter = (): ExpressionType<typeof name, Filter> => ({
+  name,
   from: {
     null: () => {
       return {
-        type: 'filter',
+        type: name,
         // Any meta data you wish to pass along.
         meta: {},
         // And filters. If you need an "or", create a filter type for it.
