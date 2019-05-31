@@ -15,7 +15,7 @@ describe('rendering', () => {
   test('renders correctly', () => {
     const wrapper = shallow(
       <FiltersGlobal>
-        <p>Additional filters here.</p>
+        <p>{'Additional filters here.'}</p>
       </FiltersGlobal>
     );
     expect(toJson(wrapper)).toMatchSnapshot();

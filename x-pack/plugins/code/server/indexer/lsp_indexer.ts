@@ -7,8 +7,11 @@
 import fs from 'fs';
 import util from 'util';
 
+import { ResponseError } from 'vscode-jsonrpc';
+
 import { ProgressReporter } from '.';
 import { TEXT_FILE_LIMIT } from '../../common/file';
+import { LanguageServerNotInstalled } from '../../common/lsp_error_codes';
 import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
@@ -231,8 +234,13 @@ export class LspIndexer extends AbstractIndexer {
         this.log.debug(`Unsupported language. Skip symbols and references indexing.`);
       }
     } catch (error) {
-      this.log.error(`Index symbols or references error. Skip to file indexing.`);
-      this.log.error(error);
+      if (error instanceof ResponseError && error.code === LanguageServerNotInstalled) {
+        // TODO maybe need to report errors to the index task and warn user later
+        this.log.debug(`Index symbols or references error due to language server not installed`);
+      } else {
+        this.log.error(`Index symbols or references error.`);
+        this.log.error(error);
+      }
     }
 
     const language = await detectLanguage(filePath, Buffer.from(content));
