@@ -99,7 +99,7 @@ class ListControl extends Control {
 
     const fieldName = this.filterManager.fieldName;
     const initialSearchSourceState = {
-      timeout: chrome.getInjected('autocompleteTimeout'),
+      timeout: `${chrome.getInjected('autocompleteTimeout')}ms`,
       terminate_after: chrome.getInjected('autocompleteTerminateAfter')
     };
     const aggs = termsAgg({
@@ -142,7 +142,7 @@ class ListControl extends Control {
       return;
     }
 
-    this.terminatedEarly = resp.terminated_early;
+    this.partialResults = resp.terminated_early || resp.timed_out;
     this.selectOptions = selectOptions;
     this.enable = true;
     this.disabledReason = '';

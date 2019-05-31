@@ -58,7 +58,7 @@ function getBody({ field, query, boolFilter = [] }, terminateAfter, timeout) {
 
   return {
     size: 0,
-    timeout,
+    timeout: `${timeout}ms`,
     terminate_after: terminateAfter,
     query: {
       bool: {

@@ -54,8 +54,9 @@ export default function (kibana) {
         defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana'),
         disableWelcomeScreen: Joi.boolean().default(false),
-        autocompleteTerminateAfter: Joi.number().default(10000),
-        autocompleteTimeout: Joi.string().default('1s'),
+        autocompleteTerminateAfter: Joi.number().default(100000),
+        // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
+        autocompleteTimeout: Joi.number().default(1000),
       }).default();
     },
 

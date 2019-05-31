@@ -23,7 +23,7 @@ import _ from 'lodash';
 import { FormRow } from './form_row';
 import { injectI18n } from '@kbn/i18n/react';
 
-import { EuiFieldText, EuiComboBox, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiFieldText, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 class ListControlUi extends Component {
@@ -118,28 +118,20 @@ class ListControlUi extends Component {
   }
 
   render() {
-    const terminatedEarlyWarningMessage = i18n.translate(
-      'inputControl.vis.listControl.terminatedEarlyWarningMessage',
+    const partialResultsWarningMessage = i18n.translate(
+      'inputControl.vis.listControl.partialResultsWarningMessage',
       {
         defaultMessage:
           `Incomplete terms list.
           Adjust "autocompleteTimeout" and "autocompleteTerminateAfter" settings to allow more resource intensive searches.`,
       }
     );
-    const label = this.props.terminatedEarly ? (
-      <>
-        <EuiToolTip position="top" content={terminatedEarlyWarningMessage}>
-          <EuiIcon type="alert" />
-        </EuiToolTip>
-        {this.props.label}
-      </>
-    ) : (
-      this.props.label
-    );
+
     return (
       <FormRow
         id={this.props.id}
-        label={label}
+        label={this.props.label}
+        warningMsg={this.props.partialResults && partialResultsWarningMessage}
         controlIndex={this.props.controlIndex}
         disableMsg={this.props.disableMsg}
       >
@@ -158,7 +150,7 @@ ListControlUi.propTypes = {
   disableMsg: PropTypes.string,
   multiselect: PropTypes.bool,
   dynamicOptions: PropTypes.bool,
-  terminatedEarly: PropTypes.bool,
+  partialResults: PropTypes.bool,
   controlIndex: PropTypes.number.isRequired,
   stageFilter: PropTypes.func.isRequired,
   fetchOptions: PropTypes.func,

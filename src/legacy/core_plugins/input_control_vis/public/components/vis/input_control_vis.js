@@ -66,7 +66,7 @@ export class InputControlVis extends Component {
               formatOptionLabel={control.format}
               disableMsg={control.isEnabled() ? null : control.disabledReason}
               multiselect={control.options.multiselect}
-              terminatedEarly={control.terminatedEarly}
+              partialResults={control.partialResults}
               dynamicOptions={control.options.dynamicOptions}
               controlIndex={index}
               stageFilter={this.props.stageFilter}
