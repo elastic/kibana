@@ -237,7 +237,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('zoom warning behavior', function describeIndexTests() {
       // Zoom warning is only applicable to OSS
-      this.tags(['skipCloud']);
+      this.tags(['skipCloud', 'skipFirefox']);
 
       const waitForLoading = false;
       let zoomWarningEnabled;
