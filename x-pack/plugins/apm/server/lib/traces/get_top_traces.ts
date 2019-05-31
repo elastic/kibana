@@ -16,7 +16,7 @@ import { getTransactionGroups } from '../transaction_groups';
 
 export type TraceListAPIResponse = PromiseReturnType<typeof getTopTraces>;
 export async function getTopTraces(setup: Setup) {
-  const { start, end } = setup;
+  const { start, end, uiFiltersES } = setup;
 
   const bodyQuery = {
     bool: {
@@ -24,7 +24,8 @@ export async function getTopTraces(setup: Setup) {
       must_not: { exists: { field: PARENT_ID } },
       filter: [
         { range: rangeFilter(start, end) },
-        { term: { [PROCESSOR_EVENT]: 'transaction' } }
+        { term: { [PROCESSOR_EVENT]: 'transaction' } },
+        ...uiFiltersES
       ],
       should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
     }

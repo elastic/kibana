@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Toast, ToastInput, ToastsApi } from '../../../../../core/public';
+import { ErrorToastOptions, Toast, ToastInput, ToastsApi } from '../../../../../core/public';
 
 export { Toast, ToastInput };
 
@@ -45,4 +45,6 @@ export class ToastNotifications {
   public addSuccess = (toastOrTitle: ToastInput) => this.toasts.addSuccess(toastOrTitle);
   public addWarning = (toastOrTitle: ToastInput) => this.toasts.addWarning(toastOrTitle);
   public addDanger = (toastOrTitle: ToastInput) => this.toasts.addDanger(toastOrTitle);
+  public addError = (error: Error, options: ErrorToastOptions) =>
+    this.toasts.addError(error, options);
 }

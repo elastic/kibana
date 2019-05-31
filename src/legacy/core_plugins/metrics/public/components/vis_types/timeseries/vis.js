@@ -22,10 +22,10 @@ import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { MarkdownSimple } from 'ui/markdown';
 
-import tickFormatter from '../../lib/tick_formatter';
+import { tickFormatter } from '../../lib/tick_formatter';
 import _ from 'lodash';
-import Timeseries from '../../../visualizations/components/timeseries';
-import replaceVars from '../../lib/replace_vars';
+import { Timeseries } from '../../../visualizations/components/timeseries';
+import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
@@ -34,7 +34,7 @@ function hasSeparateAxis(row) {
   return row.separate_axis;
 }
 
-class TimeseriesVisualization extends Component {
+export class TimeseriesVisualization extends Component {
 
   getInterval = () => {
     const { visData, model } = this.props;
@@ -243,5 +243,3 @@ TimeseriesVisualization.propTypes = {
   dateFormat: PropTypes.string,
   getConfig: PropTypes.func
 };
-
-export default TimeseriesVisualization;

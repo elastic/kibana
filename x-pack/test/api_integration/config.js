@@ -21,16 +21,11 @@ import {
   SpacesServiceProvider,
 } from '../common/services';
 
-export default async function ({ readConfigFile }) {
-  const kibanaAPITestsConfig = await readConfigFile(
-    require.resolve('../../../test/api_integration/config.js')
-  );
-  const xPackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.js')
-  );
-  const kibanaCommonConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
-  );
+export async function getApiIntegrationConfig({ readConfigFile }) {
+
+  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
+  const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
 
   return {
     testFiles: [require.resolve('./apis')],
@@ -73,3 +68,5 @@ export default async function ({ readConfigFile }) {
     },
   };
 }
+
+export default getApiIntegrationConfig;

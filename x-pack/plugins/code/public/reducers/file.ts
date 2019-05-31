@@ -29,6 +29,9 @@ import {
   resetRepoTree,
   routeChange,
   setNotFound,
+  fetchRootRepoTreeSuccess,
+  fetchRootRepoTreeFailed,
+  dirNotFound,
 } from '../actions';
 
 export interface FileState {
@@ -36,6 +39,8 @@ export interface FileState {
   fileTreeLoading: boolean;
   rootFileTreeLoading: boolean;
   openedPaths: string[];
+  // store not found directory as an array to calculate `notFound` flag by finding whether path is in this array
+  notFoundDirs: string[];
   branches: ReferenceInfo[];
   tags: ReferenceInfo[];
   commits: CommitInfo[];
@@ -56,6 +61,7 @@ const initialState: FileState = {
     type: FileTreeItemType.Directory,
   },
   openedPaths: [],
+  notFoundDirs: [],
   rootFileTreeLoading: true,
   fileTreeLoading: false,
   branches: [],
@@ -115,6 +121,7 @@ export const file = handleActions(
       produce<FileState>(state, (draft: FileState) => {
         draft.fileTreeLoading = false;
         draft.rootFileTreeLoading = false;
+        draft.notFoundDirs = draft.notFoundDirs.filter(dir => dir !== action.payload!.path);
         const { tree, path, withParents } = action.payload!;
         if (withParents || path === '/' || path === '') {
           draft.tree = mergeNode(draft.tree, tree);
@@ -132,6 +139,19 @@ export const file = handleActions(
             }
           }
         }
+      }),
+    [String(fetchRootRepoTreeSuccess)]: (state: FileState, action: Action<any>) =>
+      produce<FileState>(state, (draft: FileState) => {
+        draft.rootFileTreeLoading = false;
+        draft.tree = mergeNode(draft.tree, action.payload!);
+      }),
+    [String(fetchRootRepoTreeFailed)]: (state: FileState, action: Action<any>) =>
+      produce<FileState>(state, (draft: FileState) => {
+        draft.rootFileTreeLoading = false;
+      }),
+    [String(dirNotFound)]: (state: FileState, action: any) =>
+      produce<FileState>(state, (draft: FileState) => {
+        draft.notFoundDirs.push(action.payload);
       }),
     [String(resetRepoTree)]: (state: FileState) =>
       produce<FileState>(state, (draft: FileState) => {

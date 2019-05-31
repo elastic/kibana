@@ -54,7 +54,7 @@ export async function getErrorGroup({
     }
   };
 
-  const resp = await client<APMError>('search', params);
+  const resp = await client.search<APMError>(params);
   const error = idx(resp, _ => _.hits.hits[0]._source);
   const transactionId = idx(error, _ => _.transaction.id);
   const traceId = idx(error, _ => _.trace.id);

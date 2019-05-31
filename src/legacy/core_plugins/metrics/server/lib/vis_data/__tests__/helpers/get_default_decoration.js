@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import getDefaultDecoration from '../../helpers/get_default_decoration';
+import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 
 describe('getDefaultDecoration', () => {
 

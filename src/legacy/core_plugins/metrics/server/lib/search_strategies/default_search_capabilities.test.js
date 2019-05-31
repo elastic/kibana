@@ -20,18 +20,15 @@ import { DefaultSearchCapabilities } from './default_search_capabilities';
 
 describe('DefaultSearchCapabilities', () => {
   let defaultSearchCapabilities;
-  let batchRequestsSupport;
   let req;
 
   beforeEach(() => {
     req = {};
-    batchRequestsSupport = true;
-    defaultSearchCapabilities = new DefaultSearchCapabilities(req, batchRequestsSupport);
+    defaultSearchCapabilities = new DefaultSearchCapabilities(req);
   });
 
   test('should init default search capabilities', () => {
     expect(defaultSearchCapabilities.request).toBe(req);
-    expect(defaultSearchCapabilities.batchRequestsSupport).toBe(batchRequestsSupport);
     expect(defaultSearchCapabilities.fieldsCapabilities).toEqual({});
   });
 
