@@ -228,7 +228,6 @@ PUT /api/security/role/my_kibana_role
       "query" : "{\"match\": {\"title\": \"foo\"}}"
     } ]
   },
-<<<<<<< HEAD
   "kibana": [
     {
       "base": ["all"],
@@ -237,13 +236,6 @@ PUT /api/security/role/my_kibana_role
       "spaces": [
         "default"
       ]
-=======
-  "kibana": {
-    "global": [],
-    "space": {
-      "marketing": ["all"],
-      "engineering": ["read"]
->>>>>>> 83b7ea76b0fd7afcbeff26cd95241ef4b075d12e
     }
   ]
 }
