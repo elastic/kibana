@@ -16,9 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { parse } from 'url';
-
 import request from 'request';
 import Boom from 'boom';
 
@@ -64,14 +61,14 @@ describe('http service', () => {
           if (req.headers.authorization) {
             const user = { id: '42' };
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return t.authenticated({ credentials: user });
+            return t.authenticated(user);
           } else {
             return t.rejected(Boom.unauthorized());
           }
         };
 
         const { http } = await root.setup();
-        http.registerAuth(authenticate, cookieOptions);
+        await http.registerAuth(authenticate, cookieOptions);
         http.registerRouter(router);
         await root.start();
 
@@ -97,14 +94,14 @@ describe('http service', () => {
           if (req.headers.authorization) {
             const user = { id: '42' };
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return t.authenticated({ credentials: user });
+            return t.authenticated(user);
           } else {
             return t.rejected(Boom.unauthorized());
           }
         };
 
         const { http } = await root.setup();
-        http.registerAuth(authenticate, cookieOptions);
+        await http.registerAuth(authenticate, cookieOptions);
         await root.start();
 
         await kbnTestServer.request
@@ -120,7 +117,7 @@ describe('http service', () => {
         };
 
         const { http } = await root.setup();
-        http.registerAuth(authenticate, cookieOptions);
+        await http.registerAuth(authenticate, cookieOptions);
         await root.start();
 
         const response = await kbnTestServer.request.get(root, '/').expect(302);
@@ -132,14 +129,14 @@ describe('http service', () => {
           if (req.headers.authorization) {
             const user = { id: '42' };
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return t.authenticated({ credentials: user });
+            return t.authenticated(user);
           } else {
             return t.rejected(Boom.unauthorized());
           }
         };
 
         const { http } = await root.setup();
-        http.registerAuth(authenticate, cookieOptions);
+        await http.registerAuth(authenticate, cookieOptions);
         await root.start();
 
         const legacyUrl = '/legacy';
@@ -157,13 +154,43 @@ describe('http service', () => {
         expect(response.header['set-cookie']).toBe(undefined);
       });
 
+      it('Should pass associated auth state to Legacy platform', async () => {
+        const user = { id: '42' };
+        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
+          if (req.headers.authorization) {
+            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
+            return t.authenticated(user);
+          } else {
+            return t.rejected(Boom.unauthorized());
+          }
+        };
+
+        const { http } = await root.setup();
+        await http.registerAuth(authenticate, cookieOptions);
+        await root.start();
+
+        const legacyUrl = '/legacy';
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: legacyUrl,
+          handler: kbnServer.newPlatform.setup.core.http.auth.get,
+        });
+
+        const response = await kbnTestServer.request.get(root, legacyUrl).expect(200);
+        expect(response.body.state).toEqual(user);
+        expect(response.body.status).toEqual('authenticated');
+
+        expect(response.header['set-cookie']).toBe(undefined);
+      });
+
       it(`Shouldn't expose internal error details`, async () => {
         const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
           throw new Error('sensitive info');
         };
 
         const { http } = await root.setup();
-        http.registerAuth(authenticate, cookieOptions);
+        await http.registerAuth(authenticate, cookieOptions);
         await root.start();
 
         await kbnTestServer.request.get(root, '/').expect({
@@ -174,7 +201,7 @@ describe('http service', () => {
       });
     });
 
-    describe('#registerOnRequest()', () => {
+    describe('#registerOnPostAuth()', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
         root = kbnTestServer.createRoot();
@@ -186,8 +213,8 @@ describe('http service', () => {
         router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
 
         const { http } = await root.setup();
-        http.registerOnRequest((req, t) => t.next());
-        http.registerOnRequest(async (req, t) => {
+        http.registerOnPostAuth((req, t) => t.next());
+        http.registerOnPostAuth(async (req, t) => {
           await Promise.resolve();
           return t.next();
         });
@@ -200,7 +227,7 @@ describe('http service', () => {
       it('Should support redirecting to configured url', async () => {
         const redirectTo = '/redirect-url';
         const { http } = await root.setup();
-        http.registerOnRequest(async (req, t) => t.redirected(redirectTo));
+        http.registerOnPostAuth(async (req, t) => t.redirected(redirectTo));
         await root.start();
 
         const response = await kbnTestServer.request.get(root, '/').expect(302);
@@ -209,7 +236,7 @@ describe('http service', () => {
 
       it('Should failing a request with configured error and status code', async () => {
         const { http } = await root.setup();
-        http.registerOnRequest(async (req, t) =>
+        http.registerOnPostAuth(async (req, t) =>
           t.rejected(new Error('unexpected error'), { statusCode: 400 })
         );
         await root.start();
@@ -221,7 +248,7 @@ describe('http service', () => {
 
       it(`Shouldn't expose internal error details`, async () => {
         const { http } = await root.setup();
-        http.registerOnRequest(async (req, t) => {
+        http.registerOnPostAuth(async (req, t) => {
           throw new Error('sensitive info');
         });
         await root.start();
@@ -235,12 +262,12 @@ describe('http service', () => {
 
       it(`Shouldn't share request object between interceptors`, async () => {
         const { http } = await root.setup();
-        http.registerOnRequest(async (req, t) => {
+        http.registerOnPostAuth(async (req, t) => {
           // @ts-ignore. don't complain customField is not defined on Request type
           req.customField = { value: 42 };
           return t.next();
         });
-        http.registerOnRequest((req, t) => {
+        http.registerOnPostAuth((req, t) => {
           // @ts-ignore don't complain customField is not defined on Request type
           if (typeof req.customField !== 'undefined') {
             throw new Error('Request object was mutated');
@@ -259,7 +286,7 @@ describe('http service', () => {
       });
     });
 
-    describe('#registerOnRequest() toolkit', () => {
+    describe('#registerOnPostAuth() toolkit', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
         root = kbnTestServer.createRoot();
@@ -268,9 +295,8 @@ describe('http service', () => {
       afterEach(async () => await root.shutdown());
       it('supports Url change on the flight', async () => {
         const { http } = await root.setup();
-        http.registerOnRequest((req, t) => {
-          t.setUrl(parse('/new-url'));
-          return t.next();
+        http.registerOnPreAuth((req, t) => {
+          return t.redirected('/new-url', { forward: true });
         });
 
         const router = new Router('/');
@@ -287,9 +313,8 @@ describe('http service', () => {
       it('url re-write works for legacy server as well', async () => {
         const { http } = await root.setup();
         const newUrl = '/new-url';
-        http.registerOnRequest((req, t) => {
-          t.setUrl(newUrl);
-          return t.next();
+        http.registerOnPreAuth((req, t) => {
+          return t.redirected(newUrl, { forward: true });
         });
 
         await root.start();
@@ -314,7 +339,7 @@ describe('http service', () => {
       it('basePath information for an incoming request is available in legacy server', async () => {
         const reqBasePath = '/requests-specific-base-path';
         const { http } = await root.setup();
-        http.registerOnRequest((req, t) => {
+        http.registerOnPreAuth((req, t) => {
           http.setBasePathFor(req, reqBasePath);
           return t.next();
         });

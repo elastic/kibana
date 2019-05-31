@@ -11,9 +11,12 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof formatdate>> = {
   help: i18n.translate('xpack.canvas.functions.formatdateHelpText', {
-    defaultMessage: 'Output a {ms} since epoch number as a formatted string',
+    defaultMessage:
+      'Format a valid date string or number of {ms} since epoch using {moment} (see {url})',
     values: {
       ms: 'ms',
+      moment: 'momentJS',
+      url: 'https://momentjs.com/',
     },
   }),
   args: {

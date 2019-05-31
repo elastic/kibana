@@ -70,6 +70,24 @@ test('Repository url parsing', () => {
     org: 'foo',
     protocol: 'ssh',
   });
+
+  const repo8 = RepositoryUtils.buildRepository('https://github.com/apache/sqoop/a/b');
+  expect(repo8).toEqual({
+    uri: 'github.com/apache_sqoop_a/b',
+    url: 'https://github.com/apache/sqoop/a/b',
+    name: 'b',
+    org: 'apache_sqoop_a',
+    protocol: 'https',
+  });
+
+  const repo9 = RepositoryUtils.buildRepository('https://github.com/apache/sqoop/tree/master');
+  expect(repo9).toEqual({
+    uri: 'github.com/apache_sqoop_tree/master',
+    url: 'https://github.com/apache/sqoop/tree/master',
+    name: 'master',
+    org: 'apache_sqoop_tree',
+    protocol: 'https',
+  });
 });
 
 test('Repository url parsing with non standard segments', () => {
@@ -104,10 +122,10 @@ test('Repository url parsing with non standard segments', () => {
 test('Repository url parsing with port', () => {
   const repo1 = RepositoryUtils.buildRepository('ssh://mine@mydomain.com:27017/gitolite-admin');
   expect(repo1).toEqual({
-    uri: 'mydomain.com:27017/mine/gitolite-admin',
+    uri: 'mydomain.com:27017/_/gitolite-admin',
     url: 'ssh://mine@mydomain.com:27017/gitolite-admin',
     name: 'gitolite-admin',
-    org: 'mine',
+    org: '_',
     protocol: 'ssh',
   });
 

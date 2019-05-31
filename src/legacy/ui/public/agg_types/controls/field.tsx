@@ -31,12 +31,14 @@ import { FieldParamType } from '../param_types';
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 
 interface FieldParamEditorProps extends AggParamEditorProps<FieldParamType> {
+  customError?: string;
   customLabel?: string;
 }
 
 function FieldParamEditor({
   agg,
   aggParam,
+  customError,
   customLabel,
   indexedFields = [],
   showValidation,
@@ -61,6 +63,10 @@ function FieldParamEditor({
   };
   const errors = [];
 
+  if (customError) {
+    errors.push(customError);
+  }
+
   if (!indexedFields.length) {
     errors.push(
       i18n.translate('common.ui.aggTypes.field.noCompatibleFieldsDescription', {
@@ -75,7 +81,7 @@ function FieldParamEditor({
     setTouched();
   }
 
-  const isValid = !!value && !!indexedFields.length;
+  const isValid = !!value && !errors.length;
 
   useEffect(
     () => {

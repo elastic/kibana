@@ -50,6 +50,17 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await this.checkTabIsLoaded('tvbVisEditor', 'Time Series');
     }
 
+    public async checkTimeSeriesChartIsPresent() {
+      await testSubjects.existOrFail('timeseriesChart');
+    }
+
+    public async checkTimeSeriesLegendIsPresent() {
+      const isPresent = await find.existsByCssSelector('.tvbLegend');
+      if (!isPresent) {
+        throw new Error(`TimeSeries legend is not loaded`);
+      }
+    }
+
     public async checkMetricTabIsPresent() {
       await this.checkTabIsLoaded('tsvbMetricValue', 'Metric');
     }
@@ -195,6 +206,27 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await el.clearValue();
     }
 
+    public async toggleAutoApplyChanges() {
+      await find.clickByCssSelector('#tsvbAutoApplyInput');
+    }
+
+    public async applyChanges() {
+      await testSubjects.clickWhenNotDisabled('applyBtn');
+    }
+
+    /**
+     * write template for aggregation row in the `option` tab
+     *
+     * @param template always should contain `{{value}}`
+     * @example
+     * await visualBuilder.enterSeriesTemplate('$ {{value}}') // add `$` symbol for value
+     */
+    public async enterSeriesTemplate(template: string) {
+      const el = await testSubjects.find('tsvb_series_value');
+      await el.clearValueWithKeyboard();
+      await el.type(template);
+    }
+
     public async enterOffsetSeries(value: string) {
       const el = await testSubjects.find('offsetTimeSeries');
       await el.clearValue();
@@ -250,14 +282,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
           throw new Error('there should be atleast 2 aggSelectors');
         }
       });
-    }
-
-    public async toggleAutoApplyChanges() {
-      await find.clickByCssSelector('#tsvbAutoApplyInput');
-    }
-
-    public async applyChanges() {
-      await testSubjects.click('applyBtn');
     }
 
     public async selectAggType(value: string, nth = 0) {

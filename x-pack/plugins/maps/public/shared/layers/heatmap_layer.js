@@ -62,7 +62,6 @@ export class HeatmapLayer extends AbstractLayer {
         data: { 'type': 'FeatureCollection', 'features': [] }
       });
 
-
       mbMap.addLayer({
         id: mbLayerId,
         type: 'heatmap',
@@ -208,6 +207,15 @@ export class HeatmapLayer extends AbstractLayer {
     }
 
     return super.getCustomIconAndTooltipContent();
+  }
+
+  hasLegendDetails() {
+    return true;
+  }
+
+  getLegendDetails() {
+    const label = _.get(this._source.getMetricFields(), '[0].propertyLabel', '');
+    return this._style.getLegendDetails(label);
   }
 
 }
