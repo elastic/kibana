@@ -6,7 +6,6 @@
 
 import { Registry } from '@kbn/interpreter/target/common';
 import { CoreSetup } from 'src/core/public';
-import { register } from '@kbn/interpreter/common';
 import { xyVisualization } from './xy_visualization';
 
 import {
