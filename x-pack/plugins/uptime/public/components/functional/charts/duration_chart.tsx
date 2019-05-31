@@ -140,7 +140,7 @@ export const DurationChart = ({
             xAccessor={0}
             xScaleType={ScaleType.Time}
             yAccessors={[1]}
-            yScaleToDataExtent={true}
+            yScaleToDataExtent={false}
             yScaleType={ScaleType.Linear}
           />
         </Chart>
