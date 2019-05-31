@@ -17,19 +17,20 @@
  * under the License.
  */
 
-import { dropLastBucket } from '../series/drop_last_bucket';
-import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
+import { TIME_RANGE_DATA_MODES } from '../../../../common/timerange_data_modes';
+import { PANEL_TYPES } from '../../../../common/panel_types';
 
-export function dropLastBucketFn(bucket, panel, series) {
-  return next => results => {
-    const shouldDropLastBucket = isLastValueTimerangeMode(panel);
+const TIME_RANGE_MODE_KEY = 'time_range_mode';
 
-    if (shouldDropLastBucket) {
-      const fn = dropLastBucket({ aggregations: bucket }, panel, series);
+const shouldUseEntireTimeRangeMode = panel => panel.type !== PANEL_TYPES.TIMESERIES
+  && panel[TIME_RANGE_MODE_KEY] === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
 
-      return fn(next)(results);
-    }
+const getTimerangeMode = panel => shouldUseEntireTimeRangeMode(panel) ?
+  TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE :
+  TIME_RANGE_DATA_MODES.LAST_VALUE;
 
-    return next(results);
-  };
-}
+export const isEntireTimerangeMode = panel =>
+  getTimerangeMode(panel) === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
+
+export const isLastValueTimerangeMode = panel =>
+  getTimerangeMode(panel) === TIME_RANGE_DATA_MODES.LAST_VALUE;

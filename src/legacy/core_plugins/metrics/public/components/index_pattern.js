@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
+import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
 import { YesNo } from './yes_no';
 import {
   htmlIdGenerator,
@@ -31,20 +32,22 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiComboBox,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 import { ES_TYPES } from '../../common/es_types';
 
 const RESTRICT_FIELDS = [ES_TYPES.DATE];
+const TIME_RANGE_MODE_KEY = 'time_range_mode';
+
 const htmlId = htmlIdGenerator();
 const timeRangeOptions = [
   {
-    label: i18n.translate('tsvb.indexPattern.timeRange.entireTimeRange', { defaultMessage: 'Entire time range' }),
-    value: 'entire_time_range'
+    label: i18n.translate('tsvb.indexPattern.timeRange.lastValue', { defaultMessage: 'Last value' }),
+    value: TIME_RANGE_DATA_MODES.LAST_VALUE,
   },
   {
-    label: i18n.translate('tsvb.indexPattern.timeRange.lastValue', { defaultMessage: 'Last value' }),
-    value: 'last_value'
+    label: i18n.translate('tsvb.indexPattern.timeRange.entireTimeRange', { defaultMessage: 'Entire time range' }),
+    value: TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
   },
 ];
 
@@ -64,7 +67,7 @@ export const IndexPattern = props => {
     [indexPatternName]: '*',
     [intervalName]: 'auto',
     [dropBucketName]: 1,
-    time_range_mode: timeRangeOptions[0].value
+    [TIME_RANGE_MODE_KEY]: timeRangeOptions[0].value,
   };
 
   const model = { ...defaults, ...props.model };
@@ -85,14 +88,16 @@ export const IndexPattern = props => {
                 placeholder={i18n.translate('tsvb.indexPattern.timeRange.selectTimeRange', { defaultMessage: 'Select' })}
                 options={timeRangeOptions}
                 selectedOptions={selectedTimeRangeOption ? [selectedTimeRangeOption] : []}
-                onChange={handleSelectChange('time_range_mode')}
+                onChange={handleSelectChange(TIME_RANGE_MODE_KEY)}
                 singleSelection={{ asPlainText: true }}
                 isDisabled={props.disabled}
               />
             </EuiFormRow>
-            <EuiText size="xs" style={{ margin: 0 }}>This setting controls the timespan used for matching documents.&nbsp;
+            <EuiText size="xs" style={{ margin: 0 }}>This setting controls the timespan used for matching
+              documents.&nbsp;
               &quot;Entire timerange&quot; will match all the documents selected in the timepicker.&nbsp;
-              &quot;Last value&quot; will match only the documents for the specified interval from the end of the timerange.
+              &quot;Last value&quot; will match only the documents for the specified interval from the end of the
+              timerange.
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -104,7 +109,7 @@ export const IndexPattern = props => {
             id={htmlId('indexPattern')}
             label={i18n.translate('tsvb.indexPatternLabel', { defaultMessage: 'Index pattern' })}
             helpText={isDefaultIndexPatternUsed && i18n.translate('tsvb.indexPattern.searchByDefaultIndex', {
-              defaultMessage: 'Default index pattern is used. To query all indexes use *'
+              defaultMessage: 'Default index pattern is used. To query all indexes use *',
             })}
           >
             <EuiFieldText
@@ -139,7 +144,7 @@ export const IndexPattern = props => {
             label={i18n.translate('tsvb.indexPattern.intervalLabel', { defaultMessage: 'Interval' })}
             helpText={i18n.translate('tsvb.indexPattern.intervalHelpText', {
               defaultMessage: 'Examples: auto, 1m, 1d, 7d, 1y, >=1m',
-              description: 'auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated.'
+              description: 'auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated.',
             })}
           >
             <EuiFieldText
