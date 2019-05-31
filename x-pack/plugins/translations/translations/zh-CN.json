@@ -3646,7 +3646,6 @@
     "xpack.apm.agentMetrics.java.heapMemorySeriesUsed": "已使用",
     "xpack.apm.agentMetrics.java.nonHeapMemoryChartTitle": "非堆内存",
     "xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted": "已提交",
-    "xpack.apm.agentMetrics.java.nonHeapMemorySeriesMax": "最大值",
     "xpack.apm.agentMetrics.java.nonHeapMemorySeriesUsed": "已使用",
     "xpack.apm.agentMetrics.java.threadCount": "计数",
     "xpack.apm.agentMetrics.java.threadCountChartTitle": "线程计数",
