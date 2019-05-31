@@ -15,7 +15,7 @@ import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../../common/constan
 import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
-import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
+import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON, DEFAULT_ICON_SIZE } from './vector_constants';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -306,9 +306,19 @@ export class VectorStyle extends AbstractStyle {
 
   _getScaledFields() {
     return this.getDynamicPropertiesArray()
-      .map(({ options }) => {
+      .map(({ styleName, options }) => {
         const name = options.field.name;
+
+        // "feature-state" data expressions are not supported with layout properties.
+        // To work around this limitation, some scaled values must fall back to geojson property values.
+        let supportsFeatureState = true;
+        if (styleName === 'iconSize'
+          && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
+          supportsFeatureState = false;
+        }
+
         return {
+          supportsFeatureState,
           name,
           range: this._getFieldRange(name),
           computedName: VectorStyle.getComputedFieldName(name),
@@ -351,7 +361,7 @@ export class VectorStyle extends AbstractStyle {
       const feature = featureCollection.features[i];
 
       for (let j = 0; j < scaledFields.length; j++) {
-        const { name, range, computedName } = scaledFields[j];
+        const { supportsFeatureState, name, range, computedName } = scaledFields[j];
         const unscaledValue = parseFloat(feature.properties[name]);
         let scaledValue;
         if (isNaN(unscaledValue) || !range) {//cannot scale
@@ -361,12 +371,21 @@ export class VectorStyle extends AbstractStyle {
         } else {
           scaledValue = (feature.properties[name] - range.min) / range.delta;
         }
-        tmpFeatureState[computedName] = scaledValue;
+        if (supportsFeatureState) {
+          tmpFeatureState[computedName] = scaledValue;
+        } else {
+          feature.properties[computedName] = scaledValue;
+        }
       }
       tmpFeatureIdentifier.source = sourceId;
       tmpFeatureIdentifier.id = feature.id;
       mbMap.setFeatureState(tmpFeatureIdentifier, tmpFeatureState);
     }
+
+    const hasScaledGeoJsonProperties = scaledFields.some(({ supportsFeatureState }) => {
+      return !supportsFeatureState;
+    });
+    return hasScaledGeoJsonProperties;
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
@@ -503,7 +522,15 @@ export class VectorStyle extends AbstractStyle {
     if (iconSize.type === VectorStyle.STYLE_TYPE.STATIC) {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSize.options.size / DEFAULT_ICON_SIZE);
     } else {
-      // TODO handle dynamic size
+      const targetName = VectorStyle.getComputedFieldName(iconSize.options.field.name);
+      // Using property state instead of feature-state because layout properties do not support feature-state
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
+        'interpolate',
+        ['linear'],
+        ['get', targetName],
+        0, iconSize.options.minSize / DEFAULT_ICON_SIZE,
+        1, iconSize.options.maxSize / DEFAULT_ICON_SIZE
+      ]);
     }
   }
 

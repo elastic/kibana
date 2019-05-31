@@ -15,8 +15,7 @@ maki.svgArray.forEach(svgString => {
   if (index !== -1) {
     const idStartIndex = index + ID_FRAG.length;
     const idEndIndex = svgString.substring(idStartIndex).indexOf('"') + idStartIndex;
-    const rawSymbolId = svgString.substring(idStartIndex, idEndIndex);
-    const symbolId = rawSymbolId.split('-').join(' ');
+    const symbolId = svgString.substring(idStartIndex, idEndIndex);
     SYMBOLS[symbolId] = svgString;
   }
 });
