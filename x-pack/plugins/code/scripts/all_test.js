@@ -8,5 +8,5 @@ const execa = require('execa'); // eslint-disable-line import/no-extraneous-depe
 
 execa.sync('node', [require.resolve('./jest')], { stdio: 'inherit' });
 execa.sync('node', [require.resolve('./mocha')], { stdio: 'inherit' });
-execa.sync('node', [require.resolve('./functional_jest')], { stdio: 'inherit' });
+execa.sync('node', [require.resolve('./functional_test')], { stdio: 'inherit' });
 execa.sync('node', [require.resolve('./api_integration_test')], { stdio: 'inherit' });

@@ -184,13 +184,13 @@ const LanguageServerInstruction = (props: {
         <EuiText grow={false}>
           <h3>Install</h3>
           <div>
-            Stop your kibana Code node, then use the following command to install {props.name}{' '}
+            Stop your kibana Code node, then use the following command to install the {props.name}{' '}
             Language Server plugin:
             <EuiCodeBlock language="shell">{installCode}</EuiCodeBlock>
           </div>
           <h3>Uninstall</h3>
           <div>
-            Stop your kibana Code node, then use the following command to remove {props.name}{' '}
+            Stop your kibana Code node, then use the following command to remove the {props.name}{' '}
             Language Server plugin:
           </div>
           <div>
@@ -210,7 +210,7 @@ const LanguageServerInstruction = (props: {
         <EuiOverlayMask>
           <EuiModal onClose={props.close} maxWidth={false}>
             <EuiModalHeader>
-              <EuiModalHeaderTitle>Install Instruction</EuiModalHeaderTitle>
+              <EuiModalHeaderTitle>Installation Instructions</EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>
               <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[1]} size={'m'} />
