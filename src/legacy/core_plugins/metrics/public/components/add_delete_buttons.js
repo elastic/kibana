@@ -23,7 +23,7 @@ import { EuiToolTip, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { isBoolean } from 'lodash';
 
-function AddDeleteButtons(props) {
+export function AddDeleteButtons(props) {
   const { testSubj } = props;
   const createDelete = () => {
     if (props.disableDelete) {
@@ -146,5 +146,3 @@ AddDeleteButtons.propTypes = {
   onDelete: PropTypes.func,
   responsive: PropTypes.bool,
 };
-
-export default AddDeleteButtons;

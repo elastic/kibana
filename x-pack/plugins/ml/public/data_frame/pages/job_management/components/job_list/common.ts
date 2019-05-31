@@ -12,6 +12,7 @@ export interface DataFrameJob {
   dest: string;
   id: JobId;
   source: string;
+  sync?: object;
 }
 
 export enum DATA_FRAME_RUNNING_STATE {
@@ -50,6 +51,7 @@ export interface DataFrameJobStats {
 }
 
 export interface DataFrameJobListRow {
+  id: JobId;
   state: DataFrameJobState;
   stats: DataFrameJobStats;
   config: DataFrameJob;
@@ -63,3 +65,13 @@ export enum DataFrameJobListColumn {
 }
 
 export type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
+
+export function isCompletedBatchJob(item: DataFrameJobListRow) {
+  // If `checkpoint=1`, `sync` is missing from the config and state is stopped,
+  // then this is a completed batch data frame job.
+  return (
+    item.state.checkpoint === 1 &&
+    item.config.sync === undefined &&
+    item.state.task_state === DATA_FRAME_RUNNING_STATE.STOPPED
+  );
+}

@@ -50,4 +50,4 @@ export const REPOSITORY_PLUGINS_MAP: { [key: string]: RepositoryType } = {
   'repository-gcs': REPOSITORY_TYPES.gcs,
 };
 
-export const APP_PERMISSIONS = ['monitor', 'create_snapshot', 'cluster:admin/repository'];
+export const APP_PERMISSIONS = ['create_snapshot', 'cluster:admin/repository'];

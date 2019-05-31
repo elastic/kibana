@@ -7,7 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { FlowTarget, GetIpOverviewQuery, HostEcsFields } from '../../graphql/types';
 import { TestProviders } from '../../mock';
@@ -19,6 +19,8 @@ import {
   hostNameRenderer,
   locationRenderer,
   whoisRenderer,
+  reputationRenderer,
+  DefaultFieldRenderer,
 } from './field_renderers';
 import { mockData } from '../page/network/ip_overview/mock';
 
@@ -211,10 +213,35 @@ describe('Field Renderers', () => {
   describe('#reputationRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallowWithIntl(
-        <TestProviders>{whoisRenderer('10.10.10.10')}</TestProviders>
+        <TestProviders>{reputationRenderer('10.10.10.10')}</TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
+    });
+  });
+
+  describe('DefaultFieldRenderer', () => {
+    test('it should render a single item', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <DefaultFieldRenderer rowItems={['item1']} attrName={'item1'} idPrefix={'prefix-1'} />
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('item1 ');
+    });
+
+    test('it should render two items', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <DefaultFieldRenderer
+            displayCount={5}
+            rowItems={['item1', 'item2']}
+            attrName={'item1'}
+            idPrefix={'prefix-1'}
+          />
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('item1,item2 ');
     });
   });
 });

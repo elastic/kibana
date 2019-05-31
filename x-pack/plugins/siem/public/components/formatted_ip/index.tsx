@@ -8,12 +8,11 @@ import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { escapeQueryValue } from '../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { IPDetailsLink } from '../links';
-import { DataProvider } from '../timeline/data_providers/data_provider';
+import { DataProvider, IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
 import { TruncatableText } from '../truncatable_text';
 import { parseQueryValue } from '../timeline/body/renderers/parse_query_value';
@@ -54,7 +53,8 @@ const getDataProvider = ({
   name: `${fieldName}: ${parseQueryValue(address)}`,
   queryMatch: {
     field: fieldName,
-    value: escapeQueryValue(parseQueryValue(address)),
+    value: parseQueryValue(address),
+    operator: IS_OPERATOR,
   },
   excluded: false,
   kqlQuery: '',

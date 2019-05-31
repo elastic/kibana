@@ -158,6 +158,7 @@ export interface DomainFirstLastSeenRequestOptions {
   domainName: string;
   flowTarget: FlowTarget;
   sourceConfiguration: SourceConfiguration;
+  defaultIndex: string[];
 }
 
 export interface DomainFirstLastSeenItem {

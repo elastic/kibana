@@ -23,7 +23,8 @@ export default function exploreRepositoryFunctonalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  describe('Explore Repository', () => {
+  // FLAKY https://github.com/elastic/kibana/issues/35944
+  describe.skip('Explore Repository', () => {
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -81,6 +82,27 @@ export default function exploreRepositoryFunctonalTests({
         await testSubjects.click(repositoryListSelector);
       });
 
+      it('open a file that does not exists should load tree', async () => {
+        // open a file that does not exists
+        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter/tree/master/I_DO_NOT_EXIST`;
+        await browser.get(url);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          expect(
+            currentUrl.indexOf(
+              'github.com/elastic/TypeScript-Node-Starter/tree/master/I_DO_NOT_EXIST'
+            )
+          ).to.greaterThan(0);
+        });
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src-doc')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-test')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-views')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-File-package.json')).ok();
+        });
+      });
+
       it('tree should be loaded', async () => {
         await retry.tryForTime(5000, async () => {
           expect(await testSubjects.exists('codeFileTreeNode-Directory-src')).ok();
@@ -122,6 +144,18 @@ export default function exploreRepositoryFunctonalTests({
         // Then the 'User.ts' file on the file tree.
         await retry.try(async () => {
           expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
+        });
+
+        // Click breadcrumb does not affect file tree
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileBreadcrumb-src')).ok();
+        });
+        await testSubjects.click('codeFileBreadcrumb-src');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
         });
 
         // open another folder
@@ -260,6 +294,20 @@ export default function exploreRepositoryFunctonalTests({
       //     });
       //   });
       // });
+
+      it('goes to a repository which does not exist should render the 404 error page', async () => {
+        log.debug('it goes to a repository which does not exist');
+        const notExistRepoUri = 'github.com/I_DO_NOT_EXIST/I_DO_NOT_EXIST';
+        const url = `${PageObjects.common.getHostPort()}/app/code#/${notExistRepoUri}`;
+        await browser.get(url);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          expect(currentUrl.indexOf(notExistRepoUri)).to.greaterThan(0);
+        });
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeNotFoundErrorPage')).ok();
+        });
+      });
     });
   });
 }

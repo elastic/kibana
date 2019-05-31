@@ -23,6 +23,7 @@ import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { IPDetailsLink } from '../../../links';
 import { Columns } from '../../../load_more_table';
+import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
 
@@ -62,7 +63,7 @@ export const getNetworkTopNFlowColumns = (
               name: ip,
               excluded: false,
               kqlQuery: '',
-              queryMatch: { field: ipAttr, value: ip },
+              queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -118,7 +119,7 @@ export const getNetworkTopNFlowColumns = (
               key={escapeDataProviderId(
                 `${tableId}-table-${flowTarget}-${flowDirection}-direction-${direction}`
               )}
-              expression={`network.direction: ${escapeQueryValue(direction)}`}
+              expression={`network.direction: "${escapeQueryValue(direction)}"`}
               componentFilterType="network"
               type={type}
             >

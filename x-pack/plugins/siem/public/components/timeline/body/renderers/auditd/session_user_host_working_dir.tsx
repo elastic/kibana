@@ -51,7 +51,7 @@ export const SessionUserHostWorkingDir = pure<Props>(
       </TokensFlexItem>
       {hostName != null && (
         <TokensFlexItem grow={false} component="span">
-          @
+          {'@'}
         </TokensFlexItem>
       )}
       <HostWorkingDir

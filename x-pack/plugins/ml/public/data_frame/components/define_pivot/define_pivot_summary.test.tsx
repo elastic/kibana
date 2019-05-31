@@ -27,6 +27,7 @@ jest.mock('react', () => {
 describe('Data Frame: <DefinePivotSummary />', () => {
   test('Minimal initialization', () => {
     const currentIndexPattern = {
+      id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
     };
@@ -34,12 +35,14 @@ describe('Data Frame: <DefinePivotSummary />', () => {
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
-      aggName: 'the-group-by-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
     };
     const agg: PivotAggsConfig = {
       agg: PIVOT_SUPPORTED_AGGS.AVG,
       field: 'the-agg-field',
-      aggName: 'the-agg-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
     };
     const props: DefinePivotExposedState = {
       aggList: { 'the-agg-name': agg },
@@ -53,7 +56,14 @@ describe('Data Frame: <DefinePivotSummary />', () => {
     const wrapper = shallow(
       <div>
         <KibanaContext.Provider
-          value={{ currentIndexPattern, indexPatterns: {}, kibanaConfig: {} }}
+          value={{
+            combinedQuery: {},
+            currentIndexPattern,
+            currentSavedSearch: {},
+            indexPatterns: {},
+            kbnBaseUrl: 'url',
+            kibanaConfig: {},
+          }}
         >
           <DefinePivotSummary {...props} />
         </KibanaContext.Provider>

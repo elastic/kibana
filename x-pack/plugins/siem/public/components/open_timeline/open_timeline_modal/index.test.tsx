@@ -5,16 +5,45 @@
  */
 
 import { get } from 'lodash/fp';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
+import { MockedProvider } from 'react-apollo/test-utils';
+
+import { wait } from '../../../lib/helpers';
+import { TestProviderWithoutDragAndDrop } from '../../../mock/test_providers';
+import { mockOpenTimelineQueryResults } from '../../../mock/timeline_results';
+import * as i18n from '../translations';
 
 import { OpenTimelineModalButton } from '.';
 
-import * as i18n from '../translations';
+const getStateChildComponent = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
+): // eslint-disable-next-line @typescript-eslint/no-explicit-any
+React.Component<{}, {}, any> =>
+  wrapper
+    .childAt(0)
+    .childAt(0)
+    .childAt(0)
+    .childAt(0)
+    .childAt(0)
+    .childAt(0)
+    .childAt(0)
+    .instance();
 
 describe('OpenTimelineModalButton', () => {
-  test('it renders the expected button text', () => {
-    const wrapper = mountWithIntl(<OpenTimelineModalButton onToggle={jest.fn()} />);
+  test('it renders the expected button text', async () => {
+    const wrapper = mount(
+      <TestProviderWithoutDragAndDrop>
+        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+          <OpenTimelineModalButton onToggle={jest.fn()} />
+        </MockedProvider>
+      </TestProviderWithoutDragAndDrop>
+    );
+
+    await wait();
+
+    wrapper.update();
 
     expect(
       wrapper
@@ -25,25 +54,55 @@ describe('OpenTimelineModalButton', () => {
   });
 
   describe('statefulness', () => {
-    test('defaults showModal to false', () => {
-      const wrapper = mountWithIntl(<OpenTimelineModalButton onToggle={jest.fn()} />);
+    test('defaults showModal to false', async () => {
+      const wrapper = mount(
+        <TestProviderWithoutDragAndDrop>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <OpenTimelineModalButton onToggle={jest.fn()} />
+          </MockedProvider>
+        </TestProviderWithoutDragAndDrop>
+      );
 
-      expect(get('showModal', wrapper.state())).toEqual(false);
+      await wait();
+
+      wrapper.update();
+
+      expect(get('showModal', getStateChildComponent(wrapper).state)).toEqual(false);
     });
 
-    test('it sets showModal to true when the button is clicked', () => {
-      const wrapper = mountWithIntl(<OpenTimelineModalButton onToggle={jest.fn()} />);
+    test('it sets showModal to true when the button is clicked', async () => {
+      const wrapper = mount(
+        <TestProviderWithoutDragAndDrop>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <OpenTimelineModalButton onToggle={jest.fn()} />
+          </MockedProvider>
+        </TestProviderWithoutDragAndDrop>
+      );
+
+      await wait();
 
       wrapper
         .find('[data-test-subj="open-timeline-button"]')
         .first()
         .simulate('click');
 
-      expect(get('showModal', wrapper.state())).toEqual(true);
+      wrapper.update();
+
+      expect(wrapper.find('div[data-test-subj="open-timeline-modal"].euiModal').length).toEqual(1);
     });
 
-    test('it does NOT render the modal when showModal is false', () => {
-      const wrapper = mountWithIntl(<OpenTimelineModalButton onToggle={jest.fn()} />);
+    test('it does NOT render the modal when showModal is false', async () => {
+      const wrapper = mount(
+        <TestProviderWithoutDragAndDrop>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <OpenTimelineModalButton onToggle={jest.fn()} />
+          </MockedProvider>
+        </TestProviderWithoutDragAndDrop>
+      );
+
+      await wait();
+
+      wrapper.update();
 
       expect(
         wrapper
@@ -53,8 +112,18 @@ describe('OpenTimelineModalButton', () => {
       ).toBe(false);
     });
 
-    test('it renders the modal when showModal is true', () => {
-      const wrapper = mountWithIntl(<OpenTimelineModalButton onToggle={jest.fn()} />);
+    test('it renders the modal when showModal is true', async () => {
+      const wrapper = mount(
+        <TestProviderWithoutDragAndDrop>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <OpenTimelineModalButton onToggle={jest.fn()} />
+          </MockedProvider>
+        </TestProviderWithoutDragAndDrop>
+      );
+
+      await wait();
+
+      wrapper.update();
 
       wrapper
         .find('[data-test-subj="open-timeline-button"]')
@@ -71,25 +140,45 @@ describe('OpenTimelineModalButton', () => {
   });
 
   describe('onToggle prop', () => {
-    test('it still correctly updates the showModal state if `onToggle` is not provided as a prop', () => {
-      const wrapper = mountWithIntl(<OpenTimelineModalButton />);
+    test('it still correctly updates the showModal state if `onToggle` is not provided as a prop', async () => {
+      const wrapper = mount(
+        <TestProviderWithoutDragAndDrop>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <OpenTimelineModalButton onToggle={jest.fn()} />
+          </MockedProvider>
+        </TestProviderWithoutDragAndDrop>
+      );
+
+      await wait();
 
       wrapper
         .find('[data-test-subj="open-timeline-button"]')
         .first()
         .simulate('click');
 
-      expect(get('showModal', wrapper.state())).toEqual(true);
+      wrapper.update();
+
+      expect(get('showModal', getStateChildComponent(wrapper).state)).toEqual(true);
     });
 
-    test('it invokes the optional onToggle function provided as a prop when the open timeline button is clicked', () => {
+    test('it invokes the optional onToggle function provided as a prop when the open timeline button is clicked', async () => {
       const onToggle = jest.fn();
-      const wrapper = mountWithIntl(<OpenTimelineModalButton onToggle={onToggle} />);
+      const wrapper = mount(
+        <TestProviderWithoutDragAndDrop>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <OpenTimelineModalButton onToggle={onToggle} />
+          </MockedProvider>
+        </TestProviderWithoutDragAndDrop>
+      );
+
+      await wait();
 
       wrapper
         .find('[data-test-subj="open-timeline-button"]')
         .first()
         .simulate('click');
+
+      wrapper.update();
 
       expect(onToggle).toBeCalled();
     });

@@ -35,7 +35,7 @@ export async function getErrorGroups({
   sortDirection: string;
   setup: Setup;
 }) {
-  const { start, end, esFilterQuery, client, config } = setup;
+  const { start, end, uiFiltersES, client, config } = setup;
 
   const params: SearchParams = {
     index: config.get<string>('apm_oss.errorIndices'),
@@ -46,7 +46,8 @@ export async function getErrorGroups({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [PROCESSOR_EVENT]: 'error' } },
-            { range: rangeFilter(start, end) }
+            { range: rangeFilter(start, end) },
+            ...uiFiltersES
           ]
         }
       },
@@ -77,10 +78,6 @@ export async function getErrorGroups({
       }
     }
   };
-
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
 
   // sort buckets by last occurrence of error
   if (sortField === 'latestOccurrenceAt') {
@@ -128,7 +125,7 @@ export async function getErrorGroups({
     };
   }
 
-  const resp = await client<void, Aggs>('search', params);
+  const resp = await client.search<void, Aggs>(params);
   const buckets = idx(resp, _ => _.aggregations.error_groups.buckets) || [];
 
   const hits = buckets.map(bucket => {

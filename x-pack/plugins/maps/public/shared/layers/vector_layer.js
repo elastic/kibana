@@ -9,7 +9,7 @@ import React from 'react';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
@@ -21,20 +21,28 @@ const EMPTY_FEATURE_COLLECTION = {
   features: []
 };
 
-
 const CLOSED_SHAPE_MB_FILTER = [
   'any',
-  ['==', ['geometry-type'], 'Polygon'],
-  ['==', ['geometry-type'], 'MultiPolygon']
+  ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON]
 ];
 
 const ALL_SHAPE_MB_FILTER = [
   'any',
-  ['==', ['geometry-type'], 'Polygon'],
-  ['==', ['geometry-type'], 'MultiPolygon'],
-  ['==', ['geometry-type'], 'LineString'],
-  ['==', ['geometry-type'], 'MultiLineString']
+  ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
 ];
+
+
+let idCounter = 0;
+function generateNumericalId() {
+  const newId = idCounter < Number.MAX_SAFE_INTEGER ? idCounter : 0;
+  idCounter = newId + 1;
+  return newId;
+}
+
 
 export class VectorLayer extends AbstractLayer {
 
@@ -364,11 +372,12 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-
   _assignIdsToFeatures(featureCollection) {
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
-      feature.properties[FEATURE_ID_PROPERTY_NAME] = (typeof feature.id === 'string' || typeof feature.id === 'number')  ? feature.id : i;
+      const id = generateNumericalId();
+      feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
+      feature.id = id;
     }
   }
 
@@ -406,23 +415,23 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _syncFeatureCollectionWithMb(mbMap) {
-    const mbGeoJSONSource = mbMap.getSource(this.getId());
 
+    const mbGeoJSONSource = mbMap.getSource(this.getId());
     const featureCollection = this._getSourceFeatureCollection();
+    const featureCollectionOnMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
+
     if (!featureCollection) {
+      if (featureCollectionOnMap) {
+        this._style.clearFeatureState(featureCollectionOnMap, mbMap, this.getId());
+      }
       mbGeoJSONSource.setData(EMPTY_FEATURE_COLLECTION);
       return;
     }
 
-    const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
-    if (featureCollection !== dataBoundToMap) {
+    if (featureCollection !== featureCollectionOnMap) {
       mbGeoJSONSource.setData(featureCollection);
     }
-
-    const shouldRefresh = this._style.addScaledPropertiesBasedOnStyle(featureCollection);
-    if (shouldRefresh) {
-      mbGeoJSONSource.setData(featureCollection);
-    }
+    this._style.setFeatureState(featureCollection, mbMap, this.getId());
   }
 
   _setMbPointsProperties(mbMap) {

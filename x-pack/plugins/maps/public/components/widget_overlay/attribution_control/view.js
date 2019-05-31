@@ -8,7 +8,6 @@ import React, { Fragment } from 'react';
 import _ from 'lodash';
 import {
   EuiText,
-  EuiPanel,
   EuiLink,
 } from '@elastic/eui';
 
@@ -68,7 +67,7 @@ export class AttributionControl  extends React.Component {
     }
 
     return (
-      <EuiLink color="subdued" href={url} target="_blank">{label}</EuiLink>
+      <EuiLink color="text" href={url} target="_blank">{label}</EuiLink>
     );
   }
 
@@ -88,11 +87,11 @@ export class AttributionControl  extends React.Component {
       return null;
     }
     return (
-      <EuiPanel className="mapWidgetControl mapAttributionControl" paddingSize="none" grow={false}>
-        <EuiText color="subdued" size="xs">
-          <small>{this._renderAttributions()}</small>
+      <div className="mapAttributionControl">
+        <EuiText size="xs">
+          <small><strong>{this._renderAttributions()}</strong></small>
         </EuiText>
-      </EuiPanel>
+      </div>
     );
   }
 }

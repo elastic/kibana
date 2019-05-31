@@ -18,17 +18,20 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
+import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';
 import { Logger } from '../logging';
 import { CoreContext } from '../core_context';
-import { HttpConfig } from './http_config';
+import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
 /** @public */
-export type HttpServiceSetup = HttpServerSetup;
+export interface HttpServiceSetup extends HttpServerSetup {
+  createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
+}
 /** @public */
 export interface HttpServiceStart {
   /** Indicates if http server is listening on a port */
@@ -38,15 +41,20 @@ export interface HttpServiceStart {
 /** @internal */
 export class HttpService implements CoreService<HttpServiceSetup, HttpServiceStart> {
   private readonly httpServer: HttpServer;
+  private readonly secondaryServers: Map<number, HttpServer> = new Map();
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
   private configSubscription?: Subscription;
 
+  private readonly logger: LoggerFactory;
   private readonly log: Logger;
 
   constructor(private readonly coreContext: CoreContext) {
+    this.logger = coreContext.logger;
     this.log = coreContext.logger.get('http');
-    this.config$ = this.coreContext.configService.atPath('server', HttpConfig);
+    this.config$ = coreContext.configService
+      .atPath<HttpConfigType>('server')
+      .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
 
     this.httpServer = new HttpServer(coreContext.logger.get('http', 'server'));
     this.httpsRedirectServer = new HttpsRedirectServer(
@@ -67,7 +75,12 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    return this.httpServer.setup(config);
+    const httpSetup = (this.httpServer.setup(config) || {}) as HttpServiceSetup;
+    const setup = {
+      ...httpSetup,
+      ...{ createNewServer: this.createServer.bind(this) },
+    };
+    return setup;
   }
 
   public async start() {
@@ -84,12 +97,44 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
         await this.httpsRedirectServer.start(config);
       }
 
-      await this.httpServer.start(config);
+      await this.httpServer.start();
+      await Promise.all([...this.secondaryServers.values()].map(server => server.start()));
     }
 
     return {
-      isListening: () => this.httpServer.isListening(),
+      isListening: (port = 0) => {
+        const server = this.secondaryServers.get(port);
+        if (server) return server.isListening();
+        return this.httpServer.isListening();
+      },
     };
+  }
+
+  private async createServer(cfg: Partial<HttpConfig>) {
+    const { port } = cfg;
+    const config = await this.config$.pipe(first()).toPromise();
+
+    if (!port) {
+      throw new Error('port must be defined');
+    }
+
+    // verify that main server and none of the secondary servers are already using this port
+    if (this.secondaryServers.has(port) || config.port === port) {
+      throw new Error(`port ${port} is already in use`);
+    }
+
+    for (const [key, val] of Object.entries(cfg)) {
+      httpConfig.schema.validateKey(key, val);
+    }
+
+    const baseConfig = await this.config$.pipe(first()).toPromise();
+    const finalConfig = { ...baseConfig, ...cfg };
+    const log = this.logger.get('http', `server:${port}`);
+
+    const httpServer = new HttpServer(log);
+    const httpSetup = await httpServer.setup(finalConfig);
+    this.secondaryServers.set(port, httpServer);
+    return httpSetup;
   }
 
   public async stop() {
@@ -102,5 +147,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
+    await Promise.all([...this.secondaryServers.values()].map(s => s.stop()));
+    this.secondaryServers.clear();
   }
 }
