@@ -6,20 +6,40 @@
 
 import React from 'react';
 import { render } from 'react-dom';
+import { Position } from '@elastic/charts';
 import { Visualization, Operation } from '../types';
+import { getSuggestions } from './xy_suggestions';
+import { XYArgs } from './xy_expression';
 import { NativeRenderer } from '../native_renderer';
 
-export interface XyVisualizationState {
-  roles: string[];
-}
+export type State = XYArgs;
+export type PersistableState = XYArgs;
 
-export type XyVisualizationPersistedState = XyVisualizationState;
+export const xyVisualization: Visualization<State, PersistableState> = {
+  getSuggestions,
 
-export const xyVisualization: Visualization<XyVisualizationState, XyVisualizationPersistedState> = {
-  initialize() {
-    return {
-      roles: [],
-    };
+  initialize(state) {
+    return (
+      state || {
+        title: 'Empty line chart',
+        legend: { isVisible: true, position: Position.Right },
+        seriesType: 'line',
+        splitSeriesAccessors: [],
+        stackAccessors: [],
+        x: {
+          accessor: '',
+          position: Position.Bottom,
+          showGridlines: false,
+          title: 'Uknown',
+        },
+        y: {
+          accessors: [],
+          position: Position.Left,
+          showGridlines: false,
+          title: 'Uknown',
+        },
+      }
+    );
   },
 
   getPersistableState(state) {
@@ -50,8 +70,6 @@ export const xyVisualization: Visualization<XyVisualizationState, XyVisualizatio
       domElement
     );
   },
-
-  getSuggestions: options => [],
 
   toExpression: state => '',
 };

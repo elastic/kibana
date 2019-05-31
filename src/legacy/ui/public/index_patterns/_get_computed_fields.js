@@ -28,12 +28,10 @@ export function getComputedFields() {
   // Use a docvalue for each date field to ensure standardized formats when working with date fields
   // indexPattern.flattenHit will override "_source" values when the same field is also defined in "fields"
   docvalueFields = _.reject(self.fields.byType.date, 'scripted')
-    .map((dateField) => {
-      return {
-        field: dateField.name,
-        format: 'date_time',
-      };
-    });
+    .map((dateField) => ({
+      field: dateField.name,
+      format: dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1 ? 'strict_date_time' : 'date_time',
+    }));
 
   _.each(self.getScriptedFields(), function (field) {
     scriptFields[field.name] = {
