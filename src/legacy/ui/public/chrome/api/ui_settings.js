@@ -17,15 +17,10 @@
  * under the License.
  */
 
+import { onSetup } from 'ui/new_platform';
+
 let newPlatformUiSettingsClient;
-
-export function __newPlatformSetup__(instance) {
-  if (newPlatformUiSettingsClient) {
-    throw new Error('ui/chrome/api/ui_settings already initialized');
-  }
-
-  newPlatformUiSettingsClient = instance;
-}
+onSetup(({ core }) => (newPlatformUiSettingsClient = core.uiSettings));
 
 export function initUiSettingsApi(chrome) {
   chrome.getUiSettingsClient = function () {

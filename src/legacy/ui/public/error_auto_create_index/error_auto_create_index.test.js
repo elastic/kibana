@@ -19,14 +19,15 @@
 
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
-import { __newPlatformSetup__, kfetch } from '../kfetch';
+import { __newPlatformSetup__ } from 'ui/new_platform';
+import { kfetch } from '../kfetch';
 import { setup } from '../../../../test_utils/public/http_test_setup';
 
 import { isAutoCreateIndexError } from './error_auto_create_index';
 
 describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch', () => {
   beforeAll(() => {
-    __newPlatformSetup__(setup().http);
+    __newPlatformSetup__(setup());
   });
 
   describe('404', () => {

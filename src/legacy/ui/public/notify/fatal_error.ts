@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { onSetup } from 'ui/new_platform';
 import { FatalErrorsSetup } from '../../../../core/public';
 import {
   AngularHttpError,
@@ -25,14 +26,7 @@ import {
 } from './lib/format_angular_http_error';
 
 let newPlatformFatalErrors: FatalErrorsSetup;
-
-export function __newPlatformSetup__(instance: FatalErrorsSetup) {
-  if (newPlatformFatalErrors) {
-    throw new Error('ui/notify/fatal_error already initialized with new platform apis');
-  }
-
-  newPlatformFatalErrors = instance;
-}
+onSetup(({ core }) => (newPlatformFatalErrors = core.fatalErrors));
 
 export function addFatalErrorCallback(callback: () => void) {
   newPlatformFatalErrors.get$().subscribe(() => {

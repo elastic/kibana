@@ -17,18 +17,12 @@
  * under the License.
  */
 
+import { onStart } from 'ui/new_platform';
 import { Capabilities as UICapabilities } from '../../../../core/public';
 
 export { UICapabilities };
 let uiCapabilities: UICapabilities;
-
-export function __newPlatformStart__(capabilities: UICapabilities) {
-  if (uiCapabilities) {
-    throw new Error('ui/capabilities already initialized with new platform apis');
-  }
-
-  uiCapabilities = capabilities;
-}
+onStart(({ core }) => (uiCapabilities = core.application.capabilities));
 
 export const capabilities = {
   get() {

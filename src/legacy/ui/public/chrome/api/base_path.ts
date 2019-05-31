@@ -17,17 +17,11 @@
  * under the License.
  */
 
+import { onSetup } from 'ui/new_platform';
 import { HttpSetup } from '../../../../../core/public';
 
 let newPlatformHttp: HttpSetup;
-
-export function __newPlatformSetup__(instance: HttpSetup) {
-  if (newPlatformHttp) {
-    throw new Error('ui/chrome/api/http is already initialized');
-  }
-
-  newPlatformHttp = instance;
-}
+onSetup(({ core }) => (newPlatformHttp = core.http));
 
 export function initChromeBasePathApi(chrome: { [key: string]: any }) {
   chrome.getBasePath = newPlatformHttp.getBasePath.bind(newPlatformHttp);

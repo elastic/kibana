@@ -19,12 +19,13 @@
 
 import * as Rx from 'rxjs';
 
+import { __newPlatformSetup__ } from 'ui/new_platform';
 import { chromeServiceMock } from '../../../../../core/public/mocks';
-import { __newPlatformSetup__, initChromeControlsApi } from './controls';
+import { initChromeControlsApi } from './controls';
 
 const newPlatformChrome = chromeServiceMock.createSetupContract();
 
-__newPlatformSetup__(newPlatformChrome);
+__newPlatformSetup__({ chrome: newPlatformChrome } as any);
 
 function setup() {
   const isVisible$ = new Rx.BehaviorSubject(true);

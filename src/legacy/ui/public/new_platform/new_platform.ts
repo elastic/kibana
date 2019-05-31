@@ -40,7 +40,8 @@ export function __reset__() {
 
 export async function __newPlatformSetup__(
   core: InternalCoreSetup,
-  plugins: Record<string, unknown>
+  // defaults to {} to make unit testing simpler
+  plugins: Record<string, unknown> = {}
 ) {
   if (runtimeContext.setup.core) {
     throw new Error('New platform core api was already set up');

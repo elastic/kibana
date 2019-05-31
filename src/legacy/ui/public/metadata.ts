@@ -17,12 +17,13 @@
  * under the License.
  */
 
-export let metadata = null;
+import { onSetup } from 'ui/new_platform';
 
-export function __newPlatformSetup__(legacyMetadata) {
-  if (metadata === null) {
-    metadata = legacyMetadata;
-  } else {
-    throw new Error('ui/metadata can only be initialized once');
-  }
-}
+export let metadata: {
+  branch: string;
+  version: string;
+};
+
+onSetup(({ core }) => {
+  metadata = core.injectedMetadata.getLegacyMetadata();
+});

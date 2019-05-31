@@ -21,11 +21,14 @@ import { render } from 'enzyme';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { __newPlatformSetup__, wrapInI18nContext } from '.';
+import { __newPlatformSetup__ } from 'ui/new_platform';
+import { wrapInI18nContext } from '.';
 
 describe('ui/i18n', () => {
   test('renders children and forwards properties', () => {
-    __newPlatformSetup__(({ children }) => <div>Context: {children}</div>);
+    __newPlatformSetup__({
+      i18n: { Context: ({ children }: any) => <div>Context: {children}</div> },
+    } as any);
 
     const mockPropTypes = {
       stringProp: PropTypes.string.isRequired,
