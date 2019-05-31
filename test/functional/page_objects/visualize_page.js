@@ -380,8 +380,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getMetric() {
-      const metricElement = await find.byCssSelector('div[ng-controller="KbnMetricVisController"]');
-      return await metricElement.getVisibleText();
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .mtrVis__container');
+      const values = await Promise.all(elements.map(async element => {
+        const text = await element.getVisibleText();
+        return text;
+      }));
+      return values.filter(item => item.length > 0).reduce((arr, item) => arr.concat(item.split('\n')), []);
     }
 
     async getGaugeValue() {
@@ -413,8 +417,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setValue(newValue) {
-      await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
-      const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
+      const input = await find.byCssSelector('[data-test-subj="visEditorPercentileRanks"] input');
       await input.clearValue();
       await input.type(newValue);
     }

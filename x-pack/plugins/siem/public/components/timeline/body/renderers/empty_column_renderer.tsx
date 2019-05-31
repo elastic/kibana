@@ -11,7 +11,7 @@ import { ColumnRenderer } from './column_renderer';
 import { DraggableWrapper, DragEffects } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { parseQueryValue } from './parse_query_value';
-import { IS_OPERATOR } from '../../data_providers/data_provider';
+import { EXISTS_OPERATOR } from '../../data_providers/data_provider';
 import { Provider } from '../../data_providers/provider';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { getEmptyValue } from '../../../empty_value';
@@ -44,9 +44,10 @@ export const emptyColumnRenderer: ColumnRenderer = {
         queryMatch: {
           field: field.id,
           value: parseQueryValue(null),
-          operator: IS_OPERATOR,
+          displayValue: getEmptyValue(),
+          operator: EXISTS_OPERATOR,
         },
-        excluded: false,
+        excluded: true,
         kqlQuery: '',
         and: [],
       }}
