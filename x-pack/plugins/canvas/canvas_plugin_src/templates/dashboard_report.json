@@ -1,6 +1,6 @@
 {
     "name": "Dashboard",
-    "id": "workpad-0e126496-bb78-4b4a-96e3-a67a26560634",
+    "id": "workpad-6181471b-147d-4397-a0d3-1c0f1600fa12",
     "displayName": "Dashboard",
     "help": "Infographic-style dashboard with live charts",
     "tags": ["report"],
@@ -138,7 +138,7 @@
                 {
                     "id": "element-bdfb3910-5f65-4c24-9bbe-e62feb9e5e11",
                     "position": {
-                        "left": 586,
+                        "left": 585.75,
                         "top": 178,
                         "width": 378,
                         "height": 38,
@@ -157,7 +157,7 @@
                         "angle": 0,
                         "parent": null
                     },
-                    "expression": "filters\n| demodata\n| markdown \"##### Global cost distribution\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"h2 {\n color: rgb(25,101,176);\n}\""
+                    "expression": "filters\n| demodata\n| markdown \"##### Global cost distribution\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\""
                 },
                 {
                     "id": "element-d0c43968-cdcd-4a25-980f-83d6f0adf68e",
@@ -169,7 +169,7 @@
                         "angle": 0,
                         "parent": null
                     },
-                    "expression": "filters\n| demodata\n| markdown \"##### Project type distribution\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"h2 {\n color: rgb(25,101,176);\n}\""
+                    "expression": "filters\n| demodata\n| markdown \"##### Project type distribution\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\""
                 },
                 {
                     "id": "element-ea1f3942-066f-4032-a9d0-125072d353d9",
@@ -205,7 +205,7 @@
                         "angle": 0,
                         "parent": null
                     },
-                    "expression": "filters\n| demodata\n| markdown \"##### Global average uptime\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"h2 {\n color: rgb(25,101,176);\n}\""
+                    "expression": "filters\n| demodata\n| markdown \"##### Global average uptime\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\""
                 },
                 {
                     "id": "element-bd806eff-400b-4816-b728-b28a0390352d",
@@ -314,12 +314,12 @@
                         "angle": 0,
                         "parent": null
                     },
-                    "expression": "filters\n| demodata\n| markdown \"##### Average uptime by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"h2 {\n color: rgb(25,101,176);\n}\""
+                    "expression": "filters\n| demodata\n| markdown \"##### Average uptime by project type\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\""
                 },
                 {
                     "id": "element-c30023e3-5df6-4b54-8286-544811ce7b6a",
                     "position": {
-                        "left": 52,
+                        "left": 51.875,
                         "top": 1670,
                         "width": 500,
                         "height": 38,
@@ -350,7 +350,7 @@
                         "angle": 0,
                         "parent": null
                     },
-                    "expression": "filters\n| demodata\n| markdown \"##### Price trend over time\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"h2 {\n color: rgb(25,101,176);\n}\""
+                    "expression": "filters\n| demodata\n| markdown \"##### Price trend over time\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\""
                 },
                 {
                     "id": "element-a9b94f64-5336-4e39-ac69-5c9dacfbe129",
@@ -362,7 +362,7 @@
                         "angle": 0,
                         "parent": null
                     },
-                    "expression": "filters\n| demodata\n| markdown \"##### State distribution\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"h2 {\n color: rgb(25,101,176);\n}\""
+                    "expression": "filters\n| demodata\n| markdown \"##### State distribution\n\" \n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=14 align=\"left\" color=\"#000000\" weight=\"normal\" underline=false italic=false}\n| render css=\"\""
                 },
                 {
                     "id": "element-8777dd63-fbe7-446f-a23a-74cf55dc0a7c",
@@ -448,8 +448,8 @@
         "#FFFFFF",
         "rgba(255,255,255,0)"
     ],
-    "@timestamp": "2019-05-30T21:13:53.838Z",
-    "@created": "2019-05-30T19:17:11.511Z",
+    "@timestamp": "2019-05-31T16:02:40.420Z",
+    "@created": "2019-05-31T16:01:45.751Z",
     "assets": {},
     "css": "h3 {\ncolor: #343741;\nfont-weight: 400;\n}\n\nh5 {\ncolor: #69707D;\n}"
 }
