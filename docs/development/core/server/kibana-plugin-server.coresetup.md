@@ -9,13 +9,12 @@ Context passed to the plugins `setup` method.
 <b>Signature:</b>
 
 ```typescript
-export interface CoreSetup 
+export interface CoreSetup
 ```
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>{`<p/>`        adminClient$: Observable&lt;ClusterClient&gt;;`<p/>`        dataClient$: Observable&lt;ClusterClient&gt;;`<p/>`    }</code> |  |
-|  [http](./kibana-plugin-server.coresetup.http.md) | <code>{`<p/>`        registerAuth: HttpServiceSetup['registerAuth'];`<p/>`        registerOnRequest: HttpServiceSetup['registerOnRequest'];`<p/>`        getBasePathFor: HttpServiceSetup['getBasePathFor'];`<p/>`        setBasePathFor: HttpServiceSetup['setBasePathFor'];`<p/>`    }</code> |  |
-
+| Property                                                           | Type                                                                                                                                                                                                                                                                                                                                                                                           | Description |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>{`<p/>` adminClient\$: Observable&lt;ClusterClient&gt;;`<p/>` dataClient\$: Observable&lt;ClusterClient&gt;;`<p/>` }</code>                                                                                                                                                                                                                                                              |             |
+| [http](./kibana-plugin-server.coresetup.http.md)                   | <code>{`<p/>` registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];`<p/>` registerAuth: HttpServiceSetup['registerAuth'];`<p/>` registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];`<p/>` getBasePathFor: HttpServiceSetup['getBasePathFor'];`<p/>` setBasePathFor: HttpServiceSetup['setBasePathFor'];`<p/>` createNewServer: HttpServiceSetup['createNewServer'];`<p/>` }</code> |             |

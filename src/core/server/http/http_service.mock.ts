@@ -19,6 +19,8 @@
 
 import { Server, ServerOptions } from 'hapi';
 import { HttpService } from './http_service';
+import { HttpConfig } from './http_config';
+import { HttpServerSetup } from './http_server';
 
 const createSetupContractMock = () => {
   const setupContract = {
@@ -30,6 +32,8 @@ const createSetupContractMock = () => {
     setBasePathFor: jest.fn(),
     // we can mock some hapi server method when we need it
     server: {} as Server,
+    createNewServer: async (cfg: Partial<HttpConfig>): Promise<HttpServerSetup> =>
+      ({} as HttpServerSetup),
   };
   return setupContract;
 };
