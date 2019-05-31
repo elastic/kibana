@@ -43,7 +43,15 @@ export function getCreateTaskRunnerFunction({
           alertInstanceFactory,
         };
 
+
+        const range = {
+          // Add 1ms to the from, since the range is inclusive
+          from: new Date(new Date(taskInstance.state.previousRange.to).getTime() + 1),
+          to: new Date(taskInstance.state.scheduledRunAt),
+        };
+
         const alertTypeState = await alertType.execute({
+          range,
           services,
           params: alertSavedObject.attributes.alertTypeParams,
           state: taskInstance.state.alertTypeState || {},
@@ -66,9 +74,9 @@ export function getCreateTaskRunnerFunction({
 
         const nextRunAt = new Date(
           // In the scenario the task took longer than the interval time to run,
-          // we'll run the next interval right away
+          // we'll catch up the next runAt to now.
           Math.max(
-            new Date(taskInstance.state.nextIntendedRunAt).getTime() +
+            new Date(taskInstance.state.scheduledRunAt).getTime() +
               alertSavedObject.attributes.interval,
             Date.now()
           )
@@ -77,7 +85,8 @@ export function getCreateTaskRunnerFunction({
           state: {
             alertTypeState,
             alertInstances,
-            nextIntendedRunAt: nextRunAt,
+            scheduledRunAt: nextRunAt,
+            previousRange: range,
           },
           runAt: nextRunAt,
         };

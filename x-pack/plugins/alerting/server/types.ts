@@ -22,6 +22,10 @@ export interface AlertServices {
 }
 
 export interface AlertExecuteOptions {
+  range: {
+    from: Date;
+    to: Date;
+  };
   services: AlertServices;
   params: Record<string, any>;
   state: State;
