@@ -30,7 +30,7 @@ describe('Pane', () => {
           usersViewing={usersViewing}
           width={testWidth}
         >
-          <span>I am a child of flyout</span>,
+          <span>{'I am a child of flyout'}</span>
         </Pane>
       </TestProviders>
     );
@@ -48,7 +48,7 @@ describe('Pane', () => {
           usersViewing={usersViewing}
           width={testWidth}
         >
-          <span>I am a child of flyout</span>,
+          <span>{'I am a child of flyout'}</span>
         </Pane>
       </TestProviders>
     );
@@ -67,7 +67,7 @@ describe('Pane', () => {
           usersViewing={usersViewing}
           width={testWidth}
         >
-          <span>I am a child of flyout</span>,
+          <span>{'I am a child of flyout'}</span>
         </Pane>
       </TestProviders>
     );
@@ -91,7 +91,7 @@ describe('Pane', () => {
           usersViewing={usersViewing}
           width={testWidth}
         >
-          <span>I am a child of flyout</span>,
+          <span>{'I am a child of flyout'}</span>
         </Pane>
       </TestProviders>
     );
@@ -115,7 +115,7 @@ describe('Pane', () => {
           usersViewing={usersViewing}
           width={testWidth}
         >
-          <span>I am a child of flyout</span>,
+          <span>{'I am a child of flyout'}</span>
         </Pane>
       </TestProviders>
     );
@@ -139,7 +139,7 @@ describe('Pane', () => {
           usersViewing={usersViewing}
           width={testWidth}
         >
-          <span>I am a child of flyout</span>,
+          <span>{'I am a child of flyout'}</span>
         </Pane>
       </TestProviders>
     );
@@ -163,7 +163,7 @@ describe('Pane', () => {
           usersViewing={usersViewing}
           width={testWidth}
         >
-          <span>I am a child of flyout</span>,
+          <span>{'I am a child of flyout'}</span>
         </Pane>
       </TestProviders>
     );
@@ -187,7 +187,7 @@ describe('Pane', () => {
           usersViewing={usersViewing}
           width={testWidth}
         >
-          <span>I am a mock body</span>,
+          <span>{'I am a mock body'}</span>
         </Pane>
       </TestProviders>
     );
@@ -211,7 +211,7 @@ describe('Pane', () => {
           usersViewing={usersViewing}
           width={testWidth}
         >
-          <span>I am a mock child</span>,
+          <span>{'I am a mock child'}</span>
         </Pane>
       </TestProviders>
     );
