@@ -86,7 +86,7 @@ export async function getServicesItems(setup: Setup) {
     };
   }
 
-  const resp = await client<void, Aggs>('search', params);
+  const resp = await client.search<void, Aggs>(params);
   const aggs = resp.aggregations;
   const serviceBuckets = idx(aggs, _ => _.services.buckets) || [];
 

@@ -13,6 +13,7 @@ You must add a `translations` directory at the root of your plugin. This directo
 .
 ├── translations
 │   ├── en.json
+│   ├── ja-JP.json
 │   └── zh-CN.json
 └── .i18nrc.json
 -----------
@@ -40,7 +41,8 @@ To use Kibana i18n tooling, create a `.i18nrc.json` file with the following conf
   "exclude": [
   ],
   "translations": [
-    "translations/zh-CN.json"
+    "translations/zh-CN.json",
+    "translations/ja-JP.json"
   ]
 }
 -----------

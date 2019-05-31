@@ -47,7 +47,8 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
     key="idPrefix-attrName-item1"
     render={[Function]}
   />
-  , 
+  ,
+  <styled.span />
   <Connect(DraggableWrapperComponent)
     dataProvider={
       Object {
@@ -68,7 +69,8 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
     key="idPrefix-attrName-item2"
     render={[Function]}
   />
-  , 
+  ,
+  <styled.span />
   <Connect(DraggableWrapperComponent)
     dataProvider={
       Object {

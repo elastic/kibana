@@ -109,7 +109,7 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRowCell')
           .at(5)
           .text()
-      ).toBe('Hostshello-world,\u00a0hello-world-2 ');
+      ).toBe('Hostshello-world,hello-world-2 ');
     });
 
     test('it is empty when all hosts are invalid because they do not contain an id and a name', () => {
@@ -157,7 +157,7 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRowCell')
           .at(5)
           .text()
-      ).toBe('Hostshello-world,\u00a0hello-world-2 ');
+      ).toBe('Hostshello-world,hello-world-2 ');
     });
   });
 

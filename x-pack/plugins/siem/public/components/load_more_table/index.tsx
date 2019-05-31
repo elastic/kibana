@@ -171,7 +171,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         iconSide="right"
         onClick={this.onButtonClick}
       >
-        Rows: {limit}
+        {`${i18n.ROWS}: ${limit}`}
       </EuiButtonEmpty>
     );
 
@@ -282,17 +282,17 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
   }
 
   private onButtonClick = () => {
-    this.setState({
-      ...this.state,
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
+    this.setState(prevState => ({
+      ...prevState,
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
   };
 
   private closePopover = () => {
-    this.setState({
-      ...this.state,
+    this.setState(prevState => ({
+      ...prevState,
       isPopoverOpen: false,
-    });
+    }));
   };
 }
 

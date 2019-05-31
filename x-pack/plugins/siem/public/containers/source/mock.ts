@@ -301,6 +301,17 @@ export const mocksSource = [
                 searchable: true,
                 type: 'long',
               },
+              {
+                aggregatable: true,
+                category: 'event',
+                description:
+                  'event.end contains the date when the event ended or when the activity was last observed.',
+                example: null,
+                indexes: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+                name: 'event.end',
+                searchable: true,
+                type: 'date',
+              },
             ],
           },
         },
@@ -334,6 +345,7 @@ export const mockIndexFields = [
   { aggregatable: true, name: 'destination.port', searchable: true, type: 'long' },
   { aggregatable: true, name: 'source.ip', searchable: true, type: 'ip' },
   { aggregatable: true, name: 'source.port', searchable: true, type: 'long' },
+  { aggregatable: true, name: 'event.end', searchable: true, type: 'date' },
 ];
 
 export const mockBrowserFields: BrowserFields = {
@@ -590,6 +602,21 @@ export const mockBrowserFields: BrowserFields = {
         name: 'destination.port',
         searchable: true,
         type: 'long',
+      },
+    },
+  },
+  event: {
+    fields: {
+      'event.end': {
+        category: 'event',
+        description:
+          'event.end contains the date when the event ended or when the activity was last observed.',
+        example: null,
+        indexes: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        name: 'event.end',
+        searchable: true,
+        type: 'date',
+        aggregatable: true,
       },
     },
   },

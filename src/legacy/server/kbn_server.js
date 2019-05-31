@@ -60,19 +60,8 @@ export default class KbnServer {
       coreContext: {
         logger,
       },
-      setup: {
-        core: {
-          elasticsearch: setupDeps.elasticsearch,
-          http: setupDeps.http,
-        },
-        plugins: setupDeps.plugins,
-      },
-      start: {
-        core: {
-          http: startDeps.http,
-        },
-        plugins: startDeps.plugins,
-      },
+      setup: setupDeps,
+      start: startDeps,
       stop: null,
       params: {
         serverOptions,
