@@ -17,7 +17,8 @@ import {
   IconType,
 } from '@elastic/eui';
 import { State, SeriesType } from './types';
-import { VisualizationProps } from '../types';
+import { VisualizationProps, Operation } from '../types';
+import { NativeRenderer } from '../native_renderer';
 
 const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType }> = [
   {
@@ -147,15 +148,13 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           </EuiFormRow>
 
           <EuiFormRow label="Value">
-            <div
+            <NativeRenderer
               data-test-subj="lnsXY_xDimensionPanel"
-              ref={el =>
-                el &&
-                datasource.renderDimensionPanel(el, {
-                  columnId: state.x.accessor,
-                  filterOperations: () => true,
-                })
-              }
+              render={datasource.renderDimensionPanel}
+              nativeProps={{
+                columnId: state.x.accessor,
+                filterOperations: () => true,
+              }}
             />
           </EuiFormRow>
 
@@ -188,15 +187,14 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             <>
               {state.y.accessors.map(accessor => (
                 <div key={accessor}>
-                  <div
+                  <NativeRenderer
                     data-test-subj={`lnsXY_yDimensionPanel_${accessor}`}
-                    ref={el =>
-                      el &&
-                      datasource.renderDimensionPanel(el, {
-                        columnId: accessor,
-                        filterOperations: op => !op.isBucketed && op.dataType === 'number',
-                      })
-                    }
+                    render={datasource.renderDimensionPanel}
+                    nativeProps={{
+                      columnId: accessor,
+                      filterOperations: (op: Operation) =>
+                        !op.isBucketed && op.dataType === 'number',
+                    }}
                   />
                   <EuiButtonIcon
                     size="s"

@@ -195,7 +195,7 @@ describe('XYConfigPanel', () => {
       renderDimensionPanel: jest.fn(),
     };
     const state = testState();
-    mount(
+    const component = mount(
       <XYConfigPanel
         datasource={datasource}
         setState={jest.fn()}
@@ -203,13 +203,10 @@ describe('XYConfigPanel', () => {
       />
     );
 
-    const xDimensionCalls = datasource.renderDimensionPanel.mock.calls.filter(
-      ([el]) => el.getAttribute('data-test-subj') === 'lnsXY_xDimensionPanel'
-    );
-
-    expect(xDimensionCalls.length).toEqual(1);
-
-    const { columnId, filterOperations } = xDimensionCalls[0][1];
+    const panel = testSubj(component, 'lnsXY_xDimensionPanel');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const nativeProps = (panel as any).nativeProps;
+    const { columnId, filterOperations } = nativeProps;
     const ops = [
       { dataType: 'number' },
       { dataType: 'string' },
@@ -273,7 +270,7 @@ describe('XYConfigPanel', () => {
       renderDimensionPanel: jest.fn(),
     };
     const state = testState();
-    mount(
+    const component = mount(
       <XYConfigPanel
         datasource={datasource}
         setState={jest.fn()}
@@ -281,14 +278,11 @@ describe('XYConfigPanel', () => {
       />
     );
 
-    const yDimensionCalls = datasource.renderDimensionPanel.mock.calls.filter(([el]) =>
-      el.getAttribute('data-test-subj').startsWith('lnsXY_yDimensionPanel_')
-    );
+    const panel = testSubj(component, 'lnsXY_yDimensionPanel_a');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const nativeProps = (panel as any).nativeProps;
 
-    expect(yDimensionCalls.length).toEqual(3);
-    expect(yDimensionCalls.map(([, { columnId }]) => columnId)).toEqual(['a', 'b', 'c']);
-
-    const { filterOperations } = yDimensionCalls[0][1];
+    const { filterOperations } = nativeProps;
     const ops = [
       { dataType: 'number' },
       { dataType: 'string' },

@@ -24,11 +24,11 @@ export function createMockDatasource(): DatasourceMock {
   const publicAPIMock: jest.Mocked<DatasourcePublicAPI> = {
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
+    generateColumnId: jest.fn(),
     renderDimensionPanel: jest.fn(),
     removeColumnInTableSpec: jest.fn(),
     moveColumnTo: jest.fn(),
     duplicateColumn: jest.fn(),
-    generateColumnId: jest.fn(),
   };
 
   return {

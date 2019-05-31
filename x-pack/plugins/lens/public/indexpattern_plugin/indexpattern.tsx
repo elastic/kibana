@@ -223,10 +223,6 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
         getTableSpec: () => {
           return state.columnOrder.map(colId => ({ columnId: colId }));
         },
-        generateColumnId: () => {
-          // TODO: Come up with a more compact form of generating unique column ids
-          return uuid.v4();
-        },
         getOperationForColumnId: (columnId: string) => {
           const column = state.columns[columnId];
           const { dataType, label, isBucketed, operationId } = column;
@@ -236,6 +232,10 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
             dataType,
             isBucketed,
           };
+        },
+        generateColumnId: () => {
+          // TODO: Come up with a more compact form of generating unique column ids
+          return uuid.v4();
         },
 
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
