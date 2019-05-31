@@ -80,7 +80,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     type,
   }) => (
     <LoadMoreTable
-      columns={getAuthenticationColumns()}
+      columns={getAuthenticationColumnsCurated(type)}
       hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
@@ -112,7 +112,9 @@ export const AuthenticationTable = connect(
   }
 )(AuthenticationTableComponent);
 
-const getAuthenticationColumns = (): [
+const getAuthenticationColumns = (
+  pageType: hostsModel.HostsType
+): [
   Columns<AuthenticationsEdges>,
   Columns<AuthenticationsEdges>,
   Columns<AuthenticationsEdges>,
@@ -303,3 +305,24 @@ const getAuthenticationColumns = (): [
       }),
   },
 ];
+
+const getAuthenticationColumnsCurated = (pageType: hostsModel.HostsType) => {
+  const columnsCurated = getAuthenticationColumns(pageType);
+
+  if (pageType === 'details') {
+    // Array of column names to exclude from host details pages
+    const columnsExcluded = [i18n.LAST_FAILED_DESTINATION, i18n.LAST_SUCCESSFUL_DESTINATION];
+
+    // Find indices of excluded columns
+    const indicesExcluded = columnsExcluded.map(name =>
+      columnsCurated.findIndex(column => column.name === name)
+    );
+
+    // Remove excluded columns from array
+    for (let i = indicesExcluded.length - 1; i >= 0; i--) {
+      columnsCurated.splice(indicesExcluded[i], 1);
+    }
+  }
+
+  return columnsCurated;
+};
