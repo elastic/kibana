@@ -7,6 +7,6 @@ import React from 'react';
 
 export const App = () => (
   <div>
-    <h1>POC Kibana Cloud plugin!</h1>
+    <h1>POC Kibana Cloud plugin!!!</h1>
   </div>
 );
