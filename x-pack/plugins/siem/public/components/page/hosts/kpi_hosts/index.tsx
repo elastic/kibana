@@ -90,7 +90,7 @@ const fieldTitleMapping: StatItemsProps[] = [
 
 const FlexGroupSpinner = styled(EuiFlexGroup)`
    {
-    min-height: 247;
+    min-height: 247px;
   }
 `;
 

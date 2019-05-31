@@ -19,7 +19,7 @@ export const ACTIVE_AGENTS = i18n.translate('xpack.siem.kpiNetwork.source.active
 });
 
 export const UNIQUE_IPS = i18n.translate('xpack.siem.kpiNetwork.source.uniqueIpsTitle', {
-  defaultMessage: 'Unique IPs',
+  defaultMessage: 'Unique Private IPs',
 });
 
 export const UNIQUE_SOURCE_PRIVATE_IPS_ABBREVIATION = i18n.translate(

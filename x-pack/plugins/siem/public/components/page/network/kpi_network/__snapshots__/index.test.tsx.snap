@@ -4,7 +4,6 @@ exports[`KpiNetwork Component rendering it renders loading icons 1`] = `
 <Component
   data={
     Object {
-      "activeAgents": 60015,
       "dnsQueries": 278,
       "networkEvents": 16,
       "tlsHandshakes": 10000,
@@ -21,7 +20,6 @@ exports[`KpiNetwork Component rendering it renders the default widget 1`] = `
 <Component
   data={
     Object {
-      "activeAgents": 60015,
       "dnsQueries": 278,
       "networkEvents": 16,
       "tlsHandshakes": 10000,

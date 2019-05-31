@@ -13,6 +13,7 @@ import {
   getSpecId,
   Position,
   ScaleType,
+  Settings,
 } from '@elastic/charts';
 import '@elastic/charts/dist/style.css';
 import {
@@ -21,6 +22,7 @@ import {
   getSeriesStyle,
   numberFormatter,
   WrappedByAutoSizer,
+  getTheme,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -65,6 +67,7 @@ export const AreaChartBaseComponent = React.memo<{
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
+        <Settings theme={getTheme()} />
         {data.map(series => {
           const seriesKey = series.key;
           const seriesSpecId = getSpecId(seriesKey);

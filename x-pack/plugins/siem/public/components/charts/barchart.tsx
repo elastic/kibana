@@ -6,17 +6,7 @@
 
 import React from 'react';
 
-import {
-  Chart,
-  BarSeries,
-  Axis,
-  Position,
-  getSpecId,
-  ScaleType,
-  Settings,
-  mergeWithDefaultTheme,
-  PartialTheme,
-} from '@elastic/charts';
+import { Chart, BarSeries, Axis, Position, getSpecId, ScaleType, Settings } from '@elastic/charts';
 import { getAxisId } from '@elastic/charts';
 import {
   BarChartData,
@@ -25,17 +15,9 @@ import {
   numberFormatter,
   SeriesType,
   getSeriesStyle,
+  getTheme,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
-
-const getTheme = () => {
-  const theme: PartialTheme = {
-    scales: {
-      barsPadding: 0.5,
-    },
-  };
-  return mergeWithDefaultTheme(theme);
-};
 
 export const BarChartBaseComponent = React.memo<{
   data: BarChartData[];

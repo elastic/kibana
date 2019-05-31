@@ -6,7 +6,13 @@
 import { EuiFlexGroup, EuiText, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { CustomSeriesColorsMap, DataSeriesColorsValues, getSpecId } from '@elastic/charts';
+import {
+  CustomSeriesColorsMap,
+  DataSeriesColorsValues,
+  getSpecId,
+  mergeWithDefaultTheme,
+  PartialTheme,
+} from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 
 const FlexGroup = styled(EuiFlexGroup)`
@@ -45,7 +51,7 @@ export interface BarChartData {
 }
 
 export const WrappedByAutoSizer = styled.div`
-  height: 100px;
+  height: 74px;
   position: relative;
 
   &:hover {
@@ -78,4 +84,25 @@ export const getSeriesStyle = (
   customSeriesColors.set(dataSeriesColorValues, color);
 
   return customSeriesColors;
+};
+
+export const getTheme = () => {
+  const theme: PartialTheme = {
+    chartMargins: {
+      left: 0,
+      right: 0,
+      top: 4,
+      bottom: 0,
+    },
+    chartPaddings: {
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+    },
+    scales: {
+      barsPadding: 0.5,
+    },
+  };
+  return mergeWithDefaultTheme(theme);
 };
