@@ -17,33 +17,33 @@
  * under the License.
  */
 
-import { Legacy } from 'kibana';
-import { resolve } from 'path';
+// import { Legacy } from 'kibana';
+// import { resolve } from 'path';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['kibana'],
+    //   require: ['kibana'],
     uiExports: {
       // app: {
       //   title: 'Embeddable Explorer',
       //   order: 1,
       //   main: 'plugins/kbn_tp_embeddable_explorer',
       // },
-      embeddableActions: [
-        'plugins/embeddable_api/__test__/actions/hello_world_action',
-        'plugins/embeddable_api/__test__/actions/say_hello_action',
-        'plugins/embeddable_api/__test__/actions/send_message_action',
-      ],
-      embeddableFactories: [
-        'plugins/embeddable_api/__test__/embeddables/hello_world/hello_world_embeddable_factory',
-      ],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      // embeddableActions: [
+      //   'plugins/embeddable_api/__test__/actions/hello_world_action',
+      //   'plugins/embeddable_api/__test__/actions/say_hello_action',
+      //   'plugins/embeddable_api/__test__/actions/send_message_action',
+      // ],
+      // embeddableFactories: [
+      //   'plugins/embeddable_api/__test__/embeddables/hello_world/hello_world_embeddable_factory',
+      // ],
+      // styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
-    init(server: Legacy.Server) {
-      server.injectUiAppVars('kbn_tp_embeddable_explorer', async () =>
-        server.getInjectedUiAppVars('kibana')
-      );
-    },
+    // init(server: Legacy.Server) {
+    //   server.injectUiAppVars('kbn_tp_embeddable_explorer', async () =>
+    //     server.getInjectedUiAppVars('kibana')
+    //   );
+    // },
   });
 }
