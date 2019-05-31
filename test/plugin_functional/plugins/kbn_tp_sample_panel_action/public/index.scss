@@ -1,8 +1,1 @@
-#dashboardViewport {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  [data-reactroot] {
-    flex: 1;
-  }
-}
+@import './app/index';
