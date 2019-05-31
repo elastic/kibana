@@ -2,6 +2,7 @@
 
 exports[`DataProviders rendering renders correctly against snapshot 1`] = `
 <Component
+  browserFields={Object {}}
   dataProviders={
     Array [
       Object {
@@ -13,6 +14,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
         "name": "Provider 1",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 1",
         },
       },
@@ -25,6 +27,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
         "name": "Provider 2",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 2",
         },
       },
@@ -37,6 +40,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
         "name": "Provider 3",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 3",
         },
       },
@@ -49,6 +53,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
         "name": "Provider 4",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 4",
         },
       },
@@ -61,6 +66,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
         "name": "Provider 5",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 5",
         },
       },
@@ -73,6 +79,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
         "name": "Provider 6",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 6",
         },
       },
@@ -85,6 +92,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
         "name": "Provider 7",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 7",
         },
       },
@@ -97,6 +105,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
         "name": "Provider 8",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 8",
         },
       },
@@ -109,6 +118,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
         "name": "Provider 9",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 9",
         },
       },
@@ -121,6 +131,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
         "name": "Provider 10",
         "queryMatch": Object {
           "field": "name",
+          "operator": ":",
           "value": "Provider 10",
         },
       },
@@ -129,6 +140,7 @@ exports[`DataProviders rendering renders correctly against snapshot 1`] = `
   id="foo"
   onChangeDataProviderKqlQuery={[MockFunction]}
   onChangeDroppableAndProvider={[MockFunction]}
+  onDataProviderEdited={[MockFunction]}
   onDataProviderRemoved={[MockFunction]}
   onToggleDataProviderEnabled={[MockFunction]}
   onToggleDataProviderExcluded={[MockFunction]}

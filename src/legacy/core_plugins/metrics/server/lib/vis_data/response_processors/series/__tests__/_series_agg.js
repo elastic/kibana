@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import seriesAgg from '../_series_agg';
+import { SeriesAgg as seriesAgg } from '../_series_agg';
 
 describe('seriesAgg', () => {
   const series = [

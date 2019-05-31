@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { BaseAuthenticationProvider, AuthenticationProviderOptions } from './base';
+export {
+  BaseAuthenticationProvider,
+  AuthenticationProviderOptions,
+  RequestWithLoginAttempt,
+} from './base';
 export { BasicAuthenticationProvider, BasicCredentials } from './basic';
+export { KerberosAuthenticationProvider } from './kerberos';
 export { SAMLAuthenticationProvider } from './saml';
 export { TokenAuthenticationProvider } from './token';
+export { OIDCAuthenticationProvider } from './oidc';

@@ -36,6 +36,6 @@ export async function getTraceItems(traceId: string, setup: Setup) {
     }
   };
 
-  const resp = await client<Transaction | Span>('search', params);
+  const resp = await client.search<Transaction | Span>(params);
   return resp.hits.hits.map(hit => hit._source);
 }

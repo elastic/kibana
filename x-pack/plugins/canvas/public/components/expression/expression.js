@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { Shortcuts } from 'react-shortcuts';
 import { ExpressionInput } from '../expression_input';
+import { ToolTipShortcut } from '../tool_tip_shortcut';
 
 const { useRef } = React;
 
@@ -131,14 +132,22 @@ export const Expression = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                disabled={!!error}
-                onClick={() => setExpression(formState.expression)}
-                size="s"
+              <EuiToolTip
+                content={
+                  <span>
+                    Run the expression <ToolTipShortcut namespace="EXPRESSION" action="RUN" />
+                  </span>
+                }
               >
-                Run
-              </EuiButton>
+                <EuiButton
+                  fill
+                  disabled={!!error}
+                  onClick={() => setExpression(formState.expression)}
+                  size="s"
+                >
+                  Run
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

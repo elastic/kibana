@@ -27,6 +27,7 @@ import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { PreferenceFormattedDate } from '../../../formatted_date';
 import { Columns } from '../../../load_more_table';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
 
@@ -69,7 +70,7 @@ export const getDomainsColumns = (
               name: domainName,
               excluded: false,
               kqlQuery: '',
-              queryMatch: { field: domainNameAttr, value: domainName },
+              queryMatch: { field: domainNameAttr, value: domainName, operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -102,7 +103,7 @@ export const getDomainsColumns = (
               key={escapeDataProviderId(
                 `${tableId}-table-${flowTarget}-${flowDirection}-direction-${direction}`
               )}
-              expression={`network.direction: ${escapeQueryValue(direction)}`}
+              expression={`network.direction: "${escapeQueryValue(direction)}"`}
               type={type}
               componentFilterType={'network'}
             >

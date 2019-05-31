@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import getIntervalAndTimefield from '../get_interval_and_timefield';
+import { getIntervalAndTimefield } from '../get_interval_and_timefield';
 
 describe('getIntervalAndTimefield(panel, series)', () => {
 

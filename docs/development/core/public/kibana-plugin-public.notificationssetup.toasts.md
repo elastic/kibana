@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-toasts: ToastsApi;
+toasts: ToastsSetup;
 ```

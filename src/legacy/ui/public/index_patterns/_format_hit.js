@@ -73,7 +73,7 @@ export function formatHit(indexPattern, defaultFormat) {
     }
 
     const val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
-    return partials[fieldName] = convert(hit, val, fieldName);
+    return convert(hit, val, fieldName);
   };
 
   return formatHit;

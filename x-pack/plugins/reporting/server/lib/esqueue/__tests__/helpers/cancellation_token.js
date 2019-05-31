@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { CancellationToken } from '../../helpers/cancellation_token';
+import { CancellationToken } from '../../../../../common/cancellation_token';
 
 describe('CancellationToken', function () {
   let cancellationToken;
@@ -17,12 +17,14 @@ describe('CancellationToken', function () {
   describe('on', function () {
     [true, null, undefined, 1, 'string', {}, []].forEach(function (value) {
       it(`should throw an Error if value is ${value}`, function () {
-        expect(cancellationToken.on).withArgs(value).to.throwError();
+        const boundOn = cancellationToken.on.bind(cancellationToken);
+        expect(boundOn).withArgs(value).to.throwError();
       });
     });
 
     it('accepts a function', function () {
-      expect(cancellationToken.on).withArgs(function () {}).to.not.throwError();
+      const boundOn = cancellationToken.on.bind(cancellationToken);
+      expect(boundOn).withArgs(function () {}).not.to.throwError();
     });
 
     it(`calls function if cancel has previously been called`, function () {
@@ -35,7 +37,8 @@ describe('CancellationToken', function () {
 
   describe('cancel', function () {
     it('should be a function accepting no parameters', function () {
-      expect(cancellationToken.cancel).withArgs().to.not.throwError();
+      const boundCancel = cancellationToken.cancel.bind(cancellationToken);
+      expect(boundCancel).withArgs().to.not.throwError();
     });
 
     it('should call a single callback', function () {

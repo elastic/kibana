@@ -11,6 +11,7 @@ export const createLogOverviewPageRoute = () => ({
   path: '/api/uptime/logOverview',
   handler: async (request: any, h: any): Promise<void> => {
     await KibanaTelemetryAdapter.countOverview();
+    console.log('ding ding ding');
     return h.response().code(200);
   },
   options: {

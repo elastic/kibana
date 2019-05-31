@@ -69,6 +69,7 @@ const defaultProps = {
   services: [],
   newIndexPatternUrl: '',
   getConflictResolutions: jest.fn(),
+  confirmModalPromise: jest.fn(),
   indexPatterns: {
     getFields: jest.fn().mockImplementation(() => [{ id: '1' }, { id: '2' }]),
   },
@@ -433,6 +434,7 @@ describe('Flyout', () => {
         conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
         conflictedSearchDocs: mockConflictedSearchDocs,
         importedObjectCount: 2,
+        confirmModalPromise: () => {},
       }));
     });
 
@@ -453,7 +455,8 @@ describe('Flyout', () => {
         mockData.slice(0, 2).map((doc) => ({ ...doc, _migrationVersion: {} })),
         true,
         defaultProps.services,
-        defaultProps.indexPatterns
+        defaultProps.indexPatterns,
+        defaultProps.confirmModalPromise,
       );
 
       expect(component.state()).toMatchObject({

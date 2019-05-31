@@ -9,14 +9,14 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiButton,
+  EuiButtonIcon,
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
 import { SetView } from './set_view';
 import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoordinates }) {
   const toggleSetViewVisibility = () => {
@@ -31,18 +31,20 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
     <EuiPopover
       anchorPosition="upRight"
       button={(
-        <EuiButton
+        <EuiButtonIcon
           className="mapViewControl__gotoButton"
-          fill
-          size="s"
           onClick={toggleSetViewVisibility}
           data-test-subj="toggleSetViewVisibilityButton"
-        >
-          <FormattedMessage
-            id="xpack.maps.viewControl.goToButtonLabel"
-            defaultMessage="Go to"
-          />
-        </EuiButton>)}
+          iconType="crosshairs"
+          color="text"
+          aria-label={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
+            defaultMessage: 'Go to'
+          })}
+          title={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
+            defaultMessage: 'Go to'
+          })}
+        />
+      )}
       isOpen={isSetViewOpen}
       closePopover={closeSetView}
     >
@@ -58,9 +60,9 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
       ? _.round(mouseCoordinates.lon, DECIMAL_DEGREES_PRECISION)
       : '';
     return (
-      <EuiPanel className="mapWidgetControl mapViewControl__coordinates" paddingSize="none">
+      <div className="mapViewControl__coordinates">
         <EuiText size="xs">
-          <p>
+          <small>
             <strong>
               <FormattedMessage
                 id="xpack.maps.viewControl.latLabel"
@@ -73,19 +75,20 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
                 defaultMessage="lon:"
               />
             </strong> {lon}
-          </p>
+          </small>
         </EuiText>
-      </EuiPanel>
+      </div>
     );
   }
 
   return (
     <EuiFlexGroup
-      justifyContent="spaceBetween"
+      justifyContent="flexEnd"
+      alignItems="flexEnd"
       gutterSize="s"
       responsive={false}
     >
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         {mouseCoordinates && renderMouseCoordinates()}
       </EuiFlexItem>
 

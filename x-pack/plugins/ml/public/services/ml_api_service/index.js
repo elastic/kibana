@@ -262,6 +262,13 @@ export const ml = {
     });
   },
 
+  dataRecognizerModuleJobsExist(obj) {
+    return http({
+      url: `${basePath}/modules/jobs_exist/${obj.moduleId}`,
+      method: 'GET'
+    });
+  },
+
   setupDataRecognizerConfig(obj) {
     const data = pick(obj, [
       'prefix',

@@ -63,6 +63,8 @@ const Application = (props: UptimeAppProps) => {
     basePath,
     client,
     darkMode,
+    logMonitorPageLoad,
+    logOverviewPageLoad,
     renderGlobalHelpControls,
     routerBasename,
     setBreadcrumbs,
@@ -158,15 +160,17 @@ const Application = (props: UptimeAppProps) => {
                             render={routerProps => (
                               <OverviewPage
                                 basePath={basePath}
+                                logOverviewPageLoad={logOverviewPageLoad}
                                 setBreadcrumbs={setBreadcrumbs}
                                 {...routerProps}
                               />
                             )}
                           />
                           <Route
-                            path="/monitor/:id"
+                            path="/monitor/:id/:location?"
                             render={routerProps => (
                               <MonitorPage
+                                logMonitorPageLoad={logMonitorPageLoad}
                                 query={client.query}
                                 setBreadcrumbs={setBreadcrumbs}
                                 {...routerProps}

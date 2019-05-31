@@ -21,11 +21,11 @@ import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { fieldFormats } from 'ui/registry/field_formats';
-import tickFormatter from '../../lib/tick_formatter';
-import calculateLabel from '../../../../common/calculate_label';
+import { tickFormatter } from '../../lib/tick_formatter';
+import { calculateLabel } from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
-import replaceVars from '../../lib/replace_vars';
+import { replaceVars } from '../../lib/replace_vars';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { METRIC_TYPES } from '../../../../common/metric_types';
@@ -46,7 +46,7 @@ function getColor(rules, colorKey, value) {
   return color;
 }
 
-class TableVis extends Component {
+export class TableVis extends Component {
 
   constructor(props) {
     super(props);
@@ -251,5 +251,3 @@ TableVis.propTypes = {
   pageNumber: PropTypes.number,
   getConfig: PropTypes.func,
 };
-
-export default TableVis;

@@ -20,11 +20,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import getLastValue from '../../../common/get_last_value';
+import { getLastValue } from '../../../common/get_last_value';
 import reactcss from 'reactcss';
-import calculateCoordinates from '../lib/calculate_coordinates';
+import { calculateCoordinates } from '../lib/calculate_coordinates';
 
-class Metric extends Component {
+export class Metric extends Component {
 
   constructor(props) {
     super(props);
@@ -167,5 +167,3 @@ Metric.propTypes = {
   reversed: PropTypes.bool,
   additionalLabel: PropTypes.string
 };
-
-export default Metric;

@@ -8,12 +8,12 @@ import numeral from '@elastic/numeral';
 import React from 'react';
 
 import { NetworkDnsFields, NetworkDnsItem } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { Columns } from '../../../load_more_table';
+import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
@@ -46,7 +46,11 @@ export const getNetworkDnsColumns = (
               name: dnsName,
               excluded: false,
               kqlQuery: '',
-              queryMatch: { field: 'dns.question.etld_plus_one', value: escapeQueryValue(dnsName) },
+              queryMatch: {
+                field: 'dns.question.etld_plus_one',
+                value: dnsName,
+                operator: IS_OPERATOR,
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (

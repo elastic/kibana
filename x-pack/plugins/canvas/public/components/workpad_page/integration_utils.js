@@ -12,7 +12,7 @@ import { matrixToAngle, multiply, rotateZ, translate } from '../../lib/aeroelast
 import { arrayToMap, flatten, identity } from '../../lib/aeroelastic/functional';
 import { getLocalTransformMatrix } from '../../lib/aeroelastic/layout_functions';
 
-const isGroupId = id => id.startsWith('group');
+export const isGroupId = id => id.startsWith('group');
 
 const headerData = id =>
   isGroupId(id)
@@ -141,9 +141,8 @@ const updateGlobalPositionsInRedux = (setMultiplePositions, scene, unsortedEleme
   }
 };
 
-export const globalStateUpdater = (dispatch, getState) => state => {
+export const globalStateUpdater = (dispatch, globalState) => state => {
   const nextScene = state.currentScene;
-  const globalState = getState();
   const page = getSelectedPage(globalState);
   const elements = getNodes(globalState, page);
   const shapes = nextScene.shapes;
@@ -191,12 +190,12 @@ export const globalStateUpdater = (dispatch, getState) => state => {
 
   // set the selected element on the global store, if one element is selected
   const selectedPrimaryShapes = nextScene.selectedPrimaryShapes;
-  if (!shallowEqual(selectedPrimaryShapes, getState().transient.selectedToplevelNodes)) {
+  if (!shallowEqual(selectedPrimaryShapes, globalState.transient.selectedToplevelNodes)) {
     dispatch(
       selectToplevelNodes(
         flatten(
           selectedPrimaryShapes.map(n =>
-            n.startsWith('group') && shapes.find(s => s.id === n).subtype === 'adHocGroup'
+            n.startsWith('group') && (shapes.find(s => s.id === n) || {}).subtype === 'adHocGroup'
               ? shapes.filter(s => s.type !== 'annotation' && s.parent === n).map(s => s.id)
               : [n]
           )
