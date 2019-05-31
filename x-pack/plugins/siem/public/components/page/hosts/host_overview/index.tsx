@@ -49,7 +49,9 @@ export const HostOverview = pure<HostSummaryProps>(({ data, loading }) => {
     [
       {
         title: i18n.HOST_ID,
-        description: data.host ? hostIdRenderer(data.host) : getEmptyTagValue(),
+        description: data.host
+          ? hostIdRenderer({ host: data.host, noLink: true })
+          : getEmptyTagValue(),
       },
       {
         title: i18n.FIRST_SEEN,
