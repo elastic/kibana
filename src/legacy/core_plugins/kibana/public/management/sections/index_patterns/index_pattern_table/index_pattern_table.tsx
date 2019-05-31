@@ -39,15 +39,14 @@ const columns = [
   {
     field: 'title',
     name: 'Pattern',
-    render: (name: string, props: { id: string; default: boolean }) => (
-      <EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${props.id}`}>
+    render: (name: string, index: { id: string; default: boolean }) => (
+      <EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${index.id}`}>
         {name}
-        {props.default && <EuiBadge className="indexPatternList__badge">Default</EuiBadge>}
+        {index.default && <EuiBadge className="indexPatternList__badge">Default</EuiBadge>}
       </EuiButtonEmpty>
     ),
     dataType: 'string',
-    sortable: (props: { default: boolean; title: string }) =>
-      `${props.default ? '0' : '1'}${props.title}`,
+    sortable: ({ sort }: { sort: string }) => sort,
   },
 ];
 

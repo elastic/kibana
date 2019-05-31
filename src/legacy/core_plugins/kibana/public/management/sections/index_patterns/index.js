@@ -127,34 +127,34 @@ uiModules.get('apps/management')
             $route.current.locals.indexPatterns
               .map(pattern => {
                 const id = pattern.id;
+                const title = pattern.get('title');
+                const isDefault = $scope.defaultIndex === id;
                 const tags = indexPatternListProvider.getIndexPatternTags(
                   pattern,
-                  $scope.defaultIndex === id
+                  isDefault
                 );
 
                 return {
-                  id: id,
-                  title: pattern.get('title'),
+                  id,
+                  title,
                   url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
                   active: $scope.editingId === id,
-                  default: $scope.defaultIndex === id,
+                  default: isDefault,
                   tag: tags && tags.length ? tags[0] : null,
+                  //the prepending of 0 at the default pattern takes care of prioritization
+                  //so the sorting will but the default index on top
+                  //or on bottom of a the table
+                  sort: `${isDefault ? '0' : '1'}${title}`,
                 };
               })
               .sort((a, b) => {
-                if (a.default) {
+                if (a.sort < b.sort) {
                   return -1;
-                }
-                if (b.default) {
+                } else if (a.sort > b.sort) {
                   return 1;
+                } else {
+                  return 0;
                 }
-                if (a.title < b.title) {
-                  return -1;
-                }
-                if (a.title > b.title) {
-                  return 1;
-                }
-                return 0;
               }) || [];
 
           updateIndexPatternList($scope.indexPatternList, kbnUrl, indexPatternCreationOptions);
