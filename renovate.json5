@@ -24,8 +24,15 @@
     'release_note:skip',
     ':Operations',
     'chore',
-    'review'
+    'review',
+    'renovate',
   ],
+
+  major: {
+    labels: [
+      'renovate:major',
+    ]
+  },
 
   /**
    * Enable creation of a "Master Issue" within the repository. This
