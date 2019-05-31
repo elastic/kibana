@@ -5,7 +5,7 @@
  */
 
 import { CancellationToken } from '../../../../common/cancellation_token';
-import { SavedSearchObjectAttributes, SearchPanel, SearchRequest, SearchSource } from '../../';
+import { SearchRequest } from '../../';
 
 export interface SavedSearchGeneratorResult {
   content: string;
