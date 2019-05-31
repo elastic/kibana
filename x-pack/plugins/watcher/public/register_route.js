@@ -8,21 +8,20 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import routes from 'ui/routes';
 import { management } from 'ui/management';
+import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import template from './app.html';
 import { App } from './app';
-import 'plugins/watcher/services/license';
 import { setHttpClient, setSavedObjectsClient } from './lib/api';
 import { I18nContext } from 'ui/i18n';
 import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
-import { LicenseServiceContext } from './license_service_context';
+import { PLUGIN } from '../common/constants';
+import { LICENSE_STATUS_UNAVAILABLE, LICENSE_STATUS_INVALID } from '../../../common/constants';
 
 let elem;
-const renderReact = async (elem, licenseService) => {
+const renderReact = async (elem, licenseStatus) => {
   render(
     <I18nContext>
-      <LicenseServiceContext.Provider value={licenseService}>
-        <App />
-      </LicenseServiceContext.Provider>
+      <App licenseStatus={licenseStatus}/>
     </I18nContext>,
     elem
   );
@@ -32,7 +31,9 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
   controller: class WatcherController {
     constructor($injector, $scope, $http, Private) {
       const $route = $injector.get('$route');
-      const licenseService = $injector.get('xpackWatcherLicenseService');
+      const xpackInfoService = Private(XPackInfoProvider);
+      const licenseStatus = xpackInfoService.get(`features.${PLUGIN.ID}`);
+
       // clean up previously rendered React app if one exists
       // this happens because of React Router redirects
       elem && unmountComponentAtNode(elem);
@@ -42,7 +43,7 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
       setHttpClient($http);
       $scope.$$postDigest(() => {
         elem = document.getElementById('watchReactRoot');
-        renderReact(elem, licenseService);
+        renderReact(elem, licenseStatus);
         manageAngularLifecycle($scope, $route, elem);
       });
     }
@@ -53,22 +54,18 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
 routes.defaults(/\/management/, {
   resolve: {
     watcherManagementSection: $injector => {
-      const licenseService = $injector.get('xpackWatcherLicenseService');
+      const Private = $injector.get('Private');
+      const xpackInfoService = Private(XPackInfoProvider);
       const watchesSection = management.getSection('elasticsearch/watcher');
+      const licenseStatus = xpackInfoService.get(`features.${PLUGIN.ID}`);
+      const { status } = licenseStatus;
 
-      if (licenseService.showLinks) {
-        watchesSection.show();
-      } else {
-        watchesSection.hide();
+      if (status === LICENSE_STATUS_INVALID || status === LICENSE_STATUS_UNAVAILABLE) {
+        return watchesSection.hide();
       }
 
-      if (licenseService.enableLinks) {
-        watchesSection.enable();
-        watchesSection.tooltip = '';
-      } else {
-        watchesSection.disable();
-        watchesSection.tooltip = licenseService.message;
-      }
+      watchesSection.show();
+
     },
   },
 });

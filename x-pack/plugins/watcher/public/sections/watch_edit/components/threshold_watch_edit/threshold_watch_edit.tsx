@@ -38,7 +38,6 @@ import { onWatchSave, saveWatch } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { WatchVisualization } from './watch_visualization';
 import { WatchActionsPanel } from './threshold_watch_action_panel';
-import { LicenseServiceContext } from '../../../../license_service_context';
 
 const firstFieldOption = {
   text: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel', {
@@ -144,7 +143,6 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
   const [modal, setModal] = useState<{ title: string; message: string } | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { watch, setWatchProperty } = useContext(WatchContext);
-  const licenseService = useContext(LicenseServiceContext);
 
   const getIndexPatterns = async () => {
     const indexPatternObjects = await loadIndexPatterns();
@@ -216,7 +214,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
         modalOptions={modal}
         callback={async isConfirmed => {
           if (isConfirmed) {
-            saveWatch(watch, licenseService);
+            saveWatch(watch);
           }
           setModal(null);
         }}
@@ -836,7 +834,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
               isLoading={isSaving}
               onClick={async () => {
                 setIsSaving(true);
-                const savedWatch = await onWatchSave(watch, licenseService);
+                const savedWatch = await onWatchSave(watch);
                 if (savedWatch && savedWatch.validationError) {
                   setIsSaving(false);
                   return setModal(savedWatch.validationError);

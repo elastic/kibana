@@ -7,7 +7,6 @@
 
 import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
-import 'plugins/watcher/services/license';
 
 management.getSection('elasticsearch').register('watcher', {
   display: i18n.translate('xpack.watcher.sections.watchList.managementSection.watcherDisplayName', {
