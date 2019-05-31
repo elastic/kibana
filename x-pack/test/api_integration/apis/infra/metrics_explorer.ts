@@ -66,6 +66,33 @@ const metricsExplorerTest: KbnTestProvider = ({ getService }) => {
       });
     });
 
+    it('should work for empty metrics', async () => {
+      const postBody = {
+        timerange: {
+          field: '@timestamp',
+          to: max,
+          from: min,
+          interval: '>=1m',
+        },
+        indexPattern: 'metricbeat-*',
+        metrics: [],
+      };
+      const response = await supertest
+        .post('/api/infra/metrics_explorer')
+        .set('kbn-xsrf', 'xxx')
+        .send(postBody)
+        .expect(200);
+      const body: MetricsExplorerResponse = response.body;
+      expect(body).to.have.property('series');
+      expect(body.series).length(1);
+      const firstSeries = first(body.series);
+      expect(firstSeries).to.have.property('id', 'ALL');
+      expect(firstSeries).to.have.property('columns');
+      expect(firstSeries).to.have.property('rows');
+      expect(firstSeries!.columns).to.eql([]);
+      expect(firstSeries!.rows).to.have.length(0);
+    });
+
     it('should work with groupBy', async () => {
       const postBody = {
         timerange: {
