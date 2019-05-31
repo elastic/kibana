@@ -121,7 +121,7 @@ describe('SourceDestination', () => {
         .find('[data-test-subj="destination-bytes"]')
         .first()
         .text()
-    ).toEqual('40.000 B');
+    ).toEqual('40B');
   });
 
   test('it renders destination.geo.continent_name', () => {
@@ -223,7 +223,7 @@ describe('SourceDestination', () => {
         .find('[data-test-subj="network-bytes"]')
         .first()
         .text()
-    ).toEqual('100.000 B');
+    ).toEqual('100B');
   });
 
   test('it renders network.community_id', () => {
@@ -289,7 +289,7 @@ describe('SourceDestination', () => {
         .find('[data-test-subj="source-bytes"]')
         .first()
         .text()
-    ).toEqual('60.000 B');
+    ).toEqual('60B');
   });
 
   test('it renders source.geo.continent_name', () => {
