@@ -11,9 +11,11 @@ import mila from 'markdown-it-link-attributes';
 import { ELASTIC_WEBSITE_URL } from '../../../public/lib/documentation_links';
 import { escapeRegExp } from '../../../common/lib/escape_reg_exp';
 
-const ELASTIC_LINK = new RegExp(escapeRegExp(ELASTIC_WEBSITE_URL));
+const ELASTIC_LINK = new RegExp(
+  `^${escapeRegExp(ELASTIC_WEBSITE_URL).replace('https', 'https?')}?`
+);
 const NON_ELASTIC_EXTERNAL_LINK = new RegExp(
-  `(?!${escapeRegExp(ELASTIC_WEBSITE_URL)})((http|https):\\/\\/[\\w\\.\\/\\-=?#]+)`
+  `(?!^${escapeRegExp(ELASTIC_WEBSITE_URL)})((http|https):\\/\\/[\\w\\.\\/\\-=?#]+)`
 );
 
 const md = new Markdown();
