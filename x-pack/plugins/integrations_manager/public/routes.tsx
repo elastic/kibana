@@ -6,11 +6,18 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { APP } from '../common/constants';
 import { Detail } from './screens/Detail';
 import { Home } from './screens/Home';
+import { ID } from '../common/constants';
+
+export const APP_ROOT = `/app/${ID}`;
+
+// the `*_VIEW` routes are relative to `APP_ROOT`
+export const LIST_VIEW = '/';
+
+export const DETAIL_VIEW = '/detail/:pkgkey';
 
 export const routes = [
-  <Route exact={true} path={APP.LIST_VIEW} component={Home} breadcrumb="Home" key="home" />,
-  <Route exact={true} path={APP.DETAIL_VIEW} component={Detail} breadcrumb="Detail" key="detail" />,
+  <Route exact={true} path={LIST_VIEW} component={Home} breadcrumb="Home" key="home" />,
+  <Route exact={true} path={DETAIL_VIEW} component={Detail} breadcrumb="Detail" key="detail" />,
 ];

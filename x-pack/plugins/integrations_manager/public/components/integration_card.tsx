@@ -6,7 +6,7 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiCard } from '@elastic/eui';
 import { generatePath, Link } from 'react-router-dom';
-import { APP } from '../../common/constants';
+import { DETAIL_VIEW } from '../routes';
 import { IntegrationInfo } from '../../common/types';
 
 export function IntegrationCard({ description, name, version, icon }: IntegrationInfo) {
@@ -16,9 +16,7 @@ export function IntegrationCard({ description, name, version, icon }: Integratio
       description={description}
       footer={
         <EuiButtonEmpty>
-          <Link to={generatePath(APP.DETAIL_VIEW, { pkgkey: `${name}-${version}` })}>
-            More Details
-          </Link>
+          <Link to={generatePath(DETAIL_VIEW, { pkgkey: `${name}-${version}` })}>More Details</Link>
         </EuiButtonEmpty>
       }
     />

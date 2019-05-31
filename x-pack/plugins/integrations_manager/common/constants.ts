@@ -14,11 +14,3 @@ export const API = {
   FETCH_INFO: `${API_ROOT}/package/{pkgkey}`,
   FETCH_FILE: `${API_ROOT}/package/{pkgkey}/get`,
 };
-
-export const APP = {
-  ROOT: `/app/${ID}`,
-  // TODO: why must these be relative (something something React Router)
-  // does it matter that they're different from `API` path style?
-  LIST_VIEW: '/',
-  DETAIL_VIEW: '/detail/:pkgkey',
-};
