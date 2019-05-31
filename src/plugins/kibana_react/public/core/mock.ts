@@ -18,10 +18,29 @@
  */
 
 import { Core } from './types';
-import { uiSettingsServiceMock } from '../../../../core/public/mocks';
+
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<any> = {
+    getAll: jest.fn(),
+    get: jest.fn(),
+    get$: jest.fn(),
+    set: jest.fn(),
+    remove: jest.fn(),
+    isDeclared: jest.fn(),
+    isDefault: jest.fn(),
+    isCustom: jest.fn(),
+    isOverridden: jest.fn(),
+    overrideLocalDefault: jest.fn(),
+    getUpdate$: jest.fn(),
+    getSaved$: jest.fn(),
+    getUpdateErrors$: jest.fn(),
+    stop: jest.fn(),
+  };
+  return setupContract as any;
+};
 
 export const createMock = (): Core => {
-  const uiSettings = uiSettingsServiceMock.createSetupContract();
+  const uiSettings = createSetupContractMock();
 
   const core: Partial<Core> = {
     uiSettings,
