@@ -46,7 +46,7 @@ describe('kfetch', () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: '/my/path', headers: { 'Content-Type': 'CustomContentType' } });
     expect(fetchMock.lastOptions()!.headers).toMatchObject({
-      'Content-Type': 'CustomContentType',
+      'content-type': 'CustomContentType',
     });
   });
 
@@ -64,9 +64,9 @@ describe('kfetch', () => {
     });
 
     expect(fetchMock.lastOptions()!.headers).toEqual({
-      'Content-Type': 'application/json',
+      'content-type': 'application/json',
       'kbn-version': 'kibanaVersion',
-      myHeader: 'foo',
+      myheader: 'foo',
     });
   });
 
@@ -92,11 +92,11 @@ describe('kfetch', () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: '/my/path' });
 
+    expect(fetchMock.lastCall()!.request.credentials).toBe('same-origin');
     expect(fetchMock.lastOptions()!).toMatchObject({
       method: 'GET',
-      credentials: 'same-origin',
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         'kbn-version': 'kibanaVersion',
       },
     });
@@ -359,7 +359,7 @@ describe('kfetch', () => {
       addInterceptor({
         request: config => ({
           ...config,
-          addedByRequestInterceptor: true,
+          pathname: '/my/intercepted-route',
         }),
         response: res => ({
           ...res,
@@ -371,8 +371,8 @@ describe('kfetch', () => {
     });
 
     it('should modify request', () => {
+      expect(fetchMock.lastUrl()).toContain('/my/intercepted-route');
       expect(fetchMock.lastOptions()!).toMatchObject({
-        addedByRequestInterceptor: true,
         method: 'GET',
       });
     });
@@ -393,7 +393,7 @@ describe('kfetch', () => {
         request: config =>
           Promise.resolve({
             ...config,
-            addedByRequestInterceptor: true,
+            pathname: '/my/intercepted-route',
           }),
         response: res =>
           Promise.resolve({
@@ -406,8 +406,8 @@ describe('kfetch', () => {
     });
 
     it('should modify request', () => {
+      expect(fetchMock.lastUrl()).toContain('/my/intercepted-route');
       expect(fetchMock.lastOptions()!).toMatchObject({
-        addedByRequestInterceptor: true,
         method: 'GET',
       });
     });
