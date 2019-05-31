@@ -6,7 +6,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { pure } from 'recompose';
@@ -34,7 +34,7 @@ export const locationRenderer = (fieldNames: string[], data: IpOverviewData): Re
       {fieldNames.map((fieldName, index) => {
         const locationValue = getOr('', fieldName, data);
         return (
-          <React.Fragment key={`${IpOverviewId}-${fieldName}`}>
+          <Fragment key={`${IpOverviewId}-${fieldName}`}>
             {index ? ',\u00A0' : ''}
             <EuiFlexItem grow={false}>
               <DefaultDraggable
@@ -43,7 +43,7 @@ export const locationRenderer = (fieldNames: string[], data: IpOverviewData): Re
                 value={locationValue}
               />
             </EuiFlexItem>
-          </React.Fragment>
+          </Fragment>
         );
       })}
     </EuiFlexGroup>
@@ -108,15 +108,11 @@ export const hostIdRenderer = (data: HostIdRendererTypes): React.ReactElement =>
 
 export const hostNameRenderer = (host: HostEcsFields, ipFilter?: string): React.ReactElement =>
   host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <DefaultDraggable id={`${IpOverviewId}-host-name`} field={'host.name'} value={host.name[0]}>
-          <HostDetailsLink hostName={host.name[0]}>
-            {host.name ? host.name : getEmptyTagValue()}
-          </HostDetailsLink>
-        </DefaultDraggable>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <DefaultDraggable id={`${IpOverviewId}-host-name`} field={'host.name'} value={host.name[0]}>
+      <HostDetailsLink hostName={host.name[0]}>
+        {host.name ? host.name : getEmptyTagValue()}
+      </HostDetailsLink>
+    </DefaultDraggable>
   ) : (
     getEmptyTagValue()
   );
