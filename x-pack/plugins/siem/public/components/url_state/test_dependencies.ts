@@ -256,3 +256,36 @@ export const getMockPropsObj = ({ page, examplePath, namespaceLower, type }: Get
     ),
   },
 });
+
+// silly that this needs to be an array and not an object
+// https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout
+export const testCases = [
+  [
+    /* page */ CONSTANTS.networkPage,
+    /* namespaceLower */ 'network',
+    /* namespaceUpper */ 'Network',
+    /* examplePath */ '/network',
+    /* type */ networkModel.NetworkType.page,
+  ],
+  [
+    /* page */ CONSTANTS.hostsPage,
+    /* namespaceLower */ 'hosts',
+    /* namespaceUpper */ 'Hosts',
+    /* examplePath */ '/hosts',
+    /* type */ hostsModel.HostsType.page,
+  ],
+  [
+    /* page */ CONSTANTS.hostsDetails,
+    /* namespaceLower */ 'hosts',
+    /* namespaceUpper */ 'Hosts',
+    /* examplePath */ '/hosts/siem-es',
+    /* type */ hostsModel.HostsType.details,
+  ],
+  [
+    /* page */ CONSTANTS.networkDetails,
+    /* namespaceLower */ 'network',
+    /* namespaceUpper */ 'Network',
+    /* examplePath */ '/network/ip/100.90.80',
+    /* type */ networkModel.NetworkType.details,
+  ],
+];

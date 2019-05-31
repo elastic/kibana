@@ -10,14 +10,14 @@ import * as React from 'react';
 import { UrlStateContainerLifecycle } from './';
 import { UrlStateContainerPropTypes } from './types';
 import { CONSTANTS } from './constants';
-import { getMockPropsObj, mockHistory, filterQuery } from './test_dependencies';
-import { hostsModel, networkModel } from '../../store';
+import { getMockPropsObj, mockHistory, filterQuery, testCases } from './test_dependencies';
+import { networkModel } from '../../store';
 
 jest.mock('lodash/fp');
 
 let mockProps: UrlStateContainerPropTypes;
 
-describe('UrlStateContainer -  lodash mocked', () => {
+describe('UrlStateContainer - lodash.throttle mocked to test update url', () => {
   beforeEach(() => {
     // @ts-ignore property mockImplementation does not exists
     throttle.mockImplementation((time, faker) => faker);
@@ -105,39 +105,6 @@ describe('UrlStateContainer -  lodash mocked', () => {
   });
 
   describe('handleInitialize', () => {
-    // silly that this needs to be an array and not an object
-    // https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout
-    const testCases = [
-      [
-        /* page */ CONSTANTS.networkPage,
-        /* namespaceLower */ 'network',
-        /* namespaceUpper */ 'Network',
-        /* examplePath */ '/network',
-        /* type */ networkModel.NetworkType.page,
-      ],
-      [
-        /* page */ CONSTANTS.hostsPage,
-        /* namespaceLower */ 'hosts',
-        /* namespaceUpper */ 'Hosts',
-        /* examplePath */ '/hosts',
-        /* type */ hostsModel.HostsType.page,
-      ],
-      [
-        /* page */ CONSTANTS.hostsDetails,
-        /* namespaceLower */ 'hosts',
-        /* namespaceUpper */ 'Hosts',
-        /* examplePath */ '/hosts/siem-es',
-        /* type */ hostsModel.HostsType.details,
-      ],
-      [
-        /* page */ CONSTANTS.networkDetails,
-        /* namespaceLower */ 'network',
-        /* namespaceUpper */ 'Network',
-        /* examplePath */ '/network/ip/100.90.80',
-        /* type */ networkModel.NetworkType.details,
-      ],
-    ];
-
     describe('Redux updates URL state', () => {
       describe('kqlQuery and timerange url state is set when not defined on component mount', () => {
         test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath, type) => {

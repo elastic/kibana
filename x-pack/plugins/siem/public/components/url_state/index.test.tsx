@@ -13,15 +13,15 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { UrlStateContainer, UrlStateContainerLifecycle } from './';
 import { UrlStateContainerPropTypes } from './types';
-import { CONSTANTS } from './constants';
 import {
   defaultProps,
   getMockPropsObj,
   mockHistory,
   serializedFilterQuery,
+  testCases,
 } from './test_dependencies';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
-import { createStore, hostsModel, networkModel, State } from '../../store';
+import { createStore, State } from '../../store';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -63,41 +63,6 @@ describe('UrlStateContainer', () => {
   });
 
   describe('handleInitialize', () => {
-    // silly that this needs to be an array and not an object
-    // https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout
-    const testCases = [
-      [
-        /* page */ CONSTANTS.networkPage,
-        /* namespaceLower */ 'network',
-        /* namespaceUpper */ 'Network',
-        /* examplePath */ '/network',
-        /* type */ networkModel.NetworkType.page,
-      ],
-      [
-        /* page */ CONSTANTS.hostsPage,
-        /* namespaceLower */ 'hosts',
-        /* namespaceUpper */ 'Hosts',
-        /* examplePath */ '/hosts',
-        /* type */ hostsModel.HostsType.page,
-      ],
-      [
-        /* page */ CONSTANTS.hostsDetails,
-        /* namespaceLower */ 'hosts',
-        /* namespaceUpper */ 'Hosts',
-        /* examplePath */ '/hosts/siem-es',
-        /* type */ hostsModel.HostsType.details,
-      ],
-      [
-        /* page */ CONSTANTS.networkDetails,
-        /* namespaceLower */ 'network',
-        /* namespaceUpper */ 'Network',
-        /* examplePath */ '/network/ip/100.90.80',
-        /* type */ networkModel.NetworkType.details,
-      ],
-    ];
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
     describe('URL state updates redux', () => {
       describe('relative timerange actions are called with correct data on component mount', () => {
         test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath, type) => {
@@ -176,13 +141,7 @@ describe('UrlStateContainer', () => {
     });
 
     describe('Redux updates URL state', () => {
-      afterEach(() => {
-        jest.resetAllMocks();
-      });
       describe('kqlQuery url state is set from redux data on component mount', () => {
-        afterEach(() => {
-          jest.resetAllMocks();
-        });
         test.each(testCases)(
           '%o',
           async (page, namespaceLower, namespaceUpper, examplePath, type) => {
