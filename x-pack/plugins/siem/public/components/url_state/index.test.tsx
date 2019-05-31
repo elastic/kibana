@@ -334,7 +334,7 @@ describe('UrlStateContainer', () => {
 
       wrapper.setProps({ urlState: newUrlState });
       wrapper.update();
-      await wait(1000);
+      await wait(2000); // double throttle wait time for latency issues in jenkins
       expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
@@ -364,7 +364,7 @@ describe('UrlStateContainer', () => {
 
       wrapper.setProps({ urlState: newUrlState });
       wrapper.update();
-      await wait(1000);
+      await wait(2000); // double throttle wait time for latency issues with this test
       expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
@@ -528,7 +528,7 @@ describe('UrlStateContainer', () => {
               },
             };
             shallow(<UrlStateContainerLifecycle {...forSureResetProps} />);
-            await wait(1000);
+            await wait(2000); // double throttle wait time for latency issues in jenkins
 
             // @ts-ignore property mock does not exists
             expect(forSureResetProps.history.replace.mock.calls[0][0]).toEqual({
