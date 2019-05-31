@@ -79,7 +79,7 @@ const EventsTableComponent = pure<EventsTableProps>(
     type,
   }) => (
     <LoadMoreTable
-      columns={getEventsColumns(type)}
+      columns={getEventsColumnsCurated(type)}
       hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.EVENTS}
@@ -137,22 +137,18 @@ const getEventsColumns = (
         getEmptyTagValue()
       ),
   },
-  ...(pageType !== 'details'
-    ? [
-        {
-          name: i18n.HOST_NAME,
-          sortable: false,
-          truncateText: false,
-          render: ({ node }) =>
-            getRowItemDraggables({
-              rowItems: getOr(null, 'host.name', node),
-              attrName: 'host.name',
-              idPrefix: `host-${pageType}-events-table-${node._id}`,
-              render: item => <HostDetailsLink hostName={item} />,
-            }),
-        },
-      ]
-    : []),
+  {
+    name: i18n.HOST_NAME,
+    sortable: false,
+    truncateText: false,
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: getOr(null, 'host.name', node),
+        attrName: 'host.name',
+        idPrefix: `host-${pageType}-events-table-${node._id}`,
+        render: item => <HostDetailsLink hostName={item} />,
+      }),
+  },
   {
     name: i18n.EVENT_MODULE_DATASET,
     sortable: false,
@@ -258,3 +254,24 @@ const getEventsColumns = (
     },
   },
 ];
+
+const getEventsColumnsCurated = (pageType: hostsModel.HostsType) => {
+  const columnsCurated = getEventsColumns(pageType);
+
+  if (pageType === 'details') {
+    // Array of column names to exclude from host details pages
+    const columnsExcluded = [i18n.HOST_NAME];
+
+    // Find indices of excluded columns
+    const indicesExcluded = columnsExcluded.map(name =>
+      columnsCurated.findIndex(column => column.name === name)
+    );
+
+    // Remove excluded columns from array
+    for (let i = indicesExcluded.length - 1; i >= 0; i--) {
+      columnsCurated.splice(indicesExcluded[i], 1);
+    }
+  }
+
+  return columnsCurated;
+};
