@@ -338,7 +338,7 @@
     "babel-jest": "^24.1.0",
     "backport": "4.4.1",
     "chai": "3.5.0",
-    "chance": "1.0.10",
+    "chance": "1.0.18",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
     "chromedriver": "^74.0.0",
