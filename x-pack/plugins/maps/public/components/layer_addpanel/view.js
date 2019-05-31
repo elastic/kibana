@@ -155,7 +155,7 @@ export class AddLayerPanel extends Component {
       <FlyoutFooter
         onClick={this._layerAddHandler}
         disableNextButton={!buttonEnabled}
-        buttonText={buttonDescription}
+        nextButtonText={buttonDescription}
       />
     );
   }

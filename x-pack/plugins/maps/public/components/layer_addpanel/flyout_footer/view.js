@@ -15,10 +15,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const FlyoutFooter = (
-  { onClick, disableNextButton, buttonText, closeFlyout, hasLayerSelected, isLoading }
+  { onClick, disableNextButton, nextButtonText, closeFlyout, hasLayerSelected, isLoading }
 ) => {
 
-  const nextButtonText = buttonText || 'Add layer';
   const nextButton = (
     <EuiButton
       disabled={!hasLayerSelected || disableNextButton || isLoading}
@@ -28,11 +27,7 @@ export const FlyoutFooter = (
       onClick={onClick}
       fill
     >
-      <FormattedMessage
-        id="xpack.maps.addLayerPanel.addLayerButtonLabel"
-        defaultMessage="{nextButtonText}"
-        values={{ nextButtonText }}
-      />
+      {nextButtonText}
     </EuiButton>
   );
 
