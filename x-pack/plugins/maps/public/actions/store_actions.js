@@ -153,7 +153,7 @@ export function cloneLayer(layerId) {
 }
 
 export function addLayer(layerDescriptor) {
-  return async (dispatch, getState) => {
+  return (dispatch, getState) => {
     const isMapReady = getMapReady(getState());
     if (!isMapReady) {
       dispatch({
@@ -167,7 +167,7 @@ export function addLayer(layerDescriptor) {
       type: ADD_LAYER,
       layer: layerDescriptor,
     });
-    await dispatch(syncDataForLayer(layerDescriptor.id));
+    dispatch(syncDataForLayer(layerDescriptor.id));
   };
 }
 
