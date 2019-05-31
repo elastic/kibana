@@ -7,8 +7,31 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Markdown from 'markdown-it';
+import mila from 'markdown-it-link-attributes';
+import { ELASTIC_WEBSITE_URL } from '../../../public/lib/documentation_links';
+import { escapeRegExp } from '../../../common/lib/escape_reg_exp';
+
+const ELASTIC_SITE = new RegExp(escapeRegExp(ELASTIC_WEBSITE_URL));
+const NOT_ELASTIC_SITE = new RegExp(`^((?!${escapeRegExp(ELASTIC_WEBSITE_URL)}).)*$`);
 
 const md = new Markdown();
+md.use(mila, [
+  {
+    // forward referrer information if destination is elastic.co
+    pattern: ELASTIC_SITE,
+    attrs: {
+      target: '_blank',
+      rel: 'noopener',
+    },
+  },
+  {
+    pattern: NOT_ELASTIC_SITE,
+    attrs: {
+      target: '_blank',
+      rel: 'noreferrer noopener',
+    },
+  },
+]);
 
 export const markdown = () => ({
   name: 'markdown',

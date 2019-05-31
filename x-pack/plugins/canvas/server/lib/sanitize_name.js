@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { escapeRegExp } from '../../common/lib/escape_reg_exp';
+
 export function sanitizeName(name) {
   // blacklisted characters
   const blacklist = ['(', ')'];
   const pattern = blacklist.map(v => escapeRegExp(v)).join('|');
   const regex = new RegExp(pattern, 'g');
   return name.replace(regex, '_');
-}
-
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
