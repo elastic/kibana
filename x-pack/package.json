@@ -110,7 +110,7 @@
     "chance": "1.0.18",
     "checksum": "0.1.1",
     "cheerio": "0.22.0",
-    "commander": "2.12.2",
+    "commander": "2.20.0",
     "copy-webpack-plugin": "^4.5.2",
     "del": "^4.0.0",
     "dotenv": "2.0.0",
