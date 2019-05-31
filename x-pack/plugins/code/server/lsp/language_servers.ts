@@ -15,7 +15,7 @@ export interface LanguageServerDefinition extends LanguageServer {
   builtinWorkspaceFolders: boolean;
   launcher: LauncherConstructor;
   installationFolderName?: string;
-  downloadUrl?: (lang: LanguageServerDefinition, version: string) => string | string;
+  downloadUrl?: (version: string, devMode?: boolean) => string;
   embedPath?: string;
   installationPluginName?: string;
 }
@@ -36,8 +36,10 @@ export const JAVA: LanguageServerDefinition = {
   installationType: InstallationType.Plugin,
   installationPluginName: 'java-langserver',
   installationFolderName: 'jdt',
-  downloadUrl: (lang: LanguageServerDefinition, version: string) =>
-    `https://download.elasticsearch.org/code/java-langserver/release/java-langserver-${version}-$OS.zip`,
+  downloadUrl: (version: string, devMode?: boolean) =>
+    devMode!
+      ? `https://snapshots.elastic.co/downloads/java-langserver-plugins/java-langserver/java-langserver-${version}-SNAPSHOT-$OS.zip`
+      : `https://artifacts.elastic.co/downloads/java-langserver-plugins/java-langserver/java-langserver-${version}-$OS.zip`,
 };
 export const GO: LanguageServerDefinition = {
   name: 'Go',
