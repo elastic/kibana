@@ -64,6 +64,7 @@ export const MonitorBarSeries = ({ dangerColor, downSeries }: MonitorBarSeriesPr
           name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
             defaultMessage: 'Down checks',
           })}
+          timeZone="local"
           xAccessor={0}
           xScaleType={ScaleType.Time}
           yAccessors={[1]}

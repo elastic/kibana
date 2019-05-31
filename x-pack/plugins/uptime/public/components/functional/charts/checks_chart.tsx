@@ -98,12 +98,13 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
               [upString]: up || 0,
             }))}
             id={upSeriesSpecId}
+            seriesType="area"
+            stackAccessors={['x']}
+            timeZone="local"
             xAccessor="x"
             xScaleType={ScaleType.Time}
             yAccessors={[upString]}
             yScaleType={ScaleType.Linear}
-            seriesType="area"
-            stackAccessors={['x']}
           />
           <AreaSeries
             customSeriesColors={getColorsMap(dangerColor, downSeriesSpecId)}
@@ -114,6 +115,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
             id={downSeriesSpecId}
             seriesType="area"
             stackAccessors={['x']}
+            timeZone="local"
             xAccessor="x"
             xScaleType={ScaleType.Time}
             yAccessors={[downString]}

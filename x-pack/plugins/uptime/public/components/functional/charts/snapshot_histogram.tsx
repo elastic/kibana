@@ -82,6 +82,7 @@ export const SnapshotHistogram = ({
           id={upSpecId}
           name={upMonitorsId}
           stackAccessors={[0]}
+          timeZone="local"
           xAccessor={0}
           xScaleType={ScaleType.Time}
           yAccessors={[1]}
@@ -95,6 +96,7 @@ export const SnapshotHistogram = ({
             defaultMessage: 'Down',
           })}
           stackAccessors={[0]}
+          timeZone="local"
           xAccessor={0}
           xScaleType={ScaleType.Time}
           yAccessors={[1]}
