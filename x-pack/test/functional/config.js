@@ -286,7 +286,7 @@ export default async function ({ readConfigFile }) {
     },
 
     junit: {
-      reportName: 'Chrome X-Pack Functional Tests',
+      reportName: 'Chrome X-Pack UI Functional Tests',
     },
   };
 }
