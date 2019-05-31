@@ -131,7 +131,7 @@
     "angular-recursion": "^1.0.5",
     "angular-route": "1.4.7",
     "angular-sanitize": "1.6.5",
-    "angular-sortable-view": "0.0.15",
+    "angular-sortable-view": "0.0.17",
     "autoprefixer": "^9.1.0",
     "babel-loader": "8.0.6",
     "bluebird": "3.5.3",
