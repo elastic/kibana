@@ -9,9 +9,11 @@
   },
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
+  "peerDependencies": {
+    "@kbn/babel-preset": "1.0.0"
+  },
   "dependencies": {
     "@babel/core": "^7.4.4",
-    "@kbn/babel-preset": "1.0.0",
     "argv-split": "^2.0.1",
     "commander": "^2.9.0",
     "del": "^4.0.0",
