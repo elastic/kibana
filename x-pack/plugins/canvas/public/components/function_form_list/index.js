@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from 'plugins/interpreter/interpreter';
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
 import { toExpression } from '@kbn/interpreter/common';
+import { interpretAst } from 'plugins/interpreter/interpreter';
 import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';
 import { FunctionFormList as Component } from './function_form_list';
 

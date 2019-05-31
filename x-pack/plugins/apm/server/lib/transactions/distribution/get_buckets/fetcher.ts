@@ -95,5 +95,5 @@ export function bucketFetcher(
     }
   };
 
-  return client<void, Aggs>('search', params);
+  return client.search<void, Aggs>(params);
 }
