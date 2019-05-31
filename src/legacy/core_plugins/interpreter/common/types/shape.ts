@@ -17,13 +17,18 @@
  * under the License.
  */
 
-export const shape = () => ({
-  name: 'shape',
+import { ExpressionType } from '../../types';
+import { Render } from './render';
+
+const name = 'shape';
+
+export const shape = (): ExpressionType<typeof name, undefined> => ({
+  name,
   to: {
-    render: input => {
+    render: <T>(input: T): Render<T> => {
       return {
         type: 'render',
-        as: 'shape',
+        as: name,
         value: input,
       };
     },
