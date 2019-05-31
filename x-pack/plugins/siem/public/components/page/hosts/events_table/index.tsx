@@ -137,18 +137,22 @@ const getEventsColumns = (
         getEmptyTagValue()
       ),
   },
-  {
-    name: i18n.HOST_NAME,
-    sortable: false,
-    truncateText: false,
-    render: ({ node }) =>
-      getRowItemDraggables({
-        rowItems: getOr(null, 'host.name', node),
-        attrName: 'host.name',
-        idPrefix: `host-${pageType}-events-table-${node._id}`,
-        render: item => <HostDetailsLink hostName={item} />,
-      }),
-  },
+  ...(pageType !== 'details'
+    ? [
+        {
+          name: i18n.HOST_NAME,
+          sortable: false,
+          truncateText: false,
+          render: ({ node }) =>
+            getRowItemDraggables({
+              rowItems: getOr(null, 'host.name', node),
+              attrName: 'host.name',
+              idPrefix: `host-${pageType}-events-table-${node._id}`,
+              render: item => <HostDetailsLink hostName={item} />,
+            }),
+        },
+      ]
+    : []),
   {
     name: i18n.EVENT_MODULE_DATASET,
     sortable: false,
