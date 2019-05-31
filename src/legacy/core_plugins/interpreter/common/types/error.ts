@@ -17,17 +17,27 @@
  * under the License.
  */
 
-export const error = () => ({
-  name: 'error',
+import { ExpressionType } from '../../types';
+import { Render } from './render';
+
+const name = 'error';
+
+export interface InterpreterError {
+  type: typeof name;
+  error: unknown;
+  info: unknown;
+}
+
+export const error = (): ExpressionType<typeof name, InterpreterError> => ({
+  name,
   to: {
-    render: input => {
-      const { error, info } = input;
+    render: (input): Render<{ error: unknown; info: unknown }> => {
       return {
         type: 'render',
-        as: 'error',
+        as: name,
         value: {
-          error,
-          info,
+          error: input.error,
+          info: input.info,
         },
       };
     },
