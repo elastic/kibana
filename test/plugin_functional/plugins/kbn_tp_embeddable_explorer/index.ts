@@ -25,11 +25,11 @@ export default function(kibana: any) {
   return new kibana.Plugin({
     require: ['kibana'],
     uiExports: {
-      // app: {
-      //   title: 'Embeddable Explorer',
-      //   order: 1,
-      //   main: 'plugins/kbn_tp_embeddable_explorer',
-      // },
+      app: {
+        title: 'Embeddable Explorer',
+        order: 1,
+        main: 'plugins/kbn_tp_embeddable_explorer',
+      },
       embeddableActions: [
         'plugins/embeddable_api/__test__/actions/hello_world_action',
         'plugins/embeddable_api/__test__/actions/say_hello_action',
