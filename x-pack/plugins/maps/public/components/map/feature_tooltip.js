@@ -119,6 +119,8 @@ export class FeatureTooltip extends React.Component {
         <div>
           <div
             className="mapFeatureTooltip__lineDescription"
+            // It's necessary to explicitly set the html here as the function
+            // returns html, not just text
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
               __html: tooltipProperty.getHtmlDisplayValue()
