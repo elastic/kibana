@@ -32,7 +32,6 @@ import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/r
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { UICapabilitiesProvider } from 'ui/capabilities/react';
-import { EuiBadge } from '@elastic/eui';
 import { getListBreadcrumbs } from './breadcrumbs';
 
 import React from 'react';
@@ -124,36 +123,39 @@ uiModules.get('apps/management')
         });
 
         const renderList = () => {
-          $scope.indexPatternList = $route.current.locals.indexPatterns.map(pattern => {
-            const id = pattern.id;
-            const tags = indexPatternListProvider.getIndexPatternTags(pattern, $scope.defaultIndex === id);
+          $scope.indexPatternList =
+            $route.current.locals.indexPatterns
+              .map(pattern => {
+                const id = pattern.id;
+                const tags = indexPatternListProvider.getIndexPatternTags(
+                  pattern,
+                  $scope.defaultIndex === id
+                );
 
-            return {
-              id: id,
-              title:
-  <span>
-    {pattern.get('title')}{$scope.defaultIndex === id && (<EuiBadge className="indexPatternList__badge">Default</EuiBadge>)}
-  </span>,
-              url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
-              active: $scope.editingId === id,
-              default: $scope.defaultIndex === id,
-              tag: tags && tags.length ? tags[0] : null,
-            };
-          }).sort((a, b) => {
-            if(a.default) {
-              return -1;
-            }
-            if(b.default) {
-              return 1;
-            }
-            if(a.title < b.title) {
-              return -1;
-            }
-            if(a.title > b.title) {
-              return 1;
-            }
-            return 0;
-          }) || [];
+                return {
+                  id: id,
+                  title: pattern.get('title'),
+                  url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
+                  active: $scope.editingId === id,
+                  default: $scope.defaultIndex === id,
+                  tag: tags && tags.length ? tags[0] : null,
+                };
+              })
+              .sort((a, b) => {
+                if (a.default) {
+                  return -1;
+                }
+                if (b.default) {
+                  return 1;
+                }
+                if (a.title < b.title) {
+                  return -1;
+                }
+                if (a.title > b.title) {
+                  return 1;
+                }
+                return 0;
+              }) || [];
 
           updateIndexPatternList($scope.indexPatternList, kbnUrl, indexPatternCreationOptions);
         };

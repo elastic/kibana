@@ -18,6 +18,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -38,13 +39,15 @@ const columns = [
   {
     field: 'title',
     name: 'Pattern',
-    render: (name: string, { id }: { id: string }) => (
-      <EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${id}`}>
+    render: (name: string, props: { id: string; default: boolean }) => (
+      <EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${props.id}`}>
         {name}
+        {props.default && <EuiBadge className="indexPatternList__badge">Default</EuiBadge>}
       </EuiButtonEmpty>
     ),
     dataType: 'string',
-    sortable: true,
+    sortable: (props: { default: boolean; title: string }) =>
+      `${props.default ? '0' : '1'}${props.title}`,
   },
 ];
 
@@ -56,7 +59,7 @@ const pagination = {
 const sorting = {
   sort: {
     field: 'title',
-    direction: 'desc',
+    direction: 'asc',
   },
 };
 
@@ -123,6 +126,7 @@ export class IndexPatternTable extends React.Component<Props, State> {
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiInMemoryTable
+          allowNeutralSort={false}
           itemId="id"
           isSelectable={false}
           items={this.props.indexPatterns}
