@@ -11,7 +11,7 @@ export const NETWORK_EVENTS = i18n.translate('xpack.siem.kpiNetwork.source.netwo
 });
 
 export const UNIQUE_ID = i18n.translate('xpack.siem.kpiNetwork.source.uniquiIdTitle', {
-  defaultMessage: 'Unique Flow ID',
+  defaultMessage: 'Unique Flow IDs',
 });
 
 export const ACTIVE_AGENTS = i18n.translate('xpack.siem.kpiNetwork.source.activeAgentsTitle', {
