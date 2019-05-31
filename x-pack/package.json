@@ -107,7 +107,7 @@
     "babel-plugin-require-context-hook": "npm:babel-plugin-require-context-hook-babel7@1.0.0",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "chalk": "^2.4.1",
-    "chance": "1.0.10",
+    "chance": "1.0.18",
     "checksum": "0.1.1",
     "cheerio": "0.22.0",
     "commander": "2.12.2",
