@@ -43,7 +43,6 @@ export function getCreateTaskRunnerFunction({
           alertInstanceFactory,
         };
 
-
         const range = {
           // Add 1ms to the from, since the range is inclusive
           from: new Date(new Date(taskInstance.state.previousRange.to).getTime() + 1),
