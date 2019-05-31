@@ -181,24 +181,25 @@ const LanguageServerInstruction = (props: {
       id,
       name,
       content: (
-        <EuiText grow={false}>
-          <h3>Install</h3>
-          <div>
-            Stop your kibana Code node, then use the following command to install the {props.name}{' '}
-            Language Server plugin:
+        <div>
+          <EuiSpacer />
+          <EuiText grow={false}>
+            <h3>Install</h3>
+            <ol>
+              <li>Stop your kibana Code node.</li>
+              <li>Use the following command to install the {props.name}{' '} language server.</li>
+            </ol>
             <EuiCodeBlock language="shell">{installCode}</EuiCodeBlock>
-          </div>
-          <h3>Uninstall</h3>
-          <div>
-            Stop your kibana Code node, then use the following command to remove the {props.name}{' '}
-            Language Server plugin:
-          </div>
-          <div>
+            <h3>Uninstall</h3>
+            <ol>
+              <li>Stop your kibana Code node.</li>
+              <li>Use the following command to remove the {props.name}{' '} language server.</li>
+            </ol>
             <EuiCodeBlock language="shell">
               bin/kibana-plugin remove {props.pluginName}
             </EuiCodeBlock>
-          </div>
-        </EuiText>
+          </EuiText>
+        </div>
       ),
     };
   });
