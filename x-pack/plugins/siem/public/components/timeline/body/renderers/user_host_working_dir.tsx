@@ -34,7 +34,7 @@ export const UserHostWorkingDir = pure<Props>(
         </TokensFlexItem>
         {hostName != null && userName != null && (
           <TokensFlexItem grow={false} component="span">
-            @
+            {'@'}
           </TokensFlexItem>
         )}
         <HostWorkingDir

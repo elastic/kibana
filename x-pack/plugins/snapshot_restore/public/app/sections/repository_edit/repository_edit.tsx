@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';
 
 import { RepositoryForm, SectionError, SectionLoading } from '../../components';
@@ -123,7 +123,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
       <SectionError
         title={
           <FormattedMessage
-            id="xpack.snapshotRestore.editRepository.avingRepositoryErrorTitle"
+            id="xpack.snapshotRestore.editRepository.savingRepositoryErrorTitle"
             defaultMessage="Cannot save repository"
           />
         }
@@ -144,15 +144,36 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
       return renderError();
     }
 
+    const { isManagedRepository } = repositoryData;
+
     return (
-      <RepositoryForm
-        repository={repository}
-        isEditing={true}
-        isSaving={isSaving}
-        saveError={renderSaveError()}
-        clearSaveError={clearSaveError}
-        onSave={onSave}
-      />
+      <Fragment>
+        {isManagedRepository ? (
+          <Fragment>
+            <EuiCallOut
+              size="m"
+              color="warning"
+              iconType="iInCircle"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.editRepository.managedRepositoryWarningTitle"
+                  defaultMessage="This is a managed repository. Changing this repository might affect other systems that use it. Proceed with caution."
+                />
+              }
+            />
+            <EuiSpacer size="l" />
+          </Fragment>
+        ) : null}
+        <RepositoryForm
+          repository={repository}
+          isManagedRepository={isManagedRepository}
+          isEditing={true}
+          isSaving={isSaving}
+          saveError={renderSaveError()}
+          clearSaveError={clearSaveError}
+          onSave={onSave}
+        />
+      </Fragment>
     );
   };
 

@@ -17,7 +17,6 @@ exports[`Pane renders correctly against snapshot 1`] = `
     <span>
       I am a child of flyout
     </span>
-    ,
   </Connect(FlyoutPaneComponent)>
 </Component>
 `;
