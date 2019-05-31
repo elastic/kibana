@@ -11,6 +11,7 @@ import { EuiIcon } from '@elastic/eui';
 import { HeatmapStyle } from './styles/heatmap_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
+import { i18n } from '@kbn/i18n';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
@@ -60,7 +61,6 @@ export class HeatmapLayer extends AbstractLayer {
         type: 'geojson',
         data: { 'type': 'FeatureCollection', 'features': [] }
       });
-
 
       mbMap.addLayer({
         id: mbLayerId,
@@ -188,12 +188,34 @@ export class HeatmapLayer extends AbstractLayer {
     return 'heatmap';
   }
 
-  getIcon() {
-    return (
-      <EuiIcon
-        type={this.getLayerTypeIconName()}
-      />
-    );
+  getCustomIconAndTooltipContent() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    if (!featureCollection || featureCollection.features.length === 0) {
+      return {
+        icon: (
+          <EuiIcon
+            size="m"
+            color="subdued"
+            type="minusInCircle"
+          />
+        ),
+        tooltipContent: i18n.translate('xpack.maps.heatmapLayer.noResultsFoundTooltip', {
+          defaultMessage: `No results found.`
+        })
+      };
+    }
+
+    return super.getCustomIconAndTooltipContent();
+  }
+
+  hasLegendDetails() {
+    return true;
+  }
+
+  getLegendDetails() {
+    const label = _.get(this._source.getMetricFields(), '[0].propertyLabel', '');
+    return this._style.getLegendDetails(label);
   }
 
 }

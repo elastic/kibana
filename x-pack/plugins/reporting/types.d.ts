@@ -18,6 +18,7 @@ export interface KbnServer {
   plugins: Record<string, any>;
   route: any;
   log: any;
+  fieldFormatServiceFactory: (uiConfig: any) => any;
   savedObjects: {
     getScopedSavedObjectsClient: (
       fakeRequest: { headers: object; getBasePath: () => string }
@@ -26,6 +27,20 @@ export interface KbnServer {
   uiSettingsServiceFactory: (
     { savedObjectsClient }: { savedObjectsClient: SavedObjectClient }
   ) => UiSettings;
+}
+
+export interface ExportTypeDefinition {
+  id: string;
+  name: string;
+  jobType: string;
+  jobContentExtension: string;
+  createJobFactory: () => any;
+  executeJobFactory: () => any;
+  validLicenses: string[];
+}
+
+export interface ExportTypesRegistry {
+  register: (exportTypeDefinition: ExportTypeDefinition) => void;
 }
 
 export interface ConfigObject {
@@ -41,7 +56,7 @@ export interface Logger {
   debug: (message: string) => void;
   error: (message: string) => void;
   warning: (message: string) => void;
-  clone: (tags: string[]) => Logger;
+  clone?: (tags: string[]) => Logger;
 }
 
 export interface ViewZoomWidthHeight {
@@ -92,25 +107,82 @@ export interface CryptoFactory {
   decrypt: (headers?: Record<string, string>) => string;
 }
 
-export interface ReportingJob {
-  headers?: Record<string, string>;
+export interface TimeRangeParams {
+  timezone: string;
+  min: Date | string | number;
+  max: Date | string | number;
+}
+
+type PostPayloadState = Partial<{
+  state: {
+    query: any;
+    sort: any[];
+    columns: string[]; // TODO
+  };
+}>;
+
+// retain POST payload data, needed for async
+interface JobParamPostPayload extends PostPayloadState {
+  timerange: TimeRangeParams;
+}
+
+// params that come into a request
+export interface JobParams {
+  savedObjectType: string;
+  savedObjectId: string;
+  isImmediate: boolean;
+  post?: JobParamPostPayload;
+  panel?: any; // has to be resolved by the request handler
+  visType?: string; // has to be resolved by the request handler
+}
+
+export interface JobDocPayload {
   basePath?: string;
-  urls?: string[];
-  relativeUrl?: string;
   forceNow?: string;
+  headers?: Record<string, string>;
+  jobParams: JobParams;
+  relativeUrl?: string;
   timeRange?: any;
-  objects?: [any];
+  title: string;
+  urls?: string[];
+  type?: string | null; // string if completed job; null if incomplete job;
+  objects?: string | null; // string if completed job; null if incomplete job;
+}
+
+export interface JobDocOutput {
+  content: string; // encoded content
+  contentType: string;
 }
 
 export interface JobDoc {
-  output: any;
   jobtype: string;
-  payload: ReportingJob;
+  output: JobDocOutput;
+  payload: JobDocPayload;
+  status: string; // completed, failed, etc
 }
 
 export interface JobSource {
   _id: string;
   _source: JobDoc;
+}
+
+/*
+ * A snake_cased field is the only significant difference in structure of
+ * JobDocOutputExecuted vs JobDocOutput.
+ *
+ * JobDocOutput is the structure of the object returned by getDocumentPayload
+ *
+ * data in the _source fields of the
+ * Reporting index.
+ *
+ * The ESQueueWorker internals have executed job objects returned with this
+ * structure. See `_formatOutput` in reporting/server/lib/esqueue/worker.js
+ */
+export interface JobDocOutputExecuted {
+  content_type: string; // vs `contentType` above
+  content: string | null; // defaultOutput is null
+  max_size_reached: boolean;
+  size: number;
 }
 
 export interface ESQueueWorker {

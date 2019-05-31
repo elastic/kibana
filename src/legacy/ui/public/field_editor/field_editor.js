@@ -140,7 +140,7 @@ export class FieldEditorComponent extends PureComponent {
     const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang, DEFAULT_FIELD_TYPES);
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
-    const DefaultFieldFormat = fieldFormats.getDefaultType(field.type);
+    const DefaultFieldFormat = fieldFormats.getDefaultType(field.type, field.esTypes);
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
       ...fieldFormats.byFieldType[field.type],
@@ -295,7 +295,7 @@ export class FieldEditorComponent extends PureComponent {
               values={{
                 language: <EuiCode>{field.lang}</EuiCode>,
                 painlessLink: (
-                  <EuiLink target="_window" href={getDocLink('scriptedFields.painless')}>
+                  <EuiLink target="_blank" href={getDocLink('scriptedFields.painless')}>
                     <FormattedMessage
                       id="common.ui.fieldEditor.warningLabel.painlessLinkLabel"
                       defaultMessage="Painless"

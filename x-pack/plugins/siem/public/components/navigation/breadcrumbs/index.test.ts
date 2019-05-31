@@ -5,6 +5,7 @@
  */
 import chrome from 'ui/chrome';
 
+import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
@@ -19,6 +20,9 @@ jest.mock('ui/chrome', () => ({
   breadcrumbs: {
     set: jest.fn(),
   },
+  getUiSettingsClient: () => ({
+    get: jest.fn(),
+  }),
 }));
 
 describe('Navigation Breadcrumbs', () => {

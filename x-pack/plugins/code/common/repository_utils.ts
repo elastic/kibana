@@ -15,13 +15,23 @@ import { parseLspUrl, toCanonicalUrl } from './uri_util';
 export class RepositoryUtils {
   // Generate a Repository instance by parsing repository remote url
   public static buildRepository(remoteUrl: string): Repository {
-    const repo = GitUrlParse(remoteUrl);
+    const repo = GitUrlParse(remoteUrl.trim());
     let host = repo.source ? repo.source : '';
     if (repo.port !== null) {
       host = host + ':' + repo.port;
     }
-    const name = repo.name ? repo.name : '_';
-    const org = repo.owner ? repo.owner.split('/').join('_') : '_';
+
+    // Remove the leading `/` and tailing `.git` if necessary.
+    const pathname =
+      repo.pathname && repo.git_suffix
+        ? repo.pathname.substr(1, repo.pathname.length - 5)
+        : repo.pathname.substr(1);
+
+    // The pathname should look like `a/b/c` now.
+    const segs = pathname.split('/').filter(s => s.length > 0);
+
+    const org = segs.length >= 2 ? segs.slice(0, segs.length - 1).join('_') : '_';
+    const name = segs.length >= 1 ? segs[segs.length - 1] : '_';
     const uri: RepositoryUri = host ? `${host}/${org}/${name}` : repo.full_name;
     return {
       uri,

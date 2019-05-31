@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default [
+export const basicAggs = [
   'count',
   'avg',
   'max',

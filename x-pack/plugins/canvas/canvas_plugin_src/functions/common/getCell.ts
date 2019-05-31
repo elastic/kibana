@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ContextFunction, Datatable } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   column: string;
@@ -11,9 +12,11 @@ interface Arguments {
 }
 
 export function getCell(): ContextFunction<'getCell', Datatable, Arguments, any> {
+  const { help, args: argHelp } = getFunctionHelp().getCell;
+
   return {
     name: 'getCell',
-    help: 'Fetch a single cell in a table',
+    help,
     context: {
       types: ['datatable'],
     },
@@ -21,12 +24,12 @@ export function getCell(): ContextFunction<'getCell', Datatable, Arguments, any>
       column: {
         types: ['string'],
         aliases: ['_', 'c'],
-        help: 'The name of the column value to fetch',
+        help: argHelp.column,
       },
       row: {
         types: ['number'],
         aliases: ['r'],
-        help: 'The row number, starting at 0',
+        help: argHelp.row,
         default: 0,
       },
     },

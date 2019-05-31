@@ -3,7 +3,6 @@
 exports[`timeseriesFetcher should call client with correct query 1`] = `
 Array [
   Array [
-    "search",
     Object {
       "body": Object {
         "aggs": Object {
@@ -79,6 +78,11 @@ Array [
                     "gte": 1528113600000,
                     "lte": 1528977600000,
                   },
+                },
+              },
+              Object {
+                "term": Object {
+                  "service.environment": "test",
                 },
               },
               Object {

@@ -17,12 +17,12 @@ import { RepositoryUtils } from '../../../common/repository_utils';
 import {
   FileTree,
   FileTreeItemType,
+  SearchOptions,
   SearchScope,
   WorkerReservedProgress,
-  Repository,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
-import { changeSearchScope, FetchFileResponse, SearchOptions } from '../../actions';
+import { changeSearchScope, FetchFileResponse } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RepoState, RepoStatus, RootState } from '../../reducers';
 import {
@@ -52,9 +52,10 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
   repoScope: string[];
+  notFoundDirs: string[];
   searchOptions: SearchOptions;
-  currentRepository?: Repository;
   fileTreeLoading: boolean;
+  query: string;
 }
 const LANG_MD = 'markdown';
 
@@ -224,12 +225,12 @@ class CodeContent extends React.PureComponent<Props> {
     return (
       <div className="codeContainer__main">
         <TopBar
-          defaultSearchScope={this.props.currentRepository}
           routeParams={this.props.match.params}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
           buttons={this.renderButtons()}
           searchOptions={this.props.searchOptions}
           branches={this.props.branches}
+          query={this.props.query}
         />
         {this.renderContent()}
       </div>
@@ -265,15 +266,15 @@ class CodeContent extends React.PureComponent<Props> {
   }
 
   public renderContent() {
-    if (this.props.isNotFound) {
+    const { file, match, tree, fileTreeLoading, isNotFound, notFoundDirs } = this.props;
+    const { path, pathType, resource, org, repo, revision } = match.params;
+    if (isNotFound || notFoundDirs.includes(path || '')) {
       return <NotFound />;
     }
     if (this.shouldRenderProgress()) {
       return this.renderProgress();
     }
 
-    const { file, match, tree, fileTreeLoading } = this.props;
-    const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (pathType) {
       case PathTypes.tree:
@@ -386,6 +387,7 @@ class CodeContent extends React.PureComponent<Props> {
 
 const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
+  notFoundDirs: state.file.notFoundDirs,
   file: state.file.file,
   tree: state.file.tree,
   fileTreeLoading: state.file.fileTreeLoading,
@@ -395,7 +397,7 @@ const mapStateToProps = (state: RootState) => ({
   loadingCommits: state.file.loadingCommits,
   repoStatus: statusSelector(state, repoUriSelector(state)),
   searchOptions: state.search.searchOptions,
-  currentRepository: state.repository.currentRepository,
+  query: state.search.query,
 });
 
 const mapDispatchToProps = {

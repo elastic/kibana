@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
 import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
@@ -22,18 +21,7 @@ export async function getTransaction(
   traceId: string,
   setup: Setup
 ) {
-  const { start, end, esFilterQuery, client, config } = setup;
-
-  const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
-    { term: { [TRANSACTION_ID]: transactionId } },
-    { term: { [TRACE_ID]: traceId } },
-    { range: rangeFilter(start, end) }
-  ];
-
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
-  }
+  const { start, end, uiFiltersES, client, config } = setup;
 
   const params = {
     index: config.get<string>('apm_oss.transactionIndices'),
@@ -41,12 +29,18 @@ export async function getTransaction(
       size: 1,
       query: {
         bool: {
-          filter
+          filter: [
+            { term: { [PROCESSOR_EVENT]: 'transaction' } },
+            { term: { [TRANSACTION_ID]: transactionId } },
+            { term: { [TRACE_ID]: traceId } },
+            { range: rangeFilter(start, end) },
+            ...uiFiltersES
+          ]
         }
       }
     }
   };
 
-  const resp = await client<Transaction>('search', params);
+  const resp = await client.search<Transaction>(params);
   return idx(resp, _ => _.hits.hits[0]._source);
 }

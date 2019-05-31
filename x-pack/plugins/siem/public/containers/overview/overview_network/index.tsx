@@ -9,6 +9,8 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewNetworkQuery, OverviewNetworkData } from '../../../graphql/types';
 import { inputsModel } from '../../../store/inputs';
 import { createFilter } from '../../helpers';
@@ -44,6 +46,7 @@ export const OverviewNetworkQuery = pure<OverviewNetworkProps>(
           to: endDate,
         },
         filterQuery: createFilter(filterQuery),
+        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
       }}
     >
       {({ data, loading, refetch }) => {

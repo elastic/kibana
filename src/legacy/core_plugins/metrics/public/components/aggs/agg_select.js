@@ -241,5 +241,4 @@ AggSelectUi.propTypes = {
   uiRestrictions: PropTypes.object,
 };
 
-const AggSelect = injectI18n(AggSelectUi);
-export default AggSelect;
+export const AggSelect = injectI18n(AggSelectUi);

@@ -4,11 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NullContextFunction } from '../types';
+import { NullContextFunction, Datatable } from '../types';
+import { getFunctionHelp } from '../../strings';
 
 const noop = () => {};
 
-export function location(): NullContextFunction<'location', {}, void> {
+interface Return extends Datatable {
+  columns: [{ name: 'latitude'; type: 'number' }, { name: 'longitude'; type: 'number' }];
+  rows: [{ latitude: number; longitude: number }];
+}
+
+export function location(): NullContextFunction<'location', {}, Promise<Return>> {
+  const { help } = getFunctionHelp().location;
+
   return {
     name: 'location',
     type: 'datatable',
@@ -16,8 +24,7 @@ export function location(): NullContextFunction<'location', {}, void> {
       types: ['null'],
     },
     args: {},
-    help:
-      "Use the browser's location functionality to get your current location. Usually quite slow, but fairly accurate",
+    help,
     fn: () => {
       return new Promise(resolve => {
         function createLocation(geoposition: Position) {

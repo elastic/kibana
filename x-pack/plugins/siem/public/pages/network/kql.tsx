@@ -12,7 +12,6 @@ import { AutocompleteField } from '../../components/autocomplete_field';
 import { KueryAutocompletion } from '../../containers/kuery_autocompletion';
 import { NetworkFilter } from '../../containers/network';
 import { networkModel } from '../../store';
-import { PageHeader, PageHeaderSection } from '../styles';
 
 import * as i18n from './translations';
 
@@ -22,31 +21,27 @@ interface NetworkKqlProps {
 }
 
 export const NetworkKql = pure<NetworkKqlProps>(({ indexPattern, type }) => (
-  <PageHeader data-test-subj="paneHeader">
-    <PageHeaderSection>
-      <KueryAutocompletion indexPattern={indexPattern}>
-        {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-          <NetworkFilter indexPattern={indexPattern} type={type}>
-            {({
-              applyFilterQueryFromKueryExpression,
-              filterQueryDraft,
-              isFilterQueryDraftValid,
-              setFilterQueryDraftFromKueryExpression,
-            }) => (
-              <AutocompleteField
-                isLoadingSuggestions={isLoadingSuggestions}
-                isValid={isFilterQueryDraftValid}
-                loadSuggestions={loadSuggestions}
-                onChange={setFilterQueryDraftFromKueryExpression}
-                onSubmit={applyFilterQueryFromKueryExpression}
-                placeholder={i18n.KQL_PLACE_HOLDER}
-                suggestions={suggestions}
-                value={filterQueryDraft ? filterQueryDraft.expression : ''}
-              />
-            )}
-          </NetworkFilter>
+  <KueryAutocompletion indexPattern={indexPattern}>
+    {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+      <NetworkFilter indexPattern={indexPattern} type={type}>
+        {({
+          applyFilterQueryFromKueryExpression,
+          filterQueryDraft,
+          isFilterQueryDraftValid,
+          setFilterQueryDraftFromKueryExpression,
+        }) => (
+          <AutocompleteField
+            isLoadingSuggestions={isLoadingSuggestions}
+            isValid={isFilterQueryDraftValid}
+            loadSuggestions={loadSuggestions}
+            onChange={setFilterQueryDraftFromKueryExpression}
+            onSubmit={applyFilterQueryFromKueryExpression}
+            placeholder={i18n.KQL_PLACEHOLDER}
+            suggestions={suggestions}
+            value={filterQueryDraft ? filterQueryDraft.expression : ''}
+          />
         )}
-      </KueryAutocompletion>
-    </PageHeaderSection>
-  </PageHeader>
+      </NetworkFilter>
+    )}
+  </KueryAutocompletion>
 ));

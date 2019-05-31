@@ -6,22 +6,23 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NETWORK = i18n.translate('xpack.siem.network', {
+export const KQL_PLACEHOLDER = i18n.translate('xpack.siem.network.kqlPlaceholder', {
+  defaultMessage: 'e.g. source.ip: "foo"',
+});
+
+export const PAGE_TITLE = i18n.translate('xpack.siem.network.pageTitle', {
   defaultMessage: 'Network',
 });
 
-export const NO_FILEBEAT_INDICES = i18n.translate('xpack.siem.network.noFilebeatIndicies', {
-  defaultMessage: "Looks like you don't have any Filebeat indices.",
+export const EMPTY_TITLE = i18n.translate('xpack.siem.network.emptyTitle', {
+  defaultMessage:
+    'It looks like you don’t have any indices relevant to network in the SIEM application',
 });
 
-export const KQL_PLACE_HOLDER = i18n.translate('xpack.siem.network.kqlPlaceHolder', {
-  defaultMessage: 'Search… (e.g. network.name:"foo" AND process.name:"bar")',
+export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.network.emptyActionPrimary', {
+  defaultMessage: 'View setup instructions',
 });
 
-export const LETS_ADD_SOME = i18n.translate('xpack.siem.network.letsAddSome.description', {
-  defaultMessage: "Let's add some!",
-});
-
-export const SETUP_INSTRUCTIONS = i18n.translate('xpack.siem.network.setupInstructions', {
-  defaultMessage: 'Setup Instructions',
+export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.network.emptyActionSecondary', {
+  defaultMessage: 'Go to documentation',
 });

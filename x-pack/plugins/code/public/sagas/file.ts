@@ -39,6 +39,10 @@ import {
   gotoRepo,
   Match,
   setNotFound,
+  fetchRootRepoTree,
+  fetchRootRepoTreeSuccess,
+  fetchRootRepoTreeFailed,
+  dirNotFound,
 } from '../actions';
 import { RootState } from '../reducers';
 import { treeCommitsSelector, createTreeSelector } from '../selectors';
@@ -62,6 +66,9 @@ function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
       yield call(fetchPath, action.payload!);
     }
   } catch (err) {
+    if (action.payload!.isDir && err.body && err.body.statusCode === 404) {
+      yield put(dirNotFound(action.payload!.path));
+    }
     yield put(fetchRepoTreeFailed(err));
   }
 }
@@ -94,7 +101,7 @@ function requestRepoTree({
   uri,
   revision,
   path,
-  limit = 50,
+  limit = 1000,
   parents = false,
 }: FetchRepoTreePayload) {
   const query: FileTreeQuery = { limit, flatten: true };
@@ -109,6 +116,20 @@ function requestRepoTree({
 
 export function* watchFetchRepoTree() {
   yield takeEvery(String(fetchRepoTree), handleFetchRepoTree);
+}
+
+function* handleFetchRootRepoTree(action: Action<FetchRepoPayloadWithRevision>) {
+  try {
+    const { uri, revision } = action.payload!;
+    const tree = yield call(requestRepoTree, { uri, revision, path: '', isDir: true });
+    yield put(fetchRootRepoTreeSuccess(tree));
+  } catch (err) {
+    yield put(fetchRootRepoTreeFailed(err));
+  }
+}
+
+export function* watchFetchRootRepoTree() {
+  yield takeEvery(String(fetchRootRepoTree), handleFetchRootRepoTree);
 }
 
 function* handleFetchBranches(action: Action<FetchRepoPayload>) {
@@ -267,8 +288,9 @@ export function* watchFetchBranchesAndCommits() {
 }
 
 function* handleRepoRouteChange(action: Action<Match>) {
-  const { url } = action.payload!;
-  yield put(gotoRepo(url));
+  const { repo, org, resource } = action.payload!.params;
+  const uri = `${resource}/${org}/${repo}`;
+  yield put(gotoRepo(uri));
 }
 
 export function* watchRepoRouteChange() {

@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import 'ui/angular_ui_select';
 
 import { aggTypes } from 'ui/agg_types/index';
@@ -61,12 +62,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlCreatePopulationJob', function (
-    $scope,
-    $timeout,
-    Private,
-    AppState,
-    i18n) {
+  .controller('MlCreatePopulationJob', function ($scope, $timeout, Private, AppState) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
@@ -117,19 +113,19 @@ module
     timeBasedIndexCheck(indexPattern, true);
 
     const pageTitle = (savedSearch.id !== undefined) ?
-      i18n('xpack.ml.newJob.simple.population.savedSearchPageTitle', {
+      i18n.translate('xpack.ml.newJob.simple.population.savedSearchPageTitle', {
         defaultMessage: 'saved search {savedSearchTitle}',
         values: { savedSearchTitle: savedSearch.title }
       }) :
-      i18n('xpack.ml.newJob.simple.population.indexPatternPageTitle', {
+      i18n.translate('xpack.ml.newJob.simple.population.indexPatternPageTitle', {
         defaultMessage: 'index pattern {indexPatternTitle}',
         values: { indexPatternTitle: indexPattern.title }
       });
 
-    $scope.analysisStoppingLabel = i18n('xpack.ml.newJob.simple.population.analysisStoppingLabel', {
+    $scope.analysisStoppingLabel = i18n.translate('xpack.ml.newJob.simple.population.analysisStoppingLabel', {
       defaultMessage: 'Analysis stopping'
     });
-    $scope.stopAnalysisLabel = i18n('xpack.ml.newJob.simple.population.stopAnalysisLabel', {
+    $scope.stopAnalysisLabel = i18n.translate('xpack.ml.newJob.simple.population.stopAnalysisLabel', {
       defaultMessage: 'Stop analysis'
     });
 
@@ -150,52 +146,52 @@ module
       timeFields: [],
       splitText: '',
       intervals: [{
-        title: i18n('xpack.ml.newJob.simple.population.intervals.autoTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.autoTitle', {
           defaultMessage: 'Auto'
         }),
         value: 'auto',
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.millisecondTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.millisecondTitle', {
           defaultMessage: 'Millisecond'
         }),
         value: 'ms'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.secondTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.secondTitle', {
           defaultMessage: 'Second'
         }),
         value: 's'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.minuteTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.minuteTitle', {
           defaultMessage: 'Minute'
         }),
         value: 'm'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.hourlyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.hourlyTitle', {
           defaultMessage: 'Hourly'
         }),
         value: 'h'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.dailyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.dailyTitle', {
           defaultMessage: 'Daily'
         }),
         value: 'd'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.weeklyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.weeklyTitle', {
           defaultMessage: 'Weekly'
         }),
         value: 'w'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.monthlyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.monthlyTitle', {
           defaultMessage: 'Monthly'
         }),
         value: 'M'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.yearlyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.yearlyTitle', {
           defaultMessage: 'Yearly'
         }),
         value: 'y'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.customTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.customTitle', {
           defaultMessage: 'Custom'
         }),
         value: 'custom'
@@ -378,7 +374,7 @@ module
         chartDataUtils.loadDocCountData($scope.formConfig, $scope.chartData)
           .then((resp) => {
             if (thisLoadTimestamp === $scope.chartData.lastLoadTimestamp) {
-              _.each(dtrs, (dtr, id) => {
+              _.each(dtrs, (dtr, id) => { // eslint-disable-line no-unused-vars
                 const state = (resp.totalResults) ? CHART_STATE.LOADED : CHART_STATE.NO_RESULTS;
                 $scope.chartStates.fields[id] = state;
               });
@@ -400,7 +396,7 @@ module
     };
 
     function setFieldsChartStates(state) {
-      _.each($scope.chartStates.fields, (chart, key) => {
+      _.each($scope.chartStates.fields, (chart, key) => { // eslint-disable-line no-unused-vars
         $scope.chartStates.fields[key] = state;
       });
       $scope.$applyAsync();
@@ -515,13 +511,13 @@ module
               })
               .catch((resp) => {
                 msgs.error(
-                  i18n('xpack.ml.newJob.simple.population.couldNotOpenJobErrorMessage', {
+                  i18n.translate('xpack.ml.newJob.simple.population.couldNotOpenJobErrorMessage', {
                     defaultMessage: 'Could not open job:',
                   }),
                   resp
                 );
                 msgs.error(
-                  i18n('xpack.ml.newJob.simple.population.jobCreatedAndDatafeedCreatingAnywayErrorMessage', {
+                  i18n.translate('xpack.ml.newJob.simple.population.jobCreatedAndDatafeedCreatingAnywayErrorMessage', {
                     defaultMessage: 'Job created, creating datafeed anyway'
                   })
                 );
@@ -533,7 +529,7 @@ module
           .catch((resp) => {
             // save failed
             msgs.error(
-              i18n('xpack.ml.newJob.simple.population.saveFailedErrorMessage', {
+              i18n.translate('xpack.ml.newJob.simple.population.saveFailedErrorMessage', {
                 defaultMessage: 'Save failed:',
               }),
               resp.resp
@@ -581,7 +577,7 @@ module
                 .catch((resp) => {
                   // datafeed failed
                   msgs.error(
-                    i18n('xpack.ml.newJob.simple.population.couldNotStartDatafeedErrorMessage', {
+                    i18n.translate('xpack.ml.newJob.simple.population.couldNotStartDatafeedErrorMessage', {
                       defaultMessage: 'Could not start datafeed:'
                     }),
                     resp
@@ -596,7 +592,7 @@ module
           })
           .catch((resp) => {
             msgs.error(
-              i18n('xpack.ml.newJob.simple.population.saveDatafeedFailedErrorMessage', {
+              i18n.translate('xpack.ml.newJob.simple.population.saveDatafeedFailedErrorMessage', {
                 defaultMessage: 'Save datafeed failed:',
               }),
               resp

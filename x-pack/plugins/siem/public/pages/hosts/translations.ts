@@ -6,22 +6,23 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const HOSTS = i18n.translate('xpack.siem.hosts.hosts', {
+export const KQL_PLACEHOLDER = i18n.translate('xpack.siem.hosts.kqlPlaceholder', {
+  defaultMessage: 'e.g. host.name: "foo"',
+});
+
+export const PAGE_TITLE = i18n.translate('xpack.siem.hosts.pageTitle', {
   defaultMessage: 'Hosts',
 });
 
-export const NO_AUDITBEAT_INDICES = i18n.translate('xpack.siem.hosts.noAuditBeatIndicies', {
-  defaultMessage: "Looks like you don't have any Auditbeat indices.",
+export const EMPTY_TITLE = i18n.translate('xpack.siem.hosts.emptyTitle', {
+  defaultMessage:
+    'It looks like you don’t have any indices relevant to hosts in the SIEM application',
 });
 
-export const KQL_PLACE_HOLDER = i18n.translate('xpack.siem.hosts.kqlPlaceHolder', {
-  defaultMessage: 'Search… (e.g. host.name:"foo" AND process.name:"bar")',
+export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.hosts.emptyActionPrimary', {
+  defaultMessage: 'View setup instructions',
 });
 
-export const LETS_ADD_SOME = i18n.translate('xpack.siem.hosts.letsAddSome.description', {
-  defaultMessage: "Let's add some!",
-});
-
-export const SETUP_INSTRUCTIONS = i18n.translate('xpack.siem.hosts.setupInstructions', {
-  defaultMessage: 'Setup Instructions',
+export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.hosts.emptyActionSecondary', {
+  defaultMessage: 'Go to documentation',
 });
