@@ -46,7 +46,7 @@ export class CustomizePanelFlyoutUi extends Component<CustomizePanelProps, State
   constructor(props: CustomizePanelProps) {
     super(props);
     this.state = {
-      title: undefined,
+      title: props.embeddable.getInput().title,
     };
   }
 
@@ -78,7 +78,7 @@ export class CustomizePanelFlyoutUi extends Component<CustomizePanelProps, State
               data-test-subj="customEmbeddablePanelTitleInput"
               name="min"
               type="text"
-              placeholder={this.state.title === undefined ? this.props.embeddable.getTitle() : ''}
+              placeholder={this.props.embeddable.getOutput().defaultTitle}
               value={this.state.title || ''}
               onChange={e => this.updateTitle(e.target.value)}
               aria-label={this.props.intl.formatMessage({
