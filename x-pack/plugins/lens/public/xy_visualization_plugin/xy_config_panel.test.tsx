@@ -12,6 +12,8 @@ import { XYArgs, SeriesType } from './types';
 import { Position } from '@elastic/charts';
 
 describe('XYConfigPanel', () => {
+  const dragDropContext = { dragging: undefined, setDragging: jest.fn() };
+
   function mockDatasource(): DatasourcePublicAPI {
     return {
       duplicateColumn: () => [],
@@ -60,6 +62,7 @@ describe('XYConfigPanel', () => {
       const state = testState();
       const component = mount(
         <XYConfigPanel
+          dragDropContext={dragDropContext}
           datasource={mockDatasource()}
           setState={setState}
           state={{ ...state, seriesType: fromSeriesType }}
@@ -100,6 +103,7 @@ describe('XYConfigPanel', () => {
       const state = testState();
       const component = mount(
         <XYConfigPanel
+          dragDropContext={dragDropContext}
           datasource={mockDatasource()}
           setState={setState}
           state={{ ...state, legend: { ...state.legend, isVisible } }}
@@ -124,7 +128,12 @@ describe('XYConfigPanel', () => {
     const testSetTitle = (title: string) => {
       const setState = jest.fn();
       const component = mount(
-        <XYConfigPanel datasource={mockDatasource()} setState={setState} state={testState()} />
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          datasource={mockDatasource()}
+          setState={setState}
+          state={testState()}
+        />
       );
 
       (testSubj(component, 'lnsXY_title').onChange as Function)({ target: { value: title } });
@@ -145,7 +154,12 @@ describe('XYConfigPanel', () => {
     const testLegendPosition = (position: Position) => {
       const setState = jest.fn();
       const component = mount(
-        <XYConfigPanel datasource={mockDatasource()} setState={setState} state={testState()} />
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          datasource={mockDatasource()}
+          setState={setState}
+          state={testState()}
+        />
       );
 
       (testSubj(component, 'lnsXY_legendPosition').onChange as Function)(position);
@@ -172,7 +186,12 @@ describe('XYConfigPanel', () => {
     const testSetTitle = (title: string) => {
       const setState = jest.fn();
       const component = mount(
-        <XYConfigPanel datasource={mockDatasource()} setState={setState} state={testState()} />
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          datasource={mockDatasource()}
+          setState={setState}
+          state={testState()}
+        />
       );
 
       (testSubj(component, 'lnsXY_xTitle').onChange as Function)({ target: { value: title } });
@@ -197,6 +216,7 @@ describe('XYConfigPanel', () => {
     const state = testState();
     mount(
       <XYConfigPanel
+        dragDropContext={dragDropContext}
         datasource={datasource}
         setState={jest.fn()}
         state={{ ...state, x: { ...state.x, accessor: 'shazm' } }}
@@ -226,6 +246,7 @@ describe('XYConfigPanel', () => {
       const state = testState();
       const component = mount(
         <XYConfigPanel
+          dragDropContext={dragDropContext}
           datasource={mockDatasource()}
           setState={setState}
           state={{ ...state, x: { ...state.x, showGridlines } }}
@@ -250,7 +271,12 @@ describe('XYConfigPanel', () => {
     const testSetTitle = (title: string) => {
       const setState = jest.fn();
       const component = mount(
-        <XYConfigPanel datasource={mockDatasource()} setState={setState} state={testState()} />
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          datasource={mockDatasource()}
+          setState={setState}
+          state={testState()}
+        />
       );
 
       (testSubj(component, 'lnsXY_yTitle').onChange as Function)({ target: { value: title } });
@@ -275,6 +301,7 @@ describe('XYConfigPanel', () => {
     const state = testState();
     mount(
       <XYConfigPanel
+        dragDropContext={dragDropContext}
         datasource={datasource}
         setState={jest.fn()}
         state={{ ...state, y: { ...state.y, accessors: ['a', 'b', 'c'] } }}
@@ -308,6 +335,7 @@ describe('XYConfigPanel', () => {
     const state = testState();
     const component = mount(
       <XYConfigPanel
+        dragDropContext={dragDropContext}
         datasource={datasource}
         setState={setState}
         state={{ ...state, y: { ...state.y, accessors: ['a', 'b', 'c'] } }}
@@ -329,6 +357,7 @@ describe('XYConfigPanel', () => {
     const state = testState();
     const component = mount(
       <XYConfigPanel
+        dragDropContext={dragDropContext}
         datasource={{ ...mockDatasource(), generateColumnId: () => 'zed' }}
         setState={setState}
         state={{ ...state, y: { ...state.y, accessors: ['a', 'b', 'c'] } }}
@@ -349,6 +378,7 @@ describe('XYConfigPanel', () => {
       const state = testState();
       const component = mount(
         <XYConfigPanel
+          dragDropContext={dragDropContext}
           datasource={mockDatasource()}
           setState={setState}
           state={{ ...state, y: { ...state.y, showGridlines } }}

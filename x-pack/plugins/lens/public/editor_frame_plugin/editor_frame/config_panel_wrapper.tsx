@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useContext } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
 import { Visualization, DatasourcePublicAPI } from '../../types';
+import { DragContext } from '../../drag_drop';
 
 interface ConfigPanelWrapperProps {
   visualizationState: unknown;
@@ -19,6 +20,7 @@ interface ConfigPanelWrapperProps {
 }
 
 export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
+  const context = useContext(DragContext);
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
       props.dispatch({
@@ -52,6 +54,7 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
         <NativeRenderer
           render={props.visualizationMap[props.activeVisualizationId].renderConfigPanel}
           nativeProps={{
+            dragDropContext: context,
             state: props.visualizationState,
             setState: setVisualizationState,
             datasource: props.datasourcePublicAPI,

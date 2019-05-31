@@ -71,6 +71,11 @@ const expectedIndexPatterns = {
   },
 };
 
+const dragDropContext = {
+  dragging: undefined,
+  setDragging: jest.fn(),
+};
+
 describe('IndexPattern Data Source', () => {
   let persistedState: IndexPatternPersistedState;
   let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
@@ -126,14 +131,22 @@ describe('IndexPattern Data Source', () => {
 
     it('should match snapshot', () => {
       expect(
-        shallow(<IndexPatternDataPanel state={state} setState={() => {}} />)
+        shallow(
+          <IndexPatternDataPanel
+            dragDropContext={dragDropContext}
+            state={state}
+            setState={() => {}}
+          />
+        )
       ).toMatchSnapshot();
     });
 
     it('should call setState when the index pattern is switched', async () => {
       const setState = jest.fn();
 
-      const wrapper = shallow(<IndexPatternDataPanel {...{ state, setState }} />);
+      const wrapper = shallow(
+        <IndexPatternDataPanel dragDropContext={dragDropContext} {...{ state, setState }} />
+      );
 
       const comboBox = wrapper.find(EuiComboBox);
 
@@ -238,6 +251,7 @@ describe('IndexPattern Data Source', () => {
       it('should render a dimension panel', () => {
         const wrapper = shallow(
           <IndexPatternDimensionPanel
+            dragDropContext={dragDropContext}
             state={state}
             setState={() => {}}
             columnId={'col2'}
@@ -253,6 +267,7 @@ describe('IndexPattern Data Source', () => {
 
         shallow(
           <IndexPatternDimensionPanel
+            dragDropContext={dragDropContext}
             state={state}
             setState={() => {}}
             columnId={'col2'}
@@ -266,6 +281,7 @@ describe('IndexPattern Data Source', () => {
       it('should filter out all selections if the filter returns false', () => {
         const wrapper = shallow(
           <IndexPatternDimensionPanel
+            dragDropContext={dragDropContext}
             state={state}
             setState={() => {}}
             columnId={'col2'}
@@ -281,6 +297,7 @@ describe('IndexPattern Data Source', () => {
 
         const wrapper = shallow(
           <IndexPatternDimensionPanel
+            dragDropContext={dragDropContext}
             state={state}
             setState={setState}
             columnId={'col2'}

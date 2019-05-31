@@ -152,6 +152,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               ref={el =>
                 el &&
                 datasource.renderDimensionPanel(el, {
+                  dragDropContext: props.dragDropContext,
                   columnId: state.x.accessor,
                   filterOperations: () => true,
                 })
@@ -193,6 +194,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     ref={el =>
                       el &&
                       datasource.renderDimensionPanel(el, {
+                        dragDropContext: props.dragDropContext,
                         columnId: accessor,
                         filterOperations: op => !op.isBucketed && op.dataType === 'number',
                       })

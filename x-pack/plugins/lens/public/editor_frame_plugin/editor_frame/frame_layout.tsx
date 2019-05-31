@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { RootDragDropProvider } from '../../drag_drop';
 
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;
@@ -16,14 +17,16 @@ export interface FrameLayoutProps {
 
 export function FrameLayout(props: FrameLayoutProps) {
   return (
-    <EuiFlexGroup>
-      {/* TODO style this and add workspace prop and loading flags */}
-      <EuiFlexItem>{props.dataPanel}</EuiFlexItem>
-      <EuiFlexItem>{props.workspacePanel}</EuiFlexItem>
-      <EuiFlexItem>
-        {props.configPanel}
-        {props.suggestionsPanel}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <RootDragDropProvider>
+      <EuiFlexGroup>
+        {/* TODO style this and add workspace prop and loading flags */}
+        <EuiFlexItem>{props.dataPanel}</EuiFlexItem>
+        <EuiFlexItem>{props.workspacePanel}</EuiFlexItem>
+        <EuiFlexItem>
+          {props.configPanel}
+          {props.suggestionsPanel}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </RootDragDropProvider>
   );
 }
