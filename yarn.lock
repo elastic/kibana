@@ -14267,10 +14267,10 @@ heavy@6.x.x:
     hoek "5.x.x"
     joi "13.x.x"
 
-highlight.js@9.0.0:
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.0.0.tgz#f5f8d564c97ab374a046f5598077ae6adddbe620"
-  integrity sha1-9fjVZMl6s3SgRvVZgHeuat3b5iA=
+highlight.js@9.15.8:
+  version "9.15.8"
+  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.15.8.tgz#f344fda123f36f1a65490e932cf90569e4999971"
+  integrity sha512-RrapkKQWwE+wKdF73VsOa2RQdIoO3mxwJ4P8mhbI6KYJUraUHRKM5w5zQQKXNk0xNL4UVRdulV9SBJcmzJNzVA==
 
 highlight.js@^9.12.0, highlight.js@~9.12.0:
   version "9.12.0"
