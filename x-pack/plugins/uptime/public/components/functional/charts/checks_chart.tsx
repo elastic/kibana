@@ -70,15 +70,8 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
         </h4>
       </EuiTitle>
       <EuiPanel>
-        <Chart renderer="canvas">
-          {
-            // @ts-ignore
-            <Settings
-              domain={{ absoluteStartDate, absoluteEndDate }}
-              legendPosition={Position.Top}
-              showLegend={false}
-            />
-          }
+        <Chart>
+          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
           <Axis
             id={getAxisId('checksBottom')}
             position={Position.Bottom}
