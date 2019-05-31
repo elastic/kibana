@@ -18,24 +18,37 @@
  */
 
 import { I18nContext } from 'ui/i18n';
-import { DashboardCloneModal } from './clone_modal';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { DashboardCloneModal } from './clone_modal';
 
-export function showCloneModal(onClone, title) {
+export function showCloneModal(
+  onClone: (
+    newTitle: string,
+    isTitleDuplicateConfirmed: boolean,
+    onTitleDuplicate: () => void
+  ) => Promise<{ id: string } | { error: Error }>,
+  title: string
+) {
   const container = document.createElement('div');
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
   };
 
-  const onCloneConfirmed = (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) => {
-    onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate).then(({ id, error }) => {
-      if (id || error) {
-        closeModal();
+  const onCloneConfirmed = async (
+    newTitle: string,
+    isTitleDuplicateConfirmed: boolean,
+    onTitleDuplicate: () => void
+  ) => {
+    onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate).then(
+      (response: { id: string } | { error: Error }) => {
+        if ((response as { error: Error }).error) {
+          closeModal();
+        }
       }
-    });
+    );
   };
   document.body.appendChild(container);
   const element = (

@@ -17,40 +17,53 @@
  * under the License.
  */
 
-import { I18nContext } from 'ui/i18n';
-import { DashboardAddPanel } from './add_panel';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { I18nContext } from 'ui/i18n';
+
+import { EuiWrappingPopover } from '@elastic/eui';
+import { OptionsMenu } from './options';
 
 let isOpen = false;
 
-export function showAddPanel(addNewPanel, addNewVis, embeddableFactories) {
+const container = document.createElement('div');
+
+const onClose = () => {
+  ReactDOM.unmountComponentAtNode(container);
+  isOpen = false;
+};
+
+export function showOptionsPopover({
+  anchorElement,
+  useMargins,
+  onUseMarginsChange,
+  hidePanelTitles,
+  onHidePanelTitlesChange,
+}: {
+  anchorElement: HTMLElement;
+  useMargins: boolean;
+  onUseMarginsChange: (useMargins: boolean) => void;
+  hidePanelTitles: boolean;
+  onHidePanelTitlesChange: (hideTitles: boolean) => void;
+}) {
   if (isOpen) {
+    onClose();
     return;
   }
 
   isOpen = true;
-  const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    isOpen = false;
-  };
-
-  const addNewVisWithCleanup = () => {
-    onClose();
-    addNewVis();
-  };
 
   document.body.appendChild(container);
   const element = (
     <I18nContext>
-      <DashboardAddPanel
-        onClose={onClose}
-        addNewPanel={addNewPanel}
-        addNewVis={addNewVisWithCleanup}
-        embeddableFactories={embeddableFactories}
-      />
+      <EuiWrappingPopover id="popover" button={anchorElement} isOpen={true} closePopover={onClose}>
+        <OptionsMenu
+          useMargins={useMargins}
+          onUseMarginsChange={onUseMarginsChange}
+          hidePanelTitles={hidePanelTitles}
+          onHidePanelTitlesChange={onHidePanelTitlesChange}
+        />
+      </EuiWrappingPopover>
     </I18nContext>
   );
   ReactDOM.render(element, container);

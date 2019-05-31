@@ -18,40 +18,47 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
 
-import {
-  EuiForm,
-  EuiFormRow,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
 
-class OptionsMenuUi extends Component {
+interface Props {
+  useMargins: boolean;
+  onUseMarginsChange: (useMargins: boolean) => void;
+  hidePanelTitles: boolean;
+  onHidePanelTitlesChange: (hideTitles: boolean) => void;
+  intl: InjectedIntl;
+}
 
-  state = {
-    useMargins: this.props.useMargins,
-    hidePanelTitles: this.props.hidePanelTitles,
+interface State {
+  useMargins: boolean;
+  hidePanelTitles: boolean;
+}
+
+class OptionsMenuUi extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      useMargins: this.props.useMargins,
+      hidePanelTitles: this.props.hidePanelTitles,
+    };
   }
 
-  handleUseMarginsChange = (evt) => {
+  handleUseMarginsChange = (evt: any) => {
     const isChecked = evt.target.checked;
     this.props.onUseMarginsChange(isChecked);
     this.setState({ useMargins: isChecked });
-  }
+  };
 
-  handleHidePanelTitlesChange = (evt) => {
+  handleHidePanelTitlesChange = (evt: any) => {
     const isChecked = !evt.target.checked;
     this.props.onHidePanelTitlesChange(isChecked);
     this.setState({ hidePanelTitles: isChecked });
-  }
+  };
 
   render() {
     return (
-      <EuiForm
-        data-test-subj="dashboardOptionsMenu"
-      >
-
+      <EuiForm data-test-subj="dashboardOptionsMenu">
         <EuiFormRow>
           <EuiSwitch
             label={this.props.intl.formatMessage({
@@ -75,17 +82,9 @@ class OptionsMenuUi extends Component {
             data-test-subj="dashboardPanelTitlesCheckbox"
           />
         </EuiFormRow>
-
       </EuiForm>
     );
   }
 }
-
-OptionsMenuUi.propTypes = {
-  useMargins: PropTypes.bool.isRequired,
-  onUseMarginsChange: PropTypes.func.isRequired,
-  hidePanelTitles: PropTypes.bool.isRequired,
-  onHidePanelTitlesChange: PropTypes.func.isRequired,
-};
 
 export const OptionsMenu = injectI18n(OptionsMenuUi);
