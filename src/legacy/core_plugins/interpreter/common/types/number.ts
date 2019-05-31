@@ -17,15 +17,21 @@
  * under the License.
  */
 
-export const number = () => ({
-  name: 'number',
+import { ExpressionType } from '../../types';
+import { Datatable } from './datatable';
+import { Render } from './render';
+
+const name = 'number';
+
+export const number = (): ExpressionType<typeof name, number> => ({
+  name,
   from: {
     null: () => 0,
     boolean: b => Number(b),
     string: n => Number(n),
   },
   to: {
-    render: value => {
+    render: (value: number): Render<{ text: string }> => {
       const text = `${value}`;
       return {
         type: 'render',
@@ -33,7 +39,7 @@ export const number = () => ({
         value: { text },
       };
     },
-    datatable: value => ({
+    datatable: (value): Datatable => ({
       type: 'datatable',
       columns: [{ name: 'value', type: 'number' }],
       rows: [{ value }],
