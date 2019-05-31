@@ -17,11 +17,24 @@
  * under the License.
  */
 
-export const render = () => ({
-  name: 'render',
+import { ExpressionType } from '../../types';
+
+const name = 'render';
+
+/**
+ * Represents an object that is intended to be rendered.
+ */
+export interface Render<T> {
+  type: typeof name;
+  as: string;
+  value: T;
+}
+
+export const render = (): ExpressionType<typeof name, Render<unknown>> => ({
+  name,
   from: {
-    '*': v => ({
-      type: 'render',
+    '*': <T>(v: T): Render<T> => ({
+      type: name,
       as: 'debug',
       value: v,
     }),
