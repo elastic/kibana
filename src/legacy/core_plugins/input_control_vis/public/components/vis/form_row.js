@@ -47,7 +47,7 @@ export function FormRow(props) {
 }
 
 FormRow.propTypes = {
-  label: PropTypes.string.isRequired,
+  label: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
   id: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
   controlIndex: PropTypes.number.isRequired,
