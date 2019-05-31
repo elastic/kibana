@@ -23,6 +23,8 @@
   labels: [
     'release_note:skip',
     'renovate',
+    'v8.0.0',
+    'v7.3.0'
   ],
 
   major: {
