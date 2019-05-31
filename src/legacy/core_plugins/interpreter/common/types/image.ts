@@ -17,10 +17,15 @@
  * under the License.
  */
 
-export const image = () => ({
-  name: 'image',
+import { ExpressionType } from '../../types';
+import { Render } from './render';
+
+const name = 'image';
+
+export const image = (): ExpressionType<typeof name, undefined> => ({
+  name,
   to: {
-    render: input => {
+    render: <T>(input: T): Render<T> => {
       return {
         type: 'render',
         as: 'image',
