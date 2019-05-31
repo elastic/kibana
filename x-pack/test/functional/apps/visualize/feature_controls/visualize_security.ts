@@ -22,7 +22,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
-  const waitTimeout = 20000;
 
   describe('feature controls security', () => {
     before(async () => {
@@ -56,7 +55,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await PageObjects.security.logout();
 
         await PageObjects.security.login(
           'global_visualize_all_user',
@@ -68,7 +67,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
-        await PageObjects.security.forceLogout();
+        await PageObjects.security.logout();
         await security.role.delete('global_visualize_all_role');
         await security.user.delete('global_visualize_all_user');
       });
@@ -82,7 +81,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', waitTimeout);
+        await testSubjects.existOrFail('visualizeLandingPage', 10000);
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -95,7 +94,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizationLoader', waitTimeout);
+        await testSubjects.existOrFail('visualizationLoader', 10000);
       });
 
       it('can save existing Visualization', async () => {
@@ -103,7 +102,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizeSaveButton', waitTimeout);
+        await testSubjects.existOrFail('visualizeSaveButton', 10000);
       });
 
       it('Embed code shows create short-url button', async () => {
@@ -149,7 +148,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
-        await PageObjects.security.forceLogout();
+        await PageObjects.security.logout();
         await security.role.delete('global_visualize_read_role');
         await security.user.delete('global_visualize_read_user');
       });
@@ -163,7 +162,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', waitTimeout);
+        await testSubjects.existOrFail('visualizeLandingPage', 10000);
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -176,7 +175,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizationLoader', waitTimeout);
+        await testSubjects.existOrFail('visualizationLoader', 10000);
       });
 
       it(`can't save existing Visualization`, async () => {
@@ -184,8 +183,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('shareTopNavButton', waitTimeout);
-        await testSubjects.missingOrFail('visualizeSaveButton', waitTimeout);
+        await testSubjects.existOrFail('shareTopNavButton', 10000);
+        await testSubjects.missingOrFail('visualizeSaveButton', 10000);
       });
 
       it(`Embed Code doesn't show create short-url button`, async () => {
@@ -232,7 +231,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
-        await PageObjects.security.forceLogout();
+        await PageObjects.security.logout();
         await security.role.delete('no_visualize_privileges_role');
         await security.user.delete('no_visualize_privileges_user');
       });
@@ -242,7 +241,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', waitTimeout);
+        await testSubjects.existOrFail('homeApp', 10000);
       });
 
       it(`edit page redirects to home page`, async () => {
@@ -250,7 +249,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', waitTimeout);
+        await testSubjects.existOrFail('homeApp', 10000);
       });
     });
   });

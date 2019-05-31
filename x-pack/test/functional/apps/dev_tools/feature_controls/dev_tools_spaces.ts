@@ -16,9 +16,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const grokDebugger = getService('grokDebugger');
 
-  describe('spaces', function() {
-    // Geckodriver often crashes with https://github.com/mozilla/geckodriver/issues/1519
-    this.tags(['skipFirefox']);
+  describe('spaces', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
@@ -93,21 +91,21 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToUrl('console', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', 20000);
+        await testSubjects.existOrFail('homeApp', 10000);
       });
 
       it(`navigating to search profiler redirect to homepage`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', 20000);
+        await testSubjects.existOrFail('homeApp', 10000);
       });
 
       it(`navigating to grok debugger redirect to homepage`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', 20000);
+        await testSubjects.existOrFail('homeApp', 10000);
       });
     });
   });
