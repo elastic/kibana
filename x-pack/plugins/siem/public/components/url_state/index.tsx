@@ -113,7 +113,6 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
     if (urlKey === CONSTANTS.timerange) {
       const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
       const globalId: InputsModelId = 'global';
-
       const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', timerangeStateData) };
       const globalType: TimeRangeKinds = get('global.timerange.kind', timerangeStateData);
       if (globalType) {
