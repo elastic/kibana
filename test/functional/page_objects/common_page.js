@@ -105,17 +105,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async loginIfPrompted(appUrl) {
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await retry.tryForTime(
-        defaultTryTimeout * 2,
-        async () => {
-          await find.byCssSelector('[data-test-subj="kibanaChrome"]');
-        },
-        async () => {
-          log.debug(`Refreshing the page`);
-          await browser.refresh();
-        }
-      );
-      //await find.byCssSelector('[data-test-subj="kibanaChrome"]', defaultTryTimeout * 2);
+      await find.byCssSelector('[data-test-subj="kibanaChrome"]', defaultTryTimeout * 2);
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
