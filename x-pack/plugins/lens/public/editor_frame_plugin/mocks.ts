@@ -54,7 +54,7 @@ export type MockedDependencies = Omit<EditorFrameSetupPlugins, 'data'> & {
 };
 
 export function createExpressionRendererMock() {
-  return jest.fn();
+  return jest.fn(() => null);
 }
 
 export function createMockDependencies() {
