@@ -35,9 +35,9 @@ export default function(kibana: any) {
       //   'plugins/embeddable_api/__test__/actions/say_hello_action',
       //   'plugins/embeddable_api/__test__/actions/send_message_action',
       // ],
-      // embeddableFactories: [
-      //   'plugins/embeddable_api/__test__/embeddables/hello_world/hello_world_embeddable_factory',
-      // ],
+      embeddableFactories: [
+        'plugins/embeddable_api/__test__/embeddables/hello_world/hello_world_embeddable_factory',
+      ],
       // styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
     init(server: Legacy.Server) {
