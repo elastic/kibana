@@ -74,11 +74,11 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
       return result;
     } else {
       // TODO: Use Array.flat once supported
-      const subTree = tree
-        .filter(s => s.members)
-        .map(s => s.members)
-        .reduce((prev, current) => (prev || []).concat(current || []), []);
-      if (subTree && subTree.length > 0) {
+      const subTree = tree.reduce(
+        (s, t) => (t.members ? s.concat(t.members) : s),
+        [] as SymbolWithMembers[]
+      );
+      if (subTree.length > 0) {
         return findContainer(subTree, containerName);
       } else {
         return undefined;
