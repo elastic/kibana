@@ -12,6 +12,7 @@ import { Action } from './state_management';
 import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 import { DragDrop } from '../../drag_drop';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
+import { buildExpression } from './expression_helpers';
 
 export interface WorkspacePanelProps {
   activeDatasource: Datasource;
@@ -74,14 +75,19 @@ export function WorkspacePanel({
     }
 
     const activeVisualization = visualizationMap[activeVisualizationId];
-    const datasourceExpression = activeDatasource.toExpression(datasourceState);
-    const visualizationExpression = activeVisualization.toExpression(
+    const expression = buildExpression(
+      activeVisualization,
       visualizationState,
+      activeDatasource,
+      datasourceState,
       datasourcePublicAPI
     );
-    const expression = `${datasourceExpression} | ${visualizationExpression}`;
 
-    return <ExpressionRendererComponent expression={expression} />;
+    if (expression) {
+      return <ExpressionRendererComponent expression={expression} />;
+    } else {
+      return <span>Error while building expression</span>;
+    }
   }
 
   return (
