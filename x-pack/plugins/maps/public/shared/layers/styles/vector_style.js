@@ -280,12 +280,16 @@ export class VectorStyle extends AbstractStyle {
 
   getIcon = () => {
     const styles = this.getProperties();
+    const symbolId = this.arePointsSymbolizedAsCircles()
+      ? undefined
+      : this._descriptor.properties.symbol.options.symbolId;
     return (
       <VectorIcon
         loadIsPointsOnly={this._getIsPointsOnly}
         loadIsLinesOnly={this._getIsLinesOnly}
         fillColor={styles.fillColor}
         lineColor={styles.lineColor}
+        symbolId={symbolId}
       />
     );
   }

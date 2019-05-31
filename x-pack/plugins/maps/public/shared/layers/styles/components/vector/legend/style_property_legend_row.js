@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import { styleOptionShapes, rangeShape } from '../style_option_shapes';
 import { VectorStyle } from '../../../vector_style';
 import { ColorGradient } from '../../color_gradient';
-import { PointIcon } from './point_icon';
+import { CircleIcon } from './circle_icon';
 import { getVectorStyleLabel } from '../get_vector_style_label';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { StyleLegendRow } from '../../style_legend_row';
@@ -23,9 +23,9 @@ function getLineWidthIcons() {
     width: '12px',
   };
   return [
-    <PointIcon style={{ ...defaultStyle, strokeWidth: '1px' }}/>,
-    <PointIcon style={{ ...defaultStyle, strokeWidth: '2px' }}/>,
-    <PointIcon style={{ ...defaultStyle, strokeWidth: '3px' }}/>,
+    <CircleIcon style={{ ...defaultStyle, strokeWidth: '1px' }}/>,
+    <CircleIcon style={{ ...defaultStyle, strokeWidth: '2px' }}/>,
+    <CircleIcon style={{ ...defaultStyle, strokeWidth: '3px' }}/>,
   ];
 }
 
@@ -36,9 +36,9 @@ function getSymbolSizeIcons() {
     fill: 'grey',
   };
   return [
-    <PointIcon style={{ ...defaultStyle, width: '4px' }}/>,
-    <PointIcon style={{ ...defaultStyle, width: '8px' }}/>,
-    <PointIcon style={{ ...defaultStyle, width: '12px' }}/>,
+    <CircleIcon style={{ ...defaultStyle, width: '4px' }}/>,
+    <CircleIcon style={{ ...defaultStyle, width: '8px' }}/>,
+    <CircleIcon style={{ ...defaultStyle, width: '12px' }}/>,
   ];
 }
 
