@@ -27,12 +27,12 @@ import {
   GuideText,
 } from '../../components';
 
-const basicHtml = require('./menu_button_basic.html');
-const primaryHtml = require('./menu_button_primary.html');
-const dangerHtml = require('./menu_button_danger.html');
-const withIconHtml = require('./menu_button_with_icon.html');
-const groupHtml = require('./menu_button_group.html');
-const elementsHtml = require('./menu_button_elements.html');
+import basicHtml from './menu_button_basic.html';
+import primaryHtml from './menu_button_primary.html';
+import dangerHtml from './menu_button_danger.html';
+import withIconHtml from './menu_button_with_icon.html';
+import groupHtml from './menu_button_group.html';
+import elementsHtml from './menu_button_elements.html';
 
 export default props => (
   <GuidePage title={props.route.name}>

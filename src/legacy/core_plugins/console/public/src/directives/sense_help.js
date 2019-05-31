@@ -18,12 +18,13 @@
  */
 
 require('./sense_help_example');
+import template from './help.html';
 
 require('ui/modules')
   .get('app/sense')
   .directive('senseHelp', function () {
     return {
       restrict: 'E',
-      template: require('./help.html')
+      template
     };
   });

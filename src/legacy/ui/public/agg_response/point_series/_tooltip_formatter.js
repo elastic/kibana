@@ -19,11 +19,12 @@
 
 import $ from 'jquery';
 import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
+import template from 'ui/agg_response/point_series/_tooltip.html';
 
 export function PointSeriesTooltipFormatter($compile, $rootScope) {
 
   const $tooltipScope = $rootScope.$new();
-  const $tooltip = $(require('ui/agg_response/point_series/_tooltip.html'));
+  const $tooltip = $(template);
   $compile($tooltip)($tooltipScope);
 
   return function () {

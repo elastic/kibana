@@ -24,6 +24,7 @@ import { TooltipProvider } from '../../vis/components/tooltip';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { VislibVisualizationsTimeMarkerProvider } from './time_marker';
 import { VislibVisualizationsSeriesTypesProvider } from './point_series/series_types';
+import touchdownTmplHtml from '../partials/touchdown.tmpl.html';
 
 export function VislibVisualizationsPointSeriesProvider(Private) {
 
@@ -31,7 +32,7 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
   const Tooltip = Private(TooltipProvider);
   const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
   const seriTypes = Private(VislibVisualizationsSeriesTypesProvider);
-  const touchdownTmpl = _.template(require('../partials/touchdown.tmpl.html'));
+  const touchdownTmpl = _.template(touchdownTmplHtml);
   /**
    * Line Chart Visualization
    *

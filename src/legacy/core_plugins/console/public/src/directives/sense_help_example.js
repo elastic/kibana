@@ -18,7 +18,7 @@
  */
 
 const SenseEditor = require('../sense_editor/editor');
-const exampleText = require('raw-loader!./helpExample.txt').trim();
+import exampleText from 'raw-loader!./helpExample.txt';
 import { applyResizeCheckerToEditors } from '../sense_editor_resize';
 
 require('ui/modules')
@@ -27,7 +27,7 @@ require('ui/modules')
     return {
       restrict: 'E',
       link: function ($scope, $el) {
-        $el.text(exampleText);
+        $el.text(exampleText.trim());
         $scope.editor = new SenseEditor($el);
         applyResizeCheckerToEditors($scope, $el, $scope.editor);
         $scope.editor.setReadOnly(true);

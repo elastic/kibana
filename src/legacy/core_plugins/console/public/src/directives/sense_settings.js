@@ -19,6 +19,7 @@
 
 require('ui/directives/input_focus');
 
+import template from './settings.html';
 const mappings = require('../mappings');
 
 require('ui/modules')
@@ -26,7 +27,7 @@ require('ui/modules')
   .directive('senseSettings', function () {
     return {
       restrict: 'E',
-      template: require('./settings.html'),
+      template,
       controllerAs: 'settings',
       controller: function ($scope, $element) {
         const settings = require('../settings');

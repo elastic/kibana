@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -29,15 +31,15 @@ import {
 } from '../../components';
 
 import Bar from './bar';
-const barSource = require('!!raw-loader!./bar');
+import barSource from '!!raw-loader!./bar';
 const barHtml = renderToHtml(Bar);
 
 import BarOneSection from './bar_one_section';
-const barOneSectionSource = require('!!raw-loader!./bar_one_section');
+import barOneSectionSource from '!!raw-loader!./bar_one_section';
 const barOneSectionHtml = renderToHtml(BarOneSection);
 
 import BarThreeSections from './bar_three_sections';
-const barThreeSectionsSource = require('!!raw-loader!./bar_three_sections');
+import barThreeSectionsSource from '!!raw-loader!./bar_three_sections';
 const barThreeSectionsHtml = renderToHtml(BarThreeSections);
 
 export default props => (
