@@ -4983,10 +4983,10 @@ angular-sanitize@1.6.5:
   resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.6.5.tgz#b5625a817afad2ba58c333e98eef169a1c6f517a"
   integrity sha1-tWJagXr60rpYwzPpju8WmhxvUXo=
 
-angular-sortable-view@0.0.15:
-  version "0.0.15"
-  resolved "https://registry.yarnpkg.com/angular-sortable-view/-/angular-sortable-view-0.0.15.tgz#e8463df909db83d641b028f0773a10d50292874f"
-  integrity sha1-6EY9+Qnbg9ZBsCjwdzoQ1QKSh08=
+angular-sortable-view@0.0.17:
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/angular-sortable-view/-/angular-sortable-view-0.0.17.tgz#99e2679951a86b6ee6ff27b099022943c683fb4f"
+  integrity sha512-2WkhM0Lt/wyMyrX/+7ve9ejSegBd7A4eRBNHEIJz8XMBIOjt+3oM1WpcAm+qNThkmNmmQaDeaYv0TQZw/WDMBw==
 
 angular-ui-ace@0.2.3:
   version "0.2.3"
