@@ -19,7 +19,6 @@ import {
 } from '../../graphql/types';
 import { DefaultDraggable } from '../draggables';
 import { getEmptyTagValue } from '../empty_value';
-import { ExternalLinkIcon } from '../external_link_icon';
 import { FormattedDate } from '../formatted_date';
 import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../links';
 
@@ -122,20 +121,13 @@ export const hostNameRenderer = (host: HostEcsFields, ipFilter?: string): React.
     getEmptyTagValue()
   );
 
-export const whoisRenderer = (ip: string) => (
-  <>
-    <WhoIsLink domain={ip}>{i18n.VIEW_WHOIS}</WhoIsLink>
-    <ExternalLinkIcon />
-  </>
-);
+export const whoisRenderer = (ip: string) => <WhoIsLink domain={ip}>{i18n.VIEW_WHOIS}</WhoIsLink>;
 
 export const reputationRenderer = (ip: string): React.ReactElement => (
   <>
     <VirusTotalLink link={ip}>{i18n.VIEW_VIRUS_TOTAL}</VirusTotalLink>
-    <ExternalLinkIcon />
-    <br />
+    {', '}
     <ReputationLink domain={ip}>{i18n.VIEW_TALOS_INTELLIGENCE}</ReputationLink>
-    <ExternalLinkIcon />
   </>
 );
 

@@ -7,6 +7,7 @@
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 
 import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
@@ -40,10 +41,18 @@ interface OwnProps {
 
 export type IpOverviewProps = OwnProps;
 
+const DescriptionList = styled(EuiDescriptionList)`
+  ${({ theme }) => `
+    dt {
+      font-size: ${theme.eui.euiFontSizeXS} !important;
+    }
+  `}
+`;
+
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => {
   return (
     <EuiFlexItem key={key}>
-      <EuiDescriptionList listItems={descriptionList} />
+      <DescriptionList listItems={descriptionList} />
     </EuiFlexItem>
   );
 };
