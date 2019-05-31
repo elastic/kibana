@@ -45,6 +45,7 @@ export const DeleteWatchesModal = ({
     <EuiOverlayMask>
       <EuiConfirmModal
         buttonColor="danger"
+        data-test-subj="deleteWatchesConfirmation"
         title={confirmButtonText}
         onCancel={() => callback()}
         onConfirm={async () => {

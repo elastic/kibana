@@ -41,8 +41,10 @@ export const loadWatches = (interval: number) => {
     path: `${basePath}/watches`,
     method: 'get',
     interval,
-    processData: ({ watches }: { watches: any }) =>
-      watches.map((watch: any) => Watch.fromUpstreamJson(watch)),
+    processData: ({ watches }: { watches: any }) => {
+      const watchesArray = watches && watches.length ? watches : [];
+      return watchesArray.map((watch: any) => Watch.fromUpstreamJson(watch));
+    },
   });
 };
 

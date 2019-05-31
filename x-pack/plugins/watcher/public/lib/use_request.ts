@@ -26,7 +26,7 @@ export const sendRequest = async ({
   try {
     const response = await (getHttpClient() as any)[method](path, body);
 
-    if (!response.data) {
+    if (typeof response.data === 'undefined') {
       throw new Error(response.statusText);
     }
 
@@ -35,7 +35,7 @@ export const sendRequest = async ({
     };
   } catch (e) {
     return {
-      error: e,
+      error: e.response ? e.response : e,
     };
   }
 };

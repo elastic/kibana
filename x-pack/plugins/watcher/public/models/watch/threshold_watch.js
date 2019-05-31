@@ -6,8 +6,8 @@
 
 import { BaseWatch } from './base_watch';
 import uuid from 'uuid';
-import { WATCH_TYPES, SORT_ORDERS, COMPARATORS } from 'plugins/watcher/../common/constants';
-import { getTimeUnitsLabel } from 'plugins/watcher/lib/get_time_units_label';
+import { WATCH_TYPES, SORT_ORDERS, COMPARATORS } from '../../../common/constants';
+import { getTimeUnitsLabel } from '../../lib/get_time_units_label';
 import { i18n } from '@kbn/i18n';
 import { aggTypes } from './agg_types';
 import { groupByTypes } from './group_by_types';

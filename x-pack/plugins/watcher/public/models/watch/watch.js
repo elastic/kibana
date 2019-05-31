@@ -5,7 +5,7 @@
  */
 
 import { get, set } from 'lodash';
-import { WATCH_TYPES } from 'plugins/watcher/../common/constants';
+import { WATCH_TYPES } from '../../../common/constants';
 import { JsonWatch } from './json_watch';
 import { ThresholdWatch } from './threshold_watch';
 import { MonitoringWatch } from './monitoring_watch';

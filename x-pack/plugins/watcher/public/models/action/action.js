@@ -5,7 +5,7 @@
  */
 
 import { get, set } from 'lodash';
-import { ACTION_TYPES } from 'plugins/watcher/../common/constants';
+import { ACTION_TYPES } from '../../../common/constants';
 import { EmailAction } from './email_action';
 import { LoggingAction } from './logging_action';
 import { SlackAction } from './slack_action';
