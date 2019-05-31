@@ -4656,12 +4656,12 @@
     ms "2.1.1"
     update-notifier "2.3.0"
 
-JSONStream@1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/JSONStream/-/JSONStream-1.1.1.tgz#c98bfd88c8f1e1e8694e53c5baa6c8691553e59a"
-  integrity sha1-yYv9iMjx4ehpTlPFuqbIaRVT5Zo=
+JSONStream@1.3.5:
+  version "1.3.5"
+  resolved "https://registry.yarnpkg.com/JSONStream/-/JSONStream-1.3.5.tgz#3208c1f08d3a4d99261ab64f92302bc15e111ca0"
+  integrity sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==
   dependencies:
-    jsonparse "^1.1.0"
+    jsonparse "^1.2.0"
     through ">=2.2.7 <3"
 
 "JSV@>= 4.0.x":
@@ -4973,10 +4973,10 @@ angular-aria@1.6.6:
   resolved "https://registry.yarnpkg.com/angular-aria/-/angular-aria-1.6.6.tgz#58dd748e09564bc8409f739bde57b35fbee5b6a5"
   integrity sha1-WN10jglWS8hAn3Ob3lezX77ltqU=
 
-angular-elastic@2.5.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/angular-elastic/-/angular-elastic-2.5.0.tgz#07736ac290ea955b9fe511aac84020df623c87ec"
-  integrity sha1-B3NqwpDqlVuf5RGqyEAg32I8h+w=
+angular-elastic@2.5.1:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/angular-elastic/-/angular-elastic-2.5.1.tgz#e938ab1bd8c76415b8ca6514b15fe3593a5df535"
+  integrity sha1-6TirG9jHZBW4ymUUsV/jWTpd9TU=
   dependencies:
     angular ">=1.0.6"
 
@@ -5005,10 +5005,10 @@ angular-sanitize@1.6.5:
   resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.6.5.tgz#b5625a817afad2ba58c333e98eef169a1c6f517a"
   integrity sha1-tWJagXr60rpYwzPpju8WmhxvUXo=
 
-angular-sortable-view@0.0.15:
-  version "0.0.15"
-  resolved "https://registry.yarnpkg.com/angular-sortable-view/-/angular-sortable-view-0.0.15.tgz#e8463df909db83d641b028f0773a10d50292874f"
-  integrity sha1-6EY9+Qnbg9ZBsCjwdzoQ1QKSh08=
+angular-sortable-view@0.0.17:
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/angular-sortable-view/-/angular-sortable-view-0.0.17.tgz#99e2679951a86b6ee6ff27b099022943c683fb4f"
+  integrity sha512-2WkhM0Lt/wyMyrX/+7ve9ejSegBd7A4eRBNHEIJz8XMBIOjt+3oM1WpcAm+qNThkmNmmQaDeaYv0TQZw/WDMBw==
 
 angular-ui-ace@0.2.3:
   version "0.2.3"
@@ -16812,7 +16812,7 @@ jsonlint-lines@1.7.1:
     JSV ">= 4.0.x"
     nomnom ">= 1.5.x"
 
-jsonparse@^1.1.0:
+jsonparse@^1.2.0:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/jsonparse/-/jsonparse-1.3.1.tgz#3f4dae4a91fac315f71062f8521cc239f1366280"
   integrity sha1-P02uSpH6wxX3EGL4UhzCOfE2YoA=
