@@ -111,6 +111,9 @@ export function VislibLibDispatchProvider(Private, config) {
       const slices = isSlices ? data.slices : undefined;
       const handler = this.handler;
       const color = get(handler, 'data.color');
+      const config =  handler && handler.visConfig;
+      const valueAxes = config && config.get('valueAxes');
+      const isPercentageMode = valueAxes && valueAxes.some(({ scale }) => scale && scale.mode === 'percentage');
 
       const eventData = {
         value: d.y,
@@ -124,7 +127,8 @@ export function VislibLibDispatchProvider(Private, config) {
         config: handler && handler.visConfig,
         data: data,
         e: d3.event,
-        handler: handler
+        handler: handler,
+        isPercentageMode: isPercentageMode
       };
 
       return eventData;
