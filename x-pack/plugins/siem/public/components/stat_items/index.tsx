@@ -42,7 +42,7 @@ interface StatItem {
   name?: string;
 }
 
-interface StatItems {
+export interface StatItems {
   key: string;
   fields: StatItem[];
   description?: string;
@@ -57,32 +57,24 @@ export interface StatItemsProps extends StatItems {
 }
 
 export const useKpiMatrixStatus = (
-  mappings: StatItemsProps[],
+  mappings: Readonly<StatItems[]>,
   data: KpiHostsData | KpiNetworkData
-) => {
-  const [statItemsProps, setStatItemsProps] = useState(mappings);
+): StatItemsProps[] => {
+  const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);
 
-  const addValueToFields = (
-    fields: StatItem[],
-    kpiHostData: KpiHostsData | KpiNetworkData
-  ): StatItem[] => fields.map(field => ({ ...field, value: get(field.key, kpiHostData) }));
+  const addValueToFields = (fields: StatItem[]): StatItem[] =>
+    fields.map(field => ({ ...field, value: get(field.key, data) }));
 
-  const addValueToAreaChart = (
-    fields: StatItem[],
-    kpiHostData: KpiHostsData | KpiNetworkData
-  ): AreaChartData[] =>
+  const addValueToAreaChart = (fields: StatItem[]): AreaChartData[] =>
     fields
-      .filter(field => get(`${field.key}Histogram`, kpiHostData) != null)
+      .filter(field => get(`${field.key}Histogram`, data) != null)
       .map(field => ({
         ...field,
-        value: get(`${field.key}Histogram`, kpiHostData),
+        value: get(`${field.key}Histogram`, data),
         key: `${field.key}Histogram`,
       }));
 
-  const addValueToBarChart = (
-    fields: StatItem[],
-    kpiHostData: KpiHostsData | KpiNetworkData
-  ): BarChartData[] => {
+  const addValueToBarChart = (fields: StatItem[]): BarChartData[] => {
     if (fields.length === 0) return [];
     return fields.reduce((acc: BarChartData[], field: StatItem, idx: number) => {
       const key: string = get('key', field);
@@ -110,9 +102,9 @@ export const useKpiMatrixStatus = (
           return {
             ...stat,
             key: `kpi-summary-${stat.key}`,
-            fields: addValueToFields(stat.fields, data),
-            areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
-            barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
+            fields: addValueToFields(stat.fields),
+            areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields) : undefined,
+            barChart: stat.enableBarChart ? addValueToBarChart(stat.fields) : undefined,
           };
         })
       );

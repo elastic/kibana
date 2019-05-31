@@ -15,6 +15,7 @@ import {
   StatItemsComponent,
   StatItemsProps,
   useKpiMatrixStatus,
+  StatItems,
 } from '../../../../components/stat_items';
 import { KpiNetworkData } from '../../../../graphql/types';
 
@@ -29,7 +30,7 @@ interface KpiNetworkProps {
   loading: boolean;
 }
 
-const fieldTitleChartMapping: StatItemsProps[] = [
+const fieldTitleChartMapping: Readonly<StatItems[]> = [
   {
     key: 'UniqueIps',
     fields: [
@@ -57,7 +58,7 @@ const fieldTitleChartMapping: StatItemsProps[] = [
   },
 ];
 
-const fieldTitleMatrixMapping: StatItemsProps[] = [
+const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   {
     key: 'networkEvents',
     fields: [
@@ -110,7 +111,7 @@ export const KpiNetworkBaseComponent = ({
   fieldsMapping,
   data,
 }: {
-  fieldsMapping: StatItemsProps[];
+  fieldsMapping: Readonly<StatItems[]>;
   data: KpiNetworkData;
 }) => {
   const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, data);

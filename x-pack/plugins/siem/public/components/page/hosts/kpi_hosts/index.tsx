@@ -10,7 +10,12 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { KpiHostsData } from '../../../../graphql/types';
-import { StatItemsComponent, StatItemsProps, useKpiMatrixStatus } from '../../../stat_items';
+import {
+  StatItemsComponent,
+  StatItemsProps,
+  useKpiMatrixStatus,
+  StatItems,
+} from '../../../stat_items';
 import * as i18n from './translations';
 
 interface KpiHostsProps {
@@ -24,7 +29,7 @@ const euiColorVis2 = '#DB1374';
 const euiColorVis3 = '#490092';
 const euiColorVis9 = '#920000';
 
-const fieldTitleMapping: StatItemsProps[] = [
+const fieldTitleMapping: Readonly<StatItems[]> = [
   {
     key: 'hosts',
     fields: [
