@@ -74,8 +74,21 @@ export const ml = (kibana) => {
     },
 
     init: async function (server) {
+      const serverDeps = {
+        addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
+        config: server.config,
+        injectUiAppVars: server.injectUiAppVars,
+        plugins: {
+          elasticsearch: server.plugins.elasticsearch,
+          xpack_main: server.plugins.xpack_main,
+        },
+        route: server.route.bind(server),
+        savedObjects: server.savedObjects,
+        usage: server.usage,
+      };
+
       const thisPlugin = this;
-      const xpackMainPlugin = server.plugins.xpack_main;
+      const xpackMainPlugin = serverDeps.plugins.xpack_main;
       mirrorPluginStatus(xpackMainPlugin, thisPlugin);
       xpackMainPlugin.status.once('green', () => {
         // Register a function that is called whenever the xpack info changes,
@@ -131,34 +144,34 @@ export const ml = (kibana) => {
         ]
       };
 
-      server.injectUiAppVars('ml', () => {
-        const config = server.config();
+      serverDeps.injectUiAppVars('ml', () => {
+        const config = serverDeps.config();
         return {
           kbnIndex: config.get('kibana.index'),
           mlAnnotationsEnabled: FEATURE_ANNOTATIONS_ENABLED,
         };
       });
 
-      annotationRoutes(server, commonRouteConfig);
-      jobRoutes(server, commonRouteConfig);
-      dataFeedRoutes(server, commonRouteConfig);
-      dataFrameRoutes(server, commonRouteConfig);
-      indicesRoutes(server, commonRouteConfig);
-      jobValidationRoutes(server, commonRouteConfig);
-      notificationRoutes(server, commonRouteConfig);
-      systemRoutes(server, commonRouteConfig);
-      dataRecognizer(server, commonRouteConfig);
-      dataVisualizerRoutes(server, commonRouteConfig);
-      calendars(server, commonRouteConfig);
-      fieldsService(server, commonRouteConfig);
-      filtersRoutes(server, commonRouteConfig);
-      resultsServiceRoutes(server, commonRouteConfig);
-      jobServiceRoutes(server, commonRouteConfig);
-      jobAuditMessagesRoutes(server, commonRouteConfig);
-      fileDataVisualizerRoutes(server, commonRouteConfig);
+      annotationRoutes(serverDeps, commonRouteConfig);
+      jobRoutes(serverDeps, commonRouteConfig);
+      dataFeedRoutes(serverDeps, commonRouteConfig);
+      dataFrameRoutes(serverDeps, commonRouteConfig);
+      indicesRoutes(serverDeps, commonRouteConfig);
+      jobValidationRoutes(serverDeps, commonRouteConfig);
+      notificationRoutes(serverDeps, commonRouteConfig);
+      systemRoutes(serverDeps, commonRouteConfig);
+      dataRecognizer(serverDeps, commonRouteConfig);
+      dataVisualizerRoutes(serverDeps, commonRouteConfig);
+      calendars(serverDeps, commonRouteConfig);
+      fieldsService(serverDeps, commonRouteConfig);
+      filtersRoutes(serverDeps, commonRouteConfig);
+      resultsServiceRoutes(serverDeps, commonRouteConfig);
+      jobServiceRoutes(serverDeps, commonRouteConfig);
+      jobAuditMessagesRoutes(serverDeps, commonRouteConfig);
+      fileDataVisualizerRoutes(serverDeps, commonRouteConfig);
 
-      initMlServerLog(server);
-      makeMlUsageCollector(server);
+      initMlServerLog(serverDeps);
+      makeMlUsageCollector(serverDeps);
     }
 
   });
