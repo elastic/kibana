@@ -17,8 +17,12 @@
  * under the License.
  */
 
-export const nullType = () => ({
-  name: 'null',
+import { ExpressionType } from '../../types';
+
+const name = 'null';
+
+export const nullType = (): ExpressionType<typeof name, null> => ({
+  name,
   from: {
     '*': () => null,
   },
