@@ -74,7 +74,7 @@ describe('Kuery value suggestions', function () {
     const lastCall = fetchMock.lastCall(fetchUrlMatcher, 'POST');
 
     expect(lastCall.request._bodyInit, '{"query":"","field":"machine.os.raw","boolFilter":[]}');
-    expect(lastCall[0]).to.eql('/api/kibana/suggestions/values/logstash-*');
+    expect(lastCall[0]).to.match(/\/api\/kibana\/suggestions\/values\/logstash-\*/);
     expect(lastCall[1]).to.eql({
       method: 'POST',
       headers: {
