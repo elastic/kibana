@@ -368,6 +368,11 @@ export function IndexPatternProvider(Private, config, Promise, kbnUrl) {
       return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
     }
 
+    isTimeNanosBased() {
+      const timeField = this.getTimeField();
+      return timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1;
+    }
+
     isUnsupportedTimePattern() {
       return !!this.intervalName;
     }
