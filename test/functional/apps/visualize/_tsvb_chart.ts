@@ -36,31 +36,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
     });
 
-    describe('Time Series', () => {
-      beforeEach(async () => {
-        await PageObjects.visualBuilder.resetPage();
-      });
-
-      it('should show the correct count in the legend', async () => {
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('156');
-      });
-
-      it('should show the correct count in the legend with 2h offset', async () => {
-        await PageObjects.visualBuilder.clickSeriesOption();
-        await PageObjects.visualBuilder.enterOffsetSeries('2h');
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('293');
-      });
-
-      it('should show the correct count in the legend with -2h offset', async () => {
-        await PageObjects.visualBuilder.clickSeriesOption();
-        await PageObjects.visualBuilder.enterOffsetSeries('-2h');
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('53');
-      });
-    });
-
     describe('metric', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
@@ -116,25 +91,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
         expect(gaugeCount).to.be('156');
-      });
-    });
-
-    describe('table', () => {
-      beforeEach(async () => {
-        await PageObjects.visualBuilder.resetPage(
-          '2015-09-22 06:00:00.000',
-          '2015-09-22 11:00:00.000'
-        );
-        await PageObjects.visualBuilder.clickTable();
-      });
-
-      it('should display correct values on changing group by field and column name', async () => {
-        await PageObjects.visualBuilder.selectGroupByField('machine.os.raw');
-        await PageObjects.visualBuilder.setLabelValue('OS');
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-        const tableData = await PageObjects.visualBuilder.getViewTable();
-        const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
-        expect(tableData).to.be(expectedData);
       });
     });
 

@@ -4,22 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
+import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { LoginAttempt } from '../login_attempt';
-
-/**
- * Represents available provider options.
- */
-interface ProviderOptions {
-  basePath: string;
-  client: Cluster;
-  log: (tags: string[], message: string) => void;
-}
+import { BaseAuthenticationProvider, RequestWithLoginAttempt } from './base';
 
 /**
  * The state supported by the provider.
@@ -37,10 +27,6 @@ interface ProviderState {
    */
   refreshToken?: string;
 }
-
-type RequestWithLoginAttempt = Request & {
-  loginAttempt: () => LoginAttempt;
-};
 
 /**
  * If request with access token fails with `401 Unauthorized` then this token is no
@@ -64,16 +50,10 @@ function isAccessTokenExpiredError(err?: any) {
 /**
  * Provider that supports token-based request authentication.
  */
-export class TokenAuthenticationProvider {
-  /**
-   * Instantiates TokenAuthenticationProvider.
-   * @param options Options that may be needed by authentication provider.
-   */
-  constructor(private readonly options: ProviderOptions) {}
-
+export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs token-based request authentication
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
   public async authenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
@@ -113,10 +93,10 @@ export class TokenAuthenticationProvider {
 
   /**
    * Redirects user to the login page preserving query string parameters.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  public async deauthenticate(request: Request, state?: ProviderState | null) {
+  public async deauthenticate(request: Legacy.Request, state?: ProviderState | null) {
     this.debug(`Trying to deauthenticate user via ${request.url.path}.`);
 
     if (!state || !state.accessToken || !state.refreshToken) {
@@ -173,9 +153,9 @@ export class TokenAuthenticationProvider {
   /**
    * Validates whether request contains `Bearer ***` Authorization header and just passes it
    * forward to Elasticsearch backend.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  private async authenticateViaHeader(request: Request) {
+  private async authenticateViaHeader(request: RequestWithLoginAttempt) {
     this.debug('Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
@@ -207,7 +187,7 @@ export class TokenAuthenticationProvider {
   /**
    * Validates whether request contains a login payload and authenticates the
    * user if necessary.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
   private async authenticateViaLoginAttempt(request: RequestWithLoginAttempt) {
     this.debug('Trying to authenticate via login attempt.');
@@ -264,10 +244,13 @@ export class TokenAuthenticationProvider {
   /**
    * Tries to extract authorization header from the state and adds it to the request before
    * it's forwarded to Elasticsearch backend.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(request: Request, { accessToken }: ProviderState) {
+  private async authenticateViaState(
+    request: RequestWithLoginAttempt,
+    { accessToken }: ProviderState
+  ) {
     this.debug('Trying to authenticate via state.');
 
     if (!accessToken) {
@@ -300,10 +283,13 @@ export class TokenAuthenticationProvider {
    * This method is only called when authentication via access token stored in the state failed because of expired
    * token. So we should use refresh token, that is also stored in the state, to extend expired access token and
    * authenticate user with it.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaRefreshToken(request: Request, { refreshToken }: ProviderState) {
+  private async authenticateViaRefreshToken(
+    request: RequestWithLoginAttempt,
+    { refreshToken }: ProviderState
+  ) {
     this.debug('Trying to refresh access token.');
 
     if (!refreshToken) {
@@ -367,9 +353,9 @@ export class TokenAuthenticationProvider {
 
   /**
    * Constructs login page URL using current url path as `next` query string parameter.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  private getLoginPageURL(request: Request) {
+  private getLoginPageURL(request: RequestWithLoginAttempt) {
     const nextURL = encodeURIComponent(`${request.getBasePath()}${request.url.path}`);
     return `${this.options.basePath}/login?next=${nextURL}`;
   }

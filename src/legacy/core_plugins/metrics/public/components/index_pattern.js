@@ -19,10 +19,10 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import FieldSelect from './aggs/field_select';
-import createSelectHandler from './lib/create_select_handler';
-import createTextHandler from './lib/create_text_handler';
-import YesNo from './yes_no';
+import { FieldSelect } from './aggs/field_select';
+import { createSelectHandler } from './lib/create_select_handler';
+import { createTextHandler } from './lib/create_text_handler';
+import { YesNo } from './yes_no';
 import {
   htmlIdGenerator,
   EuiFieldText,
@@ -33,6 +33,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../common/es_types';
+
+const RESTRICT_FIELDS = [ES_TYPES.DATE];
 
 export const IndexPattern = props => {
   const { fields, prefix } = props;
@@ -51,8 +54,9 @@ export const IndexPattern = props => {
   };
 
   const htmlId = htmlIdGenerator();
-
   const model = { ...defaults, ...props.model };
+  const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
+
   return (
     <div className={props.className}>
       <EuiFlexGroup responsive={false} wrap={true}>
@@ -63,10 +67,10 @@ export const IndexPattern = props => {
               id="tsvb.indexPatternLabel"
               defaultMessage="Index pattern"
             />)}
-            helpText={(model.default_index_pattern && !model[indexPatternName] && <FormattedMessage
+            helpText={isDefaultIndexPatternUsed && <FormattedMessage
               id="tsvb.indexPattern.searchByDefaultIndex"
               defaultMessage="Default index pattern is used. To query all indexes use *"
-            />)}
+            />}
             fullWidth
           >
             <EuiFieldText
@@ -90,12 +94,13 @@ export const IndexPattern = props => {
           >
             <FieldSelect
               data-test-subj="metricsIndexPatternFieldsSelect"
-              restrict="date"
+              restrict={RESTRICT_FIELDS}
               value={model[timeFieldName]}
               disabled={props.disabled}
               onChange={handleSelectChange(timeFieldName)}
               indexPattern={model[indexPatternName]}
               fields={fields}
+              placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}
               fullWidth
             />
           </EuiFormRow>

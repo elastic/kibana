@@ -8,6 +8,7 @@
 
 
 import { mlJobService } from 'plugins/ml/services/job_service';
+import { i18n } from '@kbn/i18n';
 import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
@@ -30,7 +31,7 @@ class PostSaveService {
     this.externalCreateWatch;
   }
 
-  startRealtimeJob(jobId, i18n) {
+  startRealtimeJob(jobId) {
     return new Promise((resolve, reject) => {
       this.status.realtimeJob = this.STATUS.SAVING;
 
@@ -45,7 +46,7 @@ class PostSaveService {
               resolve();
             }).catch((resp) => {
               msgs.error(
-                i18n('xpack.ml.newJob.simple.postSaveOptions.couldNotStartDatafeedErrorMessage', {
+                i18n.translate('xpack.ml.newJob.simple.postSaveOptions.couldNotStartDatafeedErrorMessage', {
                   defaultMessage: 'Could not start datafeed:'
                 }), resp);
               this.status.realtimeJob = this.STATUS.SAVE_FAILED;
@@ -56,7 +57,7 @@ class PostSaveService {
     });
   }
 
-  apply(jobId, runInRealtime, createWatch, i18n) {
+  apply(jobId, runInRealtime, createWatch) {
     return new Promise((resolve) => {
       if (runInRealtime) {
         this.startRealtimeJob(jobId, i18n)

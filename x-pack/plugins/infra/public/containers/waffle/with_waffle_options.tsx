@@ -10,10 +10,10 @@ import { createSelector } from 'reselect';
 
 import { isBoolean, isNumber } from 'lodash';
 import {
-  InfraMetricInput,
-  InfraMetricType,
+  InfraSnapshotMetricInput,
+  InfraSnapshotMetricType,
   InfraNodeType,
-  InfraPathType,
+  InfraSnapshotGroupbyInput,
 } from '../../graphql/types';
 import { InfraGroupByOptions } from '../../lib/lib';
 import { State, waffleOptionsActions, waffleOptionsSelectors } from '../../store';
@@ -158,29 +158,26 @@ const mapToUrlState = (value: any): WaffleOptionsUrlState | undefined =>
       }
     : undefined;
 
-const isInfraMetricInput = (subject: any): subject is InfraMetricInput => {
-  return subject != null && subject.type != null && InfraMetricType[subject.type] != null;
+const isInfraSnapshotMetricInput = (subject: any): subject is InfraSnapshotMetricInput => {
+  return subject != null && subject.type != null && InfraSnapshotMetricType[subject.type] != null;
 };
 
-const isInfraPathInput = (subject: any): subject is InfraPathType => {
-  return subject != null && subject.type != null && InfraPathType[subject.type] != null;
+const isInfraSnapshotGroupbyInput = (subject: any): subject is InfraSnapshotGroupbyInput => {
+  return subject != null && subject.type != null;
 };
 
 const isInfraGroupByOption = (subject: any): subject is InfraGroupByOptions => {
-  return (
-    subject != null &&
-    subject.text != null &&
-    subject.field != null &&
-    InfraPathType[subject.type] != null
-  );
+  return subject != null && subject.text != null && subject.field != null;
 };
 
 const mapToMetricUrlState = (subject: any) => {
-  return subject && isInfraMetricInput(subject) ? subject : undefined;
+  return subject && isInfraSnapshotMetricInput(subject) ? subject : undefined;
 };
 
 const mapToGroupByUrlState = (subject: any) => {
-  return subject && Array.isArray(subject) && subject.every(isInfraPathInput) ? subject : undefined;
+  return subject && Array.isArray(subject) && subject.every(isInfraSnapshotGroupbyInput)
+    ? subject
+    : undefined;
 };
 
 const mapToNodeTypeUrlState = (subject: any) => {

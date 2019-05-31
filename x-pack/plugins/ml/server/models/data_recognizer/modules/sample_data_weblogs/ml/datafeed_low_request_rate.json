@@ -1,0 +1,24 @@
+{
+  "job_id": "JOB_ID",
+  "indexes": ["INDEX_PATTERN_NAME"],
+  "query": {
+    "bool": {
+      "filter": [{ "term": { "_index": "kibana_sample_data_logs" } }]
+    }
+  },
+  "aggregations": {
+    "buckets": {
+      "date_histogram": {
+        "field": "timestamp",
+        "interval": 3600000
+      },
+      "aggregations": {
+        "timestamp": {
+          "max": {
+            "field": "timestamp"
+          }
+        }
+      }
+    }
+  }
+}

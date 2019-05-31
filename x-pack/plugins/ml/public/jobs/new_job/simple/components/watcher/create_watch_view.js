@@ -120,7 +120,7 @@ export const CreateWatch = injectI18n(class CreateWatch extends Component {
     const { intl } = this.props;
     const mlSelectSeverityService = {
       state: {
-        set: (name, threshold) => {
+        set: (name, threshold) => { // eslint-disable-line no-unused-vars
           this.onThresholdChange(threshold);
           return {
             changed: () => {}

@@ -51,7 +51,8 @@ describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js
             name: 'OriginCityName',
             readFromDocValues: true,
             searchable: true,
-            type: 'string'
+            type: 'string',
+            esTypes: ['keyword'],
           }
         ]
       },

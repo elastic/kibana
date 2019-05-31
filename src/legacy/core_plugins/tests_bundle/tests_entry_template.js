@@ -35,30 +35,72 @@ import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
 import 'childnode-remove-polyfill';
+import sinon from 'sinon';
 
-import { CoreSystem } from '__kibanaCore__'
+import { CoreSystem } from '__kibanaCore__';
+
+// Fake uiCapabilities returned to Core in browser tests
+const uiCapabilities = {
+  navLinks: {
+    myLink: true,
+    notMyLink: true,
+  },
+  discover: {
+    showWriteControls: true
+  },
+  visualize: {
+    save: true
+  },
+  dashboard: {
+    showWriteControls: true
+  },
+  timelion: {
+    save: true
+  },
+};
+
+// Stub fetch for CoreSystem calls.
+const fetchStub = sinon.stub(window, 'fetch');
+fetchStub.callsFake((url, options) => {
+  if (url !== '/api/capabilities') {
+    console.warn('Stubbed window.fetch does not support this request.');
+    return Promise.resolve(new window.Response('Resource not found', { status: 404 }));
+  }
+
+  return Promise.resolve(
+    new window.Response(
+      JSON.stringify({ capabilities: uiCapabilities })),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+});
 
 // render the core system in a child of the body as the default children of the body
 // in the browser tests are needed for mocha and other test components to work
 const rootDomElement = document.createElement('div');
 document.body.appendChild(rootDomElement)
 
-new CoreSystem({
+const coreSystem = new CoreSystem({
   injectedMetadata: {
     version: '1.2.3',
     buildNumber: 1234,
     legacyMetadata: {
+      nav: [],
       version: '1.2.3',
       buildNum: 1234,
       devMode: true,
       uiSettings: {
         defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
         user: {}
-      }
+      },
+      nav: []
     },
     csp: {
       warnLegacyBrowsers: false,
     },
+    capabilities: uiCapabilities,
     uiPlugins: [],
     vars: {
       kbnIndex: '.kibana',
@@ -85,24 +127,6 @@ new CoreSystem({
         enabled: true,
         enableExternalUrls: true
       },
-      uiCapabilities: {
-        navLinks: {
-          myLink: true,
-          notMyLink: true,
-        },
-        discover: {
-          showWriteControls: true
-        },
-        visualize: {
-          save: true
-        },
-        dashboard: {
-          showWriteControls: true
-        },
-        timelion: {
-          save: true
-        },
-      },
       interpreterConfig: {
         enableInVisualize: true
       }
@@ -113,5 +137,11 @@ new CoreSystem({
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
   }
-}).setup()
+})
+
+coreSystem
+  .setup()
+  .then(() => {
+    return coreSystem.start();
+  });
 `;

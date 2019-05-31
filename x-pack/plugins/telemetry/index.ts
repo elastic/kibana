@@ -13,6 +13,7 @@ import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { i18n } from '@kbn/i18n';
+import { createLocalizationUsageCollector, createTelemetryUsageCollector} from './server/collectors';
 
 function isTelemetryEnabled(config: KibanaConfig) {
   const configPaths = [
@@ -81,6 +82,10 @@ export const telemetry = (kibana: any) => {
       } as CoreSetup;
 
       plugin(initializerContext).setup(coreSetup);
+
+      // register collectors
+      server.usage.collectorSet.register(createLocalizationUsageCollector(server));
+      server.usage.collectorSet.register(createTelemetryUsageCollector(server));
     }
   });
 };

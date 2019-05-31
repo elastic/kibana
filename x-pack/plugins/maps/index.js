@@ -16,8 +16,9 @@ import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
 import { initTelemetryCollection } from './server/maps_telemetry';
 import { i18n } from '@kbn/i18n';
-import {  APP_ID, APP_ICON, createMapPath } from './common/constants';
+import { APP_ID, APP_ICON, createMapPath } from './common/constants';
 import { getAppTitle } from './common/i18n_getters';
+import _ from 'lodash';
 
 export function maps(kibana) {
 
@@ -39,9 +40,17 @@ export function maps(kibana) {
       injectDefaultVars(server) {
         const serverConfig = server.config();
         const mapConfig = serverConfig.get('map');
+
         return {
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
+          emsTileLayerId: mapConfig.emsTileLayerId,
+          proxyElasticMapsServiceInMaps: mapConfig.proxyElasticMapsServiceInMaps,
+          emsManifestServiceUrl: mapConfig.manifestServiceUrl,
+          emsLandingPageUrl: mapConfig.manifestServiceUrl,
+          kbnPkgVersion: serverConfig.get('pkg.version'),
+          regionmapLayers: _.get(mapConfig, 'regionmap.layers', []),
+          tilemap: _.get(mapConfig, 'tilemap', [])
         };
       },
       embeddableFactories: [
@@ -56,6 +65,22 @@ export function maps(kibana) {
         'maps-telemetry': {
           isNamespaceAgnostic: true
         }
+      },
+      savedObjectsManagement: {
+        'map': {
+          icon: APP_ICON,
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: createMapPath(obj.id),
+              uiCapabilitiesPath: 'maps.show',
+            };
+          },
+        },
       },
       mappings,
       migrations,
@@ -92,16 +117,16 @@ export function maps(kibana) {
           all: {
             savedObject: {
               all: ['map'],
-              read: ['config', 'index-pattern']
+              read: ['index-pattern']
             },
-            ui: ['save'],
+            ui: ['save', 'show'],
           },
           read: {
             savedObject: {
               all: [],
-              read: ['map', 'config', 'index-pattern']
+              read: ['map', 'index-pattern']
             },
-            ui: [],
+            ui: ['show'],
           },
         }
       });

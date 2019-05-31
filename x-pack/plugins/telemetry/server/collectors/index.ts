@@ -9,3 +9,6 @@ export { getAllStats } from './monitoring';
 // @ts-ignore
 export { getLocalStats } from './local';
 export { getStats } from './get_stats';
+export { encryptTelemetry } from './encryption';
+export { createTelemetryUsageCollector } from './usage';
+export { createLocalizationUsageCollector } from './localization';

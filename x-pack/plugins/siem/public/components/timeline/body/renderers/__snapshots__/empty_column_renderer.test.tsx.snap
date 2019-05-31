@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`empty_column_renderer renders correctly against snapshot 1`] = `
+<span>
+  <Connect(DraggableWrapperComponent)
+    dataProvider={
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": true,
+        "id": "id-timeline-column-source_ip-for-event-1-source_ip",
+        "kqlQuery": "",
+        "name": "source.ip: ",
+        "queryMatch": Object {
+          "displayValue": "--",
+          "field": "source.ip",
+          "operator": ":*",
+          "value": "",
+        },
+      }
+    }
+    key="timeline-draggable-column-source.ip-for-event-1-source.ip"
+    render={[Function]}
+  />
+</span>
+`;

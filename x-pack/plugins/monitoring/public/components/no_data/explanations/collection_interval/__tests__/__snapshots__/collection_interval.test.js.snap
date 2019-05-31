@@ -160,7 +160,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   <EuiLoadingSpinner
     size="l"
   >
-    <div
+    <span
       className="euiLoadingSpinner euiLoadingSpinner--large"
     />
   </EuiLoadingSpinner>
@@ -457,7 +457,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
                   className="euiButton__spinner"
                   size="m"
                 >
-                  <div
+                  <span
                     className="euiLoadingSpinner euiLoadingSpinner--medium euiButton__spinner"
                   />
                 </EuiLoadingSpinner>

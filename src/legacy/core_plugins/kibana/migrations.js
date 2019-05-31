@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, get, omit, has } from 'lodash';
+import { cloneDeep, get, omit, has, flow } from 'lodash';
 
 function migrateIndexPattern(doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -57,6 +57,85 @@ function migrateIndexPattern(doc) {
   doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 }
 
+// [TSVB] Migrate percentile-rank aggregation (value -> values)
+const migratePercentileRankAggregation = doc => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const series = get(visState, 'params.series') || [];
+
+      series.forEach(part => {
+        (part.metrics || []).forEach(metric => {
+          if (metric.type === 'percentile_rank' && has(metric, 'value')) {
+            metric.values = [metric.value];
+
+            delete metric.value;
+          }
+        });
+      });
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
+// Migrate date histogram aggregation (remove customInterval)
+const migrateDateHistogramAggregation = doc => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    if (visState && visState.aggs) {
+      visState.aggs.forEach(agg => {
+        if (agg.type === 'date_histogram' && agg.params) {
+          if (agg.params.interval === 'custom') {
+            agg.params.interval = agg.params.customInterval;
+          }
+          delete agg.params.customInterval;
+        }
+
+        if (get(agg, 'params.customBucket.type', null) === 'date_histogram'
+          && agg.params.customBucket.params
+        ) {
+          if (agg.params.customBucket.params.interval === 'custom') {
+            agg.params.customBucket.params.interval = agg.params.customBucket.params.customInterval;
+          }
+          delete agg.params.customBucket.params.customInterval;
+        }
+      });
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        }
+      };
+    }
+  }
+  return doc;
+};
+
+const executeMigrations720 = flow(migratePercentileRankAggregation, migrateDateHistogramAggregation);
+
 function removeDateHistogramTimeZones(doc) {
   const visStateJSON = get(doc, 'attributes.visState');
   if (visStateJSON) {
@@ -79,6 +158,33 @@ function removeDateHistogramTimeZones(doc) {
         }
       });
       doc.attributes.visState = JSON.stringify(visState);
+    }
+  }
+  return doc;
+}
+
+// migrate gauge verticalSplit to alignment
+// https://github.com/elastic/kibana/issues/34636
+function migrateGaugeVerticalSplitToAlignment(doc)  {
+  const visStateJSON = get(doc, 'attributes.visState');
+
+  if (visStateJSON) {
+    try {
+      const visState = JSON.parse(visStateJSON);
+      if (visState && visState.type === 'gauge') {
+
+        visState.params.gauge.alignment = visState.params.gauge.verticalSplit ? 'vertical' : 'horizontal';
+        delete visState.params.gauge.verticalSplit;
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            visState: JSON.stringify(visState),
+          },
+        };
+      }
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
     }
   }
   return doc;
@@ -185,44 +291,8 @@ export const migrations = {
       }
     },
     '7.0.1': removeDateHistogramTimeZones,
-    '7.1.0': doc => {
-      // [TSVB] Migrate percentile-rank aggregation (value -> values)
-      const migratePercentileRankAggregation = doc => {
-        const visStateJSON = get(doc, 'attributes.visState');
-        let visState;
-
-        if (visStateJSON) {
-          try {
-            visState = JSON.parse(visStateJSON);
-          } catch (e) {
-            // Let it go, the data is invalid and we'll leave it as is
-          }
-          if (visState && visState.type === 'metrics') {
-            const series = get(visState, 'params.series') || [];
-
-            series.forEach(part => {
-              (part.metrics || []).forEach(metric => {
-                if (metric.type === 'percentile_rank' && has(metric, 'value')) {
-                  metric.values = [metric.value];
-
-                  delete metric.value;
-                }
-              });
-            });
-            return {
-              ...doc,
-              attributes: {
-                ...doc.attributes,
-                visState: JSON.stringify(visState),
-              },
-            };
-          }
-        }
-        return doc;
-      };
-
-      return migratePercentileRankAggregation(doc);
-    }
+    '7.2.0': doc => executeMigrations720(doc),
+    '7.3.0': migrateGaugeVerticalSplitToAlignment
   },
   dashboard: {
     '7.0.0': (doc) => {

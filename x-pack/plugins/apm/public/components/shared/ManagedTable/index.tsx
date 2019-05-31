@@ -7,7 +7,7 @@
 import { EuiBasicTable } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import React, { Component } from 'react';
-import { idx } from '../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {

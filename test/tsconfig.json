@@ -6,7 +6,8 @@
       "mocha"
     ],
     "lib": [
-      "esnext"
+      "esnext",
+      "dom"
     ]
   },
   "include": [

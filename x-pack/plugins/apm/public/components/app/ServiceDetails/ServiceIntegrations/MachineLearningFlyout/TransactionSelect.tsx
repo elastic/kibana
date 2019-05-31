@@ -8,31 +8,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   // @ts-ignore
   EuiSuperSelect,
-  EuiText,
-  EuiToolTip
+  EuiText
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { getMlJobId } from '../../../../../../common/ml_job_constants';
-import { MLJobApiResponse } from '../../../../../services/rest/ml';
 
 interface TransactionSelectProps {
-  serviceName: string;
-  existingJobs: MLJobApiResponse['jobs'];
   transactionTypes: string[];
-  selected?: string;
   onChange: (value: string) => void;
+  selectedTransactionType: string;
 }
 
 export function TransactionSelect({
-  serviceName,
-  existingJobs,
   transactionTypes,
-  selected,
-  onChange
+  onChange,
+  selectedTransactionType
 }: TransactionSelectProps) {
   return (
     <EuiFormRow
@@ -44,12 +36,9 @@ export function TransactionSelect({
       )}
     >
       <EuiSuperSelect
-        valueOfSelected={selected}
+        valueOfSelected={selectedTransactionType}
         onChange={onChange}
         options={transactionTypes.map(transactionType => {
-          const hasMlJobs = existingJobs.some(
-            job => job.job_id === getMlJobId(serviceName, transactionType)
-          );
           return {
             value: transactionType,
             inputDisplay: transactionType,
@@ -57,22 +46,6 @@ export function TransactionSelect({
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>
                   <EuiText>{transactionType}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {hasMlJobs ? (
-                    <EuiToolTip
-                      content={i18n.translate(
-                        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.existedJobTooltip',
-                        {
-                          defaultMessage: 'ML job exists for this type'
-                        }
-                      )}
-                    >
-                      <EuiIcon type="machineLearningApp" />
-                    </EuiToolTip>
-                  ) : (
-                    <EuiIcon type="empty" />
-                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             )

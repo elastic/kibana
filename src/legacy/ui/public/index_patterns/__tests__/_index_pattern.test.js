@@ -59,10 +59,6 @@ jest.mock('../_get', () => ({
   }))
 }));
 
-jest.mock('../_intervals', () => ({
-  IndexPatternsIntervalsProvider: jest.fn(),
-}));
-
 jest.mock('../_flatten_hit', () => ({
   IndexPatternsFlattenHitProvider: jest.fn(),
 }));
@@ -77,10 +73,6 @@ jest.mock('../fields_fetcher_provider', () => ({
   FieldsFetcherProvider: {
     fetch: jest.fn().mockImplementation(() => ([]))
   }
-}));
-
-jest.mock('../unsupported_time_patterns', () => ({
-  IsUserAwareOfUnsupportedTimePatternProvider: jest.fn(),
 }));
 
 

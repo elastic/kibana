@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 import { registerOssFeatures } from './server/lib/register_oss_features';
-import { getLocalizationUsageCollector } from './server/lib/get_localization_usage_collector';
 
 export const xpackMain = (kibana) => {
   return new kibana.Plugin({
@@ -35,15 +34,21 @@ export const xpackMain = (kibana) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         telemetry: Joi.object({
+          // `config` is used internally and not intended to be set
+          config: Joi.string().default(Joi.ref('$defaultConfigPath')),
           enabled: Joi.boolean().default(true),
           url: Joi.when('$dev', {
             is: true,
-            then: Joi.string().default('https://telemetry-staging.elastic.co/xpack/v1/send'),
-            otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v1/send')
+            then: Joi.string().default('https://telemetry-staging.elastic.co/xpack/v2/send'),
+            otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v2/send')
           }),
         }).default(),
         xpack_api_polling_frequency_millis: Joi.number().default(XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS),
       }).default();
+    },
+
+    uiCapabilities(server) {
+      return uiCapabilitiesForFeatures(server.plugins.xpack_main);
     },
 
     uiExports: {
@@ -63,6 +68,7 @@ export const xpackMain = (kibana) => {
       },
       injectDefaultVars(server) {
         const config = server.config();
+
         return {
           activeSpace: null,
           spacesEnabled: config.get('xpack.spaces.enabled'),
@@ -87,15 +93,13 @@ export const xpackMain = (kibana) => {
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
       setupXPackMain(server);
-      registerOssFeatures(server.plugins.xpack_main.registerFeature);
+      const { types: savedObjectTypes } = server.savedObjects;
+      registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes);
 
       // register routes
       xpackInfoRoute(server);
       settingsRoute(server, this.kbnServer);
       featuresRoute(server);
-
-      // register collectors
-      server.usage.collectorSet.register(getLocalizationUsageCollector(server));
     }
   });
 };

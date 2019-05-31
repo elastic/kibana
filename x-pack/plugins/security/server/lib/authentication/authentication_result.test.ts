@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from './authentication_result';
 
@@ -44,6 +45,28 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.redirectURL).toBeUndefined();
+    });
+
+    it('can provide `challenges` for `401` errors', () => {
+      const failureReason = Boom.unauthorized();
+      const authenticationResult = AuthenticationResult.failed(failureReason, ['Negotiate']);
+
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.notHandled()).toBe(false);
+      expect(authenticationResult.succeeded()).toBe(false);
+      expect(authenticationResult.redirected()).toBe(false);
+
+      expect(authenticationResult.challenges).toEqual(['Negotiate']);
+      expect(authenticationResult.error).toBe(failureReason);
+      expect(authenticationResult.user).toBeUndefined();
+      expect(authenticationResult.state).toBeUndefined();
+      expect(authenticationResult.redirectURL).toBeUndefined();
+    });
+
+    it('can not provide `challenges` for non-`401` errors', () => {
+      expect(() => AuthenticationResult.failed(Boom.badRequest(), ['Negotiate'])).toThrowError(
+        'Challenges can only be provided with `401 Unauthorized` errors.'
+      );
     });
   });
 

@@ -17,5 +17,5 @@ export interface FatalErrorsSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [add](./kibana-plugin-public.fatalerrorssetup.add.md) | <code>(error: string &#124; Error, source?: string) =&gt; never</code> | Add a new fatal error. This will stop the Kibana Public Core and display a fatal error screen with details about the Kibana build and the error. |
-|  [get$](./kibana-plugin-public.fatalerrorssetup.get$.md) | <code>() =&gt; Rx.Observable&lt;ErrorInfo&gt;</code> | An Observable that will emit whenever a fatal error is added with <code>add()</code> |
+|  [get$](./kibana-plugin-public.fatalerrorssetup.get$.md) | <code>() =&gt; Rx.Observable&lt;FatalErrorInfo&gt;</code> | An Observable that will emit whenever a fatal error is added with <code>add()</code> |
 

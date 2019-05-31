@@ -61,65 +61,74 @@ export const LOAD_TIMEOUT = 120 * 1000; // 2 minutes
  */
 export const loadPluginBundle: LoadPluginBundle = <
   TSetup,
-  TDependencies extends Record<string, unknown>
+  TStart,
+  TPluginsSetup extends Record<string, unknown>,
+  TPluginsStart extends Record<string, unknown>
 >(
   addBasePath: (path: string) => string,
   pluginName: PluginName,
-  { timeoutMs = LOAD_TIMEOUT } = {}
+  { timeoutMs = LOAD_TIMEOUT }: { timeoutMs?: number } = {}
 ) =>
-  new Promise<PluginInitializer<TSetup, TDependencies>>((resolve, reject) => {
-    const script = document.createElement('script');
-    const coreWindow = (window as unknown) as CoreWindow;
+  new Promise<PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>>(
+    (resolve, reject) => {
+      const script = document.createElement('script');
+      const coreWindow = (window as unknown) as CoreWindow;
 
-    // Assumes that all plugin bundles get put into the bundles/plugins subdirectory
-    const bundlePath = addBasePath(`/bundles/plugin/${pluginName}.bundle.js`);
-    script.setAttribute('src', bundlePath);
-    script.setAttribute('id', `kbn-plugin-${pluginName}`);
-    script.setAttribute('async', '');
+      // Assumes that all plugin bundles get put into the bundles/plugins subdirectory
+      const bundlePath = addBasePath(`/bundles/plugin/${pluginName}.bundle.js`);
+      script.setAttribute('src', bundlePath);
+      script.setAttribute('id', `kbn-plugin-${pluginName}`);
+      script.setAttribute('async', '');
 
-    // Add kbnNonce for CSP
-    script.setAttribute('nonce', coreWindow.__kbnNonce__);
+      // Add kbnNonce for CSP
+      script.setAttribute('nonce', coreWindow.__kbnNonce__);
 
-    const cleanupTag = () => {
-      clearTimeout(timeout);
-      // Set to null for IE memory leak issue. Webpack does the same thing.
-      // @ts-ignore
-      script.onload = script.onerror = null;
-    };
+      const cleanupTag = () => {
+        clearTimeout(timeout);
+        // Set to null for IE memory leak issue. Webpack does the same thing.
+        // @ts-ignore
+        script.onload = script.onerror = null;
+      };
 
-    // Wire up resolve and reject
-    script.onload = () => {
-      cleanupTag();
+      // Wire up resolve and reject
+      script.onload = () => {
+        cleanupTag();
 
-      const initializer = coreWindow.__kbnBundles__[`plugin/${pluginName}`];
-      if (!initializer || typeof initializer !== 'function') {
-        reject(
-          new Error(`Definition of plugin "${pluginName}" should be a function (${bundlePath}).`)
-        );
-      } else {
-        resolve(initializer as PluginInitializer<TSetup, TDependencies>);
-      }
-    };
+        const initializer = coreWindow.__kbnBundles__[`plugin/${pluginName}`];
+        if (!initializer || typeof initializer !== 'function') {
+          reject(
+            new Error(`Definition of plugin "${pluginName}" should be a function (${bundlePath}).`)
+          );
+        } else {
+          resolve(initializer as PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>);
+        }
+      };
 
-    script.onerror = () => {
-      cleanupTag();
-      reject(new Error(`Failed to load "${pluginName}" bundle (${bundlePath})`));
-    };
+      script.onerror = () => {
+        cleanupTag();
+        reject(new Error(`Failed to load "${pluginName}" bundle (${bundlePath})`));
+      };
 
-    const timeout = setTimeout(() => {
-      cleanupTag();
-      reject(new Error(`Timeout reached when loading "${pluginName}" bundle (${bundlePath})`));
-    }, timeoutMs);
+      const timeout = setTimeout(() => {
+        cleanupTag();
+        reject(new Error(`Timeout reached when loading "${pluginName}" bundle (${bundlePath})`));
+      }, timeoutMs);
 
-    // Add the script tag to the end of the body to start downloading
-    document.body.appendChild(script);
-  });
+      // Add the script tag to the end of the body to start downloading
+      document.body.appendChild(script);
+    }
+  );
 
 /**
  * @internal
  */
-export type LoadPluginBundle = <TSetup, TDependencies extends Record<string, unknown>>(
+export type LoadPluginBundle = <
+  TSetup,
+  TStart,
+  TPluginsSetup extends Record<string, unknown>,
+  TPluginsStart extends Record<string, unknown>
+>(
   addBasePath: (path: string) => string,
   pluginName: PluginName,
   options?: { timeoutMs?: number }
-) => Promise<PluginInitializer<TSetup, TDependencies>>;
+) => Promise<PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>>;

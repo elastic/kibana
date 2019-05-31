@@ -11,6 +11,9 @@ import {
   UsageAPIProvider,
   InfraOpsGraphQLClientProvider,
   InfraOpsGraphQLClientFactoryProvider,
+  SiemGraphQLClientProvider,
+  SiemGraphQLClientFactoryProvider,
+  InfraOpsSourceConfigurationProvider,
 } from './services';
 
 import {
@@ -18,7 +21,7 @@ import {
   SpacesServiceProvider,
 } from '../common/services';
 
-export default async function ({ readConfigFile }) {
+export async function getApiIntegrationConfig({ readConfigFile }) {
 
   const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
   const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
@@ -34,6 +37,9 @@ export default async function ({ readConfigFile }) {
       esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
       infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
       infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
+      siemGraphQLClientFactory: SiemGraphQLClientFactoryProvider,
+      siemGraphQLClient: SiemGraphQLClientProvider,
+      infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
       es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,
@@ -53,6 +59,14 @@ export default async function ({ readConfigFile }) {
         '--optimize.enabled=false',
       ],
     },
-    esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...xPackFunctionalTestsConfig.get('esTestCluster'),
+      serverArgs: [
+        ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
+        'node.attr.name=apiIntegrationTestNode'
+      ],
+    },
   };
 }
+
+export default getApiIntegrationConfig;

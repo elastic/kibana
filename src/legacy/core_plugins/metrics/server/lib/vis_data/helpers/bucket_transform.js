@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import parseSettings from './parse_settings';
-import getBucketsPath from './get_buckets_path';
+import { parseSettings } from './parse_settings';
+import { getBucketsPath } from './get_buckets_path';
 import { parseInterval } from './parse_interval';
 import { set, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -63,7 +63,7 @@ function extendStatsBucket(bucket, metrics) {
   return body;
 }
 
-export default {
+export const bucketTransform = {
   count: () => {
     return {
       bucket_script: {

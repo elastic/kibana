@@ -21,7 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
@@ -88,7 +88,7 @@ export class DashboardAddPanel extends React.Component {
             )}
           />
         </EuiFlyoutBody>
-        { uiCapabilities.visualize.save ? (
+        { capabilities.get().visualize.save ? (
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>

@@ -10,6 +10,7 @@ import header from './header.png';
 export const donut: ElementFactory = () => ({
   name: 'donut',
   displayName: 'Donut chart',
+  tags: ['chart', 'proportion'],
   help: 'A customizable donut chart',
   image: header,
   expression: `filters

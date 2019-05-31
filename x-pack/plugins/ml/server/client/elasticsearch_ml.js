@@ -6,7 +6,7 @@
 
 
 
-export const elasticsearchJsPlugin = (Client, config, components) => {
+export const elasticsearchJsPlugin = (Client, config, components) => { // eslint-disable-line no-unused-vars
   const ca = components.clientAction.factory;
 
   Client.prototype.ml = components.clientAction.namespaceFactory();
@@ -98,6 +98,102 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         req: {
           jobId: {
             type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'POST'
+  });
+
+  ml.getDataFrameTransforms = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms',
+      }
+    ],
+    method: 'GET'
+  });
+
+  ml.getDataFrameTransformsStats = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/<%=jobId%>/_stats',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      },
+      {
+        fmt: '/_data_frame/transforms/_stats',
+      }
+    ],
+    method: 'GET'
+  });
+
+  ml.createDataFrameTransformsJob = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/<%=jobId%>',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    needBody: true,
+    method: 'PUT'
+  });
+
+  ml.deleteDataFrameTransformsJob = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/<%=jobId%>',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'DELETE'
+  });
+
+  ml.getDataFrameTransformsPreview = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/_preview'
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
+  ml.startDataFrameTransformsJob = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/<%=jobId%>/_start',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'POST'
+  });
+
+  ml.stopDataFrameTransformsJob = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/<%=jobId%>/_stop?&force=<%=force%>',
+        req: {
+          jobId: {
+            type: 'string'
+          },
+          force: {
+            type: 'boolean'
           }
         }
       }

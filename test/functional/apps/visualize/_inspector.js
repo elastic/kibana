@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.selectAggregation('Terms');
           await PageObjects.visualize.selectField('machine.os.raw');
           await PageObjects.visualize.setSize(2);
-          await PageObjects.visualize.toggleOtherBucket();
+          await PageObjects.visualize.toggleOtherBucket(3);
           await PageObjects.visualize.clickGo();
         });
 

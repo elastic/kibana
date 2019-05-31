@@ -77,25 +77,23 @@ export function timeseriesFetcher({
   transactionName?: string;
   setup: Setup;
 }) {
-  const { start, end, esFilterQuery, client, config } = setup;
+  const { start, end, uiFiltersES, client, config } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) }
+    { range: rangeFilter(start, end) },
+    ...uiFiltersES
   ];
 
   if (transactionName) {
     filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
   }
 
+  // TODO reimplement these as uiFilters
   if (transactionType) {
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-  }
-
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
   }
 
   const params: SearchParams = {
@@ -136,5 +134,5 @@ export function timeseriesFetcher({
     }
   };
 
-  return client<void, Aggs>('search', params);
+  return client.search<void, Aggs>(params);
 }

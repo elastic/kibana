@@ -19,7 +19,7 @@
 
 import { assign } from 'lodash';
 import { IndexedArray } from '../indexed_array';
-import { uiCapabilities } from '../capabilities';
+import { capabilities } from '../capabilities';
 
 const listeners = [];
 
@@ -56,7 +56,7 @@ export class ManagementSection {
 
   get visibleItems() {
     return this.items.inOrder.filter(item => {
-      const capabilityManagementSection = uiCapabilities.management[this.id];
+      const capabilityManagementSection = capabilities.get().management[this.id];
       const itemCapability = capabilityManagementSection ? capabilityManagementSection[item.id] : null;
 
       return item.visible && itemCapability !== false;
