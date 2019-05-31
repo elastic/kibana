@@ -19,30 +19,83 @@
 
 import { map, pick, zipObject } from 'lodash';
 
-export const datatable = () => ({
-  name: 'datatable',
-  validate: datatable => {
+import { ExpressionType } from '../../types';
+import { PointSeries } from './pointseries';
+import { Render } from './render';
+
+const name = 'datatable';
+
+/**
+ * A Utility function that Typescript can use to determine if an object is a Datatable.
+ * @param datatable
+ */
+export const isDatatable = (datatable: any): datatable is Datatable =>
+  !!datatable && datatable.type === 'datatable';
+
+/**
+ * This type represents the `type` of any `DatatableColumn` in a `Datatable`.
+ */
+export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
+
+/**
+ * This type represents a `DatatableRow` in a `Datatable`.
+ */
+export type DatatableRow = Record<string, any>;
+
+/**
+ * This type represents the shape of a column in a `Datatable`.
+ */
+export interface DatatableColumn {
+  name: string;
+  type: DatatableColumnType;
+}
+
+/**
+ * A `Datatable` in Canvas is a unique structure that represents tabulated data.
+ */
+export interface Datatable {
+  type: typeof name;
+  columns: DatatableColumn[];
+  rows: DatatableRow[];
+}
+
+interface SerializedDatatable extends Datatable {
+  rows: string[][];
+}
+
+type ToRender = Render<{
+  datatable: Datatable;
+  paginate: boolean;
+  perPage: number;
+  showHeader: boolean;
+}>;
+
+export const datatable = (): ExpressionType<typeof name, Datatable, SerializedDatatable> => ({
+  name,
+  validate: dtable => {
     // TODO: Check columns types. Only string, boolean, number, date, allowed for now.
-    if (!datatable.columns) {
+    if (!dtable.columns) {
       throw new Error('datatable must have a columns array, even if it is empty');
     }
 
-    if (!datatable.rows) throw new Error('datatable must have a rows array, even if it is empty');
+    if (!dtable.rows) {
+      throw new Error('datatable must have a rows array, even if it is empty');
+    }
   },
-  serialize: datatable => {
-    const { columns, rows } = datatable;
+  serialize: dtable => {
+    const { columns, rows } = dtable;
     return {
-      ...datatable,
+      ...dtable,
       rows: rows.map(row => {
         return columns.map(column => row[column.name]);
       }),
     };
   },
-  deserialize: datatable => {
-    const { columns, rows } = datatable;
+  deserialize: dtable => {
+    const { columns, rows } = dtable;
     return {
-      ...datatable,
-      rows: rows.map(row => {
+      ...dtable,
+      rows: rows.map((row: any) => {
         return zipObject(map(columns, 'name'), row);
       }),
     };
@@ -50,44 +103,44 @@ export const datatable = () => ({
   from: {
     null: () => {
       return {
-        type: 'datatable',
+        type: name,
         rows: [],
         columns: [],
       };
     },
-    pointseries: context => {
+    pointseries: (context: PointSeries) => {
       return {
-        type: 'datatable',
+        type: name,
         rows: context.rows,
-        columns: map(context.columns, (val, name) => {
-          return { name: name, type: val.type, role: val.role };
+        columns: map(context.columns, (val, colName) => {
+          return { name: colName!, type: val.type };
         }),
       };
     },
   },
   to: {
-    render: datatable => {
+    render: (dtable): ToRender => {
       return {
         type: 'render',
         as: 'table',
         value: {
-          datatable,
+          datatable: dtable,
           paginate: true,
           perPage: 10,
           showHeader: true,
         },
       };
     },
-    pointseries: datatable => {
+    pointseries: (dtable): PointSeries => {
       // datatable columns are an array that looks like [{ name: "one", type: "string" }, { name: "two", type: "string" }]
       // rows look like [{ one: 1, two: 2}, { one: 3, two: 4}, ...]
       const validFields = ['x', 'y', 'color', 'size', 'text'];
-      const columns = datatable.columns.filter(column => validFields.includes(column.name));
-      const rows = datatable.rows.map(row => pick(row, validFields));
+      const columns = dtable.columns.filter(column => validFields.includes(column.name));
+      const rows = dtable.rows.map(row => pick(row, validFields));
 
       return {
         type: 'pointseries',
-        columns: columns.reduce((acc, column) => {
+        columns: columns.reduce((acc: Record<string, any>, column) => {
           /* pointseries columns are an object that looks like this
            * {
            *   x: { type: "string", expression: "x", role: "dimension" },
