@@ -6,9 +6,15 @@
 
 import { map, zipObject } from 'lodash';
 
-const isString = val => typeof val === 'string';
+const isString = (val: any): boolean => typeof val === 'string';
 
-export function pivotObjectArray(rows, columns) {
+export function pivotObjectArray<
+  RowType extends { [key: string]: any },
+  ReturnColumns extends string | number | symbol = keyof RowType
+>(
+  rows: RowType[],
+  columns?: string[]
+): { [s in ReturnColumns]: s extends keyof RowType ? Array<RowType[s]> : undefined[] } {
   const columnNames = columns || Object.keys(rows[0]);
   if (!columnNames.every(isString)) {
     throw new Error('Columns should be an array of strings');
