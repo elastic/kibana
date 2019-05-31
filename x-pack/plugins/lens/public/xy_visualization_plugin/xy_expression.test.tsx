@@ -31,19 +31,16 @@ function sampleArgs() {
     seriesType: 'line',
     title: 'My fanci line chart',
     legend: {
-      type: 'lens_xy_legendConfig',
       isVisible: false,
       position: Position.Top,
     },
     y: {
-      type: 'lens_xy_yConfig',
       accessors: ['a', 'b'],
       position: Position.Left,
       showGridlines: false,
       title: 'A and B',
     },
     x: {
-      type: 'lens_xy_xConfig',
       accessor: 'c',
       position: Position.Bottom,
       showGridlines: false,
