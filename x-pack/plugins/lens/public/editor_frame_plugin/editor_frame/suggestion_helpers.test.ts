@@ -6,19 +6,24 @@
 
 import { getSuggestions } from './suggestion_helpers';
 import { createMockVisualization } from '../mock_extensions';
-import { TableColumn } from '../../types';
+import { TableSuggestion } from '../../types';
+
+const generateSuggestion = (datasourceSuggestionId: number = 1, state = {}) => ({
+  state,
+  table: { datasourceSuggestionId, columns: [], isMultiRow: false },
+});
 
 describe('suggestion helpers', () => {
   it('should return suggestions array', () => {
     const mockVisualization = createMockVisualization();
     const suggestedState = {};
     const suggestions = getSuggestions(
-      [{ state: {}, tableColumns: [] }],
+      [generateSuggestion()],
       {
         vis1: {
           ...mockVisualization,
           getSuggestions: () => [
-            { tableIndex: 0, score: 0.5, title: 'Test', state: suggestedState },
+            { datasourceSuggestionId: 0, score: 0.5, title: 'Test', state: suggestedState },
           ],
         },
       },
@@ -33,18 +38,20 @@ describe('suggestion helpers', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
     const suggestions = getSuggestions(
-      [{ state: {}, tableColumns: [] }],
+      [generateSuggestion()],
       {
         vis1: {
           ...mockVisualization1,
           getSuggestions: () => [
-            { tableIndex: 0, score: 0.5, title: 'Test', state: {} },
-            { tableIndex: 0, score: 0.5, title: 'Test2', state: {} },
+            { datasourceSuggestionId: 0, score: 0.5, title: 'Test', state: {} },
+            { datasourceSuggestionId: 0, score: 0.5, title: 'Test2', state: {} },
           ],
         },
         vis2: {
           ...mockVisualization2,
-          getSuggestions: () => [{ tableIndex: 0, score: 0.5, title: 'Test3', state: {} }],
+          getSuggestions: () => [
+            { datasourceSuggestionId: 0, score: 0.5, title: 'Test3', state: {} },
+          ],
         },
       },
       'vis1',
@@ -57,18 +64,20 @@ describe('suggestion helpers', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
     const suggestions = getSuggestions(
-      [{ state: {}, tableColumns: [] }],
+      [generateSuggestion()],
       {
         vis1: {
           ...mockVisualization1,
           getSuggestions: () => [
-            { tableIndex: 0, score: 0.2, title: 'Test', state: {} },
-            { tableIndex: 0, score: 0.8, title: 'Test2', state: {} },
+            { datasourceSuggestionId: 0, score: 0.2, title: 'Test', state: {} },
+            { datasourceSuggestionId: 0, score: 0.8, title: 'Test2', state: {} },
           ],
         },
         vis2: {
           ...mockVisualization2,
-          getSuggestions: () => [{ tableIndex: 0, score: 0.6, title: 'Test3', state: {} }],
+          getSuggestions: () => [
+            { datasourceSuggestionId: 0, score: 0.6, title: 'Test3', state: {} },
+          ],
         },
       },
       'vis1',
@@ -82,10 +91,10 @@ describe('suggestion helpers', () => {
   it('should call all suggestion getters with all available data tables', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
-    const table1: TableColumn[] = [];
-    const table2: TableColumn[] = [];
+    const table1: TableSuggestion = { datasourceSuggestionId: 0, columns: [], isMultiRow: true };
+    const table2: TableSuggestion = { datasourceSuggestionId: 1, columns: [], isMultiRow: true };
     getSuggestions(
-      [{ state: {}, tableColumns: table1 }, { state: {}, tableColumns: table2 }],
+      [{ state: {}, table: table1 }, { state: {}, table: table2 }],
       {
         vis1: mockVisualization1,
         vis2: mockVisualization2,
@@ -105,18 +114,20 @@ describe('suggestion helpers', () => {
     const tableState1 = {};
     const tableState2 = {};
     const suggestions = getSuggestions(
-      [{ state: tableState1, tableColumns: [] }, { state: tableState2, tableColumns: [] }],
+      [generateSuggestion(1, tableState1), generateSuggestion(1, tableState2)],
       {
         vis1: {
           ...mockVisualization1,
           getSuggestions: () => [
-            { tableIndex: 0, score: 0.3, title: 'Test', state: {} },
-            { tableIndex: 1, score: 0.2, title: 'Test2', state: {} },
+            { datasourceSuggestionId: 0, score: 0.3, title: 'Test', state: {} },
+            { datasourceSuggestionId: 1, score: 0.2, title: 'Test2', state: {} },
           ],
         },
         vis2: {
           ...mockVisualization2,
-          getSuggestions: () => [{ tableIndex: 1, score: 0.1, title: 'Test3', state: {} }],
+          getSuggestions: () => [
+            { datasourceSuggestionId: 1, score: 0.1, title: 'Test3', state: {} },
+          ],
         },
       },
       'vis1',
@@ -132,7 +143,7 @@ describe('suggestion helpers', () => {
     const mockVisualization2 = createMockVisualization();
     const currentState = {};
     getSuggestions(
-      [{ state: {}, tableColumns: [] }, { state: {}, tableColumns: [] }],
+      [generateSuggestion(1), generateSuggestion(2)],
       {
         vis1: mockVisualization1,
         vis2: mockVisualization2,

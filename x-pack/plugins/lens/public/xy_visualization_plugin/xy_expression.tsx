@@ -152,9 +152,9 @@ export const xConfig: ContextFunction<'lens_xy_xConfig', null, XConfig, XConfigR
 export interface XYArgs {
   seriesType: 'bar' | 'line' | 'area';
   title: string;
-  legend: LegendConfigResult;
-  y: YConfigResult;
-  x: XConfigResult;
+  legend: LegendConfig;
+  y: YConfig;
+  x: XConfig;
   splitSeriesAccessors: string[];
   stackAccessors: string[];
 }

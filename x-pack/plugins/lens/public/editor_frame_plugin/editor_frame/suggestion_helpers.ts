@@ -29,7 +29,7 @@ export function getSuggestions(
   activeVisualizationId: string | null,
   visualizationState: unknown
 ): Suggestion[] {
-  const datasourceTables = datasourceTableSuggestions.map(({ tableColumns }) => tableColumns);
+  const datasourceTables = datasourceTableSuggestions.map(({ table }) => table);
 
   return (
     Object.entries(visualizationMap)
@@ -39,7 +39,7 @@ export function getSuggestions(
             tables: datasourceTables,
             state: visualizationId === activeVisualizationId ? visualizationState : undefined,
           })
-          .map(({ tableIndex: datasourceSuggestionId, ...suggestion }) => ({
+          .map(({ datasourceSuggestionId, ...suggestion }) => ({
             ...suggestion,
             visualizationId,
             datasourceState: datasourceTableSuggestions[datasourceSuggestionId].state,

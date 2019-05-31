@@ -8,13 +8,24 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EditorFrame } from './editor_frame';
-import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
+import { Visualization, Datasource, DatasourcePublicAPI, DatasourceSuggestion } from '../../types';
 import { act } from 'react-dom/test-utils';
 import { createMockVisualization, createMockDatasource } from '../mock_extensions';
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
+
+function generateSuggestion(datasourceSuggestionId = 1, state = {}): DatasourceSuggestion {
+  return {
+    state: {},
+    table: {
+      columns: [],
+      datasourceSuggestionId: 1,
+      isMultiRow: true,
+    },
+  };
+}
 
 describe('editor_frame', () => {
   let mockVisualization: Visualization;
@@ -475,13 +486,13 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  tableIndex: 0,
+                  datasourceSuggestionId: 0,
                   score: 0.5,
                   state: {},
                   title: 'Suggestion2',
                 },
                 {
-                  tableIndex: 0,
+                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: {},
                   title: 'Suggestion1',
@@ -492,13 +503,13 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  tableIndex: 0,
+                  datasourceSuggestionId: 0,
                   score: 0.4,
                   state: {},
                   title: 'Suggestion4',
                 },
                 {
-                  tableIndex: 0,
+                  datasourceSuggestionId: 0,
                   score: 0.45,
                   state: {},
                   title: 'Suggestion3',
@@ -509,7 +520,7 @@ describe('editor_frame', () => {
           datasourceMap={{
             testDatasource: {
               ...mockDatasource,
-              getDatasourceSuggestionsFromCurrentState: () => [{ state: {}, tableColumns: [] }],
+              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
             },
           }}
           initialDatasourceId="testDatasource"
@@ -540,7 +551,7 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  tableIndex: 0,
+                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion1',
@@ -552,9 +563,7 @@ describe('editor_frame', () => {
           datasourceMap={{
             testDatasource: {
               ...mockDatasource,
-              getDatasourceSuggestionsFromCurrentState: () => [
-                { state: newDatasourceState, tableColumns: [] },
-              ],
+              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
             },
           }}
           initialDatasourceId="testDatasource"
@@ -595,13 +604,13 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  tableIndex: 0,
+                  datasourceSuggestionId: 0,
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
                 },
                 {
-                  tableIndex: 0,
+                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion2',
@@ -613,8 +622,8 @@ describe('editor_frame', () => {
           datasourceMap={{
             testDatasource: {
               ...mockDatasource,
-              getDatasourceSuggestionsForField: () => [{ state: {}, tableColumns: [] }],
-              getDatasourceSuggestionsFromCurrentState: () => [{ state: {}, tableColumns: [] }],
+              getDatasourceSuggestionsForField: () => [generateSuggestion()],
+              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
             },
           }}
           initialDatasourceId="testDatasource"
@@ -648,13 +657,13 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  tableIndex: 0,
+                  datasourceSuggestionId: 0,
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
                 },
                 {
-                  tableIndex: 0,
+                  datasourceSuggestionId: 0,
                   score: 0.6,
                   state: {},
                   title: 'Suggestion2',
@@ -665,7 +674,7 @@ describe('editor_frame', () => {
               ...mockVisualization2,
               getSuggestions: () => [
                 {
-                  tableIndex: 0,
+                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion3',
@@ -676,8 +685,8 @@ describe('editor_frame', () => {
           datasourceMap={{
             testDatasource: {
               ...mockDatasource,
-              getDatasourceSuggestionsForField: () => [{ state: {}, tableColumns: [] }],
-              getDatasourceSuggestionsFromCurrentState: () => [{ state: {}, tableColumns: [] }],
+              getDatasourceSuggestionsForField: () => [generateSuggestion()],
+              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
             },
           }}
           initialDatasourceId="testDatasource"
