@@ -208,6 +208,23 @@ export function getUiSettingDefaults() {
       type: 'select',
       options: weekdays
     },
+    'dateNanosFormat': {
+      name: i18n.translate('kbn.advancedSettings.dateNanosFormatTitle', {
+        defaultMessage: 'Date with nanoseconds format',
+      }),
+      value: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+      description: i18n.translate('kbn.advancedSettings.dateNanosFormatText', {
+        defaultMessage: 'Used for the {dateNanosLink} datatype of Elasticsearch',
+        values: {
+          dateNanosLink:
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/date_nanos.html" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.dateNanosLinkTitle', {
+              defaultMessage: 'date_nanos',
+            }) +
+            '</a>',
+        },
+      }),
+    },
     'defaultIndex': {
       name: i18n.translate('kbn.advancedSettings.defaultIndexTitle', {
         defaultMessage: 'Default index',
@@ -608,6 +625,7 @@ export function getUiSettingDefaults() {
 `{
   "ip": { "id": "ip", "params": {} },
   "date": { "id": "date", "params": {} },
+  "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
   "number": { "id": "number", "params": {} },
   "boolean": { "id": "boolean", "params": {} },
   "_source": { "id": "_source", "params": {} },
