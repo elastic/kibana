@@ -22,7 +22,7 @@ interface FireOptions {
 export function createFireFunction({ taskManager, savedObjectsClient }: CreateFireFunctionOptions) {
   return async function fire({ id, params, namespace }: FireOptions) {
     const actionSavedObject = await savedObjectsClient.get('action', id, { namespace });
-    taskManager.schedule({
+    await taskManager.schedule({
       taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
       params: {
         id,

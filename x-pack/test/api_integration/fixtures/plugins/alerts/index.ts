@@ -20,6 +20,7 @@ export default function(kibana: any) {
           return { success: true, actionTypeConfig, params };
         },
       });
+
       server.plugins.alerting.registerType({
         id: 'cpu-check',
         description: 'Check CPU Usage',

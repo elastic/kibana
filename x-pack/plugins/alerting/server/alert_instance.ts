@@ -59,7 +59,7 @@ export class AlertInstance {
   /**
    * Used to serialize alert instance state
    */
-  toJson() {
+  toJSON() {
     return {
       state: this._state,
       meta: this._meta,
