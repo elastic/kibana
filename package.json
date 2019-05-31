@@ -141,7 +141,7 @@
     "chalk": "^2.4.1",
     "color": "1.0.3",
     "commander": "2.20.0",
-    "compare-versions": "3.1.0",
+    "compare-versions": "3.4.0",
     "core-js": "2.6.9",
     "css-loader": "1.0.0",
     "custom-event-polyfill": "^0.3.0",
