@@ -32,6 +32,7 @@ function samplePanelAction(kibana: KibanaPlugin) {
         'plugins/kbn_tp_sample_panel_action/sample_panel_link',
       ],
     },
+    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
   });
 }
 
