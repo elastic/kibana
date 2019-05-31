@@ -39,7 +39,7 @@ describe('GenericRowRenderer', () => {
         browserFields,
         data: auditd,
         width: 100,
-        children: <span>some children</span>,
+        children: <span>{'some children'}</span>,
       });
 
       const wrapper = shallow(<span>{children}</span>);
@@ -69,7 +69,7 @@ describe('GenericRowRenderer', () => {
         browserFields: mockBrowserFields,
         data: nonAuditd,
         width: 100,
-        children: <span>some children</span>,
+        children: <span>{'some children'}</span>,
       });
       const wrapper = mount(
         <TestProviders>
@@ -84,7 +84,7 @@ describe('GenericRowRenderer', () => {
         browserFields: mockBrowserFields,
         data: auditd,
         width: 100,
-        children: <span>some children </span>,
+        children: <span>{'some children '}</span>,
       });
       const wrapper = mount(
         <TestProviders>
@@ -118,7 +118,7 @@ describe('GenericRowRenderer', () => {
         browserFields,
         data: auditdFile,
         width: 100,
-        children: <span>some children</span>,
+        children: <span>{'some children'}</span>,
       });
 
       const wrapper = shallow(<span>{children}</span>);
@@ -148,7 +148,7 @@ describe('GenericRowRenderer', () => {
         browserFields: mockBrowserFields,
         data: nonAuditd,
         width: 100,
-        children: <span>some children</span>,
+        children: <span>{'some children'}</span>,
       });
       const wrapper = mount(
         <TestProviders>
@@ -163,7 +163,7 @@ describe('GenericRowRenderer', () => {
         browserFields: mockBrowserFields,
         data: auditdFile,
         width: 100,
-        children: <span>some children </span>,
+        children: <span>{'some children '}</span>,
       });
       const wrapper = mount(
         <TestProviders>

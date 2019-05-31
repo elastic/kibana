@@ -1,0 +1,19 @@
+{
+  "type": "index",
+  "value": {
+    "index": "date-nanos",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date_nanos"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

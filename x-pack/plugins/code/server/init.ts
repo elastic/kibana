@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as _ from 'lodash';
 import { Server } from 'hapi';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
@@ -162,6 +163,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   // Enable the developing language servers in development mode.
   if (devMode === true) {
     LanguageServers.push(...LanguageServersDeveloping);
+    const JavaLanguageServer = LanguageServers.find(d => d.name === 'Java');
+    JavaLanguageServer!.downloadUrl = _.partialRight(JavaLanguageServer!.downloadUrl!, devMode);
   }
 
   const installManager = new InstallManager(server, serverOptions);

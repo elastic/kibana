@@ -23,7 +23,7 @@ const chartBase: ChartBase<NonHeapMemoryMetrics> = {
       title: i18n.translate(
         'xpack.apm.agentMetrics.java.nonHeapMemorySeriesUsed',
         {
-          defaultMessage: 'Used'
+          defaultMessage: 'Avg. used'
         }
       ),
       color: theme.euiColorVis0
@@ -32,7 +32,7 @@ const chartBase: ChartBase<NonHeapMemoryMetrics> = {
       title: i18n.translate(
         'xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted',
         {
-          defaultMessage: 'Committed'
+          defaultMessage: 'Avg. committed'
         }
       ),
       color: theme.euiColorVis1

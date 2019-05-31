@@ -160,7 +160,7 @@ const getEventsColumns = (
           attrName: 'event.module',
           idPrefix: `host-${pageType}-events-table-${node._id}`,
         })}
-        /
+        {'/'}
         {getRowItemDraggables({
           rowItems: getOr(null, 'event.dataset', node),
           attrName: 'event.dataset',
@@ -203,7 +203,8 @@ const getEventsColumns = (
           idPrefix: `host-${pageType}-events-table-${node._id}`,
           render: item => <IPDetailsLink ip={item} />,
         })}
-        :{getOrEmptyTag('source.port', node)}
+        {':'}
+        {getOrEmptyTag('source.port', node)}
       </>
     ),
   },
@@ -219,7 +220,8 @@ const getEventsColumns = (
           idPrefix: `host-${pageType}-events-table-${node._id}`,
           render: item => <IPDetailsLink ip={item} />,
         })}
-        :{getOrEmptyTag('destination.port', node)}
+        {':'}
+        {getOrEmptyTag('destination.port', node)}
       </>
     ),
   },
