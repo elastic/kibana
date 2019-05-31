@@ -80,10 +80,6 @@ export class TablePanelConfig extends Component {
     });
   };
 
-  handleQueryChange = filter => {
-    this.props.onChange({ filter });
-  }
-
   render() {
     const { selectedTab } = this.state;
     const defaults = {
@@ -241,7 +237,7 @@ export class TablePanelConfig extends Component {
                       query: model.filter.query || '',
                     }}
                     screenTitle={'TablePanelConfigQuery'}
-                    onChange={this.handleQueryChange}
+                    onChange={filter => this.props.onChange({ filter })}
                     appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                     store={localStorage}

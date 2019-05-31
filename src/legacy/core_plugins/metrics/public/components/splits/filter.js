@@ -37,9 +37,6 @@ export const SplitByFilter = props => {
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
-  const handleQueryChange = filter => {
-    onChange({ filter });
-  };
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -71,7 +68,7 @@ export const SplitByFilter = props => {
               query: model.filter.query || '',
             }}
             screenTitle={'DataMetricsGroupByFilter'}
-            onChange={handleQueryChange}
+            onChange={filter => onChange({ filter })}
             appName={'VisEditor'}
             indexPatterns={[indexPattern]}
             store={localStorage}

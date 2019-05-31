@@ -50,9 +50,6 @@ const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
-  const handleQueryChange = filter => {
-    props.onChange({ filter });
-  };
   const defaults = {
     fill: '',
     line_width: '',
@@ -335,7 +332,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               query: (model.filter && model.filter.query) ? model.filter.query : ''
             }}
             screenTitle={'TSVBDataOptionsTab'}
-            onChange={handleQueryChange}
+            onChange={filter => props.onChange({ filter })}
             appName={'VisEditor'}
             indexPatterns={[seriesIndexPattern]}
             store={localStorage}

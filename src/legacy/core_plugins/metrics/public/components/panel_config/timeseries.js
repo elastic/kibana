@@ -54,9 +54,6 @@ class TimeseriesPanelConfigUi extends Component {
     this.state = { selectedTab: 'data' };
   }
 
-  handleQueryChange = filter => {
-    this.props.onChange({ filter });
-  }
   switchTab(selectedTab) {
     this.setState({ selectedTab });
   }
@@ -178,7 +175,7 @@ class TimeseriesPanelConfigUi extends Component {
                       query: model.filter.query || '',
                     }}
                     screenTitle={'TimeseriesPanelConfigQuery'}
-                    onChange={this.handleQueryChange}
+                    onChange={filter => this.props.onChange({ filter })}
                     appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                     store={localStorage}

@@ -65,10 +65,6 @@ export class TopNPanelConfig extends Component {
     this.props.onChange(parts);
   }
 
-  handleQueryChange = filter => {
-    this.props.onChange({ filter });
-  }
-
   switchTab(selectedTab) {
     this.setState({ selectedTab });
   }
@@ -152,7 +148,7 @@ export class TopNPanelConfig extends Component {
                       query: model.filter.query || '',
                     }}
                     screenTitle={'TopNPanelConfigQuery'}
-                    onChange={this.handleQueryChange}
+                    onChange={filter => this.props.onChange({ filter })}
                     appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                     store={localStorage}

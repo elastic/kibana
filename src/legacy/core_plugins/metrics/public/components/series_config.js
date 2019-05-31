@@ -52,9 +52,6 @@ export const SeriesConfig = props => {
   const htmlId = htmlIdGenerator();
   const seriesIndexPattern = (props.model.override_index_pattern && props.model.series_index_pattern) ?
     props.model.series_index_pattern : props.indexPatternForQuery;
-  const handleQueryChange = query => {
-    props.onChange({ filter: query });
-  };
 
   return (
     <div className="tvbAggRow">
@@ -80,7 +77,7 @@ export const SeriesConfig = props => {
             query: (model.filter && model.filter.query) ? model.filter.query : ''
           }}
           screenTitle={'TSVBTopNDataOptionsTab'}
-          onChange={handleQueryChange}
+          onChange={filter => props.onChange({ filter })}
           appName={'VisEditor'}
           indexPatterns={[seriesIndexPattern]}
           store={localStorage}

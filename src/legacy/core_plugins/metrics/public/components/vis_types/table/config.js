@@ -57,9 +57,6 @@ class TableSeriesConfigUI extends Component {
       });
     }
   }
-  handleQueryChange = filter => {
-    this.props.onChange({ filter });
-  };
 
   render() {
     const defaults = { offset_time: '', value_template: '' };
@@ -139,7 +136,7 @@ class TableSeriesConfigUI extends Component {
                   query: (model.filter && model.filter.query) ? model.filter.query : ''
                 }}
                 screenTitle={'TSVBTableDataOptionsTab'}
-                onChange={this.handleQueryChange}
+                onChange={filter => this.props.onChange({ filter })}
                 appName={'VisEditor'}
                 indexPatterns={[this.props.indexPatternForQuery]}
                 store={localStorage}

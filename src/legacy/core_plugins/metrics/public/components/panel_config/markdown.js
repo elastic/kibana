@@ -75,9 +75,7 @@ class MarkdownPanelConfigUi extends Component {
       this.props.onChange(parts);
     });
   }
-  handleQueryChange = filter => {
-    this.props.onChange({ filter });
-  }
+
   render() {
     const defaults = { filter: { query: '', language: uiSettingsQueryLanguage } };
     const model = { ...defaults, ...this.props.model };
@@ -156,7 +154,7 @@ class MarkdownPanelConfigUi extends Component {
                       query: model.filter.query || '',
                     }}
                     screenTitle={'MarkdownPanelConfigQuery'}
-                    onChange={this.handleQueryChange}
+                    onChange={filter => this.props.onChange({ filter })}
                     appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                     store={localStorage}
