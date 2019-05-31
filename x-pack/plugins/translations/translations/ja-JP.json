@@ -3636,7 +3636,6 @@
     "xpack.apm.agentMetrics.java.heapMemorySeriesUsed": "使用中",
     "xpack.apm.agentMetrics.java.nonHeapMemoryChartTitle": "ヒープ領域以外",
     "xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted": "割当",
-    "xpack.apm.agentMetrics.java.nonHeapMemorySeriesMax": "最高",
     "xpack.apm.agentMetrics.java.nonHeapMemorySeriesUsed": "使用中",
     "xpack.apm.agentMetrics.java.threadCount": "カウント",
     "xpack.apm.agentMetrics.java.threadCountChartTitle": "スレッド数",
