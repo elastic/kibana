@@ -5,10 +5,10 @@
 ```ts
 
 import * as CSS from 'csstype';
-import { default } from 'react';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import * as PropTypes from 'prop-types';
+import React from 'react';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
@@ -241,7 +241,7 @@ export type HttpStart = HttpServiceBase;
 // @public
 export interface I18nSetup {
     Context: ({ children }: {
-        children: default.ReactNode;
+        children: React.ReactNode;
     }) => JSX.Element;
 }
 
@@ -313,12 +313,12 @@ export interface OverlayStart {
     // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
+    openFlyout: (flyoutChildren: React_2.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
     }) => OverlayRef;
     // (undocumented)
-    openModal: (modalChildren: React.ReactNode, modalProps?: {
+    openModal: (modalChildren: React_2.ReactNode, modalProps?: {
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
     }) => OverlayRef;
