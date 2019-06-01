@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
+
 import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
@@ -13,7 +15,7 @@ import { IndexPattern } from 'ui/index_patterns';
 import { ml } from '../../../services/ml_api_service';
 
 import { isDefaultQuery, PivotQuery } from '../../common';
-import { EsDoc, EsFieldName, getDefaultSelectableFields } from './common';
+import { EsDoc, EsFieldName, getDefaultSelectableFields, getFlattenedFields } from './common';
 
 const SEARCH_SIZE = 1000;
 
@@ -59,7 +61,27 @@ export const useSourceIndexData = (
         setSelectedFields(newSelectedFields);
       }
 
-      setTableItems(docs as EsDoc[]);
+      // Create a version of the doc's source with flattened field names.
+      // This avoids confusion later on if a field name has dots in its name
+      // or is a nested fields when displaying it via EuiInMemoryTable.
+      const flattenedFields = getFlattenedFields(docs[0]._source);
+      const transformedTableItems = docs.map(doc => {
+        const item = {} as {
+          [key: string]: any;
+        };
+        flattenedFields.forEach(ff => {
+          item[ff] = get(doc._source, ff);
+          if (item[ff] === undefined) {
+            item[ff] = doc._source[`"${ff}"`];
+          }
+        });
+        return {
+          ...doc,
+          _source: item,
+        };
+      });
+
+      setTableItems(transformedTableItems as EsDoc[]);
       setStatus(SOURCE_INDEX_STATUS.LOADED);
     } catch (e) {
       setErrorMessage(JSON.stringify(e));
