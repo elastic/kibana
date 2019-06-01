@@ -32,7 +32,7 @@
   "devDependencies": {
     "@babel/core": "7.4.5",
     "@babel/polyfill": "7.4.4",
-    "@elastic/eui": "0.0.23",
+    "@elastic/eui": "0.0.55",
     "@kbn/babel-preset": "1.0.0",
     "autoprefixer": "6.7.7",
     "babel-loader": "8.0.6",
