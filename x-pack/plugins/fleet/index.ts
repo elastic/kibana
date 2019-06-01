@@ -5,16 +5,16 @@
  */
 import Joi from 'joi';
 import { resolve } from 'path';
+import { i18n } from '../../../packages/kbn-i18n/src/index';
 import { PLUGIN } from './common/constants';
 import { CONFIG_PREFIX } from './common/constants/plugin';
-import { i18n } from '../../../packages/kbn-i18n/src/index';
 //
 
 export const config = Joi.object({
   enabled: Joi.boolean().default(true),
 }).default();
 
-export function beats(kibana: any) {
+export function fleet(kibana: any) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     require: ['kibana', 'elasticsearch', 'xpack_main'],
