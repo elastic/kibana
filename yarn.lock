@@ -2361,31 +2361,31 @@
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
   integrity sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==
 
-"@microsoft/api-documenter@7.0.49":
-  version "7.0.49"
-  resolved "https://registry.yarnpkg.com/@microsoft/api-documenter/-/api-documenter-7.0.49.tgz#8f3077d50eec64d20e439457814e84dd8cf473ea"
-  integrity sha512-Z8em7Nx7MQpBMbnM6aZ5VsD98VRzCPiv5qL3gmXE80ZTzhYvjAUJD27j0zxqiShjJEgx/wspzhFlOZjw6IrdJA==
+"@microsoft/api-documenter@7.2.1":
+  version "7.2.1"
+  resolved "https://registry.yarnpkg.com/@microsoft/api-documenter/-/api-documenter-7.2.1.tgz#560d5649dec87cf0227ffe7ba6df4c96533ca75d"
+  integrity sha512-o5SjVRovTWL9NwZdQimhXdWEKkYdxlrRDy+Y4GDvx9R5vObS2ptKZoC0bdHT5R9Febw9I/io8YVcQOzFHxKuqw==
   dependencies:
-    "@microsoft/api-extractor-model" "7.0.28"
+    "@microsoft/api-extractor-model" "7.1.1"
     "@microsoft/node-core-library" "3.13.0"
-    "@microsoft/ts-command-line" "4.2.3"
-    "@microsoft/tsdoc" "0.12.8"
+    "@microsoft/ts-command-line" "4.2.5"
+    "@microsoft/tsdoc" "0.12.9"
     colors "~1.2.1"
-    js-yaml "~3.9.1"
-
-"@microsoft/api-extractor-model@7.0.28":
-  version "7.0.28"
-  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor-model/-/api-extractor-model-7.0.28.tgz#691b077415143a9015ed1656bca6d0b9a77f58cb"
-  integrity sha512-kZJaWwdu3z5A1DugJpOZ9dI5+DjIEhqQJwHn2/kLTpsKT7gOyqNRbGHlDGG8xSiJ6/m994+cwh3qSGYDC17dtw==
-  dependencies:
-    "@microsoft/node-core-library" "3.13.0"
-    "@microsoft/tsdoc" "0.12.8"
-    "@types/node" "8.5.8"
+    js-yaml "~3.13.1"
 
 "@microsoft/api-extractor-model@7.1.0":
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/@microsoft/api-extractor-model/-/api-extractor-model-7.1.0.tgz#57e9805ba0f2322dd12945bb0588eeda522519cd"
   integrity sha512-DvaJ1fEpwega9TVMR4xR0jeNV/9JHNMxN/t8TuBftZHSLZzTczh8HyqyFxKo2IwDDCoZy5FmXZsq/vo5JQvRMQ==
+  dependencies:
+    "@microsoft/node-core-library" "3.13.0"
+    "@microsoft/tsdoc" "0.12.9"
+    "@types/node" "8.5.8"
+
+"@microsoft/api-extractor-model@7.1.1":
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor-model/-/api-extractor-model-7.1.1.tgz#17aa30fe641db7efbcfb779f4a87b8461d6a2322"
+  integrity sha512-RiQJA8JpBbRxqUfro8SxZGLjeCFH8HUUJvD5VTUrDrgdt13omx7d0bsGN0lf+AT63yF+RX4R2+Jd2b0SaAO/sQ==
   dependencies:
     "@microsoft/node-core-library" "3.13.0"
     "@microsoft/tsdoc" "0.12.9"
@@ -2430,10 +2430,15 @@
     argparse "~1.0.9"
     colors "~1.2.1"
 
-"@microsoft/tsdoc@0.12.8":
-  version "0.12.8"
-  resolved "https://registry.yarnpkg.com/@microsoft/tsdoc/-/tsdoc-0.12.8.tgz#e9646c91c650d536f37b04762eaa81afdc9a19d3"
-  integrity sha512-0smzAmVIUCsssAqDSPn9AfOPKUobq2WXMygbzC5JNswAJOs4uJK6DTZgfnHC8QLE2q374sPNwWU5D5LuoAJQSA==
+"@microsoft/ts-command-line@4.2.5":
+  version "4.2.5"
+  resolved "https://registry.yarnpkg.com/@microsoft/ts-command-line/-/ts-command-line-4.2.5.tgz#ef5060c841e2e604c1e51c68f1b890a9b75ec6ff"
+  integrity sha512-QyTfbfpx6o+1cnjx5GubqKSRMDxBBMXABSa8wmqRa/A1K99FEBZfLIO6GmaY0s7rNYEchfR1VcVS/hV2VW+6hw==
+  dependencies:
+    "@types/argparse" "1.0.33"
+    "@types/node" "8.5.8"
+    argparse "~1.0.9"
+    colors "~1.2.1"
 
 "@microsoft/tsdoc@0.12.9":
   version "0.12.9"
@@ -16395,7 +16400,7 @@ js-yaml@^3.13.0:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
-js-yaml@~3.13.0:
+js-yaml@~3.13.0, js-yaml@~3.13.1:
   version "3.13.1"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.13.1.tgz#aff151b30bfdfa8e49e05da22e7415e9dfa37847"
   integrity sha512-YfbcO7jXDdyj0DGxYVSlSeQNHbD7XPWvrVWeVUujrQEoZzWJIRrCPoyk6kL6IAjAG2IolMK4T0hNUe0HOUs5Jw==
@@ -16419,14 +16424,6 @@ js-yaml@~3.7.0:
   dependencies:
     argparse "^1.0.7"
     esprima "^2.6.0"
-
-js-yaml@~3.9.1:
-  version "3.9.1"
-  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.9.1.tgz#08775cebdfdd359209f0d2acd383c8f86a6904a0"
-  integrity sha512-CbcG379L1e+mWBnLvHWWeLs8GyV/EMw862uLI3c+GxVyDHWZcjZinwuBd3iW2pgxgIlksW/1vNJa4to+RvDOww==
-  dependencies:
-    argparse "^1.0.7"
-    esprima "^4.0.0"
 
 jsbn@~0.1.0:
   version "0.1.1"
