@@ -19,11 +19,11 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
 
   const SUBJ_TABLE_SORT_NAME_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_name_0`;
   const SUBJ_TABLE_SORT_STATUS_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_isOnline_1`;
-  const SUBJ_TABLE_SORT_CPU_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_cpu_utilization_2`;
-  const SUBJ_TABLE_SORT_LOAD_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_load_average_3`;
-  const SUBJ_TABLE_SORT_MEM_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_jvm_mem_percent_4`;
-  const SUBJ_TABLE_SORT_DISK_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_free_space_5`;
-  const SUBJ_TABLE_SORT_SHARDS_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_shardCount_6`;
+  const SUBJ_TABLE_SORT_SHARDS_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_shardCount_2`;
+  const SUBJ_TABLE_SORT_CPU_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_cpu_utilization_3`;
+  const SUBJ_TABLE_SORT_LOAD_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_load_average_4`;
+  const SUBJ_TABLE_SORT_MEM_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_jvm_mem_percent_5`;
+  const SUBJ_TABLE_SORT_DISK_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_free_space_6`;
 
   const SUBJ_TABLE_BODY = 'elasticsearchNodesTableContainer';
   const SUBJ_NODES_NAMES = `${SUBJ_TABLE_BODY} name`;
