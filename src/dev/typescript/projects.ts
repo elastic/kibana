@@ -19,7 +19,6 @@
 
 import glob from 'glob';
 import { resolve } from 'path';
-
 import { REPO_ROOT } from '../constants';
 import { Project } from './project';
 

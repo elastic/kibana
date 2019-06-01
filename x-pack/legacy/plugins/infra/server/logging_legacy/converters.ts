@@ -6,7 +6,6 @@
 
 import invert from 'lodash/fp/invert';
 import mapKeys from 'lodash/fp/mapKeys';
-
 import { LogEntryFieldsMapping } from '../../common/log_entry';
 import { SearchResult } from '../../common/log_search_result';
 import { SearchSummaryBucket } from '../../common/log_search_summary';
@@ -21,7 +20,7 @@ import {
 export const convertHitToSearchResult = (fields: LogEntryFieldsMapping) => {
   const invertedFields = invert(fields);
   return (hit: HighlightedHit): SearchResult => {
-    const matches = mapKeys(key => invertedFields[key], hit.highlight || {});
+    const matches = mapKeys((key: string) => invertedFields[key], hit.highlight || {});
     return {
       fields: {
         tiebreaker: hit.sort[1], // use the sort property to get the normalized values
