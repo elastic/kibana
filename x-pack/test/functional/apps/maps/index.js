@@ -10,6 +10,8 @@ export default function ({ loadTestFile, getService }) {
   const browser = getService('browser');
 
   describe('maps app', function () {
+    this.tags(['skipFirefox']);
+
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('maps/data');
