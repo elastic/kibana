@@ -208,7 +208,7 @@ export default function ({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'Browser' });
         await browser.refresh();
 
-        expect(labels).to.eql(expectedLabels);
+        expect(labels.join()).to.contain(expectedLabels.join());
       });
     });
   });
