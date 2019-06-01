@@ -36,33 +36,51 @@ exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`]
 
 exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
 <Component>
-  <pure(Component)
-    field="host.name"
-    id="ip-overview-host-name"
-    value="raspberrypi"
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="none"
   >
-    <pure(Component)
-      hostName="raspberrypi"
+    <EuiFlexItem
+      grow={false}
     >
-      raspberrypi
-    </pure(Component)>
-  </pure(Component)>
+      <pure(Component)
+        field="host.name"
+        id="ip-overview-host-name"
+        value="raspberrypi"
+      >
+        <pure(Component)
+          hostName="raspberrypi"
+        >
+          raspberrypi
+        </pure(Component)>
+      </pure(Component)>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </Component>
 `;
 
 exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
 <Component>
-  <pure(Component)
-    field="host.name"
-    id="ip-overview-host-name"
-    value="raspberrypi"
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="none"
   >
-    <pure(Component)
-      hostName="raspberrypi"
+    <EuiFlexItem
+      grow={false}
     >
-      raspberrypi
-    </pure(Component)>
-  </pure(Component)>
+      <pure(Component)
+        field="host.name"
+        id="ip-overview-host-name"
+        value="raspberrypi"
+      >
+        <pure(Component)
+          hostName="raspberrypi"
+        >
+          raspberrypi
+        </pure(Component)>
+      </pure(Component)>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </Component>
 `;
 
@@ -212,14 +230,16 @@ exports[`Field Renderers #reputationRenderer it renders correctly against snapsh
   <pure(Component)
     link="10.10.10.10"
   >
-    virustotal.com
+    View at virustotal.com
   </pure(Component)>
-  , 
+  <pure(Component) />
+  <br />
   <pure(Component)
     domain="10.10.10.10"
   >
-    talosIntelligence.com
+    View at talosIntelligence.com
   </pure(Component)>
+  <pure(Component) />
 </Component>
 `;
 
@@ -331,7 +351,8 @@ exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`
   <pure(Component)
     domain="10.10.10.10"
   >
-    iana.org
+    View at iana.org
   </pure(Component)>
+  <pure(Component) />
 </Component>
 `;
