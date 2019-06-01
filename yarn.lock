@@ -3963,12 +3963,12 @@
   dependencies:
     "@types/react" "*"
 
-"@types/reduce-reducers@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@types/reduce-reducers/-/reduce-reducers-0.1.3.tgz#69f252207622ced7e063c7526ad46ec60b69f0c0"
-  integrity sha512-7U5EJ8PJs9x4RkVrJzq4cyq6ejK+/7rUQEs4CuNxmP4pkYWR7aPher9DRbLQ429Szw0TU6Twq8j3Fk6NsoTJbg==
+"@types/reduce-reducers@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@types/reduce-reducers/-/reduce-reducers-0.3.0.tgz#d86d88049c38bebbafa5baf121282d765fabbebf"
+  integrity sha512-S9Vi74p0UOlqf9dqiurBwNBp+ABAGZ7nJAZteFS6LS8y9u2fkGfvNk1gtauKoDG+BuB4vjp1+P/R0/r5rFxYDQ==
   dependencies:
-    redux "^3.6.0"
+    redux "^4.0.0"
 
 "@types/redux-actions@^2.2.1":
   version "2.3.0"
@@ -22885,7 +22885,7 @@ redux-thunks@^1.0.0:
   resolved "https://registry.yarnpkg.com/redux-thunks/-/redux-thunks-1.0.0.tgz#56e03b86d281a2664c884ab05c543d9ab1673658"
   integrity sha1-VuA7htKBomZMiEqwXFQ9mrFnNlg=
 
-redux@3.7.2, redux@^3.6.0:
+redux@3.7.2:
   version "3.7.2"
   resolved "https://registry.yarnpkg.com/redux/-/redux-3.7.2.tgz#06b73123215901d25d065be342eb026bc1c8537b"
   integrity sha512-pNqnf9q1hI5HHZRBkj3bAngGZW/JMCmexDlOxw4XagXY2o1327nHH54LoTjiPJ0gizoqPDRqWyX/00g0hD6w+A==
