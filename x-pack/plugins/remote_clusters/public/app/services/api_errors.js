@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fatalError, toastNotifications } from 'ui/notify';
+import { fatalError, toastNotifications } from './notification';
 
 function createToastConfig(error, errorTitle) {
   // Expect an error in the shape provided by Angular's $http service.

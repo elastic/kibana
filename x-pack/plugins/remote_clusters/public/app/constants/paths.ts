@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin as RemoteClustersPlugin } from './plugin';
-import { createShim } from './shim';
-
-const { core, plugins } = createShim();
-const remoteClustersPlugin = new RemoteClustersPlugin();
-remoteClustersPlugin.start(core, plugins);
+export const CRUD_APP_BASE_PATH: string = '/management/elasticsearch/remote_clusters';

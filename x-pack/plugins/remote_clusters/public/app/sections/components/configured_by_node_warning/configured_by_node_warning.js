@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiCallOut,
 } from '@elastic/eui';
+
+import { FormattedMessage } from '../../../services/i18n';
 
 export function ConfiguredByNodeWarning() {
   return (

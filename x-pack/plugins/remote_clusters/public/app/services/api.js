@@ -4,29 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { UIM_CLUSTER_ADD, UIM_CLUSTER_UPDATE } from '../constants';
 import { trackUserRequest } from './track_ui_metric';
-
-let httpClient;
-
-export const setHttpClient = (client) => {
-  httpClient = client;
-};
-
-export const getHttpClient = () => {
-  return httpClient;
-};
-
-const apiPrefix = chrome.addBasePath('/api/remote_clusters');
+import { sendGet, sendPost, sendPut, sendDelete } from './http';
 
 export async function loadClusters() {
-  const response = await httpClient.get(apiPrefix);
+  const response = await sendGet();
   return response.data;
 }
 
 export async function addCluster(cluster) {
-  const request = httpClient.post(apiPrefix, cluster);
+  const request = sendPost('', cluster);
   return await trackUserRequest(request, UIM_CLUSTER_ADD);
 }
 
@@ -36,10 +24,10 @@ export async function editCluster(cluster) {
     ...rest
   } = cluster;
 
-  const request = httpClient.put(`${apiPrefix}/${name}`, rest);
+  const request = sendPut(name, rest);
   return await trackUserRequest(request, UIM_CLUSTER_UPDATE);
 }
 
 export function removeClusterRequest(name) {
-  return httpClient.delete(`${apiPrefix}/${name}`);
+  return sendDelete(name);
 }

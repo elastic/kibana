@@ -5,7 +5,6 @@
  */
 
 export {
-  setHttpClient,
   loadClusters,
   addCluster,
   editCluster,
@@ -16,13 +15,6 @@ export {
   showApiError,
   showApiWarning,
 } from './api_errors';
-
-export {
-  listBreadcrumb,
-  buildListBreadcrumb,
-  addBreadcrumb,
-  editBreadcrumb,
-} from './breadcrumbs';
 
 export {
   setRedirect,

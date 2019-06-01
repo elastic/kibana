@@ -24,10 +24,6 @@ jest.mock('ui/chrome', () => ({
   }
 }));
 
-jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  trackUiMetric: jest.fn(),
-}));
-
 const { setup } = pageHelpers.remoteClustersList;
 
 describe('<RemoteClusterList />', () => {

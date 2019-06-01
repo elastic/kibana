@@ -7,11 +7,6 @@
 import { pageHelpers, nextTick } from './helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './helpers/constants';
 
-jest.mock('ui/chrome', () => ({
-  addBasePath: (path) => path || 'api/cross_cluster_replication',
-  breadcrumbs: { set: () => {} },
-}));
-
 const { setup } = pageHelpers.remoteClustersAdd;
 
 describe('Create Remote cluster', () => {

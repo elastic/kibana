@@ -4,4 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CRUD_APP_BASE_PATH = '/management/elasticsearch/remote_clusters';
+import { UIM_APP_NAME } from '../constants';
+
+export let track: any;
+
+export function init(_track: any): void {
+  track = _track;
+}
+
+export function trackUiMetric(actionType: string): any {
+  return track(UIM_APP_NAME, actionType);
+}

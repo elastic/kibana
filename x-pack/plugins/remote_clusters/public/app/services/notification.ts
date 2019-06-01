@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin as RemoteClustersPlugin } from './plugin';
-import { createShim } from './shim';
+export let toastNotifications: any;
+export let fatalError: any;
 
-const { core, plugins } = createShim();
-const remoteClustersPlugin = new RemoteClustersPlugin();
-remoteClustersPlugin.start(core, plugins);
+export function init(_toastNotifications: any, _fatalError: any): void {
+  toastNotifications = _toastNotifications;
+  fatalError = _fatalError;
+}

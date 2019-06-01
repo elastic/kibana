@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { fatalError, toastNotifications } from 'ui/notify';
-
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
   addCluster as sendAddClusterRequest,
@@ -14,6 +11,8 @@ import {
   extractQueryParams,
   redirect,
 } from '../../services';
+import { fatalError, toastNotifications } from '../../services/notification';
+import { i18n } from '../../services/i18n';
 
 import {
   ADD_CLUSTER_START,

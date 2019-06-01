@@ -6,7 +6,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
@@ -15,6 +14,8 @@ import {
   EuiIconTip,
   EuiText,
 } from '@elastic/eui';
+
+import { i18n } from '../../../../services/i18n';
 
 export function ConnectionStatus({ isConnected }) {
   let icon;

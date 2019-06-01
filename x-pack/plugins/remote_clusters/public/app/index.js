@@ -6,15 +6,14 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
-import { I18nContext } from 'ui/i18n';
+import { Provider } from 'react-redux';
 
 import { App } from './app';
 import { remoteClustersStore } from './store';
 
-const ReactApp = () => {
-  return (
+export const renderReact = async (elem, I18nContext) => {
+  render(
     <I18nContext>
       <Provider store={remoteClustersStore}>
         <HashRouter>
@@ -22,9 +21,5 @@ const ReactApp = () => {
         </HashRouter>
       </Provider>
     </I18nContext>
-  );
-};
-
-export const renderReact = async (elem) => {
-  render(<ReactApp />, elem);
+    , elem);
 };
