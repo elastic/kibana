@@ -516,7 +516,7 @@ export class VectorStyle extends AbstractStyle {
     }
   }
 
-  async setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId }) {
+  async setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
 
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
@@ -525,6 +525,7 @@ export class VectorStyle extends AbstractStyle {
     const color = this._getMBColor(this._descriptor.properties.fillColor);
     // icon-color is only supported on SDF icons.
     mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
+    mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
 
     const iconSize = this._descriptor.properties.iconSize;
     if (iconSize.type === VectorStyle.STYLE_TYPE.STATIC) {
