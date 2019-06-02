@@ -8,7 +8,7 @@ import { getMakiSymbolSvg, styleSvg } from './symbol_utils';
 
 describe('getMakiSymbolSvg', () => {
   it('Should load symbol svg', () => {
-    const svgString = getMakiSymbolSvg('aerialway 11');
+    const svgString = getMakiSymbolSvg('aerialway-11');
     expect(svgString.length).toBe(643);
   });
 });
