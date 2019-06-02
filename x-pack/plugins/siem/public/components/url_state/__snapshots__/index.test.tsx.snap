@@ -10,19 +10,35 @@ exports[`UrlStateContainer mounts and renders 1`] = `
         "__operations_cache__": Map {},
         "cache": InMemoryCache {
           "addTypename": true,
+          "cacheKeyRoot": KeyTrie {
+            "weakness": true,
+          },
           "config": Object {
             "addTypename": true,
             "dataIdFromObject": [Function],
             "fragmentMatcher": HeuristicFragmentMatcher {},
-            "storeFactory": [Function],
+            "freezeResults": false,
+            "resultCaching": true,
           },
-          "data": ObjectCache {
+          "data": DepTrackingCache {
             "data": Object {},
+            "depend": [Function],
           },
-          "optimistic": Array [],
+          "maybeBroadcastWatch": [Function],
+          "optimisticData": DepTrackingCache {
+            "data": Object {},
+            "depend": [Function],
+          },
           "silenceBroadcast": false,
-          "typenameDocumentCache": WeakMap {},
-          "watches": Array [],
+          "storeReader": StoreReader {
+            "executeSelectionSet": [Function],
+            "executeStoreQuery": [Function],
+            "executeSubSelectedArray": [Function],
+            "freezeResults": false,
+          },
+          "storeWriter": StoreWriter {},
+          "typenameDocumentCache": Map {},
+          "watches": Set {},
         },
         "defaultOptions": Object {},
         "disableNetworkFetches": false,
@@ -39,19 +55,35 @@ exports[`UrlStateContainer mounts and renders 1`] = `
         "store": DataStore {
           "cache": InMemoryCache {
             "addTypename": true,
+            "cacheKeyRoot": KeyTrie {
+              "weakness": true,
+            },
             "config": Object {
               "addTypename": true,
               "dataIdFromObject": [Function],
               "fragmentMatcher": HeuristicFragmentMatcher {},
-              "storeFactory": [Function],
+              "freezeResults": false,
+              "resultCaching": true,
             },
-            "data": ObjectCache {
+            "data": DepTrackingCache {
               "data": Object {},
+              "depend": [Function],
             },
-            "optimistic": Array [],
+            "maybeBroadcastWatch": [Function],
+            "optimisticData": DepTrackingCache {
+              "data": Object {},
+              "depend": [Function],
+            },
             "silenceBroadcast": false,
-            "typenameDocumentCache": WeakMap {},
-            "watches": Array [],
+            "storeReader": StoreReader {
+              "executeSelectionSet": [Function],
+              "executeStoreQuery": [Function],
+              "executeSubSelectedArray": [Function],
+              "freezeResults": false,
+            },
+            "storeWriter": StoreWriter {},
+            "typenameDocumentCache": Map {},
+            "watches": Set {},
           },
         },
         "version": "2.3.8",
@@ -172,19 +204,35 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                   "__operations_cache__": Map {},
                   "cache": InMemoryCache {
                     "addTypename": true,
+                    "cacheKeyRoot": KeyTrie {
+                      "weakness": true,
+                    },
                     "config": Object {
                       "addTypename": true,
                       "dataIdFromObject": [Function],
                       "fragmentMatcher": HeuristicFragmentMatcher {},
-                      "storeFactory": [Function],
+                      "freezeResults": false,
+                      "resultCaching": true,
                     },
-                    "data": ObjectCache {
+                    "data": DepTrackingCache {
                       "data": Object {},
+                      "depend": [Function],
                     },
-                    "optimistic": Array [],
+                    "maybeBroadcastWatch": [Function],
+                    "optimisticData": DepTrackingCache {
+                      "data": Object {},
+                      "depend": [Function],
+                    },
                     "silenceBroadcast": false,
-                    "typenameDocumentCache": WeakMap {},
-                    "watches": Array [],
+                    "storeReader": StoreReader {
+                      "executeSelectionSet": [Function],
+                      "executeStoreQuery": [Function],
+                      "executeSubSelectedArray": [Function],
+                      "freezeResults": false,
+                    },
+                    "storeWriter": StoreWriter {},
+                    "typenameDocumentCache": Map {},
+                    "watches": Set {},
                   },
                   "defaultOptions": Object {},
                   "disableNetworkFetches": false,
@@ -201,19 +249,35 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                   "store": DataStore {
                     "cache": InMemoryCache {
                       "addTypename": true,
+                      "cacheKeyRoot": KeyTrie {
+                        "weakness": true,
+                      },
                       "config": Object {
                         "addTypename": true,
                         "dataIdFromObject": [Function],
                         "fragmentMatcher": HeuristicFragmentMatcher {},
-                        "storeFactory": [Function],
+                        "freezeResults": false,
+                        "resultCaching": true,
                       },
-                      "data": ObjectCache {
+                      "data": DepTrackingCache {
                         "data": Object {},
+                        "depend": [Function],
                       },
-                      "optimistic": Array [],
+                      "maybeBroadcastWatch": [Function],
+                      "optimisticData": DepTrackingCache {
+                        "data": Object {},
+                        "depend": [Function],
+                      },
                       "silenceBroadcast": false,
-                      "typenameDocumentCache": WeakMap {},
-                      "watches": Array [],
+                      "storeReader": StoreReader {
+                        "executeSelectionSet": [Function],
+                        "executeStoreQuery": [Function],
+                        "executeSubSelectedArray": [Function],
+                        "freezeResults": false,
+                      },
+                      "storeWriter": StoreWriter {},
+                      "typenameDocumentCache": Map {},
+                      "watches": Set {},
                     },
                   },
                   "version": "2.3.8",

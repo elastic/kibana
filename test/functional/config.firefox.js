@@ -17,20 +17,22 @@
  * under the License.
  */
 
-export const kibanaContext = () => ({
-  name: 'kibana_context',
-  from: {
-    null: () => {
-      return {
-        type: 'kibana_context',
-      };
+export default async function ({ readConfigFile }) {
+  const defaultConfig = await readConfigFile(require.resolve('./config'));
+
+  return {
+    ...defaultConfig.getAll(),
+
+    browser: {
+      type: 'firefox',
     },
-  },
-  to: {
-    null: () => {
-      return {
-        type: 'null',
-      };
+
+    suiteTags: {
+      exclude: ['skipFirefox'],
     },
-  }
-});
+
+    junit: {
+      reportName: 'Firefox UI Functional Tests'
+    },
+  };
+}

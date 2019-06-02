@@ -21,17 +21,12 @@
 import { fromExpression } from '@kbn/interpreter/common';
 // @ts-ignore
 import { getInterpreter } from 'plugins/interpreter/interpreter';
+// @ts-ignore
+import { KibanaContext } from 'plugins/interpreter/types';
 
 import { Adapters } from 'ui/inspector';
-import { Filters, Query, TimeRange } from 'ui/visualize';
 
-export interface InitialContextObject {
-  timeRange?: TimeRange;
-  filters?: Filters;
-  query?: Query;
-}
-
-export type getInitialContextFunction = () => InitialContextObject;
+type getInitialContextFunction = () => KibanaContext;
 
 export interface RunPipelineHandlers {
   getInitialContext: getInitialContextFunction;

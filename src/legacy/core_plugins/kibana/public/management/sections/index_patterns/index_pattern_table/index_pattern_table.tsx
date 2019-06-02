@@ -90,9 +90,9 @@ export class IndexPatternTable extends React.Component<Props, State> {
           <CreateIndexPatternPrompt onClose={() => this.setState({ showFlyout: false })} />
         )}
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="euiIEFlexWrapFix">
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiText>
                   <h2>
                     <FormattedMessage
