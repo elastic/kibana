@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
+import chrome from 'ui/chrome';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
@@ -14,6 +15,7 @@ import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../v
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE } from '../../vector_constants';
 import { i18n } from '@kbn/i18n';
+import { SYMBOL_OPTIONS } from '../../symbol_utils';
 
 import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 
@@ -159,6 +161,8 @@ export class VectorStyleEditor extends Component {
         <VectorStyleSymbolEditor
           styleOptions={this.props.styleProperties.symbol.options}
           handlePropertyChange={this.props.handlePropertyChange}
+          symbolOptions={SYMBOL_OPTIONS}
+          isDarkMode={chrome.getUiSettingsClient().get('theme:darkMode', false)}
         />
 
         {this._renderFillColor()}

@@ -20,6 +20,13 @@ maki.svgArray.forEach(svgString => {
   }
 });
 
+export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map(symbolId => {
+  return ({
+    value: symbolId,
+    label: symbolId,
+  });
+});
+
 export function getMakiSymbolSvg(symbolId) {
   if (!SYMBOLS[symbolId]) {
     throw new Error(`Unable to find symbol: ${symbolId}`);

@@ -17,7 +17,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from '../../vector_constants';
-import { SYMBOLS, buildSrcUrl } from '../../symbol_utils';
+import { SymbolIcon } from './legend/symbol_icon';
 
 const SYMBOLIZE_AS_OPTIONS = [
   {
@@ -34,14 +34,7 @@ const SYMBOLIZE_AS_OPTIONS = [
   },
 ];
 
-const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map(symbolId => {
-  return ({
-    value: symbolId,
-    label: symbolId,
-  });
-});
-
-export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange }) {
+export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange, symbolOptions, isDarkMode }) {
   const renderSymbolizeAsSelect = () => {
     const selectedOption = SYMBOLIZE_AS_OPTIONS.find(({ value }) => {
       return value === styleOptions.symbolizeAs;
@@ -67,7 +60,7 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange }) 
   };
 
   const renderSymbolSelect = () => {
-    const selectedOption = SYMBOL_OPTIONS.find(({ value }) => {
+    const selectedOption = symbolOptions.find(({ value }) => {
       return value === styleOptions.symbolId;
     });
 
@@ -89,7 +82,10 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange }) 
       return (
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false} style={{ width: '15px' }}>
-            <img src={buildSrcUrl(SYMBOLS[value])} alt={label} />
+            <SymbolIcon
+              symbolId={value}
+              fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             {label}
@@ -100,7 +96,7 @@ export function VectorStyleSymbolEditor({ styleOptions, handlePropertyChange }) 
 
     return (
       <EuiComboBox
-        options={SYMBOL_OPTIONS}
+        options={symbolOptions}
         onChange={onSymbolChange}
         selectedOptions={selectedOption ? [selectedOption] : undefined}
         singleSelection={true}
