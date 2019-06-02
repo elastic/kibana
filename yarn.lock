@@ -16991,10 +16991,10 @@ lead@^1.0.0:
   dependencies:
     flush-write-stream "^1.0.2"
 
-leaflet-draw@0.4.10:
-  version "0.4.10"
-  resolved "https://registry.yarnpkg.com/leaflet-draw/-/leaflet-draw-0.4.10.tgz#a611a29925a32cde63638e891c3bfc93163e2f43"
-  integrity sha512-TYKF7KkLk17PB2M0yg+8VcICC9dEr8x+R6rcavsdTkchP5UPoWaidVSbaVYruh5+FRL46xHwN2t/mDbflISOeA==
+leaflet-draw@0.4.14:
+  version "0.4.14"
+  resolved "https://registry.yarnpkg.com/leaflet-draw/-/leaflet-draw-0.4.14.tgz#1b5b06d570873a015aa96b80d664dab496c45a4a"
+  integrity sha512-O99KSPjyHNMDE+uD/fpdPydvQfTE8QruaG7ylEEtKCIaSSb60mCWoDdGUqGEHU9PGPu2JxbEfkGTXY9eYv7aEw==
 
 leaflet-responsive-popup@0.6.4:
   version "0.6.4"
