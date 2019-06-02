@@ -176,7 +176,7 @@
     "json-stable-stringify": "^1.0.1",
     "json-stringify-pretty-compact": "1.0.4",
     "json-stringify-safe": "5.0.1",
-    "leaflet": "1.0.3",
+    "leaflet": "1.5.1",
     "leaflet-draw": "0.4.10",
     "leaflet-responsive-popup": "0.2.0",
     "leaflet-vega": "^0.8.6",
