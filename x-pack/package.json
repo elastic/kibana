@@ -245,7 +245,7 @@
     "io-ts": "^1.4.2",
     "joi": "^13.5.2",
     "jquery": "^3.4.1",
-    "js-yaml": "3.4.1",
+    "js-yaml": "3.13.1",
     "json-stable-stringify": "^1.0.1",
     "jsonwebtoken": "^8.3.0",
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
