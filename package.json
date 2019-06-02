@@ -378,7 +378,7 @@
     "gulp-babel": "8.0.0",
     "gulp-sourcemaps": "2.6.5",
     "has-ansi": "^3.0.0",
-    "image-diff": "1.6.0",
+    "image-diff": "1.6.3",
     "intl-messageformat-parser": "^1.4.0",
     "is-path-inside": "^2.0.0",
     "istanbul-instrumenter-loader": "3.0.1",
