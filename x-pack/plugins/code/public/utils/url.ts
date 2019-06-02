@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createHistory from 'history/createHashHistory';
+import { createHashHistory } from 'history';
 
-export const history = createHistory();
+export const history = createHashHistory();
 
 export const isImportRepositoryURLInvalid = (url: string) => url.trim() === '';
 
