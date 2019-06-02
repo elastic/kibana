@@ -20,46 +20,35 @@
 import { resolve, sep } from 'path';
 
 import { uniq } from 'lodash';
-import expect from '@kbn/expect';
 
-import { getInstalledPackages } from '../installed_packages';
+import { getInstalledPackages, InstalledPackage } from '../installed_packages';
+import { REPO_ROOT } from '../../constants';
 
-const KIBANA_ROOT = resolve(__dirname, '../../../../');
-const FIXTURE1_ROOT = resolve(__dirname, 'fixtures/fixture1');
+const FIXTURE1_ROOT = resolve(__dirname, '__fixtures__/fixture1');
 
 describe('src/dev/npm/installed_packages', () => {
-  describe('getInstalledPackages()', function () {
+  describe('getInstalledPackages()', function() {
+    let kibanaPackages: InstalledPackage[];
+    let fixture1Packages: InstalledPackage[];
 
-    let kibanaPackages;
-    let fixture1Packages;
-    before(async function () {
-      this.timeout(30 * 1000);
+    beforeAll(async function() {
       [kibanaPackages, fixture1Packages] = await Promise.all([
         getInstalledPackages({
-          directory: KIBANA_ROOT
+          directory: REPO_ROOT,
         }),
         getInstalledPackages({
           directory: FIXTURE1_ROOT,
-          dev: true
+          includeDev: true,
         }),
       ]);
-    });
-
-    it('requires a directory', async () => {
-      try {
-        await getInstalledPackages({});
-        throw new Error('expected getInstalledPackages() to reject');
-      } catch (err) {
-        expect(err.message).to.contain('directory');
-      }
-    });
+    }, 30 * 1000);
 
     it('reads all installed packages of a module', () => {
-      expect(fixture1Packages).to.eql([
+      expect(fixture1Packages).toEqual([
         {
           name: 'dep1',
           version: '0.0.2',
-          licenses: [ 'Apache-2.0' ],
+          licenses: ['Apache-2.0'],
           repository: 'https://github.com/mycorp/dep1',
           directory: resolve(FIXTURE1_ROOT, 'node_modules/dep1'),
           relative: ['node_modules', 'dep1'].join(sep),
@@ -69,7 +58,7 @@ describe('src/dev/npm/installed_packages', () => {
           name: 'privatedep',
           version: '0.0.2',
           repository: 'https://github.com/mycorp/privatedep',
-          licenses: [ 'Apache-2.0' ],
+          licenses: ['Apache-2.0'],
           directory: resolve(FIXTURE1_ROOT, 'node_modules/privatedep'),
           relative: ['node_modules', 'privatedep'].join(sep),
           isDevOnly: false,
@@ -77,23 +66,28 @@ describe('src/dev/npm/installed_packages', () => {
         {
           name: 'dep2',
           version: '0.0.2',
-          licenses: [ 'Apache-2.0' ],
+          licenses: ['Apache-2.0'],
           repository: 'https://github.com/mycorp/dep2',
           directory: resolve(FIXTURE1_ROOT, 'node_modules/dep2'),
           relative: ['node_modules', 'dep2'].join(sep),
           isDevOnly: true,
-        }
+        },
       ]);
     });
 
     it('returns a single entry for every package/version combo', () => {
       const tags = kibanaPackages.map(pkg => `${pkg.name}@${pkg.version}`);
-      expect(tags).to.eql(uniq(tags));
+      expect(tags).toEqual(uniq(tags));
     });
 
     it('does not include root package in the list', async () => {
-      expect(kibanaPackages.find(pkg => pkg.name === 'kibana')).to.be(undefined);
-      expect(fixture1Packages.find(pkg => pkg.name === 'fixture1')).to.be(undefined);
+      if (kibanaPackages.find(pkg => pkg.name === 'kibana')) {
+        throw new Error('Expected getInstalledPackages(kibana) to not include kibana pkg');
+      }
+
+      if (fixture1Packages.find(pkg => pkg.name === 'fixture1')) {
+        throw new Error('Expected getInstalledPackages(fixture1) to not include fixture1 pkg');
+      }
     });
   });
 });

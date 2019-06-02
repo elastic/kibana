@@ -56,6 +56,7 @@ export const LICENSE_WHITELIST = [
   'ISC',
   'ISC*',
   'MIT OR GPL-2.0',
+  '(MIT OR CC0-1.0)',
   'MIT',
   'MIT*',
   'MIT/X11',
@@ -69,15 +70,13 @@ export const LICENSE_WHITELIST = [
 
 // The following list only applies to licenses that
 // we wanna allow in packages only used as dev dependencies
-export const DEV_ONLY_LICENSE_WHITELIST = [
-  'MPL-2.0'
-];
+export const DEV_ONLY_LICENSE_WHITELIST = ['MPL-2.0'];
 
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
   'cycle@1.0.3': ['CC0-1.0'], // conversion to a public-domain like license
-  'jsts@1.1.2': ['Eclipse Distribution License - v 1.0'], //cf. https://github.com/bjornharrtell/jsts
-  '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], //license in readme https://github.com/tmcw/jsonlint
+  'jsts@1.1.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
+  '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
 
   // TODO can be removed once we upgrade past elasticsearch-browser@14.0.0
   'elasticsearch-browser@13.0.1': ['Apache-2.0'],
@@ -105,5 +104,5 @@ export const LICENSE_OVERRIDES = {
   'walk@2.3.9': ['MIT'],
 
   // TODO remove this once we upgrade past or equal to v1.0.2
-  'babel-plugin-mock-imports@1.0.1': ['MIT']
+  'babel-plugin-mock-imports@1.0.1': ['MIT'],
 };
