@@ -14492,10 +14492,10 @@ ignore@^4.0.6:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-4.0.6.tgz#750e3db5862087b4737ebac8207ffd1ef27b25fc"
   integrity sha512-cyFDKrqc/YdcWFniJhzI42+AzS+gNwmUzOSFcRCQYwySuBBBy/KjuxWLZ/FHEH6Moq1NizMOBWyTcv8O4OZIMg==
 
-image-diff@1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/image-diff/-/image-diff-1.6.0.tgz#d07d1311dd0468491245cff7824ba87fe4b19fdc"
-  integrity sha1-0H0TEd0EaEkSRc/3gkuof+Sxn9w=
+image-diff@1.6.3:
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/image-diff/-/image-diff-1.6.3.tgz#818a0e656ae89480e802e7ef14db460826f730fc"
+  integrity sha1-gYoOZWrolIDoAufvFNtGCCb3MPw=
   dependencies:
     async "~0.2.9"
     buffered-spawn "~1.1.1"
