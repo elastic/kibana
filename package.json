@@ -154,7 +154,7 @@
     "execa": "^1.0.0",
     "expiry-js": "0.1.7",
     "file-loader": "2.0.0",
-    "font-awesome": "4.4.0",
+    "font-awesome": "4.7.0",
     "getos": "^3.1.0",
     "glob": "^7.1.2",
     "glob-all": "^3.1.0",
