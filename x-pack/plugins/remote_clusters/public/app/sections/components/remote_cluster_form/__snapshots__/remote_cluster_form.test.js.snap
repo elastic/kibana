@@ -144,11 +144,6 @@ Array [
                     data-test-subj="comboBoxInput"
                     tabindex="-1"
                   >
-                    <p
-                      class="euiComboBoxPlaceholder"
-                    >
-                      host:port
-                    </p>
                     <div
                       class="euiComboBox__input"
                       style="font-size:14px;display:inline-block"
@@ -172,16 +167,7 @@ Array [
               class="euiFormHelpText euiFormRow__text"
               id="mockId-help"
             >
-              An IP address or host name, followed by the 
-              <a
-                class="euiLink euiLink--primary"
-                href="undefinedguide/en/elasticsearch/reference/undefined/modules-transport.html"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                transport port
-              </a>
-               of the remote cluster.
+              An IP address or host name, followed by the {transportPort} of the remote cluster.
             </div>
           </div>
         </div>
@@ -213,19 +199,7 @@ Array [
               class="euiTextColor euiTextColor--subdued"
             >
               <p>
-                By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable 
-                <strong>
-                  Skip if unavailable
-                </strong>
-                . 
-                <a
-                  class="euiLink euiLink--primary"
-                  href="undefinedguide/en/elasticsearch/reference/undefined/modules-cross-cluster-search.html#_skipping_disconnected_clusters"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  Learn more.
-                </a>
+                By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable {optionName}. {learnMoreLink}
               </p>
             </div>
           </div>
@@ -283,12 +257,6 @@ Array [
                   </svg>
                 </span>
               </span>
-              <label
-                class="euiSwitch__label"
-                for="mockId"
-              >
-                Skip if unavailable
-              </label>
             </div>
           </div>
         </div>
@@ -417,11 +385,6 @@ Array [
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
-            <p
-              class="euiComboBoxPlaceholder"
-            >
-              host:port
-            </p>
             <div
               class="euiComboBox__input"
               style="font-size: 14px; display: inline-block;"
@@ -452,16 +415,7 @@ Array [
       class="euiFormHelpText euiFormRow__text"
       id="mockId-help"
     >
-      An IP address or host name, followed by the 
-      <a
-        class="euiLink euiLink--primary"
-        href="undefinedguide/en/elasticsearch/reference/undefined/modules-transport.html"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        transport port
-      </a>
-       of the remote cluster.
+      An IP address or host name, followed by the {transportPort} of the remote cluster.
     </div>
   </div>,
   <div
@@ -514,12 +468,6 @@ Array [
           </svg>
         </span>
       </span>
-      <label
-        class="euiSwitch__label"
-        for="mockId"
-      >
-        Skip if unavailable
-      </label>
     </div>
   </div>,
   <div

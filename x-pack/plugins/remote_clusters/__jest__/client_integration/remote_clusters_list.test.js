@@ -6,23 +6,8 @@
 
 import { pageHelpers, setupEnvironment, nextTick, getRandomString, findTestSubject } from './helpers';
 
-import { getRouter } from '../../public/services';
+import { getRouter } from '../../public/app/services';
 import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: (path) => path || '/api/remote_clusters',
-  breadcrumbs: { set: () => {} },
-  getInjected: (key) => {
-    if (key === 'uiCapabilities') {
-      return {
-        navLinks: {},
-        management: {},
-        catalogue: {}
-      };
-    }
-    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
-  }
-}));
 
 const { setup } = pageHelpers.remoteClustersList;
 

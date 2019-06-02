@@ -6,6 +6,10 @@
 
 import { validateSeeds } from './validate_seeds';
 
+jest.mock('../../../../services/i18n', () => ({
+  FormattedMessage: () => {},
+}));
+
 describe('validateSeeds', () => {
   test(`rejects empty seeds when there's no input`, () => {
     expect(validateSeeds([], '')).toMatchSnapshot();

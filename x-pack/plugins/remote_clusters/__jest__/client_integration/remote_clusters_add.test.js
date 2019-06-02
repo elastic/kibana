@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pageHelpers, nextTick } from './helpers';
+import { pageHelpers, nextTick, setupEnvironment } from './helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './helpers/constants';
 
 const { setup } = pageHelpers.remoteClustersAdd;
@@ -15,6 +15,15 @@ describe('Create Remote cluster', () => {
     let exists;
     let actions;
     let form;
+    let server;
+
+    beforeAll(() => {
+      ({ server } = setupEnvironment());
+    });
+
+    afterAll(() => {
+      server.restore();
+    });
 
     beforeEach(() => {
       ({ form, exists, find, actions } = setup());

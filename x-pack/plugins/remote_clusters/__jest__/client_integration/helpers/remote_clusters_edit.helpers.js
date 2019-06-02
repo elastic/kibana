@@ -5,9 +5,9 @@
  */
 
 import { registerTestBed } from '../../../../../test_utils';
-import { RemoteClusterEdit } from '../../../public/sections/remote_cluster_edit';
-import { createRemoteClustersStore } from '../../../public/store';
-import { registerRouter } from '../../../public/services/routing';
+import { RemoteClusterEdit } from '../../../public/app/sections/remote_cluster_edit';
+import { createRemoteClustersStore } from '../../../public/app/store';
+import { registerRouter } from '../../../public/app/services/routing';
 
 import { REMOTE_CLUSTER_EDIT_NAME } from './constants';
 
