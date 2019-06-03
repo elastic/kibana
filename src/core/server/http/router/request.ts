@@ -21,6 +21,7 @@ import { Url } from 'url';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
+import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { filterHeaders, Headers } from './headers';
 import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
 
@@ -77,7 +78,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
 
   public readonly headers: Headers;
   public readonly url: Url;
-  public readonly route: KibanaRequestRoute;
+  public readonly route: RecursiveReadonly<KibanaRequestRoute>;
 
   constructor(
     private readonly request: Request,
@@ -87,7 +88,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   ) {
     this.headers = request.headers;
     this.url = request.url;
-    this.route = this.getRouteInfo();
+    this.route = deepFreeze(this.getRouteInfo());
   }
 
   public getFilteredHeaders(headersToKeep: string[]) {
