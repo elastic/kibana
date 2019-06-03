@@ -360,7 +360,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
             await testSubjects.click('restrictFieldsQuery0');
 
             // have to remove the '*'
-            return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"]')
+            return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"] svg.euiIcon')
               .then(function () {
                 return addGrantedField(userObj.elasticsearch.indices[0].field_security.grant);
               });
