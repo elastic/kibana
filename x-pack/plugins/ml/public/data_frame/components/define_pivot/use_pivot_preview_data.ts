@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
 import { dictionaryToArray } from '../../../../common/types/common';
 import { ml } from '../../../services/ml_api_service';
@@ -15,10 +15,11 @@ import { Dictionary } from '../../../../common/types/common';
 import {
   DataFramePreviewRequest,
   getDataFramePreviewRequest,
-  groupByConfigHasInterval,
+  isGroupByDateHistogram,
+  isGroupByHistogram,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
-  SimpleQuery,
+  PivotQuery,
 } from '../../common';
 
 export enum PIVOT_PREVIEW_STATUS {
@@ -36,8 +37,8 @@ export interface UsePivotPreviewDataReturnType {
 }
 
 export const usePivotPreviewData = (
-  indexPattern: StaticIndexPattern,
-  query: SimpleQuery,
+  indexPattern: IndexPattern,
+  query: PivotQuery,
   aggs: PivotAggsConfigDict,
   groupBy: PivotGroupByConfigDict
 ): UsePivotPreviewDataReturnType => {
@@ -79,10 +80,13 @@ export const usePivotPreviewData = (
       aggsArr.map(a => `${a.agg} ${a.field} ${a.aggName}`).join(' '),
       groupByArr
         .map(
-          g => `${g.agg} ${g.field} ${g.aggName} ${groupByConfigHasInterval(g) ? g.interval : ''}`
+          g =>
+            `${g.agg} ${g.field} ${g.aggName} ${
+              isGroupByDateHistogram(g) ? g.calendar_interval : ''
+            } ${isGroupByHistogram(g) ? g.interval : ''}`
         )
         .join(' '),
-      query.query_string.query,
+      JSON.stringify(query),
     ]
   );
   return { errorMessage, status, dataFramePreviewData, previewRequest };

@@ -13,8 +13,9 @@ import {
   extraSchemaField,
   filebeatSchema,
   packetbeatSchema,
+  winlogbeatSchema,
 } from './8.0.0';
-import { IndexAlias, OutputSchema, Schema, SchemaFields, SchemaItem } from './type';
+import { OutputSchema, Schema, SchemaFields, SchemaItem } from './type';
 
 export * from './type';
 export { baseCategoryFields };
@@ -75,34 +76,37 @@ const convertFieldsToAssociativeArray = (
       }, {})
     : {};
 
-export const getIndexAlias = (indexName: string): IndexAlias => {
-  if (indexName.toLocaleLowerCase().includes('auditbeat')) {
-    return 'auditbeat';
-  } else if (indexName.toLocaleLowerCase().includes('filebeat')) {
-    return 'filebeat';
-  } else if (indexName.toLocaleLowerCase().includes('packetbeat')) {
-    return 'packetbeat';
+export const getIndexAlias = (defaultIndex: string[], indexName: string): string => {
+  const found = defaultIndex.find(index => indexName.match(index) != null);
+  if (found != null) {
+    return found;
+  } else {
+    return 'unknown';
   }
-  return 'unknown';
 };
 
-export const getIndexSchemaDoc = memoize((index: IndexAlias) => {
-  if (index === 'auditbeat') {
+export const getIndexSchemaDoc = memoize((index: string) => {
+  if (index.match('auditbeat') != null) {
     return {
       ...extraSchemaField,
       ...convertSchemaToAssociativeArray(auditbeatSchema),
     };
-  } else if (index === 'filebeat') {
+  } else if (index.match('filebeat') != null) {
     return {
       ...extraSchemaField,
       ...convertSchemaToAssociativeArray(filebeatSchema),
     };
-  } else if (index === 'packetbeat') {
+  } else if (index.match('packetbeat') != null) {
     return {
       ...extraSchemaField,
       ...convertSchemaToAssociativeArray(packetbeatSchema),
     };
-  } else if (index === 'ecs') {
+  } else if (index.match('winlogbeat') != null) {
+    return {
+      ...extraSchemaField,
+      ...convertSchemaToAssociativeArray(winlogbeatSchema),
+    };
+  } else if (index.match('ecs') != null) {
     return {
       ...extraSchemaField,
       ...ecsSchema,
@@ -111,7 +115,7 @@ export const getIndexSchemaDoc = memoize((index: IndexAlias) => {
   return {};
 });
 
-export const hasDocumentation = (index: IndexAlias, path: string): boolean => {
+export const hasDocumentation = (index: string, path: string): boolean => {
   if (index === 'unknown') {
     return false;
   }
@@ -126,7 +130,7 @@ export const hasDocumentation = (index: IndexAlias, path: string): boolean => {
   return has(category, getIndexSchemaDoc(index));
 };
 
-export const getDocumentation = (index: IndexAlias, path: string) => {
+export const getDocumentation = (index: string, path: string) => {
   if (index === 'unknown') {
     return '';
   }

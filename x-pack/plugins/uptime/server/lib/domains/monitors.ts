@@ -16,9 +16,16 @@ export class UMMonitorsDomain {
     request: any,
     monitorId: string,
     dateRangeStart: string,
-    dateRangeEnd: string
+    dateRangeEnd: string,
+    location?: string | null
   ): Promise<MonitorChart> {
-    return this.adapter.getMonitorChartsData(request, monitorId, dateRangeStart, dateRangeEnd);
+    return this.adapter.getMonitorChartsData(
+      request,
+      monitorId,
+      dateRangeStart,
+      dateRangeEnd,
+      location
+    );
   }
 
   public async getMonitors(

@@ -7,19 +7,12 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { KpiHostsData } from '../../../../graphql/types';
-import {
-  AreaChartData,
-  BarChartData,
-  StatItem,
-  StatItems,
-  StatItemsComponent,
-  StatItemsProps,
-} from '../../../stat_items';
+import { StatItem, StatItems, StatItemsComponent, StatItemsProps } from '../../../stat_items';
 import * as i18n from './translations';
+import { BarChartData, AreaChartData } from '../../../charts/common';
 
 interface KpiHostsProps {
   data: KpiHostsData;
@@ -93,7 +86,7 @@ const fieldTitleMapping: StatItems[] = [
   },
 ];
 
-export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {
+export const KpiHostsComponent = React.memo<KpiHostsProps>(({ data, loading }) => {
   return loading ? (
     <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 247 }}>
       <EuiFlexItem grow={false}>
@@ -148,8 +141,8 @@ const addValueToBarChart = (fields: StatItem[], data: KpiHostsData): BarChartDat
   if (fields.length === 0) return [];
   return fields.reduce((acc: BarChartData[], field: StatItem, idx: number) => {
     const key: string = get('key', field);
-    const x: number | null = getOr(null, key, data);
-    const y: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
+    const y: number | null = getOr(null, key, data);
+    const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
 
     return acc.concat([
       {
@@ -158,6 +151,7 @@ const addValueToBarChart = (fields: StatItem[], data: KpiHostsData): BarChartDat
           {
             x,
             y,
+            g: key,
           },
         ],
       },

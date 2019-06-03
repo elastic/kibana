@@ -20,6 +20,7 @@ import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
@@ -154,6 +155,7 @@ const getAuthenticationColumns = (): [
             queryMatch: {
               field: 'event.type',
               value: 'authentication_failure',
+              operator: IS_OPERATOR,
             },
           }}
           render={(dataProvider, _, snapshot) =>
@@ -237,6 +239,7 @@ const getAuthenticationColumns = (): [
             queryMatch: {
               field: 'event.type',
               value: 'authentication_success',
+              operator: IS_OPERATOR,
             },
           }}
           render={(dataProvider, _, snapshot) =>

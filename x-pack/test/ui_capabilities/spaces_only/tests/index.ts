@@ -18,7 +18,7 @@ export default function uiCapabilitesTests({
   const featuresService: FeaturesService = getService('features');
 
   describe('ui capabilities', function() {
-    this.tags('ciGroup5');
+    this.tags('ciGroup9');
 
     before(async () => {
       const features = await featuresService.get();

@@ -22,30 +22,29 @@ describe('Rollup search request', () => {
 
     expect(rollupSearchRequest).toBeInstanceOf(AbstractSearchRequest);
     expect(rollupSearchRequest.search).toBeDefined();
-    expect(rollupSearchRequest.indexPattern).toBeDefined();
     expect(rollupSearchRequest.callWithRequest).toBeDefined();
   });
 
   test('should send one request for single search', async () => {
     const rollupSearchRequest = new RollupSearchRequest();
-    const body = 'body';
+    const searches = [{ body: 'body', index: 'index' }];
 
-    await rollupSearchRequest.search({ body });
+    await rollupSearchRequest.search(searches);
 
     expect(rollupSearchRequest.callWithRequest).toHaveBeenCalledTimes(1);
     expect(rollupSearchRequest.callWithRequest).toHaveBeenCalledWith('rollup.search', {
-      body,
-      index: 'indexPattern',
+      body: 'body',
+      index: 'index',
       rest_total_hits_as_int: true,
     });
   });
 
   test('should send multiple request for multi search', async () => {
     const rollupSearchRequest = new RollupSearchRequest();
-    const body = ['firstRequestBody', 'secondRequestBody'];
+    const searches = [{ body: 'body', index: 'index' }, { body: 'body1', index: 'index' }];
 
-    await rollupSearchRequest.search({ body });
+    await rollupSearchRequest.search(searches);
 
-    expect(rollupSearchRequest.callWithRequest).toHaveBeenCalledTimes(body.length);
+    expect(rollupSearchRequest.callWithRequest).toHaveBeenCalledTimes(2);
   });
 });

@@ -7,23 +7,24 @@
 import { ServiceAPIResponse } from '../../../../server/lib/services/get_service';
 import { ServiceListAPIResponse } from '../../../../server/lib/services/get_services';
 import { callApi } from '../callApi';
-import { getEncodedEsQuery } from './apm';
+import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
+import { UIFilters } from '../../../../typings/ui-filters';
 
 export async function loadServiceList({
   start,
   end,
-  kuery
+  uiFilters
 }: {
   start: string;
   end: string;
-  kuery: string | undefined;
+  uiFilters: UIFilters;
 }) {
   return callApi<ServiceListAPIResponse>({
     pathname: `/api/apm/services`,
     query: {
       start,
       end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }
@@ -32,19 +33,19 @@ export async function loadServiceDetails({
   serviceName,
   start,
   end,
-  kuery
+  uiFilters
 }: {
   serviceName: string;
   start: string;
   end: string;
-  kuery: string | undefined;
+  uiFilters: UIFilters;
 }) {
   return callApi<ServiceAPIResponse>({
     pathname: `/api/apm/services/${serviceName}`,
     query: {
       start,
       end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }
