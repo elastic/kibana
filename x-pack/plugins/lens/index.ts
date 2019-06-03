@@ -17,7 +17,7 @@ export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     id: PLUGIN_ID,
     configPrefix: `xpack.${PLUGIN_ID}`,
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter', 'data'],
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {

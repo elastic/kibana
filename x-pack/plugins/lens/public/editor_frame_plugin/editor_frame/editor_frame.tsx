@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useReducer, useMemo } from 'react';
+import { ExpressionRenderer } from '../../../../../../src/legacy/core_plugins/data/public';
 import { Datasource, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -19,6 +20,8 @@ export interface EditorFrameProps {
 
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
+
+  ExpressionRenderer: ExpressionRenderer;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -99,6 +102,7 @@ export function EditorFrame(props: EditorFrameProps) {
             visualizationState={state.visualization.state}
             visualizationMap={props.visualizationMap}
             dispatch={dispatch}
+            ExpressionRenderer={props.ExpressionRenderer}
           />
         }
         suggestionsPanel={

@@ -7,15 +7,25 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-
+import { CoreSetup } from 'src/core/public';
+import {
+  DataSetup,
+  data,
+  ExpressionRenderer,
+} from '../../../../../src/legacy/core_plugins/data/public';
 import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 import { EditorFrame } from './editor_frame';
 
+export interface EditorFrameSetupPlugins {
+  data: DataSetup;
+}
+
 export class EditorFramePlugin {
   constructor() {}
+  private ExpressionRenderer: ExpressionRenderer | null = null;
 
-  private datasources: Record<string, Datasource> = {};
-  private visualizations: Record<string, Visualization> = {};
+  private readonly datasources: Record<string, Datasource> = {};
+  private readonly visualizations: Record<string, Visualization> = {};
 
   private createInstance(): EditorFrameInstance {
     let domElement: Element;
@@ -41,6 +51,7 @@ export class EditorFramePlugin {
               visualizationMap={this.visualizations}
               initialDatasourceId={firstDatasourceId || null}
               initialVisualizationId={firstVisualizationId || null}
+              ExpressionRenderer={this.ExpressionRenderer!}
             />
           </I18nProvider>,
           domElement
@@ -50,7 +61,8 @@ export class EditorFramePlugin {
     };
   }
 
-  public setup(): EditorFrameSetup {
+  public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
+    this.ExpressionRenderer = plugins.data.expressions.ExpressionRenderer;
     return {
       createInstance: this.createInstance.bind(this),
       registerDatasource: (name, datasource) => {
@@ -69,5 +81,8 @@ export class EditorFramePlugin {
 
 const editorFrame = new EditorFramePlugin();
 
-export const editorFrameSetup = () => editorFrame.setup();
+export const editorFrameSetup = () =>
+  editorFrame.setup(null, {
+    data,
+  });
 export const editorFrameStop = () => editorFrame.stop();
