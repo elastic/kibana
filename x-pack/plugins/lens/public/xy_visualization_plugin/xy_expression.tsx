@@ -214,7 +214,7 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
   context: {
     types: ['kibana_datatable'],
   },
-  fn(data: KibanaDatatable, args: XYArgs): XYRender {
+  fn(data: KibanaDatatable, args: XYArgs) {
     return {
       type: 'render',
       as: 'lens_xy_chart_renderer',
