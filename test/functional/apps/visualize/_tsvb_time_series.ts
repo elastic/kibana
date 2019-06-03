@@ -113,6 +113,36 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be(expectedLegendValue);
       });
+
+      it('should show the correct count in the legend with "Human readable" duration formatter', async () => {
+        const expectedLegendValue = 'a few seconds'; // 156
+
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('Duration');
+        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
+        const actualCount = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be(expectedLegendValue);
+      });
+
+      it('should show the correct count in the legend with "Human readable" seconds duration formatter', async () => {
+        const expectedLegendValue = '3 minutes'; // 156
+
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('Duration');
+        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Seconds' });
+        const actualCount = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be(expectedLegendValue);
+      });
+
+      it('should show the correct count in the legend with "Human readable" minutes duration formatter', async () => {
+        const expectedLegendValue = '3 hours'; // 156
+
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('Duration');
+        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Minutes' });
+        const actualCount = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be(expectedLegendValue);
+      });
     });
 
     it('should show the correct count in the legend with bytes formatter', async () => {
