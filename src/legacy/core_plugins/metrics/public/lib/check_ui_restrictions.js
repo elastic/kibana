@@ -26,12 +26,13 @@ export const DEFAULT_UI_RESTRICTION = {
 const RESTRICTION_TYPES = {
   WHITE_LISTED_GROUP_BY_FIELDS: 'whiteListedGroupByFields',
   WHITE_LISTER_METRICS: 'whiteListedMetrics',
+  WHITE_LISTED_TIMERANGE_MODES: 'whiteListedTimerangeModes',
 };
 
 const checkUIRestrictions = (key, restrictions = DEFAULT_UI_RESTRICTION, type) => {
   const isAllEnabled = get(restrictions, `${type}.*`, true);
 
-  return isAllEnabled || get(restrictions, type, {})[key];
+  return isAllEnabled || Boolean(get(restrictions, type, {})[key]);
 };
 
 export const isMetricEnabled = (key, restrictions) => {
@@ -47,4 +48,8 @@ export const isFieldEnabled = (field, metricType, restrictions = DEFAULT_UI_REST
 
 export const isGroupByFieldsEnabled = (key, restrictions) => {
   return checkUIRestrictions(key, restrictions, RESTRICTION_TYPES.WHITE_LISTED_GROUP_BY_FIELDS);
+};
+
+export const isTimerangeModeEnabled = (key, restrictions) => {
+  return checkUIRestrictions(key, restrictions, RESTRICTION_TYPES.WHITE_LISTED_TIMERANGE_MODES);
 };
