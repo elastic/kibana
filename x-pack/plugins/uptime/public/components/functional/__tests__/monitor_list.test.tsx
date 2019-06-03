@@ -440,6 +440,8 @@ describe('MonitorList component', () => {
   it('renders a monitor list without errors', () => {
     const component = shallowWithIntl(
       <MonitorListComponent
+        absoluteStartDate={1548697620000}
+        absoluteEndDate={1548700920000}
         basePath="foo"
         dangerColor="red"
         data={{ monitorStatus: { monitors } }}

@@ -87,6 +87,8 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
         />
         <EuiSpacer size="s" />
         <MonitorList
+          absoluteStartDate={absoluteStartDate}
+          absoluteEndDate={absoluteEndDate}
           basePath={basePath}
           dangerColor={colors.danger}
           dateRangeStart={dateRangeStart}

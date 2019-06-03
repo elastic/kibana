@@ -34,10 +34,33 @@ interface MonitorListQueryResult {
 }
 
 interface MonitorListProps {
+  /**
+   * The date/time for the start of the timespan.
+   */
+  absoluteStartDate: number;
+  /**
+   * The date/time for the end of the timespan.
+   */
+  absoluteEndDate: number;
+  /**
+   * The base path Kibana is using.
+   */
   basePath: string;
+  /**
+   * This color will be used to express "down"-related visualizations.
+   */
   dangerColor: string;
+  /**
+   * The string-value currently in use by the date picker's start time.
+   */
   dateRangeStart: string;
+  /**
+   * The string-value currently in use by the date picker's end time.
+   */
   dateRangeEnd: string;
+  /**
+   * The current URL params. These will be passed by links rendered by this component.
+   */
   linkParameters?: string;
 }
 
@@ -51,6 +74,8 @@ const monitorListPagination = {
 };
 
 export const MonitorListComponent = ({
+  absoluteStartDate,
+  absoluteEndDate,
   basePath,
   dangerColor,
   dateRangeStart,
@@ -159,7 +184,14 @@ export const MonitorListComponent = ({
               if (!downSeries) {
                 return null;
               }
-              return <MonitorBarSeries dangerColor={dangerColor} downSeries={downSeries} />;
+              return (
+                <MonitorBarSeries
+                  absoluteStartDate={absoluteStartDate}
+                  absoluteEndDate={absoluteEndDate}
+                  dangerColor={dangerColor}
+                  downSeries={downSeries}
+                />
+              );
             },
           },
           {
