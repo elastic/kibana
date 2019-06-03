@@ -1,4 +1,19 @@
 JOB:
+  - kibana-intake
+  - x-pack-intake
+  - kibana-ciGroup1
+  - kibana-ciGroup2
+  - kibana-ciGroup3
+  - kibana-ciGroup4
+  - kibana-ciGroup5
+  - kibana-ciGroup6
+  - kibana-ciGroup7
+  - kibana-ciGroup8
+  - kibana-ciGroup9
+  - kibana-ciGroup10
+  - kibana-ciGroup11
+  - kibana-ciGroup12
+  # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
   - x-pack-ciGroup1
   - x-pack-ciGroup2
   - x-pack-ciGroup3
@@ -9,36 +24,6 @@ JOB:
   - x-pack-ciGroup8
   - x-pack-ciGroup9
   - x-pack-ciGroup10
-  - x-pack-ciGroup11
-  - x-pack-ciGroup12
-  - x-pack-ciGroup13
-  - x-pack-ciGroup14
-  - x-pack-ciGroup15
-  - x-pack-ciGroup16
-  - x-pack-ciGroup17
-  - x-pack-ciGroup18
-  - x-pack-ciGroup19
-  - x-pack-ciGroup20
-  - x-pack-ciGroup21
-  - x-pack-ciGroup22
-  - x-pack-ciGroup23
-  - x-pack-ciGroup24
-  - x-pack-ciGroup25
-  - x-pack-ciGroup26
-  - x-pack-ciGroup27
-  - x-pack-ciGroup28
-  - x-pack-ciGroup29
-  - x-pack-ciGroup30
-  - x-pack-ciGroup31
-  - x-pack-ciGroup32
-  - x-pack-ciGroup33
-  - x-pack-ciGroup34
-  - x-pack-ciGroup35
-  - x-pack-ciGroup36
-  - x-pack-ciGroup37
-  - x-pack-ciGroup38
-  - x-pack-ciGroup39
-  - x-pack-ciGroup40
 
 # `~` is yaml for `null`
 exclude: ~
