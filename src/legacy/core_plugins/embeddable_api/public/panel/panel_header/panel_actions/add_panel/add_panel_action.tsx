@@ -22,8 +22,6 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { ViewMode } from '../../../../types';
-import { IEmbeddable } from '../../../../embeddables/i_embeddable';
-import { IContainer } from '../../../../containers';
 import { Action, ActionContext } from '../../../../actions';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
 
