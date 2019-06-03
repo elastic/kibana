@@ -107,6 +107,7 @@ describe('Point Series Config Type Class Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
 
+
   describe('histogram chart', function () {
     beforeEach(function () {
       parsedConfig = pointSeriesConfig.column(histogramConfig, data);
