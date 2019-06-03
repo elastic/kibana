@@ -46,7 +46,7 @@ module.directive('mlCalendarsList', function () {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (element) {
+    link: function (scope, element) { // eslint-disable-line no-unused-vars
       const props = {
         canCreateCalendar: checkPermission('canCreateCalendar'),
         canDeleteCalendar: checkPermission('canDeleteCalendar'),

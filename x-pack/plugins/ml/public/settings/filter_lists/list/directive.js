@@ -44,7 +44,7 @@ module.directive('mlFilterLists', function () {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (element) {
+    link: function (scope, element) { // eslint-disable-line no-unused-vars
       const props = {
         canCreateFilter: checkPermission('canCreateFilter'),
         canDeleteFilter: checkPermission('canDeleteFilter'),

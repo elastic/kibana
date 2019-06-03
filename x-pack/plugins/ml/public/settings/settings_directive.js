@@ -50,7 +50,7 @@ module.directive('mlSettings', function () {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (element) {
+    link: function (scope, element) { // eslint-disable-line no-unused-vars
       timefilter.disableTimeRangeSelector();
       timefilter.disableAutoRefreshSelector();
 

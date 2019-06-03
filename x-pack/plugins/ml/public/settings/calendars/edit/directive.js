@@ -54,7 +54,7 @@ module.directive('mlNewCalendar', function ($route) {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (element) {
+    link: function (scope, element) { // eslint-disable-line no-unused-vars
       const props = {
         calendarId: $route.current.params.calendarId,
         canCreateCalendar: checkPermission('canCreateCalendar'),
