@@ -112,9 +112,7 @@ export const AuthenticationTable = connect(
   }
 )(AuthenticationTableComponent);
 
-const getAuthenticationColumns = (
-  pageType: hostsModel.HostsType
-): [
+const getAuthenticationColumns = (): [
   Columns<AuthenticationsEdges>,
   Columns<AuthenticationsEdges>,
   Columns<AuthenticationsEdges>,
@@ -307,7 +305,7 @@ const getAuthenticationColumns = (
 ];
 
 const getAuthenticationColumnsCurated = (pageType: hostsModel.HostsType) => {
-  const columnsCurated = getAuthenticationColumns(pageType);
+  const columnsCurated = getAuthenticationColumns();
 
   if (pageType === 'details') {
     // Array of column names to exclude from host details pages
