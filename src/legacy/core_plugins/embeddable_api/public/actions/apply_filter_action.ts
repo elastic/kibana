@@ -84,10 +84,7 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
   }
 }
 
-const applyFilterAction = new ApplyFilterAction();
-if (!actionRegistry.get(applyFilterAction.id)) {
-  actionRegistry.set(APPLY_FILTER_ACTION, new ApplyFilterAction());
-}
+actionRegistry.set(APPLY_FILTER_ACTION, new ApplyFilterAction());
 
 attachAction(triggerRegistry, {
   triggerId: APPLY_FILTER_TRIGGER,
