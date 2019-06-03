@@ -11,6 +11,7 @@ import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
 import { LegacyPluginInitializer } from 'src/legacy/types';
 import { Plugin } from './server';
 import { ID } from './common/constants';
+import { mappings, savedObjectSchemas } from './server/saved_objects';
 
 const ICON = 'merge';
 const PREFIX = `xpack.${ID}`;
@@ -36,6 +37,8 @@ export const integrationsManager: LegacyPluginInitializer = kibana => {
       },
       // This defines what shows up in the registry found at /app/kibana#/home and /app/kibana#/home/feature_directory
       home: [`${ROOT}/register_feature`],
+      mappings,
+      savedObjectSchemas,
     },
 
     init(server: Server) {
