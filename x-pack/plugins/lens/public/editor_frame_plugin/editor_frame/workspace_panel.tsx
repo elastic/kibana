@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ExpressionRenderer } from '../../../../../../src/legacy/core_plugins/data/public';
@@ -60,7 +60,7 @@ export function WorkspacePanel({
 
   function renderEmptyWorkspace() {
     return (
-      <p>
+      <p data-test-subj="empty-workspace">
         <FormattedMessage
           id="xpack.lens.editorFrame.emptyWorkspace"
           defaultMessage="This is the workspace panel. Drop fields here"
@@ -70,23 +70,61 @@ export function WorkspacePanel({
   }
 
   function renderVisualization() {
+    const [expressionError, setExpressionError] = useState(false);
+
+    const activeVisualization = activeVisualizationId && visualizationMap[activeVisualizationId];
+    const expression = useMemo(
+      () =>
+        activeVisualization &&
+        buildExpression(
+          activeVisualization,
+          visualizationState,
+          activeDatasource,
+          datasourceState,
+          datasourcePublicAPI
+        ),
+      [
+        activeVisualization,
+        visualizationState,
+        activeDatasource,
+        datasourceState,
+        datasourcePublicAPI,
+      ]
+    );
+
+    useEffect(
+      () => {
+        // reset expression error if component re-renders successfully
+        if (expressionError) {
+          setExpressionError(false);
+        }
+      },
+      [expressionError, expression]
+    );
+
     if (activeVisualizationId === null) {
       return renderEmptyWorkspace();
     }
 
-    const activeVisualization = visualizationMap[activeVisualizationId];
-    const expression = buildExpression(
-      activeVisualization,
-      visualizationState,
-      activeDatasource,
-      datasourceState,
-      datasourcePublicAPI
-    );
-
-    if (expression) {
-      return <ExpressionRendererComponent expression={expression} />;
+    if (expression && !expressionError) {
+      return (
+        <ExpressionRendererComponent
+          expression={expression}
+          onRenderFailure={() => {
+            setExpressionError(true);
+          }}
+        />
+      );
     } else {
-      return <span>Error while building expression</span>;
+      return (
+        <p data-test-subj="expression-failure">
+          {/* TODO word this differently because expressions should not be exposed at this level */}
+          <FormattedMessage
+            id="xpack.lens.editorFrame.expressionFailure"
+            defaultMessage="Expression could not be executed successfully"
+          />
+        </p>
+      );
     }
   }
 

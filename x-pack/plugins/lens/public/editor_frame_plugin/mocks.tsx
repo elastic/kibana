@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataSetup } from 'src/legacy/core_plugins/data/public';
+import React from 'react';
+import { DataSetup, ExpressionRendererProps } from 'src/legacy/core_plugins/data/public';
 import { DatasourcePublicAPI, Visualization, Datasource } from '../types';
 import { EditorFrameSetupPlugins } from './plugin';
 
@@ -53,8 +54,11 @@ export type MockedDependencies = Omit<EditorFrameSetupPlugins, 'data'> & {
   data: Omit<DataSetup, 'expressions'> & { expressions: jest.Mocked<DataSetup['expressions']> };
 };
 
-export function createExpressionRendererMock() {
-  return jest.fn(() => null);
+export function createExpressionRendererMock(): jest.Mock<
+  React.ReactElement,
+  [ExpressionRendererProps]
+> {
+  return jest.fn(_ => <span />);
 }
 
 export function createMockDependencies() {

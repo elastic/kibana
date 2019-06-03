@@ -174,7 +174,7 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender> = {
+export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender> = ({
   name: 'lens_xy_chart',
   type: 'render',
   help: 'An X/Y chart',
@@ -224,7 +224,8 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
       },
     };
   },
-};
+  // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
+} as unknown) as ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender>;
 
 export const xyChartRenderer: RenderFunction<XYChartProps> = {
   name: 'lens_xy_chart_renderer',
