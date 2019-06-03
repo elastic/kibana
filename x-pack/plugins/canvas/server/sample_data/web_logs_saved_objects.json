@@ -120,7 +120,7 @@
                 "height": 7.25,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-4562db88-edbe-45b2-86aa-c549f2e25c98",
@@ -131,7 +131,7 @@
                 "height": 89.13671875,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#221F20\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#221F20\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-6556fa13-4557-47bc-bb9f-08a525604e13",
@@ -209,7 +209,7 @@
                 "height": 104,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql \n  query=\"SELECT COUNT(timestamp) as total_visitors\n    FROM kibana_sample_data_logs\"\n| math \"total_visitors\"\n| metric \"TOTAL VISITORS\"\n  metricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n  labelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
+              "expression": "filters\n| essql \n  query=\"SELECT COUNT(timestamp) as total_visitors\n    FROM kibana_sample_data_logs\"\n| math \"total_visitors\"\n| metric \"TOTAL VISITORS\"\n  metricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n  labelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-a8a8fa93-8e08-4e9f-b3e4-f4014543fe1f",
@@ -220,7 +220,7 @@
                 "height": 25.75,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql \n  query=\"SELECT host\n    FROM kibana_sample_data_logs\n    WHERE host='www.elastic.co'\"\n| markdown {getCell \"host\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| essql \n  query=\"SELECT host\n    FROM kibana_sample_data_logs\n    WHERE host='www.elastic.co'\"\n| markdown {getCell \"host\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -232,7 +232,7 @@
                 "height": 26.75,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\n  query=\"SELECT host \n    FROM kibana_sample_data_logs\n    WHERE host='cdn.elastic-elastic-elastic.org'\"\n| markdown {getCell \"host\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| essql\n  query=\"SELECT host \n    FROM kibana_sample_data_logs\n    WHERE host='cdn.elastic-elastic-elastic.org'\"\n| markdown {getCell \"host\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -244,7 +244,7 @@
                 "height": 27.375,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\n  query=\"SELECT host\n    FROM kibana_sample_data_logs\n    WHERE host='elastic-elastic-elastic.org'\"\n| markdown {getCell \"host\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| essql\n  query=\"SELECT host\n    FROM kibana_sample_data_logs\n    WHERE host='elastic-elastic-elastic.org'\"\n| markdown {getCell \"host\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -268,7 +268,7 @@
                 "angle": 0,
                 "parent": null
               },
-              "expression": "\nfilters\n| essql\n  query=\"SELECT COUNT(timestamp) as total_visitors, HOUR_OF_DAY(timestamp) as hour, host\n    FROM kibana_sample_data_logs\n    GROUP BY host, HOUR_OF_DAY(timestamp)\n    ORDER BY HOUR_OF_DAY(timestamp) DESC\"\n| pointseries x=\"hour\" y=\"total_visitors\" color=\"host\"\n| plot defaultStyle={seriesStyle bars=0 lines=3 points=0} legend=false xaxis=false yaxis=false palette={palette \"#C83C5C\" \"#D56F79\" \"#F6C4C5\" \"#F1A3A6\" gradient=true}\n| render containerStyle={containerStyle backgroundColor=\"#221F20\"}\n"
+              "expression": "filters\n| essql\n  query=\"SELECT COUNT(timestamp) as total_visitors, HOUR_OF_DAY(timestamp) as hour, host\n    FROM kibana_sample_data_logs\n    GROUP BY host, HOUR_OF_DAY(timestamp)\n    ORDER BY HOUR_OF_DAY(timestamp) DESC\"\n| pointseries x=\"hour\" y=\"total_visitors\" color=\"host\"\n| plot defaultStyle={seriesStyle bars=0 lines=3 points=0} legend=false xaxis=false yaxis=false palette={palette \"#C83C5C\" \"#D56F79\" \"#F6C4C5\" \"#F1A3A6\" gradient=true}\n| render containerStyle={containerStyle backgroundColor=\"#221F20\"}\n"
             },
             {
               "id": "element-ce1da927-2d4f-413e-85e9-4fd1106b5207",
@@ -279,7 +279,7 @@
                 "height": 82,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\n  query=\"SELECT COUNT(timestamp) as total_visitors, host\n    FROM kibana_sample_data_logs\n    GROUP BY host\"\n| pointseries color=\"host\" size=\"total_visitors\"\n| pie hole=60 labels=false legend=false palette={palette \"#C83C5C\" \"#D56F79\" \"#F6C4C5\" \"#F1A3A6\" gradient=true}\n| render\n",
+              "expression": "filters\n| essql\n  query=\"SELECT COUNT(timestamp) as total_visitors, host\n    FROM kibana_sample_data_logs\n    GROUP BY host\"\n| pointseries color=\"host\" size=\"total_visitors\"\n| pie hole=60 labels=false legend=false palette={palette \"#C83C5C\" \"#D56F79\" \"#F6C4C5\" \"#F1A3A6\" gradient=true}\n| render\n",
               "filter": null
             },
             {
@@ -291,7 +291,7 @@
                 "height": 101.7578125,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(timestamp) as total_errors, timestamp\nFROM kibana_sample_data_logs\nWHERE tags LIKE '%warning%'\nGROUP BY timestamp\nORDER BY timestamp DESC\"\n| pointseries x=\"timestamp\" y=\"total_errors\"\n| plot defaultStyle={seriesStyle bars=\"1\" lines=\"0\" points=0 color=\"#E9782F\"} legend=false xaxis=false yaxis=false\n| render\n"
+              "expression": "filters\n| essql\nquery=\"SELECT COUNT(timestamp) as total_errors, timestamp\nFROM kibana_sample_data_logs\nWHERE tags LIKE '%warning%'\nGROUP BY timestamp\nORDER BY timestamp DESC\"\n| pointseries x=\"timestamp\" y=\"total_errors\"\n| plot defaultStyle={seriesStyle bars=\"1\" lines=\"0\" points=0 color=\"#E9782F\"} legend=false xaxis=false yaxis=false\n| render\n"
             },
             {
               "id": "element-1ae8ea70-993a-4503-916a-ce98717054f6",
@@ -302,7 +302,7 @@
                 "height": 101.7578125,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\n  query=\"SELECT COUNT(timestamp) as total_errors, timestamp\n    FROM kibana_sample_data_logs\n    WHERE tags LIKE '%error%'\n    GROUP BY timestamp\n    ORDER BY timestamp DESC\"\n| pointseries x=\"timestamp\" y=\"total_errors\"\n| plot defaultStyle={seriesStyle bars=\"1\" lines=\"0\" points=0 color=\"#F2C242\"} legend=false xaxis=false yaxis=false\n| render\n"
+              "expression": "filters\n| essql\n  query=\"SELECT COUNT(timestamp) as total_errors, timestamp\n    FROM kibana_sample_data_logs\n    WHERE tags LIKE '%error%'\n    GROUP BY timestamp\n    ORDER BY timestamp DESC\"\n| pointseries x=\"timestamp\" y=\"total_errors\"\n| plot defaultStyle={seriesStyle bars=\"1\" lines=\"0\" points=0 color=\"#F2C242\"} legend=false xaxis=false yaxis=false\n| render\n"
             },
             {
               "id": "element-70a2bca6-de31-4bee-81b1-b18528820645",
@@ -381,7 +381,7 @@
                 "angle": 0,
                 "parent": null
               },
-              "expression": "\ntimefilterControl compact=true column=\"timestamp\"\n| render\n",
+              "expression": "timefilterControl compact=true column=\"timestamp\"\n| render\n",
               "filter": "timefilter from=\"now-24h\" to=now column=timestamp"
             },
             {
@@ -415,7 +415,7 @@
                 "height": 7.25,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-99baa692-12dc-4d8d-9d78-05cb1aa7f7a8",
@@ -426,7 +426,7 @@
                 "height": 7.25,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-f0412810-61fb-4ab8-ba9f-a69ba344d4d7",
@@ -437,7 +437,7 @@
                 "height": 7.25,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-42587f38-4f6e-4a23-9ade-d0f23449efba",
