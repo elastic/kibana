@@ -34,7 +34,7 @@ export function createFireHandler({ fireAction, alertSavedObject }: CreateFireHa
       );
       if (!actionReference) {
         throw new Error(
-          `Action reference "${actionReference}" not found in alert id: ${alertSavedObject.id}`
+          `Action reference "${action.actionRef}" not found in alert id: ${alertSavedObject.id}`
         );
       }
       await fireAction({
