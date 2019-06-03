@@ -22,6 +22,8 @@ export const overviewHostQuery = gql`
         auditbeatPackage
         auditbeatProcess
         auditbeatUser
+        filebeatSystemModule
+        winlogbeat
       }
     }
   }

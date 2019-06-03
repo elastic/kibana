@@ -27,11 +27,31 @@ export class ElasticsearchOverviewAdapter implements OverviewAdapter {
     );
 
     return {
-      packetbeatFlow: getOr(null, 'aggregations.unique_flow_count.doc_count', response),
-      packetbeatDNS: getOr(null, 'aggregations.unique_dns_count.doc_count', response),
+      auditbeatSocket: getOr(null, 'aggregations.unique_socket_count.doc_count', response),
+      filebeatCisco: getOr(
+        null,
+        'aggregations.unique_filebeat_count.unique_cisco_count.doc_count',
+        response
+      ),
+      filebeatNetflow: getOr(
+        null,
+        'aggregations.unique_filebeat_count.unique_netflow_count.doc_count',
+        response
+      ),
+      filebeatPanw: getOr(
+        null,
+        'aggregations.unique_filebeat_count.unique_panw_count.doc_count',
+        response
+      ),
       filebeatSuricata: getOr(null, 'aggregations.unique_suricata_count.doc_count', response),
       filebeatZeek: getOr(null, 'aggregations.unique_zeek_count.doc_count', response),
-      auditbeatSocket: getOr(null, 'aggregations.unique_socket_count.doc_count', response),
+      packetbeatDNS: getOr(null, 'aggregations.unique_dns_count.doc_count', response),
+      packetbeatFlow: getOr(null, 'aggregations.unique_flow_count.doc_count', response),
+      packetbeatTLS: getOr(
+        null,
+        'aggregations.unique_packetbeat_count.unique_tls_count.doc_count',
+        response
+      ),
     };
   }
 
@@ -52,6 +72,12 @@ export class ElasticsearchOverviewAdapter implements OverviewAdapter {
       auditbeatPackage: getOr(null, 'aggregations.system_module.package_count.doc_count', response),
       auditbeatProcess: getOr(null, 'aggregations.system_module.process_count.doc_count', response),
       auditbeatUser: getOr(null, 'aggregations.system_module.user_count.doc_count', response),
+      filebeatSystemModule: getOr(
+        null,
+        'aggregations.system_module.filebeat_count.doc_count',
+        response
+      ),
+      winlogbeat: getOr(null, 'aggregations.winlog_count.doc_count', response),
     };
   }
 }

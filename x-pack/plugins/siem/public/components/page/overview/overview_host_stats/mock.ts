@@ -14,5 +14,7 @@ export const mockData: { OverviewHost: OverviewHostData } = {
     auditbeatPackage: 2003,
     auditbeatProcess: 1200,
     auditbeatUser: 1979,
+    filebeatSystemModule: 568,
+    winlogbeat: 296999,
   },
 };

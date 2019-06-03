@@ -20,11 +20,15 @@ export const overviewNetworkQuery = gql`
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
       ) {
-        packetbeatFlow
-        packetbeatDNS
+        auditbeatSocket
+        filebeatCisco
+        filebeatNetflow
+        filebeatPanw
         filebeatSuricata
         filebeatZeek
-        auditbeatSocket
+        packetbeatDNS
+        packetbeatFlow
+        packetbeatTLS
       }
     }
   }
