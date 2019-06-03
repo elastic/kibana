@@ -54,8 +54,7 @@ const timeRangeOptions = [
   },
 ];
 
-const isEntireTimeRangeEnabled = (model, options, timerange) =>
-  timerange && model[TIME_RANGE_MODE_KEY] === options[0].value; // TODO: May be removed
+const isEntireTimeRangeEnabled = (model, timerange) => timerange && model[TIME_RANGE_MODE_KEY] === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
 
 export const IndexPattern = props => {
   const { fields, prefix, timerange } = props;
@@ -161,7 +160,7 @@ export const IndexPattern = props => {
             })}
           >
             <EuiFieldText
-              disabled={props.disabled || isEntireTimeRangeEnabled(model, timeRangeOptions, timerange)}
+              disabled={props.disabled || isEntireTimeRangeEnabled(model, timerange)}
               onChange={handleTextChange(intervalName, 'auto')}
               value={model[intervalName]}
               placeholder={'auto'}
@@ -179,7 +178,7 @@ export const IndexPattern = props => {
               value={model[dropBucketName]}
               name={dropBucketName}
               onChange={props.onChange}
-              disabled={isEntireTimeRangeEnabled(model, timeRangeOptions, timerange) || props.disabled}
+              disabled={isEntireTimeRangeEnabled(model, timerange) || props.disabled}
             />
           </EuiFormRow>
         </EuiFlexItem>
