@@ -305,22 +305,15 @@ const getAuthenticationColumns = (): [
 ];
 
 const getAuthenticationColumnsCurated = (pageType: hostsModel.HostsType) => {
-  const columnsCurated = getAuthenticationColumns();
+  const columns = getAuthenticationColumns();
 
+  // Columns to exclude from host details pages
   if (pageType === 'details') {
-    // Array of column names to exclude from host details pages
-    const columnsExcluded = [i18n.LAST_FAILED_DESTINATION, i18n.LAST_SUCCESSFUL_DESTINATION];
-
-    // Find indices of excluded columns
-    const indicesExcluded = columnsExcluded.map(name =>
-      columnsCurated.findIndex(column => column.name === name)
-    );
-
-    // Remove excluded columns from array
-    for (let i = indicesExcluded.length - 1; i >= 0; i--) {
-      columnsCurated.splice(indicesExcluded[i], 1);
-    }
+    return [i18n.LAST_FAILED_DESTINATION, i18n.LAST_SUCCESSFUL_DESTINATION].reduce((acc, name) => {
+      acc.splice(acc.findIndex(column => column.name === name), 1);
+      return acc;
+    }, columns);
   }
 
-  return columnsCurated;
+  return columns;
 };

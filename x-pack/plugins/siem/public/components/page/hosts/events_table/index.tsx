@@ -256,22 +256,15 @@ const getEventsColumns = (
 ];
 
 const getEventsColumnsCurated = (pageType: hostsModel.HostsType) => {
-  const columnsCurated = getEventsColumns(pageType);
+  const columns = getEventsColumns(pageType);
 
+  // Columns to exclude from host details pages
   if (pageType === 'details') {
-    // Array of column names to exclude from host details pages
-    const columnsExcluded = [i18n.HOST_NAME];
-
-    // Find indices of excluded columns
-    const indicesExcluded = columnsExcluded.map(name =>
-      columnsCurated.findIndex(column => column.name === name)
-    );
-
-    // Remove excluded columns from array
-    for (let i = indicesExcluded.length - 1; i >= 0; i--) {
-      columnsCurated.splice(indicesExcluded[i], 1);
-    }
+    return [i18n.HOST_NAME].reduce((acc, name) => {
+      acc.splice(acc.findIndex(column => column.name === name), 1);
+      return acc;
+    }, columns);
   }
 
-  return columnsCurated;
+  return columns;
 };
