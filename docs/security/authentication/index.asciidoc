@@ -155,7 +155,7 @@ can expire, in  which case {kib} will automatically renew it with a one-time-use
 
 {kib} can only determine if an access token has expired if it receives a request that requires authentication. If both access
 and refresh tokens have already expired (for example, after 24 hours of inactivity), {kib} initiates a new "handshake" and
-redirects the user to the external authentication provider ( SAML Identity Provider or OpenID Connect Provider)
+redirects the user to the external authentication provider (SAML Identity Provider or OpenID Connect Provider)
 Depending on {es} and the external authentication provider configuration, the user might be asked to re-enter credentials.
 
 If {kib} can't redirect the user to the external authentication provider (for example, for AJAX/XHR requests), an error
