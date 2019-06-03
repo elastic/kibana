@@ -119,7 +119,6 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
             state: '',
           });
 
-          // @ts-ignore property mock does not exists
           expect(mockHistory.replace.mock.calls[1][0]).toEqual({
             hash: '',
             pathname: examplePath,
