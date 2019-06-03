@@ -220,7 +220,8 @@ export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
       try {
         const repository = await gitOperations.openRepo(uri);
         const references = await repository.getReferences(Reference.TYPE.DIRECT);
-        return await Promise.all(references.map(referenceInfo));
+        const referenceInfos = await Promise.all(references.map(referenceInfo));
+        return referenceInfos.filter(info => info !== null);
       } catch (e) {
         if (e.isBoom) {
           return e;
