@@ -290,11 +290,11 @@ export abstract class Container<
       delete this.children[id];
     }
 
-    const embeddableLoaded = this.output.embeddableLoaded;
-    delete embeddableLoaded[id];
-
     this.updateOutput({
-      embeddableLoaded,
+      embeddableLoaded: {
+        ...this.output.embeddableLoaded,
+        [id]: undefined,
+      },
     } as Partial<TContainerOutput>);
   }
 
