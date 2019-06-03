@@ -3,7 +3,7 @@
     "strict": true,
     "skipLibCheck": true,
     "lib": [
-      "esnext"
+      "es2018"
     ]
   },
   "files": [

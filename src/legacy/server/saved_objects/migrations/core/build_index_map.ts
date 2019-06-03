@@ -17,8 +17,24 @@
  * under the License.
  */
 
-import { MeterGauge } from './meter';
+import { MappingProperties } from 'src/legacy/server/mappings';
+import { SavedObjectsSchemaDefinition } from '../../schema';
 
-export const gaugeTypes = {
-  meter: MeterGauge
-};
+/*
+ * This file contains logic to convert savedObjectSchemas into a dictonary of indexes and documents
+ */
+export function createIndexMap(
+  defaultIndex: string,
+  savedObjectSchemas: SavedObjectsSchemaDefinition,
+  indexMap: MappingProperties
+) {
+  const map: { [index: string]: MappingProperties } = {};
+  Object.keys(indexMap).forEach(type => {
+    const indexPattern = (savedObjectSchemas[type] || {}).indexPattern || defaultIndex;
+    if (!map.hasOwnProperty(indexPattern as string)) {
+      map[indexPattern] = {};
+    }
+    map[indexPattern][type] = indexMap[type];
+  });
+  return map;
+}

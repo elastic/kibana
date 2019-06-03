@@ -134,7 +134,9 @@ function* handleReposStatusLoaded(action: Action<any>) {
     // Load current repository status on main page
     const currentUri = yield select(repoUriSelector);
     const status = allStatuses[currentUri];
-    yield triggerPollRepoStatus(status.state, currentUri);
+    if (status) {
+      yield triggerPollRepoStatus(status.state, currentUri);
+    }
   }
 }
 

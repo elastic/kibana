@@ -181,6 +181,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     repoConfigController
   );
   server.events.on('stop', async () => {
+    log.debug('shutdown lsp process');
     await lspService.shutdown();
   });
   // Initialize indexing factories.
@@ -216,7 +217,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     esClient,
     serverOptions,
     indexWorker,
-    repoServiceFactory
+    repoServiceFactory,
+    cancellationService
   ).bind();
   const deleteWorker = new DeleteWorker(
     queue,
@@ -232,7 +234,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     log,
     esClient,
     serverOptions,
-    repoServiceFactory
+    repoServiceFactory,
+    cancellationService
   ).bind();
 
   // Initialize schedulers.
