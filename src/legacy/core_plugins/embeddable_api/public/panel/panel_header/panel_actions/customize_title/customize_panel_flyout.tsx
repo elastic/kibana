@@ -27,6 +27,7 @@ import {
   EuiFieldText,
   EuiButton,
   EuiFlexGroup,
+  EuiSwitch,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import { EuiFlexItem } from '@elastic/eui';
@@ -40,22 +41,32 @@ interface CustomizePanelProps {
 
 interface State {
   title: string | undefined;
+  hideTitle: boolean;
 }
 
 export class CustomizePanelFlyoutUi extends Component<CustomizePanelProps, State> {
   constructor(props: CustomizePanelProps) {
     super(props);
     this.state = {
+      hideTitle: props.embeddable.getOutput().title === '',
       title: props.embeddable.getInput().title,
     };
   }
 
   updateTitle = (title: string | undefined) => {
-    this.setState({ title });
+    // An empty string will mean "use the default value", which is represented by setting
+    // title to undefined (where as an empty string is actually used to indicate "hide title").
+    this.setState({ title: title === '' ? undefined : title });
   };
 
   reset = () => {
     this.setState({ title: undefined });
+  };
+
+  onHideTitleToggle = () => {
+    this.setState(prevState => ({
+      hideTitle: !prevState.hideTitle,
+    }));
   };
 
   public render() {
@@ -67,6 +78,21 @@ export class CustomizePanelFlyoutUi extends Component<CustomizePanelProps, State
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
+          {' '}
+          <EuiFormRow>
+            <EuiSwitch
+              checked={this.state.hideTitle}
+              data-test-subj="hideTitle"
+              id="queryEnhancementOptIn"
+              label={
+                <FormattedMessage
+                  defaultMessage="Hide title"
+                  id="embeddable.customizePanel.hideTitle"
+                />
+              }
+              onChange={this.onHideTitleToggle}
+            />
+          </EuiFormRow>
           <EuiFormRow
             label={this.props.intl.formatMessage({
               id: 'kbn.dashboard.panel.optionsMenuForm.panelTitleFormRowLabel',
@@ -78,6 +104,7 @@ export class CustomizePanelFlyoutUi extends Component<CustomizePanelProps, State
               data-test-subj="customEmbeddablePanelTitleInput"
               name="min"
               type="text"
+              disabled={this.state.hideTitle}
               placeholder={this.props.embeddable.getOutput().defaultTitle}
               value={this.state.title || ''}
               onChange={e => this.updateTitle(e.target.value)}
@@ -100,7 +127,9 @@ export class CustomizePanelFlyoutUi extends Component<CustomizePanelProps, State
               <EuiFlexItem>
                 <EuiButton
                   fill
-                  onClick={() => this.props.updateTitle(this.state.title)}
+                  onClick={() =>
+                    this.props.updateTitle(this.state.hideTitle ? '' : this.state.title)
+                  }
                   data-test-subj="saveNewTitleButton"
                 >
                   <FormattedMessage
