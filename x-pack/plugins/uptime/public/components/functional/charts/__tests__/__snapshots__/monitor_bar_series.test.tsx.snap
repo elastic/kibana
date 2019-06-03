@@ -16,8 +16,8 @@ exports[`MonitorBarSeries component renders a series when there are down items 1
       tooltipType="vertical"
       xDomain={
         Object {
-          "max": 1559565012135,
-          "min": 1559564112130,
+          "max": 1548700920000,
+          "min": 1548697920000,
         }
       }
     />

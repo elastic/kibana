@@ -12,6 +12,8 @@ describe('MonitorBarSeries component', () => {
   let props: MonitorBarSeriesProps;
   beforeEach(() => {
     props = {
+      absoluteStartDate: 1548697920000,
+      absoluteEndDate: 1548700920000,
       dangerColor: 'A danger color',
       downSeries: [
         {

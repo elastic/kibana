@@ -16,13 +16,20 @@ import {
   Settings,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment } from 'react';
 import { HistogramDataPoint } from '../../../../common/graphql/types';
 import { getColorsMap } from './get_colors_map';
 import { getChartDateLabel } from '../../../lib/helper';
-import { UptimeSettingsContext } from '../../../contexts';
 
 export interface SnapshotHistogramProps {
+  /**
+   * The date/time for the start of the timespan.
+   */
+  absoluteStartDate: number;
+  /**
+   * The date/time for the end of the timespan.
+   */
+  absoluteEndDate: number;
   /**
    * The color value that is used to represent up checks.
    */
@@ -38,11 +45,12 @@ export interface SnapshotHistogramProps {
 }
 
 export const SnapshotHistogram = ({
+  absoluteStartDate,
+  absoluteEndDate,
   dangerColor,
   histogram,
   successColor,
 }: SnapshotHistogramProps) => {
-  const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
   const downMonitorsName = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
     defaultMessage: 'Down Monitors',
   });

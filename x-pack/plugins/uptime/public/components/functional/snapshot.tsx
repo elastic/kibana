@@ -5,16 +5,10 @@
  */
 
 import {
-  // @ts-ignore missing type
-  EuiAreaSeries,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore missing type
-  EuiHistogramSeries,
-  // @ts-ignore missing type
   EuiPanel,
-  // @ts-ignore missing type
   EuiStat,
   EuiTitle,
 } from '@elastic/eui';
@@ -35,6 +29,14 @@ interface SnapshotQueryResult {
 
 interface SnapshotProps {
   /**
+   * The date/time for the start of the timespan.
+   */
+  absoluteStartDate: number;
+  /**
+   * The date/time for the end of the timespan.
+   */
+  absoluteEndDate: number;
+  /**
    * Valid colors to be used by the component and its children.
    */
   colors: UptimeAppColors;
@@ -47,7 +49,12 @@ type Props = UptimeGraphQLQueryProps<SnapshotQueryResult> & SnapshotProps;
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
-export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) =>
+export const SnapshotComponent = ({
+  absoluteStartDate,
+  absoluteEndDate,
+  colors: { danger, success },
+  data,
+}: Props) =>
   data && data.snapshot ? (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={4}>
@@ -114,6 +121,8 @@ export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) 
           <EuiSpacer size="s" />
           {data.snapshot.histogram && (
             <SnapshotHistogram
+              absoluteStartDate={absoluteStartDate}
+              absoluteEndDate={absoluteEndDate}
               dangerColor={danger}
               histogram={data.snapshot.histogram}
               successColor={success}

@@ -9,8 +9,8 @@ exports[`SnapshotHistogram component renders the component without errors 1`] = 
       showLegend={false}
       xDomain={
         Object {
-          "max": 1559565012179,
-          "min": 1559564112176,
+          "max": 1548700920000,
+          "min": 1548697920000,
         }
       }
     />

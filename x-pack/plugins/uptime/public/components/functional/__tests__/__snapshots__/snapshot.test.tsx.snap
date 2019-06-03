@@ -95,6 +95,8 @@ exports[`Snapshot component renders without errors 1`] = `
         size="s"
       />
       <SnapshotHistogram
+        absoluteEndDate={1548700920000}
+        absoluteStartDate={1548697920000}
         dangerColor="#F050F0"
         histogram={
           Array [

@@ -17,14 +17,21 @@ import {
   timeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React from 'react';
 import { MonitorSeriesPoint } from '../../../../common/graphql/types';
 import { formatSparklineCounts } from '../format_sparkline_counts';
 import { getColorsMap } from './get_colors_map';
 import { getChartDateLabel, seriesHasYValues } from '../../../lib/helper';
-import { UptimeSettingsContext } from '../../../contexts';
 
 export interface MonitorBarSeriesProps {
+  /**
+   * The date/time for the start of the timespan.
+   */
+  absoluteStartDate: number;
+  /**
+   * The date/time for the end of the timespan.
+   */
+  absoluteEndDate: number;
   /**
    * The color to use for the display of down states.
    */
@@ -40,9 +47,13 @@ export interface MonitorBarSeriesProps {
  * so we will only render the series component if there are down counts for the selected monitor.
  * @param props - the values for the monitor this chart visualizes
  */
-export const MonitorBarSeries = ({ dangerColor, downSeries }: MonitorBarSeriesProps) => {
+export const MonitorBarSeries = ({
+  absoluteStartDate,
+  absoluteEndDate,
+  dangerColor,
+  downSeries,
+}: MonitorBarSeriesProps) => {
   const id = getSpecId('downSeries');
-  const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
 
   return seriesHasYValues(downSeries) ? (
     <div style={{ height: 50, width: '100%' }}>
