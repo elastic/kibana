@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionId, Payload, State, TypeName, UpdaterFunction } from '.';
+import { ActionId, Payload, State, Store, TypeName, UpdaterFunction } from '.';
 
 let counter = 0 as ActionId;
 
-export const createStore = (initialState: State, updater: UpdaterFunction) => {
+export const createStore = (initialState: State, updater: UpdaterFunction): Store => {
   let currentState = initialState;
 
   const commit = (type: TypeName, payload: Payload) => {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './index.d';
+export * from './types';
 
 /*
  * These functions are exported to share with the API route handler that

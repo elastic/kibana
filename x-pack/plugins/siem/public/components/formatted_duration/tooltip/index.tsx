@@ -7,6 +7,7 @@
 import { EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
+import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 
 import { getHumanizedDuration } from '../helpers';
@@ -22,7 +23,11 @@ export const FormattedDurationTooltipContent = pure<{
   <>
     {tooltipTitle != null ? <P data-test-subj="title">{tooltipTitle}</P> : null}
     <P data-test-subj="humanized">{getHumanizedDuration(maybeDurationNanoseconds)}</P>
-    <P data-test-subj="raw-value">raw: {maybeDurationNanoseconds}</P>
+    <P data-test-subj="raw-value">
+      <FormattedMessage id="xpack.siem.formattedDuration.tooltipLabel" defaultMessage="raw" />
+      {': '}
+      {maybeDurationNanoseconds}
+    </P>
   </>
 ));
 

@@ -5,12 +5,14 @@
  */
 
 import sinon from 'sinon';
+
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
 import { emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
+import { CancellationSerivce } from './cancellation_service';
 import { UpdateWorker } from './update_worker';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
@@ -37,6 +39,16 @@ test('Execute update job', async () => {
   const newInstanceSpy = sinon.fake.returns(repoService);
   repoServiceFactory.newInstance = newInstanceSpy;
 
+  // Setup CancellationService
+  const cancelUpdateJobSpy = sinon.spy();
+  const registerUpdateJobTokenSpy = sinon.spy();
+  const cancellationService: any = {
+    cancelUpdateJob: emptyAsyncFunc,
+    registerUpdateJobToken: emptyAsyncFunc,
+  };
+  cancellationService.cancelUpdateJob = cancelUpdateJobSpy;
+  cancellationService.registerUpdateJobToken = registerUpdateJobTokenSpy;
+
   const updateWorker = new UpdateWorker(
     esQueue as Esqueue,
     log,
@@ -46,7 +58,8 @@ test('Execute update job', async () => {
         enableGitCertCheck: false,
       },
     } as ServerOptions,
-    (repoServiceFactory as any) as RepositoryServiceFactory
+    (repoServiceFactory as any) as RepositoryServiceFactory,
+    cancellationService as CancellationSerivce
   );
 
   await updateWorker.executeJob({
