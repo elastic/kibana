@@ -30,7 +30,9 @@ type Props = OverviewPageProps;
 export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
 
 export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
-  const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
+  const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
+    UptimeSettingsContext
+  );
   const [params, updateUrl] = useUrlParams(history, location);
   const { dateRangeStart, dateRangeEnd, search } = params;
 
@@ -77,7 +79,12 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
           variables={sharedProps}
         />
         <EuiSpacer size="s" />
-        <Snapshot colors={colors} variables={sharedProps} />
+        <Snapshot
+          absoluteStartDate={absoluteStartDate}
+          absoluteEndDate={absoluteEndDate}
+          colors={colors}
+          variables={sharedProps}
+        />
         <EuiSpacer size="s" />
         <MonitorList
           basePath={basePath}
