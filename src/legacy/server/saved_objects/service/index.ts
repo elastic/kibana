@@ -37,20 +37,4 @@ export {
   SavedObjectsClientWrapperFactory,
 } from './lib';
 
-export {
-  MigrationVersion,
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsClient,
-  SavedObjectsClientContract,
-  SavedObjectReference,
-  BaseOptions,
-  BulkCreateObject,
-  BulkGetObject,
-  CreateOptions,
-  FindOptions,
-  FindResponse,
-  UpdateOptions,
-  UpdateResponse,
-  BulkResponse,
-} from './saved_objects_client';
+export * from './saved_objects_client';

@@ -33,14 +33,13 @@ export function includedFields(type: string | string[] = '*', fields?: string[] 
   const sourceType = toArray(type);
 
   return sourceType
-    .map(t => sourceFields.map(f => `${t}.${f}`))
-    .reduce((acc, value) => {
-      return acc.concat(value);
+    .reduce((acc: string[], t) => {
+      return [...acc, ...sourceFields.map(f => `${t}.${f}`)];
     }, [])
     .concat('namespace')
     .concat('type')
     .concat('references')
     .concat('migrationVersion')
     .concat('updated_at')
-    .concat(fields); // v5 compatibility;
+    .concat(fields); // v5 compatibility
 }

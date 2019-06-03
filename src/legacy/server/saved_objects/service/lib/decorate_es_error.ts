@@ -47,7 +47,7 @@ import {
   decorateRequestEntityTooLargeError,
 } from './errors';
 
-export function decorateEsError(error: any) {
+export function decorateEsError(error: Error) {
   if (!(error instanceof Error)) {
     throw new Error('Expected an instance of Error');
   }

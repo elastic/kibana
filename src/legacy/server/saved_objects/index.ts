@@ -17,25 +17,7 @@
  * under the License.
  */
 
-export {
-  MigrationVersion,
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsClient,
-  SavedObjectsClientContract,
-  SavedObjectsClientWrapperFactory,
-  SavedObjectReference,
-  SavedObjectsService,
-  BaseOptions,
-  BulkCreateObject,
-  BulkGetObject,
-  CreateOptions,
-  FindOptions,
-  FindResponse,
-  UpdateOptions,
-  UpdateResponse,
-  BulkResponse,
-} from './service';
+export * from './service';
 
 export { SavedObjectsSchema } from './schema';
 
