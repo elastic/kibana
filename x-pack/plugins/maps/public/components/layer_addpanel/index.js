@@ -18,43 +18,35 @@ import {
 } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
+  const indexingStage = getIndexingStage(state);
   return {
     inspectorAdapters: getInspectorAdapters(state),
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     mapColors: getMapColors(state),
-    isIndexingTriggered: getIndexingStage(state) === INDEXING_STAGE.TRIGGERED,
-    isIndexingSuccess: getIndexingStage(state) === INDEXING_STAGE.SUCCESS,
-    isIndexingReady: getIndexingStage(state) === INDEXING_STAGE.READY,
+    isIndexingTriggered: indexingStage === INDEXING_STAGE.TRIGGERED,
+    isIndexingSuccess: indexingStage === INDEXING_STAGE.SUCCESS,
+    isIndexingReady: indexingStage === INDEXING_STAGE.READY,
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     viewLayer: async layer => {
-      //this removal always needs to happen prior to adding the new layer
-      //many source editors allow users to modify the settings in the add-source wizard
-      //this triggers a new request for preview. Any existing transient layers need to be cleared before the new one can be added.
-      await dispatch(setSelectedLayer(null));
-      await dispatch(removeTransientLayer());
-      dispatch(addLayer(layer.toLayerDescriptor()));
-      dispatch(setSelectedLayer(layer.getId()));
-      dispatch(setTransientLayer(layer.getId()));
-    },
-    addImportedLayer: async layer => {
       await dispatch(setSelectedLayer(null));
       dispatch(addLayer(layer.toLayerDescriptor()));
       dispatch(setSelectedLayer(layer.getId()));
       dispatch(setTransientLayer(layer.getId()));
     },
     removeTransientLayer: async () => {
-      dispatch(setSelectedLayer(null));
-      dispatch(removeTransientLayer());
+      await dispatch(setSelectedLayer(null));
+      await dispatch(removeTransientLayer());
     },
     selectLayerAndAdd: () => {
       dispatch(setTransientLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
     setIndexingTriggered: () => dispatch(updateIndexingStage(INDEXING_STAGE.TRIGGERED)),
+    resetIndexing: () => dispatch(updateIndexingStage(null)),
   };
 }
 

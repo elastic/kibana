@@ -246,7 +246,7 @@ export function removeTransientLayer() {
     const transientLayerId = getTransientLayerId(getState());
     if (transientLayerId) {
       await dispatch(removeLayer(transientLayerId));
-      await dispatch(setTransientLayer(null));
+      dispatch(setTransientLayer(null));
     }
   };
 }
@@ -260,9 +260,9 @@ export function setTransientLayer(layerId) {
 
 export function clearTransientLayerStateAndCloseFlyout() {
   return async dispatch => {
-    await dispatch(updateFlyout(FLYOUT_STATE.NONE));
+    dispatch(updateFlyout(FLYOUT_STATE.NONE));
     await dispatch(setSelectedLayer(null));
-    await dispatch(removeTransientLayer());
+    dispatch(removeTransientLayer());
   };
 }
 
@@ -568,7 +568,7 @@ export function removeSelectedLayer() {
 }
 
 export function removeLayer(layerId) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const layerGettingRemoved = getLayerById(layerId, getState());
     if (!layerGettingRemoved) {
       return;
@@ -579,6 +579,7 @@ export function removeLayer(layerId) {
       type: REMOVE_LAYER,
       id: layerId
     });
+    return Promise.resolve();
   };
 }
 

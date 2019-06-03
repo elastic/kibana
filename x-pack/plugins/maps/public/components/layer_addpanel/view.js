@@ -21,50 +21,45 @@ export class AddLayerPanel extends Component {
   state = {
     sourceType: null,
     layer: null,
-    panelDescription: i18n.translate('xpack.maps.addLayerPanel.selectSource',
-      { defaultMessage: 'Select source' }),
     importView: false,
+    layerImportAddReady: false,
+  }
+
+  componentDidUpdate() {
+    if (!this.state.layerImportAddReady && this.props.isIndexingSuccess) {
+      this.setState({ layerImportAddReady: true });
+    }
   }
 
   _getPanelDescription() {
-    const { sourceType, importView } = this.state;
+    const { sourceType, importView, layerImportAddReady } = this.state;
     let panelDescription;
     if (!sourceType) {
       panelDescription = i18n.translate('xpack.maps.addLayerPanel.selectSource',
         { defaultMessage: 'Select source' });
-    } else if (importView && !this.props.isIndexingSuccess) {
-      panelDescription = i18n.translate('xpack.maps.addLayerPanel.importFile',
-        { defaultMessage: 'Import file' });
-    } else {
+    } else if (layerImportAddReady || !importView) {
       panelDescription = i18n.translate('xpack.maps.addLayerPanel.addLayer',
         { defaultMessage: 'Add layer' });
+    } else {
+      panelDescription = i18n.translate('xpack.maps.addLayerPanel.importFile',
+        { defaultMessage: 'Import file' });
     }
     return panelDescription;
   }
 
-  _viewLayer = source => {
+  _viewLayer = async source => {
+    await this.props.removeTransientLayer();
     if (!source) {
       this.setState({ layer: null });
-      this.props.removeTransientLayer();
       return;
     }
 
     const layerOptions = this.state.layer
       ? { style: this.state.layer.getCurrentStyle().getDescriptor() }
       : {};
-    const layer = source.createDefaultLayer(layerOptions, this.props.mapColors);
-    this.setState({ layer }, () => this.props.viewLayer(this.state.layer));
-  };
-
-  _addImportedLayer = async source => {
-    await this.props.removeTransientLayer();
-    if (!source) {
-      this.setState({ layer: null });
-      return;
-    }
-    this.setState({
-      layer: source.createDefaultLayer({}, this.props.mapColors)
-    }, () => this.props.addImportedLayer(this.state.layer));
+    const newLayer = source.createDefaultLayer(layerOptions, this.props.mapColors);
+    this.setState({ layer: newLayer }, () =>
+      this.props.viewLayer(this.state.layer));
   };
 
   _clearLayerData = ({ keepSourceType = false }) => {
@@ -84,8 +79,8 @@ export class AddLayerPanel extends Component {
   }
 
   _layerAddHandler = () => {
-    const { isIndexingTriggered, setIndexingTriggered, selectLayerAndAdd }
-    = this.props;
+    const { isIndexingTriggered, setIndexingTriggered, selectLayerAndAdd,
+      resetIndexing } = this.props;
     const layerSource = this.state.layer.getSource();
     const boolIndexLayer = layerSource.shouldBeIndexed();
     this.setState({ layer: null });
@@ -93,6 +88,12 @@ export class AddLayerPanel extends Component {
       setIndexingTriggered();
     } else {
       selectLayerAndAdd();
+      if (this.state.importView) {
+        this.setState({
+          layerImportAddReady: false,
+        });
+        resetIndexing();
+      }
     }
   }
 
@@ -107,8 +108,7 @@ export class AddLayerPanel extends Component {
       return (
         <ImportEditor
           clearSource={this._clearLayerData}
-          previewLayer={source => this._viewLayer(source)}
-          addImportLayer={source => this._addImportedLayer(source)}
+          viewLayer={this._viewLayer}
           onRemove={() => this._clearLayerData({ keepSourceType: true })}
         />
       );
@@ -117,7 +117,7 @@ export class AddLayerPanel extends Component {
       <SourceEditor
         clearSource={this._clearLayerData}
         sourceType={sourceType}
-        previewLayer={source => this._viewLayer(source)}
+        previewLayer={this._viewLayer}
       />
     );
   }
