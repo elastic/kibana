@@ -107,6 +107,11 @@
         groupSlug: 'grunt',
       },
       {
+        packagePatterns: ['\\bangular\\b'],
+        groupName: 'angular related packages',
+        groupSlug: 'angular',
+      },
+      {
         packagePatterns: ['\\bd3\\b'],
         groupName: 'd3 related packages',
         groupSlug: 'd3',
@@ -188,4 +193,10 @@
    * Disable semantic commit formating
    */
   semanticCommits: false,
+
+  /**
+   * Angular PRs are still being recreated even when they're
+   * closed, maybe this needs to be specified explicitly...
+   */
+  recreateClosed: false,
 }
