@@ -7,6 +7,7 @@
 export { auditbeatSchema } from './auditbeat';
 export { filebeatSchema } from './filebeat';
 export { packetbeatSchema } from './packetbeat';
+export { winlogbeatSchema } from './winlogbeat';
 export { ecsSchema } from './ecs';
 
 export const extraSchemaField = {

@@ -14,9 +14,7 @@ exports[`Stat Items disable charts it renders the default widget 1`] = `
     ]
   }
 >
-  <Styled(EuiFlexItem)
-    key="stat-items-undefined"
-  >
+  <Styled(EuiFlexItem)>
     <EuiFlexItem
       className="sc-bxivhb bQCHAr"
     >
@@ -120,9 +118,7 @@ exports[`Stat Items disable charts it renders the default widget 2`] = `
     ]
   }
 >
-  <Styled(EuiFlexItem)
-    key="stat-items-undefined"
-  >
+  <Styled(EuiFlexItem)>
     <EuiFlexItem
       className="sc-bxivhb bQCHAr"
     >
@@ -299,9 +295,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
     ]
   }
 >
-  <Styled(EuiFlexItem)
-    key="stat-items-undefined"
-  >
+  <Styled(EuiFlexItem)>
     <EuiFlexItem
       className="sc-bxivhb bQCHAr"
     >

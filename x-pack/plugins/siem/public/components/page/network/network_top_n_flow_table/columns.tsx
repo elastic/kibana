@@ -14,6 +14,7 @@ import {
   FlowTarget,
   TopNFlowNetworkEcsField,
   NetworkTopNFlowEdges,
+  TopNFlowItem,
 } from '../../../../graphql/types';
 import { assertUnreachable } from '../../../../lib/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';
@@ -29,6 +30,7 @@ import { AddToKql } from '../../add_to_kql';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
+import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 
 export const getNetworkTopNFlowColumns = (
   indexPattern: StaticIndexPattern,
@@ -41,8 +43,8 @@ export const getNetworkTopNFlowColumns = (
   Columns<NetworkTopNFlowEdges>,
   Columns<TopNFlowNetworkEcsField['direction']>,
   Columns<TopNFlowNetworkEcsField['bytes']>,
-  Columns<TopNFlowNetworkEcsField['bytes']>,
-  Columns<TopNFlowNetworkEcsField['bytes']>
+  Columns<TopNFlowNetworkEcsField['packets']>,
+  Columns<TopNFlowItem['count']>
 ] => [
   {
     name: getIpTitle(flowTarget),
@@ -138,7 +140,7 @@ export const getNetworkTopNFlowColumns = (
     sortable: true,
     render: bytes => {
       if (bytes != null) {
-        return numeral(bytes).format('0.000b');
+        return <PreferenceFormattedBytes value={bytes} />;
       } else {
         return getEmptyTagValue();
       }
