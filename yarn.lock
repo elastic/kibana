@@ -16991,15 +16991,15 @@ lead@^1.0.0:
   dependencies:
     flush-write-stream "^1.0.2"
 
-leaflet-draw@0.4.10:
-  version "0.4.10"
-  resolved "https://registry.yarnpkg.com/leaflet-draw/-/leaflet-draw-0.4.10.tgz#a611a29925a32cde63638e891c3bfc93163e2f43"
-  integrity sha512-TYKF7KkLk17PB2M0yg+8VcICC9dEr8x+R6rcavsdTkchP5UPoWaidVSbaVYruh5+FRL46xHwN2t/mDbflISOeA==
+leaflet-draw@0.4.14:
+  version "0.4.14"
+  resolved "https://registry.yarnpkg.com/leaflet-draw/-/leaflet-draw-0.4.14.tgz#1b5b06d570873a015aa96b80d664dab496c45a4a"
+  integrity sha512-O99KSPjyHNMDE+uD/fpdPydvQfTE8QruaG7ylEEtKCIaSSb60mCWoDdGUqGEHU9PGPu2JxbEfkGTXY9eYv7aEw==
 
-leaflet-responsive-popup@0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/leaflet-responsive-popup/-/leaflet-responsive-popup-0.2.0.tgz#119bfcfae147864730f6a01fbd73b5b2ce274728"
-  integrity sha1-EZv8+uFHhkcw9qAfvXO1ss4nRyg=
+leaflet-responsive-popup@0.6.4:
+  version "0.6.4"
+  resolved "https://registry.yarnpkg.com/leaflet-responsive-popup/-/leaflet-responsive-popup-0.6.4.tgz#b93d9368ef9f96d6dc911cf5b96d90e08601c6b3"
+  integrity sha512-2D8G9aQA6NHkulDBPN9kqbUCkCpWQQ6dF0xFL11AuEIWIbsL4UC/ZPP5m8GYM0dpU6YTlmyyCh1Tz+cls5Q4dg==
 
 leaflet-vega@^0.8.6:
   version "0.8.6"
