@@ -9,7 +9,8 @@ jest.mock('../kibana_services', () => ({}));
 
 import {
   mapExtentChanged,
-  setMouseCoordinates
+  setMouseCoordinates,
+  setNextColor,
 } from './store_actions';
 
 const getStoreMock = jest.fn();
@@ -232,6 +233,32 @@ describe('store_actions', () => {
         type: 'SET_MOUSE_COORDINATES',
         lat: 10,
         lon: 170,
+      });
+    });
+  });
+
+  describe('setNextColor', () => {
+    let mapColors = [];
+    beforeEach(() => {
+      require('../selectors/map_selectors').getMapColors = () => {
+        return mapColors;
+      };
+    });
+
+    it('should set next color when there are no colors used on the map', () => {
+      setNextColor()(dispatchMock, getStoreMock);
+      expect(dispatchMock).toHaveBeenCalledWith({
+        nextColor: '#e6194b',
+        type: 'SET_NEXT_LAYER_COLOR',
+      });
+    });
+
+    it('should set the next color to color after used color', () => {
+      mapColors = ['#e6194b', '#3cb44b'];
+      setNextColor()(dispatchMock, getStoreMock);
+      expect(dispatchMock).toHaveBeenCalledWith({
+        nextColor: '#ffe119',
+        type: 'SET_NEXT_LAYER_COLOR',
       });
     });
   });
