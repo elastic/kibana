@@ -74,7 +74,7 @@ class CodeMain extends React.Component<Props> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  loadingFileTree: state.file.rootFileTreeLoading,
+  loadingFileTree: state.file.fileTreeLoadingPaths.includes(''),
   loadingStructureTree: state.symbol.loading,
   hasStructure: structureSelector(state).length > 0 && !state.symbol.error,
   languageServerInitializing: state.symbol.languageServerInitializing,

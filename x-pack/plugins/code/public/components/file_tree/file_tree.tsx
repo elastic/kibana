@@ -11,7 +11,7 @@ import classes from 'classnames';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
-import { closeTreePath, fetchRepoTree, FetchRepoTreePayload, openTreePath } from '../../actions';
+import { closeTreePath, openTreePath } from '../../actions';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import { encodeRevisionString } from '../../utils/url';
@@ -20,9 +20,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   node?: Tree;
   closeTreePath: (paths: string) => void;
   openTreePath: (paths: string) => void;
-  fetchRepoTree: (p: FetchRepoTreePayload) => void;
   openedPaths: string[];
-  treeLoading?: boolean;
 }
 
 export class CodeFileTree extends React.Component<Props> {
@@ -31,16 +29,6 @@ export class CodeFileTree extends React.Component<Props> {
     if (path) {
       this.props.openTreePath(path);
     }
-  }
-
-  public fetchTree(path = '', isDir: boolean) {
-    const { resource, org, repo, revision } = this.props.match.params;
-    this.props.fetchRepoTree({
-      uri: `${resource}/${org}/${repo}`,
-      revision,
-      path: path || '',
-      isDir,
-    });
   }
 
   public onClick = (node: Tree) => {
@@ -257,11 +245,9 @@ export class CodeFileTree extends React.Component<Props> {
 const mapStateToProps = (state: RootState) => ({
   node: state.file.tree,
   openedPaths: state.file.openedPaths,
-  treeLoading: state.file.rootFileTreeLoading,
 });
 
 const mapDispatchToProps = {
-  fetchRepoTree,
   closeTreePath,
   openTreePath,
 };
