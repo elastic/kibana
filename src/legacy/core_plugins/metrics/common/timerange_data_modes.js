@@ -18,6 +18,6 @@
  */
 
 export const TIME_RANGE_DATA_MODES = {
-  ENTIRE_TIME_RANGE: 'ENTIRE_TIME_RANGE',
-  LAST_VALUE: 'LAST_VALUE',
+  ENTIRE_TIME_RANGE: 'entire_time_range',
+  LAST_VALUE: 'last_value',
 };
