@@ -21,3 +21,5 @@ export const TIME_RANGE_DATA_MODES = {
   ENTIRE_TIME_RANGE: 'entire_time_range',
   LAST_VALUE: 'last_value',
 };
+
+export const TIME_RANGE_MODE_KEY = 'time_range_mode';

@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
-import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
+import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../common/timerange_data_modes';
 import { YesNo } from './yes_no';
 import {
   htmlIdGenerator,
@@ -37,21 +37,25 @@ import {
 import { ES_TYPES } from '../../common/es_types';
 
 const RESTRICT_FIELDS = [ES_TYPES.DATE];
-const TIME_RANGE_MODE_KEY = 'time_range_mode';
 
 const htmlId = htmlIdGenerator();
 const timeRangeOptions = [
   {
-    label: i18n.translate('tsvb.indexPattern.timeRange.lastValue', { defaultMessage: 'Last value' }),
+    label: i18n.translate('tsvb.indexPattern.timeRange.lastValue', {
+      defaultMessage: 'Last value',
+    }),
     value: TIME_RANGE_DATA_MODES.LAST_VALUE,
   },
   {
-    label: i18n.translate('tsvb.indexPattern.timeRange.entireTimeRange', { defaultMessage: 'Entire time range' }),
+    label: i18n.translate('tsvb.indexPattern.timeRange.entireTimeRange', {
+      defaultMessage: 'Entire time range',
+    }),
     value: TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
   },
 ];
 
-const isEntireTimeRangeEnabled = (model, options, timerange) => timerange && model.time_range_mode === options[0].value;
+const isEntireTimeRangeEnabled = (model, options, timerange) =>
+  timerange && model[TIME_RANGE_MODE_KEY] === options[0].value; // TODO: May be removed
 
 export const IndexPattern = props => {
   const { fields, prefix, timerange } = props;
@@ -72,7 +76,7 @@ export const IndexPattern = props => {
 
   const model = { ...defaults, ...props.model };
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
-  const selectedTimeRangeOption = timeRangeOptions.find(({ value }) => model.time_range_mode === value);
+  const selectedTimeRangeOption = timeRangeOptions.find(({ value }) => model[TIME_RANGE_MODE_KEY] === value);
 
   return (
     <div className="index-pattern">
@@ -81,11 +85,15 @@ export const IndexPattern = props => {
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('timeRange')}
-              label={i18n.translate('tsvb.indexPattern.timeRange.label', { defaultMessage: 'Data timerange mode' })}
+              label={i18n.translate('tsvb.indexPattern.timeRange.label', {
+                defaultMessage: 'Data timerange mode',
+              })}
             >
               <EuiComboBox
                 isClearable={false}
-                placeholder={i18n.translate('tsvb.indexPattern.timeRange.selectTimeRange', { defaultMessage: 'Select' })}
+                placeholder={i18n.translate('tsvb.indexPattern.timeRange.selectTimeRange', {
+                  defaultMessage: 'Select',
+                })}
                 options={timeRangeOptions}
                 selectedOptions={selectedTimeRangeOption ? [selectedTimeRangeOption] : []}
                 onChange={handleSelectChange(TIME_RANGE_MODE_KEY)}
@@ -93,24 +101,25 @@ export const IndexPattern = props => {
                 isDisabled={props.disabled}
               />
             </EuiFormRow>
-            <EuiText size="xs" style={{ margin: 0 }}>This setting controls the timespan used for matching
-              documents.&nbsp;
+            <EuiText size="xs" style={{ margin: 0 }}>
+              This setting controls the timespan used for matching documents.&nbsp;
               &quot;Entire timerange&quot; will match all the documents selected in the timepicker.&nbsp;
-              &quot;Last value&quot; will match only the documents for the specified interval from the end of the
-              timerange.
+              &quot;Last value&quot; will match only the documents for the specified interval from the end of the timerange.
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-      )
-      }
+      )}
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('indexPattern')}
             label={i18n.translate('tsvb.indexPatternLabel', { defaultMessage: 'Index pattern' })}
-            helpText={isDefaultIndexPatternUsed && i18n.translate('tsvb.indexPattern.searchByDefaultIndex', {
-              defaultMessage: 'Default index pattern is used. To query all indexes use *',
-            })}
+            helpText={
+              isDefaultIndexPatternUsed &&
+              i18n.translate('tsvb.indexPattern.searchByDefaultIndex', {
+                defaultMessage: 'Default index pattern is used. To query all indexes use *',
+              })
+            }
           >
             <EuiFieldText
               data-test-subj="metricsIndexPatternInput"
@@ -124,7 +133,9 @@ export const IndexPattern = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('timeField')}
-            label={i18n.translate('tsvb.indexPattern.timeFieldLabel', { defaultMessage: 'Time field' })}
+            label={i18n.translate('tsvb.indexPattern.timeFieldLabel', {
+              defaultMessage: 'Time field',
+            })}
           >
             <FieldSelect
               data-test-subj="metricsIndexPatternFieldsSelect"
@@ -141,7 +152,9 @@ export const IndexPattern = props => {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('interval')}
-            label={i18n.translate('tsvb.indexPattern.intervalLabel', { defaultMessage: 'Interval' })}
+            label={i18n.translate('tsvb.indexPattern.intervalLabel', {
+              defaultMessage: 'Interval',
+            })}
             helpText={i18n.translate('tsvb.indexPattern.intervalHelpText', {
               defaultMessage: 'Examples: auto, 1m, 1d, 7d, 1y, >=1m',
               description: 'auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated.',
@@ -158,7 +171,9 @@ export const IndexPattern = props => {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('dropLastBucket')}
-            label={i18n.translate('tsvb.indexPattern.dropLastBucketLabel', { defaultMessage: 'Drop last bucket?' })}
+            label={i18n.translate('tsvb.indexPattern.dropLastBucketLabel', {
+              defaultMessage: 'Drop last bucket?',
+            })}
           >
             <YesNo
               value={model[dropBucketName]}

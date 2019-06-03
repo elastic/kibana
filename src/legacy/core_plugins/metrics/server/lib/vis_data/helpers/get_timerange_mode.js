@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { TIME_RANGE_DATA_MODES } from '../../../../common/timerange_data_modes';
+import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../../common/timerange_data_modes';
 import { PANEL_TYPES } from '../../../../common/panel_types';
 
-const TIME_RANGE_MODE_KEY = 'time_range_mode';
 const OVERRIDE_INDEX_PATTERN_KEY = 'override_index_pattern';
 
 const hasOverriddenIndexPattern = series => Boolean(series[OVERRIDE_INDEX_PATTERN_KEY]);
