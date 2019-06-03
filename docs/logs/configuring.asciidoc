@@ -18,19 +18,18 @@ other.
 [float]
 === Configure source
 
-Configure source can be accessed via the corresponding
+*Configure source* can be accessed via
 image:logs/images/logs-configure-source-gear-icon.png[Configure source icon]
-button in the toolbar.
+in the toolbar.
 
 [role="screenshot"]
 image::logs/images/logs-configure-source.png[Configure Logs UI source button in Kibana]
 
-This opens the source configuration fly-out dialog with multiple tabs, on which
-various index settings and the log column configuration can be inspected and
-adjusted.
+This opens the source configuration fly-out dialog with multiple tabs, where
+you can inspect and adjust various index settings and log column configuration.
 
 TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration
-changes performed via Configure source are specific to that space. You can
+changes performed via *Configure source* are specific to that space. You can
 therefore easily make different subsets of the data available by creating
 multiple spaces with different data source configurations.
 
@@ -48,10 +47,11 @@ image::logs/images/read-only-badge.png[Example of Logs' read only access indicat
 [float]
 ==== Indices and fields configuration
 
-The Indices and fields tab provides access to the following configuration items:
+The *Indices and fields* tab provides access to the following configuration
+items:
 
 * *Name*: The name of the source configuration.
-* *Indices*: The patterns of the elasticsearch indices to read metrics and logs
+* *Indices*: The patterns of the Elasticsearch indices to read metrics and logs
   from.
 * *Fields*: The names of particular fields in the indices that need to be known
   to the Infrastructure and Logs UIs in order to query and interpret the data
@@ -60,15 +60,11 @@ The Indices and fields tab provides access to the following configuration items:
 [role="screenshot"]
 image::logs/images/logs-configure-source-dialog-indices-tab.png[Configure logs UI source indices and fields dialog in Kibana]
 
-For the changes to take effect, click the Update source button at the bottom of
-the fly-out. Click the Discard and close button to discard any changes and
-close the fly-out.
-
 [float]
 ==== Log columns configuration
 
-The log columns tab enables you to change the set of columns that are displayed
-in the Logs UI. By default the following columns are shown:
+The *Log columns* tab enables you to change the set of columns that are
+displayed in the Logs UI. By default the following columns are shown:
 
 * *Timestamp*: The log entry's timestamp as defined in the `timestamp` field.
 * *events.dataset*: The event dataset as indicated by this {ecs-link} field.
@@ -79,22 +75,18 @@ in the Logs UI. By default the following columns are shown:
 [role="screenshot"]
 image::logs/images/logs-configure-source-dialog-log-columns-tab.png[Configure logs UI source columns dialog in Kibana]
 
-To add a new column, click the
-image:logs/images/logs-configure-source-dialog-add-column-button.png[Add
-column] button above the list. This will cause a popover to be shown in which
-you can filter a list of the available fields and select one for inclusion:
+To add a new column, click
+image:logs/images/logs-configure-source-dialog-add-column-button.png[Add column]
+above the list. This will cause a popover to be shown in which you can filter a
+list of the available fields and select one for inclusion:
 
 [role="screenshot"]
 image::logs/images/logs-configure-source-dialog-add-column-popover.png[Configure logs UI source add columns popover in Kibana]
 
-To remove a column, click the
-image:logs/images/logs-configure-source-dialog-remove-column-button.png[Remove
-column] button of the respective entry. The list must contain at least one
-column to apply the changes.
-
-For the changes to take effect, click the Update source button at the bottom of
-the fly-out. Click the Discard and close button to discard any changes and
-close the fly-out.
+To remove a column, click
+image:logs/images/logs-configure-source-dialog-remove-column-button.png[Remove column]
+in the respective entry. The list must contain at least one column to apply the
+changes.
 
 [float]
 === Configuration file
