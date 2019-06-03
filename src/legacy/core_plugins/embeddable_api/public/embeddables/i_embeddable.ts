@@ -66,6 +66,12 @@ export interface IEmbeddable<
   readonly id: string;
 
   /**
+   * A functional representation of the isContainer variable, but helpful for typescript to
+   * know the shape if this returns true
+   */
+  getIsContainer(): this is IContainer;
+
+  /**
    * Get the input used to instantiate this embeddable. The input is a serialized representation of
    * this embeddable instance and can be used to clone or re-instantiate it. Input state:
    * - Can be updated externally

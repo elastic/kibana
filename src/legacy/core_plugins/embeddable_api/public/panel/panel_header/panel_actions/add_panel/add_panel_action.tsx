@@ -29,10 +29,6 @@ import { openAddPanelFlyout } from './open_add_panel_flyout';
 
 export const ADD_PANEL_ACTION_ID = 'ADD_PANEL_ACTION_ID';
 
-function isContainer(embeddable: IEmbeddable | IContainer): embeddable is IContainer {
-  return embeddable.isContainer === true;
-}
-
 export class AddPanelAction extends Action {
   public readonly type = ADD_PANEL_ACTION_ID;
 
@@ -51,11 +47,11 @@ export class AddPanelAction extends Action {
   }
 
   public async isCompatible({ embeddable }: ActionContext) {
-    return isContainer(embeddable) && embeddable.getInput().viewMode === ViewMode.EDIT;
+    return embeddable.getIsContainer() && embeddable.getInput().viewMode === ViewMode.EDIT;
   }
 
   public async execute({ embeddable }: ActionContext) {
-    if (!isContainer(embeddable) || !(await this.isCompatible({ embeddable }))) {
+    if (!embeddable.getIsContainer() || !(await this.isCompatible({ embeddable }))) {
       throw new Error('Context is incompatible');
     }
 

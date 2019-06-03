@@ -27,4 +27,3 @@ export { embeddableFactories } from './embeddable_factories_registry';
 export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
 
 export { EmbeddableFactoryNotFoundError } from './embeddable_factory_not_found_error';
-export { isContainer } from './is_container';

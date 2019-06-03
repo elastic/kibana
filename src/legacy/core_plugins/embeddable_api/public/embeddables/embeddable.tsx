@@ -71,6 +71,10 @@ export abstract class Embeddable<
     }
   }
 
+  public getIsContainer(): this is IContainer {
+    return this.isContainer === true;
+  }
+
   /**
    * Reload will be called when there is a request to refresh the data or view, even if the
    * input data did not change.
