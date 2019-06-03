@@ -193,4 +193,10 @@
    * Disable semantic commit formating
    */
   semanticCommits: false,
+
+  /**
+   * Angular PRs are still being recreated even when they're
+   * closed, maybe this needs to be specified explicitly...
+   */
+  recreateClosed: false,
 }
