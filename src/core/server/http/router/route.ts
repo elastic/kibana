@@ -31,7 +31,7 @@ export interface RouteConfigOptions {
   authRequired?: boolean;
 
   /**
-   * Additional meta-data information to attach fot the route.
+   * Additional meta-data information to attach to the route.
    */
   tags?: ReadonlyArray<string>;
 }
