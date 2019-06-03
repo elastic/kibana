@@ -17,7 +17,7 @@
  * under the License.
  */
 import { CapabilitiesService, CapabilitiesStart } from './capabilities_service';
-import { deepFreeze } from '../../utils/deep_freeze';
+import { deepFreeze } from '../../../utils/';
 import { MixedApp } from '../application_service';
 
 const createStartContractMock = (

@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import { UiSettingsState } from '../ui_settings';
-import { deepFreeze } from '../utils/deep_freeze';
+import { deepFreeze } from '../../utils/';
 import { Capabilities } from '..';
 
 /** @public */
