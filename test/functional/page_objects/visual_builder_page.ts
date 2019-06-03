@@ -219,15 +219,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     /**
-     * changed data formatter for template in an `options` label tab
+     * change the data formatter for template in an `options` label tab
      *
-     * @param formatter
-     * @default 'Number'
+     * @param formatter - typeof formatter which you can use for presenting data. By default kibana show `Number` formatter
      */
     public async changeDataFormatter(
       formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
     ) {
-      const formatterEl = (await find.allByCssSelector('.euiComboBox'))[0];
+      const [formatterEl] = await find.allByCssSelector('.euiComboBox');
       await comboBox.setElement(formatterEl, formatter);
     }
 

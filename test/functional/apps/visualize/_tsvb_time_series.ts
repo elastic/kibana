@@ -78,7 +78,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(series.length).to.be(2);
       });
 
-      it('should show the correct count in the legend with custom numeric template', async () => {
+      it('should show the correct count in the legend with custom numeric formatter', async () => {
         const expectedLegendValue = '$ 156';
 
         await visualBuilder.clickSeriesOption();
