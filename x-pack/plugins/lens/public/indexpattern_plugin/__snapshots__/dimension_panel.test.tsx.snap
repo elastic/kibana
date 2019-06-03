@@ -1,0 +1,164 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IndexPatternDimensionPanel should render a dimension panel 1`] = `
+<div>
+  <EuiFlexItem
+    grow={true}
+  >
+    <EuiPopover
+      anchorPosition="rightCenter"
+      button={
+        <div
+          data-test-subj="indexPattern-dimension"
+        >
+          <EuiButtonEmpty
+            color="primary"
+            data-test-subj="indexPattern-dimensionPopover-button"
+            iconSide="left"
+            onClick={[Function]}
+            type="button"
+          >
+            <span>
+              Configure dimension
+            </span>
+          </EuiButtonEmpty>
+        </div>
+      }
+      closePopover={[Function]}
+      hasArrow={true}
+      id="col2"
+      isOpen={false}
+      ownFocus={true}
+      panelClassName="lns-indexPattern-dimensionPopover"
+      panelPaddingSize="m"
+    >
+      <EuiFlexGroup
+        wrap={true}
+      >
+        <EuiFlexItem
+          grow={2}
+        >
+          <EuiComboBox
+            compressed={false}
+            data-test-subj="indexPattern-dimension-field"
+            fullWidth={false}
+            isClearable={false}
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "label": "timestamp",
+                  "value": "0value",
+                },
+                Object {
+                  "label": "bytes",
+                  "value": "1value",
+                },
+                Object {
+                  "label": "source",
+                  "value": "2value",
+                },
+                Object {
+                  "label": "documents",
+                  "value": "count",
+                },
+              ]
+            }
+            placeholder="Field"
+            selectedOptions={Array []}
+            singleSelection={
+              Object {
+                "asPlainText": true,
+              }
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={true}
+        >
+          <div>
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="lns-indexPatternDimension-value"
+              iconSide="left"
+              isDisabled={false}
+              key="value"
+              onClick={[Function]}
+              type="button"
+            >
+              <span>
+                Value
+              </span>
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="lns-indexPatternDimension-terms"
+              iconSide="left"
+              isDisabled={false}
+              key="terms"
+              onClick={[Function]}
+              type="button"
+            >
+              <span>
+                Top Values
+              </span>
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="lns-indexPatternDimension-date_histogram"
+              iconSide="left"
+              isDisabled={false}
+              key="date_histogram"
+              onClick={[Function]}
+              type="button"
+            >
+              <span>
+                Date Histogram
+              </span>
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="lns-indexPatternDimension-sum"
+              iconSide="left"
+              isDisabled={false}
+              key="sum"
+              onClick={[Function]}
+              type="button"
+            >
+              <span>
+                Sum
+              </span>
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="lns-indexPatternDimension-average"
+              iconSide="left"
+              isDisabled={false}
+              key="average"
+              onClick={[Function]}
+              type="button"
+            >
+              <span>
+                Average
+              </span>
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="lns-indexPatternDimension-count"
+              iconSide="left"
+              isDisabled={false}
+              key="count"
+              onClick={[Function]}
+              type="button"
+            >
+              <span>
+                Count
+              </span>
+            </EuiButtonEmpty>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPopover>
+  </EuiFlexItem>
+</div>
+`;

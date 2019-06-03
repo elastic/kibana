@@ -12,7 +12,6 @@ import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
   IndexPatternDataPanel,
-  IndexPatternDimensionPanel,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 
@@ -226,9 +225,13 @@ describe('IndexPattern Data Source', () => {
         },
       };
       const state = await indexPatternDatasource.initialize(queryPersistedState);
-      expect(indexPatternDatasource.toExpression(state)).toMatchInlineSnapshot(
-        `"esaggs index=\\"1\\" aggs=\\"{\\"timestamp\\":{\\"date_histogram\\":{\\"field\\":\\"timestamp\\",\\"aggs\\":{\\"document\\":{\\"count\\":{\\"field\\":\\"document\\"}}}}}}\\""`
-      );
+      expect(indexPatternDatasource.toExpression(state)).toMatchInlineSnapshot(`
+"esaggs
+      index=\\"1\\"
+      metricsAtAllLevels=false
+      partialRows=false
+      aggConfigs='{\\"id\\":\\"document\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{\\"field\\":\\"document\\"}},{\\"id\\":\\"timestamp\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"metric\\",\\"params\\":{\\"field\\":\\"timestamp\\"}}'"
+`);
     });
   });
 
@@ -258,89 +261,6 @@ describe('IndexPattern Data Source', () => {
           dataType: 'string',
           isBucketed: false,
         } as Operation);
-      });
-    });
-
-    describe('renderDimensionPanel', () => {
-      let state: IndexPatternPrivateState;
-
-      beforeEach(async () => {
-        state = await indexPatternDatasource.initialize(persistedState);
-      });
-
-      it('should render a dimension panel', () => {
-        const wrapper = shallow(
-          <IndexPatternDimensionPanel
-            state={state}
-            setState={() => {}}
-            columnId={'col2'}
-            filterOperations={(operation: Operation) => true}
-          />
-        );
-
-        expect(wrapper).toMatchSnapshot();
-      });
-
-      it('should call the filterOperations function', () => {
-        const filterOperations = jest.fn().mockReturnValue(true);
-
-        shallow(
-          <IndexPatternDimensionPanel
-            state={state}
-            setState={() => {}}
-            columnId={'col2'}
-            filterOperations={filterOperations}
-          />
-        );
-
-        expect(filterOperations).toBeCalled();
-      });
-
-      it('should filter out all selections if the filter returns false', () => {
-        const wrapper = shallow(
-          <IndexPatternDimensionPanel
-            state={state}
-            setState={() => {}}
-            columnId={'col2'}
-            filterOperations={() => false}
-          />
-        );
-
-        expect(wrapper.find(EuiComboBox)!.prop('options')!.length).toEqual(0);
-      });
-
-      it('should update the datasource state on selection', () => {
-        const setState = jest.fn();
-
-        const wrapper = shallow(
-          <IndexPatternDimensionPanel
-            state={state}
-            setState={setState}
-            columnId={'col2'}
-            filterOperations={() => true}
-          />
-        );
-
-        const comboBox = wrapper.find(EuiComboBox)!;
-        const firstOption = comboBox.prop('options')![0];
-
-        comboBox.prop('onChange')!([firstOption]);
-
-        expect(setState).toHaveBeenCalledWith({
-          ...state,
-          columns: {
-            ...state.columns,
-            col2: {
-              operationId: firstOption.value,
-              label: 'value of timestamp',
-              dataType: 'date',
-              isBucketed: false,
-              operationType: 'value',
-              sourceField: 'timestamp',
-            },
-          },
-          columnOrder: ['col1', 'col2'],
-        });
       });
     });
   });
