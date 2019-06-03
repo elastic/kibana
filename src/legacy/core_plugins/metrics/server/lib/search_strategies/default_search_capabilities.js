@@ -40,10 +40,15 @@ export class DefaultSearchCapabilities {
     return this.createUiRestriction();
   }
 
+  get whiteListedTimerangeModes() {
+    return this.createUiRestriction();
+  }
+
   get uiRestrictions() {
     return {
       whiteListedMetrics: this.whiteListedMetrics,
       whiteListedGroupByFields: this.whiteListedGroupByFields,
+      whiteListedTimerangeModes: this.whiteListedTimerangeModes,
     };
   }
 
