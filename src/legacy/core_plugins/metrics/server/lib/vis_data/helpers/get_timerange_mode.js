@@ -21,16 +21,27 @@ import { TIME_RANGE_DATA_MODES } from '../../../../common/timerange_data_modes';
 import { PANEL_TYPES } from '../../../../common/panel_types';
 
 const TIME_RANGE_MODE_KEY = 'time_range_mode';
+const OVERRIDE_INDEX_PATTERN_KEY = 'override_index_pattern';
 
-const shouldUseEntireTimeRangeMode = panel => panel.type !== PANEL_TYPES.TIMESERIES
-  && panel[TIME_RANGE_MODE_KEY] === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
+const hasOverriddenIndexPattern = series => Boolean(series[OVERRIDE_INDEX_PATTERN_KEY]);
+const getPanelTimeRangeMode = panel => panel[TIME_RANGE_MODE_KEY];
+const getSeriesTimeRangeMode = series => series[TIME_RANGE_MODE_KEY];
 
-const getTimerangeMode = panel => shouldUseEntireTimeRangeMode(panel) ?
+const shouldUseEntireTimeRangeMode = (panel, series = {}) => {
+  if (panel.type === PANEL_TYPES.TIMESERIES) {
+    return false;
+  }
+
+  const timeRangeMode = hasOverriddenIndexPattern(series) ?
+    getSeriesTimeRangeMode(series) :
+    getPanelTimeRangeMode(panel);
+
+  return timeRangeMode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
+};
+
+const getTimerangeMode = (panel, series) => shouldUseEntireTimeRangeMode(panel, series) ?
   TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE :
   TIME_RANGE_DATA_MODES.LAST_VALUE;
 
-export const isEntireTimerangeMode = panel =>
-  getTimerangeMode(panel) === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
-
-export const isLastValueTimerangeMode = panel =>
-  getTimerangeMode(panel) === TIME_RANGE_DATA_MODES.LAST_VALUE;
+export const isLastValueTimerangeMode = (panel, series) =>
+  getTimerangeMode(panel, series) === TIME_RANGE_DATA_MODES.LAST_VALUE;

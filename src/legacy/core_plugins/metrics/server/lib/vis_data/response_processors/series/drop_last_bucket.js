@@ -22,7 +22,7 @@ import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 
 export function dropLastBucket(resp, panel, series) {
   return next => results => {
-    const shouldDropLastBucket = isLastValueTimerangeMode(panel);
+    const shouldDropLastBucket = isLastValueTimerangeMode(panel, series);
 
     if (shouldDropLastBucket) {
       const seriesDropLastBucket = get(series, 'override_drop_last_bucket', 1);
