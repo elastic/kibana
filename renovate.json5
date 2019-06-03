@@ -22,10 +22,20 @@
    */
   labels: [
     'release_note:skip',
-    ':Operations',
-    'chore',
-    'review'
+    'renovate',
+    'v8.0.0',
+    'v7.3.0'
   ],
+
+  major: {
+    labels: [
+      'release_note:skip',
+      'renovate',
+      'v8.0.0',
+      'v7.3.0',
+      'renovate:major',
+    ]
+  },
 
   /**
    * Enable creation of a "Master Issue" within the repository. This
@@ -97,12 +107,17 @@
         groupSlug: 'grunt',
       },
       {
+        packagePatterns: ['\\bangular\\b'],
+        groupName: 'angular related packages',
+        groupSlug: 'angular',
+      },
+      {
         packagePatterns: ['\\bd3\\b'],
         groupName: 'd3 related packages',
         groupSlug: 'd3',
       },
       {
-        packagePatterns: ['\\breact\\b', '\\bredux\\b'],
+        packagePatterns: ['\\breact\\b', '\\bredux\\b', '\\benzyme\\b'],
         packageNames: [
           'ngreact',
           'recompose',
@@ -129,6 +144,25 @@
         groupName: 'language server related packages',
         groupSlug: 'language server',
       },
+      {
+        packageNames: [
+          'hapi',
+          '@types/hapi',
+          'joi',
+          '@types/joi',
+          'boom',
+          '@types/boom',
+          'hoek',
+          '@types/hoek',
+          'h2o2',
+          '@elastic/good',
+          'good-squeeze',
+          'inert'
+        ],
+        packagePatterns: ['\\bhapi\\b'],
+        groupName: 'hapi related packages',
+        groupSlug: 'hapi',
+      },
 
       // internal/local packages
       {
@@ -153,5 +187,16 @@
   /**
    * Disable automatic rebase on each change to base branch
    */
-  rebaseStalePrs: false
+  rebaseStalePrs: false,
+
+  /**
+   * Disable semantic commit formating
+   */
+  semanticCommits: false,
+
+  /**
+   * Angular PRs are still being recreated even when they're
+   * closed, maybe this needs to be specified explicitly...
+   */
+  recreateClosed: false,
 }

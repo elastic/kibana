@@ -41,10 +41,16 @@ test('Execute delete job.', async () => {
 
   // Setup CancellationService
   const cancelIndexJobSpy = sinon.spy();
+  const cancelCloneJobSpy = sinon.spy();
+  const cancelUpdateJobSpy = sinon.spy();
   const cancellationService = {
+    cancelCloneJob: emptyAsyncFunc,
+    cancelUpdateJob: emptyAsyncFunc,
     cancelIndexJob: emptyAsyncFunc,
   };
   cancellationService.cancelIndexJob = cancelIndexJobSpy;
+  cancellationService.cancelCloneJob = cancelCloneJobSpy;
+  cancellationService.cancelUpdateJob = cancelUpdateJobSpy;
 
   // Setup EsClient
   const deleteSpy = sinon.fake.returns(Promise.resolve());
@@ -85,6 +91,8 @@ test('Execute delete job.', async () => {
   });
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
+  expect(cancelCloneJobSpy.calledOnce).toBeTruthy();
+  expect(cancelUpdateJobSpy.calledOnce).toBeTruthy();
 
   expect(newInstanceSpy.calledOnce).toBeTruthy();
   expect(removeSpy.calledOnce).toBeTruthy();

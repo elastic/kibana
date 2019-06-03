@@ -10,7 +10,8 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 export default ({ getPageObjects }: KibanaFunctionalTestDefaultProviders) => {
   // TODO: add UI functional tests
   const pageObjects = getPageObjects(['uptime']);
-  describe('overview page', () => {
+  describe('overview page', function() {
+    this.tags(['skipFirefox']);
     const DEFAULT_DATE_START = '2019-01-28 12:40:08.078';
     const DEFAULT_DATE_END = '2019-01-29 12:40:08.078';
     it('loads and displays uptime data based on date range', async () => {
