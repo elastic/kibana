@@ -20,7 +20,7 @@
 import { Component } from 'react';
 import React from 'react';
 
-import { EuiFieldText, EuiOutsideClickDetector } from '@elastic/eui';
+import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import {
@@ -54,6 +54,7 @@ interface Props {
   store?: Storage;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
+  languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
 }
@@ -485,6 +486,7 @@ export class QueryBarInputUI extends Component<Props, State> {
                 append={
                   <QueryLanguageSwitcher
                     language={this.props.query.language}
+                    anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
                     onSelectLanguage={this.onSelectLanguage}
                   />
                 }

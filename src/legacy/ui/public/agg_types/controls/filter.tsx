@@ -108,6 +108,7 @@ function FilterRow({
           disableAutoFocus={!autoFocus}
           data-test-subj={dataTestSubj}
           bubbleSubmitEvent={true}
+          languageSwitcherPopoverAnchorPosition="leftDown"
         />
       </EuiFormRow>
       {showCustomLabel ? (
