@@ -48,6 +48,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('query', function () {
+      this.tags(['skipFirefox']);
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {

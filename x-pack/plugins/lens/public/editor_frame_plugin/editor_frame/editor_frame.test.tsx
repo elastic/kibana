@@ -10,7 +10,12 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EditorFrame } from './editor_frame';
 import { Visualization, Datasource, DatasourcePublicAPI, DatasourceSuggestion } from '../../types';
 import { act } from 'react-dom/test-utils';
-import { createMockVisualization, createMockDatasource } from '../mock_extensions';
+import {
+  createMockVisualization,
+  createMockDatasource,
+  createExpressionRendererMock,
+} from '../mocks';
+import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.
@@ -34,12 +39,16 @@ describe('editor_frame', () => {
   let mockVisualization2: Visualization;
   let mockDatasource2: Datasource;
 
+  let expressionRendererMock: ExpressionRenderer;
+
   beforeEach(() => {
     mockVisualization = createMockVisualization();
     mockVisualization2 = createMockVisualization();
 
     mockDatasource = createMockDatasource();
     mockDatasource2 = createMockDatasource();
+
+    expressionRendererMock = createExpressionRendererMock();
   });
 
   describe('initialization', () => {
@@ -55,6 +64,7 @@ describe('editor_frame', () => {
             }}
             initialDatasourceId="testDatasource"
             initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
           />
         );
       });
@@ -75,6 +85,7 @@ describe('editor_frame', () => {
             }}
             initialDatasourceId={null}
             initialVisualizationId={null}
+            ExpressionRenderer={expressionRendererMock}
           />
         );
       });
@@ -95,6 +106,7 @@ describe('editor_frame', () => {
             }}
             initialDatasourceId="testDatasource"
             initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
           />
         );
       });
@@ -124,6 +136,7 @@ describe('editor_frame', () => {
             }}
             initialDatasourceId="testDatasource"
             initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
           />
         );
       });
@@ -153,6 +166,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -177,6 +191,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -209,6 +224,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -241,6 +257,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -283,6 +300,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -308,6 +326,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -330,6 +349,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -364,6 +384,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
       await waitForPromises();
@@ -444,6 +465,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -466,6 +488,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -522,6 +545,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -565,6 +589,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis2"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -625,6 +650,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 
@@ -688,6 +714,7 @@ describe('editor_frame', () => {
           }}
           initialDatasourceId="testDatasource"
           initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
         />
       );
 

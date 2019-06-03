@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DataSetup } from 'src/legacy/core_plugins/data/public';
 import { DatasourcePublicAPI, Visualization, Datasource } from '../types';
+import { EditorFrameSetupPlugins } from './plugin';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -44,4 +46,25 @@ export function createMockDatasource(): DatasourceMock {
     // but can be used to validate whether specific API mock functions are called
     publicAPIMock,
   };
+}
+
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
+
+export type MockedDependencies = Omit<EditorFrameSetupPlugins, 'data'> & {
+  data: Omit<DataSetup, 'expressions'> & { expressions: jest.Mocked<DataSetup['expressions']> };
+};
+
+export function createExpressionRendererMock() {
+  return jest.fn(() => null);
+}
+
+export function createMockDependencies() {
+  return ({
+    data: {
+      expressions: {
+        ExpressionRenderer: createExpressionRendererMock(),
+        run: jest.fn(_ => Promise.resolve({ type: 'render', as: 'test', value: undefined })),
+      },
+    },
+  } as unknown) as MockedDependencies;
 }
