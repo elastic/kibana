@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../get_create_task_runner_function', () => ({
+jest.mock('./get_create_task_runner_function', () => ({
   getCreateTaskRunnerFunction: jest.fn().mockReturnValue(jest.fn()),
 }));
 
-import { AlertTypeRegistry } from '../alert_type_registry';
-import { savedObjectsClientMock } from './saved_objects_client.mock';
-import { taskManagerMock } from './task_manager.mock';
+import { AlertTypeRegistry } from './alert_type_registry';
+import { savedObjectsClientMock } from './__mocks__/saved_objects_client.mock';
+import { taskManagerMock } from './__mocks__/task_manager.mock';
 
 const alertTypeRegistryParams = {
   fireAction: jest.fn(),
@@ -40,7 +40,7 @@ describe('has()', () => {
 describe('registry()', () => {
   test('registers the executor with the task manager', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getCreateTaskRunnerFunction } = require('../get_create_task_runner_function');
+    const { getCreateTaskRunnerFunction } = require('./get_create_task_runner_function');
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register({
       id: 'test',

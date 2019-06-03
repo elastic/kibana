@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertInstance } from '../alert_instance';
+import { AlertInstance } from './alert_instance';
 
 describe('shouldFire()', () => {
   test('defaults to false', () => {
