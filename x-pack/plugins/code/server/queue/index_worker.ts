@@ -84,6 +84,7 @@ export class IndexWorker extends AbstractWorker {
     }
 
     // Binding the index cancellation logic
+    let cancelled = false;
     this.cancellationService.cancelIndexJob(uri);
     const indexPromises: Array<Promise<IndexStats>> = this.indexerFactories.map(
       async (indexerFactory: IndexerFactory, index: number) => {
@@ -96,6 +97,7 @@ export class IndexWorker extends AbstractWorker {
         if (cancellationToken) {
           cancellationToken.on(() => {
             indexer.cancel();
+            cancelled = true;
           });
           this.cancellationService.registerIndexJobToken(uri, cancellationToken);
         }
@@ -108,6 +110,7 @@ export class IndexWorker extends AbstractWorker {
       uri,
       revision,
       stats: aggregateIndexStats(stats),
+      cancelled,
     };
     this.log.info(`Index worker finished with stats: ${JSON.stringify([...res.stats])}`);
     return res;

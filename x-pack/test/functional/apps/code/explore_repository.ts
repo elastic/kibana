@@ -229,71 +229,71 @@ export default function exploreRepositoryFunctonalTests({
       });
 
       // TODO(qianliang): blocked by https://github.com/elastic/code/issues/1163
-      // it('Click file/directory on the right panel', async () => {
-      //   log.debug('Click file/directory on the right panel');
+      it('Click file/directory on the right panel', async () => {
+        log.debug('Click file/directory on the right panel');
 
-      //   // Wait the file tree to be rendered and click the 'src' folder on the file tree.
-      //   await retry.try(async () => {
-      //     expect(await testSubjects.exists('codeFileExplorerNode-src')).to.be(true);
-      //   });
+        // Wait the file tree to be rendered and click the 'src' folder on the file tree.
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileExplorerNode-src')).to.be(true);
+        });
 
-      //   await testSubjects.click('codeFileExplorerNode-src');
-      //   await retry.try(async () => {
-      //     expect(await testSubjects.exists('codeFileExplorerNode-models')).to.be(true);
-      //   });
+        await testSubjects.click('codeFileExplorerNode-src');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileExplorerNode-models')).to.be(true);
+        });
 
-      //   await testSubjects.click('codeFileExplorerNode-models');
-      //   // Then the 'models' folder on the file tree.
-      //   await retry.try(async () => {
-      //     expect(await testSubjects.exists('codeFileExplorerNode-User.ts')).to.be(true);
-      //   });
+        await testSubjects.click('codeFileExplorerNode-models');
+        // Then the 'models' folder on the file tree.
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileExplorerNode-User.ts')).to.be(true);
+        });
 
-      //   await testSubjects.click('codeFileExplorerNode-User.ts');
-      //   // Then the 'User.ts' file on the file tree.
-      //   await retry.try(async () => {
-      //     expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
-      //   });
-      // });
+        await testSubjects.click('codeFileExplorerNode-User.ts');
+        // Then the 'User.ts' file on the file tree.
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
+        });
+      });
 
       // TODO(qianliang): blocked by https://github.com/elastic/code/issues/1163
-      // it('Navigate source file via structure tree', async () => {
-      //   log.debug('Navigate source file via structure tree');
-      //   // Wait the file tree to be rendered and click the 'src' folder on the file tree.
-      //   await retry.try(async () => {
-      //     expect(await testSubjects.exists('codeFileExplorerNode-src')).to.be(true);
-      //   });
+      it('Navigate source file via structure tree', async () => {
+        log.debug('Navigate source file via structure tree');
+        // Wait the file tree to be rendered and click the 'src' folder on the file tree.
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileExplorerNode-src')).to.be(true);
+        });
 
-      //   await testSubjects.click('codeFileExplorerNode-src');
-      //   await retry.try(async () => {
-      //     expect(await testSubjects.exists('codeFileExplorerNode-models')).to.be(true);
-      //   });
+        await testSubjects.click('codeFileExplorerNode-src');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileExplorerNode-models')).to.be(true);
+        });
 
-      //   await testSubjects.click('codeFileExplorerNode-models');
-      //   // Then the 'models' folder on the file tree.
-      //   await retry.try(async () => {
-      //     expect(await testSubjects.exists('codeFileExplorerNode-User.ts')).to.be(true);
-      //   });
+        await testSubjects.click('codeFileExplorerNode-models');
+        // Then the 'models' folder on the file tree.
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileExplorerNode-User.ts')).to.be(true);
+        });
 
-      //   await testSubjects.click('codeFileExplorerNode-User.ts');
-      //   // Then the 'User.ts' file on the file tree.
-      //   await retry.try(async () => {
-      //     expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
-      //     expect(await testSubjects.exists('codeStructureTreeTab')).to.be(true);
-      //   });
+        await testSubjects.click('codeFileExplorerNode-User.ts');
+        // Then the 'User.ts' file on the file tree.
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
+          expect(await testSubjects.exists('codeStructureTreeTab')).to.be(true);
+        });
 
-      //   // Click the structure tree tab
-      //   await testSubjects.click('codeStructureTreeTab');
-      //   await retry.tryForTime(300000, async () => {
-      //     expect(await testSubjects.exists('codeStructureTreeNode-User')).to.be(true);
+        // Click the structure tree tab
+        await testSubjects.click('codeStructureTreeTab');
+        await retry.tryForTime(300000, async () => {
+          expect(await testSubjects.exists('codeStructureTreeNode-User')).to.be(true);
 
-      //     await testSubjects.click('codeStructureTreeNode-User');
-      //     await retry.tryForTime(120000, async () => {
-      //       const currentUrl: string = await browser.getCurrentUrl();
-      //       log.info(`Jump to url: ${currentUrl}`);
-      //       expect(currentUrl.indexOf('src/models/User.ts!L92:6') > 0).to.be(true);
-      //     });
-      //   });
-      // });
+          await testSubjects.click('codeStructureTreeNode-User');
+          await retry.tryForTime(120000, async () => {
+            const currentUrl: string = await browser.getCurrentUrl();
+            log.info(`Jump to url: ${currentUrl}`);
+            expect(currentUrl.indexOf('src/models/User.ts!L92:6') > 0).to.be(true);
+          });
+        });
+      });
 
       it('goes to a repository which does not exist should render the 404 error page', async () => {
         log.debug('it goes to a repository which does not exist');

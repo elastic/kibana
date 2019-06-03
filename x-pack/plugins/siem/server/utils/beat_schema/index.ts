@@ -13,6 +13,7 @@ import {
   extraSchemaField,
   filebeatSchema,
   packetbeatSchema,
+  winlogbeatSchema,
 } from './8.0.0';
 import { OutputSchema, Schema, SchemaFields, SchemaItem } from './type';
 
@@ -84,7 +85,6 @@ export const getIndexAlias = (defaultIndex: string[], indexName: string): string
   }
 };
 
-// TODO: winlogbeat documentation
 export const getIndexSchemaDoc = memoize((index: string) => {
   if (index.match('auditbeat') != null) {
     return {
@@ -100,6 +100,11 @@ export const getIndexSchemaDoc = memoize((index: string) => {
     return {
       ...extraSchemaField,
       ...convertSchemaToAssociativeArray(packetbeatSchema),
+    };
+  } else if (index.match('winlogbeat') != null) {
+    return {
+      ...extraSchemaField,
+      ...convertSchemaToAssociativeArray(winlogbeatSchema),
     };
   } else if (index.match('ecs') != null) {
     return {
