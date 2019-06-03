@@ -276,7 +276,7 @@ describe('AggConfigs', function () {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
-          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp' } },
+          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp', interval: '10s' } },
           { type: 'count', schema: 'metric' }
         ]
       });
@@ -295,7 +295,7 @@ describe('AggConfigs', function () {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
-          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp' } },
+          { type: 'date_histogram', schema: 'segment', params: { field: '@timestamp', interval: '10s' } },
           { type: 'avg', schema: 'metric', params: { field: 'bytes' }  },
           { type: 'sum', schema: 'metric', params: { field: 'bytes' }  },
           { type: 'min', schema: 'metric', params: { field: 'bytes' }  },
@@ -368,7 +368,8 @@ describe('AggConfigs', function () {
                 type: 'date_histogram',
                 schema: 'bucketAgg',
                 params: {
-                  field: '@timestamp'
+                  field: '@timestamp',
+                  interval: '10s',
                 }
               },
               customMetric: {
