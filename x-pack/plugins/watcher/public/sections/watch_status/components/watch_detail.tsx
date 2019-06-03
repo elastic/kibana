@@ -48,7 +48,6 @@ const WatchDetailUi = () => {
   const [selectedErrorAction, setSelectedErrorAction] = useState<string | null>(null);
 
   const {
-    isSystemWatch,
     id: watchId,
     watchErrors: { actionErrors },
     watchStatus: { actionStatuses: currentActionStatuses },
@@ -216,51 +215,6 @@ const WatchDetailUi = () => {
           </EuiFlyoutBody>
         </EuiFlyout>
       )}
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
-            <h1>
-              <FormattedMessage
-                id="xpack.watcher.sections.watchDetail.header"
-                defaultMessage="Current status for '{watchId}'"
-                values={{ watchId }}
-              />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        {isSystemWatch && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchDetail.headerBadgeToolipText"
-                  defaultMessage="System watches cannot be deactivated or deleted."
-                />
-              }
-            >
-              <EuiBadge color="hollow">
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchDetail.headerBadgeText"
-                  defaultMessage="System watch"
-                />
-              </EuiBadge>
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
-
-      <EuiTitle size="s">
-        <h2>
-          <FormattedMessage
-            id="xpack.watcher.sections.watchDetail.actionsTitle"
-            defaultMessage="Actions"
-          />
-        </h2>
-      </EuiTitle>
-
-      <EuiSpacer size="s" />
 
       <EuiInMemoryTable
         items={actionStatuses}

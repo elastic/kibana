@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../../../components/form_errors';
@@ -134,7 +135,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             label={i18n.translate(
               'xpack.watcher.sections.watchEdit.threshold.webhookAction.pathFieldLabel',
               {
-                defaultMessage: 'Path',
+                defaultMessage: 'Path (optional)',
               }
             )}
           >
@@ -154,6 +155,8 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
 
       <ErrableFormRow
         id="webhookBody"

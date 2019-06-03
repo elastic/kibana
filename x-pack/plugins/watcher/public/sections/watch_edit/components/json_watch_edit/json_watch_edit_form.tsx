@@ -16,6 +16,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -73,6 +74,27 @@ export const JsonWatchEditForm = () => {
         isInvalid={!!validationResult && validationResult.type === 'error'}
         error={validationResult && validationResult.message ? validationResult.message : []}
       >
+        <EuiFormRow
+          id="watchName"
+          label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchNameLabel', {
+            defaultMessage: 'Name (optional)',
+          })}
+        >
+          <EuiFieldText
+            id="watchName"
+            name="name"
+            value={watch.name || ''}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const watchName = e.target.value;
+              setWatchProperty('name', watchName);
+            }}
+            onBlur={() => {
+              if (!watch.name) {
+                setWatchProperty('name', '');
+              }
+            }}
+          />
+        </EuiFormRow>
         <ErrableFormRow
           id="watchId"
           label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchIDLabel', {
@@ -81,10 +103,8 @@ export const JsonWatchEditForm = () => {
           errorKey="id"
           isShowingErrors={hasErrors && watch.id !== undefined}
           errors={errors}
-          fullWidth
         >
           <EuiFieldText
-            fullWidth
             id="id"
             name="id"
             value={watch.id || ''}
@@ -99,28 +119,7 @@ export const JsonWatchEditForm = () => {
             }}
           />
         </ErrableFormRow>
-        <EuiFormRow
-          id="watchName"
-          label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchNameLabel', {
-            defaultMessage: 'Name',
-          })}
-          fullWidth
-        >
-          <EuiFieldText
-            fullWidth
-            id="watchName"
-            name="name"
-            value={watch.name || ''}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setWatchProperty('name', e.target.value);
-            }}
-            onBlur={() => {
-              if (!watch.name) {
-                setWatchProperty('name', '');
-              }
-            }}
-          />
-        </EuiFormRow>
+        <EuiSpacer size="s" />
         <ErrableFormRow
           id="watchJson"
           label={
@@ -143,7 +142,6 @@ export const JsonWatchEditForm = () => {
           errors={jsonErrors}
         >
           <EuiCodeEditor
-            fullWidth
             mode="json"
             width="100%"
             theme="github"

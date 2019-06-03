@@ -9,9 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
 
-import { toastNotifications } from 'ui/notify';
 import {
-  EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,14 +24,8 @@ import {
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../common/constants';
-import { goToWatchList } from '../../../lib/navigation';
-import { WatchStatus, DeleteWatchesModal, SectionError } from '../../../components';
-import {
-  activateWatch,
-  deactivateWatch,
-  loadWatchHistory,
-  loadWatchHistoryDetail,
-} from '../../../lib/api';
+import { WatchStatus, SectionError } from '../../../components';
+import { loadWatchHistory, loadWatchHistoryDetail } from '../../../lib/api';
 import { WatchDetailsContext } from '../watch_details_context';
 
 const watchHistoryTimeSpanOptions = [
@@ -80,8 +72,6 @@ const WatchHistoryUi = () => {
 
   const [isActivated, setIsActivated] = useState<boolean | undefined>(undefined);
   const [detailWatchId, setDetailWatchId] = useState<string | undefined>(undefined);
-  const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
-  const [isTogglingActivation, setIsTogglingActivation] = useState<boolean>(false);
 
   const [watchHistoryTimeSpan, setWatchHistoryTimeSpan] = useState<string>(
     watchHistoryTimeSpanOptions[0].value
@@ -105,21 +95,9 @@ const WatchHistoryUi = () => {
     ? JSON.stringify(watchHistoryDetails.details, null, 2)
     : '';
 
-  const historySectionTitle = (
-    <EuiTitle size="s">
-      <h2>
-        <FormattedMessage
-          id="xpack.watcher.sections.watchHistory.header"
-          defaultMessage="Execution history"
-        />
-      </h2>
-    </EuiTitle>
-  );
-
   if (historyError) {
     return (
       <Fragment>
-        {historySectionTitle}
         <EuiSpacer size="s" />
         <SectionError
           title={
@@ -176,35 +154,6 @@ const WatchHistoryUi = () => {
   const onTimespanChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const timespan = e.target.value;
     setWatchHistoryTimeSpan(timespan);
-  };
-
-  const toggleWatchActivation = async () => {
-    const toggleActivation = isActivated ? deactivateWatch : activateWatch;
-
-    setIsTogglingActivation(true);
-
-    const { error } = await toggleActivation(loadedWatch.id);
-
-    setIsTogglingActivation(false);
-
-    if (error) {
-      const message = isActivated
-        ? i18n.translate(
-            'xpack.watcher.sections.watchList.toggleActivatationErrorNotification.deactivateDescriptionText',
-            {
-              defaultMessage: "Couldn't deactivate watch",
-            }
-          )
-        : i18n.translate(
-            'xpack.watcher.sections.watchList.toggleActivatationErrorNotification.activateDescriptionText',
-            {
-              defaultMessage: "Couldn't activate watch",
-            }
-          );
-      return toastNotifications.addDanger(message);
-    }
-
-    setIsActivated(!isActivated);
   };
 
   let flyout;
@@ -320,74 +269,21 @@ const WatchHistoryUi = () => {
     }
   }
 
-  const activationButtonText = isActivated ? (
-    <FormattedMessage
-      id="xpack.watcher.sections.watchHistory.watchTable.deactivateWatchLabel"
-      defaultMessage="Deactivate watch"
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.watcher.sections.watchHistory.watchTable.activateWatchLabel"
-      defaultMessage="Activate watch"
-    />
-  );
-
   return (
     <Fragment>
-      <DeleteWatchesModal
-        callback={(deleted?: string[]) => {
-          if (deleted) {
-            goToWatchList();
-          }
-          setWatchesToDelete([]);
-        }}
-        watchesToDelete={watchesToDelete}
-      />
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>{historySectionTitle}</EuiFlexItem>
+      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiSelect
-                options={watchHistoryTimeSpanOptions}
-                value={watchHistoryTimeSpan}
-                onChange={onTimespanChange}
-                aria-label={i18n.translate(
-                  'xpack.watcher.sections.watchHistory.changeTimespanSelectAriaLabel',
-                  {
-                    defaultMessage: 'Change timespan of watch history',
-                  }
-                )}
-              />
-            </EuiFlexItem>
-            {!loadedWatch.isSystemWatch && (
-              <Fragment>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={() => toggleWatchActivation()}
-                    isLoading={isTogglingActivation}
-                  >
-                    {activationButtonText}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="btnDeleteWatch"
-                    onClick={() => {
-                      setWatchesToDelete([loadedWatch.id]);
-                    }}
-                    color="danger"
-                    disabled={false}
-                  >
-                    <FormattedMessage
-                      id="xpack.watcher.sections.watchHistory.deleteWatchButtonLabel"
-                      defaultMessage="Delete"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </Fragment>
+          <EuiSelect
+            options={watchHistoryTimeSpanOptions}
+            value={watchHistoryTimeSpan}
+            onChange={onTimespanChange}
+            aria-label={i18n.translate(
+              'xpack.watcher.sections.watchHistory.changeTimespanSelectAriaLabel',
+              {
+                defaultMessage: 'Change timespan of watch history',
+              }
             )}
-          </EuiFlexGroup>
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
