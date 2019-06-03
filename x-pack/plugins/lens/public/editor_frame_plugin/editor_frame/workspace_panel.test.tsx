@@ -17,7 +17,6 @@ import {
 import { WorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
