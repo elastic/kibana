@@ -13,6 +13,7 @@ import { loadStructure, loadStructureFailed, loadStructureSuccess } from '../act
 import { ServerNotInitialized } from '../../common/lsp_error_codes';
 import { languageServerInitializing } from '../actions/language_server';
 import { SymbolWithMembers } from '../reducers/symbol';
+import { matchContainerName } from '../utils/symbol_utils';
 
 const STRUCTURE_TREE_POLLING_INTERVAL_SEC = 3;
 
@@ -40,9 +41,8 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
     if (containerName === undefined) {
       return undefined;
     }
-    const regex = new RegExp(`^${containerName}[<(]?.*[>)]?$`);
     const result = tree.find((s: SymbolInformation) => {
-      return regex.test(s.name);
+      return matchContainerName(containerName, s.name);
     });
     if (result) {
       return result;
