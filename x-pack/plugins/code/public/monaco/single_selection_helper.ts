@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { editor, Selection } from 'monaco-editor';
+import { editor } from 'monaco-editor';
 
 const editors = new Set();
 
 function clearSelection(ed: editor.IStandaloneCodeEditor) {
-  const sel: Selection = ed.getSelection();
+  const sel = ed.getSelection();
   if (sel && !sel.isEmpty()) {
     ed.setSelection({
       selectionStartLineNumber: sel.selectionStartLineNumber,
