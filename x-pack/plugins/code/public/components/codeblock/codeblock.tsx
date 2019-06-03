@@ -60,10 +60,11 @@ export class CodeBlock extends React.PureComponent<Props> {
           (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS ||
             e.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT)
         ) {
-          const lineNumber = (this.props.startLine || 0) + e.target.position.lineNumber;
+          const position = e.target.position || { lineNumber: 0, column: 0 };
+          const lineNumber = (this.props.startLine || 0) + position.lineNumber;
           this.props.onClick({
             lineNumber,
-            column: e.target.position.column,
+            column: position.column,
           });
         }
       });
@@ -94,21 +95,24 @@ export class CodeBlock extends React.PureComponent<Props> {
       prevProps.highlightRanges !== this.props.highlightRanges
     ) {
       if (this.ed) {
-        this.ed.getModel().setValue(this.props.code);
+        const model = this.ed.getModel();
+        if (model) {
+          model.setValue(this.props.code);
 
-        if (this.props.highlightRanges) {
-          const decorations = this.props.highlightRanges!.map((range: IRange) => {
-            return {
-              range,
-              options: {
-                inlineClassName: 'codeSearch__highlight',
-              },
-            };
-          });
-          this.currentHighlightDecorations = this.ed.deltaDecorations(
-            this.currentHighlightDecorations,
-            decorations
-          );
+          if (this.props.highlightRanges) {
+            const decorations = this.props.highlightRanges!.map((range: IRange) => {
+              return {
+                range,
+                options: {
+                  inlineClassName: 'codeSearch__highlight',
+                },
+              };
+            });
+            this.currentHighlightDecorations = this.ed.deltaDecorations(
+              this.currentHighlightDecorations,
+              decorations
+            );
+          }
         }
       }
     }

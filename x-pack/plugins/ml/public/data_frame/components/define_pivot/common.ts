@@ -80,32 +80,36 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
   fields.forEach(field => {
     // Group by
     const availableGroupByAggs = pivotGroupByFieldSupport[field.type];
-    availableGroupByAggs.forEach(groupByAgg => {
-      // Aggregation name for the group-by is the plain field name. Illegal characters will be removed.
-      const aggName = field.name.replace(illegalEsAggNameChars, '').trim();
-      // Option name in the dropdown for the group-by is in the form of `sum(fieldname)`.
-      const dropDownName = `${groupByAgg}(${field.name})`;
-      const groupByOption: DropDownLabel = { label: dropDownName };
-      groupByOptions.push(groupByOption);
-      groupByOptionsData[dropDownName] = getDefaultGroupByConfig(
-        aggName,
-        dropDownName,
-        field.name,
-        groupByAgg
-      );
-    });
+    if (availableGroupByAggs !== undefined) {
+      availableGroupByAggs.forEach(groupByAgg => {
+        // Aggregation name for the group-by is the plain field name. Illegal characters will be removed.
+        const aggName = field.name.replace(illegalEsAggNameChars, '').trim();
+        // Option name in the dropdown for the group-by is in the form of `sum(fieldname)`.
+        const dropDownName = `${groupByAgg}(${field.name})`;
+        const groupByOption: DropDownLabel = { label: dropDownName };
+        groupByOptions.push(groupByOption);
+        groupByOptionsData[dropDownName] = getDefaultGroupByConfig(
+          aggName,
+          dropDownName,
+          field.name,
+          groupByAgg
+        );
+      });
+    }
 
     // Aggregations
     const aggOption: DropDownOption = { label: field.name, options: [] };
     const availableAggs = pivotAggsFieldSupport[field.type];
-    availableAggs.forEach(agg => {
-      // Aggregation name is formatted like `fieldname.sum`. Illegal characters will be removed.
-      const aggName = `${field.name.replace(illegalEsAggNameChars, '').trim()}.${agg}`;
-      // Option name in the dropdown for the aggregation is in the form of `sum(fieldname)`.
-      const dropDownName = `${agg}(${field.name})`;
-      aggOption.options.push({ label: dropDownName });
-      aggOptionsData[dropDownName] = { agg, field: field.name, aggName, dropDownName };
-    });
+    if (availableAggs !== undefined) {
+      availableAggs.forEach(agg => {
+        // Aggregation name is formatted like `fieldname.sum`. Illegal characters will be removed.
+        const aggName = `${field.name.replace(illegalEsAggNameChars, '').trim()}.${agg}`;
+        // Option name in the dropdown for the aggregation is in the form of `sum(fieldname)`.
+        const dropDownName = `${agg}(${field.name})`;
+        aggOption.options.push({ label: dropDownName });
+        aggOptionsData[dropDownName] = { agg, field: field.name, aggName, dropDownName };
+      });
+    }
     aggOptions.push(aggOption);
   });
 
