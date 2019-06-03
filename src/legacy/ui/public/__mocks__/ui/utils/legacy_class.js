@@ -20,5 +20,5 @@
 /* eslint-env jest */
 
 export const createLegacyClass = () => ({
-  inherits: jest.fn(),
+  inherits: () => ({}),
 });

@@ -26,7 +26,7 @@ const chrome = {
   getUiSettingsClient: () => ({
     ...uiSettingsServiceMock.createSetupContract(),
     getUpdate$: () => ({
-      subscribe: jest.fn(),
+      subscribe: () => ({}),
     }),
   }),
 };
