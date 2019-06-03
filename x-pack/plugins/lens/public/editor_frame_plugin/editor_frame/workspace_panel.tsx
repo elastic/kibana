@@ -94,7 +94,7 @@ export function WorkspacePanel({
 
     useEffect(
       () => {
-        // reset expression error if component re-renders successfully
+        // reset expression error if component attempts to run it again
         if (expressionError) {
           setExpressionError(false);
         }
