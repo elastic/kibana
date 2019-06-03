@@ -35,6 +35,7 @@ export function isErrorEmbeddable<TEmbeddable extends IEmbeddable>(
 export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput> {
   public readonly type = ERROR_EMBEDDABLE_TYPE;
   public error: Error | string;
+  private dom?: HTMLElement;
 
   constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer) {
     super(input, {}, parent);
@@ -46,6 +47,7 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public render(dom: HTMLElement) {
     const title = typeof this.error === 'string' ? this.error : this.error.message;
     const stack = typeof this.error === 'string' ? '' : this.error.stack;
+    this.dom = dom;
     ReactDOM.render(
       // @ts-ignore
       <EuiCallOut title={title} color="danger" data-test-subj="embeddableStackError">
@@ -53,5 +55,11 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
       </EuiCallOut>,
       dom
     );
+  }
+
+  public destroy() {
+    if (this.dom) {
+      ReactDOM.unmountComponentAtNode(this.dom);
+    }
   }
 }

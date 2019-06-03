@@ -300,6 +300,11 @@ export abstract class Container<
       embeddable = new ErrorEmbeddable(e, { id: panel.embeddableId }, this);
     }
 
+    // EmbeddableFactory.create can return undefined without throwing an error, which indicates that an embeddable
+    // can't be created.  This logic essentially only exists to support the current use case of
+    // visualizations being created from the add panel, which redirects the user to the visualize app. Once we
+    // switch over to inline creation we can probably clean this up, and force EmbeddableFactory.create to always
+    // return an embeddable, or throw an error.
     if (embeddable) {
       // The factory creation process may ask the user for input to update or override any input coming
       // from the container.

@@ -29,7 +29,7 @@ export const createRegistry = <T>(): IRegistry<T> => {
   const reset = () => {
     data = new Map<string, T>();
   };
-  const length = () => Object.keys(data).length;
+  const length = () => data.size;
 
   return {
     get,

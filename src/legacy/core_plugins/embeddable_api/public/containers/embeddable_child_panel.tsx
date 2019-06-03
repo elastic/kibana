@@ -30,14 +30,11 @@ import { Subscription } from 'rxjs';
 import { EmbeddablePanel } from '../panel';
 import { IContainer } from './i_container';
 
-export interface EmbeddableChildPanelProps {
+export interface EmbeddableChildPanelUiProps {
+  intl: InjectedIntl;
   embeddableId: string;
   className?: string;
   container: IContainer;
-}
-
-export interface EmbeddableChildPanelUiProps extends EmbeddableChildPanelProps {
-  intl: InjectedIntl;
 }
 
 interface State {

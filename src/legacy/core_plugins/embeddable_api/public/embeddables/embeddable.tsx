@@ -73,7 +73,7 @@ export abstract class Embeddable<
 
   /**
    * Reload will be called when there is a request to refresh the data or view, even if the
-   * input data did not change at all.
+   * input data did not change.
    */
   public abstract reload(): void;
 
@@ -125,6 +125,10 @@ export abstract class Embeddable<
     return undefined;
   }
 
+  /**
+   * Called when this embeddable is no longer used, this should be the place for
+   * implementors to add any additional clean up tasks, like unmounting and unsubscribing.
+   */
   public destroy(): void {
     this.destoyed = true;
     if (this.parentSubscription) {
