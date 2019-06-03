@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
+import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { XYConfigPanel } from './xy_config_panel';
-import { DatasourcePublicAPI } from '../types';
-import { XYArgs, SeriesType } from './types';
+import { DatasourcePublicAPI, DatasourceDimensionPanelProps, Operation } from '../types';
+import { State, SeriesType } from './types';
 import { Position } from '@elastic/charts';
+import { NativeRendererProps } from '../native_renderer';
 
 describe('XYConfigPanel', () => {
   function mockDatasource(): DatasourcePublicAPI {
@@ -24,7 +26,7 @@ describe('XYConfigPanel', () => {
     };
   }
 
-  function testState(): XYArgs {
+  function testState(): State {
     return {
       legend: { isVisible: true, position: Position.Right },
       seriesType: 'bar',
@@ -46,8 +48,7 @@ describe('XYConfigPanel', () => {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function testSubj(component: ReactWrapper<any>, subj: string) {
+  function testSubj(component: ReactWrapper<unknown>, subj: string) {
     return component
       .find(`[data-test-subj="${subj}"]`)
       .first()
@@ -204,14 +205,19 @@ describe('XYConfigPanel', () => {
     );
 
     const panel = testSubj(component, 'lnsXY_xDimensionPanel');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nativeProps = (panel as any).nativeProps;
+    const nativeProps = (panel as NativeRendererProps<DatasourceDimensionPanelProps>).nativeProps;
     const { columnId, filterOperations } = nativeProps;
-    const ops = [
-      { dataType: 'number' },
-      { dataType: 'string' },
-      { dataType: 'boolean' },
-      { dataType: 'date' },
+    const exampleOperation: Operation = {
+      dataType: 'number',
+      id: 'foo',
+      isBucketed: false,
+      label: 'bar',
+    };
+    const ops: Operation[] = [
+      { ...exampleOperation, dataType: 'number' },
+      { ...exampleOperation, dataType: 'string' },
+      { ...exampleOperation, dataType: 'boolean' },
+      { ...exampleOperation, dataType: 'date' },
     ];
     expect(columnId).toEqual('shazm');
     expect(ops.filter(filterOperations)).toEqual(ops);
@@ -279,17 +285,21 @@ describe('XYConfigPanel', () => {
     );
 
     const panel = testSubj(component, 'lnsXY_yDimensionPanel_a');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nativeProps = (panel as any).nativeProps;
-
+    const nativeProps = (panel as NativeRendererProps<DatasourceDimensionPanelProps>).nativeProps;
     const { filterOperations } = nativeProps;
-    const ops = [
-      { dataType: 'number' },
-      { dataType: 'string' },
-      { dataType: 'boolean' },
-      { dataType: 'date' },
+    const exampleOperation: Operation = {
+      dataType: 'number',
+      id: 'foo',
+      isBucketed: false,
+      label: 'bar',
+    };
+    const ops: Operation[] = [
+      { ...exampleOperation, dataType: 'number' },
+      { ...exampleOperation, dataType: 'string' },
+      { ...exampleOperation, dataType: 'boolean' },
+      { ...exampleOperation, dataType: 'date' },
     ];
-    expect(ops.filter(filterOperations)).toEqual([{ dataType: 'number' }]);
+    expect(ops.filter(filterOperations).map(x => x.dataType)).toEqual(['number']);
   });
 
   test('allows removal of y dimensions', () => {
