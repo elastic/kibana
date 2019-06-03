@@ -99,7 +99,7 @@ export function WorkspacePanel({
           setExpressionError(false);
         }
       },
-      [expressionError, expression]
+      [expression]
     );
 
     if (activeVisualizationId === null) {

@@ -17,6 +17,7 @@ import {
 import { WorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -184,11 +185,11 @@ Object {
 
       instance.update();
 
-      expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+      expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
       instance.update();
 
-      expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+      expect(expressionRendererMock).toHaveBeenCalledTimes(1);
     });
 
     it('should attempt to run the expression again if changes after an error', async () => {
@@ -220,15 +221,16 @@ Object {
 
       instance.update();
 
-      expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+      expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
       expressionRendererMock.mockImplementation(_ => {
         return <span />;
       });
 
       instance.setProps({ visualizationState: {} });
+      instance.update();
 
-      expect(expressionRendererMock).toHaveBeenCalledTimes(3);
+      expect(expressionRendererMock).toHaveBeenCalledTimes(2);
 
       expect(instance.find(expressionRendererMock).length).toBe(1);
     });
