@@ -20,6 +20,7 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 |  [params](./kibana-plugin-server.kibanarequest.params.md) |  | <code>Params</code> |  |
 |  [path](./kibana-plugin-server.kibanarequest.path.md) |  | <code>string</code> |  |
 |  [query](./kibana-plugin-server.kibanarequest.query.md) |  | <code>Query</code> |  |
+|  [url](./kibana-plugin-server.kibanarequest.url.md) |  | <code>Url</code> |  |
 
 ## Methods
 

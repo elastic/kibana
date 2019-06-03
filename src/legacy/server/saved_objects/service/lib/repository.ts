@@ -63,14 +63,14 @@ const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => {
 };
 
 export interface SavedObjectsRepositoryOptions {
-  index: string | string[];
+  index: string;
   mappings: IndexMapping;
   callCluster: CallCluster;
   schema: SavedObjectsSchema;
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
   allowedTypes: string[];
-  onBeforeWrite: () => Promise<void>;
+  onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
 }
 
 export interface IncrementCounterOptions extends BaseOptions {
@@ -79,11 +79,11 @@ export interface IncrementCounterOptions extends BaseOptions {
 
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
-  private _index: string | string[];
+  private _index: string;
   private _mappings: IndexMapping;
   private _schema: SavedObjectsSchema;
   private _allowedTypes: string[];
-  private _onBeforeWrite: () => Promise<void>;
+  private _onBeforeWrite: (...args: Parameters<CallCluster>) => Promise<void>;
   private _unwrappedCallCluster: CallCluster;
   private _serializer: SavedObjectsSerializer;
 
@@ -116,6 +116,7 @@ export class SavedObjectsRepository {
     this._allowedTypes = allowedTypes;
 
     this._onBeforeWrite = onBeforeWrite;
+
     this._unwrappedCallCluster = async (...args: Parameters<CallCluster>) => {
       await migrator.awaitMigration();
       return callCluster(...args);
@@ -166,7 +167,7 @@ export class SavedObjectsRepository {
 
       const response = await this._writeToCluster(method, {
         id: raw._id,
-        index: this._index,
+        index: this.getIndexForType(type),
         refresh: 'wait_for',
         body: raw._source,
       });
@@ -234,6 +235,7 @@ export class SavedObjectsRepository {
         {
           [method]: {
             _id: expectedResult.rawMigratedDoc._id,
+            _index: this.getIndexForType(object.type),
           },
         },
         expectedResult.rawMigratedDoc._source
@@ -243,7 +245,6 @@ export class SavedObjectsRepository {
     });
 
     const esResponse = await this._writeToCluster('bulk', {
-      index: this._index,
       refresh: 'wait_for',
       body: bulkCreateParams,
     });
@@ -315,7 +316,7 @@ export class SavedObjectsRepository {
 
     const response = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this.getIndexForType(type),
       refresh: 'wait_for',
       ignore: [404],
     });
@@ -353,7 +354,7 @@ export class SavedObjectsRepository {
     const typesToDelete = allTypes.filter(type => !this._schema.isNamespaceAgnostic(type));
 
     const esOptions = {
-      index: this._index,
+      index: this.getIndicesForTypes(typesToDelete),
       ignore: [404],
       refresh: 'wait_for',
       body: {
@@ -401,25 +402,15 @@ export class SavedObjectsRepository {
       throw new TypeError(`options.type must be a string or an array of strings`);
     }
 
-    if (Array.isArray(type)) {
-      type = type.filter(t => this._allowedTypes.includes(t));
-      if (type.length === 0) {
-        return {
-          page,
-          per_page: perPage,
-          total: 0,
-          saved_objects: [],
-        };
-      }
-    } else {
-      if (!this._allowedTypes.includes(type)) {
-        return {
-          page,
-          per_page: perPage,
-          total: 0,
-          saved_objects: [],
-        };
-      }
+    const types = Array.isArray(type) ? type : [type];
+    const allowedTypes = types.filter(t => this._allowedTypes.includes(t));
+    if (allowedTypes.length === 0) {
+      return {
+        page,
+        per_page: perPage,
+        total: 0,
+        saved_objects: [],
+      };
     }
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -431,7 +422,7 @@ export class SavedObjectsRepository {
     }
 
     const esOptions = {
-      index: this._index,
+      index: this.getIndicesForTypes(allowedTypes),
       size: perPage,
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
@@ -443,7 +434,7 @@ export class SavedObjectsRepository {
           search,
           defaultSearchOperator,
           searchFields,
-          type,
+          type: allowedTypes,
           sortField,
           sortOrder,
           namespace,
@@ -510,11 +501,11 @@ export class SavedObjectsRepository {
     const supportedTypeObjects = objects.filter(o => this._allowedTypes.includes(o.type));
 
     const response = await this._callCluster('mget', {
-      index: this._index,
       body: {
         docs: supportedTypeObjects.map(({ type, id, fields }) => {
           return {
             _id: this._serializer.generateRawId(namespace, type, id),
+            _index: this.getIndexForType(type),
             _source: includedFields(type, fields),
           };
         }),
@@ -571,7 +562,7 @@ export class SavedObjectsRepository {
 
     const response = await this._callCluster('get', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this.getIndexForType(type),
       ignore: [404],
     });
 
@@ -621,7 +612,7 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this.getIndexForType(type),
       ...(version && decodeRequestVersion(version)),
       refresh: 'wait_for',
       ignore: [404],
@@ -691,7 +682,7 @@ export class SavedObjectsRepository {
 
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this.getIndexForType(type),
       refresh: 'wait_for',
       _source: true,
       body: {
@@ -729,7 +720,7 @@ export class SavedObjectsRepository {
 
   private async _writeToCluster(...args: Parameters<CallCluster>) {
     try {
-      await this._onBeforeWrite();
+      await this._onBeforeWrite(...args);
       return await this._callCluster(...args);
     } catch (err) {
       throw decorateEsError(err);
@@ -742,6 +733,27 @@ export class SavedObjectsRepository {
     } catch (err) {
       throw decorateEsError(err);
     }
+  }
+
+  /**
+   * Returns index specified by the given type or the default index
+   *
+   * @param type - the type
+   */
+  private getIndexForType(type: string) {
+    return this._schema.getIndexForType(type) || this._index;
+  }
+
+  /**
+   * Returns an array of indices as specified in `this._schema` for each of the
+   * given `types`. If any of the types don't have an associated index, the
+   * default index `this._index` will be included.
+   *
+   * @param types The types whose indices should be retrieved
+   */
+  private getIndicesForTypes(types: string[]) {
+    const unique = (array: string[]) => [...new Set(array)];
+    return unique(types.map(t => this._schema.getIndexForType(t) || this._index));
   }
 
   private _getCurrentTime() {

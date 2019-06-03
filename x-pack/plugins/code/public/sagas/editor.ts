@@ -43,6 +43,7 @@ import {
   refUrlSelector,
   repoScopeSelector,
   urlQueryStringSelector,
+  createTreeSelector,
 } from '../selectors';
 import { history } from '../utils/url';
 import { mainRoutePattern } from './patterns';
@@ -202,16 +203,28 @@ function* handleMainRouteChange(action: Action<Match>) {
         .split('/')
         .slice(0, -1)
         .join('/');
-  yield put(openTreePath(openPath));
-  yield put(
-    fetchRepoTree({
-      uri: repoUri,
-      revision,
-      path: file || '',
-      parents: getPathOfTree(tree, (file || '').split('/')) === null,
-      isDir,
-    })
-  );
+  yield put(openTreePath(openPath || ''));
+  function isTreeLoaded(isDirectory: boolean, targetTree: FileTree | null) {
+    if (!isDirectory) {
+      return !!targetTree;
+    } else if (!targetTree) {
+      return false;
+    } else {
+      return targetTree.children && targetTree.children.length > 0;
+    }
+  }
+  const targetTree: FileTree | null = yield select(createTreeSelector(file || ''));
+  if (!isTreeLoaded(isDir, targetTree)) {
+    yield put(
+      fetchRepoTree({
+        uri: repoUri,
+        revision,
+        path: file || '',
+        parents: getPathOfTree(tree, (file || '').split('/')) === null,
+        isDir,
+      })
+    );
+  }
   const uri = toCanonicalUrl({
     repoUri,
     file,
