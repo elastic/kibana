@@ -51,6 +51,7 @@ export interface DataFrameJobStats {
 }
 
 export interface DataFrameJobListRow {
+  id: JobId;
   state: DataFrameJobState;
   stats: DataFrameJobStats;
   config: DataFrameJob;

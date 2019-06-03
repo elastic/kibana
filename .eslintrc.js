@@ -568,8 +568,7 @@ module.exports = {
         // will introduced after the other warns are fixed
         // 'react/jsx-no-bind': 'error',
         'react/jsx-no-comment-textnodes': 'error',
-        // will be introduced to fix missing i18n keys
-        // 'react/jsx-no-literals': 'warn',
+        'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
         'react/jsx-sort-default-props': 'error',

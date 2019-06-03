@@ -44,6 +44,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           await find.clickByCssSelector(rawDataTabLocator);
         }
         await retry.try(async () => {
+          if (await find.existsByCssSelector(rawDataTabLocator)) {
+            await find.clickByCssSelector(rawDataTabLocator);
+          }
           await PageObjects.error.expectForbidden();
         });
         log.debug(`Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`);
