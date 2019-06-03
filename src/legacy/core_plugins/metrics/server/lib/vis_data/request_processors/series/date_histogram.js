@@ -60,7 +60,7 @@ export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObj
         buckets: 1,
       });
 
-    isLastValueTimerangeMode(panel) ?
+    isLastValueTimerangeMode(panel, series) ?
       getDateHistogramForLastBucketMode() :
       getDateHistogramForEntireTimerangeMode();
 
