@@ -21,6 +21,6 @@ import { embeddableFactories } from 'plugins/embeddable_api';
 import {
   HelloWorldEmbeddableFactory,
   HELLO_WORLD_EMBEDDABLE_TYPE,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/__test__';
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
 
 embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());

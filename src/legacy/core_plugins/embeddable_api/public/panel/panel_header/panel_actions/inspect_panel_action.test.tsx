@@ -50,7 +50,7 @@ import {
   ContactCardEmbeddable,
   FilterableEmbeddableInput,
   FILTERABLE_EMBEDDABLE,
-} from '../../../__test__';
+} from '../../../test_samples';
 
 import { EmbeddableOutput, isErrorEmbeddable } from '../../..';
 import { InspectPanelAction } from './inspect_panel_action';

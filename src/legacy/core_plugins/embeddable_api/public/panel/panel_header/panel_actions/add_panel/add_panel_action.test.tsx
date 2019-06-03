@@ -51,7 +51,7 @@ import {
   ContactCardEmbeddable,
   FilterableEmbeddableInput,
   FILTERABLE_EMBEDDABLE,
-} from '../../../../__test__';
+} from '../../../../test_samples';
 
 import { ViewMode, EmbeddableOutput, isErrorEmbeddable } from '../../../../';
 import { AddPanelAction } from './add_panel_action';

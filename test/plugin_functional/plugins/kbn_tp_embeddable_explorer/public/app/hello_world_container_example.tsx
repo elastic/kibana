@@ -30,7 +30,7 @@ import {
   HelloWorldContainer,
   CONTACT_CARD_EMBEDDABLE,
   HELLO_WORLD_EMBEDDABLE_TYPE,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/__test__';
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
 
 interface Props {
   embeddableFactories: IRegistry<EmbeddableFactory>;

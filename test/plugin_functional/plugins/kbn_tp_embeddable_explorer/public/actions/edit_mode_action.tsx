@@ -23,7 +23,7 @@ import {
   CONTEXT_MENU_TRIGGER,
   triggerRegistry,
 } from 'plugins/embeddable_api';
-import { EditModeAction } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/__test__';
+import { EditModeAction } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
 
 const editModeAction = new EditModeAction();
 actionRegistry.set(editModeAction.id, editModeAction);

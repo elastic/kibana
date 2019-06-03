@@ -24,7 +24,7 @@ jest.mock('ui/metadata', () => ({
   },
 }));
 
-import { HelloWorldAction, SayHelloAction, EmptyEmbeddable } from '../__test__/index';
+import { HelloWorldAction, SayHelloAction, EmptyEmbeddable } from '../test_samples/index';
 
 test('SayHelloAction is not compatible with not matching embeddables', async () => {
   const sayHelloAction = new SayHelloAction(() => {});

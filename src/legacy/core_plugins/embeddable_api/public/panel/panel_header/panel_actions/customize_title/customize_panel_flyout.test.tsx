@@ -40,7 +40,7 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
-} from '../../../../__test__/index';
+} from '../../../../test_samples/index';
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';

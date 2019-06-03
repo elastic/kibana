@@ -34,7 +34,7 @@ jest.mock('../context_menu_actions/open_context_menu', () => ({
 import { triggerRegistry } from '../triggers';
 import { Action, ActionContext, actionRegistry } from '../actions';
 import { executeTriggerActions } from './execute_trigger_actions';
-import { ContactCardEmbeddable } from '../__test__';
+import { ContactCardEmbeddable } from '../test_samples';
 
 class TestAction extends Action {
   public readonly type = 'testAction';

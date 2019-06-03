@@ -39,7 +39,7 @@ import {
   ContactCardEmbeddable,
   FilterableEmbeddableInput,
   FILTERABLE_EMBEDDABLE,
-} from '../../../__test__';
+} from '../../../test_samples';
 
 import { EmbeddableOutput, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';

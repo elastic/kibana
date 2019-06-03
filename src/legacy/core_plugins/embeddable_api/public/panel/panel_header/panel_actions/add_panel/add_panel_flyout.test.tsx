@@ -70,7 +70,7 @@ import {
   HelloWorldContainer,
   ContactCardEmbeddable,
   ContactCardInitializerProps,
-} from '../../../../__test__/index';
+} from '../../../../test_samples/index';
 
 import { AddPanelFlyout } from './add_panel_flyout';
 import { Container } from '../../../..';

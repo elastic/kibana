@@ -39,7 +39,7 @@ import {
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
   ContactCardEmbeddableInput,
-} from '../../../../__test__/index';
+} from '../../../../test_samples/index';
 
 import { Container, isErrorEmbeddable } from '../../../..';
 // @ts-ignore

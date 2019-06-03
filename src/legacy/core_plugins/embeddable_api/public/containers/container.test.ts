@@ -37,7 +37,7 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   SlowContactCardEmbeddableFactory,
-} from '../__test__/index';
+} from '../test_samples/index';
 import { isErrorEmbeddable, EmbeddableOutput, EmbeddableFactory } from '../embeddables';
 import { ContainerInput } from './i_container';
 import { ViewMode } from '../types';
@@ -45,7 +45,7 @@ import { createRegistry } from '../create_registry';
 import {
   FilterableEmbeddableInput,
   FilterableEmbeddable,
-} from '../__test__/embeddables/filterable_embeddable';
+} from '../test_samples/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../embeddables/error_embeddable';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 

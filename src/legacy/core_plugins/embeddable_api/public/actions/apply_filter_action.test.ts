@@ -32,11 +32,11 @@ import {
   FilterableContainerInput,
   FILTERABLE_EMBEDDABLE,
   HelloWorldContainer,
-} from '../__test__/index';
+} from '../test_samples/index';
 import { ApplyFilterAction } from './apply_filter_action';
 import { embeddableFactories, isErrorEmbeddable, EmbeddableOutput } from '../embeddables';
-import { FilterableContainerFactory } from '../__test__/embeddables/filterable_container_factory';
-import { FilterableEmbeddableInput } from '../__test__/embeddables/filterable_embeddable';
+import { FilterableContainerFactory } from '../test_samples/embeddables/filterable_container_factory';
+import { FilterableEmbeddableInput } from '../test_samples/embeddables/filterable_embeddable';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 
 beforeAll(() => {

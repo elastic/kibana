@@ -27,7 +27,7 @@ jest.mock('ui/metadata', () => ({
 }));
 
 import { skip } from 'rxjs/operators';
-import { ContactCardEmbeddable, FilterableEmbeddable } from '../__test__/index';
+import { ContactCardEmbeddable, FilterableEmbeddable } from '../test_samples/index';
 import { Embeddable } from './embeddable';
 import { EmbeddableOutput, EmbeddableInput } from './i_embeddable';
 import { ViewMode } from '../types';

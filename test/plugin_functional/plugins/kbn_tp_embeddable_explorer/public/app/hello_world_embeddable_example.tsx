@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { EmbeddablePanel } from 'plugins/embeddable_api';
-import { HelloWorldEmbeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/__test__';
+import { HelloWorldEmbeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
 
 export class ContactCardEmbeddableExample extends React.Component<{}> {
   private embeddable: HelloWorldEmbeddable;

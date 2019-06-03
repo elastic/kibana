@@ -44,7 +44,7 @@ jest.mock('ui/capabilities', () => ({
 
 import { EmbeddableInput } from '../../../embeddables/i_embeddable';
 import { Embeddable } from '../../../embeddables/embeddable';
-import { ContactCardEmbeddable } from '../../../__test__';
+import { ContactCardEmbeddable } from '../../../test_samples';
 import { ViewMode } from '../../../types';
 import { EditPanelAction } from './edit_panel_action';
 

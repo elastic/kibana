@@ -25,7 +25,7 @@ jest.mock('ui/metadata', () => ({
 }));
 
 import { triggerRegistry } from '../triggers';
-import { HELLO_WORLD_ACTION_ID } from '../__test__/';
+import { HELLO_WORLD_ACTION_ID } from '../test_samples';
 import { attachAction } from './attach_action';
 import { detachAction } from './detach_action';
 

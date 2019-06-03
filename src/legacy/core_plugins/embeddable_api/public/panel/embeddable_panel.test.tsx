@@ -32,7 +32,7 @@ import {
   HelloWorldContainer,
   EditModeAction,
   ContactCardEmbeddableOutput,
-} from '../__test__';
+} from '../test_samples';
 import {
   isErrorEmbeddable,
   ViewMode,
