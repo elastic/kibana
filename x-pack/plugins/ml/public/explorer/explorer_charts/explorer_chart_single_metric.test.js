@@ -128,7 +128,7 @@ describe('ExplorerChart', () => {
     expect(paths[0].getAttribute('class')).toBe('domain');
     expect(paths[1].getAttribute('class')).toBe('domain');
     expect(paths[2].getAttribute('class')).toBe('values-line');
-    expect(paths[2].getAttribute('d')).toBe('MNaN,159.33024504444444MNaN,9.166257955555556LNaN,169.60736875555557');
+    expect(paths[2].getAttribute('d')).toBe('MNaN,159.33024504444444ZMNaN,9.166257955555556LNaN,169.60736875555557');
 
     const dots = wrapper.getDOMNode().querySelector('.values-dots').querySelectorAll('circle');
     expect([...dots]).toHaveLength(1);
