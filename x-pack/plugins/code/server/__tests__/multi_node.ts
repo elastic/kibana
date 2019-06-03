@@ -58,6 +58,9 @@ const xpackOption = {
   oss_telemetry: {
     enabled: false,
   },
+  xpack_main: {
+    enabled: true,
+  },
 };
 
 describe('code in multiple nodes', () => {
