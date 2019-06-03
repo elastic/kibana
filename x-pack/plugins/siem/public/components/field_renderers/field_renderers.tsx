@@ -25,6 +25,7 @@ import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../l
 
 import * as i18n from '../page/network/ip_overview/translations';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import { Spacer } from '../page';
 
 export const IpOverviewId = 'ip-overview';
 
@@ -66,8 +67,8 @@ export const autonomousSystemRenderer = (
           id={`${IpOverviewId}-${flowTarget}.autonomous_system.as_org`}
           field={`${flowTarget}.autonomous_system.as_org`}
           value={as.as_org}
-        />{' '}
-        /
+        />
+        {' /'}
         <DefaultDraggable
           id={`${IpOverviewId}-${flowTarget}.autonomous_system.asn`}
           field={`${flowTarget}.autonomous_system.asn`}
@@ -137,6 +138,8 @@ interface DefaultFieldRendererProps {
   maxOverflow?: number;
 }
 
+// TODO: This causes breaks between elements until the ticket below is fixed
+// https://github.com/elastic/ingest-dev/issues/474
 export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
   ({ rowItems, attrName, idPrefix, render, displayCount = 1, maxOverflow = 5 }) => {
     if (rowItems != null && rowItems.length > 0) {
@@ -144,7 +147,12 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
         const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
         return (
           <EuiFlexItem key={id} grow={false}>
-            {index !== 0 && <>,&nbsp;</>}
+            {index !== 0 && (
+              <>
+                {','}
+                <Spacer />
+              </>
+            )}
             <DefaultDraggable id={id} field={attrName} value={rowItem}>
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>
