@@ -31,12 +31,12 @@ export default function(kibana: any) {
         main: 'plugins/kbn_tp_embeddable_explorer',
       },
       embeddableActions: [
-        'plugins/embeddable_api/__test__/actions/hello_world_action',
-        'plugins/embeddable_api/__test__/actions/say_hello_action',
-        'plugins/embeddable_api/__test__/actions/send_message_action',
+        'plugins/embeddable_api/test_samples/actions/hello_world_action',
+        'plugins/embeddable_api/test_samples/actions/say_hello_action',
+        'plugins/embeddable_api/test_samples/actions/send_message_action',
       ],
       embeddableFactories: [
-        'plugins/embeddable_api/__test__/embeddables/hello_world/hello_world_embeddable_factory',
+        'plugins/embeddable_api/test_samples/embeddables/hello_world/hello_world_embeddable_factory',
       ],
       // styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
