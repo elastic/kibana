@@ -76,7 +76,7 @@ export class InfraLogEntriesDomain {
     const documentsAfter = await this.adapter.getAdjacentLogEntryDocuments(
       request,
       configuration,
-      messageFormattingRules.requiredFields,
+      requiredFields,
       lastKeyBefore,
       'asc',
       maxCountAfter,
