@@ -18,6 +18,9 @@
  */
 
 import { embeddableFactories } from 'plugins/embeddable_api';
-import { HelloWorldEmbeddableFactory } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/__test__';
+import {
+  HelloWorldEmbeddableFactory,
+  HELLO_WORLD_EMBEDDABLE_TYPE,
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/__test__';
 
-embeddableFactories.registerFactory(new HelloWorldEmbeddableFactory());
+embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
