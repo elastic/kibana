@@ -48,17 +48,17 @@ export class AbstractVectorSource extends AbstractSource {
     }));
   }
 
-  _createDefaultLayerDescriptor(options, mapColors) {
+  _createDefaultLayerDescriptor(options, nextColor) {
     return VectorLayer.createDescriptor(
       {
         sourceDescriptor: this._descriptor,
         ...options
       },
-      mapColors);
+      nextColor);
   }
 
-  createDefaultLayer(options, mapColors) {
-    const layerDescriptor = this._createDefaultLayerDescriptor(options, mapColors);
+  createDefaultLayer(options, nextColor) {
+    const layerDescriptor = this._createDefaultLayerDescriptor(options, nextColor);
     const style = new VectorStyle(layerDescriptor.style, this);
     return new VectorLayer({
       layerDescriptor: layerDescriptor,

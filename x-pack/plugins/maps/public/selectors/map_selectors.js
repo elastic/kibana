@@ -108,6 +108,10 @@ export const getMapColors = ({ map }) => {
   }, []);
 };
 
+export const getNextColor = ({ map }) => {
+  return map.nextColor;
+};
+
 export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
   map.mapState.timeFilters : timefilter.getTime();
 

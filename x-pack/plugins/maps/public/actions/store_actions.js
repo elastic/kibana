@@ -14,7 +14,8 @@ import {
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
   getTransientLayerId,
-  getTooltipState
+  getTooltipState,
+  getMapColors,
 } from '../selectors/map_selectors';
 import { updateFlyout, FLYOUT_STATE } from '../store/ui';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
@@ -53,6 +54,7 @@ export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE'
 export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
 export const SET_TOOLTIP_STATE = 'SET_TOOLTIP_STATE';
 export const UPDATE_DRAW_STATE = 'UPDATE_DRAW_STATE';
+export const SET_NEXT_LAYER_COLOR = 'SET_NEXT_LAYER_COLOR';
 
 export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
@@ -60,6 +62,8 @@ export const DRAW_TYPE = {
 };
 export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
 export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
+
+export const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -152,6 +156,19 @@ export function cloneLayer(layerId) {
   };
 }
 
+export function setNextColor() {
+  return (dispatch, getState) => {
+    const mapColors = getMapColors(getState());
+    const lastColor = mapColors.pop();
+    const nextColorIndex = (DEFAULT_COLORS.indexOf(lastColor) + 1) % (DEFAULT_COLORS.length - 1);
+    const nextColor = DEFAULT_COLORS[nextColorIndex];
+    dispatch({
+      type: SET_NEXT_LAYER_COLOR,
+      nextColor
+    });
+  };
+}
+
 export function addLayer(layerDescriptor) {
   return (dispatch, getState) => {
     const isMapReady = getMapReady(getState());
@@ -167,6 +184,7 @@ export function addLayer(layerDescriptor) {
       type: ADD_LAYER,
       layer: layerDescriptor,
     });
+    dispatch(setNextColor());
     dispatch(syncDataForLayer(layerDescriptor.id));
   };
 }
@@ -579,6 +597,7 @@ export function removeLayer(layerId) {
       type: REMOVE_LAYER,
       id: layerId
     });
+    dispatch(setNextColor());
   };
 }
 

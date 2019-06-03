@@ -48,12 +48,12 @@ export class VectorLayer extends AbstractLayer {
 
   static type = 'VECTOR';
 
-  static createDescriptor(options, mapColors) {
+  static createDescriptor(options, nextColor) {
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = VectorLayer.type;
 
     if (!options.style) {
-      const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors);
+      const styleProperties = VectorStyle.createDefaultStyleProperties(nextColor);
       layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
     }
 

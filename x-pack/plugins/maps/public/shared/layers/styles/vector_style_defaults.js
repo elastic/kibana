@@ -7,17 +7,10 @@
 import { VectorStyle } from './vector_style';
 import { COLOR_GRADIENTS } from './color_utils';
 
-const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
-
 export const DEFAULT_MIN_SIZE = 1;
 export const DEFAULT_MAX_SIZE = 64;
 
-export function getDefaultStaticProperties(mapColors = []) {
-  // Colors must be state-aware to reduce unnecessary incrementation
-  const lastColor = mapColors.pop();
-  const nextColorIndex = (DEFAULT_COLORS.indexOf(lastColor) + 1) % (DEFAULT_COLORS.length - 1);
-  const nextColor = DEFAULT_COLORS[nextColorIndex];
-
+export function getDefaultStaticProperties(nextColor = '#e6194b') {
   return {
     fillColor: {
       type: VectorStyle.STYLE_TYPE.STATIC,

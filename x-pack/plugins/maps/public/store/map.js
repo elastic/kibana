@@ -41,6 +41,8 @@ import {
   SET_SCROLL_ZOOM,
   SET_MAP_INIT_ERROR,
   UPDATE_DRAW_STATE,
+  SET_NEXT_LAYER_COLOR,
+  DEFAULT_COLORS,
 } from '../actions/store_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -110,10 +112,9 @@ const INITIAL_STATE = {
   selectedLayerId: null,
   __transientLayerId: null,
   layerList: [],
-  waitingForMapReadyLayerList: []
+  waitingForMapReadyLayerList: [],
+  nextColor: DEFAULT_COLORS[0],
 };
-
-
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
@@ -323,6 +324,11 @@ export function map(state = INITIAL_STATE, action) {
       return {
         ...state,
         mapInitError: action.errorMessage
+      };
+    case SET_NEXT_LAYER_COLOR:
+      return {
+        ...state,
+        nextColor: action.nextColor
       };
     default:
       return state;
