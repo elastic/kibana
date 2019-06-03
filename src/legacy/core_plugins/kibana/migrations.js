@@ -134,8 +134,6 @@ const migrateDateHistogramAggregation = doc => {
   return doc;
 };
 
-const executeMigrations720 = flow(migratePercentileRankAggregation, migrateDateHistogramAggregation);
-
 function removeDateHistogramTimeZones(doc) {
   const visStateJSON = get(doc, 'attributes.visState');
   if (visStateJSON) {
@@ -189,6 +187,40 @@ function migrateGaugeVerticalSplitToAlignment(doc)  {
   }
   return doc;
 }
+
+function migrateFiltersAggQuery(doc) {
+  const visStateJSON = get(doc, 'attributes.visState');
+
+  if (visStateJSON) {
+    try {
+      const visState = JSON.parse(visStateJSON);
+      if (visState && visState.aggs) {
+        visState.aggs.forEach((agg) => {
+          if (agg.type !== 'filters') return;
+
+          agg.params.filters.forEach((filter) => {
+            if (filter.input.language) return filter;
+            filter.input.language = 'lucene';
+          });
+        });
+
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            visState: JSON.stringify(visState),
+          },
+        };
+      }
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+  }
+  return doc;
+}
+
+const executeMigrations720 = flow(migratePercentileRankAggregation, migrateDateHistogramAggregation);
+const executeMigrations730 = flow(migrateGaugeVerticalSplitToAlignment, migrateFiltersAggQuery);
 
 export const migrations = {
   'index-pattern': {
@@ -292,7 +324,7 @@ export const migrations = {
     },
     '7.0.1': removeDateHistogramTimeZones,
     '7.2.0': doc => executeMigrations720(doc),
-    '7.3.0': migrateGaugeVerticalSplitToAlignment
+    '7.3.0': executeMigrations730,
   },
   dashboard: {
     '7.0.0': (doc) => {
