@@ -48,9 +48,9 @@ export class AddLayerPanel extends Component {
   }
 
   _viewLayer = async source => {
-    await this.props.removeTransientLayer();
     if (!source) {
       this.setState({ layer: null });
+      this.props.removeTransientLayer();
       return;
     }
 

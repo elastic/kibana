@@ -33,6 +33,7 @@ function mapDispatchToProps(dispatch) {
   return {
     viewLayer: async layer => {
       await dispatch(setSelectedLayer(null));
+      await dispatch(removeTransientLayer());
       dispatch(addLayer(layer.toLayerDescriptor()));
       dispatch(setSelectedLayer(layer.getId()));
       dispatch(setTransientLayer(layer.getId()));
