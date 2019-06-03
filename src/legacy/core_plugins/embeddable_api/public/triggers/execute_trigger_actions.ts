@@ -16,14 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Action, actionRegistry } from '../actions';
+import { actionRegistry } from '../actions';
 import { triggerRegistry } from '../triggers';
-import { openContextMenu } from '../context_menu_actions';
-import {
-  buildEuiContextMenuPanels,
-  ContextMenuAction,
-  ContextMenuPanel,
-} from '../context_menu_actions';
+import { buildContextMenuForActions, openContextMenu } from '../context_menu_actions';
 import { IEmbeddable } from '../embeddables';
 import { getActionsForTrigger } from '../get_actions_for_trigger';
 
@@ -42,39 +37,17 @@ export async function executeTriggerActions(
   });
 
   if (actions.length > 1) {
-    const contextMenuPanel = new ContextMenuPanel({
-      title: 'Actions',
-      id: 'mainMenu',
-    });
-
     const closeMyContextMenuPanel = () => {
       session.close();
     };
-    const contextMenuActions: ContextMenuAction[] = [];
-    actions.forEach((action: Action) => {
-      contextMenuActions.push(
-        new ContextMenuAction(
-          {
-            id: action.id,
-            displayName: action.getDisplayName({ embeddable }),
-            parentPanelId: 'mainMenu',
-          },
-          {
-            onClick: () => {
-              action.execute({ embeddable, triggerContext });
-              closeMyContextMenuPanel();
-            },
-          }
-        )
-      );
-    });
-    const panels = buildEuiContextMenuPanels({
-      contextMenuPanel,
-      actions: contextMenuActions,
-      embeddable,
+
+    const panel = await buildContextMenuForActions({
+      actions,
+      actionContext: triggerContext,
+      closeMenu: closeMyContextMenuPanel,
     });
 
-    const session = openContextMenu(panels);
+    const session = openContextMenu([panel]);
   } else if (actions.length === 1) {
     actions[0].execute({ embeddable, triggerContext });
   }

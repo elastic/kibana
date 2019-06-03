@@ -20,15 +20,10 @@ import { EuiContextMenuPanelDescriptor, EuiPanel } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import {
-  ContextMenuAction,
-  ContextMenuPanel,
-  buildEuiContextMenuPanels,
-} from '../context_menu_actions';
+import { buildContextMenuForActions } from '../context_menu_actions';
 
 import { CONTEXT_MENU_TRIGGER, triggerRegistry } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { Action } from '../actions';
 import { ViewMode } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
@@ -131,7 +126,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     return (
       <EuiPanel className={classes} data-test-subj="embeddablePanel" paddingSize="none">
         <PanelHeader
-          getPanels={this.getPanels}
+          getActionContextMenuPanel={this.getActionContextMenuPanel}
           hidePanelTitles={this.state.hidePanelTitles}
           isViewMode={viewOnlyMode}
           closeContextMenu={this.state.closeContextMenu}
@@ -148,9 +143,17 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     }
   }
 
-  private getPanels = async () => {
-    let panels: EuiContextMenuPanelDescriptor[] = [];
+  closeMyContextMenuPanel = () => {
+    if (this.mounted) {
+      this.setState({ closeContextMenu: true }, () => {
+        if (this.mounted) {
+          this.setState({ closeContextMenu: false });
+        }
+      });
+    }
+  };
 
+  private getActionContextMenuPanel = async () => {
     const actions = await getActionsForTrigger(
       actionRegistry,
       triggerRegistry,
@@ -160,22 +163,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       }
     );
 
-    const contextMenuPanel = new ContextMenuPanel({
-      title: 'Options',
-      id: 'mainMenu',
-    });
-
-    const closeMyContextMenuPanel = () => {
-      if (this.mounted) {
-        this.setState({ closeContextMenu: true }, () => {
-          if (this.mounted) {
-            this.setState({ closeContextMenu: false });
-          }
-        });
-      }
-    };
-
-    const allPanelActions = [
+    // These actions are exposed on the context menu for every embeddable, they bypass the trigger
+    // registry.
+    const extraActions = [
       new CustomizePanelTitleAction(),
       new AddPanelAction(),
       new InspectPanelAction(),
@@ -183,50 +173,14 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       new EditPanelAction(),
     ];
 
-    const promises = allPanelActions.map(async action => {
-      if (
-        await action.isCompatible({
-          embeddable: this.props.embeddable,
-        })
-      ) {
-        actions.push(action);
-      }
-    });
-
-    await Promise.all(promises);
-
-    const contextMenuActions = actions.map((action: Action) => {
-      return new ContextMenuAction(
-        {
-          id: action.id,
-          displayName: action.getDisplayName({
-            embeddable: this.props.embeddable,
-          }),
-          parentPanelId: 'mainMenu',
-        },
-        {
-          order: action.order,
-          icon: action.getIcon({
-            embeddable: this.props.embeddable,
-          }),
-          getHref: action.getHref,
-          onClick: ({ embeddable }) => {
-            action.execute({ embeddable });
-            closeMyContextMenuPanel();
-          },
-        }
-      );
-    });
-
-    const sorted = contextMenuActions.sort((a, b) => {
+    const sorted = actions.concat(extraActions).sort((a, b) => {
       return b.order - a.order;
     });
 
-    panels = buildEuiContextMenuPanels({
-      contextMenuPanel,
+    return await buildContextMenuForActions({
       actions: sorted,
-      embeddable: this.props.embeddable,
+      actionContext: { embeddable: this.props.embeddable },
+      closeMenu: this.closeMyContextMenuPanel,
     });
-    return panels;
   };
 }

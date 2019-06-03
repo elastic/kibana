@@ -27,7 +27,7 @@ export interface PanelHeaderProps {
   title?: string;
   isViewMode: boolean;
   hidePanelTitles: boolean;
-  getPanels: () => Promise<EuiContextMenuPanelDescriptor[]>;
+  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
   closeContextMenu: boolean;
 }
 
@@ -39,7 +39,7 @@ function PanelHeaderUi({
   title,
   isViewMode,
   hidePanelTitles,
-  getPanels,
+  getActionContextMenuPanel,
   intl,
   closeContextMenu,
 }: PanelHeaderUiProps) {
@@ -51,7 +51,7 @@ function PanelHeaderUi({
     return (
       <div className={classes}>
         <PanelOptionsMenu
-          getPanels={getPanels}
+          getActionContextMenuPanel={getActionContextMenuPanel}
           isViewMode={isViewMode}
           closeContextMenu={closeContextMenu}
         />
@@ -83,7 +83,7 @@ function PanelHeaderUi({
 
       <PanelOptionsMenu
         isViewMode={isViewMode}
-        getPanels={getPanels}
+        getActionContextMenuPanel={getActionContextMenuPanel}
         closeContextMenu={closeContextMenu}
       />
     </div>

@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 
 export interface PanelOptionsMenuProps {
-  getPanels: () => Promise<EuiContextMenuPanelDescriptor[]>;
+  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
   isViewMode: boolean;
   closeContextMenu: boolean;
 }
@@ -38,7 +38,7 @@ interface PanelOptionsMenuUiProps extends PanelOptionsMenuProps {
 }
 
 interface State {
-  panels: EuiContextMenuPanelDescriptor[];
+  actionContextMenuPanel?: EuiContextMenuPanelDescriptor;
   isPopoverOpen: boolean;
 }
 
@@ -58,17 +58,17 @@ class PanelOptionsMenuUi extends React.Component<PanelOptionsMenuUiProps, State>
   constructor(props: PanelOptionsMenuUiProps) {
     super(props);
     this.state = {
-      panels: [],
+      actionContextMenuPanel: undefined,
       isPopoverOpen: false,
     };
   }
 
   public async componentDidMount() {
     this.mounted = true;
-    this.setState({ panels: [] });
-    const panels = await this.props.getPanels();
+    this.setState({ actionContextMenuPanel: undefined });
+    const actionContextMenuPanel = await this.props.getActionContextMenuPanel();
     if (this.mounted) {
-      this.setState({ panels });
+      this.setState({ actionContextMenuPanel });
     }
   }
 
@@ -108,7 +108,10 @@ class PanelOptionsMenuUi extends React.Component<PanelOptionsMenuUiProps, State>
         }
         withTitle
       >
-        <EuiContextMenu initialPanelId="mainMenu" panels={this.state.panels} />
+        <EuiContextMenu
+          initialPanelId="mainMenu"
+          panels={this.state.actionContextMenuPanel ? [this.state.actionContextMenuPanel] : []}
+        />
       </EuiPopover>
     );
   }
@@ -128,9 +131,9 @@ class PanelOptionsMenuUi extends React.Component<PanelOptionsMenuUiProps, State>
         },
         async () => {
           if (this.mounted && this.state.isPopoverOpen) {
-            this.setState({ panels: [] });
-            const panels = await this.props.getPanels();
-            this.setState({ panels });
+            this.setState({ actionContextMenuPanel: undefined });
+            const actionContextMenuPanel = await this.props.getActionContextMenuPanel();
+            this.setState({ actionContextMenuPanel });
           }
         }
       );
