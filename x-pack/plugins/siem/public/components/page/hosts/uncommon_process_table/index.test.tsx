@@ -57,7 +57,7 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRow')
           .at(0)
           .find('.euiTableRowCell')
-          .at(5)
+          .at(3)
           .text()
       ).toBe(`Hosts${getEmptyValue()}`);
     });
@@ -82,7 +82,7 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRow')
           .at(1)
           .find('.euiTableRowCell')
-          .at(5)
+          .at(3)
           .text()
       ).toBe('Hostshello-world ');
     });
@@ -107,7 +107,7 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRow')
           .at(2)
           .find('.euiTableRowCell')
-          .at(5)
+          .at(3)
           .text()
       ).toBe('Hostshello-world,hello-world-2 ');
     });
@@ -131,7 +131,7 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRow')
           .at(3)
           .find('.euiTableRowCell')
-          .at(5)
+          .at(3)
           .text()
       ).toBe(`Hosts${getEmptyValue()}`);
     });
@@ -155,7 +155,7 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRow')
           .at(4)
           .find('.euiTableRowCell')
-          .at(5)
+          .at(3)
           .text()
       ).toBe('Hostshello-world,hello-world-2 ');
     });

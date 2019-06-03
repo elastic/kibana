@@ -27,7 +27,7 @@ describe('Load More Events Table Component', () => {
   });
 
   describe('rendering', () => {
-    test('it renders the default Events table', () => {
+    test('it renders the hosts page events table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <EventsTable
@@ -39,6 +39,25 @@ describe('Load More Events Table Component', () => {
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
+          />
+        </ReduxStoreProvider>
+      );
+
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
+    test('it renders the host details page events table', () => {
+      const wrapper = shallow(
+        <ReduxStoreProvider store={store}>
+          <EventsTable
+            loading={false}
+            data={mockData.Events.edges.map(i => i.node)}
+            totalCount={mockData.Events.totalCount}
+            tiebreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)}
+            loadMore={loadMore}
+            type={hostsModel.HostsType.details}
           />
         </ReduxStoreProvider>
       );

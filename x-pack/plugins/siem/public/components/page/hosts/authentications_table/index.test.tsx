@@ -27,7 +27,7 @@ describe('Authentication Table Component', () => {
   });
 
   describe('rendering', () => {
-    test('it renders the default Authentication table', () => {
+    test('it renders the hosts page authentication table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <AuthenticationTable
@@ -38,6 +38,24 @@ describe('Authentication Table Component', () => {
             nextCursor={getOr(null, 'endCursor.value', mockData.Authentications.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
+          />
+        </ReduxStoreProvider>
+      );
+
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
+    test('it renders the host details page authentication table', () => {
+      const wrapper = shallow(
+        <ReduxStoreProvider store={store}>
+          <AuthenticationTable
+            loading={false}
+            data={mockData.Authentications.edges}
+            totalCount={mockData.Authentications.totalCount}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Authentications.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Authentications.pageInfo)}
+            loadMore={loadMore}
+            type={hostsModel.HostsType.details}
           />
         </ReduxStoreProvider>
       );
