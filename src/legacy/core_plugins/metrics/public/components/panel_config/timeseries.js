@@ -150,7 +150,6 @@ class TimeseriesPanelConfigUi extends Component {
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
-              timerange={false}
             />
 
             <EuiHorizontalRule />

@@ -24,6 +24,7 @@ import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
 import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../common/timerange_data_modes';
+import { PANEL_TYPES } from '../../common/panel_types';
 import { YesNo } from './yes_no';
 import {
   htmlIdGenerator,
@@ -54,10 +55,11 @@ const timeRangeOptions = [
   },
 ];
 
-const isEntireTimeRangeEnabled = (model, timerange) => timerange && model[TIME_RANGE_MODE_KEY] === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
+const isEntireTimeRangeActive = (model, isTimeSeries) =>
+  !isTimeSeries && model[TIME_RANGE_MODE_KEY] === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
 
 export const IndexPattern = props => {
-  const { fields, prefix, timerange } = props;
+  const { fields, prefix } = props;
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const timeFieldName = `${prefix}time_field`;
@@ -75,11 +77,14 @@ export const IndexPattern = props => {
 
   const model = { ...defaults, ...props.model };
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
-  const selectedTimeRangeOption = timeRangeOptions.find(({ value }) => model[TIME_RANGE_MODE_KEY] === value);
+  const selectedTimeRangeOption = timeRangeOptions.find(
+    ({ value }) => model[TIME_RANGE_MODE_KEY] === value
+  );
+  const isTimeSeries = model.type === PANEL_TYPES.TIMESERIES;
 
   return (
     <div className="index-pattern">
-      {timerange && (
+      {!isTimeSeries && (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
@@ -101,9 +106,10 @@ export const IndexPattern = props => {
               />
             </EuiFormRow>
             <EuiText size="xs" style={{ margin: 0 }}>
-              This setting controls the timespan used for matching documents.&nbsp;
-              &quot;Entire timerange&quot; will match all the documents selected in the timepicker.&nbsp;
-              &quot;Last value&quot; will match only the documents for the specified interval from the end of the timerange.
+              This setting controls the timespan used for matching documents.&nbsp; &quot;Entire
+              timerange&quot; will match all the documents selected in the timepicker.&nbsp;
+              &quot;Last value&quot; will match only the documents for the specified interval from
+              the end of the timerange.
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -156,11 +162,12 @@ export const IndexPattern = props => {
             })}
             helpText={i18n.translate('tsvb.indexPattern.intervalHelpText', {
               defaultMessage: 'Examples: auto, 1m, 1d, 7d, 1y, >=1m',
-              description: 'auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated.',
+              description:
+                'auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated.',
             })}
           >
             <EuiFieldText
-              disabled={props.disabled || isEntireTimeRangeEnabled(model, timerange)}
+              disabled={props.disabled || isEntireTimeRangeActive(model, isTimeSeries)}
               onChange={handleTextChange(intervalName, 'auto')}
               value={model[intervalName]}
               placeholder={'auto'}
@@ -178,7 +185,7 @@ export const IndexPattern = props => {
               value={model[dropBucketName]}
               name={dropBucketName}
               onChange={props.onChange}
-              disabled={isEntireTimeRangeEnabled(model, timerange) || props.disabled}
+              disabled={isEntireTimeRangeActive(model, isTimeSeries) || props.disabled}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -190,7 +197,6 @@ export const IndexPattern = props => {
 IndexPattern.defaultProps = {
   prefix: '',
   disabled: false,
-  timerange: true,
 };
 
 IndexPattern.propTypes = {
@@ -200,5 +206,4 @@ IndexPattern.propTypes = {
   prefix: PropTypes.string,
   disabled: PropTypes.bool,
   className: PropTypes.string,
-  timerange: PropTypes.bool,
 };
