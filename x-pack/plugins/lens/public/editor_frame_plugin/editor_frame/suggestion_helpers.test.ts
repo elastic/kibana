@@ -5,7 +5,7 @@
  */
 
 import { getSuggestions } from './suggestion_helpers';
-import { createMockVisualization } from '../mock_extensions';
+import { createMockVisualization } from '../mocks';
 import { TableSuggestion } from '../../types';
 
 const generateSuggestion = (datasourceSuggestionId: number = 1, state = {}) => ({

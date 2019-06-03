@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import uuid from 'uuid';
+import { I18nProvider } from '@kbn/i18n/react';
 import { getSuggestions } from './xy_suggestions';
 import { XYConfigPanel } from './xy_config_panel';
 import { Visualization } from '../types';
@@ -42,7 +43,13 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
   getPersistableState: state => state,
 
-  renderConfigPanel: (domElement, props) => render(<XYConfigPanel {...props} />, domElement),
+  renderConfigPanel: (domElement, props) =>
+    render(
+      <I18nProvider>
+        <XYConfigPanel {...props} />
+      </I18nProvider>,
+      domElement
+    ),
 
   toExpression: () => '',
 };
