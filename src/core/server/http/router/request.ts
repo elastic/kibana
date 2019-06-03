@@ -25,13 +25,20 @@ import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { filterHeaders, Headers } from './headers';
 import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
 
-interface KibanaRequestRoute {
+/**
+ * Request specific route information exposed to a handler.
+ * @public
+ * */
+export interface KibanaRequestRoute {
   path: string;
   method: RouteMethod | 'patch' | 'options';
   options: Required<RouteConfigOptions>;
 }
 
-/** @public */
+/**
+ * Kibana specific abstraction for an incoming request.
+ * @public
+ * */
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /**
    * Factory for creating requests. Validates the request before creating an

@@ -18,8 +18,16 @@
  */
 
 import { ObjectType, Schema } from '@kbn/config-schema';
+/**
+ * The set of common HTTP methods supported by Kibana routing.
+ * @public
+ * */
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
 
+/**
+ * Route specific configuration.
+ * @public
+ * */
 export interface RouteConfigOptions {
   /**
    * A flag shows that authentication for a route:

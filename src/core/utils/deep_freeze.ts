@@ -23,6 +23,7 @@ type Freezable = { [k: string]: any } | any[];
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface RecursiveReadonlyArray<T> extends Array<RecursiveReadonly<T>> {}
 
+/** @public */
 export type RecursiveReadonly<T> = T extends (...args: any[]) => any
   ? T
   : T extends any[]
