@@ -8,7 +8,7 @@ To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
 The assistant identifies the deprecated settings in your cluster and indices 
 and guides you through the process of resolving issues, including reindexing. 
 
-Before upgrading to {es} 7.0, make sure that you are using the final 6.7.x minor 
+Before upgrading to {es} 7.0, make sure that you are using the final 6.8.x minor 
 release to see the most up-to-date deprecation issues. 
 
 [float]
