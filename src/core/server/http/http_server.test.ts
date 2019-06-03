@@ -31,6 +31,7 @@ import { HttpConfig, Router } from '.';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
 import { KibanaRequest } from './router';
+import { httpServerMock } from './http_server.mocks';
 
 const chance = new Chance();
 
@@ -678,22 +679,9 @@ test('#getBasePathFor() is based on server base path', async () => {
 });
 
 test('#setBasePathFor() cannot be set twice for one request', async () => {
-  const incomingMessage = {
-    url: '/',
-  };
   const kibanaRequestFactory = {
     from() {
-      return KibanaRequest.from(
-        {
-          headers: {},
-          path: '/',
-          raw: {
-            req: incomingMessage,
-          },
-          route: { settings: {} },
-        } as any,
-        undefined
-      );
+      return KibanaRequest.from(httpServerMock.createRawRequest(), undefined);
     },
   };
   jest.doMock('./router/request', () => ({
@@ -701,8 +689,8 @@ test('#setBasePathFor() cannot be set twice for one request', async () => {
   }));
 
   const { setBasePathFor } = await server.setup(config);
-
-  const setPath = () => setBasePathFor(kibanaRequestFactory.from(), '/path');
+  const req = kibanaRequestFactory.from();
+  const setPath = () => setBasePathFor(req, '/path');
 
   setPath();
   expect(setPath).toThrowErrorMatchingInlineSnapshot(
