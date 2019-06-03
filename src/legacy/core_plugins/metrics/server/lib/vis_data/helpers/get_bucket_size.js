@@ -18,8 +18,8 @@
  */
 
 import { calculateAuto } from './calculate_auto';
-import moment from 'moment';
 import { getUnitValue } from './unit_to_seconds';
+import { getTimerangeDuration } from '../helpers/get_timerange';
 import {
   INTERVAL_STRING_RE,
   GTE_INTERVAL_RE,
@@ -42,16 +42,14 @@ const calculateBucketData = (timeInterval, capabilities) => {
   };
 };
 
-const getTimeRangeBucketSize = ({ min, max }) => {
-  const from = moment.utc(min);
-  const to = moment.utc(max);
-  const duration = moment.duration(to.valueOf() - from.valueOf(), 'ms');
+const calculateBucketSizeForAutoInterval = (req) => {
+  const duration = getTimerangeDuration(req);
 
   return calculateAuto.near(100, duration).asSeconds();
 };
 
 export const getBucketSize = (req, interval, capabilities) => {
-  const bucketSize = getTimeRangeBucketSize(req.payload.timerange);
+  const bucketSize = calculateBucketSizeForAutoInterval(req);
   let intervalString = `${bucketSize}s`;
 
   const gteAutoMatch = Boolean(interval) && interval.match(GTE_INTERVAL_RE);
