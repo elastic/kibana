@@ -5,6 +5,15 @@ exports[`SnapshotHistogram component renders the component without errors 1`] = 
   <Chart
     renderer="canvas"
   >
+    <inject-SettingsComponent-with-chartStore
+      showLegend={false}
+      xDomain={
+        Object {
+          "max": 1559565012179,
+          "min": 1559564112176,
+        }
+      }
+    />
     <inject-AxisSpec-with-chartStore
       id="Snapshot X Axis"
       position="bottom"
@@ -81,6 +90,7 @@ exports[`SnapshotHistogram component renders the component without errors 1`] = 
           0,
         ]
       }
+      timeZone="local"
       xAccessor={0}
       xScaleType="time"
       yAccessors={
@@ -154,6 +164,7 @@ exports[`SnapshotHistogram component renders the component without errors 1`] = 
           0,
         ]
       }
+      timeZone="local"
       xAccessor={0}
       xScaleType="time"
       yAccessors={

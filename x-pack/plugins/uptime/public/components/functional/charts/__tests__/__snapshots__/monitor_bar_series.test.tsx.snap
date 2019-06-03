@@ -14,6 +14,12 @@ exports[`MonitorBarSeries component renders a series when there are down items 1
   >
     <inject-SettingsComponent-with-chartStore
       tooltipType="vertical"
+      xDomain={
+        Object {
+          "max": 1559565012135,
+          "min": 1559564112130,
+        }
+      }
     />
     <inject-AxisSpec-with-chartStore
       hide={true}
@@ -48,6 +54,7 @@ exports[`MonitorBarSeries component renders a series when there are down items 1
       }
       id="downSeries"
       name="Down checks"
+      timeZone="local"
       xAccessor={0}
       xScaleType="time"
       yAccessors={
