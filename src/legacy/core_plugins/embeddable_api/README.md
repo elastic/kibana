@@ -9,14 +9,14 @@ There are three main pieces of this infrastructure:
 
 ## Embeddables & Containers
 
-Embeddables are isolated, serialiable, renderable widgets. A developer can hard code an embeddable inside their
+Embeddables are isolated, serializable, renderable widgets. A developer can hard code an embeddable inside their
 application, or they can use some built in actions to allow users to dynamically add them to *containers*.
 
 Containers are a special type of embeddable that can contain nested embeddables.
 
 ## Actions
 
-Actions are pluggable pieces of functionality exposed to the userthat take an embeddable as context, plus an optional action context.
+Actions are pluggable pieces of functionality exposed to the user that take an embeddable as context, plus an optional action context.
 
 ## Triggers
 

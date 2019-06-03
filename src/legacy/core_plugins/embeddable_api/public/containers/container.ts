@@ -109,21 +109,14 @@ export abstract class Container<
     const factory = this.embeddableFactories.getFactoryByName<EmbeddableFactory<EEI, EEO, E>>(type);
     const panelState = this.createNewPanelState<EEI, E>(factory, explicitInput);
 
-    return new Promise(resolve => {
-      const subscription = this.getOutput$().subscribe(() => {
-        if (this.output.embeddableLoaded[panelState.embeddableId]) {
-          subscription.unsubscribe();
-          resolve(this.children[panelState.embeddableId] as E);
-        }
-      });
+    this.updateInput({
+      panels: {
+        ...this.input.panels,
+        [panelState.embeddableId]: panelState,
+      },
+    } as Partial<TContainerInput>);
 
-      this.updateInput({
-        panels: {
-          ...this.input.panels,
-          [panelState.embeddableId]: panelState,
-        },
-      } as Partial<TContainerInput>);
-    });
+    return await this.untilEmbeddableLoaded<E>(panelState.embeddableId);
   }
 
   public async addSavedObjectEmbeddable<
@@ -134,35 +127,22 @@ export abstract class Container<
     const panelState = this.createNewPanelState(factory);
     panelState.savedObjectId = savedObjectId;
 
-    return new Promise(resolve => {
-      const subscription = this.getOutput$().subscribe(() => {
-        if (this.output.embeddableLoaded[panelState.embeddableId]) {
-          subscription.unsubscribe();
-          resolve(this.children[panelState.embeddableId] as TEmbeddable);
-        }
-      });
+    this.updateInput({
+      panels: {
+        ...this.input.panels,
+        [panelState.embeddableId]: panelState,
+      },
+    } as Partial<TContainerInput>);
 
-      this.updateInput({
-        panels: {
-          ...this.input.panels,
-          [panelState.embeddableId]: panelState,
-        },
-      } as Partial<TContainerInput>);
-    });
+    return await this.untilEmbeddableLoaded<TEmbeddable>(panelState.embeddableId);
   }
 
   public removeEmbeddable(embeddableId: string) {
     // Just a shortcut for removing the panel from input state, all internal state will get cleaned up naturally
-    // but the listener.
-    const changedInput: { panels: { [key: string]: PanelState } } = {
-      panels: {},
-    };
-    Object.values(this.input.panels).forEach(panel => {
-      if (panel.embeddableId !== embeddableId) {
-        changedInput.panels[panel.embeddableId] = panel;
-      }
-    });
-    this.updateInput({ ...changedInput } as Partial<TContainerInput>);
+    // by the listener.
+    const panels = { ...this.input.panels };
+    delete panels[embeddableId];
+    this.updateInput({ panels } as Partial<TContainerInput>);
   }
 
   public getChild<E extends IEmbeddable>(id: string): E {
@@ -205,6 +185,19 @@ export abstract class Container<
     super.destroy();
     Object.values(this.children).forEach(child => child.destroy());
     this.subscription.unsubscribe();
+  }
+
+  public async untilEmbeddableLoaded<TEmbeddable extends IEmbeddable>(
+    id: string
+  ): Promise<TEmbeddable | ErrorEmbeddable> {
+    return new Promise(resolve => {
+      const subscription = this.getOutput$().subscribe(() => {
+        if (this.output.embeddableLoaded[id]) {
+          subscription.unsubscribe();
+          resolve(this.children[id] as TEmbeddable);
+        }
+      });
+    });
   }
 
   protected createNewPanelState<

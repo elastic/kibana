@@ -23,21 +23,8 @@ import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
 
-function getPanelTitle({
-  inputTitle,
-  defaultTitle,
-  hidePanelTitles,
-}: {
-  inputTitle?: string;
-  defaultTitle?: string;
-  hidePanelTitles?: boolean;
-}) {
-  if (hidePanelTitles) {
-    return '';
-  }
-
-  // Specificaly check for undefined, as an empty string override means "hide this title".
-  return inputTitle === undefined ? defaultTitle : inputTitle;
+function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
+  return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
 }
 
 export abstract class Embeddable<
@@ -64,11 +51,7 @@ export abstract class Embeddable<
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
     this.output = {
-      title: getPanelTitle({
-        inputTitle: input.title,
-        defaultTitle: output.defaultTitle,
-        hidePanelTitles: input.hidePanelTitles,
-      }),
+      title: getPanelTitle(input, output),
       ...output,
     };
     this.input = {
@@ -88,6 +71,10 @@ export abstract class Embeddable<
     }
   }
 
+  /**
+   * Reload will be called when there is a request to refresh the data or view, even if the
+   * input data did not change at all.
+   */
   public abstract reload(): void;
 
   public getInput$(): Readonly<Rx.Observable<TEmbeddableInput>> {
@@ -165,11 +152,7 @@ export abstract class Embeddable<
       this.input = newInput;
       this.input$.next(newInput);
       this.updateOutput({
-        title: getPanelTitle({
-          inputTitle: this.input.title,
-          defaultTitle: this.output.defaultTitle,
-          hidePanelTitles: this.input.hidePanelTitles,
-        }),
+        title: getPanelTitle(this.input, this.output),
       } as Partial<TEmbeddableOutput>);
     }
   }

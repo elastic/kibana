@@ -29,12 +29,12 @@ export const createRegistry = <T>(): IRegistry<T> => {
   const reset = () => {
     data = new Map<string, T>();
   };
-  const getAll = () => data;
+  const length = () => Object.keys(data).length;
 
   return {
     get,
     set,
     reset,
-    getAll,
+    length,
   };
 };

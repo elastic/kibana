@@ -27,7 +27,7 @@ export interface Trigger {
 // TODO: use the official base Registry interface when available
 export interface IRegistry<T> {
   get(id: string): T | undefined;
-  getAll(): Map<string, T>;
+  length(): number;
   set(id: string, item: T): void;
   reset(): void;
 }
