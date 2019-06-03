@@ -28,6 +28,7 @@ import touchdownTmplHtml from '../partials/touchdown.tmpl.html';
 
 const seriTypes = seriesTypes;
 const touchdownTmpl = _.template(touchdownTmplHtml);
+
 /**
  * Line Chart Visualization
  *

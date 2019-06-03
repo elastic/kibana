@@ -211,6 +211,7 @@ export class Dispatch extends SimpleEmitter {
 
     return addEvent('click', click);
   }
+<<<<<<< HEAD
 
   /**
    * Determine if we will allow brushing
@@ -351,6 +352,150 @@ export class Dispatch extends SimpleEmitter {
   }
 }
 
+=======
+
+  /**
+   * Determine if we will allow brushing
+   *
+   * @method allowBrushing
+   * @returns {Boolean}
+   */
+  allowBrushing() {
+    const xAxis = this.handler.categoryAxes[0];
+
+    //Allow brushing for ordered axis - date histogram and histogram
+    return Boolean(xAxis.ordered);
+  }
+
+  /**
+   * Determine if brushing is currently enabled
+   *
+   * @method isBrushable
+   * @returns {Boolean}
+   */
+  isBrushable() {
+    return this.allowBrushing() && this.listenerCount('brush') > 0;
+  }
+
+  /**
+   *
+   * @param svg
+   * @returns {Function}
+   */
+  addBrushEvent(svg) {
+    if (!this.isBrushable()) return;
+
+    const xScale = this.handler.categoryAxes[0].getScale();
+    this.createBrush(xScale, svg);
+
+  }
+
+  /**
+   * Mouseover Behavior
+   *
+   * @method addMousePointer
+   * @returns {d3.Selection}
+   */
+  addMousePointer() {
+    return d3.select(this).style('cursor', 'pointer');
+  }
+
+  /**
+   * Highlight the element that is under the cursor
+   * by reducing the opacity of all the elements on the graph.
+   * @param element {d3.Selection}
+   * @method highlight
+   */
+  highlight(element) {
+    const label = this.getAttribute('data-label');
+    if (!label) return;
+
+    const dimming = this.handler.config.get('dimmingOpacity');
+    $(element).parent().find('[data-label]')
+      .css('opacity', 1)//Opacity 1 is needed to avoid the css application
+      .not((els, el) => String($(el).data('label')) === label)
+      .css('opacity', justifyOpacity(dimming));
+  }
+
+  /**
+   * Mouseout Behavior
+   *
+   * @param element {d3.Selection}
+   * @method unHighlight
+   */
+  unHighlight(element) {
+    $('[data-label]', element.parentNode).css('opacity', 1);
+  }
+
+  /**
+   * Adds D3 brush to SVG and returns the brush function
+   *
+   * @param xScale {Function} D3 xScale function
+   * @param svg {HTMLElement} Reference to SVG
+   * @returns {*} Returns a D3 brush function and a SVG with a brush group attached
+   */
+  createBrush(xScale, svg) {
+    const self = this;
+    const visConfig = self.handler.visConfig;
+    const { width, height } = svg.node().getBBox();
+    const isHorizontal = self.handler.categoryAxes[0].axisConfig.isHorizontal();
+
+    // Brush scale
+    const brush = d3.svg.brush();
+    if (isHorizontal) {
+      brush.x(xScale);
+    } else {
+      brush.y(xScale);
+    }
+
+    brush.on('brushend', function brushEnd() {
+
+      // Assumes data is selected at the chart level
+      // In this case, the number of data objects should always be 1
+      const data = d3.select(this).data()[0];
+      const isTimeSeries = (data.ordered && data.ordered.date);
+
+      // Allows for brushing on d3.scale.ordinal()
+      const selected = xScale.domain().filter(function (d) {
+        return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
+      });
+      const range = isTimeSeries ? brush.extent() : selected;
+
+      return self.emit('brush', {
+        range: range,
+        config: visConfig,
+        e: d3.event,
+        data: data
+      });
+    });
+
+    // if `addBrushing` is true, add brush canvas
+    if (self.listenerCount('brush')) {
+      const rect = svg.insert('g', 'g')
+        .attr('class', 'brush')
+        .call(brush)
+        .call(function (brushG) {
+          // hijack the brush start event to filter out right/middle clicks
+          const brushHandler = brushG.on('mousedown.brush');
+          if (!brushHandler) return; // touch events in use
+          brushG.on('mousedown.brush', function () {
+            if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);
+          });
+        })
+        .selectAll('rect');
+
+      if (isHorizontal) {
+        rect.attr('height', height);
+      } else {
+        rect.attr('width', width);
+      }
+
+      return brush;
+    }
+  }
+}
+
+>>>>>>> removing Private
 function validBrushClick(event) {
   return event.button === 0;
 }

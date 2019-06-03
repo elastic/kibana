@@ -48,7 +48,6 @@ export function VislibVisProvider(Private, config) {
       this.el = $el.get ? $el.get(0) : $el;
       this.visConfigArgs = _.cloneDeep(visConfigArgs);
       this.visConfigArgs.dimmingOpacity = config.get('visualization:dimmingOpacity');
-
     }
 
     hasLegend() {
