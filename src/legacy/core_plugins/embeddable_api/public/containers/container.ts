@@ -247,6 +247,11 @@ export abstract class Container<
     return panelState as PanelState<TEmbeddableInput>;
   }
 
+  /**
+   * Return state that comes from the container and is passed down to the child. For instance, time range and
+   * filters are common inherited input state. Note that any state stored in `this.input.panels[embeddableId].explicitInput`
+   * will override inherited input.
+   */
   protected abstract getInheritedInput(id: string): TChildInput;
 
   private createNewExplicitEmbeddableInput<
