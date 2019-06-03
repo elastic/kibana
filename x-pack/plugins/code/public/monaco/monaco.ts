@@ -61,7 +61,7 @@ import 'monaco-editor/esm/vs/basic-languages/cpp/cpp.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/csharp/csharp.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/csp/csp.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/css/css.contribution.js';
-//import 'monaco-editor/esm/vs/basic-languages/dockerfile/dockerfile.contribution.js';
+// import 'monaco-editor/esm/vs/basic-languages/dockerfile/dockerfile.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/fsharp/fsharp.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/go/go.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/handlebars/handlebars.contribution.js';
