@@ -85,21 +85,23 @@ interface HostIdRendererTypes {
   noLink?: boolean;
 }
 
-export const hostIdRenderer = (data: HostIdRendererTypes): React.ReactElement =>
-  data.host.id &&
-  data.host.ip &&
-  (!(data.ipFilter != null) || data.host.ip.includes(data.ipFilter)) ? (
+export const hostIdRenderer = ({
+  host,
+  ipFilter,
+  noLink,
+}: HostIdRendererTypes): React.ReactElement =>
+  host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
-      {data.host.name && data.host.name[0] != null ? (
-        <DefaultDraggable id={`${IpOverviewId}-host-id`} field="host.id" value={data.host.id[0]}>
-          {data.noLink ? (
-            <>{data.host.id}</>
+      {host.name && host.name[0] != null ? (
+        <DefaultDraggable id={`${IpOverviewId}-host-id`} field="host.id" value={host.id[0]}>
+          {noLink ? (
+            <>{host.id}</>
           ) : (
-            <HostDetailsLink hostName={data.host.name[0]}>{data.host.id}</HostDetailsLink>
+            <HostDetailsLink hostName={host.name[0]}>{host.id}</HostDetailsLink>
           )}
         </DefaultDraggable>
       ) : (
-        <>{data.host.id}</>
+        <>{host.id}</>
       )}
     </>
   ) : (
