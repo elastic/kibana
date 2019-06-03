@@ -112,6 +112,12 @@ export interface IEmbeddable<
   getTitle(): string | undefined;
 
   /**
+   * Returns the top most parent embeddable, or itself if this embeddable
+   * is not within a parent.
+   */
+  getRoot(): IEmbeddable | IContainer;
+
+  /**
    * Renders the embeddable at the given node.
    * @param domNode
    */

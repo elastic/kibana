@@ -101,6 +101,18 @@ export abstract class Embeddable<
     return this.output.title;
   }
 
+  /**
+   * Returns the top most parent embeddable, or itself if this embeddable
+   * is not within a parent.
+   */
+  public getRoot(): IEmbeddable | IContainer {
+    let root: IEmbeddable | IContainer = this;
+    while (root.parent) {
+      root = root.parent;
+    }
+    return root;
+  }
+
   public updateInput(changes: Partial<TEmbeddableInput>): void {
     if (this.destoyed) {
       throw new Error('Embeddable has been destroyed');

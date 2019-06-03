@@ -54,12 +54,7 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
   }
 
   public async isCompatible(context: ActionContext) {
-    let root: IEmbeddable | IContainer = context.embeddable;
-    while (root.parent) {
-      root = root.parent;
-    }
-
-    return containerAcceptsFilterInput(root);
+    return containerAcceptsFilterInput(context.embeddable.getRoot());
   }
 
   public execute({
@@ -69,10 +64,7 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
     if (!triggerContext) {
       throw new Error('Applying a filter requires a filter as context');
     }
-    let root: IEmbeddable | IContainer = embeddable;
-    while (root.parent) {
-      root = root.parent;
-    }
+    const root = embeddable.getRoot();
 
     if (!containerAcceptsFilterInput(root)) {
       throw new IncompatibleActionError();
