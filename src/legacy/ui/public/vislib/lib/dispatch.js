@@ -92,6 +92,33 @@ export function VislibLibDispatchProvider(Private, config) {
     }
 
     /**
+     * Determine whether rendering a series is configured in percentage mode
+     * Used to display a value percentage formatted in it's popover
+     *
+     * @param rawId {string} The rawId of series to check
+     * @param series {Array} Array of all series data
+     * @param config {VisConfig}
+     * @returns {Boolean}
+      */
+    isSeriesInPercentageMode(rawId, series, config) {
+      if(!rawId || !Array.isArray(series) || !config) {
+        return false;
+      }
+      //find the primary id by the rawId, that id is used in the config's seriesParams
+      const { id } = series.find(series => series.rawId === rawId);
+      if(!id) {
+        return false;
+      }
+      //find the matching seriesParams of the series, to get the id of the valueAxis
+      const { valueAxis } = config.get('seriesParams').find(param => param.data.id === id);
+      if(!valueAxis) {
+        return false;
+      }
+      const usedValueAxe = config.get('valueAxes').find(valueAxe => valueAxe.id === valueAxis);
+      return get(usedValueAxe, 'scale.mode') === 'percentage';
+    }
+
+    /**
      * Response to hover events
      *
      * @param d {Object} Data point
@@ -112,23 +139,22 @@ export function VislibLibDispatchProvider(Private, config) {
       const handler = this.handler;
       const color = get(handler, 'data.color');
       const config =  handler && handler.visConfig;
-      const valueAxes = config && config.get('valueAxes');
-      const isPercentageMode = valueAxes && valueAxes.some(({ scale }) => scale && scale.mode === 'percentage');
+      const isPercentageMode = this.isSeriesInPercentageMode(d.seriesId, series, config);
 
       const eventData = {
         value: d.y,
         point: datum,
-        datum: datum,
-        label: label,
+        datum,
+        label,
         color: color ? color(label) : undefined,
         pointIndex: i,
-        series: series,
-        slices: slices,
-        config: handler && handler.visConfig,
-        data: data,
+        series,
+        slices,
+        config,
+        data,
         e: d3.event,
-        handler: handler,
-        isPercentageMode: isPercentageMode
+        handler,
+        isPercentageMode
       };
 
       return eventData;
