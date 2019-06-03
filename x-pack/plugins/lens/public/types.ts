@@ -13,6 +13,7 @@ export interface EditorFrameInstance {
   mount: (element: Element) => void;
   unmount: () => void;
 }
+
 export interface EditorFrameSetup {
   createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
@@ -28,9 +29,15 @@ export interface TableColumn {
   operation: Operation;
 }
 
+export interface TableSuggestion {
+  datasourceSuggestionId: number;
+  isMultiRow: boolean;
+  columns: TableColumn[];
+}
+
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
-  tableColumns: TableColumn[];
+  table: TableSuggestion;
 }
 
 /**
@@ -132,7 +139,7 @@ export interface VisualizationProps<T = unknown> {
 
 export interface SuggestionRequest<T = unknown> {
   // It is up to the Visualization to rank these tables
-  tables: TableColumn[][];
+  tables: TableSuggestion[];
   state?: T; // State is only passed if the visualization is active
 }
 
@@ -140,7 +147,7 @@ export interface VisualizationSuggestion<T = unknown> {
   score: number;
   title: string;
   state: T;
-  tableIndex: number;
+  datasourceSuggestionId: number;
 }
 
 export interface Visualization<T = unknown, P = unknown> {
