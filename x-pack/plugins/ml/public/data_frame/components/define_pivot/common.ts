@@ -6,7 +6,7 @@
 
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
 import { KBN_FIELD_TYPES } from '../../../../common/constants/field_types';
 
@@ -56,14 +56,14 @@ function getDefaultGroupByConfig(
         aggName,
         dropDownName,
         field: fieldName,
-        interval: '1m',
+        calendar_interval: '1m',
       };
   }
 }
 
 const illegalEsAggNameChars = /[[\]>]/g;
 
-export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
+export function getPivotDropdownOptions(indexPattern: IndexPattern) {
   // The available group by options
   const groupByOptions: EuiComboBoxOptionProps[] = [];
   const groupByOptionsData: PivotGroupByConfigDict = {};
@@ -82,7 +82,7 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
     const availableGroupByAggs = pivotGroupByFieldSupport[field.type];
     availableGroupByAggs.forEach(groupByAgg => {
       // Aggregation name for the group-by is the plain field name. Illegal characters will be removed.
-      const aggName = field.name.replace(illegalEsAggNameChars, '');
+      const aggName = field.name.replace(illegalEsAggNameChars, '').trim();
       // Option name in the dropdown for the group-by is in the form of `sum(fieldname)`.
       const dropDownName = `${groupByAgg}(${field.name})`;
       const groupByOption: DropDownLabel = { label: dropDownName };
@@ -100,7 +100,7 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
     const availableAggs = pivotAggsFieldSupport[field.type];
     availableAggs.forEach(agg => {
       // Aggregation name is formatted like `fieldname.sum`. Illegal characters will be removed.
-      const aggName = `${field.name.replace(illegalEsAggNameChars, '')}.${agg}`;
+      const aggName = `${field.name.replace(illegalEsAggNameChars, '').trim()}.${agg}`;
       // Option name in the dropdown for the aggregation is in the form of `sum(fieldname)`.
       const dropDownName = `${agg}(${field.name})`;
       aggOption.options.push({ label: dropDownName });

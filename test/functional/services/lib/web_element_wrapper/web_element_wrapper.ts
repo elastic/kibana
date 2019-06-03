@@ -160,14 +160,21 @@ export class WebElementWrapper {
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }): Promise<void> {
     if (options.charByChar === true) {
       const value = await this.getAttribute('value');
-      for (let i = 1; i <= value.length; i++) {
+      for (let i = 0; i <= value.length; i++) {
         await this.pressKeys(this.Keys.BACK_SPACE);
         await delay(100);
       }
     } else {
-      // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
-      await this.driver.executeScript(`arguments[0].select();`, this._webElement);
-      await this.pressKeys(this.Keys.BACK_SPACE);
+      if (this.browserType === Browsers.Chrome) {
+        // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
+        await this.driver.executeScript(`arguments[0].select();`, this._webElement);
+        await this.pressKeys(this.Keys.BACK_SPACE);
+      } else {
+        const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+        await this.pressKeys([selectionKey, 'a']);
+        await this.pressKeys(this.Keys.NULL); // Release modifier keys
+        await this.pressKeys(this.Keys.BACK_SPACE); // Delete all content
+      }
     }
   }
 

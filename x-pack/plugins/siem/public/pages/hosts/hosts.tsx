@@ -10,9 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
-import chrome from 'ui/chrome';
 
-import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -31,13 +29,13 @@ import { HostsQuery } from '../../containers/hosts';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
-import { IndexType, LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../store';
 
+import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
-
-const basePath = chrome.getBasePath();
+import { UrlStateContainer } from '../../components/url_state';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
@@ -50,20 +48,19 @@ interface HostsComponentReduxProps {
 
 type HostsComponentProps = HostsComponentReduxProps;
 
-const indexTypes = [IndexType.AUDITBEAT];
-
 const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
-  <WithSource sourceId="default" indexTypes={indexTypes}>
-    {({ auditbeatIndicesExist, indexPattern }) =>
-      indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
+  <WithSource sourceId="default">
+    {({ indicesExist, indexPattern }) =>
+      indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
         <StickyContainer>
           <FiltersGlobal>
             <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
+            <UrlStateContainer indexPattern={indexPattern} />
           </FiltersGlobal>
 
           <HeaderPage
             subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
-            title={i18n.HOSTS}
+            title={i18n.PAGE_TITLE}
           />
 
           <GlobalTime>
@@ -200,12 +197,11 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
           </GlobalTime>
         </StickyContainer>
       ) : (
-        <EmptyPage
-          title={i18n.NO_AUDITBEAT_INDICES}
-          message={i18n.LETS_ADD_SOME}
-          actionLabel={i18n.SETUP_INSTRUCTIONS}
-          actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-        />
+        <>
+          <HeaderPage title={i18n.PAGE_TITLE} />
+
+          <HostsEmptyPage />
+        </>
       )
     }
   </WithSource>

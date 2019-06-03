@@ -139,12 +139,9 @@ export const buildDomainsQuery = ({
   flowDirection,
   flowTarget,
   pagination: { limit },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    auditbeatAlias,
-    logAlias,
-    packetbeatAlias,
-    winlogbeatAlias,
   },
   timerange: { from, to },
 }: DomainsRequestOptions) => {
@@ -156,7 +153,7 @@ export const buildDomainsQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggs: {
