@@ -31,7 +31,7 @@ export class EditPanelAction extends Action {
   public readonly type = EDIT_PANEL_ACTION_ID;
   constructor() {
     super(EDIT_PANEL_ACTION_ID);
-    this.order = 9;
+    this.order = 15;
   }
 
   public getDisplayName({ embeddable }: ActionContext) {

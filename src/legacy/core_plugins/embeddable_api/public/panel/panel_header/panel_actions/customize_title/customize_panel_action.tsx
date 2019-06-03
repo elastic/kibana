@@ -35,7 +35,7 @@ export class CustomizePanelTitleAction extends Action {
     ) => Promise<{ title: string | undefined }> = getUserData
   ) {
     super(CUSTOMIZE_PANEL_ACTION_ID);
-    this.order = 8;
+    this.order = 10;
     this.getDataFromUser = getDataFromUser;
   }
 

@@ -38,7 +38,6 @@ export class AddPanelAction extends Action {
 
   constructor() {
     super(ADD_PANEL_ACTION_ID);
-    this.order = 8;
   }
 
   public getDisplayName() {

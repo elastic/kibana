@@ -30,7 +30,7 @@ export class InspectPanelAction extends Action {
   public readonly type = INSPECT_PANEL_ACTION_ID;
   constructor() {
     super(INSPECT_PANEL_ACTION_ID);
-    this.order = 10;
+    this.order = 20;
   }
 
   public getDisplayName() {

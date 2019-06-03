@@ -40,7 +40,7 @@ export class RemovePanelAction extends Action {
   constructor() {
     super(REMOVE_PANEL_ACTION);
 
-    this.order = 6;
+    this.order = 5;
   }
 
   public getDisplayName() {
