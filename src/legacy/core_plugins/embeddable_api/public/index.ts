@@ -31,8 +31,6 @@ export {
 
 export {
   Query,
-  Filters,
-  Filter,
   TimeRange,
   RefreshConfig,
   ViewMode,

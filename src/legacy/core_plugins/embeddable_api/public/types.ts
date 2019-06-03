@@ -59,35 +59,6 @@ export interface RefreshConfig {
   value: number;
 }
 
-export interface FilterMeta {
-  disabled: boolean;
-  field: string;
-  negate: boolean;
-}
-
-export interface Filter {
-  meta: FilterMeta;
-  query: {
-    match: {
-      [key: string]: {
-        query: string;
-      };
-    };
-  };
-  exists: {
-    field: string;
-  };
-  script?: {
-    script: {
-      params: {
-        value: string;
-      };
-    };
-  };
-}
-
-export type Filters = Filter[];
-
 export enum QueryLanguageType {
   KUERY = 'kuery',
   LUCENE = 'lucene',

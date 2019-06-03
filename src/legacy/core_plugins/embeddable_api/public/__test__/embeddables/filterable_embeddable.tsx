@@ -17,9 +17,9 @@
  * under the License.
  */
 import { Adapters } from 'ui/inspector';
+import { Filter } from '@kbn/es-query';
 import { IContainer } from '../../containers';
 import { EmbeddableOutput, EmbeddableInput, Embeddable } from '../../embeddables';
-import { Filter } from '../../types';
 
 export const FILTERABLE_EMBEDDABLE = 'FILTERABLE_EMBEDDABLE';
 

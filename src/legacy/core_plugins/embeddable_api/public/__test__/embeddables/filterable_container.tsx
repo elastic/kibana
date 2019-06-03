@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Filter } from '@kbn/es-query';
 import { EmbeddableFactory } from '../../embeddables';
-import { Filter, IRegistry } from '../../types';
+import { IRegistry } from '../../types';
 import { Container, ContainerInput } from '../../containers';
 
 export const FILTERABLE_CONTAINER = 'FILTERABLE_CONTAINER';

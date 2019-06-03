@@ -41,10 +41,11 @@ import {
   FILTERABLE_EMBEDDABLE,
 } from '../../../__test__';
 
-import { Filter, EmbeddableOutput, isErrorEmbeddable } from '../../../';
+import { EmbeddableOutput, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';
 import { createRegistry } from '../../../create_registry';
 import { EmbeddableFactory } from '../../../embeddables';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
 const embeddableFactories = createRegistry<EmbeddableFactory>();
 embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
@@ -54,9 +55,9 @@ let embeddable: FilterableEmbeddable;
 
 beforeEach(async () => {
   const derivedFilter: Filter = {
-    meta: { disabled: false, field: 'name', negate: false },
+    $state: { store: FilterStateStore.APP_STATE },
+    meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
-    exists: { field: 'name' },
   };
   container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [derivedFilter] },

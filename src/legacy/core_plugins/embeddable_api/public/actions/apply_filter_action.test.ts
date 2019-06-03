@@ -37,7 +37,7 @@ import { ApplyFilterAction } from './apply_filter_action';
 import { embeddableFactories, isErrorEmbeddable, EmbeddableOutput } from '../embeddables';
 import { FilterableContainerFactory } from '../__test__/embeddables/filterable_container_factory';
 import { FilterableEmbeddableInput } from '../__test__/embeddables/filterable_embeddable';
-import { Filter } from '../types';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
 beforeAll(() => {
   embeddableFactories.set(FILTERABLE_CONTAINER, new FilterableContainerFactory());
@@ -83,13 +83,13 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
   }
 
   const filter: Filter = {
+    $state: { store: FilterStateStore.APP_STATE },
     meta: {
       disabled: false,
-      field: 'bird',
       negate: false,
+      alias: '',
     },
     query: { match: { extension: { query: 'foo' } } },
-    exists: { field: 'foo' },
   };
 
   applyFilterAction.execute({ embeddable, triggerContext: { filters: [filter] } });

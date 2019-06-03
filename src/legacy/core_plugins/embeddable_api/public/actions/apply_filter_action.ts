@@ -18,10 +18,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
 import { Container, ContainerInput } from '../containers';
 import { IEmbeddable } from '../embeddables';
 import { APPLY_FILTER_TRIGGER, triggerRegistry } from '../triggers';
-import { Filter } from '../types';
 import { Action, ActionContext } from './action';
 import { actionRegistry } from '../actions';
 import { IncompatibleActionError } from './incompatible_action_error';

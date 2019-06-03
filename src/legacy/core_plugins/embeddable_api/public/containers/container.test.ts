@@ -28,7 +28,6 @@ import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
 import {
   CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
   HelloWorldContainer,
   FilterableContainer,
   FILTERABLE_EMBEDDABLE,
@@ -41,13 +40,14 @@ import {
 } from '../__test__/index';
 import { isErrorEmbeddable, EmbeddableOutput, EmbeddableFactory } from '../embeddables';
 import { ContainerInput } from './i_container';
-import { ViewMode, Filter } from '../types';
+import { ViewMode } from '../types';
 import { createRegistry } from '../create_registry';
 import {
   FilterableEmbeddableInput,
   FilterableEmbeddable,
 } from '../__test__/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../embeddables/error_embeddable';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
 const embeddableFactories = createRegistry<EmbeddableFactory>();
 embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
@@ -422,9 +422,9 @@ test('Test nested reactions', async done => {
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
   const derivedFilter: Filter = {
-    meta: { disabled: false, field: 'name', negate: false },
+    $state: { store: FilterStateStore.APP_STATE },
+    meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
-    exists: { field: 'name' },
   };
   const container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [derivedFilter] },
