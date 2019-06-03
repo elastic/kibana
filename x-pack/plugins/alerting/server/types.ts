@@ -69,3 +69,5 @@ export interface AlertingPlugin {
   registerType: AlertTypeRegistry['register'];
   listTypes: AlertTypeRegistry['list'];
 }
+
+export type AlertTypeRegistry = PublicMethodsOf<AlertTypeRegistry>;

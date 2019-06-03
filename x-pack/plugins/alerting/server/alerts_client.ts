@@ -6,9 +6,8 @@
 
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { SavedObjectReference } from './types';
-import { Alert, RawAlert } from './types';
+import { Alert, RawAlert, AlertTypeRegistry, AlertAction } from './types';
 import { TaskManager } from '../../task_manager';
-import { AlertTypeRegistry } from './alert_type_registry';
 import { TASK_MANAGER_SCOPE } from '../common/constants';
 
 interface ConstructorOptions {
@@ -42,7 +41,11 @@ interface CreateOptions {
 
 interface UpdateOptions {
   id: string;
-  data: Alert;
+  data: {
+    interval: number;
+    actions: AlertAction[];
+    alertTypeParams: Record<string, any>;
+  };
   options?: { version?: string };
 }
 
@@ -58,6 +61,9 @@ export class AlertsClient {
   }
 
   public async create({ data, options }: CreateOptions) {
+    // Throws an error if alert type isn't registered
+    this.alertTypeRegistry.get(data.alertTypeId);
+    // Create alert
     const { alert: rawAlert, references } = this.getRawAlert(data);
     const createdAlert = await this.savedObjectsClient.create<any>('alert', rawAlert, {
       ...options,
@@ -88,7 +94,7 @@ export class AlertsClient {
     return this.getAlertFromRaw(result.id, result.attributes, result.references);
   }
 
-  public async find({ options = {} }: FindOptions) {
+  public async find({ options = {} }: FindOptions = {}) {
     const results = await this.savedObjectsClient.find({
       ...options,
       type: 'alert',
@@ -106,36 +112,20 @@ export class AlertsClient {
   }
 
   public async update({ id, data, options = {} }: UpdateOptions) {
-    // Throws an error if alert type is invalid
-    this.alertTypeRegistry.get(data.alertTypeId);
-    // Re-create scheduled task if alertTypeId or interval changed
-    const currentSavedObject = await this.savedObjectsClient.get('alert', id);
-    const { alert: rawAlert, references } = this.getRawAlert(data);
-    const updatedObject = await this.savedObjectsClient.update<any>('alert', id, alert, {
-      ...options,
-      references,
-    });
-    if (this.shouldRescheduleTask(currentSavedObject.attributes, data)) {
-      await this.taskManager.remove(currentSavedObject.attributes.scheduledTaskId);
-      const scheduledTask = await this.scheduleAlert(id, rawAlert);
-      await this.savedObjectsClient.update<any>(
-        'alert',
-        id,
-        {
-          scheduledTaskId: scheduledTask.id,
-        },
-        { references }
-      );
-      updatedObject.attributes.scheduledTaskId = scheduledTask.id;
-    }
-    return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
-  }
-
-  private shouldRescheduleTask(previousAlert: Alert, updatedAlert: Alert) {
-    return (
-      previousAlert.alertTypeId !== updatedAlert.alertTypeId ||
-      previousAlert.interval !== updatedAlert.interval
+    const { actions, references } = this.extractReferences(data.actions);
+    const updatedObject = await this.savedObjectsClient.update<any>(
+      'alert',
+      id,
+      {
+        ...data,
+        actions,
+      },
+      {
+        ...options,
+        references,
+      }
     );
+    return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
   private async scheduleAlert(id: string, alert: RawAlert) {
@@ -158,28 +148,9 @@ export class AlertsClient {
     });
   }
 
-  private getAlertFromRaw(id: string, rawAlert: RawAlert, references: SavedObjectReference[]) {
-    const actions = rawAlert.actions.map((action, i) => {
-      const reference = references.find(ref => ref.name === action.actionRef);
-      if (!reference) {
-        throw new Error(`Reference ${action.actionRef} not found`);
-      }
-      return {
-        ...action,
-        actionRef: undefined,
-        id: reference.id,
-      };
-    });
-    return {
-      id,
-      ...rawAlert,
-      actions,
-    };
-  }
-
-  private getRawAlert(alert: Alert): { references: SavedObjectReference[]; alert: RawAlert } {
+  private extractReferences(actions: Alert['actions']) {
     const references: SavedObjectReference[] = [];
-    const rawActions = alert.actions.map((action, i) => {
+    const rawActions = actions.map((action, i) => {
       const actionRef = `action_${i}`;
       references.push({
         name: actionRef,
@@ -193,9 +164,43 @@ export class AlertsClient {
       };
     });
     return {
+      actions: rawActions,
+      references,
+    };
+  }
+
+  private injectReferencesIntoActions(
+    actions: RawAlert['actions'],
+    references: SavedObjectReference[]
+  ) {
+    return actions.map((action, i) => {
+      const reference = references.find(ref => ref.name === action.actionRef);
+      if (!reference) {
+        throw new Error(`Reference ${action.actionRef} not found`);
+      }
+      return {
+        ...action,
+        actionRef: undefined,
+        id: reference.id,
+      };
+    });
+  }
+
+  private getAlertFromRaw(id: string, rawAlert: RawAlert, references: SavedObjectReference[]) {
+    const actions = this.injectReferencesIntoActions(rawAlert.actions, references);
+    return {
+      id,
+      ...rawAlert,
+      actions,
+    };
+  }
+
+  private getRawAlert(alert: Alert) {
+    const { references, actions } = this.extractReferences(alert.actions);
+    return {
       alert: {
         ...alert,
-        actions: rawActions,
+        actions,
       },
       references,
     };
