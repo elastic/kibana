@@ -21,6 +21,7 @@ import { cloneDeep } from 'lodash';
 import { IKey, logging } from 'selenium-webdriver';
 
 import { modifyUrl } from '../../../src/core/utils';
+
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -42,6 +43,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * Browser name
      */
     public readonly browserType: string = browserType;
+
+    public readonly isChrome: boolean = browserType === Browsers.Chrome;
+
+    public readonly isFirefox: boolean = browserType === Browsers.Firefox;
 
     /**
      * Is WebDriver instance W3C compatible

@@ -3,7 +3,6 @@
 exports[`transactionGroupsFetcher should call client with correct query 1`] = `
 Array [
   Array [
-    "search",
     Object {
       "body": Object {
         "aggs": Object {
@@ -53,15 +52,6 @@ Array [
           },
         },
         "query": Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "term": Object {
-                  "service.environment": "test",
-                },
-              },
-            ],
-          },
           "my": "bodyQuery",
         },
         "size": 0,

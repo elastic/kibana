@@ -40,6 +40,7 @@ export const fetchRepoConfigFailed = createAction<Error>('FETCH REPO CONFIGS FAI
 export const initRepoCommand = createAction<string>('INIT REPO CMD');
 
 export const gotoRepo = createAction<string>('GOTO REPO');
+export const gotoRepoFailed = createAction('GOTO REPO FAILED');
 
 export const switchLanguageServer = createAction<RepoConfigPayload>('SWITCH LANGUAGE SERVER');
 export const switchLanguageServerSuccess = createAction('SWITCH LANGUAGE SERVER SUCCESS');

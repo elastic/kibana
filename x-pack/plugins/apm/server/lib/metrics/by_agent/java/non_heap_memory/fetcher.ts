@@ -61,5 +61,5 @@ export async function fetch(setup: Setup, serviceName: string) {
     }
   };
 
-  return client<void, MetricsAggs<NonHeapMemoryMetrics>>('search', params);
+  return client.search<void, MetricsAggs<NonHeapMemoryMetrics>>(params);
 }

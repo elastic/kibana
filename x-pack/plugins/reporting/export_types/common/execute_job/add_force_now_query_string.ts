@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
+
 import url from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
-import { ConditionalHeaders, KbnServer, ReportingJob } from '../../../types';
+import { ConditionalHeaders, JobDocPayload, KbnServer } from '../../../types';
 
-function getSavedObjectAbsoluteUrl(job: ReportingJob, relativeUrl: string, server: KbnServer) {
+function getSavedObjectAbsoluteUrl(job: JobDocPayload, relativeUrl: string, server: KbnServer) {
   const getAbsoluteUrl: any = getAbsoluteUrlFactory(server);
 
   const { pathname: path, hash, search } = url.parse(relativeUrl);
@@ -21,7 +21,7 @@ export const addForceNowQuerystring = async ({
   logo,
   server,
 }: {
-  job: ReportingJob;
+  job: JobDocPayload;
   conditionalHeaders?: ConditionalHeaders;
   logo?: any;
   server: KbnServer;
@@ -34,7 +34,7 @@ export const addForceNowQuerystring = async ({
     job.urls = [getSavedObjectAbsoluteUrl(job, job.relativeUrl, server)];
   }
 
-  const urls = job.urls.map(jobUrl => {
+  const urls = job.urls.map((jobUrl: string) => {
     if (!job.forceNow) {
       return jobUrl;
     }

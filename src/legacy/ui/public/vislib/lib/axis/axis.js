@@ -22,7 +22,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import { VislibLibErrorHandlerProvider } from '../_error_handler';
 import { VislibLibAxisTitleProvider } from './axis_title';
-import { VislibAxisLabelsProvider } from './axis_labels';
+import { AxisLabels } from './axis_labels';
 import { VislibAxisScaleProvider } from './axis_scale';
 import { VislibLibAxisConfigProvider } from './axis_config';
 import { VislibError } from '../../../errors';
@@ -30,7 +30,6 @@ import { VislibError } from '../../../errors';
 export function VislibLibAxisProvider(Private) {
   const ErrorHandler = Private(VislibLibErrorHandlerProvider);
   const AxisTitle = Private(VislibLibAxisTitleProvider);
-  const AxisLabels = Private(VislibAxisLabelsProvider);
   const AxisScale = Private(VislibAxisScaleProvider);
   const AxisConfig = Private(VislibLibAxisConfigProvider);
 
