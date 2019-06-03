@@ -10,11 +10,6 @@ export { hostsModel } from './hosts';
 export { dragAndDropModel } from './drag_and_drop';
 export { networkModel } from './network';
 
-export enum KueryFilterModel {
-  hosts = 'hosts',
-  network = 'network',
-}
-
 export interface KueryFilterQuery {
   kind: 'kuery';
   expression: string;
