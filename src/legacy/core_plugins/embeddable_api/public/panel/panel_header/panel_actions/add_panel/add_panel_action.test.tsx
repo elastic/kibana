@@ -53,17 +53,13 @@ import {
   FILTERABLE_EMBEDDABLE,
 } from '../../../../__test__';
 
-import {
-  ViewMode,
-  Filter,
-  EmbeddableOutput,
-  EmbeddableFactoryRegistry,
-  isErrorEmbeddable,
-} from '../../../../';
+import { ViewMode, Filter, EmbeddableOutput, isErrorEmbeddable } from '../../../../';
 import { AddPanelAction } from './add_panel_action';
+import { createRegistry } from '../../../../create_registry';
+import { EmbeddableFactory } from '../../../../embeddables';
 
-const embeddableFactories = new EmbeddableFactoryRegistry();
-embeddableFactories.registerFactory(new FilterableEmbeddableFactory());
+const embeddableFactories = createRegistry<EmbeddableFactory>();
+embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 
 let container: FilterableContainer;
 let embeddable: FilterableEmbeddable;

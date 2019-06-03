@@ -26,7 +26,6 @@ export {
   ErrorEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  EmbeddableFactoryRegistry,
   isErrorEmbeddable,
 } from './embeddables';
 
@@ -39,6 +38,7 @@ export {
   ViewMode,
   QueryLanguageType,
   Trigger,
+  IRegistry,
 } from './types';
 
 export { actionRegistry, Action, ActionContext, IncompatibleActionError } from './actions';

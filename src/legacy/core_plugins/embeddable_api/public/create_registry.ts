@@ -31,10 +31,13 @@ export const createRegistry = <T>(): IRegistry<T> => {
   };
   const length = () => data.size;
 
+  const getAll = () => Array.from(data.values());
+
   return {
     get,
     set,
     reset,
     length,
+    getAll,
   };
 };

@@ -65,4 +65,4 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
   }
 }
 
-embeddableFactories.registerFactory(new ContactCardEmbeddableFactory());
+embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());

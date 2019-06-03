@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { EmbeddableFactoryRegistry } from '../../embeddables';
-import { Filter } from '../../types';
+import { EmbeddableFactory } from '../../embeddables';
+import { Filter, IRegistry } from '../../types';
 import { Container, ContainerInput } from '../../containers';
 
 export const FILTERABLE_CONTAINER = 'FILTERABLE_CONTAINER';
@@ -39,7 +39,7 @@ export class FilterableContainer extends Container<
 
   constructor(
     initialInput: FilterableContainerInput,
-    embeddableFactories: EmbeddableFactoryRegistry,
+    embeddableFactories: IRegistry<EmbeddableFactory>,
     parent?: Container
   ) {
     super(initialInput, { embeddableLoaded: {} }, embeddableFactories, parent);

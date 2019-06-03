@@ -30,6 +30,7 @@ export interface IRegistry<T> {
   length(): number;
   set(id: string, item: T): void;
   reset(): void;
+  getAll(): T[];
 }
 
 export interface PropertySpec {

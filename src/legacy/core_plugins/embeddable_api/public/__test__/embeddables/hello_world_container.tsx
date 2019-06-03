@@ -19,8 +19,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Container, EmbeddableFactoryRegistry, ViewMode, ContainerInput } from '../..';
+import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
+import { IRegistry } from '../../types';
+import { EmbeddableFactory } from '../../embeddables';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
 
@@ -33,7 +35,7 @@ interface InheritedInput {
 export class HelloWorldContainer extends Container<InheritedInput> {
   public readonly type = HELLO_WORLD_CONTAINER;
 
-  constructor(input: ContainerInput, embeddableFactories: EmbeddableFactoryRegistry) {
+  constructor(input: ContainerInput, embeddableFactories: IRegistry<EmbeddableFactory>) {
     super(input, { embeddableLoaded: {} }, embeddableFactories);
   }
 

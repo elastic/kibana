@@ -39,7 +39,6 @@ import {
 } from '@elastic/eui';
 
 import { SavedObjectAttributes } from '../../../../../../../server/saved_objects';
-import { embeddableFactories } from '../../../../embeddables/embeddable_factories_registry';
 import { EmbeddableFactoryNotFoundError } from '../../../../embeddables/embeddable_factory_not_found_error';
 import { IContainer } from '../../../../containers';
 
@@ -78,7 +77,7 @@ export class AddPanelFlyout extends React.Component<Props> {
 
   public createNewEmbeddable = async (type: string) => {
     this.props.onClose();
-    const factory = embeddableFactories.getFactoryByName(type);
+    const factory = this.props.container.embeddableFactories.get(type);
 
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
@@ -111,7 +110,8 @@ export class AddPanelFlyout extends React.Component<Props> {
         ),
       },
 
-      ...Object.values(this.props.container.embeddableFactories.getFactories())
+      ...this.props.container.embeddableFactories
+        .getAll()
         .filter(
           factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
         )
@@ -147,7 +147,8 @@ export class AddPanelFlyout extends React.Component<Props> {
           <SavedObjectFinder
             onChoose={this.onAddPanel}
             savedObjectMetaData={
-              Object.values(this.props.container.embeddableFactories.getFactories())
+              this.props.container.embeddableFactories
+                .getAll()
                 .filter(
                   embeddableFactory =>
                     Boolean(embeddableFactory.savedObjectMetaData) &&

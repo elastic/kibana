@@ -19,12 +19,13 @@
 
 import {
   Embeddable,
-  EmbeddableFactoryRegistry,
   EmbeddableInput,
   EmbeddableOutput,
   ErrorEmbeddable,
+  EmbeddableFactory,
 } from '../embeddables';
 import { IEmbeddable } from '../embeddables/i_embeddable';
+import { IRegistry } from '../types';
 
 export interface PanelState<E extends { [key: string]: unknown } = { [key: string]: unknown }> {
   savedObjectId?: string;
@@ -55,7 +56,7 @@ export interface IContainer<
   I extends ContainerInput = ContainerInput,
   O extends ContainerOutput = ContainerOutput
 > extends IEmbeddable<I, O> {
-  readonly embeddableFactories: EmbeddableFactoryRegistry;
+  readonly embeddableFactories: IRegistry<EmbeddableFactory>;
 
   /**
    * Returns the input for the given child. Uses a combination of explicit input

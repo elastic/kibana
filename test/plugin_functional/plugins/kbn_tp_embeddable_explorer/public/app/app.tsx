@@ -18,13 +18,16 @@
  */
 import { I18nContext } from 'ui/i18n';
 import { EuiTab } from '@elastic/eui';
-import { EmbeddableFactoryRegistry } from 'plugins/embeddable_api';
 import React, { Component } from 'react';
+import {
+  IRegistry,
+  EmbeddableFactory,
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
 import { ContactCardEmbeddableExample } from './hello_world_embeddable_example';
 import { HelloWorldContainerExample } from './hello_world_container_example';
 
 export interface AppProps {
-  embeddableFactories: EmbeddableFactoryRegistry;
+  embeddableFactories: IRegistry<EmbeddableFactory>;
 }
 
 export class App extends Component<AppProps, { selectedTabId: string }> {

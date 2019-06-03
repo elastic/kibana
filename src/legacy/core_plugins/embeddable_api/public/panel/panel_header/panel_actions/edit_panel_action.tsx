@@ -24,6 +24,7 @@ import { EuiIcon } from '@elastic/eui';
 import { embeddableFactories } from '../../../embeddables/embeddable_factories_registry';
 import { Action, ActionContext } from '../../../actions';
 import { ViewMode } from '../../../types';
+import { EmbeddableFactoryNotFoundError } from '../../../embeddables';
 
 export const EDIT_PANEL_ACTION_ID = 'editPanel';
 
@@ -35,7 +36,10 @@ export class EditPanelAction extends Action {
   }
 
   public getDisplayName({ embeddable }: ActionContext) {
-    const factory = embeddableFactories.getFactoryByName(embeddable.type);
+    const factory = embeddableFactories.get(embeddable.type);
+    if (!factory) {
+      throw new EmbeddableFactoryNotFoundError(embeddable.type);
+    }
     return i18n.translate('kbn.dashboard.panel.editPanel.displayName', {
       defaultMessage: 'Edit {value}',
       values: {

@@ -45,15 +45,17 @@ import {
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { CustomizePanelFlyout } from './customize_panel_flyout';
-import { Container, EmbeddableFactoryRegistry, isErrorEmbeddable } from '../../../..';
+import { Container, isErrorEmbeddable } from '../../../..';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { createRegistry } from '../../../../create_registry';
+import { EmbeddableFactory } from '../../../../embeddables';
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 beforeEach(async () => {
-  const embeddableFactories = new EmbeddableFactoryRegistry();
-  embeddableFactories.registerFactory(new ContactCardEmbeddableFactory());
+  const embeddableFactories = createRegistry<EmbeddableFactory>();
+  embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   container = new HelloWorldContainer({ id: '123', panels: {} }, embeddableFactories);
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

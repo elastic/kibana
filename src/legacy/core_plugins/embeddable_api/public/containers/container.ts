@@ -22,14 +22,15 @@ import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
 import {
   Embeddable,
-  EmbeddableFactoryRegistry,
   EmbeddableInput,
   EmbeddableOutput,
   ErrorEmbeddable,
   EmbeddableFactory,
+  EmbeddableFactoryNotFoundError,
 } from '../embeddables';
 import { IContainer, ContainerInput, ContainerOutput } from './i_container';
 import { IEmbeddable } from '../embeddables/i_embeddable';
+import { IRegistry } from '../types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -56,14 +57,14 @@ export abstract class Container<
   protected readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
   } = {};
-  public readonly embeddableFactories: EmbeddableFactoryRegistry;
+  public readonly embeddableFactories: IRegistry<EmbeddableFactory>;
 
   private subscription: Subscription;
 
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
-    embeddableFactories: EmbeddableFactoryRegistry,
+    embeddableFactories: IRegistry<EmbeddableFactory>,
     parent?: Container
   ) {
     super(input, output, parent);
@@ -106,7 +107,14 @@ export abstract class Container<
     EEO extends EmbeddableOutput = EmbeddableOutput,
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
   >(type: string, explicitInput: Partial<EEI>): Promise<E | ErrorEmbeddable> {
-    const factory = this.embeddableFactories.getFactoryByName<EmbeddableFactory<EEI, EEO, E>>(type);
+    const factory = this.embeddableFactories.get(type) as
+      | EmbeddableFactory<EEI, EEO, E>
+      | undefined;
+
+    if (!factory) {
+      throw new EmbeddableFactoryNotFoundError(type);
+    }
+
     const panelState = this.createNewPanelState<EEI, E>(factory, explicitInput);
 
     this.updateInput({
@@ -123,7 +131,11 @@ export abstract class Container<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
     TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
   >(type: string, savedObjectId: string): Promise<TEmbeddable | ErrorEmbeddable> {
-    const factory = this.embeddableFactories.getFactoryByName(type);
+    const factory = this.embeddableFactories.get(type) as EmbeddableFactory<
+      TEmbeddableInput,
+      any,
+      TEmbeddable
+    >;
     const panelState = this.createNewPanelState(factory);
     panelState.savedObjectId = savedObjectId;
 
@@ -292,7 +304,12 @@ export abstract class Container<
     let embeddable: IEmbeddable | ErrorEmbeddable | undefined;
     const inputForChild = this.getInputForChild(panel.embeddableId);
     try {
-      const factory = this.embeddableFactories.getFactoryByName(panel.type);
+      const factory = this.embeddableFactories.get(panel.type);
+
+      if (!factory) {
+        throw new EmbeddableFactoryNotFoundError(panel.type);
+      }
+
       embeddable = panel.savedObjectId
         ? await factory.createFromSavedObject(panel.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);

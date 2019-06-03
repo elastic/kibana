@@ -40,8 +40,8 @@ import { FilterableEmbeddableInput } from '../__test__/embeddables/filterable_em
 import { Filter } from '../types';
 
 beforeAll(() => {
-  embeddableFactories.registerFactory(new FilterableContainerFactory());
-  embeddableFactories.registerFactory(new FilterableEmbeddableFactory());
+  embeddableFactories.set(FILTERABLE_CONTAINER, new FilterableContainerFactory());
+  embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 });
 
 afterAll(() => {

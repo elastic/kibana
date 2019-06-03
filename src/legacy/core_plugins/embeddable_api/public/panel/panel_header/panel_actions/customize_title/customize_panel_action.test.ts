@@ -41,18 +41,20 @@ import {
   ContactCardEmbeddableInput,
 } from '../../../../__test__/index';
 
-import { Container, EmbeddableFactoryRegistry, isErrorEmbeddable } from '../../../..';
+import { Container, isErrorEmbeddable } from '../../../..';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { CustomizePanelTitleAction } from './customize_panel_action';
+import { createRegistry } from '../../../../create_registry';
+import { EmbeddableFactory } from '../../../../embeddables';
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
-  const embeddableFactories = new EmbeddableFactoryRegistry();
-  embeddableFactories.registerFactory(new ContactCardEmbeddableFactory());
+  const embeddableFactories = createRegistry<EmbeddableFactory>();
+  embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
   return new HelloWorldContainer(input, embeddableFactories);
 }
 

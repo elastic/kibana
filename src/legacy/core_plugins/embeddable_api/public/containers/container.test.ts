@@ -39,19 +39,19 @@ import {
   ContactCardEmbeddableOutput,
   SlowContactCardEmbeddableFactory,
 } from '../__test__/index';
-import { EmbeddableFactoryRegistry, isErrorEmbeddable, EmbeddableOutput } from '../embeddables';
+import { isErrorEmbeddable, EmbeddableOutput, EmbeddableFactory } from '../embeddables';
 import { ContainerInput } from './i_container';
 import { ViewMode, Filter } from '../types';
+import { createRegistry } from '../create_registry';
 import {
   FilterableEmbeddableInput,
   FilterableEmbeddable,
 } from '../__test__/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../embeddables/error_embeddable';
 
-const embeddableFactories = new EmbeddableFactoryRegistry();
-embeddableFactories.registerFactory(new ContactCardEmbeddableFactory());
-embeddableFactories.registerFactory(new FilterableEmbeddableFactory());
-embeddableFactories.registerFactory(new SlowContactCardEmbeddableFactory());
+const embeddableFactories = createRegistry<EmbeddableFactory>();
+embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new SlowContactCardEmbeddableFactory());
 
 async function creatHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
@@ -559,7 +559,10 @@ test('Container changes made directly after adding a new embeddable are propagat
   );
 
   embeddableFactories.reset();
-  embeddableFactories.registerFactory(new SlowContactCardEmbeddableFactory({ loadTickCount: 3 }));
+  embeddableFactories.set(
+    CONTACT_CARD_EMBEDDABLE,
+    new SlowContactCardEmbeddableFactory({ loadTickCount: 3 })
+  );
 
   Rx.merge(container.getOutput$(), container.getInput$())
     .pipe(skip(2))

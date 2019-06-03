@@ -44,4 +44,4 @@ export class HelloWorldEmbeddableFactory extends EmbeddableFactory {
   }
 }
 
-embeddableFactories.registerFactory(new HelloWorldEmbeddableFactory());
+embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());

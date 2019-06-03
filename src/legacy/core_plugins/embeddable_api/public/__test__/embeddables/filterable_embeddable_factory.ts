@@ -44,4 +44,4 @@ export class FilterableEmbeddableFactory extends EmbeddableFactory<FilterableEmb
   }
 }
 
-embeddableFactories.registerFactory(new FilterableEmbeddableFactory());
+embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());

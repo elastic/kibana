@@ -17,49 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectAttributes } from '../../../../server/saved_objects';
 import { EmbeddableFactory } from './embeddable_factory';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
-import { EmbeddableFactoryNotFoundError } from './embeddable_factory_not_found_error';
+import { createRegistry } from '../create_registry';
 
-export class EmbeddableFactoryRegistry {
-  private factories: { [key: string]: EmbeddableFactory<any, any, any, any> } = {};
-
-  public registerFactory<
-    TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-    TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput, TEmbeddableOutput> = IEmbeddable<
-      TEmbeddableInput,
-      TEmbeddableOutput
-    >,
-    TSavedObjectAttributes extends SavedObjectAttributes = SavedObjectAttributes
-  >(
-    factory: EmbeddableFactory<
-      TEmbeddableInput,
-      TEmbeddableOutput,
-      TEmbeddable,
-      TSavedObjectAttributes
-    >
-  ) {
-    this.factories[factory.type] = factory;
-  }
-
-  public getFactoryByName<TEmbeddableFactory extends EmbeddableFactory = EmbeddableFactory>(
-    type: string
-  ): TEmbeddableFactory {
-    if (this.factories[type] === undefined) {
-      throw new EmbeddableFactoryNotFoundError(type);
-    }
-    return this.factories[type] as TEmbeddableFactory;
-  }
-
-  public getFactories() {
-    return this.factories;
-  }
-
-  public reset() {
-    this.factories = {};
-  }
-}
-
-export const embeddableFactories = new EmbeddableFactoryRegistry();
+export const embeddableFactories = createRegistry<EmbeddableFactory>();
