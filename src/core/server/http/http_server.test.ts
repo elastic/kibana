@@ -708,7 +708,9 @@ test('Should enable auth for a route by default if registerAuth has been called'
   const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('');
-  router.get({ path: '/', validate: false }, async (req, res) => res.ok({}));
+  router.get({ path: '/', validate: false }, async (req, res) =>
+    res.ok({ authRequired: req.route.options.authRequired })
+  );
   registerRouter(router);
 
   const authenticate = jest
@@ -719,17 +721,17 @@ test('Should enable auth for a route by default if registerAuth has been called'
   await server.start();
   await supertest(innerServer.listener)
     .get('/')
-    .expect(200);
+    .expect(200, { authRequired: true });
 
   expect(authenticate).toHaveBeenCalledTimes(1);
 });
 
-test('Should support disabling auth for a route', async () => {
+test('Should support disabling auth for a route explicitly', async () => {
   const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('');
   router.get({ path: '/', validate: false, options: { authRequired: false } }, async (req, res) =>
-    res.ok({})
+    res.ok({ authRequired: req.route.options.authRequired })
   );
   registerRouter(router);
   const authenticate = jest.fn();
@@ -738,9 +740,73 @@ test('Should support disabling auth for a route', async () => {
   await server.start();
   await supertest(innerServer.listener)
     .get('/')
-    .expect(200);
+    .expect(200, { authRequired: false });
 
-  expect(authenticate).not.toHaveBeenCalled();
+  expect(authenticate).toHaveBeenCalledTimes(0);
+});
+
+test('Should support enabling auth for a route explicitly', async () => {
+  const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('');
+  router.get({ path: '/', validate: false, options: { authRequired: true } }, async (req, res) =>
+    res.ok({ authRequired: req.route.options.authRequired })
+  );
+  registerRouter(router);
+  const authenticate = jest
+    .fn()
+    .mockImplementation((req, sessionStorage, t) => t.authenticated({}));
+  await registerAuth(authenticate, cookieOptions);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .get('/')
+    .expect(200, { authRequired: true });
+
+  expect(authenticate).toHaveBeenCalledTimes(1);
+});
+
+test('Should let to attach meta-data tag strings to a route', async () => {
+  const tags = ['my:tag'];
+  const { registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('');
+  router.get({ path: '/with-tags', validate: false, options: { tags } }, async (req, res) =>
+    res.ok({ tags: req.route.options.tags })
+  );
+  router.get({ path: '/without-tags', validate: false }, async (req, res) =>
+    res.ok({ tags: req.route.options.tags })
+  );
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .get('/with-tags')
+    .expect(200, { tags });
+
+  await supertest(innerServer.listener)
+    .get('/without-tags')
+    .expect(200, { tags: [] });
+});
+
+test('Should expose route details of incoming request to a route handler', async () => {
+  const { registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('');
+  router.get({ path: '/', validate: false }, async (req, res) => res.ok(req.route));
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .get('/')
+    .expect(200, {
+      method: 'get',
+      path: '/',
+      options: {
+        authRequired: true,
+        tags: [],
+      },
+    });
 });
 
 describe('#auth.isAuthenticated()', () => {
