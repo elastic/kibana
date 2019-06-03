@@ -6,32 +6,17 @@
 
 import React from 'react';
 
-import {
-  ExpressionRenderer,
-  ExpressionRendererProps,
-} from '../../../../../../src/legacy/core_plugins/data/public';
-import { Action } from './state_management';
-import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
+import { ExpressionRendererProps } from '../../../../../../src/legacy/core_plugins/data/public';
+import { Visualization } from '../../types';
 import {
   createMockVisualization,
   createMockDatasource,
   createExpressionRendererMock,
   DatasourceMock,
 } from '../mocks';
-import { WorkspacePanel } from './workspace_panel';
+import { WorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
-
-export interface WorkspacePanelProps {
-  activeDatasource: Datasource;
-  datasourceState: unknown;
-  activeVisualizationId: string | null;
-  visualizationMap: Record<string, Visualization>;
-  visualizationState: unknown;
-  datasourcePublicAPI: DatasourcePublicAPI;
-  dispatch: (action: Action) => void;
-  ExpressionRenderer: ExpressionRenderer;
-}
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 

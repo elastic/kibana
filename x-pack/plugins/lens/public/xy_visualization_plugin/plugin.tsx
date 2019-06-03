@@ -13,7 +13,6 @@ import {
   functionsRegistry,
   // @ts-ignore
 } from '../../../../../src/legacy/core_plugins/interpreter/public/registries';
-// @ts-ignore
 import { ExpressionFunction } from '../../../../../src/legacy/core_plugins/interpreter/public';
 import { legendConfig, xConfig, yConfig, xyChart, xyChartRenderer } from './xy_expression';
 
