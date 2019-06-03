@@ -82,7 +82,7 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
     const availableGroupByAggs = pivotGroupByFieldSupport[field.type];
     availableGroupByAggs.forEach(groupByAgg => {
       // Aggregation name for the group-by is the plain field name. Illegal characters will be removed.
-      const aggName = field.name.replace(illegalEsAggNameChars, '');
+      const aggName = field.name.replace(illegalEsAggNameChars, '').trim();
       // Option name in the dropdown for the group-by is in the form of `sum(fieldname)`.
       const dropDownName = `${groupByAgg}(${field.name})`;
       const groupByOption: DropDownLabel = { label: dropDownName };
@@ -100,7 +100,7 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
     const availableAggs = pivotAggsFieldSupport[field.type];
     availableAggs.forEach(agg => {
       // Aggregation name is formatted like `fieldname.sum`. Illegal characters will be removed.
-      const aggName = `${field.name.replace(illegalEsAggNameChars, '')}.${agg}`;
+      const aggName = `${field.name.replace(illegalEsAggNameChars, '').trim()}.${agg}`;
       // Option name in the dropdown for the aggregation is in the form of `sum(fieldname)`.
       const dropDownName = `${agg}(${field.name})`;
       aggOption.options.push({ label: dropDownName });
