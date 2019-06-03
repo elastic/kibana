@@ -7,7 +7,7 @@
 import { http } from './http_service';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { indexPatternService } from '../../../maps/public/kibana_services';
+import { indexPatternService } from '../kibana_services';
 import { getGeoJsonIndexingDetails } from './geo_processing';
 import { sizeLimitedChunking } from './size_limited_chunking';
 
