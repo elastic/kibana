@@ -673,6 +673,8 @@ export function updateLayerStyle(layerId, styleDescriptor) {
 
     // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
     dispatch(syncDataForLayer(layerId));
+
+    dispatch(setNextColor());
   };
 }
 
