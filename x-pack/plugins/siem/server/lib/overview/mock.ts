@@ -48,6 +48,13 @@ export const mockResponseNetwork = {
     unique_suricata_count: { doc_count: 2375 },
     unique_zeek_count: { doc_count: 456 },
     unique_socket_count: { doc_count: 13 },
+    unique_filebeat_count: {
+      doc_count: 456756,
+      unique_cisco_count: { doc_count: 14 },
+      unique_netflow_count: { doc_count: 992 },
+      unique_panw_count: { doc_count: 225 },
+    },
+    unique_packetbeat_count: { doc_count: 7897896, unique_tls_count: { doc_count: 2009 } },
   },
 };
 
@@ -57,6 +64,10 @@ export const mockResultNetwork = {
   filebeatSuricata: 2375,
   filebeatZeek: 456,
   auditbeatSocket: 13,
+  filebeatCisco: 14,
+  filebeatNetflow: 992,
+  filebeatPanw: 225,
+  packetbeatTLS: 2009,
 };
 
 export const mockOptionsHost: RequestBasicOptions = {
@@ -104,7 +115,9 @@ export const mockResponseHost = {
       package_count: { doc_count: 2003 },
       process_count: { doc_count: 1200 },
       user_count: { doc_count: 1979 },
+      filebeat_count: { doc_count: 225 },
     },
+    winlog_count: { doc_count: 737 },
   },
 };
 
@@ -115,4 +128,6 @@ export const mockResultHost = {
   auditbeatPackage: 2003,
   auditbeatProcess: 1200,
   auditbeatUser: 1979,
+  filebeatSystemModule: 225,
+  winlogbeat: 737,
 };
