@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { deepFreeze } from '../../../deep_freeze';
+import { deepFreeze } from '../../../../../utils/deep_freeze';
 
 deepFreeze(
   {
