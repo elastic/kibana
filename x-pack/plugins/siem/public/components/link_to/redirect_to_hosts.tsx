@@ -5,7 +5,9 @@
  */
 
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
+
+import { RedirectWrapper } from './redirect_wrapper';
 
 export type HostComponentProps = RouteComponentProps<{
   hostName: string;
@@ -15,6 +17,6 @@ export const RedirectToHostsPage = ({
   match: {
     params: { hostName },
   },
-}: HostComponentProps) => <Redirect to={hostName ? `/hosts/${hostName}` : '/hosts'} />;
+}: HostComponentProps) => <RedirectWrapper to={hostName ? `/hosts/${hostName}` : '/hosts'} />;
 
 export const getHostsUrl = () => '#/link-to/hosts';
