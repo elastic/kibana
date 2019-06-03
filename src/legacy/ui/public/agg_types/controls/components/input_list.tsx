@@ -29,18 +29,17 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface InputListConfig {
-  defaultValue: {};
-  defaultEmptyValue: {};
-  validateClass: new (value: string) => object;
-  getModelValue(item: InputObject): {};
-  getModel(models: InputModel[], index: number, modelName?: string): InputModel | InputItem;
+  defaultValue: InputItemModel;
+  defaultEmptyValue: InputItemModel;
+  validateClass: new (value: string) => { toString(): string };
+  getModelValue(item: InputObject): InputItemModel;
   getRemoveBtnAriaLabel(model: InputModel): string;
   onChangeFn(model: InputModel): InputObject;
   hasInvalidValuesFn(model: InputModel): boolean;
   renderInputRow(
     model: InputModel,
     index: number,
-    onChangeFn: (index: number, value: string, modelName?: string) => void
+    onChangeFn: (index: number, value: string, modelName: string) => void
   ): React.ReactNode;
   validateModel(
     validateFn: (value: string | undefined, modelObj: InputItem) => void,
@@ -50,18 +49,22 @@ export interface InputListConfig {
 }
 interface InputModelBase {
   id: string;
-  [key: string]: any;
 }
 export type InputObject = object;
-interface InputItem {
+export interface InputItem {
   model: string;
   value: string;
   isInvalid: boolean;
 }
 
-export type InputModel =
-  | InputModelBase & { [model: string]: InputItem }
-  | InputModelBase & InputItem;
+interface InputItemModel {
+  [model: string]: InputItem;
+}
+
+// InputModel can have the following implementations:
+// for Mask List - { id: 'someId', mask: { model: '', value: '', isInvalid: false }}
+// for FromTo List - { id: 'someId', from: { model: '', value: '', isInvalid: false }, to: { model: '', value: '', isInvalid: false }}
+export type InputModel = InputModelBase & InputItemModel;
 
 interface InputListProps {
   config: InputListConfig;
@@ -95,8 +98,8 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
     onChange(modelList.map(config.onChangeFn));
   };
 
-  const onChangeValue = (index: number, value: string, modelName?: string) => {
-    const range = config.getModel(models, index, modelName);
+  const onChangeValue = (index: number, value: string, modelName: string) => {
+    const range = models[index][modelName];
     const { model, isInvalid } = validateValue(value);
     range.value = value;
     range.model = model;

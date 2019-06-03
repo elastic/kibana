@@ -21,7 +21,7 @@ import React from 'react';
 import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import Ipv4Address from '../../../utils/ipv4_address';
-import { InputList, InputListConfig, InputModel, InputObject } from './input_list';
+import { InputList, InputListConfig, InputModel, InputObject, InputItem } from './input_list';
 
 const EMPTY_STRING = '';
 
@@ -30,15 +30,9 @@ export interface FromToObject extends InputObject {
   to?: string;
 }
 
-interface FromToItem {
-  model: string;
-  value: string;
-  isInvalid: boolean;
-}
-
 type FromToModel = InputModel & {
-  from: FromToItem;
-  to: FromToItem;
+  from: InputItem;
+  to: InputItem;
 };
 
 interface FromToListProps {
@@ -68,11 +62,10 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
       },
       to: { value: item.to || EMPTY_STRING, model: item.to || EMPTY_STRING, isInvalid: false },
     }),
-    getModel: (models: FromToModel[], index, modelName: 'from' | 'to') => models[index][modelName],
     getRemoveBtnAriaLabel: (item: FromToModel) =>
       i18n.translate('common.ui.aggTypes.ipRanges.removeRangeAriaLabel', {
         defaultMessage: 'Remove the range of {from} to {to}',
-        values: { from: item.from.value, to: item.to.value },
+        values: { from: item.from.value || '*', to: item.to.value || '*' },
       }),
     onChangeFn: ({ from, to }: FromToModel) => {
       const result: FromToObject = {};
@@ -91,7 +84,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
           <EuiFieldText
             aria-label={i18n.translate('common.ui.aggTypes.ipRanges.ipRangeFromAriaLabel', {
               defaultMessage: 'IP range from: {value}',
-              values: { value: item.value },
+              values: { value: item.from.value || '*' },
             })}
             isInvalid={showValidation ? item.from.isInvalid : false}
             placeholder="*"
@@ -106,7 +99,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
           <EuiFieldText
             aria-label={i18n.translate('common.ui.aggTypes.ipRanges.ipRangeToAriaLabel', {
               defaultMessage: 'IP range to: {value}',
-              values: { value: item.value },
+              values: { value: item.to.value || '*' },
             })}
             isInvalid={showValidation ? item.to.isInvalid : false}
             placeholder="*"
