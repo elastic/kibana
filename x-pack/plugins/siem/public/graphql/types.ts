@@ -135,6 +135,8 @@ export interface Source {
   KpiNetwork?: KpiNetworkData | null;
 
   KpiHosts: KpiHostsData;
+
+  KpiIpDetails?: KpiIpDetailsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -1101,6 +1103,34 @@ export interface KpiHostHistogramData {
   y?: number | null;
 }
 
+export interface KpiIpDetailsData {
+  connections?: number | null;
+
+  hosts?: number | null;
+
+  sourcePackets?: number | null;
+
+  sourcePacketsHistogram?: KpiIpDetailsHistogramData[] | null;
+
+  sourceByte?: number | null;
+
+  sourceByteHistogram?: KpiIpDetailsHistogramData[] | null;
+
+  destinationPackets?: number | null;
+
+  destinationPacketsHistogram?: KpiIpDetailsHistogramData[] | null;
+
+  destinationByte?: number | null;
+
+  destinationByteHistogram?: KpiIpDetailsHistogramData[] | null;
+}
+
+export interface KpiIpDetailsHistogramData {
+  x?: string | null;
+
+  y?: number | null;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -1874,6 +1904,17 @@ export interface KpiHostsSourceArgs {
   filterQuery?: string | null;
 
   defaultIndex: string[];
+}
+export interface KpiIpDetailsSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+
+  defaultIndex: string[];
+
+  ip: string;
 }
 export interface NetworkTopNFlowSourceArgs {
   id?: string | null;
@@ -2965,6 +3006,62 @@ export namespace GetKpiHostsQuery {
   export type UniqueSourceIpsHistogram = KpiHostChartFields.Fragment;
 
   export type UniqueDestinationIpsHistogram = KpiHostChartFields.Fragment;
+}
+
+export namespace GetKpiIpDetailsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+    defaultIndex: string[];
+    ip: string;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    KpiIpDetails?: KpiIpDetails | null;
+  };
+
+  export type KpiIpDetails = {
+    __typename?: 'KpiIpDetailsData';
+
+    connections?: number | null;
+
+    hosts?: number | null;
+
+    sourcePackets?: number | null;
+
+    sourcePacketsHistogram?: SourcePacketsHistogram[] | null;
+
+    sourceByte?: number | null;
+
+    sourceByteHistogram?: SourceByteHistogram[] | null;
+
+    destinationPackets?: number | null;
+
+    destinationPacketsHistogram?: DestinationPacketsHistogram[] | null;
+
+    destinationByte?: number | null;
+
+    destinationByteHistogram?: DestinationByteHistogram[] | null;
+  };
+
+  export type SourcePacketsHistogram = KpiIpDetailsChartFields.Fragment;
+
+  export type SourceByteHistogram = KpiIpDetailsChartFields.Fragment;
+
+  export type DestinationPacketsHistogram = KpiIpDetailsChartFields.Fragment;
+
+  export type DestinationByteHistogram = KpiIpDetailsChartFields.Fragment;
 }
 
 export namespace GetKpiNetworkQuery {
@@ -5042,6 +5139,16 @@ export namespace KpiHostChartFields {
     __typename?: 'KpiHostHistogramData';
 
     x?: number | null;
+
+    y?: number | null;
+  };
+}
+
+export namespace KpiIpDetailsChartFields {
+  export type Fragment = {
+    __typename?: 'KpiIpDetailsHistogramData';
+
+    x?: string | null;
 
     y?: number | null;
   };

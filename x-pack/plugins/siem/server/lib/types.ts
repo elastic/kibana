@@ -21,6 +21,7 @@ import { UncommonProcesses } from './uncommon_processes';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
+import { KpiIpDetails } from './kpi_ip_details';
 
 export * from './hosts';
 
@@ -35,6 +36,7 @@ export interface AppDomainLibs {
   overview: Overview;
   uncommonProcesses: UncommonProcesses;
   kpiHosts: KpiHosts;
+  kpiIpDetails: KpiIpDetails;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {

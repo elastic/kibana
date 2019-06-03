@@ -27,6 +27,7 @@ import { sourcesSchema } from './sources';
 import { timelineSchema } from './timeline';
 import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i';
+import { kpiIpDetailsSchema } from './kpi_ip_details';
 export const schemas = [
   authenticationsSchema,
   ecsSchema,
@@ -39,6 +40,7 @@ export const schemas = [
   ...ipDetailsSchemas,
   kpiNetworkSchema,
   kpiHostsSchema,
+  kpiIpDetailsSchema,
   networkSchema,
   noteSchema,
   overviewSchema,

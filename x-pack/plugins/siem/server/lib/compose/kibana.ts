@@ -29,6 +29,8 @@ import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../unc
 import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
+import { KpiIpDetails } from '../kpi_ip_details';
+import { ElasticsearchKpiIpDetailsAdapter } from '../kpi_ip_details/elasticsearch_adapter';
 
 export function compose(server: Server): AppBackendLibs {
   const configuration = new KibanaConfigurationAdapter<Configuration>(server);
@@ -48,6 +50,7 @@ export function compose(server: Server): AppBackendLibs {
     ipDetails: new IpDetails(new ElasticsearchIpOverviewAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
+    kpiIpDetails: new KpiIpDetails(new ElasticsearchKpiIpDetailsAdapter(framework)),
     network: new Network(new ElasticsearchNetworkAdapter(framework)),
     overview: new Overview(new ElasticsearchOverviewAdapter(framework)),
     uncommonProcesses: new UncommonProcesses(new ElasticsearchUncommonProcessesAdapter(framework)),

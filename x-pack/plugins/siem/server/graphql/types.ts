@@ -164,6 +164,8 @@ export interface Source {
   KpiNetwork?: KpiNetworkData | null;
 
   KpiHosts: KpiHostsData;
+
+  KpiIpDetails?: KpiIpDetailsData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -1130,6 +1132,34 @@ export interface KpiHostHistogramData {
   y?: number | null;
 }
 
+export interface KpiIpDetailsData {
+  connections?: number | null;
+
+  hosts?: number | null;
+
+  sourcePackets?: number | null;
+
+  sourcePacketsHistogram?: KpiIpDetailsHistogramData[] | null;
+
+  sourceByte?: number | null;
+
+  sourceByteHistogram?: KpiIpDetailsHistogramData[] | null;
+
+  destinationPackets?: number | null;
+
+  destinationPacketsHistogram?: KpiIpDetailsHistogramData[] | null;
+
+  destinationByte?: number | null;
+
+  destinationByteHistogram?: KpiIpDetailsHistogramData[] | null;
+}
+
+export interface KpiIpDetailsHistogramData {
+  x?: string | null;
+
+  y?: number | null;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -1904,6 +1934,17 @@ export interface KpiHostsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface KpiIpDetailsSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+
+  defaultIndex: string[];
+
+  ip: string;
+}
 export interface NetworkTopNFlowSourceArgs {
   id?: string | null;
 
@@ -2424,6 +2465,8 @@ export namespace SourceResolvers {
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
 
     KpiHosts?: KpiHostsResolver<KpiHostsData, TypeParent, Context>;
+
+    KpiIpDetails?: KpiIpDetailsResolver<KpiIpDetailsData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, Context>;
 
@@ -2718,6 +2761,23 @@ export namespace SourceResolvers {
     filterQuery?: string | null;
 
     defaultIndex: string[];
+  }
+
+  export type KpiIpDetailsResolver<
+    R = KpiIpDetailsData | null,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, KpiIpDetailsArgs>;
+  export interface KpiIpDetailsArgs {
+    id?: string | null;
+
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
+
+    defaultIndex: string[];
+
+    ip: string;
   }
 
   export type NetworkTopNFlowResolver<
@@ -5997,6 +6057,116 @@ export namespace KpiHostHistogramDataResolvers {
   export type YResolver<
     R = number | null,
     Parent = KpiHostHistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace KpiIpDetailsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = KpiIpDetailsData> {
+    connections?: ConnectionsResolver<number | null, TypeParent, Context>;
+
+    hosts?: HostsResolver<number | null, TypeParent, Context>;
+
+    sourcePackets?: SourcePacketsResolver<number | null, TypeParent, Context>;
+
+    sourcePacketsHistogram?: SourcePacketsHistogramResolver<
+      KpiIpDetailsHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    sourceByte?: SourceByteResolver<number | null, TypeParent, Context>;
+
+    sourceByteHistogram?: SourceByteHistogramResolver<
+      KpiIpDetailsHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    destinationPackets?: DestinationPacketsResolver<number | null, TypeParent, Context>;
+
+    destinationPacketsHistogram?: DestinationPacketsHistogramResolver<
+      KpiIpDetailsHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    destinationByte?: DestinationByteResolver<number | null, TypeParent, Context>;
+
+    destinationByteHistogram?: DestinationByteHistogramResolver<
+      KpiIpDetailsHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+  }
+
+  export type ConnectionsResolver<
+    R = number | null,
+    Parent = KpiIpDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type HostsResolver<
+    R = number | null,
+    Parent = KpiIpDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SourcePacketsResolver<
+    R = number | null,
+    Parent = KpiIpDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SourcePacketsHistogramResolver<
+    R = KpiIpDetailsHistogramData[] | null,
+    Parent = KpiIpDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SourceByteResolver<
+    R = number | null,
+    Parent = KpiIpDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SourceByteHistogramResolver<
+    R = KpiIpDetailsHistogramData[] | null,
+    Parent = KpiIpDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DestinationPacketsResolver<
+    R = number | null,
+    Parent = KpiIpDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DestinationPacketsHistogramResolver<
+    R = KpiIpDetailsHistogramData[] | null,
+    Parent = KpiIpDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DestinationByteResolver<
+    R = number | null,
+    Parent = KpiIpDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DestinationByteHistogramResolver<
+    R = KpiIpDetailsHistogramData[] | null,
+    Parent = KpiIpDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace KpiIpDetailsHistogramDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = KpiIpDetailsHistogramData> {
+    x?: XResolver<string | null, TypeParent, Context>;
+
+    y?: YResolver<number | null, TypeParent, Context>;
+  }
+
+  export type XResolver<
+    R = string | null,
+    Parent = KpiIpDetailsHistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type YResolver<
+    R = number | null,
+    Parent = KpiIpDetailsHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
