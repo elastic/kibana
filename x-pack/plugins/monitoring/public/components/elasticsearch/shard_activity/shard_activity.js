@@ -13,7 +13,7 @@ import { SourceDestination } from './source_destination';
 import { FilesProgress, BytesProgress, TranslogProgress } from './progress';
 import { parseProps } from './parse_props';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const columns = [
   {
@@ -75,8 +75,7 @@ class ShardActivityUI extends React.Component {
 
   getNoDataMessage() {
     if (this.props.showShardActivityHistory) {
-      return this.props.intl.formatMessage({
-        id: 'xpack.monitoring.elasticsearch.shardActivity.noDataMessage',
+      return i18n.translate('xpack.monitoring.elasticsearch.shardActivity.noDataMessage', {
         defaultMessage: 'There are no historical shard activity records for the selected time range.'
       });
     }
@@ -164,4 +163,4 @@ class ShardActivityUI extends React.Component {
   }
 }
 
-export const ShardActivity = injectI18n(ShardActivityUI);
+export const ShardActivity = ShardActivityUI;

@@ -21,7 +21,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const columns = [
   {
@@ -139,7 +139,6 @@ const getNoDataMessage = () => {
 const ElasticsearchIndicesUI = ({
   clusterStatus,
   indices,
-  intl,
   sorting,
   pagination,
   onTableChange,
@@ -175,9 +174,8 @@ const ElasticsearchIndicesUI = ({
             search={{
               box: {
                 incremental: true,
-                placeholder: intl.formatMessage({
-                  id: 'xpack.monitoring.elasticsearch.indices.monitoringTablePlaceholder',
-                  defaultMessage: 'Filter Indices…',
+                placeholder: i18n.translate('xpack.monitoring.elasticsearch.indices.monitoringTablePlaceholder', {
+                  defaultMessage: 'Filter Indices…'
                 })
               },
             }}
@@ -192,4 +190,4 @@ const ElasticsearchIndicesUI = ({
   );
 };
 
-export const ElasticsearchIndices = injectI18n(ElasticsearchIndicesUI);
+export const ElasticsearchIndices = ElasticsearchIndicesUI;

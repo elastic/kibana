@@ -14,9 +14,10 @@ import { InfoTooltip } from './info_tooltip';
 import {
   EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiScreenReaderOnly
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function MonitoringTimeseriesContainerUI({ series, onBrush, intl }) {
+function MonitoringTimeseriesContainerUI({ series, onBrush }) {
   if (series === undefined) {
     return null; // still loading
   }
@@ -27,10 +28,11 @@ function MonitoringTimeseriesContainerUI({ series, onBrush, intl }) {
   const bucketSize = get(first(series), 'bucket_size'); // bucket size will be the same for all metrics in all series
 
   const seriesScreenReaderTextList = [
-    intl.formatMessage({
-      id: 'xpack.monitoring.chart.seriesScreenReaderListDescription',
-      defaultMessage: 'Interval: {bucketSize}' }, {
-      bucketSize
+    i18n.translate('xpack.monitoring.chart.seriesScreenReaderListDescription', {
+      defaultMessage: 'Interval: {bucketSize}',
+      values: {
+        bucketSize
+      }
     })
   ]
     .concat(series.map(item => `${item.metric.label}: ${item.metric.description}`));
@@ -81,5 +83,5 @@ function MonitoringTimeseriesContainerUI({ series, onBrush, intl }) {
   );
 }
 
-export const MonitoringTimeseriesContainer = injectI18n(MonitoringTimeseriesContainerUI);
+export const MonitoringTimeseriesContainer = MonitoringTimeseriesContainerUI;
 

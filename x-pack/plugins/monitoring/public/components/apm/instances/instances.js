@@ -13,7 +13,6 @@ import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
 import { i18n } from '@kbn/i18n';
-import { injectI18n } from '@kbn/i18n/react';
 
 const columns = [
   {
@@ -84,7 +83,7 @@ const columns = [
   },
 ];
 
-export function ApmServerInstancesUI({ apms, intl }) {
+export function ApmServerInstancesUI({ apms }) {
   const {
     pagination,
     sorting,
@@ -111,8 +110,7 @@ export function ApmServerInstancesUI({ apms, intl }) {
             search={{
               box: {
                 incremental: true,
-                placeholder: intl.formatMessage({
-                  id: 'xpack.monitoring.apm.instances.filterInstancesPlaceholder',
+                placeholder: i18n.translate('xpack.monitoring.apm.instances.filterInstancesPlaceholder', {
                   defaultMessage: 'Filter Instances…'
                 })
               },
@@ -120,8 +118,7 @@ export function ApmServerInstancesUI({ apms, intl }) {
                 {
                   type: 'field_value_selection',
                   field: 'version',
-                  name: intl.formatMessage({
-                    id: 'xpack.monitoring.apm.instances.versionFilter',
+                  name: i18n.translate('xpack.monitoring.apm.instances.versionFilter', {
                     defaultMessage: 'Version'
                   }),
                   options: versions,
@@ -140,4 +137,4 @@ export function ApmServerInstancesUI({ apms, intl }) {
   );
 }
 
-export const ApmServerInstances = injectI18n(ApmServerInstancesUI);
+export const ApmServerInstances = ApmServerInstancesUI;

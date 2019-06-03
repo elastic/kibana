@@ -19,7 +19,8 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 function KibanaPanelUi(props) {
   if (!props.count) {
@@ -38,8 +39,9 @@ function KibanaPanelUi(props) {
       {...props}
       statusIndicator={statusIndicator}
       url="kibana"
-      title={props.intl.formatMessage({
-        id: 'xpack.monitoring.cluster.overview.kibanaPanel.kibanaTitle', defaultMessage: 'Kibana' })}
+      title={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.kibanaTitle', {
+        defaultMessage: 'Kibana'
+      })}
     >
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
@@ -48,8 +50,9 @@ function KibanaPanelUi(props) {
               <h3>
                 <EuiLink
                   onClick={goToKibana}
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkAriaLabel', defaultMessage: 'Kibana Overview' })}
+                  aria-label={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkAriaLabel', {
+                    defaultMessage: 'Kibana Overview'
+                  })}
                   data-test-subj="kbnOverview"
                 >
                   <FormattedMessage
@@ -93,10 +96,13 @@ function KibanaPanelUi(props) {
                 <EuiLink
                   onClick={goToInstances}
                   data-test-subj="kbnInstances"
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkAriaLabel',
-                    defaultMessage: 'Kibana Instances: {instancesCount}' },
-                  { instancesCount: props.count })}
+                  aria-label={i18n.translate(
+                    'xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkAriaLabel',
+                    {
+                      defaultMessage: 'Kibana Instances: {instancesCount}',
+                      values: { instancesCount: props.count }
+                    }
+                  )}
                 >
                   <FormattedMessage
                     id="xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkLabel"
@@ -134,4 +140,4 @@ function KibanaPanelUi(props) {
   );
 }
 
-export const KibanaPanel = injectI18n(KibanaPanelUi);
+export const KibanaPanel = KibanaPanelUi;

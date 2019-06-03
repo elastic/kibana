@@ -20,7 +20,6 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 
 const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
@@ -203,7 +202,7 @@ const getColumns = showCgroupMetricsElasticsearch => {
   return cols;
 };
 
-function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticsearch, intl, ...props }) {
+function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticsearch, ...props }) {
   const columns = getColumns(showCgroupMetricsElasticsearch);
   const { sorting, pagination, onTableChange } = props;
 
@@ -224,9 +223,8 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
             search={{
               box: {
                 incremental: true,
-                placeholder: intl.formatMessage({
-                  id: 'xpack.monitoring.elasticsearch.nodes.monitoringTablePlaceholder',
-                  defaultMessage: 'Filter Nodes…',
+                placeholder: i18n.translate('xpack.monitoring.elasticsearch.nodes.monitoringTablePlaceholder', {
+                  defaultMessage: 'Filter Nodes…'
                 }),
               },
             }}
@@ -241,4 +239,4 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
   );
 }
 
-export const ElasticsearchNodes = injectI18n(ElasticsearchNodesUI);
+export const ElasticsearchNodes = ElasticsearchNodesUI;

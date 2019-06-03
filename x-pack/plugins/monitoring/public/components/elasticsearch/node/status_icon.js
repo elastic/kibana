@@ -6,20 +6,20 @@
 
 import React from 'react';
 import { StatusIcon } from '../../status_icon';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-export function NodeStatusIconUI({ isOnline, status, intl }) {
+export function NodeStatusIconUI({ isOnline, status }) {
   const type = isOnline ? StatusIcon.TYPES.GREEN : StatusIcon.TYPES.GRAY;
 
   return (
     <StatusIcon
       type={type}
-      label={intl.formatMessage({
-        id: 'xpack.monitoring.elasticsearch.node.statusIconLabel',
-        defaultMessage: 'Status: {status}' }, { status }
-      )}
+      label={i18n.translate('xpack.monitoring.elasticsearch.node.statusIconLabel', {
+        defaultMessage: 'Status: {status}',
+        values: { status }
+      })}
     />
   );
 }
 
-export const NodeStatusIcon = injectI18n(NodeStatusIconUI);
+export const NodeStatusIcon = NodeStatusIconUI;

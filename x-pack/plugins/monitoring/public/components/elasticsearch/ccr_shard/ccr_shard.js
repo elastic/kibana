@@ -22,7 +22,8 @@ import {
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
 import { formatDateTimeLocal } from '../../../../common/formatting';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 class CcrShardUI extends PureComponent {
   renderCharts() {
@@ -50,7 +51,7 @@ class CcrShardUI extends PureComponent {
   }
 
   renderErrors() {
-    const { stat, intl } = this.props;
+    const { stat } = this.props;
     if (stat.read_exceptions && stat.read_exceptions.length > 0) {
       return (
         <Fragment>
@@ -70,15 +71,13 @@ class CcrShardUI extends PureComponent {
               items={stat.read_exceptions}
               columns={[
                 {
-                  name: intl.formatMessage({
-                    id: 'xpack.monitoring.elasticsearch.ccrShard.errorsTable.typeColumnTitle',
+                  name: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.errorsTable.typeColumnTitle', {
                     defaultMessage: 'Type'
                   }),
                   field: 'exception.type'
                 },
                 {
-                  name: intl.formatMessage({
-                    id: 'xpack.monitoring.elasticsearch.ccrShard.errorsTable.reasonColumnTitle',
+                  name: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.errorsTable.reasonColumnTitle', {
                     defaultMessage: 'Reason'
                   }),
                   field: 'exception.reason',
@@ -145,4 +144,4 @@ class CcrShardUI extends PureComponent {
   }
 }
 
-export const CcrShard = injectI18n(CcrShardUI);
+export const CcrShard = CcrShardUI;

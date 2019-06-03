@@ -9,7 +9,8 @@ import moment from 'moment';
 import { get } from 'lodash';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { ClusterItemContainer, BytesPercentageUsage } from './helpers';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGrid,
@@ -37,7 +38,9 @@ function ApmPanelUi(props) {
     <ClusterItemContainer
       {...props}
       url="apm"
-      title={props.intl.formatMessage({ id: 'xpack.monitoring.cluster.overview.apmPanel.apmTitle', defaultMessage: 'APM' })}
+      title={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.apmTitle', {
+        defaultMessage: 'APM'
+      })}
     >
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
@@ -46,8 +49,9 @@ function ApmPanelUi(props) {
               <h3>
                 <EuiLink
                   onClick={goToApm}
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel', defaultMessage: 'APM Overview' })}
+                  aria-label={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel', {
+                    defaultMessage: 'APM Overview'
+                  })}
                   data-test-subj="apmOverview"
                 >
                   <FormattedMessage
@@ -90,10 +94,13 @@ function ApmPanelUi(props) {
               <h3>
                 <EuiLink
                   onClick={goToInstances}
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
-                    defaultMessage: 'Apm Instances: {apmsTotal}' },
-                  { apmsTotal: props.apms.total })}
+                  aria-label={i18n.translate(
+                    'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
+                    {
+                      defaultMessage: 'Apm Instances: {apmsTotal}',
+                      values: { apmsTotal: props.apms.total }
+                    }
+                  )}
                   data-test-subj="apmListing"
                 >
                   <FormattedMessage
@@ -123,4 +130,4 @@ function ApmPanelUi(props) {
   );
 }
 
-export const ApmPanel = injectI18n(ApmPanelUi);
+export const ApmPanel = ApmPanelUi;
