@@ -8,8 +8,13 @@ const darkTemplate = require('./theme_dark.json');
 const lightTemplate = require('./theme_light.json');
 const pitchTemplate = require('./pitch_presentation.json');
 const statusTemplate = require('./status_report.json');
+const dashboardTemplate = require('./dashboard_report.json');
 
 // Registry expects a function that returns a spec object
-export const templateSpecs = [darkTemplate, lightTemplate, pitchTemplate, statusTemplate].map(
-  template => () => template
-);
+export const templateSpecs = [
+  darkTemplate,
+  lightTemplate,
+  pitchTemplate,
+  statusTemplate,
+  dashboardTemplate,
+].map(template => () => template);

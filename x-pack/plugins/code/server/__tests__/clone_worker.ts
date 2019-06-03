@@ -15,8 +15,8 @@ import sinon from 'sinon';
 import { Repository } from '../../model';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
-import { CloneWorker } from '../queue';
-import { IndexWorker } from '../queue';
+import { CloneWorker, IndexWorker } from '../queue';
+import { CancellationSerivce } from '../queue/cancellation_service';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { createTestServerOption, emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
@@ -93,13 +93,24 @@ describe('clone_worker_tests', () => {
     const newInstanceSpy = sinon.fake.returns(repoService);
     repoServiceFactory.newInstance = newInstanceSpy;
 
+    // Setup CancellationService
+    const cancelCloneJobSpy = sinon.spy();
+    const registerCloneJobTokenSpy = sinon.spy();
+    const cancellationService: any = {
+      cancelCloneJob: emptyAsyncFunc,
+      registerCloneJobToken: emptyAsyncFunc,
+    };
+    cancellationService.cancelCloneJob = cancelCloneJobSpy;
+    cancellationService.registerCloneJobToken = registerCloneJobTokenSpy;
+
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
       log,
       {} as EsClient,
       serverOptions,
       {} as IndexWorker,
-      (repoServiceFactory as any) as RepositoryServiceFactory
+      (repoServiceFactory as any) as RepositoryServiceFactory,
+      cancellationService as CancellationSerivce
     );
 
     await cloneWorker.executeJob({
@@ -129,13 +140,24 @@ describe('clone_worker_tests', () => {
     };
     esClient.update = updateSpy;
 
+    // Setup CancellationService
+    const cancelCloneJobSpy = sinon.spy();
+    const registerCloneJobTokenSpy = sinon.spy();
+    const cancellationService: any = {
+      cancelCloneJob: emptyAsyncFunc,
+      registerCloneJobToken: emptyAsyncFunc,
+    };
+    cancellationService.cancelCloneJob = cancelCloneJobSpy;
+    cancellationService.registerCloneJobToken = registerCloneJobTokenSpy;
+
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
       log,
       esClient as EsClient,
       serverOptions,
       (indexWorker as any) as IndexWorker,
-      {} as RepositoryServiceFactory
+      {} as RepositoryServiceFactory,
+      cancellationService as CancellationSerivce
     );
 
     await cloneWorker.onJobCompleted(
@@ -173,13 +195,24 @@ describe('clone_worker_tests', () => {
     };
     esClient.index = indexSpy;
 
+    // Setup CancellationService
+    const cancelCloneJobSpy = sinon.spy();
+    const registerCloneJobTokenSpy = sinon.spy();
+    const cancellationService: any = {
+      cancelCloneJob: emptyAsyncFunc,
+      registerCloneJobToken: emptyAsyncFunc,
+    };
+    cancellationService.cancelCloneJob = cancelCloneJobSpy;
+    cancellationService.registerCloneJobToken = registerCloneJobTokenSpy;
+
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
       log,
       (esClient as any) as EsClient,
       serverOptions,
       {} as IndexWorker,
-      {} as RepositoryServiceFactory
+      {} as RepositoryServiceFactory,
+      cancellationService as CancellationSerivce
     );
 
     await cloneWorker.onJobEnqueued({
@@ -209,13 +242,24 @@ describe('clone_worker_tests', () => {
     const newInstanceSpy = sinon.fake.returns(repoService);
     repoServiceFactory.newInstance = newInstanceSpy;
 
+    // Setup CancellationService
+    const cancelCloneJobSpy = sinon.spy();
+    const registerCloneJobTokenSpy = sinon.spy();
+    const cancellationService: any = {
+      cancelCloneJob: emptyAsyncFunc,
+      registerCloneJobToken: emptyAsyncFunc,
+    };
+    cancellationService.cancelCloneJob = cancelCloneJobSpy;
+    cancellationService.registerCloneJobToken = registerCloneJobTokenSpy;
+
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
       log,
       {} as EsClient,
       serverOptions,
       {} as IndexWorker,
-      (repoServiceFactory as any) as RepositoryServiceFactory
+      (repoServiceFactory as any) as RepositoryServiceFactory,
+      cancellationService as CancellationSerivce
     );
 
     const result1 = await cloneWorker.executeJob({
