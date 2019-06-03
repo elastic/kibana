@@ -111,7 +111,7 @@ describe('Flyout', () => {
             timelineId="test"
             usersViewing={usersViewing}
           >
-            <p>Fake flyout body</p>
+            <p>{'Fake flyout body'}</p>
           </Flyout>
         </TestProviders>
       );

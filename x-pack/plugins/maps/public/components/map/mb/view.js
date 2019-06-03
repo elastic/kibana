@@ -32,19 +32,29 @@ const TOOLTIP_TYPE = {
 
 export class MBMapContainer extends React.Component {
 
-
   state = {
-    isDrawingFilter: false
+    isDrawingFilter: false,
+    prevLayerList: undefined,
+    hasSyncedLayerList: false,
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
     const nextIsDrawingFilter = nextProps.drawState !== null;
-    if (nextIsDrawingFilter === prevState.isDrawingFilter) {
-      return null;
+    if (nextIsDrawingFilter !== prevState.isDrawingFilter) {
+      return {
+        isDrawingFilter: nextIsDrawingFilter,
+      };
     }
-    return {
-      isDrawingFilter: nextIsDrawingFilter
-    };
+
+    const nextLayerList = nextProps.layerList;
+    if (nextLayerList !== prevState.prevLayerList) {
+      return {
+        prevLayerList: nextLayerList,
+        hasSyncedLayerList: false,
+      };
+    }
+
+    return null;
   }
 
   constructor() {
@@ -104,8 +114,14 @@ export class MBMapContainer extends React.Component {
 
   _debouncedSync = _.debounce(() => {
     if (this._isMounted) {
-      this._syncMbMapWithLayerList();
-      this._syncMbMapWithInspector();
+      if (!this.state.hasSyncedLayerList) {
+        this.setState({
+          hasSyncedLayerList: true
+        }, () => {
+          this._syncMbMapWithLayerList();
+          this._syncMbMapWithInspector();
+        });
+      }
       this._syncDrawControl();
     }
   }, 256);

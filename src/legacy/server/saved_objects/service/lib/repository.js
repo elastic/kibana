@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import { omit, flatten } from 'lodash';
 import { getRootPropertiesObjects } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
@@ -39,6 +39,7 @@ export class SavedObjectsRepository {
       migrator,
       allowedTypes = [],
       onBeforeWrite = () => {},
+      onBeforeRead = () => {},
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
@@ -58,6 +59,8 @@ export class SavedObjectsRepository {
     this._allowedTypes = allowedTypes;
 
     this._onBeforeWrite = onBeforeWrite;
+    this._onBeforeRead = onBeforeRead;
+
     this._unwrappedCallCluster = async (...args) => {
       await migrator.awaitMigration();
       return callCluster(...args);
@@ -104,7 +107,7 @@ export class SavedObjectsRepository {
 
       const response = await this._writeToCluster(method, {
         id: raw._id,
-        index: this._index,
+        index: this._getIndexForType(type),
         refresh: 'wait_for',
         body: raw._source,
       });
@@ -170,6 +173,7 @@ export class SavedObjectsRepository {
         {
           [method]: {
             _id: expectedResult.rawMigratedDoc._id,
+            _index: this._getIndexForType(object.type),
           },
         },
         expectedResult.rawMigratedDoc._source
@@ -179,7 +183,6 @@ export class SavedObjectsRepository {
     });
 
     const esResponse = await this._writeToCluster('bulk', {
-      index: this._index,
       refresh: 'wait_for',
       body: bulkCreateParams,
     });
@@ -251,7 +254,7 @@ export class SavedObjectsRepository {
 
     const response = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this._getIndexForType(type),
       refresh: 'wait_for',
       ignore: [404],
     });
@@ -288,8 +291,16 @@ export class SavedObjectsRepository {
 
     const typesToDelete = allTypes.filter(type => !this._schema.isNamespaceAgnostic(type));
 
+    const indexes = flatten(
+      Object.values(this._schema).map(schema =>
+        Object.values(schema).map(props => props.indexPattern)
+      )
+    )
+      .filter(pattern => pattern !== undefined)
+      .concat([this._index]);
+
     const esOptions = {
-      index: this._index,
+      index: indexes,
       ignore: [404],
       refresh: 'wait_for',
       body: {
@@ -369,7 +380,7 @@ export class SavedObjectsRepository {
     }
 
     const esOptions = {
-      index: this._index,
+      index: this._getIndexForType(type),
       size: perPage,
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
@@ -434,12 +445,12 @@ export class SavedObjectsRepository {
 
     const unsupportedTypes = [];
     const response = await this._callCluster('mget', {
-      index: this._index,
       body: {
         docs: objects.reduce((acc, { type, id, fields }) => {
           if (this._isTypeAllowed(type)) {
             acc.push({
               _id: this._serializer.generateRawId(namespace, type, id),
+              _index: this._getIndexForType(type),
               _source: includedFields(type, fields),
             });
           } else {
@@ -500,7 +511,7 @@ export class SavedObjectsRepository {
 
     const response = await this._callCluster('get', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this._getIndexForType(type),
       ignore: [404],
     });
 
@@ -545,7 +556,7 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this._getIndexForType(type),
       ...(version && decodeRequestVersion(version)),
       refresh: 'wait_for',
       ignore: [404],
@@ -610,7 +621,7 @@ export class SavedObjectsRepository {
 
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this._getIndexForType(type),
       refresh: 'wait_for',
       _source: true,
       body: {
@@ -648,7 +659,16 @@ export class SavedObjectsRepository {
 
   async _writeToCluster(method, params) {
     try {
-      await this._onBeforeWrite();
+      await this._onBeforeWrite(method, params);
+      return await this._callCluster(method, params);
+    } catch (err) {
+      throw decorateEsError(err);
+    }
+  }
+
+  async _readFromCluster(method, params) {
+    try {
+      await this._onBeforeRead(method, params);
       return await this._callCluster(method, params);
     } catch (err) {
       throw decorateEsError(err);
@@ -661,6 +681,15 @@ export class SavedObjectsRepository {
     } catch (err) {
       throw decorateEsError(err);
     }
+  }
+
+  _getIndexForType(type) {
+    return (
+      (this._schema.definition &&
+        this._schema.definition[type] &&
+        this._schema.definition[type].indexPattern) ||
+      this._index
+    );
   }
 
   _getCurrentTime() {

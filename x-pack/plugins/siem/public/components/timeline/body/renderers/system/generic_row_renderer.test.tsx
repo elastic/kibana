@@ -39,7 +39,7 @@ describe('GenericRowRenderer', () => {
         browserFields,
         data: system,
         width: 100,
-        children: <span>some children</span>,
+        children: <span>{'some children'}</span>,
       });
 
       const wrapper = shallow(<span>{children}</span>);
@@ -69,7 +69,7 @@ describe('GenericRowRenderer', () => {
         browserFields: mockBrowserFields,
         data: system,
         width: 100,
-        children: <span>some children </span>,
+        children: <span>{'some children '}</span>,
       });
       const wrapper = mount(
         <TestProviders>
@@ -103,7 +103,7 @@ describe('GenericRowRenderer', () => {
         browserFields,
         data: systemFile,
         width: 100,
-        children: <span>some children</span>,
+        children: <span>{'some children'}</span>,
       });
 
       const wrapper = shallow(<span>{children}</span>);
@@ -132,7 +132,7 @@ describe('GenericRowRenderer', () => {
         browserFields: mockBrowserFields,
         data: systemFile,
         width: 100,
-        children: <span>some children </span>,
+        children: <span>{'some children '}</span>,
       });
       const wrapper = mount(
         <TestProviders>

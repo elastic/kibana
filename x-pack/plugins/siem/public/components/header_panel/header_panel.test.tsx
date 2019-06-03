@@ -14,7 +14,7 @@ describe('rendering', () => {
   test('renders correctly', () => {
     const wrapper = shallow(
       <HeaderPanel subtitle="My Test Subtitle" title="My Test Title" tooltip="My test tooltip.">
-        <p>My test supplement.</p>
+        <p>{'My test supplement.'}</p>
       </HeaderPanel>
     );
     expect(toJson(wrapper)).toMatchSnapshot();

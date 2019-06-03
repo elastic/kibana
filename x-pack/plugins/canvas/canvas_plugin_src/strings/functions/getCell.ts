@@ -10,7 +10,7 @@ import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
-  help: i18n.translate('xpack.canvas.functions.vHelpText', {
+  help: i18n.translate('xpack.canvas.functions.getCellHelpText', {
     defaultMessage: 'Fetch a single cell in a table',
   }),
   args: {
