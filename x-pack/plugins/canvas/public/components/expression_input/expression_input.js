@@ -59,6 +59,15 @@ export class ExpressionInput extends React.Component {
     this.props.onChange(value);
   }
 
+  getSelection() {
+    if (!this.ref) {
+      return null;
+    }
+    const start = this.ref.selectionStart;
+    const finish = this.ref.selectionEnd;
+    return this.ref.value.substring(start, finish);
+  }
+
   stash = debounce(
     value => {
       this.undoHistory.push(value);

@@ -199,3 +199,15 @@ test('includes namespace in failure when wrong value type', () => {
 
   expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
 });
+
+test('individual keys can validated', () => {
+  const type = schema.object({
+    foo: schema.boolean(),
+  });
+
+  const value = false;
+  expect(() => type.validateKey('foo', value)).not.toThrowError();
+  expect(() => type.validateKey('bar', '')).toThrowErrorMatchingInlineSnapshot(
+    `"bar is not a valid part of this schema"`
+  );
+});

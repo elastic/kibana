@@ -61,14 +61,12 @@ describe('KibanaMigrator', () => {
       const { kbnServer } = mockKbnServer();
       kbnServer.server.plugins.elasticsearch = undefined;
       const result = await new KibanaMigrator({ kbnServer }).awaitMigration();
-      expect(result).toEqual({ status: 'skipped' });
+      expect(result).toEqual([{ status: 'skipped' }, { status: 'skipped' }]);
     });
 
     it('waits for kbnServer.ready and elasticsearch.ready before attempting migrations', async () => {
       const { kbnServer } = mockKbnServer();
-      const clusterStub = jest.fn<any, any>(() => {
-        throw new Error('Doh!');
-      });
+      const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));
       const waitUntilReady = jest.fn(async () => undefined);
 
       kbnServer.server.plugins.elasticsearch = {
@@ -83,7 +81,8 @@ describe('KibanaMigrator', () => {
         },
       };
 
-      await expect(new KibanaMigrator({ kbnServer }).awaitMigration()).rejects.toThrow(/Doh!/);
+      const migrationResults = await new KibanaMigrator({ kbnServer }).awaitMigration();
+      expect(migrationResults.length).toEqual(2);
     });
   });
 });
@@ -94,10 +93,37 @@ function mockKbnServer({ configValues }: { configValues?: any } = {}) {
     version: '8.2.3',
     ready: jest.fn(async () => undefined),
     uiExports: {
+      savedObjectsManagement: {},
       savedObjectValidations: {},
       savedObjectMigrations: {},
-      savedObjectMappings: [],
-      savedObjectSchemas: {},
+      savedObjectMappings: [
+        {
+          pluginId: 'testtype',
+          properties: {
+            testtype: {
+              properties: {
+                name: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        {
+          pluginId: 'testtype2',
+          properties: {
+            testtype2: {
+              properties: {
+                name: { type: 'keyword' },
+              },
+            },
+          },
+        },
+      ],
+      savedObjectSchemas: {
+        testtype2: {
+          isNamespaceAgnostic: false,
+          indexPattern: 'other-index',
+        },
+      },
     },
     server: {
       config: () => ({

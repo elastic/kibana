@@ -20,11 +20,11 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { assign } from 'lodash';
-import AggSelect from '../agg_select';
-import FieldSelect from '../field_select';
-import AggRow from '../agg_row';
-import createChangeHandler from '../../lib/create_change_handler';
-import createSelectHandler from '../../lib/create_select_handler';
+import { AggSelect } from '../agg_select';
+import { FieldSelect } from '../field_select';
+import { AggRow } from '../agg_row';
+import { createChangeHandler } from '../../lib/create_change_handler';
+import { createSelectHandler } from '../../lib/create_select_handler';
 import { PercentileRankValues } from './percentile_rank_values';
 
 import {
@@ -36,6 +36,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../../../common/es_types';
+
+const RESTRICT_FIELDS = [ES_TYPES.NUMBER];
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
@@ -61,6 +64,7 @@ export const PercentileRankAgg = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -89,7 +93,7 @@ export const PercentileRankAgg = props => {
             <FieldSelect
               fields={fields}
               type={model.type}
-              restrict="numeric"
+              restrict={RESTRICT_FIELDS}
               indexPattern={indexPattern}
               value={model.field}
               onChange={handleSelectChange('field')}

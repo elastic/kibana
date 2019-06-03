@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import buildRequestBody from './table/build_request_body';
-import handleErrorResponse from './handle_error_response';
+import { buildRequestBody } from './table/build_request_body';
+import { handleErrorResponse } from './handle_error_response';
 import { get } from 'lodash';
-import processBucket from './table/process_bucket';
+import { processBucket } from './table/process_bucket';
 import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
@@ -27,7 +27,7 @@ import { getIndexPatternObject } from './helpers/get_index_pattern';
 export async function getTableData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
   const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, panelIndexPattern);
-  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
+  const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
   const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
@@ -38,7 +38,10 @@ export async function getTableData(req, panel) {
   };
 
   try {
-    const [resp] = await searchRequest.search({ body });
+    const [resp] = await searchRequest.search([{
+      body,
+      index: panelIndexPattern,
+    }]);
     const buckets = get(resp, 'aggregations.pivot.buckets', []);
 
     return {

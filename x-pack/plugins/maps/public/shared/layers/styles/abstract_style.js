@@ -12,11 +12,15 @@ export class AbstractStyle {
     };
   }
 
-  pluckStyleMetaFromSourceDataRequest(/* sourceDataRequest */) {
+  async pluckStyleMetaFromSourceDataRequest(/* sourceDataRequest */) {
     return {};
   }
 
   getDescriptor() {
     return this._descriptor;
+  }
+
+  renderEditor(/* { layer, onStyleDescriptorChange } */) {
+    return null;
   }
 }

@@ -8,6 +8,7 @@ import { errors } from 'elasticsearch';
 import sinon from 'sinon';
 import { requestFixture } from '../../__tests__/__fixtures__/request';
 import { LoginAttempt } from '../login_attempt';
+import { mockAuthenticationProviderOptions } from './base.mock';
 import { TokenAuthenticationProvider } from './token';
 
 describe('TokenAuthenticationProvider', () => {
@@ -16,15 +17,11 @@ describe('TokenAuthenticationProvider', () => {
     let callWithRequest: sinon.SinonStub;
     let callWithInternalUser: sinon.SinonStub;
     beforeEach(() => {
-      callWithRequest = sinon.stub();
-      callWithInternalUser = sinon.stub();
-      provider = new TokenAuthenticationProvider({
-        client: { callWithRequest, callWithInternalUser },
-        log() {
-          // no-op
-        },
-        basePath: '/base-path',
-      });
+      const providerOptions = mockAuthenticationProviderOptions();
+      callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
+      callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
+
+      provider = new TokenAuthenticationProvider(providerOptions);
     });
 
     it('does not redirect AJAX requests that can not be authenticated to the login page.', async () => {
@@ -465,14 +462,10 @@ describe('TokenAuthenticationProvider', () => {
     let provider: TokenAuthenticationProvider;
     let callWithInternalUser: sinon.SinonStub;
     beforeEach(() => {
-      callWithInternalUser = sinon.stub();
-      provider = new TokenAuthenticationProvider({
-        client: { callWithInternalUser } as any,
-        log() {
-          // no-op
-        },
-        basePath: '/base-path',
-      });
+      const providerOptions = mockAuthenticationProviderOptions();
+      callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
+
+      provider = new TokenAuthenticationProvider(providerOptions);
     });
 
     describe('`deauthenticate` method', () => {

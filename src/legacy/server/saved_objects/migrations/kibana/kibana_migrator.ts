@@ -25,11 +25,12 @@
 import { once } from 'lodash';
 import { MappingProperties } from '../../../mappings';
 import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
+import { SavedObjectsManagementDefinition } from '../../management';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator } from '../../validation';
 import { buildActiveMappings, CallCluster, IndexMigrator, LogFn } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
-
+import { createIndexMap } from '../core/build_index_map';
 export interface KbnServer {
   server: Server;
   version: string;
@@ -39,6 +40,7 @@ export interface KbnServer {
     savedObjectMigrations: any;
     savedObjectValidations: any;
     savedObjectSchemas: SavedObjectsSchemaDefinition;
+    savedObjectsManagement: SavedObjectsManagementDefinition;
   };
 }
 
@@ -84,27 +86,39 @@ export class KibanaMigrator {
         ['warning', 'migration'],
         'The elasticsearch plugin is disabled. Skipping migrations.'
       );
-      return { status: 'skipped' };
+      return Object.keys(this.mappingProperties).map(() => ({ status: 'skipped' }));
     }
 
     // Wait until elasticsearch is green...
     await server.plugins.elasticsearch.waitUntilReady();
 
     const config = server.config();
-    const migrator = new IndexMigrator({
-      batchSize: config.get('migrations.batchSize'),
-      callCluster: server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
-      documentMigrator: this.documentMigrator,
-      index: config.get('kibana.index'),
-      log: this.log,
-      mappingProperties: this.mappingProperties,
-      pollInterval: config.get('migrations.pollInterval'),
-      scrollDuration: config.get('migrations.scrollDuration'),
-      serializer: this.serializer,
-      obsoleteIndexTemplatePattern: 'kibana_index_template*',
+    const indexMap = createIndexMap(
+      config.get('kibana.index'),
+      this.kbnServer.uiExports.savedObjectSchemas,
+      this.mappingProperties
+    );
+
+    const migrators = Object.keys(indexMap).map(index => {
+      return new IndexMigrator({
+        batchSize: config.get('migrations.batchSize'),
+        callCluster: server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
+        documentMigrator: this.documentMigrator,
+        index,
+        log: this.log,
+        mappingProperties: indexMap[index],
+        pollInterval: config.get('migrations.pollInterval'),
+        scrollDuration: config.get('migrations.scrollDuration'),
+        serializer: this.serializer,
+        obsoleteIndexTemplatePattern: 'kibana_index_template*',
+      });
     });
 
-    return migrator.migrate();
+    if (migrators.length === 0) {
+      throw new Error(`Migrations failed to run, no mappings found or Kibana is not "ready".`);
+    }
+
+    return Promise.all(migrators.map(migrator => migrator.migrate()));
   });
 
   private kbnServer: KbnServer;
@@ -122,11 +136,15 @@ export class KibanaMigrator {
    */
   constructor({ kbnServer }: { kbnServer: KbnServer }) {
     this.kbnServer = kbnServer;
+
     this.serializer = new SavedObjectsSerializer(
       new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas)
     );
+
     this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings || []);
+
     this.log = (meta: string[], message: string) => kbnServer.server.log(meta, message);
+
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion: kbnServer.version,
       migrations: kbnServer.uiExports.savedObjectMigrations || {},
@@ -136,7 +154,7 @@ export class KibanaMigrator {
   }
 
   /**
-   * Gets the index mappings defined by Kibana's enabled plugins.
+   * Gets all the index mappings defined by Kibana's enabled plugins.
    *
    * @returns
    * @memberof KibanaMigrator

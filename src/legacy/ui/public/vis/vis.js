@@ -32,7 +32,7 @@ import _ from 'lodash';
 import { VisTypesRegistryProvider } from '../registry/vis_types';
 import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';
-import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from '../filter_manager/query_filter';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSourceProvider } from '../courier/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';

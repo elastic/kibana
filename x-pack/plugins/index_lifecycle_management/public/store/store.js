@@ -15,7 +15,6 @@ import {
   indexLifecycleManagement
 } from './reducers/';
 
-
 export const indexLifecycleManagementStore = (initialState = {}) => {
   const enhancers = [applyMiddleware(thunk)];
 

@@ -5,7 +5,7 @@
  */
 
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
   EuiPopover
@@ -60,18 +60,6 @@ export class ServiceIntegrations extends React.Component<Props, State> {
           this.closePopover();
           this.openFlyout('ML');
         }
-      },
-      {
-        name: i18n.translate(
-          'xpack.apm.serviceDetails.integrationsMenu.viewMLJobsButtonLabel',
-          {
-            defaultMessage: 'View existing ML jobs'
-          }
-        ),
-        icon: 'machineLearningApp',
-        href: chrome.addBasePath('/app/ml'),
-        target: '_blank',
-        onClick: () => this.closePopover()
       }
     ];
   };
@@ -125,7 +113,7 @@ export class ServiceIntegrations extends React.Component<Props, State> {
 
   public render() {
     const button = (
-      <EuiButton
+      <EuiButtonEmpty
         iconType="arrowDown"
         iconSide="right"
         onClick={this.openPopover}
@@ -136,7 +124,7 @@ export class ServiceIntegrations extends React.Component<Props, State> {
             defaultMessage: 'Integrations'
           }
         )}
-      </EuiButton>
+      </EuiButtonEmpty>
     );
 
     return (

@@ -11,9 +11,32 @@ import { DefinePivotExposedState } from '../components/define_pivot/define_pivot
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from './pivot_aggs';
-import { getDataFramePreviewRequest, getDataFrameRequest, getPivotQuery } from './request';
+import {
+  getDataFramePreviewRequest,
+  getDataFrameRequest,
+  getPivotQuery,
+  isDefaultQuery,
+  isSimpleQuery,
+  PivotQuery,
+} from './request';
+
+const defaultQuery: PivotQuery = { query_string: { query: '*' } };
+const matchAllQuery: PivotQuery = { match_all: {} };
+const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 
 describe('Data Frame: Common', () => {
+  test('isSimpleQuery()', () => {
+    expect(isSimpleQuery(defaultQuery)).toBe(true);
+    expect(isSimpleQuery(matchAllQuery)).toBe(false);
+    expect(isSimpleQuery(simpleQuery)).toBe(true);
+  });
+
+  test('isDefaultQuery()', () => {
+    expect(isDefaultQuery(defaultQuery)).toBe(true);
+    expect(isDefaultQuery(matchAllQuery)).toBe(false);
+    expect(isDefaultQuery(simpleQuery)).toBe(false);
+  });
+
   test('getPivotQuery()', () => {
     const query = getPivotQuery('the-query');
 
@@ -31,18 +54,24 @@ describe('Data Frame: Common', () => {
       {
         agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
         field: 'the-group-by-field',
-        aggName: 'the-group-by-label',
+        aggName: 'the-group-by-agg-name',
+        dropDownName: 'the-group-by-drop-down-name',
       },
     ];
     const aggs: PivotAggsConfig[] = [
-      { agg: PIVOT_SUPPORTED_AGGS.AVG, field: 'the-agg-field', aggName: 'the-agg-label' },
+      {
+        agg: PIVOT_SUPPORTED_AGGS.AVG,
+        field: 'the-agg-field',
+        aggName: 'the-agg-agg-name',
+        dropDownName: 'the-agg-drop-down-name',
+      },
     ];
     const request = getDataFramePreviewRequest('the-index-pattern-title', query, groupBy, aggs);
 
     expect(request).toEqual({
       pivot: {
-        aggregations: { 'the-agg-label': { avg: { field: 'the-agg-field' } } },
-        group_by: { 'the-group-by-label': { terms: { field: 'the-group-by-field' } } },
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
       source: {
         index: 'the-index-pattern-title',
@@ -55,12 +84,14 @@ describe('Data Frame: Common', () => {
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
-      aggName: 'the-group-by-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
     };
     const agg: PivotAggsConfig = {
       agg: PIVOT_SUPPORTED_AGGS.AVG,
       field: 'the-agg-field',
-      aggName: 'the-agg-label',
+      aggName: 'the-agg-agg-name',
+      dropDownName: 'the-agg-drop-down-name',
     };
     const pivotState: DefinePivotExposedState = {
       aggList: { 'the-agg-name': agg },
@@ -69,6 +100,7 @@ describe('Data Frame: Common', () => {
       valid: true,
     };
     const jobDetailsState: JobDetailsExposedState = {
+      createIndexPattern: false,
       jobId: 'the-job-id',
       targetIndex: 'the-target-index',
       touched: true,
@@ -80,8 +112,8 @@ describe('Data Frame: Common', () => {
     expect(request).toEqual({
       dest: { index: 'the-target-index' },
       pivot: {
-        aggregations: { 'the-agg-label': { avg: { field: 'the-agg-field' } } },
-        group_by: { 'the-group-by-label': { terms: { field: 'the-group-by-field' } } },
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
       source: {
         index: 'the-index-pattern-title',

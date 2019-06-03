@@ -27,6 +27,7 @@ import testSubjSelector from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/dev-utils';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
+import { Browsers } from '../../remote/browsers';
 
 interface Driver {
   driver: WebDriver;
@@ -52,7 +53,8 @@ export class WebElementWrapper {
     private webDriver: Driver,
     private timeout: number,
     private fixedHeaderHeight: number,
-    private logger: ToolingLog
+    private logger: ToolingLog,
+    private browserType: string
   ) {
     if (webElement instanceof WebElementWrapper) {
       return webElement;
@@ -79,7 +81,8 @@ export class WebElementWrapper {
       this.webDriver,
       this.timeout,
       this.fixedHeaderHeight,
-      this.logger
+      this.logger,
+      this.browserType
     );
   }
 
@@ -157,15 +160,21 @@ export class WebElementWrapper {
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }): Promise<void> {
     if (options.charByChar === true) {
       const value = await this.getAttribute('value');
-      for (let i = 1; i <= value.length; i++) {
+      for (let i = 0; i <= value.length; i++) {
         await this.pressKeys(this.Keys.BACK_SPACE);
         await delay(100);
       }
     } else {
-      const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-      await this.pressKeys([selectionKey, 'a']);
-      await this.pressKeys(this.Keys.NULL); // Release modifier keys
-      await this.pressKeys(this.Keys.BACK_SPACE); // Delete all content
+      if (this.browserType === Browsers.Chrome) {
+        // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
+        await this.driver.executeScript(`arguments[0].select();`, this._webElement);
+        await this.pressKeys(this.Keys.BACK_SPACE);
+      } else {
+        const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+        await this.pressKeys([selectionKey, 'a']);
+        await this.pressKeys(this.Keys.NULL); // Release modifier keys
+        await this.pressKeys(this.Keys.BACK_SPACE); // Delete all content
+      }
     }
   }
 
@@ -324,12 +333,18 @@ export class WebElementWrapper {
    */
   public async moveMouseTo(): Promise<void> {
     await this.scrollIntoViewIfNecessary();
-    const mouse = (this.driver.actions() as any).mouse();
-    const actions = (this.driver as any).actions({ bridge: true });
-    await actions
-      .pause(mouse)
-      .move({ origin: this._webElement })
-      .perform();
+    if (this.browserType === Browsers.Firefox) {
+      const actions = (this.driver as any).actions();
+      await actions.move({ x: 0, y: 0 }).perform();
+      await actions.move({ x: 10, y: 10, origin: this._webElement }).perform();
+    } else {
+      const mouse = (this.driver.actions() as any).mouse();
+      const actions = (this.driver as any).actions({ bridge: true });
+      await actions
+        .pause(mouse)
+        .move({ origin: this._webElement })
+        .perform();
+    }
   }
 
   /**

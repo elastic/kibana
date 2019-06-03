@@ -260,7 +260,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async getSharedItemTitleAndDescription() {
-      const element = await find.byCssSelector('[data-shared-item]');
+      const cssSelector = '[data-shared-item][data-title][data-description]';
+      const element = await find.byCssSelector(cssSelector);
+
       return {
         title: await element.getAttribute('data-title'),
         description: await element.getAttribute('data-description')
@@ -359,8 +361,18 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async getBodyText() {
-      const el = await find.byCssSelector('body>pre');
-      return await el.getVisibleText();
+      if (await find.existsByCssSelector('a[id=rawdata-tab]', 10000)) {
+        // Firefox has 3 tabs and requires navigation to see Raw output
+        await find.clickByCssSelector('a[id=rawdata-tab]');
+      }
+      const msgElements = await find.allByCssSelector('body pre');
+      if (msgElements.length > 0) {
+        return await msgElements[0].getVisibleText();
+      } else {
+        // Sometimes Firefox renders Timelion page without tabs and with div#json
+        const jsonElement = await find.byCssSelector('body div#json');
+        return await jsonElement.getVisibleText();
+      }
     }
   }
 

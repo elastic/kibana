@@ -5,6 +5,7 @@
  */
 
 import React, { FunctionComponent, useContext, useState } from 'react';
+import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
 
@@ -13,6 +14,7 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -28,20 +30,23 @@ import {
 
 // TODO EUI's types for EuiInMemoryTable is missing these props
 interface ExpandableTableProps extends EuiInMemoryTableProps {
+  compressed: boolean;
   itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
   isExpandable: boolean;
 }
 
 const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
 
+import { KBN_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { Dictionary } from '../../../../common/types/common';
+import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
-import { IndexPatternContext, SimpleQuery } from '../../common';
+import { isKibanaContext, KibanaContext, PivotQuery } from '../../common';
 
 import {
   EsDoc,
   EsFieldName,
-  getSelectableFields,
+  getSourceIndexDevConsoleStatement,
   MAX_COLUMNS,
   toggleSelectedField,
 } from './common';
@@ -84,18 +89,20 @@ const SourceIndexPreviewTitle: React.SFC<SourceIndexPreviewTitle> = ({ indexPatt
 );
 
 interface Props {
-  query: SimpleQuery;
+  query: PivotQuery;
   cellClick?(search: string): void;
 }
 
 export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
-  const indexPattern = useContext(IndexPatternContext);
+  const kibanaContext = useContext(KibanaContext);
 
-  if (indexPattern === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
+
+  const indexPattern = kibanaContext.currentIndexPattern;
 
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
@@ -194,24 +201,32 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
   let docFields: EsFieldName[] = [];
   let docFieldsCount = 0;
   if (tableItems.length > 0) {
-    docFields = getSelectableFields(tableItems);
+    docFields = Object.keys(tableItems[0]._source);
     docFields.sort();
     docFieldsCount = docFields.length;
   }
 
   const columns = selectedFields.map(k => {
     const column = {
-      field: `_source.${k}`,
+      field: `_source["${k}"]`,
       name: k,
-      render: undefined,
       sortable: true,
       truncateText: true,
     } as Dictionary<any>;
 
+    const field = indexPattern.fields.find(f => f.name === k);
+    const render = (d: string) => {
+      return field !== undefined && field.type === KBN_FIELD_TYPES.DATE
+        ? formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000)
+        : d;
+    };
+
+    column.render = render;
+
     if (CELL_CLICK_ENABLED && cellClick) {
       column.render = (d: string) => (
         <EuiButtonEmpty size="xs" onClick={() => cellClick(`${k}:(${d})`)}>
-          {d}
+          {render(d)}
         </EuiButtonEmpty>
       );
     }
@@ -230,28 +245,30 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     };
   }
 
-  if (docFieldsCount > MAX_COLUMNS || docFieldsCount > selectedFields.length) {
-    columns.unshift({
-      align: RIGHT_ALIGNMENT,
-      width: '40px',
-      isExpander: true,
-      render: (item: EsDoc) => (
-        <EuiButtonIcon
-          onClick={() => toggleDetails(item)}
-          aria-label={
-            itemIdToExpandedRowMap[item._id]
-              ? i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowCollapse', {
-                  defaultMessage: 'Collapse',
-                })
-              : i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowExpand', {
-                  defaultMessage: 'Expand',
-                })
-          }
-          iconType={itemIdToExpandedRowMap[item._id] ? 'arrowUp' : 'arrowDown'}
-        />
-      ),
-    });
-  }
+  columns.unshift({
+    align: RIGHT_ALIGNMENT,
+    width: '40px',
+    isExpander: true,
+    render: (item: EsDoc) => (
+      <EuiButtonIcon
+        onClick={() => toggleDetails(item)}
+        aria-label={
+          itemIdToExpandedRowMap[item._id]
+            ? i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowCollapse', {
+                defaultMessage: 'Collapse',
+              })
+            : i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowExpand', {
+                defaultMessage: 'Expand',
+              })
+        }
+        iconType={itemIdToExpandedRowMap[item._id] ? 'arrowUp' : 'arrowDown'}
+      />
+    ),
+  });
+
+  const euiCopyText = i18n.translate('xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip', {
+    defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
+  });
 
   return (
     <EuiPanel grow={false}>
@@ -260,7 +277,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
@@ -315,6 +332,16 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
                 </EuiPopover>
               </EuiText>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCopy
+                beforeMessage={euiCopyText}
+                textToCopy={getSourceIndexDevConsoleStatement(query, indexPattern.title)}
+              >
+                {(copy: () => void) => (
+                  <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -324,9 +351,13 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       )}
       {clearTable === false && (
         <ExpandableTable
+          compressed
           items={tableItems}
           columns={columns}
-          pagination={true}
+          pagination={{
+            initialPageSize: 5,
+            pageSizeOptions: [5, 10, 25],
+          }}
           hasActions={false}
           isSelectable={false}
           itemId="_id"

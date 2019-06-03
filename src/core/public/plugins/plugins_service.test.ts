@@ -33,15 +33,16 @@ import {
   PluginsServiceSetupDeps,
 } from './plugins_service';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
-import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
+import { applicationServiceMock } from '../application/application_service.mock';
 import { i18nServiceMock } from '../i18n/i18n_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { PluginStartContext, PluginSetupContext } from './plugin_context';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
+import { UiSettingsClient } from '../ui_settings';
+import { CoreSetup, CoreStart } from '..';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -53,12 +54,13 @@ type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 
 const mockCoreContext: CoreContext = {};
 let mockSetupDeps: DeeplyMocked<PluginsServiceSetupDeps>;
-let mockSetupContext: DeeplyMocked<PluginSetupContext>;
+let mockSetupContext: DeeplyMocked<CoreSetup>;
 let mockStartDeps: DeeplyMocked<PluginsServiceStartDeps>;
-let mockStartContext: DeeplyMocked<PluginStartContext>;
+let mockStartContext: DeeplyMocked<CoreStart>;
 
 beforeEach(() => {
   mockSetupDeps = {
+    application: applicationServiceMock.createSetupContract(),
     injectedMetadata: (function() {
       const metadata = injectedMetadataServiceMock.createSetupContract();
       metadata.getPlugins.mockReturnValue([
@@ -71,26 +73,29 @@ beforeEach(() => {
       ]);
       return metadata;
     })(),
-    basePath: (function() {
-      const basePath = basePathServiceMock.createSetupContract();
-      basePath.addToPath.mockImplementation(path => path);
-      return basePath;
-    })(),
     chrome: chromeServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+    http: httpServiceMock.createSetupContract(),
     i18n: i18nServiceMock.createSetupContract(),
     notifications: notificationServiceMock.createSetupContract(),
-    uiSettings: uiSettingsServiceMock.createSetupContract(),
-  } as any;
-  mockSetupContext = omit(mockSetupDeps, 'injectedMetadata');
+    uiSettings: uiSettingsServiceMock.createSetupContract() as jest.Mocked<UiSettingsClient>,
+  };
+  mockSetupContext = omit(mockSetupDeps, 'application', 'injectedMetadata');
   mockStartDeps = {
-    capabilities: capabilitiesServiceMock.createStartContract(),
+    application: applicationServiceMock.createStartContract(),
+    http: httpServiceMock.createStartContract(),
+    chrome: chromeServiceMock.createStartContract(),
     i18n: i18nServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
   };
-  mockStartContext = omit(mockStartDeps, 'injectedMetadata');
+  mockStartContext = {
+    ...omit(mockStartDeps, 'injectedMetadata'),
+    application: {
+      capabilities: mockStartDeps.application.capabilities,
+    },
+  };
 
   // Reset these for each test.
   mockPluginInitializers = new Map<PluginName, MockedPluginInitializer>(([
@@ -159,14 +164,14 @@ test('`PluginsService.setup` fails if any plugin instance does not have a setup 
   );
 });
 
-test('`PluginsService.setup` calls loadPluginBundles with basePath and plugins', async () => {
+test('`PluginsService.setup` calls loadPluginBundles with http and plugins', async () => {
   const pluginsService = new PluginsService(mockCoreContext);
   await pluginsService.setup(mockSetupDeps);
 
   expect(mockLoadPluginBundle).toHaveBeenCalledTimes(3);
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.basePath.addToPath, 'pluginA');
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.basePath.addToPath, 'pluginB');
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.basePath.addToPath, 'pluginC');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.prependBasePath, 'pluginA');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.prependBasePath, 'pluginB');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.prependBasePath, 'pluginC');
 });
 
 test('`PluginsService.setup` initalizes plugins with CoreContext', async () => {

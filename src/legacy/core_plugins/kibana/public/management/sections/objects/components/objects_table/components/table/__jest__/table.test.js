@@ -44,19 +44,42 @@ jest.mock('ui/chrome', () => ({
 import { Table } from '../table';
 
 const defaultProps = {
-  selectedSavedObjects: [{ type: 'visualization' }],
+  selectedSavedObjects: [{
+    id: '1',
+    type: 'index-pattern',
+    meta: {
+      title: `MyIndexPattern*`,
+      icon: 'indexPatternApp',
+      editUrl: '#/management/kibana/index_patterns/1',
+      inAppUrl: {
+        path: '/management/kibana/index_patterns/1',
+        uiCapabilitiesPath: 'management.kibana.index_patterns',
+      },
+    },
+  }],
   selectionConfig: {
     onSelectionChange: () => {},
   },
   filterOptions: [{ value: 2 }],
   onDelete: () => {},
   onExport: () => {},
-  getEditUrl: () => {},
+  goInspectObject: () => {},
   canGoInApp: () => {},
-  goInApp: () => {},
   pageIndex: 1,
   pageSize: 2,
-  items: [3],
+  items: [{
+    id: '1',
+    type: 'index-pattern',
+    meta: {
+      title: `MyIndexPattern*`,
+      icon: 'indexPatternApp',
+      editUrl: '#/management/kibana/index_patterns/1',
+      inAppUrl: {
+        path: '/management/kibana/index_patterns/1',
+        uiCapabilitiesPath: 'management.kibana.index_patterns',
+      },
+    },
+  }],
   itemId: 'id',
   totalItemCount: 3,
   onQueryChange: () => {},

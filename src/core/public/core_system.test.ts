@@ -18,14 +18,12 @@
  */
 
 import {
-  BasePathServiceConstructor,
   ChromeServiceConstructor,
   FatalErrorsServiceConstructor,
   HttpServiceConstructor,
   I18nServiceConstructor,
   InjectedMetadataServiceConstructor,
   LegacyPlatformServiceConstructor,
-  MockBasePathService,
   MockChromeService,
   MockFatalErrorsService,
   MockHttpService,
@@ -39,7 +37,7 @@ import {
   NotificationServiceConstructor,
   OverlayServiceConstructor,
   UiSettingsServiceConstructor,
-  MockCapabilitiesService,
+  MockApplicationService,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -78,7 +76,6 @@ describe('constructor', () => {
     expect(FatalErrorsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
     expect(HttpServiceConstructor).toHaveBeenCalledTimes(1);
-    expect(BasePathServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UiSettingsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
@@ -131,13 +128,12 @@ describe('constructor', () => {
 
     expect(FatalErrorsServiceConstructor).toHaveBeenCalledTimes(1);
 
-    expect(FatalErrorsServiceConstructor).toHaveBeenLastCalledWith({
+    expect(FatalErrorsServiceConstructor).toHaveBeenLastCalledWith(
       rootDomElement,
-      injectedMetadata: MockInjectedMetadataService,
-      stopCoreSystem: expect.any(Function),
-    });
+      expect.any(Function)
+    );
 
-    const [{ stopCoreSystem }] = FatalErrorsServiceConstructor.mock.calls[0];
+    const [, stopCoreSystem] = FatalErrorsServiceConstructor.mock.calls[0];
 
     expect(coreSystem.stop).not.toHaveBeenCalled();
     stopCoreSystem();
@@ -155,6 +151,11 @@ describe('#setup()', () => {
     return core.setup();
   }
 
+  it('calls application#setup()', async () => {
+    await setupCore();
+    expect(MockApplicationService.setup).toHaveBeenCalledTimes(1);
+  });
+
   it('calls injectedMetadata#setup()', async () => {
     await setupCore();
     expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
@@ -163,11 +164,6 @@ describe('#setup()', () => {
   it('calls http#setup()', async () => {
     await setupCore();
     expect(MockHttpService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls basePath#setup()', async () => {
-    await setupCore();
-    expect(MockBasePathService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls uiSettings#setup()', async () => {
@@ -219,9 +215,9 @@ describe('#start()', () => {
     expect(root.innerHTML).toBe('<div></div><div></div><div></div>');
   });
 
-  it('calls capabilities#start()', async () => {
+  it('calls application#start()', async () => {
     await startCore();
-    expect(MockCapabilitiesService.start).toHaveBeenCalledTimes(1);
+    expect(MockApplicationService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls i18n#start()', async () => {
@@ -239,6 +235,7 @@ describe('#start()', () => {
     expect(MockNotificationsService.start).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService.start).toHaveBeenCalledWith({
       i18n: expect.any(Object),
+      overlays: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });

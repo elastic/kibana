@@ -4,26 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { GRID_RESOLUTION } from '../grid_resolution';
 import { AbstractStyle } from './abstract_style';
+import { HeatmapStyleEditor } from './components/heatmap/heatmap_style_editor';
+import { HeatmapLegend } from './components/heatmap/legend/heatmap_legend';
+import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from './components/heatmap/heatmap_constants';
+import { getColorRampStops } from './color_utils';
 import { i18n } from '@kbn/i18n';
 
 export class HeatmapStyle extends AbstractStyle {
 
   static type = 'HEATMAP';
 
-  constructor() {
+  constructor(descriptor = {}) {
     super();
-    this._descriptor = HeatmapStyle.createDescriptor();
+    this._descriptor = HeatmapStyle.createDescriptor(descriptor.colorRampName);
   }
 
-  static canEdit(styleInstance) {
-    return styleInstance.constructor === HeatmapStyle;
-  }
-
-  static createDescriptor() {
+  static createDescriptor(colorRampName) {
     return {
       type: HeatmapStyle.type,
+      colorRampName: colorRampName ? colorRampName : DEFAULT_HEATMAP_COLOR_RAMP_NAME,
     };
   }
 
@@ -33,8 +35,27 @@ export class HeatmapStyle extends AbstractStyle {
     });
   }
 
-  static renderEditor() {
-    return null;
+  renderEditor({ onStyleDescriptorChange }) {
+    const onHeatmapColorChange = ({ colorRampName }) => {
+      const styleDescriptor = HeatmapStyle.createDescriptor(colorRampName);
+      onStyleDescriptorChange(styleDescriptor);
+    };
+
+    return (
+      <HeatmapStyleEditor
+        colorRampName={this._descriptor.colorRampName}
+        onHeatmapColorChange={onHeatmapColorChange}
+      />
+    );
+  }
+
+  getLegendDetails(label) {
+    return (
+      <HeatmapLegend
+        colorRampName={this._descriptor.colorRampName}
+        label={label}
+      />
+    );
   }
 
   setMBPaintProperties({ mbMap, layerId, propertyName, resolution }) {
@@ -57,7 +78,29 @@ export class HeatmapStyle extends AbstractStyle {
       type: 'identity',
       property: propertyName
     });
+
+    const { colorRampName } = this._descriptor;
+    if (colorRampName && colorRampName !== DEFAULT_HEATMAP_COLOR_RAMP_NAME) {
+      const colorStops = getColorRampStops(colorRampName);
+      mbMap.setPaintProperty(layerId, 'heatmap-color', [
+        'interpolate',
+        ['linear'],
+        ['heatmap-density'],
+        0, 'rgba(0, 0, 255, 0)',
+        ...colorStops.slice(2) // remove first stop from colorStops to avoid conflict with transparent stop at zero
+      ]);
+    } else {
+      mbMap.setPaintProperty(layerId, 'heatmap-color', [
+        'interpolate',
+        ['linear'],
+        ['heatmap-density'],
+        0, 'rgba(0, 0, 255, 0)',
+        0.1, 'royalblue',
+        0.3, 'cyan',
+        0.5, 'lime',
+        0.7, 'yellow',
+        1, 'red'
+      ]);
+    }
   }
-
 }
-

@@ -21,8 +21,10 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
     UserScenarios.forEach(scenario => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
-          username: scenario.username,
-          password: scenario.password,
+          credentials: {
+            username: scenario.username,
+            password: scenario.password,
+          },
         });
         switch (scenario.username) {
           case 'superuser': {

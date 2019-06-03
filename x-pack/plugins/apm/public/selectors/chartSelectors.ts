@@ -6,43 +6,15 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import d3 from 'd3';
-import { difference, memoize, zipObject } from 'lodash';
+import { difference, zipObject } from 'lodash';
 import mean from 'lodash.mean';
 import { rgba } from 'polished';
-import { MetricsChartAPIResponse } from '../../server/lib/metrics/get_all_metrics_chart_data';
 import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
 import { ApmTimeSeriesResponse } from '../../server/lib/transactions/charts/get_timeseries_data/transform';
 import { StringMap } from '../../typings/common';
 import { Coordinate, RectCoordinate } from '../../typings/timeseries';
-import { asDecimal, asMillis, asPercent, tpmUnit } from '../utils/formatters';
+import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
-
-export const getEmptySerie = memoize(
-  (
-    start: string | number = Date.now() - 3600000,
-    end: string | number = Date.now()
-  ) => {
-    const dates = d3.time
-      .scale()
-      .domain([new Date(start), new Date(end)])
-      .ticks();
-
-    return [
-      {
-        data: dates.map(x => ({
-          x: x.getTime(),
-          y: 1
-        }))
-      }
-    ];
-  },
-  (start: string, end: string) => [start, end].join('_')
-);
-
-interface IEmptySeries {
-  data: Coordinate[];
-}
 
 export interface ITpmBucket {
   title: string;
@@ -54,8 +26,8 @@ export interface ITpmBucket {
 
 export interface ITransactionChartData {
   noHits: boolean;
-  tpmSeries: ITpmBucket[] | IEmptySeries[];
-  responseTimeSeries: TimeSerie[] | IEmptySeries[];
+  tpmSeries: ITpmBucket[];
+  responseTimeSeries: TimeSerie[];
 }
 
 const INITIAL_DATA = {
@@ -73,113 +45,22 @@ const INITIAL_DATA = {
 };
 
 export function getTransactionCharts(
-  { start, end, transactionType }: IUrlParams,
+  { transactionType }: IUrlParams,
   { apmTimeseries, anomalyTimeseries }: TimeSeriesAPIResponse = INITIAL_DATA
 ): ITransactionChartData {
   const noHits = apmTimeseries.totalHits === 0;
-  const tpmSeries = noHits
-    ? getEmptySerie(start, end)
-    : getTpmSeries(apmTimeseries, transactionType);
+  const tpmSeries = getTpmSeries(apmTimeseries, transactionType);
 
-  const responseTimeSeries = noHits
-    ? getEmptySerie(start, end)
-    : getResponseTimeSeries({ apmTimeseries, anomalyTimeseries });
+  const responseTimeSeries = getResponseTimeSeries({
+    apmTimeseries,
+    anomalyTimeseries
+  });
 
   return {
     noHits,
     tpmSeries,
     responseTimeSeries
   };
-}
-
-export type MemoryMetricSeries = ReturnType<typeof getMemorySeries>;
-
-export function getMemorySeries(
-  { start, end }: IUrlParams,
-  memoryChartResponse: MetricsChartAPIResponse['memory']
-) {
-  const { series, overallValues, totalHits } = memoryChartResponse;
-  const seriesList =
-    totalHits === 0
-      ? getEmptySerie(start, end)
-      : [
-          {
-            title: i18n.translate(
-              'xpack.apm.chart.memorySeries.systemMaxLabel',
-              {
-                defaultMessage: 'System max'
-              }
-            ),
-            data: series.memoryUsedMax,
-            type: 'linemark',
-            color: theme.euiColorVis1,
-            legendValue: asPercent(overallValues.memoryUsedMax || 0, 1)
-          },
-          {
-            title: i18n.translate(
-              'xpack.apm.chart.memorySeries.systemAverageLabel',
-              {
-                defaultMessage: 'System average'
-              }
-            ),
-            data: series.memoryUsedAvg,
-            type: 'linemark',
-            color: theme.euiColorVis0,
-            legendValue: asPercent(overallValues.memoryUsedAvg || 0, 1)
-          }
-        ];
-
-  return {
-    totalHits: memoryChartResponse.totalHits,
-    series: seriesList
-  };
-}
-
-export type CPUMetricSeries = ReturnType<typeof getCPUSeries>;
-
-export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
-  const { series, overallValues } = CPUChartResponse;
-
-  const seriesList: TimeSerie[] = [
-    {
-      title: i18n.translate('xpack.apm.chart.cpuSeries.systemMaxLabel', {
-        defaultMessage: 'System max'
-      }),
-      data: series.systemCPUMax,
-      type: 'linemark',
-      color: theme.euiColorVis1,
-      legendValue: asPercent(overallValues.systemCPUMax || 0, 1)
-    },
-    {
-      title: i18n.translate('xpack.apm.chart.cpuSeries.systemAverageLabel', {
-        defaultMessage: 'System average'
-      }),
-      data: series.systemCPUAverage,
-      type: 'linemark',
-      color: theme.euiColorVis0,
-      legendValue: asPercent(overallValues.systemCPUAverage || 0, 1)
-    },
-    {
-      title: i18n.translate('xpack.apm.chart.cpuSeries.processMaxLabel', {
-        defaultMessage: 'Process max'
-      }),
-      data: series.processCPUMax,
-      type: 'linemark',
-      color: theme.euiColorVis7,
-      legendValue: asPercent(overallValues.processCPUMax || 0, 1)
-    },
-    {
-      title: i18n.translate('xpack.apm.chart.cpuSeries.processAverageLabel', {
-        defaultMessage: 'Process average'
-      }),
-      data: series.processCPUAverage,
-      type: 'linemark',
-      color: theme.euiColorVis5,
-      legendValue: asPercent(overallValues.processCPUAverage || 0, 1)
-    }
-  ];
-
-  return { totalHits: CPUChartResponse.totalHits, series: seriesList };
 }
 
 interface TimeSerie {

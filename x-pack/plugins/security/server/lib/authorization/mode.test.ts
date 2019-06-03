@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { requestFixture } from '../__tests__/__fixtures__/request';
 import { authorizationModeFactory } from './mode';
 

@@ -10,6 +10,7 @@ import { ElementFactory } from '../types';
 export const pie: ElementFactory = () => ({
   name: 'pie',
   displayName: 'Pie chart',
+  tags: ['chart', 'proportion'],
   width: 300,
   height: 300,
   help: 'A simple pie chart',
