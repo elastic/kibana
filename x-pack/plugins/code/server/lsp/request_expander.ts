@@ -41,8 +41,9 @@ export class RequestExpander implements ILanguageServerHandler {
   private jobQueue: Job[] = [];
   // a map for workspacePath -> Workspace
   private workspaces: Map<string, Workspace> = new Map();
-  private workspaceRoot: string;
+  private readonly workspaceRoot: string;
   private running = false;
+  private exited = false;
 
   constructor(
     proxy: LanguageServerProxy,
@@ -62,6 +63,9 @@ export class RequestExpander implements ILanguageServerHandler {
   public handleRequest(request: LspRequest): Promise<ResponseMessage> {
     this.lastAccess = Date.now();
     return new Promise<ResponseMessage>((resolve, reject) => {
+      if (this.exited) {
+        reject(new Error('proxy is exited.'));
+      }
       this.jobQueue.push({
         request,
         resolve,
@@ -76,6 +80,7 @@ export class RequestExpander implements ILanguageServerHandler {
   }
 
   public async exit() {
+    this.exited = true;
     return this.proxy.exit();
   }
 
@@ -152,7 +157,7 @@ export class RequestExpander implements ILanguageServerHandler {
 
   private handle() {
     const job = this.jobQueue.shift();
-    if (job) {
+    if (job && !this.exited) {
       const { request, resolve, reject } = job;
       this.expand(request, job.startTime).then(
         value => {
