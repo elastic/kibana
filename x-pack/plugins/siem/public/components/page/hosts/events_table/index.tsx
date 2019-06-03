@@ -255,7 +255,7 @@ const getEventsColumns = (
   },
 ];
 
-const getEventsColumnsCurated = (pageType: hostsModel.HostsType) => {
+export const getEventsColumnsCurated = (pageType: hostsModel.HostsType) => {
   const columns = getEventsColumns(pageType);
 
   // Columns to exclude from host details pages

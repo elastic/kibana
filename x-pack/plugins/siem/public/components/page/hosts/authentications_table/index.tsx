@@ -304,7 +304,7 @@ const getAuthenticationColumns = (): [
   },
 ];
 
-const getAuthenticationColumnsCurated = (pageType: hostsModel.HostsType) => {
+export const getAuthenticationColumnsCurated = (pageType: hostsModel.HostsType) => {
   const columns = getAuthenticationColumns();
 
   // Columns to exclude from host details pages
