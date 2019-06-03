@@ -10,7 +10,7 @@ jest.mock('./get_create_task_runner_function', () => ({
 
 import { AlertTypeRegistry } from './alert_type_registry';
 import { savedObjectsClientMock } from './__mocks__/saved_objects_client.mock';
-import { taskManagerMock } from './__mocks__/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/task_manager.mock';
 
 const alertTypeRegistryParams = {
   fireAction: jest.fn(),

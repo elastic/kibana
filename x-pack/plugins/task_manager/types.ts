@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TaskManager } from './types';
-export { TaskInstance, ConcreteTaskInstance } from './task';
+import { TaskManager as TaskManagerClass } from './task_manager';
+
+export type TaskManager = PublicMethodsOf<TaskManagerClass>;
