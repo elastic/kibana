@@ -17,34 +17,13 @@
  * under the License.
  */
 
-import { boolean } from './boolean';
-import { datatable } from './datatable';
-import { error } from './error';
-import { filter } from './filter';
-import { image } from './image';
-import { nullType } from './null';
-import { number } from './number';
-import { pointseries } from './pointseries';
-import { render } from './render';
-import { shape } from './shape';
-import { string } from './string';
-import { style } from './style';
-import { kibanaContext } from './kibana_context';
-import { kibanaDatatable } from './kibana_datatable';
-
-export const typeSpecs = [
-  boolean,
-  datatable,
-  error,
-  filter,
-  image,
-  number,
-  nullType,
-  pointseries,
-  render,
-  shape,
-  string,
-  style,
-  kibanaContext,
-  kibanaDatatable,
-];
+export { ArgumentType } from './arguments';
+export {
+  TypeToString,
+  KnownTypeToString,
+  TypeString,
+  UnmappedTypeStrings,
+  UnwrapPromise,
+} from './common';
+export { ExpressionFunction } from './functions';
+export * from '../common/types';

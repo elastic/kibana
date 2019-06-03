@@ -255,8 +255,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       return;
     }
 
-    aggList[item.aggName] = item;
-    setAggList({ ...aggList });
+    aggListWithoutPrevious[item.aggName] = item;
+    setAggList({ ...aggListWithoutPrevious });
   };
 
   const deleteAggregation = (aggName: AggName) => {

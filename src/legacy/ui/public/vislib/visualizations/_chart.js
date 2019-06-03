@@ -21,7 +21,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import { dataLabel } from '../lib/_data_label';
 import { VislibLibDispatchProvider } from '../lib/dispatch';
-import { TooltipProvider } from '../../vis/components/tooltip';
+import { Tooltip } from '../../vis/components/tooltip';
 import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
 import { HierarchicalTooltipFormatterProvider } from '../../agg_response/hierarchical/_hierarchical_tooltip_formatter';
 import { PointSeriesTooltipFormatter } from '../../agg_response/point_series/_tooltip_formatter';
@@ -29,7 +29,6 @@ import { PointSeriesTooltipFormatter } from '../../agg_response/point_series/_to
 export function VislibVisualizationsChartProvider(Private) {
 
   const Dispatch = Private(VislibLibDispatchProvider);
-  const Tooltip = Private(TooltipProvider);
   /**
    * The Base Class for all visualizations.
    *

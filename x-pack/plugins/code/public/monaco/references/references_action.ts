@@ -20,15 +20,18 @@ export function registerReferencesAction(
     contextMenuOrder: 1.5,
     run(ed: editor.ICodeEditor) {
       const position = ed.getPosition();
-      const { uri } = parseSchema(ed.getModel().uri.toString());
-      const refUrl = `git:/${uri}!L${position.lineNumber - 1}:${position.column - 1}`;
-      const queries = url.parse(getUrlQuery(), true).query;
-      const query = queryString.stringify({
-        ...queries,
-        tab: 'references',
-        refUrl,
-      });
-      history.push(`${uri}?${query}`);
+      const model = ed.getModel();
+      if (model && position) {
+        const { uri } = parseSchema(model.uri.toString());
+        const refUrl = `git:/${uri}!L${position.lineNumber - 1}:${position.column - 1}`;
+        const queries = url.parse(getUrlQuery(), true).query;
+        const query = queryString.stringify({
+          ...queries,
+          tab: 'references',
+          refUrl,
+        });
+        history.push(`${uri}?${query}`);
+      }
     },
   });
 }
