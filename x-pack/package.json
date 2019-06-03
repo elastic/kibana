@@ -269,7 +269,7 @@
     "moment": "^2.20.1",
     "moment-duration-format": "^1.3.0",
     "moment-timezone": "^0.5.14",
-    "monaco-editor": "^0.14.3",
+    "monaco-editor": "^0.17.0",
     "ngreact": "^0.5.1",
     "nock": "10.0.4",
     "node-fetch": "^2.1.2",
