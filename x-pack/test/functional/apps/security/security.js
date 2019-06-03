@@ -42,7 +42,6 @@ export default function ({ getService, getPageObjects }) {
 
         const logoutMessage = await testSubjects.getVisibleText('loginInfoMessage');
         expect(logoutMessage).to.eql('You have logged out of Kibana.');
-
       });
     });
   });
