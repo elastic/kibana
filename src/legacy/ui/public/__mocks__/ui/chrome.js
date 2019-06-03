@@ -19,10 +19,8 @@
 
 import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
-/* eslint-env jest */
-
 const chrome = {
-  getBasePath: jest.fn(),
+  getBasePath: () => '',
   getUiSettingsClient: () => ({
     ...uiSettingsServiceMock.createSetupContract(),
     getUpdate$: () => ({
