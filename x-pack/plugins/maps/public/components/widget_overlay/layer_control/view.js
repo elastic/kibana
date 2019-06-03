@@ -19,7 +19,29 @@ import { LayerTOC } from './layer_toc';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-export function LayerControl({ isReadOnly, showAddLayerWizard, closeLayerTOC }) {
+export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, closeLayerTOC, openLayerTOC }) {
+  if (!isLayerTOCOpen) {
+    return (
+      <EuiToolTip
+        delay="long"
+        content={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
+          defaultMessage: 'Expand layers panel'
+        })}
+        position="left"
+      >
+        <EuiButtonIcon
+          className="mapLayerControl__openLayerTOCButton"
+          color="text"
+          onClick={openLayerTOC}
+          iconType="menuLeft"
+          aria-label={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
+            defaultMessage: 'Expand layers panel'
+          })}
+        />
+      </EuiToolTip>
+    );
+  }
+
   let addLayer;
   if (!isReadOnly) {
     addLayer = (
