@@ -35,13 +35,12 @@ http://nginx.org/[Nginx] and https://httpd.apache.org/[Apache] HTTP servers to
 image::ml/images/ml-data-recognizer.jpg[A screenshot of the Apache and NGINX job creation wizards]
 
 If you are not certain which type of job to create, you can use the
-*Data Visualizer* to learn more about your data and to identify possible fields
-for {ml} analysis. 
+*Data Visualizer* to learn more about your data. If your index pattern contains
+a time field, it can identify possible fields for {ml} analysis. 
 
 [NOTE] 
 ===============================
-* If your index pattern does not contain a time field, you cannot use the *Data Visualizer*. 
-* If your data is located outside of {es}, you cannot use {kib} to create
+If your data is located outside of {es}, you cannot use {kib} to create
 your jobs and you cannot use {dfeeds} to retrieve your data in real time.
 Machine learning analysis is still possible, however, by using APIs to
 create and manage jobs and post data to them. For more information, see
