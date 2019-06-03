@@ -238,7 +238,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectField('response.raw');
         await PageObjects.visualize.waitForVisualizationRenderingStabilized();
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['200', '404', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
