@@ -18,7 +18,7 @@ import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
 
 import { ErrorToast } from '../components/error_toast';
-import { KibanaConfigContext } from '../components/formatted_date';
+import { KibanaConfigContext } from '../lib/adapters/framework/kibana_framework_adapter';
 import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';

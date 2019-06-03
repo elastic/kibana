@@ -309,7 +309,7 @@ describe('UrlStateContainer', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  describe('componentDidUpdate', () => {
+  describe.skip('componentDidUpdate', () => {
     test('timerange redux state updates the url', async () => {
       mockProps = getMockPropsObj({
         page: CONSTANTS.networkPage,
@@ -512,7 +512,7 @@ describe('UrlStateContainer', () => {
         );
       });
 
-      describe('kqlQuery and timerange url state is set when not defined on component mount', () => {
+      describe.skip('kqlQuery and timerange url state is set when not defined on component mount', () => {
         afterEach(() => {
           jest.resetAllMocks();
         });
