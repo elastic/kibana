@@ -168,7 +168,7 @@
     "@babel/register": "7.4.4",
     "@babel/runtime": "7.4.5",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "10.4.1",
+    "@elastic/eui": "11.0.1",
     "@elastic/javascript-typescript-langserver": "^0.1.27",
     "@elastic/lsp-extension": "^0.1.1",
     "@elastic/node-crypto": "^1.0.0",
