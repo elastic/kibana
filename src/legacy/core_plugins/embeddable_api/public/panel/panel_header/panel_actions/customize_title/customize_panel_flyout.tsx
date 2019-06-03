@@ -82,8 +82,8 @@ export class CustomizePanelFlyoutUi extends Component<CustomizePanelProps, State
           <EuiFormRow>
             <EuiSwitch
               checked={this.state.hideTitle}
-              data-test-subj="hideTitle"
-              id="queryEnhancementOptIn"
+              data-test-subj="customizePanelHideTitle"
+              id="hideTitle"
               label={
                 <FormattedMessage
                   defaultMessage="Hide title"

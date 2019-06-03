@@ -191,11 +191,10 @@ test('Can set title to an empty string', async () => {
     />
   );
 
-  const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
-  const event = { target: { value: '' } };
-  inputField.simulate('change', event);
+  const inputField = findTestSubject(component, 'customizePanelHideTitle');
+  inputField.simulate('change');
 
   findTestSubject(component, 'saveNewTitleButton').simulate('click');
-  expect(inputField.props().value).toBe('');
+  expect(inputField.props().value).toBeUndefined();
   expect(updateTitle).toBeCalledWith('');
 });
