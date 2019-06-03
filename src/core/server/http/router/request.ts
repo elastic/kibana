@@ -22,26 +22,16 @@ import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
 import { filterHeaders, Headers } from './headers';
-import { RouteSchemas, RouteConfigOptions } from './route';
+import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
 
 interface KibanaRequestRoute {
   path: string;
-  method: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options';
-  options: RouteConfigOptions;
+  method: RouteMethod | 'patch' | 'options';
+  options: Required<RouteConfigOptions>;
 }
 
 /** @public */
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
-  public static getRoute(request: Request): KibanaRequestRoute {
-    return {
-      path: request.path,
-      method: request.method,
-      options: {
-        authRequired: request.route.settings.auth === false ? false : true,
-        tags: request.route.settings.tags || [],
-      },
-    };
-  }
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
@@ -51,14 +41,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     routeSchemas: RouteSchemas<P, Q, B> | undefined
   ) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
-    const route = KibanaRequest.getRoute(req);
-    return new KibanaRequest(
-      req,
-      requestParts.params,
-      requestParts.query,
-      requestParts.body,
-      route
-    );
+    return new KibanaRequest(req, requestParts.params, requestParts.query, requestParts.body);
   }
 
   /**
@@ -94,16 +77,17 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
 
   public readonly headers: Headers;
   public readonly url: Url;
+  public readonly route: KibanaRequestRoute;
 
   constructor(
     private readonly request: Request,
     readonly params: Params,
     readonly query: Query,
-    readonly body: Body,
-    readonly route: KibanaRequestRoute
+    readonly body: Body
   ) {
     this.headers = request.headers;
     this.url = request.url;
+    this.route = this.getRouteInfo();
   }
 
   public getFilteredHeaders(headersToKeep: string[]) {
@@ -113,5 +97,16 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   // eslint-disable-next-line @typescript-eslint/camelcase
   public unstable_getIncomingMessage() {
     return this.request.raw.req;
+  }
+
+  private getRouteInfo() {
+    return {
+      path: this.request.path,
+      method: this.request.method,
+      options: {
+        authRequired: this.request.route.settings.auth !== false,
+        tags: this.request.route.settings.tags || [],
+      },
+    };
   }
 }

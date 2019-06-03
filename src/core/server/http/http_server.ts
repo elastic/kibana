@@ -166,7 +166,7 @@ export class HttpServer {
           path: this.getRouteFullPath(router.path, route.path),
           options: {
             auth: this.authRegistered && authRequired ? undefined : false,
-            tags,
+            tags: tags ? Array.from(tags) : undefined,
           },
         });
       }
