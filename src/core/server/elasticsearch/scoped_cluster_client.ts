@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import { intersection } from 'lodash';
 import { Headers } from '../http/router';
 import { CallAPIOptions } from './cluster_client';
+import { isObject } from '../../utils';
 
 /** @public */
 export { Headers };
@@ -72,8 +74,18 @@ export class ScopedClusterClient {
     clientParams: Record<string, unknown> = {},
     options?: CallAPIOptions
   ) {
-    if (this.headers || clientParams.headers) {
-      clientParams.headers = Object.assign({}, this.headers, clientParams.headers);
+    if (this.headers) {
+      if (isObject(clientParams.headers)) {
+        const duplicates = intersection(
+          Object.keys(this.headers),
+          Object.keys(clientParams.headers)
+        );
+        if (duplicates.length > 0) {
+          throw Error(`Cannot override default headers [${duplicates.join(', ')}].`);
+        }
+      }
+
+      clientParams.headers = Object.assign({}, clientParams.headers, this.headers);
     }
     return this.scopedAPICaller(endpoint, clientParams, options);
   }

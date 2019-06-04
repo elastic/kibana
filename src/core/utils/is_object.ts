@@ -17,9 +17,5 @@
  * under the License.
  */
 
-export * from './get';
-export * from './map_to_object';
-export * from './pick';
-export * from './assert_never';
-export * from './url';
-export * from './is_object';
+export const isObject = (value: any): value is object =>
+  typeof value === 'object' && value !== null;

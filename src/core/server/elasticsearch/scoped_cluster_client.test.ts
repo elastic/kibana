@@ -120,18 +120,11 @@ describe('#callAsCurrentUser', () => {
     );
     scopedAPICaller.mockClear();
 
-    await expect(
-      clusterClient.callAsCurrentUser('security.authenticate', {
-        some: 'some',
-        headers: { one: '2' },
-      })
-    ).resolves.toBe(mockResponse);
-    expect(scopedAPICaller).toHaveBeenCalledTimes(1);
-    expect(scopedAPICaller).toHaveBeenCalledWith(
-      'security.authenticate',
-      { some: 'some', headers: { one: '1' } },
-      undefined
-    );
+    const mockErrorResponse = new Error('Cannot override default headers [one].');
+    const withHeaderOverride = async () =>
+      clusterClient.callAsCurrentUser('security.authenticate', { headers: { one: 'OVERRIDE' } });
+    await expect(withHeaderOverride()).rejects.toThrowError(mockErrorResponse);
+    expect(scopedAPICaller).toHaveBeenCalledTimes(0);
     scopedAPICaller.mockClear();
 
     await expect(
@@ -148,10 +141,11 @@ describe('#callAsCurrentUser', () => {
     await expect(
       clusterClient.callAsCurrentUser(
         'security.authenticate',
-        { some: 'some', headers: { one: '1' } },
+        { some: 'some' },
         { wrap401Errors: true }
       )
     ).resolves.toBe(mockResponse);
+
     expect(scopedAPICaller).toHaveBeenCalledTimes(1);
     expect(scopedAPICaller).toHaveBeenCalledWith(
       'security.authenticate',
