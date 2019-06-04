@@ -11,17 +11,13 @@ import { toastNotifications } from 'ui/notify';
 
 import {
   EuiInMemoryTable,
-  EuiSpacer,
   EuiTitle,
   EuiButtonEmpty,
-  EuiBadge,
   EuiToolTip,
   EuiCallOut,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { ackWatchAction } from '../../../lib/api';
 import { WatchStatus } from '../../../components';

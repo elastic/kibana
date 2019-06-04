@@ -90,7 +90,6 @@ export const JsonWatchEditSimulate = ({
     scheduledTimeValue,
     scheduledTimeUnit,
     triggeredTimeValue,
-    triggeredTimeUnit,
     alternativeInput,
     ignoreCondition,
   } = executeDetails;
