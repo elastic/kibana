@@ -522,24 +522,20 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   title="complete"
                   type="check"
                 >
-                  <check
-                    className="euiIcon euiIcon--medium euiStepNumber__icon"
+                  <EuiIconCheck
+                    className="euiIcon euiIcon--medium euiIcon-isLoaded euiStepNumber__icon"
                     focusable="false"
-                    height="16"
                     style={null}
                     title="complete"
-                    viewBox="0 0 16 16"
-                    width="16"
-                    xmlns="http://www.w3.org/2000/svg"
                   >
                     <svg
-                      className="euiIcon euiIcon--medium euiStepNumber__icon"
+                      className="euiIcon euiIcon--medium euiIcon-isLoaded euiStepNumber__icon"
                       focusable="false"
-                      height="16"
+                      height={16}
                       style={null}
                       title="complete"
                       viewBox="0 0 16 16"
-                      width="16"
+                      width={16}
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -547,7 +543,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                         fillRule="evenodd"
                       />
                     </svg>
-                  </check>
+                  </EuiIconCheck>
                 </EuiIcon>
               </EuiI18n>
             </div>

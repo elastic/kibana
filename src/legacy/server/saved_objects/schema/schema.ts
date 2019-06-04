@@ -20,6 +20,7 @@
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
+  indexPattern?: string;
 }
 
 export interface SavedObjectsSchemaDefinition {

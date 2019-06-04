@@ -12,7 +12,7 @@ const app = uiModules.get('xpack/watcher');
 app.directive('xpackAriaDescribes', function () {
   return {
     restrict: 'A',
-    link: function ($scope, attr) {
+    link: function ($scope, $ele, attr) {
       if (!Object.keys(attr).includes('id')) {
         throw new Error(`An element with xpack-aria-describes="${attr.xpackAriaDescribes}" does not have an id attribute defined`);
       }
