@@ -129,12 +129,12 @@ if the index doesn’t already exist. If you configure a custom index, the name 
 be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
 
 `kibana.autocompleteTimeout:`:: *Default: "1000"* Time in milliseconds to wait
-for autocomplete suggestions from Elasticsearch. This value must be a positive
-integer excluding zero.
+for autocomplete suggestions from Elasticsearch. This value must be a whole number
+greater than zero.
 
 `kibana.autocompleteTerminateAfter:`:: *Default: "100000"* Maximum number of
 documents loaded by each shard to generate autocomplete suggestions. This value
-must be a positive integer excluding zero.
+must be a whole number greater than zero.
 
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana
 stores log output.
