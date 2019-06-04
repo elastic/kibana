@@ -24,11 +24,11 @@ export const CloneStatus = (props: Props) => {
     const { receivedObjects, totalObjects, indexedObjects } = cloneProgress;
 
     if (receivedObjects === totalObjects) {
-      progress = `Indexing objects: ${progressRate.toFixed(
+      progress = `Indexing objects: ${(indexedObjects / totalObjects).toFixed(
         2
       )}% (${indexedObjects}/${totalObjects})`;
     } else {
-      progress = `Receiving objects: ${progressRate.toFixed(
+      progress = `Receiving objects: ${(receivedObjects / totalObjects).toFixed(
         2
       )}% (${receivedObjects}/${totalObjects})`;
     }
