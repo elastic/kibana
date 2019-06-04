@@ -23,8 +23,9 @@ export default function manageRepositoriesFunctionalTests({
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/36495
-  describe('History', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/37859
+  describe('History', function() {
+    this.tags('skipFirefox');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
