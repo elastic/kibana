@@ -713,7 +713,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     jobSelectServiceSub.unsubscribe();
   });
 
-  $scope.$on('contextChartSelected', function (event, selection) { // eslint-disable-line no-unused-vars
+  $scope.$on('contextChartSelected', function (event, selection) {
     // Save state of zoom (adds to URL) if it is different to the default.
     if (($scope.contextChartData === undefined || $scope.contextChartData.length === 0) &&
       ($scope.contextForecastData === undefined || $scope.contextForecastData.length === 0)) {

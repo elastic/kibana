@@ -26,9 +26,9 @@ const steps = [
     children: (
       <EuiText>
         <p>
-          If you are using multiple Kibana nodes, then you need to configure 1 Kibana instance as
+          If you are using multiple Kibana nodes, you will need to configure at least one node as a
           Code instance. Please add the following line of code into your kibana.yml file for every
-          instance to indicate your Code instance:
+          instance you wish to run Code on:
         </p>
         <pre>
           <code>xpack.code.codeNodeUrl: 'http://$YourCodeNodeAddress'</code>
@@ -42,8 +42,8 @@ const steps = [
     children: (
       <EuiText>
         <p>
-          If you need code intelligence support for your repos, you need to install the language
-          server for the programming languages.
+          If you need code intelligence support for your repos you will need to install the language
+          server for each language you wish to enable.
         </p>
         <p />
         <h5>PRE-INSTALLED LANGUAGE SERVERS:</h5>
@@ -63,9 +63,9 @@ const steps = [
     children: (
       <EuiText>
         <p>
-          You can add a repo to Code by simply putting in the git address of the repo. Usually this
-          is the same git address you use to run the git clone command, you can find more details
-          about the formats of git addresses that Code accepts&nbsp;
+          You can add a repo to Code by simply providing it's git address. Usually this is the same
+          git address you use to run the "git clone" command. You can find more details about the
+          formats of git addresses that Code accepts&nbsp;
           <a href={documentationLinks.gitFormat}>here</a>.
         </p>
       </EuiText>
@@ -77,7 +77,7 @@ const steps = [
       <EuiText>
         <p>
           Once the repo is added and indexed successfully, you can verify that the repo is
-          searchable and the code intelligence is available. You can find more details of how the
+          searchable and that code intelligence is available. You can find more details on how
           search and code intelligence work in{' '}
           <a href={documentationLinks.codeIntelligence}>our docs</a>.
         </p>
@@ -94,7 +94,7 @@ const toastMessage = (
       mean for you below.{' '}
     </p>
     <EuiButton size="s" href="">
-      Learn More
+      Learn more
     </EuiButton>
   </div>
 );
@@ -134,8 +134,8 @@ class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideTo
             {this.props.setupOk === false && (
               <EuiCallOut title="Code instance not found." color="danger" iconType="cross">
                 <p>
-                  Please follow the guide below to configure your Kibana instance and then refresh
-                  this page.
+                  Please follow the guide below to configure your Kibana instance. Once configured,
+                  refresh this page.
                 </p>
               </EuiCallOut>
             )}
@@ -143,7 +143,7 @@ class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideTo
               <React.Fragment>
                 <EuiSpacer size="s" />
                 <EuiButton iconType="sortLeft">
-                  <Link to="/admin">Back To Project Dashboard</Link>
+                  <Link to="/admin">Back To project dashboard</Link>
                 </EuiButton>
                 <EuiSpacer size="s" />
               </React.Fragment>
