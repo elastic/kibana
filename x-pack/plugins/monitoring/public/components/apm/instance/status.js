@@ -57,7 +57,7 @@ function StatusUI({ stats }) {
         defaultMessage: 'Last Event'
       }),
       value: i18n.translate('xpack.monitoring.apm.instance.status.lastEventDescription', {
-        defaultMessage: 'timeOfLastEvent} ago',
+        defaultMessage: '{timeOfLastEvent} ago',
         values: {
           timeOfLastEvent: formatTimestampToDuration(+moment(timeOfLastEvent), CALCULATE_DURATION_SINCE)
         }
