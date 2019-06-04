@@ -17,19 +17,23 @@
  * under the License.
  */
 
-const aggFilter = [
-  '!top_hits',
-  '!percentiles',
-  '!median',
-  '!std_dev',
-  '!derivative',
-  '!moving_avg',
-  '!serial_diff',
-  '!cumulative_sum',
-  '!avg_bucket',
-  '!max_bucket',
-  '!min_bucket',
-  '!sum_bucket',
-];
+import { i18n } from '@kbn/i18n';
+import { AggConfig } from '../vis/agg_config';
 
-export { aggFilter };
+function safeMakeLabel(agg: AggConfig) {
+  try {
+    return agg.makeLabel();
+  } catch (e) {
+    return i18n.translate('common.ui.aggTypes.aggNotValidLabel', {
+      defaultMessage: '- agg not valid -',
+    });
+  }
+}
+
+function isCompatibleAggregation(aggFilter: string[]) {
+  return (agg: AggConfig) => {
+    return !aggFilter.includes(`!${agg.type.name}`);
+  };
+}
+
+export { safeMakeLabel, isCompatibleAggregation };

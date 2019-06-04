@@ -31,7 +31,7 @@ uiModules
     ['setValidity', { watchDepth: 'reference' }],
     ['setValue', { watchDepth: 'reference' }],
     'aggHelpLink',
-    'isSelectInvalid',
+    'showValidation',
     'isSubAggregation',
     'value',
   ]))
@@ -46,7 +46,7 @@ uiModules
             agg="agg"
             agg-help-link="aggHelpLink"
             agg-type-options="aggTypeOptions"
-            is-select-invalid="isSelectInvalid"
+            show-validation="showValidation"
             is-sub-aggregation="isSubAggregation"
             value="paramValue"
             set-validity="setValidity"
@@ -61,51 +61,40 @@ uiModules
           $scope.$bind('isSubAggregation', attr.isSubAggregation);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
-          let _isSelectInvalid = false;
+          $scope.showValidation = false;
 
           $scope.$watch('agg.type', (value) => {
             // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
             // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
             $scope.paramValue = value;
-
-            $scope.setValidity(true);
-            $scope.isSelectInvalid = false;
           });
 
           $scope.$watch(() => {
             // The model can become touched either onBlur event or when the form is submitted.
             return ngModelCtrl.$touched;
           }, (value) => {
-            if (value === true) {
-              showValidation();
+            if (value) {
+              $scope.showValidation = true;
             }
           }, true);
 
           $scope.onChange = (value) => {
-            if (!value) {
-              // We prevent to make the field empty.
-              return;
-            }
+            $scope.paramValue = value;
             // This is obviously not a good code quality, but without using scope binding (which we can't see above)
             // to bind function values, this is right now the best temporary fix, until all of this will be gone.
             $scope.$parent.onAggTypeChange($scope.agg, value);
-
+            $scope.showValidation = true;
             ngModelCtrl.$setDirty();
           };
 
           $scope.setTouched = () => {
             ngModelCtrl.$setTouched();
-            showValidation();
+            $scope.showValidation = true;
           };
 
           $scope.setValidity = (isValid) => {
-            _isSelectInvalid = !isValid;
             ngModelCtrl.$setValidity(`agg${$scope.agg.id}`, isValid);
           };
-
-          function showValidation() {
-            $scope.isSelectInvalid = _isSelectInvalid;
-          }
         }
       }
     };

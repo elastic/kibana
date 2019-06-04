@@ -21,24 +21,26 @@ import React, { useEffect } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { aggFilter } from '../buckets/_terms_helper';
 import { safeMakeLabel, isCompatibleAggregation } from '../agg_utils';
 
+const aggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
 const isCompatibleAgg = isCompatibleAggregation(aggFilter);
+const EMPTY_VALUE = 'EMPTY_VALUE';
 
-function OrderAggParamEditor({
+function MetricAggParamEditor({
   agg,
   value,
   showValidation,
   setValue,
   setValidity,
   setTouched,
+  state,
   responseValueAggs,
 }: AggParamEditorProps<string>) {
-  const label = i18n.translate('common.ui.aggTypes.orderAgg.orderByLabel', {
-    defaultMessage: 'Order by',
+  const label = i18n.translate('common.ui.aggTypes.metricLabel', {
+    defaultMessage: 'Metric',
   });
-  const isValid = !!value;
+  const isValid = value === 'custom';
 
   useEffect(
     () => {
@@ -47,76 +49,53 @@ function OrderAggParamEditor({
     [isValid]
   );
 
-  useEffect(() => {
-    // setup the initial value of orderBy
-    if (!value) {
-      let respAgg = { id: '_key' };
-
-      if (responseValueAggs) {
-        respAgg = responseValueAggs.filter(isCompatibleAgg)[0] || respAgg;
-      }
-
-      setValue(respAgg.id);
-    }
-  }, []);
-
   useEffect(
     () => {
-      if (responseValueAggs && value && value !== 'custom') {
-        // ensure that orderBy is set to a valid agg
-        const respAgg = responseValueAggs
-          .filter(isCompatibleAgg)
-          .find(aggregation => aggregation.id === value);
-
-        if (!respAgg) {
-          setValue('_key');
-        }
+      if (!isValid && !state.aggs.find(aggregation => aggregation.id === value)) {
+        setValue();
       }
     },
-    [responseValueAggs]
+    [responseValueAggs, value]
   );
 
   const defaultOptions = [
     {
-      text: i18n.translate('common.ui.aggTypes.orderAgg.customMetricLabel', {
+      text: i18n.translate('common.ui.aggTypes.customMetricLabel', {
         defaultMessage: 'Custom metric',
       }),
       value: 'custom',
     },
-    {
-      text: i18n.translate('common.ui.aggTypes.orderAgg.alphabeticalLabel', {
-        defaultMessage: 'Alphabetical',
-      }),
-      value: '_key',
-    },
+    { text: '', value: EMPTY_VALUE, disabled: true, hidden: true },
   ];
 
   const options = responseValueAggs
-    ? responseValueAggs.map(respAgg => ({
-        text: i18n.translate('common.ui.aggTypes.orderAgg.metricLabel', {
-          defaultMessage: 'Metric: {metric}',
-          values: {
-            metric: safeMakeLabel(respAgg),
-          },
-        }),
-        value: respAgg.id,
-        disabled: !isCompatibleAgg(respAgg),
-      }))
+    ? responseValueAggs
+        .filter(respAgg => respAgg.type.name !== agg.type.name)
+        .map(respAgg => ({
+          text: i18n.translate('ccommon.ui.aggTypes.definiteMetricLabel', {
+            defaultMessage: 'Metric: {metric}',
+            values: {
+              metric: safeMakeLabel(respAgg),
+            },
+          }),
+          value: respAgg.id,
+          disabled: !isCompatibleAgg(respAgg),
+        }))
     : [];
 
   return (
     <EuiFormRow label={label} fullWidth={true} isInvalid={showValidation ? !isValid : false}>
       <EuiSelect
         options={[...options, ...defaultOptions]}
-        value={value}
+        value={value || EMPTY_VALUE}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
-        data-test-subj={`visEditorOrderBy${agg.id}`}
+        data-test-subj={`visEditorSubAggMetric${agg.id}`}
       />
     </EuiFormRow>
   );
 }
 
-export { OrderAggParamEditor };
+export { MetricAggParamEditor };

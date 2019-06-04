@@ -18,13 +18,9 @@
  */
 
 import _ from 'lodash';
-import { safeMakeLabel } from './safe_make_label';
 import { i18n } from '@kbn/i18n';
 
 const parentPipelineAggController = function ($scope) {
-
-  $scope.safeMakeLabel = safeMakeLabel;
-
   $scope.$watch('responseValueAggs', updateOrderAgg);
   $scope.$watch('agg.params.metricAgg', updateOrderAgg);
 
@@ -38,13 +34,8 @@ const parentPipelineAggController = function ($scope) {
     }
   });
 
-  $scope.isDisabledAgg = function (agg) {
-    const invalidAggs = ['top_hits', 'percentiles', 'percentile_ranks', 'median', 'std_dev'];
-    return Boolean(invalidAggs.find(invalidAgg => invalidAgg === agg.type.name));
-  };
-
   function checkBuckets() {
-    const lastBucket = _.findLast($scope.state.aggs, agg => agg.type.type === 'buckets');
+    const lastBucket = _.findLast($scope.state.aggs, agg => agg.type && agg.type.type === 'buckets');
     const bucketHasType = lastBucket && lastBucket.type;
     const bucketIsHistogram = bucketHasType && ['date_histogram', 'histogram'].includes(lastBucket.type.name);
     const canUseAggregation = lastBucket && bucketIsHistogram;
@@ -52,8 +43,8 @@ const parentPipelineAggController = function ($scope) {
     // remove errors on all buckets
     _.each($scope.state.aggs, agg => { if (agg.error) delete agg.error; });
 
-    if ($scope.aggForm.agg) {
-      $scope.aggForm.agg.$setValidity('bucket', canUseAggregation);
+    if ($scope.aggForm) {
+      $scope.aggForm.$setValidity('bucket', canUseAggregation);
     }
     if (canUseAggregation) {
       lastBucket.params.min_doc_count = (lastBucket.type.name === 'histogram') ? 1 : 0;
@@ -79,9 +70,6 @@ const parentPipelineAggController = function ($scope) {
 
     // we aren't creating a custom aggConfig
     if (metricAgg !== 'custom') {
-      if (!$scope.state.aggs.find(agg => agg.id === metricAgg)) {
-        params.metricAgg = null;
-      }
       params.customMetric = null;
       return;
     }

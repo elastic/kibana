@@ -34,6 +34,7 @@ uiModules
     ['onChange', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
+    ['state', { watchDepth: 'reference' }],
     ['responseValueAggs', { watchDepth: 'reference' }],
     'showValidation',
     'value',
@@ -70,6 +71,7 @@ uiModules
             on-change="onChange"
             set-touched="setTouched"
             set-validity="setValidity"
+            state="state"
             response-value-aggs="responseValueAggs"
           ></vis-agg-param-react-wrapper>`;
         }
