@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import { EuiRange, EuiFormErrorText } from '@elastic/eui';
-import { FormattedText } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function isWithinRange(min, max, value) {
   if (value >= min && value <= max) {
@@ -65,30 +65,33 @@ export class ValidatedRange extends React.Component {
       ...rest
     } = this.props;
 
-    let errorMessage;
+    const rangeInput = (
+      <EuiRange
+        min={min}
+        max={max}
+        value={this.state.value.toString()}
+        onChange={this._onRangeChange}
+        {...rest}
+      />
+    );
+
     if (!this.state.isValid) {
-      errorMessage = (
-        <EuiFormErrorText>
-          <FormattedText
-            id="xpack.maps.validatedRange.rangeErrorMessage"
-            defaultMessage="Must be between {min} and {max}"
-            values={{ min, max }}
-          />
-        </EuiFormErrorText>
+      // Wrap in div so single child is returned.
+      // common pattern is to put ValidateRange as a child to EuiFormRow and EuiFormRow expects a single child
+      return (
+        <div>
+          {rangeInput}
+          <EuiFormErrorText>
+            <FormattedMessage
+              id="xpack.maps.validatedRange.rangeErrorMessage"
+              defaultMessage="Must be between {min} and {max}"
+              values={{ min, max }}
+            />
+          </EuiFormErrorText>
+        </div>
       );
     }
 
-    return (
-      <Fragment>
-        <EuiRange
-          min={min}
-          max={max}
-          value={this.state.value.toString()}
-          onChange={this._onRangeChange}
-          {...rest}
-        />
-        {errorMessage}
-      </Fragment>
-    );
+    return rangeInput;
   }
 }
