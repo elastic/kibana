@@ -13,3 +13,11 @@ export const registerRouter = (aRouter: any) => {
 export const goToWatchList = () => {
   router.history.push({ pathname: `${BASE_PATH}watches` });
 };
+
+export const goToCreateThresholdAlert = () => {
+  router.history.push({ pathname: `${BASE_PATH}watches/new-watch/threshold` });
+};
+
+export const goToCreateAdvancedWatch = () => {
+  router.history.push({ pathname: `${BASE_PATH}watches/new-watch/json` });
+};

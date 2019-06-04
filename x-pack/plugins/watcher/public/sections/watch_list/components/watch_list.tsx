@@ -20,6 +20,9 @@ import {
   EuiToolTip,
   EuiEmptyPrompt,
   EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -27,7 +30,7 @@ import { Moment } from 'moment';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
-import { REFRESH_INTERVALS, PAGINATION } from '../../../../common/constants';
+import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../common/constants';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
 import {
   getPageErrorCode,
@@ -38,6 +41,7 @@ import {
 } from '../../../components';
 import { loadWatches } from '../../../lib/api';
 import { watcherGettingStartedUrl } from '../../../lib/documentation_links';
+import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../../lib/navigation';
 
 const WatchListUi = () => {
   // hooks
@@ -55,66 +59,145 @@ const WatchListUi = () => {
     REFRESH_INTERVALS.WATCH_LIST
   );
 
+  const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
+
   const availableWatches = useMemo(
     () =>
       watches ? watches.filter((watch: any) => !deletedWatches.includes(watch.id)) : undefined,
     [watches, deletedWatches]
   );
 
-  const createWatchButtons = (
-    <EuiFlexGroup gutterSize="m" justifyContent="center">
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.createThresholdAlertButtonTooltip"
-              defaultMessage="Send an alert on a specific condition"
-            />
-          }
-        >
-          <EuiButton
-            data-test-subj="createThresholdAlertButton"
-            iconType="plusInCircle"
-            href="#/management/elasticsearch/watcher/watches/new-watch/threshold"
-          >
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.createThresholdAlertButtonLabel"
-              defaultMessage="Create threshold alert"
-            />
-          </EuiButton>
-        </EuiToolTip>
-      </EuiFlexItem>
+  const watcherDescriptionText = (
+    <EuiTitle size="s">
+      <EuiText color="subdued">
+        <FormattedMessage
+          id="xpack.watcher.sections.watchList.subhead"
+          defaultMessage="Use Watcher to watch for changes or anomalies in your data and perform the necessary actions in response."
+        />
+      </EuiText>
+    </EuiTitle>
+  );
 
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.createAdvancedWatchTooltip"
-              defaultMessage="Set up a custom watch in raw JSON"
-            />
-          }
+  const createWatchContextMenu = (
+    <EuiPopover
+      id="createWatchPanel"
+      button={
+        <EuiButton
+          fill
+          data-test-subj="createWatchButton"
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={() => setIsPopOverOpen(!isPopoverOpen)}
         >
-          <EuiButton
-            data-test-subj="createAdvancedWatchButton"
-            iconType="plusInCircle"
-            href="#/management/elasticsearch/watcher/watches/new-watch/json"
-          >
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.createAdvancedWatchButtonLabel"
-              defaultMessage="Create advanced watch"
-            />
-          </EuiButton>
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <FormattedMessage
+            id="xpack.watcher.sections.watchList.createWatchButtonLabel"
+            defaultMessage="Create"
+          />
+        </EuiButton>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopOverOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenuPanel
+        items={[WATCH_TYPES.THRESHOLD, WATCH_TYPES.JSON].map((watchType: string) => {
+          return (
+            <EuiContextMenuItem
+              key={watchType}
+              data-test-subj={`${watchType}WatchCreateLink`}
+              onClick={() => {
+                setIsPopOverOpen(false);
+                const navigate =
+                  watchType === WATCH_TYPES.THRESHOLD
+                    ? goToCreateThresholdAlert
+                    : goToCreateAdvancedWatch;
+                navigate();
+              }}
+            >
+              {watchType === WATCH_TYPES.THRESHOLD ? (
+                <Fragment>
+                  <EuiText size="m">
+                    <span>
+                      <FormattedMessage
+                        id="xpack.watcher.sections.watchList.createThresholdAlertButtonLabel"
+                        defaultMessage="Create threshold alert"
+                      />
+                    </span>
+                  </EuiText>
+                  <EuiText size="s" color="subdued">
+                    <span>
+                      <FormattedMessage
+                        id="xpack.watcher.sections.watchList.createThresholdAlertButtonTooltip"
+                        defaultMessage="Send an alert on a specific condition"
+                      />
+                    </span>
+                  </EuiText>
+                </Fragment>
+              ) : (
+                <Fragment>
+                  <EuiText size="m">
+                    <span>
+                      <FormattedMessage
+                        id="xpack.watcher.sections.watchList.createAdvancedWatchButtonLabel"
+                        defaultMessage="Create advanced watch"
+                      />
+                    </span>
+                  </EuiText>
+                  <EuiText size="s" color="subdued">
+                    <span>
+                      <FormattedMessage
+                        id="xpack.watcher.sections.watchList.createAdvancedWatchTooltip"
+                        defaultMessage="Set up a custom watch in raw JSON"
+                      />
+                    </span>
+                  </EuiText>
+                </Fragment>
+              )}
+            </EuiContextMenuItem>
+          );
+        })}
+      />
+    </EuiPopover>
   );
 
   if (getPageErrorCode(error)) {
     return (
       <EuiPageContent>
         <PageError />
+      </EuiPageContent>
+    );
+  }
+
+  if (availableWatches && availableWatches.length === 0) {
+    const emptyPromptBody = (
+      <Fragment>
+        {watcherDescriptionText}
+        {''}
+        <EuiLink href={watcherGettingStartedUrl} target="_blank">
+          <FormattedMessage
+            id="xpack.watcher.sections.watchList.watcherLearnMoreLinkText"
+            defaultMessage="Learn more."
+          />
+        </EuiLink>
+      </Fragment>
+    );
+
+    return (
+      <EuiPageContent>
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          title={
+            <h1>
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.emptyPromptTitle"
+                defaultMessage="You don't have any watches yet"
+              />
+            </h1>
+          }
+          body={emptyPromptBody}
+          actions={createWatchContextMenu}
+        />
       </EuiPageContent>
     );
   }
@@ -131,31 +214,6 @@ const WatchListUi = () => {
           />
         }
         error={error}
-      />
-    );
-  } else if (availableWatches && availableWatches.length === 0) {
-    content = (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1>
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.emptyPromptTitle"
-              defaultMessage="You don't have any watches yet"
-            />
-          </h1>
-        }
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.watcher.sections.watchList.emptyPromptDescription"
-                defaultMessage="Start by creating a watch."
-              />
-            </p>
-          </Fragment>
-        }
-        actions={createWatchButtons}
       />
     );
   } else {
@@ -329,7 +387,7 @@ const WatchListUi = () => {
           )}
         </EuiButton>
       ),
-      toolsRight: createWatchButtons,
+      toolsRight: createWatchContextMenu,
     };
 
     content = (
@@ -388,14 +446,7 @@ const WatchListUi = () => {
 
       <EuiSpacer size="s" />
 
-      <EuiTitle size="s">
-        <EuiText color="subdued">
-          <FormattedMessage
-            id="xpack.watcher.sections.watchList.subhead"
-            defaultMessage="Use watcher to watch for changes or anomalies in your data and perform the necessary actions in response."
-          />
-        </EuiText>
-      </EuiTitle>
+      {watcherDescriptionText}
 
       <EuiSpacer size="xl" />
 
