@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { INDEX_NAMES } from './index_names';
-export { PLUGIN } from './plugin';
-export const BASE_PATH = '/fleet';
+import React from 'react';
+
+export const IndexPage = () => {
+  return <span>Elastic Fleet</span>;
+};
