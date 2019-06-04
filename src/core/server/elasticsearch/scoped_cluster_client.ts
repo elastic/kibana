@@ -74,7 +74,7 @@ export class ScopedClusterClient {
     clientParams: Record<string, unknown> = {},
     options?: CallAPIOptions
   ) {
-    if (this.headers) {
+    if (this.headers !== undefined) {
       if (isObject(clientParams.headers)) {
         const duplicates = intersection(
           Object.keys(this.headers),
