@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ServerRoute } from 'hapi';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
-
-export {
-  SavedObject,
-  SavedObjectAttributes,
-} from 'src/legacy/server/saved_objects/service/saved_objects_client';
 
 export { Request, Server, ServerRoute } from 'hapi';
 
