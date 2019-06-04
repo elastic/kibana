@@ -85,8 +85,8 @@ export default function (opts) {
           }
 
           if (!defined) {
-            // If there is only one index pattern, set it as default
-            if (patterns.length === 1) {
+            // If there is any index pattern created, set the first as default
+            if (patterns.length >= 1) {
               defaultId = patterns[0];
               config.set('defaultIndex', defaultId);
             } else {
