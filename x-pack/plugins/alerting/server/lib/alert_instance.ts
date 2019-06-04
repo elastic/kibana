@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { State, Context } from './types';
+import { State, Context } from '../types';
 
 interface ConstructorOptions {
   state?: Record<string, any>;

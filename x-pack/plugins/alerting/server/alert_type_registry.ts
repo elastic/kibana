@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { AlertType } from './types';
 import { TaskManager } from '../../task_manager';
-import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
+import { getCreateTaskRunnerFunction } from './lib';
 import { ActionsPlugin } from '../../actions';
 
 interface ConstructorOptions {

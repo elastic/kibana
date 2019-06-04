@@ -5,9 +5,9 @@
  */
 
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
-import { ActionsPlugin } from '../../actions';
-import { AlertType } from './types';
-import { TaskInstance } from '../../task_manager';
+import { ActionsPlugin } from '../../../actions';
+import { AlertType } from '../types';
+import { TaskInstance } from '../../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';

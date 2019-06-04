@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('./get_create_task_runner_function', () => ({
+jest.mock('./lib/get_create_task_runner_function', () => ({
   getCreateTaskRunnerFunction: jest.fn().mockReturnValue(jest.fn()),
 }));
 

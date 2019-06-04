@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertInstance } from './lib';
 import { AlertTypeRegistry } from './alert_type_registry';
-import { AlertInstance } from './alert_instance';
 
 export type State = Record<string, any>;
 export type Context = Record<string, any>;
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
-
-export interface SavedObjectReference {
-  name: string;
-  type: string;
-  id: string;
-}
 
 export interface AlertServices {
   alertInstanceFactory: (id: string) => AlertInstance;

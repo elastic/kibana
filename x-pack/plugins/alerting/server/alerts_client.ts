@@ -5,8 +5,7 @@
  */
 
 import { omit } from 'lodash';
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
-import { SavedObjectReference } from './types';
+import { SavedObjectsClient, SavedObjectReference } from 'src/legacy/server/saved_objects';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction } from './types';
 import { TaskManager } from '../../task_manager';
 import { TASK_MANAGER_SCOPE } from '../common/constants';

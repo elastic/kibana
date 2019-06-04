@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertExecuteOptions } from './types';
-import { savedObjectsClientMock } from './__mocks__/saved_objects_client.mock';
+import { AlertExecuteOptions } from '../types';
+import { savedObjectsClientMock } from '../__mocks__/saved_objects_client.mock';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 
 const mockedNow = new Date('2019-06-03T18:55:25.982Z');

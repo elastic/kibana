@@ -6,8 +6,8 @@
 
 import Handlebars from 'handlebars';
 import { SavedObject } from 'src/legacy/server/saved_objects';
-import { RawAlertAction, State, Context } from './types';
-import { ActionsPlugin } from '../../actions';
+import { RawAlertAction, State, Context } from '../types';
+import { ActionsPlugin } from '../../../actions';
 
 interface CreateFireHandlerOptions {
   fireAction: ActionsPlugin['fire'];
