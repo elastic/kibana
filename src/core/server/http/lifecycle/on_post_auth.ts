@@ -109,7 +109,7 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler) {
     h: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     try {
-      const result = await fn(KibanaRequest.from(request, undefined), toolkit);
+      const result = await fn(KibanaRequest.from(request), toolkit);
       if (!postAuthResult.isValid(result)) {
         throw new Error(
           `Unexpected result from OnPostAuth. Expected OnPostAuthResult, but given: ${result}.`

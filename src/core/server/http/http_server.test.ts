@@ -675,7 +675,7 @@ test('#getBasePathFor() is based on server base path', async () => {
 test('#setBasePathFor() cannot be set twice for one request', async () => {
   const kibanaRequestFactory = {
     from() {
-      return KibanaRequest.from(httpServerMock.createRawRequest(), undefined);
+      return KibanaRequest.from(httpServerMock.createRawRequest());
     },
   };
   jest.doMock('./router/request', () => ({

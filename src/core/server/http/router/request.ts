@@ -46,7 +46,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    */
   public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     req: Request,
-    routeSchemas: RouteSchemas<P, Q, B> | undefined
+    routeSchemas?: RouteSchemas<P, Q, B>
   ) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
     return new KibanaRequest(req, requestParts.params, requestParts.query, requestParts.body);
