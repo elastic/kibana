@@ -293,7 +293,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       };
     }
 
-    function cellMouseover(target, laneLabel, bucketScore, index, time) { // eslint-disable-line no-unused-vars
+    function cellMouseover(target, laneLabel, bucketScore, index, time) {
       if (bucketScore === undefined || cellMouseoverActive === false) {
         return;
       }
@@ -368,7 +368,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
 
     // TODO - mark if zoomed in to bucket width?
     let time = startTime;
-    Array(numBuckets || 0).fill(null).forEach((v, i) => { // eslint-disable-line no-unused-vars
+    Array(numBuckets || 0).fill(null).forEach((v, i) => {
       const cell = cellsContainer.append('div')
         .classed('sl-cell', true)
         .style('width', `${cellWidth}px`)

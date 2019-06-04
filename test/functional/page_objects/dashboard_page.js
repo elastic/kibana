@@ -54,7 +54,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         'defaultIndex': defaultIndex,
       });
       await this.selectDefaultIndex(defaultIndex);
-      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
     }
 

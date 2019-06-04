@@ -19,7 +19,7 @@ import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
 
 enum AdminTabs {
-  projects = 'Projects',
+  projects = 'Repos',
   roles = 'Roles',
   languageServers = 'LanguageServers',
 }

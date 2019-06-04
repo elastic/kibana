@@ -9,7 +9,7 @@ import { editorConfigProviders } from 'ui/vis/editors/config/editor_config_provi
 
 export function initEditorConfig() {
   // Limit agg params based on rollup capabilities
-  editorConfigProviders.register((aggType, indexPattern, aggConfig) => { // eslint-disable-line no-unused-vars
+  editorConfigProviders.register((aggType, indexPattern, aggConfig) => {
     if(indexPattern.type !== 'rollup') {
       return {};
     }

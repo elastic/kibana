@@ -13,5 +13,6 @@ http: {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         getBasePathFor: HttpServiceSetup['getBasePathFor'];
         setBasePathFor: HttpServiceSetup['setBasePathFor'];
+        createNewServer: HttpServiceSetup['createNewServer'];
     };
 ```
