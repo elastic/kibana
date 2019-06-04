@@ -153,18 +153,16 @@ export class UpdateSourceEditor extends Component {
             })
           }
         >
-          <div>
-            <ValidatedRange
-              min={1}
-              max={100}
-              step={1}
-              value={this.props.topHitsSize}
-              onChange={this.onTopHitsSizeChange}
-              showLabels
-              showInput
-              showRange
-            />
-          </div>
+          <ValidatedRange
+            min={1}
+            max={100}
+            step={1}
+            value={this.props.topHitsSize}
+            onChange={this.onTopHitsSizeChange}
+            showLabels
+            showInput
+            showRange
+          />
         </EuiFormRow>
       );
     }

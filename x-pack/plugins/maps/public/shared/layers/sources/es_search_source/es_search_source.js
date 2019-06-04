@@ -135,7 +135,62 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
+  async _getTopHits(layerName, searchFilters) {
+    const {
+      geoField,
+      topHitsSplitField,
+      topHitsTimeField,
+      topHitsSize,
+    } = this._descriptor;
+
+    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    searchSource.setField('aggs', {
+      entitySplit: {
+        terms: {
+          field: topHitsSplitField,
+          size: 10000
+        },
+        aggs: {
+          entityHits: {
+            top_hits: {
+              sort: [
+                {
+                  [topHitsTimeField]: {
+                    order: 'desc'
+                  }
+                }
+              ],
+              _source: {
+                includes: [ geoField ]
+              },
+              size: topHitsSize
+            }
+          }
+        }
+      }
+    });
+
+    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document top hits request');
+    console.log();
+
+    let hasTrimmedResults = false;
+    const hits = [];
+    const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
+    entityBuckets.forEach(entityBucket => {
+      const entityHits = _.get(entityBucket, 'entityHits.hits.hits', []);
+      hits.push(...entityHits);
+      if (hits.length === topHitsSize) {
+        hasTrimmedResults = true;
+      }
+    });
+
+    return {
+      hits: hits,
+      areResultsTrimmed: hasTrimmedResults
+    };
+  }
+
+  async _getSearchHits(layerName, searchFilters) {
     const searchSource = await this._makeSearchSource(searchFilters, DEFAULT_ES_DOC_LIMIT);
     // Setting "fields" instead of "source: { includes: []}"
     // because SearchSource automatically adds the following by default
@@ -144,7 +199,21 @@ export class ESSearchSource extends AbstractESSource {
     // By setting "fields", SearchSource removes all of defaults
     searchSource.setField('fields', searchFilters.fieldNames);
 
-    let featureCollection;
+    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document request');
+
+    return {
+      hits: resp.hits.hits,
+      areResultsTrimmed: resp.hits.total > resp.hits.hits.length
+    };
+  }
+
+  async getGeoJsonWithMeta(layerName, searchFilters) {
+    const { useTopHits, topHitsSplitField, topHitsTimeField } = this._descriptor;
+
+    const { hits, areResultsTrimmed } = useTopHits && topHitsSplitField && topHitsTimeField
+      ? await this._getTopHits(layerName, searchFilters)
+      : await this._getSearchHits(layerName, searchFilters);
+
     const indexPattern = await this._getIndexPattern();
     const unusedMetaFields = indexPattern.metaFields.filter(metaField => {
       return metaField !== '_id';
@@ -158,10 +227,10 @@ export class ESSearchSource extends AbstractESSource {
       return properties;
     };
 
-    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document request');
+    let featureCollection;
     try {
       const geoField = await this._getGeoField();
-      featureCollection = hitsToGeoJson(resp.hits.hits, flattenHit, geoField.name, geoField.type);
+      featureCollection = hitsToGeoJson(hits, flattenHit, geoField.name, geoField.type);
     } catch(error) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.convertToGeoJsonErrorMsg', {
@@ -174,7 +243,7 @@ export class ESSearchSource extends AbstractESSource {
     return {
       data: featureCollection,
       meta: {
-        areResultsTrimmed: resp.hits.total > resp.hits.hits.length
+        areResultsTrimmed
       }
     };
   }
