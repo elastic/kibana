@@ -32,6 +32,7 @@ export function updateAlertRoute(server: Hapi.Server) {
         payload: Joi.object()
           .keys({
             interval: Joi.number().required(),
+            alertTypeParams: Joi.object().required(),
             actions: Joi.array()
               .items(
                 Joi.object().keys({
@@ -41,7 +42,6 @@ export function updateAlertRoute(server: Hapi.Server) {
                 })
               )
               .required(),
-            alertTypeParams: Joi.object().required(),
           })
           .required(),
       },
@@ -49,7 +49,7 @@ export function updateAlertRoute(server: Hapi.Server) {
     async handler(request: UpdateRequest) {
       const { id } = request.params;
       const alertsClient = request.getAlertsClient!();
-      await alertsClient.update({ id, data: request.payload });
+      return await alertsClient.update({ id, data: request.payload });
     },
   });
 }

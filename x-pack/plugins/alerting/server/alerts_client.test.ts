@@ -95,7 +95,6 @@ describe('create()', () => {
 Object {
   "actions": Array [
     Object {
-      "actionRef": undefined,
       "group": "default",
       "id": "1",
       "params": Object {
@@ -122,7 +121,6 @@ Object {
           Object {
             "actionRef": "action_0",
             "group": "default",
-            "id": undefined,
             "params": Object {
               "foo": true,
             },
@@ -323,7 +321,6 @@ describe('get()', () => {
 Object {
   "actions": Array [
     Object {
-      "actionRef": undefined,
       "group": "default",
       "id": "1",
       "params": Object {
@@ -398,7 +395,6 @@ Array [
   Object {
     "actions": Array [
       Object {
-        "actionRef": undefined,
         "group": "default",
         "id": "1",
         "params": Object {
@@ -570,7 +566,6 @@ describe('update()', () => {
 Object {
   "actions": Array [
     Object {
-      "actionRef": undefined,
       "group": "default",
       "id": "1",
       "params": Object {
@@ -596,7 +591,6 @@ Object {
           Object {
             "actionRef": "action_0",
             "group": "default",
-            "id": undefined,
             "params": Object {
               "foo": true,
             },

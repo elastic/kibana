@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash';
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { SavedObjectReference } from './types';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction } from './types';
@@ -158,11 +159,10 @@ export class AlertsClient {
         id: action.id,
       });
       return {
-        ...action,
-        id: undefined,
+        ...omit(action, 'id'),
         actionRef,
       };
-    });
+    }) as RawAlert['actions'];
     return {
       actions: rawActions,
       references,
@@ -179,11 +179,10 @@ export class AlertsClient {
         throw new Error(`Reference ${action.actionRef} not found`);
       }
       return {
-        ...action,
-        actionRef: undefined,
+        ...omit(action, 'actionRef'),
         id: reference.id,
       };
-    });
+    }) as Alert['actions'];
   }
 
   private getAlertFromRaw(id: string, rawAlert: RawAlert, references: SavedObjectReference[]) {

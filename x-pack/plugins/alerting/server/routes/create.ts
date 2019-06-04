@@ -30,6 +30,7 @@ export function createAlertRoute(server: Hapi.Server) {
           .keys({
             alertTypeId: Joi.string().required(),
             interval: Joi.number().required(),
+            alertTypeParams: Joi.object().required(),
             actions: Joi.array()
               .items(
                 Joi.object().keys({
@@ -39,7 +40,6 @@ export function createAlertRoute(server: Hapi.Server) {
                 })
               )
               .required(),
-            alertTypeParams: Joi.object().required(),
           })
           .required(),
       },
