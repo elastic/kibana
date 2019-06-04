@@ -55,7 +55,7 @@ export interface StatItemsProps extends StatItems {
 }
 
 export const StatItemsComponent = React.memo<StatItemsProps>(
-  ({ fields, description, key, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
+  ({ fields, description, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
     const isBarChartDataAbailable =
       barChart &&
       barChart.length &&
@@ -65,7 +65,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       areaChart.length &&
       areaChart.every(item => item.value != null && item.value.length > 0);
     return (
-      <FlexItem key={`stat-items-${key}`} grow={grow}>
+      <FlexItem grow={grow}>
         <EuiPanel>
           <EuiTitle size="xxxs">
             <h6>{description}</h6>

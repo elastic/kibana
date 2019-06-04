@@ -371,7 +371,7 @@ function applyAutomaticAllPrivilegeGrants(...allPrivileges: Array<FeatureKibanaP
   allPrivileges.forEach(allPrivilege => {
     if (allPrivilege) {
       allPrivilege.savedObject.all = uniq([...allPrivilege.savedObject.all, 'telemetry']);
-      allPrivilege.savedObject.read = uniq([...allPrivilege.savedObject.read, 'config']);
+      allPrivilege.savedObject.read = uniq([...allPrivilege.savedObject.read, 'config', 'url']);
     }
   });
 }
@@ -381,7 +381,7 @@ function applyAutomaticReadPrivilegeGrants(
 ) {
   readPrivileges.forEach(readPrivilege => {
     if (readPrivilege) {
-      readPrivilege.savedObject.read = uniq([...readPrivilege.savedObject.read, 'config']);
+      readPrivilege.savedObject.read = uniq([...readPrivilege.savedObject.read, 'config', 'url']);
     }
   });
 }

@@ -312,7 +312,7 @@ export interface OsEcsFields {
 }
 
 export interface CursorType {
-  value: string;
+  value?: string | null;
 
   tiebreaker?: string | null;
 }
@@ -2181,7 +2181,7 @@ export namespace GetAuthenticationsQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -2195,7 +2195,7 @@ export namespace GetAuthenticationsQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -2323,7 +2323,7 @@ export namespace GetDomainsQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -2337,7 +2337,7 @@ export namespace GetDomainsQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -2386,7 +2386,7 @@ export namespace GetEventsQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
 
     tiebreaker?: string | null;
   };
@@ -2634,7 +2634,7 @@ export namespace GetHostsTableQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -2648,7 +2648,7 @@ export namespace GetHostsTableQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -3090,7 +3090,7 @@ export namespace GetNetworkDnsQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -3104,7 +3104,7 @@ export namespace GetNetworkDnsQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -3219,7 +3219,7 @@ export namespace GetNetworkTopNFlowQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -3233,7 +3233,7 @@ export namespace GetNetworkTopNFlowQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -3609,7 +3609,7 @@ export namespace GetTimelineQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
 
     tiebreaker?: string | null;
   };
@@ -4838,7 +4838,7 @@ export namespace GetTlsQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -4852,7 +4852,7 @@ export namespace GetTlsQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -4936,7 +4936,7 @@ export namespace GetUncommonProcessesQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -4950,7 +4950,7 @@ export namespace GetUncommonProcessesQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -5021,7 +5021,7 @@ export namespace GetUsersQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -5035,7 +5035,7 @@ export namespace GetUsersQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 

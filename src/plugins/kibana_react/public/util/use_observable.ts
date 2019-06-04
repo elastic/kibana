@@ -17,20 +17,21 @@
  * under the License.
  */
 
-export const kibanaContext = () => ({
-  name: 'kibana_context',
-  from: {
-    null: () => {
-      return {
-        type: 'kibana_context',
-      };
+import { useEffect, useState } from 'react';
+import { Observable } from 'rxjs';
+
+export function useObservable<T>(observable$: Observable<T>): T | undefined;
+export function useObservable<T>(observable$: Observable<T>, initialValue: T): T;
+export function useObservable<T>(observable$: Observable<T>, initialValue?: T): T | undefined {
+  const [value, update] = useState<T | undefined>(initialValue);
+
+  useEffect(
+    () => {
+      const s = observable$.subscribe(update);
+      return () => s.unsubscribe();
     },
-  },
-  to: {
-    null: () => {
-      return {
-        type: 'null',
-      };
-    },
-  }
-});
+    [observable$]
+  );
+
+  return value;
+}

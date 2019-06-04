@@ -171,7 +171,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         iconSide="right"
         onClick={this.onButtonClick}
       >
-        Rows: {limit}
+        {`${i18n.ROWS}: ${limit}`}
       </EuiButtonEmpty>
     );
 
