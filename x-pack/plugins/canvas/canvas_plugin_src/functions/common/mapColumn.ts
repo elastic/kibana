@@ -43,6 +43,7 @@ export function mapColumn(): ExpressionFunction<
         resolve: false,
         aliases: ['exp', 'fn', 'function'],
         help: argHelp.expression,
+        required: true,
       },
     },
     fn: (context, args) => {

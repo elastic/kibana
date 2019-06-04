@@ -20,7 +20,7 @@ import { getFunctionHelp } from '../../../strings';
 import { AxisConfig, PointSeries, Render, SeriesStyle, Style, Palette, Legend } from '../../types';
 
 interface Arguments {
-  seriesStyle: SeriesStyle[] | null;
+  seriesStyle: SeriesStyle[];
   defaultStyle: SeriesStyle;
   palette: Palette;
   font: Style;

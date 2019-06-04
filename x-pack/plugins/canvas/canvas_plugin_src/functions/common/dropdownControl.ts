@@ -12,7 +12,7 @@ import { getFunctionHelp } from '../../strings';
 interface Arguments {
   filterColumn: string;
   valueColumn: string;
-  filterGroup: string | null;
+  filterGroup: string;
 }
 
 interface Return {

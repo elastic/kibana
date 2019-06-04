@@ -10,7 +10,7 @@ const name = 'seriesStyle';
 
 interface Arguments {
   bars: number;
-  color: string | null;
+  color: string;
   fill: number | boolean;
   horizontalBars: boolean;
   label: string;
@@ -34,25 +34,13 @@ export function seriesStyle(): ExpressionFunction<'seriesStyle', null, Arguments
       types: ['null'],
     },
     args: {
-      label: {
-        types: ['string'],
-        help: argHelp.label,
-      },
-      color: {
-        types: ['string', 'null'],
-        help: argHelp.color,
-      },
-      lines: {
-        types: ['number', 'null'],
-        help: argHelp.lines,
-      },
       bars: {
-        types: ['number', 'null'],
+        types: ['number'],
         help: argHelp.bars,
       },
-      points: {
-        types: ['number', 'null'],
-        help: argHelp.points,
+      color: {
+        types: ['string'],
+        help: argHelp.color,
       },
       fill: {
         types: ['number', 'boolean'],
@@ -60,14 +48,26 @@ export function seriesStyle(): ExpressionFunction<'seriesStyle', null, Arguments
         default: false,
         options: [true, false],
       },
-      stack: {
-        types: ['number', 'null'],
-        help: argHelp.stack,
-      },
       horizontalBars: {
         types: ['boolean'],
         help: argHelp.horizontalBars,
         options: [true, false],
+      },
+      label: {
+        types: ['string'],
+        help: argHelp.label,
+      },
+      lines: {
+        types: ['number'],
+        help: argHelp.lines,
+      },
+      points: {
+        types: ['number'],
+        help: argHelp.points,
+      },
+      stack: {
+        types: ['number', 'null'],
+        help: argHelp.stack,
       },
     },
     fn: (_context, args) => ({ type: name, ...args }),

@@ -26,10 +26,10 @@ export enum Shape {
 }
 
 interface Arguments {
-  border: string | null;
-  borderWidth: number | null;
-  shape: Shape | null;
-  fill: string | null;
+  border: string;
+  borderWidth: number;
+  shape: Shape;
+  fill: string;
   maintainAspect: boolean;
 }
 
@@ -58,7 +58,7 @@ export function shape(): ExpressionFunction<'shape', null, Arguments, Return> {
         types: ['number'],
         aliases: ['strokeWidth'],
         help: argHelp.borderWidth,
-        default: '0',
+        default: 0,
       },
       shape: {
         types: ['string'],

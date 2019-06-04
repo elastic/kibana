@@ -13,7 +13,7 @@ interface Arguments {
   column: string;
   from: string;
   to: string;
-  filterGroup: string | null;
+  filterGroup: string;
 }
 
 export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments, Filter> {
@@ -46,7 +46,7 @@ export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments
         help: argHelp.to,
       },
       filterGroup: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: 'Group name for the filter',
       },
     },

@@ -13,10 +13,10 @@ import { CSSStyle, FontFamily, FontWeight, Style, TextAlignment, TEXT_ALIGNMENTS
 
 interface Arguments {
   align: TextAlignment;
-  color: string | null;
+  color: string;
   family: FontFamily;
   italic: boolean;
-  lHeight: number;
+  lHeight: number | null;
   size: number;
   underline: boolean;
   weight: FontWeight;
@@ -62,9 +62,9 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
         types: ['number'],
       },
       size: {
+        types: ['number'],
         default: 14,
         help: argHelp.size,
-        types: ['number'],
       },
       underline: {
         default: false,

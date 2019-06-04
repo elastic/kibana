@@ -46,11 +46,11 @@ export function axisConfig(): ExpressionFunction<'axisConfig', null, Arguments, 
         default: 'left',
       },
       min: {
-        types: ['number', 'date', 'string', 'null'],
+        types: ['number', 'string', 'null'],
         help: argHelp.min,
       },
       max: {
-        types: ['number', 'date', 'string', 'null'],
+        types: ['number', 'string', 'null'],
         help: argHelp.max,
       },
       tickSize: {

@@ -8,12 +8,12 @@ import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 export enum Operation {
   EQ = 'eq',
+  GT = 'gt',
+  GTE = 'gte',
+  LT = 'lt',
+  LTE = 'lte',
   NE = 'ne',
   NEQ = 'neq',
-  LT = 'lt',
-  GT = 'gt',
-  LTE = 'lte',
-  GTE = 'gte',
 }
 
 interface Arguments {

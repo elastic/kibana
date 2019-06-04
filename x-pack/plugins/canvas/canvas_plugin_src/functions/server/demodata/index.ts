@@ -13,7 +13,7 @@ import { Filter, Datatable, DatatableColumn, DatatableRow } from '../../types';
 import { getFunctionHelp } from '../../../strings';
 
 interface Arguments {
-  type: string | null;
+  type: string;
 }
 
 export function demodata(): ExpressionFunction<'demodata', Filter, Arguments, Datatable> {

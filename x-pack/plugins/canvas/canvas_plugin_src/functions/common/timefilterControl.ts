@@ -11,7 +11,7 @@ import { getFunctionHelp } from '../../strings';
 interface Arguments {
   column: string;
   compact: boolean;
-  filterGroup: string | null;
+  filterGroup: string;
 }
 export function timefilterControl(): ExpressionFunction<
   'timefilterControl',
@@ -43,7 +43,7 @@ export function timefilterControl(): ExpressionFunction<
         options: [true, false],
       },
       filterGroup: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.filterGroup,
       },
     },

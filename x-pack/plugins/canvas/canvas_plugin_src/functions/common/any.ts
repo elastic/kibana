@@ -8,7 +8,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
-  condition: boolean[] | null;
+  condition: boolean[];
 }
 
 export function any(): ExpressionFunction<'any', null, Arguments, boolean> {

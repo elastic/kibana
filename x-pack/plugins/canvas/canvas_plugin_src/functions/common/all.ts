@@ -8,7 +8,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
-  condition: boolean[] | null;
+  condition: boolean[];
 }
 
 export function all(): ExpressionFunction<'all', null, Arguments, boolean> {
@@ -17,17 +17,17 @@ export function all(): ExpressionFunction<'all', null, Arguments, boolean> {
   return {
     name: 'all',
     type: 'boolean',
+    help,
     context: {
       types: ['null'],
     },
-    help,
     args: {
       condition: {
         aliases: ['_'],
         types: ['boolean'],
+        help: argHelp.condition,
         required: true,
         multi: true,
-        help: argHelp.condition,
       },
     },
     fn: (_context, args) => {
