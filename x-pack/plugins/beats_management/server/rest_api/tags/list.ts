@@ -1,13 +1,26 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import * as Joi from 'joi';
-import { ReturnTypeList } from 'x-pack/plugins/beats_management/common/return_types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
+import { ReturnTypeList } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
@@ -27,8 +40,7 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
     }),
   },
   handler: async (request: FrameworkRequest): Promise<ReturnTypeList<BeatTag>> => {
-    let tags: BeatTag[];
-    tags = await libs.tags.getAll(
+    const tags = await libs.tags.getAll(
       request.user,
       request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
     );
