@@ -851,7 +851,7 @@ class MyPlugin {
 ```
 
 ### Mock core services in tests
-Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts. 
+Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts.
 ```typescript
 // my_plugin/server/plugin.test.ts
 Import { configServiceMock } from 'src/core/server/mocks.ts'
@@ -870,7 +870,8 @@ const createSetupContractMock = () => {
   const startContract: jest.Mocked<MyPluginStartContract>= {
     isValid: jest.fn();
   }
-  isValid.mockReturnValue(true);
+  // here we already type check as TS infers to the correct type declared above
+  startContract.isValid.mockReturnValue(true);
   return startContract;
 }
 
@@ -880,12 +881,12 @@ const createMyPluginMock = () => {
     start: jest.fn(),
     stop: jest.fn(),
   };
-  // here we already type check as TS infers to the correct type from above
+  // here we already type check as TS infers to the correct type declared above
   mocked.setup.mockResolvedValue(createSetupContractMock());
   return mocked;
 };
 
 export const myPluginMocks = {
-   create: createMyPluginMock
+  create: createMyPluginMock
 } 
 ```
