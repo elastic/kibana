@@ -31,7 +31,7 @@ app.directive('durationSelect', function ($injector) {
     replace: true,
     controllerAs: 'durationSelect',
     bindToController: true,
-    link: function ($scope, $element, $attrs, $ctrl) { // eslint-disable-line no-unused-vars
+    link: function ($scope, $element, $attrs, $ctrl) {
       $scope.durationSelect.form = $ctrl;
     },
     controller: class DurationSelectController extends InitAfterBindingsWorkaround {

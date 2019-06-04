@@ -23,7 +23,7 @@ app.directive('kbnTab', function () {
     controllerAs: 'kbnTab',
     bindToController: true,
     controller: class KbnTabController {},
-    link: function ($scope, $ele, attrs, kbnTabs) { // eslint-disable-line no-unused-vars
+    link: function ($scope, $ele, attrs, kbnTabs) {
       $scope.kbnTabs = kbnTabs;
     }
   };
