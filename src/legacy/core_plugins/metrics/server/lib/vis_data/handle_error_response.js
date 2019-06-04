@@ -26,9 +26,15 @@ export const handleErrorResponse = panel => error => {
   } catch (e) {
     errorResponse = error.response;
   }
-  if (!errorResponse) {
+  if (!errorResponse && !(error.name === 'KQLSyntaxError')) {
     errorResponse = {
       message: error.message,
+      stack: error.stack
+    };
+  }
+  if (error.name === 'KQLSyntaxError') {
+    errorResponse = {
+      message: error.shortMessage,
       stack: error.stack
     };
   }

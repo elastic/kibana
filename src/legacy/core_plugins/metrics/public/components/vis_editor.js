@@ -80,27 +80,6 @@ export class VisEditor extends Component {
     return true;
   };
 
-  isAllValidKueryQuery = (partialModel) => {
-    let isParsedKueryValid = true;
-    isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(partialModel.filter);
-    if (partialModel.annotations && partialModel.annotations.length) {
-      partialModel.annotations.forEach((annotationItem) => {
-        isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(annotationItem.query_string);
-      });
-    }
-    if (partialModel.series && partialModel.series.length) {
-      partialModel.series.forEach((seriesItem) => {
-        isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(seriesItem.filter);
-        if (seriesItem.split_filters && seriesItem.split_filters.length) {
-          seriesItem.split_filters.forEach((splitFilterItem) => {
-            isParsedKueryValid = isParsedKueryValid && this.isValidKueryQuery(splitFilterItem.filter);
-          });
-        }
-      });
-    }
-    return isParsedKueryValid;
-  }
-
   handleChange = async partialModel => {
     if (isEmpty(partialModel)) {
       return;
@@ -111,7 +90,7 @@ export class VisEditor extends Component {
       ...partialModel,
     };
     let dirty = true;
-    if ((this.state.autoApply || hasTypeChanged) && this.isAllValidKueryQuery(partialModel)) {
+    if (this.state.autoApply || hasTypeChanged) {
       this.updateVisState();
 
       dirty = false;
