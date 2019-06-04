@@ -18,7 +18,7 @@ import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 
-import { KibanaConfigContext } from '../components/formatted_date';
+import { KibanaConfigContext } from '../lib/adapters/framework/kibana_framework_adapter';
 import { AppTestingFrameworkAdapter } from '../lib/adapters/framework/testing_framework_adapter';
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';

@@ -55,31 +55,18 @@ exports[`Storyshots components/Tag as health 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <svg
-        className="euiIcon euiIcon--medium"
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
-        height="16"
+        height={16}
         style={
           Object {
             "fill": "#666666",
           }
         }
         viewBox="0 0 16 16"
-        width="16"
+        width={16}
         xmlns="http://www.w3.org/2000/svg"
-        xmlnsXlink="http://www.w3.org/1999/xlink"
-      >
-        <defs>
-          <circle
-            cx="8"
-            cy="8"
-            id="dot-a"
-            r="4"
-          />
-        </defs>
-        <use
-          xlinkHref="#dot-a"
-        />
-      </svg>
+      />
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -101,31 +88,18 @@ exports[`Storyshots components/Tag as health with color 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <svg
-        className="euiIcon euiIcon--medium"
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
-        height="16"
+        height={16}
         style={
           Object {
             "fill": "#9b3067",
           }
         }
         viewBox="0 0 16 16"
-        width="16"
+        width={16}
         xmlns="http://www.w3.org/2000/svg"
-        xmlnsXlink="http://www.w3.org/1999/xlink"
-      >
-        <defs>
-          <circle
-            cx="8"
-            cy="8"
-            id="dot-a"
-            r="4"
-          />
-        </defs>
-        <use
-          xlinkHref="#dot-a"
-        />
-      </svg>
+      />
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"

@@ -52,9 +52,11 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
       this._currentPid = child.pid;
       this._startTime = Date.now();
       this.running = true;
-      this.onProcessExit(child, () => this.reconnect(proxy, installationPath, port, log));
+      this.onProcessExit(child, () => {
+        if (!proxy.isClosed) this.reconnect(proxy, installationPath, port, log);
+      });
       proxy.onDisconnected(async () => {
-        this._proxyConnected = true;
+        this._proxyConnected = false;
         if (!proxy.isClosed) {
           log.debug('proxy disconnected, reconnecting');
           setTimeout(async () => {
@@ -70,12 +72,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
       log.debug('proxy exited, is the process running? ' + this.running);
       if (this.child && this.running) {
         const p = this.child!;
-        setTimeout(async () => {
-          if (!p.killed) {
-            log.debug('killing the process after 1s');
-            await this.killProcess(p, log);
-          }
-        }, 1000);
+        this.killProcess(p, log);
       }
     });
     proxy.listen();
@@ -164,7 +161,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     log: Logger
   ): Promise<ChildProcess>;
 
-  private killProcess(child: ChildProcess, log: Logger) {
+  protected killProcess(child: ChildProcess, log: Logger) {
     if (!child.killed) {
       return new Promise<boolean>((resolve, reject) => {
         // if not killed within 1s
