@@ -9161,7 +9161,6 @@
     "xpack.siem.host.details.versionLabel": "版本",
     "xpack.siem.hostsTable.firstLastSeenToolTip": "相对于选定日期范围",
     "xpack.siem.hostsTable.firstSeenTitle": "首次看到时间",
-    "xpack.siem.hostsTable.helperTooltip": "主机表已按最后看到时间排序",
     "xpack.siem.hostsTable.hostsTitle": "主机",
     "xpack.siem.hostsTable.lastSeenTitle": "最后看到时间",
     "xpack.siem.hostsTable.nameTitle": "名称",

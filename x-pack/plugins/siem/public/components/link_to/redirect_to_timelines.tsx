@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { RedirectWrapper } from './redirect_wrapper';
 
 export const TIMELINES_PAGE_NAME = 'timelines';
 
-export const RedirectToTimelinesPage = () => <Redirect to={`/${TIMELINES_PAGE_NAME}`} />;
+export const RedirectToTimelinesPage = () => <RedirectWrapper to={`/${TIMELINES_PAGE_NAME}`} />;
 
 export const getTimelinesUrl = () => `#/link-to/${TIMELINES_PAGE_NAME}`;

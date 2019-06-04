@@ -43,10 +43,6 @@ export const VERSION = i18n.translate('xpack.siem.hostsTable.versionTitle', {
   defaultMessage: 'Version',
 });
 
-export const TOOLTIP = i18n.translate('xpack.siem.hostsTable.helperTooltip', {
-  defaultMessage: 'Hosts table is sorted by last seen',
-});
-
 export const ROWS_2 = i18n.translate('xpack.siem.hostsTable.rows', {
   values: { numRows: 2 },
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
