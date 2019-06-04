@@ -20,14 +20,17 @@
 import React, { Component } from 'react';
 
 import {
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiTitle,
   EuiFormRow,
   EuiFieldText,
   EuiButton,
   EuiFlexGroup,
   EuiSwitch,
+  EuiButtonEmpty,
+  EuiModalHeader,
+  EuiModalFooter,
+  EuiModalBody,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import { EuiFlexItem } from '@elastic/eui';
@@ -44,7 +47,7 @@ interface State {
   hideTitle: boolean;
 }
 
-export class CustomizePanelFlyoutUi extends Component<CustomizePanelProps, State> {
+export class CustomizePanelModalUi extends Component<CustomizePanelProps, State> {
   constructor(props: CustomizePanelProps) {
     super(props);
     this.state = {
@@ -69,25 +72,35 @@ export class CustomizePanelFlyoutUi extends Component<CustomizePanelProps, State
     }));
   };
 
+  save = () => {
+    if (this.state.hideTitle) {
+      this.props.updateTitle('');
+    } else {
+      const newTitle = this.state.title === '' ? undefined : this.state.title;
+      this.props.updateTitle(newTitle);
+    }
+  };
+
   public render() {
     return (
       <React.Fragment>
-        <EuiFlyoutHeader>
-          <EuiTitle size="s" data-test-subj="customizePanelTitle">
-            <h1>{this.props.embeddable.getTitle()}</h1>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle data-test-subj="customizePanelTitle">
+            Customize panel
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody>
           {' '}
           <EuiFormRow>
             <EuiSwitch
-              checked={this.state.hideTitle}
+              checked={!this.state.hideTitle}
               data-test-subj="customizePanelHideTitle"
               id="hideTitle"
               label={
                 <FormattedMessage
-                  defaultMessage="Hide title"
-                  id="embeddable.customizePanel.hideTitle"
+                  defaultMessage="Show panel title"
+                  id="embeddable.customizePanel.showTitle"
                 />
               }
               onChange={this.onHideTitleToggle}
@@ -110,40 +123,39 @@ export class CustomizePanelFlyoutUi extends Component<CustomizePanelProps, State
               onChange={e => this.updateTitle(e.target.value)}
               aria-label={this.props.intl.formatMessage({
                 id: 'kbn.embeddable.panel.optionsMenuForm.panelTitleInputAriaLabel',
-                defaultMessage: 'Press enter to exit.',
+                defaultMessage: 'Enter a custom title for your panel',
               })}
-            />
-          </EuiFormRow>
-          <EuiFormRow>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiButton data-test-subj="resetCustomEmbeddablePanelTitle" onClick={this.reset}>
-                  <FormattedMessage
-                    id="kbn.dashboard.panel.optionsMenuForm.resetCustomDashboardButtonLabel"
-                    defaultMessage="Reset title"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButton
-                  fill
-                  onClick={() =>
-                    this.props.updateTitle(this.state.hideTitle ? '' : this.state.title)
-                  }
-                  data-test-subj="saveNewTitleButton"
+              append={
+                <EuiButtonEmpty
+                  data-test-subj="resetCustomEmbeddablePanelTitle"
+                  onClick={this.reset}
+                  disabled={this.state.hideTitle}
+                  icon="editorUndo"
                 >
                   <FormattedMessage
-                    id="kbn.embeddables.customizePanel.save"
-                    defaultMessage="Save"
+                    id="kbn.dashboard.panel.optionsMenuForm.resetCustomDashboardButtonLabel"
+                    defaultMessage="reset"
                   />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                </EuiButtonEmpty>
+              }
+            />
           </EuiFormRow>
-        </EuiFlyoutBody>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty
+            onClick={() => this.props.updateTitle(this.props.embeddable.getOutput().title)}
+          >
+            {' '}
+            <FormattedMessage id="kbn.embeddables.customizePanel.cancel" defaultMessage="Cancel" />
+          </EuiButtonEmpty>
+
+          <EuiButton data-test-subj="saveNewTitleButton" onClick={this.save} fill>
+            <FormattedMessage id="kbn.embeddables.customizePanel.save" defaultMessage="Save" />
+          </EuiButton>
+        </EuiModalFooter>
       </React.Fragment>
     );
   }
 }
 
-export const CustomizePanelFlyout = injectI18n(CustomizePanelFlyoutUi);
+export const CustomizePanelModal = injectI18n(CustomizePanelModalUi);

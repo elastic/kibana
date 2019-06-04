@@ -44,7 +44,7 @@ import {
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { CustomizePanelFlyout } from './customize_panel_flyout';
+import { CustomizePanelModal } from './customize_panel_modal';
 import { Container, isErrorEmbeddable } from '../../../..';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { createRegistry } from '../../../../create_registry';
@@ -73,7 +73,7 @@ beforeEach(async () => {
 
 test('Is initialized with the embeddables title', async () => {
   const component = mountWithIntl(
-    <CustomizePanelFlyout.WrappedComponent
+    <CustomizePanelModal.WrappedComponent
       intl={null as any}
       embeddable={embeddable}
       updateTitle={() => {}}
@@ -89,7 +89,7 @@ test('Is initialized with the embeddables title', async () => {
 test('Calls updateTitle with a new title', async () => {
   const updateTitle = jest.fn();
   const component = mountWithIntl(
-    <CustomizePanelFlyout.WrappedComponent
+    <CustomizePanelModal.WrappedComponent
       intl={null as any}
       embeddable={embeddable}
       updateTitle={updateTitle}
@@ -110,7 +110,7 @@ test('Input value shows custom title if one given', async () => {
 
   const updateTitle = jest.fn();
   const component = mountWithIntl(
-    <CustomizePanelFlyout.WrappedComponent
+    <CustomizePanelModal.WrappedComponent
       intl={null as any}
       embeddable={embeddable}
       updateTitle={updateTitle}
@@ -128,7 +128,7 @@ test('Reset updates the input with the default title when the embeddable has no 
 
   embeddable.updateInput({ title: 'my custom title' });
   const component = mountWithIntl(
-    <CustomizePanelFlyout.WrappedComponent
+    <CustomizePanelModal.WrappedComponent
       intl={null as any}
       embeddable={embeddable}
       updateTitle={updateTitle}
@@ -146,7 +146,7 @@ test('Reset updates the input with the default title when the embeddable has no 
 test('Reset updates the input with the default title when the embeddable has a title override', async () => {
   const updateTitle = jest.fn();
   const component = mountWithIntl(
-    <CustomizePanelFlyout.WrappedComponent
+    <CustomizePanelModal.WrappedComponent
       intl={null as any}
       embeddable={embeddable}
       updateTitle={updateTitle}
@@ -164,7 +164,7 @@ test('Reset updates the input with the default title when the embeddable has a t
 test('Reset calls updateTitle with undefined', async () => {
   const updateTitle = jest.fn();
   const component = mountWithIntl(
-    <CustomizePanelFlyout.WrappedComponent
+    <CustomizePanelModal.WrappedComponent
       intl={null as any}
       embeddable={embeddable}
       updateTitle={updateTitle}
@@ -184,7 +184,7 @@ test('Reset calls updateTitle with undefined', async () => {
 test('Can set title to an empty string', async () => {
   const updateTitle = jest.fn();
   const component = mountWithIntl(
-    <CustomizePanelFlyout.WrappedComponent
+    <CustomizePanelModal.WrappedComponent
       intl={null as any}
       embeddable={embeddable}
       updateTitle={updateTitle}

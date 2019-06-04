@@ -19,12 +19,12 @@
 import React from 'react';
 import { getNewPlatform } from 'ui/new_platform';
 import { ActionContext } from '../../../../actions';
-import { CustomizePanelFlyout } from './customize_panel_flyout';
+import { CustomizePanelModal } from './customize_panel_modal';
 
 export async function getUserData(context: ActionContext) {
   return new Promise<{ title: string | undefined }>(resolve => {
-    const session = getNewPlatform().start.core.overlays.openFlyout(
-      <CustomizePanelFlyout
+    const session = getNewPlatform().start.core.overlays.openModal(
+      <CustomizePanelModal
         embeddable={context.embeddable}
         updateTitle={title => {
           session.close();
@@ -32,7 +32,7 @@ export async function getUserData(context: ActionContext) {
         }}
       />,
       {
-        'data-test-subj': 'customizePanelFlyout',
+        'data-test-subj': 'customizePanel',
       }
     );
   });
