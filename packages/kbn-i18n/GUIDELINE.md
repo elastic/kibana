@@ -94,7 +94,7 @@ Currently we support the following ReactJS `i18n` tools, but will be removed in 
 
 #### In AngularJS
 
-The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from `@kbn/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
+The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
 
 - Call JS function `i18n.translate()` from `@kbn/i18n` package.
 - Use `i18nId` directive in template.
