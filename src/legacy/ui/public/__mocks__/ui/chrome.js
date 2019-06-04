@@ -20,11 +20,11 @@
 import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 const chrome = {
-  getBasePath: () => '',
+  getBasePath: jest.fn().mockReturnValue(''),
   getUiSettingsClient: () => ({
     ...uiSettingsServiceMock.createSetupContract(),
     getUpdate$: () => ({
-      subscribe: () => ({}),
+      subscribe: jest.fn(),
     }),
   }),
 };

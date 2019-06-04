@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
 export const createLegacyClass = () => ({
-  inherits: () => ({}),
+  inherits: jest.fn(),
 });

@@ -3,6 +3,7 @@ module.exports = {
     {
       files: [
         '**/*.{test,test.mocks,mock}.{js,ts,tsx}',
+        '**/__mocks__/**/*.{js,ts,tsx}',
       ],
       plugins: [
         'jest',
