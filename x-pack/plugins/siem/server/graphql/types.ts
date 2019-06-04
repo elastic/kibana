@@ -341,7 +341,7 @@ export interface OsEcsFields {
 }
 
 export interface CursorType {
-  value: string;
+  value?: string | null;
 
   tiebreaker?: string | null;
 }
@@ -3338,16 +3338,16 @@ export namespace OsEcsFieldsResolvers {
 
 export namespace CursorTypeResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = CursorType> {
-    value?: ValueResolver<string, TypeParent, Context>;
+    value?: ValueResolver<string | null, TypeParent, Context>;
 
     tiebreaker?: TiebreakerResolver<string | null, TypeParent, Context>;
   }
 
-  export type ValueResolver<R = string, Parent = CursorType, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type ValueResolver<
+    R = string | null,
+    Parent = CursorType,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type TiebreakerResolver<
     R = string | null,
     Parent = CursorType,
