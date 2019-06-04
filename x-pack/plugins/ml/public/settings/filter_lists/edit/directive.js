@@ -53,7 +53,7 @@ module.directive('mlEditFilterList', function ($route) {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (scope, element) { // eslint-disable-line no-unused-vars
+    link: function (scope, element) {
       const props = {
         filterId: $route.current.params.filterId,
         canCreateFilter: checkPermission('canCreateFilter'),
