@@ -13,6 +13,7 @@ import { hostsActions } from '../../../../store/actions';
 import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../empty_value';
+import { HostDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import * as i18n from './translations';
@@ -150,6 +151,7 @@ const getUncommonColumns = (): [
         rowItems: getHostNames(node),
         attrName: 'host.name',
         idPrefix: `uncommon-process-table-${node._id}-processHost`,
+        render: item => <HostDetailsLink hostName={item} />,
       }),
   },
   {
