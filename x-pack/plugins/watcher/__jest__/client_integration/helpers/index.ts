@@ -5,6 +5,7 @@
  */
 
 import { setup as watchListSetup } from './watch_list.helpers';
+import { setup as watchStatusSetup } from './watch_status.helpers';
 
 export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../test_utils';
 
@@ -12,4 +13,5 @@ export { setupEnvironment } from './setup_environment';
 
 export const pageHelpers = {
   watchList: { setup: watchListSetup },
+  watchStatus: { setup: watchStatusSetup },
 };

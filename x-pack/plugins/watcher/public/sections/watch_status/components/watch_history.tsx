@@ -79,7 +79,8 @@ const WatchHistoryUi = () => {
 
   if (isActivated === undefined) {
     // Set initial value for isActivated based on the watch we just loaded.
-    setIsActivated(loadedWatch.watchStatus.isActive);
+    const isActive = (loadedWatch.watchStatus && loadedWatch.watchStatus.isActive) || false;
+    setIsActivated(isActive);
   }
 
   const { error: historyError, data: history, isLoading } = loadWatchHistory(
@@ -169,7 +170,7 @@ const WatchHistoryUi = () => {
         >
           <EuiFlyoutHeader>
             <EuiTitle size="s">
-              <h3>
+              <h3 data-test-subj="title">
                 <FormattedMessage
                   id="xpack.watcher.sections.watchHistory.watchHistoryDetail.errorTitle"
                   defaultMessage="Execution details"
@@ -187,6 +188,7 @@ const WatchHistoryUi = () => {
                 />
               }
               error={watchHistoryDetailsError}
+              data-test-subj="errorMessage"
             />
           </EuiFlyoutBody>
         </EuiFlyout>
@@ -222,7 +224,7 @@ const WatchHistoryUi = () => {
         >
           <EuiFlyoutHeader>
             <EuiTitle size="s">
-              <h3>
+              <h3 data-test-subj="title">
                 <FormattedMessage
                   id="xpack.watcher.sections.watchHistory.watchHistoryDetail.title"
                   defaultMessage="Executed on {date}"
@@ -295,6 +297,7 @@ const WatchHistoryUi = () => {
         pagination={PAGINATION}
         sorting={true}
         loading={isLoading}
+        data-test-subj="watchHistoryTable"
         message={
           <FormattedMessage
             id="xpack.watcher.sections.watchHistory.watchTable.noCurrentStatus"

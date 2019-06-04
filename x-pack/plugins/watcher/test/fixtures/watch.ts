@@ -10,7 +10,6 @@ import { getRandomString } from '../../../../test_utils';
 interface Watch {
   id: string;
   name: string;
-  watch: {};
   type: 'json' | 'threshold' | 'monitoring';
   isSystemWatch: boolean;
   watchStatus: {
@@ -18,22 +17,22 @@ interface Watch {
     comment?: string;
     lastMetCondition?: Moment;
     lastChecked?: Moment;
+    isActive: boolean;
   };
 }
 
 export const getWatch = ({
   id = getRandomString(),
   name = getRandomString(),
-  watch = {},
   type = 'json',
   isSystemWatch = false,
   watchStatus = {
     state: 'OK',
+    isActive: true,
   },
 }: Partial<Watch> = {}): Watch => ({
   id,
   name,
-  watch,
   type,
   isSystemWatch,
   watchStatus,

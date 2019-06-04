@@ -8,4 +8,4 @@ import { getWatch } from '../../../test/fixtures';
 
 export const WATCH_ID = 'my-test-watch';
 
-export const WATCH_EDIT = getWatch({ id: WATCH_ID });
+export const WATCH = { watch: getWatch({ id: WATCH_ID }) };

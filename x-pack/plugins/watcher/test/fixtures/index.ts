@@ -5,3 +5,4 @@
  */
 
 export * from './watch';
+export * from './watch_history';

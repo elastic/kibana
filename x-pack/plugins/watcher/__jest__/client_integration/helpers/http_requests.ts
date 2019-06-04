@@ -25,6 +25,20 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     server.respondWith('GET', `${API_ROOT}/watches`, mockResponse(defaultResponse, response));
   };
 
+  const setLoadWatchResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { watch: {} };
+    server.respondWith('GET', `${API_ROOT}/watch/:id`, mockResponse(defaultResponse, response));
+  };
+
+  const setLoadWatchHistoryResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { watchHistoryItems: [] };
+    server.respondWith(
+      'GET',
+      `${API_ROOT}/watch/:id/history?startTime=*`,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
   const setDeleteWatchResponse = (response?: HttpResponse, error?: any) => {
     const status = error ? error.status || 400 : 200;
     const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
@@ -38,6 +52,8 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 
   return {
     setLoadWatchesResponse,
+    setLoadWatchResponse,
+    setLoadWatchHistoryResponse,
     setDeleteWatchResponse,
   };
 };

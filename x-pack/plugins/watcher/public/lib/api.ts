@@ -52,7 +52,12 @@ export const loadWatchDetail = (id: string) => {
   return useRequest({
     path: `${basePath}/watch/${id}`,
     method: 'get',
-    processData: ({ watch }: { watch: any }) => Watch.fromUpstreamJson(watch),
+    processData: ({ watch }: { watch: any }) => {
+      if (watch) {
+        return Watch.fromUpstreamJson(watch);
+      }
+      return {};
+    },
   });
 };
 
@@ -66,8 +71,12 @@ export const loadWatchHistory = (id: string, startTime: string) => {
   return useRequest({
     path,
     method: 'get',
-    processData: ({ watchHistoryItems: items }: { watchHistoryItems: any }) =>
-      items.map((historyItem: any) => WatchHistoryItem.fromUpstreamJson(historyItem)),
+    processData: ({ watchHistoryItems: items }: { watchHistoryItems: any }) => {
+      if (items && items.length) {
+        return items.map((historyItem: any) => WatchHistoryItem.fromUpstreamJson(historyItem));
+      }
+      return [];
+    },
   });
 };
 

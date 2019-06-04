@@ -21,7 +21,7 @@ export class Watch {
     return WatchTypes;
   }
 
-  static fromUpstreamJson(upstreamWatch) {
+  static fromUpstreamJson(upstreamWatch = {}) {
     const type = get(upstreamWatch, 'type');
     const WatchType = WatchTypes[type];
 
