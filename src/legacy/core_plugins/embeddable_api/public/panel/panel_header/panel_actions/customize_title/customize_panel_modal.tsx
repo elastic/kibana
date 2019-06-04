@@ -20,11 +20,9 @@
 import React, { Component } from 'react';
 
 import {
-  EuiTitle,
   EuiFormRow,
   EuiFieldText,
   EuiButton,
-  EuiFlexGroup,
   EuiSwitch,
   EuiButtonEmpty,
   EuiModalHeader,
@@ -33,7 +31,6 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import { EuiFlexItem } from '@elastic/eui';
 import { IEmbeddable } from '../../../../';
 
 interface CustomizePanelProps {
@@ -130,7 +127,6 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
                   data-test-subj="resetCustomEmbeddablePanelTitle"
                   onClick={this.reset}
                   disabled={this.state.hideTitle}
-                  icon="editorUndo"
                 >
                   <FormattedMessage
                     id="kbn.dashboard.panel.optionsMenuForm.resetCustomDashboardButtonLabel"
