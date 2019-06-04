@@ -271,7 +271,7 @@ const WatchHistoryUi = () => {
 
   return (
     <Fragment>
-      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiSelect
             options={watchHistoryTimeSpanOptions}

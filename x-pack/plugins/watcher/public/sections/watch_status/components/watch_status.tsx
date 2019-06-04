@@ -15,7 +15,7 @@ import {
   EuiTitle,
   EuiToolTip,
   EuiBadge,
-  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
@@ -119,12 +119,12 @@ export const WatchStatus = ({
     const activationButtonText = isActivated ? (
       <FormattedMessage
         id="xpack.watcher.sections.watchHistory.watchTable.deactivateWatchLabel"
-        defaultMessage="Deactivate watch"
+        defaultMessage="Deactivate"
       />
     ) : (
       <FormattedMessage
         id="xpack.watcher.sections.watchHistory.watchTable.activateWatchLabel"
-        defaultMessage="Activate watch"
+        defaultMessage="Activate"
       />
     );
 
@@ -205,15 +205,15 @@ export const WatchStatus = ({
               <EuiFlexItem>
                 <EuiFlexGroup justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiButtonEmpty
                       onClick={() => toggleWatchActivation()}
                       isLoading={isTogglingActivation}
                     >
                       {activationButtonText}
-                    </EuiButton>
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiButtonEmpty
                       data-test-subj="btnDeleteWatch"
                       onClick={() => {
                         setWatchesToDelete([watchId]);
@@ -225,7 +225,7 @@ export const WatchStatus = ({
                         id="xpack.watcher.sections.watchHistory.deleteWatchButtonLabel"
                         defaultMessage="Delete"
                       />
-                    </EuiButton>
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
