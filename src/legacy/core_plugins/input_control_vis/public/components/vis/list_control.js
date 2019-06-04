@@ -129,7 +129,7 @@ class ListControlUi extends Component {
       <FormRow
         id={this.props.id}
         label={this.props.label}
-        warningMsg={this.props.partialResults && partialResultsWarningMessage}
+        warningMsg={this.props.partialResults ? partialResultsWarningMessage : undefined}
         controlIndex={this.props.controlIndex}
         disableMsg={this.props.disableMsg}
       >
