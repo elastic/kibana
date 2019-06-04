@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export const ID = 'integrations_manager';
+import manifest from '../kibana.json';
+export const ID = manifest.id;
 export const SAVED_OBJECT_TYPE = 'integrations-manager';
 export const API_ROOT = `/api/${ID}`;
 export const API_INTEGRATIONS_LIST = `${API_ROOT}/list`;

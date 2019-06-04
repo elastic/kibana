@@ -7,8 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
-import { CoreSetup, Server } from './common/types';
-import { Plugin } from './server';
+import { CoreSetup, Server, PluginInitializerContext } from './common/types';
+import { Plugin } from './server/plugin';
 import { ID } from './common/constants';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 
@@ -76,7 +76,8 @@ export const integrationsManager: LegacyPluginInitializer = kibana => {
           route: server.route.bind(server),
         },
       } as CoreSetup;
-      new Plugin().setup(coreSetup);
+      const initializerContext = {} as PluginInitializerContext;
+      new Plugin(initializerContext).setup(coreSetup);
     },
   });
 };

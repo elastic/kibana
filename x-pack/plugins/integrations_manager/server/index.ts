@@ -3,12 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreSetup } from '../common/types';
-import { routes } from './routes';
+import { PluginInitializerContext } from '../common/types';
+import { Plugin } from './plugin';
 
-export class Plugin {
-  public setup(core: CoreSetup) {
-    const { route } = core.http;
-    routes.forEach(definition => route(definition));
-  }
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }
