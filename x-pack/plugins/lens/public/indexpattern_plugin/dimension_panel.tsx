@@ -7,13 +7,21 @@
 import _ from 'lodash';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiPopover, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiComboBox,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { DataType, DatasourceDimensionPanelProps } from '../types';
 import {
   IndexPatternColumn,
   IndexPatternField,
   IndexPatternPrivateState,
   OperationType,
+  columnToOperation,
 } from './indexpattern';
 
 const operations: OperationType[] = ['value', 'terms', 'date_histogram', 'sum', 'average', 'count'];
@@ -55,7 +63,7 @@ const operationPanels: Record<
     }),
     ofName: name =>
       i18n.translate('xpack.lens.indexPatternOperations.dateHistogramOf', {
-        defaultMessage: 'Date Histogram of',
+        defaultMessage: 'Date Histogram of {name}',
         values: { name },
       }),
   },
@@ -66,7 +74,7 @@ const operationPanels: Record<
     }),
     ofName: name =>
       i18n.translate('xpack.lens.indexPatternOperations.sumOf', {
-        defaultMessage: 'Sum of',
+        defaultMessage: 'Sum of {name}',
         values: { name },
       }),
   },
@@ -77,7 +85,7 @@ const operationPanels: Record<
     }),
     ofName: name =>
       i18n.translate('xpack.lens.indexPatternOperations.averageOf', {
-        defaultMessage: 'Average of',
+        defaultMessage: 'Average of {name}',
         values: { name },
       }),
   },
@@ -88,7 +96,7 @@ const operationPanels: Record<
     }),
     ofName: name =>
       i18n.translate('xpack.lens.indexPatternOperations.countOf', {
-        defaultMessage: 'Count of',
+        defaultMessage: 'Count of {name}',
         values: { name },
       }),
   },
@@ -166,14 +174,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
   const columns = getPotentialColumns(props.state);
 
   const filteredColumns = columns.filter(col => {
-    const { operationId, label, dataType, isBucketed } = col;
-
-    return props.filterOperations({
-      id: operationId,
-      label,
-      dataType,
-      isBucketed,
-    });
+    return props.filterOperations(columnToOperation(col));
   });
 
   const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
@@ -187,7 +188,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
     : filteredColumns;
 
   return (
-    <div>
+    <EuiFlexGroup>
       <EuiFlexItem grow={true}>
         <EuiPopover
           id={props.columnId}
@@ -199,7 +200,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
           ownFocus
           anchorPosition="rightCenter"
           button={
-            <div data-test-subj="indexPattern-dimension">
+            <EuiFlexItem data-test-subj="indexPattern-dimension" grow={true}>
               <EuiButtonEmpty
                 data-test-subj="indexPattern-dimensionPopover-button"
                 onClick={() => {
@@ -214,7 +215,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
                       })}
                 </span>
               </EuiButtonEmpty>
-            </div>
+            </EuiFlexItem>
           }
         >
           <EuiFlexGroup wrap={true}>
@@ -296,6 +297,29 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
           </EuiFlexGroup>
         </EuiPopover>
       </EuiFlexItem>
-    </div>
+      {selectedColumn && (
+        <EuiFlexItem>
+          <EuiButtonIcon
+            data-test-subj="indexPattern-dimensionPopover-remove"
+            iconType="cross"
+            iconSize="s"
+            color="danger"
+            aria-label="Remove"
+            onClick={() => {
+              const newColumns: IndexPatternPrivateState['columns'] = {
+                ...props.state.columns,
+              };
+              delete newColumns[props.columnId];
+
+              props.setState({
+                ...props.state,
+                columns: newColumns,
+                columnOrder: Object.keys(newColumns).filter(key => key !== props.columnId),
+              });
+            }}
+          />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 }

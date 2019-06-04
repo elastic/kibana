@@ -97,6 +97,16 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
   );
 }
 
+export function columnToOperation(column: IndexPatternColumn) {
+  const { dataType, label, isBucketed, operationId } = column;
+  return {
+    id: operationId,
+    label,
+    dataType,
+    isBucketed,
+  };
+}
+
 export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
@@ -142,14 +152,7 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
           return state.columnOrder.map(colId => ({ columnId: colId }));
         },
         getOperationForColumnId: (columnId: string) => {
-          const column = state.columns[columnId];
-          const { dataType, label, isBucketed, operationId } = column;
-          return {
-            id: operationId,
-            label,
-            dataType,
-            isBucketed,
-          };
+          return columnToOperation(state.columns[columnId]);
         },
 
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {

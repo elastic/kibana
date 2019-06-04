@@ -1,15 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`IndexPatternDimensionPanel should render a dimension panel 1`] = `
-<div>
+<EuiFlexGroup>
   <EuiFlexItem
     grow={true}
   >
     <EuiPopover
       anchorPosition="rightCenter"
       button={
-        <div
+        <EuiFlexItem
           data-test-subj="indexPattern-dimension"
+          grow={true}
         >
           <EuiButtonEmpty
             color="primary"
@@ -22,7 +23,7 @@ exports[`IndexPatternDimensionPanel should render a dimension panel 1`] = `
               Configure dimension
             </span>
           </EuiButtonEmpty>
-        </div>
+        </EuiFlexItem>
       }
       closePopover={[Function]}
       hasArrow={true}
@@ -160,5 +161,5 @@ exports[`IndexPatternDimensionPanel should render a dimension panel 1`] = `
       </EuiFlexGroup>
     </EuiPopover>
   </EuiFlexItem>
-</div>
+</EuiFlexGroup>
 `;

@@ -289,4 +289,27 @@ Array [
       columnOrder: ['col1', 'col2'],
     });
   });
+
+  it('should clear the dimension with the clear button', () => {
+    const setState = jest.fn();
+
+    const wrapper = shallow(
+      <IndexPatternDimensionPanel
+        state={state}
+        setState={setState}
+        columnId={'col1'}
+        filterOperations={() => true}
+      />
+    );
+
+    const clearButton = wrapper.find('[data-test-subj="indexPattern-dimensionPopover-remove"]');
+
+    clearButton.simulate('click');
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      columns: {},
+      columnOrder: [],
+    });
+  });
 });
