@@ -30,6 +30,7 @@ const dateFormatter = (d: string) => {
   return d.toLocaleString().split('T')[0];
 };
 
+// custom series styles: https://ela.st/areachart-styling
 const getSeriesLineStyle = (color: string | undefined) => {
   return color
     ? {
@@ -59,6 +60,7 @@ const getSeriesLineStyle = (color: string | undefined) => {
     : undefined;
 };
 
+// https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = React.memo<{
   data: AreaChartData[];
   width: number | null | undefined;

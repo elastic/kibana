@@ -19,6 +19,7 @@ import {
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
+// Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = React.memo<{
   data: BarChartData[];
   width: number | null | undefined;

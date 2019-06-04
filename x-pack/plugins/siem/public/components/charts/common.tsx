@@ -15,6 +15,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 
+const chartHeight = 74;
 const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
@@ -46,12 +47,12 @@ export interface ChartData {
 
 export interface BarChartData {
   key: string;
-  value: [ChartData] | [] | null;
+  value: ChartData[] | [] | null;
   color?: string | undefined;
 }
 
 export const WrappedByAutoSizer = styled.div`
-  height: 74px;
+  height: ${chartHeight}px;
   position: relative;
 
   &:hover {
@@ -69,6 +70,7 @@ export enum SeriesType {
   LINE = 'line',
 }
 
+// Customize colors: https://ela.st/custom-colors
 export const getSeriesStyle = (
   seriesKey: string,
   color: string | undefined,
@@ -86,11 +88,13 @@ export const getSeriesStyle = (
   return customSeriesColors;
 };
 
+// Apply margins and paddings: https://ela.st/charts-spacing
 export const getTheme = () => {
   const theme: PartialTheme = {
     chartMargins: {
       left: 0,
       right: 0,
+      // Apply some paddings to the top to avoid chopping the y tick https://ela.st/chopping-edge
       top: 4,
       bottom: 0,
     },
