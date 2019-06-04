@@ -28,7 +28,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
         read: {
           savedObject: {
             all: [],
-            read: ['index-pattern', 'search', 'url'],
+            read: ['index-pattern', 'search'],
           },
           ui: ['show'],
         },

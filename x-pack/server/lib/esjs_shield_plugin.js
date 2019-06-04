@@ -13,7 +13,7 @@
     root.ElasticsearchShield = factory();
   }
 }(this, function () {
-  return function addShieldApi(Client, config, components) { // eslint-disable-line no-unused-vars
+  return function addShieldApi(Client, config, components) {
     const ca = components.clientAction.factory;
 
     Client.prototype.shield = components.clientAction.namespaceFactory();
