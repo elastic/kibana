@@ -148,7 +148,7 @@ export class UpdateSourceEditor extends Component {
         <EuiFormRow
           label={
             i18n.translate('xpack.maps.source.esSearch.topHitsSizeLabel', {
-              defaultMessage: 'Results per entity'
+              defaultMessage: 'Documents per entity'
             })
           }
         >
@@ -215,7 +215,7 @@ export class UpdateSourceEditor extends Component {
           <EuiSwitch
             label={
               i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
-                defaultMessage: `Dynamically filter for data in the visible map area.`
+                defaultMessage: `Dynamically filter for data in the visible map area`
               })
 
             }
@@ -228,7 +228,7 @@ export class UpdateSourceEditor extends Component {
           <EuiSwitch
             label={
               i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
-                defaultMessage: `Show most recent locations by entity.`
+                defaultMessage: `Show most recent documents by entity`
               })
             }
             checked={this.props.useTopHits}
