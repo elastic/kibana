@@ -226,7 +226,8 @@ class TableSeriesConfigUI extends Component {
 TableSeriesConfigUI.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  indexPatternForQuery: PropTypes.string
 };
 
 export const TableSeriesConfig = injectI18n(TableSeriesConfigUI);

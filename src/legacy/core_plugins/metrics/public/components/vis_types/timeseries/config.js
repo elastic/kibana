@@ -276,7 +276,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
     props.model.series_index_pattern : props.indexPatternForQuery;
 
   return (
-    <div className="tvbAggRow" data-findme="timeSeries/config.js">
+    <div className="tvbAggRow">
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
