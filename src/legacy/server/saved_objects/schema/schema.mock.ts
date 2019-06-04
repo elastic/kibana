@@ -22,6 +22,7 @@ import { SavedObjectsSchema } from './schema';
 type Schema = PublicMethodsOf<SavedObjectsSchema>;
 const createSchemaMock = () => {
   const mocked: jest.Mocked<Schema> = {
+    getIndexForType: jest.fn().mockReturnValue('.kibana-test'),
     isHiddenType: jest.fn().mockReturnValue(false),
     isNamespaceAgnostic: jest.fn((type: string) => type === 'global'),
   };
