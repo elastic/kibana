@@ -27,12 +27,6 @@ export interface ExpressionRunnerOptions {
   context?: object;
   getInitialContext?: () => object;
   element?: Element;
-  /**
-   * If an element is specified, but the response of the expression run can't be rendered
-   * because it isn't a valid response or the specified renderer isn't available,
-   * this callback is called with the given result.
-   */
-  onRenderFailure?: (result: Result) => void;
 }
 
 export type ExpressionRunner = (
@@ -43,10 +37,7 @@ export type ExpressionRunner = (
 export const createRunFn = (
   renderersRegistry: RenderFunctionsRegistry,
   interpreterPromise: Promise<Interpreter>
-): ExpressionRunner => async (
-  expressionOrAst,
-  { element, context, getInitialContext, onRenderFailure }
-) => {
+): ExpressionRunner => async (expressionOrAst, { element, context, getInitialContext }) => {
   // TODO: make interpreter initialization synchronous to avoid this
   const interpreter = await interpreterPromise;
   const ast =
@@ -72,9 +63,7 @@ export const createRunFn = (
         },
       });
     } else {
-      if (onRenderFailure) {
-        onRenderFailure(response);
-      }
+      throw response;
     }
   }
 
