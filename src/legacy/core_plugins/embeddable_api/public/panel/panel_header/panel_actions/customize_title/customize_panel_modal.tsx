@@ -134,7 +134,7 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
                 >
                   <FormattedMessage
                     id="kbn.dashboard.panel.optionsMenuForm.resetCustomDashboardButtonLabel"
-                    defaultMessage="reset"
+                    defaultMessage="Reset"
                   />
                 </EuiButtonEmpty>
               }
