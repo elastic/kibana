@@ -344,7 +344,7 @@ export const MyComponent = injectI18n(
 
 ## AngularJS
 
-The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from `@kbn/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
+The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
 
 AngularJS wrapper has 4 entities: translation `provider`, `service`, `directive`
 and `filter`. Both the directive and the filter use the translation `service`
