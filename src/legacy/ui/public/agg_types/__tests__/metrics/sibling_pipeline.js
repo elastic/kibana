@@ -60,7 +60,7 @@ describe('sibling pipeline aggs', function () {
               id: '6',
               type: 'date_histogram',
               schema: 'bucket',
-              params: { field: '@timestamp' }
+              params: { field: '@timestamp', interval: '10s' }
             }
           };
 
