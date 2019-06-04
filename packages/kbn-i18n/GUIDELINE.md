@@ -84,7 +84,7 @@ In case when `indicesLength` has value 1, the result string will be "`1 index`".
 
 #### In ReactJS
 
-The long term plan is to rely on using `FormattedMessage` and `i18n.translate()` by statically importing `i18n` from `@kbn/i18n` package. **Avoid using `injectI18n` and rely on `i18n.translate()` instead.**
+The long term plan is to rely on using `FormattedMessage` and `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using `injectI18n` and use `i18n.translate()` instead.**
 
 - You should use `<FormattedMessage>` most of the time.
 - In case when the string is expected (`aria-label`, `placeholder`), Call JS function `i18n.translate()` from `@kbn/i18n` package.
