@@ -100,7 +100,7 @@ The long term plan is to rely on using `i18n.translate()` by statically importin
 - Use `i18nId` directive in template.
 
 Currently, we support the following AngluarJS `i18n` tools, but they will be removed in future releases:
-- Usage of `i18n` service in controllers, directives, services by injected it.
+- Usage of `i18n` service in controllers, directives, services by injecting it.
 - Usage of `i18n` filter in template for attribute translation. Note: Use one-time binding ("{{:: ... }}") in filters wherever it's possible to prevent unnecessary expression re-evaluation.
 
 #### In JavaScript
