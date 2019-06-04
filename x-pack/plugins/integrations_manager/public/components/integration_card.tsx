@@ -9,7 +9,7 @@ import { generatePath, Link } from 'react-router-dom';
 import { DETAIL_VIEW } from '../routes';
 import { IntegrationInfo } from '../../common/types';
 
-export function IntegrationCard({ description, name, version, icon }: IntegrationInfo) {
+export function IntegrationCard({ description, name, version }: IntegrationInfo) {
   return (
     <EuiCard
       title={name}

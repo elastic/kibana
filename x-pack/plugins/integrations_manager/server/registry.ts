@@ -10,10 +10,9 @@ import path from 'path';
 import http from 'http';
 import https from 'https';
 import { promisify } from 'util';
-
 import glob from 'glob';
-// other places use 'extract-zip' or 'yauzl'
-import { decompress } from '@kbn/es/src/utils';
+
+import { decompress } from './decompress';
 
 const REGISTRY = process.env.REGISTRY || 'http://localhost:8080';
 const globP = promisify(glob);
