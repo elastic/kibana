@@ -6,6 +6,7 @@
 
 
 import React, { Fragment, Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiCodeBlock,
   EuiSpacer,
@@ -75,7 +76,7 @@ export class JsonImportProgress extends Component {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.file_upload.indexNameLabel"
+              id="xpack.fileUpload.jsonImport.indexingStatus"
               defaultMessage="Indexing status"
             />
           }
@@ -94,7 +95,7 @@ export class JsonImportProgress extends Component {
                     <EuiFormRow
                       label={
                         <FormattedMessage
-                          id="xpack.file_upload.indexNameLabel"
+                          id="xpack.fileUpload.jsonImport.indexingResponse"
                           defaultMessage="Indexing response"
                         />
                       }
@@ -115,7 +116,7 @@ export class JsonImportProgress extends Component {
                     <EuiFormRow
                       label={
                         <FormattedMessage
-                          id="xpack.file_upload.indexNameLabel"
+                          id="xpack.fileUpload.jsonImport.indexPatternResponse"
                           defaultMessage="Index pattern response"
                         />
                       }
@@ -133,18 +134,27 @@ export class JsonImportProgress extends Component {
               <EuiFormRow>
                 <EuiFlexItem>
                   <EuiCallOut
-                    title="Index modifications"
+                    title={
+                      i18n.translate('xpack.fileUpload.jsonImport.indexModsTitle',
+                        { defaultMessage: 'Index modifications' })}
                     iconType="pin"
                   >
                     <div>
-                      {'Further index modifications can be made using\n'}
+                      {
+                        i18n.translate('xpack.fileUpload.jsonImport.indexModsMsg',
+                          { defaultMessage: 'Further index modifications can be made using\n'
+                          })
+                      }
                       <a
                         target="_blank"
                         href={`${chrome.getBasePath()}/app/kibana#/
                           management/elasticsearch/index_management/indices/
                           filter/${indexName}`.replace(/\s/g, '')}
                       >
-                        Index Management
+                        {
+                          i18n.translate('xpack.fileUpload.jsonImport.indexMgmtLink',
+                            { defaultMessage: 'Index Management' })
+                        }
                       </a>
                     </div>
                   </EuiCallOut>

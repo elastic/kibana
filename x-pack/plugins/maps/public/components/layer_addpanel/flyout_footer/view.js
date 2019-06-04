@@ -41,7 +41,7 @@ export const FlyoutFooter = (
             data-test-subj="layerAddCancelButton"
           >
             <FormattedMessage
-              id="xpack.maps.addLayerPanel.cancelButtonLabel"
+              id="xpack.maps.addLayerPanel.footer.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>

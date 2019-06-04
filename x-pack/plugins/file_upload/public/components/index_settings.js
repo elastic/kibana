@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -85,7 +86,7 @@ export class IndexSettings extends Component {
     if (indexNames.find(i => i === name) || indexPatterns.find(i => i === name)) {
       return (
         <FormattedMessage
-          id="xpack.file_upload.indexNameAlreadyExistsErrorMessage"
+          id="xpack.fileUpload.indexSettings.indexNameAlreadyExistsErrorMessage"
           defaultMessage="Index name or pattern already exists."
         />
       );
@@ -100,7 +101,7 @@ export class IndexSettings extends Component {
     ) {
       return (
         <FormattedMessage
-          id="xpack.file_upload.indexNameContainsIllegalCharactersErrorMessage"
+          id="xpack.fileUpload.indexSettings.indexNameContainsIllegalCharactersErrorMessage"
           defaultMessage="Index name contains illegal characters."
         />
       );
@@ -118,7 +119,7 @@ export class IndexSettings extends Component {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.file_upload.indexNameLabel"
+              id="xpack.fileUpload.indexSettings.enterIndexTypeLabel"
               defaultMessage="Index type"
             />
           }
@@ -137,24 +138,35 @@ export class IndexSettings extends Component {
           ? null
           : (
             <EuiCallOut
-              title="Index name guidelines"
+              title={i18n.translate('xpack.fileUpload.indexSettings.indexNameGuidelines',
+                { defaultMessage: 'Index name guidelines' })}
               iconType="pin"
             >
               <div>
                 <ul>
-                  <li>Must be a new index</li>
-                  <li>Lowercase only</li>
-                  <li>{`Cannot include \\, /, *, ?, ", <, >, |, \` \` \
-                      (space character), , (comma), #`
-                  }
+                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.mustBeNewIndex',
+                    { defaultMessage: 'Must be a new index' })}
                   </li>
-                  <li>{`Cannot start with -, _, +`}</li>
-                  <li>{`Cannot be . or ..`}</li>
-                  <li>{
-                    `Cannot be longer than 255 bytes (note it is bytes, \
+                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.lowercaseOnly',
+                    { defaultMessage: 'Lowercase only' })}
+                  </li>
+                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotInclude',
+                    { defaultMessage: 'Cannot include \\\\, /, *, ?, ", <, >, |, \
+                      " " (space character), , (comma), #'
+                    })}
+                  </li>
+                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotStartWith',
+                    { defaultMessage: 'Cannot start with -, _, +' })}
+                  </li>
+                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.cannotBe',
+                    { defaultMessage: 'Cannot be . or ..' })}
+                  </li>
+                  <li>{i18n.translate('xpack.fileUpload.indexSettings.guidelines.length',
+                    { defaultMessage:
+                      'Cannot be longer than 255 bytes (note it is bytes, \
                       so multi-byte characters will count towards the 255 \
-                      limit faster)`
-                  }
+                      limit faster)'
+                    })}
                   </li>
                 </ul>
               </div>
@@ -164,7 +176,7 @@ export class IndexSettings extends Component {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.file_upload.indexNameLabel"
+              id="xpack.fileUpload.indexSettings.enterIndexNameLabel"
               defaultMessage="Index name"
             />
           }
@@ -173,11 +185,13 @@ export class IndexSettings extends Component {
         >
           <EuiFieldText
             disabled={indexDisabled}
-            placeholder={'Enter Index Name'}
+            placeholder={i18n.translate('xpack.fileUpload.enterIndexName',
+              { defaultMessage: 'Enter Index Name' })}
             value={indexName}
             onChange={this._onIndexChange}
             isInvalid={indexNameError !== ''}
-            aria-label={'Index name, required field'}
+            aria-label={i18n.translate('xpack.fileUpload.indexNameReqField',
+              { defaultMessage: 'Index name, required field' })}
           />
         </EuiFormRow>
 

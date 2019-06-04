@@ -10,12 +10,16 @@
 
 import chrome from 'ui/chrome';
 import { addSystemApiHeader } from 'ui/system_api';
+import { i18n } from '@kbn/i18n';
 
 const FETCH_TIMEOUT = 10000;
 
 export async function http(options) {
   if(!(options && options.url)) {
-    throw 'No URL provided';
+    throw(
+      i18n.translate('xpack.fileUpload.httpService.noUrl',
+        { defaultMessage: 'No URL provided' })
+    );
   }
   const url = options.url || '';
   const headers = addSystemApiHeader({
@@ -45,7 +49,10 @@ async function fetchWithTimeout(url, payload) {
   return new Promise(function (resolve, reject) {
     const timeout = setTimeout(function () {
       timedOut = true;
-      reject(new Error('Request timed out'));
+      reject(new Error(
+        i18n.translate('xpack.fileUpload.httpService.requestTimedOut',
+          { defaultMessage: 'Request timed out' }))
+      );
     }, FETCH_TIMEOUT);
 
     fetch(url, payload)
@@ -61,6 +68,10 @@ async function fetchWithTimeout(url, payload) {
       });
   }).then(resp => resp.json())
     .catch(function (err) {
-      console.error(`Error performing fetch: ${err}`);
+      console.error(
+        i18n.translate('xpack.fileUpload.httpService.fetchError', {
+          defaultMessage: 'Error performing fetch: {error}',
+          values: { error: err }
+        }));
     });
 }

@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
+import { i18n } from '@kbn/i18n';
 
 export async function parseFile(file, previewCallback = null, transformDetails,
   FileReader = window.FileReader) {
@@ -19,7 +20,13 @@ export async function parseFile(file, previewCallback = null, transformDetails,
         cleanAndValidate = geoJsonCleanAndValidate;
         break;
       default:
-        throw(`Index options for ${transformDetails} not defined`);
+        throw(
+          i18n.translate(
+            'xpack.fileUpload.fileParser.transformDetailsNotDefined', {
+              defaultMessage: 'Index options for {transformDetails} not defined',
+              values: { transformDetails }
+            })
+        );
         return;
     }
   }

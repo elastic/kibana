@@ -14,6 +14,7 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { parseFile } from '../util/file_parser';
 import { MAX_FILE_SIZE } from '../../common/constants/file_import';
 
@@ -55,7 +56,9 @@ export class JsonIndexFilePicker extends Component {
       const file = fileList[0];
       if (!file.name) {
         this.setState({
-          fileUploadError: `No file name provided`
+          fileUploadError: i18n.translate(
+            'xpack.fileUpload.jsonIndexFilePicker.noFileNameError',
+            { defaultMessage: 'No file name provided' })
         });
         return;
       }
@@ -63,14 +66,19 @@ export class JsonIndexFilePicker extends Component {
       // Check file type, assign default index name
       const splitNameArr = file.name.split('.');
       const fileType = splitNameArr.pop();
+      const types = ACCEPTABLE_FILETYPES.reduce((accu, type) => {
+        accu = accu ? `${accu}, ${type}` : type;
+        return accu;
+      }, '');
       if (!ACCEPTABLE_FILETYPES.includes(fileType)) {
         this.setState({
-          fileUploadError: `File is not one of acceptable types: ${
-            ACCEPTABLE_FILETYPES.reduce((accu, type) => {
-              accu = accu ? `${accu}, ${type}` : type;
-              return accu;
-            }, '')
-          }`
+          fileUploadError: (
+            <FormattedMessage
+              id="xpack.fileUpload.jsonIndexFilePicker.acceptableTypesError"
+              defaultMessage="File is not one of acceptable types: {types}"
+              values={{ types }}
+            />
+          )
         });
         return;
       }
@@ -78,19 +86,42 @@ export class JsonIndexFilePicker extends Component {
       setIndexName(initIndexName);
 
       // Check valid size
-      if (file.size > MAX_FILE_SIZE) {
+      const { size } = file;
+      if (size > MAX_FILE_SIZE) {
         this.setState({
-          fileUploadError: `File size ${file.size} bytes exceeds max file size of ${MAX_FILE_SIZE}`
+          fileUploadError: (
+            <FormattedMessage
+              id="xpack.fileUpload.jsonIndexFilePicker.acceptableFileSize"
+              defaultMessage="File size {fileSize} bytes exceeds max file size of {maxFileSize}"
+              values={{
+                fileSize: size,
+                maxFileSize: MAX_FILE_SIZE
+              }}
+            />
+          )
         });
         return;
       }
 
       // Parse file
-      this.setState({ fileParsingProgress: 'Parsing file...' });
+      this.setState({ fileParsingProgress: i18n.translate(
+        'xpack.fileUpload.jsonIndexFilePicker.parsingFile',
+        { defaultMessage: 'Parsing file...' })
+      });
       const parsedFileResult = await parseFile(
         file, onFileUpload, transformDetails
       ).catch(e => {
-        this.setState({ fileUploadError: `Unable to parse file: ${e}` });
+        this.setState({
+          fileUploadError: (
+            <FormattedMessage
+              id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
+              defaultMessage="Unable to parse file: {error}"
+              values={{
+                error: e
+              }}
+            />
+          )
+        });
       });
       this.setState({ fileParsingProgress: '' });
       if (!parsedFileResult) {
@@ -124,13 +155,31 @@ export class JsonIndexFilePicker extends Component {
             ? null
             : (
               <EuiCallOut
-                title="File upload guidelines"
+                title={i18n.translate(
+                  'xpack.fileUpload.jsonIndexFilePicker.fileUploadGuidelines',
+                  { defaultMessage: 'File upload guidelines' }
+                )}
                 iconType="pin"
               >
                 <div>
                   <ul>
-                    <li>Formats accepted: .json, .geojson</li>
-                    <li>{`Max size: ${bytesToSize(MAX_FILE_SIZE)}`}</li>
+                    <li>
+                      {
+                        i18n.translate(
+                          'xpack.fileUpload.jsonIndexFilePicker.formatsAccepted',
+                          { defaultMessage: 'Formats accepted: .json, .geojson' }
+                        )
+                      }
+                    </li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.fileUpload.jsonIndexFilePicker.maxSize"
+                        defaultMessage="Max size: {maxFileSize}"
+                        values={{
+                          maxFileSize: bytesToSize(MAX_FILE_SIZE)
+                        }}
+                      />
+                    </li>
                   </ul>
                 </div>
               </EuiCallOut>
@@ -140,10 +189,8 @@ export class JsonIndexFilePicker extends Component {
         <EuiFormRow
           label={(
             <FormattedMessage
-              id="xpack.file_upload.filePickerLabel"
-              defaultMessage={
-                'Select a file to upload'
-              }
+              id="xpack.fileUpload.jsonIndexFilePicker.filePickerLabel"
+              defaultMessage="Select a file to upload"
             />
           )}
           isInvalid={fileUploadError !== ''}
@@ -153,7 +200,7 @@ export class JsonIndexFilePicker extends Component {
           <EuiFilePicker
             initialPromptText={(
               <FormattedMessage
-                id="xpack.file_upload.filePicker"
+                id="xpack.fileUpload.jsonIndexFilePicker.filePicker"
                 defaultMessage="Upload file"
               />
             )}

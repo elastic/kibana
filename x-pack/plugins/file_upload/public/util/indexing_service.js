@@ -16,14 +16,19 @@ const fileType = 'json';
 
 export async function indexData(parsedFile, transformDetails, indexName, dataType, appName) {
   if (!parsedFile) {
-    throw('No file imported');
+    throw(i18n.translate('xpack.fileUpload.indexingService.noFileImported', {
+      defaultMessage: 'No file imported.'
+    }));
     return;
   }
 
   // Perform any processing required on file prior to indexing
   const transformResult = transformDataByFormatForIndexing(transformDetails, parsedFile, dataType);
   if (!transformResult.success) {
-    throw `Error transforming data: ${transformResult.error}`;
+    throw(i18n.translate('xpack.fileUpload.indexingService.transformResultError', {
+      defaultMessage: 'Error transforming data: {error}',
+      values: { error: transformResult.error }
+    }));
   }
 
   // Create new index
@@ -40,7 +45,9 @@ export async function indexData(parsedFile, transformDetails, indexName, dataTyp
     if (createdIndex && createdIndex.id) {
       id = createdIndex.id;
     } else {
-      throw `Error creating index`;
+      throw i18n.translate('xpack.fileUpload.indexingService.errorCreatingIndex', {
+        defaultMessage: 'Error creating index',
+      });
     }
   } catch (error) {
     return {
@@ -66,7 +73,9 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
   if (!transform) {
     return {
       success: false,
-      error: 'No transform defined',
+      error: i18n.translate('xpack.fileUpload.indexingService.noTransformDefined', {
+        defaultMessage: 'No transform defined',
+      })
     };
   }
   if (typeof transform !== 'object') {
@@ -77,7 +86,10 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
       default:
         return {
           success: false,
-          error: `No handling defined for transform: ${transform}`
+          error: i18n.translate('xpack.fileUpload.indexingService.noHandlingForTransform', {
+            defaultMessage: 'No handling defined for transform: {transform}',
+            values: { transform }
+          })
         };
     }
   } else { // Custom transform
@@ -91,12 +103,18 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
   } else if (indexingDetails && indexingDetails.data) {
     return {
       success: false,
-      error: `No indexing details defined for datatype: ${dataType}`
+      error: i18n.translate('xpack.fileUpload.indexingService.noIndexingDetailsForDatatype', {
+        defaultMessage: `No indexing details defined for datatype: {dataType}`,
+        values: { dataType }
+      })
     };
   } else {
     return {
       success: false,
-      error: `Unknown error performing transform: ${transform}`,
+      error: i18n.translate('xpack.fileUpload.indexingService.unknownTransformError', {
+        defaultMessage: 'Unknown error performing transform: {transform}',
+        values: { transform }
+      })
     };
   }
 }
@@ -131,7 +149,7 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
   if (!index) {
     return {
       success: false,
-      error: i18n.translate('xpack.file_upload.noIndexSuppliedErrorMessage', {
+      error: i18n.translate('xpack.fileUpload.noIndexSuppliedErrorMessage', {
         defaultMessage: 'No index provided.'
       })
     };

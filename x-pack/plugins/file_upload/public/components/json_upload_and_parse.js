@@ -5,6 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiForm,
 } from '@elastic/eui';
@@ -17,13 +18,24 @@ import { JsonImportProgress } from './json_import_progress';
 import _ from 'lodash';
 
 const INDEXING_STAGE = {
-  INDEXING_STARTED: 'Data indexing started',
-  WRITING_TO_INDEX: 'Writing to index',
-  INDEXING_COMPLETE: 'Indexing complete',
-  CREATING_INDEX_PATTERN: 'Creating index pattern',
-  INDEX_PATTERN_COMPLETE: 'Index pattern complete',
-  DATA_INDEXING_ERROR: 'Data indexing error',
-  INDEX_PATTERN_ERROR: 'Index pattern error',
+  INDEXING_STARTED: i18n.translate(
+    'xpack.fileUpload.jsonUploadAndParse.dataIndexingStarted',
+    { defaultMessage: 'Data indexing started' }),
+  WRITING_TO_INDEX: i18n.translate(
+    'xpack.fileUpload.jsonUploadAndParse.writingToIndex',
+    { defaultMessage: 'Writing to index' }),
+  CREATING_INDEX_PATTERN: i18n.translate(
+    'xpack.fileUpload.jsonUploadAndParse.creatingIndexPattern',
+    { defaultMessage: 'Creating index pattern' }),
+  INDEX_PATTERN_COMPLETE: i18n.translate(
+    'xpack.fileUpload.jsonUploadAndParse.indexPatternComplete',
+    { defaultMessage: 'Index pattern complete' }),
+  DATA_INDEXING_ERROR: i18n.translate(
+    'xpack.fileUpload.jsonUploadAndParse.dataIndexingError',
+    { defaultMessage: 'Data indexing error' }),
+  INDEX_PATTERN_ERROR: i18n.translate(
+    'xpack.fileUpload.jsonUploadAndParse.indexPatternError',
+    { defaultMessage: 'Index pattern error' }),
 };
 
 export class JsonUploadAndParse extends Component {
