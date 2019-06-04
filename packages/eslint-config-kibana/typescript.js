@@ -42,9 +42,8 @@ module.exports = {
 
       parserOptions: {
         sourceType: 'module',
-        ecmaVersion: 6,
+        ecmaVersion: 2018,
         ecmaFeatures: {
-          experimentalObjectRestSpread: true,
           jsx: true
         },
         // NOTE: That is to avoid a known performance issue related with the `ts.Program` used by

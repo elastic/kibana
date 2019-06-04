@@ -7,11 +7,11 @@ module.exports = {
   plugins: ['@kbn/eslint-plugin-eslint'],
 
   parserOptions: {
-    ecmaVersion: 6
+    ecmaVersion: 2018
   },
 
   env: {
-    es6: true
+    es6: true,
   },
 
   rules: {
