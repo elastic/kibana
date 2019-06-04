@@ -336,7 +336,7 @@ export class JobsListView extends Component {
       deletingJobIds: taskJobIds,
     });
 
-    // only reload the jobs list if the length of the task list has changed
+    // only reload the jobs list if the contents of the task list has changed
     // or the check refresh has been forced i.e. from a user action
     if (taskListHasChanged || forceRefresh) {
       this.refreshJobSummaryList();
