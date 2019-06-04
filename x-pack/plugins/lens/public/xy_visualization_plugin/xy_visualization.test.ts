@@ -6,6 +6,7 @@
 
 import { xyVisualization, State } from './xy_visualization';
 import { Position } from '@elastic/charts';
+import { DatasourcePublicAPI } from '../types';
 
 function exampleState(): State {
   return {
@@ -29,7 +30,7 @@ function exampleState(): State {
   };
 }
 
-describe('IndexPattern Data Source', () => {
+describe('XY visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
       expect(xyVisualization.initialize()).toMatchInlineSnapshot(`
@@ -66,6 +67,14 @@ Object {
   describe('#getPersistableState', () => {
     it('persists the state as given', () => {
       expect(xyVisualization.getPersistableState(exampleState())).toEqual(exampleState());
+    });
+  });
+
+  describe('#toExpression', () => {
+    it('should map to a valid AST', () => {
+      expect(
+        xyVisualization.toExpression(exampleState(), {} as DatasourcePublicAPI)
+      ).toMatchSnapshot();
     });
   });
 });
