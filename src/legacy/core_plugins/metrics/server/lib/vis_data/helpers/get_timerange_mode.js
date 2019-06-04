@@ -22,11 +22,38 @@ import { PANEL_TYPES } from '../../../../common/panel_types';
 
 const OVERRIDE_INDEX_PATTERN_KEY = 'override_index_pattern';
 
+/**
+ * Check if passed 'series' has overridden index pattern or not.
+ * @private
+ * @param series - specific series
+ * @return {boolean}
+ */
 const hasOverriddenIndexPattern = series => Boolean(series[OVERRIDE_INDEX_PATTERN_KEY]);
+
+/**
+ * Get value of Time Range Mode for panel
+ * @private
+ * @param panel - panel configuration
+ * @return {string} - value of TIME_RANGE_DATA_MODES type
+ */
 const getPanelTimeRangeMode = panel => panel[TIME_RANGE_MODE_KEY];
+
+/**
+ * Get value of Time Range Mode for series
+ * @private
+ * @param series - specific series
+ * @return {string} - value of TIME_RANGE_DATA_MODES type
+ */
 const getSeriesTimeRangeMode = series => series[TIME_RANGE_MODE_KEY];
 
-const shouldUseEntireTimeRangeMode = (panel, series = {}) => {
+/**
+ * Check if 'Entire Time Range' mode active or not.
+ * @public
+ * @param panel - panel configuration
+ * @param series - specific series
+ * @return {boolean}
+ */
+export const isEntireTimeRangeMode = (panel, series = {}) => {
   if (panel.type === PANEL_TYPES.TIMESERIES) {
     return false;
   }
@@ -38,9 +65,11 @@ const shouldUseEntireTimeRangeMode = (panel, series = {}) => {
   return timeRangeMode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
 };
 
-const getTimerangeMode = (panel, series) => shouldUseEntireTimeRangeMode(panel, series) ?
-  TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE :
-  TIME_RANGE_DATA_MODES.LAST_VALUE;
-
-export const isLastValueTimerangeMode = (panel, series) =>
-  getTimerangeMode(panel, series) === TIME_RANGE_DATA_MODES.LAST_VALUE;
+/**
+ * Check if 'Last Value Time Range' mode active or not.
+ * @public
+ * @param panel - panel configuration
+ * @param series - specific series
+ * @return {boolean}
+ */
+export const isLastValueTimerangeMode = (panel, series) => !isEntireTimeRangeMode(panel, series);
