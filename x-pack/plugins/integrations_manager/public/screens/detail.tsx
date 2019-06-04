@@ -26,7 +26,7 @@ export function Detail({ match }: MatchPackage) {
     },
     [pkgkey]
   );
-  const { description, name, version, icon } = info;
+  const { description, name, version } = info;
 
   return (
     <EuiPanel>
