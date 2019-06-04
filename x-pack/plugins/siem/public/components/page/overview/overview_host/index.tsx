@@ -37,10 +37,7 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
           />
         }
         title={
-          <FormattedMessage
-            id="xpack.siem.overview.hostsTitle"
-            defaultMessage="Host Beats Events"
-          />
+          <FormattedMessage id="xpack.siem.overview.hostsTitle" defaultMessage="Host Events" />
         }
       >
         <EuiButton href="#/link-to/hosts">
