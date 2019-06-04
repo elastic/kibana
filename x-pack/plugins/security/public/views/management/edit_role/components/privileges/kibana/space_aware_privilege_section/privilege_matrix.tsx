@@ -172,7 +172,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
                 content={intl.formatMessage({
                   id:
                     'xpack.security.management.editRole.spacePrivilegeMatrix.basePrivilegeTooltip',
-                  defaultMessage: 'Lowest privilege level allowed.',
+                  defaultMessage: 'The base privilege is automatically granted to all features.',
                 })}
                 color="subdued"
               />
