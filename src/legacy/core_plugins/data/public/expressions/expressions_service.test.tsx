@@ -111,30 +111,35 @@ describe('expressions_service', () => {
     });
 
     it('should reject the promise if the response is not renderable but an element is passed', async () => {
-      const errorResult = { type: 'error', error: {} };
-      interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
+      const unexpectedResult = { type: 'datatable', value: {} };
+      interpretAstMock.mockReturnValue(Promise.resolve(unexpectedResult));
       expect(
         api.run(testAst, {
           element: document.createElement('div'),
         })
-      ).rejects.toBe(errorResult);
+      ).rejects.toBe(unexpectedResult);
     });
 
     it('should reject the promise if the renderer is not known', async () => {
-      const errorResult = { type: 'render', as: 'unknown_id' };
-      interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
+      const unexpectedResult = { type: 'render', as: 'unknown_id' };
+      interpretAstMock.mockReturnValue(Promise.resolve(unexpectedResult));
       expect(
         api.run(testAst, {
           element: document.createElement('div'),
         })
-      ).rejects.toBe(errorResult);
+      ).rejects.toBe(unexpectedResult);
     });
 
-    it('should not reject the promise if the runner does not render', async () => {
+    it('should not reject the promise on unknown renderer if the runner is not rendering', async () => {
+      const unexpectedResult = { type: 'render', as: 'unknown_id' };
+      interpretAstMock.mockReturnValue(Promise.resolve(unexpectedResult));
+      expect(api.run(testAst, {})).resolves.toBe(unexpectedResult);
+    });
+
+    it('should reject the promise if the response is an error', async () => {
       const errorResult = { type: 'error', error: {} };
       interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
-      const response = await api.run(testAst, {});
-      expect(response).toBe(errorResult);
+      expect(api.run(testAst, {})).rejects.toBe(errorResult);
     });
 
     it('should call the render function with the result and element', async () => {

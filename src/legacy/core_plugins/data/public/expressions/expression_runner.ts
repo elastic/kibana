@@ -52,6 +52,10 @@ export const createRunFn = (
     },
   });
 
+  if (response.type === 'error') {
+    throw response;
+  }
+
   if (element) {
     if (response.type === 'render' && response.as && renderersRegistry.get(response.as) !== null) {
       renderersRegistry.get(response.as).render(element, response.value, {
