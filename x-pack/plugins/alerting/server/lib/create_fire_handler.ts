@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Handlebars from 'handlebars';
 import { SavedObject } from 'src/legacy/server/saved_objects';
 import { RawAlertAction, State, Context } from '../types';
 import { ActionsPlugin } from '../../../actions';
+import { transformActionParams } from './transform_action_params';
 
 interface CreateFireHandlerOptions {
   fireAction: ActionsPlugin['fire'];
@@ -19,16 +19,7 @@ export function createFireHandler({ fireAction, alertSavedObject }: CreateFireHa
     const alertActions: RawAlertAction[] = alertSavedObject.attributes.actions;
     const actions = alertActions.filter(({ group }: { group: string }) => group === actionGroup);
     for (const action of actions) {
-      const params: Record<string, any> = {};
-      for (const key of Object.keys(action.params)) {
-        const value = action.params[key];
-        if (typeof value !== 'string') {
-          params[key] = value;
-          continue;
-        }
-        const template = Handlebars.compile(value);
-        params[key] = template({ context, state });
-      }
+      const params = transformActionParams(action.params, state, context);
       const actionReference = alertSavedObject.references.find(
         obj => obj.name === action.actionRef
       );

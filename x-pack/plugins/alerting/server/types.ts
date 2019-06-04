@@ -31,16 +31,18 @@ export interface AlertType {
   execute: ({ services, params, state }: AlertExecuteOptions) => Promise<State | void>;
 }
 
+export type AlertActionParams = Record<string, any>;
+
 export interface AlertAction {
   group: string;
   id: string;
-  params: Record<string, any>;
+  params: AlertActionParams;
 }
 
 export interface RawAlertAction {
   group: string;
   actionRef: string;
-  params: Record<string, any>;
+  params: AlertActionParams;
 }
 
 export interface Alert {
