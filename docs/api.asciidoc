@@ -26,6 +26,18 @@ entirely.
 
 NOTE: You cannot access these APIs via the Console in Kibana.
 
+== Request Headers
+
+The following headers must be set on all non-whitelisted API endpoints 
+(See https://www.elastic.co/guide/en/kibana/current/kibana-authentication.html#saml[SAML Authentication]
+documentation for example whitelisting). 
+
+`kbn-xsrf: true`:: By default, Kibana requires the `kbn-xsrf` header set to true
+for any API interactions.
+
+`Content-Type: application/json`:: The Kibana API uses JSON for the request and
+response bodies. Interaction with the API requires that the Content-Type is set accordingly.
+
 [float]
 == APIs
 * <<spaces-api>>
