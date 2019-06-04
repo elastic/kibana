@@ -56,6 +56,10 @@ export class ESSearchSource extends AbstractESSource {
       geoField: descriptor.geoField,
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
+      useTopHits: _.get(descriptor, 'useTopHits', false),
+      topHitsSplitField: descriptor.topHitsSplitField,
+      topHitsTimeField: descriptor.topHitsTimeField,
+      topHitsSize: _.get(descriptor, 'topHitsSize', 1),
     }, inspectorAdapters);
   }
 
@@ -66,6 +70,10 @@ export class ESSearchSource extends AbstractESSource {
         onChange={onChange}
         filterByMapBounds={this._descriptor.filterByMapBounds}
         tooltipProperties={this._descriptor.tooltipProperties}
+        useTopHits={this._descriptor.useTopHits}
+        topHitsSplitField={this._descriptor.topHitsSplitField}
+        topHitsTimeField={this._descriptor.topHitsTimeField}
+        topHitsSize={this._descriptor.topHitsSize}
       />
     );
   }
