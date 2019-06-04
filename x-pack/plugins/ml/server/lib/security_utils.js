@@ -10,7 +10,7 @@
  */
 
 export function isSecurityDisabled(server) {
-  const xpackMainPlugin = server.plugins.xpack_main;
+  const xpackMainPlugin = server.plugins.xpackMain;
   const xpackInfo = (xpackMainPlugin && xpackMainPlugin.info);
   // we assume that `xpack.isAvailable()` always returns `true` because we're inside x-pack
   // if for whatever reason it returns `false`, `isSecurityDisabled()` would also return `false`

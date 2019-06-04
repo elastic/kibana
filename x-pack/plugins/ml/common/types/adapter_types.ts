@@ -64,6 +64,7 @@ export interface KibanaLegacyServer {
       createCluster: () => any;
     };
   };
+  addAppLinksToSampleDataset: () => any;
   config: () => any;
   route: (routeConfig: any) => void;
   log: (message: string) => void;
