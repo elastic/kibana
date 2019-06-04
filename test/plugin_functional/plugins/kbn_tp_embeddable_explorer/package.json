@@ -9,7 +9,8 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@elastic/eui": "11.0.1",
-    "react": "^16.8.0"
+    "react": "^16.8.0",
+    "rxjs": "link:../../../../node_modules/rxjs"
   },
   "scripts": {
     "kbn": "node ../../../../scripts/kbn.js",
