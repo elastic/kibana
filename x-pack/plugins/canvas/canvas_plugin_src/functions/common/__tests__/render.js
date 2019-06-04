@@ -59,7 +59,7 @@ describe('render', () => {
 
       it(`defaults to '${DEFAULT_ELEMENT_CSS}'`, () => {
         const result = fn(renderTable);
-        expect(result).to.have.property('css', '"* > * {}"');
+        expect(result).to.have.property('css', `"${DEFAULT_ELEMENT_CSS}"`);
       });
     });
 
