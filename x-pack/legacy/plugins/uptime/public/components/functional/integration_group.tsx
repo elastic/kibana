@@ -16,6 +16,7 @@ import {
   getInfraIpHref,
   getInfraKubernetesHref,
   getLoggingContainerHref,
+  getLoggingIpHref,
   getLoggingKubernetesHref,
 } from '../../lib/helper';
 import { MonitorSummary } from '../../../common/graphql/types';
@@ -166,6 +167,30 @@ export const IntegrationGroup = ({
       ) : null}
       {isLogsAvailable ? (
         <React.Fragment>
+          <EuiFlexItem>
+            <IntegrationLink
+              ariaLabel={i18n.translate(
+                'xpack.uptime.monitorList.loggingIntegrationAction.ip.description',
+                {
+                  defaultMessage: `Check Logging UI for this monitor's ip address`,
+                  description: 'This value is shown as the aria label for screen readers.',
+                }
+              )}
+              href={getLoggingIpHref(monitor, basePath)}
+              iconType="loggingApp"
+              message={i18n.translate(
+                'xpack.uptime.monitorList.loggingIntegrationAction.ip.message',
+                {
+                  defaultMessage: 'Show host logs',
+                  description: `A message explaining that this link will take the user to the Infrastructure UI filtered for the monitor's IP Address`,
+                }
+              )}
+              tooltipContent={i18n.translate(
+                'xpack.uptime.monitorList.loggingIntegrationAction.ip.tooltip',
+                { defaultMessage: 'Check Logging UI for the IP "{ip}"', values: { ip } }
+              )}
+            />
+          </EuiFlexItem>
           <EuiFlexItem>
             <IntegrationLink
               ariaLabel={i18n.translate(
