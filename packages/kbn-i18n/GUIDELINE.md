@@ -89,7 +89,7 @@ The long term plan is to rely on using `FormattedMessage` and `i18n.translate()`
 - You should use `<FormattedMessage>` most of the time.
 - In the case where the string is expected (`aria-label`, `placeholder`), Call JS function `i18n.translate()` from the`@kbn/i18n` package.
 
-Currently we support the following ReactJS `i18n` tools, but will be removed in future releases:
+Currently, we support the following ReactJS `i18n` tools, but they will be removed in future releases:
 - Usage of `props.intl.formatmessage()` (where `intl` is  passed to `props` by `injectI18n` HOC).
 
 #### In AngularJS
