@@ -5,13 +5,14 @@
  */
 
 import axios from 'axios';
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import { setHttpClient } from '../../../public/services/api';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
   // axios has a $http like interface so using it to simulate $http
-  setHttpClient(axios.create());
+  setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

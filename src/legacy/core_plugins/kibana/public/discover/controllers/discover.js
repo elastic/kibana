@@ -185,7 +185,6 @@ function discoverController(
   $timeout,
   $window,
   AppState,
-  Notifier,
   Private,
   Promise,
   config,
@@ -201,9 +200,6 @@ function discoverController(
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
   const filterManager = Private(FilterManagerProvider);
-  const notify = new Notifier({
-    location: 'Discover'
-  });
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const inspectorAdapters = {
@@ -718,7 +714,13 @@ function discoverController(
         logInspectorRequest();
         return courier.fetch();
       })
-      .catch(notify.error);
+      .catch((error) => {
+        toastNotifications.addError(error, {
+          title: i18n.translate('kbn.discover.discoverError', {
+            defaultMessage: 'Discover error',
+          }),
+        });
+      });
   };
 
   $scope.updateQueryAndFetch = function ({ query, dateRange }) {
@@ -799,7 +801,11 @@ function discoverController(
         if (fetchError) {
           $scope.fetchError = fetchError;
         } else {
-          notify.error(error);
+          toastNotifications.addError(error, {
+            title: i18n.translate('kbn.discover.errorLoadingData', {
+              defaultMessage: 'Error loading data',
+            }),
+          });
         }
 
         // Restart. This enables auto-refresh functionality.
