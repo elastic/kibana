@@ -17,7 +17,6 @@ const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 let emsSources = null;
 let loadingMetaPromise = null;
-let isLoaded = false;
 
 export async function getEMSDataSources() {
   if (emsSources) {
@@ -53,24 +52,12 @@ export async function getEMSDataSources() {
           }
         };
       }
-      isLoaded = true;
       resolve(emsSources);
     } catch (e) {
       reject(e);
     }
   });
   return loadingMetaPromise;
-}
-
-/**
- * Should only call this after verifying `isMetadataLoaded` equals true
- */
-export function getEMSDataSourcesSync() {
-  return emsSources;
-}
-
-export function isMetaDataLoaded() {
-  return isLoaded;
 }
 
 export async function getEmsVectorFilesMeta() {
