@@ -70,8 +70,7 @@ export const buildQuery = ({
             failures: {
               filter: {
                 terms: {
-                  // Remove authentication_failed once winlogbeat is only using authentication_failure
-                  'event.type': ['authentication_failure', 'authentication_failed'],
+                  'event.type': ['authentication_failure'],
                 },
               },
               aggs: {
