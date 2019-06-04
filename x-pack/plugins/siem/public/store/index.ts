@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './epic';
 export * from './model';
 export * from './reducer';
 export * from './selectors';
 
-import { createStore } from './store';
+import { createStore, getStore } from './store';
 
-const store = createStore();
-
-export { store, createStore };
+export { createStore, getStore };

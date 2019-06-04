@@ -16,8 +16,8 @@ storiesOf('components/ItemGrid', module)
   ))
   .add('icon grid', () => (
     <ItemGrid
-      items={['plusInCircle', 'minusInCircle', 'check'] as IconType[]}
-      children={(item: IconType) => <EuiIcon key={item} type={item} />}
+      items={['plusInCircle', 'minusInCircle', 'check']}
+      children={item => <EuiIcon key={item} type={item} />}
     />
   ))
   .add('color dot grid', () => (

@@ -106,12 +106,16 @@ export abstract class AbstractWorker implements Worker {
     return await this.updateProgress(job, WorkerReservedProgress.INIT);
   }
 
-  public async onJobCompleted(job: Job, res: any) {
+  public async onJobCompleted(job: Job, res: WorkerResult) {
     this.log.info(
       `${this.id} job completed with result ${JSON.stringify(
         res
       )} in ${this.workerTaskDurationSeconds(job)} seconds.`
     );
+    if (res.cancelled) {
+      // Skip updating job progress if the job is done because of cancellation.
+      return;
+    }
     return await this.updateProgress(job, WorkerReservedProgress.COMPLETED);
   }
 

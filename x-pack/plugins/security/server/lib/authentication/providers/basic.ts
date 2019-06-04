@@ -10,8 +10,7 @@ import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { LoginAttempt } from '../login_attempt';
-import { BaseAuthenticationProvider } from './base';
+import { BaseAuthenticationProvider, RequestWithLoginAttempt } from './base';
 
 /**
  * Utility class that knows how to decorate request with proper Basic authentication headers.
@@ -24,7 +23,7 @@ export class BasicCredentials {
    * @param username User name.
    * @param password User password.
    */
-  public static decorateRequest<T extends Legacy.Request>(
+  public static decorateRequest<T extends RequestWithLoginAttempt>(
     request: T,
     username: string,
     password: string
@@ -47,10 +46,6 @@ export class BasicCredentials {
     return request;
   }
 }
-
-type RequestWithLoginAttempt = Legacy.Request & {
-  loginAttempt: () => LoginAttempt;
-};
 
 /**
  * The state supported by the provider.
@@ -111,9 +106,8 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   public async deauthenticate(request: Legacy.Request) {
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
-    return DeauthenticationResult.redirectTo(
-      `${this.options.basePath}/login${request.url.search || ''}`
-    );
+    const queryString = request.url.search || `?msg=LOGGED_OUT`;
+    return DeauthenticationResult.redirectTo(`${this.options.basePath}/login${queryString}`);
   }
 
   /**
@@ -153,7 +147,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    * forward to Elasticsearch backend.
    * @param request Request instance.
    */
-  private async authenticateViaHeader(request: Legacy.Request) {
+  private async authenticateViaHeader(request: RequestWithLoginAttempt) {
     this.debug('Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
@@ -189,7 +183,10 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(request: Legacy.Request, { authorization }: ProviderState) {
+  private async authenticateViaState(
+    request: RequestWithLoginAttempt,
+    { authorization }: ProviderState
+  ) {
     this.debug('Trying to authenticate via state.');
 
     if (!authorization) {

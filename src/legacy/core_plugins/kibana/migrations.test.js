@@ -718,7 +718,7 @@ Object {
   });
 
   describe('date histogram custom interval removal', () => {
-    const migrate = doc => migrations.visualization['7.1.0'](doc);
+    const migrate = doc => migrations.visualization['7.2.0'](doc);
     let doc;
     beforeEach(() => {
       doc = {
@@ -841,6 +841,54 @@ Object {
       const migratedDoc = migrate(doc);
       const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
       expect(aggs[3]).not.toHaveProperty('params.customInterval');
+    });
+  });
+  describe('7.3.0', () => {
+    const migrate = doc => migrations.visualization['7.3.0'](doc);
+
+    it('migrates type = gauge verticalSplit: false to alignment: vertical', () => {
+      const migratedDoc = migrate({
+        attributes: {
+          visState: JSON.stringify({ type: 'gauge', params: { gauge: { verticalSplit: false } } }),
+        },
+      });
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"horizontal\\"}}}",
+  },
+}
+`);
+    });
+
+    it('migrates type = gauge verticalSplit: false to alignment: horizontal', () => {
+      const migratedDoc = migrate({
+        attributes: {
+          visState: JSON.stringify({ type: 'gauge', params: { gauge: { verticalSplit: true } } }),
+        },
+      });
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"vertical\\"}}}",
+  },
+}
+`);
+    });
+
+    it('doesnt migrate type = gauge containing invalid visState object', () => {
+      const migratedDoc = migrate({
+        attributes: {
+          visState: JSON.stringify({ type: 'gauge' }),
+        },
+      });
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "visState": "{\\"type\\":\\"gauge\\"}",
+  },
+}
+`);
     });
   });
 });

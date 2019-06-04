@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, CoreStart } from '../../../../core/public';
+import { InternalCoreSetup, InternalCoreStart } from '../../../../core/public';
 
 const runtimeContext = {
   setup: {
-    core: (null as unknown) as CoreSetup,
-    plugins: {},
+    core: (null as unknown) as InternalCoreSetup,
+    plugins: {} as Record<string, unknown>,
   },
   start: {
-    core: (null as unknown) as CoreStart,
-    plugins: {},
+    core: (null as unknown) as InternalCoreStart,
+    plugins: {} as Record<string, unknown>,
   },
 };
 
@@ -34,17 +34,20 @@ const runtimeContext = {
  * @internal
  */
 export function __reset__() {
-  runtimeContext.setup.core = (null as unknown) as CoreSetup;
-  runtimeContext.start.core = (null as unknown) as CoreStart;
+  runtimeContext.setup.core = (null as unknown) as InternalCoreSetup;
+  runtimeContext.start.core = (null as unknown) as InternalCoreStart;
 }
 
-export async function __newPlatformSetup__(core: CoreSetup) {
+export async function __newPlatformSetup__(
+  core: InternalCoreSetup,
+  plugins: Record<string, unknown>
+) {
   if (runtimeContext.setup.core) {
     throw new Error('New platform core api was already set up');
   }
 
   runtimeContext.setup.core = core;
-
+  runtimeContext.setup.plugins = plugins;
   // Process any pending onSetup callbacks
   while (onSetupCallbacks.length) {
     const cb = onSetupCallbacks.shift()!;
@@ -52,12 +55,16 @@ export async function __newPlatformSetup__(core: CoreSetup) {
   }
 }
 
-export async function __newPlatformStart__(core: CoreStart) {
+export async function __newPlatformStart__(
+  core: InternalCoreStart,
+  plugins: Record<string, unknown>
+) {
   if (runtimeContext.start.core) {
     throw new Error('New platform core api was already started');
   }
 
   runtimeContext.start.core = core;
+  runtimeContext.start.plugins = plugins;
 
   // Process any pending onStart callbacks
   while (onStartCallbacks.length) {

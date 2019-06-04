@@ -8,11 +8,11 @@ import { isNumber } from 'lodash/fp';
 import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
 import { FormattedIp } from '../../../formatted_ip';
+import { IS_OPERATOR, DataProvider } from '../../data_providers/data_provider';
 import { Provider } from '../../data_providers/provider';
 import { ColumnHeader } from '../column_headers/column_header';
 import { IP_FIELD_TYPE, FormattedFieldValue } from './formatted_field';
@@ -43,13 +43,17 @@ export const plainColumnRenderer: ColumnRenderer = {
   }) =>
     values != null
       ? values.map(value => {
-          const itemDataProvider = {
+          const itemDataProvider: DataProvider = {
             enabled: true,
             id: escapeDataProviderId(
               `id-timeline-column-${columnName}-for-event-${eventId}-${field.id}-${value}`
             ),
             name: `${columnName}: ${parseQueryValue(value)}`,
-            queryMatch: { field: field.id, value: escapeQueryValue(parseQueryValue(value)) },
+            queryMatch: {
+              field: field.id,
+              value: parseQueryValue(value),
+              operator: IS_OPERATOR,
+            },
             excluded: false,
             kqlQuery: '',
             and: [],

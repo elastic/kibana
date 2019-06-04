@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ESFilter } from 'elasticsearch';
 import {
   SERVICE_AGENT_NAME,
   PROCESSOR_EVENT,
@@ -20,29 +19,28 @@ export interface ThreadCountMetrics extends MetricSeriesKeys {
 }
 
 export async function fetch(setup: Setup, serviceName: string) {
-  const { start, end, esFilterQuery, client, config } = setup;
-  const filters: ESFilter[] = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: 'metric' } },
-    { term: { [SERVICE_AGENT_NAME]: 'java' } },
-    {
-      range: rangeFilter(start, end)
-    }
-  ];
-
-  if (esFilterQuery) {
-    filters.push(esFilterQuery);
-  }
+  const { start, end, uiFiltersES, client, config } = setup;
 
   const aggs = {
-    threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } }
+    threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
+    threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } }
   };
 
   const params = {
     index: config.get<string>('apm_oss.metricsIndices'),
     body: {
       size: 0,
-      query: { bool: { filter: filters } },
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [PROCESSOR_EVENT]: 'metric' } },
+            { term: { [SERVICE_AGENT_NAME]: 'java' } },
+            { range: rangeFilter(start, end) },
+            ...uiFiltersES
+          ]
+        }
+      },
       aggs: {
         timeseriesData: {
           date_histogram: getMetricsDateHistogramParams(start, end),
@@ -53,5 +51,5 @@ export async function fetch(setup: Setup, serviceName: string) {
     }
   };
 
-  return client<void, MetricsAggs<ThreadCountMetrics>>('search', params);
+  return client.search<void, MetricsAggs<ThreadCountMetrics>>(params);
 }

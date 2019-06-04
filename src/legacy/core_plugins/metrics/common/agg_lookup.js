@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-const lookup = {
+export const lookup = {
   count: i18n.translate('tsvb.aggLookup.countLabel', { defaultMessage: 'Count' }),
   calculation: i18n.translate('tsvb.aggLookup.calculationLabel', { defaultMessage: 'Calculation' }),
   std_deviation: i18n.translate('tsvb.aggLookup.deviationLabel', { defaultMessage: 'Std. Deviation' }),
@@ -111,5 +111,3 @@ export function createOptions(type = '_all', siblings = []) {
     })
     .value();
 }
-
-export default lookup;

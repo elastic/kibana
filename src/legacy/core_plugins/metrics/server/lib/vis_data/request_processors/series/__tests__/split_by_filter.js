@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import splitByFilter from '../split_by_filter';
+import { splitByFilter } from '../split_by_filter';
 import { expect } from 'chai';
 import sinon from 'sinon';
 

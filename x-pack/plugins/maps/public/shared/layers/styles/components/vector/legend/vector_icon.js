@@ -4,24 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { dynamicColorShape, staticColorShape } from '../style_option_shapes';
-import { FillableCircle, FillableRectangle } from '../../../../../icons/additional_layer_icons';
+import { PointIcon } from './point_icon';
+import { LineIcon } from './line_icon';
+import { PolygonIcon } from './polygon_icon';
 import { VectorStyle } from '../../../vector_style';
-import { getColorRampCenterColor } from '../../../../../utils/color_utils';
+import { getColorRampCenterColor } from '../../../color_utils';
 
-export function VectorIcon({ fillColor, lineColor, isPointsOnly }) {
-  const style = {
-    stroke: extractColorFromStyleProperty(lineColor, 'none'),
-    strokeWidth: '1px',
-    fill: extractColorFromStyleProperty(fillColor, 'grey'),
-  };
+export class VectorIcon extends Component {
 
-  return isPointsOnly
-    ? <FillableCircle style={style}/>
-    : <FillableRectangle style={style}/>;
+  state = {
+    isInitialized: false
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._init();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async _init() {
+    const isPointsOnly = await this.props.loadIsPointsOnly();
+    const isLinesOnly = await this.props.loadIsLinesOnly();
+    if (this._isMounted) {
+      this.setState({
+        isInitialized: true,
+        isPointsOnly,
+        isLinesOnly,
+      });
+    }
+  }
+
+  render() {
+    if (!this.state.isInitialized) {
+      return null;
+    }
+
+    if (this.state.isLinesOnly) {
+      const style = {
+        stroke: extractColorFromStyleProperty(this.props.lineColor, 'grey'),
+        strokeWidth: '4px',
+      };
+      return (
+        <LineIcon style={style}/>
+      );
+    }
+
+    const style = {
+      stroke: extractColorFromStyleProperty(this.props.lineColor, 'none'),
+      strokeWidth: '1px',
+      fill: extractColorFromStyleProperty(this.props.fillColor, 'grey'),
+    };
+
+    return this.state.isPointsOnly
+      ? <PointIcon style={style}/>
+      : <PolygonIcon style={style}/>;
+  }
 }
 
 function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
@@ -48,5 +92,6 @@ const colorStylePropertyShape = PropTypes.shape({
 VectorIcon.propTypes = {
   fillColor: colorStylePropertyShape,
   lineColor: colorStylePropertyShape,
-  isPointsOnly: PropTypes.bool,
+  loadIsPointsOnly: PropTypes.func.isRequired,
+  loadIsLinesOnly: PropTypes.func.isRequired,
 };

@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiGlobalToastList, EuiIcon, EuiText, Toast } from '@elastic/eui';
+import { EuiGlobalToastList, Toast } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import * as React from 'react';
-import styled from 'styled-components';
 import uuid from 'uuid';
 
 import * as i18n from './translations';
@@ -16,34 +15,15 @@ export type OnCopy = (
   { content, isSuccess }: { content: string | number; isSuccess: boolean }
 ) => void;
 
-const ToastContainer = styled.div`
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  user-select: none;
-`;
-
-const CopyClipboardIcon = styled(EuiIcon)`
-  margin-right: 5px;
-`;
-
 interface GetSuccessToastParams {
-  content: string | number;
   titleSummary?: string;
 }
 
-const getSuccessToast = ({ content, titleSummary }: GetSuccessToastParams): Toast => ({
+const getSuccessToast = ({ titleSummary }: GetSuccessToastParams): Toast => ({
   id: `copy-success-${uuid.v4()}`,
   color: 'success',
-  text: (
-    <ToastContainer>
-      <CopyClipboardIcon type="copyClipboard" size="m" />
-      <EuiText>
-        {i18n.COPIED} <code>{content}</code> {i18n.TO_THE_CLIPBOARD}
-      </EuiText>
-    </ToastContainer>
-  ),
-  title: `${i18n.COPIED} ${titleSummary || content}`,
+  iconType: 'copyClipboard',
+  title: `${i18n.COPIED} ${titleSummary} ${i18n.TO_THE_CLIPBOARD}`,
 });
 
 interface Props {
@@ -102,9 +82,9 @@ export class Clipboard extends React.PureComponent<Props, State> {
     }
 
     if (isSuccess) {
-      this.setState({
-        toasts: [...this.state.toasts, getSuccessToast({ content, titleSummary })],
-      });
+      this.setState(prevState => ({
+        toasts: [...prevState.toasts, getSuccessToast({ titleSummary })],
+      }));
     }
   };
 

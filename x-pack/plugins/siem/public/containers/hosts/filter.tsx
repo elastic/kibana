@@ -66,7 +66,7 @@ const HostsFilterComponent = pure<HostsFilterProps>(
         applyFilterQueryFromKueryExpression: (expression: string) =>
           applyHostsFilterQuery({
             filterQuery: {
-              query: {
+              kuery: {
                 kind: 'kuery',
                 expression,
               },

@@ -6,27 +6,64 @@
 
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
+
+import { KBN_FIELD_TYPES } from '../../../../common/constants/field_types';
 
 import {
   DataFramePreviewRequest,
   DropDownLabel,
   DropDownOption,
+  FieldName,
   PivotAggsConfigDict,
+  pivotAggsFieldSupport,
+  PivotGroupByConfig,
   PivotGroupByConfigDict,
-  pivotSupportedAggs,
-  PIVOT_SUPPORTED_AGGS,
+  pivotGroupByFieldSupport,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../common';
 
-export enum FIELD_TYPE {
-  DATE = 'date',
-  IP = 'ip',
-  NUMBER = 'number',
-  STRING = 'string',
+export interface Field {
+  name: FieldName;
+  type: KBN_FIELD_TYPES;
 }
 
-export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
+function getDefaultGroupByConfig(
+  aggName: string,
+  dropDownName: string,
+  fieldName: FieldName,
+  groupByAgg: PIVOT_SUPPORTED_GROUP_BY_AGGS
+): PivotGroupByConfig {
+  switch (groupByAgg) {
+    case PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS:
+      return {
+        agg: groupByAgg,
+        aggName,
+        dropDownName,
+        field: fieldName,
+      };
+    case PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM:
+      return {
+        agg: groupByAgg,
+        aggName,
+        dropDownName,
+        field: fieldName,
+        interval: '10',
+      };
+    case PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM:
+      return {
+        agg: groupByAgg,
+        aggName,
+        dropDownName,
+        field: fieldName,
+        calendar_interval: '1m',
+      };
+  }
+}
+
+const illegalEsAggNameChars = /[[\]>]/g;
+
+export function getPivotDropdownOptions(indexPattern: IndexPattern) {
   // The available group by options
   const groupByOptions: EuiComboBoxOptionProps[] = [];
   const groupByOptionsData: PivotGroupByConfigDict = {};
@@ -35,56 +72,44 @@ export function getPivotDropdownOptions(indexPattern: StaticIndexPattern) {
   const aggOptions: EuiComboBoxOptionProps[] = [];
   const aggOptionsData: PivotAggsConfigDict = {};
 
+  const ignoreFieldNames = ['_id', '_index', '_type'];
   const fields = indexPattern.fields
-    .filter(field => field.aggregatable === true)
-    .map(field => ({ name: field.name, type: field.type }));
+    .filter(field => field.aggregatable === true && !ignoreFieldNames.includes(field.name))
+    .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
 
   fields.forEach(field => {
-    // group by
-    if (field.type === FIELD_TYPE.STRING) {
-      const aggName = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}(${field.name})`;
-      const groupByOption: DropDownLabel = { label: aggName };
-      groupByOptions.push(groupByOption);
-      groupByOptionsData[aggName] = {
-        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
-        field: field.name,
-        aggName,
-      };
-    } else if (field.type === FIELD_TYPE.NUMBER) {
-      const aggName = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM}(${field.name})`;
-      const groupByOption: DropDownLabel = { label: aggName };
-      groupByOptions.push(groupByOption);
-      groupByOptionsData[aggName] = {
-        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
-        field: field.name,
-        aggName,
-        interval: '10',
-      };
-    } else if (field.type === FIELD_TYPE.DATE) {
-      const aggName = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM}(${field.name})`;
-      const groupByOption: DropDownLabel = { label: aggName };
-      groupByOptions.push(groupByOption);
-      groupByOptionsData[aggName] = {
-        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
-        field: field.name,
-        aggName,
-        interval: '1m',
-      };
+    // Group by
+    const availableGroupByAggs = pivotGroupByFieldSupport[field.type];
+    if (availableGroupByAggs !== undefined) {
+      availableGroupByAggs.forEach(groupByAgg => {
+        // Aggregation name for the group-by is the plain field name. Illegal characters will be removed.
+        const aggName = field.name.replace(illegalEsAggNameChars, '').trim();
+        // Option name in the dropdown for the group-by is in the form of `sum(fieldname)`.
+        const dropDownName = `${groupByAgg}(${field.name})`;
+        const groupByOption: DropDownLabel = { label: dropDownName };
+        groupByOptions.push(groupByOption);
+        groupByOptionsData[dropDownName] = getDefaultGroupByConfig(
+          aggName,
+          dropDownName,
+          field.name,
+          groupByAgg
+        );
+      });
     }
 
-    // aggregations
+    // Aggregations
     const aggOption: DropDownOption = { label: field.name, options: [] };
-    pivotSupportedAggs.forEach(agg => {
-      if (
-        (agg === PIVOT_SUPPORTED_AGGS.CARDINALITY &&
-          (field.type === FIELD_TYPE.STRING || field.type === FIELD_TYPE.IP)) ||
-        (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER)
-      ) {
-        const aggName = `${agg}(${field.name})`;
-        aggOption.options.push({ label: aggName });
-        aggOptionsData[aggName] = { agg, field: field.name, aggName };
-      }
-    });
+    const availableAggs = pivotAggsFieldSupport[field.type];
+    if (availableAggs !== undefined) {
+      availableAggs.forEach(agg => {
+        // Aggregation name is formatted like `fieldname.sum`. Illegal characters will be removed.
+        const aggName = `${field.name.replace(illegalEsAggNameChars, '').trim()}.${agg}`;
+        // Option name in the dropdown for the aggregation is in the form of `sum(fieldname)`.
+        const dropDownName = `${agg}(${field.name})`;
+        aggOption.options.push({ label: dropDownName });
+        aggOptionsData[dropDownName] = { agg, field: field.name, aggName, dropDownName };
+      });
+    }
     aggOptions.push(aggOption);
   });
 

@@ -36,12 +36,17 @@ export const reporting = (kibana) => {
         'plugins/reporting/share_context_menu/register_csv_reporting',
         'plugins/reporting/share_context_menu/register_reporting',
       ],
+      contextMenuActions: [
+        'plugins/reporting/panel_actions/get_csv_panel_action',
+      ],
       hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],
       injectDefaultVars(server, options) {
+        const config = server.config();
         return {
-          reportingPollConfig: options.poll
+          reportingPollConfig: options.poll,
+          enablePanelActionDownload: config.get('xpack.reporting.csv.enablePanelActionDownload'),
         };
       },
       uiSettingDefaults: {
@@ -122,6 +127,7 @@ export const reporting = (kibana) => {
           }).default()
         }).default(),
         csv: Joi.object({
+          enablePanelActionDownload: Joi.boolean().default(false),
           maxSizeBytes: Joi.number().integer().default(1024 * 1024 * 10), // bytes in a kB * kB in a mB * 10
           scroll: Joi.object({
             duration: Joi.string().regex(/^[0-9]+(d|h|m|s|ms|micros|nanos)$/, { name: 'DurationString' }).default('30s'),
@@ -151,6 +157,11 @@ export const reporting = (kibana) => {
     },
 
     init: async function (server) {
+      let isCollectorReady = false;
+      const isReady = () => isCollectorReady;
+      // Register a function with server to manage the collection of usage stats
+      server.usage.collectorSet.register(getReportingUsageCollector(server, isReady));
+
       const exportTypesRegistry = await exportTypesRegistryFactory(server);
       const browserFactory = await createBrowserDriverFactory(server);
       server.expose('exportTypesRegistry', exportTypesRegistry);
@@ -172,8 +183,8 @@ export const reporting = (kibana) => {
         xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
-      // Register a function with server to manage the collection of usage stats
-      server.usage.collectorSet.register(getReportingUsageCollector(server));
+      // Post initialization of the above code, the collector is now ready to fetch its data
+      isCollectorReady = true;
 
       server.expose('browserDriverFactory', browserFactory);
       server.expose('queue', createQueueFactory(server));

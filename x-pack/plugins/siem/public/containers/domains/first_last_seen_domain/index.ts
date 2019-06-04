@@ -8,6 +8,8 @@ import ApolloClient from 'apollo-client';
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { FlowTarget, GetDomainFirstLastSeenQuery } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
 import { QueryTemplateProps } from '../../query_template';
@@ -48,7 +50,13 @@ export function useFirstLastSeenDomainQuery<TCache = object>(
       .query<GetDomainFirstLastSeenQuery.Query, GetDomainFirstLastSeenQuery.Variables>({
         query: DomainFirstLastSeenGqlQuery,
         fetchPolicy: 'cache-first',
-        variables: { sourceId, ip, domainName, flowTarget },
+        variables: {
+          sourceId,
+          ip,
+          domainName,
+          flowTarget,
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        },
       })
       .then(
         result => {
