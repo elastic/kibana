@@ -6,7 +6,6 @@
 
 import { InternalCoreSetup } from 'src/core/server';
 import { makeApmUsageCollector } from '../lib/apm_telemetry';
-import { ensureIndexPatternExists } from '../lib/index_pattern';
 import { CoreSetupWithUsageCollector } from '../lib/apm_telemetry/make_apm_usage_collector';
 import { initErrorsApi } from '../routes/errors';
 import { initMetricsApi } from '../routes/metrics';
@@ -14,6 +13,7 @@ import { initServicesApi } from '../routes/services';
 import { initTracesApi } from '../routes/traces';
 import { initTransactionGroupsApi } from '../routes/transaction_groups';
 import { initUIFiltersApi } from '../routes/ui_filters';
+import { initIndexPatternApi } from '../routes/index_pattern';
 
 export class Plugin {
   public setup(core: InternalCoreSetup) {
@@ -23,7 +23,7 @@ export class Plugin {
     initServicesApi(core);
     initErrorsApi(core);
     initMetricsApi(core);
+    initIndexPatternApi(core);
     makeApmUsageCollector(core as CoreSetupWithUsageCollector);
-    ensureIndexPatternExists(core);
   }
 }
