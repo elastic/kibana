@@ -88,8 +88,8 @@ const CODE_FORBIDDEN = 'SavedObjectsClient/forbidden';
 export function decorateForbiddenError(error: Error, reason?: string) {
   return decorate(error, CODE_FORBIDDEN, 403, reason);
 }
-export function isForbiddenError(error: any) {
-  return error && error[code] === CODE_FORBIDDEN;
+export function isForbiddenError(error: Error | DecoratedError) {
+  return isSavedObjectsClientError(error) && error[code] === CODE_FORBIDDEN;
 }
 
 // 413 - Request Entity Too Large
