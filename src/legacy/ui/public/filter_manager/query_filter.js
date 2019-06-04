@@ -20,7 +20,8 @@
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { uniqFilters } from './lib/uniq_filters';
+import { FilterStateStore } from '@kbn/es-query';
+
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
@@ -47,30 +48,20 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
   };
 
   queryFilter.getFilters = function () {
-    const compareOptions = { disabled: true, negate: true };
-    const appFilters = queryFilter.getAppFilters();
-    const globalFilters = queryFilter.getGlobalFilters();
-
-    return uniqFilters(globalFilters.concat(appFilters), compareOptions);
+    return filterStateManager ? filterStateManager.getFilters() : [];
   };
 
   queryFilter.getAppFilters = function () {
+    const filters = filterStateManager ? filterStateManager.getAppFilters() : [];
     const appState = getAppState();
-    if (!appState || !appState.filters) return [];
-
-    // Work around for https://github.com/elastic/kibana/issues/5896
-    appState.filters = validateStateFilters(appState);
-
-    return (appState.filters) ? _.map(appState.filters, appendStoreType('appState')) : [];
+    if (appState) appState.filters = filters;
+    return filters;
   };
 
   queryFilter.getGlobalFilters = function () {
-    if (!globalState.filters) return [];
-
-    // Work around for https://github.com/elastic/kibana/issues/5896
-    globalState.filters = validateStateFilters(globalState);
-
-    return _.map(globalState.filters, appendStoreType('globalState'));
+    const filters = filterStateManager ? filterStateManager.getGlobalFilters() : [];
+    globalState.filters = filters;
+    return filters;
   };
 
   /**
@@ -84,23 +75,29 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
       addToGlobalState = uiSettings.get('filters:pinnedByDefault');
     }
 
-    // Determine the state for the new filter (whether to pass the filter through other apps or not)
-    const appState = getAppState();
-    const filterState = addToGlobalState ? globalState : appState;
-
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
 
     return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters))
       .then(function (mappedFilters) {
-        if (!filterState.filters) {
-          filterState.filters = [];
-        }
+        _.map(mappedFilters, mappedFilter => {
+          mappedFilter.$state = {
+            store: addToGlobalState ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE
+          };
+        });
+        const delayedChangeUpdate = filterStateManager.addFilters(mappedFilters, false);
+        updateAppState();
+        delayedChangeUpdate.callback && delayedChangeUpdate.callback();
+      });
+  };
 
-        filterState.filters = filterState.filters.concat(mappedFilters);
-
-        filterStateManager.addFilters(mappedFilters, addToGlobalState);
+  queryFilter.setFilters = filters => {
+    return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters))
+      .then(mappedFilters => {
+        const delayedChangeUpdate = filterStateManager.setFilters(mappedFilters, false);
+        updateAppState();
+        delayedChangeUpdate.callback && delayedChangeUpdate.callback();
       });
   };
 
@@ -109,38 +106,16 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
    * @param {object} matchFilter The filter to remove
    */
   queryFilter.removeFilter = function (matchFilter) {
-    const appState = getAppState();
-    const filter = _.omit(matchFilter, ['$$hashKey']);
-    let state;
-    let index;
-
-    // check for filter in appState
-    if (appState) {
-      index = _.findIndex(appState.filters, filter);
-      if (index !== -1) state = appState;
-    }
-
-    // if not found, check for filter in globalState
-    if (!state) {
-      index = _.findIndex(globalState.filters, filter);
-      if (index !== -1) state = globalState;
-      else return; // not found in either state, do nothing
-    }
-
-    state.filters.splice(index, 1);
-
-    filterStateManager.setFilters(appState.filters, globalState.filters);
+    const delayedChangeUpdate = filterStateManager.removeFilter(matchFilter, false);
+    updateAppState();
+    delayedChangeUpdate.callback && delayedChangeUpdate.callback();
   };
 
   /**
    * Removes all filters
    */
   queryFilter.removeAll = function () {
-    const appState = getAppState();
-    appState.filters = [];
-    globalState.filters = [];
-
-    filterStateManager.removeAll();
+    queryFilter.setFilters([]);
   };
 
   /**
@@ -150,20 +125,6 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
    */
   queryFilter.invertFilter = function (filter) {
     return this.filterStateManager.invertFilter(filter);
-  };
-
-  queryFilter.setFilters = filters => {
-    return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters))
-      .then(mappedFilters => {
-        const appState = getAppState();
-        const [globalFilters, appFilters] = _.partition(mappedFilters, filter => {
-          return filter.$state.store === 'globalState';
-        });
-        globalState.filters = globalFilters;
-        if (appState) appState.filters = appFilters;
-
-        filterStateManager.setFilters(appFilters, globalFilters);
-      });
   };
 
   queryFilter.addFiltersAndChangeTimeFilter = async filters => {
@@ -176,16 +137,9 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
 
   return queryFilter;
 
-  /**
-   * Rids filter list of null values and replaces state if any nulls are found
-   */
-  function validateStateFilters(state) {
-    const compacted = _.compact(state.filters);
-    if (state.filters.length !== compacted.length) {
-      state.filters = compacted;
-      state.replace();
-    }
-    return state.filters;
+  function updateAppState() {
+    globalState.filters = filterStateManager.getGlobalFilters();
+    getAppState().filters = filterStateManager.getAppFilters();
   }
 
   /**
@@ -198,27 +152,21 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
     globalState.save();
   }
 
-  function appendStoreType(type) {
-    return function (filter) {
-      filter.$state = {
-        store: type
-      };
-      return filter;
-    };
-  }
-
   /**
    * Initializes state watchers that use the event emitter
    * @returns {void}
    */
   function initWatchers() {
     // This is a temporary solution to remove rootscope.
-    // Looking forward, new filters will be explicitly pushed into the filter manager.
+    // Moving forward, new filters will be explicitly pushed into the filter manager.
     const interval = setInterval(() => {
       const appState = getAppState();
-      if (appState && appState.filters) {
+      if (globalState && appState && appState.filters) {
         clearInterval(interval);
-        filterStateManager = new FilterManager(appState.filters);
+        filterStateManager = new FilterManager(appState.filters, globalState.filters);
+        update$.next();
+        fetch$.next();
+
         filterStateManager.getUpdates$().subscribe((shouldFetch) => {
           saveState();
           update$.next();

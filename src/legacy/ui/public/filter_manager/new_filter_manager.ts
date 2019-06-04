@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter, toggleFilterNegated } from '@kbn/es-query';
+import { Filter, toggleFilterNegated, FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
 import { Subject } from 'rxjs';
@@ -31,38 +31,44 @@ import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 // @ts-ignore
 import { uniqFilters } from './lib/uniq_filters';
 
+interface PartitionedFilters {
+  globalFilters: any[];
+  appFilters: any[];
+}
+
+interface DelayedChangeNotification {
+  callback: (() => void) | undefined;
+}
+
 export class FilterManager {
   filters: any[] = [];
-  globalFilters: any[] = [];
   updated$: Subject<any> = new Subject();
 
-  constructor(filters: any[], globalFilters: any[]) {
+  constructor(filters: any[]);
+  constructor(filters: any[], globalFilters?: []) {
+    if (globalFilters) {
+      filters = this.mergeFilters(filters, globalFilters);
+    }
     this.filters = filters || [];
-    this.globalFilters = globalFilters || [];
   }
 
-  private filtersUpdated(newFilters: any[], newGlobalFilters: any[]): boolean {
-    const oldOnes = [this.filters, this.globalFilters];
-    const newOnes = [newFilters, newGlobalFilters];
+  private partitionFilters(): PartitionedFilters {
+    const [globalFilters, appFilters] = _.partition(this.filters, filter => {
+      return filter.$state.store === FilterStateStore.GLOBAL_STATE;
+    });
 
-    return _.some(
-      _.map(oldOnes, (oldOne, index) => {
-        const newOne = newOnes[index];
-        return !_.isEqual(newOne, oldOne);
-      })
-    );
+    return {
+      globalFilters,
+      appFilters,
+    };
   }
 
-  private shouldFetch(newFilters: any[], newGlobalFilters: any[]) {
-    const oldOnes = [this.filters, this.globalFilters];
-    const newOnes = [newFilters, newGlobalFilters];
+  private filtersUpdated(newFilters: any[]): boolean {
+    return !_.isEqual(this.filters, newFilters);
+  }
 
-    return _.any(
-      _.map(oldOnes, (oldOne, index) => {
-        const newOne = newOnes[index];
-        return !onlyDisabled(newOne, oldOne) && !onlyStateChanged(newOne, oldOne);
-      })
-    );
+  private shouldFetch(newFilters: any[]) {
+    return !onlyDisabled(newFilters, this.filters) && !onlyStateChanged(newFilters, this.filters);
   }
 
   private mergeFilters(newFilters: any[], oldFilters: any[]): any[] {
@@ -72,53 +78,118 @@ export class FilterManager {
     return uniqFilters(newFilters.concat(oldFilters));
   }
 
-  private emitUpdateIfChanged(newFilters: any[], newGlobalFilters: any[]) {
+  private emitUpdateIfChanged(newFilters: any[]) {
     // This is an optimization
-    const shouldFetch = this.shouldFetch(newFilters, newGlobalFilters);
-    if (this.filtersUpdated(newFilters, newGlobalFilters)) {
+    const shouldFetch = this.shouldFetch(newFilters);
+    if (this.filtersUpdated(newFilters)) {
       this.updated$.next({
         shouldFetch,
       });
     }
   }
 
-  public getAppFilters() {
+  public getFilters() {
     return this.filters;
   }
 
+  public getAppFilters() {
+    const { appFilters } = this.partitionFilters();
+    return appFilters;
+  }
+
   public getGlobalFilters() {
-    return this.globalFilters;
+    const { globalFilters } = this.partitionFilters();
+    return globalFilters;
   }
 
   public getUpdates$() {
     return this.updated$.asObservable();
   }
 
-  public addFilters(filters: any, addToGlobalState: boolean) {
+  public addFilters(filters: any, emitChanged?: boolean): DelayedChangeNotification {
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
 
-    const newAppFilters = this.mergeFilters(addToGlobalState ? [] : filters, this.filters);
-    const newGlobalFilters = this.mergeFilters(addToGlobalState ? filters : [], this.globalFilters);
+    const newFilters = this.mergeFilters(filters, this.filters);
 
-    this.setFilters(newAppFilters, newGlobalFilters);
+    let delayChangeNotification: DelayedChangeNotification = {
+      callback: undefined,
+    };
+
+    if (emitChanged === false) {
+      const filtersUpdated = this.filtersUpdated(newFilters);
+      this.filters = newFilters;
+      if (filtersUpdated) {
+        delayChangeNotification = {
+          callback: () => {
+            this.updated$.next();
+          },
+        };
+      }
+    } else {
+      this.emitUpdateIfChanged(newFilters);
+      this.filters = newFilters;
+    }
+
+    return delayChangeNotification;
   }
 
-  public async setFilters(filters: Filter[], globalFilters: any[]) {
-    this.emitUpdateIfChanged(filters, globalFilters);
+  public setFilters(newFilters: Filter[], emitChanged?: boolean): DelayedChangeNotification {
+    let delayChangeNotification: DelayedChangeNotification = {
+      callback: undefined,
+    };
 
-    // set global and app
-    this.filters = filters;
-    this.globalFilters = globalFilters;
+    if (emitChanged === false) {
+      const filtersUpdated = this.filtersUpdated(newFilters);
+      this.filters = newFilters;
+      if (filtersUpdated) {
+        delayChangeNotification = {
+          callback: () => {
+            this.updated$.next();
+          },
+        };
+      }
+    } else {
+      this.emitUpdateIfChanged(newFilters);
+      this.filters = newFilters;
+    }
+
+    return delayChangeNotification;
   }
 
   public updateFilter(filter: any): void {
     return;
   }
 
-  public removeFilter(filter: any, removeFromGlobalState: boolean): void {
-    return;
+  public removeFilter(filter: any, emitChanged?: boolean): DelayedChangeNotification {
+    let delayChangeNotification: DelayedChangeNotification = {
+      callback: undefined,
+    };
+
+    const filterIndex = _.findIndex(this.filters, item => {
+      return _.isEqual(item.meta, filter.meta) && _.isEqual(item.query, filter.query);
+    });
+
+    const newFilters = this.filters.slice(filterIndex, 1);
+
+    if (filterIndex >= 0) {
+      if (emitChanged === false) {
+        const filtersUpdated = this.filtersUpdated(newFilters);
+        this.filters = newFilters;
+        if (filtersUpdated) {
+          delayChangeNotification = {
+            callback: () => {
+              this.updated$.next();
+            },
+          };
+        }
+      } else {
+        this.emitUpdateIfChanged(newFilters);
+        this.filters = newFilters;
+      }
+    }
+    return delayChangeNotification;
   }
 
   public invertFilter(filter: any) {
@@ -126,6 +197,6 @@ export class FilterManager {
   }
 
   public removeAll() {
-    this.setFilters([], []);
+    this.setFilters([]);
   }
 }
