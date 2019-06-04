@@ -140,7 +140,7 @@ Full details are {repo}tree/master/packages/kbn-i18n#react[here].
 [float]
 ===== i18n for Angular 
 
-It is encouraged to use `i18n.translate()` by statically importing `i18n` from `@kbn/i18n` wherever possible in your angular code. Angular wrapper uses the translation `service` with i18n engine under the hood.
+You are encouraged to use `i18n.translate()` by statically importing `i18n` from `@kbn/i18n` wherever possible in your Angular code. Angular wrappers use the translation `service` with the i18n engine under the hood.
 
 The translation directive has the following syntax:
 ["source","js"]
