@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import {
   EuiFieldText,
@@ -17,7 +17,6 @@ import {
   EuiButton,
   IconType,
 } from '@elastic/eui';
-import { InjectedIntlProps } from 'react-intl';
 import { State, SeriesType } from './types';
 import { VisualizationProps, Operation } from '../types';
 import { NativeRenderer } from '../native_renderer';
@@ -68,21 +67,19 @@ const positionIcons = [
   },
 ];
 
-export const XYConfigPanel = injectI18n((props: VisualizationProps<State> & InjectedIntlProps) => {
-  const { state, datasource, setState, intl } = props;
+export function XYConfigPanel(props: VisualizationProps<State>) {
+  const { state, datasource, setState } = props;
 
   return (
     <EuiForm className="lnsConfigPanel">
       <EuiFormRow
-        label={intl.formatMessage({
+        label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
           defaultMessage: 'Chart type',
-          id: 'xpack.lens.xyChart.chartTypeLabel',
         })}
       >
         <EuiButtonGroup
-          legend={intl.formatMessage({
+          legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
             defaultMessage: 'Chart type',
-            id: 'xpack.lens.xyChart.chartTypeLegend',
           })}
           name="chartType"
           className="eui-displayInlineBlock"
@@ -109,31 +106,27 @@ export const XYConfigPanel = injectI18n((props: VisualizationProps<State> & Inje
       </EuiFormRow>
 
       <EuiFormRow
-        label={intl.formatMessage({
+        label={i18n.translate('xpack.lens.xyChart.chartTitleLabel', {
           defaultMessage: 'Title',
-          id: 'xpack.lens.xyChart.chartTitleLabel',
         })}
       >
         <EuiFieldText
-          placeholder={intl.formatMessage({
+          placeholder={i18n.translate('xpack.lens.xyChart.chartTitlePlaceholder', {
             defaultMessage: 'Title',
-            id: 'xpack.lens.xyChart.chartTitlePlaceholder',
           })}
           data-test-subj="lnsXY_title"
           value={state.title}
           onChange={e => setState({ ...state, title: e.target.value })}
-          aria-label={intl.formatMessage({
+          aria-label={i18n.translate('xpack.lens.xyChart.chartTitleAriaLabel', {
             defaultMessage: 'Title',
-            id: 'xpack.lens.xyChart.chartTitleAriaLabel',
           })}
         />
       </EuiFormRow>
 
       <EuiFormRow>
         <EuiSwitch
-          label={intl.formatMessage({
+          label={i18n.translate('xpack.lens.xyChart.showLegendLabel', {
             defaultMessage: 'Show legend',
-            id: 'xpack.lens.xyChart.showLegendLabel',
           })}
           checked={state.legend.isVisible}
           data-test-subj="lnsXY_legendIsVisible"
@@ -148,15 +141,13 @@ export const XYConfigPanel = injectI18n((props: VisualizationProps<State> & Inje
 
       {state.legend.isVisible && (
         <EuiFormRow
-          label={intl.formatMessage({
+          label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
             defaultMessage: 'Legend position',
-            id: 'xpack.lens.xyChart.legendPositionLabel',
           })}
         >
           <EuiButtonGroup
-            legend={intl.formatMessage({
+            legend={i18n.translate('xpack.lens.xyChart.legendPositionLegend', {
               defaultMessage: 'Legend position',
-              id: 'xpack.lens.xyChart.legendPositionLegend',
             })}
             data-test-subj="lnsXY_legendPosition"
             name="legendPosition"
@@ -171,37 +162,32 @@ export const XYConfigPanel = injectI18n((props: VisualizationProps<State> & Inje
       )}
 
       <EuiFormRow
-        label={intl.formatMessage({
+        label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
           defaultMessage: 'X Axis',
-          id: 'xpack.lens.xyChart.xAxisLabel',
         })}
       >
         <>
           <EuiFormRow
-            label={intl.formatMessage({
+            label={i18n.translate('xpack.lens.xyChart.xTitleLabel', {
               defaultMessage: 'Title',
-              id: 'xpack.lens.xyChart.xTitleLabel',
             })}
           >
             <EuiFieldText
-              placeholder={intl.formatMessage({
+              placeholder={i18n.translate('xpack.lens.xyChart.xTitlePlaceholder', {
                 defaultMessage: 'Title',
-                id: 'xpack.lens.xyChart.xTitlePlaceholder',
               })}
               data-test-subj="lnsXY_xTitle"
               value={state.x.title}
               onChange={e => setState({ ...state, x: { ...state.x, title: e.target.value } })}
-              aria-label={intl.formatMessage({
+              aria-label={i18n.translate('xpack.lens.xyChart.xTitleAriaLabel', {
                 defaultMessage: 'Title',
-                id: 'xpack.lens.xyChart.xTitleAriaLabel',
               })}
             />
           </EuiFormRow>
 
           <EuiFormRow
-            label={intl.formatMessage({
+            label={i18n.translate('xpack.lens.xyChart.xValueLabel', {
               defaultMessage: 'Value',
-              id: 'xpack.lens.xyChart.xValueLabel',
             })}
           >
             <NativeRenderer
@@ -217,9 +203,8 @@ export const XYConfigPanel = injectI18n((props: VisualizationProps<State> & Inje
 
           <EuiFormRow>
             <EuiSwitch
-              label={intl.formatMessage({
+              label={i18n.translate('xpack.lens.xyChart.xShowGridlinesLabel', {
                 defaultMessage: 'Show gridlines',
-                id: 'xpack.lens.xyChart.xShowGridlinesLabel',
               })}
               data-test-subj="lnsXY_xShowGridlines"
               checked={state.x.showGridlines}
@@ -232,37 +217,32 @@ export const XYConfigPanel = injectI18n((props: VisualizationProps<State> & Inje
       </EuiFormRow>
 
       <EuiFormRow
-        label={intl.formatMessage({
+        label={i18n.translate('xpack.lens.xyChart.yAxisLabel', {
           defaultMessage: 'Y Axis',
-          id: 'xpack.lens.xyChart.yAxisLabel',
         })}
       >
         <>
           <EuiFormRow
-            label={intl.formatMessage({
+            label={i18n.translate('xpack.lens.xyChart.yTitleLabel', {
               defaultMessage: 'Title',
-              id: 'xpack.lens.xyChart.yTitleLabel',
             })}
           >
             <EuiFieldText
-              placeholder={intl.formatMessage({
+              placeholder={i18n.translate('xpack.lens.xyChart.yTitlePlaceholder', {
                 defaultMessage: 'Title',
-                id: 'xpack.lens.xyChart.yTitlePlaceholder',
               })}
               data-test-subj="lnsXY_yTitle"
               value={state.y.title}
               onChange={e => setState({ ...state, y: { ...state.y, title: e.target.value } })}
-              aria-label={intl.formatMessage({
+              aria-label={i18n.translate('xpack.lens.xyChart.yTitleAriaLabel', {
                 defaultMessage: 'Title',
-                id: 'xpack.lens.xyChart.yTitleAriaLabel',
               })}
             />
           </EuiFormRow>
 
           <EuiFormRow
-            label={intl.formatMessage({
+            label={i18n.translate('xpack.lens.xyChart.yValueLabel', {
               defaultMessage: 'Value',
-              id: 'xpack.lens.xyChart.yValueLabel',
             })}
           >
             <>
@@ -292,9 +272,8 @@ export const XYConfigPanel = injectI18n((props: VisualizationProps<State> & Inje
                         },
                       });
                     }}
-                    aria-label={intl.formatMessage({
+                    aria-label={i18n.translate('xpack.lens.xyChart.yRemoveAriaLabel', {
                       defaultMessage: 'Remove',
-                      id: 'xpack.lens.xyChart.yRemoveAriaLabel',
                     })}
                   />
                 </div>
@@ -317,9 +296,8 @@ export const XYConfigPanel = injectI18n((props: VisualizationProps<State> & Inje
 
           <EuiFormRow>
             <EuiSwitch
-              label={intl.formatMessage({
+              label={i18n.translate('xpack.lens.xyChart.yShowGridlinesLabel', {
                 defaultMessage: 'Show gridlines',
-                id: 'xpack.lens.xyChart.yShowGridlinesLabel',
               })}
               data-test-subj="lnsXY_yShowGridlines"
               checked={state.y.showGridlines}
@@ -332,4 +310,4 @@ export const XYConfigPanel = injectI18n((props: VisualizationProps<State> & Inje
       </EuiFormRow>
     </EuiForm>
   );
-});
+}
