@@ -283,7 +283,7 @@ Initial result: `1 minute ago`
 
 ### Attributes translation in React
 
-The long term plan is to rely on using `FormattedMessage` and `i18n.translate()` by statically importing `i18n` from `@kbn/i18n` package. **Avoid using `injectI18n` and rely on `i18n.translate()` instead.**
+The long term plan is to rely on using `FormattedMessage` and `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using `injectI18n` and rely on `i18n.translate()` instead.**
 
 React wrapper provides an ability to inject the imperative formatting API into a React component via its props using `injectI18n` Higher-Order Component. This should be used when your React component needs to format data to a string value where a React element is not suitable; e.g., a `title` or `aria` attribute. In order to use it you should wrap your component with `injectI18n` Higher-Order Component. The formatting API will be provided to the wrapped component via `props.intl`.
 
