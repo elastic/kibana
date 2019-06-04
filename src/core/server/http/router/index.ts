@@ -19,4 +19,4 @@
 
 export { Headers, filterHeaders } from './headers';
 export { Router } from './router';
-export { KibanaRequest } from './request';
+export { KibanaRequest, toRawRequest } from './request';

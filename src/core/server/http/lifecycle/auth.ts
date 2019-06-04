@@ -19,7 +19,6 @@
 import Boom from 'boom';
 import { noop } from 'lodash';
 import { Lifecycle, Request, ResponseToolkit } from 'hapi';
-import { SessionStorage, SessionStorageFactory } from '../session_storage';
 
 enum ResultType {
   authenticated = 'authenticated',
@@ -46,7 +45,7 @@ interface Rejected {
 type AuthResult = Authenticated | Rejected | Redirected;
 
 const authResult = {
-  authenticated(state: object): AuthResult {
+  authenticated(state: object = {}): AuthResult {
     return { type: ResultType.authenticated, state };
   },
   redirected(url: string): AuthResult {
@@ -80,7 +79,7 @@ const authResult = {
  */
 export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
-  authenticated: (state: object) => AuthResult;
+  authenticated: (state?: object) => AuthResult;
   /** Authentication requires to interrupt request handling and redirect to a configured url */
   redirected: (url: string) => AuthResult;
   /** Authentication is unsuccessful, fail the request with specified error. */
@@ -94,16 +93,14 @@ const toolkit: AuthToolkit = {
 };
 
 /** @public */
-export type AuthenticationHandler<T> = (
+export type AuthenticationHandler = (
   request: Readonly<Request>,
-  sessionStorage: SessionStorage<T>,
   t: AuthToolkit
 ) => AuthResult | Promise<AuthResult>;
 
 /** @public */
-export function adoptToHapiAuthFormat<T = any>(
-  fn: AuthenticationHandler<T>,
-  sessionStorage: SessionStorageFactory<T>,
+export function adoptToHapiAuthFormat(
+  fn: AuthenticationHandler,
   onSuccess: (req: Request, state: unknown) => void = noop
 ) {
   return async function interceptAuth(
@@ -111,7 +108,7 @@ export function adoptToHapiAuthFormat<T = any>(
     h: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     try {
-      const result = await fn(req, sessionStorage.asScoped(req), toolkit);
+      const result = await fn(req, toolkit);
       if (!authResult.isValid(result)) {
         throw new Error(
           `Unexpected result from Authenticate. Expected AuthResult, but given: ${result}.`
