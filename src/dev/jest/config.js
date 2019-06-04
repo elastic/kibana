@@ -22,6 +22,7 @@ import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../constants';
 export default {
   rootDir: '../../..',
   roots: [
+    '<rootDir>/src/plugins',
     '<rootDir>/src/legacy/ui',
     '<rootDir>/src/core',
     '<rootDir>/src/legacy/core_plugins',
@@ -88,7 +89,8 @@ export default {
     '^.+\\.html?$': 'jest-raw-loader',
   },
   transformIgnorePatterns: [
-    '[/\\\\]node_modules[/\\\\].+\\.js$',
+    // ignore all node_modules except @elastic/eui which requires babel transforms to handle dynamic import()
+    '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js'
   ],
   snapshotSerializers: [
