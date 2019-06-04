@@ -515,7 +515,7 @@ module
 
               // check to see if the percentage is past a threshold for reloading the full model
               let fullModelRefresh = false;
-              _.each(jobProgressChecks, (c, i) => { // eslint-disable-line no-unused-vars
+              _.each(jobProgressChecks, (c, i) => {
                 if (jobProgressChecks[i] === false && $scope.chartData.percentComplete >= i) {
                   jobProgressChecks[i] = true;
                   fullModelRefresh = true;
@@ -600,7 +600,7 @@ module
       $scope.jobState = JOB_STATE.NOT_STARTED;
       angular.element('.model-chart, .swimlane').css('opacity', 0);
 
-      _.each(jobProgressChecks, (c, i) => { // eslint-disable-line no-unused-vars
+      _.each(jobProgressChecks, (c, i) => {
         jobProgressChecks[i] = false;
       });
 

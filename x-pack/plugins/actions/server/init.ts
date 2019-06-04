@@ -18,6 +18,8 @@ import {
   listActionTypesRoute,
 } from './routes';
 
+import { registerBuiltInActionTypes } from './builtin_action_types';
+
 export function init(server: Legacy.Server) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsClientWithInternalUser = server.savedObjects.getSavedObjectsRepository(
@@ -38,6 +40,8 @@ export function init(server: Legacy.Server) {
     taskManager: taskManager!,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
   });
+
+  registerBuiltInActionTypes(actionTypeRegistry);
 
   // Routes
   createRoute(server);

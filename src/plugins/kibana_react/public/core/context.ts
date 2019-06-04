@@ -17,32 +17,22 @@
  * under the License.
  */
 
-import { map } from 'lodash';
+import * as React from 'react';
+import { KibanaReactContextValue, Core } from './types';
 
-export const kibanaDatatable = () => ({
-  name: 'kibana_datatable',
-  from: {
-    datatable: context => {
-      return {
-        type: 'kibana_datatable',
-        rows: context.rows,
-        columns: context.columns.map(column => {
-          return {
-            id: column.name,
-            name: column.name,
-          };
-        }),
-      };
-    },
-    pointseries: context => {
-      const columns = map(context.columns, (column, name) => {
-        return { id: name, name, ...column };
-      });
-      return {
-        type: 'kibana_datatable',
-        rows: context.rows,
-        columns: columns,
-      };
-    }
-  },
+export const context = React.createContext<KibanaReactContextValue>({
+  core: {},
 });
+
+export const createContext = (core: Core, plugins?: any) => {
+  const value: KibanaReactContextValue = { core };
+  const Provider: React.FC = ({ children }) =>
+    React.createElement(context.Provider, { value, children });
+
+  return {
+    Provider,
+    Consumer: context.Consumer,
+  };
+};
+
+export const useKibana = (): KibanaReactContextValue => React.useContext(context);

@@ -214,6 +214,11 @@ describe('SavedObjectsRepository', () => {
           type: 'keyword',
         },
       },
+      baz: {
+        properties: {
+          type: 'keyword',
+        },
+      },
       'index-pattern': {
         properties: {
           someField: {
@@ -249,6 +254,7 @@ describe('SavedObjectsRepository', () => {
     globaltype: { isNamespaceAgnostic: true },
     foo: { isNamespaceAgnostic: true },
     bar: { isNamespaceAgnostic: true },
+    baz: { indexPattern: 'beats' },
     hiddenType: { isNamespaceAgnostic: true, hidden: true },
   });
 
@@ -356,6 +362,36 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('index', expect.any(Object));
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+    });
+
+    it('should use default index', async () => {
+      await savedObjectsRepository.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash',
+      });
+
+      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+      expect(onBeforeWrite).toHaveBeenCalledWith(
+        'index',
+        expect.objectContaining({
+          index: '.kibana-test',
+        })
+      );
+    });
+
+    it('should use custom index', async () => {
+      await savedObjectsRepository.create('baz', {
+        id: 'logstash-*',
+        title: 'Logstash',
+      });
+
+      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+      expect(onBeforeWrite).toHaveBeenCalledWith(
+        'index',
+        expect.objectContaining({
+          index: 'beats',
+        })
+      );
     });
 
     it('migrates the doc', async () => {
@@ -572,14 +608,14 @@ describe('SavedObjectsRepository', () => {
       expect(bulkCalls.length).toEqual(1);
 
       expect(bulkCalls[0][1].body).toEqual([
-        { create: { _id: 'config:one' } },
+        { create: { _index: '.kibana-test', _id: 'config:one' } },
         {
           type: 'config',
           ...mockTimestampFields,
           config: { title: 'Test One' },
           references: [{ name: 'ref_0', type: 'test', id: '1' }],
         },
-        { create: { _id: 'index-pattern:two' } },
+        { create: { _index: '.kibana-test', _id: 'index-pattern:two' } },
         {
           type: 'index-pattern',
           ...mockTimestampFields,
@@ -629,7 +665,7 @@ describe('SavedObjectsRepository', () => {
         'bulk',
         expect.objectContaining({
           body: [
-            { create: { _id: 'config:one' } },
+            { create: { _index: '.kibana-test', _id: 'config:one' } },
             {
               type: 'config',
               ...mockTimestampFields,
@@ -637,7 +673,7 @@ describe('SavedObjectsRepository', () => {
               migrationVersion: { foo: '2.3.4' },
               references: [{ name: 'search_0', type: 'search', id: '123' }],
             },
-            { create: { _id: 'index-pattern:two' } },
+            { create: { _index: '.kibana-test', _id: 'index-pattern:two' } },
             {
               type: 'index-pattern',
               ...mockTimestampFields,
@@ -689,7 +725,7 @@ describe('SavedObjectsRepository', () => {
         expect.objectContaining({
           body: [
             // uses create because overwriting is not allowed
-            { create: { _id: 'foo:bar' } },
+            { create: { _index: '.kibana-test', _id: 'foo:bar' } },
             { type: 'foo', ...mockTimestampFields, foo: {}, references: [] },
           ],
         })
@@ -713,7 +749,7 @@ describe('SavedObjectsRepository', () => {
         expect.objectContaining({
           body: [
             // uses index because overwriting is allowed
-            { index: { _id: 'foo:bar' } },
+            { index: { _index: '.kibana-test', _id: 'foo:bar' } },
             { type: 'foo', ...mockTimestampFields, foo: {}, references: [] },
           ],
         })
@@ -829,6 +865,7 @@ describe('SavedObjectsRepository', () => {
             create: {
               _type: '_doc',
               _id: 'foo-namespace:config:one',
+              _index: '.kibana-test',
               _primary_term: 1,
               _seq_no: 2,
             },
@@ -857,7 +894,7 @@ describe('SavedObjectsRepository', () => {
         'bulk',
         expect.objectContaining({
           body: [
-            { create: { _id: 'foo-namespace:config:one' } },
+            { create: { _index: '.kibana-test', _id: 'foo-namespace:config:one' } },
             {
               namespace: 'foo-namespace',
               type: 'config',
@@ -865,7 +902,7 @@ describe('SavedObjectsRepository', () => {
               config: { title: 'Test One' },
               references: [],
             },
-            { create: { _id: 'foo-namespace:index-pattern:two' } },
+            { create: { _index: '.kibana-test', _id: 'foo-namespace:index-pattern:two' } },
             {
               namespace: 'foo-namespace',
               type: 'index-pattern',
@@ -908,14 +945,14 @@ describe('SavedObjectsRepository', () => {
         'bulk',
         expect.objectContaining({
           body: [
-            { create: { _id: 'config:one' } },
+            { create: { _id: 'config:one', _index: '.kibana-test' } },
             {
               type: 'config',
               ...mockTimestampFields,
               config: { title: 'Test One' },
               references: [],
             },
-            { create: { _id: 'index-pattern:two' } },
+            { create: { _id: 'index-pattern:two', _index: '.kibana-test' } },
             {
               type: 'index-pattern',
               ...mockTimestampFields,
@@ -943,7 +980,7 @@ describe('SavedObjectsRepository', () => {
         'bulk',
         expect.objectContaining({
           body: [
-            { create: { _id: 'globaltype:one' } },
+            { create: { _id: 'globaltype:one', _index: '.kibana-test' } },
             {
               type: 'globaltype',
               ...mockTimestampFields,
@@ -1063,13 +1100,13 @@ describe('SavedObjectsRepository', () => {
 
       expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, {
         namespace: 'my-namespace',
-        type: ['config', 'index-pattern', 'dashboard'],
+        type: ['config', 'baz', 'index-pattern', 'dashboard'],
       });
 
       expect(callAdminCluster).toHaveBeenCalledWith('deleteByQuery', {
         body: { conflicts: 'proceed' },
         ignore: [404],
-        index: '.kibana-test',
+        index: ['beats', '.kibana-test'],
         refresh: 'wait_for',
       });
     });
@@ -1401,9 +1438,9 @@ describe('SavedObjectsRepository', () => {
         expect.objectContaining({
           body: {
             docs: [
-              { _id: 'config:one' },
-              { _id: 'index-pattern:two' },
-              { _id: 'globaltype:three' },
+              { _id: 'config:one', _index: '.kibana-test' },
+              { _id: 'index-pattern:two', _index: '.kibana-test' },
+              { _id: 'globaltype:three', _index: '.kibana-test' },
             ],
           },
         })
@@ -1432,9 +1469,9 @@ describe('SavedObjectsRepository', () => {
         expect.objectContaining({
           body: {
             docs: [
-              { _id: 'foo-namespace:config:one' },
-              { _id: 'foo-namespace:index-pattern:two' },
-              { _id: 'globaltype:three' },
+              { _id: 'foo-namespace:config:one', _index: '.kibana-test' },
+              { _id: 'foo-namespace:index-pattern:two', _index: '.kibana-test' },
+              { _id: 'globaltype:three', _index: '.kibana-test' },
             ],
           },
         })
@@ -1963,6 +2000,14 @@ describe('SavedObjectsRepository', () => {
         expect(error).toBe(es401);
         expect(errors.isNotAuthorizedError(error)).toBe(true);
       }
+    });
+  });
+
+  describe('types on custom index', () => {
+    it("should error when attempting to 'update' an unsupported type", async () => {
+      await expect(
+        savedObjectsRepository.update('hiddenType', 'bogus', { title: 'some title' })
+      ).rejects.toEqual(new Error('Saved object [hiddenType/bogus] not found'));
     });
   });
 

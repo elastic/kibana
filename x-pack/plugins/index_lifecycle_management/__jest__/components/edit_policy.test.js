@@ -13,8 +13,9 @@ import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import { EditPolicy } from '../../public/sections/edit_policy';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { setHttpClient } from '../../public/services/api';
-setHttpClient(axios.create());
+setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import {
