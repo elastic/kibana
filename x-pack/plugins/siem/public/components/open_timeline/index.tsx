@@ -10,7 +10,6 @@ import { getOr, assign } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 
-import { SortFieldTimeline } from '../../../server/graphql/types';
 import {
   defaultHeaders,
   defaultColumnHeaderType,
@@ -20,7 +19,12 @@ import { AllTimelinesVariables } from '../../containers/timeline/all';
 
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
-import { DeleteTimelineMutation, GetOneTimeline, TimelineResult } from '../../graphql/types';
+import {
+  DeleteTimelineMutation,
+  GetOneTimeline,
+  TimelineResult,
+  SortFieldTimeline,
+} from '../../graphql/types';
 import { Note } from '../../lib/note';
 import { State, timelineSelectors } from '../../store';
 import { addNotes as dispatchAddNotes } from '../../store/app/actions';
@@ -347,6 +351,7 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
         fetchPolicy: 'no-cache',
         variables: { id: timelineId },
       })
+      // eslint-disable-next-line
       .then(result => {
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)

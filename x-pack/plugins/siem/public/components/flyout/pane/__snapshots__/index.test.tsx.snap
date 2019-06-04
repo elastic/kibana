@@ -4,7 +4,7 @@ exports[`Pane renders correctly against snapshot 1`] = `
 <Component>
   <Connect(FlyoutPaneComponent)
     flyoutHeight={980}
-    headerHeight={48}
+    headerHeight={60}
     onClose={[MockFunction]}
     timelineId="test"
     usersViewing={
@@ -17,7 +17,6 @@ exports[`Pane renders correctly against snapshot 1`] = `
     <span>
       I am a child of flyout
     </span>
-    ,
   </Connect(FlyoutPaneComponent)>
 </Component>
 `;

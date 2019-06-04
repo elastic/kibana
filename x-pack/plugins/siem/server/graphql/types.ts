@@ -341,7 +341,7 @@ export interface OsEcsFields {
 }
 
 export interface CursorType {
-  value: string;
+  value?: string | null;
 
   tiebreaker?: string | null;
 }
@@ -933,6 +933,8 @@ export interface IpOverviewData {
 
   destination?: Overview | null;
 
+  host: HostEcsFields;
+
   server?: Overview | null;
 
   source?: Overview | null;
@@ -944,8 +946,6 @@ export interface Overview {
   lastSeen?: Date | null;
 
   autonomousSystem: AutonomousSystem;
-
-  host: HostEcsFields;
 
   geo: GeoEcsFields;
 }
@@ -1355,6 +1355,8 @@ export interface QueryMatchResult {
   value?: string | null;
 
   displayValue?: string | null;
+
+  operator?: string | null;
 }
 
 export interface DateRangePickerResult {
@@ -1642,6 +1644,8 @@ export interface QueryMatchInput {
   value?: string | null;
 
   displayValue?: string | null;
+
+  operator?: string | null;
 }
 
 export interface SerializedFilterQueryInput {
@@ -3338,16 +3342,16 @@ export namespace OsEcsFieldsResolvers {
 
 export namespace CursorTypeResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = CursorType> {
-    value?: ValueResolver<string, TypeParent, Context>;
+    value?: ValueResolver<string | null, TypeParent, Context>;
 
     tiebreaker?: TiebreakerResolver<string | null, TypeParent, Context>;
   }
 
-  export type ValueResolver<R = string, Parent = CursorType, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type ValueResolver<
+    R = string | null,
+    Parent = CursorType,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type TiebreakerResolver<
     R = string | null,
     Parent = CursorType,
@@ -5296,6 +5300,8 @@ export namespace IpOverviewDataResolvers {
 
     destination?: DestinationResolver<Overview | null, TypeParent, Context>;
 
+    host?: HostResolver<HostEcsFields, TypeParent, Context>;
+
     server?: ServerResolver<Overview | null, TypeParent, Context>;
 
     source?: SourceResolver<Overview | null, TypeParent, Context>;
@@ -5308,6 +5314,11 @@ export namespace IpOverviewDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type DestinationResolver<
     R = Overview | null,
+    Parent = IpOverviewData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type HostResolver<
+    R = HostEcsFields,
     Parent = IpOverviewData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5331,8 +5342,6 @@ export namespace OverviewResolvers {
 
     autonomousSystem?: AutonomousSystemResolver<AutonomousSystem, TypeParent, Context>;
 
-    host?: HostResolver<HostEcsFields, TypeParent, Context>;
-
     geo?: GeoResolver<GeoEcsFields, TypeParent, Context>;
   }
 
@@ -5351,11 +5360,6 @@ export namespace OverviewResolvers {
     Parent = Overview,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type HostResolver<R = HostEcsFields, Parent = Overview, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
   export type GeoResolver<R = GeoEcsFields, Parent = Overview, Context = SiemContext> = Resolver<
     R,
     Parent,
@@ -6713,6 +6717,8 @@ export namespace QueryMatchResultResolvers {
     value?: ValueResolver<string | null, TypeParent, Context>;
 
     displayValue?: DisplayValueResolver<string | null, TypeParent, Context>;
+
+    operator?: OperatorResolver<string | null, TypeParent, Context>;
   }
 
   export type FieldResolver<
@@ -6731,6 +6737,11 @@ export namespace QueryMatchResultResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DisplayValueResolver<
+    R = string | null,
+    Parent = QueryMatchResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type OperatorResolver<
     R = string | null,
     Parent = QueryMatchResult,
     Context = SiemContext

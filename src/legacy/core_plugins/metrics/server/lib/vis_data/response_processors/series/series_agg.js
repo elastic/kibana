@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import SeriesAgg from './_series_agg';
+import { SeriesAgg } from './_series_agg';
 import _ from 'lodash';
-import getDefaultDecoration from '../../helpers/get_default_decoration';
-import calculateLabel from '../../../../../common/calculate_label';
-export default function seriesAgg(resp, panel, series) {
+import { getDefaultDecoration } from '../../helpers/get_default_decoration';
+import { calculateLabel } from '../../../../../common/calculate_label';
+
+export function seriesAgg(resp, panel, series) {
   return next => results => {
     if (series.metrics.some(m => m.type === 'series_agg')) {
       const decoration = getDefaultDecoration(series);

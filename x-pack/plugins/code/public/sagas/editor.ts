@@ -8,6 +8,7 @@ import queryString from 'querystring';
 import { Action } from 'redux-actions';
 import { kfetch } from 'ui/kfetch';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
+import Url from 'url';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { parseGoto, parseLspUrl, toCanonicalUrl } from '../../common/uri_util';
 import { FileTree } from '../../model';
@@ -29,6 +30,7 @@ import {
   fetchRepos,
   turnOnDefaultRepoScope,
   openTreePath,
+  fetchRootRepoTree,
 } from '../actions';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import { PathTypes } from '../common/types';
@@ -40,6 +42,8 @@ import {
   lastRequestPathSelector,
   refUrlSelector,
   repoScopeSelector,
+  urlQueryStringSelector,
+  createTreeSelector,
 } from '../selectors';
 import { history } from '../utils/url';
 import { mainRoutePattern } from './patterns';
@@ -67,10 +71,11 @@ export function* watchLspMethods() {
   yield takeLatest(String(findReferences), handleReferences);
 }
 
-function handleCloseReferences(action: Action<boolean>) {
+function* handleCloseReferences(action: Action<boolean>) {
   if (action.payload) {
-    const { pathname, search } = history.location;
-    const queryParams = queryString.parse(search);
+    const search = yield select(urlQueryStringSelector);
+    const { pathname } = history.location;
+    const queryParams = Url.parse(search, true).query;
     if (queryParams.tab) {
       delete queryParams.tab;
     }
@@ -188,6 +193,7 @@ function* handleMainRouteChange(action: Action<Match>) {
   if (currentTree.repoUri !== repoUri) {
     yield put(resetRepoTree());
     yield put(fetchRepoCommits({ uri: repoUri, revision }));
+    yield put(fetchRootRepoTree({ uri: repoUri, revision }));
   }
   const tree = yield select(getTree);
   const isDir = pathType === PathTypes.tree;
@@ -197,16 +203,28 @@ function* handleMainRouteChange(action: Action<Match>) {
         .split('/')
         .slice(0, -1)
         .join('/');
-  yield put(openTreePath(openPath));
-  yield put(
-    fetchRepoTree({
-      uri: repoUri,
-      revision,
-      path: file || '',
-      parents: getPathOfTree(tree, (file || '').split('/')) === null,
-      isDir,
-    })
-  );
+  yield put(openTreePath(openPath || ''));
+  function isTreeLoaded(isDirectory: boolean, targetTree: FileTree | null) {
+    if (!isDirectory) {
+      return !!targetTree;
+    } else if (!targetTree) {
+      return false;
+    } else {
+      return targetTree.children && targetTree.children.length > 0;
+    }
+  }
+  const targetTree: FileTree | null = yield select(createTreeSelector(file || ''));
+  if (!isTreeLoaded(isDir, targetTree)) {
+    yield put(
+      fetchRepoTree({
+        uri: repoUri,
+        revision,
+        path: file || '',
+        parents: getPathOfTree(tree, (file || '').split('/')) === null,
+        isDir,
+      })
+    );
+  }
   const uri = toCanonicalUrl({
     repoUri,
     file,

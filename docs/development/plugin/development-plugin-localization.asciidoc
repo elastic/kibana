@@ -13,6 +13,7 @@ You must add a `translations` directory at the root of your plugin. This directo
 .
 ├── translations
 │   ├── en.json
+│   ├── ja-JP.json
 │   └── zh-CN.json
 └── .i18nrc.json
 -----------
@@ -40,7 +41,8 @@ To use Kibana i18n tooling, create a `.i18nrc.json` file with the following conf
   "exclude": [
   ],
   "translations": [
-    "translations/zh-CN.json"
+    "translations/zh-CN.json",
+    "translations/ja-JP.json"
   ]
 }
 -----------
@@ -107,7 +109,7 @@ export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
 });
 -----------
 
-Full details are {repo}tree/6.7/packages/kbn-i18n#vanilla-js[here].
+Full details are {repo}tree/master/packages/kbn-i18n#vanilla-js[here].
 
 [float]
 ===== i18n for React 
@@ -131,15 +133,14 @@ export const Component = () => {
 };
 -----------
 
-Full details are {repo}tree/6.7/packages/kbn-i18n#react[here].
+Full details are {repo}tree/master/packages/kbn-i18n#react[here].
 
 
 
 [float]
 ===== i18n for Angular 
 
-AngularJS wrapper has 4 entities: translation `provider`, `service`, `directive` and `filter`. Both the directive and the filter use the translation `service` with i18n engine under the hood.
-
+You are encouraged to use `i18n.translate()` by statically importing `i18n` from `@kbn/i18n` wherever possible in your Angular code. Angular wrappers use the translation `service` with the i18n engine under the hood.
 
 The translation directive has the following syntax:
 ["source","js"]
@@ -152,7 +153,7 @@ The translation directive has the following syntax:
 ></ANY>
 -----------
 
-Full details are {repo}tree/6.7/packages/kbn-i18n#angularjs[here].
+Full details are {repo}tree/master/packages/kbn-i18n#angularjs[here].
 
 
 [float]
