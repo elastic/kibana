@@ -343,4 +343,13 @@ export class ESSearchSource extends AbstractESSource {
       values: { count: featureCollection.features.length }
     });
   }
+
+  getSyncMeta() {
+    return {
+      useTopHits: this._descriptor.useTopHits,
+      topHitsSplitField: this._descriptor.topHitsSplitField,
+      topHitsTimeField: this._descriptor.topHitsTimeField,
+      topHitsSize: this._descriptor.topHitsSize,
+    };
+  }
 }

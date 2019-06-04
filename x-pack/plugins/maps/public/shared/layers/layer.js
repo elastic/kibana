@@ -265,14 +265,14 @@ export class AbstractLayer {
     //no-op by default
   }
 
-  updateDueToExtent(source, meta = {}, dataFilters = {}) {
+  updateDueToExtent(source, prevMeta = {}, nextMeta = {}) {
     const extentAware = source.isFilterByMapBounds();
     if (!extentAware) {
       return NO_SOURCE_UPDATE_REQUIRED;
     }
 
-    const { buffer: previousBuffer } = meta;
-    const { buffer: newBuffer } = dataFilters;
+    const { buffer: previousBuffer } = prevMeta;
+    const { buffer: newBuffer } = nextMeta;
 
     if (!previousBuffer) {
       return SOURCE_UPDATE_REQUIRED;
@@ -296,7 +296,7 @@ export class AbstractLayer {
     ]);
     const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
 
-    const isTrimmed = _.get(meta, 'areResultsTrimmed', false);
+    const isTrimmed = _.get(prevMeta, 'areResultsTrimmed', false);
     return doesPreviousBufferContainNewBuffer && !isTrimmed
       ? NO_SOURCE_UPDATE_REQUIRED
       : SOURCE_UPDATE_REQUIRED;

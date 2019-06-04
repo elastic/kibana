@@ -18,12 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { getTermsFields } from '../../../utils/get_terms_fields';
 import { ValidatedRange } from '../../../components/validated_range';
 
-function getDateFields(fields) {
-  return fields.filter(field => {
-    return field.type === 'date';
-  });
-}
-
 export class UpdateSourceEditor extends Component {
 
   static propTypes = {
@@ -38,7 +32,9 @@ export class UpdateSourceEditor extends Component {
   }
 
   state = {
-    fields: null,
+    tooltipFields: null,
+    termFields: null,
+    dateFields: null,
   }
 
   componentDidMount() {
@@ -72,12 +68,18 @@ export class UpdateSourceEditor extends Component {
       return;
     }
 
+    const dateFields = indexPattern.fields.filter(field => {
+      return field.type === 'date';
+    });
+
     this.setState({
-      fields: indexPattern.fields.filter(field => {
+      dateFields,
+      tooltipFields: indexPattern.fields.filter(field => {
         // Do not show multi fields as tooltip field options
         // since they do not have values in _source and exist for indexing only
         return field.subType !== 'multi';
-      })
+      }),
+      termFields: getTermsFields(indexPattern.fields),
     });
 
     if (!this.props.topHitsTimeField) {
@@ -86,11 +88,8 @@ export class UpdateSourceEditor extends Component {
         this.onTopHitsTimeFieldChange(indexPattern.timeFieldName);
       } else {
         // fall back to first date field in index
-        for (let i = 0; i < indexPattern.fields.length - 1; i++) {
-          if (indexPattern.fields[i].type === 'date') {
-            this.onTopHitsTimeFieldChange(indexPattern.fields[i].name);
-            break;
-          }
+        if (dateFields.length > 0) {
+          this.onTopHitsTimeFieldChange(dateFields[0].name);
         }
       }
     }
@@ -140,7 +139,7 @@ export class UpdateSourceEditor extends Component {
             })}
             value={this.props.topHitsTimeField}
             onChange={this.onTopHitsTimeFieldChange}
-            fields={this.state.fields ? getDateFields(this.state.fields) : undefined}
+            fields={this.state.dateFields}
           />
         </EuiFormRow>
       );
@@ -180,7 +179,7 @@ export class UpdateSourceEditor extends Component {
             })}
             value={this.props.topHitsSplitField}
             onChange={this.onTopHitsSplitFieldChange}
-            fields={this.state.fields ? getTermsFields(this.state.fields) : undefined}
+            fields={this.state.termFields}
           />
         </EuiFormRow>
 
@@ -208,7 +207,7 @@ export class UpdateSourceEditor extends Component {
             }
             value={this.props.tooltipProperties}
             onChange={this.onTooltipPropertiesSelect}
-            fields={this.state.fields}
+            fields={this.state.tooltipFields}
           />
         </EuiFormRow>
 
