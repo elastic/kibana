@@ -90,10 +90,8 @@ export function _isDirectory(filename) {
 }
 
 export function extractArchive(archive, targetDir, extractPath) {
-  console.log('extractArchive', { archive, targetDir, extractPath });
   return new Promise((resolve, reject) => {
     yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
-      console.log('yauzl.open', { err, archive });
       if (err) {
         return reject(err);
       }
@@ -102,17 +100,17 @@ export function extractArchive(archive, targetDir, extractPath) {
       zipfile.on('close', resolve);
       zipfile.on('entry', function (entry) {
         let fileName = entry.fileName;
-        console.log('yauzl.on(entry)', { fileName });
+
         if (extractPath && fileName.startsWith(extractPath)) {
           fileName = fileName.substring(extractPath.length);
         } else {
           return zipfile.readEntry();
         }
-        console.log('yauzl.on(entry)', { targetDir });
+
         if (targetDir) {
           fileName = path.join(targetDir, fileName);
         }
-        console.log('yauzl.on(entry)', { isDir: _isDirectory(fileName) });
+
         if (_isDirectory(fileName)) {
           mkdirp(fileName, function (err) {
             if (err) {
@@ -123,7 +121,6 @@ export function extractArchive(archive, targetDir, extractPath) {
           });
         } else {
           // file entry
-          console.log('yauzl.openReadstream(entry)', { entry });
           zipfile.openReadStream(entry, function (err, readStream) {
             if (err) {
               return reject(err);
@@ -134,10 +131,9 @@ export function extractArchive(archive, targetDir, extractPath) {
               if (err) {
                 return reject(err);
               }
-              console.log('readstream pipe');
+
               readStream.pipe(createWriteStream(fileName, { mode: entry.externalFileAttributes >>> 16 }));
               readStream.on('end', function () {
-                console.log('yauzl.on(end) DONE');
                 zipfile.readEntry();
               });
             });
