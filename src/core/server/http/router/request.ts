@@ -24,6 +24,8 @@ import { Request } from 'hapi';
 import { filterHeaders, Headers } from './headers';
 import { RouteSchemas } from './route';
 
+const requestSymbol = Symbol('request');
+
 /** @public */
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /**
@@ -73,8 +75,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   public readonly path: string;
   public readonly url: Url;
 
+  protected readonly [requestSymbol]: Request;
+
   constructor(
-    private readonly request: Request,
+    request: Request,
     readonly params: Params,
     readonly query: Query,
     readonly body: Body
@@ -82,14 +86,13 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     this.headers = request.headers;
     this.path = request.path;
     this.url = request.url;
+
+    this[requestSymbol] = request;
   }
 
   public getFilteredHeaders(headersToKeep: string[]) {
     return filterHeaders(this.headers, headersToKeep);
   }
-
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  public unstable_getIncomingMessage() {
-    return this.request.raw.req;
-  }
 }
+
+export const toRawRequest = (request: KibanaRequest) => request[requestSymbol];
