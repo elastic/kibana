@@ -58,13 +58,6 @@ const scheduledTimeUnitOptions = [
   },
 ];
 
-const triggeredTimeUnitOptions = [
-  {
-    value: TIME_UNITS.SECOND,
-    text: timeUnits[TIME_UNITS.SECOND].labelPlural,
-  },
-];
-
 export const JsonWatchEditSimulate = ({
   executeWatchErrors,
   hasExecuteWatchErrors,
@@ -97,7 +90,6 @@ export const JsonWatchEditSimulate = ({
     scheduledTimeValue,
     scheduledTimeUnit,
     triggeredTimeValue,
-    triggeredTimeUnit,
     alternativeInput,
     ignoreCondition,
   } = executeDetails;
@@ -193,7 +185,7 @@ export const JsonWatchEditSimulate = ({
             )}
           >
             <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiFieldNumber
                   value={scheduledTimeValue}
                   min={0}
@@ -208,7 +200,7 @@ export const JsonWatchEditSimulate = ({
                   }}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiSelect
                   value={scheduledTimeUnit}
                   options={scheduledTimeUnitOptions}
@@ -232,95 +224,24 @@ export const JsonWatchEditSimulate = ({
               }
             )}
           >
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiFieldNumber
-                  value={triggeredTimeValue}
-                  min={0}
-                  onChange={e => {
-                    const value = e.target.value;
-                    setExecuteDetails(
-                      new ExecuteDetails({
-                        ...executeDetails,
-                        triggeredTimeValue: value === '' ? value : parseInt(value, 10),
-                      })
-                    );
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  value={triggeredTimeUnit}
-                  options={triggeredTimeUnitOptions}
-                  onChange={e => {
-                    setExecuteDetails(
-                      new ExecuteDetails({
-                        ...executeDetails,
-                        triggeredTimeUnit: e.target.value,
-                      })
-                    );
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-        <EuiDescribedFormGroup
-          fullWidth
-          idAria="simulateExecutionInputOverridesDescription"
-          title={
-            <h3>
-              {i18n.translate(
-                'xpack.watcher.sections.watchEdit.simulate.form.inputOverridesTitle',
-                { defaultMessage: 'Input' }
-              )}
-            </h3>
-          }
-          description={i18n.translate(
-            'xpack.watcher.sections.watchEdit.simulate.form.inputOverridesDescription',
-            {
-              defaultMessage:
-                'Enter JSON data to override the watch payload that comes from running the input.',
-            }
-          )}
-        >
-          <ErrableFormRow
-            id="executeWatchJson"
-            describedByIds={['simulateExecutionInputOverridesDescription']}
-            label={i18n.translate(
-              'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldLabel',
-              {
-                defaultMessage: 'Alternative input',
-              }
-            )}
-            errorKey="json"
-            isShowingErrors={hasExecuteWatchErrors}
-            fullWidth
-            errors={executeWatchErrors}
-          >
-            <EuiCodeEditor
-              fullWidth
-              mode="json"
-              width="100%"
-              theme="github"
-              aria-label={i18n.translate(
-                'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputAriaLabel',
-                {
-                  defaultMessage: 'Code editor',
-                }
-              )}
-              value={alternativeInput}
-              onChange={(json: string) => {
+            <EuiFieldNumber
+              value={triggeredTimeValue}
+              min={0}
+              append={<EuiText size="s">{timeUnits[TIME_UNITS.SECOND].labelPlural}</EuiText>}
+              onChange={e => {
+                const value = e.target.value;
                 setExecuteDetails(
                   new ExecuteDetails({
                     ...executeDetails,
-                    alternativeInput: json,
+                    triggeredTimeValue: value === '' ? value : parseInt(value, 10),
+                    triggeredTimeUnit: TIME_UNITS.SECOND,
                   })
                 );
               }}
             />
-          </ErrableFormRow>
+          </EuiFormRow>
         </EuiDescribedFormGroup>
+
         <EuiDescribedFormGroup
           fullWidth
           title={
@@ -354,6 +275,7 @@ export const JsonWatchEditSimulate = ({
             }}
           />
         </EuiDescribedFormGroup>
+
         <EuiDescribedFormGroup
           fullWidth
           idAria="simulateExecutionActionModesDescription"
@@ -400,6 +322,64 @@ export const JsonWatchEditSimulate = ({
               columns={columns}
             />
           </EuiFormRow>
+        </EuiDescribedFormGroup>
+
+        <EuiDescribedFormGroup
+          fullWidth
+          idAria="simulateExecutionInputOverridesDescription"
+          title={
+            <h3>
+              {i18n.translate(
+                'xpack.watcher.sections.watchEdit.simulate.form.inputOverridesTitle',
+                { defaultMessage: 'Input' }
+              )}
+            </h3>
+          }
+          description={i18n.translate(
+            'xpack.watcher.sections.watchEdit.simulate.form.inputOverridesDescription',
+            {
+              defaultMessage:
+                'Enter JSON data to override the watch payload that comes from running the input.',
+            }
+          )}
+        >
+          <ErrableFormRow
+            id="executeWatchJson"
+            describedByIds={['simulateExecutionInputOverridesDescription']}
+            label={i18n.translate(
+              'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldLabel',
+              {
+                defaultMessage: 'Alternative input',
+              }
+            )}
+            errorKey="json"
+            isShowingErrors={hasExecuteWatchErrors}
+            fullWidth
+            errors={executeWatchErrors}
+          >
+            <EuiCodeEditor
+              fullWidth
+              mode="json"
+              width="100%"
+              height="200px"
+              theme="github"
+              aria-label={i18n.translate(
+                'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputAriaLabel',
+                {
+                  defaultMessage: 'Code editor',
+                }
+              )}
+              value={alternativeInput}
+              onChange={(json: string) => {
+                setExecuteDetails(
+                  new ExecuteDetails({
+                    ...executeDetails,
+                    alternativeInput: json,
+                  })
+                );
+              }}
+            />
+          </ErrableFormRow>
         </EuiDescribedFormGroup>
         <EuiButton
           iconType="play"

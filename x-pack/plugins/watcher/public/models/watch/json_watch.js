@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { get } from 'lodash';
 import { BaseWatch } from './base_watch';
 import { ACTION_TYPES, WATCH_TYPES } from 'plugins/watcher/../common/constants';
@@ -16,10 +17,12 @@ import { i18n } from '@kbn/i18n';
 export class JsonWatch extends BaseWatch {
   constructor(props = {}) {
     props.type = WATCH_TYPES.JSON;
+    props.id = typeof props.id === 'undefined' ? uuid.v4() : props.id;
     super(props);
     const existingWatch = get(props, 'watch');
     this.watch = existingWatch ? existingWatch : defaultWatchJson;
     this.watchString = get(props, 'watchString', JSON.stringify(existingWatch ? existingWatch : defaultWatchJson, null, 2));
+    this.id = props.id;
   }
 
   validate() {

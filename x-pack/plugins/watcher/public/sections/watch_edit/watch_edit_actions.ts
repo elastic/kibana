@@ -92,8 +92,10 @@ export async function validateActionsAndSaveWatch(watch: BaseWatch) {
         if (!hasErrors) {
           return actionsErrorsAcc;
         }
-        const newErrors = errorKeys.map(errorKey => errors[errorKey]).flat();
-        return [...actionsErrorsAcc, ...newErrors];
+        const newErrors = errorKeys.map(errorKey => errors[errorKey]);
+        const newErrorsFlattened = newErrors && newErrors.length ? [].concat(...newErrors) : [];
+
+        return [...actionsErrorsAcc, ...newErrorsFlattened];
       }
       return actionsErrorsAcc;
     }, []);

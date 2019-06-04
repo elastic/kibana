@@ -71,7 +71,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
         label={i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.emailAction.subjectTextFieldLabel',
           {
-            defaultMessage: 'Subject',
+            defaultMessage: 'Subject (optional)',
           }
         )}
       >

@@ -23,7 +23,8 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     }
 
     async createWatch(watchName, name) {
-      await testSubjects.click('createAdvancedWatchButton');
+      await testSubjects.click('createWatchButton');
+      await testSubjects.click('jsonWatchCreateLink');
       await find.setValue('#id', watchName);
       await find.setValue('#watchName', name);
       await find.clickByCssSelector('[type="submit"]');

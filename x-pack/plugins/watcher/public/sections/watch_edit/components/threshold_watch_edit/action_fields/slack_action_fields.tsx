@@ -30,7 +30,7 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({
         label={i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.slackAction.recipientTextFieldLabel',
           {
-            defaultMessage: 'Recipient',
+            defaultMessage: 'Recipient (optional)',
           }
         )}
       >
@@ -56,7 +56,7 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({
         label={i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.slackAction.messageTextAreaFieldLabel',
           {
-            defaultMessage: 'Message',
+            defaultMessage: 'Message (optional)',
           }
         )}
       >
