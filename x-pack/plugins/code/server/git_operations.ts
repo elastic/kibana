@@ -194,7 +194,11 @@ export class GitOperations {
     async function* walk(t: Tree): AsyncIterableIterator<FileTree> {
       for (const e of t.entries()) {
         if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
-          yield entry2Tree(e);
+          const blob = await e.getBlob();
+          // Ignore binary files
+          if (!blob.isBinary()) {
+            yield entry2Tree(e);
+          }
         } else if (e.isDirectory()) {
           const subFolder = await e.getTree();
           await (yield* walk(subFolder));
