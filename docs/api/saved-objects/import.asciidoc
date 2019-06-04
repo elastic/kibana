@@ -45,7 +45,6 @@ Content-Type: application/ndjson
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
 --EXAMPLE--
 --------------------------------------------------
-// KIBANA
 
 A successful call returns a response code of `200` and a response body
 containing a JSON structure similar to the following example:
@@ -72,7 +71,6 @@ Content-Type: application/ndjson
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
 --EXAMPLE--
 --------------------------------------------------
-// KIBANA
 
 The call returns a response code of `200` and a response body
 containing a JSON structure similar to the following example:
@@ -109,7 +107,6 @@ Content-Type: application/ndjson
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}
 --EXAMPLE--
 --------------------------------------------------
-// KIBANA
 
 The call returns a response code of `200` and a response body
 containing a JSON structure similar to the following example:
