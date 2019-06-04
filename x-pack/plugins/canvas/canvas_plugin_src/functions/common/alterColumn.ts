@@ -30,18 +30,17 @@ export function alterColumn(): ExpressionFunction<'alterColumn', Datatable, Argu
       column: {
         aliases: ['_'],
         types: ['string'],
+        required: true,
         help: argHelp.column,
       },
       type: {
         types: ['string'],
         help: argHelp.type,
-        default: null,
         options: ['null', 'boolean', 'number', 'string'],
       },
       name: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.name,
-        default: null,
       },
     },
     fn: (context, args) => {

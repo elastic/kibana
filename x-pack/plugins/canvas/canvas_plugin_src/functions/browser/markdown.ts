@@ -35,7 +35,7 @@ export function markdown(): ExpressionFunction<'markdown', Context, Arguments, R
     },
     args: {
       expression: {
-        aliases: ['_'],
+        aliases: ['_', 'content'],
         types: ['string'],
         help: argHelp.expression,
         default: '""',

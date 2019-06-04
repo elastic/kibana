@@ -43,7 +43,7 @@ export function plot(): ExpressionFunction<'plot', PointSeries, Arguments, Rende
     args: {
       seriesStyle: {
         multi: true,
-        types: ['seriesStyle', 'null'],
+        types: ['seriesStyle'],
         help: argHelp.seriesStyle,
       },
       defaultStyle: {

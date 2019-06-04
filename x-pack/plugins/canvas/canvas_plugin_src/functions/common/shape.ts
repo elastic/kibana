@@ -50,25 +50,25 @@ export function shape(): ExpressionFunction<'shape', null, Arguments, Return> {
     },
     args: {
       border: {
-        types: ['string', 'null'],
+        types: ['string'],
         aliases: ['stroke'],
         help: argHelp.border,
       },
       borderWidth: {
-        types: ['number', 'null'],
+        types: ['number'],
         aliases: ['strokeWidth'],
         help: argHelp.borderWidth,
         default: '0',
       },
       shape: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.shape,
         aliases: ['_'],
         default: 'square',
         options: Object.values(Shape),
       },
       fill: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.fill,
         default: 'black',
       },

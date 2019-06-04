@@ -29,6 +29,7 @@ export function seriesStyle(): ExpressionFunction<'seriesStyle', null, Arguments
   return {
     name,
     help,
+    type: 'seriesStyle',
     context: {
       types: ['null'],
     },
@@ -42,15 +43,15 @@ export function seriesStyle(): ExpressionFunction<'seriesStyle', null, Arguments
         help: argHelp.color,
       },
       lines: {
-        types: ['number'],
+        types: ['number', 'null'],
         help: argHelp.lines,
       },
       bars: {
-        types: ['number'],
+        types: ['number', 'null'],
         help: argHelp.bars,
       },
       points: {
-        types: ['number'],
+        types: ['number', 'null'],
         help: argHelp.points,
       },
       fill: {

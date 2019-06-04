@@ -43,7 +43,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       },
       color: {
         help: argHelp.color,
-        types: ['string', 'null'],
+        types: ['string'],
       },
       family: {
         default: `"${openSans.value}"`,
@@ -57,7 +57,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
         types: ['boolean'],
       },
       lHeight: {
-        aliases: ['lineHeight'],
+        aliases: ['lineHeight', 'null'],
         help: argHelp.lHeight,
         types: ['number'],
       },

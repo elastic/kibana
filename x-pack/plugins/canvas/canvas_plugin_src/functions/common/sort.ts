@@ -29,12 +29,14 @@ export function sort(): ExpressionFunction<'sort', Datatable, Arguments, Datatab
         types: ['string'],
         aliases: ['_', 'column'],
         multi: false, // TODO: No reason you couldn't.
+        required: true,
         help: argHelp.by,
       },
       reverse: {
         types: ['boolean'],
         help: argHelp.reverse,
         options: [true, false],
+        default: false,
       },
     },
     fn: (context, args) => {

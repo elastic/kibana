@@ -34,6 +34,7 @@ export function timefilterControl(): ExpressionFunction<
         types: ['string'],
         aliases: ['field', 'c'],
         help: argHelp.column,
+        default: '@timestamp',
       },
       compact: {
         types: ['boolean'],

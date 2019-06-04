@@ -27,7 +27,7 @@ export function date(): ExpressionFunction<'date', null, Arguments, number> {
     args: {
       value: {
         aliases: ['_'],
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.value,
       },
       format: {

@@ -11,17 +11,20 @@ interface Arguments {
   condition: boolean[] | null;
 }
 
-export function all(): ExpressionFunction<'all', any, Arguments, boolean> {
+export function all(): ExpressionFunction<'all', null, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().all;
 
   return {
     name: 'all',
     type: 'boolean',
+    context: {
+      types: ['null'],
+    },
     help,
     args: {
       condition: {
         aliases: ['_'],
-        types: ['boolean', 'null'],
+        types: ['boolean'],
         required: true,
         multi: true,
         help: argHelp.condition,

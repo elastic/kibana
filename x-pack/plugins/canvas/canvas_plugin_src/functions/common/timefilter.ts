@@ -11,8 +11,8 @@ import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   column: string;
-  from: string | null;
-  to: string | null;
+  from: string;
+  to: string;
   filterGroup: string | null;
 }
 
@@ -36,12 +36,12 @@ export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments
         help: argHelp.column,
       },
       from: {
-        types: ['string', 'null'],
+        types: ['string'],
         aliases: ['f', 'start'],
         help: argHelp.from,
       },
       to: {
-        types: ['string', 'null'],
+        types: ['string'],
         aliases: ['t', 'end'],
         help: argHelp.to,
       },

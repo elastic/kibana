@@ -28,12 +28,10 @@ export function columns(): ExpressionFunction<'columns', Datatable, Arguments, D
       include: {
         types: ['string'],
         help: argHelp.include,
-        default: null,
       },
       exclude: {
         types: ['string'],
         help: argHelp.exclude,
-        default: null,
       },
     },
     fn: (context, args) => {

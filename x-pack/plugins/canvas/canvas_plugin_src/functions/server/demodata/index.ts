@@ -29,7 +29,7 @@ export function demodata(): ExpressionFunction<'demodata', Filter, Arguments, Da
     },
     args: {
       type: {
-        types: ['string', 'null'],
+        types: ['string'],
         aliases: ['_'],
         help: argHelp.type,
         default: 'ci',

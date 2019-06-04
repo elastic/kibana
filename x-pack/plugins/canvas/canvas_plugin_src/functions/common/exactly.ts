@@ -28,15 +28,17 @@ export function exactly(): ExpressionFunction<'exactly', Filter, Arguments, Filt
       column: {
         types: ['string'],
         aliases: ['field', 'c'],
+        required: true,
         help: argHelp.column,
       },
       value: {
         types: ['string'],
         aliases: ['v', 'val'],
+        required: true,
         help: argHelp.value,
       },
       filterGroup: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.filterGroup,
       },
     },
