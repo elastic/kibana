@@ -53,7 +53,7 @@ const WATCH_STATUS_TABS: WatchStatusTab[] = [
   {
     id: WATCH_ACTIONS_TAB,
     name: i18n.translate('xpack.watcher.sections.watchStatus.actionsTabLabel', {
-      defaultMessage: 'Actions',
+      defaultMessage: 'Action statuses',
     }),
   },
 ];
@@ -109,7 +109,7 @@ export const WatchStatus = ({
   }
 
   if (watchDetail) {
-    const { isSystemWatch, id: watchId, watchStatus } = watchDetail;
+    const { isSystemWatch, id: watchId, watchStatus, name: watchName } = watchDetail;
 
     if (isActivated === undefined) {
       // Set initial value for isActivated based on the watch we just loaded.
@@ -175,8 +175,10 @@ export const WatchStatus = ({
                 <h1>
                   <FormattedMessage
                     id="xpack.watcher.sections.watchDetail.header"
-                    defaultMessage="Current status for '{watchId}'"
-                    values={{ watchId }}
+                    defaultMessage="Current status for '{watch}'"
+                    values={{
+                      watch: watchName ? watchName : watchId,
+                    }}
                   />
                 </h1>
               </EuiTitle>
