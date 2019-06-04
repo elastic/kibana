@@ -19,23 +19,23 @@
 import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '..';
 
-export interface SavedObjectsClientWrapperOptions<Request = any> {
+export interface SavedObjectsClientWrapperOptions<Request = unknown> {
   client: SavedObjectsClientContract;
   request: Request;
 }
 
-export type SavedObjectsClientWrapperFactory<Request = any> = (
+export type SavedObjectsClientWrapperFactory<Request = unknown> = (
   options: SavedObjectsClientWrapperOptions<Request>
 ) => SavedObjectsClientContract;
 
-export type SavedObjectsClientFactory<Request = any> = (
+export type SavedObjectsClientFactory<Request = unknown> = (
   { request }: { request: Request }
 ) => SavedObjectsClientContract;
 
 /**
  * Provider for the Scoped Saved Object Client.
  */
-export class ScopedSavedObjectsClientProvider<Request = any> {
+export class ScopedSavedObjectsClientProvider<Request = unknown> {
   private readonly _wrapperFactories = new PriorityCollection<
     SavedObjectsClientWrapperFactory<Request>
   >();
