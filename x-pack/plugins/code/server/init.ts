@@ -79,7 +79,7 @@ async function getCodeNodeUuid(url: string, log: Logger) {
 }
 
 export function init(server: Server, options: any) {
-  if (!options.enabled) {
+  if (!options.ui.enabled) {
     return;
   }
 
@@ -181,6 +181,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     repoConfigController
   );
   server.events.on('stop', async () => {
+    log.debug('shutdown lsp process');
     await lspService.shutdown();
   });
   // Initialize indexing factories.

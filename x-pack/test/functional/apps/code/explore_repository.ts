@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { TestInvoker } from './lib/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function exploreRepositoryFunctonalTests({
+export default function exploreRepositoryFunctionalTests({
   getService,
   getPageObjects,
 }: TestInvoker) {
@@ -23,8 +23,7 @@ export default function exploreRepositoryFunctonalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  // FLAKY https://github.com/elastic/kibana/issues/35944
-  describe.skip('Explore Repository', () => {
+  describe('Explore Repository', () => {
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -228,7 +227,6 @@ export default function exploreRepositoryFunctonalTests({
         });
       });
 
-      // TODO(qianliang): blocked by https://github.com/elastic/code/issues/1163
       it('Click file/directory on the right panel', async () => {
         log.debug('Click file/directory on the right panel');
 
@@ -255,7 +253,6 @@ export default function exploreRepositoryFunctonalTests({
         });
       });
 
-      // TODO(qianliang): blocked by https://github.com/elastic/code/issues/1163
       it('Navigate source file via structure tree', async () => {
         log.debug('Navigate source file via structure tree');
         // Wait the file tree to be rendered and click the 'src' folder on the file tree.
@@ -302,9 +299,10 @@ export default function exploreRepositoryFunctonalTests({
         await browser.get(url);
         await retry.try(async () => {
           const currentUrl: string = await browser.getCurrentUrl();
-          expect(currentUrl.indexOf(notExistRepoUri)).to.greaterThan(0);
+          // should redirect to main page
+          expect(currentUrl.indexOf(`${notExistRepoUri}/tree/master`)).to.greaterThan(0);
         });
-        await retry.try(async () => {
+        await retry.tryForTime(5000, async () => {
           expect(await testSubjects.exists('codeNotFoundErrorPage')).ok();
         });
       });

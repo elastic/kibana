@@ -23,6 +23,10 @@ export const TimelineProperties = styled.div<{ width: number }>`
 
 export const DatePicker = styled(EuiFlexItem)<{ width: number }>`
   width: ${({ width }) => `${width}px`};
+  .euiSuperDatePicker__flexWrapper {
+    max-width: none;
+    width: auto;
+  }
 `;
 
 export const NameField = styled(EuiFieldText)`
