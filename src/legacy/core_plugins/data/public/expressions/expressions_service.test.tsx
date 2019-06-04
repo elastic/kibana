@@ -142,6 +142,10 @@ describe('expressions_service', () => {
       expect(api.run(testAst, {})).rejects.toBe(errorResult);
     });
 
+    it('should reject the promise if there are syntax errors', async () => {
+      expect(api.run('|||', {})).rejects.toBeInstanceOf(Error);
+    });
+
     it('should call the render function with the result and element', async () => {
       const element = document.createElement('div');
 
