@@ -125,7 +125,7 @@ class MonitoringTableUI extends React.Component {
       default:
         throw new Error(
           i18n.translate('xpack.monitoring.table.unknownTableActionTypeErrorMessage', {
-            defaultMessage: 'Unknown table action type {action}! This shouldn\'t happen!',
+            defaultMessage: `Unknown table action type {action}! This shouldn't happen!`,
 
             values: {
               action
