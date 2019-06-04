@@ -574,7 +574,7 @@ describe('TokenAuthenticationProvider', () => {
         });
 
         expect(authenticationResult.redirected()).toBe(true);
-        expect(authenticationResult.redirectURL).toBe('/base-path/login');
+        expect(authenticationResult.redirectURL).toBe('/base-path/login?msg=LOGGED_OUT');
       });
 
       it('redirects to /login with optional search parameters if tokens are deleted successfully', async () => {
