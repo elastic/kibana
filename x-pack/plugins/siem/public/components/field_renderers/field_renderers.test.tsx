@@ -114,9 +114,7 @@ describe('Field Renderers', () => {
     };
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <TestProviders>
-          {hostNameRenderer(mockData.complete.source!.host!, '10.10.10.10')}
-        </TestProviders>
+        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -124,9 +122,7 @@ describe('Field Renderers', () => {
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
       const wrapper = mount(
-        <TestProviders>
-          {hostNameRenderer(mockData.complete.source!.host!, '10.10.10.11')}
-        </TestProviders>
+        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.11')}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -163,9 +159,7 @@ describe('Field Renderers', () => {
     };
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <TestProviders>
-          {hostNameRenderer(mockData.complete.source!.host!, '10.10.10.10')}
-        </TestProviders>
+        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -173,9 +167,7 @@ describe('Field Renderers', () => {
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
       const wrapper = mount(
-        <TestProviders>
-          {hostNameRenderer(mockData.complete.source!.host!, '10.10.10.11')}
-        </TestProviders>
+        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.11')}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
