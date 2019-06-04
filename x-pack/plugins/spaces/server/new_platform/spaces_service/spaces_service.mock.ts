@@ -5,7 +5,7 @@
  */
 
 import { SpacesServiceSetup } from './spaces_service';
-import { spacesClientMock } from '../../lib/spaces_client';
+import { spacesClientMock } from '../../lib/spaces_client/spaces_client.mock';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 
 const createSetupContractMock = (spaceId = DEFAULT_SPACE_ID) => {

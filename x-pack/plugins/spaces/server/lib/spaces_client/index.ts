@@ -5,4 +5,3 @@
  */
 
 export { SpacesClient } from './spaces_client';
-export { spacesClientMock } from './spaces_client.mock';
