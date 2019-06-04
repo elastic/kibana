@@ -18,7 +18,7 @@
  */
 
 /**
- * Time Range modes.
+ * Time Range data modes.
  * @constant
  * @public
  */
