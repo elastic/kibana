@@ -41,7 +41,7 @@ export class MetricsTimeControls extends React.Component<MetricsTimeControlsProp
 
   private handleTimeChange = ({ start, end }: OnTimeChangeProps) => {
     const parsedStart = dateMath.parse(start);
-    const parsedEnd = dateMath.parse(end);
+    const parsedEnd = dateMath.parse(end, { roundUp: true });
 
     if (parsedStart && parsedEnd) {
       this.props.onChangeTimeRange({
