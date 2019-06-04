@@ -5,10 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Server } from 'hapi';
 import { resolve } from 'path';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
 import { LegacyPluginInitializer } from 'src/legacy/types';
+import { CoreSetup, Server } from './common/types';
 import { Plugin } from './server';
 import { ID } from './common/constants';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
@@ -72,13 +71,12 @@ export const integrationsManager: LegacyPluginInitializer = kibana => {
       });
 
       // new Kibana platform shim starts here
-      const pluginSetup = {} as PluginInitializerContext;
       const coreSetup = {
         http: {
-          server,
+          route: server.route.bind(server),
         },
       } as CoreSetup;
-      new Plugin().setup(coreSetup, pluginSetup);
+      new Plugin().setup(coreSetup);
     },
   });
 };

@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { Detail } from './screens/Detail';
-import { Home } from './screens/Home';
+import { Detail } from './screens/detail';
+import { Home } from './screens/home';
 import { ID } from '../common/constants';
 
 export const APP_ROOT = `/app/${ID}`;

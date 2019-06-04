@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import {
   ID,
   API_ROOT,
@@ -13,15 +12,18 @@ import {
   API_INTEGRATIONS_FILE,
   SAVED_OBJECT_TYPE,
 } from '../common/constants';
+import { Request, Server } from '../common/types';
 import { fetchInfo, fetchList, getZipInfo } from './registry';
 import { getClient } from './saved_objects';
 
-interface Req extends Request {
-  payload: Payload;
+interface RequestFacade extends Request {
+  server: Server;
 }
 
-interface Payload {
-  body: string;
+interface PostRequest extends Request {
+  payload: {
+    body: string;
+  };
 }
 
 // Manager public API paths (currently essentially a proxy to registry service)
@@ -29,26 +31,20 @@ export const routes = [
   {
     method: 'GET',
     path: API_INTEGRATIONS_LIST,
-    options: {
-      tags: [`access:${ID}`],
-    },
+    options: { tags: [`access:${ID}`] },
     handler: fetchList,
   },
   {
     method: 'GET',
     path: API_INTEGRATIONS_INFO,
-    options: {
-      tags: [`access:${ID}`],
-    },
-    handler: async (req: Request) => fetchInfo(req.params.pkgkey),
+    options: { tags: [`access:${ID}`] },
+    handler: async (req: RequestFacade) => fetchInfo(req.params.pkgkey),
   },
   {
     method: 'GET',
     path: API_INTEGRATIONS_FILE,
-    options: {
-      tags: [`access:${ID}`],
-    },
-    handler: async (req: Request) => {
+    options: { tags: [`access:${ID}`] },
+    handler: async (req: RequestFacade) => {
       const { pkgkey } = req.params;
       const directory = await getZipInfo(pkgkey);
       return { meta: { pkgkey, directory } };
@@ -57,10 +53,8 @@ export const routes = [
   {
     method: 'GET',
     path: `${API_ROOT}/saved_objects`,
-    options: {
-      tags: [`access:${ID}`],
-    },
-    handler: async ({ server }: Request) => {
+    options: { tags: [`access:${ID}`] },
+    handler: async ({ server }: RequestFacade) => {
       const client = getClient(server);
       const savedObject = await client.find({ type: SAVED_OBJECT_TYPE });
       return savedObject;
@@ -69,10 +63,8 @@ export const routes = [
   {
     method: 'GET',
     path: `${API_ROOT}/saved_objects/{oid}`,
-    options: {
-      tags: [`access:${ID}`],
-    },
-    handler: async ({ server, params }: Request) => {
+    options: { tags: [`access:${ID}`] },
+    handler: async ({ server, params }: RequestFacade) => {
       const client = getClient(server);
 
       const savedObject = await client.get(SAVED_OBJECT_TYPE, params.oid);
@@ -82,17 +74,14 @@ export const routes = [
   {
     method: 'POST',
     path: `${API_ROOT}/saved_objects`,
-    options: {
-      tags: [`access:${ID}`],
-    },
-    handler: async ({ server, payload }: Req) => {
-      // eslint-disable-next-line
-      const { body } = payload
+    options: { tags: [`access:${ID}`] },
+    handler: async ({ server, payload }: PostRequest) => {
+      const { body } = payload;
       const savedObject = await getClient(server).create(
         SAVED_OBJECT_TYPE,
         {
           is_working: true,
-          other: body as string,
+          other: body,
         },
         { id: 'TBD', overwrite: true }
       );

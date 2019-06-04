@@ -3,6 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ServerRoute } from 'hapi';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+
+export {
+  SavedObject,
+  SavedObjectAttributes,
+} from 'src/legacy/server/saved_objects/service/saved_objects_client';
+
+export { Request, Server, ServerRoute } from 'hapi';
+
+export interface CoreSetup {
+  http: { route(route: ServerRoute | ServerRoute[]): void };
+}
 
 // the contract with the registry
 export interface IntegrationInfo {
@@ -10,33 +23,4 @@ export interface IntegrationInfo {
   name: string;
   version: string;
   icon: string;
-}
-
-// copied from src/legacy/server/saved_objects/service/saved_objects_client.d.ts.
-export interface SavedObjectAttributes {
-  [key: string]: SavedObjectAttributes | string | number | boolean | null;
-}
-
-export interface SavedObject<T extends SavedObjectAttributes = any> {
-  id: string;
-  type: string;
-  version?: string;
-  updated_at?: string;
-  error?: {
-    message: string;
-    statusCode: number;
-  };
-  attributes: T;
-  references: SavedObjectReference[];
-  migrationVersion?: MigrationVersion;
-}
-
-export interface SavedObjectReference {
-  name: string;
-  type: string;
-  id: string;
-}
-
-interface MigrationVersion {
-  [pluginName: string]: string;
 }

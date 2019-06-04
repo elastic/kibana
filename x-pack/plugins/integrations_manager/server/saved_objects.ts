@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '../common/types';
 import { SAVED_OBJECT_TYPE } from '../common/constants';
 
 export function getClient(server: Server) {
