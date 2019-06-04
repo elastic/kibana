@@ -8,10 +8,7 @@ import expect from '@kbn/expect';
 import { TestInvoker } from './lib/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function manageRepositoriesFunctionalTests({
-  getService,
-  getPageObjects,
-}: TestInvoker) {
+export default function history({ getService, getPageObjects }: TestInvoker) {
   // const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -23,9 +20,7 @@ export default function manageRepositoriesFunctionalTests({
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/37859
   describe('History', function() {
-    this.tags('skipFirefox');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
@@ -136,36 +131,44 @@ export default function manageRepositoriesFunctionalTests({
         const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&p=&langs=typescript`;
         await browser.get(url);
 
-        const language = await (await find.byCssSelector(
-          '.euiFacetButton--isSelected'
-        )).getVisibleText();
+        await retry.try(async () => {
+          const language = await (await find.byCssSelector(
+            '.euiFacetButton--isSelected'
+          )).getVisibleText();
 
-        expect(language.indexOf('typescript')).to.equal(0);
+          expect(language.indexOf('typescript')).to.equal(0);
+        });
 
         const unselectedFilter = (await find.allByCssSelector('.euiFacetButton--unSelected'))[1];
         await unselectedFilter.click();
 
-        const l = await (await find.allByCssSelector(
-          '.euiFacetButton--isSelected'
-        ))[1].getVisibleText();
+        await retry.try(async () => {
+          const language = await (await find.allByCssSelector(
+            '.euiFacetButton--isSelected'
+          ))[1].getVisibleText();
 
-        expect(l.indexOf('javascript')).to.equal(0);
+          expect(language.indexOf('javascript')).to.equal(0);
+        });
 
         await browser.goBack();
 
-        const lang = await (await find.byCssSelector(
-          '.euiFacetButton--isSelected'
-        )).getVisibleText();
+        await retry.try(async () => {
+          const language = await (await find.byCssSelector(
+            '.euiFacetButton--isSelected'
+          )).getVisibleText();
 
-        expect(lang.indexOf('typescript')).to.equal(0);
+          expect(language.indexOf('typescript')).to.equal(0);
+        });
 
         await driver.navigate().forward();
 
-        const filter = await (await find.allByCssSelector(
-          '.euiFacetButton--isSelected'
-        ))[1].getVisibleText();
+        await retry.try(async () => {
+          const language = await (await find.allByCssSelector(
+            '.euiFacetButton--isSelected'
+          ))[1].getVisibleText();
 
-        expect(filter.indexOf('javascript')).to.equal(0);
+          expect(language.indexOf('javascript')).to.equal(0);
+        });
       });
 
       it('in source view page file line number changed can go back and forward', async () => {
