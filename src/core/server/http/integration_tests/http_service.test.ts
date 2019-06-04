@@ -16,12 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import request from 'request';
 import Boom from 'boom';
 
-import { AuthenticationHandler } from '../../../../core/server';
 import { Router } from '../router';
-
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 
 interface User {
@@ -29,7 +26,7 @@ interface User {
   roles?: string[];
 }
 
-interface Storage {
+interface StorageData {
   value: User;
   expires: number;
 }
@@ -41,7 +38,7 @@ describe('http service', () => {
       const cookieOptions = {
         name: 'sid',
         encryptionKey: 'something_at_least_32_characters',
-        validate: (session: Storage) => true,
+        validate: (session: StorageData) => true,
         isSecure: false,
         path: '/',
       };
@@ -53,90 +50,18 @@ describe('http service', () => {
 
       afterEach(async () => await root.shutdown());
 
-      it('Should support implementing custom authentication logic', async () => {
-        const router = new Router('');
-        router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
-
-        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
-          if (req.headers.authorization) {
-            const user = { id: '42' };
-            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return t.authenticated(user);
-          } else {
-            return t.rejected(Boom.unauthorized());
-          }
-        };
-
-        const { http } = await root.setup();
-        await http.registerAuth(authenticate, cookieOptions);
-        http.registerRouter(router);
-        await root.start();
-
-        const response = await kbnTestServer.request.get(root, '/').expect(200, { content: 'ok' });
-
-        expect(response.header['set-cookie']).toBeDefined();
-        const cookies = response.header['set-cookie'];
-        expect(cookies).toHaveLength(1);
-
-        const sessionCookie = request.cookie(cookies[0]);
-        if (!sessionCookie) {
-          throw new Error('session cookie expected to be defined');
-        }
-        expect(sessionCookie).toBeDefined();
-        expect(sessionCookie.key).toBe('sid');
-        expect(sessionCookie.value).toBeDefined();
-        expect(sessionCookie.path).toBe('/');
-        expect(sessionCookie.httpOnly).toBe(true);
-      });
-
-      it('Should support rejecting a request from an unauthenticated user', async () => {
-        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
-          if (req.headers.authorization) {
-            const user = { id: '42' };
-            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return t.authenticated(user);
-          } else {
-            return t.rejected(Boom.unauthorized());
-          }
-        };
-
-        const { http } = await root.setup();
-        await http.registerAuth(authenticate, cookieOptions);
-        await root.start();
-
-        await kbnTestServer.request
-          .get(root, '/')
-          .unset('Authorization')
-          .expect(401);
-      });
-
-      it('Should support redirecting', async () => {
-        const redirectTo = '/redirect-url';
-        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
-          return t.redirected(redirectTo);
-        };
-
-        const { http } = await root.setup();
-        await http.registerAuth(authenticate, cookieOptions);
-        await root.start();
-
-        const response = await kbnTestServer.request.get(root, '/').expect(302);
-        expect(response.header.location).toBe(redirectTo);
-      });
-
       it('Should run auth for legacy routes and proxy request to legacy server route handlers', async () => {
-        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
+        const { http } = await root.setup();
+        const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
           if (req.headers.authorization) {
             const user = { id: '42' };
+            const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
             return t.authenticated(user);
           } else {
             return t.rejected(Boom.unauthorized());
           }
-        };
-
-        const { http } = await root.setup();
-        await http.registerAuth(authenticate, cookieOptions);
+        }, cookieOptions);
         await root.start();
 
         const legacyUrl = '/legacy';
@@ -156,17 +81,17 @@ describe('http service', () => {
 
       it('Should pass associated auth state to Legacy platform', async () => {
         const user = { id: '42' };
-        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
+
+        const { http } = await root.setup();
+        const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
           if (req.headers.authorization) {
+            const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
             return t.authenticated(user);
           } else {
             return t.rejected(Boom.unauthorized());
           }
-        };
-
-        const { http } = await root.setup();
-        await http.registerAuth(authenticate, cookieOptions);
+        }, cookieOptions);
         await root.start();
 
         const legacyUrl = '/legacy';
@@ -182,22 +107,6 @@ describe('http service', () => {
         expect(response.body.status).toEqual('authenticated');
 
         expect(response.header['set-cookie']).toBe(undefined);
-      });
-
-      it(`Shouldn't expose internal error details`, async () => {
-        const authenticate: AuthenticationHandler<Storage> = async (req, sessionStorage, t) => {
-          throw new Error('sensitive info');
-        };
-
-        const { http } = await root.setup();
-        await http.registerAuth(authenticate, cookieOptions);
-        await root.start();
-
-        await kbnTestServer.request.get(root, '/').expect({
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'An internal server error occurred',
-        });
       });
     });
 
