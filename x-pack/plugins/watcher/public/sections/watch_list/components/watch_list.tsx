@@ -68,14 +68,14 @@ const WatchListUi = () => {
   );
 
   const watcherDescriptionText = (
-    <EuiTitle size="s">
-      <EuiText color="subdued">
+    <EuiText color="subdued">
+      <p>
         <FormattedMessage
           id="xpack.watcher.sections.watchList.subhead"
           defaultMessage="Use Watcher to watch for changes or anomalies in your data and perform the necessary actions in response."
         />
-      </EuiText>
-    </EuiTitle>
+      </p>
+    </EuiText>
   );
 
   const createWatchContextMenu = (
@@ -98,7 +98,7 @@ const WatchListUi = () => {
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopOverOpen(false)}
       panelPaddingSize="none"
-      anchorPosition="downLeft"
+      anchorPosition="downCenter"
     >
       <EuiContextMenuPanel
         items={[WATCH_TYPES.THRESHOLD, WATCH_TYPES.JSON].map((watchType: string) => {
