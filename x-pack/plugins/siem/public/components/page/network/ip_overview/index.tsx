@@ -83,12 +83,12 @@ export const IpOverview = pure<IpOverviewProps>(({ ip, data, loading, flowTarget
       {
         title: i18n.HOST_ID,
         description: typeData
-          ? hostIdRenderer({ host: typeData.host, ipFilter: ip })
+          ? hostIdRenderer({ host: data.host, ipFilter: ip })
           : getEmptyTagValue(),
       },
       {
         title: i18n.HOST_NAME,
-        description: typeData ? hostNameRenderer(typeData.host, ip) : getEmptyTagValue(),
+        description: typeData ? hostNameRenderer(data.host, ip) : getEmptyTagValue(),
       },
     ],
     [
