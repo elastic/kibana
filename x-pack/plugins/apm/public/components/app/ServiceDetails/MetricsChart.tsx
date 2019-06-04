@@ -16,13 +16,16 @@ import {
   asDecimal
 } from '../../../utils/formatters';
 import { Coordinate } from '../../../../typings/timeseries';
+import { getEmptySeries } from '../../shared/charts/CustomPlot/getEmptySeries';
 
 interface Props {
+  start: number | string | undefined;
+  end: number | string | undefined;
   chart: GenericMetricsChart;
   hoverXHandlers: HoverXHandlers;
 }
 
-export function MetricsChart({ chart, hoverXHandlers }: Props) {
+export function MetricsChart({ start, end, chart, hoverXHandlers }: Props) {
   const formatYValue = getYTickFormatter(chart);
   const formatTooltip = getTooltipFormatter(chart);
 
@@ -31,6 +34,8 @@ export function MetricsChart({ chart, hoverXHandlers }: Props) {
     legendValue: formatYValue(series.overallValue)
   }));
 
+  const noHits = chart.totalHits === 0;
+
   return (
     <React.Fragment>
       <EuiTitle size="xs">
@@ -38,8 +43,8 @@ export function MetricsChart({ chart, hoverXHandlers }: Props) {
       </EuiTitle>
       <CustomPlot
         {...hoverXHandlers}
-        noHits={chart.totalHits === 0}
-        series={transformedSeries}
+        noHits={noHits}
+        series={noHits ? getEmptySeries(start, end) : transformedSeries}
         tickFormatY={formatYValue}
         formatTooltipValue={formatTooltip}
         yMax={chart.yUnit === 'percent' ? 1 : 'max'}
@@ -52,8 +57,8 @@ function getYTickFormatter(chart: GenericMetricsChart) {
   switch (chart.yUnit) {
     case 'bytes': {
       const max = Math.max(
-        ...chart.series.flatMap(series =>
-          series.data.map(coord => coord.y || 0)
+        ...chart.series.map(({ data }) =>
+          Math.max(...data.map(({ y }) => y || 0))
         )
       );
       return getFixedByteFormatter(max);

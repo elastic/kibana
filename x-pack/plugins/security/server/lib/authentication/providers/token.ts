@@ -141,9 +141,8 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
         );
       }
 
-      return DeauthenticationResult.redirectTo(
-        `${this.options.basePath}/login${request.url.search || ''}`
-      );
+      const queryString = request.url.search || `?msg=LOGGED_OUT`;
+      return DeauthenticationResult.redirectTo(`${this.options.basePath}/login${queryString}`);
     } catch (err) {
       this.debug(`Failed invalidating user's access token: ${err.message}`);
       return DeauthenticationResult.failed(err);
