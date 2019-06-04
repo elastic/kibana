@@ -26,7 +26,7 @@ describe('Scroll to top', () => {
     spyScrollTo.mockClear();
   });
 
-  test('scroll have been called', () => {
+  test.skip('scroll have been called', () => {
     Object.defineProperty(globalNode.window, 'scroll', { value: spyScroll });
     mount(<HookWrapper hook={() => scrollToTop()} />);
 
@@ -36,7 +36,7 @@ describe('Scroll to top', () => {
     });
   });
 
-  test('scrollTo have been called', () => {
+  test.skip('scrollTo have been called', () => {
     Object.defineProperty(globalNode.window, 'scroll', { value: null });
     Object.defineProperty(globalNode.window, 'scrollTo', { value: spyScrollTo });
     mount(<HookWrapper hook={() => scrollToTop()} />);
