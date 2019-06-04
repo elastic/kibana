@@ -100,7 +100,7 @@ export function VislibLibDispatchProvider(Private, config) {
      * @param config {VisConfig}
      * @returns {Boolean}
       */
-    isSeriesInPercentageMode(rawId, series, config) {
+    _isSeriesInPercentageMode(rawId, series, config) {
       if(!rawId || !Array.isArray(series) || !config) {
         return false;
       }
@@ -110,12 +110,13 @@ export function VislibLibDispatchProvider(Private, config) {
         return false;
       }
       //find the matching seriesParams of the series, to get the id of the valueAxis
-      const { valueAxis } = config.get('seriesParams').find(param => param.data.id === id);
-      if(!valueAxis) {
+      const seriesParams =  config.get('seriesParams', []);
+      const { valueAxis: valueAxisId  } = seriesParams.find(param => param.data.id === id) || {};
+      if(!valueAxisId) {
         return false;
       }
-      const usedValueAxe = config.get('valueAxes').find(valueAxe => valueAxe.id === valueAxis);
-      return get(usedValueAxe, 'scale.mode') === 'percentage';
+      const usedValueAxis = config.get('valueAxes', []).find(valueAxis => valueAxis.id === valueAxisId);
+      return get(usedValueAxis, 'scale.mode') === 'percentage';
     }
 
     /**
@@ -139,7 +140,7 @@ export function VislibLibDispatchProvider(Private, config) {
       const handler = this.handler;
       const color = get(handler, 'data.color');
       const config =  handler && handler.visConfig;
-      const isPercentageMode = this.isSeriesInPercentageMode(d.seriesId, series, config);
+      const isPercentageMode = this._isSeriesInPercentageMode(d.seriesId, series, config);
 
       const eventData = {
         value: d.y,
