@@ -79,7 +79,7 @@ const EventsTableComponent = pure<EventsTableProps>(
     type,
   }) => (
     <LoadMoreTable
-      columns={getEventsColumns(type)}
+      columns={getEventsColumnsCurated(type)}
       hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.EVENTS}
@@ -254,3 +254,17 @@ const getEventsColumns = (
     },
   },
 ];
+
+export const getEventsColumnsCurated = (pageType: hostsModel.HostsType) => {
+  const columns = getEventsColumns(pageType);
+
+  // Columns to exclude from host details pages
+  if (pageType === 'details') {
+    return [i18n.HOST_NAME].reduce((acc, name) => {
+      acc.splice(acc.findIndex(column => column.name === name), 1);
+      return acc;
+    }, columns);
+  }
+
+  return columns;
+};

@@ -13,6 +13,7 @@ import { hostsActions } from '../../../../store/actions';
 import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../empty_value';
+import { HostDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import * as i18n from './translations';
@@ -130,14 +131,27 @@ const getUncommonColumns = (): [
       }),
   },
   {
-    name: i18n.LAST_USER,
+    name: i18n.NUMBER_OF_HOSTS,
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
+  },
+  {
+    name: i18n.NUMBER_OF_INSTANCES,
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ node }) => defaultToEmptyTag(node.instances),
+  },
+  {
+    name: i18n.HOSTS,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems: node.user != null ? node.user.name : null,
-        attrName: 'user.name',
-        idPrefix: `uncommon-process-table-${node._id}-processUser`,
+        rowItems: getHostNames(node),
+        attrName: 'host.name',
+        idPrefix: `uncommon-process-table-${node._id}-processHost`,
+        render: item => <HostDetailsLink hostName={item} />,
       }),
   },
   {
@@ -153,26 +167,14 @@ const getUncommonColumns = (): [
       }),
   },
   {
-    name: i18n.NUMBER_OF_INSTANCES,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => defaultToEmptyTag(node.instances),
-  },
-  {
-    name: i18n.NUMBER_OF_HOSTS,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
-  },
-  {
-    name: i18n.HOSTS,
+    name: i18n.LAST_USER,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems: getHostNames(node),
-        attrName: 'host.name',
-        idPrefix: `uncommon-process-table-${node._id}-processHost`,
+        rowItems: node.user != null ? node.user.name : null,
+        attrName: 'user.name',
+        idPrefix: `uncommon-process-table-${node._id}-processUser`,
       }),
   },
 ];

@@ -80,7 +80,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     type,
   }) => (
     <LoadMoreTable
-      columns={getAuthenticationColumns()}
+      columns={getAuthenticationColumnsCurated(type)}
       hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
@@ -303,3 +303,17 @@ const getAuthenticationColumns = (): [
       }),
   },
 ];
+
+export const getAuthenticationColumnsCurated = (pageType: hostsModel.HostsType) => {
+  const columns = getAuthenticationColumns();
+
+  // Columns to exclude from host details pages
+  if (pageType === 'details') {
+    return [i18n.LAST_FAILED_DESTINATION, i18n.LAST_SUCCESSFUL_DESTINATION].reduce((acc, name) => {
+      acc.splice(acc.findIndex(column => column.name === name), 1);
+      return acc;
+    }, columns);
+  }
+
+  return columns;
+};
