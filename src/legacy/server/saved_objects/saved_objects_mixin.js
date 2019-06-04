@@ -42,6 +42,9 @@ import {
   createLogLegacyImportRoute,
 } from './routes';
 
+import { getSortedObjectsForExport, objectsToNdJson } from './export';
+import { importSavedObjects } from './import';
+
 function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
   const { savedObjectsManagement = {} } = kbnServer.uiExports;
   return visibleTypes.filter(
@@ -141,6 +144,12 @@ export function savedObjectsMixin(kbnServer, server) {
     setScopedSavedObjectsClientFactory: (...args) => provider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       provider.addClientWrapperFactory(...args),
+    importExport: {
+      importSavedObjects,
+      getSortedObjectsForExport,
+      objectsToNdJson,
+    },
+    schema,
   };
   server.decorate('server', 'savedObjects', service);
 

@@ -27,7 +27,7 @@ interface ObjectToExport {
   type: string;
 }
 
-interface ExportObjectsOptions {
+export interface ExportObjectsOptions {
   types?: string[];
   objects?: ObjectToExport[];
   savedObjectsClient: SavedObjectsClient;

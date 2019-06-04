@@ -32,18 +32,15 @@ const coerceToArray = (param: string | string[]) => {
   return [param];
 };
 
-const getNamespace = (spaceId: string) => {
-  if (spaceId === DEFAULT_SPACE_ID) {
+const getNamespace = (spaceId: string, operationOptions: { namespace?: string }) => {
+  // Prefer namespace on incoming options, falling back to space id parsed from request
+  const effectiveSpaceId = operationOptions.namespace || spaceId;
+
+  if (effectiveSpaceId === DEFAULT_SPACE_ID) {
     return undefined;
   }
 
-  return spaceId;
-};
-
-const throwErrorIfNamespaceSpecified = (options: any) => {
-  if (options.namespace) {
-    throw new Error('Spaces currently determines the namespaces');
-  }
+  return effectiveSpaceId;
 };
 
 const throwErrorIfTypeIsSpace = (type: string) => {
@@ -90,11 +87,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
     options: CreateOptions = {}
   ) {
     throwErrorIfTypeIsSpace(type);
-    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.create(type, attributes, {
       ...options,
-      namespace: getNamespace(this.spaceId),
+      namespace: getNamespace(this.spaceId, options),
     });
   }
 
@@ -109,11 +105,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    */
   public async bulkCreate(objects: BulkCreateObject[], options: BaseOptions = {}) {
     throwErrorIfTypesContainsSpace(objects.map(object => object.type));
-    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.bulkCreate(objects, {
       ...options,
-      namespace: getNamespace(this.spaceId),
+      namespace: getNamespace(this.spaceId, options),
     });
   }
 
@@ -128,11 +123,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    */
   public async delete(type: string, id: string, options: BaseOptions = {}) {
     throwErrorIfTypeIsSpace(type);
-    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.delete(type, id, {
       ...options,
-      namespace: getNamespace(this.spaceId),
+      namespace: getNamespace(this.spaceId, options),
     });
   }
 
@@ -157,14 +151,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
       throwErrorIfTypesContainsSpace(coerceToArray(options.type));
     }
 
-    throwErrorIfNamespaceSpecified(options);
-
     return await this.client.find({
       ...options,
       type: (options.type ? coerceToArray(options.type) : this.types).filter(
         type => type !== 'space'
       ),
-      namespace: getNamespace(this.spaceId),
+      namespace: getNamespace(this.spaceId, options),
     });
   }
 
@@ -184,11 +176,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    */
   public async bulkGet(objects: BulkGetObjects = [], options: BaseOptions = {}) {
     throwErrorIfTypesContainsSpace(objects.map(object => object.type));
-    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.bulkGet(objects, {
       ...options,
-      namespace: getNamespace(this.spaceId),
+      namespace: getNamespace(this.spaceId, options),
     });
   }
 
@@ -203,11 +194,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    */
   public async get(type: string, id: string, options: BaseOptions = {}) {
     throwErrorIfTypeIsSpace(type);
-    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.get(type, id, {
       ...options,
-      namespace: getNamespace(this.spaceId),
+      namespace: getNamespace(this.spaceId, options),
     });
   }
 
@@ -228,11 +218,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
     options: UpdateOptions = {}
   ) {
     throwErrorIfTypeIsSpace(type);
-    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.update(type, id, attributes, {
       ...options,
-      namespace: getNamespace(this.spaceId),
+      namespace: getNamespace(this.spaceId, options),
     });
   }
 }

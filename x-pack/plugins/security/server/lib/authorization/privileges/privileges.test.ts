@@ -679,6 +679,8 @@ describe('savedObjectsManagement feature', () => {
 
       actions.ui.get('savedObjectsManagement', 'all-savedObject-read-1', 'read'),
 
+      actions.savedObject.manage,
+
       actions.allHack,
     ]);
 
@@ -702,6 +704,8 @@ describe('savedObjectsManagement feature', () => {
       actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'read'),
 
       actions.ui.get('savedObjectsManagement', 'read-savedObject-read-1', 'read'),
+
+      actions.savedObject.manage,
     ]);
   });
 });

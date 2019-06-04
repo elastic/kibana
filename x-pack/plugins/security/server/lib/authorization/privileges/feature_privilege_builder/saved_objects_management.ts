@@ -17,6 +17,7 @@ export class FeaturePrivilegeSavedObjectsManagementBuilder extends BaseFeaturePr
     if (feature.id !== 'savedObjectsManagement') {
       return [];
     }
+    const canManage = privilegeDefinition.savedObject.all.length > 0;
     return uniq([
       ...flatten(
         privilegeDefinition.savedObject.all.map(type => [
@@ -28,6 +29,7 @@ export class FeaturePrivilegeSavedObjectsManagementBuilder extends BaseFeaturePr
       ...privilegeDefinition.savedObject.read.map(type =>
         this.actions.ui.get('savedObjectsManagement', type, 'read')
       ),
+      ...(canManage ? [this.actions.savedObject.manage] : []),
     ]);
   }
 }

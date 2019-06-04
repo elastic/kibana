@@ -17,6 +17,10 @@ export class SavedObjectActions {
     return `${this.prefix}*`;
   }
 
+  public get manage(): string {
+    return `${this.prefix}manage`;
+  }
+
   public get(type: string, operation: string): string {
     if (!type || !isString(type)) {
       throw new Error('type is required and must be a string');

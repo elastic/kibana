@@ -24,15 +24,16 @@ import { extractErrors } from './extract_errors';
 import { ImportError } from './types';
 import { validateReferences } from './validate_references';
 
-interface ImportSavedObjectsOptions {
+export interface ImportSavedObjectsOptions {
   readStream: Readable;
   objectLimit: number;
   overwrite: boolean;
   savedObjectsClient: SavedObjectsClient;
   supportedTypes: string[];
+  namespace?: string;
 }
 
-interface ImportResponse {
+export interface ImportResponse {
   success: boolean;
   successCount: number;
   errors?: ImportError[];
@@ -44,6 +45,7 @@ export async function importSavedObjects({
   overwrite,
   savedObjectsClient,
   supportedTypes,
+  namespace,
 }: ImportSavedObjectsOptions): Promise<ImportResponse> {
   let errorAccumulator: ImportError[] = [];
 
@@ -73,6 +75,7 @@ export async function importSavedObjects({
   // Create objects in bulk
   const bulkCreateResult = await savedObjectsClient.bulkCreate(filteredObjects, {
     overwrite,
+    namespace,
   });
   errorAccumulator = [
     ...errorAccumulator,

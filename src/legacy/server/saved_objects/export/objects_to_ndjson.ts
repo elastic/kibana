@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import stringify from 'json-stable-stringify';
+import { SavedObject } from '..';
 
-export { getSortedObjectsForExport, ExportObjectsOptions } from './get_sorted_objects_for_export';
-export { objectsToNdJson } from './objects_to_ndjson';
+export function objectsToNdJson(savedObjects: SavedObject[]): string {
+  return savedObjects.map(doc => stringify(doc)).join('\n');
+}

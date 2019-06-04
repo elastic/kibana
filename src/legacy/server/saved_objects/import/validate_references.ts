@@ -29,7 +29,8 @@ function filterReferencesToValidate({ type }: { type: string }) {
 
 export async function getNonExistingReferenceAsKeys(
   savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClient
+  savedObjectsClient: SavedObjectsClient,
+  namespace?: string
 ) {
   const collector = new Map();
   // Collect all references within objects
@@ -50,7 +51,7 @@ export async function getNonExistingReferenceAsKeys(
 
   // Fetch references to see if they exist
   const bulkGetOpts = Array.from(collector.values()).map(obj => ({ ...obj, fields: ['id'] }));
-  const bulkGetResponse = await savedObjectsClient.bulkGet(bulkGetOpts);
+  const bulkGetResponse = await savedObjectsClient.bulkGet(bulkGetOpts, { namespace });
 
   // Error handling
   const erroredObjects = bulkGetResponse.saved_objects.filter(
@@ -77,12 +78,14 @@ export async function getNonExistingReferenceAsKeys(
 
 export async function validateReferences(
   savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClient
+  savedObjectsClient: SavedObjectsClient,
+  namespace?: string
 ) {
   const errorMap: { [key: string]: ImportError } = {};
   const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(
     savedObjects,
-    savedObjectsClient
+    savedObjectsClient,
+    namespace
   );
 
   // Filter out objects with missing references, add to error object

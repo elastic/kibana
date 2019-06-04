@@ -9,6 +9,7 @@ import { initDeleteSpacesApi } from './delete';
 import { initGetSpacesApi } from './get';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
+import { initCopyToSpacesApi } from './copy_to_space';
 
 export function initExternalSpacesApi(server: any) {
   const routePreCheckLicenseFn = routePreCheckLicense(server);
@@ -17,4 +18,5 @@ export function initExternalSpacesApi(server: any) {
   initGetSpacesApi(server, routePreCheckLicenseFn);
   initPostSpacesApi(server, routePreCheckLicenseFn);
   initPutSpacesApi(server, routePreCheckLicenseFn);
+  initCopyToSpacesApi(server, routePreCheckLicenseFn);
 }

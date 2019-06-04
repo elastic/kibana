@@ -17,5 +17,9 @@
  * under the License.
  */
 
-export { importSavedObjects } from './import_saved_objects';
+export {
+  importSavedObjects,
+  ImportSavedObjectsOptions,
+  ImportResponse,
+} from './import_saved_objects';
 export { resolveImportErrors } from './resolve_import_errors';

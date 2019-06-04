@@ -19,9 +19,8 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import stringify from 'json-stable-stringify';
 import { SavedObjectsClient } from '../';
-import { getSortedObjectsForExport } from '../export';
+import { getSortedObjectsForExport, objectsToNdJson } from '../export';
 import { Prerequisites } from './types';
 
 interface ExportRequest extends Hapi.Request {
@@ -78,7 +77,7 @@ export const createExportRoute = (
         includeReferencesDeep: request.payload.includeReferencesDeep,
       });
       return h
-        .response(docsToExport.map(doc => stringify(doc)).join('\n'))
+        .response(objectsToNdJson(docsToExport))
         .header('Content-Disposition', `attachment; filename="export.ndjson"`)
         .header('Content-Type', 'application/ndjson');
     },
