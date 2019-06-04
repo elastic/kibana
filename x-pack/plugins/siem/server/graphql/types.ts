@@ -933,6 +933,8 @@ export interface IpOverviewData {
 
   destination?: Overview | null;
 
+  host: HostEcsFields;
+
   server?: Overview | null;
 
   source?: Overview | null;
@@ -944,8 +946,6 @@ export interface Overview {
   lastSeen?: Date | null;
 
   autonomousSystem: AutonomousSystem;
-
-  host: HostEcsFields;
 
   geo: GeoEcsFields;
 }
@@ -5296,6 +5296,8 @@ export namespace IpOverviewDataResolvers {
 
     destination?: DestinationResolver<Overview | null, TypeParent, Context>;
 
+    host?: HostResolver<HostEcsFields, TypeParent, Context>;
+
     server?: ServerResolver<Overview | null, TypeParent, Context>;
 
     source?: SourceResolver<Overview | null, TypeParent, Context>;
@@ -5308,6 +5310,11 @@ export namespace IpOverviewDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type DestinationResolver<
     R = Overview | null,
+    Parent = IpOverviewData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type HostResolver<
+    R = HostEcsFields,
     Parent = IpOverviewData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5331,8 +5338,6 @@ export namespace OverviewResolvers {
 
     autonomousSystem?: AutonomousSystemResolver<AutonomousSystem, TypeParent, Context>;
 
-    host?: HostResolver<HostEcsFields, TypeParent, Context>;
-
     geo?: GeoResolver<GeoEcsFields, TypeParent, Context>;
   }
 
@@ -5351,11 +5356,6 @@ export namespace OverviewResolvers {
     Parent = Overview,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type HostResolver<R = HostEcsFields, Parent = Overview, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
   export type GeoResolver<R = GeoEcsFields, Parent = Overview, Context = SiemContext> = Resolver<
     R,
     Parent,
