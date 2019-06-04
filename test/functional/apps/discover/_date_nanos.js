@@ -23,8 +23,8 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
-  const fromTime = '2015-09-19 06:31:44.000';
-  const toTime = '2015-09-23 18:31:44.000';
+  const fromTime = '2019-09-19 20:31:44.000';
+  const toTime = '2019-09-20 03:31:44.000';
 
   describe('date_nanos', function () {
 
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
       expect(time.start).to.be('Sep 19, 2015 @ 06:31:44.000');
       expect(time.end).to.be('Sep 23, 2015 @ 18:31:44.000');
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253123345')).to.be.ok();
+      expect(rowData.startsWith('Sep 22, 2019 @ 23:50:13.253123345')).to.be.ok();
     });
   });
 

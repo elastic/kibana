@@ -47,6 +47,64 @@ const DAY_MILLIS = 24 * 60 * 60 * 1000;
 // look from 1 day up to 10000 days into the past and future
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS);
 
+/**
+ * extract nanoseconds if available in ISO timestamp
+ * returns the nanos like this:
+ * 9ns -> 000000009
+ * 10000ns -> 0000010000
+ * @param {string} timeFieldValue
+ * @returns {string}
+ */
+function extractNanoSeconds(timeFieldValue = '') {
+  const fractionSeconds = timeFieldValue
+    .split('.')[1]
+    .replace('Z', '');
+  return (fractionSeconds.length !== 9)
+    ? fractionSeconds.padEnd(9, '0')
+    : fractionSeconds;
+}
+
+function convertIsoToNanosAsStr(isoValue) {
+  const nanos = extractNanoSeconds(isoValue);
+  const millis = convertIsoToMillis(isoValue);
+  return `${millis}${nanos.substr(3, 6)}`;
+}
+
+/**
+ * convert an iso formatted string to number of milliseconds since
+ * 1970-01-01T00:00:00.000Z
+ * @param {string} isoValue
+ * @returns {number}
+ */
+function convertIsoToMillis(isoValue) {
+  const date = new Date(isoValue);
+  return date.getTime();
+}
+/**
+ * the given time value in milliseconds is converted to a ISO formatted string
+ * if nanosValue is provided, the given value replaces the fractional seconds part
+ * of the formated string since moment.js doesn't support formatting timestamps
+ * with a higher precision then microseconds
+ * The browser rounds date nanos values:
+ * 2019-09-18T06:50:12.999999999 -> browser rounds to 1568789413000000000
+ * 2019-09-18T06:50:59.999999999 -> browser rounds to 1568789460000000000
+ * 2017-12-31T23:59:59.999999999 -> browser rounds 1514761199999999999 to 1514761200000000000
+ * @param {number} timeValueMillis
+ * @param {string} nanosValue
+ */
+function convertTimeValueToIso(timeValueMillis, nanosValue) {
+  if(!timeValueMillis) {
+    return null;
+  }
+  const isoString = moment(timeValueMillis).toISOString();
+  if(!isoString) {
+    return null;
+  } else if(nanosValue !== '') {
+    return `${isoString.substring(0, isoString.length - 4)}${nanosValue}Z`;
+  }
+  return isoString;
+}
+
 function fetchContextProvider(indexPatterns, Private) {
   /**
    * @type {{new(): SearchSourceT}}
@@ -60,42 +118,50 @@ function fetchContextProvider(indexPatterns, Private) {
 
   async function fetchSuccessors(
     indexPatternId,
-    timeField,
-    timeSortDirection,
-    timeValue,
+    timeFieldName,
+    timeFieldSortDir,
+    timeFieldIsoValue,
+    timeFieldNumValue,
     tieBreakerField,
     tieBreakerValue,
     size,
     filters
   ) {
-    const searchSource = await createSearchSource(indexPatternId, filters);
-    const offsetSign = timeSortDirection === 'asc' ? 1 : -1;
+    const indexPattern = await indexPatterns.get(indexPatternId);
+    const searchSource = await createSearchSource(indexPattern, filters);
+    const offsetSign = timeFieldSortDir === 'asc' ? 1 : -1;
+
+    const nanoSeconds = indexPattern.isTimeNanosBased() ? extractNanoSeconds(timeFieldIsoValue) : '';
+    const timeValueMillis = nanoSeconds !== '' ? convertIsoToMillis(timeFieldIsoValue) : timeFieldNumValue;
 
     // ending with `null` opens the last interval
-    const intervals = asPairs([...LOOKUP_OFFSETS.map(offset => timeValue + offset * offsetSign), null]);
+    const intervals = asPairs([...LOOKUP_OFFSETS.map(offset => timeValueMillis + offset * offsetSign), null]);
 
     let successors = [];
-    for (const [startTimeValue, endTimeValue] of intervals) {
+    for (const [iStartTimeValue, iEndTimeValue] of intervals) {
       const remainingSize = size - successors.length;
 
       if (remainingSize <= 0) {
         break;
       }
 
-      const [afterTimeValue, afterTieBreakerValue] = successors.length > 0
-        ? successors[successors.length - 1].sort
-        : [timeValue, tieBreakerValue];
+      const afterTimeValue = nanoSeconds
+        ? convertIsoToNanosAsStr(successors.length ? successors[successors.length - 1]._source[timeFieldName] : timeFieldIsoValue)
+        : timeFieldNumValue;
+
+      const afterTieBreakerValue = successors.length > 0 ? successors[successors.length - 1].sort[1] : tieBreakerValue;
 
       const hits = await fetchHitsInInterval(
         searchSource,
-        timeField,
-        timeSortDirection,
-        startTimeValue,
-        endTimeValue,
+        timeFieldName,
+        timeFieldSortDir,
+        iStartTimeValue,
+        iEndTimeValue,
         afterTimeValue,
         tieBreakerField,
         afterTieBreakerValue,
-        remainingSize
+        remainingSize,
+        nanoSeconds
       );
 
       successors = [...successors, ...hits];
@@ -106,42 +172,47 @@ function fetchContextProvider(indexPatterns, Private) {
 
   async function fetchPredecessors(
     indexPatternId,
-    timeField,
-    timeSortDirection,
-    timeValue,
+    timeFieldName,
+    timeFieldSortDir,
+    timeFieldIsoValue,
+    timeFieldNumValue,
     tieBreakerField,
     tieBreakerValue,
     size,
     filters
   ) {
-    const searchSource = await createSearchSource(indexPatternId, filters);
-    const offsetSign = timeSortDirection === 'desc' ? 1 : -1;
+    const indexPattern = await indexPatterns.get(indexPatternId);
+    const searchSource = await createSearchSource(indexPattern, filters);
+    const offsetSign = timeFieldSortDir === 'desc' ? 1 : -1;
+    const nanoSeconds = indexPattern.isTimeNanosBased() ? extractNanoSeconds(timeFieldIsoValue) : '';
+    const timeValueMillis = nanoSeconds !== '' ? convertIsoToMillis(timeFieldIsoValue) : timeFieldNumValue;
 
     // ending with `null` opens the last interval
-    const intervals = asPairs([...LOOKUP_OFFSETS.map(offset => timeValue + offset * offsetSign), null]);
+    const intervals = asPairs([...LOOKUP_OFFSETS.map(offset => timeValueMillis + offset * offsetSign), null]);
 
     let predecessors = [];
-    for (const [startTimeValue, endTimeValue] of intervals) {
+    for (const [iStartTimeValue, iEndTimeValue] of intervals) {
       const remainingSize = size - predecessors.length;
 
       if (remainingSize <= 0) {
         break;
       }
-
-      const [afterTimeValue, afterTieBreakerValue] = predecessors.length > 0
-        ? predecessors[0].sort
-        : [timeValue, tieBreakerValue];
+      const afterTimeValue = nanoSeconds
+        ? convertIsoToNanosAsStr(predecessors.length ? predecessors[0]._source[timeFieldName] : timeFieldIsoValue)
+        : timeFieldNumValue;
+      const afterTieBreakerValue = predecessors.length > 0 ? predecessors[0].sort[1] : tieBreakerValue;
 
       const hits = await fetchHitsInInterval(
         searchSource,
-        timeField,
-        reverseSortDirection(timeSortDirection),
-        startTimeValue,
-        endTimeValue,
+        timeFieldName,
+        reverseSortDirection(timeFieldSortDir),
+        iStartTimeValue,
+        iEndTimeValue,
         afterTimeValue,
         tieBreakerField,
         afterTieBreakerValue,
-        remainingSize
+        remainingSize,
+        nanoSeconds
       );
 
       predecessors = [...hits.slice().reverse(), ...predecessors];
@@ -150,14 +221,13 @@ function fetchContextProvider(indexPatterns, Private) {
     return predecessors;
   }
 
+
   /**
-   * @param {string} indexPatternId
+   * @param {Object} indexPattern
    * @param {any[]} filters
    * @returns {Promise<Object>}
    */
-  async function createSearchSource(indexPatternId, filters) {
-    const indexPattern = await indexPatterns.get(indexPatternId);
-
+  async function createSearchSource(indexPattern, filters) {
     return new SearchSource()
       .setParent(false)
       .setField('index', indexPattern)
@@ -166,7 +236,7 @@ function fetchContextProvider(indexPatterns, Private) {
 
   /**
    * Fetch the hits between `(afterTimeValue, tieBreakerValue)` and
-   * `endTimeValue` from the `searchSource` using the given `timeField` and
+   * `endRangeMillis` from the `searchSource` using the given `timeField` and
    * `tieBreakerField` fields up to a maximum of `maxCount` documents. The
    * documents are sorted by `(timeField, tieBreakerField)` using the
    * `timeSortDirection` for both fields
@@ -175,32 +245,35 @@ function fetchContextProvider(indexPatterns, Private) {
    * and filters set.
    *
    * @param {SearchSourceT} searchSource
-   * @param {string} timeField
-   * @param {SortDirection} timeSortDirection
-   * @param {number} startTimeValue
-   * @param {number | null} endTimeValue
-   * @param {number} [afterTimeValue=startTimeValue]
+   * @param {string} timeFieldName
+   * @param {SortDirection} timeFieldSortDir
+   * @param {number} startRangeMillis
+   * @param {number | null} endRangeMillis
+   * @param {number| string} afterTimeValue
    * @param {string} tieBreakerField
    * @param {number} tieBreakerValue
    * @param {number} maxCount
+   * @param {string} nanosValue
    * @returns {Promise<object[]>}
    */
   async function fetchHitsInInterval(
     searchSource,
-    timeField,
-    timeSortDirection,
-    startTimeValue,
-    endTimeValue,
+    timeFieldName,
+    timeFieldSortDir,
+    startRangeMillis,
+    endRangeMillis,
     afterTimeValue,
     tieBreakerField,
     tieBreakerValue,
-    maxCount
+    maxCount,
+    nanosValue
   ) {
+
     const startRange = {
-      [timeSortDirection === 'asc' ? 'gte' : 'lte']: moment(startTimeValue).toISOString(),
+      [timeFieldSortDir === 'asc' ? 'gte' : 'lte']: convertTimeValueToIso(startRangeMillis, nanosValue),
     };
-    const endRange = endTimeValue === null ? {} : {
-      [timeSortDirection === 'asc' ? 'lte' : 'gte']: moment(endTimeValue).toISOString(),
+    const endRange = endRangeMillis === null ? {} : {
+      [timeFieldSortDir === 'asc' ? 'lte' : 'gte']: convertTimeValueToIso(endRangeMillis, nanosValue),
     };
 
     const response = await searchSource
@@ -210,7 +283,7 @@ function fetchContextProvider(indexPatterns, Private) {
           constant_score: {
             filter: {
               range: {
-                [timeField]: {
+                [timeFieldName]: {
                   format: 'strict_date_optional_time',
                   ...startRange,
                   ...endRange,
@@ -222,12 +295,12 @@ function fetchContextProvider(indexPatterns, Private) {
         language: 'lucene'
       })
       .setField('searchAfter', [
-        afterTimeValue !== null ? afterTimeValue : startTimeValue,
-        tieBreakerValue,
+        afterTimeValue,
+        tieBreakerValue
       ])
       .setField('sort', [
-        { [timeField]: timeSortDirection },
-        { [tieBreakerField]: timeSortDirection },
+        { [timeFieldName]: timeFieldSortDir },
+        { [tieBreakerField]: timeFieldSortDir },
       ])
       .setField('version', true)
       .fetch();
