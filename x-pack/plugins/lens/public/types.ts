@@ -54,7 +54,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
 
-  toExpression: (state: T) => Ast | string;
+  toExpression: (state: T) => Ast | string | null;
 
   getDatasourceSuggestionsForField: (state: T) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
@@ -158,7 +158,7 @@ export interface Visualization<T = unknown, P = unknown> {
 
   renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
 
-  toExpression: (state: T, datasource: DatasourcePublicAPI) => Ast | string;
+  toExpression: (state: T, datasource: DatasourcePublicAPI) => Ast | string | null;
 
   // The frame will call this function on all visualizations when the table changes, or when
   // rendering additional ways of using the data

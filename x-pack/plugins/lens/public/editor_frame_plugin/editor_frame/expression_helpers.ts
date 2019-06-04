@@ -8,32 +8,35 @@ import { Ast, fromExpression } from '@kbn/interpreter/common';
 import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
 
 export function buildExpression(
-  visualization: Visualization,
+  visualization: Visualization | null,
   visualizationState: unknown,
   datasource: Datasource,
   datasourceState: unknown,
   datasourcePublicAPI: DatasourcePublicAPI
-): Ast | undefined {
+): Ast | null {
+  if (visualization === null) {
+    return null;
+  }
   const datasourceExpression = datasource.toExpression(datasourceState);
   const visualizationExpression = visualization.toExpression(
     visualizationState,
     datasourcePublicAPI
   );
 
-  try {
-    const parsedDatasourceExpression =
-      typeof datasourceExpression === 'string'
-        ? fromExpression(datasourceExpression)
-        : datasourceExpression;
-    const parsedVisualizationExpression =
-      typeof visualizationExpression === 'string'
-        ? fromExpression(visualizationExpression)
-        : visualizationExpression;
-    return {
-      type: 'expression',
-      chain: [...parsedDatasourceExpression.chain, ...parsedVisualizationExpression.chain],
-    };
-  } catch (_) {
-    return undefined;
+  if (datasourceExpression === null || visualizationExpression === null) {
+    return null;
   }
+
+  const parsedDatasourceExpression =
+    typeof datasourceExpression === 'string'
+      ? fromExpression(datasourceExpression)
+      : datasourceExpression;
+  const parsedVisualizationExpression =
+    typeof visualizationExpression === 'string'
+      ? fromExpression(visualizationExpression)
+      : visualizationExpression;
+  return {
+    type: 'expression',
+    chain: [...parsedDatasourceExpression.chain, ...parsedVisualizationExpression.chain],
+  };
 }

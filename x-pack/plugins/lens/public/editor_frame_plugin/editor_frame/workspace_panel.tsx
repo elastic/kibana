@@ -6,7 +6,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 
+import { toExpression } from '@kbn/interpreter/common';
 import { ExpressionRenderer } from '../../../../../../src/legacy/core_plugins/data/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
@@ -70,19 +72,25 @@ export function WorkspacePanel({
   }
 
   function renderVisualization() {
-    const [expressionError, setExpressionError] = useState(false);
+    const [expressionError, setExpressionError] = useState<unknown>(undefined);
 
-    const activeVisualization = activeVisualizationId && visualizationMap[activeVisualizationId];
+    const activeVisualization = activeVisualizationId
+      ? visualizationMap[activeVisualizationId]
+      : null;
     const expression = useMemo(
-      () =>
-        activeVisualization &&
-        buildExpression(
-          activeVisualization,
-          visualizationState,
-          activeDatasource,
-          datasourceState,
-          datasourcePublicAPI
-        ),
+      () => {
+        try {
+          return buildExpression(
+            activeVisualization,
+            visualizationState,
+            activeDatasource,
+            datasourceState,
+            datasourcePublicAPI
+          );
+        } catch (e) {
+          setExpressionError(e.toString());
+        }
+      },
       [
         activeVisualization,
         visualizationState,
@@ -96,34 +104,43 @@ export function WorkspacePanel({
       () => {
         // reset expression error if component attempts to run it again
         if (expressionError) {
-          setExpressionError(false);
+          setExpressionError(undefined);
         }
       },
       [expression]
     );
 
-    if (activeVisualizationId === null) {
+    if (expression === null) {
       return renderEmptyWorkspace();
     }
 
-    if (expression && !expressionError) {
+    if (expressionError) {
       return (
-        <ExpressionRendererComponent
-          expression={expression}
-          onRenderFailure={() => {
-            setExpressionError(true);
-          }}
-        />
+        <>
+          <p data-test-subj="expression-failure">
+            {/* TODO word this differently because expressions should not be exposed at this level */}
+            <FormattedMessage
+              id="xpack.lens.editorFrame.expressionFailure"
+              defaultMessage="Expression could not be executed successfully"
+            />
+          </p>
+          {expression && (
+            <>
+              <EuiCodeBlock>{toExpression(expression)}</EuiCodeBlock>
+              <EuiSpacer />
+            </>
+          )}
+          <EuiCodeBlock>{JSON.stringify(expressionError, null, 2)}</EuiCodeBlock>
+        </>
       );
     } else {
       return (
-        <p data-test-subj="expression-failure">
-          {/* TODO word this differently because expressions should not be exposed at this level */}
-          <FormattedMessage
-            id="xpack.lens.editorFrame.expressionFailure"
-            defaultMessage="Expression could not be executed successfully"
-          />
-        </p>
+        <ExpressionRendererComponent
+          expression={expression!}
+          onRenderFailure={e => {
+            setExpressionError(e);
+          }}
+        />
       );
     }
   }

@@ -71,5 +71,5 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     );
   },
 
-  toExpression: state => '',
+  toExpression: state => null,
 };

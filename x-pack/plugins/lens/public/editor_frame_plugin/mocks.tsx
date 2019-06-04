@@ -15,7 +15,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     getSuggestions: jest.fn(_options => []),
     initialize: jest.fn(_state => ({})),
     renderConfigPanel: jest.fn(),
-    toExpression: jest.fn((_state, _datasource) => ''),
+    toExpression: jest.fn((_state, _datasource) => null),
   };
 }
 
@@ -40,7 +40,7 @@ export function createMockDatasource(): DatasourceMock {
     getPublicAPI: jest.fn((_state, _setState) => publicAPIMock),
     initialize: jest.fn(_state => Promise.resolve()),
     renderDataPanel: jest.fn(),
-    toExpression: jest.fn(_state => ''),
+    toExpression: jest.fn(_state => null),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called

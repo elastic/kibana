@@ -11,7 +11,7 @@ import { xyVisualization } from './xy_visualization';
 import {
   renderersRegistry,
   functionsRegistry,
-  // @ts-ignore
+  // @ts-ignore untyped dependency
 } from '../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { ExpressionFunction } from '../../../../../src/legacy/core_plugins/interpreter/public';
 import { legendConfig, xConfig, yConfig, xyChart, xyChartRenderer } from './xy_expression';

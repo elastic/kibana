@@ -60,6 +60,46 @@ describe('workspace_panel', () => {
     expect(instance.find(expressionRendererMock).length).toBe(0);
   });
 
+  it('should render an explanatory text if the visualization does not produce an expression', () => {
+    instance = mount(
+      <WorkspacePanel
+        activeDatasource={{ ...mockDatasource, toExpression: () => 'datasource' }}
+        datasourceState={{}}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => null },
+        }}
+        visualizationState={{}}
+        datasourcePublicAPI={mockDatasource.publicAPIMock}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
+
+    expect(instance.find('[data-test-subj="empty-workspace"]').length).toBe(1);
+    expect(instance.find(expressionRendererMock).length).toBe(0);
+  });
+
+  it('should render an explanatory text if the datasource does not produce an expression', () => {
+    instance = mount(
+      <WorkspacePanel
+        activeDatasource={{ ...mockDatasource, toExpression: () => null }}
+        datasourceState={{}}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        datasourcePublicAPI={mockDatasource.publicAPIMock}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
+
+    expect(instance.find('[data-test-subj="empty-workspace"]').length).toBe(1);
+    expect(instance.find(expressionRendererMock).length).toBe(0);
+  });
+
   it('should render the resulting expression using the expression renderer', () => {
     instance = mount(
       <WorkspacePanel
@@ -99,7 +139,7 @@ Object {
   });
 
   describe('expression failures', () => {
-    it('should show an error message if the expression fails to parse', async () => {
+    it('should show an error message if the expression fails to parse', () => {
       instance = mount(
         <WorkspacePanel
           activeDatasource={{
