@@ -3,12 +3,46 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KpiHostsData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { MSearchHeader, SearchHit } from '../types';
 
+export interface KpiHostChartData {
+  x: number | string | null;
+  y: number | string | null;
+  y0?: number;
+  g?: number | string;
+}
+
+export interface KpiHostsMappedData {
+  hosts?: number | null;
+  hostsHistogram?: KpiHostChartData[] | null;
+  authSuccess?: number | null;
+  authSuccessHistogram?: KpiHostChartData[] | null;
+  authFailure?: number | null;
+  authFailureHistogram?: KpiHostChartData[] | null;
+  uniqueSourceIps?: number | null;
+  uniqueSourceIpsHistogram?: KpiHostChartData[] | null;
+  uniqueDestinationIps?: number | null;
+  uniqueDestinationIpsHistogram?: KpiHostChartData[] | null;
+}
+
 export interface KpiHostsAdapter {
-  getKpiHosts(request: FrameworkRequest, options: RequestBasicOptions): Promise<KpiHostsData>;
+  getKpiHosts(request: FrameworkRequest, options: RequestBasicOptions): Promise<KpiHostsMappedData>;
+}
+
+export interface KpiHostHistogram<T> {
+  key_as_string: string;
+  key: number;
+  doc_count: number;
+  count: T;
+}
+
+export interface KpiHostGeneralHistogramCount {
+  value: number;
+}
+
+export interface KpiHostAuthHistogramCount {
+  doc_count: number;
 }
 
 export interface KpiHostsGeneralHit extends SearchHit {
@@ -17,46 +51,19 @@ export interface KpiHostsGeneralHit extends SearchHit {
       value: number;
     };
     hosts_histogram: {
-      buckets: [
-        {
-          key_as_string: string;
-          key: number;
-          doc_count: number;
-          count: {
-            value: number;
-          };
-        }
-      ];
+      buckets: Array<KpiHostHistogram<KpiHostGeneralHistogramCount>>;
     };
     unique_source_ips: {
       value: number;
     };
     unique_source_ips_histogram: {
-      buckets: [
-        {
-          key_as_string: string;
-          key: number;
-          doc_count: number;
-          count: {
-            value: number;
-          };
-        }
-      ];
+      buckets: Array<KpiHostHistogram<KpiHostGeneralHistogramCount>>;
     };
     unique_destination_ips: {
       value: number;
     };
     unique_destination_ips_histogram: {
-      buckets: [
-        {
-          key_as_string: string;
-          key: number;
-          doc_count: number;
-          count: {
-            value: number;
-          };
-        }
-      ];
+      buckets: Array<KpiHostHistogram<KpiHostGeneralHistogramCount>>;
     };
   };
   _shards: {
@@ -79,31 +86,13 @@ export interface KpiHostsAuthHit extends SearchHit {
       doc_count: number;
     };
     authentication_success_histogram: {
-      buckets: [
-        {
-          key_as_string: string;
-          key: number;
-          doc_count: number;
-          count: {
-            doc_count: number;
-          };
-        }
-      ];
+      buckets: Array<KpiHostHistogram<KpiHostAuthHistogramCount>>;
     };
     authentication_failure: {
       doc_count: number;
     };
     authentication_failure_histogram: {
-      buckets: [
-        {
-          key_as_string: string;
-          key: number;
-          doc_count: number;
-          count: {
-            doc_count: number;
-          };
-        }
-      ];
+      buckets: Array<KpiHostHistogram<KpiHostAuthHistogramCount>>;
     };
   };
   _shards: {

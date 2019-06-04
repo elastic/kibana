@@ -7,16 +7,9 @@
 import gql from 'graphql-tag';
 
 export const kpiHostsSchema = gql`
-  type KpiHostCount {
-    value: Float
-    doc_count: Float
-  }
-
   type KpiHostHistogramData {
-    key: Float
-    key_as_string: String
-    count: KpiHostCount
-    doc_count: Float
+    x: String
+    y: Float
   }
 
   type KpiHostsData {

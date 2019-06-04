@@ -17,7 +17,7 @@ import {
 } from '@elastic/charts';
 import '@elastic/charts/dist/style.css';
 import {
-  AreaChartData,
+  ChartConfigsData,
   ChartHolder,
   getSeriesStyle,
   numberFormatter,
@@ -62,7 +62,7 @@ const getSeriesLineStyle = (color: string | undefined) => {
 
 // https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = React.memo<{
-  data: AreaChartData[];
+  data: ChartConfigsData[];
   width: number | null | undefined;
   height: number | null | undefined;
 }>(({ data, ...chartConfigs }) => {
@@ -108,7 +108,7 @@ export const AreaChartBaseComponent = React.memo<{
 });
 
 export const AreaChartWithCustomPrompt = React.memo<{
-  data: AreaChartData[] | null | undefined;
+  data: ChartConfigsData[] | null | undefined;
   height: number | null | undefined;
   width: number | null | undefined;
 }>(({ data, height, width }) => {
@@ -126,7 +126,7 @@ export const AreaChartWithCustomPrompt = React.memo<{
   );
 });
 
-export const AreaChart = React.memo<{ areaChart: AreaChartData[] | null | undefined }>(
+export const AreaChart = React.memo<{ areaChart: ChartConfigsData[] | null | undefined }>(
   ({ areaChart }) => (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (

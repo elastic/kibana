@@ -1133,19 +1133,9 @@ export interface KpiHostsData {
 }
 
 export interface KpiHostHistogramData {
-  key?: number | null;
+  x?: string | null;
 
-  key_as_string?: string | null;
-
-  count?: KpiHostCount | null;
-
-  doc_count?: number | null;
-}
-
-export interface KpiHostCount {
-  value?: number | null;
-
-  doc_count?: number | null;
+  y?: number | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -6028,52 +6018,19 @@ export namespace KpiHostsDataResolvers {
 
 export namespace KpiHostHistogramDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = KpiHostHistogramData> {
-    key?: KeyResolver<number | null, TypeParent, Context>;
+    x?: XResolver<string | null, TypeParent, Context>;
 
-    key_as_string?: KeyAsStringResolver<string | null, TypeParent, Context>;
-
-    count?: CountResolver<KpiHostCount | null, TypeParent, Context>;
-
-    doc_count?: DocCountResolver<number | null, TypeParent, Context>;
+    y?: YResolver<number | null, TypeParent, Context>;
   }
 
-  export type KeyResolver<
-    R = number | null,
-    Parent = KpiHostHistogramData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type KeyAsStringResolver<
+  export type XResolver<
     R = string | null,
     Parent = KpiHostHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type CountResolver<
-    R = KpiHostCount | null,
-    Parent = KpiHostHistogramData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DocCountResolver<
+  export type YResolver<
     R = number | null,
     Parent = KpiHostHistogramData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace KpiHostCountResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = KpiHostCount> {
-    value?: ValueResolver<number | null, TypeParent, Context>;
-
-    doc_count?: DocCountResolver<number | null, TypeParent, Context>;
-  }
-
-  export type ValueResolver<
-    R = number | null,
-    Parent = KpiHostCount,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DocCountResolver<
-    R = number | null,
-    Parent = KpiHostCount,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

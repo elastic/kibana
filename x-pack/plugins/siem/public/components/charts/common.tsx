@@ -32,12 +32,6 @@ export const ChartHolder = () => (
   </FlexGroup>
 );
 
-export interface AreaChartData {
-  key: string;
-  value: ChartData[] | [] | null;
-  color?: string | undefined;
-}
-
 export interface ChartData {
   x: number | string | null;
   y: number | string | null;
@@ -45,7 +39,7 @@ export interface ChartData {
   g?: number | string;
 }
 
-export interface BarChartData {
+export interface ChartConfigsData {
   key: string;
   value: ChartData[] | [] | null;
   color?: string | undefined;

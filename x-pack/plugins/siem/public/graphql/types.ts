@@ -1104,19 +1104,9 @@ export interface KpiHostsData {
 }
 
 export interface KpiHostHistogramData {
-  key?: number | null;
+  x?: string | null;
 
-  key_as_string?: string | null;
-
-  count?: KpiHostCount | null;
-
-  doc_count?: number | null;
-}
-
-export interface KpiHostCount {
-  value?: number | null;
-
-  doc_count?: number | null;
+  y?: number | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -5061,15 +5051,7 @@ export namespace KpiHostChartFields {
 
     x?: string | null;
 
-    y?: Y | null;
-  };
-
-  export type Y = {
-    __typename?: 'KpiHostCount';
-
-    value?: number | null;
-
-    doc_count?: number | null;
+    y?: number | null;
   };
 }
 

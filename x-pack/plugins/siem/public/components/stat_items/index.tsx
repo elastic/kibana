@@ -20,7 +20,7 @@ import { get, getOr } from 'lodash/fp';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { getEmptyTagValue } from '../empty_value';
-import { AreaChartData, BarChartData, ChartData } from '../charts/common';
+import { ChartConfigsData, ChartData } from '../charts/common';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 
 const FlexItem = styled(EuiFlexItem)`
@@ -52,8 +52,8 @@ export interface StatItems {
 }
 
 export interface StatItemsProps extends StatItems {
-  areaChart?: AreaChartData[];
-  barChart?: BarChartData[];
+  areaChart?: ChartConfigsData[];
+  barChart?: ChartConfigsData[];
 }
 
 export const useKpiMatrixStatus = (
@@ -65,7 +65,7 @@ export const useKpiMatrixStatus = (
   const addValueToFields = (fields: StatItem[]): StatItem[] =>
     fields.map(field => ({ ...field, value: get(field.key, data) }));
 
-  const addValueToAreaChart = (fields: StatItem[]): AreaChartData[] =>
+  const addValueToAreaChart = (fields: StatItem[]): ChartConfigsData[] =>
     fields
       .filter(field => get(`${field.key}Histogram`, data) != null)
       .map(field => ({
@@ -74,9 +74,9 @@ export const useKpiMatrixStatus = (
         key: `${field.key}Histogram`,
       }));
 
-  const addValueToBarChart = (fields: StatItem[]): BarChartData[] => {
+  const addValueToBarChart = (fields: StatItem[]): ChartConfigsData[] => {
     if (fields.length === 0) return [];
-    return fields.reduce((acc: BarChartData[], field: StatItem, idx: number) => {
+    return fields.reduce((acc: ChartConfigsData[], field: StatItem, idx: number) => {
       const { key, color } = field;
       const y: number | null = getOr(null, key, data);
       const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);

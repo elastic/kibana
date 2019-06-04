@@ -8,11 +8,8 @@ import gql from 'graphql-tag';
 
 export const kpiHostsQuery = gql`
   fragment KpiHostChartFields on KpiHostHistogramData {
-    x: key_as_string
-    y: count {
-      value
-      doc_count
-    }
+    x
+    y
   }
 
   query GetKpiHostsQuery(
