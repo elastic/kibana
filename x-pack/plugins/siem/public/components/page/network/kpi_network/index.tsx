@@ -21,6 +21,9 @@ import { KpiNetworkData } from '../../../../graphql/types';
 
 import * as i18n from './translations';
 
+const kipsPerRow = 2;
+const kpiWidgetHeight = 228;
+
 const euiColorVis1 = '#3185FC';
 const euiColorVis2 = '#DB1374';
 const euiColorVis3 = '#490092';
@@ -37,21 +40,21 @@ const fieldTitleChartMapping: Readonly<StatItems[]> = [
       {
         key: 'uniqueSourcePrivateIps',
         value: null,
-        name: i18n.UNIQUE_SOURCE_PRIVATE_IPS_ABBREVIATION,
-        description: i18n.UNIQUE_SOURCE_PRIVATE_IPS,
+        name: i18n.SRC,
+        description: i18n.SOURCE,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
       },
       {
         key: 'uniqueDestinationPrivateIps',
         value: null,
-        name: i18n.UNIQUE_DESTINATION_PRIVATE_IPS_ABBREVIATION,
-        description: i18n.UNIQUE_DESTINATION_PRIVATE_IPS,
+        name: i18n.DIST,
+        description: i18n.DESTINATION,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
       },
     ],
-    description: i18n.UNIQUE_IPS,
+    description: i18n.UNIQUE_PRIVATE_IPS,
     enableAreaChart: true,
     enableBarChart: true,
     grow: 2,
@@ -89,7 +92,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
         value: null,
       },
     ],
-    description: i18n.UNIQUE_ID,
+    description: i18n.UNIQUE_FLOW_IDS,
   },
   {
     key: 'tlsHandshakes',
@@ -104,7 +107,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
 ];
 
 const FlexGroup = styled(EuiFlexGroup)`
-  min-height: 228px;
+  min-height: ${kpiWidgetHeight}px;
 `;
 
 export const KpiNetworkBaseComponent = ({
@@ -124,8 +127,6 @@ export const KpiNetworkBaseComponent = ({
     </EuiFlexGroup>
   );
 };
-
-const kipsPerRow = 2;
 
 export const KpiNetworkComponent = React.memo<KpiNetworkProps>(({ data, loading }) => {
   return loading ? (

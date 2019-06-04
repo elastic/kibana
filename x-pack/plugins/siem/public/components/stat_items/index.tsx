@@ -20,7 +20,7 @@ import { get, getOr } from 'lodash/fp';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { getEmptyTagValue } from '../empty_value';
-import { AreaChartData, BarChartData } from '../charts/common';
+import { AreaChartData, BarChartData, ChartData } from '../charts/common';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 
 const FlexItem = styled(EuiFlexItem)`
@@ -77,22 +77,25 @@ export const useKpiMatrixStatus = (
   const addValueToBarChart = (fields: StatItem[]): BarChartData[] => {
     if (fields.length === 0) return [];
     return fields.reduce((acc: BarChartData[], field: StatItem, idx: number) => {
-      const key: string = get('key', field);
+      const { key, color } = field;
       const y: number | null = getOr(null, key, data);
       const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
-
-      return acc.concat([
+      const value: [ChartData] = [
         {
-          ...field,
-          value: [
-            {
-              x,
-              y,
-              g: key,
-            },
-          ],
+          x,
+          y,
+          g: key,
         },
-      ]);
+      ];
+
+      return [
+        ...acc,
+        {
+          key,
+          color,
+          value,
+        },
+      ];
     }, []);
   };
   useEffect(

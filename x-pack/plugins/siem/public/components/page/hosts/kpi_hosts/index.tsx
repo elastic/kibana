@@ -18,16 +18,18 @@ import {
 } from '../../../stat_items';
 import * as i18n from './translations';
 
-interface KpiHostsProps {
-  data: KpiHostsData;
-  loading: boolean;
-}
+const kpiWidgetHeight = 247;
 
 const euiColorVis0 = '#00B3A4';
 const euiColorVis1 = '#3185FC';
 const euiColorVis2 = '#DB1374';
 const euiColorVis3 = '#490092';
 const euiColorVis9 = '#920000';
+
+interface KpiHostsProps {
+  data: KpiHostsData;
+  loading: boolean;
+}
 
 const fieldTitleMapping: Readonly<StatItems[]> = [
   {
@@ -95,7 +97,7 @@ const fieldTitleMapping: Readonly<StatItems[]> = [
 
 const FlexGroupSpinner = styled(EuiFlexGroup)`
    {
-    min-height: 247px;
+    min-height: ${kpiWidgetHeight}px;
   }
 `;
 

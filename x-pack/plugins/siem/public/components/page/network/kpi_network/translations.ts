@@ -10,7 +10,7 @@ export const NETWORK_EVENTS = i18n.translate('xpack.siem.kpiNetwork.source.netwo
   defaultMessage: 'Network Events',
 });
 
-export const UNIQUE_ID = i18n.translate('xpack.siem.kpiNetwork.source.uniquiIdTitle', {
+export const UNIQUE_FLOW_IDS = i18n.translate('xpack.siem.kpiNetwork.source.uniqueFlowIdsTitle', {
   defaultMessage: 'Unique Flow IDs',
 });
 
@@ -18,37 +18,28 @@ export const ACTIVE_AGENTS = i18n.translate('xpack.siem.kpiNetwork.source.active
   defaultMessage: 'Active Agents',
 });
 
-export const UNIQUE_IPS = i18n.translate('xpack.siem.kpiNetwork.source.uniqueIpsTitle', {
-  defaultMessage: 'Unique Private IPs',
+export const UNIQUE_PRIVATE_IPS = i18n.translate(
+  'xpack.siem.kpiNetwork.source.uniquePrivateIpsTitle',
+  {
+    defaultMessage: 'Unique Private IPs',
+  }
+);
+
+export const SRC = i18n.translate('xpack.siem.kpiNetwork.source.srcTitle', {
+  defaultMessage: 'Src.',
 });
 
-export const UNIQUE_SOURCE_PRIVATE_IPS_ABBREVIATION = i18n.translate(
-  'xpack.siem.kpiNetwork.source.uniqueSourcePrivateIpsAbbreviationTitle',
-  {
-    defaultMessage: 'Src.',
-  }
-);
+export const SOURCE = i18n.translate('xpack.siem.kpiNetwork.source.sourceTitle', {
+  defaultMessage: 'Source',
+});
 
-export const UNIQUE_SOURCE_PRIVATE_IPS = i18n.translate(
-  'xpack.siem.kpiNetwork.source.uniqueSourcePrivateIpsTitle',
-  {
-    defaultMessage: 'Source',
-  }
-);
+export const DESTINATION = i18n.translate('xpack.siem.kpiNetwork.source.destinationTitle', {
+  defaultMessage: 'Destination',
+});
 
-export const UNIQUE_DESTINATION_PRIVATE_IPS = i18n.translate(
-  'xpack.siem.kpiNetwork.source.uniqueDestinationPrivateIpsTitle',
-  {
-    defaultMessage: 'Destination',
-  }
-);
-
-export const UNIQUE_DESTINATION_PRIVATE_IPS_ABBREVIATION = i18n.translate(
-  'xpack.siem.kpiNetwork.source.uniqueDestinationPrivateIpsAbbreviationTitle',
-  {
-    defaultMessage: 'Dist.',
-  }
-);
+export const DIST = i18n.translate('xpack.siem.kpiNetwork.source.distTitle', {
+  defaultMessage: 'Dist.',
+});
 
 export const LOADING = i18n.translate('xpack.siem.kpiNetwork.source.loadingDescription', {
   defaultMessage: 'Loading',
