@@ -72,10 +72,10 @@ function MetricAggParamEditor({
     ? responseValueAggs
         .filter(respAgg => respAgg.type.name !== agg.type.name)
         .map(respAgg => ({
-          text: i18n.translate('ccommon.ui.aggTypes.definiteMetricLabel', {
-            defaultMessage: 'Metric: {metric}',
+          text: i18n.translate('common.ui.aggTypes.definiteMetricLabel', {
+            defaultMessage: 'Metric: {safeMakeLabel}',
             values: {
-              metric: safeMakeLabel(respAgg),
+              safeMakeLabel: safeMakeLabel(respAgg),
             },
           }),
           value: respAgg.id,

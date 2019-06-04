@@ -107,7 +107,6 @@
     "common.ui.aggTypes.buckets.significantTerms.includeLabel": "含める",
     "common.ui.aggTypes.buckets.significantTermsLabel": "{fieldName} のトップ {size} の珍しいアイテム",
     "common.ui.aggTypes.buckets.significantTermsTitle": "Significant Terms",
-    "common.ui.aggTypes.buckets.terms.aggNotValidLabel": "- 無効な集約 -",
     "common.ui.aggTypes.buckets.terms.excludeLabel": "除外",
     "common.ui.aggTypes.buckets.terms.includeLabel": "含める",
     "common.ui.aggTypes.buckets.terms.missingBucketLabel": "欠測値",
