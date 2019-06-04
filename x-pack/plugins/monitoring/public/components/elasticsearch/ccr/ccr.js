@@ -25,7 +25,7 @@ function toSeconds(ms) {
   return Math.floor(ms / 1000) + 's';
 }
 
-class CcrUI extends Component {
+export class Ccr extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -267,5 +267,3 @@ class CcrUI extends Component {
     );
   }
 }
-
-export const Ccr = CcrUI;

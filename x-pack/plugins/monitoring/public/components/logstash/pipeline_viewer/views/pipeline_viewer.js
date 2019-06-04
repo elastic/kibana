@@ -17,7 +17,7 @@ import {
   EuiPageBody,
 } from '@elastic/eui';
 
-class PipelineViewerUi extends React.Component {
+export class PipelineViewer extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -89,7 +89,7 @@ class PipelineViewerUi extends React.Component {
   }
 }
 
-PipelineViewerUi.propTypes = {
+PipelineViewer.propTypes = {
   pipeline: PropTypes.shape({
     inputs: PropTypes.array.isRequired,
     filters: PropTypes.array.isRequired,
@@ -97,5 +97,3 @@ PipelineViewerUi.propTypes = {
     queue: PropTypes.object.isRequired,
   }).isRequired
 };
-
-export const PipelineViewer = PipelineViewerUi;

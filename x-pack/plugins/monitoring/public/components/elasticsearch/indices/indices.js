@@ -136,7 +136,7 @@ const getNoDataMessage = () => {
   );
 };
 
-const ElasticsearchIndicesUI = ({
+export const ElasticsearchIndices = ({
   clusterStatus,
   indices,
   sorting,
@@ -189,5 +189,3 @@ const ElasticsearchIndicesUI = ({
     </EuiPage>
   );
 };
-
-export const ElasticsearchIndices = ElasticsearchIndicesUI;

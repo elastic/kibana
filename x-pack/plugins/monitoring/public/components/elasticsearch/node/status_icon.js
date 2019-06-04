@@ -8,7 +8,7 @@ import React from 'react';
 import { StatusIcon } from '../../status_icon';
 import { i18n } from '@kbn/i18n';
 
-export function NodeStatusIconUI({ isOnline, status }) {
+export function NodeStatusIcon({ isOnline, status }) {
   const type = isOnline ? StatusIcon.TYPES.GREEN : StatusIcon.TYPES.GRAY;
 
   return (
@@ -21,5 +21,3 @@ export function NodeStatusIconUI({ isOnline, status }) {
     />
   );
 }
-
-export const NodeStatusIcon = NodeStatusIconUI;

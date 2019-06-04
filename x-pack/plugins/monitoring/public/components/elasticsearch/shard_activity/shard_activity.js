@@ -67,7 +67,7 @@ const columns = [
 ];
 
 
-class ShardActivityUI extends React.Component {
+export class ShardActivity extends React.Component {
   constructor(props) {
     super(props);
     this.getNoDataMessage = this.getNoDataMessage.bind(this);
@@ -162,5 +162,3 @@ class ShardActivityUI extends React.Component {
     );
   }
 }
-
-export const ShardActivity = ShardActivityUI;

@@ -11,7 +11,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-function LatestActiveUi({ latestActive }) {
+export function LatestActive({ latestActive }) {
   const rangeMap = {
     'last1m':
       i18n.translate('xpack.monitoring.beats.overview.latestActive.last1MinuteLabel', {
@@ -56,11 +56,9 @@ function LatestActiveUi({ latestActive }) {
   );
 }
 
-LatestActiveUi.propTypes = {
+LatestActive.propTypes = {
   latestActive: PropTypes.arrayOf(PropTypes.shape({
     range: PropTypes.string.isRequired,
     count: PropTypes.number.isRequired,
   })).isRequired
 };
-
-export const LatestActive = LatestActiveUi;

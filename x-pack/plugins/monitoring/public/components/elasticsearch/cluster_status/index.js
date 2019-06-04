@@ -10,7 +10,7 @@ import { ElasticsearchStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 
-function ClusterStatusUI({ stats }) {
+export function ClusterStatus({ stats }) {
   const {
     dataSize,
     nodesCount,
@@ -88,5 +88,3 @@ function ClusterStatusUI({ stats }) {
     />
   );
 }
-
-export const ClusterStatus = ClusterStatusUI;

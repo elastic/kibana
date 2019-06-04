@@ -12,7 +12,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-class HorizontalLegendUI extends React.Component {
+export class HorizontalLegend extends React.Component {
   constructor() {
     super();
     this.formatter = this.formatter.bind(this);
@@ -109,5 +109,3 @@ class HorizontalLegendUI extends React.Component {
     );
   }
 }
-
-export const HorizontalLegend = HorizontalLegendUI;

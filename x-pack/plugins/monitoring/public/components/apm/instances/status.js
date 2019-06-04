@@ -14,7 +14,7 @@ import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-function StatusUI({ stats }) {
+export function Status({ stats }) {
   const {
     apms: {
       total
@@ -74,5 +74,3 @@ function StatusUI({ stats }) {
     />
   );
 }
-
-export const Status = StatusUI;

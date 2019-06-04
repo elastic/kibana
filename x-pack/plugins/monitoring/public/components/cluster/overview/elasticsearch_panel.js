@@ -135,7 +135,7 @@ function renderLog(log) {
   );
 }
 
-function ElasticsearchPanelUi(props) {
+export function ElasticsearchPanel(props) {
   const clusterStats = props.cluster_stats || {};
   const nodes = clusterStats.nodes;
   const indices = clusterStats.indices;
@@ -365,5 +365,3 @@ function ElasticsearchPanelUi(props) {
     </ClusterItemContainer>
   );
 }
-
-export const ElasticsearchPanel = ElasticsearchPanelUi;

@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-function KibanaPanelUi(props) {
+export function KibanaPanel(props) {
   if (!props.count) {
     return null;
   }
@@ -139,5 +139,3 @@ function KibanaPanelUi(props) {
     </ClusterItemContainer>
   );
 }
-
-export const KibanaPanel = KibanaPanelUi;

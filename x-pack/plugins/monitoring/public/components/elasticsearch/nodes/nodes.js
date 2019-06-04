@@ -202,7 +202,7 @@ const getColumns = showCgroupMetricsElasticsearch => {
   return cols;
 };
 
-function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticsearch, ...props }) {
+export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElasticsearch, ...props }) {
   const columns = getColumns(showCgroupMetricsElasticsearch);
   const { sorting, pagination, onTableChange } = props;
 
@@ -238,5 +238,3 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
     </EuiPage>
   );
 }
-
-export const ElasticsearchNodes = ElasticsearchNodesUI;

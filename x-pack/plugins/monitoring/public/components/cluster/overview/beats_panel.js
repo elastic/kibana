@@ -22,7 +22,7 @@ import { ClusterItemContainer } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-function BeatsPanelUi(props) {
+export function BeatsPanel(props) {
   if (!get(props, 'beats.total', 0) > 0) {
     return null;
   }
@@ -130,5 +130,3 @@ function BeatsPanelUi(props) {
     </ClusterItemContainer>
   );
 }
-
-export const BeatsPanel = BeatsPanelUi;

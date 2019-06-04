@@ -9,7 +9,7 @@ import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 
-function ClusterStatusUi({ stats }) {
+export function ClusterStatus({ stats }) {
   const {
     node_count: nodeCount,
     avg_memory_used: avgMemoryUsed,
@@ -56,5 +56,3 @@ function ClusterStatusUi({ stats }) {
     />
   );
 }
-
-export const ClusterStatus = ClusterStatusUi;

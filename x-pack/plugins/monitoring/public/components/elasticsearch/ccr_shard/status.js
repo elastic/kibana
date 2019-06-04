@@ -9,7 +9,7 @@ import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 
-function StatusUI({ stat, formattedLeader, oldestStat }) {
+export function Status({ stat, formattedLeader, oldestStat }) {
   const {
     follower_index: followerIndex,
     shard_id: shardId,
@@ -67,5 +67,3 @@ function StatusUI({ stat, formattedLeader, oldestStat }) {
     />
   );
 }
-
-export const Status = StatusUI;

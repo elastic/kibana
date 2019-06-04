@@ -65,7 +65,7 @@ function renderPluginStatementMetrics(pluginType, vertex) {
     : getProcessorStatementMetrics(vertex);
 }
 
-function PluginStatementUi({
+export function PluginStatement({
   statement: { hasExplicitId, id, name, pluginType, vertex },
   onShowVertexDetails,
 }) {
@@ -119,7 +119,7 @@ function PluginStatementUi({
   );
 }
 
-PluginStatementUi.propTypes = {
+PluginStatement.propTypes = {
   onShowVertexDetails: PropTypes.func.isRequired,
   statement: PropTypes.shape({
     hasExplicitId: PropTypes.bool.isRequired,
@@ -133,5 +133,3 @@ PluginStatementUi.propTypes = {
     }).isRequired,
   }).isRequired,
 };
-
-export const PluginStatement = PluginStatementUi;

@@ -14,7 +14,7 @@ import { Sparkline } from 'plugins/monitoring/components/sparkline';
 import { EuiMonitoringTable } from '../../table';
 import { i18n } from '@kbn/i18n';
 
-class PipelineListingUI extends Component {
+export class PipelineListing extends Component {
   tooltipXValueFormatter(xValue, dateFormat) {
     return moment(xValue).format(dateFormat);
   }
@@ -183,5 +183,3 @@ class PipelineListingUI extends Component {
     );
   }
 }
-
-export const PipelineListing = PipelineListingUI;

@@ -13,7 +13,7 @@ import { EuiMonitoringTable } from '../../table';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-class ListingUI extends PureComponent {
+export class Listing extends PureComponent {
   getColumns() {
     const { kbnUrl, scope } = this.props.angular;
 
@@ -162,5 +162,3 @@ class ListingUI extends PureComponent {
     );
   }
 }
-
-export const Listing = ListingUI;

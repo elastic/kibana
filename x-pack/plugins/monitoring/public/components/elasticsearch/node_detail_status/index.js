@@ -10,7 +10,7 @@ import { NodeStatusIcon } from '../node';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 
-function NodeDetailStatusUI({ stats }) {
+export function NodeDetailStatus({ stats }) {
   const {
     transport_address: transportAddress,
     usedHeap,
@@ -103,5 +103,3 @@ function NodeDetailStatusUI({ stats }) {
     />
   );
 }
-
-export const NodeDetailStatus = NodeDetailStatusUI;

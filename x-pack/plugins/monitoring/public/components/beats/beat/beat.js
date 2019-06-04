@@ -11,7 +11,7 @@ import { EuiFlexItem, EuiPage, EuiPageBody, EuiFlexGrid, EuiSpacer, EuiPageConte
 import { i18n } from '@kbn/i18n';
 import { SummaryStatus } from '../../summary_status';
 
-function BeatUi({ summary, metrics, ...props }) {
+export function Beat({ summary, metrics, ...props }) {
 
   const metricsToShow = [
     metrics.beat_event_rates,
@@ -152,5 +152,3 @@ function BeatUi({ summary, metrics, ...props }) {
     </EuiPage>
   );
 }
-
-export const Beat = BeatUi;

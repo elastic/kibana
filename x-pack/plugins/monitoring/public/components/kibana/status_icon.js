@@ -8,7 +8,7 @@ import React from 'react';
 import { StatusIcon } from 'plugins/monitoring/components/status_icon';
 import { i18n } from '@kbn/i18n';
 
-function KibanaStatusIconUI({ status, availability = true }) {
+export function KibanaStatusIcon({ status, availability = true }) {
   const type = (() => {
     if (!availability) {
       return StatusIcon.TYPES.GRAY;
@@ -30,5 +30,3 @@ function KibanaStatusIconUI({ status, availability = true }) {
     />
   );
 }
-
-export const KibanaStatusIcon = KibanaStatusIconUI;

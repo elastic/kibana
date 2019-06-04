@@ -8,7 +8,7 @@ import React from 'react';
 import { StatusIcon } from 'plugins/monitoring/components/status_icon';
 import { i18n } from '@kbn/i18n';
 
-export function MachineLearningJobStatusIconUI({ status }) {
+export function MachineLearningJobStatusIcon({ status }) {
   const type = (() => {
     const statusKey = status.toUpperCase();
 
@@ -34,5 +34,3 @@ export function MachineLearningJobStatusIconUI({ status }) {
     />
   );
 }
-
-export const MachineLearningJobStatusIcon = MachineLearningJobStatusIconUI;

@@ -48,7 +48,7 @@ import { i18n } from '@kbn/i18n';
  *  }
  * ];
  */
-class MonitoringTableUI extends React.Component {
+export class MonitoringTable extends React.Component {
   constructor(props) {
     super(props);
 
@@ -467,12 +467,10 @@ const defaultGetNoDataMessage = filterText => {
   return DEFAULT_NO_DATA_MESSAGE;
 };
 
-MonitoringTableUI.defaultProps = {
+MonitoringTable.defaultProps = {
   rows: [],
   filterFields: [],
   getNoDataMessage: defaultGetNoDataMessage,
   alwaysShowPageControls: false,
   rowsPerPage: 20
 };
-
-export const MonitoringTable = MonitoringTableUI;

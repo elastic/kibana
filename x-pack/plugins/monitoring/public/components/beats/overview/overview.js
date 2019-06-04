@@ -75,8 +75,8 @@ function renderLatestActive(latestActive, latestTypes, latestVersions) {
   }
 
   const calloutMsg = i18n.translate('xpack.monitoring.beats.overview.noActivityDescription', {
-    // eslint-disable-next-line max-len
-    defaultMessage: 'Hi there! This area is where your latest Beats activity would show up, but you don\'t seem to have any activity within the last day.'
+    defaultMessage: 'Hi there! This area is where your latest Beats activity would show up, ' +
+      `but you don't seem to have any activity within the last day.`
   });
 
 
@@ -89,7 +89,7 @@ function renderLatestActive(latestActive, latestTypes, latestVersions) {
   );
 }
 
-export function BeatsOverviewUI({
+export function BeatsOverview({
   latestActive,
   latestTypes,
   latestVersions,
@@ -130,5 +130,3 @@ export function BeatsOverviewUI({
     </EuiPage>
   );
 }
-
-export const BeatsOverview = BeatsOverviewUI;

@@ -25,7 +25,7 @@ import { formatDateTimeLocal } from '../../../../common/formatting';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-class CcrShardUI extends PureComponent {
+export class CcrShard extends PureComponent {
   renderCharts() {
     const { metrics } = this.props;
     const seriesToShow = [
@@ -143,5 +143,3 @@ class CcrShardUI extends PureComponent {
     );
   }
 }
-
-export const CcrShard = CcrShardUI;

@@ -25,7 +25,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-function LogstashPanelUi(props) {
+export function LogstashPanel(props) {
   if (!props.node_count) {
     return null;
   }
@@ -192,5 +192,3 @@ function LogstashPanelUi(props) {
     </ClusterItemContainer>
   );
 }
-
-export const LogstashPanel = LogstashPanelUi;

@@ -8,7 +8,7 @@ import React from 'react';
 import { StatusIcon } from '../status_icon';
 import { i18n } from '@kbn/i18n';
 
-function ElasticsearchStatusIconUI({ status }) {
+export function ElasticsearchStatusIcon({ status }) {
   const type = (() => {
     const statusKey = status.toUpperCase();
     return StatusIcon.TYPES[statusKey] || StatusIcon.TYPES.GRAY;
@@ -27,5 +27,3 @@ function ElasticsearchStatusIconUI({ status }) {
     />
   );
 }
-
-export const ElasticsearchStatusIcon = ElasticsearchStatusIconUI;

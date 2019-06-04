@@ -83,7 +83,7 @@ const columns = [
   },
 ];
 
-export function ApmServerInstancesUI({ apms }) {
+export function ApmServerInstances({ apms }) {
   const {
     pagination,
     sorting,
@@ -136,5 +136,3 @@ export function ApmServerInstancesUI({ apms }) {
     </EuiPage>
   );
 }
-
-export const ApmServerInstances = ApmServerInstancesUI;

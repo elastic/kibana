@@ -14,7 +14,7 @@ const HIGH_SEVERITY = 2000;
 const MEDIUM_SEVERITY = 1000;
 const LOW_SEVERITY = 0;
 
-function AlertsIndicatorUi({ alerts }) {
+export function AlertsIndicator({ alerts }) {
   if (alerts && alerts.count > 0) {
     const severity = (() => {
       if (alerts.high > 0) { return HIGH_SEVERITY; }
@@ -71,5 +71,3 @@ function AlertsIndicatorUi({ alerts }) {
     </EuiToolTip>
   );
 }
-
-export const AlertsIndicator = AlertsIndicatorUi;

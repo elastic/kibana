@@ -26,7 +26,7 @@ import {
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 
-function ApmPanelUi(props) {
+export function ApmPanel(props) {
   if (!get(props, 'apms.total', 0) > 0) {
     return null;
   }
@@ -129,5 +129,3 @@ function ApmPanelUi(props) {
     </ClusterItemContainer>
   );
 }
-
-export const ApmPanel = ApmPanelUi;

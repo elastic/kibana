@@ -11,7 +11,7 @@ import { formatMetric } from '../../../lib/format_number';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-function IndexDetailStatusUI({ stats }) {
+export function IndexDetailStatus({ stats }) {
   const {
     dataSize,
     documents: documentCount,
@@ -84,5 +84,3 @@ function IndexDetailStatusUI({ stats }) {
     />
   );
 }
-
-export const IndexDetailStatus = IndexDetailStatusUI;

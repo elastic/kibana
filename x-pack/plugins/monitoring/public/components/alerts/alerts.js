@@ -129,7 +129,7 @@ const getColumns = (kbnUrl, scope) => ([
   },
 ]);
 
-const AlertsUI = ({ alerts, angular, sorting, pagination, onTableChange }) => {
+export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) => {
   const alertsFlattened = alerts.map(alert => ({
     ...alert,
     status: alert.metadata.severity,
@@ -166,5 +166,3 @@ const AlertsUI = ({ alerts, angular, sorting, pagination, onTableChange }) => {
     />
   );
 };
-
-export const Alerts = AlertsUI;

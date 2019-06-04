@@ -9,7 +9,7 @@ import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 
-function DetailStatusUi({ stats }) {
+export function DetailStatus({ stats }) {
   const {
     http_address: httpAddress,
     events,
@@ -102,5 +102,3 @@ function DetailStatusUi({ stats }) {
     />
   );
 }
-
-export const DetailStatus = DetailStatusUi;

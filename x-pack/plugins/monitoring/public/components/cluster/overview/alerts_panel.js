@@ -23,7 +23,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-function AlertsPanelUi({ alerts, changeUrl }) {
+export function AlertsPanel({ alerts, changeUrl }) {
   const goToAlerts = () => changeUrl('/alerts');
 
   if (!alerts || !alerts.length) {
@@ -108,5 +108,3 @@ function AlertsPanelUi({ alerts, changeUrl }) {
     </div>
   );
 }
-
-export const AlertsPanel = AlertsPanelUi;

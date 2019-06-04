@@ -93,7 +93,6 @@ const instanceRowFactory = (scope, kbnUrl) => {
             title={
               i18n.translate('xpack.monitoring.kibana.listing.instanceStatusTitle', {
                 defaultMessage: 'Instance status: {kibanaStatus}',
-
                 values: {
                   kibanaStatus: props.kibana.status
                 }

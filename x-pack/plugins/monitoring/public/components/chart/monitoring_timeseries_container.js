@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-function MonitoringTimeseriesContainerUI({ series, onBrush }) {
+export function MonitoringTimeseriesContainer({ series, onBrush }) {
   if (series === undefined) {
     return null; // still loading
   }
@@ -82,6 +82,3 @@ function MonitoringTimeseriesContainerUI({ series, onBrush }) {
     </EuiFlexGroup>
   );
 }
-
-export const MonitoringTimeseriesContainer = MonitoringTimeseriesContainerUI;
-

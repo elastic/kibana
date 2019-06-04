@@ -10,7 +10,7 @@ import { KibanaStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 
-function DetailStatusUI({ stats }) {
+export function DetailStatus({ stats }) {
   const {
     transport_address: transportAddress,
     os_memory_free: osFreeMemory,
@@ -63,5 +63,3 @@ function DetailStatusUI({ stats }) {
     />
   );
 }
-
-export const DetailStatus = DetailStatusUI;
