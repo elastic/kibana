@@ -26,7 +26,7 @@ const $style = $('<style>').appendTo('head').attr('id', 'style-compile');
 
 uiModules
   .get('kibana')
-  .run(function ($rootScope, $compile, config) {
+  .run(function ($rootScope, config) {
     const truncateGradientHeight = 15;
     const template = _.template(require('./style_compile.css.tmpl'));
     const locals = {};

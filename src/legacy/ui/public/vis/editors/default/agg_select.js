@@ -55,12 +55,12 @@ uiModules
           ></vis-agg-select-react-wrapper>`;
       },
       link: {
-        pre: function ($scope, $el, attr) {
+        pre: function ($scope, attr) {
           $scope.$bind('agg', attr.agg);
           $scope.$bind('aggTypeOptions', attr.aggTypeOptions);
           $scope.$bind('isSubAggregation', attr.isSubAggregation);
         },
-        post: function ($scope, $el, attr, ngModelCtrl) {
+        post: function ($scope, ngModelCtrl) {
           let _isSelectInvalid = false;
 
           $scope.$watch('agg.type', (value) => {

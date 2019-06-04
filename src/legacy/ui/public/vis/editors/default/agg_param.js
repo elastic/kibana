@@ -77,11 +77,11 @@ uiModules
         return $el.html();
       },
       link: {
-        pre: function ($scope, $el, attr) {
+        pre: function ($scope, attr) {
           $scope.$bind('aggParam', attr.aggParam);
           $scope.$bind('editorComponent', attr.editorComponent);
         },
-        post: function ($scope, $el, attr, ngModelCtrl) {
+        post: function ($scope, attr, ngModelCtrl) {
           $scope.config = config;
           $scope.showValidation = false;
 

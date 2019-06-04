@@ -27,7 +27,7 @@ uiModules.get('kibana').directive('validateCidrMask', function () {
     scope: {
       'ngModel': '='
     },
-    link: function ($scope, elem, attr, ngModel) {
+    link: function (ngModel) {
       ngModel.$parsers.unshift(validateCidrMask);
       ngModel.$formatters.unshift(validateCidrMask);
 

@@ -65,7 +65,7 @@ export default function (opts) {
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
 
   uiRoutes
-    .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config) {
+    .addSetupWork(function loadDefaultIndexPattern(Private, $route, config) {
       const getIds = Private(IndexPatternsGetProvider)('id');
       const route = _.get($route, 'current.$$route');
 
