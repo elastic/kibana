@@ -31,10 +31,11 @@ export default function actionsPlugin(kibana: any) {
           },
         },
         async handler(request: any) {
-          return await request.server.plugins.actions.fire({
+          await request.server.plugins.actions.fire({
             id: request.params.id,
             params: request.payload.params,
           });
+          return { success: true };
         },
       });
     },

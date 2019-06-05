@@ -19,7 +19,14 @@ export default function(kibana: any) {
         name: 'Test',
         unencryptedAttributes: ['unencrypted'],
         async executor({ actionTypeConfig, params }: { actionTypeConfig: any; params: any }) {
-          return { success: true, actionTypeConfig, params };
+          return await callWithInternalUser('index', {
+            index: params.index,
+            refresh: 'wait_for',
+            body: {
+              ...params.body,
+              actionTypeConfig,
+            },
+          });
         },
       });
       server.plugins.actions.registerType({
