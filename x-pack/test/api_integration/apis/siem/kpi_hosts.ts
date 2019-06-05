@@ -25,38 +25,22 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
         hostsHistogram: [
           {
             x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 1,
-            },
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 0,
-            },
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 1,
-            },
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 1,
-            },
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
         ],
@@ -68,38 +52,22 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
         uniqueSourceIpsHistogram: [
           {
             x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 52,
-            },
+            y: 52,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 0,
-            },
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 31,
-            },
+            y: 31,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 88,
-            },
+            y: 88,
             __typename: 'KpiHostHistogramData',
           },
         ],
@@ -107,38 +75,22 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
         uniqueDestinationIpsHistogram: [
           {
             x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 61,
-            },
+            y: 61,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 0,
-            },
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 45,
-            },
+            y: 45,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 114,
-            },
+            y: 114,
             __typename: 'KpiHostHistogramData',
           },
         ],
@@ -177,38 +129,22 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
         hostsHistogram: [
           {
             x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 1,
-            },
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 0,
-            },
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 1,
-            },
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 1,
-            },
+            y: 1,
             __typename: 'KpiHostHistogramData',
           },
         ],
@@ -220,38 +156,22 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
         uniqueSourceIpsHistogram: [
           {
             x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 52,
-            },
+            y: 52,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 0,
-            },
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 31,
-            },
+            y: 31,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 88,
-            },
+            y: 88,
             __typename: 'KpiHostHistogramData',
           },
         ],
@@ -259,38 +179,22 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
         uniqueDestinationIpsHistogram: [
           {
             x: '2019-02-09T16:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 61,
-            },
+            y: 61,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T19:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 0,
-            },
+            y: 0,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-09T22:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 45,
-            },
+            y: 45,
             __typename: 'KpiHostHistogramData',
           },
           {
             x: '2019-02-10T01:00:00.000Z',
-            y: {
-              __typename: 'KpiHostCount',
-              doc_count: null,
-              value: 114,
-            },
+            y: 114,
             __typename: 'KpiHostHistogramData',
           },
         ],
