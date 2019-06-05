@@ -28,17 +28,9 @@ import { VegaHelpMenu } from './vega_help_menu';
 import { VegaActionsMenu } from './vega_action_menu';
 
 module.directive('vegaActionsMenu', function (reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(VegaActionsMenu),
-    undefined,
-    { restrict: 'E' }
-  );
+  return reactDirective(wrapInI18nContext(VegaActionsMenu));
 });
 
 module.directive('vegaHelpMenu', function (reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(VegaHelpMenu),
-    undefined,
-    { restrict: 'E' }
-  );
+  return reactDirective(wrapInI18nContext(VegaHelpMenu));
 });
