@@ -5,7 +5,10 @@
  */
 
 import { Position } from '@elastic/charts';
-import { ContextFunction, ArgumentType } from '../../../canvas/canvas_plugin_src/functions/types';
+import {
+  ExpressionFunction,
+  ArgumentType,
+} from '../../../../../src/legacy/core_plugins/interpreter/public';
 
 export interface LegendConfig {
   isVisible: boolean;
@@ -14,7 +17,7 @@ export interface LegendConfig {
 
 type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
 
-export const legendConfig: ContextFunction<
+export const legendConfig: ExpressionFunction<
   'lens_xy_legendConfig',
   null,
   LegendConfig,
@@ -74,7 +77,7 @@ export interface YConfig extends AxisConfig {
 
 type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
 
-export const yConfig: ContextFunction<'lens_xy_yConfig', null, YConfig, YConfigResult> = {
+export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConfigResult> = {
   name: 'lens_xy_yConfig',
   aliases: [],
   type: 'lens_xy_yConfig',
@@ -104,7 +107,7 @@ export interface XConfig extends AxisConfig {
 
 type XConfigResult = XConfig & { type: 'lens_xy_xConfig' };
 
-export const xConfig: ContextFunction<'lens_xy_xConfig', null, XConfig, XConfigResult> = {
+export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConfigResult> = {
   name: 'lens_xy_xConfig',
   aliases: [],
   type: 'lens_xy_xConfig',

@@ -181,6 +181,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     repoConfigController
   );
   server.events.on('stop', async () => {
+    log.debug('shutdown lsp process');
     await lspService.shutdown();
   });
   // Initialize indexing factories.

@@ -181,7 +181,8 @@ export class EditorComponent extends React.Component<IProps> {
       this.editor.onMouseDown((e: editorInterfaces.IEditorMouseEvent) => {
         if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
           const uri = `${repo}/blob/${encodeRevisionString(revision)}/${file}`;
-          history.push(`/${uri}!L${e.target.position.lineNumber}:0${qs}`);
+          const position = e.target.position || { lineNumber: 0, column: 0 };
+          history.push(`/${uri}!L${position.lineNumber}:0${qs}`);
         }
         this.monaco!.container.focus();
       });

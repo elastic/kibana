@@ -146,7 +146,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           })}
         >
           <EuiButtonGroup
-            legend={i18n.translate('xpack.lens.xyChart.legendPositionLegend', {
+            legend={i18n.translate('xpack.lens.xyChart.legendPositionButtonLabel', {
               defaultMessage: 'Legend position',
             })}
             data-test-subj="lnsXY_legendPosition"

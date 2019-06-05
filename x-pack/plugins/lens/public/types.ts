@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Ast } from '@kbn/interpreter/common';
 import { DragContextState } from './drag_drop';
 
 // eslint-disable-next-line
@@ -54,7 +55,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
 
-  toExpression: (state: T) => string;
+  toExpression: (state: T) => Ast | string | null;
 
   getDatasourceSuggestionsForField: (state: T) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
@@ -163,7 +164,7 @@ export interface Visualization<T = unknown, P = unknown> {
 
   renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
 
-  toExpression: (state: T, datasource: DatasourcePublicAPI) => string;
+  toExpression: (state: T, datasource: DatasourcePublicAPI) => Ast | string | null;
 
   // The frame will call this function on all visualizations when the table changes, or when
   // rendering additional ways of using the data

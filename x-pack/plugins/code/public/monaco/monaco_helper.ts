@@ -161,15 +161,13 @@ export class MonacoHelper {
   }
 
   private handleCopy(e: any) {
-    if (
-      this.editor &&
-      this.editor.hasTextFocus() &&
-      this.editor.hasWidgetFocus() &&
-      !this.editor.getSelection().isEmpty()
-    ) {
-      const text = this.editor.getModel().getValueInRange(this.editor.getSelection());
-      e.clipboardData.setData('text/plain', text);
-      e.preventDefault();
+    if (this.editor && this.editor.hasTextFocus() && this.editor.hasWidgetFocus()) {
+      const selection = this.editor.getSelection();
+      if (selection && !selection.isEmpty()) {
+        const text = this.editor.getModel()!.getValueInRange(selection);
+        e.clipboardData.setData('text/plain', text);
+        e.preventDefault();
+      }
     }
   }
 }
