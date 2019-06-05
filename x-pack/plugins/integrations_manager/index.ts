@@ -6,8 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-import { LegacyPluginInitializer } from 'src/legacy/types';
-import { CoreSetup, Server, PluginInitializerContext } from './common/types';
+import {
+  CoreSetup,
+  LegacyPluginInitializer,
+  PluginInitializerContext,
+  Server,
+} from './common/types';
 import { Plugin } from './server/plugin';
 import { ID } from './common/constants';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
