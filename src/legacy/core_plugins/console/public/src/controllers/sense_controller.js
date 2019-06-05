@@ -41,8 +41,9 @@ module.controller('SenseController', function SenseController(Private, $scope, $
 
   $scope.topNavController = Private(SenseTopNavController);
 
-  // Since we pass this via reactDirective into a react component, which has the function as required
-  // we apply an empty function to it before the real function is set after the timeout below.
+  // Since we pass this callback via reactDirective into a react component, which has the function defined as required
+  // in it's prop types, we should set this initially (before it's set in the $timeout below). Without this line
+  // the component we pass this in will throw an propType validation error.
   $scope.getRequestsAsCURL = () => '';
 
   // We need to wait for these elements to be rendered before we can select them with jQuery
