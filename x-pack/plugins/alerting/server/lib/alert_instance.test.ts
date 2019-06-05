@@ -23,7 +23,7 @@ describe('getFireOptions()', () => {
 describe('resetFire()', () => {
   test('makes shouldFire() return false', () => {
     const alertInstance = new AlertInstance();
-    alertInstance.fire('default', {}, {});
+    alertInstance.fire('default');
     expect(alertInstance.shouldFire()).toEqual(true);
     alertInstance.resetFire();
     expect(alertInstance.shouldFire()).toEqual(false);
@@ -31,7 +31,7 @@ describe('resetFire()', () => {
 
   test('makes getFireOptions() return undefined', () => {
     const alertInstance = new AlertInstance();
-    alertInstance.fire('default', {}, {});
+    alertInstance.fire('default');
     expect(alertInstance.getFireOptions()).toEqual({
       actionGroup: 'default',
       context: {},
@@ -61,13 +61,13 @@ describe('getMeta()', () => {
 describe('fire()', () => {
   test('makes shouldFire() return true', () => {
     const alertInstance = new AlertInstance({ state: { foo: true }, meta: { bar: true } });
-    alertInstance.fire('default', { field: true }, { otherField: true });
+    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
     expect(alertInstance.shouldFire()).toEqual(true);
   });
 
   test('makes getFireOptions() return given options', () => {
     const alertInstance = new AlertInstance({ state: { foo: true }, meta: { bar: true } });
-    alertInstance.fire('default', { field: true }, { otherField: true });
+    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
     expect(alertInstance.getFireOptions()).toEqual({
       actionGroup: 'default',
       context: { field: true },

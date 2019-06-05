@@ -33,6 +33,7 @@ export class AlertInstance {
   resetFire() {
     this._shouldFire = false;
     delete this._fireOptions;
+    return this;
   }
 
   getState() {
@@ -43,17 +44,20 @@ export class AlertInstance {
     return this._meta;
   }
 
-  fire(actionGroup: string, context: Context, state: State) {
+  fire(actionGroup: string, context: Context = {}) {
     this._shouldFire = true;
-    this._fireOptions = { actionGroup, context, state };
+    this._fireOptions = { actionGroup, context, state: this._state };
+    return this;
   }
 
   replaceState(state: State) {
     this._state = state;
+    return this;
   }
 
   replaceMeta(meta: Record<string, any>) {
     this._meta = meta;
+    return this;
   }
 
   /**

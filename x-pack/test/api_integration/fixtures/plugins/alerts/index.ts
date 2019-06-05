@@ -27,16 +27,13 @@ export default function(kibana: any) {
         async execute({ services, params, state }: AlertExecuteOptions) {
           const cpuUsage = 100;
           if (cpuUsage >= params.threshold) {
-            services.alertInstanceFactory(params.server).fire(
-              'default',
-              {
+            services
+              .alertInstanceFactory(params.server)
+              .replaceState({ lastCpuUsage: cpuUsage })
+              .fire('default', {
                 server: params.server,
                 threshold: params.threshold,
-              },
-              {
-                lastCpuUsage: cpuUsage,
-              }
-            );
+              });
           }
           return {
             lastCpuUsage: cpuUsage,

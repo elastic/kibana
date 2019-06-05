@@ -124,7 +124,7 @@ Object {
 test('fireAction is called per alert instance that fired', async () => {
   getCreateTaskRunnerFunctionParams.alertType.execute.mockImplementation(
     ({ services }: AlertExecuteOptions) => {
-      services.alertInstanceFactory('1').fire('default', {}, {});
+      services.alertInstanceFactory('1').fire('default');
     }
   );
   const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
@@ -158,7 +158,7 @@ test('fireAction is called per alert instance that fired', async () => {
 test('persists alertInstances passed in from state, only if they fire', async () => {
   getCreateTaskRunnerFunctionParams.alertType.execute.mockImplementation(
     ({ services }: AlertExecuteOptions) => {
-      services.alertInstanceFactory('1').fire('default', {}, {});
+      services.alertInstanceFactory('1').fire('default');
     }
   );
   const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
