@@ -7,8 +7,14 @@
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { Watch } from '../../../models/watch';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
-import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
+import { wrapEsError, wrapUnknownError, wrapCustomError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+
+function fetchWatch(callWithRequest, watchId) {
+  return callWithRequest('watcher.getWatch', {
+    id: watchId
+  });
+}
 
 function saveWatch(callWithRequest, watch) {
   return callWithRequest('watcher.putWatch', {
@@ -25,11 +31,31 @@ export function registerSaveRoute(server) {
   server.route({
     path: '/api/watcher/watch/{id}',
     method: 'PUT',
-    handler: (request) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       const watch = Watch.fromDownstreamJson(request.payload);
 
+      const conflictError = wrapCustomError(
+        new Error(`There is already a watch with ID '${watch.id}'.`),
+        409
+      );
+
+      // Check that a watch with the same ID doesn't already exist
+      try {
+        const existingWatch = await fetchWatch(callWithRequest, watch.id);
+
+        if (existingWatch.found) {
+          throw conflictError;
+        }
+      } catch (e) {
+        // Rethrow conflict error but silently swallow all others
+        if (e === conflictError) {
+          throw e;
+        }
+      }
+
+      // Otherwise create new watch
       return saveWatch(callWithRequest, watch.upstreamJson)
         .catch(err => {
           // Case: Error from Elasticsearch JS client
