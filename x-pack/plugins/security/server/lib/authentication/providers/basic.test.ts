@@ -179,7 +179,7 @@ describe('BasicAuthenticationProvider', () => {
       const request = requestFixture();
       const deauthenticateResult = await provider.deauthenticate(request);
       expect(deauthenticateResult.redirected()).toBe(true);
-      expect(deauthenticateResult.redirectURL).toBe('/base-path/login');
+      expect(deauthenticateResult.redirectURL).toBe('/base-path/login?msg=LOGGED_OUT');
     });
 
     it('passes query string parameters to the login page.', async () => {

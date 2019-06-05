@@ -31,7 +31,7 @@ app.directive('durationSelect', function ($injector) {
     replace: true,
     controllerAs: 'durationSelect',
     bindToController: true,
-    link: function ($scope, $ctrl) {
+    link: function ($scope, $element, $attrs, $ctrl) {
       $scope.durationSelect.form = $ctrl;
     },
     controller: class DurationSelectController extends InitAfterBindingsWorkaround {

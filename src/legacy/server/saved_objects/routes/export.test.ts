@@ -17,6 +17,11 @@
  * under the License.
  */
 
+jest.mock('../export', () => ({
+  getSortedObjectsForExport: jest.fn(),
+  objectsToNdJson: jest.fn(),
+}));
+
 import Hapi from 'hapi';
 import * as exportMock from '../export';
 import { createMockServer } from './_mock_server';
@@ -25,11 +30,6 @@ import { objectsToNdJson as origObjectsToNdJson } from '../export/objects_to_ndj
 
 const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
 const objectsToNdJson = exportMock.objectsToNdJson as jest.Mock;
-
-jest.mock('../export', () => ({
-  getSortedObjectsForExport: jest.fn(),
-  objectsToNdJson: jest.fn(),
-}));
 
 describe('POST /api/saved_objects/_export', () => {
   let server: Hapi.Server;

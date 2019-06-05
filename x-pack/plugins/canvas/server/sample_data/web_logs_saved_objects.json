@@ -1,6 +1,6 @@
 [
   {
-    "id": "workpad-5563cc40-5760-4afe-bf33-9da72fac53b7",
+    "id": "workpad-ad72a4e9-b422-480c-be6d-a64a0b79541d",
     "type": "canvas-workpad",
     "updated_at": "2018-10-22T12:41:57.071Z",
     "version": 1,
@@ -15,8 +15,12 @@
       "pages": [
         {
           "id": "page-e125ca0b-f6b2-437c-bc4c-918c468fbd9f",
-          "style": { "background": "#000000" },
-          "transition": { "name": "" },
+          "style": {
+            "background": "#000000"
+          },
+          "transition": {
+            "name": ""
+          },
           "elements": [
             {
               "id": "element-950e478d-39be-4630-9ebe-d46578951025",
@@ -27,7 +31,7 @@
                 "height": 131.2578125,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-f6d67bd9-7edf-4a4c-944e-019eb2a89e46",
@@ -38,7 +42,7 @@
                 "height": 131.2578125,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-fa296ebc-3ede-44f1-a027-f9aa0a8ba58b",
@@ -49,7 +53,7 @@
                 "height": 131.2578125,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-21844047-2818-4071-bb9b-59cc68139c5f",
@@ -60,7 +64,7 @@
                 "height": 148.3046875,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#414143\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#414143\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-a2136689-36d7-4f61-a9c7-5e4e3c89f2ca",
@@ -71,7 +75,7 @@
                 "height": 148.3046875,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#414143\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#414143\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-2e02449b-433e-47c4-84ab-6f702619e21a",
@@ -82,7 +86,7 @@
                 "height": 148.3046875,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#414143\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#414143\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-0f10bedf-728c-4207-96b8-bbb3021a91f1",
@@ -93,7 +97,7 @@
                 "height": 65.90625,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#221F20\" border=\"#777777\" borderWidth=0 maintainAspect=false\n| render\n",
+              "expression": "shape \"square\" fill=\"#221F20\" border=\"#777777\" borderWidth=0 maintainAspect=false\n| render\n",
               "filter": null
             },
             {
@@ -105,7 +109,7 @@
                 "height": 693.625,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#221F20\" border=\"#777777\" borderWidth=0 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#221F20\" border=\"#777777\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-57ffa8a7-f3f3-45bf-a35a-025a7647b8e7",
@@ -116,7 +120,7 @@
                 "height": 7.25,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-4562db88-edbe-45b2-86aa-c549f2e25c98",
@@ -127,7 +131,7 @@
                 "height": 89.13671875,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#221F20\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#221F20\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-6556fa13-4557-47bc-bb9f-08a525604e13",
@@ -138,7 +142,7 @@
                 "height": 149,
                 "angle": 0
               },
-              "expression": "\nshape \"circle\" fill=\"#221F20\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=true\n| render\n"
+              "expression": "shape \"circle\" fill=\"#221F20\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=true\n| render\n"
             },
             {
               "id": "element-671589a9-54b6-46a1-b5e7-363b9d539795",
@@ -149,7 +153,7 @@
                 "height": 36,
                 "angle": 0
               },
-              "expression": "\nimage mode=\"contain\" dataurl={\nasset {\nfilters | essql\nquery=\"SELECT host,response\nFROM kibana_sample_data_logs\nWHERE host='artifacts.elastic.co'\nORDER BY timestamp DESC\nLIMIT 1\"|\nalterColumn \"response\" type=\"number\" |\ngetCell \"response\" |\nif {compare lt to=400} then=\"asset-0a807073-d056-4c7b-9bf4-225b71e47243\" else=\"asset-1343672d-7c02-4402-929e-0f8fef69cddd\"\n}\n} | render\n"
+              "expression": "filters \n| essql\n  query=\"SELECT host, response.keyword AS response\n    FROM kibana_sample_data_logs\n    WHERE host='artifacts.elastic.co'\n    ORDER BY timestamp DESC\n    LIMIT 1\"\n| alterColumn \"response\" type=\"number\" \n| getCell \"response\" \n| image mode=\"contain\" \n  dataurl={\n    asset {\n      if {compare lt to=400} \n      then=\"asset-0a807073-d056-4c7b-9bf4-225b71e47243\" \n      else=\"asset-1343672d-7c02-4402-929e-0f8fef69cddd\"\n    }\n  } \n| render\n"
             },
             {
               "id": "element-d98c4bb0-f9ae-4e4a-838d-572b6919a3a2",
@@ -160,7 +164,7 @@
                 "height": 27.8125,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"5XX\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#CFD0D2\" weight=\"normal\" underline=false italic=false}\n| render\n"
+              "expression": "filters\n| demodata\n| markdown \"5XX\"\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#CFD0D2\" weight=\"normal\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-11de34da-7783-4d09-b22f-4ec1f8c957ea",
@@ -171,7 +175,7 @@
                 "height": 82,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT SUM(bytes) as total_bytes, host\nFROM kibana_sample_data_logs\nGROUP BY host\"\n| pointseries color=\"host\" size=\"total_bytes\"\n| pie hole=60 labels=false legend=false palette={palette \"#346822\" \"#57993F\" \"#C3F99C\" \"#6CBD38\" gradient=true}\n| render\n"
+              "expression": "filters\n| essql\n  query=\"SELECT SUM(bytes) as total_bytes, host\n    FROM kibana_sample_data_logs\n    GROUP BY host\"\n| pointseries color=\"host\" size=\"total_bytes\"\n| pie hole=60 labels=false legend=false palette={palette \"#346822\" \"#57993F\" \"#C3F99C\" \"#6CBD38\" gradient=true}\n| render\n"
             },
             {
               "id": "element-a2e808f6-1b2e-4f84-931e-6c38424c5480",
@@ -182,18 +186,19 @@
                 "height": 26.75,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT host\nFROM kibana_sample_data_logs\nWHERE host='artifacts.elastic.co'\nORDER BY timestamp DESC\nLIMIT 1\"\n| markdown {getCell \"host\"}\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n"
+              "expression": "filters\n| essql\n  query=\"SELECT host\n    FROM kibana_sample_data_logs\n    WHERE host='artifacts.elastic.co'\n    ORDER BY timestamp DESC\n    LIMIT 1\"\n| markdown {getCell \"host\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-bc35a3fe-c896-4898-a7f3-e5778958d6b0",
               "position": {
-                "left": 263.25,
+                "left": 265,
                 "top": 436.25,
                 "width": 302,
                 "height": 110,
-                "angle": 0
+                "angle": 0,
+                "parent": null
               },
-              "expression": "\nfilters\n| essql query=\"SELECT SUM(bytes) as total_bytes\nFROM kibana_sample_data_logs\"\n| math \"total_bytes\"\n| formatNumber \"0.00b\"\n| metric \"BYTES TRANSFERRED\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
+              "expression": "filters\n| essql \n  query=\"SELECT SUM(bytes) as total_bytes\n    FROM kibana_sample_data_logs\"\n| math \"total_bytes\"\n| formatNumber \"0.00b\"\n| metric \"BYTES TRANSFERRED\"\n  metricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n  labelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-a684991f-f179-4fcc-b474-5ed71b0a6f3e",
@@ -204,7 +209,7 @@
                 "height": 104,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql query=\"SELECT COUNT(timestamp) as total_visitors\nFROM kibana_sample_data_logs\"\n| math \"total_visitors\"\n| metric \"TOTAL VISITORS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
+              "expression": "filters\n| essql \n  query=\"SELECT COUNT(timestamp) as total_visitors\n    FROM kibana_sample_data_logs\"\n| math \"total_visitors\"\n| metric \"TOTAL VISITORS\"\n  metricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n  labelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-a8a8fa93-8e08-4e9f-b3e4-f4014543fe1f",
@@ -215,7 +220,7 @@
                 "height": 25.75,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql query=\"SELECT host\nFROM kibana_sample_data_logs\nWHERE host='www.elastic.co'\"\n| markdown {getCell \"host\"}\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| essql \n  query=\"SELECT host\n    FROM kibana_sample_data_logs\n    WHERE host='www.elastic.co'\"\n| markdown {getCell \"host\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -227,7 +232,7 @@
                 "height": 26.75,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT host\nFROM kibana_sample_data_logs\nWHERE host='cdn.elastic-elastic-elastic.org'\"\n| markdown {getCell \"host\"}\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| essql\n  query=\"SELECT host \n    FROM kibana_sample_data_logs\n    WHERE host='cdn.elastic-elastic-elastic.org'\"\n| markdown {getCell \"host\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -239,7 +244,7 @@
                 "height": 27.375,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT host\nFROM kibana_sample_data_logs\nWHERE host='elastic-elastic-elastic.org'\"\n| markdown {getCell \"host\"}\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| essql\n  query=\"SELECT host\n    FROM kibana_sample_data_logs\n    WHERE host='elastic-elastic-elastic.org'\"\n| markdown {getCell \"host\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=12 align=\"left\" color=\"#CFD0D2\" size=18 weight=\"lighter\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -251,7 +256,7 @@
                 "height": 90.5,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT SUM(bytes) as total_bytes, HOUR_OF_DAY(timestamp) as hour, host\nFROM kibana_sample_data_logs\nGROUP BY host, HOUR_OF_DAY(timestamp)\nORDER BY HOUR_OF_DAY(timestamp) DESC\"\n| pointseries x=\"hour\" y=\"total_bytes\" color=\"host\"\n| plot defaultStyle={seriesStyle bars=0 lines=3 points=0} legend=false xaxis=false yaxis=false palette={palette \"#346822\" \"#57993F\" \"#C3F99C\" \"#6CBD38\" gradient=true}\n| render containerStyle={containerStyle backgroundColor=\"#221F20\"}\n"
+              "expression": "filters\n| essql\n  query=\"SELECT SUM(bytes) as total_bytes, HOUR_OF_DAY(timestamp) as hour, host\n    FROM kibana_sample_data_logs\n    GROUP BY host, HOUR_OF_DAY(timestamp)\n    ORDER BY HOUR_OF_DAY(timestamp) DESC\"\n| pointseries x=\"hour\" y=\"total_bytes\" color=\"host\"\n| plot defaultStyle={seriesStyle bars=0 lines=3 points=0} legend=false xaxis=false yaxis=false palette={palette \"#346822\" \"#57993F\" \"#C3F99C\" \"#6CBD38\" gradient=true}\n| render containerStyle={containerStyle backgroundColor=\"#221F20\"}\n"
             },
             {
               "id": "element-05a065b5-5f01-4502-9f91-fdfc3de1b456",
@@ -260,9 +265,10 @@
                 "top": 594.875,
                 "width": 578,
                 "height": 87.25,
-                "angle": 0
+                "angle": 0,
+                "parent": null
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(timestamp) as total_visitors, HOUR_OF_DAY(timestamp) as hour, host\nFROM kibana_sample_data_logs\nGROUP BY host, HOUR_OF_DAY(timestamp)\nORDER BY HOUR_OF_DAY(timestamp) DESC\"\n| pointseries x=\"hour\" y=\"total_visitors\" color=\"host\"\n| plot defaultStyle={seriesStyle bars=0 lines=3 points=0} legend=false xaxis=false yaxis=false palette={palette \"#C83C5C\" \"#D56F79\" \"#F6C4C5\" \"#F1A3A6\" gradient=true}\n| render containerStyle={containerStyle backgroundColor=\"#221F20\"}\n"
+              "expression": "filters\n| essql\n  query=\"SELECT COUNT(timestamp) as total_visitors, HOUR_OF_DAY(timestamp) as hour, host\n    FROM kibana_sample_data_logs\n    GROUP BY host, HOUR_OF_DAY(timestamp)\n    ORDER BY HOUR_OF_DAY(timestamp) DESC\"\n| pointseries x=\"hour\" y=\"total_visitors\" color=\"host\"\n| plot defaultStyle={seriesStyle bars=0 lines=3 points=0} legend=false xaxis=false yaxis=false palette={palette \"#C83C5C\" \"#D56F79\" \"#F6C4C5\" \"#F1A3A6\" gradient=true}\n| render containerStyle={containerStyle backgroundColor=\"#221F20\"}\n"
             },
             {
               "id": "element-ce1da927-2d4f-413e-85e9-4fd1106b5207",
@@ -273,7 +279,7 @@
                 "height": 82,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(timestamp) as total_visitors, host\nFROM kibana_sample_data_logs\nGROUP BY host\"\n| pointseries color=\"host\" size=\"total_visitors\"\n| pie hole=60 labels=false legend=false palette={palette \"#C83C5C\" \"#D56F79\" \"#F6C4C5\" \"#F1A3A6\" gradient=true}\n| render\n",
+              "expression": "filters\n| essql\n  query=\"SELECT COUNT(timestamp) as total_visitors, host\n    FROM kibana_sample_data_logs\n    GROUP BY host\"\n| pointseries color=\"host\" size=\"total_visitors\"\n| pie hole=60 labels=false legend=false palette={palette \"#C83C5C\" \"#D56F79\" \"#F6C4C5\" \"#F1A3A6\" gradient=true}\n| render\n",
               "filter": null
             },
             {
@@ -285,7 +291,7 @@
                 "height": 101.7578125,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(timestamp) as total_errors, timestamp\nFROM kibana_sample_data_logs\nWHERE tags LIKE '%warning%'\nGROUP BY timestamp\nORDER BY timestamp DESC\"\n| pointseries x=\"timestamp\" y=\"total_errors\"\n| plot defaultStyle={seriesStyle bars=\"1\" lines=\"0\" points=0 color=\"#E9782F\"} legend=false xaxis=false yaxis=false\n| render\n"
+              "expression": "filters\n| essql\nquery=\"SELECT COUNT(timestamp) as total_errors, timestamp\nFROM kibana_sample_data_logs\nWHERE tags LIKE '%warning%'\nGROUP BY timestamp\nORDER BY timestamp DESC\"\n| pointseries x=\"timestamp\" y=\"total_errors\"\n| plot defaultStyle={seriesStyle bars=\"1\" lines=\"0\" points=0 color=\"#E9782F\"} legend=false xaxis=false yaxis=false\n| render\n"
             },
             {
               "id": "element-1ae8ea70-993a-4503-916a-ce98717054f6",
@@ -296,7 +302,7 @@
                 "height": 101.7578125,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(timestamp) as total_errors, timestamp\nFROM kibana_sample_data_logs\nWHERE tags LIKE '%error%'\nGROUP BY timestamp\nORDER BY timestamp DESC\"\n| pointseries x=\"timestamp\" y=\"total_errors\"\n| plot defaultStyle={seriesStyle bars=\"1\" lines=\"0\" points=0 color=\"#F2C242\"} legend=false xaxis=false yaxis=false\n| render\n"
+              "expression": "filters\n| essql\n  query=\"SELECT COUNT(timestamp) as total_errors, timestamp\n    FROM kibana_sample_data_logs\n    WHERE tags LIKE '%error%'\n    GROUP BY timestamp\n    ORDER BY timestamp DESC\"\n| pointseries x=\"timestamp\" y=\"total_errors\"\n| plot defaultStyle={seriesStyle bars=\"1\" lines=\"0\" points=0 color=\"#F2C242\"} legend=false xaxis=false yaxis=false\n| render\n"
             },
             {
               "id": "element-70a2bca6-de31-4bee-81b1-b18528820645",
@@ -307,7 +313,7 @@
                 "height": 104.94140625,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(timestamp) as total_errors\nFROM kibana_sample_data_logs\nWHERE tags LIKE '%warning%' OR tags LIKE '%error%'\"\n| math \"total_errors\"\n| metric \"TOTAL ISSUES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| essql\n  query=\"SELECT COUNT(timestamp) as total_errors\n    FROM kibana_sample_data_logs\n    WHERE tags LIKE '%warning%' OR tags LIKE '%error%'\"\n| math \"total_errors\"\n| metric \"TOTAL ISSUES\"\n  metricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n  labelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -319,7 +325,7 @@
                 "height": 98.18359375,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(timestamp) as total_errors\nFROM kibana_sample_data_logs\nWHERE tags LIKE '%warning%' OR tags LIKE '%error%'\"\n| math \"sum(total_errors / 100)\"\n| revealImage origin=\"bottom\" image={asset \"asset-a1e77720-eb0b-42a0-a1c0-a159035e4f26\"} emptyImage={asset \"asset-d2cca77f-ba40-4acb-beff-38fab19c7b65\"}\n| render\n"
+              "expression": "filters\n| essql\n  query=\"SELECT COUNT(timestamp) as total_errors\n    FROM kibana_sample_data_logs\n    WHERE tags LIKE '%warning%' OR tags LIKE '%error%'\"\n| math \"clamp(sum(total_errors / 100),0,1)\"\n| revealImage origin=\"bottom\" image={asset \"asset-a1e77720-eb0b-42a0-a1c0-a159035e4f26\"} emptyImage={asset \"asset-d2cca77f-ba40-4acb-beff-38fab19c7b65\"}\n| render\n"
             },
             {
               "id": "element-9d5e9c4b-a7f5-459b-ab15-cfcd1d1d00c9",
@@ -330,7 +336,7 @@
                 "height": 39.68359375,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"MACHINE\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
+              "expression": "filters\n| demodata\n| markdown \"MACHINE\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-d575ce4e-4aa5-4c54-993a-ca56890e434f",
@@ -341,7 +347,7 @@
                 "height": 80.12109375,
                 "angle": 0
               },
-              "expression": "\nfilters\n| esdocs index=\"kibana_sample_data_logs\" sort=\"timestamp, desc\" fields=\"machine.os, machine.ram\" count=1\n| markdown \"**OS:** \" {getCell \"machine.os\"} \"\\\n **RAM:** \" {getCell \"machine.ram\" | formatNumber \"00.0b\"}\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=20 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render containerStyle={containerStyle padding=\"5px\"}\n"
+              "expression": "filters\n| esdocs index=\"kibana_sample_data_logs\" sort=\"timestamp, desc\" fields=\"machine.os, machine.ram\" count=1\n| markdown \"**OS:** \" {getCell \"machine.os\"} \"\\\n  **RAM:** \" {getCell \"machine.ram\" | formatNumber \"00.0b\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=20 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render containerStyle={containerStyle padding=\"5px\"}\n"
             },
             {
               "id": "element-6f777a39-f934-4263-94ea-4f1d48f3849c",
@@ -352,7 +358,7 @@
                 "height": 83.74609375,
                 "angle": 0
               },
-              "expression": "\nfilters\n| esdocs index=\"kibana_sample_data_logs\" sort=\"timestamp, desc\" fields=\"request\" count=1\n| markdown {getCell \"request\"}\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=20 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render containerStyle={containerStyle padding=\"5px\"}\n"
+              "expression": "filters\n| esdocs index=\"kibana_sample_data_logs\" sort=\"timestamp, desc\" fields=\"request\" count=1\n| markdown {getCell \"request\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=20 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render containerStyle={containerStyle padding=\"5px\"}\n"
             },
             {
               "id": "element-7bfcdb0f-3533-4e50-a94a-f0487f374bff",
@@ -363,18 +369,19 @@
                 "height": 80.12109375,
                 "angle": 0
               },
-              "expression": "\nfilters\n| esdocs index=\"kibana_sample_data_logs\" sort=\"timestamp, desc\" fields=\"geo.src, geo.dest\" count=1\n| markdown \"**ORIGIN COUNTRY:** \" {getCell \"geo.src\"} \"\\\n **DESTINATION:** \" {getCell \"geo.dest\"}\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=20 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render containerStyle={containerStyle padding=\"5px\"}\n"
+              "expression": "filters\n| esdocs index=\"kibana_sample_data_logs\" sort=\"timestamp, desc\" fields=\"geo.src, geo.dest\" count=1\n| markdown \"**ORIGIN COUNTRY:** \" {getCell \"geo.src\"} \"\\\n  **DESTINATION:** \" {getCell \"geo.dest\"}\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=20 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render containerStyle={containerStyle padding=\"5px\"}\n"
             },
             {
               "id": "element-db2d0540-f734-421e-a9a5-7f6e9eef0bd7",
               "position": {
-                "left": 986.5,
-                "top": -50.75,
+                "left": 987.5,
+                "top": -51,
                 "width": 285,
                 "height": 50,
-                "angle": 0
+                "angle": 0,
+                "parent": null
               },
-              "expression": "\ntimefilterControl compact=true column=\"timestamp\"\n| render\n",
+              "expression": "timefilterControl compact=true column=\"timestamp\"\n| render\n",
               "filter": "timefilter from=\"now-24h\" to=now column=timestamp"
             },
             {
@@ -386,7 +393,7 @@
                 "height": 108.609375,
                 "angle": 0
               },
-              "expression": "\nshape \"circle\" fill=\"#C83C5B\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=true\n| render\n"
+              "expression": "shape \"circle\" fill=\"#C83C5B\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=true\n| render\n"
             },
             {
               "id": "element-c509ce21-e729-4aa5-b892-f4be441cde26",
@@ -397,7 +404,7 @@
                 "height": 49.125,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(*) as response_code\nFROM kibana_sample_data_logs\nWHERE response >= 500\"\n| math \"response_code\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#FFFFFF\" weight=\"bold\" underline=false italic=false}\n| render\n"
+              "expression": "filters \n| essql \n  query=\"SELECT COUNT(*) as response_code\n    FROM kibana_sample_data_logs\n    WHERE response >= 500\"\n| math \"response_code\"\n| metric\n  metricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#FFFFFF\" weight=\"bold\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-d27ad090-4e58-4d9c-aef7-ccb8ca043758",
@@ -408,7 +415,7 @@
                 "height": 7.25,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-99baa692-12dc-4d8d-9d78-05cb1aa7f7a8",
@@ -419,7 +426,7 @@
                 "height": 7.25,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-f0412810-61fb-4ab8-ba9f-a69ba344d4d7",
@@ -430,7 +437,7 @@
                 "height": 7.25,
                 "angle": 0
               },
-              "expression": "\nshape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
+              "expression": "shape \"square\" fill=\"#CFD0D2\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=false\n| render\n"
             },
             {
               "id": "element-42587f38-4f6e-4a23-9ade-d0f23449efba",
@@ -441,7 +448,7 @@
                 "height": 149,
                 "angle": 0
               },
-              "expression": "\nshape \"circle\" fill=\"#221F20\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=true\n| render\n"
+              "expression": "shape \"circle\" fill=\"#221F20\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=true\n| render\n"
             },
             {
               "id": "element-40d243ea-088c-4e17-b797-c47c8b94e282",
@@ -452,7 +459,7 @@
                 "height": 149,
                 "angle": 0
               },
-              "expression": "\nshape \"circle\" fill=\"#221F20\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=true\n| render\n"
+              "expression": "shape \"circle\" fill=\"#221F20\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=true\n| render\n"
             },
             {
               "id": "element-349aaa30-c164-4b95-b5aa-891a43e7b693",
@@ -463,7 +470,7 @@
                 "height": 149,
                 "angle": 0
               },
-              "expression": "\nshape \"circle\" fill=\"#221F20\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=true\n| render\n"
+              "expression": "shape \"circle\" fill=\"#221F20\" border=\"#CFD0D2\" borderWidth=2 maintainAspect=true\n| render\n"
             },
             {
               "id": "element-e92c89d9-4ddd-499c-8367-94271da02b3d",
@@ -474,7 +481,7 @@
                 "height": 108.609375,
                 "angle": 0
               },
-              "expression": "\nshape \"circle\" fill=\"#E9782F\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=true\n| render\n"
+              "expression": "shape \"circle\" fill=\"#E9782F\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=true\n| render\n"
             },
             {
               "id": "element-f827824d-fc40-4905-937d-060e9748acce",
@@ -485,7 +492,7 @@
                 "height": 108.609375,
                 "angle": 0
               },
-              "expression": "\nshape \"circle\" fill=\"#F2C242\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=true\n| render\n"
+              "expression": "shape \"circle\" fill=\"#F2C242\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=true\n| render\n"
             },
             {
               "id": "element-f7e459a0-613e-43f4-9ced-d5f4ae6f3c47",
@@ -496,7 +503,7 @@
                 "height": 108.609375,
                 "angle": 0
               },
-              "expression": "\nshape \"circle\" fill=\"#6CBD38\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=true\n| render\n"
+              "expression": "shape \"circle\" fill=\"#6CBD38\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=true\n| render\n"
             },
             {
               "id": "element-f5760f24-d9cb-42e8-ae60-13c60335f049",
@@ -507,7 +514,7 @@
                 "height": 25.8125,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"2XX\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#CFD0D2\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| demodata\n| markdown \"2XX\"\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#CFD0D2\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -519,7 +526,7 @@
                 "height": 26.28125,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"3XX\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#CFD0D2\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| demodata\n| markdown \"3XX\"\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#CFD0D2\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -531,7 +538,7 @@
                 "height": 30.625,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"4XX\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#CFD0D2\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| demodata\n| markdown \"4XX\"\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=18 align=\"left\" color=\"#CFD0D2\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -543,7 +550,7 @@
                 "height": 59,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(*) as response_code\nFROM kibana_sample_data_logs\nWHERE response >= 400 AND response < 500\"\n| math \"unique(response_code)\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#FFFFFF\" weight=\"bold\" underline=false italic=false}\n| render\n"
+              "expression": "filters\n| essql \n  query=\"SELECT COUNT(*) as response_code\n    FROM kibana_sample_data_logs\n    WHERE response >= 400 AND response < 500\"\n| math \"unique(response_code)\"\n| metric\n  metricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#FFFFFF\" weight=\"bold\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-607512ac-3d83-4d36-87c1-d5f13502f084",
@@ -554,7 +561,7 @@
                 "height": 59,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(*) as response_code\nFROM kibana_sample_data_logs\nWHERE response >= 300 AND response < 400\"\n| math \"response_code\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#FFFFFF\" weight=\"bold\" underline=false italic=false}\n| render\n"
+              "expression": "filters\n| essql\n  query=\"SELECT COUNT(*) as response_code\n    FROM kibana_sample_data_logs\n    WHERE response >= 300 AND response < 400\"\n| math \"response_code\"\n| metric\n  metricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#FFFFFF\" weight=\"bold\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-3cc56225-d739-4279-97f2-5c179fb013a5",
@@ -565,7 +572,7 @@
                 "height": 59,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(*) as response_code\nFROM kibana_sample_data_logs\nWHERE response >= 200 AND response < 300\"\n| math \"response_code\"\n| formatNumber \"0a\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#FFFFFF\" weight=\"bold\" underline=false italic=false}\n| render\n"
+              "expression": "filters\n| essql\n  query=\"SELECT COUNT(*) as response_code\n    FROM kibana_sample_data_logs\n    WHERE response >= 200 AND response < 300\"\n| math \"response_code\"\n| formatNumber \"0a\"\n| metric\n  metricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#FFFFFF\" weight=\"bold\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-f7d5956f-287d-4ac6-bcfb-fca6f8ebe63e",
@@ -576,7 +583,7 @@
                 "height": 36,
                 "angle": 0
               },
-              "expression": "\nimage mode=\"contain\" dataurl={\nasset {\nfilters | essql\nquery=\"SELECT host,response\nFROM kibana_sample_data_logs\nWHERE host='www.elastic.co'\nORDER BY timestamp DESC\nLIMIT 1\"|\nalterColumn \"response\" type=\"number\" |\ngetCell \"response\" |\nif {compare lt to=400} then=\"asset-0a807073-d056-4c7b-9bf4-225b71e47243\" else=\"asset-1343672d-7c02-4402-929e-0f8fef69cddd\"\n}\n} | render\n",
+              "expression": "filters \n| essql\n  query=\"SELECT host, response.keyword AS response\n    FROM kibana_sample_data_logs\n    WHERE host='www.elastic.co'\n    ORDER BY timestamp DESC\n    LIMIT 1\"\n| alterColumn \"response\" type=\"number\" \n| image mode=\"contain\" \n  dataurl={\n    asset {\n      if {getCell \"response\" | compare lt to=400} \n      then=\"asset-0a807073-d056-4c7b-9bf4-225b71e47243\" \n      else=\"asset-1343672d-7c02-4402-929e-0f8fef69cddd\"\n    }\n  } \n| render\n",
               "filter": null
             },
             {
@@ -588,7 +595,7 @@
                 "height": 36,
                 "angle": 0
               },
-              "expression": "\nimage mode=\"contain\" dataurl={\nasset {\nfilters | essql\nquery=\"SELECT host,response\nFROM kibana_sample_data_logs\nWHERE host='cdn.elastic-elastic-elastic.org'\nORDER BY timestamp DESC\nLIMIT 1\"|\nalterColumn \"response\" type=\"number\" |\ngetCell \"response\" |\nif {compare lt to=400} then=\"asset-0a807073-d056-4c7b-9bf4-225b71e47243\" else=\"asset-1343672d-7c02-4402-929e-0f8fef69cddd\"\n}\n} | render\n",
+              "expression": "filters \n| essql\n  query=\"SELECT host, response.keyword AS response\n    FROM kibana_sample_data_logs\n    WHERE host='cdn.elastic-elastic-elastic.org'\n    ORDER BY timestamp DESC\n    LIMIT 1\"\n| alterColumn \"response\" type=\"number\" \n| image mode=\"contain\" \n  dataurl={\n    asset {\n      if {getCell \"response\" | compare lt to=400} then=\"asset-0a807073-d056-4c7b-9bf4-225b71e47243\" else=\"asset-1343672d-7c02-4402-929e-0f8fef69cddd\"\n    }\n  } \n| render\n",
               "filter": null
             },
             {
@@ -600,7 +607,7 @@
                 "height": 36,
                 "angle": 0
               },
-              "expression": "\nimage mode=\"contain\" dataurl={\nasset {\nfilters | essql\nquery=\"SELECT host,response\nFROM kibana_sample_data_logs\nWHERE host='elastic-elastic-elastic.org'\nORDER BY timestamp DESC\nLIMIT 1\"|\nalterColumn \"response\" type=\"number\" |\ngetCell \"response\" |\nif {compare lt to=400} then=\"asset-0a807073-d056-4c7b-9bf4-225b71e47243\" else=\"asset-1343672d-7c02-4402-929e-0f8fef69cddd\"\n}\n} | render\n",
+              "expression": "filters \n| essql\n  query=\"SELECT host, response.keyword AS response\n    FROM kibana_sample_data_logs\n    WHERE host='elastic-elastic-elastic.org'\n    ORDER BY timestamp DESC\n    LIMIT 1\"\n| alterColumn \"response\" type=\"number\" \n| image mode=\"contain\" \n  dataurl={\n    asset {\n      if {getCell \"response\" | compare lt to=400} then=\"asset-0a807073-d056-4c7b-9bf4-225b71e47243\" else=\"asset-1343672d-7c02-4402-929e-0f8fef69cddd\"\n    }\n  } \n| render\n",
               "filter": null
             },
             {
@@ -612,7 +619,7 @@
                 "height": 28.25,
                 "angle": 0
               },
-              "expression": "\nimage mode=\"contain\" dataurl={asset \"asset-e9118351-dcc5-4a27-a7fc-f15eb308999b\"}\n| render\n"
+              "expression": "image mode=\"contain\" dataurl={asset \"asset-e9118351-dcc5-4a27-a7fc-f15eb308999b\"}\n| render\n"
             },
             {
               "id": "element-0f3c5e51-24b8-421e-b151-0c0229f80550",
@@ -623,7 +630,7 @@
                 "height": 37.3828125,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"REQUEST\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| demodata\n| markdown \"REQUEST\"\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -635,7 +642,7 @@
                 "height": 43.68359375,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"GEO\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n",
+              "expression": "filters\n| demodata\n| markdown \"GEO\"\n  font={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=30 align=\"left\" color=\"#FFFFFF\" weight=\"lighter\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -647,7 +654,7 @@
                 "height": 28.25,
                 "angle": 0
               },
-              "expression": "\nimage mode=\"contain\" dataurl={asset \"asset-c2128a19-e5ba-450c-99c0-a68abbdfa684\"}\n| render\n",
+              "expression": "image mode=\"contain\" dataurl={asset \"asset-c2128a19-e5ba-450c-99c0-a68abbdfa684\"}\n| render\n",
               "filter": null
             },
             {
@@ -659,10 +666,11 @@
                 "height": 29.25,
                 "angle": 0
               },
-              "expression": "\nimage mode=\"contain\" dataurl={asset \"asset-86622ebc-32db-40fa-8310-262c85a10979\"}\n| render\n",
+              "expression": "image mode=\"contain\" dataurl={asset \"asset-86622ebc-32db-40fa-8310-262c85a10979\"}\n| render\n",
               "filter": null
             }
-          ]
+          ],
+          "groups": []
         }
       ],
       "colors": [
@@ -697,8 +705,8 @@
         "#FFFFFF",
         "rgba(255,255,255,0)"
       ],
-      "@timestamp": "2018-10-31T17:56:10.178Z",
-      "@created": "2018-10-31T17:53:56.695Z",
+      "@timestamp": "2019-06-03T20:54:03.958Z",
+      "@created": "2019-06-03T20:46:16.137Z",
       "assets": {
         "asset-a1e77720-eb0b-42a0-a1c0-a159035e4f26": {
           "id": "asset-a1e77720-eb0b-42a0-a1c0-a159035e4f26",
@@ -742,7 +750,8 @@
           "type": "dataurl",
           "value": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MC44MSAyNS4zMSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiM0MTQwNDI7c3Ryb2tlOiNmZmY7c3Ryb2tlLW1pdGVybGltaXQ6MTA7c3Ryb2tlLXdpZHRoOjJweDt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPk1hY2hpbmUgSWNvbjwvdGl0bGU+PGcgaWQ9IkxheWVyXzIiIGRhdGEtbmFtZT0iTGF5ZXIgMiI+PGcgaWQ9IkxheWVyXzItMiIgZGF0YS1uYW1lPSJMYXllciAyIj48cmVjdCBjbGFzcz0iY2xzLTEiIHg9IjUuMTgiIHk9IjEiIHdpZHRoPSIyOS44MyIgaGVpZ2h0PSIxNy45NiIvPjxsaW5lIGNsYXNzPSJjbHMtMSIgeTE9IjI0LjMxIiB4Mj0iNDAuODEiIHkyPSIyNC4zMSIvPjwvZz48L2c+PC9zdmc+"
         }
-      }
+      },
+      "css": ".canvasPage {\n\n}"
     }
   }
 ]
