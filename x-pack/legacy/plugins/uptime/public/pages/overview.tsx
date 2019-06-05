@@ -47,10 +47,17 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
   }, []);
 
   const filterQueryString = search || '';
+  let error: any;
+  let filters: any | undefined;
+  try {
+    filters = JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString));
+  } catch (e) {
+    error = e;
+  }
   const sharedProps = {
     dateRangeStart,
     dateRangeEnd,
-    filters: search ? JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString)) : undefined,
+    filters,
   };
 
   const updateQuery: UptimeSearchBarQueryChangeHandler = ({ query }) => {
@@ -73,6 +80,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
         <FilterBar
           currentQuery={filterQueryString}
+          error={error}
           updateQuery={updateQuery}
           variables={sharedProps}
         />
