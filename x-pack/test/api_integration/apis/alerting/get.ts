@@ -43,7 +43,7 @@ export default function createGetTests({ getService }: KibanaFunctionalTestDefau
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: alertId,
-            alertTypeId: 'cpu-check',
+            alertTypeId: 'test-cpu-check',
             interval: 10000,
             actions: [
               {

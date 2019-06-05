@@ -16,3 +16,19 @@
     }
   }
 }
+
+{
+  "value": {
+    "id": "action:2fe13e69-4561-420f-b61c-ce82a8a1a31f",
+    "index": ".kibana",
+    "source": {
+      "action": {
+        "description": "Index to ES",
+        "actionTypeId": "test-index-record",
+        "actionTypeConfig": {}
+      },
+      "type": "action",
+      "migrationVersion": {}
+    }
+  }
+}

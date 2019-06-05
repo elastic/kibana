@@ -48,6 +48,7 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
       chance: kibanaAPITestsConfig.get('services.chance'),
       security: SecurityServiceProvider,
       spaces: SpacesServiceProvider,
+      retry: xPackFunctionalTestsConfig.get('services.retry'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {

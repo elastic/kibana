@@ -44,7 +44,7 @@ export default function createFindTests({ getService }: KibanaFunctionalTestDefa
           const match = resp.body.find((obj: any) => obj.id === alertId);
           expect(match).to.eql({
             id: alertId,
-            alertTypeId: 'cpu-check',
+            alertTypeId: 'test-cpu-check',
             interval: 10000,
             actions: [
               {

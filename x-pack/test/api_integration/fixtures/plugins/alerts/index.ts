@@ -9,9 +9,11 @@ import { AlertExecuteOptions } from '../../../../../plugins/alerting';
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['actions', 'alerting'],
+    require: ['actions', 'alerting', 'elasticsearch'],
     name: 'alerts',
     init(server: any) {
+      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+
       server.plugins.actions.registerType({
         id: 'test',
         name: 'Test',
@@ -20,9 +22,20 @@ export default function(kibana: any) {
           return { success: true, actionTypeConfig, params };
         },
       });
+      server.plugins.actions.registerType({
+        id: 'test-index-record',
+        name: 'Index a record into ES',
+        async executor({ params }: { actionTypeConfig: any; params: any }) {
+          return await callWithInternalUser('index', {
+            index: params.index,
+            refresh: 'wait_for',
+            body: params.body,
+          });
+        },
+      });
 
       server.plugins.alerting.registerType({
-        id: 'cpu-check',
+        id: 'test-cpu-check',
         description: 'Check CPU Usage',
         async execute({ services, params, state }: AlertExecuteOptions) {
           const cpuUsage = 100;

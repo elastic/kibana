@@ -6,9 +6,9 @@
 
 import { ES_ARCHIVER_ACTION_ID } from './constants';
 
-export function getTestAlertData() {
+export function getTestAlertData(attributeOverwrites = {}) {
   return {
-    alertTypeId: 'cpu-check',
+    alertTypeId: 'test-cpu-check',
     interval: 10 * 1000,
     actions: [
       {
@@ -24,5 +24,6 @@ export function getTestAlertData() {
       server: '1.2.3.4',
       threshold: 80,
     },
+    ...attributeOverwrites,
   };
 }

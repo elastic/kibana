@@ -63,3 +63,19 @@ Object {
 }
 `);
 });
+
+test('works recursively', () => {
+  const params = {
+    body: {
+      message: 'State: "{{state.value}}", Context: "{{context.value}}"',
+    },
+  };
+  const result = transformActionParams(params, { value: 'state' }, { value: 'context' });
+  expect(result).toMatchInlineSnapshot(`
+Object {
+  "body": Object {
+    "message": "State: \\"state\\", Context: \\"context\\"",
+  },
+}
+`);
+});
