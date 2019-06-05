@@ -58,6 +58,16 @@ class MockLauncher extends AbstractLauncher {
     childProcess.send('listen');
     return childProcess;
   }
+
+  protected killProcess(child: ChildProcess, log: Logger): Promise<boolean> {
+    // don't kill the process so fast, otherwise no normal exit can happen
+    return new Promise<boolean>(resolve => {
+      setTimeout(async () => {
+        const killed = await super.killProcess(child, log);
+        resolve(killed);
+      }, 100);
+    });
+  }
 }
 
 class PassiveMockLauncher extends MockLauncher {

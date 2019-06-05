@@ -187,6 +187,67 @@ describe('clone_worker_tests', () => {
     assert.ok(enqueueJobSpy.calledOnce);
   });
 
+  it('On clone job completed because of cancellation', async () => {
+    // Setup IndexWorker
+    const enqueueJobSpy = sinon.spy();
+    const indexWorker = {
+      enqueueJob: emptyAsyncFunc,
+    };
+    indexWorker.enqueueJob = enqueueJobSpy;
+
+    // Setup EsClient
+    const updateSpy = sinon.spy();
+    const esClient = {
+      update: emptyAsyncFunc,
+    };
+    esClient.update = updateSpy;
+
+    // Setup CancellationService
+    const cancelCloneJobSpy = sinon.spy();
+    const registerCloneJobTokenSpy = sinon.spy();
+    const cancellationService: any = {
+      cancelCloneJob: emptyAsyncFunc,
+      registerCloneJobToken: emptyAsyncFunc,
+    };
+    cancellationService.cancelCloneJob = cancelCloneJobSpy;
+    cancellationService.registerCloneJobToken = registerCloneJobTokenSpy;
+
+    const cloneWorker = new CloneWorker(
+      esQueue as Esqueue,
+      log,
+      esClient as EsClient,
+      serverOptions,
+      (indexWorker as any) as IndexWorker,
+      {} as RepositoryServiceFactory,
+      cancellationService as CancellationSerivce
+    );
+
+    await cloneWorker.onJobCompleted(
+      {
+        payload: {
+          url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git',
+        },
+        options: {},
+        timestamp: 0,
+      },
+      {
+        uri: 'github.com/Microsoft/TypeScript-Node-Starter',
+        repo: ({
+          uri: 'github.com/Microsoft/TypeScript-Node-Starter',
+        } as any) as Repository,
+        cancelled: true,
+      }
+    );
+
+    // EsClient update should not be called for the sake of clone
+    // cancellation.
+    assert.ok(updateSpy.notCalled);
+
+    // Index request should not be issued after clone request is done.
+    await delay(1000);
+    assert.ok(enqueueJobSpy.notCalled);
+  });
+
   it('On clone job enqueued.', async () => {
     // Setup EsClient
     const indexSpy = sinon.spy();

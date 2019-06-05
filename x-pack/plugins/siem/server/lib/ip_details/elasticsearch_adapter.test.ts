@@ -5,11 +5,17 @@
  */
 import { FlowTarget } from '../../graphql/types';
 
-import { formatDomainsEdges, getIpOverviewAgg, getUsersEdges } from './elasticsearch_adapter';
+import {
+  formatDomainsEdges,
+  getIpOverviewAgg,
+  getIpOverviewHostAgg,
+  getUsersEdges,
+} from './elasticsearch_adapter';
 
 import {
   formattedDestination,
   formattedEmptySource,
+  formattedHost,
   formattedSource,
   mockDomainsResponseBuckets,
   mockFormattedDestination,
@@ -30,20 +36,25 @@ describe('elasticsearch_adapter', () => {
     });
 
     test('will return a source correctly', () => {
-      const destination = getIpOverviewAgg(FlowTarget.source, responseAggs.aggregations.source!);
-      expect(destination).toEqual(formattedSource);
+      const source = getIpOverviewAgg(FlowTarget.source, responseAggs.aggregations.source!);
+      expect(source).toEqual(formattedSource);
+    });
+
+    test('will return a host correctly', () => {
+      const host = getIpOverviewHostAgg(responseAggs.aggregations.host);
+      expect(host).toEqual(formattedHost);
     });
 
     test('will return an empty source correctly', () => {
-      const destination = getIpOverviewAgg(FlowTarget.source, {});
-      expect(destination).toEqual(formattedEmptySource);
+      const source = getIpOverviewAgg(FlowTarget.source, {});
+      expect(source).toEqual(formattedEmptySource);
     });
   });
 
   describe('#getDomains', () => {
     test('will return a source correctly', () => {
-      const destination = formatDomainsEdges(mockDomainsResponseBuckets, FlowTarget.source);
-      expect(destination).toEqual(mockFormattedSource);
+      const source = formatDomainsEdges(mockDomainsResponseBuckets, FlowTarget.source);
+      expect(source).toEqual(mockFormattedSource);
     });
 
     test('will return a destination correctly', () => {

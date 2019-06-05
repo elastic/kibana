@@ -19,15 +19,10 @@ import {
 } from '../actions';
 import { languageServerInitializing } from '../actions/language_server';
 
-const SPECIAL_SYMBOL_NAME = '{...}';
-const SPECIAL_CONTAINER_NAME = '';
-
 export interface SymbolWithMembers extends SymbolInformation {
   members?: SymbolWithMembers[];
   path?: string;
 }
-
-type Container = SymbolWithMembers | undefined;
 
 export interface SymbolState {
   symbols: { [key: string]: SymbolInformation[] };
@@ -47,77 +42,6 @@ const initialState: SymbolState = {
   languageServerInitializing: false,
 };
 
-const sortSymbol = (a: SymbolWithMembers, b: SymbolWithMembers) => {
-  const lineDiff = a.location.range.start.line - b.location.range.start.line;
-  if (lineDiff === 0) {
-    return a.location.range.start.character - b.location.range.start.character;
-  } else {
-    return lineDiff;
-  }
-};
-
-const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => {
-  const structureTree: SymbolWithMembers[] = [];
-
-  function findContainer(
-    tree: SymbolWithMembers[],
-    containerName?: string
-  ): SymbolInformation | undefined {
-    if (containerName === undefined) {
-      return undefined;
-    }
-    const regex = new RegExp(`^${containerName}[<(]?.*[>)]?$`);
-    const result = tree.find((s: SymbolInformation) => {
-      return regex.test(s.name);
-    });
-    if (result) {
-      return result;
-    } else {
-      const subTree = tree
-        .filter(s => s.members)
-        .map(s => s.members)
-        .flat();
-      if (subTree.length > 0) {
-        return findContainer(subTree, containerName);
-      } else {
-        return undefined;
-      }
-    }
-  }
-
-  symbols
-    .sort(sortSymbol)
-    .forEach((s: SymbolInformation, index: number, arr: SymbolInformation[]) => {
-      let container: Container;
-      /**
-       * For Enum class in Java, the container name and symbol name that LSP gives are special.
-       * For more information, see https://github.com/elastic/codesearch/issues/580
-       */
-      if (s.containerName === SPECIAL_CONTAINER_NAME) {
-        container = _.findLast(
-          arr.slice(0, index),
-          (sy: SymbolInformation) => sy.name === SPECIAL_SYMBOL_NAME
-        );
-      } else {
-        container = findContainer(structureTree, s.containerName);
-      }
-      if (container) {
-        if (!container.path) {
-          container.path = container.name;
-        }
-        if (container.members) {
-          container.members.push({ ...s, path: `${container.path}/${s.name}` });
-        } else {
-          container.members = [{ ...s, path: `${container.path}/${s.name}` }];
-        }
-      } else {
-        structureTree.push({ ...s, path: s.name });
-      }
-    });
-
-  return structureTree;
-};
-
 export const symbol = handleActions(
   {
     [String(loadStructure)]: (state: SymbolState, action: Action<any>) =>
@@ -128,8 +52,8 @@ export const symbol = handleActions(
     [String(loadStructureSuccess)]: (state: SymbolState, action: Action<SymbolsPayload>) =>
       produce<SymbolState>(state, (draft: SymbolState) => {
         draft.loading = false;
-        const { path, data } = action.payload!;
-        draft.structureTree[path] = generateStructureTree(data);
+        const { path, data, structureTree } = action.payload!;
+        draft.structureTree[path] = structureTree;
         draft.symbols = {
           ...state.symbols,
           [path]: data,

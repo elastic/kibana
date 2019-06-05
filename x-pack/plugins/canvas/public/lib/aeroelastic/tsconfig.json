@@ -2,7 +2,7 @@
   "extends": "../../../../../tsconfig",
   "compilerOptions": {
     "module": "commonjs",
-    "lib": ["esnext", "dom"],
+    "lib": ["es2018", "dom"],
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": false,
