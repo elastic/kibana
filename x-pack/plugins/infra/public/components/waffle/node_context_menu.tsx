@@ -90,7 +90,9 @@ export const NodeContextMenu = injectUICapabilities(
             }
           : undefined;
 
-      const uptimeUrl = node.ip
+      const showUptimeLink =
+        [InfraNodeType.pod, InfraNodeType.container].includes(nodeType) || node.ip;
+      const uptimeUrl = showUptimeLink
         ? {
             name: intl.formatMessage(
               {
