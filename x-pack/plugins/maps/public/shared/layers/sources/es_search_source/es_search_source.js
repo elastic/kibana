@@ -337,17 +337,19 @@ export class ESSearchSource extends AbstractESSource {
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 
     if (this._isTopHits()) {
+      const entitiesFoundMsg = i18n.translate('xpack.maps.esSearch.featureCountMsg', {
+        defaultMessage: `Found {entityCount} entities.`,
+        values: { entityCount: meta.entityCount }
+      });
       if (meta.areResultsTrimmed) {
-        return i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
-          defaultMessage: `Results limited to most recent {count} documents per entity.`,
-          values: { count: this._descriptor.topHitsSize }
+        const trimmedMsg = i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
+          defaultMessage: `Results limited to most recent {topHitsSize} documents per entity.`,
+          values: { topHitsSize: this._descriptor.topHitsSize }
         });
+        return `${entitiesFoundMsg} ${trimmedMsg}`;
       }
 
-      return i18n.translate('xpack.maps.esSearch.featureCountMsg', {
-        defaultMessage: `Found {count} entities.`,
-        values: { count: meta.entityCount }
-      });
+      return entitiesFoundMsg;
     }
 
     if (meta.areResultsTrimmed) {
