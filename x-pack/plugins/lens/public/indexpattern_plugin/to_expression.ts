@@ -25,28 +25,28 @@ export function toExpression(state: IndexPatternPrivateState) {
   } else if (sortedColumns.length) {
     const aggs = sortedColumns
       .map((col, index) => {
-        if (col.operationId === 'date_histogram') {
+        if (col.operationType === 'date_histogram') {
           return {
-            id: fieldNames[index],
+            id: state.columnOrder[index],
             enabled: true,
             type: 'date_histogram',
             schema: 'segment',
             params: {
               field: col.sourceField,
               timeRange: {
-                from: 'now-15m',
+                from: 'now-1d',
                 to: 'now',
               },
               useNormalizedEsInterval: true,
-              interval: 'auto',
+              interval: '1h',
               drop_partials: false,
               min_doc_count: 1,
               extended_bounds: {},
             },
           };
-        } else if (col.operationId === 'terms') {
+        } else if (col.operationType === 'terms') {
           return {
-            id: fieldNames[index],
+            id: state.columnOrder[index],
             enabled: true,
             type: 'terms',
             schema: 'segment',
@@ -61,9 +61,9 @@ export function toExpression(state: IndexPatternPrivateState) {
               missingBucketLabel: 'Missing',
             },
           };
-        } else if (col.operationId === 'count') {
+        } else if (col.operationType === 'count') {
           return {
-            id: fieldNames[index],
+            id: state.columnOrder[index],
             enabled: true,
             type: 'count',
             schema: 'metric',
@@ -71,7 +71,7 @@ export function toExpression(state: IndexPatternPrivateState) {
           };
         } else {
           return {
-            id: fieldNames[index],
+            id: state.columnOrder[index],
             enabled: true,
             type: col.operationType,
             schema: 'metric',
@@ -84,10 +84,10 @@ export function toExpression(state: IndexPatternPrivateState) {
       .map(agg => JSON.stringify(agg));
 
     return `esaggs
-      index="${indexName}"
-      metricsAtAllLevels=false
-      partialRows=false
-      aggConfigs='${aggs.join(',')}'`;
+      index="${state.currentIndexPatternId}"
+      metricsAtAllLevels="false"
+      partialRows="false"
+      aggConfigs='[${aggs.join(',')}]'`;
   }
 
   return '';
