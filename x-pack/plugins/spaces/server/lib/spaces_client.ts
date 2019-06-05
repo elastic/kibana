@@ -5,7 +5,6 @@
  */
 import Boom from 'boom';
 import { omit } from 'lodash';
-import { AuthorizationService } from '../../../security/server/lib/authorization/service';
 import { isReservedSpace } from '../../common/is_reserved_space';
 import { Space } from '../../common/model/space';
 import { SpacesAuditLogger } from './audit_logger';
@@ -14,7 +13,7 @@ export class SpacesClient {
   constructor(
     private readonly auditLogger: SpacesAuditLogger,
     private readonly debugLogger: (message: string) => void,
-    private readonly authorization: AuthorizationService,
+    private readonly authorization: any,
     private readonly callWithRequestSavedObjectRepository: any,
     private readonly config: any,
     private readonly internalSavedObjectRepository: any,
