@@ -14,7 +14,7 @@ const defaultProps = {
   max: MAX,
   min: 0,
   value: 3,
-  onCHange: () => {}
+  onChange: () => {}
 };
 
 test('Should render slider', () => {
