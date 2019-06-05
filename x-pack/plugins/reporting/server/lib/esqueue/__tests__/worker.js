@@ -706,7 +706,7 @@ describe('Worker class', function () {
       });
 
       it('should update the job with the workerFn output', function () {
-        const workerFn = function (job, jobPayload) { // eslint-disable-line no-unused-vars
+        const workerFn = function (job, jobPayload) {
           expect(jobPayload).to.eql(payload);
           return payload;
         };
@@ -729,7 +729,7 @@ describe('Worker class', function () {
 
       it('should update the job status and completed time', function () {
         const startTime = moment().valueOf();
-        const workerFn = function (job, jobPayload) { // eslint-disable-line no-unused-vars
+        const workerFn = function (job, jobPayload) {
           expect(jobPayload).to.eql(payload);
           return new Promise(function (resolve) {
             setTimeout(() => resolve(payload), 10);
@@ -790,7 +790,7 @@ describe('Worker class', function () {
 
       it('should handle async errors', function () {
         const workerFn = function () {
-          return new Promise((resolve, reject) => { // eslint-disable-line no-unused-vars
+          return new Promise((resolve, reject) => {
             reject(new Error('test error'));
           });
         };
@@ -807,7 +807,7 @@ describe('Worker class', function () {
       it('should handle rejecting with strings', function () {
         const errorMessage = 'this is a string error';
         const workerFn = function () {
-          return new Promise((resolve, reject) => { // eslint-disable-line no-unused-vars
+          return new Promise((resolve, reject) => {
             reject(errorMessage);
           });
         };
@@ -823,7 +823,7 @@ describe('Worker class', function () {
 
       it('should handle empty rejection', function (done) {
         const workerFn = function () {
-          return new Promise((resolve, reject) => { // eslint-disable-line no-unused-vars
+          return new Promise((resolve, reject) => {
             reject();
           });
         };
@@ -904,7 +904,7 @@ describe('Worker class', function () {
         const timeout = 20;
         cancellationCallback = function () {};
 
-        const workerFn = function (job, payload, cancellationToken) { // eslint-disable-line no-unused-vars
+        const workerFn = function (job, payload, cancellationToken) {
           cancellationToken.on(cancellationCallback);
           return new Promise(function (resolve) {
             setTimeout(() => {
@@ -991,7 +991,7 @@ describe('Worker class', function () {
       describe('workerFn rejects promise', function () {
         beforeEach(function () {
           const workerFn = function () {
-            return new Promise(function (resolve, reject) { // eslint-disable-line no-unused-vars
+            return new Promise(function (resolve, reject) {
               setTimeout(() => {
                 reject();
               }, timeout / 2);

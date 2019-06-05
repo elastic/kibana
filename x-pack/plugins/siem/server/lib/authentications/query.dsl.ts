@@ -34,7 +34,6 @@ export const buildQuery = ({
 
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    { term: { 'event.module': 'system' } },
     { term: { 'event.category': 'authentication' } },
     {
       range: {
@@ -65,7 +64,7 @@ export const buildQuery = ({
           terms: {
             size: limit + 1,
             field: 'user.name',
-            order: { 'failures.doc_count': 'desc' },
+            order: [{ 'successes.doc_count': 'desc' }, { 'failures.doc_count': 'desc' }],
           },
           aggs: {
             failures: {
