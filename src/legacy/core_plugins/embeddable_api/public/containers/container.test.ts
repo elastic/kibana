@@ -37,6 +37,8 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   SlowContactCardEmbeddableFactory,
+  HELLO_WORLD_EMBEDDABLE_TYPE,
+  HelloWorldEmbeddableFactory,
 } from '../test_samples/index';
 import { isErrorEmbeddable, EmbeddableOutput, EmbeddableFactory } from '../embeddables';
 import { ContainerInput } from './i_container';
@@ -48,10 +50,12 @@ import {
 } from '../test_samples/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../embeddables/error_embeddable';
 import { Filter, FilterStateStore } from '@kbn/es-query';
+import { PanelNotFoundError } from './panel_not_found_error';
 
 const embeddableFactories = createRegistry<EmbeddableFactory>();
 embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new SlowContactCardEmbeddableFactory());
+embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
 
 async function creatHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
@@ -564,7 +568,7 @@ test('Container changes made directly after adding a new embeddable are propagat
     new SlowContactCardEmbeddableFactory({ loadTickCount: 3 })
   );
 
-  Rx.merge(container.getOutput$(), container.getInput$())
+  const subscription = Rx.merge(container.getOutput$(), container.getInput$())
     .pipe(skip(2))
     .subscribe(() => {
       expect(Object.keys(container.getOutput().embeddableLoaded).length).toBe(1);
@@ -574,6 +578,7 @@ test('Container changes made directly after adding a new embeddable are propagat
         if (container.getOutput().embeddableLoaded[embeddableId] === true) {
           const embeddable = container.getChild(embeddableId);
           if (embeddable.getInput().viewMode === ViewMode.VIEW) {
+            subscription.unsubscribe();
             done();
           }
         }
@@ -668,4 +673,91 @@ test('ErrorEmbeddables get updated when parent does', async done => {
       done();
     }
   });
+});
+
+test('untilEmbeddableLoaded throws an error if there is no such child panel in the container', () => {
+  const container = new HelloWorldContainer(
+    {
+      id: 'hello',
+      panels: {},
+    },
+    embeddableFactories
+  );
+
+  expect(container.untilEmbeddableLoaded('idontexist')).rejects.toThrowError();
+});
+
+test('untilEmbeddableLoaded resolves if child is has an type that does not exist', async done => {
+  embeddableFactories.reset();
+  const container = new HelloWorldContainer(
+    {
+      id: 'hello',
+      panels: {
+        '123': {
+          type: HELLO_WORLD_EMBEDDABLE_TYPE,
+          explicitInput: {},
+          embeddableId: '123',
+        },
+      },
+    },
+    embeddableFactories
+  );
+
+  const child = await container.untilEmbeddableLoaded('123');
+  expect(child).toBeDefined();
+  expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
+  done();
+});
+
+test('untilEmbeddableLoaded resolves if child is loaded in the container', async done => {
+  embeddableFactories.reset();
+  embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+
+  const container = new HelloWorldContainer(
+    {
+      id: 'hello',
+      panels: {
+        '123': {
+          type: HELLO_WORLD_EMBEDDABLE_TYPE,
+          explicitInput: {},
+          embeddableId: '123',
+        },
+      },
+    },
+    embeddableFactories
+  );
+
+  const child = await container.untilEmbeddableLoaded('123');
+  expect(child).toBeDefined();
+  expect(child.type).toBe(HELLO_WORLD_EMBEDDABLE_TYPE);
+  done();
+});
+
+test('untilEmbeddableLoaded rejects with an error if child is subsequently removed', async done => {
+  embeddableFactories.reset();
+  embeddableFactories.set(
+    CONTACT_CARD_EMBEDDABLE,
+    new SlowContactCardEmbeddableFactory({ loadTickCount: 3 })
+  );
+
+  const container = new HelloWorldContainer(
+    {
+      id: 'hello',
+      panels: {
+        '123': {
+          embeddableId: '123',
+          explicitInput: { firstName: 'Sam', lastName: 'Tarley' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        },
+      },
+    },
+    embeddableFactories
+  );
+
+  container.untilEmbeddableLoaded('123').catch(error => {
+    expect(error).toBeInstanceOf(PanelNotFoundError);
+    done();
+  });
+
+  container.updateInput({ panels: {} });
 });

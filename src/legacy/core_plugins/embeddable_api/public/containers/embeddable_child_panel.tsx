@@ -64,14 +64,11 @@ class EmbeddableChildPanelUi extends React.Component<EmbeddableChildPanelUiProps
   public async componentDidMount() {
     this.mounted = true;
     const { container } = this.props;
-    this.subscription = container.getOutput$().subscribe(() => {
-      if (this.mounted) {
-        if (container.getOutput().embeddableLoaded[this.props.embeddableId]) {
-          this.embeddable = container.getChild(this.props.embeddableId);
-          this.setState({ loading: false });
-        }
-      }
-    });
+
+    this.embeddable = await container.untilEmbeddableLoaded(this.props.embeddableId);
+    if (this.mounted) {
+      this.setState({ loading: false });
+    }
   }
 
   public componentWillUnmount() {

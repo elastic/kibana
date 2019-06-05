@@ -59,6 +59,13 @@ export interface IContainer<
   readonly embeddableFactories: IRegistry<EmbeddableFactory>;
 
   /**
+   * Call if you want to wait until an embeddable with that id has finished loading.
+   */
+  untilEmbeddableLoaded<TEmbeddable extends IEmbeddable>(
+    id: string
+  ): Promise<TEmbeddable | ErrorEmbeddable>;
+
+  /**
    * Returns the input for the given child. Uses a combination of explicit input
    * for the child stored on the parent and derived/inherited input taken from the
    * container itself.
