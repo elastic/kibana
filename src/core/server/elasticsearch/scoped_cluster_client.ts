@@ -86,7 +86,11 @@ export class ScopedClusterClient {
           }
         } catch (err) {
           // eslint-disable-next-line
-          console.log('Error:', err);
+          console.log('Got Error:', err);
+          // eslint-disable-next-line
+          console.log('this.headers:', this.headers);
+          // eslint-disable-next-line
+          console.log('clientParams:', clientParams);
         }
       }
 
