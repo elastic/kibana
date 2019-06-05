@@ -10,7 +10,7 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
-import { DEFAULT_INDEX_KEY } from '../../..';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetUsersQuery,
   FlowTarget,

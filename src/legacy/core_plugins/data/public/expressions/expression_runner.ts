@@ -52,8 +52,12 @@ export const createRunFn = (
     },
   });
 
+  if (response.type === 'error') {
+    throw response;
+  }
+
   if (element) {
-    if (response.type === 'render' && response.as) {
+    if (response.type === 'render' && response.as && renderersRegistry.get(response.as) !== null) {
       renderersRegistry.get(response.as).render(element, response.value, {
         onDestroy: fn => {
           // TODO implement
@@ -63,8 +67,7 @@ export const createRunFn = (
         },
       });
     } else {
-      // eslint-disable-next-line no-console
-      console.log('Unexpected result of expression', response);
+      throw response;
     }
   }
 

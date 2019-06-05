@@ -46,6 +46,7 @@ export interface Result {
   type: string;
   as?: string;
   value?: unknown;
+  error?: unknown;
 }
 
 interface RenderHandlers {

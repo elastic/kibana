@@ -14,8 +14,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
         id="ip-overview-source.autonomous_system.as_org"
         value="Test Org"
       />
-       
-      /
+       /
       <pure(Component)
         field="source.autonomous_system.asn"
         id="ip-overview-source.autonomous_system.asn"
@@ -37,51 +36,33 @@ exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`]
 
 exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
 <Component>
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
+  <pure(Component)
+    field="host.name"
+    id="ip-overview-host-name"
+    value="raspberrypi"
   >
-    <EuiFlexItem
-      grow={false}
+    <pure(Component)
+      hostName="raspberrypi"
     >
-      <pure(Component)
-        field="host.name"
-        id="ip-overview-host-name"
-        value="raspberrypi"
-      >
-        <pure(Component)
-          hostName="raspberrypi"
-        >
-          raspberrypi
-        </pure(Component)>
-      </pure(Component)>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+      raspberrypi
+    </pure(Component)>
+  </pure(Component)>
 </Component>
 `;
 
 exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
 <Component>
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
+  <pure(Component)
+    field="host.name"
+    id="ip-overview-host-name"
+    value="raspberrypi"
   >
-    <EuiFlexItem
-      grow={false}
+    <pure(Component)
+      hostName="raspberrypi"
     >
-      <pure(Component)
-        field="host.name"
-        id="ip-overview-host-name"
-        value="raspberrypi"
-      >
-        <pure(Component)
-          hostName="raspberrypi"
-        >
-          raspberrypi
-        </pure(Component)>
-      </pure(Component)>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+      raspberrypi
+    </pure(Component)>
+  </pure(Component)>
 </Component>
 `;
 
@@ -229,11 +210,16 @@ exports[`Field Renderers #reputationRenderer it renders correctly against snapsh
   }
 >
   <pure(Component)
+    link="10.10.10.10"
+  >
+    virustotal.com
+  </pure(Component)>
+  , 
+  <pure(Component)
     domain="10.10.10.10"
   >
-    View at iana.org
+    talosIntelligence.com
   </pure(Component)>
-  <pure(Component) />
 </Component>
 `;
 
@@ -345,8 +331,7 @@ exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`
   <pure(Component)
     domain="10.10.10.10"
   >
-    View at iana.org
+    iana.org
   </pure(Component)>
-  <pure(Component) />
 </Component>
 `;

@@ -23,7 +23,7 @@ Array [
           },
           "date_histogram": Object {
             "field": "@timestamp",
-            "interval": "36000ms",
+            "fixed_interval": "36000ms",
           },
         },
       },
@@ -81,7 +81,7 @@ Array [
           },
           "date_histogram": Object {
             "field": "@timestamp",
-            "interval": "36000ms",
+            "fixed_interval": "36000ms",
           },
         },
       },

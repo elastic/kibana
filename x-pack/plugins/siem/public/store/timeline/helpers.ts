@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getOr, omit, uniq } from 'lodash/fp';
+import { getOr, omit, uniq, isEmpty, isEqualWith } from 'lodash/fp';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { getColumnWidthFromType } from '../../components/timeline/body/helpers';
@@ -11,6 +11,7 @@ import { Sort } from '../../components/timeline/body/sort';
 import {
   DataProvider,
   QueryOperator,
+  QueryMatch,
 } from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
@@ -207,6 +208,13 @@ export const applyDeltaToCurrentWidth = ({
   };
 };
 
+const queryMatchCustomizer = (dp1: QueryMatch, dp2: QueryMatch) => {
+  if (dp1.field === dp2.field && dp1.value === dp2.value && dp1.operator === dp2.operator) {
+    return true;
+  }
+  return false;
+};
+
 const addAndToProviderInTimeline = (
   id: string,
   provider: DataProvider,
@@ -219,6 +227,16 @@ const addAndToProviderInTimeline = (
   const newProvider = timeline.dataProviders[alreadyExistsProviderIndex];
   const alreadyExistsAndProviderIndex = newProvider.and.findIndex(p => p.id === provider.id);
   const { and, ...andProvider } = provider;
+
+  if (
+    isEqualWith(queryMatchCustomizer, newProvider.queryMatch, andProvider.queryMatch) ||
+    (alreadyExistsAndProviderIndex === -1 &&
+      newProvider.and.filter(itemAndProvider =>
+        isEqualWith(queryMatchCustomizer, itemAndProvider.queryMatch, andProvider.queryMatch)
+      ).length > 0)
+  ) {
+    return timelineById;
+  }
 
   const dataProviders = [
     ...timeline.dataProviders.slice(0, alreadyExistsProviderIndex),
@@ -252,8 +270,15 @@ const addProviderToTimeline = (
   timelineById: TimelineById
 ): TimelineById => {
   const alreadyExistsAtIndex = timeline.dataProviders.findIndex(p => p.id === provider.id);
+
+  if (alreadyExistsAtIndex > -1 && !isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)) {
+    provider.id = `${provider.id}-${
+      timeline.dataProviders.filter(p => p.id === provider.id).length
+    }`;
+  }
+
   const dataProviders =
-    alreadyExistsAtIndex > -1
+    alreadyExistsAtIndex > -1 && isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)
       ? [
           ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
           provider,
@@ -1000,6 +1025,14 @@ const removeProvider = (providerId: string, timeline: TimelineModel) => {
   const providerIndex = timeline.dataProviders.findIndex(p => p.id === providerId);
   return [
     ...timeline.dataProviders.slice(0, providerIndex),
+    ...(timeline.dataProviders[providerIndex].and.length
+      ? [
+          {
+            ...timeline.dataProviders[providerIndex].and.slice(0, 1)[0],
+            and: [...timeline.dataProviders[providerIndex].and.slice(1)],
+          },
+        ]
+      : []),
     ...timeline.dataProviders.slice(providerIndex + 1),
   ];
 };

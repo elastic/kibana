@@ -35,6 +35,8 @@ const createServiceMock = () => ({
   addLoadingCount: jest.fn(),
   getLoadingCount$: jest.fn(),
   stop: jest.fn(),
+  intercept: jest.fn(),
+  removeAllInterceptors: jest.fn(),
 });
 
 const createSetupContractMock = (): jest.Mocked<HttpSetup> => createServiceMock();

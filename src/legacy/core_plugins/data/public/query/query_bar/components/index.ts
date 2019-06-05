@@ -18,3 +18,4 @@
  */
 
 export { QueryBar } from './query_bar';
+export { QueryBarInput } from './query_bar_input';

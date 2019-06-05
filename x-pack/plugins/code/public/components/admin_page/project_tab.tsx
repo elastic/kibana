@@ -149,7 +149,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
       <EuiOverlayMask>
         <EuiModal onClose={this.closeModal}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>Add new project</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>Import a new repo</EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <EuiTitle size="xs">
@@ -161,7 +161,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
                   value={this.state.repoURL}
                   onChange={this.onChange}
                   onBlur={this.updateIsInvalid}
-                  placeholder="https://github.com/elastic/elasticsearch"
+                  placeholder="https://github.com/Microsoft/TypeScript-Node-Starter"
                   aria-label="input project url"
                   data-test-subj="importRepositoryUrlInputBox"
                   isLoading={this.props.importLoading}
@@ -245,7 +245,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
                 onClick={this.openModal}
                 data-test-subj="newProjectButton"
               >
-                Add New Project
+                Import a new repo
               </EuiButton>
             )}
           </EuiFlexItem>
@@ -254,7 +254,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         <EuiText>
           <h3>
             {projectsCount}
-            {projectsCount === 1 ? <span> Project</span> : <span> Projects</span>}
+            {projectsCount === 1 ? <span> Repo</span> : <span> Repos</span>}
           </h3>
         </EuiText>
         <EuiSpacer />

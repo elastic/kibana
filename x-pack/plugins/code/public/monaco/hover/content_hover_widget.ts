@@ -62,7 +62,7 @@ export class ContentHoverWidget extends ContentWidget {
       return;
     }
     this.hoverOperation.cancel();
-    const url = this.editor.getModel().uri.toString();
+    const url = this.editor.getModel()!.uri.toString();
     if (this.isVisible) {
       this.hide();
     }

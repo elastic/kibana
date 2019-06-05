@@ -387,3 +387,42 @@ test('On index job completed.', async () => {
 
   expect(updateSpy.calledTwice).toBeTruthy();
 });
+
+test('On index job completed because of cancellation.', async () => {
+  // Setup EsClient
+  const updateSpy = sinon.fake.returns(Promise.resolve());
+  const esClient = {
+    update: emptyAsyncFunc,
+  };
+  esClient.update = updateSpy;
+
+  const indexWorker = new IndexWorker(
+    esQueue as Esqueue,
+    log,
+    esClient as EsClient,
+    [],
+    {} as ServerOptions,
+    {} as CancellationSerivce
+  );
+
+  await indexWorker.onJobCompleted(
+    {
+      payload: {
+        uri: 'github.com/elastic/kibana',
+      },
+      options: {},
+      timestamp: 0,
+    },
+    {
+      uri: 'github.com/elastic/kibana',
+      revision: 'master',
+      stats: new Map(),
+      // Index job is done because of cancellation.
+      cancelled: true,
+    }
+  );
+
+  // The elasticsearch update won't be called for the sake of
+  // cancellation.
+  expect(updateSpy.notCalled).toBeTruthy();
+});
