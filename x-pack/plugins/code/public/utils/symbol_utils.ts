@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { UptimeRefreshContext } from './uptime_refresh_context';
-export { UMSettingsContext, UptimeSettingsContext } from './uptime_settings_context';
+export const matchContainerName = (containerName: string, symbolName: string) =>
+  new RegExp(`^${containerName}[[<(].*[>)]]?$`).test(symbolName);
