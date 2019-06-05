@@ -33,7 +33,7 @@ interface KpiNetworkProps {
   loading: boolean;
 }
 
-const fieldTitleChartMapping: Readonly<StatItems[]> = [
+export const fieldTitleChartMapping: Readonly<StatItems[]> = [
   {
     key: 'UniqueIps',
     fields: [

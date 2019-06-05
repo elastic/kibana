@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Stat Items disable charts it renders the default widget 1`] = `
+exports[`Stat Items Component disable charts it renders the default widget 1`] = `
 <Component
   description="HOSTS"
   fields={
@@ -102,7 +102,7 @@ exports[`Stat Items disable charts it renders the default widget 1`] = `
 </Component>
 `;
 
-exports[`Stat Items disable charts it renders the default widget 2`] = `
+exports[`Stat Items Component disable charts it renders the default widget 2`] = `
 <Component
   areaChart={Array []}
   barChart={Array []}
@@ -207,7 +207,7 @@ exports[`Stat Items disable charts it renders the default widget 2`] = `
 </Component>
 `;
 
-exports[`Stat Items rendering kpis with charts it renders the default widget 1`] = `
+exports[`Stat Items Component rendering kpis with charts it renders the default widget 1`] = `
 <Component
   areaChart={
     Array [

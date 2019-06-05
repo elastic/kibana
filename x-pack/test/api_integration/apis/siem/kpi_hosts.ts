@@ -45,9 +45,9 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           },
         ],
         authSuccess: 0,
-        authSuccessHistogram: [],
+        authSuccessHistogram: null,
         authFailure: 0,
-        authFailureHistogram: [],
+        authFailureHistogram: null,
         uniqueSourceIps: 121,
         uniqueSourceIpsHistogram: [
           {
@@ -149,9 +149,9 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           },
         ],
         authSuccess: 0,
-        authSuccessHistogram: [],
+        authSuccessHistogram: null,
         authFailure: 0,
-        authFailureHistogram: [],
+        authFailureHistogram: null,
         uniqueSourceIps: 121,
         uniqueSourceIpsHistogram: [
           {

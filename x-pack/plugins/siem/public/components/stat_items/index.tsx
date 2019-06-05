@@ -56,48 +56,57 @@ export interface StatItemsProps extends StatItems {
   barChart?: ChartConfigsData[];
 }
 
+export const addValueToFields = (
+  fields: StatItem[],
+  data: KpiHostsData | KpiNetworkData
+): StatItem[] => fields.map(field => ({ ...field, value: get(field.key, data) }));
+
+export const addValueToAreaChart = (
+  fields: StatItem[],
+  data: KpiHostsData | KpiNetworkData
+): ChartConfigsData[] =>
+  fields
+    .filter(field => get(`${field.key}Histogram`, data) != null)
+    .map(field => ({
+      ...field,
+      value: get(`${field.key}Histogram`, data),
+      key: `${field.key}Histogram`,
+    }));
+
+export const addValueToBarChart = (
+  fields: StatItem[],
+  data: KpiHostsData | KpiNetworkData
+): ChartConfigsData[] => {
+  if (fields.length === 0) return [];
+  return fields.reduce((acc: ChartConfigsData[], field: StatItem, idx: number) => {
+    const { key, color } = field;
+    const y: number | null = getOr(null, key, data);
+    const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
+    const value: [ChartData] = [
+      {
+        x,
+        y,
+        g: key,
+      },
+    ];
+
+    return [
+      ...acc,
+      {
+        key,
+        color,
+        value,
+      },
+    ];
+  }, []);
+};
+
 export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
   data: KpiHostsData | KpiNetworkData
 ): StatItemsProps[] => {
   const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);
 
-  const addValueToFields = (fields: StatItem[]): StatItem[] =>
-    fields.map(field => ({ ...field, value: get(field.key, data) }));
-
-  const addValueToAreaChart = (fields: StatItem[]): ChartConfigsData[] =>
-    fields
-      .filter(field => get(`${field.key}Histogram`, data) != null)
-      .map(field => ({
-        ...field,
-        value: get(`${field.key}Histogram`, data),
-        key: `${field.key}Histogram`,
-      }));
-
-  const addValueToBarChart = (fields: StatItem[]): ChartConfigsData[] => {
-    if (fields.length === 0) return [];
-    return fields.reduce((acc: ChartConfigsData[], field: StatItem, idx: number) => {
-      const { key, color } = field;
-      const y: number | null = getOr(null, key, data);
-      const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
-      const value: [ChartData] = [
-        {
-          x,
-          y,
-          g: key,
-        },
-      ];
-
-      return [
-        ...acc,
-        {
-          key,
-          color,
-          value,
-        },
-      ];
-    }, []);
-  };
   useEffect(
     () => {
       setStatItemsProps(
@@ -105,9 +114,9 @@ export const useKpiMatrixStatus = (
           return {
             ...stat,
             key: `kpi-summary-${stat.key}`,
-            fields: addValueToFields(stat.fields),
-            areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields) : undefined,
-            barChart: stat.enableBarChart ? addValueToBarChart(stat.fields) : undefined,
+            fields: addValueToFields(stat.fields, data),
+            areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
+            barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
           };
         })
       );
