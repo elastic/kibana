@@ -6,7 +6,11 @@
 
 import { Legacy } from 'kibana';
 
-export function createShim(server: Legacy.Server) {
+export interface Plugins {
+  elasticsearch: any;
+}
+
+export function createShim(server: Legacy.Server): { plugins: Plugins } {
   return {
     plugins: {
       elasticsearch: server.plugins.elasticsearch,
