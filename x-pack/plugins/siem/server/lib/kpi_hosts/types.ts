@@ -5,25 +5,19 @@
  */
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { MSearchHeader, SearchHit } from '../types';
-
-export interface KpiHostChartData {
-  x: number | string | null;
-  y: number | string | null;
-  y0?: number;
-  g?: number | string;
-}
+import { KpiHostHistogramData } from '../../graphql/types';
 
 export interface KpiHostsMappedData {
   hosts?: number | null;
-  hostsHistogram?: KpiHostChartData[] | null;
+  hostsHistogram?: KpiHostHistogramData[] | null;
   authSuccess?: number | null;
-  authSuccessHistogram?: KpiHostChartData[] | null;
+  authSuccessHistogram?: KpiHostHistogramData[] | null;
   authFailure?: number | null;
-  authFailureHistogram?: KpiHostChartData[] | null;
+  authFailureHistogram?: KpiHostHistogramData[] | null;
   uniqueSourceIps?: number | null;
-  uniqueSourceIpsHistogram?: KpiHostChartData[] | null;
+  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
   uniqueDestinationIps?: number | null;
-  uniqueDestinationIpsHistogram?: KpiHostChartData[] | null;
+  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
 }
 
 export interface KpiHostsAdapter {

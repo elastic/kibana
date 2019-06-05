@@ -1068,17 +1068,9 @@ export interface KpiNetworkData {
 }
 
 export interface KpiNetworkHistogramData {
-  key_as_string?: string | null;
+  x?: string | null;
 
-  count?: KpiNetworkCount | null;
-
-  doc_count?: number | null;
-}
-
-export interface KpiNetworkCount {
-  value?: number | null;
-
-  doc_count?: number | null;
+  y?: number | null;
 }
 
 export interface KpiHostsData {
@@ -5059,16 +5051,8 @@ export namespace KpiNetworkChartFields {
   export type Fragment = {
     __typename?: 'KpiNetworkHistogramData';
 
-    key_as_string?: string | null;
+    x?: string | null;
 
-    doc_count?: number | null;
-
-    count?: Count | null;
-  };
-
-  export type Count = {
-    __typename?: 'KpiNetworkCount';
-
-    value?: number | null;
+    y?: number | null;
   };
 }

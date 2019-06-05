@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KpiNetworkData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 
-import { KpiNetworkAdapter } from './types';
+import { KpiNetworkAdapter, KpiNetworkMappedData } from './types';
 
 export class KpiNetwork {
   constructor(private readonly adapter: KpiNetworkAdapter) {}
@@ -15,7 +14,7 @@ export class KpiNetwork {
   public async getKpiNetwork(
     req: FrameworkRequest,
     options: RequestBasicOptions
-  ): Promise<KpiNetworkData> {
+  ): Promise<KpiNetworkMappedData> {
     return await this.adapter.getKpiNetwork(req, options);
   }
 }

@@ -1097,17 +1097,9 @@ export interface KpiNetworkData {
 }
 
 export interface KpiNetworkHistogramData {
-  key_as_string?: string | null;
+  x?: string | null;
 
-  count?: KpiNetworkCount | null;
-
-  doc_count?: number | null;
-}
-
-export interface KpiNetworkCount {
-  value?: number | null;
-
-  doc_count?: number | null;
+  y?: number | null;
 }
 
 export interface KpiHostsData {
@@ -5882,45 +5874,19 @@ export namespace KpiNetworkDataResolvers {
 
 export namespace KpiNetworkHistogramDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = KpiNetworkHistogramData> {
-    key_as_string?: KeyAsStringResolver<string | null, TypeParent, Context>;
+    x?: XResolver<string | null, TypeParent, Context>;
 
-    count?: CountResolver<KpiNetworkCount | null, TypeParent, Context>;
-
-    doc_count?: DocCountResolver<number | null, TypeParent, Context>;
+    y?: YResolver<number | null, TypeParent, Context>;
   }
 
-  export type KeyAsStringResolver<
+  export type XResolver<
     R = string | null,
     Parent = KpiNetworkHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type CountResolver<
-    R = KpiNetworkCount | null,
-    Parent = KpiNetworkHistogramData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DocCountResolver<
+  export type YResolver<
     R = number | null,
     Parent = KpiNetworkHistogramData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace KpiNetworkCountResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = KpiNetworkCount> {
-    value?: ValueResolver<number | null, TypeParent, Context>;
-
-    doc_count?: DocCountResolver<number | null, TypeParent, Context>;
-  }
-
-  export type ValueResolver<
-    R = number | null,
-    Parent = KpiNetworkCount,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DocCountResolver<
-    R = number | null,
-    Parent = KpiNetworkCount,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

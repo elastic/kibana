@@ -8,11 +8,8 @@ import gql from 'graphql-tag';
 
 export const kpiNetworkQuery = gql`
   fragment KpiNetworkChartFields on KpiNetworkHistogramData {
-    key_as_string
-    doc_count
-    count {
-      value
-    }
+    x
+    y
   }
 
   query GetKpiNetworkQuery(

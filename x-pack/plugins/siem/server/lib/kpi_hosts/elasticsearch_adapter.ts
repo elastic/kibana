@@ -16,18 +16,18 @@ import {
   KpiHostsESMSearchBody,
   KpiHostsGeneralHit,
   KpiHostsAuthHit,
-  KpiHostChartData,
   KpiHostsMappedData,
   KpiHostHistogram,
   KpiHostGeneralHistogramCount,
   KpiHostAuthHistogramCount,
 } from './types';
+import { KpiHostHistogramData } from '../../graphql/types';
 
 const formatGeneralHistogramData = (
   data: Array<KpiHostHistogram<KpiHostGeneralHistogramCount>>
-): KpiHostChartData[] | null => {
+): KpiHostHistogramData[] | null => {
   return data && data.length > 0
-    ? data.map<KpiHostChartData>(({ key_as_string, count }) => ({
+    ? data.map<KpiHostHistogramData>(({ key_as_string, count }) => ({
         x: key_as_string,
         y: count.value,
       }))
@@ -36,9 +36,9 @@ const formatGeneralHistogramData = (
 
 const formatAuthHistogramData = (
   data: Array<KpiHostHistogram<KpiHostAuthHistogramCount>>
-): KpiHostChartData[] | null => {
+): KpiHostHistogramData[] | null => {
   return data && data.length > 0
-    ? data.map<KpiHostChartData>(({ key_as_string, count }) => ({
+    ? data.map<KpiHostHistogramData>(({ key_as_string, count }) => ({
         x: key_as_string,
         y: count.doc_count,
       }))
