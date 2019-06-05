@@ -28,7 +28,7 @@ export const indexRepoSuccess = createAction<string>('INDEX REPOS SUCCESS');
 export const indexRepoFailed = createAction<Error>('INDEX REPOS FAILED');
 
 export const importRepo = createAction<string>('IMPORT REPO');
-export const importRepoSuccess = createAction<string>('IMPORT REPO SUCCESS');
+export const importRepoSuccess = createAction<Repository>('IMPORT REPO SUCCESS');
 export const importRepoFailed = createAction<Error>('IMPORT REPO FAILED');
 
 export const closeToast = createAction('CLOSE TOAST');
