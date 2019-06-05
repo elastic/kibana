@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createShim } from './shim';
 import { TaskManager } from './task_manager';
+
+const PLUGIN_ID = 'task_manager';
 
 export function taskManager(kibana) {
   return new kibana.Plugin({
-    id: 'task_manager',
+    id: PLUGIN_ID,
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     configPrefix: 'xpack.task_manager',
     config(Joi) {
@@ -36,10 +39,11 @@ export function taskManager(kibana) {
       }).default();
     },
     init(server) {
+      const { plugins } = createShim(server, PLUGIN_ID);
       const config = server.config();
       const services = {
         log: msg =>  server.log(msg),
-        elasticsearch: server.plugins.elasticsearch,
+        elasticsearch: plugins.elasticsearch,
       };
       const taskManager = new TaskManager(services, config, this.kbnServer.afterPluginsInit);
       server.decorate('server', 'taskManager', taskManager);
