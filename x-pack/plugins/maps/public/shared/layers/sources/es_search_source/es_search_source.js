@@ -171,22 +171,24 @@ export class ESSearchSource extends AbstractESSource {
     });
 
     const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document top hits request');
-    console.log();
 
     let hasTrimmedResults = false;
-    const hits = [];
+    const allHits = [];
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
     entityBuckets.forEach(entityBucket => {
-      const entityHits = _.get(entityBucket, 'entityHits.hits.hits', []);
-      hits.push(...entityHits);
-      if (hits.length === topHitsSize) {
+      const { total, hits } = _.get(entityBucket, 'entityHits.hits', {});
+      allHits.push(...hits);
+      if (total > hits.length) {
         hasTrimmedResults = true;
       }
     });
 
     return {
-      hits: hits,
-      areResultsTrimmed: hasTrimmedResults
+      hits: allHits,
+      meta: {
+        areResultsTrimmed: hasTrimmedResults,
+        entityCount: entityBuckets.length,
+      }
     };
   }
 
@@ -203,14 +205,19 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       hits: resp.hits.hits,
-      areResultsTrimmed: resp.hits.total > resp.hits.hits.length
+      meta: {
+        areResultsTrimmed: resp.hits.total > resp.hits.hits.length
+      }
     };
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
+  _isTopHits() {
     const { useTopHits, topHitsSplitField, topHitsTimeField } = this._descriptor;
+    return useTopHits && topHitsSplitField && topHitsTimeField;
+  }
 
-    const { hits, areResultsTrimmed } = useTopHits && topHitsSplitField && topHitsTimeField
+  async getGeoJsonWithMeta(layerName, searchFilters) {
+    const { hits, meta } = this._isTopHits()
       ? await this._getTopHits(layerName, searchFilters)
       : await this._getSearchHits(layerName, searchFilters);
 
@@ -242,9 +249,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       data: featureCollection,
-      meta: {
-        areResultsTrimmed
-      }
+      meta
     };
   }
 
@@ -331,9 +336,23 @@ export class ESSearchSource extends AbstractESSource {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 
+    if (this._isTopHits()) {
+      if (meta.areResultsTrimmed) {
+        return i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
+          defaultMessage: `Results limited to most recent {count} documents per entity.`,
+          values: { count: this._descriptor.topHitsSize }
+        });
+      }
+
+      return i18n.translate('xpack.maps.esSearch.featureCountMsg', {
+        defaultMessage: `Found {count} entities.`,
+        values: { count: meta.entityCount }
+      });
+    }
+
     if (meta.areResultsTrimmed) {
       return i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
-        defaultMessage: `Results limited to first {count} matching documents.`,
+        defaultMessage: `Results limited to first {count} documents.`,
         values: { count: featureCollection.features.length }
       });
     }
