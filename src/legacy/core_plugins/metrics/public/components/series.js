@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { assign, get } from 'lodash';
+import { assign } from 'lodash';
 
 import { TimeseriesSeries as timeseries } from './vis_types/timeseries/series';
 import { MetricSeries as metric } from './vis_types/metric/series';
@@ -28,6 +28,7 @@ import { TableSeries as table } from './vis_types/table/series';
 import { GaugeSeries as gauge } from './vis_types/gauge/series';
 import { MarkdownSeries as markdown } from './vis_types/markdown/series';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { UIRestrictionsContext } from '../contexts/ui_restriction_context';
 
 const lookup = {
   top_n: topN,
@@ -39,23 +40,16 @@ const lookup = {
 };
 
 export class Series extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      visible: true,
-      selectedTab: 'metrics',
-      uiRestrictions: undefined,
-    };
-
-    this.visDataSubscription = null;
-  }
-
-  switchTab = (selectedTab) => {
-    this.setState({ selectedTab });
+  state = {
+    visible: true,
+    selectedTab: 'metrics',
   };
 
-  handleChange = (part) => {
+  switchTab = selectedTab => {
+    this.setState(() => ({ selectedTab }));
+  };
+
+  handleChange = part => {
     if (this.props.onChange) {
       const { model } = this.props;
       const doc = assign({}, model, part);
@@ -71,22 +65,14 @@ export class Series extends Component {
     });
   };
 
-  toggleVisible = (e) => {
+  toggleVisible = e => {
     e.preventDefault();
 
-    this.setState({
-      visible: !this.state.visible,
-    });
+    this.setState(({ visible, ...state }) => ({
+      ...state,
+      visible: !visible,
+    }));
   };
-
-  componentDidMount() {
-    if (this.props.visData$) {
-      this.visDataSubscription = this.props.visData$
-        .subscribe(visData => this.setState({
-          uiRestrictions: get(visData, 'uiRestrictions'),
-        }));
-    }
-  }
 
   render() {
     const { panel } = this.props;
@@ -106,7 +92,6 @@ export class Series extends Component {
       panel: this.props.panel,
       selectedTab: this.state.selectedTab,
       style: this.props.style,
-      uiRestrictions: this.state.uiRestrictions,
       switchTab: this.switchTab,
       toggleVisible: this.toggleVisible,
       togglePanelActivation: this.togglePanelActivation,
@@ -114,19 +99,17 @@ export class Series extends Component {
       dragHandleProps: this.props.dragHandleProps,
     };
 
-    return Boolean(Component) ?
-      (<Component {...params}/>) :
-      (<FormattedMessage
+    return Boolean(Component) ? (
+      <UIRestrictionsContext.Consumer>
+        { uiRestrictions => <Component uiRestrictions={uiRestrictions} {...params} /> }
+      </UIRestrictionsContext.Consumer>
+    ) : (
+      <FormattedMessage
         id="tsvb.seriesConfig.missingSeriesComponentDescription"
         defaultMessage="Missing Series component for panel type: {panelType}"
         values={{ panelType: panel.type }}
-      />);
-  }
-
-  componentWillUnmount() {
-    if (this.visDataSubscription) {
-      this.visDataSubscription.unsubscribe();
-    }
+      />
+    );
   }
 }
 

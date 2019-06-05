@@ -28,6 +28,7 @@ import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { PANEL_TYPES } from '../../../../common/panel_types';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {
   const {
@@ -45,7 +46,10 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
     uiRestrictions
   } = props;
 
-  const defaults = { label: '' };
+  const defaults = {
+    label: '',
+    type: PANEL_TYPES.TIMESERIES
+  };
   const model = { ...defaults, ...props.model };
 
   const handleChange = createTextHandler(onChange);
@@ -84,7 +88,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
       seriesBody = (
         <SeriesConfig
           fields={props.fields}
-          model={props.model}
+          model={model}
           onChange={props.onChange}
         />
       );

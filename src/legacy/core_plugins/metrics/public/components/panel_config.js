@@ -18,7 +18,8 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { get } from 'lodash';
 import { TimeseriesPanelConfig as timeseries } from './panel_config/timeseries';
 import { MetricPanelConfig as metric } from './panel_config/metric';
 import { TopNPanelConfig as topN } from './panel_config/top_n';
@@ -26,6 +27,7 @@ import { TablePanelConfig as table } from './panel_config/table';
 import { GaugePanelConfig as gauge } from './panel_config/gauge';
 import { MarkdownPanelConfig as markdown } from './panel_config/markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { UIRestrictionsContext } from '../contexts/ui_restriction_context';
 
 const types = {
   timeseries,
@@ -33,15 +35,35 @@ const types = {
   metric,
   top_n: topN,
   gauge,
-  markdown
+  markdown,
 };
 
 export function PanelConfig(props) {
   const { model } = props;
   const component = types[model.type];
+  const [uiRestrictions, setUIRestrictions] = useState(null);
+
+  useEffect(
+    () => {
+      const visDataSubscription = props.visData$.subscribe(visData =>
+        setUIRestrictions(get(visData, 'uiRestrictions', null))
+      );
+
+      return function cleanup() {
+        visDataSubscription.unsubscribe();
+      };
+    },
+    [props.visData$]
+  );
+
   if (component) {
-    return React.createElement(component, props);
+    return (
+      <UIRestrictionsContext.Provider value={uiRestrictions}>
+        { React.createElement(component, props) }
+      </UIRestrictionsContext.Provider>
+    );
   }
+
   return (
     <div>
       <FormattedMessage
@@ -49,7 +71,8 @@ export function PanelConfig(props) {
         defaultMessage="Missing panel config for &ldquo;{modelType}&rdquo;"
         values={{ modelType: model.type }}
       />
-    </div>);
+    </div>
+  );
 }
 
 PanelConfig.propTypes = {

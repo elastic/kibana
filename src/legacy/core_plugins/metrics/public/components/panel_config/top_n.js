@@ -42,9 +42,9 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { UIRestrictionsContext } from '../../contexts/ui_restriction_context';
 
 export class TopNPanelConfig extends Component {
-
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -87,25 +87,24 @@ export class TopNPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.topN.optionsTab.dataLabel"
-                  defaultMessage="Data"
-                />
+                <FormattedMessage id="tsvb.topN.optionsTab.dataLabel" defaultMessage="Data" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiFormRow
               id={htmlId('itemUrl')}
-              label={(<FormattedMessage
-                id="tsvb.topN.optionsTab.itemUrlLabel"
-                defaultMessage="Item url"
-              />)}
+              label={
+                <FormattedMessage
+                  id="tsvb.topN.optionsTab.itemUrlLabel"
+                  defaultMessage="Item url"
+                />
+              }
               helpText={
                 <span>
                   <FormattedMessage
                     id="tsvb.topN.optionsTab.itemUrlDescription"
                     defaultMessage="This supports mustache templating. {key} is set to the term."
-                    values={{ key: (<EuiCode>{'{{key}}'}</EuiCode>) }}
+                    values={{ key: <EuiCode>{'{{key}}'}</EuiCode> }}
                   />
                 </span>
               }
@@ -118,11 +117,16 @@ export class TopNPanelConfig extends Component {
 
             <EuiHorizontalRule />
 
-            <IndexPattern
-              fields={this.props.fields}
-              model={this.props.model}
-              onChange={this.props.onChange}
-            />
+            <UIRestrictionsContext.Consumer>
+              {uiRestrictions => (
+                <IndexPattern
+                  uiRestrictions={uiRestrictions}
+                  fields={this.props.fields}
+                  model={this.props.model}
+                  onChange={this.props.onChange}
+                />
+              )}
+            </UIRestrictionsContext.Consumer>
 
             <EuiHorizontalRule />
 
@@ -130,10 +134,12 @@ export class TopNPanelConfig extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label={(<FormattedMessage
-                    id="tsvb.topN.optionsTab.panelFilterLabel"
-                    defaultMessage="Panel filter"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.topN.optionsTab.panelFilterLabel"
+                      defaultMessage="Panel filter"
+                    />
+                  }
                   fullWidth
                 >
                   <EuiFieldText
@@ -165,10 +171,7 @@ export class TopNPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.topN.optionsTab.styleLabel"
-                  defaultMessage="Style"
-                />
+                <FormattedMessage id="tsvb.topN.optionsTab.styleLabel" defaultMessage="Style" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -217,19 +220,10 @@ export class TopNPanelConfig extends Component {
     return (
       <div>
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'data'}
-            onClick={() => this.switchTab('data')}
-          >
-            <FormattedMessage
-              id="tsvb.topN.dataTab.dataButtonLabel"
-              defaultMessage="Data"
-            />
+          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+            <FormattedMessage id="tsvb.topN.dataTab.dataButtonLabel" defaultMessage="Data" />
           </EuiTab>
-          <EuiTab
-            isSelected={selectedTab === 'options'}
-            onClick={() => this.switchTab('options')}
-          >
+          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
             <FormattedMessage
               id="tsvb.topN.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
@@ -240,7 +234,6 @@ export class TopNPanelConfig extends Component {
       </div>
     );
   }
-
 }
 
 TopNPanelConfig.propTypes = {

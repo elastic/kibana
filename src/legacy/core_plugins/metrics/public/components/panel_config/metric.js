@@ -40,9 +40,9 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { UIRestrictionsContext } from '../../contexts/ui_restriction_context';
 
 export class MetricPanelConfig extends Component {
-
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -50,9 +50,12 @@ export class MetricPanelConfig extends Component {
 
   componentWillMount() {
     const { model } = this.props;
-    if (!model.background_color_rules || (model.background_color_rules && model.background_color_rules.length === 0)) {
+    if (
+      !model.background_color_rules ||
+      (model.background_color_rules && model.background_color_rules.length === 0)
+    ) {
       this.props.onChange({
-        background_color_rules: [{ id: uuid.v1() }]
+        background_color_rules: [{ id: uuid.v1() }],
       });
     }
   }
@@ -86,19 +89,21 @@ export class MetricPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.metric.optionsTab.dataLabel"
-                  defaultMessage="Data"
-                />
+                <FormattedMessage id="tsvb.metric.optionsTab.dataLabel" defaultMessage="Data" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
 
-            <IndexPattern
-              fields={this.props.fields}
-              model={this.props.model}
-              onChange={this.props.onChange}
-            />
+            <UIRestrictionsContext.Consumer>
+              {uiRestrictions => (
+                <IndexPattern
+                  uiRestrictions={uiRestrictions}
+                  fields={this.props.fields}
+                  model={this.props.model}
+                  onChange={this.props.onChange}
+                />
+              )}
+            </UIRestrictionsContext.Consumer>
 
             <EuiHorizontalRule />
 
@@ -106,10 +111,12 @@ export class MetricPanelConfig extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label={(<FormattedMessage
-                    id="tsvb.metric.optionsTab.panelFilterLabel"
-                    defaultMessage="Panel filter"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.metric.optionsTab.panelFilterLabel"
+                      defaultMessage="Panel filter"
+                    />
+                  }
                   fullWidth
                 >
                   <EuiFieldText
@@ -161,14 +168,8 @@ export class MetricPanelConfig extends Component {
     return (
       <div>
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'data'}
-            onClick={() => this.switchTab('data')}
-          >
-            <FormattedMessage
-              id="tsvb.metric.dataTab.dataButtonLabel"
-              defaultMessage="Data"
-            />
+          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+            <FormattedMessage id="tsvb.metric.dataTab.dataButtonLabel" defaultMessage="Data" />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}
@@ -185,7 +186,6 @@ export class MetricPanelConfig extends Component {
       </div>
     );
   }
-
 }
 
 MetricPanelConfig.propTypes = {

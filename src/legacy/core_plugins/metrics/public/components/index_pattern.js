@@ -36,36 +36,40 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { ES_TYPES } from '../../common/es_types';
+import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 
 const RESTRICT_FIELDS = [ES_TYPES.DATE];
 
 const htmlId = htmlIdGenerator();
-const timeRangeOptions = [
-  {
-    label: i18n.translate('tsvb.indexPattern.timeRange.lastValue', {
-      defaultMessage: 'Last value',
-    }),
-    value: TIME_RANGE_DATA_MODES.LAST_VALUE,
-  },
-  {
-    label: i18n.translate('tsvb.indexPattern.timeRange.entireTimeRange', {
-      defaultMessage: 'Entire time range',
-    }),
-    value: TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
-  },
-];
 
 const isEntireTimeRangeActive = (model, isTimeSeries) =>
   !isTimeSeries && model[TIME_RANGE_MODE_KEY] === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
 
 export const IndexPattern = props => {
-  const { fields, prefix } = props;
+  const { fields, prefix, uiRestrictions } = props;
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const timeFieldName = `${prefix}time_field`;
   const indexPatternName = `${prefix}index_pattern`;
   const intervalName = `${prefix}interval`;
   const dropBucketName = `${prefix}drop_last_bucket`;
+
+  const timeRangeOptions = [
+    {
+      label: i18n.translate('tsvb.indexPattern.timeRange.lastValue', {
+        defaultMessage: 'Last value',
+      }),
+      value: TIME_RANGE_DATA_MODES.LAST_VALUE,
+      disabled: !isTimerangeModeEnabled(TIME_RANGE_DATA_MODES.LAST_VALUE, uiRestrictions),
+    },
+    {
+      label: i18n.translate('tsvb.indexPattern.timeRange.entireTimeRange', {
+        defaultMessage: 'Entire time range',
+      }),
+      value: TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      disabled: !isTimerangeModeEnabled(TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE, uiRestrictions),
+    },
+  ];
 
   const defaults = {
     default_index_pattern: '',
@@ -197,6 +201,7 @@ export const IndexPattern = props => {
 IndexPattern.defaultProps = {
   prefix: '',
   disabled: false,
+  uiRestrictions: null,
 };
 
 IndexPattern.propTypes = {
@@ -206,4 +211,7 @@ IndexPattern.propTypes = {
   prefix: PropTypes.string,
   disabled: PropTypes.bool,
   className: PropTypes.string,
+  uiRestrictions: PropTypes.shape({
+    whiteListedTimerangeModes: PropTypes.objectOf(PropTypes.bool),
+  }),
 };
