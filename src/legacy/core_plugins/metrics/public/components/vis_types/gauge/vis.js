@@ -31,10 +31,12 @@ function getColors(props) {
   let text;
   let gauge;
   if (model.gauge_color_rules) {
-    model.gauge_color_rules.forEach((rule) => {
+    model.gauge_color_rules.forEach(rule => {
       if (rule.operator && rule.value != null) {
-        const value = (series[0] && getLastValue(series[0].data)) ||
-          series[1] && getLastValue(series[1].data) || 0;
+        const value =
+          (series[0] && getLastValue(series[0].data)) ||
+          (series[1] && getLastValue(series[1].data)) ||
+          0;
         if (_[rule.operator](value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;
@@ -55,7 +57,11 @@ function GaugeVisualization(props) {
       const seriesDef = model.series.find(s => _.includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        newProps.formatter = tickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig);
+        newProps.formatter = tickFormatter(
+          seriesDef.formatter,
+          seriesDef.value_template,
+          props.getConfig
+        );
       }
       if (i === 0 && colors.gauge) newProps.color = colors.gauge;
       return _.assign({}, row, newProps);
@@ -95,7 +101,7 @@ GaugeVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   visData: PropTypes.object,
-  getConfig: PropTypes.func
+  getConfig: PropTypes.func,
 };
 
 export const gauge = visWithSplits(GaugeVisualization);

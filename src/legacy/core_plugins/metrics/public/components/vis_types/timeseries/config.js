@@ -39,7 +39,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const TimeseriesConfig = injectI18n(function (props) {
+export const TimeseriesConfig = injectI18n(function(props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
 
@@ -53,47 +53,77 @@ export const TimeseriesConfig = injectI18n(function (props) {
     axis_min: '',
     axis_max: '',
     stacked: 'none',
-    steps: 0
+    steps: 0,
   };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
   const { intl } = props;
 
   const stackedOptions = [
-    { label: intl.formatMessage({ id: 'tsvb.timeSeries.noneLabel', defaultMessage: 'None' }), value: 'none' },
-    { label: intl.formatMessage({ id: 'tsvb.timeSeries.stackedLabel', defaultMessage: 'Stacked' }), value: 'stacked' },
+    {
+      label: intl.formatMessage({ id: 'tsvb.timeSeries.noneLabel', defaultMessage: 'None' }),
+      value: 'none',
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.timeSeries.stackedLabel', defaultMessage: 'Stacked' }),
+      value: 'stacked',
+    },
     {
       label: intl.formatMessage({
         id: 'tsvb.timeSeries.stackedWithinSeriesLabel',
-        defaultMessage: 'Stacked within series'
+        defaultMessage: 'Stacked within series',
       }),
-      value: 'stacked_within_series'
+      value: 'stacked_within_series',
     },
-    { label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }), value: 'percent' }
+    {
+      label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }),
+      value: 'percent',
+    },
   ];
   const selectedStackedOption = stackedOptions.find(option => {
     return model.stacked === option.value;
   });
 
   const positionOptions = [
-    { label: intl.formatMessage({ id: 'tsvb.timeSeries.rightLabel', defaultMessage: 'Right' }), value: 'right' },
-    { label: intl.formatMessage({ id: 'tsvb.timeSeries.leftLabel', defaultMessage: 'Left' }), value: 'left' }
+    {
+      label: intl.formatMessage({ id: 'tsvb.timeSeries.rightLabel', defaultMessage: 'Right' }),
+      value: 'right',
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.timeSeries.leftLabel', defaultMessage: 'Left' }),
+      value: 'left',
+    },
   ];
   const selectedAxisPosOption = positionOptions.find(option => {
     return model.axis_position === option.value;
   });
 
   const chartTypeOptions = [
-    { label: intl.formatMessage({ id: 'tsvb.timeSeries.barLabel', defaultMessage: 'Bar' }), value: 'bar' },
-    { label: intl.formatMessage({ id: 'tsvb.timeSeries.lineLabel', defaultMessage: 'Line' }), value: 'line' }
+    {
+      label: intl.formatMessage({ id: 'tsvb.timeSeries.barLabel', defaultMessage: 'Bar' }),
+      value: 'bar',
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.timeSeries.lineLabel', defaultMessage: 'Line' }),
+      value: 'line',
+    },
   ];
   const selectedChartTypeOption = chartTypeOptions.find(option => {
     return model.chart_type === option.value;
   });
 
   const splitColorOptions = [
-    { label: intl.formatMessage({ id: 'tsvb.timeSeries.gradientLabel', defaultMessage: 'Gradient' }), value: 'gradient' },
-    { label: intl.formatMessage({ id: 'tsvb.timeSeries.rainbowLabel', defaultMessage: 'Rainbow' }), value: 'rainbow' }
+    {
+      label: intl.formatMessage({
+        id: 'tsvb.timeSeries.gradientLabel',
+        defaultMessage: 'Gradient',
+      }),
+      value: 'gradient',
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.timeSeries.rainbowLabel', defaultMessage: 'Rainbow' }),
+      value: 'rainbow',
+    },
   ];
   const selectedSplitColorOption = splitColorOptions.find(option => {
     return model.split_color_mode === option.value;
@@ -106,10 +136,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('chartType')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.chartLine.chartTypeLabel"
-              defaultMessage="Chart type"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.chartLine.chartTypeLabel"
+                defaultMessage="Chart type"
+              />
+            }
           >
             <EuiComboBox
               isClearable={false}
@@ -123,10 +155,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('stacked')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.chartLine.stackedLabel"
-              defaultMessage="Stacked"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.chartLine.stackedLabel"
+                defaultMessage="Stacked"
+              />
+            }
           >
             <EuiComboBox
               isClearable={false}
@@ -140,10 +174,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('fill')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.chartLine.fillLabel"
-              defaultMessage="Fill (0 to 1)"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.chartLine.fillLabel"
+                defaultMessage="Fill (0 to 1)"
+              />
+            }
           >
             <EuiFieldNumber
               step={0.1}
@@ -155,10 +191,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('lineWidth')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.chartLine.lineWidthLabel"
-              defaultMessage="Line width"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.chartLine.lineWidthLabel"
+                defaultMessage="Line width"
+              />
+            }
           >
             <EuiFieldNumber
               onChange={handleTextChange('line_width')}
@@ -169,10 +207,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('pointSize')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.chartLine.pointSizeLabel"
-              defaultMessage="Point size"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.chartLine.pointSizeLabel"
+                defaultMessage="Point size"
+              />
+            }
           >
             <EuiFieldNumber
               onChange={handleTextChange('point_size')}
@@ -182,17 +222,10 @@ export const TimeseriesConfig = injectI18n(function (props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormLabel>
-            <FormattedMessage
-              id="tsvb.timeSeries.chartLine.stepsLabel"
-              defaultMessage="Steps"
-            />
+            <FormattedMessage id="tsvb.timeSeries.chartLine.stepsLabel" defaultMessage="Steps" />
           </EuiFormLabel>
           <EuiSpacer size="s" />
-          <YesNo
-            value={model.steps}
-            name="steps"
-            onChange={props.onChange}
-          />
+          <YesNo value={model.steps} name="steps" onChange={props.onChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -203,10 +236,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('chartType')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.chartBar.chartTypeLabel"
-              defaultMessage="Chart type"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.chartBar.chartTypeLabel"
+                defaultMessage="Chart type"
+              />
+            }
           >
             <EuiComboBox
               isClearable={false}
@@ -220,10 +255,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('stacked')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.chartBar.stackedLabel"
-              defaultMessage="Stacked"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.chartBar.stackedLabel"
+                defaultMessage="Stacked"
+              />
+            }
           >
             <EuiComboBox
               isClearable={false}
@@ -237,10 +274,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('fill')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.chartBar.fillLabel"
-              defaultMessage="Fill (0 to 1)"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.chartBar.fillLabel"
+                defaultMessage="Fill (0 to 1)"
+              />
+            }
           >
             <EuiFieldNumber
               step={0.5}
@@ -252,10 +291,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('lineWidth')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.chartBar.lineWidthLabel"
-              defaultMessage="Line width"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.chartBar.lineWidthLabel"
+                defaultMessage="Line width"
+              />
+            }
           >
             <EuiFieldNumber
               onChange={handleTextChange('line_width')}
@@ -271,30 +312,25 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
   return (
     <div className="tvbAggRow">
-
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
-          <DataFormatPicker
-            onChange={handleSelectChange('formatter')}
-            value={model.formatter}
-          />
+          <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('template')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.templateLabel"
-              defaultMessage="Template"
-            />)}
-            helpText={(
+            label={
+              <FormattedMessage id="tsvb.timeSeries.templateLabel" defaultMessage="Template" />
+            }
+            helpText={
               <span>
                 <FormattedMessage
                   id="tsvb.timeSeries.templateHelpText"
                   defaultMessage="eg.{templateExample}"
-                  values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
+                  values={{ templateExample: <EuiCode>{'{{value}}/s'}</EuiCode> }}
                 />
               </span>
-            )}
+            }
             fullWidth
           >
             <EuiFieldText
@@ -311,22 +347,15 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
       <EuiFormRow
         id={htmlId('series_filter')}
-        label={(<FormattedMessage
-          id="tsvb.timeSeries.filterLabel"
-          defaultMessage="Filter"
-        />)}
+        label={<FormattedMessage id="tsvb.timeSeries.filterLabel" defaultMessage="Filter" />}
         fullWidth
       >
-        <EuiFieldText
-          onChange={handleTextChange('filter')}
-          value={model.filter}
-          fullWidth
-        />
+        <EuiFieldText onChange={handleTextChange('filter')} value={model.filter} fullWidth />
       </EuiFormRow>
 
       <EuiHorizontalRule margin="s" />
 
-      { type }
+      {type}
 
       <EuiHorizontalRule margin="s" />
 
@@ -334,11 +363,13 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={true}>
           <EuiFormRow
             id={htmlId('offset')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.offsetSeriesTimeLabel"
-              defaultMessage="Offset series time by (1m, 1h, 1w, 1d)"
-              description="1m, 1h, 1w, 1d are required values and must not be translated."
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.offsetSeriesTimeLabel"
+                defaultMessage="Offset series time by (1m, 1h, 1w, 1d)"
+                description="1m, 1h, 1w, 1d are required values and must not be translated."
+              />
+            }
           >
             <EuiFieldText
               data-test-subj="offsetTimeSeries"
@@ -355,19 +386,17 @@ export const TimeseriesConfig = injectI18n(function (props) {
             />
           </EuiFormLabel>
           <EuiSpacer size="s" />
-          <YesNo
-            value={model.hide_in_legend}
-            name="hide_in_legend"
-            onChange={props.onChange}
-          />
+          <YesNo value={model.hide_in_legend} name="hide_in_legend" onChange={props.onChange} />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiFormRow
             id={htmlId('splitColor')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.splitColorThemeLabel"
-              defaultMessage="Split color theme"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.splitColorThemeLabel"
+                defaultMessage="Split color theme"
+              />
+            }
           >
             <EuiComboBox
               isClearable={false}
@@ -391,19 +420,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
             />
           </EuiFormLabel>
           <EuiSpacer size="s" />
-          <YesNo
-            value={model.separate_axis}
-            name="separate_axis"
-            onChange={props.onChange}
-          />
+          <YesNo value={model.separate_axis} name="separate_axis" onChange={props.onChange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('axisMin')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.axisMinLabel"
-              defaultMessage="Axis min"
-            />)}
+            label={<FormattedMessage id="tsvb.timeSeries.axisMinLabel" defaultMessage="Axis min" />}
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -421,10 +443,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('axisMax')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.axisMaxLabel"
-              defaultMessage="Axis max"
-            />)}
+            label={<FormattedMessage id="tsvb.timeSeries.axisMaxLabel" defaultMessage="Axis max" />}
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -441,10 +460,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('axisPos')}
-            label={(<FormattedMessage
-              id="tsvb.timeSeries.axisPositionLabel"
-              defaultMessage="Axis position"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.timeSeries.axisPositionLabel"
+                defaultMessage="Axis position"
+              />
+            }
           >
             <EuiComboBox
               isClearable={false}
@@ -484,14 +505,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
     </div>
   );
-
 });
 
 TimeseriesConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };

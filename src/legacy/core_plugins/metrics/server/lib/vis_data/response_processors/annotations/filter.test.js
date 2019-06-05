@@ -32,7 +32,7 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/response_processor
       },
       {
         key: 10000,
-      }
+      },
     ];
   });
 

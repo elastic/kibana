@@ -24,16 +24,19 @@ import reactcss from 'reactcss';
 import { htmlIdGenerator, EuiButtonIcon } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
-export const HorizontalLegend = injectI18n(function (props) {
+export const HorizontalLegend = injectI18n(function(props) {
   const rows = props.series.map(createLegendSeries(props));
   const htmlId = htmlIdGenerator();
-  const styles = reactcss({
-    hideLegend: {
-      legend: {
-        display: 'none'
-      }
-    }
-  }, { hideLegend: !props.showLegend });
+  const styles = reactcss(
+    {
+      hideLegend: {
+        legend: {
+          display: 'none',
+        },
+      },
+    },
+    { hideLegend: !props.showLegend }
+  );
 
   let legendToggleIcon = 'arrowDown';
   if (!props.showLegend) {
@@ -47,13 +50,19 @@ export const HorizontalLegend = injectI18n(function (props) {
         color="text"
         iconSize="s"
         onClick={props.onClick}
-        aria-label={props.intl.formatMessage({ id: 'tsvb.horizontalLegend.toggleChartAriaLabel', defaultMessage: 'Toggle chart legend' })}
-        title={props.intl.formatMessage({ id: 'tsvb.horizontalLegend.toggleChartAriaLabel', defaultMessage: 'Toggle chart legend' })}
+        aria-label={props.intl.formatMessage({
+          id: 'tsvb.horizontalLegend.toggleChartAriaLabel',
+          defaultMessage: 'Toggle chart legend',
+        })}
+        title={props.intl.formatMessage({
+          id: 'tsvb.horizontalLegend.toggleChartAriaLabel',
+          defaultMessage: 'Toggle chart legend',
+        })}
         aria-expanded={!!props.showLegend}
         aria-controls={htmlId('legend')}
       />
       <div className="tvbLegend__series" style={styles.legend} id={htmlId('legend')}>
-        { rows }
+        {rows}
       </div>
     </div>
   );
@@ -67,5 +76,5 @@ HorizontalLegend.propTypes = {
   showLegend: PropTypes.bool,
   seriesValues: PropTypes.object,
   seriesFilter: PropTypes.array,
-  tickFormatter: PropTypes.func
+  tickFormatter: PropTypes.func,
 };

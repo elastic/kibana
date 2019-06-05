@@ -27,36 +27,35 @@ import uuid from 'uuid';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 class FilterItemsUi extends Component {
-
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
   }
 
   handleChange(item, name) {
-    return (e) => {
+    return e => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
-      handleChange(_.assign({}, item, {
-        [name]: _.get(e, 'value', _.get(e, 'target.value'))
-      }));
+      handleChange(
+        _.assign({}, item, {
+          [name]: _.get(e, 'value', _.get(e, 'target.value')),
+        })
+      );
     };
   }
 
   renderRow(row, i, items) {
     const defaults = { filter: '', label: '' };
     const model = { ...defaults, ...row };
-    const handleChange = (part) => {
+    const handleChange = part => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
     const newFilter = () => ({ color: this.props.model.color, id: uuid.v1() });
-    const handleAdd = collectionActions.handleAdd
-      .bind(null, this.props, newFilter);
-    const handleDelete = collectionActions.handleDelete
-      .bind(null, this.props, model);
+    const handleAdd = collectionActions.handleAdd.bind(null, this.props, newFilter);
+    const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     const { intl } = this.props;
 
-    return  (
+    return (
       <EuiFlexGroup gutterSize="s" className="tvbAggRow" alignItems="center" key={model.id}>
         <EuiFlexItem grow={false}>
           <ColorPicker
@@ -68,8 +67,14 @@ class FilterItemsUi extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
-            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
-            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
+            placeholder={intl.formatMessage({
+              id: 'tsvb.splits.filterItems.filterPlaceholder',
+              defaultMessage: 'Filter',
+            })}
+            aria-label={intl.formatMessage({
+              id: 'tsvb.splits.filterItems.filterAriaLabel',
+              defaultMessage: 'Filter',
+            })}
             onChange={this.handleChange(model, 'filter')}
             value={model.filter}
             fullWidth
@@ -77,8 +82,14 @@ class FilterItemsUi extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
-            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.labelPlaceholder', defaultMessage: 'Label' })}
-            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.labelAriaLabel', defaultMessage: 'Label' })}
+            placeholder={intl.formatMessage({
+              id: 'tsvb.splits.filterItems.labelPlaceholder',
+              defaultMessage: 'Label',
+            })}
+            aria-label={intl.formatMessage({
+              id: 'tsvb.splits.filterItems.labelAriaLabel',
+              defaultMessage: 'Label',
+            })}
             onChange={this.handleChange(model, 'label')}
             value={model.label}
             fullWidth
@@ -98,21 +109,16 @@ class FilterItemsUi extends Component {
 
   render() {
     const { model, name } = this.props;
-    if (!model[name]) return (<div/>);
+    if (!model[name]) return <div />;
     const rows = model[name].map(this.renderRow);
-    return (
-      <div>
-        { rows }
-      </div>
-    );
+    return <div>{rows}</div>;
   }
-
 }
 
 FilterItemsUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };
 
 export const FilterItems = injectI18n(FilterItemsUi);

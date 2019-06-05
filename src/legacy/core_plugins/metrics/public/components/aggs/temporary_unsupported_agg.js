@@ -37,7 +37,7 @@ export function TemporaryUnsupportedAgg(props) {
           <FormattedMessage
             id="tsvb.unsupportedAgg.aggIsTemporaryUnsupportedDescription"
             defaultMessage="The {modelType} aggregation is currently unsupported."
-            values={{ modelType: (<EuiCode>{props.model.type}</EuiCode>) }}
+            values={{ modelType: <EuiCode>{props.model.type}</EuiCode> }}
           />
         </span>
       </EuiTitle>

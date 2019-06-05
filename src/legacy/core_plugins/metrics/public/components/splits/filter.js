@@ -37,10 +37,9 @@ export const SplitByFilter = props => {
       <EuiFlexItem>
         <EuiFormRow
           id={htmlId('group')}
-          label={(<FormattedMessage
-            id="tsvb.splits.filter.groupByLabel"
-            defaultMessage="Group by"
-          />)}
+          label={
+            <FormattedMessage id="tsvb.splits.filter.groupByLabel" defaultMessage="Group by" />
+          }
         >
           <GroupBySelect
             value={model.split_mode}
@@ -52,15 +51,14 @@ export const SplitByFilter = props => {
       <EuiFlexItem>
         <EuiFormRow
           id={htmlId('query')}
-          label={(<FormattedMessage
-            id="tsvb.splits.filter.queryStringLabel"
-            defaultMessage="Query string"
-          />)}
+          label={
+            <FormattedMessage
+              id="tsvb.splits.filter.queryStringLabel"
+              defaultMessage="Query string"
+            />
+          }
         >
-          <EuiFieldText
-            value={model.filter}
-            onChange={handleTextChange('filter')}
-          />
+          <EuiFieldText value={model.filter} onChange={handleTextChange('filter')} />
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>

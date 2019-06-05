@@ -25,18 +25,14 @@ import { PersistedState } from 'ui/persisted_state';
 
 import chrome from 'ui/chrome';
 
-
 export const tsvb = () => ({
   name: 'tsvb',
   type: 'render',
   context: {
-    types: [
-      'kibana_context',
-      'null',
-    ],
+    types: ['kibana_context', 'null'],
   },
   help: i18n.translate('tsvb.function.help', {
-    defaultMessage: 'TSVB visualization'
+    defaultMessage: 'TSVB visualization',
   }),
   args: {
     params: {
@@ -46,7 +42,7 @@ export const tsvb = () => ({
     uiState: {
       types: ['string'],
       default: '"{}"',
-    }
+    },
   },
   async fn(context, args) {
     const $injector = await chrome.dangerouslyGetActiveInjector();

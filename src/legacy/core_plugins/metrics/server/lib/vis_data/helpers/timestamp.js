@@ -43,9 +43,9 @@ export function getLastSeriesTimestamp(seriesGroup = []) {
 
   seriesGroup.forEach(series => {
     series.forEach(({ data }) => {
-      const [ dataLastTimestamp ] = last(data);
+      const [dataLastTimestamp] = last(data);
 
-      lastTimestamp  = Math.max(lastTimestamp, dataLastTimestamp);
+      lastTimestamp = Math.max(lastTimestamp, dataLastTimestamp);
     });
   });
 

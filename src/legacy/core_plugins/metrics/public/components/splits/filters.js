@@ -25,7 +25,7 @@ import React from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const SplitByFilters = (props) => {
+export const SplitByFilters = props => {
   const { onChange, model, uiRestrictions } = props;
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
@@ -35,10 +35,9 @@ export const SplitByFilters = (props) => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('group')}
-            label={(<FormattedMessage
-              id="tsvb.splits.filters.groupByLabel"
-              defaultMessage="Group by"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.splits.filters.groupByLabel" defaultMessage="Group by" />
+            }
           >
             <GroupBySelect
               value={model.split_mode}
@@ -49,11 +48,7 @@ export const SplitByFilters = (props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <FilterItems
-        name="split_filters"
-        model={model}
-        onChange={onChange}
-      />
+      <FilterItems name="split_filters" model={model} onChange={onChange} />
     </div>
   );
 };

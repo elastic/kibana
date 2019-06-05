@@ -27,8 +27,8 @@ export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, cap
   return next => doc => {
     const { timeField, interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
-    const { from, to }  = getTimerange(req);
-    const  timezone = capabilities.searchTimezone;
+    const { from, to } = getTimerange(req);
+    const timezone = capabilities.searchTimezone;
 
     panel.series.forEach(column => {
       const aggRoot = calculateAggRoot(doc, column);
@@ -39,13 +39,13 @@ export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, cap
         time_zone: timezone,
         extended_bounds: {
           min: from.valueOf(),
-          max: to.valueOf()
-        }
+          max: to.valueOf(),
+        },
       });
       set(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
         timeField,
         intervalString,
-        bucketSize
+        bucketSize,
       });
     });
     return next(doc);

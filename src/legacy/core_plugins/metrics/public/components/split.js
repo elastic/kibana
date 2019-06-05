@@ -41,9 +41,7 @@ export class Split extends Component {
     const { model } = nextProps;
     if (model.split_mode === 'filters' && !model.split_filters) {
       this.props.onChange({
-        split_filters: [
-          { color: model.color, id: uuid.v1() },
-        ],
+        split_filters: [{ color: model.color, id: uuid.v1() }],
       });
     }
   }
@@ -67,9 +65,8 @@ export class Split extends Component {
 
   render() {
     const { model, panel, uiRestrictions } = this.props;
-    const indexPattern = model.override_index_pattern &&
-      model.series_index_pattern ||
-      panel.index_pattern;
+    const indexPattern =
+      (model.override_index_pattern && model.series_index_pattern) || panel.index_pattern;
 
     const splitMode = get(this.props, 'model.split_mode', SPLIT_MODES.EVERYTHING);
 
@@ -82,7 +79,8 @@ export class Split extends Component {
         fields={this.props.fields}
         onChange={this.props.onChange}
         uiRestrictions={uiRestrictions}
-      />);
+      />
+    );
   }
 }
 

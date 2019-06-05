@@ -31,7 +31,7 @@ export function calculateCoordinates(innerRef, resizeRef, state) {
   } else {
     scale = resize.clientHeight / inner.clientHeight;
   }
-  let [ newWidth, newHeight ] = calcDimensions(inner, scale);
+  let [newWidth, newHeight] = calcDimensions(inner, scale);
 
   // Now we need to check to see if it will still fit
   if (newWidth > resize.clientWidth) {
@@ -42,7 +42,7 @@ export function calculateCoordinates(innerRef, resizeRef, state) {
   }
 
   // Calculate the final dimensions
-  [ newWidth, newHeight ] = calcDimensions(inner, scale);
+  [newWidth, newHeight] = calcDimensions(inner, scale);
 
   // Because scale is middle out we need to translate
   // the new X,Y coordinates
@@ -54,5 +54,4 @@ export function calculateCoordinates(innerRef, resizeRef, state) {
   const left = Math.floor((resize.clientWidth - newWidth) / 2);
 
   return { scale, top, left, translateY, translateX };
-
 }

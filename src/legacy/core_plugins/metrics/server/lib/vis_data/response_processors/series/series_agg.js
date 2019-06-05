@@ -37,20 +37,20 @@ export function seriesAgg(resp, panel, series) {
         }
         return true;
       });
-      const data = series.metrics.filter(m => m.type === 'series_agg')
+      const data = series.metrics
+        .filter(m => m.type === 'series_agg')
         .reduce((acc, m) => {
           const fn = SeriesAgg[m.function];
-          return fn && fn(acc) || acc;
+          return (fn && fn(acc)) || acc;
         }, targetSeries);
       results.push({
         id: `${series.id}`,
         label: series.label || calculateLabel(_.last(series.metrics), series.metrics),
         color: series.color,
         data: _.first(data),
-        ...decoration
+        ...decoration,
       });
     }
     return next(results);
   };
 }
-

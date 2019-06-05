@@ -36,7 +36,7 @@ const types = {
   top_n: topN,
   table,
   gauge,
-  markdown
+  markdown,
 };
 
 export function Visualization(props) {
@@ -63,19 +63,17 @@ export function Visualization(props) {
 
   const component = types[model.type];
   if (component) {
-    return (
-      React.createElement(component, {
-        dateFormat: props.dateFormat,
-        backgroundColor: props.backgroundColor,
-        model: props.model,
-        onBrush: props.onBrush,
-        onChange: props.onChange,
-        onUiState: props.onUiState,
-        uiState: props.uiState,
-        visData: visData.type === model.type ? visData : {},
-        getConfig: props.getConfig
-      })
-    );
+    return React.createElement(component, {
+      dateFormat: props.dateFormat,
+      backgroundColor: props.backgroundColor,
+      model: props.model,
+      onBrush: props.onBrush,
+      onChange: props.onChange,
+      onUiState: props.onUiState,
+      uiState: props.uiState,
+      visData: visData.type === model.type ? visData : {},
+      getConfig: props.getConfig,
+    });
   }
   return <div className={props.className} />;
 }
@@ -90,9 +88,9 @@ Visualization.propTypes = {
   uiState: PropTypes.object,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
-  getConfig: PropTypes.func
+  getConfig: PropTypes.func,
 };
 
 Visualization.defaultProps = {
-  className: 'tvbVis'
+  className: 'tvbVis',
 };

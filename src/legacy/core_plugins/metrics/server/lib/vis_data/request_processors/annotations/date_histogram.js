@@ -21,12 +21,19 @@ import _ from 'lodash';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
 
-export function dateHistogram(req, panel, annotation, esQueryConfig, indexPatternObject, capabilities) {
+export function dateHistogram(
+  req,
+  panel,
+  annotation,
+  esQueryConfig,
+  indexPatternObject,
+  capabilities
+) {
   return next => doc => {
     const timeField = annotation.time_field;
     const { bucketSize, intervalString } = getBucketSize(req, 'auto', capabilities);
     const { from, to } = getTimerange(req);
-    const  timezone = capabilities.searchTimezone;
+    const timezone = capabilities.searchTimezone;
 
     _.set(doc, `aggs.${annotation.id}.date_histogram`, {
       field: timeField,
@@ -35,8 +42,8 @@ export function dateHistogram(req, panel, annotation, esQueryConfig, indexPatter
       time_zone: timezone,
       extended_bounds: {
         min: from.valueOf(),
-        max: to.valueOf() - (bucketSize * 1000)
-      }
+        max: to.valueOf() - bucketSize * 1000,
+      },
     });
     return next(doc);
   };

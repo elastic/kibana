@@ -24,9 +24,9 @@ import { HorizontalLegend } from './horizontal_legend';
 
 export function Legend(props) {
   if (props.legendPosition === 'bottom') {
-    return (<HorizontalLegend {...props}/>);
+    return <HorizontalLegend {...props} />;
   }
-  return (<VerticalLegend {...props}/>);
+  return <VerticalLegend {...props} />;
 }
 
 Legend.propTypes = {
@@ -37,5 +37,5 @@ Legend.propTypes = {
   showLegend: PropTypes.bool,
   seriesValues: PropTypes.object,
   seriesFilter: PropTypes.array,
-  tickFormatter: PropTypes.func
+  tickFormatter: PropTypes.func,
 };

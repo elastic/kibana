@@ -36,7 +36,7 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
   checkForViability(req) {
     return {
       isViable: true,
-      capabilities: new DefaultSearchCapabilities(req)
+      capabilities: new DefaultSearchCapabilities(req),
     };
   }
 }

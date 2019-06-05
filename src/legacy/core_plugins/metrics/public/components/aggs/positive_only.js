@@ -65,10 +65,7 @@ export const PositiveOnlyAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={(<FormattedMessage
-              id="tsvb.positiveOnly.metricLabel"
-              defaultMessage="Metric"
-            />)}
+            label={<FormattedMessage id="tsvb.positiveOnly.metricLabel" defaultMessage="Metric" />}
           >
             <MetricSelect
               onChange={handleSelectChange('field')}

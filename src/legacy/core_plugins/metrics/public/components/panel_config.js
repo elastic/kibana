@@ -33,7 +33,7 @@ const types = {
   metric,
   top_n: topN,
   gauge,
-  markdown
+  markdown,
 };
 
 export function PanelConfig(props) {
@@ -49,7 +49,8 @@ export function PanelConfig(props) {
         defaultMessage="Missing panel config for &ldquo;{modelType}&rdquo;"
         values={{ modelType: model.type }}
       />
-    </div>);
+    </div>
+  );
 }
 
 PanelConfig.propTypes = {

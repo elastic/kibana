@@ -22,7 +22,6 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 describe('splitByFilter(req, panel, series)', () => {
-
   let panel;
   let series;
   let req;
@@ -33,9 +32,9 @@ describe('splitByFilter(req, panel, series)', () => {
       payload: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
-          max: '2017-01-01T01:00:00Z'
-        }
-      }
+          max: '2017-01-01T01:00:00Z',
+        },
+      },
     };
   });
 
@@ -54,11 +53,11 @@ describe('splitByFilter(req, panel, series)', () => {
           filter: {
             query_string: {
               query: 'host:example-01',
-              analyze_wildcard: true
-            }
-          }
-        }
-      }
+              analyze_wildcard: true,
+            },
+          },
+        },
+      },
     });
   });
 
@@ -69,6 +68,4 @@ describe('splitByFilter(req, panel, series)', () => {
     expect(next.calledOnce).to.equal(true);
     expect(doc).to.eql({});
   });
-
 });
-

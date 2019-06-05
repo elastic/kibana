@@ -22,11 +22,7 @@ import React, { Component } from 'react';
 import { find } from 'lodash';
 import { reIdSeries } from './lib/re_id_series';
 import { Series } from './series';
-import {
-  handleAdd,
-  handleDelete,
-  handleChange,
-} from './lib/collection_actions';
+import { handleAdd, handleDelete, handleChange } from './lib/collection_actions';
 import { newSeriesFn } from './lib/new_series_fn';
 import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 import { reorder } from './lib/reorder';
@@ -34,7 +30,6 @@ import { reorder } from './lib/reorder';
 const DROPPABLE_ID = 'series_editor_dnd';
 
 export class SeriesEditor extends Component {
-
   handleClone = series => {
     const newSeries = reIdSeries(series);
 
@@ -52,10 +47,9 @@ export class SeriesEditor extends Component {
   };
 
   getSortFunction = ({ destination, source }) =>
-    (destination.droppableId === source.droppableId && source.droppableId === DROPPABLE_ID ?
-      this.sortSeries :
-      this.sortAggregations
-    );
+    destination.droppableId === source.droppableId && source.droppableId === DROPPABLE_ID
+      ? this.sortSeries
+      : this.sortAggregations;
 
   sortSeries = ({ destination, source }) => {
     this.props.onChange({
@@ -82,16 +76,11 @@ export class SeriesEditor extends Component {
 
   render() {
     const { limit, model, name, fields, colorPicker } = this.props;
-    const list = model[name]
-      .filter((val, index) => index < (limit || Infinity));
+    const list = model[name].filter((val, index) => index < (limit || Infinity));
 
     return (
       <EuiDragDropContext onDragEnd={this.sortHandler}>
-        <EuiDroppable
-          droppableId={DROPPABLE_ID}
-          spacing="l"
-          type="MACRO"
-        >
+        <EuiDroppable droppableId={DROPPABLE_ID} spacing="l" type="MACRO">
           {list.map((row, idx) => (
             <EuiDraggable
               spacing="m"
@@ -109,7 +98,7 @@ export class SeriesEditor extends Component {
                   disableDelete={model[name].length < 2}
                   fields={fields}
                   onAdd={() => handleAdd(this.props, newSeriesFn)}
-                  onChange={(doc) => handleChange(this.props, doc)}
+                  onChange={doc => handleChange(this.props, doc)}
                   onClone={() => this.handleClone(row)}
                   onDelete={() => handleDelete(this.props, row)}
                   visData$={this.props.visData$}

@@ -23,7 +23,14 @@ import { AddDeleteButtons } from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Aggs } from '../../aggs/aggs';
 import { SeriesDragHandler } from '../../series_drag_handler';
@@ -41,7 +48,7 @@ function MarkdownSeriesUi(props) {
     visible,
     intl,
     name,
-    uiRestrictions
+    uiRestrictions,
   } = props;
 
   const defaults = { label: '', var_name: '' };
@@ -80,20 +87,13 @@ function MarkdownSeriesUi(props) {
       );
     } else {
       seriesBody = (
-        <SeriesConfig
-          fields={props.fields}
-          model={props.model}
-          onChange={props.onChange}
-        />
+        <SeriesConfig fields={props.fields} model={props.model} onChange={props.onChange} />
       );
     }
     body = (
       <div className="tvbSeries__body">
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'metrics'}
-            onClick={() => props.switchTab('metrics')}
-          >
+          <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
             <FormattedMessage
               id="tsvb.markdown.dataTab.metricsButtonLabel"
               defaultMessage="Metrics"
@@ -116,17 +116,17 @@ function MarkdownSeriesUi(props) {
   }
 
   return (
-    <div
-      className={`${props.className}`}
-      style={props.style}
-    >
+    <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}
-            aria-label={intl.formatMessage({ id: 'tsvb.markdown.editor.toggleEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
+            aria-label={intl.formatMessage({
+              id: 'tsvb.markdown.editor.toggleEditorAriaLabel',
+              defaultMessage: 'Toggle series editor',
+            })}
             aria-expanded={props.visible}
           />
         </EuiFlexItem>
@@ -135,7 +135,10 @@ function MarkdownSeriesUi(props) {
           <EuiFieldText
             fullWidth
             onChange={handleChange('label')}
-            placeholder={intl.formatMessage({ id: 'tsvb.markdown.editor.labelPlaceholder', defaultMessage: 'Label' })}
+            placeholder={intl.formatMessage({
+              id: 'tsvb.markdown.editor.labelPlaceholder',
+              defaultMessage: 'Label',
+            })}
             value={model.label}
           />
         </EuiFlexItem>
@@ -144,7 +147,10 @@ function MarkdownSeriesUi(props) {
           <EuiFieldText
             fullWidth
             onChange={handleChange('var_name')}
-            placeholder={intl.formatMessage({ id: 'tsvb.markdown.editor.variableNamePlaceholder', defaultMessage: 'Variable name' })}
+            placeholder={intl.formatMessage({
+              id: 'tsvb.markdown.editor.variableNamePlaceholder',
+              defaultMessage: 'Variable name',
+            })}
             value={model.var_name}
           />
         </EuiFlexItem>
@@ -153,9 +159,18 @@ function MarkdownSeriesUi(props) {
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip={intl.formatMessage({ id: 'tsvb.markdown.editor.addSeriesTooltip', defaultMessage: 'Add series' })}
-            deleteTooltip={intl.formatMessage({ id: 'tsvb.markdown.editor.deleteSeriesTooltip', defaultMessage: 'Delete series' })}
-            cloneTooltip={intl.formatMessage({ id: 'tsvb.markdown.editor.cloneSeriesTooltip', defaultMessage: 'Clone series' })}
+            addTooltip={intl.formatMessage({
+              id: 'tsvb.markdown.editor.addSeriesTooltip',
+              defaultMessage: 'Add series',
+            })}
+            deleteTooltip={intl.formatMessage({
+              id: 'tsvb.markdown.editor.deleteSeriesTooltip',
+              defaultMessage: 'Delete series',
+            })}
+            cloneTooltip={intl.formatMessage({
+              id: 'tsvb.markdown.editor.cloneSeriesTooltip',
+              defaultMessage: 'Clone series',
+            })}
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
@@ -165,7 +180,7 @@ function MarkdownSeriesUi(props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      { body }
+      {body}
     </div>
   );
 }

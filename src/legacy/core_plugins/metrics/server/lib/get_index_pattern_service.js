@@ -26,5 +26,5 @@ export const getIndexPatternService = {
       return dataCluster.callWithRequest(req, ...args);
     };
     return new IndexPatternsService(callDataCluster);
-  }
+  },
 };

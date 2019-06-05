@@ -128,7 +128,7 @@ export class FlotChart extends Component {
         }
         return {
           color: '#990000',
-          data: set
+          data: set,
         };
       })
       .reverse()
@@ -177,7 +177,7 @@ export class FlotChart extends Component {
       yaxis: {
         color: lineColor,
         font: { color: textColor, size: 11 },
-        tickFormatter: props.tickFormatter
+        tickFormatter: props.tickFormatter,
       },
       xaxis: {
         tickLength: props.showGrid ? null : 0,
@@ -185,25 +185,25 @@ export class FlotChart extends Component {
         timezone: 'browser',
         mode: 'time',
         font: { color: textColor, size: 11 },
-        ticks: this.calculateTicks()
+        ticks: this.calculateTicks(),
       },
       series: {
-        shadowSize: 0
+        shadowSize: 0,
       },
       grid: {
         margin: 0,
         borderWidth,
         borderColor: lineColor,
         hoverable: true,
-        mouseActiveRadius: 200
-      }
+        mouseActiveRadius: 200,
+      },
     };
 
     if (props.crosshair) {
       _.set(opts, 'crosshair', {
         mode: 'x',
         color: '#C66',
-        lineWidth: 1
+        lineWidth: 1,
       });
     }
 
@@ -223,7 +223,9 @@ export class FlotChart extends Component {
     const sample = this.props.xAxisFormatter(new Date());
     const tickLetterWidth = 7;
     const tickPadding = 45;
-    const ticks = Math.floor(this.target.clientWidth / ((sample.length * tickLetterWidth) + tickPadding));
+    const ticks = Math.floor(
+      this.target.clientWidth / (sample.length * tickLetterWidth + tickPadding)
+    );
     return ticks;
   }
 
@@ -277,7 +279,8 @@ export class FlotChart extends Component {
           }
         };
 
-        this.handlePlotover = (e, pos, item) => eventBus.trigger('thorPlotover', [pos, item, this.plot]);
+        this.handlePlotover = (e, pos, item) =>
+          eventBus.trigger('thorPlotover', [pos, item, this.plot]);
         this.handlePlotleave = () => eventBus.trigger('thorPlotleave');
         this.handleThorPlotleave = e => {
           if (this.plot) this.plot.clearCrosshair();
@@ -313,20 +316,17 @@ export class FlotChart extends Component {
     return (
       <Resize
         onResize={this.handleResize}
-        ref={(el) => this.resize = el}
+        ref={el => (this.resize = el)}
         className="tvbVisTimeSeries__container"
       >
-        <div
-          ref={(el) => this.target = el}
-          className="tvbVisTimeSeries__container"
-        />
+        <div ref={el => (this.target = el)} className="tvbVisTimeSeries__container" />
       </Resize>
     );
   }
 }
 
 FlotChart.defaultProps = {
-  showGrid: true
+  showGrid: true,
 };
 
 FlotChart.propTypes = {
@@ -342,5 +342,5 @@ FlotChart.propTypes = {
   show: PropTypes.array,
   tickFormatter: PropTypes.func,
   showGrid: PropTypes.bool,
-  yaxes: PropTypes.array
+  yaxes: PropTypes.array,
 };

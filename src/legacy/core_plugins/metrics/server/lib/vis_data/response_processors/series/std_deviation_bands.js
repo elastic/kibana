@@ -26,9 +26,13 @@ export function stdDeviationBands(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
     if (metric.type === 'std_deviation' && metric.mode === 'band') {
-      getSplits(resp, panel, series, meta).forEach((split) => {
-        const upper = split.timeseries.buckets.map(mapBucket(_.assign({}, metric, { mode: 'upper' })));
-        const lower = split.timeseries.buckets.map(mapBucket(_.assign({}, metric, { mode: 'lower' })));
+      getSplits(resp, panel, series, meta).forEach(split => {
+        const upper = split.timeseries.buckets.map(
+          mapBucket(_.assign({}, metric, { mode: 'upper' }))
+        );
+        const lower = split.timeseries.buckets.map(
+          mapBucket(_.assign({}, metric, { mode: 'lower' }))
+        );
         results.push({
           id: `${split.id}:upper`,
           label: split.label,
@@ -36,18 +40,17 @@ export function stdDeviationBands(resp, panel, series, meta) {
           lines: { show: true, fill: 0.5, lineWidth: 0 },
           points: { show: false },
           fillBetween: `${split.id}:lower`,
-          data: upper
+          data: upper,
         });
         results.push({
           id: `${split.id}:lower`,
           color: split.color,
           lines: { show: true, fill: false, lineWidth: 0 },
           points: { show: false },
-          data: lower
+          data: lower,
         });
       });
     }
     return next(results);
   };
-
 }

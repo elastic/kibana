@@ -35,16 +35,17 @@ export function percentile(bucket, panel, series) {
     };
 
     getSplits(fakeResp, panel, series).forEach(split => {
-
       // table allows only one percentile in a series (the last one will be chosen in case of several)
       const percentile = last(metric.percentiles);
       const percentileKey = toPercentileNumber(percentile.value);
-      const data = split.timeseries.buckets
-        .map(bucket => [bucket.key, bucket[metric.id].values[percentileKey]]);
+      const data = split.timeseries.buckets.map(bucket => [
+        bucket.key,
+        bucket[metric.id].values[percentileKey],
+      ]);
 
       results.push({
         id: split.id,
-        data
+        data,
       });
     });
 

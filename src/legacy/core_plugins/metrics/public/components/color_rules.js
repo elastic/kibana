@@ -35,14 +35,13 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 class ColorRulesUI extends Component {
-
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
   }
 
   handleChange(item, name, cast = String) {
-    return (e) => {
+    return e => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = cast(_.get(e, '[0].value', _.get(e, 'target.value')));
@@ -59,15 +58,36 @@ class ColorRulesUI extends Component {
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     const { intl } = this.props;
     const operatorOptions = [
-      { label: intl.formatMessage({ id: 'tsvb.colorRules.greaterThanLabel', defaultMessage: '> greater than' }), value: 'gt' },
       {
-        label: intl.formatMessage({ id: 'tsvb.colorRules.greaterThanOrEqualLabel', defaultMessage: '>= greater than or equal' }),
-        value: 'gte'
+        label: intl.formatMessage({
+          id: 'tsvb.colorRules.greaterThanLabel',
+          defaultMessage: '> greater than',
+        }),
+        value: 'gt',
       },
-      { label: intl.formatMessage({ id: 'tsvb.colorRules.lessThanLabel', defaultMessage: '< less than' }), value: 'lt' },
-      { label: intl.formatMessage({ id: 'tsvb.colorRules.lessThanOrEqualLabel', defaultMessage: '<= less than or equal' }), value: 'lte' },
+      {
+        label: intl.formatMessage({
+          id: 'tsvb.colorRules.greaterThanOrEqualLabel',
+          defaultMessage: '>= greater than or equal',
+        }),
+        value: 'gte',
+      },
+      {
+        label: intl.formatMessage({
+          id: 'tsvb.colorRules.lessThanLabel',
+          defaultMessage: '< less than',
+        }),
+        value: 'lt',
+      },
+      {
+        label: intl.formatMessage({
+          id: 'tsvb.colorRules.lessThanOrEqualLabel',
+          defaultMessage: '<= less than or equal',
+        }),
+        value: 'lte',
+      },
     ];
-    const handleColorChange = (part) => {
+    const handleColorChange = part => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       handleChange(_.assign({}, model, part));
     };
@@ -104,7 +124,14 @@ class ColorRulesUI extends Component {
       );
     }
     return (
-      <EuiFlexGroup wrap={true} responsive={false} gutterSize="s" key={model.id} alignItems="center" className="tvbColorRules__rule">
+      <EuiFlexGroup
+        wrap={true}
+        responsive={false}
+        gutterSize="s"
+        key={model.id}
+        alignItems="center"
+        className="tvbColorRules__rule"
+      >
         <EuiFlexItem grow={false}>
           <EuiFormLabel style={labelStyle}>
             <FormattedMessage
@@ -124,7 +151,7 @@ class ColorRulesUI extends Component {
           />
         </EuiFlexItem>
 
-        { secondary }
+        {secondary}
 
         <EuiFlexItem grow={false}>
           <EuiFormLabel style={labelStyle} htmlFor={htmlId('ifMetricIs')}>
@@ -149,7 +176,10 @@ class ColorRulesUI extends Component {
 
         <EuiFlexItem>
           <EuiFieldNumber
-            aria-label={intl.formatMessage({ id: 'tsvb.colorRules.valueAriaLabel', defaultMessage: 'Value' })}
+            aria-label={intl.formatMessage({
+              id: 'tsvb.colorRules.valueAriaLabel',
+              defaultMessage: 'Value',
+            })}
             value={model.value}
             onChange={this.handleChange(model, 'value', Number)}
             fullWidth
@@ -170,24 +200,23 @@ class ColorRulesUI extends Component {
 
   render() {
     const { model, name } = this.props;
-    if (!model[name]) return (<div/>);
+    if (!model[name]) return <div />;
     const rows = model[name].map(this.renderRow);
-    return (
-      <div>
-        { rows }
-      </div>
-    );
+    return <div>{rows}</div>;
   }
-
 }
 
 ColorRulesUI.defaultProps = {
   name: 'color_rules',
-  primaryName: i18n.translate('tsvb.colorRules.defaultPrimaryNameLabel', { defaultMessage: 'background' }),
+  primaryName: i18n.translate('tsvb.colorRules.defaultPrimaryNameLabel', {
+    defaultMessage: 'background',
+  }),
   primaryVarName: 'background_color',
-  secondaryName: i18n.translate('tsvb.colorRules.defaultSecondaryNameLabel', { defaultMessage: 'text' }),
+  secondaryName: i18n.translate('tsvb.colorRules.defaultSecondaryNameLabel', {
+    defaultMessage: 'text',
+  }),
   secondaryVarName: 'color',
-  hideSecondary: false
+  hideSecondary: false,
 };
 
 ColorRulesUI.propTypes = {
@@ -198,7 +227,7 @@ ColorRulesUI.propTypes = {
   primaryVarName: PropTypes.string,
   secondaryName: PropTypes.string,
   secondaryVarName: PropTypes.string,
-  hideSecondary: PropTypes.bool
+  hideSecondary: PropTypes.bool,
 };
 
 export const ColorRules = injectI18n(ColorRulesUI);

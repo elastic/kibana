@@ -23,14 +23,17 @@ const SEARCH_METHOD = 'msearch';
 export class MultiSearchRequest extends AbstractSearchRequest {
   async search(searches) {
     const includeFrozen = await this.req.getUiSettingsService().get('search:includeFrozen');
-    const multiSearchBody = searches.reduce((acc, { body, index }) => ([
-      ...acc,
-      {
-        index,
-        ignoreUnavailable: true,
-      },
-      body,
-    ]), []);
+    const multiSearchBody = searches.reduce(
+      (acc, { body, index }) => [
+        ...acc,
+        {
+          index,
+          ignoreUnavailable: true,
+        },
+        body,
+      ],
+      []
+    );
 
     const { responses } = await this.callWithRequest(this.req, SEARCH_METHOD, {
       body: multiSearchBody,

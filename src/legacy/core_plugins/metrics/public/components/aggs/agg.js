@@ -42,10 +42,7 @@ export function Agg(props) {
   };
 
   return (
-    <div
-      className={props.className}
-      style={style}
-    >
+    <div className={props.className} style={style}>
       <Component
         fields={props.fields}
         disableDelete={props.disableDelete}

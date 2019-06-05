@@ -60,10 +60,7 @@ export function CumulativeSumAgg(props) {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={(<FormattedMessage
-              id="tsvb.cumulativeSum.metricLabel"
-              defaultMessage="Metric"
-            />)}
+            label={<FormattedMessage id="tsvb.cumulativeSum.metricLabel" defaultMessage="Metric" />}
           >
             <MetricSelect
               onChange={handleSelectChange('field')}
@@ -76,7 +73,6 @@ export function CumulativeSumAgg(props) {
       </EuiFlexGroup>
     </AggRow>
   );
-
 }
 
 CumulativeSumAgg.propTypes = {

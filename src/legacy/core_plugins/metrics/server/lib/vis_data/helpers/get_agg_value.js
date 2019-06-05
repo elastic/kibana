@@ -49,11 +49,7 @@ export const getAggValue = (row, metric) => {
     case METRIC_TYPES.PERCENTILE_RANK:
       const percentileRankKey = toPercentileNumber(`${metric.value}`);
 
-      return (
-        row[metric.id] &&
-        row[metric.id].values &&
-        row[metric.id].values[percentileRankKey]
-      );
+      return row[metric.id] && row[metric.id].values && row[metric.id].values[percentileRankKey];
     case METRIC_TYPES.TOP_HIT:
       if (row[metric.id].doc_count === 0) {
         return null;

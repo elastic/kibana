@@ -21,7 +21,9 @@ import { i18n } from '@kbn/i18n';
 
 const durationBaseOptions = [
   {
-    label: i18n.translate('tsvb.durationOptions.millisecondsLabel', { defaultMessage: 'Milliseconds' }),
+    label: i18n.translate('tsvb.durationOptions.millisecondsLabel', {
+      defaultMessage: 'Milliseconds',
+    }),
     value: 'ms',
   },
   {
@@ -64,44 +66,50 @@ export const durationOutputOptions = [
 
 export const durationInputOptions = [
   {
-    label: i18n.translate('tsvb.durationOptions.picosecondsLabel', { defaultMessage: 'Picoseconds' }),
+    label: i18n.translate('tsvb.durationOptions.picosecondsLabel', {
+      defaultMessage: 'Picoseconds',
+    }),
     value: 'ps',
   },
   {
-    label: i18n.translate('tsvb.durationOptions.nanosecondsLabel', { defaultMessage: 'Nanoseconds' }),
+    label: i18n.translate('tsvb.durationOptions.nanosecondsLabel', {
+      defaultMessage: 'Nanoseconds',
+    }),
     value: 'ns',
   },
   {
-    label: i18n.translate('tsvb.durationOptions.microsecondsLabel', { defaultMessage: 'Microseconds' }),
+    label: i18n.translate('tsvb.durationOptions.microsecondsLabel', {
+      defaultMessage: 'Microseconds',
+    }),
     value: 'us',
   },
   ...durationBaseOptions,
 ];
 
 export const inputFormats = {
-  'ps': 'picoseconds',
-  'ns': 'nanoseconds',
-  'us': 'microseconds',
-  'ms': 'milliseconds',
-  's': 'seconds',
-  'm': 'minutes',
-  'h': 'hours',
-  'd': 'days',
-  'w': 'weeks',
-  'M': 'months',
-  'Y': 'years',
+  ps: 'picoseconds',
+  ns: 'nanoseconds',
+  us: 'microseconds',
+  ms: 'milliseconds',
+  s: 'seconds',
+  m: 'minutes',
+  h: 'hours',
+  d: 'days',
+  w: 'weeks',
+  M: 'months',
+  Y: 'years',
 };
 
 export const outputFormats = {
-  'humanize': 'humanize',
-  'ms': 'asMilliseconds',
-  's': 'asSeconds',
-  'm': 'asMinutes',
-  'h': 'asHours',
-  'd': 'asDays',
-  'w': 'asWeeks',
-  'M': 'asMonths',
-  'Y': 'asYears',
+  humanize: 'humanize',
+  ms: 'asMilliseconds',
+  s: 'asSeconds',
+  m: 'asMinutes',
+  h: 'asHours',
+  d: 'asDays',
+  w: 'asWeeks',
+  M: 'asMonths',
+  Y: 'asYears',
 };
 
 export const isDuration = format => {
