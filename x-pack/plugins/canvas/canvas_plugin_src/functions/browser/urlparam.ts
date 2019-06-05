@@ -5,7 +5,7 @@
  */
 
 import { parse } from 'url';
-import { NullContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -13,7 +13,7 @@ interface Arguments {
   default: string;
 }
 
-export function urlparam(): NullContextFunction<'urlparam', Arguments, string | string[]> {
+export function urlparam(): ExpressionFunction<'urlparam', null, Arguments, string | string[]> {
   const { help, args: argHelp } = getFunctionHelp().urlparam;
 
   return {

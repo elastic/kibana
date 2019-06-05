@@ -5,7 +5,8 @@
  */
 
 import { uniq } from 'lodash';
-import { ContextFunction, Datatable, Render } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable, Render } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -19,7 +20,7 @@ interface Return {
   choices: any;
 }
 
-export function dropdownControl(): ContextFunction<
+export function dropdownControl(): ExpressionFunction<
   'dropdownControl',
   Datatable,
   Arguments,

@@ -5,7 +5,8 @@
  */
 
 import { groupBy, flatten, pick, map } from 'lodash';
-import { ContextFunction, Datatable, DatatableColumn } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable, DatatableColumn } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -15,7 +16,7 @@ interface Arguments {
 
 type Return = Datatable | Promise<Datatable>;
 
-export function ply(): ContextFunction<'ply', Datatable, Arguments, Return> {
+export function ply(): ExpressionFunction<'ply', Datatable, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().ply;
 
   return {

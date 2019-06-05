@@ -10,6 +10,9 @@ import { MarkedString } from 'vscode-languageserver-types';
 import ReactMarkdown from 'react-markdown';
 // @ts-ignore
 import { tokenizeToString } from 'monaco-editor/esm/vs/editor/common/modes/textToHtmlTokenizer';
+// @ts-ignore
+import { TokenizationRegistry } from 'monaco-editor/esm/vs/editor/common/modes';
+
 export interface HoverWidgetProps {
   state: HoverState;
   contents?: MarkedString[];
@@ -59,7 +62,8 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
         </EuiLink>
       ),
       code: ({ value, language }: { value: string; language: string }) => {
-        const code = tokenizeToString(value, language);
+        const support = TokenizationRegistry.get(language);
+        const code = tokenizeToString(value, support);
         return <div className="code" dangerouslySetInnerHTML={{ __html: code }} />;
       },
     };
