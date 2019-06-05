@@ -40,7 +40,7 @@ export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
         args: [
           'scripts/functional_tests',
           '--include-tag', tag,
-          '--config', 'test/functional/config.js',
+          //'--config', 'test/functional/config.js',
           '--config', 'test/functional/config.firefox.js',
           '--bail',
           '--debug',
