@@ -137,7 +137,6 @@ export class ESSearchSource extends AbstractESSource {
 
   async _getTopHits(layerName, searchFilters) {
     const {
-      geoField,
       topHitsSplitField,
       topHitsTimeField,
       topHitsSize,
@@ -161,7 +160,7 @@ export class ESSearchSource extends AbstractESSource {
                 }
               ],
               _source: {
-                includes: [ geoField ]
+                includes: searchFilters.fieldNames
               },
               size: topHitsSize
             }
