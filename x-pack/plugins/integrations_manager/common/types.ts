@@ -14,7 +14,7 @@ export interface CoreSetup {
 }
 
 // the contract with the registry
-export type IntegrationList = [IntegrationListItem];
+export type IntegrationList = IntegrationListItem[];
 
 // registry /list
 export interface IntegrationListItem {
