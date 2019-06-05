@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+
 import { Subject } from 'rxjs';
 
 import { FilterStateStore } from '@kbn/es-query';
@@ -34,6 +35,8 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
   const queryFilter = {};
 
   let filterStateManager;
+  let filterStateUpdateSubscription$;
+
   const { uiSettings } = getNewPlatform().setup.core;
 
   const update$ = new Subject();
@@ -52,16 +55,11 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
   };
 
   queryFilter.getAppFilters = function () {
-    const filters = filterStateManager ? filterStateManager.getAppFilters() : [];
-    const appState = getAppState();
-    if (appState) appState.filters = filters;
-    return filters;
+    return filterStateManager ? filterStateManager.getAppFilters() : [];
   };
 
   queryFilter.getGlobalFilters = function () {
-    const filters = filterStateManager ? filterStateManager.getGlobalFilters() : [];
-    globalState.filters = filters;
-    return filters;
+    return filterStateManager ? filterStateManager.getGlobalFilters() : [];
   };
 
   /**
@@ -152,29 +150,43 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
     globalState.save();
   }
 
+  function setupFilterManager(appFilters, globalFilters) {
+    if (filterStateUpdateSubscription$) {
+      filterStateUpdateSubscription$.unsubscribe();
+    }
+
+    filterStateManager = new FilterManager(appFilters || [], globalFilters || []);
+    update$.next();
+    fetch$.next();
+
+    filterStateUpdateSubscription$ = filterStateManager.getUpdates$().subscribe((shouldFetch) => {
+      saveState();
+      update$.next();
+      if (shouldFetch) {
+        fetch$.next();
+      }
+    });
+  }
+
   /**
-   * Initializes state watchers that use the event emitter
+   * Initializes state watchers
    * @returns {void}
    */
   function initWatchers() {
     // This is a temporary solution to remove rootscope.
     // Moving forward, new filters will be explicitly pushed into the filter manager.
-    const interval = setInterval(() => {
+    setInterval(() => {
       const appState = getAppState();
-      if (globalState && appState && appState.filters) {
-        clearInterval(interval);
-        filterStateManager = new FilterManager(appState.filters, globalState.filters);
-        update$.next();
-        fetch$.next();
+      if (!appState || !globalState) return;
 
-        filterStateManager.getUpdates$().subscribe((shouldFetch) => {
-          saveState();
-          update$.next();
-          if (shouldFetch) {
-            fetch$.next();
-          }
-        });
-      }
-    }, 100);
+      const filtersChanged = (!filterStateManager ||
+            !_.isEqual(appState.filters || [], filterStateManager.getAppFilters()) ||
+            !_.isEqual(globalState.filters || [], filterStateManager.getGlobalFilters())
+      );
+
+      if (!filtersChanged) return;
+
+      setupFilterManager(appState && appState.filters, globalState.filters);
+    }, 50);
   }
 }
