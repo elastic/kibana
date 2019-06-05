@@ -22,6 +22,8 @@ import { Filter, toggleFilterNegated, FilterStateStore } from '@kbn/es-query';
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
+import { getNewPlatform } from 'ui/new_platform';
+
 // @ts-ignore
 import { onlyDisabled } from './lib/only_disabled';
 // @ts-ignore
@@ -37,15 +39,17 @@ interface PartitionedFilters {
 }
 
 interface DelayedChangeNotification {
-  callback: (() => void) | undefined;
+  update: (() => void) | undefined;
 }
 
 export class FilterManager {
+  indexPatterns: any;
   filters: Filter[] = [];
   updated$: Subject<any> = new Subject();
 
-  constructor(filters: Filter[]);
-  constructor(filters: Filter[], globalFilters?: Filter[]) {
+  constructor(indexPatterns: any, filters: Filter[]);
+  constructor(indexPatterns: any, filters: Filter[], globalFilters?: Filter[]) {
+    this.indexPatterns = indexPatterns;
     if (globalFilters) {
       filters = this.mergeFilters(filters, globalFilters);
     }
@@ -106,15 +110,33 @@ export class FilterManager {
     return this.updated$.asObservable();
   }
 
-  public addFilters(filters: Filter[], emitChanged?: boolean): DelayedChangeNotification {
+  public async addFilters(
+    filters: Filter[],
+    pinFilterStatus?: boolean,
+    emitChanged?: boolean
+  ): Promise<DelayedChangeNotification> {
+    const { uiSettings } = getNewPlatform().setup.core;
+    if (pinFilterStatus === undefined) {
+      pinFilterStatus = uiSettings.get('filters:pinnedByDefault');
+    }
+
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
 
-    const newFilters = this.mergeFilters(filters, this.filters);
+    // set the store of all filters
+    _.map(filters, filter => {
+      filter.$state = {
+        store: pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
+      };
+    });
+
+    const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, filters);
+
+    const newFilters = this.mergeFilters(mappedFilters, this.filters);
 
     let delayChangeNotification: DelayedChangeNotification = {
-      callback: undefined,
+      update: undefined,
     };
 
     if (emitChanged === false) {
@@ -122,7 +144,7 @@ export class FilterManager {
       this.filters = newFilters;
       if (filtersUpdated) {
         delayChangeNotification = {
-          callback: () => {
+          update: () => {
             this.updated$.next();
           },
         };
@@ -135,24 +157,29 @@ export class FilterManager {
     return delayChangeNotification;
   }
 
-  public setFilters(newFilters: Filter[], emitChanged?: boolean): DelayedChangeNotification {
+  public async setFilters(
+    newFilters: Filter[],
+    emitChanged?: boolean
+  ): Promise<DelayedChangeNotification> {
     let delayChangeNotification: DelayedChangeNotification = {
-      callback: undefined,
+      update: undefined,
     };
 
+    const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, newFilters);
+
     if (emitChanged === false) {
-      const filtersUpdated = this.filtersUpdated(newFilters);
-      this.filters = newFilters;
+      const filtersUpdated = this.filtersUpdated(mappedFilters);
+      this.filters = mappedFilters;
       if (filtersUpdated) {
         delayChangeNotification = {
-          callback: () => {
+          update: () => {
             this.updated$.next();
           },
         };
       }
     } else {
-      this.emitUpdateIfChanged(newFilters);
-      this.filters = newFilters;
+      this.emitUpdateIfChanged(mappedFilters);
+      this.filters = mappedFilters;
     }
 
     return delayChangeNotification;
@@ -160,7 +187,7 @@ export class FilterManager {
 
   public removeFilter(filter: Filter, emitChanged?: boolean): DelayedChangeNotification {
     let delayChangeNotification: DelayedChangeNotification = {
-      callback: undefined,
+      update: undefined,
     };
 
     const filterIndex = _.findIndex(this.filters, item => {
@@ -175,7 +202,7 @@ export class FilterManager {
         this.filters = newFilters;
         if (filtersUpdated) {
           delayChangeNotification = {
-            callback: () => {
+            update: () => {
               this.updated$.next();
             },
           };

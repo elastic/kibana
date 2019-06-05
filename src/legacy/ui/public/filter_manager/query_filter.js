@@ -18,17 +18,10 @@
  */
 
 import _ from 'lodash';
-
 import { Subject } from 'rxjs';
 
-import { FilterStateStore } from '@kbn/es-query';
-
-import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
-
-import { getNewPlatform } from 'ui/new_platform';
-
 import { FilterManager } from './new_filter_manager';
 
 export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState, globalState) {
@@ -36,8 +29,6 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
 
   let filterStateManager;
   let filterStateUpdateSubscription$;
-
-  const { uiSettings } = getNewPlatform().setup.core;
 
   const update$ = new Subject();
   const fetch$ = new Subject();
@@ -69,33 +60,18 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
    * @returns {Promise} filter map promise
    */
   queryFilter.addFilters = function (filters, addToGlobalState) {
-    if (addToGlobalState === undefined) {
-      addToGlobalState = uiSettings.get('filters:pinnedByDefault');
-    }
-
-    if (!Array.isArray(filters)) {
-      filters = [filters];
-    }
-
-    return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters))
-      .then(function (mappedFilters) {
-        _.map(mappedFilters, mappedFilter => {
-          mappedFilter.$state = {
-            store: addToGlobalState ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE
-          };
-        });
-        const delayedChangeUpdate = filterStateManager.addFilters(mappedFilters, false);
+    return Promise.resolve(filterStateManager.addFilters(filters, addToGlobalState, false))
+      .then(function (delayedChangeUpdate) {
         updateAppState();
-        delayedChangeUpdate.callback && delayedChangeUpdate.callback();
+        delayedChangeUpdate.update && delayedChangeUpdate.update();
       });
   };
 
   queryFilter.setFilters = filters => {
-    return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters))
-      .then(mappedFilters => {
-        const delayedChangeUpdate = filterStateManager.setFilters(mappedFilters, false);
+    return Promise.resolve(filterStateManager.setFilters(filters, false))
+      .then(delayedChangeUpdate => {
         updateAppState();
-        delayedChangeUpdate.callback && delayedChangeUpdate.callback();
+        delayedChangeUpdate.update && delayedChangeUpdate.update();
       });
   };
 
@@ -106,7 +82,7 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
   queryFilter.removeFilter = function (matchFilter) {
     const delayedChangeUpdate = filterStateManager.removeFilter(matchFilter, false);
     updateAppState();
-    delayedChangeUpdate.callback && delayedChangeUpdate.callback();
+    delayedChangeUpdate.update && delayedChangeUpdate.update();
   };
 
   /**
@@ -155,7 +131,7 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
       filterStateUpdateSubscription$.unsubscribe();
     }
 
-    filterStateManager = new FilterManager(appFilters || [], globalFilters || []);
+    filterStateManager = new FilterManager(indexPatterns, appFilters || [], globalFilters || []);
     update$.next();
     fetch$.next();
 
