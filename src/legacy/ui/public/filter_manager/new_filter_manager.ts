@@ -32,6 +32,10 @@ import { onlyStateChanged } from './lib/only_state_changed';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 // @ts-ignore
 import { uniqFilters } from './lib/uniq_filters';
+// @ts-ignore
+import { extractTimeFilter } from './lib/extract_time_filter';
+// @ts-ignore
+import { changeTimeFilter } from './lib/change_time_filter';
 
 import { PartitionedFilters } from './partitioned_filters';
 
@@ -217,5 +221,11 @@ export class FilterManager {
 
   public removeAll() {
     this.setFilters([]);
+  }
+
+  public async addFiltersAndChangeTimeFilter(filters: Filter[]) {
+    const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
+    if (timeFilter) changeTimeFilter(timeFilter);
+    return this.addFilters(filters.filter(filter => filter !== timeFilter));
   }
 }

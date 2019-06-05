@@ -20,8 +20,6 @@
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { extractTimeFilter } from './lib/extract_time_filter';
-import { changeTimeFilter } from './lib/change_time_filter';
 import { FilterManager } from './new_filter_manager';
 import { FilterStateManager } from './filter_state_manager';
 
@@ -41,7 +39,6 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
 
     setupFilterManager(partitionedFilters);
   });
-
 
   filterStateManager.watchFilterState();
 
@@ -68,12 +65,6 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
     return filterManager ? filterManager.getGlobalFilters() : [];
   };
 
-  /**
-   * Adds new filters to the scope and state
-   * @param {object|array} filters Filter(s) to add
-   * @param {bool} global Whether the filter should be added to global state
-   * @returns {Promise} filter map promise
-   */
   queryFilter.addFilters = function (filters, addToGlobalState) {
     return filterManager.addFilters(filters, addToGlobalState, false)
       .then(function (delayedChangeUpdate) {
@@ -90,36 +81,22 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
       });
   };
 
-  /**
-   * Removes the filter from the proper state
-   * @param {object} matchFilter The filter to remove
-   */
   queryFilter.removeFilter = function (matchFilter) {
     const delayedChangeUpdate = filterManager.removeFilter(matchFilter, false);
     filterStateManager.updateAppState(filterManager.getPartitionedFilters());
     delayedChangeUpdate.update && delayedChangeUpdate.update();
   };
 
-  /**
-   * Removes all filters
-   */
   queryFilter.removeAll = function () {
     queryFilter.setFilters([]);
   };
 
-  /**
-   * Inverts the negate value on the filter
-   * @param {object} filter The filter to toggle
-   * @returns {object} updated filter
-   */
   queryFilter.invertFilter = function (filter) {
     return filterManager.invertFilter(filter);
   };
 
   queryFilter.addFiltersAndChangeTimeFilter = async filters => {
-    const timeFilter = await extractTimeFilter(indexPatterns, filters);
-    if (timeFilter) changeTimeFilter(timeFilter);
-    queryFilter.addFilters(filters.filter(filter => filter !== timeFilter));
+    this.filterManager.addFiltersAndChangeTimeFilter(filters);
   };
 
   return queryFilter;
