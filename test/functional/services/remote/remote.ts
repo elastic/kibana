@@ -25,9 +25,15 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
+  const retry: any = getService('retry');
   const browserType: Browsers = config.get('browser.type');
 
-  const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver(log, browserType);
+  const { driver, By, Key, until, LegacyActionSequence } = await retry.tryForTime(
+    300000,
+    async () => {
+      return initWebDriver(log, browserType);
+    }
+  );
   const caps = await driver.getCapabilities();
   const browserVersion = caps.get(browserType === Browsers.Chrome ? 'version' : 'browserVersion');
 
