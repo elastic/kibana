@@ -5,8 +5,9 @@
  */
 
 import { get } from 'lodash';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { ContextFunction, Render, Style } from '../types';
+import { Render, Style } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 export enum Shape {
@@ -31,7 +32,7 @@ interface Arguments {
   valueWeight: number;
 }
 
-export function progress(): ContextFunction<'progress', number, Arguments, Render<Arguments>> {
+export function progress(): ExpressionFunction<'progress', number, Arguments, Render<Arguments>> {
   const { help, args: argHelp } = getFunctionHelp().progress;
 
   return {
