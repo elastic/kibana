@@ -19,11 +19,16 @@
 
 // Creates a filter corresponding to a raw Elasticsearch query DSL object
 export function buildQueryFilter(query, index, alias) {
-  return {
+  const filter = {
     query: query,
     meta: {
       index,
-      alias,
     }
   };
+
+  if (alias) {
+    filter.meta.alias = alias;
+  }
+
+  return filter;
 }
