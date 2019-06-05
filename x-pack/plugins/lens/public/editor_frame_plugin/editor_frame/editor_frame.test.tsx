@@ -177,6 +177,47 @@ describe('editor_frame', () => {
         expect.objectContaining({ state: initialState })
       );
     });
+
+    it('should render the resulting expression using the expression renderer', async () => {
+      const instance = mount(
+        <EditorFrame
+          visualizationMap={{
+            testVis: { ...mockVisualization, toExpression: () => 'vis' },
+          }}
+          datasourceMap={{
+            testDatasource: {
+              ...mockDatasource,
+              toExpression: () => 'datasource',
+            },
+          }}
+          initialDatasourceId="testDatasource"
+          initialVisualizationId="testVis"
+          ExpressionRenderer={expressionRendererMock}
+        />
+      );
+
+      await waitForPromises();
+
+      instance.update();
+
+      expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {},
+      "function": "datasource",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {},
+      "function": "vis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`);
+    });
   });
 
   describe('state update', () => {

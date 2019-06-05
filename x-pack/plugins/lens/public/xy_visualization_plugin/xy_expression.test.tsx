@@ -100,7 +100,7 @@ describe('xy_expression', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
 
-      expect(xyChart.fn(data, args)).toEqual({
+      expect(xyChart.fn(data, args, {})).toEqual({
         type: 'render',
         as: 'lens_xy_chart_renderer',
         value: { data, args },
