@@ -7,6 +7,7 @@
 // custom edits or fixes for default kibana types which are incomplete
 
 import { IndexPattern } from 'ui/index_patterns';
+import { SearchSource } from 'ui/courier';
 
 // the type property is missing from the official IndexPattern interface
 export interface IndexPatternWithType extends IndexPattern {
@@ -14,3 +15,13 @@ export interface IndexPatternWithType extends IndexPattern {
 }
 
 export type IndexPatternTitle = string;
+
+export interface SavedSearch {
+  readonly id: string;
+  title: string;
+  searchSource: SearchSource;
+  description?: string;
+  columns: string[];
+  sort: string[];
+  destroy: () => void;
+}

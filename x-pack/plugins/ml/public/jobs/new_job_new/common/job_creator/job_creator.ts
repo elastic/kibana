@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
-import { IndexPatternWithType, IndexPatternTitle } from '../../../../../common/types/kibana';
+import {
+  IndexPatternWithType,
+  IndexPatternTitle,
+  SavedSearch,
+} from '../../../../../common/types/kibana';
 import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
 import { createEmptyJob, createEmptyDatafeed } from './util';
 import { mlJobService } from '../../../../services/job_service';
