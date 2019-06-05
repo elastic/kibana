@@ -110,14 +110,14 @@ export class JsonIndexFilePicker extends Component {
       });
       const parsedFileResult = await parseFile(
         file, onFileUpload, transformDetails
-      ).catch(e => {
+      ).catch(err => {
         this.setState({
           fileUploadError: (
             <FormattedMessage
               id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
               defaultMessage="Unable to parse file: {error}"
               values={{
-                error: e
+                error: err.message
               }}
             />
           )

@@ -71,7 +71,7 @@ async function fetchWithTimeout(url, payload) {
       console.error(
         i18n.translate('xpack.fileUpload.httpService.fetchError', {
           defaultMessage: 'Error performing fetch: {error}',
-          values: { error: err }
+          values: { error: err.message }
         }));
     });
 }
