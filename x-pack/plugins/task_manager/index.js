@@ -37,7 +37,11 @@ export function taskManager(kibana) {
     },
     init(server) {
       const config = server.config();
-      const taskManager = new TaskManager(this.kbnServer, server, config);
+      const services = {
+        log: msg =>  server.log(msg),
+        elasticsearch: server.plugins.elasticsearch,
+      };
+      const taskManager = new TaskManager(this.kbnServer, services, config);
       server.decorate('server', 'taskManager', taskManager);
     },
   });

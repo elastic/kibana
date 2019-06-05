@@ -5,7 +5,7 @@
  */
 
 import { fillPool } from './lib/fill_pool';
-import { Logger, TaskManagerLogger } from './lib/logger';
+import { Logger, TaskManagerLogger, LogFn } from './lib/logger';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
 import { ConcreteTaskInstance, RunContext, TaskInstance } from './task';
@@ -14,6 +14,11 @@ import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
 import { FetchOpts, FetchResult, RemoveResult, TaskStore } from './task_store';
+
+interface Services {
+  log: LogFn;
+  elasticsearch: any;
+}
 
 /*
  * The TaskManager is the public interface into the task manager system. This glues together
@@ -46,17 +51,17 @@ export class TaskManager {
    * enabling the task manipulation methods, and beginning the background polling
    * mechanism.
    */
-  public constructor(kbnServer: any, server: any, config: any) {
+  public constructor(kbnServer: any, services: Services, config: any) {
     this.maxWorkers = config.get('xpack.task_manager.max_workers');
     this.overrideNumWorkers = config.get('xpack.task_manager.override_num_workers');
     this.definitions = {};
 
-    const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
+    const logger = new TaskManagerLogger(services.log);
 
     /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
      * to initialize, and can change after startup */
     const store = new TaskStore({
-      callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
+      callCluster: services.elasticsearch.getCluster('admin').callWithInternalUser,
       index: config.get('xpack.task_manager.index'),
       maxAttempts: config.get('xpack.task_manager.max_attempts'),
       supportedTypes: Object.keys(this.definitions),
