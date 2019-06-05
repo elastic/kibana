@@ -45,7 +45,7 @@ export const parseProps = props => {
     relocationType: type === 'PRIMARY_RELOCATION' ? 'Primary Relocation' : normalizeString(type),
     stage: normalizeString(stage),
     startTime: formatDateTimeLocal(startTimeInMillis),
-    totalTime: formatMetric(totalTimeInMillis / 1000, '00:00:00'),
+    totalTime: formatMetric(Math.floor(totalTimeInMillis / 1000), '00:00:00'),
     isCopiedFromPrimary: !isPrimary || type === 'PRIMARY_RELOCATION',
     sourceName: source.name === undefined ? 'n/a' : source.name,
     targetName: target.name,
