@@ -17,7 +17,7 @@ export const sharedSchema = gql`
   }
 
   type CursorType {
-    value: String!
+    value: String
     tiebreaker: String
   }
 

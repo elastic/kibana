@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 export enum Operation {
@@ -22,7 +22,7 @@ interface Arguments {
 
 type Context = boolean | number | string | null;
 
-export function compare(): ContextFunction<'compare', Context, Arguments, boolean> {
+export function compare(): ExpressionFunction<'compare', Context, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().compare;
 
   return {

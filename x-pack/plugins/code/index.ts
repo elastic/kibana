@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from 'hapi';
 import JoiNamespace from 'joi';
 import moment from 'moment';
 import { resolve } from 'path';
@@ -24,9 +25,19 @@ export const code = (kibana: any) =>
         euiIconType: 'codeApp',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      injectDefaultVars(server: Server) {
+        const config = server.config();
+        return {
+          codeUiEnabled: config.get('xpack.code.ui.enabled'),
+        };
+      },
+      hacks: ['plugins/code/hacks/toggle_app_link_in_nav'],
     },
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
+        ui: Joi.object({
+          enabled: Joi.boolean().default(true),
+        }).default(),
         enabled: Joi.boolean().default(true),
         queueIndex: Joi.string().default('.code_internal-worker-queue'),
         // 1 hour by default.

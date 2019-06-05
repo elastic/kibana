@@ -202,19 +202,14 @@ exports[`Storyshots components/ColorManager interactive 1`] = `
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -225,19 +220,14 @@ exports[`Storyshots components/ColorManager interactive 1`] = `
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M7.5 0C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882zM3.5 7h8a.5.5 0 1 1 0 1h-8a.5.5 0 0 1 0-1z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
     </div>
   </div>
@@ -415,19 +405,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -438,19 +423,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M7.5 0C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882zM3.5 7h8a.5.5 0 1 1 0 1h-8a.5.5 0 0 1 0-1z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
     </div>
   </div>,
@@ -512,19 +492,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -535,19 +510,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M7.5 0C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882zM3.5 7h8a.5.5 0 1 1 0 1h-8a.5.5 0 0 1 0-1z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
     </div>
   </div>,
@@ -609,19 +579,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -632,19 +597,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M7.5 0C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882zM3.5 7h8a.5.5 0 1 1 0 1h-8a.5.5 0 0 1 0-1z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
     </div>
   </div>,

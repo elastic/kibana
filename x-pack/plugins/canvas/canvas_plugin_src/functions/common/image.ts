@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NullContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 // @ts-ignore untyped local
@@ -28,7 +28,7 @@ interface Return {
   dataurl: string;
 }
 
-export function image(): NullContextFunction<'image', Arguments, Return> {
+export function image(): ExpressionFunction<'image', null, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().image;
 
   return {

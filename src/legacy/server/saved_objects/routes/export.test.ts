@@ -17,16 +17,16 @@
  * under the License.
  */
 
+jest.mock('../export', () => ({
+  getSortedObjectsForExport: jest.fn(),
+}));
+
 import Hapi from 'hapi';
 import * as exportMock from '../export';
 import { createMockServer } from './_mock_server';
 import { createExportRoute } from './export';
 
 const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
-
-jest.mock('../export', () => ({
-  getSortedObjectsForExport: jest.fn(),
-}));
 
 describe('POST /api/saved_objects/_export', () => {
   let server: Hapi.Server;

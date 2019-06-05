@@ -107,6 +107,12 @@
         groupSlug: 'grunt',
       },
       {
+        packagePatterns: ['\\bangular\\b'],
+        groupName: 'angular related packages',
+        groupSlug: 'angular',
+        recreateClosed: false,
+      },
+      {
         packagePatterns: ['\\bd3\\b'],
         groupName: 'd3 related packages',
         groupSlug: 'd3',
