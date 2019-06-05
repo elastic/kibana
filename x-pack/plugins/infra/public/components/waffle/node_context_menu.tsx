@@ -56,14 +56,14 @@ export const NodeContextMenu = injectUICapabilities(
         [InfraNodeType.pod]: 'kubernetes.pod.uid',
       };
 
-      const nodeLogsUrl =
-        node.id && uiCapabilities.logs.show
-          ? getNodeLogsUrl({
-              nodeType,
-              nodeId: node.id,
-              time: timeRange.to,
-            })
-          : undefined;
+      const nodeLogsUrl = node.id
+        ? getNodeLogsUrl({
+            nodeType,
+            nodeId: node.id,
+            time: timeRange.to,
+          })
+        : undefined;
+
       const nodeDetailUrl = node.id
         ? getNodeDetailUrl({
             nodeType,
@@ -73,44 +73,41 @@ export const NodeContextMenu = injectUICapabilities(
           })
         : undefined;
 
-      const apmTracesUrl =
-        uiCapabilities.apm && uiCapabilities.apm.show
-          ? {
-              name: intl.formatMessage(
-                {
-                  id: 'xpack.infra.nodeContextMenu.viewAPMTraces',
-                  defaultMessage: 'View {nodeType} APM traces',
-                },
-                { nodeType }
-              ),
-              href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${
-                node.id
-              }~22`,
-              'data-test-subj': 'viewApmTracesContextMenuItem',
-            }
-          : undefined;
+      const apmTracesUrl = {
+        name: intl.formatMessage(
+          {
+            id: 'xpack.infra.nodeContextMenu.viewAPMTraces',
+            defaultMessage: 'View {nodeType} APM traces',
+          },
+          { nodeType }
+        ),
+        href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
+        'data-test-subj': 'viewApmTracesContextMenuItem',
+      };
 
+      const uptimeUrl = {
+        name: intl.formatMessage(
+          {
+            id: 'xpack.infra.nodeContextMenu.viewUptimeLink',
+            defaultMessage: 'View {nodeType} in Uptime',
+          },
+          { nodeType }
+        ),
+        href: createUptimeLink(options, nodeType, node),
+      };
+
+      const showLogsLink = node.id && uiCapabilities.logs.show && nodeLogsUrl;
+      const showNodeDetailLink = nodeDetailUrl != null;
+      const showAPMTraceLink = uiCapabilities.apm && uiCapabilities.apm.show;
       const showUptimeLink =
         [InfraNodeType.pod, InfraNodeType.container].includes(nodeType) || node.ip;
-      const uptimeUrl = showUptimeLink
-        ? {
-            name: intl.formatMessage(
-              {
-                id: 'xpack.infra.nodeContextMenu.viewUptimeLink',
-                defaultMessage: 'View {nodeType} in Uptime',
-              },
-              { nodeType }
-            ),
-            href: createUptimeLink(options, nodeType, node),
-          }
-        : undefined;
 
       const panels: EuiContextMenuPanelDescriptor[] = [
         {
           id: 0,
           title: '',
           items: [
-            ...(nodeLogsUrl
+            ...(showLogsLink
               ? [
                   {
                     name: intl.formatMessage({
@@ -122,7 +119,7 @@ export const NodeContextMenu = injectUICapabilities(
                   },
                 ]
               : []),
-            ...(nodeDetailUrl
+            ...(showNodeDetailLink
               ? [
                   {
                     name: intl.formatMessage({
@@ -133,8 +130,8 @@ export const NodeContextMenu = injectUICapabilities(
                   },
                 ]
               : []),
-            ...(apmTracesUrl ? [apmTracesUrl] : []),
-            ...(uptimeUrl ? [uptimeUrl] : []),
+            ...(showAPMTraceLink ? [apmTracesUrl] : []),
+            ...(showUptimeLink ? [uptimeUrl] : []),
           ],
         },
       ];
