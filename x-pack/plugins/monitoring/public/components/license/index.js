@@ -12,7 +12,6 @@ import {
   EuiCodeBlock,
   EuiPanel,
   EuiText,
-  EuiTextAlign,
   EuiLink
 } from '@elastic/eui';
 import { LicenseStatus, AddLicense } from 'plugins/xpack_main/components';
@@ -72,15 +71,13 @@ export function License(props) {
         <LicenseUpdateInfoForPrimary {...props} />
         <LicenseUpdateInfoForRemote {...props} />
         <EuiSpacer />
-        <EuiText size="m">
-          <EuiTextAlign textAlign="center">
-            <p>
-              For more license options please visit&nbsp;
-              <EuiLink href={licenseManagement}>
-                License Management
-              </EuiLink>
-            </p>
-          </EuiTextAlign>
+        <EuiText size="m" textAlign="center">
+          <p>
+            For more license options please visit&nbsp;
+            <EuiLink href={licenseManagement}>
+              License Management
+            </EuiLink>
+          </p>
         </EuiText>
       </EuiPageBody>
     </EuiPage>
