@@ -76,12 +76,17 @@ export class ScopedClusterClient {
   ) {
     if (this.headers !== undefined) {
       if (isObject(clientParams.headers)) {
-        const duplicates = intersection(
-          Object.keys(this.headers),
-          Object.keys(clientParams.headers)
-        );
-        if (duplicates.length > 0) {
-          throw Error(`Cannot override default headers [${duplicates.join(', ')}].`);
+        try {
+          const duplicates = intersection(
+            Object.keys(this.headers),
+            Object.keys(clientParams.headers)
+          );
+          if (duplicates.length > 0) {
+            throw Error(`Cannot override default headers [${duplicates.join(', ')}].`);
+          }
+        } catch (err) {
+          // eslint-disable-next-line
+          console.log('Error:', err);
         }
       }
 
