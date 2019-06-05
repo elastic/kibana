@@ -11,6 +11,7 @@ import { TaskInstance } from '../../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
+import { getNextRunAt } from './get_next_run_at';
 
 interface CreateTaskRunnerFunctionOptions {
   alertType: AlertType;
@@ -71,15 +72,11 @@ export function getCreateTaskRunnerFunction({
           alertInstance.resetFire();
         }
 
-        const nextRunAt = new Date(
-          // In the scenario the task took longer than the interval time to run,
-          // we'll catch up the next runAt to now.
-          Math.max(
-            new Date(taskInstance.state.scheduledRunAt).getTime() +
-              alertSavedObject.attributes.interval,
-            Date.now()
-          )
+        const nextRunAt = getNextRunAt(
+          new Date(taskInstance.state.scheduledRunAt),
+          alertSavedObject.attributes.interval
         );
+
         return {
           state: {
             alertTypeState,
