@@ -7,7 +7,6 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { pure } from 'recompose';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -29,7 +28,7 @@ export interface KpiHostsProps extends QueryTemplateProps {
   children: (args: KpiHostsArgs) => React.ReactNode;
 }
 
-export const KpiHostsQuery = pure<KpiHostsProps>(
+export const KpiHostsQuery = React.memo<KpiHostsProps>(
   ({ id = 'kpiHostsQuery', children, filterQuery, sourceId, startDate, endDate }) => (
     <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
       query={kpiHostsQuery}
