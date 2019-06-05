@@ -7,6 +7,7 @@
 import { xyVisualization } from './xy_visualization';
 import { Position } from '@elastic/charts';
 import { State } from './types';
+import { createMockDatasource } from '../editor_frame_plugin/mocks';
 
 function exampleState(): State {
   return {
@@ -33,7 +34,10 @@ function exampleState(): State {
 describe('IndexPattern Data Source', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
-      const initialState = xyVisualization.initialize();
+      const initialState = xyVisualization.initialize(
+        undefined,
+        createMockDatasource().publicAPIMock
+      );
 
       expect(initialState.x.accessor).toBeDefined();
       expect(initialState.y.accessors[0]).toBeDefined();
@@ -69,7 +73,9 @@ Object {
     });
 
     it('loads from persisted state', () => {
-      expect(xyVisualization.initialize(exampleState())).toEqual(exampleState());
+      expect(
+        xyVisualization.initialize(exampleState(), createMockDatasource().publicAPIMock)
+      ).toEqual(exampleState());
     });
   });
 

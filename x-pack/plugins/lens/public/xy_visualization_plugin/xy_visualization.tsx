@@ -7,7 +7,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
-import uuid from 'uuid';
 import { I18nProvider } from '@kbn/i18n/react';
 import { getSuggestions } from './xy_suggestions';
 import { XYConfigPanel } from './xy_config_panel';
@@ -17,20 +16,20 @@ import { State, PersistableState } from './types';
 export const xyVisualization: Visualization<State, PersistableState> = {
   getSuggestions,
 
-  initialize(state) {
+  initialize(state, datasource) {
     return (
       state || {
         seriesType: 'line',
         title: 'Empty XY Chart',
         legend: { isVisible: true, position: Position.Right },
         x: {
-          accessor: uuid.v4(),
+          accessor: datasource.generateColumnId(),
           position: Position.Bottom,
           showGridlines: false,
           title: 'X',
         },
         y: {
-          accessors: [uuid.v4()],
+          accessors: [datasource.generateColumnId()],
           position: Position.Left,
           showGridlines: false,
           title: 'Y',

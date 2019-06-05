@@ -153,7 +153,7 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface Visualization<T = unknown, P = unknown> {
   // For initializing from saved object
-  initialize: (state?: P, datasource: DatasourcePublicAPI) => T;
+  initialize: (state: P | undefined, datasource: DatasourcePublicAPI) => T;
 
   getPersistableState: (state: T) => P;
 

@@ -8,7 +8,7 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EditorFrame } from './editor_frame';
-import { Visualization, Datasource, DatasourcePublicAPI, DatasourceSuggestion } from '../../types';
+import { Visualization, DatasourcePublicAPI, DatasourceSuggestion } from '../../types';
 import { act } from 'react-dom/test-utils';
 import {
   createMockVisualization,
