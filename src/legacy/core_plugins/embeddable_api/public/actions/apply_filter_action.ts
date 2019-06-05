@@ -53,8 +53,12 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
     });
   }
 
-  public async isCompatible(context: ActionContext) {
-    return containerAcceptsFilterInput(context.embeddable.getRoot());
+  public async isCompatible(context: ActionContext<IEmbeddable, { filters: Filter[] }>) {
+    return Boolean(
+      containerAcceptsFilterInput(context.embeddable.getRoot()) &&
+        context.triggerContext &&
+        context.triggerContext.filters !== undefined
+    );
   }
 
   public execute({
