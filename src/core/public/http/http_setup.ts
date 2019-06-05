@@ -31,7 +31,7 @@ import { merge } from 'lodash';
 import { format } from 'url';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
-import { modifyUrl } from '../utils';
+import { modifyUrl } from '../../utils';
 import { HttpFetchOptions, HttpServiceBase, HttpInterceptor, HttpResponse } from './types';
 import { HttpInterceptController } from './http_intercept_controller';
 import { HttpFetchError } from './http_fetch_error';
