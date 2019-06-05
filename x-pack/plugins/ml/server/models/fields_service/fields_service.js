@@ -37,7 +37,7 @@ export function fieldsServiceProvider(callWithRequest) {
             const fieldInfo = fieldCapsResp.fields[fieldName];
             const typeKeys = Object.keys(fieldInfo);
             if (typeKeys.length > 0) {
-              const fieldType = Object.keys(fieldInfo)[0];
+              const fieldType = typeKeys[0];
               const isFieldAggregatable = fieldInfo[fieldType].aggregatable;
               if (isFieldAggregatable === true) {
                 aggregatableFields.push(fieldName);
