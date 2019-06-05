@@ -7024,7 +7024,6 @@
     "xpack.ml.timeSeriesExplorer.anomaliesTitle": "異常",
     "xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText": "、初めのジョブを自動選択します",
     "xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage": "リクエストされた‘{invalidIdsCount, plural, one {ジョブ} other {ジョブ}} {invalidIds} をこのダッシュボードで表示できません",
-    "xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription": "{openBrace}{cardinality} 特徴的な {fieldName} {cardinality, plural, one {} other { 値}}{closeBrace}",
     "xpack.ml.timeSeriesExplorer.createNewSingleMetricJobLinkText": "新規シングルメトリックジョブを作成",
     "xpack.ml.timeSeriesExplorer.dataNotChartableDescription": "選択された{entityCount, plural, one {エントリー} other {エントリー}}にはモデルプロットは収取されず、ソースデータはこのディテクター用にプロットできません",
     "xpack.ml.timeSeriesExplorer.deleteAnnotationModal.cancelButtonLabel": "キャンセル",
