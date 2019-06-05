@@ -267,7 +267,8 @@ export class WorkspaceHandler {
     if (uri && uri.startsWith(prefix)) {
       const locationPath = fs.realpathSync(decodeURIComponent(uri.substring(prefix.length)));
       const workspacePath = fs.realpathSync(decodeURIComponent(this.workspacePath));
-      if (locationPath.startsWith(workspacePath)) {
+      // On windows, it's possible one path has c:\ and another has C:\, so we need compare case-insensitive
+      if (locationPath.toLocaleLowerCase().startsWith(workspacePath.toLocaleLowerCase())) {
         let relativePath = path.relative(workspacePath, locationPath);
         if (path.sep === '\\') {
           relativePath = relativePath.replace(/\\/gi, '/');
