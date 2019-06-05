@@ -269,7 +269,6 @@ export default function ({ getService }) {
         });
 
         it('should return 200 if the job is already stopped', async () => {
-          await stopJob(job.config.id); // Stop the job
           await stopJob(job.config.id).expect(200);
         });
       });
