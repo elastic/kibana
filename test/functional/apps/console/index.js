@@ -31,7 +31,7 @@ export default function ({ getService, loadTestFile }) {
   });
 
   describe('visual console app', function () {
-    this.tags('ciGroup100');
+    this.tags('ciGroup13');
 
     before(async function () {
       await browser.setWindowSize(1300, 1100);

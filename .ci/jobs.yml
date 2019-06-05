@@ -13,7 +13,7 @@ JOB:
   - kibana-ciGroup10
   - kibana-ciGroup11
   - kibana-ciGroup12
-  - kibana-ciGroup100
+  - kibana-ciGroup13
   # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
   - x-pack-ciGroup1
   - x-pack-ciGroup2
@@ -25,7 +25,7 @@ JOB:
   - x-pack-ciGroup8
   - x-pack-ciGroup9
   - x-pack-ciGroup10
-  - x-pack-ciGroup100
+  - x-pack-ciGroup11
 
 # `~` is yaml for `null`
 exclude: ~
