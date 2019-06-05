@@ -5,11 +5,10 @@
  */
 
 import numeral from '@elastic/numeral';
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';
@@ -104,7 +103,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders a destination label', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -115,7 +114,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders destination.bytes', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -126,7 +125,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders percent destination.bytes', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
     const destinationBytes = asArrayIfExists(
       get(DESTINATION_BYTES_FIELD_NAME, getMockNetflowData())
     );
@@ -145,7 +144,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders destination.geo.continent_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -156,7 +155,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders destination.geo.country_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -167,7 +166,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders destination.geo.country_iso_code', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -178,7 +177,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders destination.geo.region_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -189,7 +188,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders destination.geo.city_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -200,7 +199,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders the destination ip and port, separated with a colon', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -211,7 +210,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders destination.packets', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -222,7 +221,7 @@ describe('SourceDestination', () => {
   });
 
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -236,7 +235,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders network.bytes', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -247,7 +246,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders network.community_id', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -258,7 +257,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders network.direction', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -269,7 +268,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders network.packets', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -280,7 +279,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders network.protocol', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -291,7 +290,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders a source label', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -302,7 +301,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders source.bytes', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -313,7 +312,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders percent source.bytes', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
     const sourceBytes = asArrayIfExists(get(SOURCE_BYTES_FIELD_NAME, getMockNetflowData()));
     const sumBytes = asArrayIfExists(get(NETWORK_BYTES_FIELD_NAME, getMockNetflowData()));
     let percent = '';
@@ -330,7 +329,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders source.geo.continent_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -341,7 +340,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders source.geo.country_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -352,7 +351,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders source.geo.country_iso_code', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -363,7 +362,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders source.geo.region_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -374,7 +373,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders source.geo.city_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -385,7 +384,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders the source ip and port, separated with a colon', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -396,7 +395,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders source.packets', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -407,7 +406,7 @@ describe('SourceDestination', () => {
   });
 
   test('it renders network.transport', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
       wrapper
