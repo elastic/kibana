@@ -2916,8 +2916,6 @@
     "tsvb.splits.everything.groupByLabel": "分组依据",
     "tsvb.splits.filter.groupByLabel": "分组依据",
     "tsvb.splits.filter.queryStringLabel": "查询字符串",
-    "tsvb.splits.filterItems.filterAriaLabel": "筛选",
-    "tsvb.splits.filterItems.filterPlaceholder": "筛选",
     "tsvb.splits.filterItems.labelAriaLabel": "标签",
     "tsvb.splits.filterItems.labelPlaceholder": "标签",
     "tsvb.splits.filters.groupByLabel": "分组依据",
