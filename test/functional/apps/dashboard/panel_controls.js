@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await browser.refresh();
+      await PageObjects.header.awaitKibanaChrome();
 
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like
