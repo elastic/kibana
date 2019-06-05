@@ -9,10 +9,10 @@ import { InternalCoreSetup } from 'src/core/server';
 import { getIndexPattern } from '../lib/index_pattern';
 
 const ROOT = '/api/apm/index_pattern';
-const defaultErrorHandler = (err: Error) => {
+const defaultErrorHandler = (err: Error & { status?: number }) => {
   // eslint-disable-next-line
   console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
+  throw Boom.boomify(err, { statusCode: err.status || 500 });
 };
 
 export function initIndexPatternApi(core: InternalCoreSetup) {
