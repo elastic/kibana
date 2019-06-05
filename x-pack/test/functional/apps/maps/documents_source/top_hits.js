@@ -9,8 +9,9 @@ import expect from '@kbn/expect';
 const VECTOR_SOURCE_ID = 'z52lq';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const PageObjects = getPageObjects(['maps', 'common']);
   const inspector = getService('inspector');
+  const find = getService('find');
 
   describe('top hits', () => {
     before(async () => {
@@ -21,8 +22,6 @@ export default function ({ getPageObjects, getService }) {
       await inspector.open();
       await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
-      expect(totalHits).to.equal('13190');
       const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
       expect(hits).to.equal('0'); // aggregation requests do not return any documents
     });
@@ -32,10 +31,41 @@ export default function ({ getPageObjects, getService }) {
       expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(10);
     });
 
-    it('should apply query to top hits request', async () => {
-      await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-      expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(2);
+    describe('configuration', async () => {
+      before(async () => {
+        await PageObjects.maps.openLayerPanel('logstash');
+        // Can not use testSubjects because data-test-subj is placed range input and number input
+        const sizeInput = await find.byCssSelector(`input[data-test-subj="layerPanelTopHitsSize"][type='number']`);
+        await sizeInput.click();
+        await sizeInput.clearValue();
+        await sizeInput.type('3');
+        await PageObjects.maps.waitForLayersToLoad();
+      });
+
+      after(async () => {
+        await PageObjects.maps.closeLayerPanel();
+      });
+
+      it('should update top hits when configation changes', async () => {
+        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+        expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(15);
+      });
+    });
+
+    describe('query', async () => {
+      before(async () => {
+        await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+      });
+
+      after(async () => {
+        await PageObjects.maps.setAndSubmitQuery('');
+      });
+
+      it('should apply query to top hits request', async () => {
+        await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+        expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(2);
+      });
     });
   });
 }

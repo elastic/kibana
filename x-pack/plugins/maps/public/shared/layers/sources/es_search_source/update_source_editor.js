@@ -161,6 +161,7 @@ export class UpdateSourceEditor extends Component {
             showLabels
             showInput
             showRange
+            data-test-subj="layerPanelTopHitsSize"
           />
         </EuiFormRow>
       );
