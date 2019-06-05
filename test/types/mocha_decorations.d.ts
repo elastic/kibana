@@ -31,7 +31,8 @@ type Tags =
   | 'ciGroup9'
   | 'ciGroup10'
   | 'ciGroup11'
-  | 'ciGroup12';
+  | 'ciGroup12'
+  | 'ciGroup13';
 
 // We need to use the namespace here to match the Mocha definition
 // eslint-disable-next-line @typescript-eslint/no-namespace
