@@ -18,18 +18,17 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import ReactMarkdown from 'react-markdown';
 
 const markdownRenderers = {
   root: Fragment,
 };
 
+interface MarkdownSimpleProps {
+  children: string;
+}
+
 // Render markdown string into JSX inside of a Fragment.
-export const MarkdownSimple = ({ children }) => (
+export const MarkdownSimple = ({ children }: MarkdownSimpleProps) => (
   <ReactMarkdown renderers={markdownRenderers}>{children}</ReactMarkdown>
 );
-
-MarkdownSimple.propTypes = {
-  children: PropTypes.string,
-};
