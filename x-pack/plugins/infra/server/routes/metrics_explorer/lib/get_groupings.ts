@@ -37,6 +37,13 @@ export const getGroupings = async (
       size: 0,
       query: {
         bool: {
+          should: [
+            ...options.metrics
+              .filter(m => m.field)
+              .map(m => ({
+                exists: { field: m.field },
+              })),
+          ],
           filter: [
             {
               range: {
@@ -47,11 +54,6 @@ export const getGroupings = async (
                 },
               },
             },
-            ...options.metrics
-              .filter(m => m.field)
-              .map(m => ({
-                exists: { field: m.field },
-              })),
           ] as object[],
         },
       },
