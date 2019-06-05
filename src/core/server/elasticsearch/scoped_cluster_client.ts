@@ -74,24 +74,16 @@ export class ScopedClusterClient {
     clientParams: Record<string, unknown> = {},
     options?: CallAPIOptions
   ) {
-    if (this.headers !== undefined) {
-      if (isObject(clientParams.headers)) {
-        try {
-          const duplicates = intersection(
-            Object.keys(this.headers),
-            Object.keys(clientParams.headers)
-          );
-          if (duplicates.length > 0) {
-            throw Error(`Cannot override default headers [${duplicates.join(', ')}].`);
+    const defaultHeaders = this.headers;
+    if (defaultHeaders !== undefined) {
+      const customHeaders: any = clientParams.headers;
+      if (isObject(customHeaders)) {
+        const duplicates = intersection(Object.keys(defaultHeaders), Object.keys(customHeaders));
+        duplicates.forEach(duplicate => {
+          if (defaultHeaders[duplicate] !== (customHeaders as any)[duplicate]) {
+            throw Error(`Cannot override default header ${duplicate}.`);
           }
-        } catch (err) {
-          // eslint-disable-next-line
-          console.log('Got Error:', err);
-          // eslint-disable-next-line
-          console.log('this.headers:', this.headers);
-          // eslint-disable-next-line
-          console.log('clientParams:', clientParams);
-        }
+        });
       }
 
       clientParams.headers = Object.assign({}, clientParams.headers, this.headers);
