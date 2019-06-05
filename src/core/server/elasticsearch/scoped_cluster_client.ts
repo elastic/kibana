@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { intersection } from 'lodash';
+import { intersection, isObject } from 'lodash';
 import { Headers } from '../http/router';
 import { CallAPIOptions } from './cluster_client';
-import { isObject } from '../../utils';
 
 /** @public */
 export { Headers };

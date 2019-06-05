@@ -148,6 +148,7 @@ describe('#callAsCurrentUser', () => {
 
   test('callAsCurrentUser allows passing additional headers', async () => {
     const mockResponse = { data: 'response' };
+    scopedAPICaller.mockClear();
     scopedAPICaller.mockResolvedValue(mockResponse);
     await expect(
       clusterClient.callAsCurrentUser('security.authenticate', {
@@ -161,14 +162,14 @@ describe('#callAsCurrentUser', () => {
       { some: 'some', headers: { one: '1', additionalHeader: 'Oh Yes!' } },
       undefined
     );
-    scopedAPICaller.mockClear();
   });
 
   test('callAsCurrentUser cannot override default headers', async () => {
-    const mockErrorResponse = new Error('Cannot override default headers [one].');
+    const expectedErrorResponse = new Error('Cannot override default header one.');
+    scopedAPICaller.mockClear();
     const withHeaderOverride = async () =>
       clusterClient.callAsCurrentUser('security.authenticate', { headers: { one: 'OVERRIDE' } });
-    await expect(withHeaderOverride()).rejects.toThrowError(mockErrorResponse);
+    await expect(withHeaderOverride()).rejects.toThrowError(expectedErrorResponse);
     expect(scopedAPICaller).toHaveBeenCalledTimes(0);
     scopedAPICaller.mockClear();
   });
