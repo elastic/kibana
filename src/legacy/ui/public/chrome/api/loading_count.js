@@ -18,10 +18,9 @@
  */
 
 import * as Rx from 'rxjs';
-import { onSetup } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 
-let newPlatformHttp;
-onSetup(({ core }) => newPlatformHttp = core.http);
+const newPlatformHttp = npSetup.core.http;
 
 export function initLoadingCountApi(chrome) {
   const manualCount$ = new Rx.BehaviorSubject(0);

@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import { onSetup } from 'ui/new_platform';
-import { FatalErrorsSetup } from '../../../../core/public';
+import { npSetup } from 'ui/new_platform';
 import {
   AngularHttpError,
   formatAngularHttpError,
   isAngularHttpError,
 } from './lib/format_angular_http_error';
 
-let newPlatformFatalErrors: FatalErrorsSetup;
-onSetup(({ core }) => (newPlatformFatalErrors = core.fatalErrors));
+const newPlatformFatalErrors = npSetup.core.fatalErrors;
 
 export function addFatalErrorCallback(callback: () => void) {
   newPlatformFatalErrors.get$().subscribe(() => {

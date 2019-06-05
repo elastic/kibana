@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import { onSetup } from 'ui/new_platform';
-import { ChromeBreadcrumb, ChromeSetup } from '../../../../../core/public';
+import { npSetup } from 'ui/new_platform';
+import { ChromeBreadcrumb } from '../../../../../core/public';
 export type Breadcrumb = ChromeBreadcrumb;
 
 export type BreadcrumbsApi = ReturnType<typeof createBreadcrumbsApi>['breadcrumbs'];
 
-let newPlatformChrome: ChromeSetup;
-onSetup(({ core }) => (newPlatformChrome = core.chrome));
+const newPlatformChrome = npSetup.core.chrome;
 
 function createBreadcrumbsApi(chrome: { [key: string]: any }) {
   let currentBreadcrumbs: Breadcrumb[] = [];

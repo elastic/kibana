@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { onSetup } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 
-let newPlatformUiSettingsClient;
-onSetup(({ core }) => (newPlatformUiSettingsClient = core.uiSettings));
+const newPlatformUiSettingsClient = npSetup.core.uiSettings;
 
 export function initUiSettingsApi(chrome) {
   chrome.getUiSettingsClient = function () {

@@ -18,14 +18,13 @@
  */
 
 import { Chrome } from 'ui/chrome';
-import { onSetup } from 'ui/new_platform';
-import { ChromeBadge, ChromeSetup } from '../../../../../core/public';
+import { npSetup } from 'ui/new_platform';
+import { ChromeBadge } from '../../../../../core/public';
 export type Badge = ChromeBadge;
 
 export type BadgeApi = ReturnType<typeof createBadgeApi>['badge'];
 
-let newPlatformChrome: ChromeSetup;
-onSetup(({ core }) => (newPlatformChrome = core.chrome));
+const newPlatformChrome = npSetup.core.chrome;
 
 function createBadgeApi() {
   return {

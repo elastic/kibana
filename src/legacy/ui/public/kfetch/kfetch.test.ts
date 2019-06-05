@@ -19,19 +19,14 @@
 
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
+import './kfetch.test.mocks';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { __newPlatformSetup__ } from 'ui/new_platform';
 import { addInterceptor, kfetch, KFetchOptions } from '.';
 import { Interceptor, resetInterceptors, withDefaultOptions } from './kfetch';
 import { KFetchError } from './kfetch_error';
-import { setup } from '../../../../test_utils/public/http_test_setup';
 
 describe('kfetch', () => {
-  beforeAll(() => {
-    __newPlatformSetup__(setup() as any);
-  });
-
   afterEach(() => {
     fetchMock.restore();
     resetInterceptors();

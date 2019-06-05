@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import { onSetup } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 import { ToastNotifications } from './toast_notifications';
 
-export let toastNotifications: ToastNotifications;
-onSetup(({ core }) => {
-  toastNotifications = new ToastNotifications(core.notifications.toasts);
-});
+export const toastNotifications = new ToastNotifications(npSetup.core.notifications.toasts);

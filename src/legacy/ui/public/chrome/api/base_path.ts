@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { onSetup } from 'ui/new_platform';
-import { HttpSetup } from '../../../../../core/public';
+import { npSetup } from 'ui/new_platform';
 
-let newPlatformHttp: HttpSetup;
-onSetup(({ core }) => (newPlatformHttp = core.http));
+const newPlatformHttp = npSetup.core.http;
 
 export function initChromeBasePathApi(chrome: { [key: string]: any }) {
   chrome.getBasePath = newPlatformHttp.getBasePath.bind(newPlatformHttp);

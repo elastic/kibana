@@ -57,7 +57,7 @@ export class LegacyPlatformService {
   public setup({ core, plugins }: SetupDeps) {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
-    require('ui/new_platform').__newPlatformSetup__(core, plugins);
+    require('ui/new_platform').__setup__(core, plugins);
 
     core.injectedMetadata.getLegacyMetadata().nav.forEach((navLink: any) =>
       core.application.registerLegacyApp({
@@ -76,7 +76,7 @@ export class LegacyPlatformService {
   public start({ core, targetDomElement, plugins }: StartDeps) {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
-    require('ui/new_platform').__newPlatformStart__(core, plugins);
+    require('ui/new_platform').__start__(core, plugins);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first

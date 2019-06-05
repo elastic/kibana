@@ -21,15 +21,18 @@ import { render } from 'enzyme';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { __newPlatformSetup__ } from 'ui/new_platform';
+jest.mock('ui/new_platform', () => ({
+  npSetup: {
+    core: {
+      i18n: { Context: ({ children }: any) => <div>Context: {children}</div> },
+    },
+  },
+}));
+
 import { wrapInI18nContext } from '.';
 
 describe('ui/i18n', () => {
   test('renders children and forwards properties', () => {
-    __newPlatformSetup__({
-      i18n: { Context: ({ children }: any) => <div>Context: {children}</div> },
-    } as any);
-
     const mockPropTypes = {
       stringProp: PropTypes.string.isRequired,
       numberProp: PropTypes.number,

@@ -17,13 +17,9 @@
  * under the License.
  */
 
-import { onSetup } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 
-export let metadata: {
+export const metadata: {
   branch: string;
   version: string;
-};
-
-onSetup(({ core }) => {
-  metadata = core.injectedMetadata.getLegacyMetadata();
-});
+} = npSetup.core.injectedMetadata.getLegacyMetadata();

@@ -17,21 +17,13 @@
  * under the License.
  */
 
-import { onStart } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { Capabilities as UICapabilities } from '../../../../core/public';
 
 export { UICapabilities };
-let uiCapabilities: UICapabilities;
-onStart(({ core }) => (uiCapabilities = core.application.capabilities));
 
 export const capabilities = {
   get() {
-    if (!uiCapabilities) {
-      throw new Error(
-        `UI Capabilities are only available in the legacy platform once Angular has booted.`
-      );
-    }
-
-    return uiCapabilities;
+    return npStart.core.application.capabilities;
   },
 };

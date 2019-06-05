@@ -18,11 +18,9 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { onSetup } from 'ui/new_platform';
-import { InternalCoreSetup } from '../../../../../core/public';
+import { npSetup } from 'ui/new_platform';
 
-let newPlatformInjectedVars: InternalCoreSetup['injectedMetadata'];
-onSetup(({ core }) => (newPlatformInjectedVars = core.injectedMetadata));
+const newPlatformInjectedVars = npSetup.core.injectedMetadata;
 
 export function initChromeInjectedVarsApi(chrome: { [key: string]: any }) {
   chrome.getInjected = (name?: string, defaultValue?: any) =>

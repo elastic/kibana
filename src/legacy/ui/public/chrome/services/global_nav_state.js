@@ -18,11 +18,10 @@
  */
 
 import { distinctUntilChanged } from 'rxjs/operators';
-import { onSetup } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 import { uiModules } from '../../modules';
 
-let newPlatformChrome;
-onSetup(({ core }) => (newPlatformChrome = core.chrome));
+const newPlatformChrome = npSetup.core.chrome;
 
 uiModules.get('kibana')
   .service('globalNavState', ($rootScope) => {

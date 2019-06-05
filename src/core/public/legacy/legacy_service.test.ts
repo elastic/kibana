@@ -26,8 +26,8 @@ const mockUiNewPlatformStart = jest.fn();
 jest.mock('ui/new_platform', () => {
   mockLoadOrder.push('ui/new_platform');
   return {
-    __newPlatformSetup__: mockUiNewPlatformSetup,
-    __newPlatformStart__: mockUiNewPlatformStart,
+    __setup__: mockUiNewPlatformSetup,
+    __start__: mockUiNewPlatformStart,
   };
 });
 

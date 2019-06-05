@@ -17,27 +17,21 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { ToastsSetup } from './toasts_service';
+import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
 
-const createToastsApiMock = () => {
-  const api: jest.Mocked<PublicMethodsOf<ToastsSetup>> = {
-    get$: jest.fn(() => new Observable()),
-    add: jest.fn(),
-    remove: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addDanger: jest.fn(),
-    addError: jest.fn(),
-  };
-  return api;
-};
+jest.doMock('ui/new_platform', () => ({
+  npSetup: {
+    core: {
+      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+      notifications: notificationServiceMock.createSetupContract(),
+    }
+  },
+}));
 
-const createSetupContractMock = createToastsApiMock;
-
-const createStartContractMock = createToastsApiMock;
-
-export const toastsServiceMock = {
-  createSetupContract: createSetupContractMock,
-  createStartContract: createStartContractMock,
-};
+// Make importing the ui/notify module work in jest
+jest.doMock('ui/metadata', () => ({
+  metadata: {
+    branch: 'my-metadata-branch',
+    version: 'my-metadata-version'
+  }
+}));
