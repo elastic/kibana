@@ -32,8 +32,8 @@ import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
 
 interface PartitionedFilters {
-  globalFilters: any[];
-  appFilters: any[];
+  globalFilters: Filter[];
+  appFilters: Filter[];
 }
 
 interface DelayedChangeNotification {
@@ -41,11 +41,11 @@ interface DelayedChangeNotification {
 }
 
 export class FilterManager {
-  filters: any[] = [];
+  filters: Filter[] = [];
   updated$: Subject<any> = new Subject();
 
-  constructor(filters: any[]);
-  constructor(filters: any[], globalFilters?: []) {
+  constructor(filters: Filter[]);
+  constructor(filters: Filter[], globalFilters?: Filter[]) {
     if (globalFilters) {
       filters = this.mergeFilters(filters, globalFilters);
     }
@@ -63,22 +63,22 @@ export class FilterManager {
     };
   }
 
-  private filtersUpdated(newFilters: any[]): boolean {
+  private filtersUpdated(newFilters: Filter[]): boolean {
     return !_.isEqual(this.filters, newFilters);
   }
 
-  private shouldFetch(newFilters: any[]) {
+  private shouldFetch(newFilters: Filter[]) {
     return !onlyDisabled(newFilters, this.filters) && !onlyStateChanged(newFilters, this.filters);
   }
 
-  private mergeFilters(newFilters: any[], oldFilters: any[]): any[] {
+  private mergeFilters(newFilters: Filter[], oldFilters: Filter[]): Filter[] {
     // Order matters!
     // uniqFilters will throw out duplicates from the back of the array,
     // but we want newer filters to overwrite previously created filters.
     return uniqFilters(newFilters.concat(oldFilters));
   }
 
-  private emitUpdateIfChanged(newFilters: any[]) {
+  private emitUpdateIfChanged(newFilters: Filter[]) {
     // This is an optimization
     const shouldFetch = this.shouldFetch(newFilters);
     if (this.filtersUpdated(newFilters)) {
@@ -106,7 +106,7 @@ export class FilterManager {
     return this.updated$.asObservable();
   }
 
-  public addFilters(filters: any, emitChanged?: boolean): DelayedChangeNotification {
+  public addFilters(filters: Filter[], emitChanged?: boolean): DelayedChangeNotification {
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
@@ -158,11 +158,7 @@ export class FilterManager {
     return delayChangeNotification;
   }
 
-  public updateFilter(filter: any): void {
-    return;
-  }
-
-  public removeFilter(filter: any, emitChanged?: boolean): DelayedChangeNotification {
+  public removeFilter(filter: Filter, emitChanged?: boolean): DelayedChangeNotification {
     let delayChangeNotification: DelayedChangeNotification = {
       callback: undefined,
     };
@@ -192,7 +188,7 @@ export class FilterManager {
     return delayChangeNotification;
   }
 
-  public invertFilter(filter: any) {
+  public invertFilter(filter: Filter) {
     return toggleFilterNegated(filter);
   }
 
