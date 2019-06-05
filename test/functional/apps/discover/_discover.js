@@ -438,6 +438,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
+        await PageObjects.header.awaitKibanaChrome();
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         const maxTicks = [
