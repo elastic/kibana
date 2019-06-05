@@ -132,7 +132,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           closeContextMenu={this.state.closeContextMenu}
           title={title}
         />
-        <div className="panel-content" ref={this.embeddableRoot} />
+        <div className="embPanel__content" ref={this.embeddableRoot} />
       </EuiPanel>
     );
   }
