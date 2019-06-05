@@ -5,6 +5,7 @@
  */
 
 import { resolve } from 'path';
+import { get, has } from 'lodash';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
@@ -83,6 +84,17 @@ export const security = (kibana) => new kibana.Plugin({
     return [
       unused('authorization.legacyFallback.enabled'),
       rename('authProviders', 'authc.providers'),
+      (settings, log) => {
+        const hasSAMLProvider = get(settings, 'authc.providers').includes('saml');
+        if (hasSAMLProvider && !get(settings, 'authc.saml.realm')) {
+          log('Config key "authc.saml.realm" will become mandatory in the next major version.');
+        }
+
+        if (has(settings, 'public')) {
+          log('Config key "public" is deprecated and will be removed in the next major version. ' +
+            'Consider specifying "authc.saml.realm" instead.');
+        }
+      }
     ];
   },
 

@@ -58,37 +58,19 @@ Set the configuration values in `kibana.yml` as follows:
 xpack.security.authc.providers: [saml]
 --------------------------------------------------------------------------------
 
-. The Identify Provider sends authentication requests to the `Assertion Consumer Service` endpoint that {kib} exposes through a "non-safe" `POST` HTTP method. This does not include CSRF protection HTTP headers specific to {kib}. You must disable the CSRF check for this endpoint.
-+
-[source,yaml]
---------------------------------------------------------------------------------
-server.xsrf.whitelist: [/api/security/v1/saml]
---------------------------------------------------------------------------------
-
-. Sometimes {kib} is behind a reverse proxy so that the user-facing {kib} protocol, hostname, and port are different than what is known to {kib}. If this is your case, update the following settings:
-+
-[source,yaml]
---------------------------------------------------------------------------------
-xpack.security.public:
-  protocol: https
-  hostname: kibana.proxy.com
-  port: 8080
---------------------------------------------------------------------------------
---
-
-IMPORTANT: The {kib} user-facing origin should be the same in {kib}, {es}, and the Identity Provider SAML configuration.
-
-. {es} can potentially have multiple different SAML realms configured at the same time, and the one that will be used by a particular {kib}
-instance is determined by the `Assertion Consumer Service` URL that {kib} constructs and sends to {es} during SAML handshake. But there are
-cases when it'd make more sense to change this behaviour and force {kib} to use a specific SAML realm by defining the following setting:
+. {kib} needs to specify which SAML realm in {es} should be used:
 +
 [source,yaml]
 --------------------------------------------------------------------------------
 xpack.security.authc.saml.realm: realm-name
 --------------------------------------------------------------------------------
 
-Relying on specific realm name can also help when `xpack.security.public.port` is set to the value that is considered as default for
-a particular protocol and hence omitted by some systems (e.g. `443`) that can lead to various misconfiguration issues.
+. The Identify Provider sends authentication requests to the `Assertion Consumer Service` endpoint that {kib} exposes through a "non-safe" `POST` HTTP method. This does not include CSRF protection HTTP headers specific to {kib}. You must disable the CSRF check for this endpoint.
++
+[source,yaml]
+--------------------------------------------------------------------------------
+server.xsrf.whitelist: [/api/security/v1/saml]
+--------------------------------------------------------------------------------
 
 Users will be able to log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. Users who aren't authenticated are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session—users who logged in to a different application using the same Identity Provider in the same browser are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force user to re-authenticate. This login scenario is called _Service Provider initiated login_.
 
@@ -115,7 +97,7 @@ should also be configured in {es}, see {xpack-ref}/saml-guide.html[Configuring O
 
 Set the configuration values in `kibana.yml` as follows:
 
-. Enable the SAML authentication:
+. Enable the OpenID Connect authentication:
 +
 [source,yaml]
 --------------------------------------------------------------------------------
