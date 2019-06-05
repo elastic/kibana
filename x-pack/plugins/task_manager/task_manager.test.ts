@@ -28,7 +28,7 @@ describe('TaskManager', () => {
 
   test('disallows schedule before init', async () => {
     const { opts } = testOpts();
-    const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
+    const client = new TaskManager(opts.services, opts.config, opts.afterInit);
     const task = {
       taskType: 'foo',
       params: {},
@@ -39,19 +39,19 @@ describe('TaskManager', () => {
 
   test('disallows fetch before init', async () => {
     const { opts } = testOpts();
-    const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
+    const client = new TaskManager(opts.services, opts.config, opts.afterInit);
     await expect(client.fetch({})).rejects.toThrow(/^NotInitialized: .*/i);
   });
 
   test('disallows remove before init', async () => {
     const { opts } = testOpts();
-    const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
+    const client = new TaskManager(opts.services, opts.config, opts.afterInit);
     await expect(client.remove('23')).rejects.toThrow(/^NotInitialized: .*/i);
   });
 
   test('allows middleware registration before init', () => {
     const { opts } = testOpts();
-    const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
+    const client = new TaskManager(opts.services, opts.config, opts.afterInit);
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
@@ -61,7 +61,7 @@ describe('TaskManager', () => {
 
   test('disallows middleware registration after init', async () => {
     const { $test, opts } = testOpts();
-    const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
+    const client = new TaskManager(opts.services, opts.config, opts.afterInit);
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
@@ -87,28 +87,18 @@ describe('TaskManager', () => {
       config: {
         get: (path: string) => _.get(defaultConfig, path),
       },
-      kbnServer: {
-        uiExports: {
-          taskDefinitions: {},
-        },
-        afterPluginsInit(callback: any) {
-          $test.afterPluginsInit = callback;
-        },
+      afterInit: (callback: any) => {
+        $test.afterPluginsInit = callback;
       },
-      server: {
+      services: {
         log: sinon.spy(),
-        decorate(...args: any[]) {
-          _.set(opts, args.slice(0, -1), _.last(args));
-        },
-        plugins: {
-          elasticsearch: {
-            getCluster() {
-              return { callWithInternalUser: callCluster };
-            },
-            status: {
-              on(eventName: string, callback: () => any) {
-                $test.events[eventName] = callback;
-              },
+        elasticsearch: {
+          getCluster() {
+            return { callWithInternalUser: callCluster };
+          },
+          status: {
+            on(eventName: string, callback: () => any) {
+              $test.events[eventName] = callback;
             },
           },
         },

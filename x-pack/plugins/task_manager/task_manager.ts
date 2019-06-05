@@ -51,7 +51,7 @@ export class TaskManager {
    * enabling the task manipulation methods, and beginning the background polling
    * mechanism.
    */
-  public constructor(kbnServer: any, services: Services, config: any) {
+  public constructor(services: Services, config: any, afterInit: any) {
     this.maxWorkers = config.get('xpack.task_manager.max_workers');
     this.overrideNumWorkers = config.get('xpack.task_manager.override_num_workers');
     this.definitions = {};
@@ -75,7 +75,6 @@ export class TaskManager {
     const createRunner = (instance: ConcreteTaskInstance) =>
       new TaskManagerRunner({
         logger,
-        kbnServer,
         instance,
         store,
         definitions: this.definitions,
@@ -94,7 +93,7 @@ export class TaskManager {
     this.store = store;
     this.poller = poller;
 
-    kbnServer.afterPluginsInit(async () => {
+    afterInit(async () => {
       store.addSupportedTypes(Object.keys(this.definitions));
       const startPoller = () => {
         return poller
