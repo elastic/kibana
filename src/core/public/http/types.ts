@@ -22,13 +22,12 @@ import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 import { HttpInterceptController } from './http_intercept_controller';
 import { HttpFetchError } from './http_fetch_error';
+import { BasePath } from './base_path_service';
 
 /** @public */
 export interface HttpServiceBase {
   stop(): void;
-  getBasePath(): string;
-  prependBasePath(path: string): string;
-  removeBasePath(path: string): string;
+  basePath: BasePath;
   intercept(interceptor: HttpInterceptor): () => void;
   removeAllInterceptors(): void;
   fetch: HttpHandler;
