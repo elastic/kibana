@@ -21,11 +21,14 @@ import Hapi from 'hapi';
 import * as exportMock from '../export';
 import { createMockServer } from './_mock_server';
 import { createExportRoute } from './export';
+import { objectsToNdJson as origObjectsToNdJson } from '../export/objects_to_ndjson';
 
 const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
+const objectsToNdJson = exportMock.objectsToNdJson as jest.Mock;
 
 jest.mock('../export', () => ({
   getSortedObjectsForExport: jest.fn(),
+  objectsToNdJson: jest.fn(),
 }));
 
 describe('POST /api/saved_objects/_export', () => {
@@ -88,10 +91,10 @@ describe('POST /api/saved_objects/_export', () => {
         ],
       },
     ]);
+    objectsToNdJson.mockImplementationOnce(origObjectsToNdJson);
 
     const { payload, statusCode, headers } = await server.inject(request);
     const objects = payload.split('\n').map(row => JSON.parse(row));
-
     expect(statusCode).toBe(200);
     expect(headers).toHaveProperty('content-disposition', 'attachment; filename="export.ndjson"');
     expect(headers).toHaveProperty('content-type', 'application/ndjson');

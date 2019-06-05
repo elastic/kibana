@@ -471,6 +471,9 @@ Object {
           "type": "index-pattern",
         },
       ],
+      Object {
+        "namespace": undefined,
+      },
     ],
   ],
   "results": Array [
