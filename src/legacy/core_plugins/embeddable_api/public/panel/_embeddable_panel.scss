@@ -1,42 +1,30 @@
-
 .embPanel {
   z-index: auto;
   flex: 1;
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: $euiSizeL + 2px; // + 2px to account for border
   position: relative;
 
   // SASSTODO: The inheritence factor stemming from embeddables makes this class hard to change
-  .panel-content {
+  .embPanel__content {
     display: flex;
     flex: 1 1 100%;
     z-index: 1;
-    min-height: 0; // Absolute must for Firefox to scroll contents 
+    min-height: 0; // Absolute must for Firefox to scroll contents
   }
-
 
   // SASSTODO: Pretty sure this doesn't do anything since the flex-basis 100%,
   // but it MIGHT be fixing IE
-  .panel-content--fullWidth {
+  .embPanel__content--fullWidth {
     width: 100%;
   }
 
-  .panel-content-isLoading {
+  .embPanel__content-isLoading {
     // completely center the loading indicator
     justify-content: center;
     align-items: center;
-  }
-}
-
-.embPanel--editing {
-  border-style: dashed;
-  border-color: $euiColorMediumShade;
-  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
-
-  &:hover,
-  &:focus {
-    @include euiSlightShadowHover;
   }
 }
 
@@ -60,17 +48,6 @@
   }
 }
 
-.embPanel--editing {
-  .embPanel__dragger {
-    transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
-  }
-
-  .embPanel__dragger:hover {
-    background-color: $embEditingModeHoverColor;
-    cursor: move;
-  }
-}
-
 .embPanel__dragger:not(.embPanel__title) {
   flex-grow: 1;
 }
@@ -91,7 +68,7 @@
   * 3. Always show in editing mode
   */
 
-.embPanel_optionsMenuButton {
+.embPanel__optionsMenuButton {
   background-color: transparentize($euiColorDarkestShade, .9);
   border-bottom-right-radius: 0;
   border-top-left-radius: 0;
@@ -102,7 +79,7 @@
 }
 
 .embPanel
-.embPanel_optionsMenuButton {
+.embPanel__optionsMenuButton {
   opacity: 0; /* 1 */
 
   &:focus {
@@ -110,15 +87,35 @@
   }
 }
 
-.embPanel_optionsMenuPopover[class*="-isOpen"],
+.embPanel__optionsMenuPopover[class*="-isOpen"],
 .embPanel:hover  {
-  .embPanel_optionsMenuButton {
+  .embPanel__optionsMenuButton {
     opacity: 1;
   }
 }
 
+// EDITING MODE
+
 .embPanel--editing {
-  .embPanel_optionsMenuButton {
+  border-style: dashed;
+  border-color: $euiColorMediumShade;
+  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+
+  &:hover,
+  &:focus {
+    @include euiSlightShadowHover;
+  }
+
+  .embPanel__dragger {
+    transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
+
+    &:hover {
+      background-color: $embEditingModeHoverColor;
+      cursor: move;
+    }
+  }
+
+  .embPanel__optionsMenuButton {
     opacity: 1; /* 3 */
   }
 }

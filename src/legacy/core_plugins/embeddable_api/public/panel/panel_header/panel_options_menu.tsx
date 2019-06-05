@@ -82,7 +82,7 @@ class PanelOptionsMenuUi extends React.Component<PanelOptionsMenuUiProps, State>
       <EuiButtonIcon
         iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
         color="text"
-        className="embPanel_optionsMenuButton"
+        className="embPanel__optionsMenuButton"
         aria-label={intl.formatMessage({
           id: 'kbn.dashboard.panel.optionsMenu.panelOptionsButtonAriaLabel',
           defaultMessage: 'Panel options',
@@ -95,7 +95,7 @@ class PanelOptionsMenuUi extends React.Component<PanelOptionsMenuUiProps, State>
     return (
       <EuiPopover
         id="dashboardPanelContextMenu"
-        className="embPanel_optionsMenuPopover"
+        className="embPanel__optionsMenuPopover"
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}

@@ -82,8 +82,8 @@ class EmbeddableChildPanelUi extends React.Component<EmbeddableChildPanelUiProps
   }
 
   public render() {
-    const classes = classNames('embPanel panel-content', {
-      'panel-content-isLoading': this.state.loading,
+    const classes = classNames('embPanel embPanel__content', {
+      'embPanel__content-isLoading': this.state.loading,
     });
 
     return (
