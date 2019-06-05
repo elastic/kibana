@@ -29,7 +29,6 @@ export function sort(): ExpressionFunction<'sort', Datatable, Arguments, Datatab
         types: ['string'],
         aliases: ['_', 'column'],
         multi: false, // TODO: No reason you couldn't.
-        required: true,
         help: argHelp.by,
       },
       reverse: {

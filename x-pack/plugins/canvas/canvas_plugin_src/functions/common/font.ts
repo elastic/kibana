@@ -57,9 +57,9 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
         types: ['boolean'],
       },
       lHeight: {
-        aliases: ['lineHeight', 'null'],
+        aliases: ['lineHeight'],
         help: argHelp.lHeight,
-        types: ['number'],
+        types: ['number', 'null'],
       },
       size: {
         types: ['number'],
