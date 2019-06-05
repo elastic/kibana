@@ -17,27 +17,10 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { ToastsSetup } from './toasts_service';
+import { setup } from '../../../../test_utils/public/http_test_setup';
 
-const createToastsApiMock = () => {
-  const api: jest.Mocked<PublicMethodsOf<ToastsSetup>> = {
-    get$: jest.fn(() => new Observable()),
-    add: jest.fn(),
-    remove: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addDanger: jest.fn(),
-    addError: jest.fn(),
-  };
-  return api;
-};
-
-const createSetupContractMock = createToastsApiMock;
-
-const createStartContractMock = createToastsApiMock;
-
-export const toastsServiceMock = {
-  createSetupContract: createSetupContractMock,
-  createStartContract: createStartContractMock,
-};
+jest.doMock('ui/new_platform', () => ({
+  npSetup: {
+    core: setup(),
+  },
+}));
