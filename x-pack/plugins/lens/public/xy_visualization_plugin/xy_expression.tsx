@@ -17,8 +17,12 @@ import {
   AreaSeries,
   BarSeries,
 } from '@elastic/charts';
-import { ContextFunction, ArgumentType } from '../../../canvas/canvas_plugin_src/functions/types';
+import {
+  ExpressionFunction,
+  ArgumentType,
+} from '../../../../../src/legacy/core_plugins/interpreter/public';
 import { KibanaDatatable } from '../types';
+import { RenderFunction } from './plugin';
 
 /**
  * This file contains TypeScript type definitions and their equivalent expression
@@ -36,7 +40,7 @@ export interface LegendConfig {
 
 type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
 
-export const legendConfig: ContextFunction<
+export const legendConfig: ExpressionFunction<
   'lens_xy_legendConfig',
   null,
   LegendConfig,
@@ -96,7 +100,7 @@ export interface YConfig extends AxisConfig {
 
 type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
 
-export const yConfig: ContextFunction<'lens_xy_yConfig', null, YConfig, YConfigResult> = {
+export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConfigResult> = {
   name: 'lens_xy_yConfig',
   aliases: [],
   type: 'lens_xy_yConfig',
@@ -126,7 +130,7 @@ export interface XConfig extends AxisConfig {
 
 type XConfigResult = XConfig & { type: 'lens_xy_xConfig' };
 
-export const xConfig: ContextFunction<'lens_xy_xConfig', null, XConfig, XConfigResult> = {
+export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConfigResult> = {
   name: 'lens_xy_xConfig',
   aliases: [],
   type: 'lens_xy_xConfig',
@@ -164,12 +168,16 @@ export interface XYChartProps {
   args: XYArgs;
 }
 
-// TODO: Specify the TypeScript type of this definition, once the
-// ContextFunction has moved to core and has the correct signature:
-// ContextFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender>
-export const xyChart = {
+export interface XYRender {
+  type: 'render';
+  as: 'lens_xy_chart_renderer';
+  value: XYChartProps;
+}
+
+export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender> = ({
   name: 'lens_xy_chart',
   type: 'render',
+  help: 'An X/Y chart',
   args: {
     seriesType: {
       types: ['string'],
@@ -216,13 +224,16 @@ export const xyChart = {
       },
     };
   },
-};
+  // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
+} as unknown) as ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender>;
 
-export const xyChartRenderer = {
+export const xyChartRenderer: RenderFunction<XYChartProps> = {
   name: 'lens_xy_chart_renderer',
   displayName: 'XY Chart',
+  help: 'X/Y Chart Renderer',
+  validate: () => {},
   reuseDomNode: true,
-  render: async (domNode: HTMLDivElement, config: XYChartProps, _handlers: unknown) => {
+  render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
     ReactDOM.render(<XYChart {...config} />, domNode);
   },
 };
