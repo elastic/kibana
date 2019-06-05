@@ -353,6 +353,34 @@ Object {
 }
 `);
   });
+
+  test(`throws an error when references aren't found`, async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    alertsClientParams.savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        interval: 10000,
+        alertTypeParams: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [],
+    });
+    await expect(alertsClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Reference action_0 not found"`
+    );
+  });
 });
 
 describe('find()', () => {

@@ -40,7 +40,7 @@ describe('has()', () => {
 describe('registry()', () => {
   test('registers the executor with the task manager', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getCreateTaskRunnerFunction } = require('./get_create_task_runner_function');
+    const { getCreateTaskRunnerFunction } = require('./lib/get_create_task_runner_function');
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register({
       id: 'test',
