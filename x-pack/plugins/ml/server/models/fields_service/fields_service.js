@@ -13,6 +13,8 @@ export function fieldsServiceProvider(callWithRequest) {
   // Obtains the cardinality of one or more fields.
   // Returns an Object whose keys are the names of the fields,
   // with values equal to the cardinality of the field.
+  // Any of the supplied fieldNames which are not aggregatable will
+  // be omitted from the returned Object.
   function getCardinalityOfFields(
     index,
     fieldNames,
@@ -21,63 +23,95 @@ export function fieldsServiceProvider(callWithRequest) {
     earliestMs,
     latestMs) {
 
-    // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the time range and the datafeed config query.
-    const mustCriteria = [
-      {
-        range: {
-          [timeFieldName]: {
-            gte: earliestMs,
-            lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
-      }
-    ];
-
-    if (query) {
-      mustCriteria.push(query);
-    }
-
-    const aggs = fieldNames.reduce((obj, field) => {
-      obj[field] = { cardinality: { field } };
-      return obj;
-    }, {});
-
-    const body = {
-      query: {
-        bool: {
-          must: mustCriteria
-        }
-      },
-      size: 0,
-      _source: {
-        excludes: []
-      },
-      aggs
-    };
-
+    // First check that each of the supplied fieldNames are aggregatable,
+    // then obtain the cardinality for each of the aggregatable fields.
     return new Promise((resolve, reject) => {
-      callWithRequest('search', {
+      callWithRequest('fieldCaps', {
         index,
-        body
+        fields: fieldNames
       })
-        .then((resp) => {
-          const aggregations = resp.aggregations;
-          if (aggregations !== undefined) {
-            const results = fieldNames.reduce((obj, field) => {
-              obj[field] = (aggregations[field] || { value: 0 }).value;
+        .then((fieldCapsResp) => {
+          const aggregatableFields = [];
+
+          fieldNames.forEach((fieldName) => {
+            const fieldInfo = fieldCapsResp.fields[fieldName];
+            const typeKeys = Object.keys(fieldInfo);
+            if (typeKeys.length > 0) {
+              const fieldType = typeKeys[0];
+              const isFieldAggregatable = fieldInfo[fieldType].aggregatable;
+              if (isFieldAggregatable === true) {
+                aggregatableFields.push(fieldName);
+              }
+            }
+          });
+
+          if (aggregatableFields.length > 0) {
+            // Build the criteria to use in the bool filter part of the request.
+            // Add criteria for the time range and the datafeed config query.
+            const mustCriteria = [
+              {
+                range: {
+                  [timeFieldName]: {
+                    gte: earliestMs,
+                    lte: latestMs,
+                    format: 'epoch_millis'
+                  }
+                }
+              }
+            ];
+
+            if (query) {
+              mustCriteria.push(query);
+            }
+
+            const aggs = aggregatableFields.reduce((obj, field) => {
+              obj[field] = { cardinality: { field } };
               return obj;
             }, {});
-            resolve(results);
+
+            const body = {
+              query: {
+                bool: {
+                  must: mustCriteria
+                }
+              },
+              size: 0,
+              _source: {
+                excludes: []
+              },
+              aggs
+            };
+
+            callWithRequest('search', {
+              index,
+              body
+            })
+              .then((resp) => {
+                const aggregations = resp.aggregations;
+                if (aggregations !== undefined) {
+                  const results = aggregatableFields.reduce((obj, field) => {
+                    obj[field] = (aggregations[field] || { value: 0 }).value;
+                    return obj;
+                  }, {});
+                  resolve(results);
+                } else {
+                  resolve({});
+                }
+              })
+              .catch((resp) => {
+                reject(resp);
+              });
           } else {
+            // None of the fields are aggregatable. Return empty Object.
             resolve({});
           }
+
         })
         .catch((resp) => {
           reject(resp);
         });
     });
+
   }
 
   function getTimeFieldRange(

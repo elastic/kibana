@@ -128,6 +128,8 @@ function getChartDetails(job, detectorIndex, entityFields, earliestMs, latestMs)
       })
         .then((results) => {
           _.each(blankEntityFields, (field) => {
+            // results will not contain keys for non-aggregatable fields,
+            // so store as 0 to indicate over all field values.
             obj.results.entityData.entities.push({
               fieldName: field.fieldName,
               cardinality: _.get(results, field.fieldName, 0)
