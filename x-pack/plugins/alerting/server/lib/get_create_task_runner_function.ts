@@ -81,6 +81,7 @@ export function getCreateTaskRunnerFunction({
           state: {
             alertTypeState,
             alertInstances,
+            // We store nextRunAt ourselves since task manager changes runAt when executing a task
             scheduledRunAt: nextRunAt,
             previousRange: range,
           },
