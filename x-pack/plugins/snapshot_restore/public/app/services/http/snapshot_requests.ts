@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { API_BASE_PATH } from '../../../../common/constants';
-import { MINIMUM_TIMEOUT_MS } from '../../constants';
+import { MINIMUM_TIMEOUT_MS, UIM_SNAPSHOT_DELETE, UIM_SNAPSHOT_DELETE_MANY } from '../../constants';
 import { httpService } from './http';
-import { useRequest } from './use_request';
+import { sendRequest, useRequest } from './use_request';
 
 export const loadSnapshots = () =>
   useRequest({
@@ -25,3 +25,15 @@ export const loadSnapshot = (repositoryName: string, snapshotId: string) =>
     ),
     method: 'get',
   });
+
+export const deleteSnapshots = async (snapshotIds: string[]) => {
+  return sendRequest({
+    path: httpService.addBasePath(
+      `${API_BASE_PATH}snapshots/${snapshotIds
+        .map(snapshotId => encodeURIComponent(snapshotId))
+        .join(',')}`
+    ),
+    method: 'delete',
+    uimActionType: snapshotIds.length > 1 ? UIM_SNAPSHOT_DELETE_MANY : UIM_SNAPSHOT_DELETE,
+  });
+};

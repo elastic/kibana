@@ -227,38 +227,39 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     );
   } else {
     const repositoryErrorsWarning = Object.keys(errors).length ? (
-      <EuiCallOut
-        title={
+      <Fragment>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryWarningTitle"
+              defaultMessage="Some repositories contain errors"
+            />
+          }
+          color="warning"
+          iconType="alert"
+        >
           <FormattedMessage
-            id="xpack.snapshotRestore.repositoryWarningTitle"
-            defaultMessage="Some repositories contain errors"
+            id="xpack.snapshotRestore.repositoryWarningDescription"
+            defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
+            values={{
+              repositoryLink: (
+                <EuiLink href={linkToRepositories()}>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryWarningLinkText"
+                    defaultMessage="Repositories"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
-        }
-        color="warning"
-        iconType="alert"
-      >
-        <FormattedMessage
-          id="xpack.snapshotRestore.repositoryWarningDescription"
-          defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
-          values={{
-            repositoryLink: (
-              <EuiLink href={linkToRepositories()}>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryWarningLinkText"
-                  defaultMessage="Repositories"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
+        </EuiCallOut>
+        <EuiSpacer />
+      </Fragment>
     ) : null;
 
     content = (
       <Fragment>
         {repositoryErrorsWarning}
-
-        <EuiSpacer />
 
         <SnapshotTable
           snapshots={snapshots}
