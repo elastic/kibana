@@ -5,13 +5,13 @@
  */
 import EventEmitter from 'events';
 import * as net from 'net';
+import { fileURLToPath } from 'url';
 import {
   createMessageConnection,
   MessageConnection,
   SocketMessageReader,
   SocketMessageWriter,
 } from 'vscode-jsonrpc';
-
 import { RequestMessage, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 import {
@@ -111,6 +111,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       workspaceFolders,
       rootUri,
       capabilities: clientCapabilities,
+      rootPath: fileURLToPath(rootUri),
     };
     return await clientConn
       .sendRequest(

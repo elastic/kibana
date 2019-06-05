@@ -32,6 +32,8 @@ const metricVal = (metric, format, isPercent) => {
   return formatMetric(metric, format);
 };
 
+const noWrapStyle = { overflowX: 'hidden', whiteSpace: 'nowrap' };
+
 function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
   if (isOnline) {
     const { lastVal, maxVal, minVal, slope } = get(metric, 'summary', {});
@@ -40,15 +42,13 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
     return (
       <EuiFlexGroup gutterSize="m" alignItems="center" wrap {...props}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
-            <h4>
-              { metricVal(lastVal, format, isPercent) }
+          <EuiTitle size="s" style={noWrapStyle}>
+            <span>
+              {metricVal(lastVal, format, isPercent)}
               &nbsp;
               <span className={`fa fa-long-arrow-${getSlopeArrow(slope)}`} />
-            </h4>
+            </span>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <EuiText size="xs">
             {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.maxText', {
               defaultMessage: '{metric} max',
