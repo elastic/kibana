@@ -5,4 +5,4 @@
  */
 
 export { UptimeRefreshContext } from './uptime_refresh_context';
-export { UptimeSettingsContext } from './uptime_settings_context';
+export { UMSettingsContext, UptimeSettingsContext } from './uptime_settings_context';
