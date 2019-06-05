@@ -8,6 +8,8 @@ import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
+
 import { HostItem } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
 
@@ -30,9 +32,17 @@ interface OwnProps {
 
 type HostSummaryProps = OwnProps;
 
+const DescriptionList = styled(EuiDescriptionList)`
+  ${({ theme }) => `
+    dt {
+      font-size: ${theme.eui.euiFontSizeXS} !important;
+    }
+  `}
+`;
+
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (
   <EuiFlexItem key={key}>
-    <EuiDescriptionList listItems={descriptionList} />
+    <DescriptionList listItems={descriptionList} />
   </EuiFlexItem>
 );
 
@@ -49,7 +59,9 @@ export const HostOverview = pure<HostSummaryProps>(({ data, loading }) => {
     [
       {
         title: i18n.HOST_ID,
-        description: data.host ? hostIdRenderer(data.host) : getEmptyTagValue(),
+        description: data.host
+          ? hostIdRenderer({ host: data.host, noLink: true })
+          : getEmptyTagValue(),
       },
       {
         title: i18n.FIRST_SEEN,

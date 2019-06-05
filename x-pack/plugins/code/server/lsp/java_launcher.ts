@@ -123,6 +123,7 @@ export class JavaLauncher extends AbstractLauncher {
       '-Dosgi.bundles.defaultStartLevel=4',
       '-Declipse.product=org.elastic.jdt.ls.core.product',
       '-Dlog.level=ALL',
+      '-Dfile.encoding=utf8',
       '-noverify',
       '-Xmx4G',
       '-jar',
