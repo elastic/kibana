@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { buildESRequest } from '../../../server/lib/build_es_request';
-import { ContextFunction, Filter } from '../types';
+import { Filter } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -14,7 +15,7 @@ interface Arguments {
   query: string;
 }
 
-export function escount(): ContextFunction<'escount', Filter, Arguments, any> {
+export function escount(): ExpressionFunction<'escount', Filter, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().escount;
 
   return {

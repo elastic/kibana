@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { palettes } from '../../../common/lib/palettes';
-import { NullContextFunction } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -21,7 +21,7 @@ interface Return {
   gradient: boolean;
 }
 
-export function palette(): NullContextFunction<'palette', Arguments, Return> {
+export function palette(): ExpressionFunction<'palette', null, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().palette;
 
   return {
