@@ -152,7 +152,9 @@ fi
 ###
 ### skip chomium download, use the system chrome install
 ###
-#export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+PUPPETEER_EXECUTABLE_PATH="$(command -v google-chrome-stable)"
+export PUPPETEER_EXECUTABLE_PATH
 
 ###
 ### install dependencies
