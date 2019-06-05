@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import numeral from '@elastic/numeral';
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
@@ -122,6 +123,25 @@ describe('SourceDestination', () => {
         .first()
         .text()
     ).toEqual('40B');
+  });
+
+  test('it renders percent destination.bytes', () => {
+    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const destinationBytes = asArrayIfExists(
+      get(DESTINATION_BYTES_FIELD_NAME, getMockNetflowData())
+    );
+    const sumBytes = asArrayIfExists(get(NETWORK_BYTES_FIELD_NAME, getMockNetflowData()));
+    let percent = '';
+    if (destinationBytes != null && sumBytes != null) {
+      percent = `(${numeral((destinationBytes[0] / sumBytes[0]) * 100).format('0.00')}%)`;
+    }
+
+    expect(
+      wrapper
+        .find('[data-test-subj="destination-bytes-percent"]')
+        .first()
+        .text()
+    ).toEqual(percent);
   });
 
   test('it renders destination.geo.continent_name', () => {
@@ -290,6 +310,23 @@ describe('SourceDestination', () => {
         .first()
         .text()
     ).toEqual('60B');
+  });
+
+  test('it renders percent source.bytes', () => {
+    const wrapper = mountWithIntl(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    const sourceBytes = asArrayIfExists(get(SOURCE_BYTES_FIELD_NAME, getMockNetflowData()));
+    const sumBytes = asArrayIfExists(get(NETWORK_BYTES_FIELD_NAME, getMockNetflowData()));
+    let percent = '';
+    if (sourceBytes != null && sumBytes != null) {
+      percent = `(${numeral((sourceBytes[0] / sumBytes[0]) * 100).format('0.00')}%)`;
+    }
+
+    expect(
+      wrapper
+        .find('[data-test-subj="source-bytes-percent"]')
+        .first()
+        .text()
+    ).toEqual(percent);
   });
 
   test('it renders source.geo.continent_name', () => {
