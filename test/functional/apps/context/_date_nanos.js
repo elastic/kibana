@@ -21,13 +21,11 @@ import expect from '@kbn/expect';
 
 const TEST_INDEX_PATTERN = 'date-nanos';
 const TEST_ANCHOR_TYPE = '_doc';
-const TEST_ANCHOR_ID = 'AU_x3-TaGFA8no6Qjisd';
 const TEST_DEFAULT_CONTEXT_SIZE = 1;
-const TEST_STEP_SIZE = 1;
+const TEST_STEP_SIZE = 3;
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
-  const retry = getService('retry');
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
@@ -46,48 +44,39 @@ export default function ({ getService, getPageObjects }) {
       return esArchiver.unload('date_nanos');
     });
 
-    it('should default to the `context:defaultSize` setting', async function () {
-      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
-
+    it('displays predessors - anchor - successors in right order ', async function () {
+      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, 'AU_x3-TaGFA8no6Qj999Z');
       const table = await docTable.getTable();
-      await retry.try(async function () {
-        expect(await docTable.getBodyRows(table)).to.have.length(2 * TEST_DEFAULT_CONTEXT_SIZE + 1);
-      });
-      await retry.try(async function () {
-        const predecessorCountPicker = await PageObjects.context.getPredecessorCountPicker();
-        expect(await predecessorCountPicker.getProperty('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
-      });
-      await retry.try(async function () {
-        const successorCountPicker = await PageObjects.context.getSuccessorCountPicker();
-        expect(await successorCountPicker.getProperty('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
-      });
+      const rows = await docTable.getBodyRows(table);
+      const actualRowsText = await Promise.all(rows.map(row => row.getVisibleText()));
+      const expectedRowsText = [
+        'Sep 18, 2019 @ 06:50:13.000000000\n-2',
+        'Sep 18, 2019 @ 06:50:12.999999999\n-3',
+        'Sep 19, 2015 @ 06:50:13.000100001\n1'
+      ];
+      expect(actualRowsText).to.eql(expectedRowsText);
     });
 
-    it('should increase according to the `context:step` setting when clicking the `load newer` button', async function () {
-      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
-
-      const table = await docTable.getTable();
+    it('displays correctly when predecessors and successors are loaded', async function () {
+      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, 'AU_x3-TaGFA8no6Qjisd');
       await PageObjects.context.clickPredecessorLoadMoreButton();
-
-      await retry.try(async function () {
-        expect(await docTable.getBodyRows(table)).to.have.length(
-          2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
-        );
-      });
-    });
-
-    it('should increase according to the `context:step` setting when clicking the `load older` button', async function () {
-      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
-
-      const table = await docTable.getTable();
       await PageObjects.context.clickSuccessorLoadMoreButton();
+      const table = await docTable.getTable();
+      const rows = await docTable.getBodyRows(table);
+      const actualRowsText = await Promise.all(rows.map(row => row.getVisibleText()));
+      const expectedRowsText = [
+        'Sep 22, 2019 @ 23:50:13.253123345\n5',
+        'Sep 18, 2019 @ 06:50:13.000000104\n4',
+        'Sep 18, 2019 @ 06:50:13.000000103\n2',
+        'Sep 18, 2019 @ 06:50:13.000000102\n1',
+        'Sep 18, 2019 @ 06:50:13.000000101\n0',
+        'Sep 18, 2019 @ 06:50:13.000000001\n-1',
+        'Sep 18, 2019 @ 06:50:13.000000000\n-2',
+        'Sep 18, 2019 @ 06:50:12.999999999\n-3',
+        'Sep 19, 2015 @ 06:50:13.000100001\n1'
+      ];
+      expect(actualRowsText).to.eql(expectedRowsText);
 
-      await retry.try(async function () {
-        expect(await docTable.getBodyRows(table)).to.have.length(
-          2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
-        );
-      });
     });
   });
-
 }
