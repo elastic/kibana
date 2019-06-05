@@ -8,6 +8,8 @@ import fs from 'fs';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
+import { pathToFileURL } from 'url';
+
 import { ServerOptions } from '../server_options';
 import { LanguageServerProxy } from './proxy';
 import { InitializingError, RequestExpander } from './request_expander';
@@ -117,6 +119,7 @@ test('be able to open multiple workspace', async () => {
     params: [],
     workspacePath: '/tmp/test/workspace/1',
   };
+
   const request2 = {
     method: 'request2',
     params: [],
@@ -131,7 +134,7 @@ test('be able to open multiple workspace', async () => {
     proxyStub.initialize.calledOnceWith({}, [
       {
         name: request1.workspacePath,
-        uri: `file://${request1.workspacePath}`,
+        uri: pathToFileURL(request1.workspacePath).href,
       },
     ])
   ).toBeTruthy();
@@ -143,7 +146,7 @@ test('be able to open multiple workspace', async () => {
           added: [
             {
               name: request2.workspacePath,
-              uri: `file://${request2.workspacePath}`,
+              uri: pathToFileURL(request2.workspacePath).href,
             },
           ],
           removed: [],
@@ -187,13 +190,13 @@ test('be able to swap workspace', async () => {
           added: [
             {
               name: request2.workspacePath,
-              uri: `file://${request2.workspacePath}`,
+              uri: pathToFileURL(request2.workspacePath).href,
             },
           ],
           removed: [
             {
               name: request1.workspacePath,
-              uri: `file://${request1.workspacePath}`,
+              uri: pathToFileURL(request1.workspacePath).href,
             },
           ],
         },

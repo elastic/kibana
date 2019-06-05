@@ -119,7 +119,7 @@ export function TimeBucketsCalcAutoIntervalProvider() {
 
     }),
 
-    atLeast: find(revRoundingRules, function atLeast(upperBound, lowerBound, target) { // eslint-disable-line no-unused-vars
+    atLeast: find(revRoundingRules, function atLeast(upperBound, lowerBound, target) {
       // Unmodified from Kibana ui/time_buckets/calc_auto_interval.js.
       if (lowerBound <= target) {
         return lowerBound;
