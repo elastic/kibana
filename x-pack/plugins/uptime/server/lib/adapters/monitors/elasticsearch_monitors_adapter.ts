@@ -82,7 +82,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           timeseries: {
             date_histogram: {
               field: '@timestamp',
-              interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
+              fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
             },
             aggs: {
               status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
@@ -297,7 +297,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
               histogram: {
                 date_histogram: {
                   field: '@timestamp',
-                  interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
+                  fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
                   missing: 0,
                 },
                 aggs: {
