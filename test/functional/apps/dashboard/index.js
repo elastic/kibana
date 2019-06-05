@@ -96,5 +96,16 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./dashboard_listing'));
       loadTestFile(require.resolve('./dashboard_clone'));
     });
+
+    describe('visual - using current data', function () {
+      this.tags('ciGroup100');
+      before(loadCurrentData);
+      after(unloadCurrentData);
+
+      loadTestFile(require.resolve('./visual_create_and_add_embeddables'));
+     
+    });
+
+
   });
 }

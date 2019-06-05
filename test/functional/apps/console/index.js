@@ -29,4 +29,15 @@ export default function ({ getService, loadTestFile }) {
 
     loadTestFile(require.resolve('./_console'));
   });
+
+  describe('visual console app', function () {
+    this.tags('ciGroup100');
+
+    before(async function () {
+      await browser.setWindowSize(1300, 1100);
+    });
+
+    loadTestFile(require.resolve('./visual_console'));
+  });
+
 }
