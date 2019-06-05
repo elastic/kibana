@@ -10,6 +10,7 @@ import uniqBy from 'lodash.uniqby';
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit, values } from 'lodash';
 import moment from 'moment';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore Untyped local
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
 // @ts-ignore Untyped local
@@ -20,7 +21,6 @@ import { isColumnReference } from './lib/is_column_reference';
 import { getExpressionType } from './lib/get_expression_type';
 import { getFunctionHelp } from '../../../strings';
 import {
-  ContextFunction,
   Datatable,
   DatatableRow,
   PointSeries,
@@ -39,7 +39,12 @@ function keysOf<T, K extends keyof T>(obj: T): K[] {
 
 type Arguments = { [key in PointSeriesColumnName]: string | null };
 
-export function pointseries(): ContextFunction<'pointseries', Datatable, Arguments, PointSeries> {
+export function pointseries(): ExpressionFunction<
+  'pointseries',
+  Datatable,
+  Arguments,
+  PointSeries
+> {
   const { help, args: argHelp } = getFunctionHelp().pointseries;
 
   return {
