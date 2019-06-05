@@ -63,10 +63,8 @@ export const MetricsExplorerChart = injectI18n(
       <React.Fragment>
         {options.groupBy ? (
           <EuiTitle size="xs">
-            <EuiFlexGroup>
-              <EuiFlexItem grow={1}>
-                <ChartTitle>{title}</ChartTitle>
-              </EuiFlexItem>
+            <EuiFlexGroup alignItems="center">
+              <ChartTitle>{title}</ChartTitle>
               <EuiFlexItem grow={false}>
                 <MetricsExplorerChartContextMenu
                   timeRange={timeRange}
@@ -122,4 +120,6 @@ const ChartTitle = euiStyled.div`
             text-overflow: ellipsis;
             white-space: nowrap;
             text-align: left;
+            flex: 1 1 auto;
+            margin: 12px;
           `;
