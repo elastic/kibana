@@ -15,127 +15,28 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { DataType, DatasourceDimensionPanelProps } from '../types';
+import { DatasourceDimensionPanelProps, DimensionPriority } from '../types';
+import { IndexPatternColumn, IndexPatternPrivateState, columnToOperation } from './indexpattern';
+
 import {
-  IndexPatternColumn,
-  IndexPatternField,
-  IndexPatternPrivateState,
-  OperationType,
-  columnToOperation,
-} from './indexpattern';
-
-const operations: OperationType[] = ['value', 'terms', 'date_histogram', 'sum', 'average', 'count'];
-
-const operationPanels: Record<
-  OperationType,
-  {
-    type: OperationType;
-    displayName: string;
-    ofName: (name: string) => string;
-  }
-> = {
-  value: {
-    type: 'value',
-    displayName: i18n.translate('xpack.lens.indexPatternOperations.value', {
-      defaultMessage: 'Value',
-    }),
-    ofName: name =>
-      i18n.translate('xpack.lens.indexPatternOperations.valueOf', {
-        defaultMessage: 'Value of {name}',
-        values: { name },
-      }),
-  },
-  terms: {
-    type: 'terms',
-    displayName: i18n.translate('xpack.lens.indexPatternOperations.terms', {
-      defaultMessage: 'Top Values',
-    }),
-    ofName: name =>
-      i18n.translate('xpack.lens.indexPatternOperations.termsOf', {
-        defaultMessage: 'Top Values of {name}',
-        values: { name },
-      }),
-  },
-  date_histogram: {
-    type: 'date_histogram',
-    displayName: i18n.translate('xpack.lens.indexPatternOperations.dateHistogram', {
-      defaultMessage: 'Date Histogram',
-    }),
-    ofName: name =>
-      i18n.translate('xpack.lens.indexPatternOperations.dateHistogramOf', {
-        defaultMessage: 'Date Histogram of {name}',
-        values: { name },
-      }),
-  },
-  sum: {
-    type: 'sum',
-    displayName: i18n.translate('xpack.lens.indexPatternOperations.sum', {
-      defaultMessage: 'Sum',
-    }),
-    ofName: name =>
-      i18n.translate('xpack.lens.indexPatternOperations.sumOf', {
-        defaultMessage: 'Sum of {name}',
-        values: { name },
-      }),
-  },
-  average: {
-    type: 'average',
-    displayName: i18n.translate('xpack.lens.indexPatternOperations.average', {
-      defaultMessage: 'Average',
-    }),
-    ofName: name =>
-      i18n.translate('xpack.lens.indexPatternOperations.averageOf', {
-        defaultMessage: 'Average of {name}',
-        values: { name },
-      }),
-  },
-  count: {
-    type: 'count',
-    displayName: i18n.translate('xpack.lens.indexPatternOperations.count', {
-      defaultMessage: 'Count',
-    }),
-    ofName: name =>
-      i18n.translate('xpack.lens.indexPatternOperations.countOf', {
-        defaultMessage: 'Count of {name}',
-        values: { name },
-      }),
-  },
-};
+  getOperationDisplay,
+  getOperations,
+  getOperationTypesForField,
+  getOperationResultType,
+} from './operations';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
   setState: (newState: IndexPatternPrivateState) => void;
 };
 
-function getOperationTypesForField({ type }: IndexPatternField): OperationType[] {
-  switch (type) {
-    case 'date':
-      return ['value', 'date_histogram'];
-    case 'number':
-      return ['value', 'sum', 'average'];
-    case 'string':
-      return ['value', 'terms'];
-  }
-  return [];
-}
-
-function getOperationResultType({ type }: IndexPatternField, op: OperationType): DataType {
-  switch (op) {
-    case 'value':
-      return type as DataType;
-    case 'average':
-    case 'count':
-    case 'sum':
-      return 'number';
-    case 'date_histogram':
-      return 'date';
-    case 'terms':
-      return 'string';
-  }
-}
-
-export function getPotentialColumns(state: IndexPatternPrivateState): IndexPatternColumn[] {
+export function getPotentialColumns(
+  state: IndexPatternPrivateState,
+  suggestedOrder?: DimensionPriority
+): IndexPatternColumn[] {
   const fields = state.indexPatterns[state.currentIndexPatternId].fields;
+
+  const operationPanels = getOperationDisplay();
 
   const columns: IndexPatternColumn[] = fields
     .map((field, index) => {
@@ -149,6 +50,7 @@ export function getPotentialColumns(state: IndexPatternPrivateState): IndexPatte
 
         operationType: op,
         sourceField: field.name,
+        suggestedOrder,
       }));
     })
     .reduce((prev, current) => prev.concat(current));
@@ -163,15 +65,36 @@ export function getPotentialColumns(state: IndexPatternPrivateState): IndexPatte
 
     operationType: 'count',
     sourceField: 'documents',
+    suggestedOrder,
   });
 
   return columns;
 }
 
+export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
+  const entries = Object.entries(columns);
+
+  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
+
+  return aggregations
+    .sort(([id, col], [id2, col2]) => {
+      return (
+        // Sort undefined orders last
+        (col.suggestedOrder !== undefined ? col.suggestedOrder : 3) -
+        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : 3)
+      );
+    })
+    .map(([id]) => id)
+    .concat(metrics.map(([id]) => id));
+}
+
 export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
   const [isOpen, setOpen] = useState(false);
 
-  const columns = getPotentialColumns(props.state);
+  const operations = getOperations();
+  const operationPanels = getOperationDisplay();
+
+  const columns = getPotentialColumns(props.state, props.suggestedPriority);
 
   const filteredColumns = columns.filter(col => {
     return props.filterOperations(columnToOperation(col));
@@ -192,7 +115,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
       <EuiFlexItem grow={true}>
         <EuiPopover
           id={props.columnId}
-          panelClassName="lns-indexPattern-dimensionPopover"
+          panelClassName="lnsIndexPattern__dimensionPopover"
           isOpen={isOpen}
           closePopover={() => {
             setOpen(false);
@@ -210,7 +133,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
                 <span>
                   {selectedColumn
                     ? selectedColumn.label
-                    : i18n.translate('xpack.lens.configureDimension', {
+                    : i18n.translate('xpack.lens.indexPattern.configureDimensionLabel', {
                         defaultMessage: 'Configure dimension',
                       })}
                 </span>
@@ -251,8 +174,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
                   props.setState({
                     ...props.state,
                     columns: newColumns,
-                    // Order is not meaningful until we aggregate
-                    columnOrder: Object.keys(newColumns),
+                    columnOrder: getColumnOrder(newColumns),
                   });
                 }}
               />
@@ -277,15 +199,15 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
                           col.operationType === o && col.sourceField === selectedColumn.sourceField
                       )!;
 
+                      const newColumns = {
+                        ...props.state.columns,
+                        [props.columnId]: newColumn,
+                      };
+
                       props.setState({
                         ...props.state,
-                        columnOrder: _.uniq(
-                          Object.keys(props.state.columns).concat(props.columnId)
-                        ),
-                        columns: {
-                          ...props.state.columns,
-                          [props.columnId]: newColumn,
-                        },
+                        columnOrder: getColumnOrder(newColumns),
+                        columns: newColumns,
                       });
                     }}
                   >
@@ -314,7 +236,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
               props.setState({
                 ...props.state,
                 columns: newColumns,
-                columnOrder: Object.keys(newColumns).filter(key => key !== props.columnId),
+                columnOrder: getColumnOrder(newColumns),
               });
             }}
           />

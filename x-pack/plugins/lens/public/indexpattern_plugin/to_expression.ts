@@ -16,8 +16,10 @@ export function toExpression(state: IndexPatternPrivateState) {
   const fieldNames = state.columnOrder.map(col => state.columns[col].sourceField);
   const sortedColumns = state.columnOrder.map(col => state.columns[col]);
 
+  const indexName = state.indexPatterns[state.currentIndexPatternId].title;
+
   if (sortedColumns.every(({ operationType }) => operationType === 'value')) {
-    return `esdocs index="${state.currentIndexPatternId}" fields="${fieldNames.join(', ')}" sort="${
+    return `esdocs index="${indexName}" fields="${fieldNames.join(', ')}" sort="${
       fieldNames[0]
     }, DESC"`;
   } else if (sortedColumns.length) {
@@ -82,7 +84,7 @@ export function toExpression(state: IndexPatternPrivateState) {
       .map(agg => JSON.stringify(agg));
 
     return `esaggs
-      index="${state.currentIndexPatternId}"
+      index="${indexName}"
       metricsAtAllLevels=false
       partialRows=false
       aggConfigs='${aggs.join(',')}'`;

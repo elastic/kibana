@@ -9,7 +9,7 @@ export function getIndexPatterns() {
     resolve([
       {
         id: '1',
-        title: 'Fake Index Pattern',
+        title: 'my-fake-index-pattern',
         timeFieldName: 'timestamp',
         fields: [
           {
@@ -34,7 +34,7 @@ export function getIndexPatterns() {
       },
       {
         id: '2',
-        title: 'Fake Rollup Pattern',
+        title: 'my-fake-rollup-pattern',
         timeFieldName: 'timestamp',
         fields: [
           {
@@ -56,6 +56,52 @@ export function getIndexPatterns() {
             searchable: true,
           },
         ],
+        typeMeta: {
+          params: {
+            rollup_index: 'my-fake-index-pattern',
+          },
+          aggs: {
+            terms: {
+              source: {
+                agg: 'terms',
+              },
+            },
+            date_histogram: {
+              timestamp: {
+                agg: 'date_histogram',
+                fixed_interval: '1d',
+                delay: '7d',
+                time_zone: 'UTC',
+              },
+            },
+            histogram: {
+              bytes: {
+                agg: 'histogram',
+                interval: 1000,
+              },
+            },
+            avg: {
+              bytes: {
+                agg: 'avg',
+              },
+            },
+            max: {
+              bytes: {
+                agg: 'max',
+              },
+            },
+            min: {
+              bytes: {
+                agg: 'min',
+              },
+            },
+            sum: {
+              bytes: {
+                agg: 'sum',
+              },
+            },
+          },
+        },
       },
     ]);
   });

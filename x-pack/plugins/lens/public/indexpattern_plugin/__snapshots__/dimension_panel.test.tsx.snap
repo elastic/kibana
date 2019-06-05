@@ -30,7 +30,7 @@ exports[`IndexPatternDimensionPanel should render a dimension panel 1`] = `
       id="col2"
       isOpen={false}
       ownFocus={true}
-      panelClassName="lns-indexPattern-dimensionPopover"
+      panelClassName="lnsIndexPattern__dimensionPopover"
       panelPaddingSize="m"
     >
       <EuiFlexGroup
@@ -132,15 +132,41 @@ exports[`IndexPatternDimensionPanel should render a dimension panel 1`] = `
             </EuiButtonEmpty>
             <EuiButtonEmpty
               color="text"
-              data-test-subj="lns-indexPatternDimension-average"
+              data-test-subj="lns-indexPatternDimension-avg"
               iconSide="left"
               isDisabled={false}
-              key="average"
+              key="avg"
               onClick={[Function]}
               type="button"
             >
               <span>
                 Average
+              </span>
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="lns-indexPatternDimension-min"
+              iconSide="left"
+              isDisabled={false}
+              key="min"
+              onClick={[Function]}
+              type="button"
+            >
+              <span>
+                Minimum
+              </span>
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="lns-indexPatternDimension-max"
+              iconSide="left"
+              isDisabled={false}
+              key="max"
+              onClick={[Function]}
+              type="button"
+            >
+              <span>
+                Maximum
               </span>
             </EuiButtonEmpty>
             <EuiButtonEmpty

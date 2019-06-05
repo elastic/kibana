@@ -11,12 +11,24 @@ import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
 import { Datasource, DataType } from '..';
-import { DatasourceDimensionPanelProps, DatasourceDataPanelProps } from '../types';
+import {
+  DatasourceDimensionPanelProps,
+  DatasourceDataPanelProps,
+  DimensionPriority,
+} from '../types';
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 
-export type OperationType = 'value' | 'terms' | 'date_histogram' | 'sum' | 'average' | 'count';
+export type OperationType =
+  | 'value'
+  | 'terms'
+  | 'date_histogram'
+  | 'sum'
+  | 'avg'
+  | 'min'
+  | 'max'
+  | 'count';
 
 export interface IndexPatternColumn {
   // Public
@@ -28,6 +40,7 @@ export interface IndexPatternColumn {
   // Private
   operationType: OperationType;
   sourceField: string;
+  suggestedOrder?: DimensionPriority;
 }
 
 export interface IndexPattern {
@@ -43,6 +56,19 @@ export interface IndexPatternField {
   esTypes?: string[];
   aggregatable: boolean;
   searchable: boolean;
+  rollupRestrictions?: Partial<
+    Record<
+      string,
+      {
+        agg: string;
+        interval?: number;
+        fixed_interval?: string;
+        calendar_interval?: string;
+        delay?: string;
+        time_zone?: string;
+      }
+    >
+  >;
 }
 
 export interface IndexPatternPersistedState {
@@ -107,6 +133,41 @@ export function columnToOperation(column: IndexPatternColumn) {
   };
 }
 
+type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
+type InferFromArray<T> = T extends Array<infer P> ? P : T;
+
+function addRollupInfoToFields(
+  indexPattern: InferFromArray<Exclude<UnwrapPromise<ReturnType<typeof getIndexPatterns>>, void>>
+): IndexPattern {
+  if (!indexPattern.typeMeta || typeof indexPattern.fields === 'string') {
+    return indexPattern;
+  }
+
+  const aggs = Object.keys(indexPattern.typeMeta.aggs);
+
+  const newFields = [...(indexPattern.fields as IndexPatternField[])];
+  newFields.forEach((field, index) => {
+    const restrictionsObj: IndexPatternField['rollupRestrictions'] = {};
+    aggs.forEach(agg => {
+      if (indexPattern.typeMeta.aggs[agg] && indexPattern.typeMeta.aggs[agg][field.name]) {
+        restrictionsObj[agg] = indexPattern.typeMeta.aggs[agg][field.name];
+      }
+    });
+    if (Object.keys(restrictionsObj).length) {
+      newFields[index] = { ...field, rollupRestrictions: restrictionsObj };
+    }
+  });
+
+  const { id, title, timeFieldName } = indexPattern;
+
+  return {
+    id,
+    title,
+    timeFieldName: timeFieldName || undefined,
+    fields: newFields,
+  };
+}
+
 export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
@@ -116,7 +177,7 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
 
       if (indexPatternObjects) {
         indexPatternObjects.forEach(obj => {
-          indexPatterns[obj.id] = obj;
+          indexPatterns[obj.id] = addRollupInfoToFields(obj);
         });
       }
 
@@ -157,7 +218,11 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
 
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
-            <IndexPatternDimensionPanel state={state} setState={setState} {...props} />,
+            <IndexPatternDimensionPanel
+              state={state}
+              setState={newState => setState(newState)}
+              {...props}
+            />,
             domElement
           );
         },

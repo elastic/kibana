@@ -20,7 +20,7 @@ jest.mock('./loader');
 const expectedIndexPatterns = {
   1: {
     id: '1',
-    title: 'Fake Index Pattern',
+    title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     fields: [
       {
@@ -45,7 +45,7 @@ const expectedIndexPatterns = {
   },
   2: {
     id: '2',
-    title: 'Fake Rollup Pattern',
+    title: 'my-fake-rollup-pattern',
     timeFieldName: 'timestamp',
     fields: [
       {
@@ -53,18 +53,50 @@ const expectedIndexPatterns = {
         type: 'date',
         aggregatable: true,
         searchable: true,
+        rollupRestrictions: {
+          date_histogram: {
+            agg: 'date_histogram',
+            fixed_interval: '1d',
+            delay: '7d',
+            time_zone: 'UTC',
+          },
+        },
       },
       {
         name: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
+        rollupRestrictions: {
+          // Ignored in the UI
+          histogram: {
+            agg: 'histogram',
+            interval: 1000,
+          },
+          avg: {
+            agg: 'avg',
+          },
+          max: {
+            agg: 'max',
+          },
+          min: {
+            agg: 'min',
+          },
+          sum: {
+            agg: 'sum',
+          },
+        },
       },
       {
         name: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
+        rollupRestrictions: {
+          terms: {
+            agg: 'terms',
+          },
+        },
       },
     ],
   },
@@ -193,7 +225,7 @@ describe('IndexPattern Data Source', () => {
       };
       const state = await indexPatternDatasource.initialize(queryPersistedState);
       expect(indexPatternDatasource.toExpression(state)).toMatchInlineSnapshot(
-        `"esdocs index=\\"1\\" fields=\\"source, bytes\\" sort=\\"source, DESC\\""`
+        `"esdocs index=\\"my-fake-index-pattern\\" fields=\\"source, bytes\\" sort=\\"source, DESC\\""`
       );
     });
 
@@ -227,7 +259,7 @@ describe('IndexPattern Data Source', () => {
       const state = await indexPatternDatasource.initialize(queryPersistedState);
       expect(indexPatternDatasource.toExpression(state)).toMatchInlineSnapshot(`
 "esaggs
-      index=\\"1\\"
+      index=\\"my-fake-index-pattern\\"
       metricsAtAllLevels=false
       partialRows=false
       aggConfigs='{\\"id\\":\\"document\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{\\"field\\":\\"document\\"}},{\\"id\\":\\"timestamp\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"metric\\",\\"params\\":{\\"field\\":\\"timestamp\\"}}'"

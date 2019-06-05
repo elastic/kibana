@@ -13,11 +13,11 @@ exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
       options={
         Array [
           Object {
-            "label": "Fake Index Pattern",
+            "label": "my-fake-index-pattern",
             "value": "1",
           },
           Object {
-            "label": "Fake Rollup Pattern",
+            "label": "my-fake-rollup-pattern",
             "value": "2",
           },
         ]
@@ -25,7 +25,7 @@ exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
       selectedOptions={
         Array [
           Object {
-            "label": "Fake Index Pattern",
+            "label": "my-fake-index-pattern",
             "value": "1",
           },
         ]
