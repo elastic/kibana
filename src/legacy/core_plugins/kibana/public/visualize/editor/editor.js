@@ -309,7 +309,7 @@ function VisEditor(
 
   $scope.onFiltersUpdated = filters => {
     // The filters will automatically be set when the queryFilter emits an update event (see below)
-    queryFilter.setFilters(filters);
+    Promise.resolve(queryFilter.setFilters(filters));
   };
 
   $scope.onCancelApplyFilters = () => {

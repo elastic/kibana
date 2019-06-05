@@ -24,7 +24,7 @@ import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 import { FilterManager } from './new_filter_manager';
 
-export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState, globalState) {
+export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalState) {
   const queryFilter = {};
 
   let filterStateManager;
@@ -60,7 +60,7 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
    * @returns {Promise} filter map promise
    */
   queryFilter.addFilters = function (filters, addToGlobalState) {
-    return Promise.resolve(filterStateManager.addFilters(filters, addToGlobalState, false))
+    return filterStateManager.addFilters(filters, addToGlobalState, false)
       .then(function (delayedChangeUpdate) {
         updateAppState();
         delayedChangeUpdate.update && delayedChangeUpdate.update();
@@ -68,7 +68,7 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
   };
 
   queryFilter.setFilters = filters => {
-    return Promise.resolve(filterStateManager.setFilters(filters, false))
+    return filterStateManager.setFilters(filters, false)
       .then(delayedChangeUpdate => {
         updateAppState();
         delayedChangeUpdate.update && delayedChangeUpdate.update();
