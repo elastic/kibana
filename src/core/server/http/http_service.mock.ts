@@ -21,16 +21,21 @@ import { Server, ServerOptions } from 'hapi';
 import { HttpService } from './http_service';
 import { HttpConfig } from './http_config';
 import { HttpServerSetup } from './http_server';
+import { HttpServiceSetup } from './http_service';
 
 const createSetupContractMock = () => {
-  const setupContract = {
-    options: {} as ServerOptions,
+  const setupContract: Required<HttpServiceSetup> = {
+    options: ({} as unknown) as ServerOptions,
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
     registerRouter: jest.fn(),
-    getBasePathFor: jest.fn(),
-    setBasePathFor: jest.fn(),
+    basePath: {
+      get: jest.fn(),
+      set: jest.fn(),
+      prepend: jest.fn(),
+      remove: jest.fn(),
+    },
     // we can mock some hapi server method when we need it
     server: {} as Server,
     auth: {
