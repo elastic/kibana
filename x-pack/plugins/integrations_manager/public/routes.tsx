@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
+import { generatePath } from 'react-router-dom';
 import { Detail } from './screens/detail';
 import { Home } from './screens/home';
 import { ID } from '../common/constants';
@@ -16,6 +17,9 @@ export const APP_ROOT = `/app/${ID}`;
 export const LIST_VIEW = '/';
 
 export const DETAIL_VIEW = '/detail/:pkgkey';
+
+export const linkToDetailView = ({ name, version }: { name: string; version: string }) =>
+  generatePath(DETAIL_VIEW, { pkgkey: `${name}-${version}` });
 
 export const routes = [
   <Route exact={true} path={LIST_VIEW} component={Home} breadcrumb="Home" key="home" />,

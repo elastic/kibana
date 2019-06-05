@@ -5,18 +5,18 @@
  */
 import React from 'react';
 import { EuiButtonEmpty, EuiCard } from '@elastic/eui';
-import { generatePath, Link } from 'react-router-dom';
-import { DETAIL_VIEW } from '../routes';
-import { IntegrationInfo } from '../../common/types';
+import { Link } from 'react-router-dom';
+import { linkToDetailView } from '../routes';
+import { IntegrationListItem } from '../../common/types';
 
-export function IntegrationCard({ description, name, version }: IntegrationInfo) {
+export function IntegrationCard({ description, name, version }: IntegrationListItem) {
   return (
     <EuiCard
       title={name}
       description={description}
       footer={
         <EuiButtonEmpty>
-          <Link to={generatePath(DETAIL_VIEW, { pkgkey: `${name}-${version}` })}>More Details</Link>
+          <Link to={linkToDetailView({ name, version })}>More Details</Link>
         </EuiButtonEmpty>
       }
     />

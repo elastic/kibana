@@ -7,10 +7,10 @@ import React, { useState, useEffect } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { getIntegrationsList } from '../data';
 import { IntegrationCard } from '../components/integration_card';
-import { IntegrationInfo } from '../../common/types';
+import { IntegrationList } from '../../common/types';
 
 export function Home() {
-  const [list, setList] = useState([] as IntegrationInfo[]);
+  const [list, setList] = useState([{}] as IntegrationList);
 
   useEffect(() => {
     getIntegrationsList().then(({ data }) => setList(data));

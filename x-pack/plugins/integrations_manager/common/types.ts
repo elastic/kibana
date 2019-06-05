@@ -14,9 +14,26 @@ export interface CoreSetup {
 }
 
 // the contract with the registry
-export interface IntegrationInfo {
-  description: string;
+export type IntegrationList = [IntegrationListItem];
+
+// registry /list
+export interface IntegrationListItem {
   name: string;
   version: string;
+  description: string;
   icon: string;
+}
+
+// registry /package/{name}
+// https://github.com/elastic/integrations-registry/blob/8306aa1abe83eab71c7677e4e964ebf66dc3880b/main.go#L180-L190
+export interface IntegrationInfo {
+  name: string;
+  version: string;
+  description: string;
+  requirement: {
+    kibana: {
+      min: string;
+      max: string;
+    };
+  };
 }
