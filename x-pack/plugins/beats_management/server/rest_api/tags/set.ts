@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { get } from 'lodash';
-import { BeatTag } from 'x-pack/plugins/beats_management/common/domain_types';
+import { BeatTag } from '../../../common/domain_types';
 import { REQUIRED_LICENSES } from '../../../common/constants';
 import { ReturnTypeUpsert } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
