@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Embeddable } from './embeddable';
@@ -46,13 +46,16 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
 
   public render(dom: HTMLElement) {
     const title = typeof this.error === 'string' ? this.error : this.error.message;
-    const stack = typeof this.error === 'string' ? '' : this.error.stack;
     this.dom = dom;
     ReactDOM.render(
       // @ts-ignore
-      <EuiCallOut title={title} color="danger" data-test-subj="embeddableStackError">
-        {stack}
-      </EuiCallOut>,
+      <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
+        <EuiText color="subdued" size="xs">
+          <EuiIcon type="alert" color="danger" />
+          <EuiSpacer size="s" />
+          {title}
+        </EuiText>
+      </div>,
       dom
     );
   }

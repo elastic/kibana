@@ -119,3 +119,16 @@
     opacity: 1; /* 3 */
   }
 }
+
+.embPanel__error {
+  text-align: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: auto;
+  text-align: center;
+
+  .fa-exclamation-triangle {
+    font-size: $euiFontSizeXL;
+    color: $euiColorDanger;
+  }
+}
