@@ -19,7 +19,7 @@
 
 import { SearchSource } from 'ui/courier';
 import { SavedObject } from 'ui/saved_objects/saved_object';
-import moment = require('moment');
+import moment from 'moment';
 import { RefreshInterval } from 'ui/timefilter/timefilter';
 
 export interface SavedObjectDashboard extends SavedObject {

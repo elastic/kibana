@@ -26,6 +26,7 @@ import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
 import { TimeRange, Query } from 'ui/embeddable';
 import { Timefilter } from 'ui/timefilter';
 import { Filter } from '@kbn/es-query';
+import moment from 'moment';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
@@ -73,7 +74,6 @@ import {
   StagedFilter,
   DashboardAppStateParameters,
 } from './types';
-import moment = require('moment');
 
 export type AddFilterFuntion = ({ field, value, operator, index }: StagedFilter) => void;
 
