@@ -33,10 +33,7 @@ import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 // @ts-ignore
 import { uniqFilters } from './lib/uniq_filters';
 
-interface PartitionedFilters {
-  globalFilters: Filter[];
-  appFilters: Filter[];
-}
+import { PartitionedFilters } from './partitioned_filters';
 
 interface DelayedChangeNotification {
   update: (() => void) | undefined;
@@ -47,24 +44,12 @@ export class FilterManager {
   filters: Filter[] = [];
   updated$: Subject<any> = new Subject();
 
-  constructor(indexPatterns: any, filters: Filter[]);
-  constructor(indexPatterns: any, filters: Filter[], globalFilters?: Filter[]) {
+  constructor(indexPatterns: any, partitionedFilters: PartitionedFilters) {
     this.indexPatterns = indexPatterns;
-    if (globalFilters) {
-      filters = this.mergeFilters(filters, globalFilters);
-    }
-    this.filters = filters || [];
-  }
-
-  private partitionFilters(): PartitionedFilters {
-    const [globalFilters, appFilters] = _.partition(this.filters, filter => {
-      return filter.$state.store === FilterStateStore.GLOBAL_STATE;
-    });
-
-    return {
-      globalFilters,
-      appFilters,
-    };
+    this.filters = this.mergeFilters(
+      partitionedFilters.appFilters,
+      partitionedFilters.globalFilters
+    );
   }
 
   private filtersUpdated(newFilters: Filter[]): boolean {
@@ -97,13 +82,24 @@ export class FilterManager {
   }
 
   public getAppFilters() {
-    const { appFilters } = this.partitionFilters();
+    const { appFilters } = this.getPartitionedFilters();
     return appFilters;
   }
 
   public getGlobalFilters() {
-    const { globalFilters } = this.partitionFilters();
+    const { globalFilters } = this.getPartitionedFilters();
     return globalFilters;
+  }
+
+  public getPartitionedFilters(): PartitionedFilters {
+    const [globalFilters, appFilters] = _.partition(this.filters, filter => {
+      return filter.$state.store === FilterStateStore.GLOBAL_STATE;
+    });
+
+    return {
+      globalFilters,
+      appFilters,
+    };
   }
 
   public getUpdates$() {

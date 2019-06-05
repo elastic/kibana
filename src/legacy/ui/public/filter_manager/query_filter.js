@@ -23,12 +23,27 @@ import { Subject } from 'rxjs';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 import { FilterManager } from './new_filter_manager';
+import { FilterStateManager } from './filter_state_manager';
 
 export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalState) {
   const queryFilter = {};
 
-  let filterStateManager;
+  let filterManager;
   let filterStateUpdateSubscription$;
+
+  const filterStateManager = new FilterStateManager(globalState, getAppState);
+  filterStateManager.getStateUpdated$().subscribe((partitionedFilters) => {
+    const filtersChanged = (!filterManager ||
+      !_.isEqual(partitionedFilters.appFilters || [], filterManager.getAppFilters()) ||
+      !_.isEqual(partitionedFilters.globalFilters || [], filterManager.getGlobalFilters()));
+
+    if (!filtersChanged) return;
+
+    setupFilterManager(partitionedFilters);
+  });
+
+
+  filterStateManager.watchFilterState();
 
   const update$ = new Subject();
   const fetch$ = new Subject();
@@ -42,15 +57,15 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
   };
 
   queryFilter.getFilters = function () {
-    return filterStateManager ? filterStateManager.getFilters() : [];
+    return filterManager ? filterManager.getFilters() : [];
   };
 
   queryFilter.getAppFilters = function () {
-    return filterStateManager ? filterStateManager.getAppFilters() : [];
+    return filterManager ? filterManager.getAppFilters() : [];
   };
 
   queryFilter.getGlobalFilters = function () {
-    return filterStateManager ? filterStateManager.getGlobalFilters() : [];
+    return filterManager ? filterManager.getGlobalFilters() : [];
   };
 
   /**
@@ -60,17 +75,17 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
    * @returns {Promise} filter map promise
    */
   queryFilter.addFilters = function (filters, addToGlobalState) {
-    return filterStateManager.addFilters(filters, addToGlobalState, false)
+    return filterManager.addFilters(filters, addToGlobalState, false)
       .then(function (delayedChangeUpdate) {
-        updateAppState();
+        filterStateManager.updateAppState(filterManager.getPartitionedFilters());
         delayedChangeUpdate.update && delayedChangeUpdate.update();
       });
   };
 
   queryFilter.setFilters = filters => {
-    return filterStateManager.setFilters(filters, false)
+    return filterManager.setFilters(filters, false)
       .then(delayedChangeUpdate => {
-        updateAppState();
+        filterStateManager.updateAppState(filterManager.getPartitionedFilters());
         delayedChangeUpdate.update && delayedChangeUpdate.update();
       });
   };
@@ -80,8 +95,8 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
    * @param {object} matchFilter The filter to remove
    */
   queryFilter.removeFilter = function (matchFilter) {
-    const delayedChangeUpdate = filterStateManager.removeFilter(matchFilter, false);
-    updateAppState();
+    const delayedChangeUpdate = filterManager.removeFilter(matchFilter, false);
+    filterStateManager.updateAppState(filterManager.getPartitionedFilters());
     delayedChangeUpdate.update && delayedChangeUpdate.update();
   };
 
@@ -98,7 +113,7 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
    * @returns {object} updated filter
    */
   queryFilter.invertFilter = function (filter) {
-    return this.filterStateManager.invertFilter(filter);
+    return filterManager.invertFilter(filter);
   };
 
   queryFilter.addFiltersAndChangeTimeFilter = async filters => {
@@ -107,62 +122,23 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
     queryFilter.addFilters(filters.filter(filter => filter !== timeFilter));
   };
 
-  initWatchers();
-
   return queryFilter;
 
-  function updateAppState() {
-    globalState.filters = filterStateManager.getGlobalFilters();
-    getAppState().filters = filterStateManager.getAppFilters();
-  }
-
-  /**
-   * Saves both app and global states, ensuring filters are persisted
-   * @returns {object} Resulting filter list, app and global combined
-   */
-  function saveState() {
-    const appState = getAppState();
-    if (appState) appState.save();
-    globalState.save();
-  }
-
-  function setupFilterManager(appFilters, globalFilters) {
+  function setupFilterManager(partitionedFilters) {
     if (filterStateUpdateSubscription$) {
       filterStateUpdateSubscription$.unsubscribe();
     }
 
-    filterStateManager = new FilterManager(indexPatterns, appFilters || [], globalFilters || []);
+    filterManager = new FilterManager(indexPatterns, partitionedFilters);
     update$.next();
     fetch$.next();
 
-    filterStateUpdateSubscription$ = filterStateManager.getUpdates$().subscribe((shouldFetch) => {
-      saveState();
+    filterStateUpdateSubscription$ = filterManager.getUpdates$().subscribe((shouldFetch) => {
+      filterStateManager.saveState();
       update$.next();
       if (shouldFetch) {
         fetch$.next();
       }
     });
-  }
-
-  /**
-   * Initializes state watchers
-   * @returns {void}
-   */
-  function initWatchers() {
-    // This is a temporary solution to remove rootscope.
-    // Moving forward, new filters will be explicitly pushed into the filter manager.
-    setInterval(() => {
-      const appState = getAppState();
-      if (!appState || !globalState) return;
-
-      const filtersChanged = (!filterStateManager ||
-            !_.isEqual(appState.filters || [], filterStateManager.getAppFilters()) ||
-            !_.isEqual(globalState.filters || [], filterStateManager.getGlobalFilters())
-      );
-
-      if (!filtersChanged) return;
-
-      setupFilterManager(appState && appState.filters, globalState.filters);
-    }, 50);
   }
 }
