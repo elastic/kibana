@@ -115,7 +115,7 @@ export const NodeContextMenu = injectUICapabilities(
           id: 0,
           title: '',
           items: [
-            ...(showLogsLink && nodeLogsMenuItem ? [nodeLogsMenuItem] : []),
+            ...(showLogsLink ? [nodeLogsMenuItem] : []),
             nodeDetailMenuItem,
             ...(showAPMTraceLink ? [apmTracesMenuItem] : []),
             ...(showUptimeLink ? [uptimeMenuItem] : []),
