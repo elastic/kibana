@@ -173,10 +173,7 @@ export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
   };
 }
 
-const workpadCollector: TelemetryCollector = async function customElementCollector(
-  server,
-  callCluster
-) {
+const workpadCollector: TelemetryCollector = async function(server, callCluster) {
   const index = server.config().get<string>('kibana.index');
   const searchParams: SearchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
