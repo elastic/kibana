@@ -176,12 +176,7 @@ export const MonitorListComponent = ({
                 'The heading column of some action buttons that will take users to other Obsevability apps',
             }),
             render: (ping: Ping, monitor: LatestMonitor) => (
-              <MonitorListActionsPopover
-                basePath={basePath}
-                dateRangeStart={dateRangeStart}
-                dateRangeEnd={dateRangeEnd}
-                monitor={monitor}
-              />
+              <MonitorListActionsPopover monitor={monitor} />
             ),
           },
         ]}
