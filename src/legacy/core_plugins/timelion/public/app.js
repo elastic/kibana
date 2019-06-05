@@ -120,7 +120,6 @@ app.controller('timelion', function (
   config,
   confirmModal,
   kbnUrl,
-  Notifier,
   Private
 ) {
 
@@ -131,10 +130,6 @@ app.controller('timelion', function (
 
   timefilter.enableAutoRefreshSelector();
   timefilter.enableTimeRangeSelector();
-
-  const notify = new Notifier({
-    location
-  });
 
   const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
   const timezone = Private(timezoneProvider)();
@@ -380,8 +375,11 @@ app.controller('timelion', function (
 
         const err = new Error(resp.message);
         err.stack = resp.stack;
-        notify.error(err);
-
+        toastNotifications.addError(err, {
+          title: i18n.translate('timelion.searchErrorTitle', {
+            defaultMessage: 'Timelion request error',
+          }),
+        });
       });
   };
 

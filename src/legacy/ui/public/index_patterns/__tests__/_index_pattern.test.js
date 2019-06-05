@@ -39,11 +39,9 @@ jest.mock('../../utils/mapping_setup', () => ({
 }));
 
 jest.mock('../../notify', () => ({
-  Notifier: jest.fn().mockImplementation(() => ({
-    error: jest.fn(),
-  })),
   toastNotifications: {
     addDanger: jest.fn(),
+    addError: jest.fn(),
   }
 }));
 

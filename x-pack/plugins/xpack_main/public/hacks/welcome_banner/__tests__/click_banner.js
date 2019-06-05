@@ -11,7 +11,6 @@ import { uiModules } from 'ui/modules';
 uiModules.get('kibana')
   // disable stat reporting while running tests,
   // MockInjector used in these tests is not impacted
-  .constant('Notifier', function mockNotifier() { this.notify = sinon.stub(); })
   .constant('telemetryOptedIn', null);
 
 import {
@@ -23,7 +22,6 @@ const getMockInjector = ({ simulateFailure }) => {
   const get = sinon.stub();
 
   get.withArgs('telemetryOptedIn').returns(null);
-  get.withArgs('Notifier').returns(function mockNotifier() { this.notify = sinon.stub(); });
 
   const mockHttp = {
     post: sinon.stub()

@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { I18nContext } from 'ui/i18n';
 import { PipelineEditor } from '../../../../components/pipeline_editor';
 import 'plugins/logstash/services/license';
@@ -49,7 +49,6 @@ app.directive('pipelineEdit', function ($injector) {
             routeService={$route}
             toastNotifications={toastNotifications}
             licenseService={licenseService}
-            notifier={new Notifier({ location: 'Logstash' })}
           />
         </I18nContext>,
         el[0]

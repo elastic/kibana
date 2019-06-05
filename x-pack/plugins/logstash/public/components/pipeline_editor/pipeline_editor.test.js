@@ -14,7 +14,6 @@ describe('PipelineEditor component', () => {
   let close;
   let isNewPipeline;
   let licenseService;
-  let notifier;
   let open;
   let pipeline;
   let pipelineService;
@@ -29,9 +28,6 @@ describe('PipelineEditor component', () => {
       checkValidity: jest.fn(),
       isReadOnly: false,
       message: 'license service message',
-    };
-    notifier = {
-      error: jest.fn(),
     };
     open = jest.fn();
     pipeline = {
@@ -62,13 +58,13 @@ describe('PipelineEditor component', () => {
     toastNotifications = {
       addWarning: jest.fn(),
       addSuccess: jest.fn(),
+      addError: jest.fn(),
     };
     username = 'elastic';
     props = {
       close,
       isNewPipeline,
       licenseService,
-      notifier,
       open,
       pipeline,
       pipelineService,

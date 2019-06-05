@@ -19,16 +19,14 @@
 
 import compactStringify from 'json-stringify-pretty-compact';
 import hjson from 'hjson';
-import { Notifier } from 'ui/notify';
 import { uiModules } from 'ui/modules';
 
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 
 const module = uiModules.get('kibana/vega', ['kibana']);
 module.controller('VegaEditorController', ($scope /*, kbnUiAceKeyboardModeService*/) => {
-
-  const notify = new Notifier({ location: 'Vega' });
-
   return new (class VegaEditorController {
     constructor() {
       $scope.aceLoaded = (editor) => {
@@ -69,7 +67,11 @@ module.controller('VegaEditorController', ($scope /*, kbnUiAceKeyboardModeServic
         newSpec = stringify(spec, opts);
       } catch (err) {
         // This is a common case - user tries to format an invalid HJSON text
-        notify.error(err);
+        toastNotifications.addError(err, {
+          title: i18n.translate('vega.editor.formatError', {
+            defaultMessage: 'Error formatting spec',
+          }),
+        });
         return;
       }
 

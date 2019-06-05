@@ -6,10 +6,10 @@
 
 import moment from 'moment';
 import { setCanTrackUiMetrics } from 'ui/ui_metric';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 
 export function TelemetryOptInProvider($injector, chrome) {
-  const Notifier = $injector.get('Notifier');
-  const notify = new Notifier();
   let currentOptInStatus = $injector.get('telemetryOptedIn');
   setCanTrackUiMetrics(currentOptInStatus);
 
@@ -24,7 +24,14 @@ export function TelemetryOptInProvider($injector, chrome) {
         await $http.post(chrome.addBasePath('/api/telemetry/v2/optIn'), { enabled });
         currentOptInStatus = enabled;
       } catch (error) {
-        notify.error(error);
+        toastNotifications.addError(error, {
+          title: i18n.translate('xpack.main.telemetry.optInErrorToastTitle', {
+            defaultMessage: 'Error',
+          }),
+          toastMessage: i18n.translate('xpack.main.telemetry.optInErrorToastText', {
+            defaultMessage: 'An error occured while trying to set the usage statistics preference.',
+          }),
+        });
         return false;
       }
 

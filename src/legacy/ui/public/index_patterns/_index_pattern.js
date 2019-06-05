@@ -22,7 +22,7 @@ import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 
 import angular from 'angular';
 import { fieldFormats } from '../registry/field_formats';
 import UtilsMappingSetupProvider from '../utils/mapping_setup';
-import { Notifier, toastNotifications } from '../notify';
+import { toastNotifications } from '../notify';
 
 import { getComputedFields } from './_get_computed_fields';
 import { formatHit } from './_format_hit';
@@ -57,7 +57,6 @@ export function IndexPatternProvider(Private, config, Promise) {
   const fieldformats = fieldFormats;
 
   const type = 'index-pattern';
-  const notify = new Notifier();
   const configWatchers = new WeakMap();
 
   const mapping = mappingSetup.expandShorthand({
@@ -435,7 +434,6 @@ export function IndexPatternProvider(Private, config, Promise) {
       return fetchFields(this)
         .then(() => this.save())
         .catch((err) => {
-          notify.error(err);
           // https://github.com/elastic/kibana/issues/9224
           // This call will attempt to remap fields from the matching
           // ES index which may not actually exist. In that scenario,
@@ -443,9 +441,15 @@ export function IndexPatternProvider(Private, config, Promise) {
           // but we do not want to potentially make any pages unusable
           // so do not rethrow the error here
           if (err instanceof IndexPatternMissingIndices) {
+            toastNotifications.addDanger(err.message);
             return [];
           }
 
+          toastNotifications.addError(err, {
+            title: i18n.translate('common.ui.indexPattern.fetchFieldErrorTitle', {
+              defaultMessage: 'Error fetching fields',
+            }),
+          });
           throw err;
         });
     }
