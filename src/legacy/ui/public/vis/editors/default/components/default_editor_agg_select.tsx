@@ -93,7 +93,10 @@ function DefaultEditorAggSelect({
         },
       })
     );
-    setTouched();
+  }
+
+  if (agg.error) {
+    errors.push(agg.error);
   }
 
   const isValid = !!value && !errors.length && !agg.error;
@@ -103,6 +106,15 @@ function DefaultEditorAggSelect({
       setValidity(isValid);
     },
     [isValid]
+  );
+
+  useEffect(
+    () => {
+      if (errors.length) {
+        setTouched();
+      }
+    },
+    [errors.length]
   );
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
