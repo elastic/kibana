@@ -72,7 +72,7 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
   public render() {
     return (
       <I18nContext>
-        <div id="dashboardViewport">
+        <div id="dashboardViewport" style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
           <div>{this.renderTabs()}</div>
           {this.getContentsForTab()}
         </div>

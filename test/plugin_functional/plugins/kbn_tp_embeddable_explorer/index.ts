@@ -18,7 +18,6 @@
  */
 
 import { Legacy } from 'kibana';
-// import { resolve } from 'path';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -38,7 +37,6 @@ export default function(kibana: any) {
       embeddableFactories: [
         'plugins/embeddable_api/test_samples/embeddables/hello_world/hello_world_embeddable_factory',
       ],
-      // styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
     init(server: Legacy.Server) {
       server.injectUiAppVars('kbn_tp_embeddable_explorer', async () =>
