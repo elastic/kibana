@@ -17,18 +17,9 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { buildEsQuery } from '@kbn/es-query';
-export function splitByEverything(req, panel, esQueryConfig, indexPattern) {
-  return next => doc => {
-    panel.series.filter(c => !(c.aggregate_by && c.aggregate_function)).forEach(column => {
-      if (column.filter) {
-        _.set(doc, `aggs.pivot.aggs.${column.id}.filter`, buildEsQuery(indexPattern, [column.filter], [], esQueryConfig));
-      } else {
-        _.set(doc, `aggs.pivot.aggs.${column.id}.filter.match_all`, {});
-      }
-    });
-    return next(doc);
-  };
-}
 
+import chrome from 'ui/chrome';
+
+export function getDefaultQueryLanguage() {
+  return chrome.getUiSettingsClient().get('search:queryLanguage');
+}

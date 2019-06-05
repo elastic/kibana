@@ -17,20 +17,23 @@
  * under the License.
  */
 
-import { createTextHandler } from '../lib/create_text_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { data } from 'plugins/data';
+const { QueryBarInput } = data.query.ui;
+import { Storage } from 'ui/storage';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+const localStorage = new Storage(window.localStorage);
 
 export const SplitByFilter = props => {
-  const { onChange, uiRestrictions } = props;
-  const defaults = { filter: '' };
+  const { onChange, uiRestrictions, indexPattern } = props;
+  const defaults = { filter: { language: getDefaultQueryLanguage(), query: '' } };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
-  const handleTextChange = createTextHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
   return (
     <EuiFlexGroup alignItems="center">
@@ -57,9 +60,15 @@ export const SplitByFilter = props => {
             defaultMessage="Query string"
           />)}
         >
-          <EuiFieldText
-            value={model.filter}
-            onChange={handleTextChange('filter')}
+          <QueryBarInput
+            query={{
+              language: model.filter.language || getDefaultQueryLanguage(),
+              query: model.filter.query || '',
+            }}
+            onChange={filter => onChange({ filter })}
+            appName={'VisEditor'}
+            indexPatterns={[indexPattern]}
+            store={localStorage}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -71,4 +80,5 @@ SplitByFilter.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   uiRestrictions: PropTypes.object,
+  indexPatterns: PropTypes.string,
 };
