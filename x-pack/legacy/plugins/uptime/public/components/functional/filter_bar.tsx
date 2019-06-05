@@ -148,13 +148,7 @@ export const FilterBarComponent = ({ currentQuery, data, error, updateQuery }: P
           <EuiSearchBar
             box={{
               incremental: false,
-              placeholder: currentQuery
-                ? i18n.translate('xpack.uptime.filterBar.options.placeholder', {
-                    defaultMessage: '{currentQuery} could not be parsed',
-                    description: `When there is a filter error we display the failed query along with a brief message as placeholder text`,
-                    values: { currentQuery },
-                  })
-                : '',
+              placeholder: currentQuery,
             }}
             className="euiFlexGroup--gutterSmall"
             onChange={updateQuery}
@@ -170,14 +164,12 @@ export const FilterBarComponent = ({ currentQuery, data, error, updateQuery }: P
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
-                  <p>
-                    <EuiCode>{currentQuery}</EuiCode>{' '}
-                    {i18n.translate('xpack.uptime.filterBar.errorCalloutMessage', {
-                      defaultMessage: ' cannot be parsed.',
-                      description: `When there's an error we display the failed query in a special code
+                  <EuiCode>{currentQuery}</EuiCode>{' '}
+                  {i18n.translate('xpack.uptime.filterBar.errorCalloutMessage', {
+                    defaultMessage: ' cannot be parsed.',
+                    description: `When there's an error we display the failed query in a special code
                       block and append this text to the end of the line. Example: "monitor.id:foo" cannot be parsed.`,
-                    })}
-                  </p>
+                  })}
                 </EuiText>
               </EuiFlexItem>
               {!!error.message && <EuiFlexItem>{error.message}</EuiFlexItem>}

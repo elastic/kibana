@@ -27,7 +27,9 @@ interface OverviewPageProps {
 
 type Props = OverviewPageProps;
 
-export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
+export type UptimeSearchBarQueryChangeHandler = (
+  queryChangedEvent: { query?: { text: string }; queryText?: string }
+) => void;
 
 export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
@@ -50,6 +52,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
   let error: any;
   let filters: any | undefined;
   try {
+    // toESQuery will throw errors
     filters = JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString));
   } catch (e) {
     error = e;
@@ -60,14 +63,12 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
     filters,
   };
 
-  const updateQuery: UptimeSearchBarQueryChangeHandler = ({ query }) => {
+  const updateQuery: UptimeSearchBarQueryChangeHandler = ({ queryText }) => {
     try {
-      if (query && typeof query.text !== 'undefined') {
-        updateUrl({ search: query.text });
+      if (!!queryText) {
+        updateUrl({ search: queryText });
       }
-      if (refreshApp) {
-        refreshApp();
-      }
+      refreshApp();
     } catch (e) {
       updateUrl({ search: '' });
     }
