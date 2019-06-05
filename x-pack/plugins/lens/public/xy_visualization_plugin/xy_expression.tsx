@@ -16,15 +16,26 @@ import {
   AreaSeries,
   BarSeries,
 } from '@elastic/charts';
-import { KibanaDatatable } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { XYArgs } from './types';
+import { KibanaDatatable } from '../types';
+import { RenderFunction } from './plugin';
 
-// TODO: Specify the TypeScript type of this definition, once the
-// ContextFunction has moved to core and has the correct signature:
-// ContextFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender>
-export const xyChart = {
+export interface XYChartProps {
+  data: KibanaDatatable;
+  args: XYArgs;
+}
+
+export interface XYRender {
+  type: 'render';
+  as: 'lens_xy_chart_renderer';
+  value: XYChartProps;
+}
+
+export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender> = ({
   name: 'lens_xy_chart',
   type: 'render',
+  help: 'An X/Y chart',
   args: {
     seriesType: {
       types: ['string'],
@@ -71,18 +82,21 @@ export const xyChart = {
       },
     };
   },
-};
+  // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
+} as unknown) as ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender>;
 
 export interface XYChartProps {
   data: KibanaDatatable;
   args: XYArgs;
 }
 
-export const xyChartRenderer = {
+export const xyChartRenderer: RenderFunction<XYChartProps> = {
   name: 'lens_xy_chart_renderer',
   displayName: 'XY Chart',
+  help: 'X/Y Chart Renderer',
+  validate: () => {},
   reuseDomNode: true,
-  render: async (domNode: HTMLDivElement, config: XYChartProps, _handlers: unknown) => {
+  render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
     ReactDOM.render(<XYChart {...config} />, domNode);
   },
 };

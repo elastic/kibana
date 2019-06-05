@@ -27,6 +27,12 @@ export interface ExpressionRunnerOptions {
   context?: object;
   getInitialContext?: () => object;
   element?: Element;
+  /**
+   * If an element is specified, but the response of the expression run can't be rendered
+   * because it isn't a valid response or the specified renderer isn't available,
+   * this callback is called with the given result.
+   */
+  onRenderFailure?: (result: Result) => void;
 }
 
 export type ExpressionRunner = (
@@ -37,7 +43,10 @@ export type ExpressionRunner = (
 export const createRunFn = (
   renderersRegistry: RenderFunctionsRegistry,
   interpreterPromise: Promise<Interpreter>
-): ExpressionRunner => async (expressionOrAst, { element, context, getInitialContext }) => {
+): ExpressionRunner => async (
+  expressionOrAst,
+  { element, context, getInitialContext, onRenderFailure }
+) => {
   // TODO: make interpreter initialization synchronous to avoid this
   const interpreter = await interpreterPromise;
   const ast =
@@ -53,7 +62,7 @@ export const createRunFn = (
   });
 
   if (element) {
-    if (response.type === 'render' && response.as) {
+    if (response.type === 'render' && response.as && renderersRegistry.get(response.as) !== null) {
       renderersRegistry.get(response.as).render(element, response.value, {
         onDestroy: fn => {
           // TODO implement
@@ -63,8 +72,9 @@ export const createRunFn = (
         },
       });
     } else {
-      // eslint-disable-next-line no-console
-      console.log('Unexpected result of expression', response);
+      if (onRenderFailure) {
+        onRenderFailure(response);
+      }
     }
   }
 

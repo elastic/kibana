@@ -531,10 +531,15 @@ export function commitInfo(commit: Commit): CommitInfo {
   };
 }
 
-export async function referenceInfo(ref: Reference): Promise<ReferenceInfo> {
+export async function referenceInfo(ref: Reference): Promise<ReferenceInfo | null> {
   const repository = ref.owner();
-  const object = await ref.peel(Object.TYPE.COMMIT);
-  const commit = await repository.getCommit(object.id());
+  let commit: CommitInfo | undefined;
+  try {
+    const object = await ref.peel(Object.TYPE.COMMIT);
+    commit = commitInfo(await repository.getCommit(object.id()));
+  } catch {
+    return null;
+  }
   let type: ReferenceType;
   if (ref.isTag()) {
     type = ReferenceType.TAG;
@@ -548,7 +553,7 @@ export async function referenceInfo(ref: Reference): Promise<ReferenceInfo> {
   return {
     name: ref.shorthand(),
     reference: ref.name(),
-    commit: commitInfo(commit),
+    commit,
     type,
   };
 }

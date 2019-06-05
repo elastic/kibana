@@ -39,18 +39,22 @@ const waitForInterpreterRun = async () => {
   await new Promise(resolve => setTimeout(resolve));
 };
 
+const RENDERER_ID = 'mockId';
+
 describe('expressions_service', () => {
+  let interpretAstMock: jest.Mocked<Interpreter>['interpretAst'];
   let interpreterMock: jest.Mocked<Interpreter>;
   let renderFunctionMock: jest.Mocked<RenderFunction>;
   let setupPluginsMock: ExpressionsServiceDependencies;
-  const expressionResult: Result = { type: 'render', as: 'abc', value: {} };
+  const expressionResult: Result = { type: 'render', as: RENDERER_ID, value: {} };
 
   let api: ExpressionsSetup;
   let testExpression: string;
   let testAst: Ast;
 
   beforeEach(() => {
-    interpreterMock = { interpretAst: jest.fn(_ => Promise.resolve(expressionResult)) };
+    interpretAstMock = jest.fn(_ => Promise.resolve(expressionResult));
+    interpreterMock = { interpretAst: interpretAstMock };
     renderFunctionMock = ({
       render: jest.fn(),
     } as unknown) as jest.Mocked<RenderFunction>;
@@ -58,7 +62,7 @@ describe('expressions_service', () => {
       interpreter: {
         getInterpreter: () => Promise.resolve({ interpreter: interpreterMock }),
         renderersRegistry: ({
-          get: () => renderFunctionMock,
+          get: (id: string) => (id === RENDERER_ID ? renderFunctionMock : null),
         } as unknown) as RenderFunctionsRegistry,
       },
     };
@@ -99,6 +103,44 @@ describe('expressions_service', () => {
         expect.anything(),
         expect.anything()
       );
+    });
+
+    it('should return the result of the interpreter run', async () => {
+      const response = await api.run(testAst, {});
+      expect(response).toBe(expressionResult);
+    });
+
+    it('should call on render failure if the response is not valid', async () => {
+      const errorResult = { type: 'error', error: {} };
+      interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
+      const renderFailureSpy = jest.fn();
+      const response = await api.run(testAst, {
+        element: document.createElement('div'),
+        onRenderFailure: renderFailureSpy,
+      });
+      expect(renderFailureSpy).toHaveBeenCalledWith(errorResult);
+      expect(response).toBe(response);
+    });
+
+    it('should call on render failure if the renderer is not known', async () => {
+      const errorResult = { type: 'render', as: 'unknown_id' };
+      interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
+      const renderFailureSpy = jest.fn();
+      const response = await api.run(testAst, {
+        element: document.createElement('div'),
+        onRenderFailure: renderFailureSpy,
+      });
+      expect(renderFailureSpy).toHaveBeenCalledWith(errorResult);
+      expect(response).toBe(response);
+    });
+
+    it('should not call on render failure if the runner does not render', async () => {
+      const errorResult = { type: 'error', error: {} };
+      interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
+      const renderFailureSpy = jest.fn();
+      const response = await api.run(testAst, { onRenderFailure: renderFailureSpy });
+      expect(renderFailureSpy).not.toHaveBeenCalled();
+      expect(response).toBe(response);
     });
 
     it('should call the render function with the result and element', async () => {

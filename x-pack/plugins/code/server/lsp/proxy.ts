@@ -159,19 +159,17 @@ export class LanguageServerProxy implements ILanguageServerHandler {
    * https://microsoft.github.io/language-server-protocol/specification#exit
    */
   public async exit() {
+    this.closed = true; // stop the socket reconnect
     if (this.clientConnection) {
       this.logger.info('sending `shutdown` request to language server.');
       const clientConn = this.clientConnection;
-      await clientConn.sendRequest('shutdown').then(() => {
-        this.logger.info('sending `exit` notification to language server.');
-
-        // @ts-ignore
-        // TODO fix this
-        clientConn.sendNotification(ExitNotification.type);
-        this.conn.dispose(); // stop listening
+      clientConn.sendRequest('shutdown').then(() => {
+        this.conn.dispose();
       });
+      this.logger.info('sending `exit` notification to language server.');
+      // @ts-ignore
+      clientConn.sendNotification(ExitNotification.type);
     }
-    this.closed = true; // stop the socket reconnect
     this.eventEmitter.emit('exit');
   }
 
@@ -263,9 +261,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   }
 
   private onSocketClosed() {
-    if (this.clientConnection) {
-      this.clientConnection.dispose();
-    }
     this.clientConnection = null;
     this.connectingPromise = null;
     this.eventEmitter.emit('close');
