@@ -156,18 +156,18 @@ function fetchContextProvider(indexPatterns, Private) {
     // ending with `null` opens the last interval
     const intervals = asPairs([...LOOKUP_OFFSETS.map(offset => timeValueMillis + offset * offsetSign), null]);
 
-    let result = [];
+    let documents = [];
     for (const [iStartTimeValue, iEndTimeValue] of intervals) {
-      const remainingSize = size - result.length;
+      const remainingSize = size - documents.length;
 
       if (remainingSize <= 0) {
         break;
       }
-      const afterTimeRecIdx = type === 'successors' && result.length ? result.length - 1 : 0;
+      const afterTimeRecIdx = type === 'successors' && documents.length ? documents.length - 1 : 0;
       const afterTimeValue = nanoSeconds
-        ? convertIsoToNanosAsStr(result.length ? result[afterTimeRecIdx]._source[timeFieldName] : timeFieldIsoValue)
+        ? convertIsoToNanosAsStr(documents.length ? documents[afterTimeRecIdx]._source[timeFieldName] : timeFieldIsoValue)
         : timeFieldNumValue;
-      const afterTieBreakerValue = result.length > 0 ? result[afterTimeRecIdx].sort[1] : tieBreakerValue;
+      const afterTieBreakerValue = documents.length > 0 ? documents[afterTimeRecIdx].sort[1] : tieBreakerValue;
 
       const hits = await fetchHitsInInterval(
         searchSource,
@@ -182,12 +182,12 @@ function fetchContextProvider(indexPatterns, Private) {
         nanoSeconds
       );
 
-      result = type === 'successors'
-        ? [...result, ...hits]
-        : [...hits.slice().reverse(), ...result];
+      documents = type === 'successors'
+        ? [...documents, ...hits]
+        : [...hits.slice().reverse(), ...documents];
     }
 
-    return result;
+    return documents;
   }
 
   /**
