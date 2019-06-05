@@ -53,8 +53,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./dashboard_options'));
       loadTestFile(require.resolve('./data_shared_attributes'));
       loadTestFile(require.resolve('./embed_mode'));
-      loadTestFile(require.resolve('./visual_create_and_add_embeddables'));
-
+     
       // Note: This one must be last because it unloads some data for one of its tests!
       // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
       // to improve efficiency...
@@ -97,5 +96,14 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./dashboard_listing'));
       loadTestFile(require.resolve('./dashboard_clone'));
     });
+
+    describe('visual using current data', function () {
+      this.tags('ciGroup100');
+      before(loadCurrentData);
+      after(unloadCurrentData);
+
+      loadTestFile(require.resolve('./visual_create_and_add_embeddables'));
+    });
+
   });
 }

@@ -87,7 +87,6 @@ export default function ({ getService, getPageObjects }) {
           const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
           await dashboardAddPanel.closeAddPanel();
           expect(exists).to.be(false);
-          await visualTesting.snapshot();
         });
 
         after(async () => {

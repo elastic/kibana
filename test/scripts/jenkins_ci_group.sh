@@ -19,7 +19,7 @@ node scripts/build --debug --oss;
 
 export TEST_BROWSER_HEADLESS=1
 
-if [ "$CI_GROUP" == "2" ]; then
+if [ "$CI_GROUP" == "100" ]; then
   checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" \
   yarn run percy exec \
   grunt "run:functionalTests_ciGroup${CI_GROUP}";

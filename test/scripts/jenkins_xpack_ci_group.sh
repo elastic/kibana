@@ -27,7 +27,8 @@ node scripts/functional_tests --assert-none-excluded \
   --include-tag ciGroup7 \
   --include-tag ciGroup8 \
   --include-tag ciGroup9 \
-  --include-tag ciGroup10
+  --include-tag ciGroup10 \
+  --include-tag ciGroup100
 
 echo " -> building and extracting default Kibana distributable for use in functional tests"
 cd "$KIBANA_DIR"
@@ -40,7 +41,7 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
 
-if [ "$CI_GROUP" == "11" ]; then
+if [ "$CI_GROUP" == "100" ]; then
   checks-reporter-with-killswitch "X-Pack Functional tests / Group ${CI_GROUP}" \
   yarn run percy exec \
   node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag "ciGroup$CI_GROUP"

@@ -64,7 +64,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(actualResponse);
         expect(actualResponse).to.contain(expectedResponseContains);
       });
-      await visualTesting.snapshot();
     });
 
     it('settings should allow changing the text size', async () => {
@@ -79,7 +78,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         // the settings are not applied synchronously, so we retry for a time
         expect(await PageObjects.console.getRequestFontSize()).to.be('24px');
       });
-      await visualTesting.snapshot();
     });
   });
 }
