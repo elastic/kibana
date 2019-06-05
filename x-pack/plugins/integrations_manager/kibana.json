@@ -1,5 +1,5 @@
 {
-  "version": "0.0.2",
+  "version": "kibana",
   "id": "integrations_manager",
   "requiredPlugins": ["kibana", "elasticsearch", "xpack_main"],
   "server": true,
