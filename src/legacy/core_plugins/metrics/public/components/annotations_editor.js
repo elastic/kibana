@@ -174,7 +174,6 @@ export class AnnotationsEditor extends Component {
                       language: model.query_string.language || getDefaultQueryLanguage(),
                       query: model.query_string.query || '',
                     }}
-                    screenTitle={'AnnotationsEditor'}
                     onChange={query => this.handleQueryChange(model, query)}
                     appName={'VisEditor'}
                     indexPatterns={[model.index_pattern]}

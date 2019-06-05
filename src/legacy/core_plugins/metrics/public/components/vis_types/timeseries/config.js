@@ -328,7 +328,6 @@ export const TimeseriesConfig = injectI18n(function (props) {
               language: (model.filter && model.filter.language) ? model.filter.language : getDefaultQueryLanguage(),
               query: (model.filter && model.filter.query) ? model.filter.query : ''
             }}
-            screenTitle={'TSVBDataOptionsTab'}
             onChange={filter => props.onChange({ filter })}
             appName={'VisEditor'}
             indexPatterns={[seriesIndexPattern]}

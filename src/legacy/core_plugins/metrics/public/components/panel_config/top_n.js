@@ -146,7 +146,6 @@ export class TopNPanelConfig extends Component {
                       language: model.filter.language ? model.filter.language : getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    screenTitle={'TopNPanelConfigQuery'}
                     onChange={filter => this.props.onChange({ filter })}
                     appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}

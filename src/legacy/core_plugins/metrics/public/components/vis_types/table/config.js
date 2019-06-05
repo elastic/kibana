@@ -133,7 +133,6 @@ class TableSeriesConfigUI extends Component {
                   language: (model.filter && model.filter.language) ? model.filter.language : getDefaultQueryLanguage(),
                   query: (model.filter && model.filter.query) ? model.filter.query : ''
                 }}
-                screenTitle={'TSVBTableDataOptionsTab'}
                 onChange={filter => this.props.onChange({ filter })}
                 appName={'VisEditor'}
                 indexPatterns={[this.props.indexPatternForQuery]}

@@ -85,7 +85,6 @@ class FilterItemsUi extends Component {
               language: model.filter.language || getDefaultQueryLanguage(),
               query: model.filter.query || '',
             }}
-            screenTitle={'DataMetricsGroupByFiltersFilter'}
             onChange={(query) => this.handleQueryChange(model, query)}
             appName={'VisEditor'}
             indexPatterns={[indexPatterns]}

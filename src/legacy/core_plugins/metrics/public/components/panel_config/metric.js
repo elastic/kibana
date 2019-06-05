@@ -119,7 +119,6 @@ export class MetricPanelConfig extends Component {
                       language: model.filter.language || getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    screenTitle={'MetricPanelConfigQuery'}
                     onChange={filter => this.props.onChange({ filter })}
                     appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}

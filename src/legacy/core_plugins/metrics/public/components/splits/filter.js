@@ -65,7 +65,6 @@ export const SplitByFilter = props => {
               language: model.filter.language || getDefaultQueryLanguage(),
               query: model.filter.query || '',
             }}
-            screenTitle={'DataMetricsGroupByFilter'}
             onChange={filter => onChange({ filter })}
             appName={'VisEditor'}
             indexPatterns={[indexPattern]}
