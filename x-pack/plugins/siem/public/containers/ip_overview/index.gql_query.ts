@@ -36,20 +36,6 @@ export const ipOverviewQuery = gql`
             region_iso_code
             region_name
           }
-          host {
-            architecture
-            id
-            ip
-            mac
-            name
-            os {
-              family
-              name
-              platform
-              version
-            }
-            type
-          }
         }
         destination {
           firstSeen
@@ -71,20 +57,20 @@ export const ipOverviewQuery = gql`
             region_iso_code
             region_name
           }
-          host {
-            architecture
-            id
-            ip
-            mac
+        }
+        host {
+          architecture
+          id
+          ip
+          mac
+          name
+          os {
+            family
             name
-            os {
-              family
-              name
-              platform
-              version
-            }
-            type
+            platform
+            version
           }
+          type
         }
       }
     }
