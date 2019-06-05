@@ -22,31 +22,38 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { embeddableIsInitialized, setPanels } from './actions';
 import { getAppStateMock, getSavedDashboardMock } from './__tests__';
 import { store } from '../store';
-import { IAppState } from 'ui/state_management/app_state';
+import { AppStateClass } from 'ui/state_management/app_state';
 import { DashboardAppState } from './types';
-import { TimeRange } from 'ui/embeddable';
 import { IndexPattern } from 'ui/index_patterns';
+import { Timefilter } from 'ui/timefilter';
 
 jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });
 
 describe('DashboardState', function() {
   let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();
-  const mockTimefilter: {
-    time: TimeRange;
-    setTime: (time: TimeRange) => void;
-  } = {
+  const mockTimefilter: Timefilter = {
     time: { to: 'now', from: 'now-15m' },
     setTime(time) {
       this.time = time;
     },
+    getTime() {
+      return this.time;
+    },
+    disableAutoRefreshSelector: jest.fn(),
+    setRefreshInterval: jest.fn(),
+    getRefreshInterval: jest.fn(),
+    disableTimeRangeSelector: jest.fn(),
+    enableAutoRefreshSelector: jest.fn(),
+    off: jest.fn(),
+    on: jest.fn(),
   };
   const mockIndexPattern: IndexPattern = { id: 'index1', fields: [], title: 'hi' };
 
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
       savedDashboard,
-      AppStateClass: getAppStateMock() as IAppState<DashboardAppState>,
+      AppStateClass: getAppStateMock() as AppStateClass<DashboardAppState>,
       hideWriteControls: false,
       addFilter: () => {},
     });

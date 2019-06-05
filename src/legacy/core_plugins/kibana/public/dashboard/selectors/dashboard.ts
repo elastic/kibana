@@ -18,15 +18,9 @@
  */
 
 import _ from 'lodash';
-import {
-  ContainerState,
-  EmbeddableMetadata,
-  Filters,
-  Query,
-  RefreshConfig,
-  TimeRange,
-} from 'ui/embeddable';
+import { ContainerState, EmbeddableMetadata, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { EmbeddableCustomization } from 'ui/embeddable/types';
+import { Filter } from '@kbn/es-query';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import {
   DashboardMetadata,
@@ -35,11 +29,10 @@ import {
   EmbeddablesMap,
   PanelId,
 } from './types';
-import { SavedDashboardPanel } from '../types';
+import { SavedDashboardPanel, SavedDashboardPanelMap, StagedFilter } from '../types';
 
-export const getPanels = (
-  dashboard: DashboardState
-): Readonly<{ [key: string]: SavedDashboardPanel }> => dashboard.panels;
+export const getPanels = (dashboard: DashboardState): Readonly<SavedDashboardPanelMap> =>
+  dashboard.panels;
 
 export const getPanel = (dashboard: DashboardState, panelId: PanelId): SavedDashboardPanel =>
   getPanels(dashboard)[panelId] as SavedDashboardPanel;
@@ -119,7 +112,7 @@ export const getTimeRange = (dashboard: DashboardState): TimeRange => dashboard.
 export const getRefreshConfig = (dashboard: DashboardState): RefreshConfig =>
   dashboard.view.refreshConfig;
 
-export const getFilters = (dashboard: DashboardState): Filters => dashboard.view.filters;
+export const getFilters = (dashboard: DashboardState): Filter[] => dashboard.view.filters;
 
 export const getQuery = (dashboard: DashboardState): Query => dashboard.view.query;
 
@@ -151,7 +144,5 @@ export const getContainerState = (dashboard: DashboardState, panelId: PanelId): 
 /**
  * @return an array of filters any embeddables wish dashboard to apply
  */
-export const getStagedFilters = (
-  dashboard: DashboardState
-): Array<{ field: string; value: string; operator: string; index: string }> =>
+export const getStagedFilters = (dashboard: DashboardState): StagedFilter[] =>
   _.compact(_.map(dashboard.embeddables, 'stagedFilter'));

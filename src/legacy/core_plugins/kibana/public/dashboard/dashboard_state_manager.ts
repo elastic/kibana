@@ -20,9 +20,9 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
-import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+import { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_monitor_factory';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { IAppState } from 'ui/state_management/app_state';
+import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
 import { TimeRange, Query } from 'ui/embeddable';
 import { Timefilter } from 'ui/timefilter';
 import { Filter } from '@kbn/es-query';
@@ -66,16 +66,16 @@ import {
   getFilters,
 } from '../selectors';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
-import { DashboardAppState, SavedDashboardPanel } from './types';
+import {
+  DashboardAppState,
+  SavedDashboardPanel,
+  SavedDashboardPanelMap,
+  StagedFilter,
+  DashboardAppStateParameters,
+} from './types';
+import moment = require('moment');
 
-export type AddFilterFuntion = (
-  {
-    field,
-    value,
-    operator,
-    index,
-  }: { field: string; value: string; operator: string; index: string }
-) => void;
+export type AddFilterFuntion = ({ field, value, operator, index }: StagedFilter) => void;
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -86,12 +86,17 @@ export type AddFilterFuntion = (
 export class DashboardStateManager {
   public savedDashboard: SavedObjectDashboard;
   public appState: DashboardAppState;
-  public lastSavedDashboardFilters: any;
-  private stateDefaults: any;
+  public lastSavedDashboardFilters: {
+    timeTo?: string | moment.Moment;
+    timeFrom?: string | moment.Moment;
+    filterBars: Filter[];
+    query: Query | string;
+  };
+  private stateDefaults: DashboardAppStateParameters;
   private hideWriteControls: boolean;
   public isDirty: boolean;
-  private changeListeners: any[];
-  private stateMonitor: any;
+  private changeListeners: Array<(status: { dirty: boolean }) => void>;
+  private stateMonitor: StateMonitor<DashboardAppStateParameters>;
   private panelIndexPatternMapping: { [key: string]: StaticIndexPattern[] } = {};
   private addFilter: AddFilterFuntion;
   private unsubscribe: () => void;
@@ -110,7 +115,7 @@ export class DashboardStateManager {
     addFilter,
   }: {
     savedDashboard: SavedObjectDashboard;
-    AppStateClass: IAppState<DashboardAppState>;
+    AppStateClass: TAppStateClass<DashboardAppState>;
     hideWriteControls: boolean;
     addFilter: AddFilterFuntion;
   }) {
@@ -141,7 +146,23 @@ export class DashboardStateManager {
 
     PanelUtils.initPanelIndexes(this.getPanels());
 
-    this.createStateMonitor();
+    /**
+     * Creates a state monitor and saves it to this.stateMonitor. Used to track unsaved changes made to appState.
+     */
+    this.stateMonitor = stateMonitorFactory.create<DashboardAppStateParameters>(
+      this.appState,
+      this.stateDefaults
+    );
+
+    this.stateMonitor.ignoreProps('viewMode');
+    // Filters need to be compared manually because they sometimes have a $$hashkey stored on the object.
+    this.stateMonitor.ignoreProps('filters');
+    // Query needs to be compared manually because saved legacy queries get migrated in app state automatically
+    this.stateMonitor.ignoreProps('query');
+
+    this.stateMonitor.onChange((status: { dirty: boolean }) => {
+      this.isDirty = status.dirty;
+    });
 
     store.dispatch(closeContextMenu());
 
@@ -179,16 +200,14 @@ export class DashboardStateManager {
 
   /**
    * Time is part of global state so we need to deal with it outside of pushAppStateChangesToStore.
-   * @param {String|Object} newTimeFilter.to -- either a string representing an absolute time in utc format,
-   * or a relative time (now-15m), or a moment object
-   * @param {String|Object} newTimeFilter.from - either a string representing an absolute or a relative time, or a
-   * moment object
    */
-  public handleTimeChange(newTimeFilter: Timefilter) {
+  public handleTimeChange(newTimeRange: TimeRange) {
+    const from = FilterUtils.convertTimeToUTCString(newTimeRange.from);
+    const to = FilterUtils.convertTimeToUTCString(newTimeRange.to);
     store.dispatch(
       updateTimeRange({
-        from: FilterUtils.convertTimeToUTCString(newTimeFilter.from).toString(),
-        to: FilterUtils.convertTimeToUTCString(newTimeFilter.to).toString(),
+        from: from ? from.toString() : '',
+        to: to ? to.toString() : '',
       })
     );
   }
@@ -212,13 +231,10 @@ export class DashboardStateManager {
     if (!this.areStoreAndAppStatePanelsEqual()) {
       // Translate appState panels data into the data expected by redux, copying the panel objects as we do so
       // because the panels inside appState can be mutated, while redux state should never be mutated directly.
-      const panelsMap = this.getPanels().reduce(
-        (acc: { [key: string]: SavedDashboardPanel }, panel) => {
-          acc[panel.panelIndex] = _.cloneDeep(panel);
-          return acc;
-        },
-        {}
-      );
+      const panelsMap = this.getPanels().reduce((acc: SavedDashboardPanelMap, panel) => {
+        acc[panel.panelIndex] = _.cloneDeep(panel);
+        return acc;
+      }, {});
       store.dispatch(setPanels(panelsMap));
     }
 
@@ -283,7 +299,7 @@ export class DashboardStateManager {
   private handleStoreChanges() {
     let dirty = false;
     if (!this.areStoreAndAppStatePanelsEqual()) {
-      const panels: { [key: string]: SavedDashboardPanel } = getPanels(store.getState());
+      const panels: SavedDashboardPanelMap = getPanels(store.getState());
       this.appState.panels = [];
       this.panelIndexPatternMapping = {};
       Object.values(panels).map((panel: SavedDashboardPanel) => {
@@ -450,11 +466,11 @@ export class DashboardStateManager {
     return FilterUtils.getQueryFilterForDashboard(this.savedDashboard);
   }
 
-  public getLastSavedFilterBars() {
+  public getLastSavedFilterBars(): Filter[] {
     return this.lastSavedDashboardFilters.filterBars;
   }
 
-  public getLastSavedQuery() {
+  public getLastSavedQuery(): Query | string {
     return this.lastSavedDashboardFilters.query;
   }
 
@@ -469,7 +485,7 @@ export class DashboardStateManager {
     const isLegacyStringQuery =
       _.isString(lastSavedQuery) && _.isPlainObject(currentQuery) && _.has(currentQuery, 'query');
     if (isLegacyStringQuery) {
-      return lastSavedQuery !== currentQuery.query;
+      return (lastSavedQuery as string) !== (currentQuery as Query).query;
     }
 
     return !_.isEqual(currentQuery, lastSavedQuery);
@@ -526,7 +542,7 @@ export class DashboardStateManager {
    *
    * @returns {boolean} True if the dashboard has changed since the last save (or, is new).
    */
-  public getIsDirty(timeFilter?: TimeRange) {
+  public getIsDirty(timeFilter?: Timefilter) {
     // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
     // changes are not tracked by the state monitor.
     const hasTimeFilterChanged = timeFilter ? this.getFiltersChanged(timeFilter) : false;
@@ -637,23 +653,6 @@ export class DashboardStateManager {
     this.saveState();
     // pinned filters go on global state, therefore are not propagated to store via app state and have to be pushed manually.
     this._pushFiltersToStore();
-  }
-
-  /**
-   * Creates a state monitor and saves it to this.stateMonitor. Used to track unsaved changes made to appState.
-   */
-  public createStateMonitor() {
-    this.stateMonitor = stateMonitorFactory.create(this.appState, this.stateDefaults);
-
-    this.stateMonitor.ignoreProps('viewMode');
-    // Filters need to be compared manually because they sometimes have a $$hashkey stored on the object.
-    this.stateMonitor.ignoreProps('filters');
-    // Query needs to be compared manually because saved legacy queries get migrated in app state automatically
-    this.stateMonitor.ignoreProps('query');
-
-    this.stateMonitor.onChange((status: { dirty: boolean }) => {
-      this.isDirty = status.dirty;
-    });
   }
 
   /**

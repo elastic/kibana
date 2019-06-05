@@ -19,7 +19,8 @@
 
 import _ from 'lodash';
 import moment, { Moment } from 'moment';
-import { Filter } from 'ui/embeddable';
+import { QueryFilter } from 'ui/filter_manager/query_filter';
+import { Filter } from '@kbn/es-query';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
 /**
@@ -45,7 +46,7 @@ export class FilterUtils {
    * @returns {Array.<Object>} An array of filters stored with the dashboard. Includes
    * both query filters and filter bar filters.
    */
-  public static getDashboardFilters(dashboard: SavedObjectDashboard) {
+  public static getDashboardFilters(dashboard: SavedObjectDashboard): Filter[] {
     return dashboard.searchSource.getOwnField('filter');
   }
 
@@ -54,7 +55,7 @@ export class FilterUtils {
    * @param {SavedDashboard} dashboard
    * @returns {QueryFilter}
    */
-  public static getQueryFilterForDashboard(dashboard: SavedObjectDashboard) {
+  public static getQueryFilterForDashboard(dashboard: SavedObjectDashboard): QueryFilter | string {
     if (dashboard.searchSource.getOwnField('query')) {
       return dashboard.searchSource.getOwnField('query');
     }
@@ -83,7 +84,7 @@ export class FilterUtils {
    * @returns {string} the time represented in utc format, or if the time range was not able to be parsed into a moment
    * object, it returns the same object it was given.
    */
-  public static convertTimeToUTCString(time: string | Moment): string | moment.Moment {
+  public static convertTimeToUTCString(time?: string | Moment): undefined | string | moment.Moment {
     if (moment(time).isValid()) {
       return moment(time).utc();
     } else {
@@ -99,7 +100,7 @@ export class FilterUtils {
    * @param timeB {string|Moment}
    * @returns {boolean}
    */
-  public static areTimesEqual(timeA: string | Moment, timeB: string | Moment) {
+  public static areTimesEqual(timeA?: string | Moment, timeB?: string | Moment) {
     return this.convertTimeToUTCString(timeA) === this.convertTimeToUTCString(timeB);
   }
 

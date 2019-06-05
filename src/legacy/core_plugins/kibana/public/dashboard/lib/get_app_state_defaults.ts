@@ -20,16 +20,20 @@
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { FilterUtils } from './filter_utils';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
-import { Pre61SavedDashboardPanel, Pre64SavedDashboardPanel } from '../types';
+import {
+  Pre61SavedDashboardPanel,
+  Pre64SavedDashboardPanel,
+  DashboardAppStateParameters,
+} from '../types';
 
 export function getAppStateDefaults(
   savedDashboard: SavedObjectDashboard,
   hideWriteControls: boolean
-) {
+): DashboardAppStateParameters {
   const appState = {
     fullScreenMode: false,
     title: savedDashboard.title,
-    description: savedDashboard.description,
+    description: savedDashboard.description || '',
     timeRestore: savedDashboard.timeRestore,
     panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
     options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},

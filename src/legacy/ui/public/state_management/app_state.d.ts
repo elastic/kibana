@@ -20,7 +20,7 @@ import { State } from './state';
 
 export class AppState extends State {}
 
-export type IAppState<
+export type AppStateClass<
   TAppState extends AppState = AppState,
   TDefaults = { [key: string]: any }
 > = new (defaults: TDefaults) => TAppState;

@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { Query, Filter } from 'ui/embeddable';
+import { Query } from 'ui/embeddable';
 import { AppState } from 'ui/state_management/app_state';
+import { Filter } from '@kbn/es-query';
 import { DashboardViewMode } from './dashboard_view_mode';
 
 export interface GridData {
@@ -47,10 +48,10 @@ export interface Pre61SavedDashboardPanel {
   readonly size_y: number;
   readonly row: number;
   readonly col: number;
-  readonly panelIndex: any; // earlier versions allowed this to be number or string
+  readonly panelIndex: number | string; // earlier versions allowed this to be number or string
   readonly id: string;
   readonly type: string;
-  embeddableConfig: any | undefined;
+  embeddableConfig: any;
 }
 
 export interface Pre64SavedDashboardPanel {
@@ -80,7 +81,7 @@ export interface DashboardAppStateDefaults {
   viewMode: DashboardViewMode;
 }
 
-export interface DashboardAppState extends AppState {
+export interface DashboardAppStateParameters {
   panels: SavedDashboardPanel[];
   fullScreenMode: boolean;
   title: string;
@@ -90,14 +91,22 @@ export interface DashboardAppState extends AppState {
     hidePanelTitles: boolean;
     useMargins: boolean;
   };
-  query: Query;
+  query: Query | string;
   filters: Filter[];
   viewMode: DashboardViewMode;
 }
 
-export interface RefreshInterval {
-  display: string;
-  pause: boolean;
-  section: string;
+// This could probably be improved if we flesh out AppState more... though AppState will be going away
+// so maybe not worth too much time atm.
+export type DashboardAppState = DashboardAppStateParameters & AppState;
+
+export interface SavedDashboardPanelMap {
+  [key: string]: SavedDashboardPanel;
+}
+
+export interface StagedFilter {
+  field: string;
   value: string;
+  operator: string;
+  index: string;
 }

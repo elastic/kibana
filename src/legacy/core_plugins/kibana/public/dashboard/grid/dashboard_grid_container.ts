@@ -23,16 +23,16 @@ import { updatePanels } from '../actions';
 import { getPanels, getUseMargins, getViewMode } from '../selectors';
 import { DashboardViewMode } from '../selectors/types';
 import { DashboardGrid } from './dashboard_grid';
-import { SavedDashboardPanel } from '../types';
+import { SavedDashboardPanelMap } from '../types';
 
 interface DashboardGridContainerStateProps {
-  panels: { [key: string]: SavedDashboardPanel };
+  panels: SavedDashboardPanelMap;
   dashboardViewMode: DashboardViewMode;
   useMargins: boolean;
 }
 
 interface DashboardGridContainerDispatchProps {
-  onPanelsUpdated(updatedPanels: { [key: string]: SavedDashboardPanel }): void;
+  onPanelsUpdated(updatedPanels: SavedDashboardPanelMap): void;
 }
 
 const mapStateToProps = ({ dashboard }: any): any => ({
@@ -42,8 +42,7 @@ const mapStateToProps = ({ dashboard }: any): any => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  onPanelsUpdated: (updatedPanels: { [key: string]: SavedDashboardPanel }) =>
-    dispatch(updatePanels(updatedPanels)),
+  onPanelsUpdated: (updatedPanels: SavedDashboardPanelMap) => dispatch(updatePanels(updatedPanels)),
 });
 
 export const DashboardGridContainer = connect<

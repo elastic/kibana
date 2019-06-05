@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { EmbeddableMetadata, Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
+import { EmbeddableMetadata, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
+import { Filter } from '@kbn/es-query';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { SavedDashboardPanel } from '../types';
+import { SavedDashboardPanelMap } from '../types';
 
 export type DashboardViewMode = DashboardViewMode;
 export interface ViewState {
@@ -32,7 +33,7 @@ export interface ViewState {
   readonly hidePanelTitles: boolean;
   readonly useMargins: boolean;
   readonly query: Query;
-  readonly filters: Filters;
+  readonly filters: Filter[];
 }
 
 export type PanelId = string;
@@ -60,7 +61,7 @@ export interface DashboardMetadata {
 
 export interface DashboardState {
   readonly view: ViewState;
-  readonly panels: { [key: string]: SavedDashboardPanel };
+  readonly panels: SavedDashboardPanelMap;
   readonly embeddables: EmbeddablesMap;
   readonly metadata: DashboardMetadata;
 }

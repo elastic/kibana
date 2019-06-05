@@ -37,7 +37,12 @@ import {
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from '../panel';
 import { PanelUtils } from '../panel/panel_utils';
-import { GridData, SavedDashboardPanel, Pre61SavedDashboardPanel } from '../types';
+import {
+  GridData,
+  SavedDashboardPanel,
+  Pre61SavedDashboardPanel,
+  SavedDashboardPanelMap,
+} from '../types';
 
 let lastValidGridSize = 0;
 
@@ -116,10 +121,10 @@ const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 interface Props extends ReactIntl.InjectedIntlProps {
-  panels: { [key: string]: SavedDashboardPanel };
+  panels: SavedDashboardPanelMap;
   getEmbeddableFactory: (panelType: string) => EmbeddableFactory;
   dashboardViewMode: DashboardViewMode.EDIT | DashboardViewMode.VIEW;
-  onPanelsUpdated: (updatedPanels: { [key: string]: SavedDashboardPanel }) => void;
+  onPanelsUpdated: (updatedPanels: SavedDashboardPanelMap) => void;
   maximizedPanelId?: string;
   useMargins: boolean;
 }
@@ -192,7 +197,7 @@ class DashboardGridUi extends React.Component<Props, State> {
     });
   }
 
-  public createEmbeddableFactoriesMap(panels: { [key: string]: SavedDashboardPanel }) {
+  public createEmbeddableFactoriesMap(panels: SavedDashboardPanelMap) {
     Object.values(panels).map(panel => {
       if (!this.embeddableFactoryMap[panel.type]) {
         this.embeddableFactoryMap[panel.type] = this.props.getEmbeddableFactory(panel.type);
@@ -210,17 +215,14 @@ class DashboardGridUi extends React.Component<Props, State> {
 
   public onLayoutChange = (layout: PanelLayout[]) => {
     const { onPanelsUpdated, panels } = this.props;
-    const updatedPanels = layout.reduce(
-      (updatedPanelsAcc: { [key: string]: SavedDashboardPanel }, panelLayout) => {
-        updatedPanelsAcc[panelLayout.i] = {
-          ...panels[panelLayout.i],
-          panelIndex: panelLayout.i,
-          gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
-        };
-        return updatedPanelsAcc;
-      },
-      {}
-    );
+    const updatedPanels = layout.reduce((updatedPanelsAcc: SavedDashboardPanelMap, panelLayout) => {
+      updatedPanelsAcc[panelLayout.i] = {
+        ...panels[panelLayout.i],
+        panelIndex: panelLayout.i,
+        gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
+      };
+      return updatedPanelsAcc;
+    }, {});
     onPanelsUpdated(updatedPanels);
   };
 
