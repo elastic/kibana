@@ -21,23 +21,21 @@ export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
 
   describe('console app', function () {
-    this.tags('ciGroup1');
+    describe('console', function () {
+      this.tags('ciGroup1');
 
-    before(async function () {
-      await browser.setWindowSize(1300, 1100);
+      before(async function () {
+        await browser.setWindowSize(1300, 1100);
+      });
+
+      loadTestFile(require.resolve('./_console'));
     });
 
-    loadTestFile(require.resolve('./_console'));
-  });
-
-  describe('visual console app', function () {
-    this.tags('ciGroup100');
-
-    before(async function () {
-      await browser.setWindowSize(1300, 1100);
+    describe('visual console', function () {
+      this.tags('ciGroup100');
+      loadTestFile(require.resolve('./visual_console'));
     });
 
-    loadTestFile(require.resolve('./visual_console'));
   });
 
 }
