@@ -39,6 +39,7 @@ import {
   IpDetailsAdapter,
   IpOverviewHit,
   OverviewHit,
+  OverviewHostHit,
   TlsBuckets,
   UsersBucketsItem,
 } from './types';
@@ -62,6 +63,7 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     return {
       ...getIpOverviewAgg('source', getOr({}, 'aggregations.source', response)),
       ...getIpOverviewAgg('destination', getOr({}, 'aggregations.destination', response)),
+      ...getIpOverviewHostAgg(getOr({}, 'aggregations.host', response)),
     };
   }
 
@@ -184,11 +186,6 @@ export const getIpOverviewAgg = (type: string, overviewHit: OverviewHit | {}) =>
     `geo.results.hits.hits[0]._source.${type}.geo`,
     overviewHit
   );
-  const hostFields: HostEcsFields | null = getOr(
-    null,
-    `host.results.hits.hits[0]._source.host`,
-    overviewHit
-  );
 
   return {
     [type]: {
@@ -197,12 +194,23 @@ export const getIpOverviewAgg = (type: string, overviewHit: OverviewHit | {}) =>
       autonomousSystem: {
         ...autonomousSystem,
       },
-      host: {
-        ...hostFields,
-      },
       geo: {
         ...geoFields,
       },
+    },
+  };
+};
+
+export const getIpOverviewHostAgg = (overviewHostHit: OverviewHostHit | {}) => {
+  const hostFields: HostEcsFields | null = getOr(
+    null,
+    `host.results.hits.hits[0]._source.host`,
+    overviewHostHit
+  );
+
+  return {
+    host: {
+      ...hostFields,
     },
   };
 };

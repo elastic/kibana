@@ -10,6 +10,7 @@ import { SymbolInformation } from 'vscode-languageserver-types/lib/esm/main';
 export interface SymbolsPayload {
   path: string;
   data: SymbolInformation[];
+  structureTree: any;
 }
 
 export const loadStructure = createAction<string>('LOAD STRUCTURE');
