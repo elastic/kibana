@@ -1,31 +1,31 @@
 # Migrating legacy plugins to the new platform
 
-* [Overview](#overview)
-  * [Architecture](#architecture)
-  * [Services](#services)
-  * [Integrating with other plugins](#integrating-with-other-plugins)
-  * [Challenges to overcome with legacy plugins](#challenges-to-overcome-with-legacy-plugins)
-  * [Plan of action](#plan-of-action)
-* [Server-side plan of action](#server-side-plan-of-action)
-  * [De-couple from hapi.js server and request objects](#de-couple-from-hapijs-server-and-request-objects)
-  * [Introduce new plugin definition shim](#introduce-new-plugin-definition-shim)
-  * [Switch to new platform services](#switch-to-new-platform-services)
-  * [Migrate to the new plugin system](#migrate-to-the-new-plugin-system)
-* [Browser-side plan of action](#browser-side-plan-of-action)
-  * [Move UI modules into plugins](#move-ui-modules-into-plugins)
-  * [Provide plugin extension points decoupled from angular.js](#provide-plugin-extension-points-decoupled-from-angularjs)
-  * [Move all webpack alias imports into uiExport entry files](#move-all-webpack-alias-imports-into-uiexport-entry-files)
-  * [Switch to new platform services](#switch-to-new-platform-services-1)
-  * [Migrate to the new plugin system](#migrate-to-the-new-plugin-system-1)
-* [Frequently asked questions](#frequently-asked-questions)
-  * [Is migrating a plugin an all-or-nothing thing?](#is-migrating-a-plugin-an-all-or-nothing-thing)
-  * [Do plugins need to be converted to TypeScript?](#do-plugins-need-to-be-converted-to-typescript)
-  * [Can static code be shared between plugins?](#can-static-code-be-shared-between-plugins)
-  * [How can I avoid passing Core services deeply within my UI component tree?](#how-can-i-avoid-passing-core-services-deeply-within-my-ui-component-tree)
-  * [How is "common" code shared on both the client and server?](#how-is-common-code-shared-on-both-the-client-and-server)
-  * [When does code go into a plugin, core, or packages?](#when-does-code-go-into-a-plugin-core-or-packages)
-* [How to](#how-to)
-  * [Configure plugin](#configure-plugin)
+- [Overview](#overview)
+  - [Architecture](#architecture)
+  - [Services](#services)
+  - [Integrating with other plugins](#integrating-with-other-plugins)
+  - [Challenges to overcome with legacy plugins](#challenges-to-overcome-with-legacy-plugins)
+  - [Plan of action](#plan-of-action)
+- [Server-side plan of action](#server-side-plan-of-action)
+  - [De-couple from hapi.js server and request objects](#de-couple-from-hapijs-server-and-request-objects)
+  - [Introduce new plugin definition shim](#introduce-new-plugin-definition-shim)
+  - [Switch to new platform services](#switch-to-new-platform-services)
+  - [Migrate to the new plugin system](#migrate-to-the-new-plugin-system)
+- [Browser-side plan of action](#browser-side-plan-of-action)
+  - [Move UI modules into plugins](#move-ui-modules-into-plugins)
+  - [Provide plugin extension points decoupled from angular.js](#provide-plugin-extension-points-decoupled-from-angularjs)
+  - [Move all webpack alias imports into uiExport entry files](#move-all-webpack-alias-imports-into-uiexport-entry-files)
+  - [Switch to new platform services](#switch-to-new-platform-services-1)
+  - [Migrate to the new plugin system](#migrate-to-the-new-plugin-system-1)
+- [Frequently asked questions](#frequently-asked-questions)
+  - [Is migrating a plugin an all-or-nothing thing?](#is-migrating-a-plugin-an-all-or-nothing-thing)
+  - [Do plugins need to be converted to TypeScript?](#do-plugins-need-to-be-converted-to-typescript)
+  - [Can static code be shared between plugins?](#can-static-code-be-shared-between-plugins)
+  - [How can I avoid passing Core services deeply within my UI component tree?](#how-can-i-avoid-passing-core-services-deeply-within-my-ui-component-tree)
+  - [How is "common" code shared on both the client and server?](#how-is-common-code-shared-on-both-the-client-and-server)
+  - [When does code go into a plugin, core, or packages?](#when-does-code-go-into-a-plugin-core-or-packages)
+- [How to](#how-to)
+  - [Configure plugin](#configure-plugin)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -86,8 +86,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 import { PluginInitializerContext, CoreSetup, CoreStart } from '../../../core/public';
 
 export class Plugin {
-  constructor(initializerContext: PluginInitializerContext) {
-  }
+  constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     // called when plugin is setting up
@@ -106,12 +105,10 @@ export class Plugin {
 **[4] `server/index.ts`** is the entry-point into the server-side code of this plugin. It is identical in almost every way to the client-side entry-point:
 
 ```ts
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializer } from '../../../core/server';
 import { Plugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+export const plugin: PluginInitializer<...> = (initializerContext) => new Plugin(initializerContext)
 ```
 
 **[5] `server/plugin.ts`** is the server-side plugin definition. The _shape_ of this plugin is the same as it's client-side counter-part:
@@ -120,8 +117,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 import { PluginInitializerContext, CoreSetup, CoreStart } from '../../../core/server';
 
 export class Plugin {
-  constructor(initializerContext: PluginInitializerContext) {
-  }
+  constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     // called when plugin is setting up during Kibana's startup sequence
@@ -148,10 +144,10 @@ In the new platform, there are three lifecycle functions today: `setup`, `start`
 The table below explains how each lifecycle event relates to the state of Kibana.
 
 | lifecycle event | server                                    | browser                                             |
-|-----------------|-------------------------------------------|-----------------------------------------------------|
-| *setup*         | bootstrapping and configuring routes      | loading plugin bundles and configuring applications |
-| *start*         | server is now serving traffic             | browser is now showing UI to the user               |
-|  *stop*         | server has received a request to shutdown | user is navigating away from Kibana                 |
+| --------------- | ----------------------------------------- | --------------------------------------------------- |
+| _setup_         | bootstrapping and configuring routes      | loading plugin bundles and configuring applications |
+| _start_         | server is now serving traffic             | browser is now showing UI to the user               |
+| _stop_          | server has received a request to shutdown | user is navigating away from Kibana                 |
 
 There is no equivalent behavior to `start` or `stop` in legacy plugins, so this guide primarily focuses on migrating functionality into `setup`.
 
@@ -190,7 +186,7 @@ export class Plugin {
     return {
       getFoo() {
         return 'foo';
-      }
+      },
     };
   }
 
@@ -198,8 +194,8 @@ export class Plugin {
     return {
       getBar() {
         return 'bar';
-      }
-    }
+      },
+    };
   }
 }
 ```
@@ -211,9 +207,7 @@ Unlike core, capabilities exposed by plugins are _not_ automatically injected in
 ```json
 {
   "id": "demo",
-  "requiredPlugins": [
-    "foobar"
-  ],
+  "requiredPlugins": ["foobar"],
   "server": true,
   "ui": true
 }
@@ -313,7 +307,7 @@ function search(server, request) {
   return elasticsearch.getCluster('admin').callWithRequest(request, 'search');
 }
 
-export default (kibana) => {
+export default kibana => {
   return new kibana.Plugin({
     id: 'demo_plugin',
 
@@ -323,15 +317,15 @@ export default (kibana) => {
         method: 'POST',
         async handler(request) {
           search(server, request); // target acquired
-        }
+        },
       });
 
       server.expose('getDemoBar', () => {
         return `Demo ${server.plugins.foo.getBar()}`;
       });
-    }
+    },
   });
-}
+};
 ```
 
 This example legacy plugin uses hapi's `server` object directly inside of its `init` function, which is something we can address in a later step. What we need to address in this step is when we pass the raw `server` and `request` objects into our custom `search` function.
@@ -342,11 +336,10 @@ Instead, we identify which functionality we actually need from those objects and
 import { ElasticsearchPlugin, Request } from '../elasticsearch';
 export interface ServerFacade {
   plugins: {
-    elasticsearch: ElasticsearchPlugin
-  }
+    elasticsearch: ElasticsearchPlugin;
+  };
 }
-export interface RequestFacade extends Request {
-}
+export interface RequestFacade extends Request {}
 
 // likely imported from another file
 function search(server: ServerFacade, request: RequestFacade) {
@@ -354,34 +347,34 @@ function search(server: ServerFacade, request: RequestFacade) {
   return elasticsearch.getCluster('admin').callWithRequest(request, 'search');
 }
 
-export default (kibana) => {
+export default kibana => {
   return new kibana.Plugin({
     id: 'demo_plugin',
 
     init(server) {
       const serverFacade: ServerFacade = {
         plugins: {
-          elasticsearch: server.plugins.elasticsearch
-        }
-      }
+          elasticsearch: server.plugins.elasticsearch,
+        },
+      };
 
       server.route({
         path: '/api/demo_plugin/search',
         method: 'POST',
         async handler(request) {
           const requestFacade: RequestFacade = {
-            headers: request.headers
+            headers: request.headers,
           };
           search(serverFacade, requestFacade);
-        }
+        },
       });
 
       server.expose('getDemoBar', () => {
         return `Demo ${server.plugins.foo.getBar()}`;
       });
-    }
+    },
   });
-}
+};
 ```
 
 This change might seem trivial, but it's important for two reasons.
@@ -397,16 +390,16 @@ While most plugin logic is now decoupled from hapi, the plugin definition itself
 ```ts
 // index.ts
 
-export default (kibana) => {
+export default kibana => {
   return new kibana.Plugin({
     id: 'demo_plugin',
 
     init(server) {
       const serverFacade: ServerFacade = {
         plugins: {
-          elasticsearch: server.plugins.elasticsearch
-        }
-      }
+          elasticsearch: server.plugins.elasticsearch,
+        },
+      };
 
       // HTTP functionality from core
       server.route({
@@ -414,19 +407,19 @@ export default (kibana) => {
         method: 'POST',
         async handler(request) {
           const requestFacade: RequestFacade = {
-            headers: request.headers
+            headers: request.headers,
           };
           search(serverFacade, requestFacade);
-        }
+        },
       });
 
       // Exposing functionality for other plugins
       server.expose('getDemoBar', () => {
         return `Demo ${server.plugins.foo.getBar()}`; // Accessing functionality from another plugin
       });
-    }
+    },
   });
-}
+};
 ```
 
 We now move this logic into a new plugin definition, which is based off of the conventions used in real new platform plugins. While the legacy plugin definition is in the root of the plugin, this new plugin definition will be under the plugin's `server/` directory since it is only the server-side plugin definition.
@@ -436,15 +429,15 @@ We now move this logic into a new plugin definition, which is based off of the c
 import { ElasticsearchPlugin } from '../elasticsearch';
 
 interface CoreSetup {
-  elasticsearch: ElasticsearchPlugin // note: we know elasticsearch will move to core
+  elasticsearch: ElasticsearchPlugin; // note: we know elasticsearch will move to core
 }
 
 interface FooSetup {
-  getBar(): string
+  getBar(): string;
 }
 
 interface PluginsSetup {
-  foo: FooSetup
+  foo: FooSetup;
 }
 
 export type DemoPluginSetup = ReturnType<Plugin['setup']>;
@@ -453,27 +446,28 @@ export class Plugin {
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     const serverFacade: ServerFacade = {
       plugins: {
-        elasticsearch: core.elasticsearch
-      }
-    }
+        elasticsearch: core.elasticsearch,
+      },
+    };
 
     // HTTP functionality from core
-    core.http.route({ // note: we know routes will be created on core.http
+    core.http.route({
+      // note: we know routes will be created on core.http
       path: '/api/demo_plugin/search',
       method: 'POST',
       async handler(request) {
         const requestFacade: RequestFacade = {
-          headers: request.headers
+          headers: request.headers,
         };
         search(serverFacade, requestFacade);
-      }
+      },
     });
 
     // Exposing functionality for other plugins
     return {
       getDemoBar() {
         return `Demo ${plugins.foo.getBar()}`; // Accessing functionality from another plugin
-      }
+      },
     };
   }
 }
@@ -486,7 +480,7 @@ The legacy plugin definition is still the one that is being executed, so we now 
 
 import { Plugin } from './server/plugin';
 
-export default (kibana) => {
+export default kibana => {
   return new kibana.Plugin({
     id: 'demo_plugin',
 
@@ -495,21 +489,21 @@ export default (kibana) => {
       const coreSetup = {
         elasticsearch: server.plugins.elasticsearch,
         http: {
-          route: server.route
-        }
+          route: server.route,
+        },
       };
       // plugins shim
       const pluginsSetup = {
-        foo: server.plugins.foo
+        foo: server.plugins.foo,
       };
 
       const demoSetup = new Plugin().setup(coreSetup, pluginsSetup);
 
       // continue to expose functionality to legacy plugins
       server.expose('getDemoBar', demoSetup.getDemoBar);
-    }
+    },
   });
-}
+};
 ```
 
 This introduces a layer between the legacy plugin system with hapi.js and the logic you want to move to the new plugin system. The functionality exposed through that layer is still provided from the legacy world and in some cases is still technically powered directly by hapi, but building this layer forced you to identify the remaining touch points into the legacy world and it provides you with control when you start migrating to new platform-backed services.
@@ -594,7 +588,6 @@ Many plugins will copy and paste all of their plugin code into a new plugin dire
 
 With the previous steps resolved, this final step should be easy, but the exact process may vary plugin by plugin, so when you're at this point talk to the platform team to figure out the exact changes you need.
 
-
 ## Browser-side plan of action
 
 It is generally a much greater challenge preparing legacy browser-side code for the new platform than it is server-side, and as such there are a few more steps. The level of effort here is proportional to the extent to which a plugin is dependent on angular.js.
@@ -607,10 +600,10 @@ Also unlike the server-side migration, we won't concern ourselves with creating 
 
 Everything inside of the `ui/public` directory is going to be dealt with in one of the following ways:
 
-* Deleted because it doesn't need to be used anymore
-* Moved to or replaced by something in core that isn't coupled to angular
-* Moved to or replaced by an extension point in a specific plugin that "owns" that functionality
-* Copied into each plugin that depends on it and becomes an implementation detail there
+- Deleted because it doesn't need to be used anymore
+- Moved to or replaced by something in core that isn't coupled to angular
+- Moved to or replaced by an extension point in a specific plugin that "owns" that functionality
+- Copied into each plugin that depends on it and becomes an implementation detail there
 
 To rapidly define ownership and determine interdependencies, UI modules should move to the most appropriate plugins to own them. Modules that are considered "core" can remain in the ui directory as the platform team works to move them out.
 
@@ -683,6 +676,7 @@ At the very least, any plugin exposing an extension point should do so with firs
 Legacy Kibana has never run as a single page application. Each plugin has it's own entry point and gets "ownership" of every module it imports when it is loaded into the browser. This has allowed stateful modules to work without breaking other plugins because each time the user navigates to a new plugin, the browser reloads with a different entry bundle, clearing the state of the previous plugin.
 
 Because of this "feature" many undesirable things developed in the legacy platform:
+
 - We had to invent an unconventional and fragile way of allowing plugins to integrate and communicate with one another, `uiExports`.
 - It has never mattered if shared modules in `ui/public` were stateful or cleaned up after themselves, so many of them behave like global singletons. These modules could never work in single-page application because of this state.
 - We've had to ship Webpack with Kibana in production so plugins could be disabled or installed and still have access to all the "platform" features of `ui/public` modules and all the `uiExports` would be present for any enabled plugins.
@@ -700,7 +694,6 @@ One goal of a stable Kibana core API is to allow Kibana instances to run plugins
 
 This method of building and installing plugins comes with side effects which are important to be aware of when developing a plugin.
 
-
 - **Any code you export to other plugins will get copied into their bundles.** If a plugin is built for 8.1 and is running on Kibana 8.2, any modules it imported that changed will not be updated in that plugin.
 - **When a plugin is disabled, other plugins can still import its static exports.** This can make code difficult to reason about and result in poor user experience. For example, users generally expect that all of a plugin’s features will be disabled when the plugin is disabled. If another plugin imports a disabled plugin’s feature and exposes it to the user, then users will be confused about whether that plugin really is disabled or not.
 - **Plugins cannot share state by importing each others modules.** Sharing state via imports does not work because exported modules will be copied into plugins that import them. Let’s say your plugin exports a module that’s imported by other plugins. If your plugin populates state into this module, a natural expectation would be that the other plugins now have access to this state. However, because those plugins have copies of the exported module, this assumption will be incorrect.
@@ -710,16 +703,19 @@ This method of building and installing plugins comes with side effects which are
 The general rule of thumb here is: any module that is not purely functional should not be shared statically, and instead should be exposed at runtime via the plugin's `setup` and/or `start` contracts.
 
 Ask yourself these questions when deciding to share code through static exports or plugin contracts:
+
 - Is its behavior dependent on any state populated from my plugin?
 - If a plugin uses an old copy (from an older version of Kibana) of this module, will it still break?
 
 If you answered yes to any of the above questions, you probably have an impure module that cannot be shared across plugins. Another way to think about this: if someone literally copied and pasted your exported module into their plugin, would it break if:
+
 - Your original module changed in a future version and the copy was the old version; or
 - If your plugin doesn’t have access to the copied version in the other plugin (because it doesn't know about it).
 
 If your module were to break for either of these reasons, it should not be exported statically. This can be more easily illustrated by examples of what can and cannot be exported statically.
 
 Examples of code that could be shared statically:
+
 - Constants. Strings and numbers that do not ever change (even between Kibana versions)
   - If constants do change between Kibana versions, then they should only be exported statically if the old value would not _break_ if it is still used. For instance, exporting a constant like `VALID_INDEX_NAME_CHARACTERS` would be fine, but exporting a constant like `API_BASE_PATH` would not because if this changed, old bundles using the previous value would break.
 - React components that do not depend on module state.
@@ -728,38 +724,43 @@ Examples of code that could be shared statically:
 - Pure computation functions, for example lodash-like functions like `mapValues`.
 
 Examples of code that could **not** be shared statically and how to fix it:
+
 - A function that calls a Core service, but does not take that service as a parameter.
   - If the function does not take a client as an argument, it must have an instance of the client in its internal state, populated by your plugin. This would not work across plugin boundaries because your plugin would not be able to call `setClient` in the copy of this module in other plugins:
     ```js
     let esClient;
-    export const setClient = (client) => esClient = client;
-    export const query = (params) => esClient.search(params);
+    export const setClient = client => (esClient = client);
+    export const query = params => esClient.search(params);
     ```
   - This could be fixed by requiring the calling code to provide the client:
     ```js
     export const query = (esClient, params) => esClient.search(params);
     ```
 - A function that allows other plugins to register values that get pushed into an array defined internally to the module.
+
   - The values registered would only be visible to the plugin that imported it. Each plugin would essentially have their own registry of visTypes that is not visible to any other plugins.
     ```js
     const visTypes = [];
-    export const registerVisType = (visType) => visTypes.push(visType);
+    export const registerVisType = visType => visTypes.push(visType);
     export const getVisTypes = () => visTypes;
     ```
   - For state that does need to be shared across plugins, you will need to expose methods in your plugin's `setup` and `start` contracts.
+
     ```js
     class MyPlugin {
-      constructor() { this.visTypes = [] }
+      constructor() {
+        this.visTypes = [];
+      }
       setup() {
-        return { 
-          registerVisType: (visType) => this.visTypes.push(visType)
-        }
+        return {
+          registerVisType: visType => this.visTypes.push(visType),
+        };
       }
 
       start() {
         return {
-          getVisTypes: () => this.visTypes
-        }
+          getVisTypes: () => this.visTypes,
+        };
       }
     }
     ```
@@ -790,11 +791,12 @@ If you have code that should be available to other plugins on both the client an
 ### How can I avoid passing Core services deeply within my UI component tree?
 
 There are some Core services that are purely presentational, for example `core.overlays.openModal()` or `core.application.createLink()` where UI code does need access to these deeply within your application. However, passing these services down as props throughout your application leads to lots of boilerplate. To avoid this, you have three options:
+
 1. Use an abstraction layer, like Redux, to decouple your UI code from core (**this is the highly preferred option**); or
-    - [redux-thunk](https://github.com/reduxjs/redux-thunk#injecting-a-custom-argument) and [redux-saga](https://redux-saga.js.org/docs/api/#createsagamiddlewareoptions) already have ways to do this.
+   - [redux-thunk](https://github.com/reduxjs/redux-thunk#injecting-a-custom-argument) and [redux-saga](https://redux-saga.js.org/docs/api/#createsagamiddlewareoptions) already have ways to do this.
 1. Use React Context to provide these services to large parts of your React tree; or
 1. Create a high-order-component that injects core into a React component; or
-    - This would be a stateful module that holds a reference to Core, but provides it as props to components with a `withCore(MyComponent)` interface. This can make testing components simpler. (Note: this module cannot be shared across plugin boundaries, see above).
+   - This would be a stateful module that holds a reference to Core, but provides it as props to components with a `withCore(MyComponent)` interface. This can make testing components simpler. (Note: this module cannot be shared across plugin boundaries, see above).
 1. Create a global singleton module that gets imported into each module that needs it. (Note: this module cannot be shared across plugin boundaries, see above). [Example](https://gist.github.com/epixa/06c8eeabd99da3c7545ab295e49acdc3).
 
 If you find that you need many different Core services throughout your application, this may be a code smell and could lead to pain down the road. For instance, if you need access to an HTTP Client or SavedObjectsClient in many places in your React tree, it's likely that a data layer abstraction (like Redux) could make developing your plugin much simpler (see option 1).
@@ -823,14 +825,16 @@ After plugins, core is where most of the rest of the code in Kibana will exist. 
 
 The packages directory should have the least amount of code in Kibana. Just because some piece of code is not stateful doesn't mean it should go into packages. The packages directory exists to aid us in our quest to centralize as many of our owned dependencies in this single monorepo, so it's the logical place to put things like Kibana specific forks of node modules or vendor dependencies.
 
-
 ## How to
 
 ### Configure plugin
+
 Kibana provides ConfigService if a plugin developer may want to support adjustable runtime behavior for their plugins. Access to Kibana config in New platform has been subject to significant refactoring.
-In order to have access to a config, plugin *should*:
+In order to have access to a config, plugin _should_:
+
 - Declare plugin specific "configPath" (will fallback to plugin "id" if not specified) in `kibana.json` file.
 - Export schema validation for config from plugin's main file. Schema is mandatory. If a plugin reads from the config without schema declaration, ConfigService will throw an error.
+
 ```js
 // my_plugin/server/index.ts
 import { schema } from '@kbn/config-schema';
@@ -839,7 +843,9 @@ export const config = {
   schema: schema.object(...),
 };
 ```
+
 - Read config value exposed via initializerContext. No config path is required.
+
 ```js
 class MyPlugin {
   constructor(initializerContext: PluginInitializerContext) {
