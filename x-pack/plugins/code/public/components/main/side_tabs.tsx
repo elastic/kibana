@@ -69,9 +69,9 @@ class CodeSideTabs extends React.PureComponent<Props> {
     return [
       {
         id: Tabs.file,
-        name: 'File',
+        name: 'Files',
         content: fileTabContent,
-        'data-test-subj': 'codeFileTreeTab',
+        'data-test-subj': `codeFileTreeTab${this.sideTab === Tabs.file ? 'Active' : ''}`,
       },
       {
         id: Tabs.structure,

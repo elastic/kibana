@@ -12,8 +12,9 @@ import * as React from 'react';
 import { AppTestingFrameworkAdapter } from '../../lib/adapters/framework/testing_framework_adapter';
 import { mockFrameworks, TestProviders } from '../../mock';
 
-import { KibanaConfigContext, PreferenceFormattedDate, FormattedDate, getMaybeDate } from '.';
+import { PreferenceFormattedDate, FormattedDate, getMaybeDate } from '.';
 import { getEmptyValue } from '../empty_value';
+import { KibanaConfigContext } from '../../lib/adapters/framework/kibana_framework_adapter';
 
 describe('formatted_date', () => {
   describe('PreferenceFormattedDate', () => {

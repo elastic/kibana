@@ -53,7 +53,7 @@ export class IndexMigrator {
       pollInterval: context.pollInterval,
 
       async isMigrated() {
-        return requiresMigration(context);
+        return !(await requiresMigration(context));
       },
 
       async runMigration() {

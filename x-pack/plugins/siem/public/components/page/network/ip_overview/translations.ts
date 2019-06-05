@@ -42,18 +42,18 @@ export const WHOIS = i18n.translate('xpack.siem.network.ipDetails.ipOverview.who
 });
 
 export const VIEW_WHOIS = i18n.translate('xpack.siem.network.ipDetails.ipOverview.viewWhoisTitle', {
-  defaultMessage: 'View at iana.org',
+  defaultMessage: 'iana.org',
 });
 export const VIEW_VIRUS_TOTAL = i18n.translate(
   'xpack.siem.network.ipDetails.ipOverview.viewVirusTotalTitle.',
   {
-    defaultMessage: 'View at virustotal.com',
+    defaultMessage: 'virustotal.com',
   }
 );
 export const VIEW_TALOS_INTELLIGENCE = i18n.translate(
   'xpack.siem.network.ipDetails.ipOverview.viewTalosIntelligenceTitle',
   {
-    defaultMessage: 'View at talosIntelligence.com',
+    defaultMessage: 'talosIntelligence.com',
   }
 );
 

@@ -2,6 +2,7 @@
 
 exports[`Summary Status Component should allow label to be optional 1`] = `
 <div
+  class="monSummaryStatusNoWrap"
   intl="[object Object]"
 >
   <div
@@ -24,7 +25,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-labelledby="generated-id"
-          class="euiTitle euiTitle--small euiStat__title"
+          class="euiTitle euiTitle--xsmall euiStat__title"
         >
           Status: 
           <span
@@ -56,7 +57,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-labelledby="generated-id"
-          class="euiTitle euiTitle--small euiStat__title"
+          class="euiTitle euiTitle--xsmall euiStat__title"
         >
           127.0.0.1:9300
         </p>
@@ -80,7 +81,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-labelledby="generated-id"
-          class="euiTitle euiTitle--small euiStat__title"
+          class="euiTitle euiTitle--xsmall euiStat__title"
         >
           24.8k
         </p>
@@ -92,6 +93,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
 
 exports[`Summary Status Component should allow status to be optional 1`] = `
 <div
+  class="monSummaryStatusNoWrap"
   intl="[object Object]"
 >
   <div
@@ -115,7 +117,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         </div>
         <p
           aria-labelledby="generated-id"
-          class="euiTitle euiTitle--small euiStat__title"
+          class="euiTitle euiTitle--xsmall euiStat__title"
         >
           173.9 GB
         </p>
@@ -139,7 +141,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         </div>
         <p
           aria-labelledby="generated-id"
-          class="euiTitle euiTitle--small euiStat__title"
+          class="euiTitle euiTitle--xsmall euiStat__title"
         >
           24.8k
         </p>
@@ -151,6 +153,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
 
 exports[`Summary Status Component should render metrics in a summary bar 1`] = `
 <div
+  class="monSummaryStatusNoWrap"
   intl="[object Object]"
 >
   <div
@@ -173,7 +176,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-labelledby="generated-id"
-          class="euiTitle euiTitle--small euiStat__title"
+          class="euiTitle euiTitle--xsmall euiStat__title"
         >
           Status: 
           <span
@@ -207,7 +210,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-labelledby="generated-id"
-          class="euiTitle euiTitle--small euiStat__title"
+          class="euiTitle euiTitle--xsmall euiStat__title"
         >
           173.9 GB
         </p>
@@ -231,7 +234,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-labelledby="generated-id"
-          class="euiTitle euiTitle--small euiStat__title"
+          class="euiTitle euiTitle--xsmall euiStat__title"
         >
           24.8k
         </p>
