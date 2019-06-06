@@ -29,143 +29,142 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
-routes
-  .when(`${EDIT_ROLES_PATH}/:name?`, {
-    template,
-    k7Breadcrumbs: ($injector, $route) => $injector.invoke(
-      $route.current.params.name
-        ? getEditRoleBreadcrumbs
-        : getCreateRoleBreadcrumbs
-    ),
-    resolve: {
-      role($route, ShieldRole, Promise) {
-        const name = $route.current.params.name;
+routes.when(`${EDIT_ROLES_PATH}/:name?`, {
+  template,
+  k7Breadcrumbs: ($injector, $route) => $injector.invoke(
+    $route.current.params.name
+      ? getEditRoleBreadcrumbs
+      : getCreateRoleBreadcrumbs
+  ),
+  resolve: {
+    role($route, ShieldRole, Promise) {
+      const name = $route.current.params.name;
 
-        let role;
+      let role;
 
-        if (name != null) {
-          role = ShieldRole.get({ name }).$promise
-            .catch((response) => {
+      if (name != null) {
+        role = ShieldRole.get({ name }).$promise
+          .catch((response) => {
 
-              if (response.status === 404) {
-                toastNotifications.addDanger({
-                  title: i18n.translate('xpack.security.management.roles.roleNotFound',
-                    {
-                      defaultMessage: 'No "{roleName}" role found.',
-                      values: { roleName: name }
-                    }),
-                });
-              }
+            if (response.status === 404) {
+              toastNotifications.addDanger({
+                title: i18n.translate('xpack.security.management.roles.roleNotFound',
+                  {
+                    defaultMessage: 'No "{roleName}" role found.',
+                    values: { roleName: name }
+                  }),
+              });
+            }
 
-              return fatalError(response);
-            });
+            return fatalError(response);
+          });
 
-        } else {
-          role = Promise.resolve(new ShieldRole({
-            elasticsearch: {
-              cluster: [],
-              indices: [],
-              run_as: [],
-            },
-            kibana: [],
-            _unrecognized_applications: [],
-          }));
-        }
-
-        return role.then(res => res.toJSON());
-      },
-      users(ShieldUser) {
-      // $promise is used here because the result is an ngResource, not a promise itself
-        return ShieldUser.query().$promise
-          .then(users => _.map(users, 'username'));
-      },
-      indexPatterns(Private) {
-        const indexPatterns = Private(IndexPatternsProvider);
-        return indexPatterns.getTitles();
-      },
-      spaces($http, chrome, spacesEnabled) {
-        if (spacesEnabled) {
-          return new SpacesManager($http, chrome).getSpaces();
-        }
-        return [];
-      },
-      privileges() {
-        return kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
-      },
-      features() {
-        return kfetch({ method: 'get', pathname: '/api/features/v1' }).catch(e => {
-        // TODO: This check can be removed once all of these `resolve` entries are moved out of Angular and into the React app.
-          const unauthorizedForFeatures = _.get(e, 'body.statusCode') === 404;
-          if (unauthorizedForFeatures) {
-            return [];
-          }
-          throw e;
-        });
+      } else {
+        role = Promise.resolve(new ShieldRole({
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [],
+          _unrecognized_applications: [],
+        }));
       }
+
+      return role.then(res => res.toJSON());
     },
-    controllerAs: 'editRole',
-    controller($injector, $scope, $http, enableSpaceAwarePrivileges) {
-      const $route = $injector.get('$route');
-      const Private = $injector.get('Private');
-
-      const role = $route.current.locals.role;
-
-      const xpackInfo = Private(XPackInfoProvider);
-      const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
-      const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
-
-      if (role.elasticsearch.indices.length === 0) {
-        const emptyOption = {
-          names: [],
-          privileges: []
-        };
-
-        if (allowFieldLevelSecurity) {
-          emptyOption.field_security = {
-            grant: ['*'],
-            except: [],
-          };
-        }
-
-        if (allowDocumentLevelSecurity) {
-          emptyOption.query = '';
-        }
-
-        role.elasticsearch.indices.push(emptyOption);
+    users(ShieldUser) {
+      // $promise is used here because the result is an ngResource, not a promise itself
+      return ShieldUser.query().$promise
+        .then(users => _.map(users, 'username'));
+    },
+    indexPatterns(Private) {
+      const indexPatterns = Private(IndexPatternsProvider);
+      return indexPatterns.getTitles();
+    },
+    spaces($http, chrome, spacesEnabled) {
+      if (spacesEnabled) {
+        return new SpacesManager($http, chrome).getSpaces();
       }
-
-      const {
-        users,
-        indexPatterns,
-        spaces,
-        privileges,
-        features,
-      } = $route.current.locals;
-
-      $scope.$$postDigest(async () => {
-        const domNode = document.getElementById('editRoleReactRoot');
-
-        render(
-          <I18nContext>
-            <EditRolePage
-              runAsUsers={users}
-              role={role}
-              indexPatterns={indexPatterns}
-              httpClient={$http}
-              allowDocumentLevelSecurity={allowDocumentLevelSecurity}
-              allowFieldLevelSecurity={allowFieldLevelSecurity}
-              spaces={spaces}
-              spacesEnabled={enableSpaceAwarePrivileges}
-              uiCapabilities={capabilities.get()}
-              features={features}
-              privileges={privileges}
-            />
-          </I18nContext>, domNode);
-
-        // unmount react on controller destroy
-        $scope.$on('$destroy', () => {
-          unmountComponentAtNode(domNode);
-        });
+      return [];
+    },
+    privileges() {
+      return kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
+    },
+    features() {
+      return kfetch({ method: 'get', pathname: '/api/features/v1' }).catch(e => {
+        // TODO: This check can be removed once all of these `resolve` entries are moved out of Angular and into the React app.
+        const unauthorizedForFeatures = _.get(e, 'body.statusCode') === 404;
+        if (unauthorizedForFeatures) {
+          return [];
+        }
+        throw e;
       });
     }
-  });
+  },
+  controllerAs: 'editRole',
+  controller($injector, $scope, $http, enableSpaceAwarePrivileges) {
+    const $route = $injector.get('$route');
+    const Private = $injector.get('Private');
+
+    const role = $route.current.locals.role;
+
+    const xpackInfo = Private(XPackInfoProvider);
+    const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
+    const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
+
+    if (role.elasticsearch.indices.length === 0) {
+      const emptyOption = {
+        names: [],
+        privileges: []
+      };
+
+      if (allowFieldLevelSecurity) {
+        emptyOption.field_security = {
+          grant: ['*'],
+          except: [],
+        };
+      }
+
+      if (allowDocumentLevelSecurity) {
+        emptyOption.query = '';
+      }
+
+      role.elasticsearch.indices.push(emptyOption);
+    }
+
+    const {
+      users,
+      indexPatterns,
+      spaces,
+      privileges,
+      features,
+    } = $route.current.locals;
+
+    $scope.$$postDigest(async () => {
+      const domNode = document.getElementById('editRoleReactRoot');
+
+      render(
+        <I18nContext>
+          <EditRolePage
+            runAsUsers={users}
+            role={role}
+            indexPatterns={indexPatterns}
+            httpClient={$http}
+            allowDocumentLevelSecurity={allowDocumentLevelSecurity}
+            allowFieldLevelSecurity={allowFieldLevelSecurity}
+            spaces={spaces}
+            spacesEnabled={enableSpaceAwarePrivileges}
+            uiCapabilities={capabilities.get()}
+            features={features}
+            privileges={privileges}
+          />
+        </I18nContext>, domNode);
+
+      // unmount react on controller destroy
+      $scope.$on('$destroy', () => {
+        unmountComponentAtNode(domNode);
+      });
+    });
+  }
+});
