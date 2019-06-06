@@ -15,5 +15,6 @@ export default function alertingTests({ loadTestFile }: KibanaFunctionalTestDefa
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./list_alert_types'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./alerts'));
   });
 }
