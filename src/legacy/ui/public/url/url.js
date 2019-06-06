@@ -18,14 +18,48 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
+import chrome from '../chrome';
 import { uiModules } from '../modules';
-import { AppStateProvider } from '../state_management/app_state';
+import '../state_management/app_state';
 
-uiModules.get('kibana/url')
-  .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
-export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
+// implements replacement for angular $location service
+const location = {
+  search: (param, value, replace) => {
+    const searchParams = {};
+    const urlSearchParams = new URLSearchParams(window.location.search.slice(1));
+    urlSearchParams.forEach((v, k) => {
+      searchParams[k] = v;
+    });
+
+    if (!param) {
+      return searchParams;
+    }
+    if (value) {
+      urlSearchParams.set(param, value);
+      this.url(`${window.location.pathname}?${urlSearchParams.toString()}`, replace);
+    }
+    return searchParams[param];
+  },
+  path: (value, replace) => {
+    if (!value) {
+      return window.location.pathname;
+    }
+    this.url(`${value}?${window.location.search}`, replace);
+  },
+  url: (value, replace) => {
+    if (!value) {
+      return window.location.href;
+    }
+    if (replace) {
+      window.location.replace(value);
+    } else {
+      window.location.assign(value);
+    }
+  }
+};
+
+export function kbnUrlProvider() {
   /**
    *  the `kbnUrl` service was created to smooth over some of the
    *  inconsistent behavior that occurs when modifying the url via
@@ -44,7 +78,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    *
    *  @type {KbnUrl}
    */
-  const self = this;
+  const self = {};
 
   /**
    * Navigate to a url
@@ -108,19 +142,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
       // remove filters
       const key = expr.split('|')[0].trim();
 
-      // verify that the expression can be evaluated
-      const p = $parse(key)(paramObj);
-
-      // if evaluation can't be made, throw
-      if (_.isUndefined(p)) {
-        throw new Error(
-          i18n.translate('common.ui.url.replacementFailedErrorMessage', {
-            defaultMessage: 'Replacement failed, unresolved expression: {expr}',
-            values: { expr }
-          }));
-      }
-
-      return encodeURIComponent($parse(expr)(paramObj));
+      return encodeURIComponent(paramObj[key]);
     });
   };
 
@@ -178,7 +200,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @param param
    */
   self.removeParam = function (param) {
-    $location.search(param, null).replace();
+    location.search(param, null, true);
   };
 
   /////
@@ -188,28 +210,32 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
 
   self._changeLocation = function (type, url, paramObj, replace, appState) {
     const prev = {
-      path: $location.path(),
-      search: $location.search()
+      path: location.path(),
+      search: location.search()
     };
 
     url = self.eval(url, paramObj);
-    $location[type](url);
-    if (replace) $location.replace();
+    location[type](url, replace);
 
     if (appState) {
-      $location.search(appState.getQueryParamName(), appState.toQueryParam());
+      location.search(appState.getQueryParamName(), appState.toQueryParam());
     }
 
     const next = {
-      path: $location.path(),
-      search: $location.search()
+      path: location.path(),
+      search: location.search()
     };
 
-    if ($injector.has('$route')) {
+    // we use $injector to limit angular dependency just to this part (access to angular router).
+    // we can remove it once we have a new platform router
+    const $injector = chrome.dangerouslyGetActiveInjector();
+    if ($injector.has('$route') && $injector.has('getAppState')) {
       const $route = $injector.get('$route');
+      const getAppState = $injector.get('getAppState');
+      const $rootScope = $injector.get('$rootScope');
 
       if (self._shouldForceReload(next, prev, $route)) {
-        const appState = Private(AppStateProvider).getAppState();
+        const appState = getAppState();
         if (appState) appState.destroy();
 
         reloading = $rootScope.$on('$locationChangeSuccess', function () {
@@ -240,4 +266,13 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
     const searchSame = _.isEqual(next.search, prev.search);
     return (reloadOnSearch && searchSame) || !reloadOnSearch;
   };
+
+  return self;
 }
+
+export const KbnUrlProvider = () => {
+  return kbnUrlProvider();
+};
+
+uiModules.get('kibana/url')
+  .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
