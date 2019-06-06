@@ -176,7 +176,8 @@ export class ESSearchSource extends AbstractESSource {
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
     entityBuckets.forEach(entityBucket => {
       const { total, hits } = _.get(entityBucket, 'entityHits.hits', {});
-      allHits.push(...hits);
+      // Reverse hits list so they are drawn from oldest to newest (per entity) so newest events are on top
+      allHits.push(...hits.reverse());
       if (total > hits.length) {
         hasTrimmedResults = true;
       }
