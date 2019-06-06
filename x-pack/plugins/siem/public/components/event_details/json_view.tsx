@@ -37,7 +37,6 @@ export const JsonView = pure<Props>(({ data }) => (
       )}
       width="100%"
     />
-    }
   </JsonEditor>
 ));
 

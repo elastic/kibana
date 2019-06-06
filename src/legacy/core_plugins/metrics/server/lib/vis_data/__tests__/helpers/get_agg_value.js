@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import getAggValue from '../../helpers/get_agg_value';
+import { getAggValue } from '../../helpers/get_agg_value';
 
 function testAgg(row, metric, expected) {
   let name = metric.type;

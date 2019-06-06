@@ -22,6 +22,7 @@ import {
   loadConfigsSuccess,
   loadRepoSuccess,
   loadRepoFailed,
+  loadRepo,
 } from '../actions';
 
 export enum ToastType {
@@ -41,6 +42,7 @@ export interface RepositoryState {
   toastType?: ToastType;
   projectConfigs: { [key: string]: RepositoryConfig };
   currentRepository?: Repository;
+  repoNotFound: boolean;
 }
 
 const initialState: RepositoryState = {
@@ -49,6 +51,7 @@ const initialState: RepositoryState = {
   importLoading: false,
   showToast: false,
   projectConfigs: {},
+  repoNotFound: false,
 };
 
 export const repository = handleActions(
@@ -116,13 +119,20 @@ export const repository = handleActions(
       produce<RepositoryState>(state, draft => {
         draft.projectConfigs = action.payload;
       }),
+    [String(loadRepo)]: (state: RepositoryState, action: Action<any>) =>
+      produce<RepositoryState>(state, draft => {
+        draft.currentRepository = undefined;
+        draft.repoNotFound = false;
+      }),
     [String(loadRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
         draft.currentRepository = action.payload;
+        draft.repoNotFound = false;
       }),
     [String(loadRepoFailed)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
         draft.currentRepository = undefined;
+        draft.repoNotFound = true;
       }),
   },
   initialState

@@ -59,7 +59,7 @@ interface Props {
   disableAutoFocus?: boolean;
   appName: string;
   screenTitle: string;
-  indexPatterns: IndexPattern[];
+  indexPatterns: Array<IndexPattern | string>;
   store: Storage;
   intl: InjectedIntl;
   prepend?: any;

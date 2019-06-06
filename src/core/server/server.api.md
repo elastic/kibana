@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
 import { ObjectType } from '@kbn/config-schema';
@@ -25,11 +26,11 @@ export type APICaller = (endpoint: string, clientParams: Record<string, unknown>
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type AuthenticationHandler<T> = (request: Request, sessionStorage: SessionStorage<T>, t: AuthToolkit) => Promise<AuthResult>;
+export type AuthenticationHandler<T> = (request: Readonly<Request>, sessionStorage: SessionStorage<T>, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
 
 // @public
 export interface AuthToolkit {
-    authenticated: (credentials: any) => AuthResult;
+    authenticated: (state: object) => AuthResult;
     redirected: (url: string) => AuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
@@ -83,10 +84,12 @@ export interface CoreSetup {
     };
     // (undocumented)
     http: {
+        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
         registerAuth: HttpServiceSetup['registerAuth'];
-        registerOnRequest: HttpServiceSetup['registerOnRequest'];
+        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         getBasePathFor: HttpServiceSetup['getBasePathFor'];
         setBasePathFor: HttpServiceSetup['setBasePathFor'];
+        createNewServer: HttpServiceSetup['createNewServer'];
     };
 }
 
@@ -132,7 +135,12 @@ export type Headers = Record<string, string | string[] | undefined>;
 // Warning: (ae-forgotten-export) The symbol "HttpServerSetup" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type HttpServiceSetup = HttpServerSetup;
+export interface HttpServiceSetup extends HttpServerSetup {
+    // Warning: (ae-forgotten-export) The symbol "HttpConfig" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
+}
 
 // @public (undocumented)
 export interface HttpServiceStart {
@@ -157,13 +165,13 @@ export interface InternalCoreStart {
     plugins: PluginsServiceStart;
 }
 
-// @public (undocumented)
+// @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     constructor(request: Request, params: Params, query: Query, body: Body);
     // (undocumented)
     readonly body: Body;
     // Warning: (ae-forgotten-export) The symbol "RouteSchemas" needs to be exported by the entry point index.d.ts
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas: RouteSchemas<P, Q, B> | undefined): KibanaRequest<P["type"], Q["type"], B["type"]>;
+    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>): KibanaRequest<P["type"], Q["type"], B["type"]>;
     // (undocumented)
     getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
     // (undocumented)
@@ -171,12 +179,24 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     // (undocumented)
     readonly params: Params;
     // (undocumented)
-    readonly path: string;
-    // (undocumented)
     readonly query: Query;
     // (undocumented)
+    readonly route: RecursiveReadonly<KibanaRequestRoute>;
+    // (undocumented)
     unstable_getIncomingMessage(): import("http").IncomingMessage;
+    // (undocumented)
+    readonly url: Url;
     }
+
+// @public
+export interface KibanaRequestRoute {
+    // (undocumented)
+    method: RouteMethod | 'patch' | 'options';
+    // (undocumented)
+    options: Required<RouteConfigOptions>;
+    // (undocumented)
+    path: string;
+}
 
 // @public
 export interface Logger {
@@ -247,19 +267,34 @@ export interface LogRecord {
     timestamp: Date;
 }
 
-// Warning: (ae-forgotten-export) The symbol "OnRequestResult" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type OnRequestHandler<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: OnRequestToolkit) => OnRequestResult | Promise<OnRequestResult>;
+export type OnPostAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPostAuthToolkit) => OnPostAuthResult | Promise<OnPostAuthResult>;
 
 // @public
-export interface OnRequestToolkit {
-    next: () => OnRequestResult;
-    redirected: (url: string) => OnRequestResult;
+export interface OnPostAuthToolkit {
+    next: () => OnPostAuthResult;
+    redirected: (url: string) => OnPostAuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
-    }) => OnRequestResult;
-    setUrl: (newUrl: string | Url) => void;
+    }) => OnPostAuthResult;
+}
+
+// Warning: (ae-forgotten-export) The symbol "OnPreAuthResult" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type OnPreAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPreAuthToolkit) => OnPreAuthResult | Promise<OnPreAuthResult>;
+
+// @public
+export interface OnPreAuthToolkit {
+    next: () => OnPreAuthResult;
+    redirected: (url: string, options?: {
+        forward: boolean;
+    }) => OnPreAuthResult;
+    rejected: (error: Error, options?: {
+        statusCode?: number;
+    }) => OnPreAuthResult;
 }
 
 // @public
@@ -309,6 +344,22 @@ export interface PluginsServiceStart {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
 }
+
+// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
+    [K in keyof T]: RecursiveReadonly<T[K]>;
+}> : T;
+
+// @public
+export interface RouteConfigOptions {
+    authRequired?: boolean;
+    tags?: ReadonlyArray<string>;
+}
+
+// @public
+export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
 
 // @public (undocumented)
 export class Router {

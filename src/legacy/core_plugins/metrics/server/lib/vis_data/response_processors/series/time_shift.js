@@ -19,7 +19,8 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-export default function timeShift(resp, panel, series) {
+
+export function timeShift(resp, panel, series) {
   return next => results => {
     if (/^([+-]?[\d]+)([shmdwMy]|ms)$/.test(series.offset_time)) {
       const matches = series.offset_time.match(/^([+-]?[\d]+)([shmdwMy]|ms)$/);

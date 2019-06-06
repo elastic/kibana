@@ -18,10 +18,11 @@
  */
 
 import _ from 'lodash';
-import getLastValue from '../../../common/get_last_value';
-import tickFormatter from './tick_formatter';
+import { getLastValue } from '../../../common/get_last_value';
+import { tickFormatter } from './tick_formatter';
 import moment from 'moment';
-export default (series, model, dateFormat = 'lll', getConfig = null) => {
+
+export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig = null) => {
   const variables = {};
   model.series.forEach(seriesModel => {
     series

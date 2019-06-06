@@ -14,8 +14,10 @@ function getDates(apmTimeseries: ApmTimeSeriesResponse) {
   return apmTimeseries.responseTimes.avg.map(p => p.x);
 }
 
-export type TimeSeriesAPIResponse = PromiseReturnType<typeof getChartsData>;
-export async function getChartsData(options: {
+export type TimeSeriesAPIResponse = PromiseReturnType<
+  typeof getTransactionCharts
+>;
+export async function getTransactionCharts(options: {
   serviceName: string;
   transactionType?: string;
   transactionName?: string;

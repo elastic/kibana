@@ -26,7 +26,7 @@ const renderReact = (elem, changeUrl) => {
 routes.when(USERS_PATH, {
   template,
   k7Breadcrumbs: getUsersBreadcrumbs,
-  controller($scope, $route, $q, confirmModal, $http, kbnUrl) {
+  controller($scope, $http, kbnUrl) {
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('usersReactRoot');
       if (elem) unmountComponentAtNode(elem);

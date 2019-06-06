@@ -18,13 +18,13 @@
  */
 
 import React from 'react';
-import AggRow from './agg_row';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
+import { AggRow } from './agg_row';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
 import { i18n } from '@kbn/i18n';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,

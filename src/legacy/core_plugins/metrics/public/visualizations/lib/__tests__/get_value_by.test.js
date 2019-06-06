@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import getValueBy from '../get_value_by';
+import { getValueBy } from '../get_value_by';
 import { expect } from 'chai';
 
 describe('getValueBy(fn, data)', () => {

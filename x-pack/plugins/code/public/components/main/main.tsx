@@ -29,17 +29,22 @@ class CodeMain extends React.Component<Props> {
   }
 
   public componentDidUpdate() {
-    chrome.breadcrumbs.pop();
     this.setBreadcrumbs();
   }
 
   public setBreadcrumbs() {
-    const { org, repo } = this.props.match.params;
-    chrome.breadcrumbs.push({ text: `${org} → ${repo}` });
+    const { resource, org, repo } = this.props.match.params;
+    chrome.breadcrumbs.set([
+      { text: 'Code', href: '#/' },
+      {
+        text: `${org} → ${repo}`,
+        href: `#/${resource}/${org}/${repo}`,
+      },
+    ]);
   }
 
   public componentWillUnmount() {
-    chrome.breadcrumbs.pop();
+    chrome.breadcrumbs.set([{ text: 'Code', href: '#/' }]);
   }
 
   public render() {
@@ -69,7 +74,7 @@ class CodeMain extends React.Component<Props> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  loadingFileTree: state.file.rootFileTreeLoading,
+  loadingFileTree: state.file.fileTreeLoadingPaths.includes(''),
   loadingStructureTree: state.symbol.loading,
   hasStructure: structureSelector(state).length > 0 && !state.symbol.error,
   languageServerInitializing: state.symbol.languageServerInitializing,

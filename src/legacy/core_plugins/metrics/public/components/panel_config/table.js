@@ -19,13 +19,13 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import FieldSelect from '../aggs/field_select';
-import SeriesEditor from '../series_editor';
+import { FieldSelect } from '../aggs/field_select';
+import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import createTextHandler from '../lib/create_text_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import { get } from 'lodash';
 import uuid from 'uuid';
-import YesNo from '../yes_no';
+import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -43,9 +43,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-class TablePanelConfig extends Component {
-
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+const { QueryBarInput } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
+export class TablePanelConfig extends Component {
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -78,7 +81,13 @@ class TablePanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { drilldown_url: '', filter: '', pivot_label: '', pivot_rows: 10, pivot_type: '' };
+    const defaults = {
+      drilldown_url: '',
+      filter: { query: '', language: getDefaultQueryLanguage() },
+      pivot_label: '',
+      pivot_rows: 10,
+      pivot_type: '',
+    };
     const model = { ...defaults, ...this.props.model };
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
@@ -221,10 +230,15 @@ class TablePanelConfig extends Component {
                   />)}
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBarInput
+                    query={{
+                      language: model.filter.language ? model.filter.language : getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    appName={'VisEditor'}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -283,5 +297,3 @@ TablePanelConfig.propTypes = {
   onChange: PropTypes.func,
   visData$: PropTypes.object,
 };
-
-export default TablePanelConfig;

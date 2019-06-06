@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import stdDeviationSibling from '../std_deviation_sibling';
+import { stdDeviationSibling } from '../std_deviation_sibling';
 import { expect } from 'chai';
 import sinon from 'sinon';
 

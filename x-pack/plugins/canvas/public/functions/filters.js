@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from 'plugins/interpreter/interpreter';
-import { registries } from 'plugins/interpreter/registries';
 import { fromExpression } from '@kbn/interpreter/common';
 import { get } from 'lodash';
+import { interpretAst } from 'plugins/interpreter/interpreter';
+import { registries } from 'plugins/interpreter/registries';
 import { getState } from '../state/store';
 import { getGlobalFilters } from '../state/selectors/workpad';
 

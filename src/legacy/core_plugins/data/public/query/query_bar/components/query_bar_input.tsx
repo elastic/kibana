@@ -28,8 +28,8 @@ import {
   AutocompleteSuggestionType,
   getAutocompleteProvider,
 } from 'ui/autocomplete_providers';
-import { debounce, compact } from 'lodash';
-import { IndexPattern } from 'ui/index_patterns';
+import { debounce, compact, isEqual } from 'lodash';
+import { IndexPattern, StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedLog } from 'ui/persisted_log';
 import chrome from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
@@ -38,6 +38,7 @@ import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
+import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
 interface Query {
   query: string;
@@ -45,12 +46,13 @@ interface Query {
 }
 
 interface Props {
-  indexPatterns: IndexPattern[];
+  indexPatterns: Array<IndexPattern | string>;
   intl: InjectedIntl;
   query: Query;
   appName: string;
+  id?: string;
   disableAutoFocus?: boolean;
-  screenTitle: string;
+  screenTitle?: string;
   prepend?: any;
   store: Storage;
   persistedLog?: PersistedLog;
@@ -65,6 +67,7 @@ interface State {
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
+  indexPatterns: StaticIndexPattern[];
 }
 
 const KEY_CODES = {
@@ -90,6 +93,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     suggestionLimit: 50,
     selectionStart: null,
     selectionEnd: null,
+    indexPatterns: [],
   };
 
   public inputRef: HTMLInputElement | null = null;
@@ -99,6 +103,21 @@ export class QueryBarInputUI extends Component<Props, State> {
 
   private getQueryString = () => {
     return toUser(this.props.query.query);
+  };
+
+  private fetchIndexPatterns = async () => {
+    const stringPatterns = this.props.indexPatterns.filter(
+      indexPattern => typeof indexPattern === 'string'
+    ) as string[];
+    const objectPatterns = this.props.indexPatterns.filter(
+      indexPattern => typeof indexPattern !== 'string'
+    ) as IndexPattern[];
+
+    const objectPatternsFromStrings = await fetchIndexPatterns(stringPatterns);
+
+    this.setState({
+      indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
+    });
   };
 
   private getSuggestions = async () => {
@@ -114,13 +133,13 @@ export class QueryBarInputUI extends Component<Props, State> {
     const autocompleteProvider = getAutocompleteProvider(language);
     if (
       !autocompleteProvider ||
-      !Array.isArray(this.props.indexPatterns) ||
-      compact(this.props.indexPatterns).length === 0
+      !Array.isArray(this.state.indexPatterns) ||
+      compact(this.state.indexPatterns).length === 0
     ) {
       return recentSearchSuggestions;
     }
 
-    const indexPatterns = this.props.indexPatterns;
+    const indexPatterns = this.state.indexPatterns;
     const getAutocompleteSuggestions = autocompleteProvider({ config, indexPatterns });
 
     const { selectionStart, selectionEnd } = this.inputRef;
@@ -368,14 +387,20 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(this.props.appName, this.props.query.language);
-    this.updateSuggestions();
+
+    this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 
   public componentDidUpdate(prevProps: Props) {
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(this.props.appName, this.props.query.language);
-    this.updateSuggestions();
+
+    if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
+      this.fetchIndexPatterns().then(this.updateSuggestions);
+    } else if (!isEqual(prevProps.query, this.props.query)) {
+      this.updateSuggestions();
+    }
 
     if (this.state.selectionStart !== null && this.state.selectionEnd !== null) {
       if (this.inputRef) {
@@ -410,6 +435,7 @@ export class QueryBarInputUI extends Component<Props, State> {
             <div role="search">
               <div className="kuiLocalSearchAssistedInput">
                 <EuiFieldText
+                  id={this.props.id}
                   placeholder={this.props.intl.formatMessage({
                     id: 'data.query.queryBar.searchInputPlaceholder',
                     defaultMessage: 'Search',
@@ -428,17 +454,21 @@ export class QueryBarInputUI extends Component<Props, State> {
                   }}
                   autoComplete="off"
                   spellCheck={false}
-                  aria-label={this.props.intl.formatMessage(
-                    {
-                      id: 'data.query.queryBar.searchInputAriaLabel',
-                      defaultMessage:
-                        'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
-                    },
-                    {
-                      previouslyTranslatedPageTitle: this.props.screenTitle,
-                      pageType: this.props.appName,
-                    }
-                  )}
+                  aria-label={
+                    this.props.screenTitle
+                      ? this.props.intl.formatMessage(
+                          {
+                            id: 'data.query.queryBar.searchInputAriaLabel',
+                            defaultMessage:
+                              'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
+                          },
+                          {
+                            previouslyTranslatedPageTitle: this.props.screenTitle,
+                            pageType: this.props.appName,
+                          }
+                        )
+                      : undefined
+                  }
                   type="text"
                   data-test-subj="queryInput"
                   aria-autocomplete="list"

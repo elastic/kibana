@@ -24,8 +24,8 @@
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
-import tickFormatter from './lib/tick_formatter';
-import convertSeriesToVars from './lib/convert_series_to_vars';
+import { tickFormatter } from './lib/tick_formatter';
+import { convertSeriesToVars } from './lib/convert_series_to_vars';
 import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
@@ -40,7 +40,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-class MarkdownEditor extends Component {
+export class MarkdownEditor extends Component {
   state = {
     visData: null,
   };
@@ -234,5 +234,3 @@ MarkdownEditor.propTypes = {
   dateFormat: PropTypes.string,
   visData$: PropTypes.object,
 };
-
-export default MarkdownEditor;

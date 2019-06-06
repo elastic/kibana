@@ -5,17 +5,18 @@
  */
 
 import produce from 'immer';
-import { handleActions } from 'redux-actions';
+import { Action, handleActions } from 'redux-actions';
 
 import { RepositoryUri, WorkerReservedProgress } from '../../model';
 import {
+  deleteRepoFinished,
   loadStatus,
   loadStatusFailed,
   loadStatusSuccess,
   updateCloneProgress,
   updateDeleteProgress,
   updateIndexProgress,
-} from '../actions/status';
+} from '../actions';
 
 export enum RepoState {
   CLONING,
@@ -178,6 +179,10 @@ export const status = handleActions(
             state: s,
           };
         }
+      }),
+    [String(deleteRepoFinished)]: (state: StatusState, action: Action<any>) =>
+      produce<StatusState>(state, (draft: StatusState) => {
+        delete draft.status[action.payload];
       }),
   },
   initialState

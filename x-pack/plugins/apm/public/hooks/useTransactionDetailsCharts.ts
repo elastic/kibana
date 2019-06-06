@@ -5,7 +5,7 @@
  */
 
 import { useMemo } from 'react';
-import { loadTransactionDetailsCharts } from '../services/rest/apm/transaction_groups';
+import { loadTransactionCharts } from '../services/rest/apm/transaction_groups';
 import { getTransactionCharts } from '../selectors/chartSelectors';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
@@ -24,7 +24,7 @@ export function useTransactionDetailsCharts(urlParams: IUrlParams) {
   const { data, error, status } = useFetcher(
     () => {
       if (serviceName && start && end && transactionName && transactionType) {
-        return loadTransactionDetailsCharts({
+        return loadTransactionCharts({
           serviceName,
           start,
           end,

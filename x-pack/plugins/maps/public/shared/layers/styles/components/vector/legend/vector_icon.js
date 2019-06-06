@@ -8,9 +8,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { dynamicColorShape, staticColorShape } from '../style_option_shapes';
-import { ColorableLine, FillableCircle, FillableRectangle } from '../../../../../icons/additional_layer_icons';
+import { PointIcon } from './point_icon';
+import { LineIcon } from './line_icon';
+import { PolygonIcon } from './polygon_icon';
 import { VectorStyle } from '../../../vector_style';
-import { getColorRampCenterColor } from '../../../../../utils/color_utils';
+import { getColorRampCenterColor } from '../../../color_utils';
 
 export class VectorIcon extends Component {
 
@@ -50,7 +52,7 @@ export class VectorIcon extends Component {
         strokeWidth: '4px',
       };
       return (
-        <ColorableLine style={style}/>
+        <LineIcon style={style}/>
       );
     }
 
@@ -61,8 +63,8 @@ export class VectorIcon extends Component {
     };
 
     return this.state.isPointsOnly
-      ? <FillableCircle style={style}/>
-      : <FillableRectangle style={style}/>;
+      ? <PointIcon style={style}/>
+      : <PolygonIcon style={style}/>;
   }
 }
 

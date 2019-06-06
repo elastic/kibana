@@ -10,7 +10,6 @@ import { getOr, assign } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 
-import { SortFieldTimeline } from '../../../server/graphql/types';
 import {
   defaultHeaders,
   defaultColumnHeaderType,
@@ -20,7 +19,12 @@ import { AllTimelinesVariables } from '../../containers/timeline/all';
 
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
-import { DeleteTimelineMutation, GetOneTimeline, TimelineResult } from '../../graphql/types';
+import {
+  DeleteTimelineMutation,
+  GetOneTimeline,
+  TimelineResult,
+  SortFieldTimeline,
+} from '../../graphql/types';
 import { Note } from '../../lib/note';
 import { State, timelineSelectors } from '../../store';
 import { addNotes as dispatchAddNotes } from '../../store/app/actions';
@@ -57,9 +61,7 @@ import { AllTimelinesQuery } from '../../containers/timeline/all';
 import { Direction } from '../../graphql/types';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-
-export const DEFAULT_SORT_FIELD = 'updated';
-export const DEFAULT_SORT_DIRECTION = 'desc';
+import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 
 export interface OpenTimelineState {
   /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
@@ -181,7 +183,6 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
               onAddTimelinesToFavorites={undefined}
-              onDeleteSelected={this.onDeleteSelected}
               onlyFavorites={onlyFavorites}
               onOpenTimeline={this.openTimeline}
               onQueryChange={this.onQueryChange}
@@ -347,6 +348,7 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
         fetchPolicy: 'no-cache',
         variables: { id: timelineId },
       })
+      // eslint-disable-next-line
       .then(result => {
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)
@@ -375,6 +377,7 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
                       description: col.description != null ? col.description : undefined,
                       example: col.example != null ? col.example : undefined,
                       type: col.type != null ? col.type : undefined,
+                      aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
                       width:
                         col.id === '@timestamp'
                           ? DEFAULT_DATE_COLUMN_MIN_WIDTH

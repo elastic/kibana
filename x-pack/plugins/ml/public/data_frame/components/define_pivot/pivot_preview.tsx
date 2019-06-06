@@ -18,6 +18,7 @@ import {
   EuiInMemoryTableProps,
   EuiPanel,
   EuiProgress,
+  EuiText,
   EuiTitle,
   SortDirection,
 } from '@elastic/eui';
@@ -104,6 +105,29 @@ const PreviewTitle: SFC<PreviewTitleProps> = ({ previewRequest }) => {
   );
 };
 
+interface ErrorMessageProps {
+  message: string;
+}
+
+const ErrorMessage: SFC<ErrorMessageProps> = ({ message }) => {
+  const error = JSON.parse(message);
+
+  const statusCodeLabel = i18n.translate('xpack.ml.dataframe.pivotPreview.statusCodeLabel', {
+    defaultMessage: 'Status code',
+  });
+
+  return (
+    <EuiText size="xs">
+      <pre>
+        {(error.message &&
+          error.statusCode &&
+          `${statusCodeLabel}: ${error.statusCode}\n${error.message}`) ||
+          message}
+      </pre>
+    </EuiText>
+  );
+};
+
 interface PivotPreviewProps {
   aggs: PivotAggsConfigDict;
   groupBy: PivotGroupByConfigDict;
@@ -167,13 +191,30 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
           color="danger"
           iconType="cross"
         >
-          <p>{errorMessage}</p>
+          <ErrorMessage message={errorMessage} />
         </EuiCallOut>
       </EuiPanel>
     );
   }
 
   if (dataFramePreviewData.length === 0) {
+    let noDataMessage = i18n.translate(
+      'xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewNoDataCalloutBody',
+      {
+        defaultMessage:
+          'The preview request did not return any data. Please ensure the optional query returns data and that values exist for the field used by group-by and aggregation fields.',
+      }
+    );
+
+    const aggsArr = dictionaryToArray(aggs);
+    if (aggsArr.length === 0 || groupByArr.length === 0) {
+      noDataMessage = i18n.translate(
+        'xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewIncompleteConfigCalloutBody',
+        {
+          defaultMessage: 'Please choose at least one group-by field and aggregation.',
+        }
+      );
+    }
     return (
       <EuiPanel grow={false}>
         <PreviewTitle previewRequest={previewRequest} />
@@ -186,14 +227,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
           )}
           color="primary"
         >
-          <p>
-            {i18n.translate(
-              'xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewNoDataCalloutBody',
-              {
-                defaultMessage: 'Please choose at least one group-by field and aggregation.',
-              }
-            )}
-          </p>
+          <p>{noDataMessage}</p>
         </EuiCallOut>
       </EuiPanel>
     );

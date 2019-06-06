@@ -19,7 +19,7 @@
 
 import { expect } from 'chai';
 import moment from 'moment';
-import offsetTime from '../offset_time';
+import { offsetTime } from '../offset_time';
 
 describe('offsetTime(req, by)', () => {
   it('should return a moment object for to and from', () => {

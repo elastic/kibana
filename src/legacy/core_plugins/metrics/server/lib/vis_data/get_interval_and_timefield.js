@@ -21,7 +21,7 @@ import { get } from 'lodash';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 
-export default function getIntervalAndTimefield(panel, series = {}, indexPatternObject) {
+export function getIntervalAndTimefield(panel, series = {}, indexPatternObject) {
   const getDefaultTimeField = () => get(indexPatternObject, 'timeFieldName', DEFAULT_TIME_FIELD);
 
   const timeField = (series.override_index_pattern && series.series_time_field || panel.time_field) || getDefaultTimeField();
