@@ -39,3 +39,4 @@ export * from './verify_env_task';
 export * from './write_sha_sums_task';
 export * from './patch_native_modules_task';
 export * from './path_length_task';
+export * from './siem_cycle_task';

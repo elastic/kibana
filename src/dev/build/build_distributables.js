@@ -54,6 +54,7 @@ import {
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
   PathLengthTask,
+  SiemCycleTask,
   WriteShaSumsTask,
 } from './tasks';
 
@@ -86,7 +87,7 @@ export async function buildDistributables(options) {
   const config = await getConfig({
     isRelease,
     versionQualifier,
-    targetAllPlatforms
+    targetAllPlatforms,
   });
 
   const run = createRunner({
@@ -138,6 +139,8 @@ export async function buildDistributables(options) {
   await run(CleanNodeBuildsTask);
 
   await run(PathLengthTask);
+
+  await run(SiemCycleTask);
 
   /**
    * package platform-specific builds into archives
