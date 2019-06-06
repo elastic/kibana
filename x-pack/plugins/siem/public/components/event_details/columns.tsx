@@ -26,6 +26,7 @@ import { WithHoverActions } from '../with_hover_actions';
 
 import * as i18n from './translations';
 import { OverflowField } from '../tables/helpers';
+import { DATE_FIELD_TYPE, MESSAGE_FIELD_NAME } from '../timeline/body/renderers/constants';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -137,14 +138,14 @@ export const getColumns = ({
                   </HoverActionsContainer>
                 }
                 render={() =>
-                  data.field === 'message' ? (
+                  data.field === MESSAGE_FIELD_NAME ? (
                     <OverflowField value={value} />
                   ) : (
                     <DefaultDraggable
                       data-test-subj="ip"
                       field={data.field}
                       id={`event-details-field-value-${eventId}-${data.field}-${i}-${value}`}
-                      tooltipContent={data.field}
+                      tooltipContent={data.type !== DATE_FIELD_TYPE ? data.field : null}
                       value={value}
                     >
                       <FormattedFieldValue
