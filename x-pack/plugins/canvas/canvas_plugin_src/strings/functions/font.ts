@@ -52,3 +52,24 @@ export const help: FunctionHelp<FunctionFactory<typeof font>> = {
     }),
   },
 };
+
+export const errors = {
+  invalidFontWeight: (weight: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.font.invalidFontWeightErrorMessage', {
+        defaultMessage: "Invalid font weight: '{weight}'",
+        values: {
+          weight,
+        },
+      })
+    ),
+  invalidTextAlignment: (align: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.font.invalidTextAlignmentErrorMessage', {
+        defaultMessage: "Invalid text alignment: '{align}'",
+        values: {
+          align,
+        },
+      })
+    ),
+};

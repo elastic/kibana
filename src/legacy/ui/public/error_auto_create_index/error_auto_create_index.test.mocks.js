@@ -17,16 +17,7 @@
  * under the License.
  */
 
-export {
-  MigrationVersion,
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsClient,
-  SavedObjectsClientWrapperFactory,
-  SavedObjectReference,
-  SavedObjectsService,
-} from './service';
 
-export { SavedObjectsSchema } from './schema';
+import { setup } from '../../../../test_utils/public/http_test_setup';
 
-export { SavedObjectsManagement } from './management';
+jest.doMock('ui/new_platform', () => ({ npSetup: { core: setup() } }));

@@ -9,7 +9,7 @@ import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 
-import { mockTimelineData } from '../../../../mock';
+import { mockTimelineData, TestProviders } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 import { FormattedFieldValue } from './formatted_field';
 
@@ -100,5 +100,76 @@ describe('Events', () => {
     );
 
     expect(wrapper.text()).toEqual(getEmptyValue());
+  });
+
+  test('it renders tooltip for message when it exists', () => {
+    const wrapper = mount(
+      <FormattedFieldValue
+        eventId={mockTimelineData[0].ecs._id}
+        contextId="test"
+        fieldName="message"
+        fieldType="text"
+        value={'some message'}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(true);
+  });
+
+  test('it does NOT render a tooltip for message when it is null', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName="message"
+          fieldType="text"
+          value={null}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(false);
+  });
+
+  test('it does NOT render a tooltip for message when it is undefined', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName="message"
+          fieldType="text"
+          value={undefined}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(false);
+  });
+
+  test('it does NOT render a tooltip for message when it is an empty string', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName="message"
+          fieldType="text"
+          value={''}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(false);
+  });
+
+  test('it renders a message text string', () => {
+    const wrapper = mount(
+      <FormattedFieldValue
+        eventId={mockTimelineData[0].ecs._id}
+        contextId="test"
+        fieldName="message"
+        fieldType="text"
+        value={'some message'}
+      />
+    );
+    expect(wrapper.text()).toEqual('some message');
   });
 });

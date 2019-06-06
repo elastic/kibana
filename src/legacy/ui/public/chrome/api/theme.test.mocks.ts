@@ -17,5 +17,11 @@
  * under the License.
  */
 
-export { savedObjectsMixin } from './saved_objects_mixin';
-export { SavedObjectsClient } from './service';
+import { chromeServiceMock } from '../../../../../core/public/mocks';
+
+export const newPlatformChrome = chromeServiceMock.createSetupContract();
+jest.doMock('ui/new_platform', () => ({
+  npSetup: {
+    core: { chrome: newPlatformChrome },
+  },
+}));

@@ -17,12 +17,12 @@
  * under the License.
  */
 
-export let metadata = null;
-
-export function __newPlatformSetup__(legacyMetadata) {
-  if (metadata === null) {
-    metadata = legacyMetadata;
-  } else {
-    throw new Error('ui/metadata can only be initialized once');
-  }
-}
+export const newPlatformInjectedMetadata: any = {
+  getInjectedVars: jest.fn(),
+  getInjectedVar: jest.fn(),
+};
+jest.doMock('ui/new_platform', () => ({
+  npSetup: {
+    core: { injectedMetadata: newPlatformInjectedMetadata },
+  },
+}));
