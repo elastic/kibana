@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   value: string | null;
@@ -15,6 +15,7 @@ interface Arguments {
 
 export function date(): ExpressionFunction<'date', null, Arguments, number> {
   const { help, args: argHelp } = getFunctionHelp().date;
+  const errors = getFunctionErrors().date;
 
   return {
     name: 'date',
@@ -45,7 +46,7 @@ export function date(): ExpressionFunction<'date', null, Arguments, number> {
           : new Date();
 
       if (isNaN(outputDate.getTime())) {
-        throw new Error(`Invalid date input: ${argDate}`);
+        throw errors.invalidDateInput(argDate);
       }
 
       return outputDate.valueOf();

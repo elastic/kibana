@@ -7,7 +7,7 @@
 import moment from 'moment';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Datatable, Position } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   show: boolean;
@@ -23,6 +23,7 @@ interface AxisConfig extends Arguments {
 
 export function axisConfig(): ExpressionFunction<'axisConfig', Datatable, Arguments, AxisConfig> {
   const { help, args: argHelp } = getFunctionHelp().axisConfig;
+  const errors = getFunctionErrors().axisConfig;
 
   return {
     name: 'axisConfig',
@@ -61,7 +62,7 @@ export function axisConfig(): ExpressionFunction<'axisConfig', Datatable, Argume
       const { position, min, max, ...rest } = args;
 
       if (!Object.values(Position).includes(position)) {
-        throw new Error(`Invalid position: '${args.position}'`);
+        throw errors.invalidPosition(position);
       }
 
       const minVal = typeof min === 'string' ? moment.utc(min).valueOf() : min;
@@ -69,20 +70,14 @@ export function axisConfig(): ExpressionFunction<'axisConfig', Datatable, Argume
 
       // This != check is not !== in order to handle NaN cases properly.
       if (minVal != null && isNaN(minVal)) {
-        throw new Error(
-          `Invalid date string: '${
-            args.min
-          }'. 'min' must be a number, date in ms, or ISO8601 date string`
-        );
+        // using `as` because of typing constraint: we know it's a string at this point.
+        throw errors.invalidMinDateString(min as string);
       }
 
       // This != check is not !== in order to handle NaN cases properly.
       if (maxVal != null && isNaN(maxVal)) {
-        throw new Error(
-          `Invalid date string: '${
-            args.max
-          }'. 'max' must be a number, date in ms, or ISO8601 date string`
-        );
+        // using `as` because of typing constraint: we know it's a string at this point.
+        throw errors.invalidMaxDateString(max as string);
       }
 
       return {
