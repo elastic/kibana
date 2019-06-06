@@ -185,7 +185,6 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
               onAddTimelinesToFavorites={undefined}
-              onDeleteSelected={this.onDeleteSelected}
               onlyFavorites={onlyFavorites}
               onOpenTimeline={this.openTimeline}
               onQueryChange={this.onQueryChange}
