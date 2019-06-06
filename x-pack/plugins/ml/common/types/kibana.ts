@@ -7,7 +7,6 @@
 // custom edits or fixes for default kibana types which are incomplete
 
 import { IndexPattern } from 'ui/index_patterns';
-import { SearchSource } from 'ui/courier';
 
 // the type property is missing from the official IndexPattern interface
 export interface IndexPatternWithType extends IndexPattern {
