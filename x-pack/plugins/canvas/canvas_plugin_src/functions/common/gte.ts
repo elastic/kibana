@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 type Context = boolean | number | string | null;
@@ -12,7 +12,7 @@ interface Arguments {
   value: Context;
 }
 
-export function gte(): ContextFunction<'gte', Context, Arguments, boolean> {
+export function gte(): ExpressionFunction<'gte', Context, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().gte;
 
   return {

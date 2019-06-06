@@ -8,7 +8,7 @@ exports[`Columns it renders the expected columns 1`] = `
       Array [
         Object {
           "columnHeaderType": "not-filtered",
-          "id": "event.severity",
+          "id": "message",
           "width": 180,
         },
         Object {

@@ -214,8 +214,8 @@ export const SourceDestinationArrows = pure<{
   const maybeSourceBytesPercent =
     maybeSourceBytes != null && maybeDestinationBytes != null
       ? getPercent({
-          numerator: Math.min(Number(maybeSourceBytes), Number(maybeDestinationBytes)),
-          denominator: Math.max(Number(maybeSourceBytes), Number(maybeDestinationBytes)),
+          numerator: Number(maybeSourceBytes),
+          denominator: Number(maybeSourceBytes) + Number(maybeDestinationBytes),
         })
       : undefined;
 

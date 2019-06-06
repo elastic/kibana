@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { wrapEsError } from './wrap_es_error';
+import * as React from 'react';
+
+export interface TimelineContextData {
+  isLoading: boolean;
+}
+
+export const TimelineContext = React.createContext<TimelineContextData>({ isLoading: false });
