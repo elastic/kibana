@@ -41,7 +41,8 @@ export function createJestConfig({
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
     },
     transformIgnorePatterns: [
-      '[/\\\\]node_modules[/\\\\].+\\.js$'
+      // ignore all node_modules except @elastic/eui which requires babel transforms to handle dynamic import()
+      '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)[/\\\\].+\\.js$'
     ],
     snapshotSerializers: [
       `${kibanaDirectory}/node_modules/enzyme-to-json/serializer`

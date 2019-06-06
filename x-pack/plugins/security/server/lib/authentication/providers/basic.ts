@@ -106,9 +106,8 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   public async deauthenticate(request: Legacy.Request) {
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
-    return DeauthenticationResult.redirectTo(
-      `${this.options.basePath}/login${request.url.search || ''}`
-    );
+    const queryString = request.url.search || `?msg=LOGGED_OUT`;
+    return DeauthenticationResult.redirectTo(`${this.options.basePath}/login${queryString}`);
   }
 
   /**

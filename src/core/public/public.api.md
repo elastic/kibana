@@ -4,10 +4,8 @@
 
 ```ts
 
-import * as CSS from 'csstype';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import * as PropTypes from 'prop-types';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
@@ -310,15 +308,13 @@ export interface OverlayRef {
 
 // @public (undocumented)
 export interface OverlayStart {
-    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
-    openFlyout: (flyoutChildren: React_2.ReactNode, flyoutProps?: {
+    openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
     }) => OverlayRef;
     // (undocumented)
-    openModal: (modalChildren: React_2.ReactNode, modalProps?: {
+    openModal: (modalChildren: React.ReactNode, modalProps?: {
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
     }) => OverlayRef;
@@ -340,6 +336,13 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<strin
 // @public
 export interface PluginInitializerContext {
 }
+
+// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
+    [K in keyof T]: RecursiveReadonly<T[K]>;
+}> : T;
 
 export { Toast }
 

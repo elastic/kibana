@@ -344,12 +344,13 @@ export class DocumentSearchClient extends AbstractSearchClient {
   }
 
   private termsToHits(source: string, terms: string[]): SourceHit[] {
-    if (terms.length === 0) {
+    const filteredTerms = terms.filter(t => t.trim().length > 0);
+    if (filteredTerms.length === 0) {
       return [];
     }
 
     const lineMapper = new LineMapper(source);
-    const regex = new RegExp(`(${terms.join('|')})`, 'g');
+    const regex = new RegExp(`(${filteredTerms.join('|')})`, 'g');
     let match;
     const hits: SourceHit[] = [];
     do {
