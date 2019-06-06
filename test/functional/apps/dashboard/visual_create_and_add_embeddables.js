@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
   const visualTesting = getService('visualTesting');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('create and add embeddables', async () => {
+  describe('visual create and add embeddables', async () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
