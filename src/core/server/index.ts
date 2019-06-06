@@ -63,6 +63,7 @@ export {
   RouteMethod,
   RouteConfigOptions,
   SessionStorageFactory,
+  SessionStorage,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 

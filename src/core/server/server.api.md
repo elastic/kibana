@@ -22,15 +22,14 @@ import { Url } from 'url';
 // @public (undocumented)
 export type APICaller = (endpoint: string, clientParams: Record<string, unknown>, options?: CallAPIOptions) => Promise<unknown>;
 
-// Warning: (ae-forgotten-export) The symbol "SessionStorage" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type AuthenticationHandler<T> = (request: Readonly<Request>, sessionStorage: SessionStorage<T>, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
+export type AuthenticationHandler = (request: Readonly<Request>, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
 
 // @public
 export interface AuthToolkit {
-    authenticated: (state: object) => AuthResult;
+    authenticated: (state?: object) => AuthResult;
     redirected: (url: string) => AuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
@@ -167,6 +166,8 @@ export interface InternalCoreStart {
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
+    // (undocumented)
+    protected readonly [requestSymbol]: Request;
     constructor(request: Request, params: Params, query: Query, body: Body);
     // (undocumented)
     readonly body: Body;
@@ -182,8 +183,6 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     readonly query: Query;
     // (undocumented)
     readonly route: RecursiveReadonly<KibanaRequestRoute>;
-    // (undocumented)
-    unstable_getIncomingMessage(): import("http").IncomingMessage;
     // (undocumented)
     readonly url: Url;
     }
@@ -385,6 +384,19 @@ export class ScopedClusterClient {
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
     callAsInternalUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
     }
+
+// @public
+export interface SessionStorage<T> {
+    clear(): void;
+    get(): Promise<T | null>;
+    set(sessionValue: T): void;
+}
+
+// @public
+export interface SessionStorageFactory<T> {
+    // (undocumented)
+    asScoped: (request: Readonly<Request> | KibanaRequest) => SessionStorage<T>;
+}
 
 
 // Warnings were encountered during analysis:
