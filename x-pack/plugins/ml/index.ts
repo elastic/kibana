@@ -78,7 +78,7 @@ export const ml = (kibana: any) => {
 
       const core: MlCoreSetup = {
         addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
-        config: server.config,
+        config: server.config, // TODO: remove this as it's in the initializerContext
         injectUiAppVars: server.injectUiAppVars,
         http: mlHttpService,
         elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch, // TODO: check if this is needed
@@ -94,105 +94,6 @@ export const ml = (kibana: any) => {
       };
 
       plugin(initializerContext).setup(core, plugins);
-
-      // const serverDeps = {
-      //   addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
-      //   config: server.config,
-      //   injectUiAppVars: server.injectUiAppVars,
-      //   plugins: {
-      //     elasticsearch: server.plugins.elasticsearch,
-      //     xpack_main: server.plugins.xpack_main,
-      //   },
-      //   route: server.route.bind(server),
-      //   savedObjects: server.savedObjects,
-      //   usage: server.usage,
-      // };
-
-      // const thisPlugin = this;
-      // const xpackMainPlugin = serverDeps.plugins.xpack_main;
-      // mirrorPluginStatus(xpackMainPlugin, thisPlugin);
-      // xpackMainPlugin.status.once('green', () => {
-      //   // Register a function that is called whenever the xpack info changes,
-      //   // to re-compute the license check results for this plugin
-      //   xpackMainPlugin.info
-      //     .feature(thisPlugin.id)
-      //     .registerLicenseCheckResultsGenerator(checkLicense);
-
-      //   const isEnabled = xpackMainPlugin.info.feature(thisPlugin.id).isEnabled();
-      //   if (isEnabled === true) {
-      //     addLinksToSampleDatasets(serverDeps);
-      //   }
-      // });
-
-      // xpackMainPlugin.registerFeature({
-      //   id: 'ml',
-      //   name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
-      //     defaultMessage: 'Machine Learning',
-      //   }),
-      //   icon: 'machineLearningApp',
-      //   navLinkId: 'ml',
-      //   app: ['ml', 'kibana'],
-      //   catalogue: ['ml'],
-      //   privileges: {},
-      //   reserved: {
-      //     privilege: {
-      //       savedObject: {
-      //         all: [],
-      //         read: [],
-      //       },
-      //       ui: [],
-      //     },
-      //     description: i18n.translate('xpack.ml.feature.reserved.description', {
-      //       defaultMessage:
-      //         'To grant users access, you should also assign either the machine_learning_user or machine_learning_admin role.',
-      //     }),
-      //   },
-      // });
-
-      // Add server routes and initialize the plugin here
-      // const commonRouteConfig = {
-      //   pre: [
-      //     function forbidApiAccess() {
-      //       const licenseCheckResults = xpackMainPlugin.info
-      //         .feature(thisPlugin.id)
-      //         .getLicenseCheckResults();
-      //       if (licenseCheckResults.isAvailable) {
-      //         return null;
-      //       } else {
-      //         throw Boom.forbidden(licenseCheckResults.message);
-      //       }
-      //     },
-      //   ],
-      // };
-
-      // serverDeps.injectUiAppVars('ml', () => {
-      //   const config = serverDeps.config();
-      //   return {
-      //     kbnIndex: config.get('kibana.index'),
-      //     mlAnnotationsEnabled: FEATURE_ANNOTATIONS_ENABLED,
-      //   };
-      // });
-
-      // annotationRoutes(serverDeps, commonRouteConfig);
-      // jobRoutes(serverDeps, commonRouteConfig);
-      // dataFeedRoutes(serverDeps, commonRouteConfig);
-      // dataFrameRoutes(serverDeps, commonRouteConfig);
-      // indicesRoutes(serverDeps, commonRouteConfig);
-      // jobValidationRoutes(serverDeps, commonRouteConfig);
-      // notificationRoutes(serverDeps, commonRouteConfig);
-      // systemRoutes(serverDeps, commonRouteConfig);
-      // dataRecognizer(serverDeps, commonRouteConfig);
-      // dataVisualizerRoutes(serverDeps, commonRouteConfig);
-      // calendars(serverDeps, commonRouteConfig);
-      // fieldsService(serverDeps, commonRouteConfig);
-      // filtersRoutes(serverDeps, commonRouteConfig);
-      // resultsServiceRoutes(serverDeps, commonRouteConfig);
-      // jobServiceRoutes(serverDeps, commonRouteConfig);
-      // jobAuditMessagesRoutes(serverDeps, commonRouteConfig);
-      // fileDataVisualizerRoutes(serverDeps, commonRouteConfig);
-
-      // initMlServerLog(serverDeps);
-      // makeMlUsageCollector(serverDeps);
     },
   });
 };

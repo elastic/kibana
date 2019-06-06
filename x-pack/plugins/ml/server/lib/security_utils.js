@@ -9,8 +9,7 @@
  * Contains utility functions related to x-pack security.
  */
 
-export function isSecurityDisabled(server) {
-  const xpackMainPlugin = server.plugins.xpackMain;
+export function isSecurityDisabled(xpackMainPlugin) {
   const xpackInfo = (xpackMainPlugin && xpackMainPlugin.info);
   // we assume that `xpack.isAvailable()` always returns `true` because we're inside x-pack
   // if for whatever reason it returns `false`, `isSecurityDisabled()` would also return `false`

@@ -19,26 +19,47 @@ import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
 // @ts-ignore: could not find declaration file for module
 import { checkLicense } from '../lib/check_license';
+// @ts-ignore: could not find declaration file for module
 import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status';
+// @ts-ignore: could not find declaration file for module
 import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flags';
+// @ts-ignore: could not find declaration file for module
 import { annotationRoutes } from '../routes/annotations';
+// @ts-ignore: could not find declaration file for module
 import { jobRoutes } from '../routes/anomaly_detectors';
+// @ts-ignore: could not find declaration file for module
 import { dataFeedRoutes } from '../routes/datafeeds';
+// @ts-ignore: could not find declaration file for module
 import { indicesRoutes } from '../routes/indices';
+// @ts-ignore: could not find declaration file for module
 import { jobValidationRoutes } from '../routes/job_validation';
+// @ts-ignore: could not find declaration file for module
 import { makeMlUsageCollector } from '../lib/ml_telemetry';
+// @ts-ignore: could not find declaration file for module
 import { notificationRoutes } from '../routes/notification_settings';
+// @ts-ignore: could not find declaration file for module
 import { systemRoutes } from '../routes/system';
+// @ts-ignore: could not find declaration file for module
 import { dataFrameRoutes } from '../routes/data_frame';
+// @ts-ignore: could not find declaration file for module
 import { dataRecognizer } from '../routes/modules';
+// @ts-ignore: could not find declaration file for module
 import { dataVisualizerRoutes } from '../routes/data_visualizer';
+// @ts-ignore: could not find declaration file for module
 import { calendars } from '../routes/calendars';
+// @ts-ignore: could not find declaration file for module
 import { fieldsService } from '../routes/fields_service';
+// @ts-ignore: could not find declaration file for module
 import { filtersRoutes } from '../routes/filters';
+// @ts-ignore: could not find declaration file for module
 import { resultsServiceRoutes } from '../routes/results_service';
+// @ts-ignore: could not find declaration file for module
 import { jobServiceRoutes } from '../routes/job_service';
+// @ts-ignore: could not find declaration file for module
 import { jobAuditMessagesRoutes } from '../routes/job_audit_messages';
+// @ts-ignore: could not find declaration file for module
 import { fileDataVisualizerRoutes } from '../routes/file_data_visualizer';
+// @ts-ignore: could not find declaration file for module
 import { initMlServerLog } from '../client/log';
 
 export interface MlHttpServiceSetup extends HttpServiceSetup {
@@ -68,7 +89,27 @@ export interface PluginsSetup {
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }
-
+export interface RouteInitialization {
+  commonRouteConfig: any;
+  config?: any;
+  elasticsearchPlugin: ElasticsearchPlugin;
+  route(route: ServerRoute | ServerRoute[]): void;
+  xpackMainPlugin?: XPackMainPlugin;
+  savedObjects?: SavedObjectsService;
+}
+export interface UsageInitialization {
+  elasticsearchPlugin: ElasticsearchPlugin;
+  usage: {
+    collectorSet: {
+      makeUsageCollector: any;
+      register: (collector: any) => void;
+    };
+  };
+  savedObjects: SavedObjectsService;
+}
+export interface LogInitialization {
+  log: Logger;
+}
 export class Plugin {
   private readonly pluginId: string = 'ml';
   private config: any;
@@ -145,31 +186,49 @@ export class Plugin {
       };
     });
 
-    // const routeIntializationContext = {
-    //   route: http.route,
-    //   elasticsearchPlugin: plugins.elasticsearch
-    // }
+    const routeInitializationDeps: RouteInitialization = {
+      commonRouteConfig,
+      route: http.route,
+      elasticsearchPlugin: plugins.elasticsearch,
+    };
 
-    annotationRoutes({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    jobRoutes({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    dataFeedRoutes({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    dataFrameRoutes({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    indicesRoutes({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    jobValidationRoutes({ ...http, plugins }, commonRouteConfig); // calls estimateBucketSpanFactory - elasticsearchPlugin, isSecurityDisabled - xpackMain
-    notificationRoutes({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    systemRoutes({ ...http, plugins }, commonRouteConfig); // calls internalUserFactory - elasticsearchPlugin, isSecurityDisabled - xpackMain
-    dataRecognizer({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    dataVisualizerRoutes({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    calendars({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    fieldsService({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    filtersRoutes({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    resultsServiceRoutes({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    jobServiceRoutes({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    jobAuditMessagesRoutes({ ...http, plugins }, commonRouteConfig); // routeIntializationContext
-    fileDataVisualizerRoutes({ ...http, plugins }, commonRouteConfig); // calls incrementFileDataVisualizerIndexCreationCount - savedObjects, elasticsearchPlugin for internalUserFactory
+    const extendedRouteInitializationDeps: RouteInitialization = {
+      ...routeInitializationDeps,
+      config: this.config,
+      xpackMainPlugin: plugins.xpackMain,
+      savedObjects: core.savedObjects,
+    };
 
-    initMlServerLog({ log: this.log }); // only calls server.log - so pass logger
-    makeMlUsageCollector({ ...http, usage: core.usage }); // server.usage.collectorSet.makeUsageCollector, server.usage.collectorSet.register, savedObjects
+    const usageInitializationDeps: UsageInitialization = {
+      elasticsearchPlugin: plugins.elasticsearch,
+      usage: core.usage,
+      savedObjects: core.savedObjects,
+    };
+
+    const logInitializationDeps: LogInitialization = {
+      log: this.log,
+    };
+
+    annotationRoutes(routeInitializationDeps);
+    jobRoutes(routeInitializationDeps);
+    dataFeedRoutes(routeInitializationDeps);
+    dataFrameRoutes(routeInitializationDeps);
+    indicesRoutes(routeInitializationDeps);
+    jobValidationRoutes(extendedRouteInitializationDeps);
+    notificationRoutes(routeInitializationDeps);
+    systemRoutes(extendedRouteInitializationDeps);
+    dataRecognizer(routeInitializationDeps);
+    dataVisualizerRoutes(routeInitializationDeps);
+    calendars(routeInitializationDeps);
+    fieldsService(routeInitializationDeps);
+    filtersRoutes(routeInitializationDeps);
+    resultsServiceRoutes(routeInitializationDeps);
+    jobServiceRoutes(routeInitializationDeps);
+    jobAuditMessagesRoutes(routeInitializationDeps);
+    fileDataVisualizerRoutes(extendedRouteInitializationDeps);
+
+    initMlServerLog(logInitializationDeps);
+    makeMlUsageCollector(usageInitializationDeps);
   }
 
   public stop() {}
