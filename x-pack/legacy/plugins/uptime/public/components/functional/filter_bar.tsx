@@ -154,7 +154,7 @@ export const FilterBarComponent = ({ currentQuery, data, error, updateQuery }: P
             className="euiFlexGroup--gutterSmall"
             onChange={updateQuery}
             filters={filters}
-            query={error ? '' : currentQuery}
+            query={error || currentQuery === '' ? undefined : currentQuery}
             schema={filterBarSearchSchema}
           />
         </div>

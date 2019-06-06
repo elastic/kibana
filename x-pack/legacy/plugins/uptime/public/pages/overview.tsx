@@ -53,7 +53,9 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
   let filters: any | undefined;
   try {
     // toESQuery will throw errors
-    filters = JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString));
+    if (filterQueryString) {
+      filters = JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString));
+    }
   } catch (e) {
     error = e;
   }
