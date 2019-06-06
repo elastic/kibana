@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Filter } from '@kbn/es-query';
+
 import _ from 'lodash';
 import { Observable, Subject } from 'rxjs';
 
@@ -26,6 +28,8 @@ import { PartitionedFilters } from './partitioned_filters';
 export class FilterStateManager {
   globalState: State;
   getAppState: () => State;
+  prevGlobalFilters: Filter[] | undefined;
+  prevAppFilters: Filter[] | undefined;
   stateUpdated$: Subject<PartitionedFilters> = new Subject();
 
   constructor(globalState: State, getAppState: () => State) {
@@ -40,12 +44,24 @@ export class FilterStateManager {
     // Moving forward, state should provide observable subscriptions.
     setInterval(() => {
       const appState = this.getAppState();
-      if (!appState || !this.globalState) return;
+      if (
+        !appState ||
+        !this.globalState ||
+        (this.prevGlobalFilters &&
+          this.prevGlobalFilters === this.globalState.filters &&
+          this.prevAppFilters &&
+          this.prevAppFilters === appState.filters)
+      )
+        return;
 
       this.stateUpdated$.next({
         appFilters: appState.filters || [],
         globalFilters: this.globalState.filters || [],
       });
+
+      // store new filter changes
+      this.prevGlobalFilters = this.globalState.filters;
+      this.prevAppFilters = appState.filters;
     }, 50);
   }
 
