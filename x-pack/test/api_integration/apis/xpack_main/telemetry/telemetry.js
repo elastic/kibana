@@ -40,7 +40,7 @@ export default function ({ getService }) {
           max: '2018-07-23T22:13:00Z'
         };
 
-        await  esArchiver.load(archive);
+        await esArchiver.load(archive);
 
         const { body } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')

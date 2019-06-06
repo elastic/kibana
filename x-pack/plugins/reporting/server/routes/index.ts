@@ -11,6 +11,8 @@ import { KbnServer } from '../../types';
 // @ts-ignore
 import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerate } from './generate';
+import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
+import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { registerJobs } from './jobs';
 import { registerLegacy } from './legacy';
 
@@ -20,7 +22,15 @@ export function registerRoutes(server: KbnServer) {
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
   const enqueueJob = enqueueJobFactory(server);
 
-  async function handler(exportTypeId: any, jobParams: any, request: Request, h: ResponseToolkit) {
+  /*
+   * Generates enqueued job details to use in responses
+   */
+  async function handler(
+    exportTypeId: string,
+    jobParams: any,
+    request: Request,
+    h: ResponseToolkit
+  ) {
     // @ts-ignore
     const user = request.pre.user;
     const headers = request.headers;
@@ -38,12 +48,12 @@ export function registerRoutes(server: KbnServer) {
       .type('application/json');
   }
 
-  function handleError(exportType: any, err: Error) {
+  function handleError(exportTypeId: string, err: Error) {
     if (err instanceof esErrors['401']) {
       return boom.unauthorized(`Sorry, you aren't authenticated`);
     }
     if (err instanceof esErrors['403']) {
-      return boom.forbidden(`Sorry, you are not authorized to create ${exportType} reports`);
+      return boom.forbidden(`Sorry, you are not authorized to create ${exportTypeId} reports`);
     }
     if (err instanceof esErrors['404']) {
       return boom.boomify(err, { statusCode: 404 });
@@ -53,5 +63,12 @@ export function registerRoutes(server: KbnServer) {
 
   registerGenerate(server, handler, handleError);
   registerLegacy(server, handler, handleError);
+
+  // Register beta panel-action download-related API's
+  if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {
+    registerGenerateCsvFromSavedObject(server, handler, handleError);
+    registerGenerateCsvFromSavedObjectImmediate(server);
+  }
+
   registerJobs(server);
 }

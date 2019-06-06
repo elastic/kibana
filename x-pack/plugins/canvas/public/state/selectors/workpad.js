@@ -6,7 +6,6 @@
 
 import { get, omit } from 'lodash';
 import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
-
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 
@@ -156,7 +155,7 @@ function extractFilterGroups(ast) {
       return groups.concat(
         buildGroupValues(args, argValue => {
           // this only handles simple values
-          if (typeof argValue !== 'object') {
+          if (argValue !== null && typeof argValue !== 'object') {
             return argValue;
           }
         })
@@ -166,7 +165,7 @@ function extractFilterGroups(ast) {
       return groups.concat(
         buildGroupValues(args, argValue => {
           // recursively collect filter groups
-          if (typeof argValue === 'object' && argValue.type === 'expression') {
+          if (argValue !== null && typeof argValue === 'object' && argValue.type === 'expression') {
             return extractFilterGroups(argValue);
           }
         })

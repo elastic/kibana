@@ -6,6 +6,7 @@
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
+import styled from 'styled-components';
 
 import { ACTION_COLUMN_WIDTH, PositionedIcon } from './common_styles';
 import { FavoriteTimelineResult, OpenTimelineResult } from '../types';
@@ -13,16 +14,25 @@ import { getNotesCount, getPinnedEventCount } from '../helpers';
 
 import * as i18n from '../translations';
 
+const PinnedIcon = styled(EuiIcon)`
+  position: relative;
+  left: -3px;
+`;
+
+const CommentIcon = styled(EuiIcon)`
+  position: relative;
+  left: -2px;
+`;
+
 /**
  * Returns the columns that have icon headers
  */
 export const getIconHeaderColumns = () => [
   {
-    align: 'center',
     field: 'pinnedEventIds',
     name: (
       <EuiToolTip content={i18n.PINNED_EVENTS}>
-        <EuiIcon data-test-subj="pinned-event-header-icon" size="m" color="subdued" type="pin" />
+        <PinnedIcon data-test-subj="pinned-event-header-icon" size="m" color="subdued" type="pin" />
       </EuiToolTip>
     ),
     render: (_: Record<string, boolean> | null | undefined, timelineResult: OpenTimelineResult) => (
@@ -32,11 +42,10 @@ export const getIconHeaderColumns = () => [
     width: ACTION_COLUMN_WIDTH,
   },
   {
-    align: 'center',
     field: 'eventIdToNoteIds',
     name: (
       <EuiToolTip content={i18n.NOTES}>
-        <EuiIcon
+        <CommentIcon
           data-test-subj="notes-count-header-icon"
           size="m"
           color="subdued"
@@ -52,7 +61,6 @@ export const getIconHeaderColumns = () => [
     width: ACTION_COLUMN_WIDTH,
   },
   {
-    align: 'center',
     field: 'favorite',
     name: (
       <EuiToolTip content={i18n.FAVORITES}>

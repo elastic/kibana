@@ -41,6 +41,6 @@ export async function getTransaction(
     }
   };
 
-  const resp = await client<Transaction>('search', params);
+  const resp = await client.search<Transaction>(params);
   return idx(resp, _ => _.hits.hits[0]._source);
 }

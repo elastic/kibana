@@ -9,7 +9,6 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { escapeQueryValue } from '../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getEmptyStringTag } from '../empty_value';
@@ -95,7 +94,7 @@ export const DefaultDraggable = pure<DefaultDraggableType>(
           kqlQuery: '',
           queryMatch: {
             field,
-            value: escapeQueryValue(queryValue ? queryValue : value),
+            value: queryValue ? queryValue : value,
             operator: IS_OPERATOR,
           },
         }}
