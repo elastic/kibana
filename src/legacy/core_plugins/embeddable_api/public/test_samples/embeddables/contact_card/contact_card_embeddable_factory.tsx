@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { embeddableFactories, EmbeddableFactory } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
@@ -42,7 +42,7 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
 
   public getExplicitInput(): Promise<Partial<ContactCardEmbeddableInput>> {
     return new Promise(resolve => {
-      const modalSession = getNewPlatform().start.core.overlays.openModal(
+      const modalSession = npStart.core.overlays.openModal(
         <ContactCardInitializer
           onCancel={() => {
             modalSession.close();

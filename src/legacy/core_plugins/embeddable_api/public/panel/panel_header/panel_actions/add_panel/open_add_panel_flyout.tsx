@@ -17,12 +17,12 @@
  * under the License.
  */
 import React from 'react';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
 
 export async function openAddPanelFlyout(embeddable: IContainer) {
-  const flyoutSession = getNewPlatform().start.core.overlays.openFlyout(
+  const flyoutSession = npStart.core.overlays.openFlyout(
     <AddPanelFlyout
       container={embeddable}
       onClose={() => {

@@ -17,13 +17,13 @@
  * under the License.
  */
 import React from 'react';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { ActionContext } from '../../../../actions';
 import { CustomizePanelModal } from './customize_panel_modal';
 
 export async function getUserData(context: ActionContext) {
   return new Promise<{ title: string | undefined }>(resolve => {
-    const session = getNewPlatform().start.core.overlays.openModal(
+    const session = npStart.core.overlays.openModal(
       <CustomizePanelModal
         embeddable={context.embeddable}
         updateTitle={title => {

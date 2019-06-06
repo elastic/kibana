@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { EuiFlyoutBody } from '@elastic/eui';
 import {
   Action,
@@ -57,7 +57,7 @@ export class SendMessageAction extends Action {
     const greeting = `Hello, ${context.embeddable.getOutput().fullName}`;
 
     const content = message ? `${greeting}. ${message}` : greeting;
-    getNewPlatform().start.core.overlays.openFlyout(<EuiFlyoutBody>{content}</EuiFlyoutBody>);
+    npStart.core.overlays.openFlyout(<EuiFlyoutBody>{content}</EuiFlyoutBody>);
   }
 
   async execute(
@@ -70,7 +70,7 @@ export class SendMessageAction extends Action {
       throw new IncompatibleActionError();
     }
 
-    const modal = getNewPlatform().start.core.overlays.openModal(
+    const modal = npStart.core.overlays.openModal(
       <GetMessageModal
         onCancel={() => modal.close()}
         onDone={message => {

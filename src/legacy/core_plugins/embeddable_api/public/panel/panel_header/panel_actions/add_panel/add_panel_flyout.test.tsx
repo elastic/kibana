@@ -52,15 +52,13 @@ const mockOpenModal = (component: Component) => {
   };
 };
 jest.mock('ui/new_platform', () => ({
-  getNewPlatform: () => ({
-    start: {
-      core: {
-        overlays: {
-          openModal: mockOpenModal,
-        },
+  npStart: {
+    core: {
+      overlays: {
+        openModal: mockOpenModal,
       },
     },
-  }),
+  },
 }));
 
 import React, { Component } from 'react';

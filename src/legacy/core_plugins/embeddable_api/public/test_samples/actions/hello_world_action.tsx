@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { EuiFlyout } from '@elastic/eui';
 import { Action, actionRegistry, triggerRegistry, CONTEXT_MENU_TRIGGER } from '../..';
 
@@ -38,7 +38,7 @@ export class HelloWorldAction extends Action {
   }
 
   public execute() {
-    const flyoutSession = getNewPlatform().start.core.overlays.openFlyout(
+    const flyoutSession = npStart.core.overlays.openFlyout(
       <EuiFlyout ownFocus onClose={() => flyoutSession && flyoutSession.close()}>
         Hello World, I am a hello world action!
       </EuiFlyout>,

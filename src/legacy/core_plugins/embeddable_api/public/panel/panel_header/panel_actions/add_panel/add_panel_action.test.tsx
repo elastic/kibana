@@ -33,15 +33,13 @@ jest.mock('ui/capabilities', () => ({
 }));
 
 jest.mock('ui/new_platform', () => ({
-  getNewPlatform: () => ({
-    start: {
-      core: {
-        overlays: {
-          openFlyout: jest.fn(),
-        },
+  npStart: {
+    core: {
+      overlays: {
+        openFlyout: jest.fn(),
       },
     },
-  }),
+  },
 }));
 
 import {

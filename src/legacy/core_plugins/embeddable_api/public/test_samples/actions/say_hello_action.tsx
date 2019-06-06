@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { triggerRegistry, CONTEXT_MENU_TRIGGER, attachAction } from '../../triggers';
 import { Action, ActionContext, actionRegistry, IncompatibleActionError } from '../../actions';
@@ -39,7 +39,7 @@ export function hasFullNameOutput(
 }
 
 function openSayHelloFlyout(hello: string) {
-  getNewPlatform().start.core.overlays.openFlyout(<EuiFlyoutBody>{hello}</EuiFlyoutBody>);
+  npStart.core.overlays.openFlyout(<EuiFlyoutBody>{hello}</EuiFlyoutBody>);
 }
 
 export class SayHelloAction extends Action {
