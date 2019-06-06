@@ -760,7 +760,7 @@ test('Should support enabling auth for a route explicitly', async () => {
   expect(authenticate).toHaveBeenCalledTimes(1);
 });
 
-test('Should let to attach meta-data tag strings to a route', async () => {
+test('Should allow attaching metadata to attach meta-data tag strings to a route', async () => {
   const tags = ['my:tag'];
   const { registerRouter, server: innerServer } = await server.setup(config);
 
