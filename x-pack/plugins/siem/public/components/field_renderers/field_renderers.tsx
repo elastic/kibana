@@ -6,7 +6,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { pure } from 'recompose';
@@ -19,12 +19,12 @@ import {
 } from '../../graphql/types';
 import { DefaultDraggable } from '../draggables';
 import { getEmptyTagValue } from '../empty_value';
-import { ExternalLinkIcon } from '../external_link_icon';
 import { FormattedDate } from '../formatted_date';
 import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../links';
 
 import * as i18n from '../page/network/ip_overview/translations';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import { Spacer } from '../page';
 
 export const IpOverviewId = 'ip-overview';
 
@@ -34,7 +34,7 @@ export const locationRenderer = (fieldNames: string[], data: IpOverviewData): Re
       {fieldNames.map((fieldName, index) => {
         const locationValue = getOr('', fieldName, data);
         return (
-          <React.Fragment key={`${IpOverviewId}-${fieldName}`}>
+          <Fragment key={`${IpOverviewId}-${fieldName}`}>
             {index ? ',\u00A0' : ''}
             <EuiFlexItem grow={false}>
               <DefaultDraggable
@@ -43,7 +43,7 @@ export const locationRenderer = (fieldNames: string[], data: IpOverviewData): Re
                 value={locationValue}
               />
             </EuiFlexItem>
-          </React.Fragment>
+          </Fragment>
         );
       })}
     </EuiFlexGroup>
@@ -66,8 +66,8 @@ export const autonomousSystemRenderer = (
           id={`${IpOverviewId}-${flowTarget}.autonomous_system.as_org`}
           field={`${flowTarget}.autonomous_system.as_org`}
           value={as.as_org}
-        />{' '}
-        /
+        />
+        {' /'}
         <DefaultDraggable
           id={`${IpOverviewId}-${flowTarget}.autonomous_system.asn`}
           field={`${flowTarget}.autonomous_system.asn`}
@@ -79,52 +79,53 @@ export const autonomousSystemRenderer = (
     getEmptyTagValue()
   );
 
-export const hostIdRenderer = (host: HostEcsFields, ipFilter?: string): React.ReactElement =>
-  host.id && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        {host.name && host.name[0] != null ? (
-          <DefaultDraggable id={`${IpOverviewId}-host-id`} field={'host.id'} value={host.id[0]}>
+interface HostIdRendererTypes {
+  host: HostEcsFields;
+  ipFilter?: string;
+  noLink?: boolean;
+}
+
+export const hostIdRenderer = ({
+  host,
+  ipFilter,
+  noLink,
+}: HostIdRendererTypes): React.ReactElement =>
+  host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
+    <>
+      {host.name && host.name[0] != null ? (
+        <DefaultDraggable id={`${IpOverviewId}-host-id`} field="host.id" value={host.id[0]}>
+          {noLink ? (
+            <>{host.id}</>
+          ) : (
             <HostDetailsLink hostName={host.name[0]}>{host.id}</HostDetailsLink>
-          </DefaultDraggable>
-        ) : (
-          <>{host.id}</>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          )}
+        </DefaultDraggable>
+      ) : (
+        <>{host.id}</>
+      )}
+    </>
   ) : (
     getEmptyTagValue()
   );
 
 export const hostNameRenderer = (host: HostEcsFields, ipFilter?: string): React.ReactElement =>
   host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <DefaultDraggable id={`${IpOverviewId}-host-name`} field={'host.name'} value={host.name[0]}>
-          <HostDetailsLink hostName={host.name[0]}>
-            {host.name ? host.name : getEmptyTagValue()}
-          </HostDetailsLink>
-        </DefaultDraggable>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <DefaultDraggable id={`${IpOverviewId}-host-name`} field={'host.name'} value={host.name[0]}>
+      <HostDetailsLink hostName={host.name[0]}>
+        {host.name ? host.name : getEmptyTagValue()}
+      </HostDetailsLink>
+    </DefaultDraggable>
   ) : (
     getEmptyTagValue()
   );
 
-export const whoisRenderer = (ip: string) => (
-  <>
-    <WhoIsLink domain={ip}>{i18n.VIEW_WHOIS}</WhoIsLink>
-    <ExternalLinkIcon />
-  </>
-);
+export const whoisRenderer = (ip: string) => <WhoIsLink domain={ip}>{i18n.VIEW_WHOIS}</WhoIsLink>;
 
 export const reputationRenderer = (ip: string): React.ReactElement => (
   <>
     <VirusTotalLink link={ip}>{i18n.VIEW_VIRUS_TOTAL}</VirusTotalLink>
-    <ExternalLinkIcon />
-    <br />
+    {', '}
     <ReputationLink domain={ip}>{i18n.VIEW_TALOS_INTELLIGENCE}</ReputationLink>
-    <ExternalLinkIcon />
   </>
 );
 
@@ -137,6 +138,8 @@ interface DefaultFieldRendererProps {
   maxOverflow?: number;
 }
 
+// TODO: This causes breaks between elements until the ticket below is fixed
+// https://github.com/elastic/ingest-dev/issues/474
 export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
   ({ rowItems, attrName, idPrefix, render, displayCount = 1, maxOverflow = 5 }) => {
     if (rowItems != null && rowItems.length > 0) {
@@ -144,7 +147,12 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
         const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
         return (
           <EuiFlexItem key={id} grow={false}>
-            {index !== 0 && <>,&nbsp;</>}
+            {index !== 0 && (
+              <>
+                {','}
+                <Spacer />
+              </>
+            )}
             <DefaultDraggable id={id} field={attrName} value={rowItem}>
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>

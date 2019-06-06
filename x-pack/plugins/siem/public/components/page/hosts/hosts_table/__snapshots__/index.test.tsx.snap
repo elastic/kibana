@@ -4,6 +4,7 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
 <ContextProvider
   value={
     Object {
+      "bytesFormat": "0,0.[000]b",
       "dateFormat": "MMM D, YYYY @ HH:mm:ss.SSS",
       "dateFormatTz": "UTC",
       "timezone": "UTC",

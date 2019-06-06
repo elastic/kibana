@@ -116,7 +116,7 @@ export class CoreSystem {
       this.fatalErrorsSetup = this.fatalErrors.setup({ injectedMetadata, i18n });
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
-      const notifications = this.notifications.setup({ uiSettings });
+      const notifications = this.notifications.setup({ uiSettings, i18n });
       const application = this.application.setup();
       const chrome = this.chrome.setup({ injectedMetadata, notifications });
 
@@ -166,11 +166,12 @@ export class CoreSystem {
       this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
+      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
       const notifications = await this.notifications.start({
         i18n,
+        overlays,
         targetDomElement: notificationsTargetDomElement,
       });
-      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
 
       const core: InternalCoreStart = {
         application,

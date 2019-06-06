@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 
+// TODO this logic should be re-used with Discover
 export function createFlattenHit(fields, metaFields, conflictedTypesFields) {
   const flattenSource = (flat, obj, keyPrefix) => {
     keyPrefix = keyPrefix ? keyPrefix + '.' : '';

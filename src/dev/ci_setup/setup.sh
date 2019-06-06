@@ -198,7 +198,7 @@ fi
 ###
 ### github-checks-reporter kill switch. Remove to disable
 ###
-export CHECKS_REPORTER_ACTIVE=false
+export CHECKS_REPORTER_ACTIVE=true
 
 ### only run on pr jobs
 if [[ "$JOB_NAME" != "elastic+kibana+pull-request"* ]] ; then

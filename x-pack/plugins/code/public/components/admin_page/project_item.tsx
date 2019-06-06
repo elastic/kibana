@@ -115,7 +115,7 @@ class CodeProjectItem extends React.PureComponent<{
               className="codeButton__project"
               data-test-subj="settingsRepositoryButton"
               tabIndex={0}
-              onKeyDown={onClickSettings}
+              onKeyPress={onClickSettings}
               onClick={onClickSettings}
               role="button"
               style={{ visibility: settingsVisibility }}
@@ -131,7 +131,7 @@ class CodeProjectItem extends React.PureComponent<{
               className="codeButton__project"
               data-test-subj="indexRepositoryButton"
               tabIndex={0}
-              onKeyDown={onClickIndex}
+              onKeyPress={onClickIndex}
               onClick={onClickIndex}
               role="button"
               style={{ visibility: indexVisibility }}
@@ -147,7 +147,7 @@ class CodeProjectItem extends React.PureComponent<{
               className="codeButton__project"
               data-test-subj="deleteRepositoryButton"
               tabIndex={0}
-              onKeyDown={onClickDelete}
+              onKeyPress={onClickDelete}
               onClick={onClickDelete}
               role="button"
               style={{ visibility: deleteVisibility }}

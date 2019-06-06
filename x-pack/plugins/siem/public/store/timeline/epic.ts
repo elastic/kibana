@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, merge as mergeObject, set, omit, getOr } from 'lodash/fp';
+import { get, has, merge as mergeObject, set, omit } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { from, Observable, Subject, empty, merge } from 'rxjs';
@@ -151,7 +151,6 @@ export const createTimelineEpic = <State>(): Epic<
       withLatestFrom(timeline$),
       filter(([action, timeline]) => {
         const timelineId: TimelineModel = timeline[get('payload.id', action)];
-        const columns: ColumnHeader[] = getOr([], 'columns', timelineId);
         if (action.type === createTimeline.type) {
           myEpicTimelineId.setTimelineId(null);
           myEpicTimelineId.setTimelineVersion(null);
@@ -160,12 +159,6 @@ export const createTimelineEpic = <State>(): Epic<
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
         } else if (timelineActionsType.includes(action.type) && !timelineId.isLoading) {
-          if (
-            action.type === addProvider.type &&
-            columns.filter(col => col.type != null).length === 0
-          ) {
-            return false;
-          }
           return true;
         }
         return false;

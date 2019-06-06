@@ -17,45 +17,43 @@ interface Props {
 
 export const SnapshotState: React.SFC<Props> = ({ state }) => {
   const {
-    core: {
-      i18n: { translate },
-    },
+    core: { i18n },
   } = useAppDependencies();
 
   const stateMap: any = {
     [SNAPSHOT_STATE.IN_PROGRESS]: {
       icon: <EuiLoadingSpinner size="m" />,
-      label: translate('xpack.snapshotRestore.snapshotState.inProgressLabel', {
+      label: i18n.translate('xpack.snapshotRestore.snapshotState.inProgressLabel', {
         defaultMessage: 'Taking snapshot…',
       }),
     },
     [SNAPSHOT_STATE.SUCCESS]: {
       icon: <EuiIcon color="success" type="check" />,
-      label: translate('xpack.snapshotRestore.snapshotState.inProgressLabel', {
+      label: i18n.translate('xpack.snapshotRestore.snapshotState.completeLabel', {
         defaultMessage: 'Snapshot complete',
       }),
     },
     [SNAPSHOT_STATE.FAILED]: {
       icon: <EuiIcon color="danger" type="cross" />,
-      label: translate('xpack.snapshotRestore.snapshotState.failedLabel', {
+      label: i18n.translate('xpack.snapshotRestore.snapshotState.failedLabel', {
         defaultMessage: 'Snapshot failed',
       }),
     },
     [SNAPSHOT_STATE.PARTIAL]: {
       icon: <EuiIcon color="warning" type="alert" />,
-      label: translate('xpack.snapshotRestore.snapshotState.partialLabel', {
+      label: i18n.translate('xpack.snapshotRestore.snapshotState.partialLabel', {
         defaultMessage: 'Partial failure',
       }),
-      tip: translate('xpack.snapshotRestore.snapshotState.partialTipDescription', {
+      tip: i18n.translate('xpack.snapshotRestore.snapshotState.partialTipDescription', {
         defaultMessage: `Global cluster state was stored, but at least one shard wasn't stored successfully. See the 'Failed indices' tab.`,
       }),
     },
     [SNAPSHOT_STATE.INCOMPATIBLE]: {
       icon: <EuiIcon color="warning" type="alert" />,
-      label: translate('xpack.snapshotRestore.snapshotState.incompatibleLabel', {
+      label: i18n.translate('xpack.snapshotRestore.snapshotState.incompatibleLabel', {
         defaultMessage: 'Incompatible version',
       }),
-      tip: translate('xpack.snapshotRestore.snapshotState.partialTipDescription', {
+      tip: i18n.translate('xpack.snapshotRestore.snapshotState.incompatibleTipDescription', {
         defaultMessage: `Snapshot was created with a version of Elasticsearch incompatible with the cluster's version.`,
       }),
     },

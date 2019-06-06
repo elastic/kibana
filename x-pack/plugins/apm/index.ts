@@ -10,8 +10,8 @@ import { resolve } from 'path';
 import {
   InternalCoreSetup,
   PluginInitializerContext
-} from 'src/core/server/index.js';
-import { LegacyPluginInitializer } from 'src/legacy/types';
+} from '../../../src/core/server';
+import { LegacyPluginInitializer } from '../../../src/legacy/types';
 import mappings from './mappings.json';
 import { plugin } from './server/new-platform/index';
 

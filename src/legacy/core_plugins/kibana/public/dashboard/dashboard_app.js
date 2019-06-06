@@ -26,8 +26,6 @@ import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
-import 'ui/apply_filters';
-
 import { panelActionsStore } from './store/panel_actions_store';
 
 import { getDashboardTitle } from './dashboard_strings';
@@ -58,8 +56,6 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
-import { data } from 'plugins/data';
-data.search.loadLegacyDirectives();
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -114,7 +110,7 @@ app.directive('dashboardApp', function ($injector) {
 
       const dashboardStateManager = new DashboardStateManager({
         savedDashboard: dash,
-        AppState,
+        AppStateClass: AppState,
         hideWriteControls: dashboardConfig.getHideWriteControls(),
         addFilter: ({ field, value, operator, index }) => {
           filterActions.addFilter(field, value, operator, index, dashboardStateManager.getAppState(), filterManager);

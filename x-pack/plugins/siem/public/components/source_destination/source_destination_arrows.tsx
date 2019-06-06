@@ -18,6 +18,7 @@ import {
   hasOneValue,
 } from '../arrows/helpers';
 import { DefaultDraggable } from '../draggables';
+import { PreferenceFormattedBytes } from '../formatted_bytes';
 
 import * as i18n from './translations';
 
@@ -73,7 +74,9 @@ const SourceArrow = pure<{
                   {`(${numeral(sourceBytesPercent).format('0.00')}%)`}
                 </Percent>
               ) : null}
-              <span data-test-subj="source-bytes">{numeral(sourceBytes).format('0.000 b')}</span>
+              <span data-test-subj="source-bytes">
+                <PreferenceFormattedBytes value={sourceBytes} />
+              </span>
             </Data>
           </DefaultDraggable>
         </EuiFlexItem>
@@ -148,7 +151,7 @@ const DestinationArrow = pure<{
                 </Percent>
               ) : null}
               <span data-test-subj="destination-bytes">
-                {numeral(destinationBytes).format('0.000 b')}
+                <PreferenceFormattedBytes value={destinationBytes} />
               </span>
             </Data>
           </DefaultDraggable>
@@ -211,8 +214,8 @@ export const SourceDestinationArrows = pure<{
   const maybeSourceBytesPercent =
     maybeSourceBytes != null && maybeDestinationBytes != null
       ? getPercent({
-          numerator: Math.min(Number(maybeSourceBytes), Number(maybeDestinationBytes)),
-          denominator: Math.max(Number(maybeSourceBytes), Number(maybeDestinationBytes)),
+          numerator: Number(maybeSourceBytes),
+          denominator: Number(maybeSourceBytes) + Number(maybeDestinationBytes),
         })
       : undefined;
 

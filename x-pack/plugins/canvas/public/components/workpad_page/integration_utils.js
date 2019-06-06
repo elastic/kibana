@@ -12,7 +12,7 @@ import { matrixToAngle, multiply, rotateZ, translate } from '../../lib/aeroelast
 import { arrayToMap, flatten, identity } from '../../lib/aeroelastic/functional';
 import { getLocalTransformMatrix } from '../../lib/aeroelastic/layout_functions';
 
-const isGroupId = id => id.startsWith('group');
+export const isGroupId = id => id.startsWith('group');
 
 const headerData = id =>
   isGroupId(id)
