@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { FilterBar as FilterBarType, MonitorKey } from '../../../common/graphql/types';
 import { UptimeSearchBarQueryChangeHandler } from '../../pages/overview';
@@ -164,12 +165,11 @@ export const FilterBarComponent = ({ currentQuery, data, error, updateQuery }: P
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
-                  <EuiCode>{currentQuery}</EuiCode>{' '}
-                  {i18n.translate('xpack.uptime.filterBar.errorCalloutMessage', {
-                    defaultMessage: ' cannot be parsed.',
-                    description: `When there's an error we display the failed query in a special code
-                      block and append this text to the end of the line. Example: "monitor.id:foo" cannot be parsed.`,
-                  })}
+                  <FormattedMessage
+                    id="xpack.uptime.filterBar.errorCalloutMessage"
+                    defaultMessage="{codeBlock} cannot be parsed"
+                    values={{ codeBlock: <EuiCode>{currentQuery}</EuiCode> }}
+                  />
                 </EuiText>
               </EuiFlexItem>
               {!!error.message && <EuiFlexItem>{error.message}</EuiFlexItem>}
