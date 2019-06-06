@@ -6,14 +6,12 @@
 import { LICENSE_TYPE_BASIC, LicenseType } from '../../../common/constants';
 import { RepositoryType } from './types';
 
-const PLUGIN_NAME = 'Snapshot Repositories';
-
 export const PLUGIN = {
   ID: 'snapshot_restore',
   MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType,
-  getI18nName: (translate: (key: string, config: object) => string): string => {
-    return translate('xpack.snapshotRestore.appName', {
-      defaultMessage: PLUGIN_NAME,
+  getI18nName: (i18n: any): string => {
+    return i18n.translate('xpack.snapshotRestore.appName', {
+      defaultMessage: 'Snapshot Repositories',
     });
   },
 };

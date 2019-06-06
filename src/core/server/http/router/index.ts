@@ -19,4 +19,5 @@
 
 export { Headers, filterHeaders } from './headers';
 export { Router } from './router';
-export { KibanaRequest } from './request';
+export { KibanaRequest, KibanaRequestRoute } from './request';
+export { RouteMethod, RouteConfigOptions } from './route';
