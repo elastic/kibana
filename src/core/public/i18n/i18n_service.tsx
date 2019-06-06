@@ -57,6 +57,18 @@ export class I18nService {
             'Screen reader announcement that functionality is available in the page document',
         }
       ),
+      'euiCardSelect.select': i18n.translate('core.euiCardSelect.select', {
+        defaultMessage: 'Select',
+        description: 'Displayed button text when a card option can be selected.',
+      }),
+      'euiCardSelect.selected': i18n.translate('core.euiCardSelect.selected', {
+        defaultMessage: 'Unavailable',
+        description: 'Displayed button text when a card option is selected.',
+      }),
+      'euiCardSelect.unavailable': i18n.translate('core.euiCardSelect.unavailable', {
+        defaultMessage: 'Selected',
+        description: 'Displayed button text when a card option is unavailable.',
+      }),
       'euiCodeBlock.copyButton': i18n.translate('core.euiCodeBlock.copyButton', {
         defaultMessage: 'Copy',
         description: 'ARIA label for a button that copies source code text to the clipboard',
@@ -81,15 +93,23 @@ export class I18nService {
             'ARIA label and tooltip content describing a button that expands an actions menu',
         }
       ),
-      'euiColorPicker.colorSelectionLabel': ({ colorValue }: EuiValues) =>
-        i18n.translate('core.euiColorPicker.colorSelectionLabel', {
-          defaultMessage: 'Color selection is {colorValue}',
-          values: { colorValue },
-        }),
-      'euiColorPicker.transparentColor': i18n.translate('core.euiColorPicker.transparentColor', {
-        defaultMessage: 'transparent',
-        description: 'Describes a color that is fully transparent',
-      }),
+      'euiColorPicker.screenReaderAnnouncement': i18n.translate(
+        'core.euiColorPicker.screenReaderAnnouncement',
+        {
+          defaultMessage:
+            'A popup with a range of selectable colors opened. Tab forward to cycle through colors choices or press escape to close this popup.',
+          description:
+            'Message when the color picker popover is opened. Describes the interaction with the elements in the popover.',
+        }
+      ),
+      'euiColorPicker.swatchAriaLabel': ({ swatch }: EuiValues) => (
+        <FormattedMessage
+          id="core.euiColorPicker.swatchAriaLabel"
+          defaultMessage="Select {swatch} as the color"
+          description="Screen reader text to describe the action and hex value of the selectable option"
+          values={{ swatch }}
+        />
+      ),
       'euiComboBoxOptionsList.allOptionsSelected': i18n.translate(
         'core.euiComboBoxOptionsList.allOptionsSelected',
         {
@@ -136,6 +156,11 @@ export class I18nService {
           values: { children },
           description: 'ARIA label, `children` is the human-friendly value of an option',
         }),
+      'euiFilterButton.filterBadge': ({ count, hasActiveFilters }: EuiValues) =>
+        i18n.translate('core.euiFilterButton.filterBadge', {
+          defaultMessage: '${count} ${filterCountLabel} filters',
+          values: { count, filterCountLabel: hasActiveFilters ? 'active' : 'available' },
+        }),
       'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
         defaultMessage: 'Please address the errors in your form.',
       }),
@@ -160,6 +185,9 @@ export class I18nService {
           defaultMessage: 'Open navigation menu',
         }
       ),
+      'euiHue.label': i18n.translate('core.euiHue.label', {
+        defaultMessage: 'Select the HSV color mode "hue" value',
+      }),
       'euiModal.closeModal': i18n.translate('core.euiModal.closeModal', {
         defaultMessage: 'Closes this modal window',
       }),
@@ -185,6 +213,19 @@ export class I18nService {
           defaultMessage: 'You are in a popup. To exit this popup, hit Escape.',
         }
       ),
+      'euiSaturation.roleDescription': () => (
+        <FormattedMessage
+          id="core.euiSaturation.roleDescription"
+          defaultMessage="HSV color mode saturation and value selection"
+        />
+      ),
+      'euiSaturation.screenReaderAnnouncement': i18n.translate(
+        'core.euiSaturation.screenReaderAnnouncement',
+        {
+          defaultMessage:
+            'Use the arrow keys to navigate the square color gradient. The coordinates resulting from each key press will be used to calculate HSV color mode "saturation" and "value" numbers, in the range of 0 to 1. Left and right decrease and increase (respectively) the "saturation" value. Up and down decrease and increase (respectively) the "value" value.',
+        }
+      ),
       'euiSelectable.loadingOptions': i18n.translate('core.euiSelectable.loadingOptions', {
         defaultMessage: 'Loading options',
         description: 'Placeholder message while data is asynchronously loaded',
@@ -198,6 +239,9 @@ export class I18nService {
           defaultMessage="{searchValue} doesn't match any options"
           values={{ searchValue }}
         />
+      ),
+      'euiStat.loadingText': () => (
+        <FormattedMessage id="core.euiStat.loadingText" defaultMessage="Statistic is loading" />
       ),
       'euiStep.completeStep': i18n.translate('core.euiStep.completeStep', {
         defaultMessage: 'Step',
@@ -252,6 +296,12 @@ export class I18nService {
         defaultMessage: 'Rows per page',
         description: 'Displayed in a button that toggles a table pagination menu',
       }),
+      'euiTablePagination.rowsPerPageOption': ({ rowsPerPage }: EuiValues) =>
+        i18n.translate('core.euiTablePagination.rowsPerPageOption', {
+          defaultMessage: '{rowsPerPage} rows',
+          description: 'Displayed in a button that toggles the number of visible rows',
+          values: { rowsPerPage },
+        }),
       'euiTableSortMobile.sorting': i18n.translate('core.euiTableSortMobile.sorting', {
         defaultMessage: 'Sorting',
         description: 'Displayed in a button that toggles a table sorting menu',
