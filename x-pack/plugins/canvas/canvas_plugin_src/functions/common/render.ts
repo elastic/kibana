@@ -4,16 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunction, Render, ContainerStyle } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Render, ContainerStyle } from '../types';
 import { getFunctionHelp } from '../../strings';
+
+interface ContainerStyleArgument extends ContainerStyle {
+  type: 'containerStyle';
+}
 
 interface Arguments {
   as: string | null;
   css: string | null;
-  containerStyle: ContainerStyle | null;
+  containerStyle: ContainerStyleArgument | null;
 }
 
-export function render(): ContextFunction<'render', Render<any>, Arguments, Render<Arguments>> {
+export function render(): ExpressionFunction<'render', Render<any>, Arguments, Render<Arguments>> {
   const { help, args: argHelp } = getFunctionHelp().render;
 
   return {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -12,7 +12,7 @@ interface Arguments {
   flags: string;
   replacement: string;
 }
-export function replace(): ContextFunction<'replace', string, Arguments, string> {
+export function replace(): ExpressionFunction<'replace', string, Arguments, string> {
   const { help, args: argHelp } = getFunctionHelp().replace;
 
   return {

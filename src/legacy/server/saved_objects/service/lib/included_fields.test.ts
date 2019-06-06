@@ -24,10 +24,59 @@ describe('includedFields', () => {
     expect(includedFields()).toBe(undefined);
   });
 
-  it('includes type', () => {
+  it('accepts type string', () => {
     const fields = includedFields('config', 'foo');
     expect(fields).toHaveLength(7);
     expect(fields).toContain('type');
+  });
+
+  it('accepts type as string array', () => {
+    const fields = includedFields(['config', 'secret'], 'foo');
+    expect(fields).toMatchInlineSnapshot(`
+Array [
+  "config.foo",
+  "secret.foo",
+  "namespace",
+  "type",
+  "references",
+  "migrationVersion",
+  "updated_at",
+  "foo",
+]
+`);
+  });
+
+  it('accepts field as string', () => {
+    const fields = includedFields('config', 'foo');
+    expect(fields).toHaveLength(7);
+    expect(fields).toContain('config.foo');
+  });
+
+  it('accepts fields as an array', () => {
+    const fields = includedFields('config', ['foo', 'bar']);
+
+    expect(fields).toHaveLength(9);
+    expect(fields).toContain('config.foo');
+    expect(fields).toContain('config.bar');
+  });
+
+  it('accepts type as string array and fields as string array', () => {
+    const fields = includedFields(['config', 'secret'], ['foo', 'bar']);
+    expect(fields).toMatchInlineSnapshot(`
+Array [
+  "config.foo",
+  "config.bar",
+  "secret.foo",
+  "secret.bar",
+  "namespace",
+  "type",
+  "references",
+  "migrationVersion",
+  "updated_at",
+  "foo",
+  "bar",
+]
+`);
   });
 
   it('includes namespace', () => {
@@ -52,20 +101,6 @@ describe('includedFields', () => {
     const fields = includedFields('config', 'foo');
     expect(fields).toHaveLength(7);
     expect(fields).toContain('updated_at');
-  });
-
-  it('accepts field as string', () => {
-    const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(7);
-    expect(fields).toContain('config.foo');
-  });
-
-  it('accepts fields as an array', () => {
-    const fields = includedFields('config', ['foo', 'bar']);
-
-    expect(fields).toHaveLength(9);
-    expect(fields).toContain('config.foo');
-    expect(fields).toContain('config.bar');
   });
 
   it('uses wildcard when type is not provided', () => {

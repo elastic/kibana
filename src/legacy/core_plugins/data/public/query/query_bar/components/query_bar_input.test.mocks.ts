@@ -87,7 +87,6 @@ jest.mock('ui/autocomplete_providers', () => ({
   getAutocompleteProvider: mockGetAutocompleteProvider,
 }));
 jest.mock('ui/kfetch', () => ({
-  __newPlatformSetup__: jest.fn(),
   kfetch: mockKfetch,
 }));
 
