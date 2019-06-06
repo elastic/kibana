@@ -9,7 +9,8 @@ import {
   SecureSavedObjectsClientWrapperDeps,
 } from './secure_saved_objects_client_wrapper';
 import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
-import { Legacy } from 'kibana';
+import { checkSavedObjectsPrivilegesFactory } from '../authorization/saved_objects';
+import { Actions } from '../authorization';
 
 const createMockErrors = () => {
   const forbiddenError = new Error('Mock ForbiddenError');
@@ -37,6 +38,34 @@ const createMockActions = () => {
         return `mock-saved_object:${type}/${action}`;
       },
     },
+  } as Actions;
+};
+
+const createCheckSavedObjectsPrivileges = (checkPrivilegesImpl: () => Promise<any>) => {
+  const mockAuditLogger = createMockAuditLogger();
+  const mockErrors = createMockErrors();
+  const mockActions = createMockActions();
+
+  const checkSavedObjectsPrivileges = jest.fn(
+    checkSavedObjectsPrivilegesFactory({
+      actionsService: mockActions,
+      auditLogger: mockAuditLogger,
+      checkPrivilegesWithRequest: () => ({
+        atSpace: jest.fn().mockRejectedValue('atSpace should not be called'),
+        atSpaces: jest.fn().mockRejectedValue('atSpaces should not be called'),
+        globally: jest.fn().mockImplementationOnce(checkPrivilegesImpl),
+      }),
+      errors: mockErrors,
+      request: null as any,
+      spacesEnabled: false,
+    })
+  );
+
+  return {
+    mockActions,
+    mockAuditLogger,
+    mockErrors,
+    checkSavedObjectsPrivileges,
   };
 };
 
@@ -44,10 +73,14 @@ describe('#errors', () => {
   test(`assigns errors from constructor to .errors`, () => {
     const errors = Symbol();
 
-    const client = new SecureSavedObjectsClientWrapper({
-      checkPrivilegesDynamicallyWithRequest: () => {},
+    const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(() => {
+      throw new Error('An actual error would happen here');
+    });
+
+    const client = new SecureSavedObjectsClientWrapper(({
+      checkSavedObjectsPrivileges,
       errors,
-    } as SecureSavedObjectsClientWrapperDeps);
+    } as unknown) as SecureSavedObjectsClientWrapperDeps);
 
     expect(client.errors).toBe(errors);
   });
@@ -57,30 +90,26 @@ describe(`spaces disabled`, () => {
   describe('#create', () => {
     test(`throws decorated GeneralError when checkPrivileges.globally rejects promise`, async () => {
       const type = 'foo';
-      const mockErrors = createMockErrors();
-      const mockCheckPrivilegesDynamically = jest.fn(async () => {
+      const {
+        mockErrors,
+        mockAuditLogger,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(() => {
         throw new Error('An actual error would happen here');
       });
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivilegesDynamically);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
-      const mockActions = createMockActions();
+
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
 
       await expect(client.create(type, {})).rejects.toThrowError(mockErrors.generalError);
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivilegesDynamically).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type, 'create'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', undefined, {
+        attributes: {},
+        options: {},
+        type,
+      });
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -90,26 +119,22 @@ describe(`spaces disabled`, () => {
       const type = 'foo';
       const username = Symbol();
       const mockActions = createMockActions();
-      const mockErrors = createMockErrors();
-      const mockCheckPrivileges = jest.fn(async () => ({
+      const {
+        mockErrors,
+        mockAuditLogger,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(async () => ({
         hasAllRequested: false,
         username,
         privileges: {
           [mockActions.savedObject.get(type, 'create')]: false,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const attributes = Symbol();
       const options = Symbol();
@@ -118,10 +143,11 @@ describe(`spaces disabled`, () => {
         mockErrors.forbiddenError
       );
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type, 'create'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', undefined, {
+        attributes,
+        options,
+        type,
+      });
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
@@ -145,25 +171,20 @@ describe(`spaces disabled`, () => {
       const mockBaseClient = ({
         create: jest.fn().mockReturnValue(returnValue),
       } as unknown) as SavedObjectsClientContract;
-      const mockCheckPrivileges = jest.fn(async () => ({
-        hasAllRequested: true,
-        username,
-        privileges: {
-          [mockActions.savedObject.get(type, 'create')]: true,
-        },
-      }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        async () => ({
+          hasAllRequested: true,
+          username,
+          privileges: {
+            [mockActions.savedObject.get(type, 'create')]: true,
+          },
+        })
+      );
+
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: mockBaseClient,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: null,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const attributes = Symbol();
       const options = Symbol();
@@ -171,10 +192,11 @@ describe(`spaces disabled`, () => {
       const result = await client.create(type, attributes as any, options as any);
 
       expect(result).toBe(returnValue);
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type, 'create'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', undefined, {
+        attributes,
+        options,
+        type,
+      });
       expect(mockBaseClient.create).toHaveBeenCalledWith(type, attributes, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
@@ -193,33 +215,32 @@ describe(`spaces disabled`, () => {
   describe('#bulkCreate', () => {
     test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
       const type = 'foo';
-      const mockErrors = createMockErrors();
-      const mockCheckPrivileges = jest.fn(async () => {
+      const {
+        mockAuditLogger,
+        mockErrors,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(async () => {
         throw new Error('An actual error would happen here');
       });
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
-      const mockActions = createMockActions();
+
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
 
-      await expect(client.bulkCreate([{ type, attributes: {} }])).rejects.toThrowError(
+      const attributes = Symbol() as any;
+      const options = Symbol();
+      const objects = [{ type, attributes }];
+
+      await expect(client.bulkCreate(objects, options as any)).rejects.toThrowError(
         mockErrors.generalError
       );
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type, 'bulk_create'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith([type], 'bulk_create', undefined, {
+        objects,
+        options,
+      });
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -230,8 +251,11 @@ describe(`spaces disabled`, () => {
       const type2 = 'bar';
       const username = Symbol();
       const mockActions = createMockActions();
-      const mockErrors = createMockErrors();
-      const mockCheckPrivileges = jest.fn(async () => ({
+      const {
+        mockAuditLogger,
+        mockErrors,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(async () => ({
         hasAllRequested: false,
         username,
         privileges: {
@@ -239,18 +263,10 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type2, 'bulk_create')]: true,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const objects = [
         { type: type1, attributes: {} },
@@ -263,11 +279,15 @@ describe(`spaces disabled`, () => {
         mockErrors.forbiddenError
       );
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type1, 'bulk_create'),
-        mockActions.savedObject.get(type2, 'bulk_create'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+        [type1, type2],
+        'bulk_create',
+        undefined,
+        {
+          objects,
+          options,
+        }
+      );
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
@@ -289,6 +309,7 @@ describe(`spaces disabled`, () => {
       const mockBaseClient = ({
         bulkCreate: jest.fn().mockReturnValue(returnValue),
       } as unknown) as SavedObjectsClientContract;
+
       const mockActions = createMockActions();
       const mockCheckPrivileges = jest.fn(async () => ({
         hasAllRequested: true,
@@ -298,18 +319,15 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type2, 'bulk_create')]: true,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+
+      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
+
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: mockBaseClient,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: null,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const objects = [
         { type: type1, otherThing: 'sup', attributes: {} },
@@ -320,11 +338,15 @@ describe(`spaces disabled`, () => {
       const result = await client.bulkCreate(objects, options as any);
 
       expect(result).toBe(returnValue);
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type1, 'bulk_create'),
-        mockActions.savedObject.get(type2, 'bulk_create'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+        [type1, type2],
+        'bulk_create',
+        undefined,
+        {
+          objects,
+          options,
+        }
+      );
       expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(objects, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
@@ -342,31 +364,32 @@ describe(`spaces disabled`, () => {
   describe('#delete', () => {
     test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
       const type = 'foo';
-      const mockErrors = createMockErrors();
       const mockCheckPrivileges = jest.fn(async () => {
         throw new Error('An actual error would happen here');
       });
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
-      const mockActions = createMockActions();
+
+      const {
+        mockAuditLogger,
+        mockErrors,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
+
+      const id = Symbol() as any;
+      const options = Symbol() as any;
+
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
 
-      await expect(client.delete(type, 'foo')).rejects.toThrowError(mockErrors.generalError);
+      await expect(client.delete(type, id, options)).rejects.toThrowError(mockErrors.generalError);
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type, 'delete'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', undefined, {
+        type,
+        id,
+        options,
+      });
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -376,7 +399,6 @@ describe(`spaces disabled`, () => {
       const type = 'foo';
       const username = Symbol();
       const mockActions = createMockActions();
-      const mockErrors = createMockErrors();
       const mockCheckPrivileges = jest.fn(async () => ({
         hasAllRequested: false,
         username,
@@ -384,18 +406,15 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'delete')]: false,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+      const {
+        mockAuditLogger,
+        mockErrors,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const id = Symbol();
       const options = Symbol();
@@ -404,10 +423,11 @@ describe(`spaces disabled`, () => {
         mockErrors.forbiddenError
       );
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type, 'delete'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', undefined, {
+        type,
+        id,
+        options,
+      });
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
@@ -438,18 +458,14 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'delete')]: true,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
+
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: mockBaseClient,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: null,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const id = Symbol();
       const options = Symbol();
@@ -457,10 +473,11 @@ describe(`spaces disabled`, () => {
       const result = await client.delete(type, id as any, options as any);
 
       expect(result).toBe(returnValue);
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type, 'delete'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', undefined, {
+        type,
+        options,
+        id,
+      });
       expect(mockBaseClient.delete).toHaveBeenCalledWith(type, id, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
@@ -479,29 +496,27 @@ describe(`spaces disabled`, () => {
   describe('#find', () => {
     test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
       const type = 'foo';
-      const mockErrors = createMockErrors();
       const mockCheckPrivileges = jest.fn(async () => {
         throw new Error('An actual error would happen here');
       });
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
-      const mockActions = createMockActions();
+
+      const {
+        mockAuditLogger,
+        mockErrors,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
+
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
 
       await expect(client.find({ type })).rejects.toThrowError(mockErrors.generalError);
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'find')]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', undefined, {
+        options: { type },
+      });
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -511,7 +526,6 @@ describe(`spaces disabled`, () => {
       const type = 'foo';
       const username = Symbol();
       const mockActions = createMockActions();
-      const mockErrors = createMockErrors();
       const mockCheckPrivileges = jest.fn(async () => ({
         hasAllRequested: false,
         username,
@@ -519,25 +533,24 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'find')]: false,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+      const {
+        mockAuditLogger,
+        mockErrors,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
+
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const options = { type };
 
       await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'find')]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', undefined, {
+        options,
+      });
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
@@ -556,7 +569,6 @@ describe(`spaces disabled`, () => {
       const type2 = 'bar';
       const username = Symbol();
       const mockActions = createMockActions();
-      const mockErrors = createMockErrors();
       const mockCheckPrivileges = jest.fn(async () => ({
         hasAllRequested: false,
         username,
@@ -565,29 +577,23 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type2, 'find')]: true,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-
-      const mockAuditLogger = createMockAuditLogger();
+      const {
+        mockAuditLogger,
+        mockErrors,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const options = { type: [type1, type2] };
 
       await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type1, 'find'),
-        mockActions.savedObject.get(type2, 'find'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith([type1, type2], 'find', undefined, {
+        options,
+      });
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
@@ -616,26 +622,23 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'find')]: true,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: mockBaseClient,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: null,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const options = { type };
 
       const result = await client.find(options);
 
       expect(result).toBe(returnValue);
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'find')]);
+
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', undefined, {
+        options,
+      });
       expect(mockBaseClient.find).toHaveBeenCalledWith({ type });
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
@@ -652,33 +655,29 @@ describe(`spaces disabled`, () => {
   describe('#bulkGet', () => {
     test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
       const type = 'foo';
-      const mockErrors = createMockErrors();
       const mockCheckPrivileges = jest.fn(async () => {
         throw new Error('An actual error would happen here');
       });
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
-      const mockActions = createMockActions();
+      const {
+        mockErrors,
+        mockAuditLogger,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
+
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
 
-      await expect(client.bulkGet([{ type, id: 'foo' }])).rejects.toThrowError(
-        mockErrors.generalError
-      );
+      const objects = [{ type, id: 'foo' }];
+      const options = Symbol() as any;
+      await expect(client.bulkGet(objects, options)).rejects.toThrowError(mockErrors.generalError);
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type, 'bulk_get'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith([type], 'bulk_get', undefined, {
+        objects,
+        options,
+      });
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -689,7 +688,6 @@ describe(`spaces disabled`, () => {
       const type2 = 'bar';
       const username = Symbol();
       const mockActions = createMockActions();
-      const mockErrors = createMockErrors();
       const mockCheckPrivileges = jest.fn(async () => ({
         hasAllRequested: false,
         username,
@@ -698,18 +696,15 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type2, 'bulk_get')]: true,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+      const {
+        mockErrors,
+        mockAuditLogger,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const objects = [
         { type: type1, id: 'foo' },
@@ -722,11 +717,15 @@ describe(`spaces disabled`, () => {
         mockErrors.forbiddenError
       );
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type1, 'bulk_get'),
-        mockActions.savedObject.get(type2, 'bulk_get'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+        [type1, type2],
+        'bulk_get',
+        undefined,
+        {
+          objects,
+          options,
+        }
+      );
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
@@ -758,18 +757,13 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type2, 'bulk_get')]: true,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: mockBaseClient,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: null,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const objects = [{ type: type1, id: 'foo-id' }, { type: type2, id: 'bar-id' }];
       const options = Symbol();
@@ -777,11 +771,16 @@ describe(`spaces disabled`, () => {
       const result = await client.bulkGet(objects, options as any);
 
       expect(result).toBe(returnValue);
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type1, 'bulk_get'),
-        mockActions.savedObject.get(type2, 'bulk_get'),
-      ]);
+
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+        [type1, type2],
+        'bulk_get',
+        undefined,
+        {
+          objects,
+          options,
+        }
+      );
       expect(mockBaseClient.bulkGet).toHaveBeenCalledWith(objects, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
@@ -799,29 +798,30 @@ describe(`spaces disabled`, () => {
   describe('#get', () => {
     test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
       const type = 'foo';
-      const mockErrors = createMockErrors();
       const mockCheckPrivileges = jest.fn(async () => {
         throw new Error('An actual error would happen here');
       });
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
-      const mockActions = createMockActions();
+      const {
+        mockAuditLogger,
+        mockErrors,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
 
-      await expect(client.get(type, 'foo')).rejects.toThrowError(mockErrors.generalError);
+      const id = Symbol() as any;
+      const options = Symbol() as any;
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'get')]);
+      await expect(client.get(type, id, options)).rejects.toThrowError(mockErrors.generalError);
+
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', undefined, {
+        type,
+        id,
+        options,
+      });
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -831,7 +831,6 @@ describe(`spaces disabled`, () => {
       const type = 'foo';
       const username = Symbol();
       const mockActions = createMockActions();
-      const mockErrors = createMockErrors();
       const mockCheckPrivileges = jest.fn(async () => ({
         hasAllRequested: false,
         username,
@@ -839,18 +838,15 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'get')]: false,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+      const {
+        mockAuditLogger,
+        mockErrors,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const id = Symbol();
       const options = Symbol();
@@ -859,8 +855,11 @@ describe(`spaces disabled`, () => {
         mockErrors.forbiddenError
       );
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'get')]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', undefined, {
+        type,
+        id,
+        options,
+      });
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
@@ -891,18 +890,13 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'get')]: true,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: mockBaseClient,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: null,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const id = Symbol();
       const options = Symbol();
@@ -910,8 +904,12 @@ describe(`spaces disabled`, () => {
       const result = await client.get(type, id as any, options as any);
 
       expect(result).toBe(returnValue);
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'get')]);
+
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', undefined, {
+        type,
+        id,
+        options,
+      });
       expect(mockBaseClient.get).toHaveBeenCalledWith(type, id, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
@@ -930,31 +928,34 @@ describe(`spaces disabled`, () => {
   describe('#update', () => {
     test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
       const type = 'foo';
-      const mockErrors = createMockErrors();
       const mockCheckPrivileges = jest.fn(async () => {
         throw new Error('An actual error would happen here');
       });
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
-      const mockActions = createMockActions();
+      const {
+        mockAuditLogger,
+        mockErrors,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
 
-      await expect(client.update(type, 'foo', {})).rejects.toThrowError(mockErrors.generalError);
+      const id = Symbol() as any;
+      const attributes = Symbol() as any;
+      const options = Symbol() as any;
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type, 'update'),
-      ]);
+      await expect(client.update(type, id, attributes, options)).rejects.toThrowError(
+        mockErrors.generalError
+      );
+
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', undefined, {
+        type,
+        id,
+        attributes,
+        options,
+      });
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -964,7 +965,6 @@ describe(`spaces disabled`, () => {
       const type = 'foo';
       const username = Symbol();
       const mockActions = createMockActions();
-      const mockErrors = createMockErrors();
       const mockCheckPrivileges = jest.fn(async () => ({
         hasAllRequested: false,
         username,
@@ -972,18 +972,15 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'update')]: false,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+      const {
+        mockAuditLogger,
+        mockErrors,
+        checkSavedObjectsPrivileges,
+      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: mockErrors,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const id = Symbol();
       const attributes = Symbol();
@@ -993,10 +990,12 @@ describe(`spaces disabled`, () => {
         client.update(type, id as any, attributes as any, options as any)
       ).rejects.toThrowError(mockErrors.forbiddenError);
 
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type, 'update'),
-      ]);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', undefined, {
+        type,
+        id,
+        attributes,
+        options,
+      });
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
@@ -1028,18 +1027,13 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'update')]: true,
         },
       }));
-      const mockCheckPrivilegesDynamicallyWithRequest = jest
-        .fn()
-        .mockReturnValue(mockCheckPrivileges);
-      const mockRequest = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
       const client = new SecureSavedObjectsClientWrapper({
-        actions: mockActions,
-        auditLogger: mockAuditLogger,
         baseClient: mockBaseClient,
-        checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivileges,
         errors: null,
-        request: (mockRequest as unknown) as Legacy.Request,
       });
       const id = Symbol();
       const attributes = Symbol();
@@ -1048,10 +1042,13 @@ describe(`spaces disabled`, () => {
       const result = await client.update(type, id as any, attributes as any, options as any);
 
       expect(result).toBe(returnValue);
-      expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges).toHaveBeenCalledWith([
-        mockActions.savedObject.get(type, 'update'),
-      ]);
+
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', undefined, {
+        type,
+        id,
+        options,
+        attributes,
+      });
       expect(mockBaseClient.update).toHaveBeenCalledWith(type, id, attributes, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(

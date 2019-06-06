@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import {
   SavedObjectsClientContract,
   CreateOptions,
@@ -18,44 +18,26 @@ import {
   SavedObject,
   UpdateOptions,
 } from 'src/legacy/server/saved_objects';
-import { Legacy } from 'kibana';
-import { Actions } from '../authorization';
+import { CheckSavedObjectsPrivileges, SavedObjectsAction } from '../authorization/saved_objects';
 
 export interface SecureSavedObjectsClientWrapperDeps {
-  actions: any;
-  auditLogger: any;
   baseClient: SavedObjectsClientContract;
-  checkPrivilegesDynamicallyWithRequest: any;
+  checkSavedObjectsPrivileges: CheckSavedObjectsPrivileges;
   errors: any;
-  request: Legacy.Request;
 }
-
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
-  private actions: Actions;
-
-  private auditLogger: any;
-
   private baseClient: SavedObjectsClientContract;
 
-  private checkPrivileges: any;
+  private checkSavedObjectsPrivileges: CheckSavedObjectsPrivileges;
 
   public errors: any;
 
   constructor(options: SecureSavedObjectsClientWrapperDeps) {
-    const {
-      actions,
-      auditLogger,
-      baseClient,
-      checkPrivilegesDynamicallyWithRequest,
-      errors,
-      request,
-    } = options;
+    const { baseClient, checkSavedObjectsPrivileges, errors } = options;
 
     this.errors = errors;
-    this.actions = actions;
-    this.auditLogger = auditLogger;
     this.baseClient = baseClient;
-    this.checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
+    this.checkSavedObjectsPrivileges = checkSavedObjectsPrivileges;
   }
 
   public async create<T extends SavedObjectAttributes = any>(
@@ -63,7 +45,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: T,
     options: CreateOptions = {}
   ) {
-    await this.ensureAuthorized(type, 'create', { type, attributes, options });
+    await this.ensureAuthorized(type, 'create', options.namespace, { type, attributes, options });
 
     return await this.baseClient.create(type, attributes, options);
   }
@@ -73,13 +55,13 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: CreateOptions = {}
   ) {
     const types = uniq(objects.map(o => o.type));
-    await this.ensureAuthorized(types, 'bulk_create', { objects, options });
+    await this.ensureAuthorized(types, 'bulk_create', options.namespace, { objects, options });
 
     return await this.baseClient.bulkCreate(objects, options);
   }
 
   public async delete(type: string, id: string, options: BaseOptions = {}) {
-    await this.ensureAuthorized(type, 'delete', { type, id, options });
+    await this.ensureAuthorized(type, 'delete', options.namespace, { type, id, options });
 
     return await this.baseClient.delete(type, id, options);
   }
@@ -87,7 +69,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   public async find<T extends SavedObjectAttributes = any>(
     options: FindOptions = {}
   ): Promise<FindResponse<T>> {
-    await this.ensureAuthorized(options.type, 'find', { options });
+    await this.ensureAuthorized(options.type, 'find', options.namespace, { options });
 
     return this.baseClient.find(options);
   }
@@ -97,7 +79,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: BaseOptions = {}
   ): Promise<BulkResponse<T>> {
     const types = uniq(objects.map(o => o.type));
-    await this.ensureAuthorized(types, 'bulk_get', { objects, options });
+    await this.ensureAuthorized(types, 'bulk_get', options.namespace, { objects, options });
 
     return await this.baseClient.bulkGet(objects, options);
   }
@@ -107,7 +89,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     id: string,
     options: BaseOptions = {}
   ): Promise<SavedObject<T>> {
-    await this.ensureAuthorized(type, 'get', { type, id, options });
+    await this.ensureAuthorized(type, 'get', options.namespace, { type, id, options });
 
     return await this.baseClient.get(type, id, options);
   }
@@ -118,61 +100,22 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: Partial<T>,
     options: UpdateOptions = {}
   ) {
-    await this.ensureAuthorized(type, 'update', { type, id, attributes, options });
+    await this.ensureAuthorized(type, 'update', options.namespace, {
+      type,
+      id,
+      attributes,
+      options,
+    });
 
     return await this.baseClient.update(type, id, attributes, options);
   }
 
-  private async checkSavedObjectPrivileges(actions: string[]) {
-    try {
-      return await this.checkPrivileges(actions);
-    } catch (error) {
-      const { reason } = get<Record<string, any>>(error, 'body.error', {});
-      throw this.errors.decorateGeneralError(error, reason);
-    }
-  }
-
   private async ensureAuthorized(
     typeOrTypes: string | string[] | undefined,
-    action: string,
+    action: SavedObjectsAction,
+    namespace: string | undefined,
     args: any
   ) {
-    const types = this.coerceToArray(typeOrTypes);
-    const actionsToTypesMap = new Map(
-      types.map(type => [this.actions.savedObject.get(type, action), type] as [string, string])
-    );
-    const actions = Array.from(actionsToTypesMap.keys());
-    const { hasAllRequested, username, privileges } = await this.checkSavedObjectPrivileges(
-      actions
-    );
-
-    if (hasAllRequested) {
-      this.auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
-    } else {
-      const missingPrivileges = this.getMissingPrivileges(privileges);
-      this.auditLogger.savedObjectsAuthorizationFailure(
-        username,
-        action,
-        types,
-        missingPrivileges,
-        args
-      );
-      const msg = `Unable to ${action} ${missingPrivileges
-        .map(privilege => actionsToTypesMap.get(privilege))
-        .sort()
-        .join(',')}`;
-      throw this.errors.decorateForbiddenError(new Error(msg));
-    }
-  }
-
-  private coerceToArray(typeOrTypes: string | string[] | undefined): string[] {
-    if (!typeOrTypes) {
-      return [];
-    }
-    return Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-  }
-
-  private getMissingPrivileges(response: Record<string, boolean>) {
-    return Object.keys(response).filter(privilege => !response[privilege]);
+    await this.checkSavedObjectsPrivileges(typeOrTypes, action, namespace, args);
   }
 }

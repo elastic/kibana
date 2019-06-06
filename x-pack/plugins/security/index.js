@@ -27,7 +27,8 @@ import {
   initAPIAuthorization,
   initAppAuthorization,
   registerPrivilegesWithCluster,
-  validateFeaturePrivileges
+  validateFeaturePrivileges,
+  checkSavedObjectsPrivilegesFactory,
 } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
@@ -189,16 +190,21 @@ export const security = (kibana) => new kibana.Plugin({
       return new savedObjects.SavedObjectsClient(callWithRequestRepository);
     });
 
-    savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_SAFE_INTEGER, ({ client, request }) => {
+    savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MAX_SAFE_INTEGER - 1, ({ client, request }) => {
       if (authorization.mode.useRbacForRequest(request)) {
-        return new SecureSavedObjectsClientWrapper({
-          actions: authorization.actions,
-          auditLogger,
-          baseClient: client,
-          checkPrivilegesDynamicallyWithRequest: authorization.checkPrivilegesDynamicallyWithRequest,
-          errors: savedObjects.SavedObjectsClient.errors,
+        const checkSavedObjectsPrivileges = checkSavedObjectsPrivilegesFactory({
+          spacesEnabled: spaces.isEnabled,
+          checkPrivilegesWithRequest: authorization.checkPrivilegesWithRequest,
           request,
-          savedObjectTypes: savedObjects.types,
+          actionsService: authorization.actions,
+          errors: savedObjects.SavedObjectsClient.errors,
+          auditLogger,
+        });
+
+        return new SecureSavedObjectsClientWrapper({
+          baseClient: client,
+          checkSavedObjectsPrivileges,
+          errors: savedObjects.SavedObjectsClient.errors,
         });
       }
 
