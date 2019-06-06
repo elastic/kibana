@@ -17,30 +17,7 @@
  * under the License.
  */
 
-jest.mock('ui/metadata', () => ({
-  metadata: {
-    branch: 'my-metadata-branch',
-    version: 'my-metadata-version',
-  },
-}));
-
-jest.mock(
-  'ui/notify',
-  () => ({
-    toastNotifications: {
-      addSuccess: () => {},
-    },
-  }),
-  { virtual: true }
-);
-
-jest.mock('ui/capabilities', () => ({
-  uiCapabilities: {
-    visualize: {
-      save: true,
-    },
-  },
-}));
+import '../../../np_core.test.mocks';
 
 import { EmbeddableInput } from '../../../embeddables/i_embeddable';
 import { Embeddable } from '../../../embeddables/embeddable';

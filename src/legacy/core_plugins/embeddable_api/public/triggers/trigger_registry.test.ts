@@ -17,12 +17,7 @@
  * under the License.
  */
 
-jest.mock('ui/metadata', () => ({
-  metadata: {
-    branch: 'my-metadata-branch',
-    version: 'my-metadata-version',
-  },
-}));
+import '../np_core.test.mocks';
 
 import { triggerRegistry } from '../triggers';
 import { HELLO_WORLD_ACTION_ID } from '../test_samples';

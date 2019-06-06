@@ -16,16 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import '../np_core.test.mocks';
+
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 const executeFn = jest.fn();
-
-jest.mock('ui/metadata', () => ({
-  metadata: {
-    branch: 'my-metadata-branch',
-    version: 'my-metadata-version',
-  },
-}));
 
 jest.mock('../context_menu_actions/open_context_menu', () => ({
   openContextMenu: (actions: EuiContextMenuPanelDescriptor[]) => jest.fn()(actions),

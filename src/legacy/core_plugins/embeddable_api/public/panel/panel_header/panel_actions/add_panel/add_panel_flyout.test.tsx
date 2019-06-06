@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getModalContents } from './add_panel.test.mocks';
+import { getModalContents } from '../../../../np_core.test.mocks';
 
 import React from 'react';
 import {

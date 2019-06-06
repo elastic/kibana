@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import {
-  fatalErrorsServiceMock,
-  notificationServiceMock,
-} from '../../../../../../../../../src/core/public/mocks';
+import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../core/public/mocks';
 
 let modalContents: React.Component;
 

@@ -19,12 +19,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-jest.mock('ui/metadata', () => ({
-  metadata: {
-    branch: 'my-metadata-branch',
-    version: 'my-metadata-version',
-  },
-}));
+import '../np_core.test.mocks';
 
 import { skip } from 'rxjs/operators';
 import { ContactCardEmbeddable, FilterableEmbeddable } from '../test_samples/index';

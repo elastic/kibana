@@ -16,13 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import '../np_core.test.mocks';
+
 import React from 'react';
-jest.mock('ui/metadata', () => ({
-  metadata: {
-    branch: 'my-metadata-branch',
-    version: 'my-metadata-version',
-  },
-}));
 
 import {
   ContactCardEmbeddable,

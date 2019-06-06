@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import './add_panel.test.mocks';
+import '../../../../np_core.test.mocks';
 
 import {
   FilterableContainer,
