@@ -726,7 +726,7 @@ test('Should enable auth for a route by default if registerAuth has been called'
     .mockImplementation((req, sessionStorage, t) => t.authenticated({}));
   await registerAuth(authenticate, cookieOptions);
 
-  await server.start(config);
+  await server.start();
   await supertest(innerServer.listener)
     .get('/')
     .expect(200);
@@ -743,7 +743,7 @@ test('Should support disabling auth for a route', async () => {
   const authenticate = jest.fn();
   await registerAuth(authenticate, cookieOptions);
 
-  await server.start(config);
+  await server.start();
   await supertest(innerServer.listener)
     .get('/')
     .expect(200);
@@ -763,7 +763,7 @@ describe('#auth.isAuthenticated()', () => {
 
     await registerAuth((req, sessionStorage, t) => t.authenticated({}), cookieOptions);
 
-    await server.start(config);
+    await server.start();
     await supertest(innerServer.listener)
       .get('/')
       .expect(200, { isAuthenticated: true });
@@ -780,7 +780,7 @@ describe('#auth.isAuthenticated()', () => {
 
     await registerAuth((req, sessionStorage, t) => t.authenticated({}), cookieOptions);
 
-    await server.start(config);
+    await server.start();
     await supertest(innerServer.listener)
       .get('/')
       .expect(200, { isAuthenticated: false });
@@ -795,7 +795,7 @@ describe('#auth.isAuthenticated()', () => {
     );
     registerRouter(router);
 
-    await server.start(config);
+    await server.start();
     await supertest(innerServer.listener)
       .get('/')
       .expect(200, { isAuthenticated: false });
@@ -814,7 +814,7 @@ describe('#auth.get()', () => {
     const router = new Router('');
     router.get({ path: '/', validate: false }, async (req, res) => res.ok(auth.get(req)));
     registerRouter(router);
-    await server.start(config);
+    await server.start();
 
     await supertest(innerServer.listener)
       .get('/')
@@ -827,7 +827,7 @@ describe('#auth.get()', () => {
     router.get({ path: '/', validate: false }, async (req, res) => res.ok(auth.get(req)));
 
     registerRouter(router);
-    await server.start(config);
+    await server.start();
     await supertest(innerServer.listener)
       .get('/')
       .expect(200, { status: 'unknown' });
@@ -844,7 +844,7 @@ describe('#auth.get()', () => {
     );
 
     registerRouter(router);
-    await server.start(config);
+    await server.start();
 
     await supertest(innerServer.listener)
       .get('/')
