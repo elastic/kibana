@@ -36,7 +36,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { UIRestrictionsContext } from '../contexts/ui_restriction_context';
 import { data } from 'plugins/data';
 import { Storage } from 'ui/storage';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
@@ -54,13 +53,20 @@ export const SeriesConfig = props => {
 
   return (
     <div className="tvbAggRow">
-      <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
+
+      <DataFormatPicker
+        onChange={handleSelectChange('formatter')}
+        value={model.formatter}
+      />
 
       <EuiHorizontalRule margin="s" />
 
       <EuiFormRow
         id={htmlId('series_filter')}
-        label={<FormattedMessage id="tsvb.seriesConfig.filterLabel" defaultMessage="Filter" />}
+        label={(<FormattedMessage
+          id="tsvb.seriesConfig.filterLabel"
+          defaultMessage="Filter"
+        />)}
         fullWidth
       >
         <QueryBarInput
@@ -82,18 +88,19 @@ export const SeriesConfig = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('template')}
-            label={
-              <FormattedMessage id="tsvb.seriesConfig.templateLabel" defaultMessage="Template" />
-            }
-            helpText={
+            label={(<FormattedMessage
+              id="tsvb.seriesConfig.templateLabel"
+              defaultMessage="Template"
+            />)}
+            helpText={(
               <span>
                 <FormattedMessage
                   id="tsvb.seriesConfig.templateHelpText"
                   defaultMessage="eg. {templateExample}"
-                  values={{ templateExample: <EuiCode>{'{{value}}/s'}</EuiCode> }}
+                  values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
                 />
               </span>
-            }
+            )}
             fullWidth
           >
             <EuiFieldText
@@ -106,13 +113,11 @@ export const SeriesConfig = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('offsetSeries')}
-            label={
-              <FormattedMessage
-                id="tsvb.seriesConfig.offsetSeriesTimeLabel"
-                defaultMessage="Offset series time by (1m, 1h, 1w, 1d)"
-                description="1m, 1h, 1w and 1d are required values and must not be translated."
-              />
-            }
+            label={(<FormattedMessage
+              id="tsvb.seriesConfig.offsetSeriesTimeLabel"
+              defaultMessage="Offset series time by (1m, 1h, 1w, 1d)"
+              description="1m, 1h, 1w and 1d are required values and must not be translated."
+            />)}
           >
             <EuiFieldText
               data-test-subj="offsetTimeSeries"
@@ -141,20 +146,16 @@ export const SeriesConfig = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <UIRestrictionsContext.Consumer>
-            {uiRestrictions => (
-              <IndexPattern
-                onChange={props.onChange}
-                model={props.model}
-                fields={props.fields}
-                prefix="series_"
-                disabled={!model.override_index_pattern}
-                uiRestrictions={uiRestrictions}
-              />
-            )}
-          </UIRestrictionsContext.Consumer>
+          <IndexPattern
+            onChange={props.onChange}
+            model={props.model}
+            fields={props.fields}
+            prefix="series_"
+            disabled={!model.override_index_pattern}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
+
     </div>
   );
 };

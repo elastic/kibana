@@ -31,7 +31,7 @@ export const RESTRICTIONS_KEYS = {
   /**
    * Key for getting the white listed metrics from the UIRestrictions object.
    */
-  WHITE_LISTER_METRICS: 'whiteListedMetrics',
+  WHITE_LISTED_METRICS: 'whiteListedMetrics',
 
   /**
    * Key for getting  the white listed Time Range modes from the UIRestrictions object.

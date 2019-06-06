@@ -28,7 +28,6 @@ import { TableSeries as table } from './vis_types/table/series';
 import { GaugeSeries as gauge } from './vis_types/gauge/series';
 import { MarkdownSeries as markdown } from './vis_types/markdown/series';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { UIRestrictionsContext } from '../contexts/ui_restriction_context';
 
 const lookup = {
   top_n: topN,
@@ -45,11 +44,11 @@ export class Series extends Component {
     selectedTab: 'metrics',
   };
 
-  switchTab = selectedTab => {
-    this.setState(() => ({ selectedTab }));
+  switchTab = (selectedTab) => {
+    this.setState({ selectedTab });
   };
 
-  handleChange = part => {
+  handleChange = (part) => {
     if (this.props.onChange) {
       const { model } = this.props;
       const doc = assign({}, model, part);
@@ -65,13 +64,12 @@ export class Series extends Component {
     });
   };
 
-  toggleVisible = e => {
+  toggleVisible = (e) => {
     e.preventDefault();
 
-    this.setState(({ visible, ...state }) => ({
-      ...state,
-      visible: !visible,
-    }));
+    this.setState({
+      visible: !this.state.visible,
+    });
   };
 
   render() {
@@ -99,18 +97,13 @@ export class Series extends Component {
       dragHandleProps: this.props.dragHandleProps,
       indexPatternForQuery: panel.index_pattern || panel.default_index_pattern,
     };
-
-    return Boolean(Component) ? (
-      <UIRestrictionsContext.Consumer>
-        { uiRestrictions => <Component uiRestrictions={uiRestrictions} {...params} /> }
-      </UIRestrictionsContext.Consumer>
-    ) : (
-      <FormattedMessage
+    return Boolean(Component) ?
+      (<Component {...params}/>) :
+      (<FormattedMessage
         id="tsvb.seriesConfig.missingSeriesComponentDescription"
         defaultMessage="Missing Series component for panel type: {panelType}"
         values={{ panelType: panel.type }}
-      />
-    );
+      />);
   }
 }
 

@@ -39,7 +39,7 @@ const checkUIRestrictions = (key, restrictions = DEFAULT_UI_RESTRICTION, type) =
  * @return {boolean}
  */
 export const isMetricEnabled = (key, restrictions) => {
-  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTER_METRICS);
+  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_METRICS);
 };
 
 /**
@@ -53,7 +53,7 @@ export const isMetricEnabled = (key, restrictions) => {
  */
 export const isFieldEnabled = (field, metricType, restrictions = DEFAULT_UI_RESTRICTION) => {
   if (isMetricEnabled(metricType, restrictions)) {
-    return checkUIRestrictions(field, restrictions[RESTRICTIONS_KEYS.WHITE_LISTER_METRICS], metricType);
+    return checkUIRestrictions(field, restrictions[RESTRICTIONS_KEYS.WHITE_LISTED_METRICS], metricType);
   }
   return false;
 };

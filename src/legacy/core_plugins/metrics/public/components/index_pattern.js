@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
@@ -37,6 +37,7 @@ import {
 } from '@elastic/eui';
 import { ES_TYPES } from '../../common/es_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
+import { UIRestrictionsContext } from '../contexts/ui_restriction_context';
 
 const RESTRICT_FIELDS = [ES_TYPES.DATE];
 
@@ -46,13 +47,15 @@ const isEntireTimeRangeActive = (model, isTimeSeries) =>
   !isTimeSeries && model[TIME_RANGE_MODE_KEY] === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
 
 export const IndexPattern = props => {
-  const { fields, prefix, uiRestrictions } = props;
+  const { fields, prefix } = props;
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const timeFieldName = `${prefix}time_field`;
   const indexPatternName = `${prefix}index_pattern`;
   const intervalName = `${prefix}interval`;
   const dropBucketName = `${prefix}drop_last_bucket`;
+
+  const uiRestrictions = useContext(UIRestrictionsContext);
 
   const timeRangeOptions = [
     {
@@ -70,6 +73,8 @@ export const IndexPattern = props => {
       disabled: !isTimerangeModeEnabled(TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE, uiRestrictions),
     },
   ];
+
+  console.log({ uiRestrictions });
 
   const defaults = {
     default_index_pattern: '',
@@ -201,7 +206,6 @@ export const IndexPattern = props => {
 IndexPattern.defaultProps = {
   prefix: '',
   disabled: false,
-  uiRestrictions: null,
 };
 
 IndexPattern.propTypes = {
@@ -211,7 +215,4 @@ IndexPattern.propTypes = {
   prefix: PropTypes.string,
   disabled: PropTypes.bool,
   className: PropTypes.string,
-  uiRestrictions: PropTypes.shape({
-    whiteListedTimerangeModes: PropTypes.objectOf(PropTypes.bool),
-  }),
 };

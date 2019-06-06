@@ -47,7 +47,7 @@ export class DefaultSearchCapabilities {
 
   get uiRestrictions() {
     return {
-      [RESTRICTIONS_KEYS.WHITE_LISTER_METRICS]: this.whiteListedMetrics,
+      [RESTRICTIONS_KEYS.WHITE_LISTED_METRICS]: this.whiteListedMetrics,
       [RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS]: this.whiteListedGroupByFields,
       [RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES]: this.whiteListedTimerangeModes,
     };
