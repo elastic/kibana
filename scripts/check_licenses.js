@@ -17,10 +17,5 @@
  * under the License.
  */
 
-/* global jest */
-export function getEmbeddableFactoryMock(config) {
-  const embeddableFactoryMockDefaults = {
-    create: jest.fn(() => Promise.resolve({})),
-  };
-  return Object.assign(embeddableFactoryMockDefaults, config);
-}
+require('../src/setup_node_env');
+require('../src/dev/license_checker/run_check_licenses_cli');

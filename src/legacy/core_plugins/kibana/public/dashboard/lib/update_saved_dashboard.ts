@@ -18,21 +18,35 @@
  */
 
 import _ from 'lodash';
+import { AppState } from 'ui/state_management/app_state';
+import { Timefilter } from 'ui/timefilter';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { FilterUtils } from './filter_utils';
+import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
-export function updateSavedDashboard(savedDashboard, appState, timeFilter, toJson) {
+export function updateSavedDashboard(
+  savedDashboard: SavedObjectDashboard,
+  appState: AppState,
+  timeFilter: Timefilter,
+  toJson: <T>(object: T) => string
+) {
   savedDashboard.title = appState.title;
   savedDashboard.description = appState.description;
   savedDashboard.timeRestore = appState.timeRestore;
   savedDashboard.panelsJSON = toJson(appState.panels);
   savedDashboard.optionsJSON = toJson(appState.options);
 
-  savedDashboard.timeFrom = savedDashboard.timeRestore ?
-    FilterUtils.convertTimeToUTCString(timeFilter.getTime().from)
+  savedDashboard.timeFrom = savedDashboard.timeRestore
+    ? FilterUtils.convertTimeToUTCString(timeFilter.getTime().from)
     : undefined;
-  savedDashboard.timeTo = savedDashboard.timeRestore ?
-    FilterUtils.convertTimeToUTCString(timeFilter.getTime().to)
+  savedDashboard.timeTo = savedDashboard.timeRestore
+    ? FilterUtils.convertTimeToUTCString(timeFilter.getTime().to)
     : undefined;
-  const timeRestoreObj = _.pick(timeFilter.getRefreshInterval(), ['display', 'pause', 'section', 'value']);
+  const timeRestoreObj: RefreshInterval = _.pick(timeFilter.getRefreshInterval(), [
+    'display',
+    'pause',
+    'section',
+    'value',
+  ]);
   savedDashboard.refreshInterval = savedDashboard.timeRestore ? timeRestoreObj : undefined;
 }

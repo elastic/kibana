@@ -17,26 +17,32 @@
  * under the License.
  */
 
-type Freezable = { [k: string]: any } | any[];
+import { AppStateClass } from 'ui/state_management/app_state';
 
-// if we define this inside RecursiveReadonly TypeScript complains
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface RecursiveReadonlyArray<T> extends Array<RecursiveReadonly<T>> {}
+/**
+ * A poor excuse for a mock just to get some basic tests to run in jest without requiring the injector.
+ * This could be improved if we extract the appState and state classes externally of their angular providers.
+ * @return {AppStateMock}
+ */
+export function getAppStateMock(): AppStateClass {
+  class AppStateMock {
+    constructor(defaults: any) {
+      Object.assign(this, defaults);
+    }
 
-export type RecursiveReadonly<T> = T extends any[]
-  ? RecursiveReadonlyArray<T[number]>
-  : T extends object
-  ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
-  : T;
-
-export function deepFreeze<T extends Freezable>(object: T) {
-  // for any properties that reference an object, makes sure that object is
-  // recursively frozen as well
-  for (const value of Object.values(object)) {
-    if (value !== null && typeof value === 'object') {
-      deepFreeze(value);
+    on() {}
+    off() {}
+    toJSON() {
+      return '';
+    }
+    save() {}
+    translateHashToRison(stateHashOrRison: string | string[]) {
+      return stateHashOrRison;
+    }
+    getQueryParamName() {
+      return '';
     }
   }
 
-  return Object.freeze(object) as RecursiveReadonly<T>;
+  return AppStateMock;
 }
