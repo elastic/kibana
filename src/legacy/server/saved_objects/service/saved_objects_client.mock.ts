@@ -17,5 +17,18 @@
  * under the License.
  */
 
-export { SavedObjectsClient } from './saved_objects_client';
-export { SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './lib';
+import { SavedObjectsClientContract } from './saved_objects_client';
+import * as errors from './lib/errors';
+
+const create = (): jest.Mocked<SavedObjectsClientContract> => ({
+  errors,
+  create: jest.fn(),
+  bulkCreate: jest.fn(),
+  delete: jest.fn(),
+  bulkGet: jest.fn(),
+  find: jest.fn(),
+  get: jest.fn(),
+  update: jest.fn(),
+});
+
+export const SavedObjectsClientMock = { create };

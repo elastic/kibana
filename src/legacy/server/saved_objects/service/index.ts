@@ -17,26 +17,24 @@
  * under the License.
  */
 
-/**
- * Provides an array of paths for ES source filtering
- *
- * @param {string} type
- * @param {string|array} fields
- * @returns {array}
- */
-export function includedFields(type, fields) {
-  if (!fields || fields.length === 0) return;
+import { ScopedSavedObjectsClientProvider } from './lib';
+import { SavedObjectsClient } from './saved_objects_client';
 
-  // convert to an array
-  const sourceFields = typeof fields === 'string' ? [fields] : fields;
-  const sourceType = type || '*';
-
-  return sourceFields
-    .map(f => `${sourceType}.${f}`)
-    .concat('namespace')
-    .concat('type')
-    .concat('references')
-    .concat('migrationVersion')
-    .concat('updated_at')
-    .concat(fields); // v5 compatibility
+export interface SavedObjectsService<Request = any> {
+  // ATTENTION: these types are incomplete
+  addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<
+    Request
+  >['addClientWrapperFactory'];
+  getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+  SavedObjectsClient: typeof SavedObjectsClient;
+  types: string[];
+  getSavedObjectsRepository(...rest: any[]): any;
 }
+
+export {
+  SavedObjectsRepository,
+  ScopedSavedObjectsClientProvider,
+  SavedObjectsClientWrapperFactory,
+} from './lib';
+
+export * from './saved_objects_client';

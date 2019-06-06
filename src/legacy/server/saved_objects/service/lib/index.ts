@@ -17,22 +17,12 @@
  * under the License.
  */
 
-/**
- * A poor excuse for a mock just to get some basic tests to run in jest without requiring the injector.
- * This could be improved if we extract the appState and state classes externally of their angular providers.
- * @return {AppStateMock}
- */
-export function getAppStateMock() {
-  class AppStateMock {
-    constructor(defaults) {
-      Object.assign(this, defaults);
-    }
+export { SavedObjectsRepository, SavedObjectsRepositoryOptions } from './repository';
+export {
+  SavedObjectsClientWrapperFactory,
+  SavedObjectsClientWrapperOptions,
+  ScopedSavedObjectsClientProvider,
+} from './scoped_client_provider';
 
-    on() {}
-    off() {}
-    toJSON() { return ''; }
-    save() {}
-  }
-
-  return AppStateMock;
-}
+import * as errors from './errors';
+export { errors };

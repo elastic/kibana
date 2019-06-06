@@ -44,3 +44,35 @@ export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
     }),
   },
 };
+
+export const errors = {
+  invalidPosition: (position: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.axisConfig.invalidPositionErrorMessage', {
+        defaultMessage: "Invalid position: '{position}'",
+        values: {
+          position,
+        },
+      })
+    ),
+  invalidMinDateString: (min: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.axisConfig.invalidMinDateStringErrorMessage', {
+        defaultMessage:
+          "Invalid date string: '{min}'. 'min' must be a number, date in ms, or ISO8601 date string",
+        values: {
+          min,
+        },
+      })
+    ),
+  invalidMaxDateString: (max: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.axisConfig.invalidMaxPositionErrorMessage', {
+        defaultMessage:
+          "Invalid date string: '{max}'. 'max' must be a number, date in ms, or ISO8601 date string",
+        values: {
+          max,
+        },
+      })
+    ),
+};

@@ -10,7 +10,7 @@ import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
 import { Render } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 export enum Origin {
   TOP = 'top',
@@ -32,6 +32,7 @@ export function revealImage(): ExpressionFunction<
   Render<Arguments>
 > {
   const { help, args: argHelp } = getFunctionHelp().revealImage;
+  const errors = getFunctionErrors().revealImage;
 
   return {
     name: 'revealImage',
@@ -61,7 +62,7 @@ export function revealImage(): ExpressionFunction<
     },
     fn: (percent, args) => {
       if (percent > 1 || percent < 0) {
-        throw new Error(`Invalid value: '${percent}'. Percentage must be between 0 and 1`);
+        throw errors.invalidPercent(percent);
       }
 
       return {

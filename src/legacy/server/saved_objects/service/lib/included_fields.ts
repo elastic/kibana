@@ -17,15 +17,29 @@
  * under the License.
  */
 
+function toArray(value: string | string[]): string[] {
+  return typeof value === 'string' ? [value] : value;
+}
+/**
+ * Provides an array of paths for ES source filtering
+ */
+export function includedFields(type: string | string[] = '*', fields?: string[] | string) {
+  if (!fields || fields.length === 0) {
+    return;
+  }
 
-export function getSavedDashboardMock(config) {
-  const defaults = {
-    id: '123',
-    title: 'my dashboard',
-    panelsJSON: '[]',
-    searchSource: {
-      getOwnField: (param) => param
-    }
-  };
-  return Object.assign(defaults, config);
+  // convert to an array
+  const sourceFields = toArray(fields);
+  const sourceType = toArray(type);
+
+  return sourceType
+    .reduce((acc: string[], t) => {
+      return [...acc, ...sourceFields.map(f => `${t}.${f}`)];
+    }, [])
+    .concat('namespace')
+    .concat('type')
+    .concat('references')
+    .concat('migrationVersion')
+    .concat('updated_at')
+    .concat(fields); // v5 compatibility
 }

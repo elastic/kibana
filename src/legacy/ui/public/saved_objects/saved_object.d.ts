@@ -17,10 +17,13 @@
  * under the License.
  */
 
-/* global jest */
-export function getEmbeddableFactoryMock(config) {
-  const embeddableFactoryMockDefaults = {
-    create: jest.fn(() => Promise.resolve({})),
-  };
-  return Object.assign(embeddableFactoryMockDefaults, config);
+export interface SaveOptions {
+  confirmOverwrite: boolean;
+  isTitleDuplicateConfirmed: boolean;
+  onTitleDuplicate: () => void;
+}
+
+export interface SavedObject {
+  save: (saveOptions: SaveOptions) => Promise<string>;
+  copyOnSave: boolean;
 }

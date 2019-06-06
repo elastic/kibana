@@ -17,8 +17,20 @@
  * under the License.
  */
 
-export { SavedObjectsRepository } from './repository';
-export { ScopedSavedObjectsClientProvider } from './scoped_client_provider';
+import { SavedDashboardPanel, DashboardAppState } from '../types';
 
-import * as errors from './errors';
-export { errors };
+/**
+ * Creates a new instance of AppState based of the saved dashboard.
+ *
+ * @param appState {AppState} AppState class to instantiate
+ */
+export function migrateAppState(appState: DashboardAppState) {
+  // For BWC in pre 6.1 versions where uiState was stored at the dashboard level, not at the panel level.
+  if (appState.uiState) {
+    appState.panels.forEach((panel: SavedDashboardPanel) => {
+      panel.embeddableConfig = appState.uiState[`P-${panel.panelIndex}`];
+    });
+    delete appState.uiState;
+    appState.save();
+  }
+}
