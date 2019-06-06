@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 // @ts-ignore untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
@@ -30,6 +30,7 @@ interface Return {
 
 export function image(): ExpressionFunction<'image', null, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().image;
+  const errors = getFunctionErrors().image;
 
   return {
     name: 'image',
@@ -56,7 +57,7 @@ export function image(): ExpressionFunction<'image', null, Arguments, Return> {
     },
     fn: (_context, { dataurl, mode }) => {
       if (!mode || !Object.values(ImageMode).includes(mode)) {
-        throw new Error('"mode" must be "contain", "cover", or "stretch"');
+        throw errors.invalidImageMode();
       }
 
       const modeStyle = mode === 'stretch' ? '100% 100%' : mode;

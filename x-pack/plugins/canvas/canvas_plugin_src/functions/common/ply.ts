@@ -7,7 +7,7 @@
 import { groupBy, flatten, pick, map } from 'lodash';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Datatable, DatatableColumn } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   by: string[];
@@ -18,6 +18,7 @@ type Return = Datatable | Promise<Datatable>;
 
 export function ply(): ExpressionFunction<'ply', Datatable, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().ply;
+  const errors = getFunctionErrors().ply;
 
   return {
     name: 'ply',
@@ -55,7 +56,7 @@ export function ply(): ExpressionFunction<'ply', Datatable, Arguments, Return> {
           const column = context.columns.find(col => col.name === by);
 
           if (!column) {
-            throw new Error(`Column not found: '${by}'`);
+            throw errors.columnNotFound(by);
           }
 
           return column;
@@ -127,13 +128,14 @@ function combineColumns(arrayOfColumnsArrays: DatatableColumn[][]) {
 // This handles merging the tables produced by multiple expressions run on a single member of the `by` split.
 // Thus all tables must be the same length, although their columns do not need to be the same, we will handle combining the columns
 function combineAcross(datatableArray: Datatable[]) {
+  const errors = getFunctionErrors().ply;
   const [referenceTable] = datatableArray;
   const targetRowLength = referenceTable.rows.length;
 
   // Sanity check
   datatableArray.forEach(datatable => {
     if (datatable.rows.length !== targetRowLength) {
-      throw new Error('All expressions must return the same number of rows');
+      throw errors.rowCountMismatch();
     }
   });
 
