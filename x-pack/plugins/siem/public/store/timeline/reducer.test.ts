@@ -171,6 +171,7 @@ describe('Timeline', () => {
         example: 'user-password-change',
         id: 'event.action',
         type: 'keyword',
+        aggregatable: true,
         width: DEFAULT_COLUMN_MIN_WIDTH,
       };
     });

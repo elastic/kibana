@@ -113,8 +113,8 @@ export class Series extends Component {
       togglePanelActivation: this.togglePanelActivation,
       visible: this.state.visible,
       dragHandleProps: this.props.dragHandleProps,
+      indexPatternForQuery: panel.index_pattern || panel.default_index_pattern,
     };
-
     return Boolean(Component) ? (
       <Component {...params} />
     ) : (

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NullContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 const name = 'seriesStyle';
@@ -23,7 +23,7 @@ interface Return extends Arguments {
   type: 'seriesStyle';
 }
 
-export function seriesStyle(): NullContextFunction<'seriesStyle', Arguments, Return> {
+export function seriesStyle(): ExpressionFunction<'seriesStyle', null, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().seriesStyle;
 
   return {

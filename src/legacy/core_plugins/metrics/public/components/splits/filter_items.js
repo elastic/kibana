@@ -24,8 +24,13 @@ import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
+import { data } from 'plugins/data';
+const { QueryBarInput } = data.query.ui;
+import { Storage } from 'ui/storage';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+const localStorage = new Storage(window.localStorage);
 class FilterItemsUi extends Component {
   constructor(props) {
     super(props);
@@ -42,15 +47,24 @@ class FilterItemsUi extends Component {
       );
     };
   }
-
+  handleQueryChange = (model, filter) => {
+    const part = { filter };
+    collectionActions.handleChange(this.props, _.assign({}, model, part));
+  };
   renderRow(row, i, items) {
+    const indexPatterns = this.props.indexPatterns;
     const defaults = { filter: '', label: '' };
     const model = { ...defaults, ...row };
     const handleChange = part => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
-    const newFilter = () => ({ color: this.props.model.color, id: uuid.v1() });
+
+    const newFilter = () => ({
+      color: this.props.model.color,
+      id: uuid.v1(),
+      filter: { language: model.filter.language || getDefaultQueryLanguage(), query: '' },
+    });
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newFilter);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     const { intl } = this.props;
@@ -66,18 +80,15 @@ class FilterItemsUi extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFieldText
-            placeholder={intl.formatMessage({
-              id: 'tsvb.splits.filterItems.filterPlaceholder',
-              defaultMessage: 'Filter',
-            })}
-            aria-label={intl.formatMessage({
-              id: 'tsvb.splits.filterItems.filterAriaLabel',
-              defaultMessage: 'Filter',
-            })}
-            onChange={this.handleChange(model, 'filter')}
-            value={model.filter}
-            fullWidth
+          <QueryBarInput
+            query={{
+              language: model.filter.language || getDefaultQueryLanguage(),
+              query: model.filter.query || '',
+            }}
+            onChange={query => this.handleQueryChange(model, query)}
+            appName={'VisEditor'}
+            indexPatterns={[indexPatterns]}
+            store={localStorage}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -119,6 +130,7 @@ FilterItemsUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
   onChange: PropTypes.func,
+  indexPatterns: PropTypes.string,
 };
 
 export const FilterItems = injectI18n(FilterItemsUi);

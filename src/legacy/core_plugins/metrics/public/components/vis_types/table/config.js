@@ -40,7 +40,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-
+import { data } from 'plugins/data';
+import { Storage } from 'ui/storage';
+import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
+const { QueryBarInput } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
 class TableSeriesConfigUI extends Component {
   componentWillMount() {
     const { model } = this.props;
@@ -155,7 +159,19 @@ class TableSeriesConfigUI extends Component {
               label={<FormattedMessage id="tsvb.table.filterLabel" defaultMessage="Filter" />}
               fullWidth
             >
-              <EuiFieldText onChange={handleTextChange('filter')} value={model.filter} fullWidth />
+              <QueryBarInput
+                query={{
+                  language:
+                    model.filter && model.filter.language
+                      ? model.filter.language
+                      : getDefaultQueryLanguage(),
+                  query: model.filter && model.filter.query ? model.filter.query : '',
+                }}
+                onChange={filter => this.props.onChange({ filter })}
+                appName={'VisEditor'}
+                indexPatterns={[this.props.indexPatternForQuery]}
+                store={localStorage}
+              />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -235,6 +251,7 @@ TableSeriesConfigUI.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const TableSeriesConfig = injectI18n(TableSeriesConfigUI);

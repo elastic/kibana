@@ -88,7 +88,12 @@ function MetricSeriesUi(props) {
       );
     } else {
       seriesBody = (
-        <SeriesConfig fields={props.fields} model={props.model} onChange={props.onChange} />
+        <SeriesConfig
+          fields={props.fields}
+          model={props.model}
+          onChange={props.onChange}
+          indexPatternForQuery={props.indexPatternForQuery}
+        />
       );
     }
     body = (
@@ -216,6 +221,7 @@ MetricSeriesUi.propTypes = {
   togglePanelActivation: PropTypes.func,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const MetricSeries = injectI18n(MetricSeriesUi);

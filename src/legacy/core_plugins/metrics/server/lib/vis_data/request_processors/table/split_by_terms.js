@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
-
-export function splitByTerms(req, panel) {
+import { buildEsQuery } from '@kbn/es-query';
+export function splitByTerms(req, panel, esQueryConfig, indexPattern) {
   return next => doc => {
     panel.series
       .filter(c => c.aggregate_by && c.aggregate_function)
@@ -29,13 +29,8 @@ export function splitByTerms(req, panel) {
         if (column.filter) {
           _.set(
             doc,
-            `aggs.pivot.aggs.${column.id}.column_filter.filter.query_string.query`,
-            column.filter
-          );
-          _.set(
-            doc,
-            `aggs.pivot.aggs.${column.id}.column_filter.filter.query_string.analyze_wildcard`,
-            true
+            `aggs.pivot.aggs.${column.id}.column_filter.filter`,
+            buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
           );
         }
       });

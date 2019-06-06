@@ -42,7 +42,11 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+const { QueryBarInput } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
 class TimeseriesPanelConfigUi extends Component {
   constructor(props) {
     super(props);
@@ -55,7 +59,7 @@ class TimeseriesPanelConfigUi extends Component {
 
   render() {
     const defaults = {
-      filter: '',
+      filter: { query: '', language: getDefaultQueryLanguage() },
       axis_max: '',
       axis_min: '',
       legend_position: 'right',
@@ -184,10 +188,15 @@ class TimeseriesPanelConfigUi extends Component {
                   }
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBarInput
+                    query={{
+                      language: model.filter.language || getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    appName={'VisEditor'}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

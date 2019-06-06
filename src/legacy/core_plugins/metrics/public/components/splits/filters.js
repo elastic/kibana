@@ -26,7 +26,7 @@ import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SplitByFilters = props => {
-  const { onChange, model, uiRestrictions } = props;
+  const { onChange, model, uiRestrictions, indexPattern } = props;
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
   return (
@@ -48,7 +48,12 @@ export const SplitByFilters = props => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <FilterItems name="split_filters" model={model} onChange={onChange} />
+      <FilterItems
+        name="split_filters"
+        model={model}
+        onChange={onChange}
+        indexPatterns={indexPattern}
+      />
     </div>
   );
 };
@@ -57,4 +62,5 @@ SplitByFilters.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   uiRestrictions: PropTypes.object,
+  indexPatterns: PropTypes.array,
 };

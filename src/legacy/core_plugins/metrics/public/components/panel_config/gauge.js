@@ -38,12 +38,16 @@ import {
   EuiFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
   EuiFieldNumber,
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+const { QueryBarInput } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 
 class GaugePanelConfigUi extends Component {
   constructor(props) {
@@ -75,7 +79,7 @@ class GaugePanelConfigUi extends Component {
     const { intl } = this.props;
     const defaults = {
       gauge_max: '',
-      filter: '',
+      filter: { query: '', language: getDefaultQueryLanguage() },
       gauge_style: 'circle',
       gauge_inner_width: '',
       gauge_width: '',
@@ -147,10 +151,15 @@ class GaugePanelConfigUi extends Component {
                   }
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBarInput
+                    query={{
+                      language: model.filter.language || getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    appName={'VisEditor'}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

@@ -87,7 +87,12 @@ function MarkdownSeriesUi(props) {
       );
     } else {
       seriesBody = (
-        <SeriesConfig fields={props.fields} model={props.model} onChange={props.onChange} />
+        <SeriesConfig
+          fields={props.fields}
+          model={props.model}
+          onChange={props.onChange}
+          indexPatternForQuery={props.indexPatternForQuery}
+        />
       );
     }
     body = (
@@ -205,6 +210,7 @@ MarkdownSeriesUi.propTypes = {
   visible: PropTypes.bool,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const MarkdownSeries = injectI18n(MarkdownSeriesUi);
