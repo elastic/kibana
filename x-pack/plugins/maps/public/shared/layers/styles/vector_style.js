@@ -312,11 +312,7 @@ export class VectorStyle extends AbstractStyle {
           range: this._getFieldRange(name),
           computedName: VectorStyle.getComputedFieldName(name),
         };
-      })
-      .filter(({ range }) => {
-        return !!range;
       });
-
   }
 
   clearFeatureState(featureCollection, mbMap, sourceId) {
@@ -352,11 +348,12 @@ export class VectorStyle extends AbstractStyle {
     //scale to [0,1] domain
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
+
       for (let j = 0; j < scaledFields.length; j++) {
         const { name, range, computedName } = scaledFields[j];
         const unscaledValue = parseFloat(feature.properties[name]);
         let scaledValue;
-        if (isNaN(unscaledValue)) {//cannot scale
+        if (isNaN(unscaledValue) || !range) {//cannot scale
           scaledValue = -1;//put outside range
         } else if (range.delta === 0) {//values are identical
           scaledValue = 1;//snap to end of color range
@@ -385,7 +382,8 @@ export class VectorStyle extends AbstractStyle {
 
   _getMbDataDrivenSize({ fieldName, minSize, maxSize }) {
     const targetName = VectorStyle.getComputedFieldName(fieldName);
-    return   ['interpolate',
+    return   [
+      'interpolate',
       ['linear'],
       ['feature-state', targetName],
       0, minSize,

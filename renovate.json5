@@ -22,10 +22,20 @@
    */
   labels: [
     'release_note:skip',
-    ':Operations',
-    'chore',
-    'review'
+    'renovate',
+    'v8.0.0',
+    'v7.3.0'
   ],
+
+  major: {
+    labels: [
+      'release_note:skip',
+      'renovate',
+      'v8.0.0',
+      'v7.3.0',
+      'renovate:major',
+    ]
+  },
 
   /**
    * Enable creation of a "Master Issue" within the repository. This
@@ -33,6 +43,21 @@
    * PRs pending, open, closed (unmerged) or in error.
    */
   masterIssue: true,
+
+  /**
+   * Whether updates should require manual approval from within the
+   * Master Issue before creation.
+   *
+   * We can turn this off once we've gotten through the backlog of
+   * outdated packages.
+   */
+  masterIssueApproval: true,
+
+  /**
+   * Policy for how to modify/update existing ranges
+   * pin = convert ranges to exact versions, e.g. ^1.0.0 -> 1.1.0
+   */
+  rangeStrategy: 'replace',
 
   npm: {
     /**
@@ -46,21 +71,101 @@
      */
     packageRules: [
       {
-        packagePatterns: ['^.*$'],
-        enabled: false,
-      },
-      {
-        packagePatterns: ['^eslint'],
+        packagePatterns: ['\\beslint\\b'],
         groupName: 'eslint related packages',
         groupSlug: 'eslint',
-        enabled: true,
       },
       {
-        packagePatterns: ['^@babel', '.*babel.*'],
+        packagePatterns: ['\\bbabel\\b'],
+        packageNames: ['core-js'],
         groupName: 'babel related packages',
         groupSlug: 'babel',
-        enabled: true,
       },
+      {
+        packagePatterns: ['\\bjest\\b'],
+        groupName: 'jest related packages',
+        groupSlug: 'jest',
+      },
+      {
+        packagePatterns: ['\\bmocha\\b'],
+        groupName: 'mocha related packages',
+        groupSlug: 'mocha',
+      },
+      {
+        packagePatterns: ['\\bkarma\\b'],
+        groupName: 'karma related packages',
+        groupSlug: 'karma',
+      },
+      {
+        packagePatterns: ['\\bgulp\\b'],
+        groupName: 'gulp related packages',
+        groupSlug: 'gulp',
+      },
+      {
+        packagePatterns: ['\\bgrunt\\b'],
+        groupName: 'grunt related packages',
+        groupSlug: 'grunt',
+      },
+      {
+        packagePatterns: ['\\bangular\\b'],
+        groupName: 'angular related packages',
+        groupSlug: 'angular',
+        recreateClosed: false,
+      },
+      {
+        packagePatterns: ['\\bd3\\b'],
+        groupName: 'd3 related packages',
+        groupSlug: 'd3',
+      },
+      {
+        packagePatterns: ['\\breact\\b', '\\bredux\\b', '\\benzyme\\b'],
+        packageNames: [
+          'ngreact',
+          'recompose',
+          'prop-types',
+          'typescript-fsa-reducers',
+          'reselect'
+        ],
+        groupName: 'react related packages',
+        groupSlug: 'react',
+      },
+      {
+        packagePatterns: ['\\bgraphql\\b'],
+        groupName: 'graphql related packages',
+        groupSlug: 'graphql',
+      },
+      {
+        packagePatterns: ['\\bwebpack\\b', '\\bloader\\b'],
+        packageNames: ['mini-css-extract-plugin', 'chokidar'],
+        groupName: 'webpack related packages',
+        groupSlug: 'webpack',
+      },
+      {
+        packageNames: ['vscode-jsonrpc', 'vscode-languageserver', 'vscode-languageserver-types'],
+        groupName: 'language server related packages',
+        groupSlug: 'language server',
+      },
+      {
+        packageNames: [
+          'hapi',
+          '@types/hapi',
+          'joi',
+          '@types/joi',
+          'boom',
+          '@types/boom',
+          'hoek',
+          '@types/hoek',
+          'h2o2',
+          '@elastic/good',
+          'good-squeeze',
+          'inert'
+        ],
+        packagePatterns: ['\\bhapi\\b'],
+        groupName: 'hapi related packages',
+        groupSlug: 'hapi',
+      },
+
+      // internal/local packages
       {
         packagePatterns: ['^@kbn/.*'],
         enabled: false,
@@ -83,5 +188,10 @@
   /**
    * Disable automatic rebase on each change to base branch
    */
-  rebaseStalePrs: false
+  rebaseStalePrs: false,
+
+  /**
+   * Disable semantic commit formating
+   */
+  semanticCommits: false,
 }

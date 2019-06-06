@@ -22,7 +22,7 @@ export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
         iso: 'ISO8601',
       },
     }),
-    min: i18n.translate('xpack.canvas.functions.axisConfig.args.maxHelpText', {
+    min: i18n.translate('xpack.canvas.functions.axisConfig.args.minHelpText', {
       defaultMessage:
         'Minimum value displayed in the axis. Must be a number or a date in {ms} or {iso} string',
       values: {
@@ -31,7 +31,7 @@ export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
       },
     }),
     position: i18n.translate('xpack.canvas.functions.axisConfig.args.positionHelpText', {
-      defaultMessage: 'Position of the axis labels - top, bottom, left, and right',
+      defaultMessage: 'Position of the axis labels: {examples}',
       values: {
         examples: Object.values(Position).join(', '),
       },

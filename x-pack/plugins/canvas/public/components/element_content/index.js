@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registries } from 'plugins/interpreter/registries';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
+import { registries } from 'plugins/interpreter/registries';
 import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
 import { ElementContent as Component } from './element_content';
 

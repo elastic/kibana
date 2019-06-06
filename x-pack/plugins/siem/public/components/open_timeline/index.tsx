@@ -351,6 +351,7 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
         fetchPolicy: 'no-cache',
         variables: { id: timelineId },
       })
+      // eslint-disable-next-line
       .then(result => {
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)

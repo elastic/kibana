@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ContextFunction, Datatable } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable } from '../types';
 import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
@@ -11,7 +12,7 @@ interface Arguments {
   row: number;
 }
 
-export function getCell(): ContextFunction<'getCell', Datatable, Arguments, any> {
+export function getCell(): ExpressionFunction<'getCell', Datatable, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().getCell;
   const errors = getFunctionErrors().getCell;
 
