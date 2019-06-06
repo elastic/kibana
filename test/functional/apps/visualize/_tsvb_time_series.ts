@@ -143,24 +143,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be(expectedLegendValue);
       });
-
-      it('should show the correct count in the legend with bytes formatter', async () => {
-        const expectedLegendValue = '156B';
-
-        await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('Bytes');
-        const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be(expectedLegendValue);
-      });
-
-      it('should show the correct count in the legend with duration formatter', async () => {
-        const expectedLegendValue = '156,00';
-
-        await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('Duration');
-        const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be(expectedLegendValue);
-      });
     });
   });
 }
