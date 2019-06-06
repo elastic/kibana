@@ -6,8 +6,11 @@
 
 import fs from 'fs';
 import path from 'path';
+import { pathToFileURL } from 'url';
+
 import { ResponseError, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { DidChangeWorkspaceFoldersParams, InitializeResult } from 'vscode-languageserver-protocol';
+
 import { ServerNotInitialized } from '../../common/lsp_error_codes';
 import { LspRequest } from '../../model';
 import { ServerOptions } from '../server_options';
@@ -93,7 +96,7 @@ export class RequestExpander implements ILanguageServerHandler {
             removed: [
               {
                 name: workspacePath!,
-                uri: `file://${workspacePath}`,
+                uri: pathToFileURL(workspacePath).href,
               },
             ],
             added: [],
@@ -148,7 +151,7 @@ export class RequestExpander implements ILanguageServerHandler {
       [
         {
           name: workspacePath,
-          uri: `file://${workspacePath}`,
+          uri: pathToFileURL(workspacePath).href,
         },
       ],
       this.initialOptions
@@ -227,7 +230,7 @@ export class RequestExpander implements ILanguageServerHandler {
         added: [
           {
             name: workspacePath!,
-            uri: `file://${workspacePath}`,
+            uri: pathToFileURL(workspacePath).href,
           },
         ],
         removed: [],
@@ -247,7 +250,7 @@ export class RequestExpander implements ILanguageServerHandler {
       if (oldestWorkspace) {
         params.event.removed.push({
           name: oldestWorkspace,
-          uri: `file://${oldestWorkspace}`,
+          uri: pathToFileURL(oldestWorkspace).href,
         });
         this.removeWorkspace(oldestWorkspace);
       }

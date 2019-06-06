@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NullContextFunction, Datatable } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 const noop = () => {};
@@ -14,7 +15,7 @@ interface Return extends Datatable {
   rows: [{ latitude: number; longitude: number }];
 }
 
-export function location(): NullContextFunction<'location', {}, Promise<Return>> {
+export function location(): ExpressionFunction<'location', null, {}, Promise<Return>> {
   const { help } = getFunctionHelp().location;
 
   return {

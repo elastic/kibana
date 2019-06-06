@@ -28,3 +28,14 @@ export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
     }),
   },
 };
+export const errors = {
+  invalidPercent: (percent: number) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.revealImage.invalidPercentErrorMessage', {
+        defaultMessage: "Invalid value: '{percent}'. Percentage must be between 0 and 1",
+        values: {
+          percent,
+        },
+      })
+    ),
+};

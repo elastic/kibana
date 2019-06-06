@@ -137,7 +137,7 @@ export function WorkspacePanel({
       return (
         <ExpressionRendererComponent
           expression={expression!}
-          onRenderFailure={e => {
+          onRenderFailure={(e: unknown) => {
             setExpressionError(e);
           }}
         />
