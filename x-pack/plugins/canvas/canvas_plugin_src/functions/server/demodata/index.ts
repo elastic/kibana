@@ -8,8 +8,7 @@ import { sortBy } from 'lodash';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore
 import { queryDatatable } from '../../../../common/lib/datatable/query';
-// @ts-ignore
-import { getDemoRows } from './get_demo_rows';
+import { DemoRows, getDemoRows } from './get_demo_rows';
 import { Filter, Datatable, DatatableColumn, DatatableRow } from '../../types';
 import { getFunctionHelp } from '../../../strings';
 
@@ -42,7 +41,7 @@ export function demodata(): ExpressionFunction<'demodata', Filter, Arguments, Da
 
       let set = {} as { columns: DatatableColumn[]; rows: DatatableRow[] };
 
-      if (args.type === 'ci') {
+      if (args.type === DemoRows.CI) {
         set = {
           columns: [
             { name: '@timestamp', type: 'date' },
@@ -58,7 +57,7 @@ export function demodata(): ExpressionFunction<'demodata', Filter, Arguments, Da
           ],
           rows: sortBy(demoRows, 'time'),
         };
-      } else if (args.type === 'shirts') {
+      } else if (args.type === DemoRows.SHIRTS) {
         set = {
           columns: [
             { name: 'size', type: 'string' },
