@@ -43,4 +43,41 @@ describe('MetricVisValue', () => {
     expect(component.find('EuiKeyboardAccessible').exists()).toBe(false);
   });
 
+  it('should add -isfilterable class if onFilter is provided', () => {
+    const onFilter = jest.fn();
+    const component = shallow(
+      <MetricVisValue
+        fontSize={12}
+        metric={{ label: 'Foo', value: 'foo' }}
+        onFilter={onFilter}
+      />
+    );
+    component.simulate('click');
+    expect(component.find('.mtrVis__container-isfilterable')).toHaveLength(1);
+  });
+
+  it('should not add -isfilterable class if onFilter is not provided', () => {
+    const component = shallow(
+      <MetricVisValue
+        fontSize={12}
+        metric={{ label: 'Foo', value: 'foo' }}
+        onFilter={null}
+      />
+    );
+    component.simulate('click');
+    expect(component.find('.mtrVis__container-isfilterable')).toHaveLength(0);
+  });
+
+  it('should call onFilter callback if provided', () => {
+    const onFilter = jest.fn();
+    const component = shallow(
+      <MetricVisValue
+        fontSize={12}
+        metric={{ label: 'Foo', value: 'foo' }}
+        onFilter={onFilter}
+      />
+    );
+    component.find('.mtrVis__container-isfilterable').simulate('click');
+    expect(onFilter).toHaveBeenCalledWith({ label: 'Foo', value: 'foo' });
+  });
 });

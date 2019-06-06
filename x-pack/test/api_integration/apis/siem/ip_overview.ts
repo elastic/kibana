@@ -31,10 +31,10 @@ const ipOverviewTests: KbnTestProvider = ({ getService }) => {
             const ipOverview = resp.data.source.IpOverview;
             expect(ipOverview!.source!.geo!.continent_name).to.be('North America');
             expect(ipOverview!.source!.geo!.location!.lat!).to.be(37.751);
-            expect(ipOverview!.source!.host!.os!.platform!).to.be('raspbian');
+            expect(ipOverview!.host.os!.platform!).to.be('raspbian');
             expect(ipOverview!.destination!.geo!.continent_name).to.be('North America');
             expect(ipOverview!.destination!.geo!.location!.lat!).to.be(37.751);
-            expect(ipOverview!.destination!.host!.os!.platform!).to.be('raspbian');
+            expect(ipOverview!.host.os!.platform!).to.be('raspbian');
           });
       });
     });
@@ -55,9 +55,9 @@ const ipOverviewTests: KbnTestProvider = ({ getService }) => {
           })
           .then(resp => {
             const ipOverview = resp.data.source.IpOverview;
-            expect(ipOverview!.destination!.host!.id!).to.be('2ce8b1e7d69e4a1d9c6bcddc473da9d9');
-            expect(ipOverview!.destination!.host!.name!).to.be('zeek-sensor-amsterdam');
-            expect(ipOverview!.destination!.host!.os!.platform!).to.be('ubuntu');
+            expect(ipOverview!.host.id!).to.be('2ce8b1e7d69e4a1d9c6bcddc473da9d9');
+            expect(ipOverview!.host.name!).to.be('zeek-sensor-amsterdam');
+            expect(ipOverview!.host.os!.platform!).to.be('ubuntu');
           });
       });
     });

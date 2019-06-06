@@ -5,16 +5,17 @@
  */
 
 import moment from 'moment';
-import { NullContextFunction } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   value: string | null;
   format: string;
 }
 
-export function date(): NullContextFunction<'date', Arguments, number> {
+export function date(): ExpressionFunction<'date', null, Arguments, number> {
   const { help, args: argHelp } = getFunctionHelp().date;
+  const errors = getFunctionErrors().date;
 
   return {
     name: 'date',
@@ -45,7 +46,7 @@ export function date(): NullContextFunction<'date', Arguments, number> {
           : new Date();
 
       if (isNaN(outputDate.getTime())) {
-        throw new Error(`Invalid date input: ${argDate}`);
+        throw errors.invalidDateInput(argDate);
       }
 
       return outputDate.valueOf();

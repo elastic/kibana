@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import * as Rx from 'rxjs';
 import { UiSettingsService, UiSettingsSetup } from './ui_settings_service';
 
 const createSetupContractMock = () => {
@@ -35,6 +36,11 @@ const createSetupContractMock = () => {
     getUpdateErrors$: jest.fn(),
     stop: jest.fn(),
   };
+  setupContract.get$.mockReturnValue(new Rx.Subject<any>());
+  setupContract.getUpdate$.mockReturnValue(new Rx.Subject<any>());
+  setupContract.getSaved$.mockReturnValue(new Rx.Subject<any>());
+  setupContract.getUpdateErrors$.mockReturnValue(new Rx.Subject<any>());
+
   // we have to suppress type errors until decide how to mock es6 class
   return (setupContract as unknown) as UiSettingsSetup;
 };
