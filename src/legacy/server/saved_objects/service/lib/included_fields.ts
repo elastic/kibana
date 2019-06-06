@@ -17,22 +17,25 @@
  * under the License.
  */
 
+function toArray(value: string | string[]): string[] {
+  return typeof value === 'string' ? [value] : value;
+}
 /**
  * Provides an array of paths for ES source filtering
- *
- * @param {string} type
- * @param {string|array} fields
- * @returns {array}
  */
-export function includedFields(type, fields) {
-  if (!fields || fields.length === 0) return;
+export function includedFields(type: string | string[] = '*', fields?: string[] | string) {
+  if (!fields || fields.length === 0) {
+    return;
+  }
 
   // convert to an array
-  const sourceFields = typeof fields === 'string' ? [fields] : fields;
-  const sourceType = type || '*';
+  const sourceFields = toArray(fields);
+  const sourceType = toArray(type);
 
-  return sourceFields
-    .map(f => `${sourceType}.${f}`)
+  return sourceType
+    .reduce((acc: string[], t) => {
+      return [...acc, ...sourceFields.map(f => `${t}.${f}`)];
+    }, [])
     .concat('namespace')
     .concat('type')
     .concat('references')

@@ -17,22 +17,47 @@
  * under the License.
  */
 import { PriorityCollection } from './priority_collection';
+import { SavedObjectsClientContract } from '..';
+
+export interface SavedObjectsClientWrapperOptions<Request = unknown> {
+  client: SavedObjectsClientContract;
+  request: Request;
+}
+
+export type SavedObjectsClientWrapperFactory<Request = unknown> = (
+  options: SavedObjectsClientWrapperOptions<Request>
+) => SavedObjectsClientContract;
+
+export type SavedObjectsClientFactory<Request = unknown> = (
+  { request }: { request: Request }
+) => SavedObjectsClientContract;
 
 /**
  * Provider for the Scoped Saved Object Client.
  */
-export class ScopedSavedObjectsClientProvider {
-  _wrapperFactories = new PriorityCollection();
+export class ScopedSavedObjectsClientProvider<Request = unknown> {
+  private readonly _wrapperFactories = new PriorityCollection<
+    SavedObjectsClientWrapperFactory<Request>
+  >();
+  private _clientFactory: SavedObjectsClientFactory<Request>;
+  private readonly _originalClientFactory: SavedObjectsClientFactory<Request>;
 
-  constructor({ defaultClientFactory }) {
+  constructor({
+    defaultClientFactory,
+  }: {
+    defaultClientFactory: SavedObjectsClientFactory<Request>;
+  }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
   }
 
-  addClientWrapperFactory(priority, wrapperFactory) {
+  addClientWrapperFactory(
+    priority: number,
+    wrapperFactory: SavedObjectsClientWrapperFactory<Request>
+  ): void {
     this._wrapperFactories.add(priority, wrapperFactory);
   }
 
-  setClientFactory(customClientFactory) {
+  setClientFactory(customClientFactory: SavedObjectsClientFactory) {
     if (this._clientFactory !== this._originalClientFactory) {
       throw new Error(`custom client factory is already set, unable to replace the current one`);
     }
@@ -40,7 +65,7 @@ export class ScopedSavedObjectsClientProvider {
     this._clientFactory = customClientFactory;
   }
 
-  getClient(request) {
+  getClient(request: Request): SavedObjectsClientContract {
     const client = this._clientFactory({
       request,
     });

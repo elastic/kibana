@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export { SavedObjectsRepository } from './repository';
-export { ScopedSavedObjectsClientProvider } from './scoped_client_provider';
+export * from './service';
 
-import * as errors from './errors';
-export { errors };
+export { SavedObjectsSchema } from './schema';
+
+export { SavedObjectsManagement } from './management';
