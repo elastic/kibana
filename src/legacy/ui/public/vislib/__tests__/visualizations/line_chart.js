@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 

@@ -17,10 +17,9 @@
  * under the License.
  */
 export class AbstractSearchRequest {
-  constructor(req, callWithRequest, indexPattern) {
+  constructor(req, callWithRequest) {
     this.req = req;
     this.callWithRequest = callWithRequest;
-    this.indexPattern = indexPattern;
   }
 
   search() {

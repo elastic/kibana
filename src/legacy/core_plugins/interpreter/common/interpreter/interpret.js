@@ -145,7 +145,7 @@ export function interpreterProvider(config) {
     const argAstsWithDefaults = reduce(
       argDefs,
       (argAsts, argDef, argName) => {
-        if (typeof argAsts[argName] === 'undefined' && typeof argDef.default !== 'undefined')  {
+        if (typeof argAsts[argName] === 'undefined' && typeof argDef.default !== 'undefined') {
           argAsts[argName] = [fromExpression(argDef.default, 'argument')];
         }
 

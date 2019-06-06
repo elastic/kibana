@@ -73,6 +73,7 @@ exports[`BasicLoginForm renders as expected 1`] = `
         iconSide="left"
         isLoading={false}
         onClick={[Function]}
+        size="m"
         type="submit"
       >
         <FormattedMessage

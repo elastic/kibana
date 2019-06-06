@@ -5,6 +5,7 @@
  */
 
 import gql from 'graphql-tag';
+import { sharedFragments } from '../../../common/graphql/shared';
 
 export const flyoutItemQuery = gql`
   query FlyoutItemQuery($sourceId: ID!, $itemId: ID!) {
@@ -13,6 +14,9 @@ export const flyoutItemQuery = gql`
       logItem(id: $itemId) {
         id
         index
+        key {
+          ...InfraTimeKeyFields
+        }
         fields {
           field
           value
@@ -20,4 +24,6 @@ export const flyoutItemQuery = gql`
       }
     }
   }
+
+  ${sharedFragments.InfraTimeKey}
 `;

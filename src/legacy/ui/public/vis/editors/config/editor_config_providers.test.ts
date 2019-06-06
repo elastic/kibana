@@ -29,6 +29,7 @@ describe('EditorConfigProvider', () => {
       {
         name: 'response',
         type: 'number',
+        esTypes: ['integer'],
         aggregatable: true,
         filterable: true,
         searchable: true,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import path from 'path';
 import mkdirp from 'mkdirp';
 import fs from 'fs';
@@ -17,7 +17,6 @@ const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const kibanaServer = getService('kibanaServer');
   const config = getService('config');
   const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'header', 'discover', 'visualize']);
   const log = getService('log');
@@ -25,7 +24,6 @@ export default function ({ getService, getPageObjects }) {
   describe('Reporting', () => {
 
     before('initialize tests', async () => {
-      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.reporting.initTests();
     });
 

@@ -1,10 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MonitorList component renders a monitor list without errors 1`] = `
-<Fragment>
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="s"
+>
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
     <h5>
       <FormattedMessage
@@ -14,1275 +17,1278 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
       />
     </h5>
   </EuiTitle>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="l"
-  >
-    <EuiInMemoryTable
-      columns={
-        Array [
-          Object {
-            "field": "ping.monitor.status",
-            "name": "Status",
-            "render": [Function],
-          },
-          Object {
-            "field": "ping.timestamp",
-            "name": "Last updated",
-            "render": [Function],
-          },
-          Object {
-            "field": "ping.monitor.id",
-            "name": "ID",
-            "render": [Function],
-          },
-          Object {
-            "field": "ping.url.full",
-            "name": "URL",
-            "render": [Function],
-          },
-          Object {
-            "field": "ping.monitor.ip",
-            "name": "IP",
-          },
-          Object {
-            "field": "upSeries",
-            "name": "Monitor History",
-            "render": [Function],
-          },
-        ]
-      }
-      executeQueryOptions={Object {}}
-      items={
-        Array [
-          Object {
-            "downSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": null,
-              },
-            ],
-            "id": Object {
-              "key": "auto-http-0X131221E73F825974",
-              "url": "https://www.google.com/",
-            },
-            "ping": Object {
-              "monitor": Object {
-                "duration": Object {
-                  "us": 132169,
-                },
-                "id": "auto-http-0X131221E73F825974",
-                "ip": "172.217.12.132",
-                "name": "",
-                "status": "up",
-              },
-              "timestamp": "2019-01-28T18:43:15.077Z",
-              "url": Object {
-                "full": "https://www.google.com/",
-              },
-            },
-            "upSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": 74,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": 73,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": 74,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": 19,
-              },
-            ],
-          },
-          Object {
-            "downSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": 74,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": 75,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": 19,
-              },
-            ],
-            "id": Object {
-              "key": "auto-http-0X3675F89EF0612091",
-              "url": "http://localhost:12349/",
-            },
-            "ping": Object {
-              "monitor": Object {
-                "duration": Object {
-                  "us": 3331,
-                },
-                "id": "auto-http-0X3675F89EF0612091",
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "down",
-              },
-              "timestamp": "2019-01-28T18:43:15.077Z",
-              "url": Object {
-                "full": "http://localhost:12349/",
-              },
-            },
-            "upSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": null,
-              },
-            ],
-          },
-          Object {
-            "downSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": null,
-              },
-            ],
-            "id": Object {
-              "key": "auto-http-0X970CBD2F2102BFA8",
-              "url": "http://www.google.com/",
-            },
-            "ping": Object {
-              "monitor": Object {
-                "duration": Object {
-                  "us": 118727,
-                },
-                "id": "auto-http-0X970CBD2F2102BFA8",
-                "ip": "172.217.12.132",
-                "name": "",
-                "status": "up",
-              },
-              "timestamp": "2019-01-28T18:43:15.077Z",
-              "url": Object {
-                "full": "http://www.google.com/",
-              },
-            },
-            "upSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": 58,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": 16,
-              },
-            ],
-          },
-          Object {
-            "downSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": null,
-              },
-            ],
-            "id": Object {
-              "key": "auto-http-0X9CB71300ABD5A2A8",
-              "url": "https://www.github.com/",
-            },
-            "ping": Object {
-              "monitor": Object {
-                "duration": Object {
-                  "us": 247244,
-                },
-                "id": "auto-http-0X9CB71300ABD5A2A8",
-                "ip": "192.30.253.112",
-                "name": "",
-                "status": "up",
-              },
-              "timestamp": "2019-01-28T18:43:15.077Z",
-              "url": Object {
-                "full": "https://www.github.com/",
-              },
-            },
-            "upSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": 69,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": 70,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": 68,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": 69,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": 69,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": 69,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": 70,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": 70,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": 70,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": 69,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": 70,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": 18,
-              },
-            ],
-          },
-          Object {
-            "downSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": 57,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": 61,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": 56,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": 45,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": 49,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": 64,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": 59,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": 60,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": 14,
-              },
-            ],
-            "id": Object {
-              "key": "auto-http-0XA8096548ECEB85B7",
-              "url": "http://www.example.com/",
-            },
-            "ping": Object {
-              "monitor": Object {
-                "duration": Object {
-                  "us": 4751074,
-                },
-                "id": "auto-http-0XA8096548ECEB85B7",
-                "ip": "198.71.248.67",
-                "name": "",
-                "status": "down",
-              },
-              "timestamp": "2019-01-28T18:43:07.078Z",
-              "url": Object {
-                "full": "http://www.example.com/",
-              },
-            },
-            "upSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": null,
-              },
-            ],
-          },
-          Object {
-            "downSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": null,
-              },
-            ],
-            "id": Object {
-              "key": "auto-http-0XC9CDA429418EDC2B",
-              "url": "https://www.wikipedia.org/",
-            },
-            "ping": Object {
-              "monitor": Object {
-                "duration": Object {
-                  "us": 1164812,
-                },
-                "id": "auto-http-0XC9CDA429418EDC2B",
-                "ip": "208.80.154.224",
-                "name": "",
-                "status": "up",
-              },
-              "timestamp": "2019-01-28T18:42:55.074Z",
-              "url": Object {
-                "full": "https://www.wikipedia.org/",
-              },
-            },
-            "upSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": 1,
-              },
-            ],
-          },
-          Object {
-            "downSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": 1,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": null,
-              },
-            ],
-            "id": Object {
-              "key": "auto-http-0XD9AE729FC1C1E04A",
-              "url": "http://www.reddit.com/",
-            },
-            "ping": Object {
-              "monitor": Object {
-                "duration": Object {
-                  "us": 299586,
-                },
-                "id": "auto-http-0XD9AE729FC1C1E04A",
-                "ip": "151.101.249.140",
-                "name": "",
-                "status": "up",
-              },
-              "timestamp": "2019-01-28T18:43:13.074Z",
-              "url": Object {
-                "full": "http://www.reddit.com/",
-              },
-            },
-            "upSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": 79,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": 80,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": 86,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": 87,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": 81,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": 100,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": 100,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": 99,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": 96,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": 81,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": 80,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": 20,
-              },
-            ],
-          },
-          Object {
-            "downSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": null,
-              },
-            ],
-            "id": Object {
-              "key": "auto-http-0XDD2D4E60FD4A61C3",
-              "url": "https://www.elastic.co",
-            },
-            "ping": Object {
-              "monitor": Object {
-                "duration": Object {
-                  "us": 850870,
-                },
-                "id": "auto-http-0XDD2D4E60FD4A61C3",
-                "ip": "151.101.250.217",
-                "name": "",
-                "status": "up",
-              },
-              "timestamp": "2019-01-28T18:43:13.074Z",
-              "url": Object {
-                "full": "https://www.elastic.co",
-              },
-            },
-            "upSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": 79,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": 80,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": 86,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": 88,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": 81,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": 95,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": 94,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": 98,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": 93,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": 81,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": 80,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": 20,
-              },
-            ],
-          },
-          Object {
-            "downSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": null,
-              },
-            ],
-            "id": Object {
-              "key": "auto-http-0XE3B163481423197D",
-              "url": "https://news.google.com/",
-            },
-            "ping": Object {
-              "monitor": Object {
-                "duration": Object {
-                  "us": 2059606,
-                },
-                "id": "auto-http-0XE3B163481423197D",
-                "ip": "216.58.219.206",
-                "name": "",
-                "status": "up",
-              },
-              "timestamp": "2019-01-28T18:42:55.074Z",
-              "url": Object {
-                "full": "https://news.google.com/",
-              },
-            },
-            "upSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": 5,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": 1,
-              },
-            ],
-          },
-          Object {
-            "downSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": 293,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": 300,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": 155,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": null,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": null,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": null,
-              },
-            ],
-            "id": Object {
-              "key": "auto-tcp-0X81440A68E839814C",
-              "url": "tcp://localhost:9200",
-            },
-            "ping": Object {
-              "monitor": Object {
-                "duration": Object {
-                  "us": 3328,
-                },
-                "id": "auto-tcp-0X81440A68E839814C",
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "up",
-              },
-              "timestamp": "2019-01-28T18:43:16.078Z",
-              "url": Object {
-                "full": "tcp://localhost:9200",
-              },
-            },
-            "upSeries": Array [
-              Object {
-                "x": 1548697620000,
-                "y": 1,
-              },
-              Object {
-                "x": 1548697920000,
-                "y": null,
-              },
-              Object {
-                "x": 1548698220000,
-                "y": 145,
-              },
-              Object {
-                "x": 1548698520000,
-                "y": 300,
-              },
-              Object {
-                "x": 1548698820000,
-                "y": 300,
-              },
-              Object {
-                "x": 1548699120000,
-                "y": 300,
-              },
-              Object {
-                "x": 1548699420000,
-                "y": 300,
-              },
-              Object {
-                "x": 1548699720000,
-                "y": 300,
-              },
-              Object {
-                "x": 1548700020000,
-                "y": 300,
-              },
-              Object {
-                "x": 1548700320000,
-                "y": 300,
-              },
-              Object {
-                "x": 1548700620000,
-                "y": 300,
-              },
-              Object {
-                "x": 1548700920000,
-                "y": 77,
-              },
-            ],
-          },
-        ]
-      }
-      loading={false}
-      pagination={
+  <EuiSpacer
+    size="s"
+  />
+  <EuiInMemoryTable
+    columns={
+      Array [
         Object {
-          "initialPageSize": 10,
-          "pageSizeOptions": Array [
-            5,
-            10,
-            20,
-            50,
+          "field": "ping.monitor.status",
+          "name": "Status",
+          "render": [Function],
+          "width": "150px",
+        },
+        Object {
+          "field": "ping.monitor.id",
+          "name": "ID",
+          "render": [Function],
+        },
+        Object {
+          "field": "ping.observer.geo.name",
+          "name": "Location",
+          "render": [Function],
+        },
+        Object {
+          "field": "ping.url.full",
+          "name": "URL",
+          "render": [Function],
+        },
+        Object {
+          "align": "right",
+          "field": "upSeries",
+          "name": "Downtime history",
+          "render": [Function],
+          "width": "180px",
+        },
+        Object {
+          "align": "right",
+          "field": "ping",
+          "name": "Integrations",
+          "render": [Function],
+          "width": "110px",
+        },
+      ]
+    }
+    executeQueryOptions={Object {}}
+    items={
+      Array [
+        Object {
+          "downSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": null,
+            },
           ],
-        }
+          "id": Object {
+            "key": "auto-http-0X131221E73F825974",
+            "url": "https://www.google.com/",
+          },
+          "ping": Object {
+            "monitor": Object {
+              "duration": Object {
+                "us": 132169,
+              },
+              "id": "auto-http-0X131221E73F825974",
+              "ip": "172.217.12.132",
+              "name": "",
+              "status": "up",
+            },
+            "timestamp": "2019-01-28T18:43:15.077Z",
+            "url": Object {
+              "full": "https://www.google.com/",
+            },
+          },
+          "upSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": 74,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": 73,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": 74,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": 19,
+            },
+          ],
+        },
+        Object {
+          "downSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": 74,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": 75,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": 19,
+            },
+          ],
+          "id": Object {
+            "key": "auto-http-0X3675F89EF0612091",
+            "url": "http://localhost:12349/",
+          },
+          "ping": Object {
+            "monitor": Object {
+              "duration": Object {
+                "us": 3331,
+              },
+              "id": "auto-http-0X3675F89EF0612091",
+              "ip": "127.0.0.1",
+              "name": "",
+              "status": "down",
+            },
+            "timestamp": "2019-01-28T18:43:15.077Z",
+            "url": Object {
+              "full": "http://localhost:12349/",
+            },
+          },
+          "upSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": null,
+            },
+          ],
+        },
+        Object {
+          "downSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": null,
+            },
+          ],
+          "id": Object {
+            "key": "auto-http-0X970CBD2F2102BFA8",
+            "url": "http://www.google.com/",
+          },
+          "ping": Object {
+            "monitor": Object {
+              "duration": Object {
+                "us": 118727,
+              },
+              "id": "auto-http-0X970CBD2F2102BFA8",
+              "ip": "172.217.12.132",
+              "name": "",
+              "status": "up",
+            },
+            "timestamp": "2019-01-28T18:43:15.077Z",
+            "url": Object {
+              "full": "http://www.google.com/",
+            },
+          },
+          "upSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": 58,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": 16,
+            },
+          ],
+        },
+        Object {
+          "downSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": null,
+            },
+          ],
+          "id": Object {
+            "key": "auto-http-0X9CB71300ABD5A2A8",
+            "url": "https://www.github.com/",
+          },
+          "ping": Object {
+            "monitor": Object {
+              "duration": Object {
+                "us": 247244,
+              },
+              "id": "auto-http-0X9CB71300ABD5A2A8",
+              "ip": "192.30.253.112",
+              "name": "",
+              "status": "up",
+            },
+            "timestamp": "2019-01-28T18:43:15.077Z",
+            "url": Object {
+              "full": "https://www.github.com/",
+            },
+          },
+          "upSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": 69,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": 70,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": 68,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": 69,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": 69,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": 69,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": 70,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": 70,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": 70,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": 69,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": 70,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": 18,
+            },
+          ],
+        },
+        Object {
+          "downSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": 57,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": 61,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": 56,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": 45,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": 49,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": 64,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": 59,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": 60,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": 14,
+            },
+          ],
+          "id": Object {
+            "key": "auto-http-0XA8096548ECEB85B7",
+            "url": "http://www.example.com/",
+          },
+          "ping": Object {
+            "monitor": Object {
+              "duration": Object {
+                "us": 4751074,
+              },
+              "id": "auto-http-0XA8096548ECEB85B7",
+              "ip": "198.71.248.67",
+              "name": "",
+              "status": "down",
+            },
+            "timestamp": "2019-01-28T18:43:07.078Z",
+            "url": Object {
+              "full": "http://www.example.com/",
+            },
+          },
+          "upSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": null,
+            },
+          ],
+        },
+        Object {
+          "downSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": null,
+            },
+          ],
+          "id": Object {
+            "key": "auto-http-0XC9CDA429418EDC2B",
+            "url": "https://www.wikipedia.org/",
+          },
+          "ping": Object {
+            "monitor": Object {
+              "duration": Object {
+                "us": 1164812,
+              },
+              "id": "auto-http-0XC9CDA429418EDC2B",
+              "ip": "208.80.154.224",
+              "name": "",
+              "status": "up",
+            },
+            "timestamp": "2019-01-28T18:42:55.074Z",
+            "url": Object {
+              "full": "https://www.wikipedia.org/",
+            },
+          },
+          "upSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": 1,
+            },
+          ],
+        },
+        Object {
+          "downSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": 1,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": null,
+            },
+          ],
+          "id": Object {
+            "key": "auto-http-0XD9AE729FC1C1E04A",
+            "url": "http://www.reddit.com/",
+          },
+          "ping": Object {
+            "monitor": Object {
+              "duration": Object {
+                "us": 299586,
+              },
+              "id": "auto-http-0XD9AE729FC1C1E04A",
+              "ip": "151.101.249.140",
+              "name": "",
+              "status": "up",
+            },
+            "timestamp": "2019-01-28T18:43:13.074Z",
+            "url": Object {
+              "full": "http://www.reddit.com/",
+            },
+          },
+          "upSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": 79,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": 80,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": 86,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": 87,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": 81,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": 100,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": 100,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": 99,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": 96,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": 81,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": 80,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": 20,
+            },
+          ],
+        },
+        Object {
+          "downSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": null,
+            },
+          ],
+          "id": Object {
+            "key": "auto-http-0XDD2D4E60FD4A61C3",
+            "url": "https://www.elastic.co",
+          },
+          "ping": Object {
+            "monitor": Object {
+              "duration": Object {
+                "us": 850870,
+              },
+              "id": "auto-http-0XDD2D4E60FD4A61C3",
+              "ip": "151.101.250.217",
+              "name": "",
+              "status": "up",
+            },
+            "timestamp": "2019-01-28T18:43:13.074Z",
+            "url": Object {
+              "full": "https://www.elastic.co",
+            },
+          },
+          "upSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": 79,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": 80,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": 86,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": 88,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": 81,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": 95,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": 94,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": 98,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": 93,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": 81,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": 80,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": 20,
+            },
+          ],
+        },
+        Object {
+          "downSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": null,
+            },
+          ],
+          "id": Object {
+            "key": "auto-http-0XE3B163481423197D",
+            "url": "https://news.google.com/",
+          },
+          "ping": Object {
+            "monitor": Object {
+              "duration": Object {
+                "us": 2059606,
+              },
+              "id": "auto-http-0XE3B163481423197D",
+              "ip": "216.58.219.206",
+              "name": "",
+              "status": "up",
+            },
+            "timestamp": "2019-01-28T18:42:55.074Z",
+            "url": Object {
+              "full": "https://news.google.com/",
+            },
+          },
+          "upSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": 5,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": 1,
+            },
+          ],
+        },
+        Object {
+          "downSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": 293,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": 300,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": 155,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": null,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": null,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": null,
+            },
+          ],
+          "id": Object {
+            "key": "auto-tcp-0X81440A68E839814C",
+            "url": "tcp://localhost:9200",
+          },
+          "ping": Object {
+            "monitor": Object {
+              "duration": Object {
+                "us": 3328,
+              },
+              "id": "auto-tcp-0X81440A68E839814C",
+              "ip": "127.0.0.1",
+              "name": "",
+              "status": "up",
+            },
+            "timestamp": "2019-01-28T18:43:16.078Z",
+            "url": Object {
+              "full": "tcp://localhost:9200",
+            },
+          },
+          "upSeries": Array [
+            Object {
+              "x": 1548697620000,
+              "y": 1,
+            },
+            Object {
+              "x": 1548697920000,
+              "y": null,
+            },
+            Object {
+              "x": 1548698220000,
+              "y": 145,
+            },
+            Object {
+              "x": 1548698520000,
+              "y": 300,
+            },
+            Object {
+              "x": 1548698820000,
+              "y": 300,
+            },
+            Object {
+              "x": 1548699120000,
+              "y": 300,
+            },
+            Object {
+              "x": 1548699420000,
+              "y": 300,
+            },
+            Object {
+              "x": 1548699720000,
+              "y": 300,
+            },
+            Object {
+              "x": 1548700020000,
+              "y": 300,
+            },
+            Object {
+              "x": 1548700320000,
+              "y": 300,
+            },
+            Object {
+              "x": 1548700620000,
+              "y": 300,
+            },
+            Object {
+              "x": 1548700920000,
+              "y": 77,
+            },
+          ],
+        },
+      ]
+    }
+    loading={false}
+    pagination={
+      Object {
+        "initialPageSize": 10,
+        "pageSizeOptions": Array [
+          5,
+          10,
+          20,
+          50,
+        ],
       }
-      responsive={true}
-      sorting={false}
-    />
-  </EuiPanel>
-</Fragment>
+    }
+    responsive={true}
+    sorting={false}
+  />
+</EuiPanel>
 `;

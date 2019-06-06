@@ -8,7 +8,7 @@ import Boom from 'boom';
 
 import { Server } from 'hapi';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
+import { XPackInfo } from '../../../../xpack_main/server/lib/xpack_info';
 import {
   IndexGroup,
   ReindexSavedObject,
@@ -463,6 +463,7 @@ export const reindexServiceFactory = (
         index: [
           {
             names,
+            allow_restricted_indices: true,
             privileges: ['all'],
           },
           {
@@ -589,7 +590,7 @@ export const reindexServiceFactory = (
           });
 
           // Cleanup any changes, ignoring any errors.
-          lockedReindexOp = await cleanupChanges(lockedReindexOp).catch(e => lockedReindexOp);
+          lockedReindexOp = await cleanupChanges(lockedReindexOp).catch(err => lockedReindexOp);
         }
 
         return lockedReindexOp;

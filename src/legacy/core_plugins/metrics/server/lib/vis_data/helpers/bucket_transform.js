@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import parseSettings from './parse_settings';
-import getBucketsPath from './get_buckets_path';
+import { parseSettings } from './parse_settings';
+import { getBucketsPath } from './get_buckets_path';
 import { parseInterval } from './parse_interval';
-import { set } from 'lodash';
+import { set, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 function checkMetric(metric, fields) {
@@ -63,7 +63,7 @@ function extendStatsBucket(bucket, metrics) {
   return body;
 }
 
-export default {
+export const bucketTransform = {
   count: () => {
     return {
       bucket_script: {
@@ -122,17 +122,6 @@ export default {
     return body;
   },
 
-  percentile_rank: bucket => {
-    checkMetric(bucket, ['type', 'field', 'value']);
-    const body = {
-      percentile_ranks: {
-        field: bucket.field,
-        values: [bucket.value],
-      },
-    };
-    return body;
-  },
-
   avg_bucket: extendStatsBucket,
   max_bucket: extendStatsBucket,
   min_bucket: extendStatsBucket,
@@ -157,6 +146,19 @@ export default {
     };
     return agg;
   },
+
+  percentile_rank: bucket => {
+    checkMetric(bucket, ['type', 'field', 'values']);
+
+    return {
+      percentile_ranks: {
+        field: bucket.field,
+        values: (bucket.values || [])
+          .map(value => isEmpty(value) ? 0 : value),
+      },
+    };
+  },
+
 
   derivative: (bucket, metrics, bucketSize) => {
     checkMetric(bucket, ['type', 'field']);

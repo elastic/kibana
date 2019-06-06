@@ -243,7 +243,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
 >
   <EuiTitle
     size="s"
-    textTransform="none"
   >
     <h3
       className="euiTitle euiTitle--small"
@@ -288,31 +287,23 @@ exports[`ilm summary extension should return extension when index has lifecycle 
           size="m"
           type="cross"
         >
-          <cross
+          <EuiIconEmpty
             aria-hidden="true"
-            className="euiIcon euiIcon--medium euiCallOutHeader__icon"
+            className="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
             focusable="false"
-            height="16"
             style={null}
-            viewBox="0 0 16 16"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
           >
             <svg
               aria-hidden="true"
-              className="euiIcon euiIcon--medium euiCallOutHeader__icon"
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
               focusable="false"
-              height="16"
+              height={16}
               style={null}
               viewBox="0 0 16 16"
-              width="16"
+              width={16}
               xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-              />
-            </svg>
-          </cross>
+            />
+          </EuiIconEmpty>
         </EuiIcon>
         <span
           className="euiCallOutHeader__title"
@@ -327,7 +318,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
         </span>
       </div>
       <EuiText
-        grow={true}
         size="s"
       >
         <div
@@ -524,8 +514,11 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   <div
                     className="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
                     id="phaseExecutionPopover"
-                    onClick={[Function]}
                     onKeyDown={[Function]}
+                    onMouseDown={[Function]}
+                    onMouseUp={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
                   >
                     <div
                       className="euiPopover__anchor"
@@ -696,7 +689,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
 >
   <EuiTitle
     size="s"
-    textTransform="none"
   >
     <h3
       className="euiTitle euiTitle--small"

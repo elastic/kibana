@@ -4,41 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
+import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+} from '../../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../../typings/common';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
 
-export type TransactionAPIResponse = Transaction | undefined;
-
-export interface TransactionWithErrorCountAPIResponse {
-  transaction: TransactionAPIResponse;
-  errorCount: number;
-}
-
+export type TransactionAPIResponse = PromiseReturnType<typeof getTransaction>;
 export async function getTransaction(
   transactionId: string,
   traceId: string,
   setup: Setup
-): Promise<TransactionAPIResponse> {
-  const { start, end, esFilterQuery, client, config } = setup;
-
-  const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
-    { term: { [TRANSACTION_ID]: transactionId } },
-    { term: { [TRACE_ID]: traceId } },
-    { range: rangeFilter(start, end) }
-  ];
-
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
-  }
+) {
+  const { start, end, uiFiltersES, client, config } = setup;
 
   const params = {
     index: config.get<string>('apm_oss.transactionIndices'),
@@ -46,12 +29,18 @@ export async function getTransaction(
       size: 1,
       query: {
         bool: {
-          filter
+          filter: [
+            { term: { [PROCESSOR_EVENT]: 'transaction' } },
+            { term: { [TRANSACTION_ID]: transactionId } },
+            { term: { [TRACE_ID]: traceId } },
+            { range: rangeFilter(start, end) },
+            ...uiFiltersES
+          ]
         }
       }
     }
   };
 
-  const resp = await client<Transaction>('search', params);
+  const resp = await client.search<Transaction>(params);
   return idx(resp, _ => _.hits.hits[0]._source);
 }

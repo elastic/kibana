@@ -113,10 +113,9 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
   }
   property="xpack.monitoring.collection.enabled"
 >
-  <Component>
+  <WhatIs>
     <EuiTitle
       size="l"
-      textTransform="none"
     >
       <h2
         className="euiTitle euiTitle--large"
@@ -132,15 +131,11 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
     </EuiTitle>
     <EuiTextColor
       color="subdued"
-      component="span"
     >
       <span
         className="euiTextColor euiTextColor--subdued"
       >
-        <EuiText
-          grow={true}
-          size="m"
-        >
+        <EuiText>
           <div
             className="euiText euiText--medium"
           >
@@ -157,7 +152,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
         </EuiText>
       </span>
     </EuiTextColor>
-  </Component>
+  </WhatIs>
   <EuiHorizontalRule
     size="half"
   >
@@ -165,10 +160,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
     />
   </EuiHorizontalRule>
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <div
       className="euiText euiText--medium"
     >
@@ -269,6 +261,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             fill={true}
             iconSide="left"
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <button

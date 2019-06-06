@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import 'ui/angular_ui_select';
 
 import { aggTypes } from 'ui/agg_types';
@@ -39,7 +40,6 @@ import {
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { MultiMetricJobServiceProvider } from './create_job_service';
-import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
@@ -63,12 +63,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlCreateMultiMetricJob', function (
-    $scope,
-    $timeout,
-    Private,
-    AppState,
-    i18n) {
+  .controller('MlCreateMultiMetricJob', function ($scope, $timeout, Private, AppState) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
@@ -77,7 +72,6 @@ module
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
     const chartDataUtils = Private(ChartDataUtilsProvider);
     const mlMultiMetricJobService = Private(MultiMetricJobServiceProvider);
-    const mlFullTimeRangeSelectorService = Private(FullTimeRangeSelectorServiceProvider);
     $scope.addNewJobToRecentlyAccessed = addNewJobToRecentlyAccessed;
 
     const stateDefaults = {
@@ -119,19 +113,19 @@ module
     timeBasedIndexCheck(indexPattern, true);
 
     const pageTitle = (savedSearch.id !== undefined) ?
-      i18n('xpack.ml.newJob.simple.multiMetric.savedSearchPageTitle', {
+      i18n.translate('xpack.ml.newJob.simple.multiMetric.savedSearchPageTitle', {
         defaultMessage: 'saved search {savedSearchTitle}',
         values: { savedSearchTitle: savedSearch.title }
       }) :
-      i18n('xpack.ml.newJob.simple.multiMetric.indexPatternPageTitle', {
+      i18n.translate('xpack.ml.newJob.simple.multiMetric.indexPatternPageTitle', {
         defaultMessage: 'index pattern {indexPatternTitle}',
         values: { indexPatternTitle: indexPattern.title }
       });
 
-    $scope.analysisStoppingLabel = i18n('xpack.ml.newJob.simple.multiMetric.analysisStoppingLabel', {
+    $scope.analysisStoppingLabel = i18n.translate('xpack.ml.newJob.simple.multiMetric.analysisStoppingLabel', {
       defaultMessage: 'Analysis stopping'
     });
-    $scope.stopAnalysisLabel = i18n('xpack.ml.newJob.simple.multiMetric.stopAnalysisLabel', {
+    $scope.stopAnalysisLabel = i18n.translate('xpack.ml.newJob.simple.multiMetric.stopAnalysisLabel', {
       defaultMessage: 'Stop analysis'
     });
 
@@ -151,52 +145,52 @@ module
       timeFields: [],
       splitText: '',
       intervals: [{
-        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.autoTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.multiMetric.intervals.autoTitle', {
           defaultMessage: 'Auto'
         }),
         value: 'auto',
       }, {
-        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.millisecondTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.multiMetric.intervals.millisecondTitle', {
           defaultMessage: 'Millisecond'
         }),
         value: 'ms'
       }, {
-        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.secondTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.multiMetric.intervals.secondTitle', {
           defaultMessage: 'Second'
         }),
         value: 's'
       }, {
-        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.minuteTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.multiMetric.intervals.minuteTitle', {
           defaultMessage: 'Minute'
         }),
         value: 'm'
       }, {
-        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.hourlyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.multiMetric.intervals.hourlyTitle', {
           defaultMessage: 'Hourly'
         }),
         value: 'h'
       }, {
-        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.dailyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.multiMetric.intervals.dailyTitle', {
           defaultMessage: 'Daily'
         }),
         value: 'd'
       }, {
-        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.weeklyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.multiMetric.intervals.weeklyTitle', {
           defaultMessage: 'Weekly'
         }),
         value: 'w'
       }, {
-        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.monthlyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.multiMetric.intervals.monthlyTitle', {
           defaultMessage: 'Monthly'
         }),
         value: 'M'
       }, {
-        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.yearlyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.multiMetric.intervals.yearlyTitle', {
           defaultMessage: 'Yearly'
         }),
         value: 'y'
       }, {
-        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.customTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.multiMetric.intervals.customTitle', {
           defaultMessage: 'Custom'
         }),
         value: 'custom'
@@ -255,7 +249,7 @@ module
       if (splitField !== undefined) {
         $scope.addDefaultFieldsToInfluencerList();
 
-        $scope.ui.splitText = i18n('xpack.ml.newJob.simple.multiMetric.dataSplitByLabel', {
+        $scope.ui.splitText = i18n.translate('xpack.ml.newJob.simple.multiMetric.dataSplitByLabel', {
           defaultMessage: 'Data split by {splitFieldName}',
           values: { splitFieldName: splitField.name }
         });
@@ -494,13 +488,13 @@ module
               })
               .catch((resp) => {
                 msgs.error(
-                  i18n('xpack.ml.newJob.simple.multiMetric.couldNotOpenJobErrorMessage', {
+                  i18n.translate('xpack.ml.newJob.simple.multiMetric.couldNotOpenJobErrorMessage', {
                     defaultMessage: 'Could not open job:'
                   }),
                   resp
                 );
                 msgs.error(
-                  i18n('xpack.ml.newJob.simple.multiMetric.jobCreatedAndDatafeedCreatingAnywayErrorMessage', {
+                  i18n.translate('xpack.ml.newJob.simple.multiMetric.jobCreatedAndDatafeedCreatingAnywayErrorMessage', {
                     defaultMessage: 'Job created, creating datafeed anyway'
                   })
                 );
@@ -512,7 +506,7 @@ module
           .catch((resp) => {
             // save failed
             msgs.error(
-              i18n('xpack.ml.newJob.simple.multiMetric.saveFailedErrorMessage', {
+              i18n.translate('xpack.ml.newJob.simple.multiMetric.saveFailedErrorMessage', {
                 defaultMessage: 'Save failed:'
               }),
               resp.resp
@@ -560,7 +554,7 @@ module
                 .catch((resp) => {
                   // datafeed failed
                   msgs.error(
-                    i18n('xpack.ml.newJob.simple.multiMetric.couldNotStartDatafeedErrorMessage', {
+                    i18n.translate('xpack.ml.newJob.simple.multiMetric.couldNotStartDatafeedErrorMessage', {
                       defaultMessage: 'Could not start datafeed:'
                     }),
                     resp
@@ -575,7 +569,7 @@ module
           })
           .catch((resp) => {
             msgs.error(
-              i18n('xpack.ml.newJob.simple.multiMetric.saveDatafeedFailedErrorMessage', {
+              i18n.translate('xpack.ml.newJob.simple.multiMetric.saveDatafeedFailedErrorMessage', {
                 defaultMessage: 'Save datafeed failed:',
               }),
               resp
@@ -753,10 +747,6 @@ module
             formConfig.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
           }
         });
-    };
-
-    $scope.setFullTimeRange = function () {
-      return mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
 
     initAgg();

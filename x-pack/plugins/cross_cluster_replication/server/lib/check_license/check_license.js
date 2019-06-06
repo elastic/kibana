@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export function checkLicense(xpackLicenseInfo) {
-  const pluginName = 'Cross Cluster Replication';
+  const pluginName = 'Cross-Cluster Replication';
 
   // If, for some reason, we cannot get the license information
   // from Elasticsearch, assume worst case and disable

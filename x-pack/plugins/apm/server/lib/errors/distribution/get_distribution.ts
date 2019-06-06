@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
 
@@ -12,16 +13,11 @@ function getBucketSize({ start, end, config }: Setup) {
   return Math.floor((end - start) / bucketTargetCount);
 }
 
-export interface ErrorDistributionAPIResponse {
-  totalHits: number;
-  buckets: Array<{
-    key: number;
-    count: number;
-  }>;
-  bucketSize: number;
-}
+export type ErrorDistributionAPIResponse = PromiseReturnType<
+  typeof getErrorDistribution
+>;
 
-export async function getDistribution({
+export async function getErrorDistribution({
   serviceName,
   groupId,
   setup
@@ -29,7 +25,7 @@ export async function getDistribution({
   serviceName: string;
   groupId?: string;
   setup: Setup;
-}): Promise<ErrorDistributionAPIResponse> {
+}) {
   const bucketSize = getBucketSize(setup);
   const { buckets, totalHits } = await getBuckets({
     serviceName,

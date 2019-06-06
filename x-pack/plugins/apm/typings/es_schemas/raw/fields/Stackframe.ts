@@ -19,7 +19,6 @@ interface IStackframeBase {
   line: {
     number: number;
   };
-  [key: string]: unknown;
 }
 
 export interface IStackframeWithLineContext extends IStackframeBase {

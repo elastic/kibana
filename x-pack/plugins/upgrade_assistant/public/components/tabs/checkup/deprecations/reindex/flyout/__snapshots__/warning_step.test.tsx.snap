@@ -33,9 +33,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
       }
       description={
         <FormattedMessage
-          defaultMessage="The {allField} meta field is no longer supported in 7.0. Reindexing removes
-                      the {allField} field in the new index. Ensure that no application code or scripts reply on
-                      this field."
+          defaultMessage="The {allField} meta field is no longer supported in 7.0. Reindexing removes the {allField} field in the new index. Ensure that no application code or scripts reply on this field."
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningDetail"
           values={
             Object {
@@ -72,9 +70,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
       }
       description={
         <FormattedMessage
-          defaultMessage="If a document contain a boolean field that is neither {true} or {false}
-                   (for example, {yes}, {on}, {one}), reindexing converts these fields to {true} or {false}.
-                   Ensure that no application code or scripts rely on boolean fields in the deprecated format."
+          defaultMessage="If a document contain a boolean field that is neither {true} or {false} (for example, {yes}, {on}, {one}), reindexing converts these fields to {true} or {false}. Ensure that no application code or scripts rely on boolean fields in the deprecated format."
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningDetail"
           values={
             Object {
@@ -146,6 +142,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
           fill={true}
           iconSide="left"
           onClick={[MockFunction]}
+          size="m"
           type="button"
         >
           <FormattedMessage

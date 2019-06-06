@@ -36,13 +36,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
 
   beforeEach(() => {
     server = createMockServer();
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
+    jest.resetAllMocks();
 
     const prereqs = {
       getSavedObjectsClient: {
@@ -53,7 +47,13 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       },
     };
 
-    server.route(createResolveImportErrorsRoute(prereqs, server));
+    server.route(
+      createResolveImportErrorsRoute(prereqs, server, [
+        'index-pattern',
+        'visualization',
+        'dashboard',
+      ])
+    );
   });
 
   test('formats successful response', async () => {
@@ -66,6 +66,10 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
         'Content-Type: application/ndjson',
         '',
         '',
+        '--BOUNDARY',
+        'Content-Disposition: form-data; name="retries"',
+        '',
+        '[]',
         '--BOUNDARY--',
       ].join('\r\n'),
       headers: {
@@ -79,7 +83,48 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
   });
 
-  test('resolves conflicts for an index pattern and dashboard but skips the index pattern', async () => {
+  test('defaults migrationVersion to empty object', async () => {
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/_resolve_import_errors',
+      payload: [
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+        'Content-Type: application/ndjson',
+        '',
+        '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}',
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="retries"',
+        '',
+        '[{"type":"dashboard","id":"my-dashboard"}]',
+        '--EXAMPLE--',
+      ].join('\r\n'),
+      headers: {
+        'content-Type': 'multipart/form-data; boundary=EXAMPLE',
+      },
+    };
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'dashboard',
+          id: 'my-dashboard',
+          attributes: {
+            title: 'Look at my dashboard',
+          },
+        },
+      ],
+    });
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual({ success: true, successCount: 1 });
+    expect(savedObjectsClient.bulkCreate.mock.calls).toHaveLength(1);
+    const firstBulkCreateCallArray = savedObjectsClient.bulkCreate.mock.calls[0][0];
+    expect(firstBulkCreateCallArray).toHaveLength(1);
+    expect(firstBulkCreateCallArray[0].migrationVersion).toEqual({});
+  });
+
+  test('retries importing a dashboard', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
     const request = {
       method: 'POST',
@@ -89,14 +134,9 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
         'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
         'Content-Type: application/ndjson',
         '',
-        '{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}',
         '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}',
         '--EXAMPLE',
-        'Content-Disposition: form-data; name="skips"',
-        '',
-        '[{"type":"index-pattern","id":"my-pattern"}]',
-        '--EXAMPLE',
-        'Content-Disposition: form-data; name="overwrites"',
+        'Content-Disposition: form-data; name="retries"',
         '',
         '[{"type":"dashboard","id":"my-dashboard"}]',
         '--EXAMPLE--',
@@ -130,6 +170,70 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
             "title": "Look at my dashboard",
           },
           "id": "my-dashboard",
+          "migrationVersion": Object {},
+          "type": "dashboard",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
+  test('resolves conflicts for dashboard', async () => {
+    // NOTE: changes to this scenario should be reflected in the docs
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/_resolve_import_errors',
+      payload: [
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+        'Content-Type: application/ndjson',
+        '',
+        '{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}',
+        '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}',
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="retries"',
+        '',
+        '[{"type":"dashboard","id":"my-dashboard","overwrite":true}]',
+        '--EXAMPLE--',
+      ].join('\r\n'),
+      headers: {
+        'content-Type': 'multipart/form-data; boundary=EXAMPLE',
+      },
+    };
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'dashboard',
+          id: 'my-dashboard',
+          attributes: {
+            title: 'Look at my dashboard',
+          },
+        },
+      ],
+    });
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual({ success: true, successCount: 1 });
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "attributes": Object {
+            "title": "Look at my dashboard",
+          },
+          "id": "my-dashboard",
+          "migrationVersion": Object {},
           "type": "dashboard",
         },
       ],
@@ -158,12 +262,11 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
         'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
         'Content-Type: application/ndjson',
         '',
-        '{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"}}',
-        '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"panel_0","type":"visualization","id":"my-vis"}]}',
+        '{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"missing"}]}',
         '--EXAMPLE',
-        'Content-Disposition: form-data; name="replaceReferences"',
+        'Content-Disposition: form-data; name="retries"',
         '',
-        '[{"type":"visualization","from":"my-vis","to":"my-vis-2"}]',
+        '[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"missing","to":"existing"}]}]',
         '--EXAMPLE--',
       ].join('\r\n'),
       headers: {
@@ -173,18 +276,28 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
         {
-          type: 'dashboard',
-          id: 'my-dashboard',
+          type: 'visualization',
+          id: 'my-vis',
           attributes: {
-            title: 'Look at my dashboard',
+            title: 'Look at my visualization',
           },
           references: [
             {
-              name: 'panel_0',
-              type: 'visualization',
-              id: 'my-vis-2',
+              name: 'ref_0',
+              type: 'index-pattern',
+              id: 'existing',
             },
           ],
+        },
+      ],
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'existing',
+          type: 'index-pattern',
+          attributes: {},
+          references: [],
         },
       ],
     });
@@ -199,22 +312,43 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       Array [
         Object {
           "attributes": Object {
-            "title": "Look at my dashboard",
+            "title": "Look at my visualization",
           },
-          "id": "my-dashboard",
+          "id": "my-vis",
+          "migrationVersion": Object {},
           "references": Array [
             Object {
-              "id": "my-vis-2",
-              "name": "panel_0",
-              "type": "visualization",
+              "id": "existing",
+              "name": "ref_0",
+              "type": "index-pattern",
             },
           ],
-          "type": "dashboard",
+          "type": "visualization",
         },
       ],
-      Object {
-        "overwrite": true,
-      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "fields": Array [
+            "id",
+          ],
+          "id": "existing",
+          "type": "index-pattern",
+        },
+      ],
     ],
   ],
   "results": Array [

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -76,12 +76,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickClone();
 
       await PageObjects.dashboard.confirmClone();
+      await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
       await PageObjects.dashboard.confirmClone();
-
-      // This is important since saving a new dashboard will cause a refresh of the page.  We have to
-      // wait till it finishes reloading or it might reload the url after simulating the
-      // dashboard landing page click.
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
 
       const countOfDashboards =
         await PageObjects.dashboard.getDashboardCountWithName(dashboardName + ' Copy');

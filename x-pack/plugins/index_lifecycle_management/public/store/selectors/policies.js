@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { createSelector } from 'reselect';
 import { Pager } from '@elastic/eui';
+
 import {
   PHASE_HOT,
   PHASE_WARM,
@@ -32,15 +31,16 @@ import {
   PHASE_FREEZE_ENABLED,
   PHASE_INDEX_PRIORITY,
   PHASE_ROLLOVER_MAX_DOCUMENTS
-} from '../constants';
+} from '../../constants';
+
+import { filterItems, sortTable } from '../../services';
+
 import {
   defaultEmptyDeletePhase,
   defaultEmptyColdPhase,
   defaultEmptyWarmPhase,
   defaultEmptyHotPhase
 } from '../defaults';
-import { filterItems, sortTable } from '../../services';
-
 
 export const getPolicies = state => state.policies.policies;
 export const getPolicyByName = (state, name) => getPolicies(state).find((policy) => policy.name === name) || {};
@@ -97,8 +97,10 @@ export const getSelectedPolicyName = state => {
 };
 
 export const getPhases = state => state.policies.selectedPolicy.phases;
+
 export const getPhase = (state, phase) =>
   getPhases(state)[phase];
+
 export const getPhaseData = (state, phase, key) => {
   if (PHASE_ATTRIBUTES_THAT_ARE_NUMBERS.includes(key)) {
     return parseInt(getPhase(state, phase)[key]);
@@ -124,10 +126,10 @@ export const splitSizeAndUnits = field => {
 
 export const isNumber = value => typeof value === 'number';
 export const isEmptyObject = (obj) => {
-  return Object.entries(obj).length === 0 && obj.constructor === Object;
+  return !obj || (Object.entries(obj).length === 0 && obj.constructor === Object);
 };
 
-export const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
+const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
   const policy = { ...defaultEmptyPolicy };
   if (!phase) {
     return policy;
@@ -196,11 +198,14 @@ export const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
     }
 
     if (actions.shrink) {
+      policy[PHASE_SHRINK_ENABLED] = true;
       policy[PHASE_PRIMARY_SHARD_COUNT] = actions.shrink.number_of_shards;
     }
+
     if (actions.freeze) {
       policy[PHASE_FREEZE_ENABLED] = true;
     }
+
     if (actions.set_priority) {
       policy[PHASE_INDEX_PRIORITY] = actions.set_priority.priority;
     }
@@ -210,6 +215,7 @@ export const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
 
 export const policyFromES = (policy) => {
   const { name, policy: { phases } } = policy;
+
   return {
     name,
     phases: {
@@ -275,7 +281,7 @@ export const phaseToES = (phase, originalEsPhase) => {
   }
   if (esPhase.actions.allocate
       && !esPhase.actions.allocate.require
-      && !esPhase.actions.allocate.number_of_replicas
+      && !isNumber(esPhase.actions.allocate.number_of_replicas)
       && isEmptyObject(esPhase.actions.allocate.include)
       && isEmptyObject(esPhase.actions.allocate.exclude)
   ) {

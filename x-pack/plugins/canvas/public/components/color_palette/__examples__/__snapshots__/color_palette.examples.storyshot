@@ -27,7 +27,7 @@ exports[`Storyshots components/ColorPalette interactive 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(255, 255, 255)",
+              "background": "#fff",
             }
           }
         />
@@ -53,7 +53,7 @@ exports[`Storyshots components/ColorPalette interactive 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(102, 102, 102)",
+              "background": "#666",
             }
           }
         />
@@ -79,7 +79,7 @@ exports[`Storyshots components/ColorPalette interactive 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(0, 0, 0)",
+              "background": "#000",
             }
           }
         />
@@ -105,7 +105,7 @@ exports[`Storyshots components/ColorPalette interactive 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(170, 187, 204)",
+              "background": "#abc",
             }
           }
         />
@@ -131,7 +131,7 @@ exports[`Storyshots components/ColorPalette interactive 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(221, 238, 255)",
+              "background": "#def",
             }
           }
         />
@@ -157,7 +157,7 @@ exports[`Storyshots components/ColorPalette interactive 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(171, 205, 239)",
+              "background": "#abcdef",
             }
           }
         />
@@ -195,7 +195,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(255, 255, 255)",
+                "background": "#fff",
               }
             }
           />
@@ -221,7 +221,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(102, 102, 102)",
+                "background": "#666",
               }
             }
           />
@@ -247,7 +247,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(0, 0, 0)",
+                "background": "#000",
               }
             }
           />
@@ -273,7 +273,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(170, 187, 204)",
+                "background": "#abc",
               }
             }
           />
@@ -299,7 +299,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(221, 238, 255)",
+                "background": "#def",
               }
             }
           />
@@ -325,7 +325,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(171, 205, 239)",
+                "background": "#abcdef",
               }
             }
           />
@@ -359,28 +359,23 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(255, 255, 255)",
+                "background": "#fff",
               }
             }
           >
             <svg
-              className="euiIcon euiIcon--medium selected-color"
+              className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
               focusable="false"
-              height="16"
+              height={16}
               style={
                 Object {
                   "fill": "#333",
                 }
               }
               viewBox="0 0 16 16"
-              width="16"
+              width={16}
               xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-                fillRule="evenodd"
-              />
-            </svg>
+            />
           </div>
         </div>
       </button>
@@ -404,7 +399,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(102, 102, 102)",
+                "background": "#666",
               }
             }
           />
@@ -430,7 +425,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(0, 0, 0)",
+                "background": "#000",
               }
             }
           />
@@ -456,7 +451,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(170, 187, 204)",
+                "background": "#abc",
               }
             }
           />
@@ -482,7 +477,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(221, 238, 255)",
+                "background": "#def",
               }
             }
           />
@@ -508,7 +503,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(171, 205, 239)",
+                "background": "#abcdef",
               }
             }
           />
@@ -546,7 +541,7 @@ exports[`Storyshots components/ColorPalette six colors, value missing 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(255, 255, 255)",
+              "background": "#fff",
             }
           }
         />
@@ -572,7 +567,7 @@ exports[`Storyshots components/ColorPalette six colors, value missing 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(102, 102, 102)",
+              "background": "#666",
             }
           }
         />
@@ -598,7 +593,7 @@ exports[`Storyshots components/ColorPalette six colors, value missing 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(0, 0, 0)",
+              "background": "#000",
             }
           }
         />
@@ -624,7 +619,7 @@ exports[`Storyshots components/ColorPalette six colors, value missing 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(170, 187, 204)",
+              "background": "#abc",
             }
           }
         />
@@ -650,7 +645,7 @@ exports[`Storyshots components/ColorPalette six colors, value missing 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(221, 238, 255)",
+              "background": "#def",
             }
           }
         />
@@ -676,7 +671,7 @@ exports[`Storyshots components/ColorPalette six colors, value missing 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(171, 205, 239)",
+              "background": "#abcdef",
             }
           }
         />
@@ -713,28 +708,23 @@ exports[`Storyshots components/ColorPalette six colors, wrap at 4 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(255, 255, 255)",
+              "background": "#fff",
             }
           }
         >
           <svg
-            className="euiIcon euiIcon--medium selected-color"
+            className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
             focusable="false"
-            height="16"
+            height={16}
             style={
               Object {
                 "fill": "#333",
               }
             }
             viewBox="0 0 16 16"
-            width="16"
+            width={16}
             xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-              fillRule="evenodd"
-            />
-          </svg>
+          />
         </div>
       </div>
     </button>
@@ -758,7 +748,7 @@ exports[`Storyshots components/ColorPalette six colors, wrap at 4 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(102, 102, 102)",
+              "background": "#666",
             }
           }
         />
@@ -784,7 +774,7 @@ exports[`Storyshots components/ColorPalette six colors, wrap at 4 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(0, 0, 0)",
+              "background": "#000",
             }
           }
         />
@@ -810,7 +800,7 @@ exports[`Storyshots components/ColorPalette six colors, wrap at 4 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(170, 187, 204)",
+              "background": "#abc",
             }
           }
         />
@@ -840,7 +830,7 @@ exports[`Storyshots components/ColorPalette six colors, wrap at 4 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(221, 238, 255)",
+              "background": "#def",
             }
           }
         />
@@ -866,7 +856,7 @@ exports[`Storyshots components/ColorPalette six colors, wrap at 4 1`] = `
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "rgb(171, 205, 239)",
+              "background": "#abcdef",
             }
           }
         />
@@ -904,7 +894,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(255, 255, 255)",
+                "background": "#fff",
               }
             }
           />
@@ -930,7 +920,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(102, 102, 102)",
+                "background": "#666",
               }
             }
           />
@@ -956,7 +946,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(0, 0, 0)",
+                "background": "#000",
               }
             }
           />
@@ -990,28 +980,23 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(255, 255, 255)",
+                "background": "#fff",
               }
             }
           >
             <svg
-              className="euiIcon euiIcon--medium selected-color"
+              className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
               focusable="false"
-              height="16"
+              height={16}
               style={
                 Object {
                   "fill": "#333",
                 }
               }
               viewBox="0 0 16 16"
-              width="16"
+              width={16}
               xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-                fillRule="evenodd"
-              />
-            </svg>
+            />
           </div>
         </div>
       </button>
@@ -1035,7 +1020,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(102, 102, 102)",
+                "background": "#666",
               }
             }
           />
@@ -1061,7 +1046,7 @@ Array [
             className="canvasColorDot__foreground"
             style={
               Object {
-                "background": "rgb(0, 0, 0)",
+                "background": "#000",
               }
             }
           />

@@ -18,7 +18,9 @@ import {
   chartLimits,
   getChartType
 } from '../../util/chart_utils';
-import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
+
+import { getEntityFieldList } from '../../../common/util/anomaly_utils';
+import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
 import { severity$ } from '../../components/controls/select_severity/select_severity';
@@ -37,7 +39,6 @@ export function getDefaultChartsData() {
 }
 
 export function explorerChartsContainerServiceFactory(callback) {
-  const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
   const CHART_MAX_POINTS = 500;
   const ANOMALIES_MAX_RESULTS = 500;
   const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -100,18 +101,90 @@ export function explorerChartsContainerServiceFactory(callback) {
 
     // Query 1 - load the raw metric data.
     function getMetricData(config, range) {
-      const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
-      return mlResultsService.getMetricData(
-        config.datafeedConfig.indices,
-        config.entityFields,
-        datafeedQuery,
-        config.metricFunction,
-        config.metricFieldName,
-        config.timeField,
-        range.min,
-        range.max,
-        config.interval
-      );
+      const {
+        jobId,
+        detectorIndex,
+        entityFields,
+        interval
+      } = config;
+
+      const job = mlJobService.getJob(jobId);
+
+      // If source data can be plotted, use that, otherwise model plot will be available.
+      const useSourceData = isSourceDataChartableForDetector(job, detectorIndex);
+      if (useSourceData === true) {
+        const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
+        return mlResultsService.getMetricData(
+          config.datafeedConfig.indices,
+          config.entityFields,
+          datafeedQuery,
+          config.metricFunction,
+          config.metricFieldName,
+          config.timeField,
+          range.min,
+          range.max,
+          config.interval
+        );
+      } else {
+        // Extract the partition, by, over fields on which to filter.
+        const criteriaFields = [];
+        const detector = job.analysis_config.detectors[detectorIndex];
+        if (_.has(detector, 'partition_field_name')) {
+          const partitionEntity = _.find(entityFields, { 'fieldName': detector.partition_field_name });
+          if (partitionEntity !== undefined) {
+            criteriaFields.push(
+              { fieldName: 'partition_field_name', fieldValue: partitionEntity.fieldName },
+              { fieldName: 'partition_field_value', fieldValue: partitionEntity.fieldValue });
+          }
+        }
+
+        if (_.has(detector, 'over_field_name')) {
+          const overEntity = _.find(entityFields, { 'fieldName': detector.over_field_name });
+          if (overEntity !== undefined) {
+            criteriaFields.push(
+              { fieldName: 'over_field_name', fieldValue: overEntity.fieldName },
+              { fieldName: 'over_field_value', fieldValue: overEntity.fieldValue });
+          }
+        }
+
+        if (_.has(detector, 'by_field_name')) {
+          const byEntity = _.find(entityFields, { 'fieldName': detector.by_field_name });
+          if (byEntity !== undefined) {
+            criteriaFields.push(
+              { fieldName: 'by_field_name', fieldValue: byEntity.fieldName },
+              { fieldName: 'by_field_value', fieldValue: byEntity.fieldValue });
+          }
+        }
+
+        return new Promise((resolve, reject) => {
+          const obj = {
+            success: true,
+            results: {}
+          };
+
+          return mlResultsService.getModelPlotOutput(
+            jobId,
+            detectorIndex,
+            criteriaFields,
+            range.min,
+            range.max,
+            interval
+          )
+            .then((resp) => {
+              // Return data in format required by the explorer charts.
+              const results = resp.results;
+              Object.keys(results).forEach((time) => {
+                obj.results[time] = results[time].actual;
+              });
+              resolve(obj);
+            })
+            .catch((resp) => {
+              reject(resp);
+            });
+
+        });
+      }
+
     }
 
     // Query 2 - load the anomalies.
@@ -346,13 +419,18 @@ export function explorerChartsContainerServiceFactory(callback) {
     // Aggregate by job, detector, and analysis fields (partition, by, over).
     const aggregatedData = {};
     _.each(anomalyRecords, (record) => {
-      // Only plot charts for metric functions, and for detectors which don't use categorization
-      // or scripted fields which can be very difficult or impossible to invert to a reverse search.
+      // Check if we can plot a chart for this record, depending on whether the source data
+      // is chartable, and if model plot is enabled for the job.
       const job = mlJobService.getJob(record.job_id);
-      if (
-        isTimeSeriesViewDetector(job, record.detector_index) === false ||
-        FUNCTION_DESCRIPTIONS_TO_PLOT.includes(record.function_description) === false
-      ) {
+      let isChartable = isSourceDataChartableForDetector(job, record.detector_index);
+      if (isChartable === false) {
+        // Check if model plot is enabled for this job.
+        // Need to check the entity fields for the record in case the model plot config has a terms list.
+        const entityFields = getEntityFieldList(record);
+        isChartable = isModelPlotEnabled(job, record.detector_index, entityFields);
+      }
+
+      if (isChartable === false) {
         return;
       }
       const jobId = record.job_id;

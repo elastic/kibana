@@ -18,7 +18,7 @@
  */
 
 import { includes, startsWith } from 'lodash';
-import lookup from './agg_lookup';
+import { lookup } from './agg_lookup';
 import { i18n } from '@kbn/i18n';
 
 const paths = [
@@ -35,7 +35,8 @@ const paths = [
   'serial_diff',
   'positive_only',
 ];
-export default function calculateLabel(metric, metrics) {
+
+export function calculateLabel(metric, metrics) {
   if (!metric) return i18n.translate('tsvb.calculateLabel.unknownLabel', { defaultMessage: 'Unknown' });
   if (metric.alias) return metric.alias;
 
@@ -56,16 +57,10 @@ export default function calculateLabel(metric, metrics) {
     );
   }
 
-  if (metric.type === 'percentile_rank') {
-    return i18n.translate('tsvb.calculateLabel.percentileRankLabel', {
-      defaultMessage: '{lookupMetricType} ({metricValue}) of {metricField}',
-      values: { lookupMetricType: lookup[metric.type], metricValue: metric.value, metricField: metric.field }
-    });
-  }
-
   if (includes(paths, metric.type)) {
     const targetMetric = metrics.find(m => startsWith(metric.field, m.id));
     const targetLabel = calculateLabel(targetMetric, metrics);
+
     // For percentiles we need to parse the field id to extract the percentile
     // the user configured in the percentile aggregation and specified in the
     // submetric they selected. This applies only to pipeline aggs.

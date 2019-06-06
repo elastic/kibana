@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { csv } from '../csv';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../strings';
+
+const errors = getFunctionErrors().csv;
 
 describe('csv', () => {
   const fn = functionWrapper(csv);
@@ -100,5 +103,16 @@ fourty two%SPLIT%42`,
         { foo: '  good', bar: ' bad', baz: ' better   ', buz: ' worst    ' },
       ],
     });
+  });
+
+  it('throws when given invalid csv', () => {
+    expect(fn)
+      .withArgs(null, {
+        data: `name,number
+one|1
+two.2
+fourty two,42`,
+      })
+      .to.throwException(new RegExp(errors.invalidInputCSV().message));
   });
 });

@@ -22,22 +22,29 @@ import _ from 'lodash';
 export function VislibTypesPointSeries() {
 
   const createSeriesFromParams = (cfg, seri) => {
+    //percentile data id format is {mainId}.{percentileValue}, this has to be cleaned
+    //up to match with ids in cfg.seriesParams entry that contain only {mainId}
+    const seriId = seri.id && seri.id.indexOf('.') !== -1
+      ? seri.id.split('.')[0]
+      : seri.id;
     const matchingSeriesParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
-      return seri.id === seriConfig.data.id;
+      return seriId === seriConfig.data.id;
     }) : null;
-
 
     const interpolate = cfg.smoothLines ? 'cardinal' : cfg.interpolate;
 
     if (!matchingSeriesParams) {
+      const seriesParams0 = Array.isArray(cfg.seriesParams) && cfg.seriesParams[0]
+        ? cfg.seriesParams[0]
+        : cfg;
       const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(cfg.mode);
       return {
         show: true,
         type: cfg.type || 'line',
         mode: stacked ? 'stacked' : 'normal',
         interpolate: interpolate,
-        drawLinesBetweenPoints: cfg.drawLinesBetweenPoints,
-        showCircles: cfg.showCircles,
+        drawLinesBetweenPoints: seriesParams0.drawLinesBetweenPoints,
+        showCircles: seriesParams0.showCircles,
         radiusRatio: cfg.radiusRatio,
         data: seri
       };

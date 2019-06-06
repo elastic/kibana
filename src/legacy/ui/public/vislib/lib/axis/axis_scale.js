@@ -20,7 +20,9 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import moment from 'moment';
+
 import { InvalidLogScaleValues } from '../../../errors';
+import { timeTicks } from './time_ticks';
 
 export function VislibAxisScaleProvider() {
   class AxisScale {
@@ -179,7 +181,9 @@ export function VislibAxisScaleProvider() {
       let scaleType = scaleTypeArg || 'linear';
       if (scaleType === 'square root') scaleType = 'sqrt';
 
-      if (this.axisConfig.isTimeDomain()) return d3.time.scale.utc(); // allow time scale
+      if (this.axisConfig.isTimeDomain()) {
+        return d3.time.scale.utc(); // allow time scale
+      }
       if (this.axisConfig.isOrdinal()) return d3.scale.ordinal();
       if (typeof d3.scale[scaleType] !== 'function') {
         return this.throwCustomError(`Axis.getScaleType: ${scaleType} is not a function`);
@@ -201,6 +205,7 @@ export function VislibAxisScaleProvider() {
       const padding = config.get('style.rangePadding');
       const outerPadding = config.get('style.rangeOuterPadding');
       this.scale = scale.domain(domain);
+
       if (config.isOrdinal()) {
         this.scale.rangeBands(range, padding, outerPadding);
       } else {
@@ -212,6 +217,10 @@ export function VislibAxisScaleProvider() {
       if (this.scale.clamp) this.scale.clamp(true);
 
       this.validateScale(this.scale);
+
+      if (this.axisConfig.isTimeDomain()) {
+        this.scale.timezoneCorrectedTicks = timeTicks(scale);
+      }
 
       return this.scale;
     }

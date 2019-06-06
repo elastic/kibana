@@ -38,23 +38,24 @@ interface ImportRequest extends Hapi.Request {
   };
   payload: {
     file: HapiReadableStream;
-    overwrites: Array<{
+    retries: Array<{
       type: string;
       id: string;
-    }>;
-    replaceReferences: Array<{
-      type: string;
-      from: string;
-      to: string;
-    }>;
-    skips: Array<{
-      type: string;
-      id: string;
+      overwrite: boolean;
+      replaceReferences: Array<{
+        type: string;
+        from: string;
+        to: string;
+      }>;
     }>;
   };
 }
 
-export const createResolveImportErrorsRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
+export const createResolveImportErrorsRoute = (
+  prereqs: Prerequisites,
+  server: Hapi.Server,
+  supportedTypes: string[]
+) => ({
   path: '/api/saved_objects/_resolve_import_errors',
   method: 'POST',
   config: {
@@ -67,31 +68,24 @@ export const createResolveImportErrorsRoute = (prereqs: Prerequisites, server: H
     validate: {
       payload: Joi.object({
         file: Joi.object().required(),
-        overwrites: Joi.array()
+        retries: Joi.array()
           .items(
             Joi.object({
               type: Joi.string().required(),
               id: Joi.string().required(),
+              overwrite: Joi.boolean().default(false),
+              replaceReferences: Joi.array()
+                .items(
+                  Joi.object({
+                    type: Joi.string().required(),
+                    from: Joi.string().required(),
+                    to: Joi.string().required(),
+                  })
+                )
+                .default([]),
             })
           )
-          .default([]),
-        replaceReferences: Joi.array()
-          .items(
-            Joi.object({
-              type: Joi.string().required(),
-              from: Joi.string().required(),
-              to: Joi.string().required(),
-            })
-          )
-          .default([]),
-        skips: Joi.array()
-          .items(
-            Joi.object({
-              type: Joi.string().required(),
-              id: Joi.string().required(),
-            })
-          )
-          .default([]),
+          .required(),
       }).default(),
     },
   },
@@ -99,16 +93,17 @@ export const createResolveImportErrorsRoute = (prereqs: Prerequisites, server: H
     const { savedObjectsClient } = request.pre;
     const { filename } = request.payload.file.hapi;
     const fileExtension = extname(filename).toLowerCase();
+
     if (fileExtension !== '.ndjson') {
       return Boom.badRequest(`Invalid file extension ${fileExtension}`);
     }
+
     return await resolveImportErrors({
+      supportedTypes,
       savedObjectsClient,
       readStream: request.payload.file,
+      retries: request.payload.retries,
       objectLimit: request.server.config().get('savedObjects.maxImportExportSize'),
-      skips: request.payload.skips,
-      overwrites: request.payload.overwrites,
-      replaceReferences: request.payload.replaceReferences,
     });
   },
 });

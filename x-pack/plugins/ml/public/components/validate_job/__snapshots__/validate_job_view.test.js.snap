@@ -45,20 +45,14 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
         }
       }
     />
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <FormattedMessage
         defaultMessage="Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results."
         id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
         values={Object {}}
       />
     </EuiText>
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <FormattedMessage
         defaultMessage="For more information, see {mlJobTipsLink}."
         id="xpack.ml.validateJob.modal.linkToJobTipsText"
@@ -139,20 +133,14 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
       />
     }
   >
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <FormattedMessage
         defaultMessage="Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results."
         id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
         values={Object {}}
       />
     </EuiText>
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <FormattedMessage
         defaultMessage="For more information, see {mlJobTipsLink}."
         id="xpack.ml.validateJob.modal.linkToJobTipsText"

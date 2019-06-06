@@ -16,65 +16,115 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Observable } from 'rxjs';
+import { Type } from '@kbn/config-schema';
 
-import { first } from 'rxjs/operators';
-import { ConfigService, Env } from './config';
-import { ElasticsearchModule } from './elasticsearch';
-import { HttpConfig, HttpModule, HttpServiceSetup } from './http';
-import { LegacyCompatModule } from './legacy';
+import { ConfigService, Env, Config, ConfigPath } from './config';
+import { ElasticsearchService } from './elasticsearch';
+import { HttpService, HttpServiceSetup, Router } from './http';
+import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
-import { PluginsModule } from './plugins';
+import { PluginsService, config as pluginsConfig } from './plugins';
+
+import { config as elasticsearchConfig } from './elasticsearch';
+import { config as httpConfig } from './http';
+import { config as loggingConfig } from './logging';
+import { config as devConfig } from './dev';
+import { mapToObject } from '../utils/';
 
 export class Server {
-  private readonly elasticsearch: ElasticsearchModule;
-  private readonly http: HttpModule;
-  private readonly plugins: PluginsModule;
-  private readonly legacy: LegacyCompatModule;
+  public readonly configService: ConfigService;
+  private readonly elasticsearch: ElasticsearchService;
+  private readonly http: HttpService;
+  private readonly plugins: PluginsService;
+  private readonly legacy: LegacyService;
   private readonly log: Logger;
 
-  constructor(configService: ConfigService, logger: LoggerFactory, private readonly env: Env) {
-    this.log = logger.get('server');
+  constructor(
+    readonly config$: Observable<Config>,
+    readonly env: Env,
+    private readonly logger: LoggerFactory
+  ) {
+    this.log = this.logger.get('server');
+    this.configService = new ConfigService(config$, env, logger);
 
-    this.http = new HttpModule(configService.atPath('server', HttpConfig), logger);
-
-    const core = { env, configService, logger };
-    this.plugins = new PluginsModule(core);
-    this.legacy = new LegacyCompatModule(core);
-    this.elasticsearch = new ElasticsearchModule(core);
+    const core = { configService: this.configService, env, logger };
+    this.http = new HttpService(core);
+    this.plugins = new PluginsService(core);
+    this.legacy = new LegacyService(core);
+    this.elasticsearch = new ElasticsearchService(core);
   }
 
   public async setup() {
     this.log.debug('setting up server');
 
-    // We shouldn't set up http service in two cases:
-    // 1. If `server.autoListen` is explicitly set to `false`.
-    // 2. When the process is run as dev cluster master in which case cluster manager
-    // will fork a dedicated process where http service will be set up instead.
-    let httpSetup: HttpServiceSetup | undefined;
-    const httpConfig = await this.http.config$.pipe(first()).toPromise();
-    if (!this.env.isDevClusterMaster && httpConfig.autoListen) {
-      httpSetup = await this.http.service.setup();
-    }
+    const httpSetup = await this.http.setup();
+    this.registerDefaultRoute(httpSetup);
 
-    const elasticsearchServiceSetup = await this.elasticsearch.service.setup();
+    const elasticsearchServiceSetup = await this.elasticsearch.setup();
 
-    const pluginsSetup = await this.plugins.service.setup({
+    const pluginsSetup = await this.plugins.setup({
       elasticsearch: elasticsearchServiceSetup,
+      http: httpSetup,
     });
 
-    await this.legacy.service.setup({
+    const coreSetup = {
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
       plugins: pluginsSetup,
+    };
+
+    await this.legacy.setup({
+      core: coreSetup,
+      plugins: mapToObject(pluginsSetup.contracts),
     });
+
+    return coreSetup;
+  }
+
+  public async start() {
+    const httpStart = await this.http.start();
+    const pluginsStart = await this.plugins.start({});
+
+    const coreStart = {
+      http: httpStart,
+      plugins: pluginsStart,
+    };
+
+    await this.legacy.start({
+      core: coreStart,
+      plugins: mapToObject(pluginsStart.contracts),
+    });
+
+    return coreStart;
   }
 
   public async stop() {
     this.log.debug('stopping server');
 
-    await this.legacy.service.stop();
-    await this.plugins.service.stop();
-    await this.elasticsearch.service.stop();
-    await this.http.service.stop();
+    await this.legacy.stop();
+    await this.plugins.stop();
+    await this.elasticsearch.stop();
+    await this.http.stop();
+  }
+
+  private registerDefaultRoute(httpSetup: HttpServiceSetup) {
+    const router = new Router('/core');
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
+    httpSetup.registerRouter(router);
+  }
+
+  public async setupConfigSchemas() {
+    const schemas: Array<[ConfigPath, Type<unknown>]> = [
+      [elasticsearchConfig.path, elasticsearchConfig.schema],
+      [loggingConfig.path, loggingConfig.schema],
+      [httpConfig.path, httpConfig.schema],
+      [pluginsConfig.path, pluginsConfig.schema],
+      [devConfig.path, devConfig.schema],
+    ];
+
+    for (const [path, schema] of schemas) {
+      await this.configService.setSchema(path, schema);
+    }
   }
 }

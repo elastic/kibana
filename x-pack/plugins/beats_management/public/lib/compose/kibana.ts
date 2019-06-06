@@ -12,8 +12,8 @@ import chrome from 'ui/chrome';
 // @ts-ignore not typed yet
 import { management } from 'ui/management';
 import routes from 'ui/routes';
-import { translateConfigSchema } from 'x-pack/plugins/beats_management/common/config_schemas_translations_map';
 import { configBlockSchemas } from '../../../common/config_schemas';
+import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { INDEX_NAMES } from '../../../common/constants/index_names';
 import { RestBeatsAdapter } from '../adapters/beats/rest_beats_adapter';
 import { RestConfigBlocksAdapter } from '../adapters/configuration_blocks/rest_config_blocks_adapter';

@@ -104,9 +104,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async waitForListLoading() {
-      await retry.waitFor('dashboard add panel loading to complete', async () => {
-        return !(await testSubjects.exists('savedObjectFinderLoadingIndicator'));
-      });
+      await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
     }
 
     async closeAddPanel() {
@@ -148,15 +146,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async addSavedSearch(searchName) {
-      log.debug(`addSavedSearch(${searchName})`);
-
-      await this.ensureAddPanelIsShowing();
-      await this.toggleFilter('search');
-      await this.filterEmbeddableNames(searchName);
-
-      await testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
-      await testSubjects.exists('addObjectToDashboardSuccess');
-      await this.closeAddPanel();
+      return this.addEmbeddable(searchName, 'search');
     }
 
     async addSavedSearches(searches) {
@@ -176,14 +166,18 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async addVisualization(vizName) {
-      log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
+      return this.addEmbeddable(vizName, 'visualization');
+    }
+
+    async addEmbeddable(embeddableName, embeddableType) {
+      log.debug(`DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`);
       await this.ensureAddPanelIsShowing();
-      await this.toggleFilter('visualization');
-      await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
-      await testSubjects.click(`savedObjectTitle${vizName.split(' ').join('-')}`);
+      await this.toggleFilter(embeddableType);
+      await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
+      await testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
       await testSubjects.exists('addObjectToDashboardSuccess');
       await this.closeAddPanel();
-      return vizName;
+      return embeddableName;
     }
 
     async filterEmbeddableNames(name) {

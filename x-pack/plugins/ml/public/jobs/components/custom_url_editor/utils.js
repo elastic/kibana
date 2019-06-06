@@ -175,20 +175,10 @@ function buildDashboardUrlFromSettings(settings) {
         // which includes the ID of the index holding the field used in the filter.
 
         // So for simplicity, put entities in the query, replacing any query which is there already.
-        // e.g. query:(language:lucene,query:'region:us-east-1%20AND%20instance:i-20d061fa')
-        if (queryFieldNames !== undefined && queryFieldNames.length > 0) {
-          let queryString = '';
-          queryFieldNames.forEach((fieldName, index) => {
-            if (index > 0) {
-              queryString += ' AND ';
-            }
-            queryString += `${escapeForElasticsearchQuery(fieldName)}:"$${fieldName}$"`;
-          });
-
-          query = {
-            language: 'lucene',
-            query: queryString
-          };
+        // e.g. query:(language:kuery,query:'region:us-east-1%20and%20instance:i-20d061fa')
+        const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames);
+        if (queryFromEntityFieldNames !== undefined) {
+          query = queryFromEntityFieldNames;
         }
 
         if (query !== undefined) {
@@ -247,20 +237,10 @@ function buildDiscoverUrlFromSettings(settings) {
   // which includes the ID of the index holding the field used in the filter.
 
   // So for simplicity, put entities in the query, replacing any query which is there already.
-  // e.g. query:(language:lucene,query:'region:us-east-1%20AND%20instance:i-20d061fa')
-  if (queryFieldNames !== undefined && queryFieldNames.length > 0) {
-    let queryString = '';
-    queryFieldNames.forEach((fieldName, i) => {
-      if (i > 0) {
-        queryString += ' AND ';
-      }
-      queryString += `${escapeForElasticsearchQuery(fieldName)}:"$${fieldName}$"`;
-    });
-
-    appState.query = {
-      language: 'lucene',
-      query: queryString
-    };
+  // e.g. query:(language:kuery,query:'region:us-east-1%20and%20instance:i-20d061fa')
+  const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames);
+  if (queryFromEntityFieldNames !== undefined) {
+    appState.query = queryFromEntityFieldNames;
   }
 
   const _a = rison.encode(appState);
@@ -279,6 +259,27 @@ function buildDiscoverUrlFromSettings(settings) {
 
   return urlToAdd;
 
+}
+
+// Builds the query parameter for use in the _a AppState part of a Kibana Dashboard or Discover URL.
+function buildAppStateQueryParam(queryFieldNames) {
+  let queryParam;
+  if (queryFieldNames !== undefined && queryFieldNames.length > 0) {
+    let queryString = '';
+    queryFieldNames.forEach((fieldName, i) => {
+      if (i > 0) {
+        queryString += ' and ';
+      }
+      queryString += `${escapeForElasticsearchQuery(fieldName)}:"$${fieldName}$"`;
+    });
+
+    queryParam = {
+      language: 'kuery',
+      query: queryString
+    };
+  }
+
+  return queryParam;
 }
 
 // Builds the full URL for testing out a custom URL configuration, which

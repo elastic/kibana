@@ -13,6 +13,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 
 import 'plugins/ml/components/annotations/annotation_flyout/annotation_flyout_directive';
@@ -30,6 +31,7 @@ import {
   isTimeSeriesViewJob,
   isTimeSeriesViewDetector,
   isModelPlotEnabled,
+  isSourceDataChartableForDetector,
   mlFunctionToESAggregation } from 'plugins/ml/../common/util/job_utils';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { getSingleMetricViewerBreadcrumbs } from './breadcrumbs';
@@ -48,7 +50,6 @@ import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
-import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
 import {
@@ -58,6 +59,7 @@ import {
 import { annotationsRefresh$ } from '../services/annotations_service';
 import { interval$ } from '../components/controls/select_interval/select_interval';
 import { severity$ } from '../components/controls/select_severity/select_severity';
+import { setGlobalState, getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 
 
 import chrome from 'ui/chrome';
@@ -72,6 +74,7 @@ uiRoutes
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
       mlNodeCount: getMlNodeCount,
+      jobs: mlJobService.loadJobsWrapper
     }
   });
 
@@ -85,10 +88,11 @@ module.controller('MlTimeSeriesExplorerController', function (
   Private,
   AppState,
   config,
-  i18n) {
+  globalState) {
 
   $injector.get('mlSelectIntervalService');
   $injector.get('mlSelectSeverityService');
+  const mlJobSelectService = $injector.get('mlJobSelectService');
 
   $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
@@ -97,7 +101,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   const CHARTS_POINT_TARGET = 500;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const TimeBuckets = Private(IntervalHelperProvider);
-  const mlJobSelectService = Private(JobSelectServiceProvider);
 
   $scope.jobPickerSelections = [];
   $scope.selectedJob;
@@ -105,6 +108,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.loading = true;
   $scope.loadCounter = 0;
   $scope.hasResults = false;
+  $scope.dataNotChartable = false;          // e.g. model plot with terms for a varp detector
   $scope.anomalyRecords = [];
 
   $scope.modelPlotEnabled = false;
@@ -116,6 +120,13 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.showForecastCheckbox = false;
 
   $scope.focusAnnotationData = [];
+
+  // Used in the template to indicate the chart is being plotted across
+  // all partition field values, where the cardinality of the field cannot be
+  // obtained as it is not aggregatable e.g. 'all distinct kpi_indicator values'
+  $scope.allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionValuesLabel', {
+    defaultMessage: 'all',
+  });
 
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
   const tzConfig = config.get('dateFormat:tz');
@@ -134,91 +145,92 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     $scope.jobs = [];
 
-    // Load the job info needed by the visualization, then do the first load.
-    mlJobService.loadJobs()
-      .then((resp) => {
+    // Get the job info needed by the visualization, then do the first load.
+    if (mlJobService.jobs.length > 0) {
+      $scope.jobs = createTimeSeriesJobData(mlJobService.jobs);
+      const timeSeriesJobIds = $scope.jobs.map(j => j.id);
 
-        if (resp.jobs.length > 0) {
-          $scope.jobs = createTimeSeriesJobData(resp.jobs);
-          const timeSeriesJobIds = $scope.jobs.map(j => j.id);
+      // Select any jobs set in the global state (i.e. passed in the URL).
+      let { jobIds: selectedJobIds } = getSelectedJobIds(globalState);
 
-          // Select any jobs set in the global state (i.e. passed in the URL).
-          let selectedJobIds = mlJobSelectService.getSelectedJobIds(true);
-
-          // Check if any of the jobs set in the URL are not time series jobs
-          // (e.g. if switching to this view straight from the Anomaly Explorer).
-          const invalidIds = _.difference(selectedJobIds, timeSeriesJobIds);
-          selectedJobIds = _.without(selectedJobIds, ...invalidIds);
-          if (invalidIds.length > 0) {
-            let warningText = i18n('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
-              defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
-              values: {
-                invalidIdsCount: invalidIds.length,
-                invalidIds
-              }
-            });
-            if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
-              warningText += i18n('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
-                defaultMessage: ', auto selecting first job'
-              });
-            }
-            toastNotifications.addWarning(warningText);
+      // Check if any of the jobs set in the URL are not time series jobs
+      // (e.g. if switching to this view straight from the Anomaly Explorer).
+      const invalidIds = _.difference(selectedJobIds, timeSeriesJobIds);
+      selectedJobIds = _.without(selectedJobIds, ...invalidIds);
+      if (invalidIds.length > 0) {
+        let warningText = i18n.translate('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
+          defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
+          values: {
+            invalidIdsCount: invalidIds.length,
+            invalidIds
           }
+        });
+        if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
+          warningText += i18n.translate('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
+            defaultMessage: ', auto selecting first job'
+          });
+        }
+        toastNotifications.addWarning(warningText);
+      }
 
-          if (selectedJobIds.length > 1 || mlJobSelectService.groupIds.length) {
-          // if more than one job or a group has been loaded from the URL
-            if (selectedJobIds.length > 1) {
-            // if more than one job, select the first job from the selection.
-              toastNotifications.addWarning(
-                i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
-                  defaultMessage: 'You can only view one job at a time in this dashboard'
-                })
-              );
-              mlJobSelectService.setJobIds([selectedJobIds[0]]);
-            } else {
-            // if a group has been loaded
-              if (selectedJobIds.length > 0) {
-              // if the group contains valid jobs, select the first
-                toastNotifications.addWarning(
-                  i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
-                    defaultMessage: 'You can only view one job at a time in this dashboard'
-                  })
-                );
-                mlJobSelectService.setJobIds([selectedJobIds[0]]);
-              } else if ($scope.jobs.length > 0) {
-              // if there are no valid jobs in the group but there are valid jobs
-              // in the list of all jobs, select the first
-                mlJobSelectService.setJobIds([$scope.jobs[0].id]);
-              } else {
-              // if there are no valid jobs left.
-                $scope.loading = false;
-              }
-            }
-          } else if (invalidIds.length > 0 && selectedJobIds.length > 0) {
-          // if some ids have been filtered out because they were invalid.
-          // refresh the URL with the first valid id
-            mlJobSelectService.setJobIds([selectedJobIds[0]]);
-          } else if (selectedJobIds.length > 0) {
-          // normal behavior. a job ID has been loaded from the URL
-            loadForJobId(selectedJobIds[0]);
-          } else {
-            if (selectedJobIds.length === 0 && $scope.jobs.length > 0) {
-            // no jobs were loaded from the URL, so add the first job
-            // from the full jobs list.
-              mlJobSelectService.setJobIds([$scope.jobs[0].id]);
-            } else {
-            // Jobs exist, but no time series jobs.
-              $scope.loading = false;
-            }
-          }
+      if (selectedJobIds.length > 1) {
+      // if more than one job or a group has been loaded from the URL
+        if (selectedJobIds.length > 1) {
+        // if more than one job, select the first job from the selection.
+          toastNotifications.addWarning(
+            i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+              defaultMessage: 'You can only view one job at a time in this dashboard'
+            })
+          );
+
+          setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
+          mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
         } else {
+        // if a group has been loaded
+          if (selectedJobIds.length > 0) {
+          // if the group contains valid jobs, select the first
+            toastNotifications.addWarning(
+              i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+                defaultMessage: 'You can only view one job at a time in this dashboard'
+              })
+            );
+
+            setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
+            mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+          } else if ($scope.jobs.length > 0) {
+          // if there are no valid jobs in the group but there are valid jobs
+          // in the list of all jobs, select the first
+            setGlobalState(globalState, { selectedIds: [$scope.jobs[0].id] });
+            mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
+          } else {
+          // if there are no valid jobs left.
+            $scope.loading = false;
+          }
+        }
+      } else if (invalidIds.length > 0 && selectedJobIds.length > 0) {
+      // if some ids have been filtered out because they were invalid.
+      // refresh the URL with the first valid id
+        setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
+        mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+      } else if (selectedJobIds.length > 0) {
+      // normal behavior. a job ID has been loaded from the URL
+        loadForJobId(selectedJobIds[0]);
+      } else {
+        if (selectedJobIds.length === 0 && $scope.jobs.length > 0) {
+        // no jobs were loaded from the URL, so add the first job
+        // from the full jobs list.
+          setGlobalState(globalState, { selectedIds: [$scope.jobs[0].id] });
+          mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
+        } else {
+        // Jobs exist, but no time series jobs.
           $scope.loading = false;
         }
+      }
+    } else {
+      $scope.loading = false;
+    }
 
-        $scope.$applyAsync();
-      }).catch((resp) => {
-        console.log('Time series explorer - error getting job info from elasticsearch:', resp);
-      });
+    $scope.$applyAsync();
   };
 
   $scope.refresh = function () {
@@ -229,6 +241,7 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     $scope.loading = true;
     $scope.hasResults = false;
+    $scope.dataNotChartable = false;
     delete $scope.chartDetails;
     delete $scope.contextChartData;
     delete $scope.focusChartData;
@@ -282,12 +295,25 @@ module.controller('MlTimeSeriesExplorerController', function (
     const detectorIndex = +$scope.detectorId;
     $scope.modelPlotEnabled = isModelPlotEnabled($scope.selectedJob, detectorIndex, $scope.entities);
 
+
     // Only filter on the entity if the field has a value.
     const nonBlankEntities = _.filter($scope.entities, (entity) => { return entity.fieldValue.length > 0; });
     $scope.criteriaFields = [{
       'fieldName': 'detector_index',
       'fieldValue': detectorIndex }
     ].concat(nonBlankEntities);
+
+    if ($scope.modelPlotEnabled === false &&
+      isSourceDataChartableForDetector($scope.selectedJob, detectorIndex) === false &&
+      nonBlankEntities.length > 0) {
+      // For detectors where model plot has been enabled with a terms filter and the
+      // selected entity(s) are not in the terms list, indicate that data cannot be viewed.
+      $scope.hasResults = false;
+      $scope.loading = false;
+      $scope.dataNotChartable = true;
+      $scope.$applyAsync();
+      return;
+    }
 
     // Calculate the aggregation interval for the context chart.
     // Context chart swimlane will display bucket anomaly score at the same interval.
@@ -404,7 +430,8 @@ module.controller('MlTimeSeriesExplorerController', function (
           refreshFocusData.focusChartData,
           refreshFocusData.anomalyRecords,
           $scope.timeFieldName,
-          $scope.focusAggregationInterval);
+          $scope.focusAggregationInterval,
+          $scope.modelPlotEnabled);
 
         refreshFocusData.focusChartData = processScheduledEventsForChart(
           refreshFocusData.focusChartData,
@@ -671,26 +698,26 @@ module.controller('MlTimeSeriesExplorerController', function (
   const intervalSub = interval$.subscribe(tableControlsListener);
   const severitySub = severity$.subscribe(tableControlsListener);
   const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
-
-  $scope.$on('$destroy', () => {
-    refreshWatcher.cancel();
-    intervalSub.unsubscribe();
-    severitySub.unsubscribe();
-    annotationsRefreshSub.unsubscribe();
-  });
-
   // Listen for changes to job selection.
-  mlJobSelectService.listenJobSelectionChange($scope, (event, selections) => {
+  const jobSelectServiceSub = mlJobSelectService.subscribe(({ selection }) => {
     // Clear the detectorIndex, entities and forecast info.
-    if (selections.length > 0) {
+    if (selection.length > 0 && $scope.appState !== undefined) {
       delete $scope.appState.mlTimeSeriesExplorer.detectorIndex;
       delete $scope.appState.mlTimeSeriesExplorer.entities;
       delete $scope.appState.mlTimeSeriesExplorer.forecastId;
       $scope.appState.save();
 
       $scope.showForecastCheckbox = false;
-      loadForJobId(selections[0]);
+      loadForJobId(selection[0]);
     }
+  });
+
+  $scope.$on('$destroy', () => {
+    refreshWatcher.cancel();
+    intervalSub.unsubscribe();
+    severitySub.unsubscribe();
+    annotationsRefreshSub.unsubscribe();
+    jobSelectServiceSub.unsubscribe();
   });
 
   $scope.$on('contextChartSelected', function (event, selection) {
@@ -755,7 +782,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     const appStateDtrIdx = $scope.appState.mlTimeSeriesExplorer.detectorIndex;
     let detectorIndex = appStateDtrIdx !== undefined ? appStateDtrIdx : +(viewableDetectors[0].index);
     if (_.find(viewableDetectors, { 'index': '' + detectorIndex }) === undefined) {
-      const warningText = i18n('xpack.ml.timeSeriesExplorer.requestedDetectorIndexNotValidWarningMessage', {
+      const warningText = i18n.translate('xpack.ml.timeSeriesExplorer.requestedDetectorIndexNotValidWarningMessage', {
         defaultMessage: 'Requested detector index {detectorIndex} is not valid for job {jobId}',
         values: {
           detectorIndex,

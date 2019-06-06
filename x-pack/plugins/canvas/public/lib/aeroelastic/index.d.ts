@@ -4,25 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 // linear algebra
 type f64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
 type f = f64; // shorthand
 
-export type vector2d = [f, f, f] & ReadonlyArray<f> & { __nominal: 'vector2d' };
-export type vector3d = [f, f, f, f] & ReadonlyArray<f> & { __nominal: 'vector3d' };
+export type Vector2d = Readonly<[f, f, f]>;
+export type Vector3d = Readonly<[f, f, f, f]>;
 
-export type transformMatrix2d = [f, f, f, f, f, f, f, f, f] &
-  ReadonlyArray<f> & { __nominal: 'transformMatrix2d' };
-export type transformMatrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f] &
-  ReadonlyArray<f> & { __nominal: 'transformMatrix3d' };
+export type Matrix2d = [f, f, f, f, f, f, f, f, f];
+export type TransformMatrix2d = Readonly<Matrix2d>;
+export type Matrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f];
+export type TransformMatrix3d = Readonly<Matrix3d>;
 
 // plain, JSON-bijective value
 export type Json = JsonPrimitive | JsonArray | JsonMap;
 type JsonPrimitive = null | boolean | number | string;
 interface JsonArray extends Array<Json> {}
-interface JsonMap extends IMap<Json> {}
-interface IMap<T> {
-  [key: string]: T;
+interface JsonMap {
+  [key: string]: Json;
 }
 
 // state object
@@ -36,16 +37,14 @@ interface WithActionId {
 // reselect-based data flow
 export type PlainFun = (...args: Json[]) => Json;
 export type Selector = (...fns: Resolve[]) => Resolve;
-type Resolve = ((obj: State) => Json);
+export type Resolve = ((obj: State) => Json);
 
-//
-export interface Meta {
-  silent: boolean;
-}
 export type TypeName = string;
 export type Payload = JsonMap;
 export type UpdaterFunction = (arg: State) => State;
-export type ChangeCallbackFunction = (
-  { type, state }: { type: TypeName; state: State },
-  meta: Meta
-) => void;
+
+export interface Store {
+  getCurrentState: () => State;
+  setCurrentState: (state: State) => void;
+  commit: (type: TypeName, payload: Payload) => void;
+}

@@ -2,28 +2,29 @@
 
 exports[`Home component should render 1`] = `
 <div>
-  <EuiFlexGroup
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem>
-      <EuiTitle
-        size="l"
-        textTransform="none"
-      >
-        <h1>
-          APM
-        </h1>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+  <ApmHeader>
+    <EuiFlexGroup
+      alignItems="center"
     >
-      <SetupInstructionsLink />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer />
-  <FilterBar />
-  <withRouter(HistoryTabsWithoutRouter)
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiTitle
+          size="l"
+        >
+          <h1>
+            APM
+          </h1>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <SetupInstructionsLink />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </ApmHeader>
+  <HistoryTabs
     tabs={
       Array [
         Object {

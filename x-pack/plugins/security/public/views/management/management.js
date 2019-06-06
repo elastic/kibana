@@ -6,9 +6,9 @@
 
 import 'plugins/security/views/management/change_password_form/change_password_form';
 import 'plugins/security/views/management/password_form/password_form';
-import 'plugins/security/views/management/users';
-import 'plugins/security/views/management/roles';
-import 'plugins/security/views/management/edit_user';
+import 'plugins/security/views/management/users_grid/users';
+import 'plugins/security/views/management/roles_grid/roles';
+import 'plugins/security/views/management/edit_user/edit_user';
 import 'plugins/security/views/management/edit_role/index';
 import routes from 'ui/routes';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';

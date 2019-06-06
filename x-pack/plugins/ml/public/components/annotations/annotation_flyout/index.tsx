@@ -22,6 +22,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { CommonProps } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntlProps } from 'react-intl';
+import { toastNotifications } from 'ui/notify';
+import { ANNOTATION_MAX_LENGTH_CHARS } from '../../../../common/constants/annotations';
 import {
   annotation$,
   annotationsRefresh$,
@@ -30,11 +35,6 @@ import {
 import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
-
-import { CommonProps } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { InjectedIntlProps } from 'react-intl';
-import { toastNotifications } from 'ui/notify';
 
 import { ml } from '../../../services/ml_api_service';
 
@@ -113,6 +113,45 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
     this.setState({ isDeleteModalVisible: false });
   };
 
+  public validateAnnotationText = () => {
+    // Validates the entered text, returning an array of error messages
+    // for display in the form. An empty array is returned if the text is valid.
+    const { annotation, intl } = this.props;
+    const errors: string[] = [];
+    if (annotation === null) {
+      return errors;
+    }
+
+    if (annotation.annotation.trim().length === 0) {
+      errors.push(
+        intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.annotationFlyout.noAnnotationTextError',
+          defaultMessage: 'Enter annotation text',
+        })
+      );
+    }
+
+    const textLength = annotation.annotation.length;
+    if (textLength > ANNOTATION_MAX_LENGTH_CHARS) {
+      const charsOver = textLength - ANNOTATION_MAX_LENGTH_CHARS;
+      errors.push(
+        intl.formatMessage(
+          {
+            id: 'xpack.ml.timeSeriesExplorer.annotationFlyout.maxLengthError',
+            defaultMessage:
+              '{charsOver, number} {charsOver, plural, one {character} other {characters}} above maximum length of {maxChars}',
+          },
+          {
+            maxChars: ANNOTATION_MAX_LENGTH_CHARS,
+            charsOver,
+          }
+        )
+      );
+    }
+
+    return errors;
+  };
+
   public saveOrUpdateAnnotation = () => {
     const { annotation, intl } = this.props;
 
@@ -180,7 +219,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
   };
 
   public render(): ReactNode {
-    const { annotation } = this.props;
+    const { annotation, intl } = this.props;
     const { isDeleteModalVisible } = this.state;
 
     if (annotation === null) {
@@ -188,6 +227,26 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
     }
 
     const isExistingAnnotation = typeof annotation._id !== 'undefined';
+
+    // Check the length of the text is within the max length limit,
+    // and warn if the length is approaching the limit.
+    const validationErrors = this.validateAnnotationText();
+    const isInvalid = validationErrors.length > 0;
+    const lengthRatioToShowWarning = 0.95;
+    let helpText = null;
+    if (
+      isInvalid === false &&
+      annotation.annotation.length > ANNOTATION_MAX_LENGTH_CHARS * lengthRatioToShowWarning
+    ) {
+      helpText = intl.formatMessage(
+        {
+          id: 'xpack.ml.timeSeriesExplorer.annotationFlyout.approachingMaxLengthWarning',
+          defaultMessage:
+            '{charsRemaining, number} {charsRemaining, plural, one {character} other {characters}} remaining',
+        },
+        { charsRemaining: ANNOTATION_MAX_LENGTH_CHARS - annotation.annotation.length }
+      );
+    }
 
     return (
       <Fragment>
@@ -220,10 +279,13 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
                 />
               }
               fullWidth
+              helpText={helpText}
+              isInvalid={isInvalid}
+              error={validationErrors}
             >
               <EuiTextArea
                 fullWidth
-                isInvalid={annotation.annotation === ''}
+                isInvalid={isInvalid}
                 onChange={this.annotationTextChangeHandler}
                 placeholder="..."
                 value={annotation.annotation}
@@ -253,7 +315,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
-                  isDisabled={annotation.annotation === ''}
+                  isDisabled={isInvalid === true}
                   onClick={this.saveOrUpdateAnnotation}
                 >
                   {isExistingAnnotation ? (

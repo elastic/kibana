@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment-timezone';
 import { formatValue } from '../format_value';
 

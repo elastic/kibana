@@ -331,13 +331,18 @@ export class MapListing extends React.Component {
       totalItemCount: this.state.items.length,
       pageSizeOptions: [10, 20, 50],
     };
-    const selection = {
-      onSelectionChange: (selection) => {
-        this.setState({
-          selectedIds: selection.map(item => { return item.id; })
-        });
-      }
-    };
+
+    let selection = false;
+    if (!this.props.readOnly) {
+      selection = {
+        onSelectionChange: (selection) => {
+          this.setState({
+            selectedIds: selection.map(item => { return item.id; })
+          });
+        }
+      };
+    }
+
     const sorting = {};
     if (this.state.sortField) {
       sorting.sort = {
@@ -364,7 +369,7 @@ export class MapListing extends React.Component {
 
   renderListing() {
     let createButton;
-    if (!this.props.hideWriteControls) {
+    if (!this.props.readOnly) {
       createButton = (
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -450,6 +455,7 @@ export class MapListing extends React.Component {
 }
 
 MapListing.propTypes = {
+  readOnly: PropTypes.bool.isRequired,
   find: PropTypes.func.isRequired,
   delete: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,

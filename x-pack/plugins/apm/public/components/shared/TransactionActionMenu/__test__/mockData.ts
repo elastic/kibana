@@ -5,9 +5,8 @@
  */
 
 import { Location } from 'history';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 
-export const transaction: Transaction = {
+const bareTransaction = {
   '@metadata': 'whatever',
   observer: 'whatever',
   agent: {
@@ -18,13 +17,7 @@ export const transaction: Transaction = {
     name: 'transaction',
     event: 'transaction'
   },
-  trace: {
-    id: '8b60bd32ecc6e1506735a8b6cfcf175c'
-  },
   '@timestamp': '2018-12-18T00:14:30.952Z',
-  host: {
-    hostname: '227453131a17'
-  },
   service: {
     framework: {
       name: 'gin',
@@ -52,6 +45,9 @@ export const transaction: Transaction = {
     ],
     ppid: 0
   },
+  trace: {
+    id: '8b60bd32ecc6e1506735a8b6cfcf175c'
+  },
   transaction: {
     result: 'HTTP 2xx',
     duration: {
@@ -66,17 +62,57 @@ export const transaction: Transaction = {
     type: 'request',
     sampled: true
   },
+  timestamp: {
+    us: 1545092070952472
+  }
+};
+
+export const transactionWithMinimalData = bareTransaction;
+
+export const transactionWithKubernetesData = {
+  ...bareTransaction,
   kubernetes: {
     pod: {
       uid: 'pod123456abcdef'
     }
-  },
+  }
+};
+
+export const transactionWithContainerData = {
+  ...bareTransaction,
   container: {
     id: 'container123456abcdef'
-  },
-  timestamp: {
-    us: 1545092070952472
   }
+};
+
+export const transactionWithHostData = {
+  ...bareTransaction,
+  host: {
+    hostname: '227453131a17'
+  }
+};
+
+export const transactionWithUrlWithoutDomain = {
+  ...bareTransaction,
+  url: {
+    full: 'http://opbeans-go'
+  }
+};
+
+export const transactionWithUrlAndDomain = {
+  ...bareTransaction,
+  url: {
+    full: 'http://example.com',
+    domain: 'example.com'
+  }
+};
+
+export const transactionWithAllData = {
+  ...bareTransaction,
+  ...transactionWithKubernetesData,
+  ...transactionWithHostData,
+  ...transactionWithUrlWithoutDomain,
+  ...transactionWithUrlAndDomain
 };
 
 export const location: Location = {

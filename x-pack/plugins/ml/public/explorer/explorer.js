@@ -12,7 +12,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import DragSelect from 'dragselect';
+import DragSelect from 'dragselect/dist/ds.min.js';
 import { map } from 'rxjs/operators';
 
 import {
@@ -48,7 +48,9 @@ import { injectObservablesAsProps } from '../util/observable_utils';
 import {
   getKqlQueryValues,
   removeFilterFromQueryString,
-  getQueryPattern
+  getQueryPattern,
+  escapeParens,
+  escapeDoubleQuotes
 } from '../components/kql_filter_bar/utils';
 
 import {
@@ -104,6 +106,7 @@ function getExplorerDefaultState() {
     influencersFilterQuery: undefined,
     hasResults: false,
     influencers: {},
+    isAndOperator: false,
     loading: true,
     noInfluencersConfigured: true,
     noJobsFound: true,
@@ -141,7 +144,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     static propTypes = {
       appStateHandler: PropTypes.func.isRequired,
       dateFormatTz: PropTypes.string.isRequired,
-      mlJobSelectService: PropTypes.object.isRequired,
       MlTimeBuckets: PropTypes.func.isRequired,
     };
 
@@ -254,50 +256,48 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         // Listen for changes to job selection.
         if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
-          this.setState(...getExplorerDefaultState(), async () => {
-            const { selectedJobs } = payload;
-            const stateUpdate = {
-              noInfluencersConfigured: (getInfluencers(selectedJobs).length === 0),
-              selectedJobs,
+          const { selectedJobs } = payload;
+          const stateUpdate = {
+            noInfluencersConfigured: (getInfluencers(selectedJobs).length === 0),
+            selectedJobs,
+          };
+
+          this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+          Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
+          // clear filter if selected jobs have no influencers
+          if (stateUpdate.noInfluencersConfigured === true) {
+            this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
+            const noFilterState = {
+              filterActive: false,
+              filteredFields: [],
+              influencersFilterQuery: undefined,
+              maskAll: false,
+              queryString: '',
+              tableQueryString: ''
             };
 
-            this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-            Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
-            // clear filter if selected jobs have no influencers
-            if (stateUpdate.noInfluencersConfigured === true) {
-              this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
-              const noFilterState = {
-                filterActive: false,
-                filteredFields: [],
-                influencersFilterQuery: undefined,
-                maskAll: false,
-                queryString: '',
-                tableQueryString: ''
-              };
+            Object.assign(stateUpdate, noFilterState);
+          } else {
+            // indexPattern will not be used if there are no influencers so set up can be skipped
+            // indexPattern is passed to KqlFilterBar which is only shown if (noInfluencersConfigured === false)
+            const indexPattern = await this.getIndexPattern(selectedJobs);
+            stateUpdate.indexPattern = indexPattern;
+          }
 
-              Object.assign(stateUpdate, noFilterState);
-            } else {
-              // indexPattern will not be used if there are no influencers so set up can be skipped
-              // indexPattern is passed to KqlFilterBar which is only shown if (noInfluencersConfigured === false)
-              const indexPattern = await this.getIndexPattern(selectedJobs);
-              stateUpdate.indexPattern = indexPattern;
-            }
+          if (selectedJobs.length > 1) {
+            this.props.appStateHandler(
+              APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+              { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL },
+            );
+            stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
+            // enforce a state update for swimlaneViewByFieldName
+            this.setState({ swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }, () => {
+              this.updateExplorer(stateUpdate, true);
+            });
+            return;
+          }
 
-            if (selectedJobs.length > 1) {
-              this.props.appStateHandler(
-                APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
-                { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL },
-              );
-              stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
-              // enforce a state update for swimlaneViewByFieldName
-              this.setState({ swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }, () => {
-                this.updateExplorer(stateUpdate, true);
-              });
-              return;
-            }
-
-            this.updateExplorer(stateUpdate, true);
-          });
+          this.updateExplorer(stateUpdate, true);
         }
 
         // RELOAD reloads full Anomaly Explorer and clears the selection.
@@ -635,6 +635,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         filterActive,
         filteredFields,
         influencersFilterQuery,
+        isAndOperator,
         noInfluencersConfigured,
         noJobsFound,
         selectedCells,
@@ -712,7 +713,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         currentSwimlaneViewByFieldName: swimlaneViewByFieldName,
         filterActive,
         filteredFields,
-        selectedJobs
+        isAndOperator,
+        selectedJobs,
+        selectedCells
       });
 
       Object.assign(stateUpdate, viewBySwimlaneOptions);
@@ -755,12 +758,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       // do a sanity check against selectedCells. It can happen that a previously
       // selected lane loaded via URL/AppState is not available anymore.
+      // If filter is active - selectedCell may not be available due to swimlane view by change to filter fieldName
+      // Ok to keep cellSelection in this case
       let clearSelection = false;
       if (
         selectedCells !== null &&
         selectedCells.type === SWIMLANE_TYPE.VIEW_BY
       ) {
-        clearSelection = !selectedCells.lanes.some((lane) => {
+        clearSelection = (filterActive === false) && !selectedCells.lanes.some((lane) => {
           return viewBySwimlaneData.points.some((point) => {
             return (
               point.laneLabel === lane &&
@@ -810,7 +815,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       this.setState(stateUpdate);
 
-      if (selectedCells !== null || influencersFilterQuery !== undefined) {
+      if (selectedCells !== null) {
         this.updateCharts(
           stateUpdate.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
         );
@@ -925,11 +930,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         this.updateExplorer({ selectedCells: swimlaneSelectedCells }, false);
       }
     }
-
-    applyFilterFromTable = (fieldName, fieldValue, action) => {
+    // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
+    // and will cause a syntax error when called with getKqlQueryValues
+    applyFilter = (fieldName, fieldValue, action) => {
       let newQueryString = '';
       const { queryString } = this.state;
       const operator = 'and ';
+      const sanitizedFieldName = escapeParens(fieldName);
+      const sanitizedFieldValue = escapeDoubleQuotes(fieldValue);
 
       if (action === FILTER_ACTION.ADD) {
         // Don't re-add if already exists in the query
@@ -937,12 +945,12 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         if (queryString.match(queryPattern) !== null) {
           return;
         }
-        newQueryString = `${queryString ? `${queryString} ${operator}` : ''}${fieldName}:"${fieldValue}"`;
+        newQueryString = `${queryString ? `${queryString} ${operator}` : ''}${sanitizedFieldName}:"${sanitizedFieldValue}"`;
       } else if (action === FILTER_ACTION.REMOVE) {
         if (this.state.filterActive === false) {
           return;
         } else {
-          newQueryString = removeFilterFromQueryString(this.state.queryString, fieldName, fieldValue);
+          newQueryString = removeFilterFromQueryString(this.state.queryString, sanitizedFieldName, sanitizedFieldValue);
         }
       }
 
@@ -961,18 +969,21 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     applyInfluencersFilterQuery = ({
       influencersFilterQuery,
+      isAndOperator,
       filteredFields,
       queryString,
       tableQueryString }) => {
-      const { swimlaneViewByFieldName, viewBySwimlaneOptions } = this.state;
+      const { selectedCells, swimlaneViewByFieldName, viewBySwimlaneOptions } = this.state;
       let selectedViewByFieldName = swimlaneViewByFieldName;
 
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
         const stateUpdate = {
           filterActive: false,
           filteredFields: [],
           influencersFilterQuery: undefined,
+          isAndOperator: false,
           maskAll: false,
           queryString: '',
           tableQueryString: '',
@@ -981,25 +992,37 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         this.updateExplorer(stateUpdate, false);
       } else {
-        // Set View by dropdown to first relevant fieldName based on incoming filter
-        for (let i = 0; i < filteredFields.length; i++) {
-          if (viewBySwimlaneOptions.includes(filteredFields[i])) {
-            selectedViewByFieldName = filteredFields[i];
-            this.props.appStateHandler(
-              APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
-              { swimlaneViewByFieldName: selectedViewByFieldName },
-            );
-            break;
+        // if it's an AND filter set view by swimlane to job ID as the others will have no results
+        if (isAndOperator && selectedCells === null) {
+          selectedViewByFieldName = VIEW_BY_JOB_LABEL;
+          this.props.appStateHandler(
+            APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+            { swimlaneViewByFieldName: selectedViewByFieldName },
+          );
+        } else {
+        // Set View by dropdown to first relevant fieldName based on incoming filter if there's no cell selection already
+        // or if selected cell is from overall swimlane as this won't include an additional influencer filter
+          for (let i = 0; i < filteredFields.length; i++) {
+            if (viewBySwimlaneOptions.includes(filteredFields[i]) &&
+                ((selectedCells === null || (selectedCells && selectedCells.type === 'overall')))) {
+              selectedViewByFieldName = filteredFields[i];
+              this.props.appStateHandler(
+                APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+                { swimlaneViewByFieldName: selectedViewByFieldName },
+              );
+              break;
+            }
           }
         }
 
         this.props.appStateHandler(APP_STATE_ACTION.SAVE_INFLUENCER_FILTER_SETTINGS,
-          { influencersFilterQuery, filterActive: true, filteredFields, queryString, tableQueryString });
+          { influencersFilterQuery, filterActive: true, filteredFields, queryString, tableQueryString, isAndOperator });
 
         this.updateExplorer({
           filterActive: true,
           filteredFields,
           influencersFilterQuery,
+          isAndOperator,
           queryString,
           tableQueryString,
           maskAll: (selectedViewByFieldName === VIEW_BY_JOB_LABEL ||
@@ -1107,7 +1130,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   defaultMessage="Top Influencers"
                 />
               </span>
-              <InfluencersList influencers={influencers} />
+              <InfluencersList
+                influencers={influencers}
+                influencerFilter={this.applyFilter}
+              />
             </div>
           )}
 
@@ -1274,7 +1300,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   <SelectInterval />
                 </EuiFormRow>
               </EuiFlexItem>
-              {anomalyChartRecords.length > 0 && (
+              {(anomalyChartRecords.length > 0 && selectedCells !== null) && (
                 <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
                   <EuiFormRow label="&#8203;">
                     <CheckboxShowCharts />
@@ -1292,7 +1318,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             <AnomaliesTable
               tableData={tableData}
               timefilter={timefilter}
-              influencerFilter={this.applyFilterFromTable}
+              influencerFilter={this.applyFilter}
             />
           </div>
         </div>

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import {
@@ -25,18 +25,18 @@ import {
 } from '../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
   const dashboardName = 'Dashboard Panel Controls Test';
 
   describe('dashboard panel controls', function viewEditModeTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
-      await kibanaServer.uiSettings.disableToastAutohide();
       await browser.refresh();
+      await PageObjects.header.awaitKibanaChrome();
 
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like
@@ -94,6 +94,7 @@ export default function ({ getService, getPageObjects }) {
 
       describe('on an expanded panel', function () {
         it('are hidden in view mode', async function () {
+          await renderable.waitForRender();
           await PageObjects.dashboard.saveDashboard(dashboardName);
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.clickExpandPanelToggle();

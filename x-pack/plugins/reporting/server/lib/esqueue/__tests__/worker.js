@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import moment from 'moment';
 import { noop, random, get, find, identity } from 'lodash';
@@ -27,6 +27,9 @@ const defaultWorkerOptions = {
 };
 
 describe('Worker class', function () {
+  // some of these tests might be a little slow, give them a little extra time
+  this.timeout(10000);
+
   let anchorMoment;
   let clock;
   let client;

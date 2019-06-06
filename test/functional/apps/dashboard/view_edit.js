@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('when the query is edited and applied', async function () {
           const originalQuery = await queryBar.getQueryString();
-          await queryBar.setQuery(`${originalQuery} and extra stuff`);
+          await queryBar.setQuery(`${originalQuery}and extra stuff`);
           await queryBar.submitQuery();
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
@@ -126,6 +126,8 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel');
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
+          // for this sleep see https://github.com/elastic/kibana/issues/22299
+          await PageObjects.common.sleep(500);
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
@@ -209,7 +211,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
 
         const originalQuery = await queryBar.getQueryString();
-        await queryBar.setQuery(`${originalQuery} extra stuff`);
+        await queryBar.setQuery(`${originalQuery}extra stuff`);
 
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 

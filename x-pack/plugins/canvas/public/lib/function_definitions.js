@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registries } from 'plugins/interpreter/registries';
 import uniqBy from 'lodash.uniqby';
+import { registries } from 'plugins/interpreter/registries';
 import { getServerFunctions } from '../state/selectors/app';
 
 export async function getFunctionDefinitions(state) {

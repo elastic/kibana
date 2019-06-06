@@ -9,17 +9,14 @@ import {
   PROCESSOR_EVENT,
   TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../typings/common';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 import { getTransactionGroups } from '../transaction_groups';
-import { ITransactionGroup } from '../transaction_groups/transform';
 
-export type TraceListAPIResponse = ITransactionGroup[];
-
-export async function getTopTraces(
-  setup: Setup
-): Promise<TraceListAPIResponse> {
-  const { start, end } = setup;
+export type TraceListAPIResponse = PromiseReturnType<typeof getTopTraces>;
+export async function getTopTraces(setup: Setup) {
+  const { start, end, uiFiltersES } = setup;
 
   const bodyQuery = {
     bool: {
@@ -27,7 +24,8 @@ export async function getTopTraces(
       must_not: { exists: { field: PARENT_ID } },
       filter: [
         { range: rangeFilter(start, end) },
-        { term: { [PROCESSOR_EVENT]: 'transaction' } }
+        { term: { [PROCESSOR_EVENT]: 'transaction' } },
+        ...uiFiltersES
       ],
       should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
     }

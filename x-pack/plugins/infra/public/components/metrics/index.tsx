@@ -8,9 +8,8 @@ import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
-import { InfraMetricData } from '../../graphql/types';
+import { InfraMetricData, InfraTimerangeInput } from '../../graphql/types';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
-import { metricTimeActions } from '../../store';
 import { NoData } from '../empty_states';
 import { InfraLoadingPanel } from '../loading';
 import { Section } from './section';
@@ -22,7 +21,7 @@ interface Props {
   refetch: () => void;
   nodeId: string;
   label: string;
-  onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
+  onChangeRangeTime?: (time: InfraTimerangeInput) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
   intl: InjectedIntl;

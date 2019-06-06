@@ -11,13 +11,13 @@ import { getId } from '../../lib/get_id';
 import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
+import { getSelectedPageIndex } from '../selectors/workpad';
+import { isGroupId } from '../../components/workpad_page/integration_utils';
 
-function setPageIndex(workpadState, index) {
-  if (index < 0 || !workpadState.pages[index]) {
-    return workpadState;
-  }
-  return set(workpadState, 'page', index);
-}
+const setPageIndex = (workpadState, index) =>
+  index < 0 || !workpadState.pages[index] || getSelectedPageIndex(workpadState) === index
+    ? workpadState
+    : set(workpadState, 'page', index);
 
 function getPageIndexById(workpadState, id) {
   return workpadState.pages.findIndex(page => page.id === id);
@@ -37,8 +37,8 @@ function clonePage(page) {
   return {
     ...page,
     id: getId('page'),
-    groups: newNodes.filter(n => n.position.type === 'group'),
-    elements: newNodes.filter(n => n.position.type !== 'group'),
+    groups: newNodes.filter(n => isGroupId(n.id)),
+    elements: newNodes.filter(n => !isGroupId(n.id)),
   };
 }
 

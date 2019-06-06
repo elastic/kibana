@@ -12,6 +12,12 @@ const isEmpty = value => {
   return !value || !value.trim().length;
 };
 
+const hasSpaces = (value) => (
+  typeof value === 'string'
+    ? value.includes(' ')
+    : false
+);
+
 const beginsWithPeriod = value => {
   return value[0] === '.';
 };
@@ -57,6 +63,15 @@ export const indexNameValidator = (value) => {
     )];
   }
 
+  if(hasSpaces(value)) {
+    return [(
+      <FormattedMessage
+        id="xpack.crossClusterReplication.followerIndex.indexNameValidation.noEmptySpace"
+        defaultMessage="Spaces are not allowed in the name."
+      />
+    )];
+  }
+
   return undefined;
 };
 
@@ -78,6 +93,15 @@ export const leaderIndexValidator = (value) => {
         id="xpack.crossClusterReplication.followerIndexForm.errors.leaderIndexIllegalCharactersMessage"
         defaultMessage="Remove the characters {characterList} from your leader index."
         values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
+      />
+    )];
+  }
+
+  if(hasSpaces(value)) {
+    return [(
+      <FormattedMessage
+        id="xpack.crossClusterReplication.followerIndex.leaderIndexValidation.noEmptySpace"
+        defaultMessage="Spaces are not allowed in the leader index."
       />
     )];
   }

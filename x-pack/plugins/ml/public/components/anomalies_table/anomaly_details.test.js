@@ -53,7 +53,7 @@ const props = {
     typicalSort: 0.012071679592192066,
     metricDescriptionSort: 82.83851409101328,
     detector: 'count by mlcategory',
-    isTimeSeriesViewDetector: false
+    isTimeSeriesViewRecord: false
   },
   examples: [
     'Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com',

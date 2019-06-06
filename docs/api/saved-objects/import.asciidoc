@@ -35,17 +35,16 @@ The following example imports an index pattern and dashboard.
 
 [source,js]
 --------------------------------------------------
-POST api/saved_objects/_import
-Content-Type: multipart/form-data; boundary=EXAMPLE
---EXAMPLE
-Content-Disposition: form-data; name="file"; filename="export.ndjson"
-Content-Type: application/ndjson
+$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
+--------------------------------------------------
 
+The `file.ndjson` file would contain the following.
+
+[source,js]
+--------------------------------------------------
 {"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
---EXAMPLE--
 --------------------------------------------------
-// KIBANA
 
 A successful call returns a response code of `200` and a response body
 containing a JSON structure similar to the following example:
@@ -62,17 +61,16 @@ The following example imports an index pattern and dashboard but has a conflict 
 
 [source,js]
 --------------------------------------------------
-POST api/saved_objects/_import
-Content-Type: multipart/form-data; boundary=EXAMPLE
---EXAMPLE
-Content-Disposition: form-data; name="file"; filename="export.ndjson"
-Content-Type: application/ndjson
+$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
+--------------------------------------------------
 
+The `file.ndjson` file would contain the following.
+
+[source,js]
+--------------------------------------------------
 {"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
---EXAMPLE--
 --------------------------------------------------
-// KIBANA
 
 The call returns a response code of `200` and a response body
 containing a JSON structure similar to the following example:
@@ -86,11 +84,57 @@ containing a JSON structure similar to the following example:
     {
       "id": "my-pattern",
       "type": "index-pattern",
+      "title": "my-pattern-*",
       "error": {
-        "statusCode": 409,
-        "message": "version conflict, document already exists",
+        "type": "conflict"
       },
     },
   ],
 }
+--------------------------------------------------
+
+The following example imports a visualization and dashboard but the index pattern for the visualization reference doesn't exist.
+
+[source,js]
+--------------------------------------------------
+$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
+--------------------------------------------------
+
+The `file.ndjson` file would contain the following.
+
+[source,js]
+--------------------------------------------------
+{"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern-*"}]}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}
+--------------------------------------------------
+
+The call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+  "success": false,
+  "successCount": 0,
+  "errors": [
+    {
+      "id": "my-vis",
+      "type": "visualization",
+      "title": "my-vis",
+      "error": {
+        "type": "missing_references",
+        "references": [
+          {
+            "type": "index-pattern",
+            "id": "my-pattern-*"
+          }
+        ],
+        "blocking": [
+          {
+            "type": "dashboard",
+            "id": "my-dashboard"
+          }
+        ]
+      }
+    }
+  ]
 --------------------------------------------------

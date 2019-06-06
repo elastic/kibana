@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
@@ -66,9 +66,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: area with not filter');
-      await PageObjects.common.closeToast();
       await PageObjects.dashboard.saveDashboard('area');
-      await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
       await dashboardPanelActions.openContextMenu();

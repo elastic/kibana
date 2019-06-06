@@ -127,10 +127,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
               justifyContent="spaceBetween"
             >
               <EuiFlexItem>
-                <EuiText
-                  grow={true}
-                  size="m"
-                >
+                <EuiText>
                   <p>
                     Imports index pattern, visualizations and pre-defined dashboards.
                   </p>
@@ -146,6 +143,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
+                  size="m"
                   type="button"
                 >
                   Load Kibana objects
@@ -208,7 +206,6 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
           <EuiTitle
             className="euiStep__title"
             size="s"
-            textTransform="none"
           >
             <p
               className="euiTitle euiTitle--small euiStep__title"
@@ -230,10 +227,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   <div
                     className="euiFlexItem"
                   >
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
+                    <EuiText>
                       <div
                         className="euiText euiText--medium"
                       >
@@ -257,6 +251,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                       iconSide="left"
                       isLoading={false}
                       onClick={[Function]}
+                      size="m"
                       type="button"
                     >
                       <button
@@ -443,10 +438,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
               justifyContent="spaceBetween"
             >
               <EuiFlexItem>
-                <EuiText
-                  grow={true}
-                  size="m"
-                >
+                <EuiText>
                   <p>
                     Imports index pattern, visualizations and pre-defined dashboards.
                   </p>
@@ -462,6 +454,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
+                  size="m"
                   type="button"
                 >
                   Load Kibana objects
@@ -529,24 +522,20 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   title="complete"
                   type="check"
                 >
-                  <check
-                    className="euiIcon euiIcon--medium euiStepNumber__icon"
+                  <EuiIconCheck
+                    className="euiIcon euiIcon--medium euiIcon-isLoaded euiStepNumber__icon"
                     focusable="false"
-                    height="16"
                     style={null}
                     title="complete"
-                    viewBox="0 0 16 16"
-                    width="16"
-                    xmlns="http://www.w3.org/2000/svg"
                   >
                     <svg
-                      className="euiIcon euiIcon--medium euiStepNumber__icon"
+                      className="euiIcon euiIcon--medium euiIcon-isLoaded euiStepNumber__icon"
                       focusable="false"
-                      height="16"
+                      height={16}
                       style={null}
                       title="complete"
                       viewBox="0 0 16 16"
-                      width="16"
+                      width={16}
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -554,7 +543,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                         fillRule="evenodd"
                       />
                     </svg>
-                  </check>
+                  </EuiIconCheck>
                 </EuiIcon>
               </EuiI18n>
             </div>
@@ -562,7 +551,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
           <EuiTitle
             className="euiStep__title"
             size="s"
-            textTransform="none"
           >
             <p
               className="euiTitle euiTitle--small euiStep__title"
@@ -584,10 +572,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   <div
                     className="euiFlexItem"
                   >
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
+                    <EuiText>
                       <div
                         className="euiText euiText--medium"
                       >
@@ -611,6 +596,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                       iconSide="left"
                       isLoading={false}
                       onClick={[Function]}
+                      size="m"
                       type="button"
                     >
                       <button
@@ -683,10 +669,7 @@ exports[`renders 1`] = `
             justifyContent="spaceBetween"
           >
             <EuiFlexItem>
-              <EuiText
-                grow={true}
-                size="m"
-              >
+              <EuiText>
                 <p>
                   Imports index pattern, visualizations and pre-defined dashboards.
                 </p>
@@ -702,6 +685,7 @@ exports[`renders 1`] = `
                 iconSide="left"
                 isLoading={false}
                 onClick={[Function]}
+                size="m"
                 type="button"
               >
                 Load Kibana objects

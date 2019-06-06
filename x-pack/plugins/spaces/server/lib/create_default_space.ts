@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
@@ -40,6 +39,7 @@ export async function createDefaultSpace(server: any) {
           defaultMessage: 'This is your default space!',
         }),
         color: '#00bfb3',
+        disabledFeatures: [],
         _reserved: true,
       },
       options

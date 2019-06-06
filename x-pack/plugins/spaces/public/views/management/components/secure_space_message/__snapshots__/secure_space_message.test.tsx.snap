@@ -1,22 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SecureSpaceMessage doesn't render if user profile does not allow security to be managed 1`] = `""`;
+exports[`SecureSpaceMessage doesn't render if UI Capabilities does not allow security to be managed 1`] = `""`;
 
 exports[`SecureSpaceMessage renders if user profile allows security to be managed 1`] = `
 <Fragment>
-  <EuiSpacer />
+  <EuiHorizontalRule />
   <EuiText
     className="eui-textCenter"
-    grow={true}
-    size="m"
   >
     <p>
       <FormattedMessage
-        defaultMessage="Want to assign a role to a space? Go to Management and select {rolesLink}."
+        defaultMessage="Want to assign a role to a space? Go to {rolesLink}."
         id="xpack.spaces.management.secureSpaceMessage.howToAssignRoleToSpaceDescription"
         values={
           Object {
             "rolesLink": <EuiLink
+              aria-label="Roles management page"
               color="primary"
               href="#/management/security/roles"
               type="button"

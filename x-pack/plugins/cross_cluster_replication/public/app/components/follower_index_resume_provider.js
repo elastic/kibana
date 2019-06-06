@@ -94,6 +94,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
             )
           }
           onMouseOver={this.onMouseOverModal}
+          data-test-subj="resumeReplicationConfirmation"
         >
           {isSingle ? (
             <p>
@@ -105,7 +106,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
                   editLink: (
                     <EuiLink
                       href={routing.getFollowerIndexPath(ids[0])}
-                      data-test-subj="ccrFollowerIndexConfirmResumeModalEditLink"
+                      data-test-subj="editLink"
                     >
                       <FormattedMessage
                         id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeEditLink"

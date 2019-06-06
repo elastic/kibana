@@ -1,10 +1,10 @@
 [role="xpack"]
 [[xpack-profiler]]
-== Profiling your Queries and Aggregations
+== Profiling queries and aggregations
 
-Elasticsearch has a powerful profiler API which can be used to inspect and analyze
-your search queries.  The response, however, is a very large JSON blob which is
-difficult to analyze by hand.
+{es} has a powerful {ref}/search-profile.html[Profile API] which can be used to inspect and analyze
+your search queries. The response returns a large JSON blob, which can be
+difficult to analyze manually.
 
 The {searchprofiler} tool can transform this JSON output
 into a visualization that is easy to navigate, allowing you to diagnose and debug
@@ -18,5 +18,3 @@ include::getting-started.asciidoc[]
 include::more-complicated.asciidoc[]
 
 include::pasting.asciidoc[]
-
-include::misc.asciidoc[]

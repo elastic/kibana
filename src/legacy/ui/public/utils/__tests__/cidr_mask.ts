@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { CidrMask } from '../cidr_mask';
 
 describe('CidrMask', () => {
@@ -43,6 +43,8 @@ describe('CidrMask', () => {
     expect(() => new CidrMask('0.0.0.0/32/32')).to.throwError();
 
     expect(() => new CidrMask('1.2.3/1')).to.throwError();
+
+    expect(() => new CidrMask('0.0.0.0/123d')).to.throwError();
   });
 
   it('should correctly grab IP address and prefix length', () => {

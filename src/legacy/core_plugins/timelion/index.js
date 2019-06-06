@@ -37,6 +37,14 @@ export default function (kibana) {
       }).default();
     },
 
+    uiCapabilities() {
+      return {
+        timelion: {
+          save: true,
+        }
+      };
+    },
+
     uiExports: {
       app: {
         title: 'Timelion',
@@ -46,24 +54,24 @@ export default function (kibana) {
         main: 'plugins/timelion/app',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      injectDefaultVars(server) {
-        return {
-          timelionUiEnabled: server.config().get('timelion.ui.enabled'),
-        };
-      },
       hacks: [
         'plugins/timelion/hacks/toggle_app_link_in_nav',
         'plugins/timelion/lib/panel_registry',
         'plugins/timelion/panels/timechart/timechart'
       ],
+      injectDefaultVars(server) {
+        return {
+          timelionUiEnabled: server.config().get('timelion.ui.enabled'),
+        };
+      },
       visTypes: [
         'plugins/timelion/vis'
       ],
+      interpreter: ['plugins/timelion/timelion_vis_fn'],
       home: [
         'plugins/timelion/register_feature'
       ],
       mappings: require('./mappings.json'),
-
       uiSettingDefaults: {
         'timelion:showTutorial': {
           name: i18n.translate('timelion.uiSettings.showTutorialLabel', {

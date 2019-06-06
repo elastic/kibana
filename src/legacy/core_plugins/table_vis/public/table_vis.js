@@ -20,8 +20,8 @@
 import { i18n } from '@kbn/i18n';
 import './table_vis_controller';
 import './table_vis_params';
-import 'ui/agg_table';
-import 'ui/agg_table/agg_table_group';
+import './agg_table';
+import './agg_table/agg_table_group';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import tableVisTemplate from './table_vis.html';

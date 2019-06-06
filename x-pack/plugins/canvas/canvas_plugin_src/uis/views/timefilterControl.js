@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-import { getState, getValue } from '../../../public/lib/resolved_arg';
-
 export const timefilterControl = () => ({
   name: 'timefilterControl',
   displayName: 'Time filter',
@@ -21,11 +18,11 @@ export const timefilterControl = () => ({
         confirm: 'Set',
       },
     },
+    {
+      name: 'filterGroup',
+      displayName: 'Filter group name',
+      help: "Apply the selected group name to an element's filters function to target this filter",
+      argType: 'filterGroup',
+    },
   ],
-  resolve({ context }) {
-    if (getState(context) !== 'ready') {
-      return { columns: [] };
-    }
-    return { columns: get(getValue(context), 'columns', []) };
-  },
 });

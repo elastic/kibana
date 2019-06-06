@@ -1,3 +1,4 @@
+[role="xpack"]
 [[maps]]
 = Maps
 
@@ -17,3 +18,5 @@ include::maps-getting-started.asciidoc[]
 include::heatmap-layer.asciidoc[]
 include::tile-layer.asciidoc[]
 include::vector-layer.asciidoc[]
+include::search.asciidoc[]
+include::connect-to-ems.asciidoc[]

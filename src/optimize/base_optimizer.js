@@ -58,7 +58,9 @@ export default class BaseOptimizer {
   constructor(opts) {
     this.logWithMetadata = opts.logWithMetadata || (() => null);
     this.uiBundles = opts.uiBundles;
+    this.discoveredPlugins = opts.discoveredPlugins;
     this.profile = opts.profile || false;
+    this.workers = opts.workers;
 
     switch (opts.sourceMaps) {
       case true:
@@ -122,10 +124,6 @@ export default class BaseOptimizer {
       BABEL_PRESET_PATH
     ];
 
-    const nonDistributableOnlyModules = !IS_KIBANA_DISTRIBUTABLE
-      ? ['ts-loader']
-      : [];
-
     threadLoader.warmup(
       // pool options, like passed to loader options
       // must match loader options to boot the correct pool
@@ -133,12 +131,15 @@ export default class BaseOptimizer {
       [
         // modules to load on the pool
         ...baseModules,
-        ...nonDistributableOnlyModules
       ]
     );
   }
 
   getThreadPoolCpuCount() {
+    if (this.workers) {
+      return this.workers;
+    }
+
     const cpus = os.cpus();
     if (!cpus) {
       // sometimes this call returns undefined so we fall back to 1: https://github.com/nodejs/node/issues/19022
@@ -211,15 +212,13 @@ export default class BaseOptimizer {
      * of Kibana and just make compressing and extracting it more difficult.
      */
     const maybeAddCacheLoader = (cacheName, loaders) => {
-      if (IS_KIBANA_DISTRIBUTABLE) {
-        return loaders;
-      }
-
       return [
         {
           loader: 'cache-loader',
           options: {
-            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName)
+            cacheContext: fromRoot('.'),
+            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName),
+            readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE
           }
         },
         ...loaders
@@ -251,6 +250,7 @@ export default class BaseOptimizer {
       cache: true,
       entry: {
         ...this.uiBundles.toWebpackEntries(),
+        ...this._getDiscoveredPluginEntryPoints(),
         light_theme: [
           require.resolve('../legacy/ui/public/styles/bootstrap_light.less'),
         ],
@@ -267,7 +267,13 @@ export default class BaseOptimizer {
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: PUBLIC_PATH_PLACEHOLDER,
-        devtoolModuleFilenameTemplate: '[absolute-resource-path]'
+        devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+
+        // When the entry point is loaded, assign it's exported `plugin`
+        // value to a key on the global `__kbnBundles__` object.
+        // NOTE: Only actually used by new platform plugins
+        library: ['__kbnBundles__', '[name]'],
+        libraryExport: 'plugin',
       },
 
       optimization: {
@@ -363,7 +369,7 @@ export default class BaseOptimizer {
             }
           },
           {
-            resource: createSourceFileResourceSelector(/\.js$/),
+            resource: createSourceFileResourceSelector(/\.(js|tsx?)$/),
             use: maybeAddCacheLoader('babel', [
               {
                 loader: 'thread-loader',
@@ -389,7 +395,7 @@ export default class BaseOptimizer {
       },
 
       resolve: {
-        extensions: ['.js', '.json'],
+        extensions: ['.js', '.ts', '.tsx', '.json'],
         mainFields: ['browser', 'browserify', 'main'],
         modules: [
           'webpackShims',
@@ -422,47 +428,6 @@ export default class BaseOptimizer {
           }
         }),
       ]
-    };
-
-    // when running from source transpile TypeScript automatically
-    const getSourceConfig = () => {
-      // dev/typescript is deleted from the distributable, so only require it if we actually need the source config
-      const { Project } = require('../dev/typescript');
-      const browserProject = new Project(fromRoot('tsconfig.browser.json'));
-
-      return {
-        module: {
-          rules: [
-            {
-              resource: createSourceFileResourceSelector(/\.tsx?$/),
-              use: maybeAddCacheLoader('typescript', [
-                {
-                  loader: 'thread-loader',
-                  options: this.getThreadLoaderPoolConfig()
-                },
-                {
-                  loader: 'ts-loader',
-                  options: {
-                    happyPackMode: true,
-                    transpileOnly: true,
-                    experimentalWatchApi: true,
-                    onlyCompileBundledFiles: true,
-                    configFile: fromRoot('tsconfig.json'),
-                    compilerOptions: {
-                      ...browserProject.config.compilerOptions,
-                      sourceMap: Boolean(this.sourceMaps),
-                    }
-                  }
-                }
-              ]),
-            }
-          ]
-        },
-
-        resolve: {
-          extensions: ['.ts', '.tsx'],
-        },
-      };
     };
 
     // We need to add react-addons (and a few other bits) for enzyme to work.
@@ -511,7 +476,7 @@ export default class BaseOptimizer {
       commonConfig,
       IS_KIBANA_DISTRIBUTABLE
         ? isDistributableConfig
-        : getSourceConfig(),
+        : {},
       this.uiBundles.isDevMode()
         ? webpackMerge(watchingConfig, supportEnzymeConfig)
         : productionConfig
@@ -556,5 +521,14 @@ export default class BaseOptimizer {
         ...Stats.presetToOptions('detailed')
       }))
     );
+  }
+
+  _getDiscoveredPluginEntryPoints() {
+    // New platform plugin entry points
+    return [...this.discoveredPlugins.entries()]
+      .reduce((entryPoints, [pluginId, plugin]) => {
+        entryPoints[`plugin/${pluginId}`] = `${plugin.path}/public`;
+        return entryPoints;
+      }, {});
   }
 }

@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
 
   describe('dashboard save', function describeIndexTests() {
     const dashboardName = 'Dashboard Save Test';
+    const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';
 
     before(async function () {
       await PageObjects.dashboard.initTests();
@@ -102,5 +103,20 @@ export default function ({ getPageObjects }) {
 
       await PageObjects.dashboard.cancelSave();
     });
+
+    it('Saves new Dashboard using the Enter key', async function () {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.enterDashboardTitleAndPressEnter(dashboardNameEnterKey);
+
+      // This is important since saving a new dashboard will cause a refresh of the page. We have to
+      // wait till it finishes reloading or it might reload the url after simulating the
+      // dashboard landing page click.
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardNameEnterKey);
+      expect(countOfDashboards).to.equal(1);
+    });
+
   });
 }

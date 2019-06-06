@@ -10,6 +10,8 @@ import { AbstractLayer } from './layer';
 import { EuiIcon } from '@elastic/eui';
 import { HeatmapStyle } from './styles/heatmap_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
+import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
+import { i18n } from '@kbn/i18n';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
@@ -32,10 +34,6 @@ export class HeatmapLayer extends AbstractLayer {
     }
   }
 
-  getSupportedStyles() {
-    return [HeatmapStyle];
-  }
-
   getIndexPatternIds() {
     return this._source.getIndexPatternIds();
   }
@@ -44,7 +42,6 @@ export class HeatmapLayer extends AbstractLayer {
     const metricfields = this._source.getMetricFields();
     return metricfields[0].propertyKey;
   }
-
 
   _getMbLayerId() {
     return this.getId() + '_heatmap';
@@ -64,7 +61,6 @@ export class HeatmapLayer extends AbstractLayer {
         type: 'geojson',
         data: { 'type': 'FeatureCollection', 'features': [] }
       });
-
 
       mbMap.addLayer({
         id: mbLayerId,
@@ -106,8 +102,9 @@ export class HeatmapLayer extends AbstractLayer {
     mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
-  async getBounds(filters) {
-    return await this._source.getBoundsForFilters(filters);
+  async getBounds(dataFilters) {
+    const searchFilters = this._getSearchFilters(dataFilters);
+    return await this._source.getBoundsForFilters(searchFilters);
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -119,45 +116,60 @@ export class HeatmapLayer extends AbstractLayer {
       return;
     }
 
+    const searchFilters = this._getSearchFilters(dataFilters);
+
     const sourceDataRequest = this.getSourceDataRequest();
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 
-    const geogridPrecision = this._source.getGeoGridPrecision(dataFilters.zoom);
-    const isSamePrecision = meta.geogridPrecision === geogridPrecision;
+    const isSamePrecision = meta.geogridPrecision === searchFilters.geogridPrecision;
 
-    const isSameTime = _.isEqual(meta.timeFilters, dataFilters.timeFilters);
+    const isSameTime = _.isEqual(meta.timeFilters, searchFilters.timeFilters);
 
-    const updateDueToRefreshTimer = dataFilters.refreshTimerLastTriggeredAt
-      && !_.isEqual(meta.refreshTimerLastTriggeredAt, dataFilters.refreshTimerLastTriggeredAt);
+    const updateDueToRefreshTimer = searchFilters.refreshTimerLastTriggeredAt
+      && !_.isEqual(meta.refreshTimerLastTriggeredAt, searchFilters.refreshTimerLastTriggeredAt);
 
-    const updateDueToExtent = this.updateDueToExtent(this._source, meta, dataFilters);
+    const updateDueToExtent = this.updateDueToExtent(this._source, meta, searchFilters);
 
-    const updateDueToQuery = dataFilters.query
-      && !_.isEqual(meta.query, dataFilters.query);
+    let updateDueToQuery = false;
+    let updateDueToFilters = false;
+    if (searchFilters.applyGlobalQuery) {
+      updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
+      updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+    } else {
+      // Global filters and query are not applied to layer search request so no re-fetch required.
+      // Exception is "Refresh" query.
+      updateDueToQuery = isRefreshOnlyQuery(meta.query, searchFilters.query);
+    }
+    const updateDueToLayerQuery = searchFilters.layerQuery
+      && !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
+    const updateDueToApplyGlobalQuery = meta.applyGlobalQuery !== searchFilters.applyGlobalQuery;
 
-    const updateDueToFilters = dataFilters.filters
-      && !_.isEqual(meta.filters, dataFilters.filters);
-
-    const metricPropertyKey = this._getPropKeyOfSelectedMetric();
-    const updateDueToMetricChange = !_.isEqual(meta.metric, metricPropertyKey);
+    const updateDueToMetricChange = !_.isEqual(meta.metric, searchFilters.metric);
 
     if (isSamePrecision
       && isSameTime
       && !updateDueToExtent
       && !updateDueToRefreshTimer
       && !updateDueToQuery
+      && !updateDueToLayerQuery
+      && !updateDueToApplyGlobalQuery
       && !updateDueToFilters
       && !updateDueToMetricChange
     ) {
       return;
     }
 
-    const searchFilters = {
-      ...dataFilters,
-      geogridPrecision,
-      metric: metricPropertyKey
-    };
     await this._fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters });
+  }
+
+  _getSearchFilters(dataFilters) {
+    return {
+      ...dataFilters,
+      layerQuery: this.getQuery(),
+      applyGlobalQuery: this.getApplyGlobalQuery(),
+      geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
+      metric: this._getPropKeyOfSelectedMetric()
+    };
   }
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters }) {
@@ -176,12 +188,34 @@ export class HeatmapLayer extends AbstractLayer {
     return 'heatmap';
   }
 
-  getIcon() {
-    return (
-      <EuiIcon
-        type={this.getLayerTypeIconName()}
-      />
-    );
+  getCustomIconAndTooltipContent() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    if (!featureCollection || featureCollection.features.length === 0) {
+      return {
+        icon: (
+          <EuiIcon
+            size="m"
+            color="subdued"
+            type="minusInCircle"
+          />
+        ),
+        tooltipContent: i18n.translate('xpack.maps.heatmapLayer.noResultsFoundTooltip', {
+          defaultMessage: `No results found.`
+        })
+      };
+    }
+
+    return super.getCustomIconAndTooltipContent();
+  }
+
+  hasLegendDetails() {
+    return true;
+  }
+
+  getLegendDetails() {
+    const label = _.get(this._source.getMetricFields(), '[0].propertyLabel', '');
+    return this._style.getLegendDetails(label);
   }
 
 }

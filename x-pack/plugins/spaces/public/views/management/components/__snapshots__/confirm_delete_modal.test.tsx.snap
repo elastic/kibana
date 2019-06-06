@@ -4,6 +4,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
 <EuiOverlayMask>
   <EuiModal
     className="spcConfirmDeleteModal"
+    initialFocus="input[name=\\"confirmDeleteSpaceInput\\"]"
     maxWidth={true}
     onClose={[MockFunction]}
   >
@@ -25,8 +26,6 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
     <EuiModalBody>
       <EuiText
         data-test-subj="confirmModalBodyText"
-        grow={true}
-        size="m"
       >
         <p>
           <FormattedMessage
@@ -51,7 +50,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
           fullWidth={false}
           hasEmptyLabelSpace={false}
           isInvalid={false}
-          label="Confirm space name"
+          label="Confirm space name to delete"
           labelType="label"
         >
           <EuiFieldText
@@ -59,6 +58,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
             disabled={false}
             fullWidth={false}
             isLoading={false}
+            name="confirmDeleteSpaceInput"
             onChange={[Function]}
             value=""
           />
@@ -67,10 +67,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
           color="warning"
           size="m"
         >
-          <EuiText
-            grow={true}
-            size="m"
-          >
+          <EuiText>
             <FormattedMessage
               defaultMessage="You are about to delete your current space {name}. You will be redirected to choose a different space if you continue."
               id="xpack.spaces.management.confirmDeleteModal.redirectAfterDeletingCurrentSpaceWarningMessage"
@@ -112,6 +109,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         iconSide="left"
         isLoading={false}
         onClick={[Function]}
+        size="m"
         type="button"
       >
         <FormattedMessage

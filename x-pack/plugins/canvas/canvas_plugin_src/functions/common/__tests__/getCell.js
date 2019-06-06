@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getCell } from '../getCell';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../strings';
 import { emptyTable, testTable } from './fixtures/test_tables';
+
+const errors = getFunctionErrors().getCell;
 
 describe('getCell', () => {
   const fn = functionWrapper(getCell);
@@ -43,9 +46,9 @@ describe('getCell', () => {
       });
 
       it('throws when invalid column is provided', () => {
-        expect(() => fn(testTable, { column: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be(`Column not found: 'foo'`);
-        });
+        expect(() => fn(testTable, { column: 'foo' })).to.throwException(
+          new RegExp(errors.columnNotFound('foo').message)
+        );
       });
     });
 
@@ -65,17 +68,15 @@ describe('getCell', () => {
       it('throws when row does not exist', () => {
         const invalidRow = testTable.rows.length;
 
-        expect(() => fn(testTable, { column: 'name', row: invalidRow })).to.throwException(e => {
-          expect(e.message).to.be(`Row not found: '${invalidRow}'`);
-        });
+        expect(() => fn(testTable, { column: 'name', row: invalidRow })).to.throwException(
+          new RegExp(errors.rowNotFound(invalidRow).message)
+        );
 
-        expect(() => fn(emptyTable, { column: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be(`Row not found: '0'`);
-        });
+        expect(() => fn(emptyTable, { column: 'foo' })).to.throwException(
+          new RegExp(errors.rowNotFound(0).message)
+        );
 
-        expect(() => fn(emptyTable)).to.throwException(e => {
-          expect(e.message).to.be(`Row not found: '0'`);
-        });
+        expect(() => fn(emptyTable)).to.throwException(new RegExp(errors.rowNotFound(0).message));
       });
     });
   });

@@ -12,7 +12,7 @@ import { EsVersionPrecheck } from '../lib/es_version_precheck';
 import { registerClusterCheckupRoutes } from './cluster_checkup';
 
 // Need to require to get mock on named export to work.
-// tslint:disable:no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const MigrationApis = require('../lib/es_migration_apis');
 MigrationApis.getUpgradeAssistantStatus = jest.fn();
 

@@ -5,17 +5,22 @@
  */
 
 
-import { GIS_API_PATH } from '../common/constants';
+import { GIS_API_PATH, EMS_META_PATH } from '../common/constants';
 import _ from 'lodash';
+import { getEMSResources } from '../common/ems_util';
+import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
+import { EMSClient } from 'ui/vis/map/ems_client';
+import { xpackInfo } from './kibana_services';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
-let meta = null;
+let emsSources = null;
 let loadingMetaPromise = null;
-let isLoaded = false;
-export async function getDataSources() {
-  if (meta) {
-    return meta;
+
+export async function getEMSDataSources() {
+  if (emsSources) {
+    return emsSources;
   }
 
   if (loadingMetaPromise) {
@@ -24,45 +29,51 @@ export async function getDataSources() {
 
   loadingMetaPromise = new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch(`${GIS_API_RELATIVE}/meta`);
-      const metaJson = await response.json();
-      isLoaded = true;
-      meta = metaJson.data_sources;
-      resolve(meta);
-    } catch(e) {
+      const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
+      if (proxyElasticMapsServiceInMaps) {
+        const fullResponse = await fetch(`${GIS_API_RELATIVE}/${EMS_META_PATH}`);
+        emsSources = await fullResponse.json();
+      } else {
+        const emsClient = new EMSClient({
+          language: i18n.getLocale(),
+          kbnVersion: chrome.getInjected('kbnPkgVersion'),
+          manifestServiceUrl: chrome.getInjected('emsManifestServiceUrl'),
+          landingPageUrl: chrome.getInjected('emsLandingPageUrl')
+        });
+        const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
+        const xpackMapsFeature = xpackInfo.get('features.maps');
+        const licenseId = xpackMapsFeature && xpackMapsFeature.maps && xpackMapsFeature.uid ? xpackMapsFeature.uid :  '';
+
+        const emsResponse = await getEMSResources(emsClient, isEmsEnabled, licenseId, false);
+        emsSources = {
+          ems: {
+            file: emsResponse.fileLayers,
+            tms: emsResponse.tmsServices
+          }
+        };
+      }
+      resolve(emsSources);
+    } catch (e) {
       reject(e);
     }
   });
   return loadingMetaPromise;
 }
 
-/**
- * Should only call this after verifying `isMetadataLoaded` equals true
- */
-export function getDataSourcesSync() {
-  return meta;
-}
-
-export function isMetaDataLoaded() {
-  return isLoaded;
-}
-
 export async function getEmsVectorFilesMeta() {
-  const dataSource = await getDataSources();
+  const dataSource = await getEMSDataSources();
   return _.get(dataSource, 'ems.file', []);
 }
 
 export async function getEmsTMSServices() {
-  const dataSource = await getDataSources();
+  const dataSource = await getEMSDataSources();
   return _.get(dataSource, 'ems.tms', []);
 }
 
-export async function getKibanaRegionList() {
-  const dataSource = await getDataSources();
-  return _.get(dataSource, 'kibana.regionmap', []);
+export function getKibanaRegionList() {
+  return chrome.getInjected('regionmapLayers');
 }
 
-export async function getKibanaTileMap() {
-  const dataSource = await getDataSources();
-  return _.get(dataSource, 'kibana.tilemap', {});
+export function getKibanaTileMap() {
+  return chrome.getInjected('tilemap');
 }

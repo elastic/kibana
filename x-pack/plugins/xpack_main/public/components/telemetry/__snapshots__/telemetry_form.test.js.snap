@@ -8,10 +8,7 @@ exports[`TelemetryForm renders as expected 1`] = `
     paddingSize="l"
   >
     <EuiForm>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiFlexGroup
           alignItems="baseline"
         >
@@ -33,6 +30,7 @@ exports[`TelemetryForm renders as expected 1`] = `
       />
       <InjectIntl(FieldUI)
         clear={[Function]}
+        enableSaving={true}
         save={[Function]}
         setting={
           Object {

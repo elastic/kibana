@@ -18,37 +18,11 @@
  */
 
 import { SavedObject } from '../service';
+import { Retry } from './types';
 
-export function createObjectsFilter(
-  skips: Array<{
-    type: string;
-    id: string;
-  }>,
-  overwrites: Array<{
-    type: string;
-    id: string;
-  }>,
-  replaceReferences: Array<{
-    type: string;
-    from: string;
-    to: string;
-  }>
-) {
-  const refReplacements = replaceReferences.map(ref => `${ref.type}:${ref.from}`);
+export function createObjectsFilter(retries: Retry[]) {
+  const retryKeys = new Set<string>(retries.map(retry => `${retry.type}:${retry.id}`));
   return (obj: SavedObject) => {
-    if (skips.some(skipObj => skipObj.type === obj.type && skipObj.id === obj.id)) {
-      return false;
-    }
-    if (
-      overwrites.some(overwriteObj => overwriteObj.type === obj.type && overwriteObj.id === obj.id)
-    ) {
-      return true;
-    }
-    for (const reference of obj.references || []) {
-      if (refReplacements.includes(`${reference.type}:${reference.id}`)) {
-        return true;
-      }
-    }
-    return false;
+    return retryKeys.has(`${obj.type}:${obj.id}`);
   };
 }

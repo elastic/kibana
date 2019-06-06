@@ -17,11 +17,16 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-import { PanelState } from '../../selectors';
+import expect from '@kbn/expect';
 import { createPanelState } from '../panel_state';
+import { SavedDashboardPanel } from '../../types';
 
-function createPanelWithDimensions(x: number, y: number, w: number, h: number): PanelState {
+function createPanelWithDimensions(
+  x: number,
+  y: number,
+  w: number,
+  h: number
+): SavedDashboardPanel {
   return {
     id: 'foo',
     version: '6.3.0',

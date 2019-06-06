@@ -22,7 +22,7 @@ export const WorkpadManager = ({ onClose }) => {
   const tabs = [
     {
       id: 'workpadLoader',
-      name: 'My Workpads',
+      name: 'My workpads',
       content: (
         <Fragment>
           <EuiSpacer />
@@ -50,7 +50,7 @@ export const WorkpadManager = ({ onClose }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalHeader>
-      <EuiModalBody>
+      <EuiModalBody className="canvasHomeApp__modalBody">
         <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
       </EuiModalBody>
     </Fragment>

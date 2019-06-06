@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   USERS_PATH,
   EDIT_USERS_PATH,
@@ -18,7 +18,9 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
-  describe('Management', () => {
+  describe('Management', function () {
+    this.tags(['skipFirefox']);
+
     before(async () => {
       // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();

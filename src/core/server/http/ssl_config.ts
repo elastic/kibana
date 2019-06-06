@@ -30,7 +30,7 @@ const protocolMap = new Map<string, number>([
   ['TLSv1.2', cryptoConstants.SSL_OP_NO_TLSv1_2],
 ]);
 
-const sslSchema = schema.object(
+export const sslSchema = schema.object(
   {
     certificate: schema.maybe(schema.string()),
     certificateAuthorities: schema.maybe(
@@ -62,11 +62,6 @@ const sslSchema = schema.object(
 type SslConfigType = TypeOf<typeof sslSchema>;
 
 export class SslConfig {
-  /**
-   * @internal
-   */
-  public static schema = sslSchema;
-
   public enabled: boolean;
   public redirectHttpFromPort: number | undefined;
   public key: string | undefined;
@@ -105,10 +100,9 @@ export class SslConfig {
     return Array.from(protocolMap).reduce((secureOptions, [protocolAlias, secureOption]) => {
       // `secureOption` is the option that turns *off* support for a particular protocol,
       // so if protocol is supported, we should not enable this option.
-      // tslint:disable no-bitwise
       return supportedProtocols.includes(protocolAlias)
         ? secureOptions
-        : secureOptions | secureOption;
+        : secureOptions | secureOption; // eslint-disable-line no-bitwise
     }, 0);
   }
 

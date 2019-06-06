@@ -19,6 +19,7 @@
 
 import { assign } from 'lodash';
 import { IndexedArray } from '../indexed_array';
+import { capabilities } from '../capabilities';
 
 const listeners = [];
 
@@ -50,10 +51,16 @@ export class ManagementSection {
     this.url = '';
 
     assign(this, options);
+
   }
 
   get visibleItems() {
-    return this.items.inOrder.filter(item => item.visible);
+    return this.items.inOrder.filter(item => {
+      const capabilityManagementSection = capabilities.get().management[this.id];
+      const itemCapability = capabilityManagementSection ? capabilityManagementSection[item.id] : null;
+
+      return item.visible && itemCapability !== false;
+    });
   }
 
   /**

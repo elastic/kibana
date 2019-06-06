@@ -18,7 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import getUrl from '../../../src/test_utils/get_url';
 
@@ -49,10 +49,14 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      * @param {string} appName As defined in the apps config
      * @param {string} subUrl The route after the hash (#)
      */
-    async navigateToUrl(appName, subUrl) {
+    async navigateToUrl(appName, subUrl, {
+      basePath = '',
+      ensureCurrentUrl = true,
+      shouldLoginIfPrompted = true
+    } = {}) {
+      // we onlt use the pathname from the appConfig and use the subUrl as the hash
       const appConfig = {
-        ...config.get(['apps', appName]),
-        // Overwrite the default hash with the URL we really want.
+        pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
         hash: `${appName}/${subUrl}`,
       };
 
@@ -60,8 +64,38 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         log.debug(`navigateToUrl ${appUrl}`);
         await browser.get(appUrl);
-        const currentUrl = await this.loginIfPrompted(appUrl);
-        if (!currentUrl.includes(appUrl)) {
+
+        const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
+
+        if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
+          throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
+        }
+      });
+    }
+
+    /**
+     * @param {string} appName As defined in the apps config
+     * @param {string} hash The route after the hash (#)
+     */
+    async navigateToActualUrl(appName, hash, {
+      basePath = '',
+      ensureCurrentUrl = true,
+      shouldLoginIfPrompted = true
+    } = {}) {
+      // we only use the apps config to get the application path
+      const appConfig = {
+        pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
+        hash,
+      };
+
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
+      await retry.try(async () => {
+        log.debug(`navigateToActualUrl ${appUrl}`);
+        await browser.get(appUrl);
+
+        const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
+
+        if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
           throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
         }
       });
@@ -89,17 +123,12 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return currentUrl;
     }
 
-
-    /**
-     * @param {string} appName - name of the app
-     * @param {object} [opts] - optional options object
-     * @param {object} [opts.appConfig] - overrides for appConfig, e.g. { pathname, hash }
-     */
-    navigateToApp(appName, opts = { appConfig: {} }) {
+    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, hash = '' } = {}) {
       const self = this;
+      const appConfig = config.get(['apps', appName]);
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
-        ...config.get(['apps', appName]),
-        ...opts.appConfig,
+        pathname: `${basePath}${appConfig.pathname}`,
+        hash: hash || appConfig.hash,
       });
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
@@ -133,13 +162,14 @@ export function CommonPageProvider({ getService, getPageObjects }) {
               return browser.refresh();
             })
             .then(async function () {
-              const currentUrl = await self.loginIfPrompted(appUrl);
+              const currentUrl = shouldLoginIfPrompted ? await self.loginIfPrompted(appUrl) : browser.getCurrentUrl();
 
               if (currentUrl.includes('app/kibana')) {
                 await testSubjects.find('kibanaChrome');
               }
             })
             .then(async function () {
+
               const currentUrl = (await browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
               const maxAdditionalLengthOnNavUrl = 230;
               // On several test failures at the end of the TileMap test we try to navigate back to
@@ -230,7 +260,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async getSharedItemTitleAndDescription() {
-      const element = await find.byCssSelector('[data-shared-item]');
+      const cssSelector = '[data-shared-item][data-title][data-description]';
+      const element = await find.byCssSelector(cssSelector);
+
       return {
         title: await element.getAttribute('data-title'),
         description: await element.getAttribute('data-description')
@@ -325,6 +357,21 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         } catch (err) {
           // ignore errors, toast clear themselves after timeout
         }
+      }
+    }
+
+    async getBodyText() {
+      if (await find.existsByCssSelector('a[id=rawdata-tab]', 10000)) {
+        // Firefox has 3 tabs and requires navigation to see Raw output
+        await find.clickByCssSelector('a[id=rawdata-tab]');
+      }
+      const msgElements = await find.allByCssSelector('body pre');
+      if (msgElements.length > 0) {
+        return await msgElements[0].getVisibleText();
+      } else {
+        // Sometimes Firefox renders Timelion page without tabs and with div#json
+        const jsonElement = await find.byCssSelector('body div#json');
+        return await jsonElement.getVisibleText();
       }
     }
   }

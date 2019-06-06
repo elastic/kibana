@@ -33,13 +33,10 @@ export function formatEsBucketsForHistogram<T extends UMESBucket>(
     const nextItem = array[index + 1];
     const bucketSize = nextItem ? Math.abs(nextItem.key - key) : Math.abs(terminalBucketTime - key);
 
-    return Object.assign(
-      {},
-      {
-        x: key + bucketSize,
-        x0: key,
-      },
-      item
-    );
+    return {
+      x: key + bucketSize,
+      x0: key,
+      ...item,
+    };
   });
 }

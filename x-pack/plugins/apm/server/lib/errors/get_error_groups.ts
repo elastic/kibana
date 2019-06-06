@@ -5,8 +5,7 @@
  */
 
 import { SearchParams } from 'elasticsearch';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
+import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -16,19 +15,14 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../typings/common';
+import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
-interface ErrorResponseItems {
-  message?: string;
-  occurrenceCount: number;
-  culprit?: string;
-  groupId?: string;
-  latestOccurrenceAt: string;
-  handled?: boolean;
-}
-
-export type ErrorGroupListAPIResponse = ErrorResponseItems[];
+export type ErrorGroupListAPIResponse = PromiseReturnType<
+  typeof getErrorGroups
+>;
 
 export async function getErrorGroups({
   serviceName,
@@ -40,8 +34,8 @@ export async function getErrorGroups({
   sortField: string;
   sortDirection: string;
   setup: Setup;
-}): Promise<ErrorGroupListAPIResponse> {
-  const { start, end, esFilterQuery, client, config } = setup;
+}) {
+  const { start, end, uiFiltersES, client, config } = setup;
 
   const params: SearchParams = {
     index: config.get<string>('apm_oss.errorIndices'),
@@ -52,7 +46,8 @@ export async function getErrorGroups({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [PROCESSOR_EVENT]: 'error' } },
-            { range: rangeFilter(start, end) }
+            { range: rangeFilter(start, end) },
+            ...uiFiltersES
           ]
         }
       },
@@ -83,10 +78,6 @@ export async function getErrorGroups({
       }
     }
   };
-
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
 
   // sort buckets by last occurrence of error
   if (sortField === 'latestOccurrenceAt') {
@@ -134,7 +125,7 @@ export async function getErrorGroups({
     };
   }
 
-  const resp = await client<void, Aggs>('search', params);
+  const resp = await client.search<void, Aggs>(params);
   const buckets = idx(resp, _ => _.aggregations.error_groups.buckets) || [];
 
   const hits = buckets.map(bucket => {

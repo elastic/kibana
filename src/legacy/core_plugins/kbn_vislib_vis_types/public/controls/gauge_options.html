@@ -31,16 +31,17 @@
   <div class="visEditorSidebar__formRow" ng-hide="editorState.params.gauge.type === 'simple'">
     <label
       class="visEditorSidebar__formLabel"
-      for="verticalSplit"
-      i18n-id="kbnVislibVisTypes.controls.gaugeOptions.verticalSplitLabel"
-      i18n-default-message="Vertical Split"
+      for="alignment"
+      i18n-id="kbnVislibVisTypes.controls.gaugeOptions.alignmentLabel"
+      i18n-default-message="Alignment"
     ></label>
     <div class="visEditorSidebar__formControl">
-      <input class="kuiCheckBox" id="verticalSplit" type="checkbox" ng-model="editorState.params.gauge.verticalSplit">&nbsp;
-      <icon-tip
-        content="'Shows gauges one under another'"
-        position="'right'"
-      ></icon-tip>
+      <select
+        id="alignment"
+        class="kuiSelect visEditorSidebar__select"
+        ng-model="editorState.params.gauge.alignment"
+        ng-options="alignment.id as alignment.label for alignment in collections.alignments"
+      ></select>
     </div>
   </div>
 
@@ -173,7 +174,7 @@
               type="number"
               class="form-control"
               name="range.from"
-              greater-or-equal-than="{{getGreaterThan($index)}}"
+              greater-or-equal-than="getGreaterThan($index)"
               required
               step="any" />
           </td>
@@ -184,7 +185,7 @@
               type="number"
               class="form-control"
               name="range.to"
-              greater-or-equal-than="{{range.from}}"
+              greater-or-equal-than="range.from"
               required
               step="any" />
           </td>

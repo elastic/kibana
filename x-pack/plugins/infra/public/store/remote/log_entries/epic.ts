@@ -11,7 +11,13 @@ import { exhaustMap, filter, map, withLatestFrom } from 'rxjs/operators';
 
 import { logFilterActions, logPositionActions } from '../..';
 import { pickTimeKey, TimeKey, timeKeyIsBetween } from '../../../../common/time';
-import { loadEntries, loadMoreEntries, loadNewerEntries } from './actions';
+import {
+  loadEntries,
+  loadMoreEntries,
+  loadNewerEntries,
+  reloadEntries,
+  setSourceId,
+} from './actions';
 import { loadEntriesEpic } from './operations/load';
 import { loadMoreEntriesEpic } from './operations/load_more';
 
@@ -62,6 +68,11 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     map(pickTimeKey)
   );
 
+  const sourceId$ = action$.pipe(
+    filter(setSourceId.match),
+    map(({ payload }) => payload)
+  );
+
   const shouldLoadAroundNewPosition$ = action$.pipe(
     filter(logPositionActions.jumpToTargetPosition.match),
     withLatestFrom(state$),
@@ -80,6 +91,8 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     filter(logFilterActions.applyLogFilterQuery.match),
     withLatestFrom(filterQuery$, (filterQuery, filterQueryString) => filterQueryString)
   );
+
+  const shouldReload$ = merge(action$.pipe(filter(reloadEntries.match)), sourceId$);
 
   const shouldLoadMoreBefore$ = action$.pipe(
     filter(logPositionActions.reportVisiblePositions.match),
@@ -120,10 +133,10 @@ export const createEntriesEffectsEpic = <State>(): Epic<
 
   return merge(
     shouldLoadAroundNewPosition$.pipe(
-      withLatestFrom(filterQuery$),
-      exhaustMap(([timeKey, filterQuery]) => [
+      withLatestFrom(filterQuery$, sourceId$),
+      exhaustMap(([timeKey, filterQuery, sourceId]) => [
         loadEntries({
-          sourceId: 'default',
+          sourceId,
           timeKey,
           countBefore: LOAD_CHUNK_SIZE,
           countAfter: LOAD_CHUNK_SIZE,
@@ -132,10 +145,22 @@ export const createEntriesEffectsEpic = <State>(): Epic<
       ])
     ),
     shouldLoadWithNewFilter$.pipe(
-      withLatestFrom(visibleMidpointOrTarget$),
-      exhaustMap(([filterQuery, timeKey]) => [
+      withLatestFrom(visibleMidpointOrTarget$, sourceId$),
+      exhaustMap(([filterQuery, timeKey, sourceId]) => [
         loadEntries({
-          sourceId: 'default',
+          sourceId,
+          timeKey,
+          countBefore: LOAD_CHUNK_SIZE,
+          countAfter: LOAD_CHUNK_SIZE,
+          filterQuery,
+        }),
+      ])
+    ),
+    shouldReload$.pipe(
+      withLatestFrom(visibleMidpointOrTarget$, filterQuery$, sourceId$),
+      exhaustMap(([_, timeKey, filterQuery, sourceId]) => [
+        loadEntries({
+          sourceId,
           timeKey,
           countBefore: LOAD_CHUNK_SIZE,
           countAfter: LOAD_CHUNK_SIZE,
@@ -144,10 +169,10 @@ export const createEntriesEffectsEpic = <State>(): Epic<
       ])
     ),
     shouldLoadMoreAfter$.pipe(
-      withLatestFrom(filterQuery$),
-      exhaustMap(([timeKey, filterQuery]) => [
+      withLatestFrom(filterQuery$, sourceId$),
+      exhaustMap(([timeKey, filterQuery, sourceId]) => [
         loadMoreEntries({
-          sourceId: 'default',
+          sourceId,
           timeKey,
           countBefore: 0,
           countAfter: LOAD_CHUNK_SIZE,
@@ -156,10 +181,10 @@ export const createEntriesEffectsEpic = <State>(): Epic<
       ])
     ),
     shouldLoadMoreBefore$.pipe(
-      withLatestFrom(filterQuery$),
-      exhaustMap(([timeKey, filterQuery]) => [
+      withLatestFrom(filterQuery$, sourceId$),
+      exhaustMap(([timeKey, filterQuery, sourceId]) => [
         loadMoreEntries({
-          sourceId: 'default',
+          sourceId,
           timeKey,
           countBefore: LOAD_CHUNK_SIZE,
           countAfter: 0,

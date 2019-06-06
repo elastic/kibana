@@ -55,7 +55,7 @@ export async function runCheckTsProjectsCli() {
         if (projects.length === 0) {
           isNotInTsProject.push(file);
         }
-        if (projects.length > 1) {
+        if (projects.length > 1 && !file.isTypescriptAmbient()) {
           isInMultipleTsProjects.push(file);
         }
       }

@@ -17,165 +17,80 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// tslint:disable-next-line:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
-  const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects([
-    'common',
-    'visualize',
-    'header',
-    'settings',
-    'visualBuilder',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
 
   describe('visual builder', function describeIndexTests() {
-    describe('Time Series', () => {
-      before(async () => {
-        await PageObjects.visualBuilder.resetPage();
-      });
-
-      it('should show the correct count in the legend', async () => {
-        await retry.try(async () => {
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-          expect(actualCount).to.be('156');
-        });
-      });
-
-      it('should show the correct count in the legend with 2h offset', async () => {
-        await PageObjects.visualBuilder.clickSeriesOption();
-        await PageObjects.visualBuilder.enterOffsetSeries('2h');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('293');
-      });
-
-      it('should show the correct count in the legend with -2h offset', async () => {
-        await PageObjects.visualBuilder.enterOffsetSeries('-2h');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('53');
-      });
-
-      after(async () => {
-        // set back to no offset for the next test, an empty string didn't seem to work here
-        await PageObjects.visualBuilder.enterOffsetSeries('0h');
-      });
+    beforeEach(async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisualBuilder();
+      await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
     });
 
-    describe('Math Aggregation', () => {
-      before(async () => {
+    describe('metric', () => {
+      beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
+      });
+
+      it('should not have inspector enabled', async () => {
+        await inspector.expectIsNotEnabled();
+      });
+
+      it('should show correct data', async () => {
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        expect(value).to.eql('156');
+      });
+
+      it('should show correct data with Math Aggregation', async () => {
         await PageObjects.visualBuilder.createNewAgg();
         await PageObjects.visualBuilder.selectAggType('math', 1);
         await PageObjects.visualBuilder.fillInVariable();
         await PageObjects.visualBuilder.fillInExpression('params.test + 1');
-      });
-
-      it('should not have inspector enabled', async () => {
-        await inspector.expectIsNotEnabled();
-      });
-
-      it('should show correct data', async () => {
-        const expectedMetricValue = '157';
         const value = await PageObjects.visualBuilder.getMetricValue();
-        log.debug(`metric value: ${JSON.stringify(value)}`);
-        log.debug(`metric value: ${value}`);
-        expect(value).to.eql(expectedMetricValue);
+        expect(value).to.eql('157');
       });
     });
 
-    describe('metric', () => {
-      before(async () => {
-        await PageObjects.visualBuilder.resetPage();
-        await PageObjects.visualBuilder.clickMetric();
-      });
-
-      it('should not have inspector enabled', async () => {
-        await inspector.expectIsNotEnabled();
-      });
-
-      it('should show correct data', async () => {
-        const expectedMetricValue = '156';
-        await PageObjects.visualize.waitForVisualization();
-        const value = await PageObjects.visualBuilder.getMetricValue();
-        log.debug(`metric value: ${value}`);
-        expect(value).to.eql(expectedMetricValue);
-      });
-    });
-
-    // add a gauge test
     describe('gauge', () => {
-      before(async () => {
+      beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickGauge();
-        log.debug('clicked on Gauge');
+        await PageObjects.visualBuilder.checkGaugeTabIsPresent();
       });
 
       it('should verify gauge label and count display', async () => {
-        await retry.try(async () => {
-          await PageObjects.visualize.waitForVisualization();
-          const labelString = await PageObjects.visualBuilder.getGaugeLabel();
-          expect(labelString).to.be('Count');
-          const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
-          expect(gaugeCount).to.be('156');
-        });
+        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        const labelString = await PageObjects.visualBuilder.getGaugeLabel();
+        expect(labelString).to.be('Count');
+        const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
+        expect(gaugeCount).to.be('156');
       });
     });
 
-    // add a top N test
     describe('topN', () => {
-      before(async () => {
+      beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickTopN();
-        log.debug('clicked on TopN');
+        await PageObjects.visualBuilder.checkTopNTabIsPresent();
       });
 
       it('should verify topN label and count display', async () => {
-        await retry.try(async () => {
-          await PageObjects.visualize.waitForVisualization();
-          const labelString = await PageObjects.visualBuilder.getTopNLabel();
-          expect(labelString).to.be('Count');
-          const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
-          expect(gaugeCount).to.be('156');
-        });
-      });
-    });
-
-    // add a table sanity timestamp
-    describe('table', () => {
-      before(async () => {
-        await PageObjects.visualBuilder.resetPage();
-        await PageObjects.visualBuilder.clickTable();
-        await PageObjects.timePicker.setAbsoluteRange(
-          '2015-09-22 06:00:00.000',
-          '2015-09-22 11:00:00.000'
-        );
-        log.debug('clicked on Table');
-      });
-
-      it('should be able to set values for group by field and column name', async () => {
-        await PageObjects.visualBuilder.selectGroupByField('machine.os.raw');
-        await PageObjects.visualBuilder.setLabelValue('OS');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        log.debug('finished setting field and column name');
-      });
-
-      it('should be able verify that values are displayed in the table', async () => {
-        const tableData = await PageObjects.visualBuilder.getViewTable();
-        log.debug(`Values on ${tableData}`);
-        const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
-        expect(tableData).to.be(expectedData);
+        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        const labelString = await PageObjects.visualBuilder.getTopNLabel();
+        expect(labelString).to.be('Count');
+        const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
+        expect(gaugeCount).to.be('156');
       });
     });
 

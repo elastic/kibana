@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../../../src/dev/constants';
+
 export default {
   rootDir: '../../',
   roots: [
@@ -31,11 +33,6 @@ export default {
   coverageReporters: [
     'html',
   ],
-  globals: {
-    'ts-jest': {
-      skipBabel: true,
-    },
-  },
   moduleFileExtensions: [
     'js',
     'json',
@@ -52,11 +49,10 @@ export default {
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',
-    'integration_tests/'
+    `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],
   transform: {
-    '^.+\\.js$': '<rootDir>/../src/dev/jest/babel_transform.js',
-    '^.+\\.tsx?$': '<rootDir>/../src/dev/jest/ts_transform.js',
+    '^.+\\.(js|tsx?)$': '<rootDir>/../src/dev/jest/babel_transform.js',
     '^.+\\.txt?$': 'jest-raw-loader',
     '^.+\\.html?$': 'jest-raw-loader',
   },

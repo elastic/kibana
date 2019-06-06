@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import Boom from 'boom';
 import Joi from 'joi';
 import sinon from 'sinon';
@@ -295,17 +295,15 @@ describe('Authentication routes', () => {
       const unhandledException = new Error('Something went wrong.');
       serverStub.plugins.security.authenticate.throws(unhandledException);
 
-      return samlAcsRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          sinon.assert.notCalled(hStub.redirect);
-          expect(response.isBoom).to.be(true);
-          expect(response.output.payload).to.eql({
-            statusCode: 500,
-            error: 'Internal Server Error',
-            message: 'An internal server error occurred'
-          });
-        });
+      const response = await samlAcsRoute.handler(request, hStub);
+
+      sinon.assert.notCalled(hStub.redirect);
+      expect(response.isBoom).to.be(true);
+      expect(response.output.payload).to.eql({
+        statusCode: 500,
+        error: 'Internal Server Error',
+        message: 'An internal server error occurred'
+      });
     });
 
     it('returns 401 if authentication fails.', async () => {
@@ -314,14 +312,12 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.failed(failureReason))
       );
 
-      return samlAcsRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          sinon.assert.notCalled(hStub.redirect);
-          expect(response.isBoom).to.be(true);
-          expect(response.message).to.be(failureReason.message);
-          expect(response.output.statusCode).to.be(401);
-        });
+      const response = await samlAcsRoute.handler(request, hStub);
+
+      sinon.assert.notCalled(hStub.redirect);
+      expect(response.isBoom).to.be(true);
+      expect(response.message).to.be(failureReason.message);
+      expect(response.output.statusCode).to.be(401);
     });
 
     it('returns 401 if authentication is not handled.', async () => {
@@ -329,30 +325,25 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.notHandled())
       );
 
-      return samlAcsRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          sinon.assert.notCalled(hStub.redirect);
-          expect(response.isBoom).to.be(true);
-          expect(response.message).to.be('Unauthorized');
-          expect(response.output.statusCode).to.be(401);
-        });
+      const response = await samlAcsRoute.handler(request, hStub);
+
+      sinon.assert.notCalled(hStub.redirect);
+      expect(response.isBoom).to.be(true);
+      expect(response.message).to.be('Unauthorized');
+      expect(response.output.statusCode).to.be(401);
     });
 
-    it('returns 403 if there an active session exists.', async () => {
+    it('returns 401 if authentication completes with unexpected result.', async () => {
       serverStub.plugins.security.authenticate.returns(
         Promise.resolve(AuthenticationResult.succeeded({}))
       );
 
-      return samlAcsRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          sinon.assert.notCalled(hStub.redirect);
-          expect(response.isBoom).to.be(true);
-          expect(response.message).to.be('Sorry, you already have an active Kibana session. ' +
-                'If you want to start a new one, please logout from the existing session first.');
-          expect(response.output.statusCode).to.be(403);
-        });
+      const response = await samlAcsRoute.handler(request, hStub);
+
+      sinon.assert.notCalled(hStub.redirect);
+      expect(response.isBoom).to.be(true);
+      expect(response.message).to.be('Unauthorized');
+      expect(response.output.statusCode).to.be(401);
     });
 
     it('redirects if required by the authentication process.', async () => {

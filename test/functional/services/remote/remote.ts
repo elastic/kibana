@@ -19,55 +19,45 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver } from './webdriver';
+import { Browsers } from './browsers';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
-  const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
-
-  if (browserType !== 'chrome' && browserType !== 'firefox') {
-    throw new Error(
-      `Unexpected TEST_BROWSER_TYPE "${browserType}", only "chrome" and "firefox" are supported`
-    );
-  }
+  const browserType: Browsers = config.get('browser.type');
 
   const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver(log, browserType);
+  const caps = await driver.getCapabilities();
+  const browserVersion = caps.get(browserType === Browsers.Chrome ? 'version' : 'browserVersion');
 
-  log.info('Remote initialized');
+  log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
+
+  if (browserType === Browsers.Chrome) {
+    log.info(`Chromedriver version: ${caps.get('chrome').chromedriverVersion}`);
+  }
 
   lifecycle.on('beforeTests', async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
-    await driver
-      .manage()
-      .window()
-      .setRect({ width: 1600, height: 1000 });
+    await (driver.manage().window() as any).setRect({ width: 1600, height: 1000 });
   });
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.on('beforeTestSuite', async () => {
-    windowSizeStack.unshift(
-      await driver
-        .manage()
-        .window()
-        .getRect()
-    );
+    windowSizeStack.unshift(await (driver.manage().window() as any).getRect());
   });
 
   lifecycle.on('beforeEachTest', async () => {
-    await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
+    await (driver.manage() as any).setTimeouts({ implicit: config.get('timeouts.find') });
   });
 
   lifecycle.on('afterTestSuite', async () => {
     const { width, height } = windowSizeStack.shift()!;
-    await driver
-      .manage()
-      .window()
-      .setRect({ width, height });
+    await (driver.manage().window() as any).setRect({ width, height });
   });
 
   lifecycle.on('cleanup', async () => await driver.quit());
 
-  return { driver, By, Key, until, LegacyActionSequence };
+  return { driver, By, Key, until, LegacyActionSequence, browserType };
 }

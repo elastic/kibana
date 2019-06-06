@@ -17,34 +17,14 @@
  * under the License.
  */
 
-import { toArray } from 'rxjs/operators';
-import { buildAll } from '../../../legacy/server/sass/build_all';
-import { findPluginSpecs } from '../../../legacy/plugin_discovery/find_plugin_specs';
-import { collectUiExports } from '../../../legacy/ui/ui_exports/collect_ui_exports';
+import { buildSass } from '../../sass';
 
 export const TranspileScssTask = {
   description: 'Transpiling SCSS to CSS',
-
   async run(config, log, build) {
-    const scanDirs = [ build.resolvePath('src/legacy/core_plugins') ];
-    const paths = [ build.resolvePath('node_modules/x-pack') ];
-
-    const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths } });
-    const enabledPlugins = await spec$.pipe(toArray()).toPromise();
-    const uiExports = collectUiExports(enabledPlugins);
-
-    try {
-      const bundles = await buildAll({
-        styleSheets: uiExports.styleSheetPaths,
-        log,
-        buildDir: build.resolvePath('built_assets/css'),
-        outputStyle: 'compressed',
-        sourceMap: false
-      });
-      bundles.forEach(bundle => log.info(`Compiled SCSS: ${bundle.sourcePath} (theme=${bundle.theme})`));
-    } catch (error) {
-      const { message, line, file } = error;
-      throw new Error(`${message} on line ${line} of ${file}`);
-    }
+    await buildSass({
+      log,
+      kibanaDir: build.resolvePath('.')
+    });
   }
 };

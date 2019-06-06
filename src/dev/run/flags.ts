@@ -97,6 +97,5 @@ export function getHelp(options: Options) {
     .join('\n  ')}
 
   Options:
-    ${optionHelp}
-`;
+    ${optionHelp + '\n\n'}`;
 }

@@ -6,22 +6,21 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
-import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { idx } from '@kbn/elastic-idx';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
   URL_FULL,
   USER_ID
 } from '../../../../../common/elasticsearch_fieldnames';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {
   IStickyProperty,
   StickyProperties
 } from '../../../shared/StickyProperties';
+import { ErrorCountBadge } from './ErrorCountBadge';
 
 interface Props {
   transaction: Transaction;
@@ -40,26 +39,6 @@ export function StickyTransactionProperties({
     idx(transaction, _ => _.url.full) ||
     NOT_AVAILABLE_LABEL;
   const duration = transaction.transaction.duration.us;
-
-  const errorsOverviewLink = (
-    <KibanaLink
-      pathname={'/app/apm'}
-      hash={`/${idx(transaction, _ => _.service.name)}/errors`}
-      query={{
-        kuery: legacyEncodeURIComponent(
-          `trace.id : "${transaction.trace.id}" and transaction.id : "${
-            transaction.transaction.id
-          }"`
-        )
-      }}
-    >
-      {i18n.translate('xpack.apm.transactionDetails.errorsOverviewLink', {
-        values: { errorCount: errorCount || 0 },
-        defaultMessage:
-          '{errorCount, plural, one {View 1 error} other {View # errors}}'
-      })}
-    </KibanaLink>
-  );
 
   const noErrorsText = i18n.translate(
     'xpack.apm.transactionDetails.errorsNone',
@@ -109,16 +88,7 @@ export function StickyTransactionProperties({
       }),
       fieldName: TRANSACTION_RESULT,
       val: idx(transaction, _ => _.transaction.result) || NOT_AVAILABLE_LABEL,
-      width: '25%'
-    },
-    {
-      label: i18n.translate('xpack.apm.transactionDetails.userIdLabel', {
-        defaultMessage: 'User ID'
-      }),
-      fieldName: USER_ID,
-      val: idx(transaction, _ => _.user.id) || NOT_AVAILABLE_LABEL,
-      truncated: true,
-      width: '25%'
+      width: '14%'
     },
     {
       label: i18n.translate(
@@ -127,8 +97,25 @@ export function StickyTransactionProperties({
           defaultMessage: 'Errors'
         }
       ),
-      val: errorCount ? errorsOverviewLink : noErrorsText,
-      width: '25%'
+      val: errorCount ? (
+        <ErrorCountBadge
+          errorCount={errorCount}
+          transaction={transaction}
+          verbose
+        />
+      ) : (
+        noErrorsText
+      ),
+      width: '18%'
+    },
+    {
+      label: i18n.translate('xpack.apm.transactionDetails.userIdLabel', {
+        defaultMessage: 'User ID'
+      }),
+      fieldName: USER_ID,
+      val: idx(transaction, _ => _.user.id) || NOT_AVAILABLE_LABEL,
+      truncated: true,
+      width: '18%'
     }
   ];
 

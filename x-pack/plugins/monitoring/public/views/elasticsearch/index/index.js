@@ -8,6 +8,7 @@
  * Controller for single index detail
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
@@ -53,13 +54,13 @@ uiRoutes.when('/elasticsearch/indices/:index', {
   },
   controllerAs: 'monitoringElasticsearchIndexApp',
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const kbnUrl = $injector.get('kbnUrl');
       const indexName = $route.current.params.index;
 
       super({
-        title: i18n('xpack.monitoring.elasticsearch.indices.overview.routeTitle', {
+        title: i18n.translate('xpack.monitoring.elasticsearch.indices.overview.routeTitle', {
           defaultMessage: 'Elasticsearch - Indices - {indexName} - Overview',
           values: {
             indexName,
@@ -90,12 +91,15 @@ uiRoutes.when('/elasticsearch/indices/:index', {
           $scope.labels = labels.index;
         }
 
+
         this.renderReact(
           <I18nContext>
             <Index
               scope={$scope}
               kbnUrl={kbnUrl}
               onBrush={this.onBrush}
+              indexUuid={this.indexName}
+              clusterUuid={$scope.cluster.cluster_uuid}
               {...data}
             />
           </I18nContext>

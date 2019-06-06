@@ -1,3 +1,4 @@
+[role="xpack"]
 [[tile-layer]]
 == Tile layer
 

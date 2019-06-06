@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { compare } from '../compare';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../strings';
+
+const errors = getFunctionErrors().compare;
 
 describe('compare', () => {
   const fn = functionWrapper(compare);
@@ -23,16 +26,12 @@ describe('compare', () => {
       });
 
       it('throws when invalid op is provided', () => {
-        expect(() => fn(1, { op: 'boo', to: 2 })).to.throwException(e => {
-          expect(e.message).to.be(
-            `Invalid compare operator: 'boo'. Use eq, ne, lt, gt, lte, or gte.`
-          );
-        });
-        expect(() => fn(1, { op: 'boo' })).to.throwException(e => {
-          expect(e.message).to.be(
-            `Invalid compare operator: 'boo'. Use eq, ne, lt, gt, lte, or gte.`
-          );
-        });
+        expect(() => fn(1, { op: 'boo', to: 2 })).to.throwException(
+          new RegExp(errors.invalidCompareOperator('boo').message)
+        );
+        expect(() => fn(1, { op: 'boo' })).to.throwException(
+          new RegExp(errors.invalidCompareOperator('boo').message)
+        );
       });
     });
 

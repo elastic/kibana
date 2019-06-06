@@ -7,34 +7,35 @@
 import { getAnomalySeries } from '.';
 import { mlAnomalyResponse } from './mock-responses/mlAnomalyResponse';
 import { mlBucketSpanResponse } from './mock-responses/mlBucketSpanResponse';
-import { AnomalyTimeSeriesResponse } from './transform';
+import { PromiseReturnType } from '../../../../../typings/common';
 
 describe('getAnomalySeries', () => {
-  let avgAnomalies: AnomalyTimeSeriesResponse;
+  let avgAnomalies: PromiseReturnType<typeof getAnomalySeries>;
   beforeEach(async () => {
     const clientSpy = jest
       .fn()
       .mockResolvedValueOnce(mlBucketSpanResponse)
       .mockResolvedValueOnce(mlAnomalyResponse);
 
-    avgAnomalies = (await getAnomalySeries({
+    avgAnomalies = await getAnomalySeries({
       serviceName: 'myServiceName',
       transactionType: 'myTransactionType',
       timeSeriesDates: [100, 100000],
       setup: {
         start: 0,
         end: 500000,
-        client: clientSpy,
+        client: { search: clientSpy } as any,
         config: {
           get: () => 'myIndex' as any,
           has: () => true
-        }
+        },
+        uiFiltersES: []
       }
-    })) as AnomalyTimeSeriesResponse;
+    });
   });
 
   it('should remove buckets lower than threshold and outside date range from anomalyScore', () => {
-    expect(avgAnomalies.anomalyScore).toEqual([
+    expect(avgAnomalies!.anomalyScore).toEqual([
       { x0: 15000, x: 25000 },
       { x0: 25000, x: 35000 }
     ]);
@@ -42,7 +43,7 @@ describe('getAnomalySeries', () => {
 
   it('should remove buckets outside date range from anomalyBoundaries', () => {
     expect(
-      avgAnomalies.anomalyBoundaries.filter(
+      avgAnomalies!.anomalyBoundaries!.filter(
         bucket => bucket.x < 100 || bucket.x > 100000
       ).length
     ).toBe(0);
@@ -50,7 +51,7 @@ describe('getAnomalySeries', () => {
 
   it('should remove buckets with null from anomalyBoundaries', () => {
     expect(
-      avgAnomalies.anomalyBoundaries.filter(p => p.y === null).length
+      avgAnomalies!.anomalyBoundaries!.filter(p => p.y === null).length
     ).toBe(0);
   });
 

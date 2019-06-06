@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
-  EuiButton,
+  EuiButtonIcon,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
@@ -58,14 +58,23 @@ function getColumns(viewForecast) {
       name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.viewColumnName', {
         defaultMessage: 'View'
       }),
-      render: (forecast) => (
-        <EuiButton
-          className="view-forecast-btn"
-          onClick={() => viewForecast(forecast.forecast_id)}
-        >
-          <i aria-hidden="true" className="fa fa-line-chart"/>
-        </EuiButton>
-      )
+      width: '60px',
+      render: (forecast) => {
+        const viewForecastAriaLabel = i18n.translate(
+          'xpack.ml.timeSeriesExplorer.forecastsList.viewForecastAriaLabel', {
+            defaultMessage: 'View forecast created at {createdDate}',
+            values: { createdDate: formatHumanReadableDateTimeSeconds(forecast.forecast_create_timestamp) }
+          }
+        );
+
+        return (
+          <EuiButtonIcon
+            onClick={() => viewForecast(forecast.forecast_id)}
+            iconType="stats"
+            aria-label={viewForecastAriaLabel}
+          />
+        );
+      }
     }
   ];
 }

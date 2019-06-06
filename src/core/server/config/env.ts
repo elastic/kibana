@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import process from 'process';
 
 // `require` is necessary for this to work inside x-pack code as well
-// tslint:disable no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../../../../package.json');
 
 export interface PackageInfo {

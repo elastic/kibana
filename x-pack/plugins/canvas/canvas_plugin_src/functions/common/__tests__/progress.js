@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { progress } from '../progress';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../strings';
 import { fontStyle } from './fixtures/test_styles';
+
+const errors = getFunctionErrors().progress;
 
 describe('progress', () => {
   const fn = functionWrapper(progress);
@@ -28,9 +31,7 @@ describe('progress', () => {
   it(`throws when context is outside of the valid range`, () => {
     expect(fn)
       .withArgs(3)
-      .to.throwException(e => {
-        expect(e.message).to.be(`Invalid value: '3'. Value must be between 0 and 1`);
-      });
+      .to.throwException(new RegExp(errors.invalidValue(3).message));
   });
 
   describe('args', () => {
@@ -64,9 +65,7 @@ describe('progress', () => {
       it('throws if max <= 0', () => {
         expect(fn)
           .withArgs(value, { max: -0.5 })
-          .to.throwException(e => {
-            expect(e.message).to.be(`Invalid max value: '-0.5'. 'max' must be greater than 0`);
-          });
+          .to.throwException(new RegExp(errors.invalidMaxValue(-0.5).message));
       });
     });
 

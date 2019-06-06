@@ -18,12 +18,12 @@
  */
 
 import { startsWith } from 'lodash';
-import { METRIC_TYPES } from './metric_types';
-import { toPercentileNumber } from './to_percentile_number';
+import { toPercentileNumber } from '../../../../common/to_percentile_number';
+import { METRIC_TYPES } from '../../../../common/metric_types';
 
 const percentileTest = /\[[0-9\.]+\]$/;
 
-export default (id, metrics) => {
+export const getBucketsPath = (id, metrics) => {
   const metric = metrics.find(m => startsWith(id, m.id));
   let bucketsPath = String(id);
 
@@ -40,6 +40,7 @@ export default (id, metrics) => {
       bucketsPath += `[${toPercentileNumber(percent.value)}]`;
       break;
     case METRIC_TYPES.PERCENTILE_RANK:
+      if (percentileTest.test(bucketsPath)) break;
       bucketsPath += `[${toPercentileNumber(metric.value)}]`;
       break;
     case METRIC_TYPES.STD_DEVIATION:

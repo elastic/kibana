@@ -8,6 +8,7 @@ import { format as formatUrl } from 'url';
 
 import elasticsearch from 'elasticsearch';
 import shieldPlugin from '../../../server/lib/esjs_shield_plugin';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DEFAULT_API_VERSION } from '../../../../src/core/server/elasticsearch/elasticsearch_config';
 
 export function EsProvider({ getService }) {

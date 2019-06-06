@@ -6,8 +6,6 @@
 
 export { logFilterActions } from './log_filter';
 export { logPositionActions } from './log_position';
-export { metricTimeActions } from './metric_time';
 export { waffleFilterActions } from './waffle_filter';
 export { waffleTimeActions } from './waffle_time';
 export { waffleOptionsActions } from './waffle_options';
-export { flyoutOptionsActions } from './log_flyout';

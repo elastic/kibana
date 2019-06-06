@@ -14,88 +14,76 @@ exports[`it renders without crashing 1`] = `
       options={
         Array [
           Object {
-            "isGroupLabelOption": false,
             "label": "all",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "monitor",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_security",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_index_templates",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_pipeline",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_ingest_pipelines",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "transport_client",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_ml",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "monitor_ml",
           },
           Object {
-            "isGroupLabelOption": false,
+            "label": "manage_data_frame_transforms",
+          },
+          Object {
+            "label": "monitor_data_frame_transforms",
+          },
+          Object {
             "label": "manage_watcher",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "monitor_watcher",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "read_ccr",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_ccr",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_ilm",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "read_ilm",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "monitor_rollup",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_rollup",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_token",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_saml",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "create_snapshot",
+          },
+          Object {
+            "label": "manage_oidc",
           },
         ]
       }

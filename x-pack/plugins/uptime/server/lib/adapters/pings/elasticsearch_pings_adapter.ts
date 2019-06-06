@@ -8,10 +8,10 @@ import { get } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DocCount, HistogramDataPoint, Ping, PingResults } from '../../../../common/graphql/types';
-import { formatEsBucketsForHistogram } from '../../helper';
-import { getFilterFromMust } from '../../helper/get_filter_from_must';
+import { formatEsBucketsForHistogram, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
+import { getHistogramInterval } from '../../helper/get_histogram_interval';
 
 export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   private database: DatabaseAdapter;
@@ -36,10 +36,11 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     dateRangeEnd: string,
     monitorId?: string | null,
     status?: string | null,
-    sort?: string | null,
-    size?: number | null
+    sort: string | null = 'desc',
+    size?: number | null,
+    location?: string | null
   ): Promise<PingResults> {
-    const sortParam = sort ? { sort: [{ '@timestamp': { order: sort } }] } : undefined;
+    const sortParam = { sort: [{ '@timestamp': { order: sort } }] };
     const sizeParam = size ? { size } : undefined;
     const filter: any[] = [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }];
     if (monitorId) {
@@ -47,6 +48,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     }
     if (status) {
       filter.push({ term: { 'monitor.status': status } });
+    }
+    if (location) {
+      filter.push({ term: { 'observer.geo.name': location } });
     }
     const queryContext = { bool: { filter } };
     const params = {
@@ -87,12 +91,10 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string | null
+    monitorId?: string | null,
+    location?: string | null
   ): Promise<Ping[]> {
-    const filter: any[] = [];
-    if (monitorId) {
-      filter.push({ term: { 'monitor.id': monitorId } });
-    }
+    // TODO: Write tests for this function
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -107,6 +109,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
                   },
                 },
               },
+              ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
+              ...(location ? [{ term: { 'observer.geo.name': location } }] : []),
             ],
           },
         },
@@ -131,10 +135,6 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         },
       },
     };
-
-    if (filter.length) {
-      params.body.query.bool.filter.push(...filter);
-    }
 
     const result = await this.database.search(request, params);
     const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
@@ -165,7 +165,11 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<HistogramDataPoint[]> {
-    const query = getFilterFromMust(dateRangeStart, dateRangeEnd, filters);
+    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
+      dateRangeStart,
+      dateRangeEnd,
+      filters
+    );
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -173,9 +177,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         size: 0,
         aggs: {
           timeseries: {
-            auto_date_histogram: {
+            date_histogram: {
               field: '@timestamp',
-              buckets: 25,
+              fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
             },
             aggs: {
               down: {
@@ -212,8 +216,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       const downCount: number = get(bucket, 'down.bucket_count.value');
       return {
         key,
-        downCount,
-        upCount: total - downCount,
+        downCount: statusFilter && statusFilter !== 'down' ? 0 : downCount,
+        upCount: statusFilter && statusFilter !== 'up' ? 0 : total - downCount,
         y: 1,
       };
     });

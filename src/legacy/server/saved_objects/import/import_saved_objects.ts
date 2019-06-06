@@ -18,17 +18,18 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
 import { extractErrors } from './extract_errors';
 import { ImportError } from './types';
 import { validateReferences } from './validate_references';
+import { SavedObjectsClientContract } from '../';
 
 interface ImportSavedObjectsOptions {
   readStream: Readable;
   objectLimit: number;
   overwrite: boolean;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  supportedTypes: string[];
 }
 
 interface ImportResponse {
@@ -42,30 +43,45 @@ export async function importSavedObjects({
   objectLimit,
   overwrite,
   savedObjectsClient,
+  supportedTypes,
 }: ImportSavedObjectsOptions): Promise<ImportResponse> {
-  const objectsFromStream = await collectSavedObjects(readStream, objectLimit);
+  let errorAccumulator: ImportError[] = [];
 
+  // Get the objects to import
+  const {
+    errors: collectorErrors,
+    collectedObjects: objectsFromStream,
+  } = await collectSavedObjects({ readStream, objectLimit, supportedTypes });
+  errorAccumulator = [...errorAccumulator, ...collectorErrors];
+
+  // Validate references
   const { filteredObjects, errors: validationErrors } = await validateReferences(
     objectsFromStream,
     savedObjectsClient
   );
+  errorAccumulator = [...errorAccumulator, ...validationErrors];
 
+  // Exit early if no objects to import
   if (filteredObjects.length === 0) {
     return {
-      success: validationErrors.length === 0,
+      success: errorAccumulator.length === 0,
       successCount: 0,
-      ...(validationErrors.length ? { errors: validationErrors } : {}),
+      ...(errorAccumulator.length ? { errors: errorAccumulator } : {}),
     };
   }
 
+  // Create objects in bulk
   const bulkCreateResult = await savedObjectsClient.bulkCreate(filteredObjects, {
     overwrite,
   });
-  const errors = [...validationErrors, ...extractErrors(bulkCreateResult.saved_objects)];
+  errorAccumulator = [
+    ...errorAccumulator,
+    ...extractErrors(bulkCreateResult.saved_objects, filteredObjects),
+  ];
 
   return {
-    success: errors.length === 0,
-    successCount: objectsFromStream.length - errors.length,
-    ...(errors.length ? { errors } : {}),
+    success: errorAccumulator.length === 0,
+    successCount: bulkCreateResult.saved_objects.filter(obj => !obj.error).length,
+    ...(errorAccumulator.length ? { errors: errorAccumulator } : {}),
   };
 }

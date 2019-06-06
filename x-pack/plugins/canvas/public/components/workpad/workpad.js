@@ -25,13 +25,14 @@ export class Workpad extends React.PureComponent {
     isFullscreen: PropTypes.bool.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    workpadCss: PropTypes.string,
+    workpadCss: PropTypes.string.isRequired,
     undoHistory: PropTypes.func.isRequired,
     redoHistory: PropTypes.func.isRequired,
     nextPage: PropTypes.func.isRequired,
     previousPage: PropTypes.func.isRequired,
     fetchAllRenderables: PropTypes.func.isRequired,
-    css: PropTypes.object,
+    registerLayout: PropTypes.func.isRequired,
+    unregisterLayout: PropTypes.func.isRequired,
   };
 
   keyHandler = action => {
@@ -83,6 +84,8 @@ export class Workpad extends React.PureComponent {
       workpadCss,
       grid,
       isFullscreen,
+      registerLayout,
+      unregisterLayout,
     } = this.props;
 
     const bufferStyle = {
@@ -131,12 +134,14 @@ export class Workpad extends React.PureComponent {
                   {pages.map((page, i) => (
                     <WorkpadPage
                       key={page.id}
-                      page={page}
+                      pageId={page.id}
                       height={height}
                       width={width}
                       isSelected={i + 1 === selectedPageNumber}
                       animation={getAnimation(i + 1)}
                       onAnimationEnd={onTransitionEnd}
+                      registerLayout={registerLayout}
+                      unregisterLayout={unregisterLayout}
                     />
                   ))}
                   <div

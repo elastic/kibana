@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { date } from '../date';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../strings';
+
+const errors = getFunctionErrors().date;
 
 describe('date', () => {
   const fn = functionWrapper(date);
@@ -47,9 +50,9 @@ describe('date', () => {
       });
 
       it('throws when passing an invalid date string and format is not specified', () => {
-        expect(() => fn(null, { value: '23/25/2014' })).to.throwException(e => {
-          expect(e.message).to.be('Invalid date input: 23/25/2014');
-        });
+        expect(() => fn(null, { value: '23/25/2014' })).to.throwException(
+          new RegExp(errors.invalidDateInput('23/25/2014').message)
+        );
       });
     });
   });

@@ -32,7 +32,7 @@ module.directive('mlDocumentationHelpLink', function () {
       function renderReactComponent() {
 
         const props = {
-          fullUrl: `${baseUrl}/guide/en/x-pack/${version}/${scope.uri}`,
+          fullUrl: `${baseUrl}/guide/en/elastic-stack-overview/${version}/${scope.uri}`,
           label: scope.label
         };
 

@@ -1,196 +1,206 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FilterBar component renders the component without errors 1`] = `
-<EuiFlexGroup>
-  <EuiFlexItem
-    grow={true}
-  >
-    <EuiSearchBar
-      filters={
-        Array [
-          Object {
-            "field": "monitor.status",
-            "items": Array [
-              Object {
-                "name": "Up",
-                "value": "up",
-              },
-              Object {
-                "name": "Down",
-                "value": "down",
-              },
-            ],
-            "type": "field_value_toggle_group",
-          },
-          Object {
-            "field": "monitor.id",
-            "multiSelect": false,
-            "name": "ID",
-            "options": Array [
-              Object {
-                "value": "auto-tcp-0X81440A68E839814C",
-                "view": "auto-tcp-0X81440A68E839814C",
-              },
-              Object {
-                "value": "auto-http-0X3675F89EF0612091",
-                "view": "auto-http-0X3675F89EF0612091",
-              },
-              Object {
-                "value": "auto-http-0X970CBD2F2102BFA8",
-                "view": "auto-http-0X970CBD2F2102BFA8",
-              },
-              Object {
-                "value": "auto-http-0X131221E73F825974",
-                "view": "auto-http-0X131221E73F825974",
-              },
-              Object {
-                "value": "auto-http-0X9CB71300ABD5A2A8",
-                "view": "auto-http-0X9CB71300ABD5A2A8",
-              },
-              Object {
-                "value": "auto-http-0XD9AE729FC1C1E04A",
-                "view": "auto-http-0XD9AE729FC1C1E04A",
-              },
-              Object {
-                "value": "auto-http-0XDD2D4E60FD4A61C3",
-                "view": "auto-http-0XDD2D4E60FD4A61C3",
-              },
-              Object {
-                "value": "auto-http-0XA8096548ECEB85B7",
-                "view": "auto-http-0XA8096548ECEB85B7",
-              },
-              Object {
-                "value": "auto-http-0XC9CDA429418EDC2B",
-                "view": "auto-http-0XC9CDA429418EDC2B",
-              },
-              Object {
-                "value": "auto-http-0XE3B163481423197D",
-                "view": "auto-http-0XE3B163481423197D",
-              },
-            ],
-            "searchThreshold": 2,
-            "type": "field_value_selection",
-          },
-          Object {
-            "field": "monitor.name",
-            "multiSelect": false,
-            "name": "Name",
-            "options": Array [],
-            "searchThreshold": 2,
-            "type": "field_value_selection",
-          },
-          Object {
-            "field": "url.full",
-            "multiSelect": false,
-            "name": "URL",
-            "options": Array [
-              Object {
-                "value": "tcp://localhost:9200",
-                "view": "tcp://localhost:9200",
-              },
-              Object {
-                "value": "http://localhost:12349/",
-                "view": "http://localhost:12349/",
-              },
-              Object {
-                "value": "http://www.google.com/",
-                "view": "http://www.google.com/",
-              },
-              Object {
-                "value": "https://www.google.com/",
-                "view": "https://www.google.com/",
-              },
-              Object {
-                "value": "https://www.github.com/",
-                "view": "https://www.github.com/",
-              },
-              Object {
-                "value": "http://www.reddit.com/",
-                "view": "http://www.reddit.com/",
-              },
-              Object {
-                "value": "https://www.elastic.co",
-                "view": "https://www.elastic.co",
-              },
-              Object {
-                "value": "http://www.example.com/",
-                "view": "http://www.example.com/",
-              },
-              Object {
-                "value": "https://www.wikipedia.org/",
-                "view": "https://www.wikipedia.org/",
-              },
-              Object {
-                "value": "https://news.google.com/",
-                "view": "https://news.google.com/",
-              },
-            ],
-            "searchThreshold": 2,
-            "type": "field_value_selection",
-          },
-          Object {
-            "field": "url.port",
-            "multiSelect": false,
-            "name": "Port",
-            "options": Array [
-              Object {
-                "value": 9200,
-                "view": 9200,
-              },
-              Object {
-                "value": 12349,
-                "view": 12349,
-              },
-            ],
-            "searchThreshold": 2,
-            "type": "field_value_selection",
-          },
-          Object {
-            "field": "monitor.type",
-            "multiSelect": false,
-            "name": "Scheme",
-            "options": Array [
-              Object {
-                "value": "tcp",
-                "view": "tcp",
-              },
-              Object {
-                "value": "http",
-                "view": "http",
-              },
-            ],
-            "searchThreshold": 2,
-            "type": "field_value_selection",
-          },
-        ]
+<div
+  data-test-subj="xpack.uptime.filterBar"
+>
+  <EuiSearchBar
+    box={
+      Object {
+        "incremental": false,
       }
-      onChange={[Function]}
-      schema={
+    }
+    className="euiFlexGroup--gutterSmall"
+    filters={
+      Array [
         Object {
-          "fields": Object {
-            "monitor.host": Object {
-              "type": "string",
+          "field": "monitor.status",
+          "items": Array [
+            Object {
+              "name": "Up",
+              "value": "up",
             },
-            "monitor.id": Object {
-              "type": "string",
+            Object {
+              "name": "Down",
+              "value": "down",
             },
-            "monitor.ip": Object {
-              "type": "string",
+          ],
+          "type": "field_value_toggle_group",
+        },
+        Object {
+          "field": "observer.geo.name",
+          "name": "Location",
+          "options": Array [],
+          "type": "field_value_selection",
+        },
+        Object {
+          "field": "monitor.id",
+          "multiSelect": false,
+          "name": "ID",
+          "options": Array [
+            Object {
+              "value": "auto-tcp-0X81440A68E839814C",
+              "view": "auto-tcp-0X81440A68E839814C",
             },
-            "monitor.scheme": Object {
-              "type": "string",
+            Object {
+              "value": "auto-http-0X3675F89EF0612091",
+              "view": "auto-http-0X3675F89EF0612091",
             },
-            "monitor.status": Object {
-              "type": "string",
+            Object {
+              "value": "auto-http-0X970CBD2F2102BFA8",
+              "view": "auto-http-0X970CBD2F2102BFA8",
             },
-            "url.port": Object {
-              "type": "number",
+            Object {
+              "value": "auto-http-0X131221E73F825974",
+              "view": "auto-http-0X131221E73F825974",
             },
+            Object {
+              "value": "auto-http-0X9CB71300ABD5A2A8",
+              "view": "auto-http-0X9CB71300ABD5A2A8",
+            },
+            Object {
+              "value": "auto-http-0XD9AE729FC1C1E04A",
+              "view": "auto-http-0XD9AE729FC1C1E04A",
+            },
+            Object {
+              "value": "auto-http-0XDD2D4E60FD4A61C3",
+              "view": "auto-http-0XDD2D4E60FD4A61C3",
+            },
+            Object {
+              "value": "auto-http-0XA8096548ECEB85B7",
+              "view": "auto-http-0XA8096548ECEB85B7",
+            },
+            Object {
+              "value": "auto-http-0XC9CDA429418EDC2B",
+              "view": "auto-http-0XC9CDA429418EDC2B",
+            },
+            Object {
+              "value": "auto-http-0XE3B163481423197D",
+              "view": "auto-http-0XE3B163481423197D",
+            },
+          ],
+          "searchThreshold": 2,
+          "type": "field_value_selection",
+        },
+        Object {
+          "field": "monitor.name",
+          "multiSelect": false,
+          "name": "Name",
+          "options": Array [],
+          "searchThreshold": 2,
+          "type": "field_value_selection",
+        },
+        Object {
+          "field": "url.full",
+          "multiSelect": false,
+          "name": "URL",
+          "options": Array [
+            Object {
+              "value": "tcp://localhost:9200",
+              "view": "tcp://localhost:9200",
+            },
+            Object {
+              "value": "http://localhost:12349/",
+              "view": "http://localhost:12349/",
+            },
+            Object {
+              "value": "http://www.google.com/",
+              "view": "http://www.google.com/",
+            },
+            Object {
+              "value": "https://www.google.com/",
+              "view": "https://www.google.com/",
+            },
+            Object {
+              "value": "https://www.github.com/",
+              "view": "https://www.github.com/",
+            },
+            Object {
+              "value": "http://www.reddit.com/",
+              "view": "http://www.reddit.com/",
+            },
+            Object {
+              "value": "https://www.elastic.co",
+              "view": "https://www.elastic.co",
+            },
+            Object {
+              "value": "http://www.example.com/",
+              "view": "http://www.example.com/",
+            },
+            Object {
+              "value": "https://www.wikipedia.org/",
+              "view": "https://www.wikipedia.org/",
+            },
+            Object {
+              "value": "https://news.google.com/",
+              "view": "https://news.google.com/",
+            },
+          ],
+          "searchThreshold": 2,
+          "type": "field_value_selection",
+        },
+        Object {
+          "field": "url.port",
+          "multiSelect": false,
+          "name": "Port",
+          "options": Array [
+            Object {
+              "value": 9200,
+              "view": 9200,
+            },
+            Object {
+              "value": 12349,
+              "view": 12349,
+            },
+          ],
+          "searchThreshold": 2,
+          "type": "field_value_selection",
+        },
+        Object {
+          "field": "monitor.type",
+          "multiSelect": false,
+          "name": "Scheme",
+          "options": Array [
+            Object {
+              "value": "tcp",
+              "view": "tcp",
+            },
+            Object {
+              "value": "http",
+              "view": "http",
+            },
+          ],
+          "searchThreshold": 2,
+          "type": "field_value_selection",
+        },
+      ]
+    }
+    onChange={[MockFunction]}
+    schema={
+      Object {
+        "fields": Object {
+          "monitor.host": Object {
+            "type": "string",
           },
-          "strict": true,
-        }
+          "monitor.id": Object {
+            "type": "string",
+          },
+          "monitor.ip": Object {
+            "type": "string",
+          },
+          "monitor.scheme": Object {
+            "type": "string",
+          },
+          "monitor.status": Object {
+            "type": "string",
+          },
+          "url.port": Object {
+            "type": "number",
+          },
+        },
+        "strict": true,
       }
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>
+    }
+  />
+</div>
 `;

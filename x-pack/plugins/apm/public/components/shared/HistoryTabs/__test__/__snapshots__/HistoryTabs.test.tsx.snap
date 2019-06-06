@@ -1,28 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`HistoryTabs should change the selected item on tab click 1`] = `
-<Content
-  name="two"
->
-  <div>
-    two
-  </div>
-</Content>
-`;
-
-exports[`HistoryTabs should change the selected item on tab click 2`] = `
-<Content
-  name="three"
->
-  <div>
-    three
-  </div>
-</Content>
-`;
-
 exports[`HistoryTabs should render correctly 1`] = `
 <Fragment>
   <EuiTabs
+    display="default"
     expand={false}
     size="m"
   >

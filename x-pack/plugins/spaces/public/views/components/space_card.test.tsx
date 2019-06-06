@@ -13,6 +13,7 @@ test('it renders without crashing', () => {
     id: '',
     name: 'space name',
     description: 'space description',
+    disabledFeatures: [],
   };
 
   shallow(<SpaceCard space={space} onClick={jest.fn()} />);
@@ -23,6 +24,7 @@ test('it is clickable', () => {
     id: '',
     name: 'space name',
     description: 'space description',
+    disabledFeatures: [],
   };
 
   const clickHandler = jest.fn();

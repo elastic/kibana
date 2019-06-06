@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 import { nodesToWaffleMap } from '../../containers/waffle/nodes_to_wafflemap';
 import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
 } from '../../containers/waffle/type_guards';
-import { InfraNode, InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
+import { InfraSnapshotNode, InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../lib/lib';
 import { AutoSizer } from '../auto_sizer';
 import { GroupOfGroups } from './group_of_groups';
@@ -19,7 +20,7 @@ import { Legend } from './legend';
 import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
 
 interface Props {
-  nodes: InfraNode[];
+  nodes: InfraSnapshotNode[];
   nodeType: InfraNodeType;
   options: InfraWaffleMapOptions;
   formatter: (subject: string | number) => string;
@@ -95,16 +96,16 @@ export const Map: React.SFC<Props> = ({
   );
 };
 
-const WaffleMapOuterContainer = styled.div`
+const WaffleMapOuterContainer = euiStyled.div`
   flex: 1 0 0%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
 `;
 
-const WaffleMapInnerContainer = styled.div`
+const WaffleMapInnerContainer = euiStyled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;

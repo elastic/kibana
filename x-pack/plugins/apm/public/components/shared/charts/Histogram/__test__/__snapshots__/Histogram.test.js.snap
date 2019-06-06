@@ -1461,7 +1461,7 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
     <div
       className="c1"
     >
-      811 - 869 ms
+      811 - 927 ms
     </div>
     <div
       className="c2"

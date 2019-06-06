@@ -3,7 +3,7 @@
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-The resolve import errors API enables you to resolve errors given by the import API by either overwriting specific saved objects or changing references to a newly created object.
+The resolve import errors API enables you to resolve errors given by the import API by either retrying certain saved objects, overwriting specific saved objects or changing references to different saved objects.
 
 Note: You cannot access this endpoint via the Console in Kibana.
 
@@ -16,49 +16,32 @@ Note: You cannot access this endpoint via the Console in Kibana.
 The request body must be of type multipart/form-data.
 
 `file`::
-  (ndjson) The same new line delimited JSON objects given to the import API.
+  The same file given to the import API.
 
-`overwrites` (optional)::
-  (array) A list of `type` and `id` objects allowed to be overwritten on import.
-
-`replaceReferences` (optional)::
-  (array) A list of `type`, `from` and `to` used to change imported saved object references to.
-
-`skips` (optional)::
-  (array) A list of `type` and `id` objects to skip importing.
+`retries`::
+  (array) A list of `type`, `id`, `replaceReferences` and `overwrite` objects to retry importing. The property `replaceReferences` is a list of `type`, `from` and `to` used to change the object's references.
 
 ==== Response body
 
 The response body will have a top level `success` property that indicates
-if the import was successful or not as well as a `successCount` indicating how many records are successfully resolved.
-In the scenario the import wasn't successful a top level `errors` array will contain the objects that failed to import.
+if resolving errors was successful or not as well as a `successCount` indicating how many records are successfully resolved.
+In the scenario resolving errors wasn't successful, a top level `errors` array will contain the objects that failed to be resolved.
 
 ==== Examples
 
-The following example resolves errors for an index pattern and dashboard but indicates to skip the index pattern.
-This will cause the index pattern to not be in the system and the dashboard to overwrite the existing saved object.
+The following example retries importing a dashboard.
 
 [source,js]
 --------------------------------------------------
-POST api/saved_objects/_resolve_import_errors
-Content-Type: multipart/form-data; boundary=EXAMPLE
---EXAMPLE
-Content-Disposition: form-data; name="file"; filename="export.ndjson"
-Content-Type: application/ndjson
-
-{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
-{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
---EXAMPLE
-Content-Disposition: form-data; name="skips"
-
-[{"type":"index-pattern","id":"my-pattern"}]
---EXAMPLE
-Content-Disposition: form-data; name="overwrites"
-
-[{"type":"dashboard","id":"my-dashboard"}]
---EXAMPLE--
+$ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard"}]'
 --------------------------------------------------
-// KIBANA
+
+The `file.ndjson` file would contain the following.
+
+[source,js]
+--------------------------------------------------
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
+--------------------------------------------------
 
 A successful call returns a response code of `200` and a response body
 containing a JSON structure similar to the following example:
@@ -71,26 +54,45 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-The following example resolves errors for a visualization and dashboard but indicates
-to replace the dashboard references to another visualization.
+The following example resolves errors for a dashboard. This will cause the dashboard to overwrite the existing saved object.
 
 [source,js]
 --------------------------------------------------
-POST api/saved_objects/_resolve_import_errors
-Content-Type: multipart/form-data; boundary=EXAMPLE
---EXAMPLE
-Content-Disposition: form-data; name="file"; filename="export.ndjson"
-Content-Type: application/ndjson
-
-{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"}}
-{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"panel_0","type":"visualization","id":"my-vis"}]}
---EXAMPLE
-Content-Disposition: form-data; name="replaceReferences"
-
-[{"type":"visualization","from":"my-vis","to":"my-vis-2"}]
---EXAMPLE--
+$ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard","overwrite":true}]'
 --------------------------------------------------
-// KIBANA
+
+The `file.ndjson` file would contain the following.
+
+[source,js]
+--------------------------------------------------
+{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
+--------------------------------------------------
+
+A successful call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "success": true,
+  "successCount": 1
+}
+--------------------------------------------------
+
+The following example resolves errors for a visualization by replacing the index pattern to another.
+
+[source,js]
+--------------------------------------------------
+$ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"missing","to":"existing"}]}]'
+--------------------------------------------------
+
+The `file.ndjson` file would contain the following.
+
+[source,js]
+--------------------------------------------------
+{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"missing"}]}
+--------------------------------------------------
 
 A successful call returns a response code of `200` and a response body
 containing a JSON structure similar to the following example:

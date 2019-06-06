@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   xpackFeatureProvider,
 } from '../check_license';

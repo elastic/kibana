@@ -5,9 +5,9 @@
  */
 
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
-import { initPrivateSpacesApi } from './spaces';
+import { initInternalSpacesApi } from './spaces';
 
-export function initPrivateApis(server: any) {
+export function initInternalApis(server: any) {
   const routePreCheckLicenseFn = routePreCheckLicense(server);
-  initPrivateSpacesApi(server, routePreCheckLicenseFn);
+  initInternalSpacesApi(server, routePreCheckLicenseFn);
 }

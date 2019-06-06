@@ -8,13 +8,8 @@ import React, { Component, Fragment } from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { BASE_PATH } from '../../../../../common/constants';
-import { NoMatch } from '../no_match';
-import { getPolicyPath } from '../../../../services/navigation';
-import { flattenPanelTree } from '../../../../services/flatten_panel_tree';
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
+
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiLink,
@@ -38,10 +33,17 @@ import {
   EuiPageBody,
   EuiPageContent,
 } from '@elastic/eui';
+import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
+import { getIndexListUri } from '../../../../../../index_management/public/services/navigation';
+import { BASE_PATH, UIM_EDIT_CLICK } from '../../../../../common/constants';
+import { getPolicyPath } from '../../../../services/navigation';
+import { flattenPanelTree } from '../../../../services/flatten_panel_tree';
+import { trackUiMetric } from '../../../../services';
+import { NoMatch } from '../no_match';
 import { ConfirmDelete } from './confirm_delete';
 import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
-import { getIndexListUri } from '../../../../../../index_management/public/services/navigation';
+
 const COLUMNS = {
   name: {
     label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.nameHeader', {
@@ -176,6 +178,7 @@ export class PolicyTableUi extends Component {
           className="policyTable__link"
           data-test-subj="policyTablePolicyNameLink"
           href={getPolicyPath(value)}
+          onClick={() => trackUiMetric(UIM_EDIT_CLICK)}
         >
           {value}
         </EuiLink>
@@ -453,27 +456,14 @@ export class PolicyTableUi extends Component {
               <Fragment>
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiFlexGroup alignItems="center" gutterSize="m">
-                      <EuiFlexItem grow={false}>
-                        <EuiTitle size="l">
-                          <h1>
-                            <FormattedMessage
-                              id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-                              defaultMessage="Index lifecycle policies"
-                            />
-                          </h1>
-                        </EuiTitle>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiBetaBadge
-                          label={intl.formatMessage({
-                            id: 'xpack.indexLifecycleMgmt.policyTable.sectionHeadingBetaBadgeText',
-                            defaultMessage: 'Beta',
-                          })}
+                    <EuiTitle size="l">
+                      <h1>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
+                          defaultMessage="Index Lifecycle Policies"
                         />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                      </h1>
+                    </EuiTitle>
                   </EuiFlexItem>
                   {totalNumberOfPolicies ? (
                     <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>

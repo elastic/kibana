@@ -157,7 +157,6 @@ exports[`InspectorPanel should render as expected 1`] = `
             >
               <EuiTitle
                 size="s"
-                textTransform="none"
               >
                 <h1
                   className="euiTitle euiTitle--small"
@@ -242,8 +241,11 @@ exports[`InspectorPanel should render as expected 1`] = `
                     <div
                       className="euiPopover euiPopover--anchorDownRight"
                       id="inspectorViewChooser"
-                      onClick={[Function]}
                       onKeyDown={[Function]}
+                      onMouseDown={[Function]}
+                      onMouseUp={[Function]}
+                      onTouchEnd={[Function]}
+                      onTouchStart={[Function]}
                     >
                       <div
                         className="euiPopover__anchor"
@@ -272,40 +274,23 @@ exports[`InspectorPanel should render as expected 1`] = `
                                 size="m"
                                 type="arrowDown"
                               >
-                                <arrowDown
+                                <EuiIconEmpty
                                   aria-hidden="true"
-                                  className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
                                   focusable="false"
-                                  height="16"
                                   style={null}
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  xmlnsXlink="http://www.w3.org/1999/xlink"
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
                                     focusable="false"
-                                    height="16"
+                                    height={16}
                                     style={null}
                                     viewBox="0 0 16 16"
-                                    width="16"
+                                    width={16}
                                     xmlns="http://www.w3.org/2000/svg"
-                                    xmlnsXlink="http://www.w3.org/1999/xlink"
-                                  >
-                                    <defs>
-                                      <path
-                                        d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
-                                        id="arrow_down-a"
-                                      />
-                                    </defs>
-                                    <use
-                                      fillRule="nonzero"
-                                      xlinkHref="#arrow_down-a"
-                                    />
-                                  </svg>
-                                </arrowDown>
+                                  />
+                                </EuiIconEmpty>
                               </EuiIcon>
                               <span
                                 className="euiButtonEmpty__text"

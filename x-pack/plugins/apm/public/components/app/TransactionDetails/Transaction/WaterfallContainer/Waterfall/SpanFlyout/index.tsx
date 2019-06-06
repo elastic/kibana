@@ -21,11 +21,11 @@ import { i18n } from '@kbn/i18n';
 import { get, keys } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { DiscoverSpanLink } from 'x-pack/plugins/apm/public/components/shared/Links/DiscoverLinks/DiscoverSpanLink';
-import { Stacktrace } from 'x-pack/plugins/apm/public/components/shared/Stacktrace';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+import { idx } from '@kbn/elastic-idx';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { DiscoverSpanLink } from '../../../../../../shared/Links/DiscoverLinks/DiscoverSpanLink';
+import { Stacktrace } from '../../../../../../shared/Stacktrace';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { DatabaseContext } from './DatabaseContext';
@@ -57,10 +57,10 @@ export function SpanFlyout({
   const codeLanguage = idx(parentTransaction, _ => _.service.language.name);
   const dbContext = idx(span, _ => _.span.db);
   const httpContext = idx(span, _ => _.span.http);
-  const labels = span.labels;
-  const tags = keys(labels).map(key => ({
+  const spanLabels = span.labels;
+  const labels = keys(spanLabels).map(key => ({
     key,
-    value: get(labels, key)
+    value: get(spanLabels, key)
   }));
 
   return (
@@ -123,11 +123,11 @@ export function SpanFlyout({
                 )
               },
               {
-                id: 'tags',
+                id: 'labels',
                 name: i18n.translate(
-                  'xpack.apm.transactionDetails.spanFlyout.tagsTabLabel',
+                  'xpack.apm.propertiesTable.tabs.labelsLabel',
                   {
-                    defaultMessage: 'Tags'
+                    defaultMessage: 'Labels'
                   }
                 ),
                 content: (
@@ -144,7 +144,7 @@ export function SpanFlyout({
                           field: 'value'
                         }
                       ]}
-                      items={tags}
+                      items={labels}
                     />
                   </Fragment>
                 )

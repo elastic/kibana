@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const Chance = require('chance'); // eslint-disable-line import/no-extraneous-dependencies
-const chance = new Chance();
+import { getRandomString } from '../../../test_utils';
 
 export const getAutoFollowPatternMock = (
-  name = chance.string(),
-  remoteCluster = chance.string(),
-  leaderIndexPatterns = [chance.string()],
-  followIndexPattern = chance.string()
+  name = getRandomString(),
+  remoteCluster = getRandomString(),
+  leaderIndexPatterns = [getRandomString()],
+  followIndexPattern = getRandomString()
 ) => ({
   name,
   pattern: {
@@ -33,3 +32,18 @@ export const getAutoFollowPatternListMock = (total = 3) => {
 
   return list;
 };
+
+// -----------------
+// Client test mock
+// -----------------
+export const getAutoFollowPatternClientMock = ({
+  name = getRandomString(),
+  remoteCluster = getRandomString(),
+  leaderIndexPatterns = [`${getRandomString()}-*`],
+  followIndexPattern = getRandomString()
+}) => ({
+  name,
+  remoteCluster,
+  leaderIndexPatterns,
+  followIndexPattern,
+});

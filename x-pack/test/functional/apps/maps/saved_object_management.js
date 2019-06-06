@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
 
@@ -39,9 +39,9 @@ export default function ({ getPageObjects, getService }) {
 
       it('should set map location to value stored with map', async () => {
         const { lat, lon, zoom } = await PageObjects.maps.getView();
-        expect(lat).to.equal('-0.04647');
-        expect(lon).to.equal('77.33426');
-        expect(zoom).to.equal('3.02');
+        expect(lat).to.equal(-0.04647);
+        expect(lon).to.equal(77.33426);
+        expect(zoom).to.equal(3.02);
       });
 
       it('should load map layers stored with map', async () => {

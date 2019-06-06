@@ -7,26 +7,31 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
-import { getIsReadOnly, updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';
+import {
+  getIsReadOnly,
+  updateFlyout,
+  FLYOUT_STATE,
+  getOpenTOCDetails,
+  hideTOCDetails,
+  showTOCDetails,
+} from '../../../../../store/ui';
 import {
   fitToLayerExtent,
   setSelectedLayer,
   toggleLayerVisible,
-  removeTransientLayer
+  removeTransientLayer,
+  cloneLayer,
 } from '../../../../../actions/store_actions';
 
 import { hasDirtyState, getSelectedLayer } from '../../../../../selectors/map_selectors';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state = {}, ownProps) {
   return {
     isReadOnly: getIsReadOnly(state),
     zoom: _.get(state, 'map.mapState.zoom', 0),
-    getSelectedLayerSelector: () => {
-      return getSelectedLayer(state);
-    },
-    hasDirtyStateSelector: () => {
-      return hasDirtyState(state);
-    }
+    selectedLayer: getSelectedLayer(state),
+    hasDirtyStateSelector: hasDirtyState(state),
+    isLegendDetailsOpen: getOpenTOCDetails(state).includes(ownProps.layer.getId()),
   };
 }
 
@@ -40,9 +45,18 @@ function mapDispatchToProps(dispatch) {
     toggleVisible: layerId => {
       dispatch(toggleLayerVisible(layerId));
     },
-    fitToBounds: (layerId) => {
+    fitToBounds: layerId => {
       dispatch(fitToLayerExtent(layerId));
-    }
+    },
+    cloneLayer: layerId => {
+      dispatch(cloneLayer(layerId));
+    },
+    hideTOCDetails: layerId => {
+      dispatch(hideTOCDetails(layerId));
+    },
+    showTOCDetails: layerId => {
+      dispatch(showTOCDetails(layerId));
+    },
   });
 }
 

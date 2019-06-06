@@ -5,7 +5,7 @@
  */
 
 import { getUsageStats, combineStats, rollUpTotals } from '../get_kibana_stats';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('Get Kibana Stats', () => {
   describe('Make a map of usage stats for each cluster', () => {

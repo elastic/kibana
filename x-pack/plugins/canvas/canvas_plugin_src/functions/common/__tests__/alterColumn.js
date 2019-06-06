@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { alterColumn } from '../alterColumn';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../strings';
 import { emptyTable, testTable } from './fixtures/test_tables';
+
+const errors = getFunctionErrors().alterColumn;
 
 describe('alterColumn', () => {
   const fn = functionWrapper(alterColumn);
@@ -48,9 +51,9 @@ describe('alterColumn', () => {
       });
 
       it('throws if column does not exists', () => {
-        expect(() => fn(emptyTable, { column: 'foo', type: 'number' })).to.throwException(e => {
-          expect(e.message).to.be("Column not found: 'foo'");
-        });
+        expect(() => fn(emptyTable, { column: 'foo', type: 'number' })).to.throwException(
+          new RegExp(errors.columnNotFound('foo').message)
+        );
       });
     });
 
@@ -78,9 +81,9 @@ describe('alterColumn', () => {
       });
 
       it('throws when converting to an invalid type', () => {
-        expect(() => fn(testTable, { column: 'name', type: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be(`Cannot convert to 'foo'`);
-        });
+        expect(() => fn(testTable, { column: 'name', type: 'foo' })).to.throwException(
+          new RegExp(errors.cannotConvertType('foo').message)
+        );
       });
     });
 

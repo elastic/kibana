@@ -29,7 +29,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
-import { getUrlForRecord } from '../../util/custom_url_utils';
+import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 import { getIndexPatterns } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
@@ -119,8 +119,7 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
           // Replace any tokens in the configured url_value with values from the source record,
           // and then open link in a new tab/window.
           const urlPath = replaceStringTokens(customUrl.url_value, record, true);
-          window.open(urlPath, '_blank');
-
+          openCustomUrlWindow(urlPath, customUrl);
         }).catch((resp) => {
           console.log('openCustomUrl(): error loading categoryDefinition:', resp);
           toastNotifications.addDanger(intl.formatMessage({
@@ -135,7 +134,7 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
       // Replace any tokens in the configured url_value with values from the source record,
       // and then open link in a new tab/window.
       const urlPath = getUrlForRecord(customUrl, record);
-      window.open(urlPath, '_blank');
+      openCustomUrlWindow(urlPath, customUrl);
     }
 
   };
@@ -395,11 +394,11 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
       });
     }
 
-    if (showViewSeriesLink === true && anomaly.isTimeSeriesViewDetector === true) {
+    if (showViewSeriesLink === true && anomaly.isTimeSeriesViewRecord === true) {
       items.push(
         <EuiContextMenuItem
           key="view_series"
-          icon="popout"
+          icon="stats"
           onClick={() => { this.closePopover(); this.viewSeries(); }}
         >
           <FormattedMessage

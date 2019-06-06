@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { openSans } from '../../../../common/lib/fonts';
 import { font } from '../font';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../strings';
+
+const errors = getFunctionErrors().font;
 
 describe('font', () => {
   const fn = functionWrapper(font);
@@ -104,9 +107,9 @@ describe('font', () => {
       });
 
       it('throws when provided an invalid weight', () => {
-        expect(() => fn(null, { weight: 'foo' })).to.throwException(e => {
-          expect(e.message).to.be(`Invalid font weight: 'foo'`);
-        });
+        expect(() => fn(null, { weight: 'foo' })).to.throwException(
+          new RegExp(errors.invalidFontWeight('foo').message)
+        );
       });
     });
 
@@ -174,9 +177,7 @@ describe('font', () => {
       it('throws when provided an invalid alignment', () => {
         expect(fn)
           .withArgs(null, { align: 'foo' })
-          .to.throwException(e => {
-            expect(e.message).to.be(`Invalid text alignment: 'foo'`);
-          });
+          .to.throwException(errors.invalidTextAlignment('foo').message);
       });
     });
   });

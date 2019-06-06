@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { IfStatement } from '../if_statement';
 import { PluginVertex } from '../../graph/plugin_vertex';
 import { IfElement } from '../../list/if_element';

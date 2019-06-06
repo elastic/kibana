@@ -162,7 +162,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
             data-focus-lock-disabled="false"
           >
             <div
+              aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
               class="euiModal euiModal--maxWidth-default visNewVisDialog"
+              role="menu"
               tabindex="0"
             >
               <button
@@ -172,17 +174,13 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
               >
                 <svg
                   aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                  class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                   focusable="false"
                   height="16"
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                  />
-                </svg>
+                />
               </button>
               <div
                 class="euiModal__flex"
@@ -233,24 +231,13 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                    class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                     focusable="false"
                                     height="16"
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                                  >
-                                    <defs>
-                                      <path
-                                        d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
-                                        id="search-a"
-                                      />
-                                    </defs>
-                                    <use
-                                      xlink:href="#search-a"
-                                    />
-                                  </svg>
+                                  />
                                 </span>
                               </div>
                             </div>
@@ -275,6 +262,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                               class="euiKeyPadMenuItem visNewVisDialog__type"
                               data-test-subj="visType-visWithSearch"
                               data-vis-stage="production"
+                              role="menuitem"
                               type="button"
                             >
                               <div
@@ -285,7 +273,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--large euiIcon--secondary"
+                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                     focusable="false"
                                     height="16"
                                     viewBox="0 0 16 16"
@@ -310,6 +298,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                               data-test-subj="visType-vis"
                               data-vis-stage="production"
                               disabled=""
+                              role="menuitem"
                               type="button"
                             >
                               <div
@@ -320,7 +309,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--large euiIcon--secondary"
+                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                     focusable="false"
                                     height="16"
                                     viewBox="0 0 16 16"
@@ -376,9 +365,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
       }
     >
       <EuiModal
+        aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
         className="visNewVisDialog"
         maxWidth={true}
         onClose={[Function]}
+        role="menu"
       >
         <EuiFocusTrap
           clickOutsideDisables={false}
@@ -439,7 +430,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                     data-focus-lock-disabled="false"
                   >
                     <div
+                      aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                       class="euiModal euiModal--maxWidth-default visNewVisDialog"
+                      role="menu"
                       tabindex="0"
                     >
                       <button
@@ -449,17 +442,13 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                       >
                         <svg
                           aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                          class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
                           height="16"
                           viewBox="0 0 16 16"
                           width="16"
                           xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                          />
-                        </svg>
+                        />
                       </button>
                       <div
                         class="euiModal__flex"
@@ -510,24 +499,13 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         >
                                           <svg
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                            class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                             focusable="false"
                                             height="16"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             xmlns="http://www.w3.org/2000/svg"
-                                            xmlns:xlink="http://www.w3.org/1999/xlink"
-                                          >
-                                            <defs>
-                                              <path
-                                                d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
-                                                id="search-a"
-                                              />
-                                            </defs>
-                                            <use
-                                              xlink:href="#search-a"
-                                            />
-                                          </svg>
+                                          />
                                         </span>
                                       </div>
                                     </div>
@@ -552,6 +530,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                       class="euiKeyPadMenuItem visNewVisDialog__type"
                                       data-test-subj="visType-visWithSearch"
                                       data-vis-stage="production"
+                                      role="menuitem"
                                       type="button"
                                     >
                                       <div
@@ -562,7 +541,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         >
                                           <svg
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--large euiIcon--secondary"
+                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                             focusable="false"
                                             height="16"
                                             viewBox="0 0 16 16"
@@ -587,6 +566,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                       data-test-subj="visType-vis"
                                       data-vis-stage="production"
                                       disabled=""
+                                      role="menuitem"
                                       type="button"
                                     >
                                       <div
@@ -597,7 +577,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         >
                                           <svg
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--large euiIcon--secondary"
+                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                             focusable="false"
                                             height="16"
                                             viewBox="0 0 16 16"
@@ -657,7 +637,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                       data-focus-lock-disabled="false"
                     >
                       <div
+                        aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                         class="euiModal euiModal--maxWidth-default visNewVisDialog"
+                        role="menu"
                         tabindex="0"
                       >
                         <button
@@ -667,17 +649,13 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                         >
                           <svg
                             aria-hidden="true"
-                            class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                            class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
                             height="16"
                             viewBox="0 0 16 16"
                             width="16"
                             xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                            />
-                          </svg>
+                          />
                         </button>
                         <div
                           class="euiModal__flex"
@@ -728,24 +706,13 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           >
                                             <svg
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                              class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                               focusable="false"
                                               height="16"
                                               viewBox="0 0 16 16"
                                               width="16"
                                               xmlns="http://www.w3.org/2000/svg"
-                                              xmlns:xlink="http://www.w3.org/1999/xlink"
-                                            >
-                                              <defs>
-                                                <path
-                                                  d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
-                                                  id="search-a"
-                                                />
-                                              </defs>
-                                              <use
-                                                xlink:href="#search-a"
-                                              />
-                                            </svg>
+                                            />
                                           </span>
                                         </div>
                                       </div>
@@ -770,6 +737,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         class="euiKeyPadMenuItem visNewVisDialog__type"
                                         data-test-subj="visType-visWithSearch"
                                         data-vis-stage="production"
+                                        role="menuitem"
                                         type="button"
                                       >
                                         <div
@@ -780,7 +748,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           >
                                             <svg
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--large euiIcon--secondary"
+                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                               focusable="false"
                                               height="16"
                                               viewBox="0 0 16 16"
@@ -805,6 +773,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         data-test-subj="visType-vis"
                                         data-vis-stage="production"
                                         disabled=""
+                                        role="menuitem"
                                         type="button"
                                       >
                                         <div
@@ -815,7 +784,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           >
                                             <svg
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--large euiIcon--secondary"
+                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                               focusable="false"
                                               height="16"
                                               viewBox="0 0 16 16"
@@ -869,8 +838,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                 />
               </SideEffect(FocusWatcher)>
               <div
+                aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                 className="euiModal euiModal--maxWidth-default visNewVisDialog"
                 onKeyDown={[Function]}
+                role="menu"
                 tabIndex={0}
               >
                 <EuiI18n
@@ -898,31 +869,23 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                         size="m"
                         type="cross"
                       >
-                        <cross
+                        <EuiIconEmpty
                           aria-hidden="true"
-                          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
-                          height="16"
                           style={null}
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
                         >
                           <svg
                             aria-hidden="true"
-                            className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
-                            height="16"
+                            height={16}
                             style={null}
                             viewBox="0 0 16 16"
-                            width="16"
+                            width={16}
                             xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                            />
-                          </svg>
-                        </cross>
+                          />
+                        </EuiIconEmpty>
                       </EuiIcon>
                     </button>
                   </EuiButtonIcon>
@@ -1068,39 +1031,23 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                         className="euiFormControlLayoutCustomIcon__icon"
                                                         type="search"
                                                       >
-                                                        <search
+                                                        <EuiIconEmpty
                                                           aria-hidden="true"
-                                                          className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                           focusable="false"
-                                                          height="16"
                                                           style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width="16"
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                          xmlnsXlink="http://www.w3.org/1999/xlink"
                                                         >
                                                           <svg
                                                             aria-hidden="true"
-                                                            className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                             focusable="false"
-                                                            height="16"
+                                                            height={16}
                                                             style={null}
                                                             viewBox="0 0 16 16"
-                                                            width="16"
+                                                            width={16}
                                                             xmlns="http://www.w3.org/2000/svg"
-                                                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                                                          >
-                                                            <defs>
-                                                              <path
-                                                                d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
-                                                                id="search-a"
-                                                              />
-                                                            </defs>
-                                                            <use
-                                                              xlinkHref="#search-a"
-                                                            />
-                                                          </svg>
-                                                        </search>
+                                                          />
+                                                        </EuiIconEmpty>
                                                       </EuiIcon>
                                                     </span>
                                                   </EuiFormControlLayoutCustomIcon>
@@ -1125,10 +1072,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           className="euiScreenReaderOnly"
                                         >
                                           <FormattedMessage
-                                            defaultMessage="{resultCount} {resultCount, plural,
-                            one {type}
-                            other {types}
-                          } found"
+                                            defaultMessage="{resultCount} {resultCount, plural, one {type} other {types} } found"
                                             id="kbn.visualize.newVisWizard.resultsFound"
                                             values={
                                               Object {
@@ -1168,6 +1112,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             onFocus={[Function]}
                                             onMouseEnter={[Function]}
                                             onMouseLeave={[Function]}
+                                            role="menuitem"
                                           >
                                             <button
                                               aria-describedby="visTypeDescription-visWithSearch"
@@ -1180,6 +1125,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
+                                              role="menuitem"
                                               type="button"
                                             >
                                               <div
@@ -1188,7 +1134,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -1209,29 +1155,25 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <empty
+                                                      <EuiIconEmpty
                                                         aria-hidden="true"
-                                                        className="euiIcon euiIcon--large euiIcon--secondary"
+                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                         focusable="false"
-                                                        height="16"
                                                         style={null}
-                                                        viewBox="0 0 16 16"
-                                                        width="16"
-                                                        xmlns="http://www.w3.org/2000/svg"
                                                       >
                                                         <svg
                                                           aria-hidden="true"
-                                                          className="euiIcon euiIcon--large euiIcon--secondary"
+                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                           focusable="false"
-                                                          height="16"
+                                                          height={16}
                                                           style={null}
                                                           viewBox="0 0 16 16"
-                                                          width="16"
+                                                          width={16}
                                                           xmlns="http://www.w3.org/2000/svg"
                                                         />
-                                                      </empty>
+                                                      </EuiIconEmpty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -1264,6 +1206,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             onFocus={[Function]}
                                             onMouseEnter={[Function]}
                                             onMouseLeave={[Function]}
+                                            role="menuitem"
                                           >
                                             <button
                                               aria-describedby="visTypeDescription-vis"
@@ -1276,6 +1219,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
+                                              role="menuitem"
                                               type="button"
                                             >
                                               <div
@@ -1284,7 +1228,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -1305,29 +1249,25 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <empty
+                                                      <EuiIconEmpty
                                                         aria-hidden="true"
-                                                        className="euiIcon euiIcon--large euiIcon--secondary"
+                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                         focusable="false"
-                                                        height="16"
                                                         style={null}
-                                                        viewBox="0 0 16 16"
-                                                        width="16"
-                                                        xmlns="http://www.w3.org/2000/svg"
                                                       >
                                                         <svg
                                                           aria-hidden="true"
-                                                          className="euiIcon euiIcon--large euiIcon--secondary"
+                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                           focusable="false"
-                                                          height="16"
+                                                          height={16}
                                                           style={null}
                                                           viewBox="0 0 16 16"
-                                                          width="16"
+                                                          width={16}
                                                           xmlns="http://www.w3.org/2000/svg"
                                                         />
-                                                      </empty>
+                                                      </EuiIconEmpty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -1358,7 +1298,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                             >
                               <EuiTitle
                                 size="s"
-                                textTransform="none"
                               >
                                 <h2
                                   className="euiTitle euiTitle--small"
@@ -1379,11 +1318,8 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   className="euiSpacer euiSpacer--m"
                                 />
                               </EuiSpacer>
-                              <Component>
-                                <EuiText
-                                  grow={true}
-                                  size="m"
-                                >
+                              <NewVisHelp>
+                                <EuiText>
                                   <div
                                     className="euiText euiText--medium"
                                   >
@@ -1398,7 +1334,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     </p>
                                   </div>
                                 </EuiText>
-                              </Component>
+                              </NewVisHelp>
                             </div>
                           </EuiFlexItem>
                         </div>
@@ -1593,7 +1529,9 @@ exports[`NewVisModal should render as expected 1`] = `
             data-focus-lock-disabled="false"
           >
             <div
+              aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
               class="euiModal euiModal--maxWidth-default visNewVisDialog"
+              role="menu"
               tabindex="0"
             >
               <button
@@ -1603,17 +1541,13 @@ exports[`NewVisModal should render as expected 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                  class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                   focusable="false"
                   height="16"
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                  />
-                </svg>
+                />
               </button>
               <div
                 class="euiModal__flex"
@@ -1664,24 +1598,13 @@ exports[`NewVisModal should render as expected 1`] = `
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                    class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                     focusable="false"
                                     height="16"
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                                  >
-                                    <defs>
-                                      <path
-                                        d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
-                                        id="search-a"
-                                      />
-                                    </defs>
-                                    <use
-                                      xlink:href="#search-a"
-                                    />
-                                  </svg>
+                                  />
                                 </span>
                               </div>
                             </div>
@@ -1704,6 +1627,7 @@ exports[`NewVisModal should render as expected 1`] = `
                               class="euiKeyPadMenuItem visNewVisDialog__type"
                               data-test-subj="visType-vis"
                               data-vis-stage="production"
+                              role="menuitem"
                               type="button"
                             >
                               <div
@@ -1714,7 +1638,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--large euiIcon--secondary"
+                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                     focusable="false"
                                     height="16"
                                     viewBox="0 0 16 16"
@@ -1738,6 +1662,7 @@ exports[`NewVisModal should render as expected 1`] = `
                               class="euiKeyPadMenuItem visNewVisDialog__type"
                               data-test-subj="visType-visWithSearch"
                               data-vis-stage="production"
+                              role="menuitem"
                               type="button"
                             >
                               <div
@@ -1748,7 +1673,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--large euiIcon--secondary"
+                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                     focusable="false"
                                     height="16"
                                     viewBox="0 0 16 16"
@@ -1804,9 +1729,11 @@ exports[`NewVisModal should render as expected 1`] = `
       }
     >
       <EuiModal
+        aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
         className="visNewVisDialog"
         maxWidth={true}
         onClose={[Function]}
+        role="menu"
       >
         <EuiFocusTrap
           clickOutsideDisables={false}
@@ -1867,7 +1794,9 @@ exports[`NewVisModal should render as expected 1`] = `
                     data-focus-lock-disabled="false"
                   >
                     <div
+                      aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                       class="euiModal euiModal--maxWidth-default visNewVisDialog"
+                      role="menu"
                       tabindex="0"
                     >
                       <button
@@ -1877,17 +1806,13 @@ exports[`NewVisModal should render as expected 1`] = `
                       >
                         <svg
                           aria-hidden="true"
-                          class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                          class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
                           height="16"
                           viewBox="0 0 16 16"
                           width="16"
                           xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                          />
-                        </svg>
+                        />
                       </button>
                       <div
                         class="euiModal__flex"
@@ -1938,24 +1863,13 @@ exports[`NewVisModal should render as expected 1`] = `
                                         >
                                           <svg
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                            class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                             focusable="false"
                                             height="16"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             xmlns="http://www.w3.org/2000/svg"
-                                            xmlns:xlink="http://www.w3.org/1999/xlink"
-                                          >
-                                            <defs>
-                                              <path
-                                                d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
-                                                id="search-a"
-                                              />
-                                            </defs>
-                                            <use
-                                              xlink:href="#search-a"
-                                            />
-                                          </svg>
+                                          />
                                         </span>
                                       </div>
                                     </div>
@@ -1978,6 +1892,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                       class="euiKeyPadMenuItem visNewVisDialog__type"
                                       data-test-subj="visType-vis"
                                       data-vis-stage="production"
+                                      role="menuitem"
                                       type="button"
                                     >
                                       <div
@@ -1988,7 +1903,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                         >
                                           <svg
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--large euiIcon--secondary"
+                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                             focusable="false"
                                             height="16"
                                             viewBox="0 0 16 16"
@@ -2012,6 +1927,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                       class="euiKeyPadMenuItem visNewVisDialog__type"
                                       data-test-subj="visType-visWithSearch"
                                       data-vis-stage="production"
+                                      role="menuitem"
                                       type="button"
                                     >
                                       <div
@@ -2022,7 +1938,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                         >
                                           <svg
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--large euiIcon--secondary"
+                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                             focusable="false"
                                             height="16"
                                             viewBox="0 0 16 16"
@@ -2082,7 +1998,9 @@ exports[`NewVisModal should render as expected 1`] = `
                       data-focus-lock-disabled="false"
                     >
                       <div
+                        aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                         class="euiModal euiModal--maxWidth-default visNewVisDialog"
+                        role="menu"
                         tabindex="0"
                       >
                         <button
@@ -2092,17 +2010,13 @@ exports[`NewVisModal should render as expected 1`] = `
                         >
                           <svg
                             aria-hidden="true"
-                            class="euiIcon euiIcon--medium euiButtonIcon__icon"
+                            class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
                             height="16"
                             viewBox="0 0 16 16"
                             width="16"
                             xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                            />
-                          </svg>
+                          />
                         </button>
                         <div
                           class="euiModal__flex"
@@ -2153,24 +2067,13 @@ exports[`NewVisModal should render as expected 1`] = `
                                           >
                                             <svg
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                              class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                               focusable="false"
                                               height="16"
                                               viewBox="0 0 16 16"
                                               width="16"
                                               xmlns="http://www.w3.org/2000/svg"
-                                              xmlns:xlink="http://www.w3.org/1999/xlink"
-                                            >
-                                              <defs>
-                                                <path
-                                                  d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
-                                                  id="search-a"
-                                                />
-                                              </defs>
-                                              <use
-                                                xlink:href="#search-a"
-                                              />
-                                            </svg>
+                                            />
                                           </span>
                                         </div>
                                       </div>
@@ -2193,6 +2096,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                         class="euiKeyPadMenuItem visNewVisDialog__type"
                                         data-test-subj="visType-vis"
                                         data-vis-stage="production"
+                                        role="menuitem"
                                         type="button"
                                       >
                                         <div
@@ -2203,7 +2107,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                           >
                                             <svg
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--large euiIcon--secondary"
+                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                               focusable="false"
                                               height="16"
                                               viewBox="0 0 16 16"
@@ -2227,6 +2131,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                         class="euiKeyPadMenuItem visNewVisDialog__type"
                                         data-test-subj="visType-visWithSearch"
                                         data-vis-stage="production"
+                                        role="menuitem"
                                         type="button"
                                       >
                                         <div
@@ -2237,7 +2142,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                           >
                                             <svg
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--large euiIcon--secondary"
+                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                               focusable="false"
                                               height="16"
                                               viewBox="0 0 16 16"
@@ -2291,8 +2196,10 @@ exports[`NewVisModal should render as expected 1`] = `
                 />
               </SideEffect(FocusWatcher)>
               <div
+                aria-label="Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further."
                 className="euiModal euiModal--maxWidth-default visNewVisDialog"
                 onKeyDown={[Function]}
+                role="menu"
                 tabIndex={0}
               >
                 <EuiI18n
@@ -2320,31 +2227,23 @@ exports[`NewVisModal should render as expected 1`] = `
                         size="m"
                         type="cross"
                       >
-                        <cross
+                        <EuiIconEmpty
                           aria-hidden="true"
-                          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
-                          height="16"
                           style={null}
-                          viewBox="0 0 16 16"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
                         >
                           <svg
                             aria-hidden="true"
-                            className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
-                            height="16"
+                            height={16}
                             style={null}
                             viewBox="0 0 16 16"
-                            width="16"
+                            width={16}
                             xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                            />
-                          </svg>
-                        </cross>
+                          />
+                        </EuiIconEmpty>
                       </EuiIcon>
                     </button>
                   </EuiButtonIcon>
@@ -2490,39 +2389,23 @@ exports[`NewVisModal should render as expected 1`] = `
                                                         className="euiFormControlLayoutCustomIcon__icon"
                                                         type="search"
                                                       >
-                                                        <search
+                                                        <EuiIconEmpty
                                                           aria-hidden="true"
-                                                          className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                           focusable="false"
-                                                          height="16"
                                                           style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width="16"
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                          xmlnsXlink="http://www.w3.org/1999/xlink"
                                                         >
                                                           <svg
                                                             aria-hidden="true"
-                                                            className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                             focusable="false"
-                                                            height="16"
+                                                            height={16}
                                                             style={null}
                                                             viewBox="0 0 16 16"
-                                                            width="16"
+                                                            width={16}
                                                             xmlns="http://www.w3.org/2000/svg"
-                                                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                                                          >
-                                                            <defs>
-                                                              <path
-                                                                d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
-                                                                id="search-a"
-                                                              />
-                                                            </defs>
-                                                            <use
-                                                              xlinkHref="#search-a"
-                                                            />
-                                                          </svg>
-                                                        </search>
+                                                          />
+                                                        </EuiIconEmpty>
                                                       </EuiIcon>
                                                     </span>
                                                   </EuiFormControlLayoutCustomIcon>
@@ -2575,6 +2458,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             onFocus={[Function]}
                                             onMouseEnter={[Function]}
                                             onMouseLeave={[Function]}
+                                            role="menuitem"
                                           >
                                             <button
                                               aria-describedby="visTypeDescription-vis"
@@ -2587,6 +2471,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
+                                              role="menuitem"
                                               type="button"
                                             >
                                               <div
@@ -2595,7 +2480,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -2616,29 +2501,25 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <empty
+                                                      <EuiIconEmpty
                                                         aria-hidden="true"
-                                                        className="euiIcon euiIcon--large euiIcon--secondary"
+                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                         focusable="false"
-                                                        height="16"
                                                         style={null}
-                                                        viewBox="0 0 16 16"
-                                                        width="16"
-                                                        xmlns="http://www.w3.org/2000/svg"
                                                       >
                                                         <svg
                                                           aria-hidden="true"
-                                                          className="euiIcon euiIcon--large euiIcon--secondary"
+                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                           focusable="false"
-                                                          height="16"
+                                                          height={16}
                                                           style={null}
                                                           viewBox="0 0 16 16"
-                                                          width="16"
+                                                          width={16}
                                                           xmlns="http://www.w3.org/2000/svg"
                                                         />
-                                                      </empty>
+                                                      </EuiIconEmpty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -2671,6 +2552,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             onFocus={[Function]}
                                             onMouseEnter={[Function]}
                                             onMouseLeave={[Function]}
+                                            role="menuitem"
                                           >
                                             <button
                                               aria-describedby="visTypeDescription-visWithSearch"
@@ -2683,6 +2565,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
+                                              role="menuitem"
                                               type="button"
                                             >
                                               <div
@@ -2691,7 +2574,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -2712,29 +2595,25 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       size="l"
                                                       type="empty"
                                                     >
-                                                      <empty
+                                                      <EuiIconEmpty
                                                         aria-hidden="true"
-                                                        className="euiIcon euiIcon--large euiIcon--secondary"
+                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                         focusable="false"
-                                                        height="16"
                                                         style={null}
-                                                        viewBox="0 0 16 16"
-                                                        width="16"
-                                                        xmlns="http://www.w3.org/2000/svg"
                                                       >
                                                         <svg
                                                           aria-hidden="true"
-                                                          className="euiIcon euiIcon--large euiIcon--secondary"
+                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                           focusable="false"
-                                                          height="16"
+                                                          height={16}
                                                           style={null}
                                                           viewBox="0 0 16 16"
-                                                          width="16"
+                                                          width={16}
                                                           xmlns="http://www.w3.org/2000/svg"
                                                         />
-                                                      </empty>
+                                                      </EuiIconEmpty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -2765,7 +2644,6 @@ exports[`NewVisModal should render as expected 1`] = `
                             >
                               <EuiTitle
                                 size="s"
-                                textTransform="none"
                               >
                                 <h2
                                   className="euiTitle euiTitle--small"
@@ -2786,11 +2664,8 @@ exports[`NewVisModal should render as expected 1`] = `
                                   className="euiSpacer euiSpacer--m"
                                 />
                               </EuiSpacer>
-                              <Component>
-                                <EuiText
-                                  grow={true}
-                                  size="m"
-                                >
+                              <NewVisHelp>
+                                <EuiText>
                                   <div
                                     className="euiText euiText--medium"
                                   >
@@ -2805,7 +2680,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     </p>
                                   </div>
                                 </EuiText>
-                              </Component>
+                              </NewVisHelp>
                             </div>
                           </EuiFlexItem>
                         </div>

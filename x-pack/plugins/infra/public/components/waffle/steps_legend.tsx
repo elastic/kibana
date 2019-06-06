@@ -6,7 +6,8 @@
 
 import { darken } from 'polished';
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 import {
   InfraFormatter,
   InfraWaffleMapRuleOperator,
@@ -46,18 +47,18 @@ export const StepLegend: React.SFC<Props> = ({ legend, formatter }) => {
   return <StepLegendContainer>{legend.rules.map(createStep(formatter))}</StepLegendContainer>;
 };
 
-const StepLegendContainer = styled.div`
+const StepLegendContainer = euiStyled.div`
   display: flex;
   padding: 10px 40px 10px 10px;
 `;
 
-const StepContainer = styled.div`
+const StepContainer = euiStyled.div`
   display: flex;
   margin-right: 20px
   align-items: center;
 `;
 
-const StepSquare = styled.div`
+const StepSquare = euiStyled.div`
   position: relative;
   width: 24px;
   height: 24px;
@@ -67,7 +68,7 @@ const StepSquare = styled.div`
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
 
-const StepSquareInner = styled.div`
+const StepSquareInner = euiStyled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -76,6 +77,6 @@ const StepSquareInner = styled.div`
   border-radius: 3px;
 `;
 
-const StepLabel = styled.div`
+const StepLabel = euiStyled.div`
   font-size: 12px;
 `;

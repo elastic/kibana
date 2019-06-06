@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`usingPrivileges checkPrivileges errors otherwise it throws the error 1`] = `"something else entirely"`;

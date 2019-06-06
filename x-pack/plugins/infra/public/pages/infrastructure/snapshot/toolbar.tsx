@@ -48,6 +48,7 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
                       })}
                       suggestions={suggestions}
                       value={filterQueryDraft ? filterQueryDraft.expression : ''}
+                      autoFocus={true}
                     />
                   )}
                 </WithWaffleFilter>

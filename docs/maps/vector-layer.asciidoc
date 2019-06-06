@@ -1,3 +1,4 @@
+[role="xpack"]
 [[vector-layer]]
 == Vector layer
 

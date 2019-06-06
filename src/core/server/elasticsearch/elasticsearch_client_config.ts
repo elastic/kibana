@@ -28,9 +28,11 @@ import { Logger } from '../logging';
 import { ElasticsearchConfig } from './elasticsearch_config';
 
 /**
- * Config that consumers can pass to the Elasticsearch JS client is complex and includes
+ * @internalremarks Config that consumers can pass to the Elasticsearch JS client is complex and includes
  * not only entries from standard `elasticsearch.*` yaml config, but also some Elasticsearch JS
  * client specific options like `keepAlive` or `plugins` (that eventually will be deprecated).
+ *
+ * @public
  */
 export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> &
   Pick<

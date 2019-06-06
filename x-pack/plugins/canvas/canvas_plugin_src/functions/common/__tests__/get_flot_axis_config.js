@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getFlotAxisConfig } from '../plot/get_flot_axis_config';
 import { xAxisConfig, yAxisConfig, hideAxis } from './fixtures/test_styles';
 

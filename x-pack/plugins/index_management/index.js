@@ -13,7 +13,6 @@ import { registerStatsRoute } from './server/routes/api/stats';
 import { registerLicenseChecker } from '../../server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
 import { addIndexManagementDataEnricher } from './index_management_data';
-import { registerIndexManagementUsageCollector } from './server/usage';
 
 export function indexManagement(kibana)  {
   return new kibana.Plugin({
@@ -35,7 +34,6 @@ export function indexManagement(kibana)  {
       registerSettingsRoutes(router);
       registerStatsRoute(router);
       registerMappingRoute(router);
-      registerIndexManagementUsageCollector(server);
     }
   });
 }

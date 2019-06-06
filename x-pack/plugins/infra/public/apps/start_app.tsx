@@ -11,17 +11,18 @@ import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
-import { ThemeProvider } from 'styled-components';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { UICapabilitiesProvider } from 'ui/capabilities/react';
 import { I18nContext } from 'ui/i18n';
+import { EuiThemeProvider } from '../../../../common/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { ApolloClientContext } from '../utils/apollo_context';
+import { HistoryContext } from '../utils/history_context';
+import { useKibanaUiSetting } from '../utils/use_kibana_ui_setting';
 
 export async function startApp(libs: InfraFrontendLibs) {
   const history = createHashHistory();
@@ -32,26 +33,31 @@ export async function startApp(libs: InfraFrontendLibs) {
     observableApi: libs$.pipe(pluck('observableApi')),
   });
 
-  libs.framework.render(
-    <I18nContext>
-      <EuiErrorBoundary>
-        <ConstateProvider devtools>
-          <ReduxStoreProvider store={store}>
-            <ApolloProvider client={libs.apolloClient}>
-              <ApolloClientContext.Provider value={libs.apolloClient}>
-                <ThemeProvider
-                  theme={() => ({
-                    eui: libs.framework.darkMode ? euiDarkVars : euiLightVars,
-                    darkMode: libs.framework.darkMode,
-                  })}
-                >
-                  <PageRouter history={history} />
-                </ThemeProvider>
-              </ApolloClientContext.Provider>
-            </ApolloProvider>
-          </ReduxStoreProvider>
-        </ConstateProvider>
-      </EuiErrorBoundary>
-    </I18nContext>
-  );
+  const InfraPluginRoot: React.FunctionComponent = () => {
+    const [darkMode] = useKibanaUiSetting('theme:darkMode');
+
+    return (
+      <I18nContext>
+        <UICapabilitiesProvider>
+          <EuiErrorBoundary>
+            <ConstateProvider devtools>
+              <ReduxStoreProvider store={store}>
+                <ApolloProvider client={libs.apolloClient}>
+                  <ApolloClientContext.Provider value={libs.apolloClient}>
+                    <EuiThemeProvider darkMode={darkMode}>
+                      <HistoryContext.Provider value={history}>
+                        <PageRouter history={history} />
+                      </HistoryContext.Provider>
+                    </EuiThemeProvider>
+                  </ApolloClientContext.Provider>
+                </ApolloProvider>
+              </ReduxStoreProvider>
+            </ConstateProvider>
+          </EuiErrorBoundary>
+        </UICapabilitiesProvider>
+      </I18nContext>
+    );
+  };
+
+  libs.framework.render(<InfraPluginRoot />);
 }

@@ -128,84 +128,81 @@ exports[`Inspector Data View component should render empty state 1`] = `
       <div
         className="euiFlyoutBody kbnInspectorView--flex"
       >
-        <EuiEmptyPrompt
-          body={
-            <React.Fragment>
-              <p>
+        <div
+          className="euiFlyoutBody__overflow"
+        >
+          <EuiEmptyPrompt
+            body={
+              <React.Fragment>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="The element did not provide any data."
+                    id="inspectorViews.data.noDataAvailableDescription"
+                    values={Object {}}
+                  />
+                </p>
+              </React.Fragment>
+            }
+            iconColor="subdued"
+            title={
+              <h2>
                 <FormattedMessage
-                  defaultMessage="The element did not provide any data."
-                  id="inspectorViews.data.noDataAvailableDescription"
+                  defaultMessage="No data available"
+                  id="inspectorViews.data.noDataAvailableTitle"
                   values={Object {}}
                 />
-              </p>
-            </React.Fragment>
-          }
-          iconColor="subdued"
-          title={
-            <h2>
-              <FormattedMessage
-                defaultMessage="No data available"
-                id="inspectorViews.data.noDataAvailableTitle"
-                values={Object {}}
-              />
-            </h2>
-          }
-        >
-          <div
-            className="euiEmptyPrompt"
+              </h2>
+            }
           >
-            <EuiTextColor
-              color="subdued"
-              component="span"
+            <div
+              className="euiEmptyPrompt"
             >
-              <span
-                className="euiTextColor euiTextColor--subdued"
+              <EuiTextColor
+                color="subdued"
               >
-                <EuiTitle
-                  size="m"
-                  textTransform="none"
+                <span
+                  className="euiTextColor euiTextColor--subdued"
                 >
-                  <h2
-                    className="euiTitle euiTitle--medium"
-                  >
-                    <FormattedMessage
-                      defaultMessage="No data available"
-                      id="inspectorViews.data.noDataAvailableTitle"
-                      values={Object {}}
+                  <EuiTitle>
+                    <h2
+                      className="euiTitle euiTitle--medium"
                     >
-                      No data available
-                    </FormattedMessage>
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer
-                  size="m"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--m"
-                  />
-                </EuiSpacer>
-                <EuiText
-                  grow={true}
-                  size="m"
-                >
-                  <div
-                    className="euiText euiText--medium"
-                  >
-                    <p>
                       <FormattedMessage
-                        defaultMessage="The element did not provide any data."
-                        id="inspectorViews.data.noDataAvailableDescription"
+                        defaultMessage="No data available"
+                        id="inspectorViews.data.noDataAvailableTitle"
                         values={Object {}}
                       >
-                        The element did not provide any data.
+                        No data available
                       </FormattedMessage>
-                    </p>
-                  </div>
-                </EuiText>
-              </span>
-            </EuiTextColor>
-          </div>
-        </EuiEmptyPrompt>
+                    </h2>
+                  </EuiTitle>
+                  <EuiSpacer
+                    size="m"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
+                  <EuiText>
+                    <div
+                      className="euiText euiText--medium"
+                    >
+                      <p>
+                        <FormattedMessage
+                          defaultMessage="The element did not provide any data."
+                          id="inspectorViews.data.noDataAvailableDescription"
+                          values={Object {}}
+                        >
+                          The element did not provide any data.
+                        </FormattedMessage>
+                      </p>
+                    </div>
+                  </EuiText>
+                </span>
+              </EuiTextColor>
+            </div>
+          </EuiEmptyPrompt>
+        </div>
       </div>
     </EuiFlyoutBody>
   </InspectorView>
@@ -222,6 +219,8 @@ exports[`Inspector Data View component should render loading state 1`] = `
         },
         "_eventsCount": 1,
         "_maxListeners": undefined,
+        "tabular": undefined,
+        "tabularOptions": undefined,
       },
     }
   }
@@ -338,79 +337,80 @@ exports[`Inspector Data View component should render loading state 1`] = `
       <div
         className="euiFlyoutBody kbnInspectorView--flex"
       >
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="center"
+        <div
+          className="euiFlyoutBody__overflow"
         >
-          <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
           >
-            <EuiFlexItem
-              grow={false}
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
+              <EuiFlexItem
+                grow={false}
               >
-                <EuiPanel
-                  className="eui-textCenter"
-                  grow={true}
-                  hasShadow={false}
-                  paddingSize="m"
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  <div
-                    className="euiPanel euiPanel--paddingMedium eui-textCenter"
+                  <EuiPanel
+                    className="eui-textCenter"
+                    grow={true}
+                    hasShadow={false}
+                    paddingSize="m"
                   >
-                    <EuiLoadingChart
-                      size="m"
+                    <div
+                      className="euiPanel euiPanel--paddingMedium eui-textCenter"
                     >
-                      <div
-                        className="euiLoadingChart euiLoadingChart--medium"
+                      <EuiLoadingChart
+                        size="m"
+                      >
+                        <span
+                          className="euiLoadingChart euiLoadingChart--medium"
+                        >
+                          <span
+                            className="euiLoadingChart__bar"
+                          />
+                          <span
+                            className="euiLoadingChart__bar"
+                          />
+                          <span
+                            className="euiLoadingChart__bar"
+                          />
+                          <span
+                            className="euiLoadingChart__bar"
+                          />
+                        </span>
+                      </EuiLoadingChart>
+                      <EuiSpacer
+                        size="s"
                       >
                         <div
-                          className="euiLoadingChart__bar"
+                          className="euiSpacer euiSpacer--s"
                         />
+                      </EuiSpacer>
+                      <EuiText>
                         <div
-                          className="euiLoadingChart__bar"
-                        />
-                        <div
-                          className="euiLoadingChart__bar"
-                        />
-                        <div
-                          className="euiLoadingChart__bar"
-                        />
-                      </div>
-                    </EuiLoadingChart>
-                    <EuiSpacer
-                      size="s"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--s"
-                      />
-                    </EuiSpacer>
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
-                      <div
-                        className="euiText euiText--medium"
-                      >
-                        <p>
-                          <FormattedMessage
-                            defaultMessage="Gathering data"
-                            id="inspectorViews.data.gatheringDataLabel"
-                            values={Object {}}
-                          >
-                            Gathering data
-                          </FormattedMessage>
-                        </p>
-                      </div>
-                    </EuiText>
-                  </div>
-                </EuiPanel>
-              </div>
-            </EuiFlexItem>
-          </div>
-        </EuiFlexGroup>
+                          className="euiText euiText--medium"
+                        >
+                          <p>
+                            <FormattedMessage
+                              defaultMessage="Gathering data"
+                              id="inspectorViews.data.gatheringDataLabel"
+                              values={Object {}}
+                            >
+                              Gathering data
+                            </FormattedMessage>
+                          </p>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiPanel>
+                </div>
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+        </div>
       </div>
     </EuiFlyoutBody>
   </InspectorView>

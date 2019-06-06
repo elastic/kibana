@@ -17,10 +17,15 @@
  * under the License.
  */
 
+import { intersection, isObject } from 'lodash';
 import { Headers } from '../http/router';
 import { CallAPIOptions } from './cluster_client';
 
-type APICaller = (
+/** @public */
+export { Headers };
+
+/** @public */
+export type APICaller = (
   endpoint: string,
   clientParams: Record<string, unknown>,
   options?: CallAPIOptions
@@ -31,6 +36,8 @@ type APICaller = (
  * `callAsCurrentUser` method that doesn't use credentials of the Kibana internal
  * user (as `callAsInternalUser` does) to request Elasticsearch API, but rather
  * passes HTTP headers extracted from the current user request to the API
+ *
+ * @public
  */
 export class ScopedClusterClient {
   constructor(
@@ -40,11 +47,11 @@ export class ScopedClusterClient {
   ) {}
 
   /**
-   * Calls specified {@param endpoint} with provided {@param clientParams} on behalf of the
+   * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * Kibana internal user.
-   * @param endpoint String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
-   * @param clientParams A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
-   * @param options Options that affect the way we call the API and process the result.
+   * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
+   * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
+   * @param options - Options that affect the way we call the API and process the result.
    */
   public callAsInternalUser(
     endpoint: string,
@@ -55,21 +62,31 @@ export class ScopedClusterClient {
   }
 
   /**
-   * Calls specified {@param endpoint} with provided {@param clientParams} on behalf of the
+   * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * user initiated request to the Kibana server (via HTTP request headers).
-   * @param endpoint String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
-   * @param clientParams A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
-   * @param options Options that affect the way we call the API and process the result.
+   * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
+   * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
+   * @param options - Options that affect the way we call the API and process the result.
    */
   public callAsCurrentUser(
     endpoint: string,
     clientParams: Record<string, unknown> = {},
     options?: CallAPIOptions
   ) {
-    if (this.headers !== undefined) {
-      clientParams.headers = this.headers;
-    }
+    const defaultHeaders = this.headers;
+    if (defaultHeaders !== undefined) {
+      const customHeaders: any = clientParams.headers;
+      if (isObject(customHeaders)) {
+        const duplicates = intersection(Object.keys(defaultHeaders), Object.keys(customHeaders));
+        duplicates.forEach(duplicate => {
+          if (defaultHeaders[duplicate] !== (customHeaders as any)[duplicate]) {
+            throw Error(`Cannot override default header ${duplicate}.`);
+          }
+        });
+      }
 
+      clientParams.headers = Object.assign({}, clientParams.headers, this.headers);
+    }
     return this.scopedAPICaller(endpoint, clientParams, options);
   }
 }

@@ -44,7 +44,7 @@ export class Join extends Component {
   }
 
   componentDidUpdate() {
-    if (!this.state.rigthFields && getIndexPatternId(this.props)) {
+    if (!this.state.rightFields && getIndexPatternId(this.props) && !this.state.loadError) {
       this._loadRightFields(getIndexPatternId(this.props));
     }
   }
@@ -91,7 +91,9 @@ export class Join extends Component {
       return;
     }
 
-    this.setState({ rightFields: indexPattern.fields });
+    this.setState({
+      rightFields: indexPattern.fields
+    });
   }
 
   async _loadLeftSourceName() {
@@ -103,16 +105,16 @@ export class Join extends Component {
   }
 
   async _loadLeftFields() {
-    let stringFields;
+    let leftFields;
     try {
-      stringFields = await this.props.layer.getStringFields();
+      leftFields = await this.props.layer.getLeftJoinFields();
     } catch (error) {
-      stringFields = [];
+      leftFields = [];
     }
     if (!this._isMounted) {
       return;
     }
-    this.setState({ leftFields: stringFields });
+    this.setState({ leftFields });
   }
 
   _onLeftFieldChange = (leftField) => {

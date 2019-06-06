@@ -5,6 +5,7 @@
  */
 
 import { Request, ResponseToolkit } from 'hapi';
+import { JobDocPayload } from '../../types';
 
 export type HandlerFunction = (
   exportType: any,
@@ -14,3 +15,12 @@ export type HandlerFunction = (
 ) => any;
 
 export type HandlerErrorFunction = (exportType: any, err: Error) => any;
+
+export interface QueuedJobPayload {
+  error?: boolean;
+  source: {
+    job: {
+      payload: JobDocPayload;
+    };
+  };
+}

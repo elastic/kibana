@@ -29,25 +29,27 @@
     padding-right: $euiSize;
   }
 
-  // ASSETS LIST
-
-  .canvasAssetManager__asset {
-    text-align: center;
-    overflow: hidden; // hides image from outer panel boundaries
+  .canvasAssetManager__modalFooter {
+    justify-content: space-between;
   }
 
   .canvasAssetManager__emptyPanel {
     max-width: 400px;
-    margin: 0 auto;
+    margin: $euiSizeXL auto 0;
   }
+}
 
-  .canvasAssetManager__thumb {
+.canvasAsset {
+  text-align: center;
+  overflow: hidden; // hides image from outer panel boundaries
+
+  .canvasAsset__thumb {
     margin: -$euiSizeS;
     margin-bottom: 0;
     font-size: 0; // eliminates any extra space around img
   }
 
-  .canvasAssetManager__img {
+  .canvasAsset__img {
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -58,9 +60,5 @@
       height: 164px; // nice default proportions for typical 4x3 images
       opacity: 0; // only show the background image (which will properly keep proportions)
     }
-  }
-
-  .canvasAssetManager__modalFooter {
-    justify-content: space-between;
   }
 }

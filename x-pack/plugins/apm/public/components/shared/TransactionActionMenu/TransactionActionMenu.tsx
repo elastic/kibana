@@ -11,22 +11,24 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
-  EuiPopover
+  EuiPopover,
+  EuiLink
 } from '@elastic/eui';
+import chrome from 'ui/chrome';
+import url from 'url';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
-import React from 'react';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { getRisonHref } from 'x-pack/plugins/apm/public/components/shared/Links/rison_helpers';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
-import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
-import { QueryWithIndexPattern } from '../Links/DiscoverLinks/QueryWithIndexPattern';
+import React, { useState, FunctionComponent } from 'react';
+import { idx } from '@kbn/elastic-idx';
+import { pick } from 'lodash';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { DiscoverTransactionLink } from '../Links/DiscoverLinks/DiscoverTransactionLink';
+import { InfraLink } from '../Links/InfraLink';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { fromQuery } from '../Links/url_helpers';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
-  const minus5 = new Date(transaction['@timestamp']);
+  const minus5 = new Date(plus5.getTime());
 
   plus5.setMinutes(plus5.getMinutes() + 5);
   minus5.setMinutes(minus5.getMinutes() - 5);
@@ -49,183 +51,179 @@ function ActionMenuButton({ onClick }: { onClick: () => void }) {
 
 interface Props {
   readonly transaction: Transaction;
-  readonly location: Location;
 }
 
-interface State {
-  readonly isOpen: boolean;
-}
+export const TransactionActionMenu: FunctionComponent<Props> = (
+  props: Props
+) => {
+  const { transaction } = props;
 
-export class TransactionActionMenu extends React.Component<Props, State> {
-  public state: State = {
-    isOpen: false
-  };
+  const [isOpen, setIsOpen] = useState(false);
 
-  public toggle = () => {
-    this.setState(state => ({ isOpen: !state.isOpen }));
-  };
+  const { urlParams } = useUrlParams();
 
-  public close = () => {
-    this.setState({ isOpen: false });
-  };
+  const hostName = idx(transaction, _ => _.host.hostname);
+  const podId = idx(transaction, _ => _.kubernetes.pod.uid);
+  const containerId = idx(transaction, _ => _.container.id);
 
-  public getInfraActions() {
-    const { transaction, location } = this.props;
-    const hostName = idx(transaction, _ => _.host.hostname);
-    const podId = idx(transaction, _ => _.kubernetes.pod.uid);
-    const containerId = idx(transaction, _ => _.container.id);
-    const pathname = '/app/infra';
-    const time = new Date(transaction['@timestamp']).getTime();
-    const infraMetricsQuery = getInfraMetricsQuery(transaction);
+  const time = Math.round(transaction.timestamp.us / 1000);
+  const infraMetricsQuery = getInfraMetricsQuery(transaction);
 
-    return [
-      {
-        icon: 'loggingApp',
-        label: i18n.translate(
-          'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
-          { defaultMessage: 'Show pod logs' }
-        ),
-        target: podId,
-        hash: `/link-to/pod-logs/${podId}`,
-        query: { time }
-      },
+  const infraItems = [
+    {
+      icon: 'loggingApp',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
+        { defaultMessage: 'Show pod logs' }
+      ),
+      condition: podId,
+      path: `/link-to/pod-logs/${podId}`,
+      query: { time }
+    },
+    {
+      icon: 'loggingApp',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
+        { defaultMessage: 'Show container logs' }
+      ),
+      condition: containerId,
+      path: `/link-to/container-logs/${containerId}`,
+      query: { time }
+    },
+    {
+      icon: 'loggingApp',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
+        { defaultMessage: 'Show host logs' }
+      ),
+      condition: hostName,
+      path: `/link-to/host-logs/${hostName}`,
+      query: { time }
+    },
+    {
+      icon: 'loggingApp',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
+        { defaultMessage: 'Show trace logs' }
+      ),
+      condition: true,
+      hash: `/link-to/logs`,
+      query: { time, filter: `trace.id:${transaction.trace.id}` }
+    },
+    {
+      icon: 'infraApp',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
+        { defaultMessage: 'Show pod metrics' }
+      ),
+      condition: podId,
+      path: `/link-to/pod-detail/${podId}`,
+      query: infraMetricsQuery
+    },
+    {
+      icon: 'infraApp',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
+        { defaultMessage: 'Show container metrics' }
+      ),
+      condition: containerId,
+      path: `/link-to/container-detail/${containerId}`,
+      query: infraMetricsQuery
+    },
+    {
+      icon: 'infraApp',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostMetricsLinkLabel',
+        { defaultMessage: 'Show host metrics' }
+      ),
+      condition: hostName,
+      path: `/link-to/host-detail/${hostName}`,
+      query: infraMetricsQuery
+    }
+  ].map(({ icon, label, condition, path, query }, index) => ({
+    icon,
+    key: `infra-link-${index}`,
+    child: (
+      <InfraLink path={path} query={query}>
+        {label}
+      </InfraLink>
+    ),
+    condition
+  }));
 
-      {
-        icon: 'loggingApp',
-        label: i18n.translate(
-          'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
-          { defaultMessage: 'Show container logs' }
-        ),
-        target: containerId,
-        hash: `/link-to/container-logs/${containerId}`,
-        query: { time }
-      },
+  const uptimeLink = url.format({
+    pathname: chrome.addBasePath('/app/uptime'),
+    hash: `/?${fromQuery(
+      pick(
+        {
+          dateRangeStart: urlParams.rangeFrom,
+          dateRangeEnd: urlParams.rangeTo,
+          search: `url.domain:${idx(transaction, t => t.url.domain)}`
+        },
+        (val: string) => !!val
+      )
+    )}`
+  });
 
-      {
-        icon: 'loggingApp',
-        label: i18n.translate(
-          'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
-          { defaultMessage: 'Show host logs' }
-        ),
-        target: hostName,
-        hash: `/link-to/host-logs/${hostName}`,
-        query: { time }
-      },
-
-      {
-        icon: 'infraApp',
-        label: i18n.translate(
-          'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
-          { defaultMessage: 'Show pod metrics' }
-        ),
-        target: podId,
-        hash: `/link-to/pod-detail/${podId}`,
-        query: infraMetricsQuery
-      },
-
-      {
-        icon: 'infraApp',
-        label: i18n.translate(
-          'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
-          { defaultMessage: 'Show container metrics' }
-        ),
-        target: containerId,
-        hash: `/link-to/container-detail/${containerId}`,
-        query: infraMetricsQuery
-      },
-
-      {
-        icon: 'infraApp',
-        label: i18n.translate(
-          'xpack.apm.transactionActionMenu.showHostMetricsLinkLabel',
-          { defaultMessage: 'Show host metrics' }
-        ),
-        target: hostName,
-        hash: `/link-to/host-detail/${hostName}`,
-        query: infraMetricsQuery
-      }
-    ]
-      .filter(({ target }) => Boolean(target))
-      .map(({ icon, label, hash, query }, index) => {
-        const href = getRisonHref({
-          location,
-          pathname,
-          hash,
-          query: query as StringMap // TODO: differentiate between APM ui query args, and external query args
-        });
-
-        return (
-          <EuiContextMenuItem icon={icon} href={href} key={index}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <EuiLink>{label}</EuiLink>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="popout" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiContextMenuItem>
-        );
-      });
-  }
-
-  public render() {
-    const { transaction, location } = this.props;
-    return (
-      <QueryWithIndexPattern query={getDiscoverQuery(transaction)}>
-        {query => {
-          const discoverTransactionHref = getRisonHref({
-            location,
-            pathname: '/app/kibana',
-            hash: '/discover',
-            query
-          });
-
-          const items = [
-            ...this.getInfraActions(),
-            <EuiContextMenuItem
-              icon="discoverApp"
-              href={discoverTransactionHref}
-              key="discover-transaction"
-            >
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>
-                  <EuiLink>
-                    {i18n.translate(
-                      'xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel',
-                      {
-                        defaultMessage: 'View sample document'
-                      }
-                    )}
-                  </EuiLink>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="popout" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiContextMenuItem>
-          ];
-
-          return (
-            <EuiPopover
-              id="transactionActionMenu"
-              button={<ActionMenuButton onClick={this.toggle} />}
-              isOpen={this.state.isOpen}
-              closePopover={this.close}
-              anchorPosition="downRight"
-              panelPaddingSize="none"
-            >
-              <EuiContextMenuPanel
-                items={items}
-                title={i18n.translate(
-                  'xpack.apm.transactionActionMenu.actionsLabel',
-                  { defaultMessage: 'Actions' }
-                )}
-              />
-            </EuiPopover>
-          );
-        }}
-      </QueryWithIndexPattern>
+  const menuItems = [
+    ...infraItems,
+    {
+      icon: 'discoverApp',
+      key: 'discover-transaction',
+      condition: true,
+      child: (
+        <DiscoverTransactionLink transaction={transaction}>
+          {i18n.translate(
+            'xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel',
+            {
+              defaultMessage: 'View sample document'
+            }
+          )}
+        </DiscoverTransactionLink>
+      )
+    },
+    {
+      icon: 'uptimeApp',
+      key: 'uptime',
+      child: (
+        <EuiLink href={uptimeLink}>
+          {i18n.translate('xpack.apm.transactionActionMenu.viewInUptime', {
+            defaultMessage: 'View monitor status'
+          })}
+        </EuiLink>
+      ),
+      condition: idx(transaction, _ => _.url.domain)
+    }
+  ]
+    .filter(({ condition }) => condition)
+    .map(({ icon, key, child, condition }) =>
+      condition ? (
+        <EuiContextMenuItem icon={icon} key={key}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>{child}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="popout" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiContextMenuItem>
+      ) : null
     );
-  }
-}
+
+  return (
+    <EuiPopover
+      id="transactionActionMenu"
+      button={<ActionMenuButton onClick={() => setIsOpen(!isOpen)} />}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="downRight"
+      panelPaddingSize="none"
+    >
+      <EuiContextMenuPanel
+        items={menuItems}
+        title={i18n.translate('xpack.apm.transactionActionMenu.actionsLabel', {
+          defaultMessage: 'Actions'
+        })}
+      />
+    </EuiPopover>
+  );
+};

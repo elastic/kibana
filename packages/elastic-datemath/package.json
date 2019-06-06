@@ -11,9 +11,9 @@
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-preset-env": "^1.7.0",
+    "@babel/cli": "7.4.4",
+    "@babel/preset-env": "7.4.5",
+    "babel-plugin-add-module-exports": "1.0.2",
     "moment": "^2.13.0"
   },
   "dependencies": {

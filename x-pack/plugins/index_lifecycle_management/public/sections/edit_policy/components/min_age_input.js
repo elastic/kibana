@@ -15,7 +15,7 @@ import {
 import {
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
-} from '../../../store/constants';
+} from '../../../constants';
 import { ErrableFormRow } from '../form_errors';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 const MinAgeInputUi = props => {

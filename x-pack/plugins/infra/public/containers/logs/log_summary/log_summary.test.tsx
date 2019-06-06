@@ -90,7 +90,7 @@ describe('useLogSummary hook', () => {
    * test case above once `act` is capable of dealing with it.
    */
 
-  it('queries for new summary buckets when the source id changes', () => {
+  it('queries for new summary buckets when the source id changes - workaround', () => {
     const firstMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 1 }]);
     const secondMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 2 }]);
     const mockApolloClient = {

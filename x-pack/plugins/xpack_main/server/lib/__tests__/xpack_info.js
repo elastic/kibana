@@ -5,7 +5,7 @@
  */
 
 import { createHash } from 'crypto';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { XPackInfo } from '../xpack_info';
 
@@ -67,6 +67,7 @@ describe('XPackInfo', () => {
 
     mockServer = sinon.stub({
       plugins: { elasticsearch: mockElasticsearchPlugin },
+      events: { on() {} },
       log() { }
     });
   });

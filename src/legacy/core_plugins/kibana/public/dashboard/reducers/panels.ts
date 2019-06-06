@@ -20,7 +20,12 @@
 import _ from 'lodash';
 import { Reducer } from 'redux';
 import { PanelActions, PanelActionTypeKeys, SetPanelTitleActionPayload } from '../actions';
-import { PanelId, PanelState, PanelStateMap } from '../selectors';
+import { PanelId } from '../selectors';
+import { SavedDashboardPanel } from '../types';
+
+interface PanelStateMap {
+  [key: string]: SavedDashboardPanel;
+}
 
 const deletePanel = (panels: PanelStateMap, panelId: PanelId): PanelStateMap => {
   const panelsCopy = { ...panels };
@@ -28,7 +33,7 @@ const deletePanel = (panels: PanelStateMap, panelId: PanelId): PanelStateMap => 
   return panelsCopy;
 };
 
-const updatePanel = (panels: PanelStateMap, panelState: PanelState): PanelStateMap => ({
+const updatePanel = (panels: PanelStateMap, panelState: SavedDashboardPanel): PanelStateMap => ({
   ...panels,
   [panelState.panelIndex]: panelState,
 });
@@ -57,7 +62,7 @@ const setPanelTitle = (panels: PanelStateMap, payload: SetPanelTitleActionPayloa
   },
 });
 
-const setPanels = (panels: PanelStateMap, newPanels: PanelStateMap) => _.cloneDeep(newPanels);
+const setPanels = ({}, newPanels: PanelStateMap) => _.cloneDeep(newPanels);
 
 export const panelsReducer: Reducer<PanelStateMap> = (panels = {}, action): PanelStateMap => {
   switch ((action as PanelActions).type) {
@@ -67,9 +72,9 @@ export const panelsReducer: Reducer<PanelStateMap> = (panels = {}, action): Pane
       return updatePanel(panels, action.payload);
     case PanelActionTypeKeys.UPDATE_PANELS:
       return updatePanels(panels, action.payload);
-    case PanelActionTypeKeys.RESET_PANEl_TITLE:
+    case PanelActionTypeKeys.RESET_PANEL_TITLE:
       return resetPanelTitle(panels, action.payload);
-    case PanelActionTypeKeys.SET_PANEl_TITLE:
+    case PanelActionTypeKeys.SET_PANEL_TITLE:
       return setPanelTitle(panels, action.payload);
     case PanelActionTypeKeys.SET_PANELS:
       return setPanels(panels, action.payload);

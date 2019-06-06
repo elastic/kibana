@@ -6,7 +6,7 @@
 
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { SFC } from 'react';
+import React, { FunctionComponent } from 'react';
 import tinycolor from 'tinycolor2';
 import { readableColor } from '../../lib/readable_color';
 import { ColorDot } from '../color_dot';
@@ -26,13 +26,13 @@ export interface Props {
   /** The function to call when the color is changed. */
   onChange: (value: string) => void;
   /**
-   * The value of the color in the selector. Should be hexadecimal. If it is not in the colors array, it will be ignored.
+   * The value of the color in the selector. If not in the colors array, it will be ignored.
    * @default ''
    */
   value?: string;
 }
 
-export const ColorPalette: SFC<Props> = ({
+export const ColorPalette: FunctionComponent<Props> = ({
   colors = [],
   colorsPerRow = 6,
   onChange,
@@ -43,8 +43,7 @@ export const ColorPalette: SFC<Props> = ({
   }
 
   colors = colors.filter(color => {
-    const providedColor = tinycolor(color);
-    return providedColor.isValid() && providedColor.getFormat() === 'hex';
+    return tinycolor(color).isValid();
   });
 
   return (

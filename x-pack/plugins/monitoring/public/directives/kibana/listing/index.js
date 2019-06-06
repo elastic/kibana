@@ -6,7 +6,7 @@
 
 import { capitalize, get } from 'lodash';
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import {
   KuiTableRowCell,
@@ -138,7 +138,7 @@ const instanceRowFactory = (scope, kbnUrl) => {
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringKibanaListing', (kbnUrl, i18n) => {
+uiModule.directive('monitoringKibanaListing', kbnUrl => {
   return {
     restrict: 'E',
     scope: {
@@ -150,7 +150,8 @@ uiModule.directive('monitoringKibanaListing', (kbnUrl, i18n) => {
       onNewState: '=',
     },
     link(scope, $el) {
-      const filterInstancesPlaceholder = i18n('xpack.monitoring.kibana.listing.filterInstancesPlaceholder', {
+      scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
+      const filterInstancesPlaceholder = i18n.translate('xpack.monitoring.kibana.listing.filterInstancesPlaceholder', {
         defaultMessage: 'Filter Instances…'
       });
 

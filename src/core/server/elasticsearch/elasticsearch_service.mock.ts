@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { BehaviorSubject } from 'rxjs';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -38,6 +39,7 @@ type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
 const createMock = () => {
   const mocked: jest.Mocked<ElasticsearchServiceContract> = {
     setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createSetupContractMock());

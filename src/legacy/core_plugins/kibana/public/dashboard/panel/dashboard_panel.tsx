@@ -30,14 +30,15 @@ import {
   EmbeddableState,
 } from 'ui/embeddable';
 import { EmbeddableErrorAction } from '../actions';
-import { PanelId, PanelState } from '../selectors';
+import { PanelId } from '../selectors';
 import { PanelError } from './panel_error';
 import { PanelHeader } from './panel_header';
+import { SavedDashboardPanel } from '../types';
 
 export interface DashboardPanelProps {
   viewOnlyMode: boolean;
-  onPanelFocused?: (panelIndex: PanelId) => {};
-  onPanelBlurred?: (panelIndex: PanelId) => {};
+  onPanelFocused?: (panelIndex: PanelId) => void;
+  onPanelBlurred?: (panelIndex: PanelId) => void;
   error?: string | object;
   destroy: () => void;
   containerState: ContainerState;
@@ -48,7 +49,7 @@ export interface DashboardPanelProps {
   embeddableError: (errorMessage: EmbeddableErrorAction) => void;
   embeddableIsInitializing: () => void;
   initialized: boolean;
-  panel: PanelState;
+  panel: SavedDashboardPanel;
   className?: string;
 }
 

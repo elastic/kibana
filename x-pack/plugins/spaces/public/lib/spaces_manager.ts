@@ -29,7 +29,9 @@ export class SpacesManager extends EventEmitter {
   }
 
   public async getSpace(id: string): Promise<Space> {
-    return await this.httpAgent.get(`${this.baseUrl}/space/${id}`);
+    return await this.httpAgent
+      .get(`${this.baseUrl}/space/${id}`)
+      .then((response: IHttpResponse<Space[]>) => response.data);
   }
 
   public async createSpace(space: Space) {

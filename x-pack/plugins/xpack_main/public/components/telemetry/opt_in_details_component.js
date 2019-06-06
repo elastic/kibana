@@ -46,16 +46,26 @@ export class OptInExampleFlyout extends Component {
     this.state = {
       data: null,
       isLoading: true,
+      hasPrivilegeToRead: false,
     };
   }
 
   componentDidMount() {
     this.props.fetchTelemetry()
-      .then(response => this.setState({ data: Array.isArray(response.data) ? response.data : null, isLoading: false }))
-      .catch(() => this.setState({ isLoading: false }));
+      .then(response => this.setState({
+        data: Array.isArray(response.data) ? response.data : null,
+        isLoading: false,
+        hasPrivilegeToRead: true,
+      }))
+      .catch(err => {
+        this.setState({
+          isLoading: false,
+          hasPrivilegeToRead: err.status !== 403,
+        });
+      });
   }
 
-  renderBody({ data, isLoading }) {
+  renderBody({ data, isLoading, hasPrivilegeToRead }) {
     if (isLoading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
@@ -63,6 +73,24 @@ export class OptInExampleFlyout extends Component {
             <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
         </EuiFlexGroup>
+      );
+    }
+
+    if (!hasPrivilegeToRead) {
+      return (
+        <EuiCallOut
+          title={<FormattedMessage
+            id="xpack.main.telemetry.callout.errorUnprivilegedUserTitle"
+            defaultMessage="Error displaying cluster statistics"
+          />}
+          color="danger"
+          iconType="cross"
+        >
+          <FormattedMessage
+            id="xpack.main.telemetry.callout.errorUnprivilegedUserDescription"
+            defaultMessage="You do not have access to see unencrypted cluster statistics."
+          />
+        </EuiCallOut>
       );
     }
 

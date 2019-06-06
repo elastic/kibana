@@ -18,5 +18,4 @@ export interface Service {
     name: string;
     version?: string;
   };
-  [key: string]: unknown;
 }

@@ -5,15 +5,14 @@
  */
 
 import React from 'react';
-import { InfraMetricData } from '../../graphql/types';
+import { InfraMetricData, InfraTimerangeInput } from '../../graphql/types';
 import { InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
-import { metricTimeActions } from '../../store';
 import { sections } from './sections';
 
 interface Props {
   section: InfraMetricLayoutSection;
   metrics: InfraMetricData[];
-  onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
+  onChangeRangeTime?: (time: InfraTimerangeInput) => void;
   crosshairValue?: number;
   onCrosshairUpdate?: (crosshairValue: number) => void;
   isLiveStreaming?: boolean;

@@ -17,29 +17,24 @@
  * under the License.
  */
 
-import { BasePathSetup } from '../base_path';
 import { HttpSetup } from '../http';
 import { InjectedMetadataSetup } from '../injected_metadata';
-import { NotificationsSetup } from '../notifications';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 
-import { i18n } from '@kbn/i18n';
-
-interface Deps {
-  notifications: NotificationsSetup;
+interface UiSettingsServiceDeps {
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
-  basePath: BasePathSetup;
 }
 
+/** @internal */
 export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
 
-  public setup({ notifications, http, injectedMetadata, basePath }: Deps): UiSettingsSetup {
-    this.uiSettingsApi = new UiSettingsApi(basePath, injectedMetadata.getKibanaVersion());
+  public setup({ http, injectedMetadata }: UiSettingsServiceDeps): UiSettingsSetup {
+    this.uiSettingsApi = new UiSettingsApi(http);
     http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
 
     // TODO: Migrate away from legacyMetadata https://github.com/elastic/kibana/issues/22779
@@ -47,14 +42,6 @@ export class UiSettingsService {
 
     this.uiSettingsClient = new UiSettingsClient({
       api: this.uiSettingsApi,
-      onUpdateError: error => {
-        notifications.toasts.addDanger({
-          title: i18n.translate('core.uiSettings.unableUpdateUISettingNotificationMessageTitle', {
-            defaultMessage: 'Unable to update UI setting',
-          }),
-          text: error.message,
-        });
-      },
       defaults: legacyMetadata.uiSettings.defaults,
       initialSettings: legacyMetadata.uiSettings.user,
     });
@@ -73,4 +60,5 @@ export class UiSettingsService {
   }
 }
 
+/** @public */
 export type UiSettingsSetup = UiSettingsClient;

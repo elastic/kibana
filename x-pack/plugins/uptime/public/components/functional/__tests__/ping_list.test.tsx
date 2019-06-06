@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PingResults } from '../../../../common/graphql/types';
-import { PingList } from '../ping_list';
+import { PingListComponent } from '../ping_list';
 
 describe('PingList component', () => {
   let pingList: { allPings: PingResults };
@@ -188,14 +188,12 @@ describe('PingList component', () => {
   it('renders sorted list without errors', () => {
     const { allPings } = pingList;
     const component = shallowWithIntl(
-      <PingList
+      <PingListComponent
         loading={false}
-        maxSearchSize={100}
-        pingResults={allPings}
-        searchSizeOnBlur={jest.fn()}
-        selectedOption={{ label: 'All', value: '' }}
-        selectedOptionChanged={jest.fn()}
-        statusOptions={[{ label: 'All', value: '' }]}
+        data={{ allPings }}
+        onUpdateApp={jest.fn()}
+        onSelectedStatusUpdate={jest.fn()}
+        selectedOption="down"
       />
     );
     expect(component).toMatchSnapshot();

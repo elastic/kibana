@@ -8,8 +8,8 @@ import { scaleLinear, scaleTime } from 'd3-scale';
 import { area, curveMonotoneY } from 'd3-shape';
 import max from 'lodash/fp/max';
 import * as React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { SummaryBucket } from './types';
 
 interface DensityChartProps {
@@ -55,14 +55,14 @@ export const DensityChart: React.SFC<DensityChartProps> = ({
   );
 };
 
-const PositiveAreaPath = styled.path`
+const PositiveAreaPath = euiStyled.path`
   fill: ${props =>
     props.theme.darkMode
       ? props.theme.eui.euiColorMediumShade
       : props.theme.eui.euiColorLightShade};
 `;
 
-const NegativeAreaPath = styled.path`
+const NegativeAreaPath = euiStyled.path`
   fill: ${props =>
     props.theme.darkMode
       ? props.theme.eui.euiColorLightShade

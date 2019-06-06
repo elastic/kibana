@@ -11,20 +11,22 @@
     "kbn:watch": "node scripts/build --source-maps --watch"
   },
   "dependencies": {
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana1"
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
+    "moment-timezone": "^0.5.14",
+    "@kbn/i18n": "1.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.3.4",
-    "@babel/plugin-proposal-class-properties": "^7.3.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
-    "@babel/preset-env": "^7.3.4",
-    "@babel/preset-typescript": "^7.3.3",
+    "@babel/cli": "7.4.4",
+    "@babel/core": "7.4.5",
+    "@babel/plugin-proposal-class-properties": "7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "7.4.4",
+    "@babel/preset-env": "7.4.5",
+    "@babel/preset-typescript": "7.3.3",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
-    "del": "^3.0.0",
-    "expect.js": "0.3.1",
-    "getopts": "^2.2.3",
+    "@kbn/expect": "1.0.0",
+    "del": "^4.0.0",
+    "getopts": "^2.2.4",
     "supports-color": "^6.1.0",
     "typescript": "^3.3.3333"
   }

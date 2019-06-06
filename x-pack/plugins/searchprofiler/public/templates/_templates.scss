@@ -1,63 +1,102 @@
+@import '@elastic/eui/src/components/header/variables';
+@import '@elastic/eui/src/components/panel/mixins';
+
 .prfDevTool {
+  height: calc(100vh - #{$euiHeaderChildSize});
+  overflow: hidden;
 
-  .prfDevTool__wrapper {
-    display: flex;
-    flex-flow: row wrap;
-    position: absolute;
-    width: 99%; // SASSTODO Short-term fix (incl IE11) until markup can be re-arranged
-    height: 100%;
-  }
-
-  .prfDevTool__main {
-    overflow-y: auto;
-    height: 100%;
-    padding: 0 $euiSizeS;
-    flex: 3;
-    order: 2;
-  }
-
-  .prfDevTool__details {
-    padding: $euiSizeS;
-    flex: 1;
-    order: 3;
-  }
-
-  .prfDevTool__sense {
-    height: 100%;
-    flex: 1;
-    order: 1;
-
-    .kuiTextInput {
-      width: 100%;
-    }
-
-    // Ace Editor overrides
-    .ace_editor {
-      height: 100%;
-      padding-bottom: $euiSizeXXL;
-      outline: solid 1px $euiColorLightShade;
-    }
-
-    .errorMarker {
-      position: absolute;
-      background: rgba($euiColorDanger, .5);
-      z-index: 20;
-    }
-
-    .error {
-        /* These styles are arbitrary */
-        padding: $euiSize;
-        font-weight: bold;
-        color: $euiColorDanger;
-        border: 1px solid $euiColorDanger;
-    }
+  .devApp__container {
+  overflow: hidden;
+  flex-shrink: 1;
   }
 }
 
 .prfDevTool__container {
-  overflow: auto;
-  height: 100%;
-  width: 100%;
   display: flex;
-  flex: 1 0 auto;
+  flex: 1 1 auto;
+  padding: $euiSize;
+  overflow: hidden;
+
+  // SASSTODO/EUITODO/HACK: Reset font styles of headers
+  h1, h2, h3, h4, h5, h6 {
+    font: inherit;
+  }
+}
+
+@include euiPanel('prfDevTool__main');
+
+.prfDevTool__main {
+  flex: 3;
+  order: 2;
+  margin-left: $euiSize;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+
+  // Make only the tab content scroll
+  search-profiler-tabs {
+    flex-shrink: 0;
+  }
+
+  profiletree {
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+}
+
+.prfDevTool__details {
+  max-width: map-get($euiBreakpoints, 's');
+}
+
+highlightdetails {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.prfDevTool__sense {
+  flex: 1;
+  order: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
+  }
+
+  .kuiTextInput {
+    width: 100%;
+  }
+
+  // Ace Editor overrides
+  .ace_editor {
+    min-height: $euiSize * 10;
+    flex-grow: 1;
+    margin-bottom: $euiSize;
+    margin-top: $euiSize;
+    outline: solid 1px $euiColorLightShade;
+  }
+
+  .errorMarker {
+    position: absolute;
+    background: rgba($euiColorDanger, .5);
+    z-index: 20;
+  }
+}
+
+@include euiBreakpoint('xs', 's') {
+  .prfDevTool__container {
+    flex-direction: column;
+  }
+
+  .prfDevTool__sense,
+  .prfDevTool__main {
+    flex: 0 0 auto;
+  }
+
+  .prfDevTool__main {
+    margin: $euiSize 0;
+  }
 }

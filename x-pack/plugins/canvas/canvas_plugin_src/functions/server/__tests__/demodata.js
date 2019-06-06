@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { demodata } from '../demodata';
+import { getFunctionErrors } from '../../../strings';
+
+const errors = getFunctionErrors().demodata;
 
 const nullFilter = {
   type: 'filter',
@@ -35,8 +38,6 @@ describe('demodata', () => {
   it('invalid set', () => {
     expect(fn)
       .withArgs(null, { type: 'foo' })
-      .to.throwException(e => {
-        expect(e.message).to.be("Invalid data set: 'foo', use 'ci' or 'shirts'.");
-      });
+      .to.throwException(new RegExp(errors.invalidDataSet('foo').message));
   });
 });

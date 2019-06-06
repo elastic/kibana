@@ -14,7 +14,7 @@ exports[`Storyshots components/ItemGrid color dot grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(255, 255, 255)",
+          "background": "#fff",
         }
       }
     />
@@ -29,7 +29,7 @@ exports[`Storyshots components/ItemGrid color dot grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(102, 102, 102)",
+          "background": "#666",
         }
       }
     />
@@ -44,7 +44,7 @@ exports[`Storyshots components/ItemGrid color dot grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(0, 0, 0)",
+          "background": "#000",
         }
       }
     />
@@ -66,28 +66,23 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(255, 255, 255)",
+          "background": "#fff",
         }
       }
     >
       <svg
-        className="euiIcon euiIcon--medium"
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
-        height="16"
+        height={16}
         style={
           Object {
             "fill": "#333",
           }
         }
         viewBox="0 0 16 16"
-        width="16"
+        width={16}
         xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
-          fillRule="evenodd"
-        />
-      </svg>
+      />
     </div>
   </div>
   <div
@@ -100,28 +95,23 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(102, 102, 102)",
+          "background": "#666",
         }
       }
     >
       <svg
-        className="euiIcon euiIcon--medium"
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
-        height="16"
+        height={16}
         style={
           Object {
             "fill": "#FFF",
           }
         }
         viewBox="0 0 16 16"
-        width="16"
+        width={16}
         xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M7.5 0C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882zM3.5 7h8a.5.5 0 1 1 0 1h-8a.5.5 0 0 1 0-1z"
-          fillRule="evenodd"
-        />
-      </svg>
+      />
     </div>
   </div>
   <div
@@ -134,28 +124,23 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       className="canvasColorDot__foreground"
       style={
         Object {
-          "background": "rgb(0, 0, 0)",
+          "background": "#000",
         }
       }
     >
       <svg
-        className="euiIcon euiIcon--medium"
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
-        height="16"
+        height={16}
         style={
           Object {
             "fill": "#FFF",
           }
         }
         viewBox="0 0 16 16"
-        width="16"
+        width={16}
         xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-          fillRule="evenodd"
-        />
-      </svg>
+      />
     </div>
   </div>
 </div>
@@ -166,47 +151,32 @@ exports[`Storyshots components/ItemGrid icon grid 1`] = `
   className="item-grid-row"
 >
   <svg
-    className="euiIcon euiIcon--medium"
+    className="euiIcon euiIcon--medium euiIcon-isLoading"
     focusable="false"
-    height="16"
+    height={16}
     style={null}
     viewBox="0 0 16 16"
-    width="16"
+    width={16}
     xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
-      fillRule="evenodd"
-    />
-  </svg>
+  />
   <svg
-    className="euiIcon euiIcon--medium"
+    className="euiIcon euiIcon--medium euiIcon-isLoading"
     focusable="false"
-    height="16"
+    height={16}
     style={null}
     viewBox="0 0 16 16"
-    width="16"
+    width={16}
     xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M7.5 0C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882zM3.5 7h8a.5.5 0 1 1 0 1h-8a.5.5 0 0 1 0-1z"
-      fillRule="evenodd"
-    />
-  </svg>
+  />
   <svg
-    className="euiIcon euiIcon--medium"
+    className="euiIcon euiIcon--medium euiIcon-isLoading"
     focusable="false"
-    height="16"
+    height={16}
     style={null}
     viewBox="0 0 16 16"
-    width="16"
+    width={16}
     xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-      fillRule="evenodd"
-    />
-  </svg>
+  />
 </div>
 `;
 

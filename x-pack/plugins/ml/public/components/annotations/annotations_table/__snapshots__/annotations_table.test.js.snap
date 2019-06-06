@@ -10,6 +10,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "field": "annotation",
           "name": "Annotation",
           "sortable": true,
+          "width": "50%",
         },
         Object {
           "dataType": "date",
@@ -23,18 +24,6 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "field": "end_timestamp",
           "name": "To",
           "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "date",
-          "field": "create_time",
-          "name": "Creation date",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "create_username",
-          "name": "Created by",
           "sortable": true,
         },
         Object {

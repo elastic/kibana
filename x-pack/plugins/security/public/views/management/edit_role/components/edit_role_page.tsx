@@ -21,18 +21,17 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
+import { UICapabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../../../spaces/common/model/space';
-import { UserProfile } from '../../../../../../xpack_main/public/services/user_profile';
-import { IndexPrivilege } from '../../../../../common/model/index_privilege';
-import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
-import { Role } from '../../../../../common/model/role';
-import { isReservedRole } from '../../../../lib/role';
+import { Feature } from '../../../../../../xpack_main/types';
+import { KibanaPrivileges, RawKibanaPrivileges, Role } from '../../../../../common/model';
+import { isReadOnlyRole, isReservedRole } from '../../../../lib/role_utils';
 import { deleteRole, saveRole } from '../../../../objects';
 import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from '../lib/validate_role';
 import { DeleteRoleButton } from './delete_role_button';
-import { ElasticsearchPrivileges, KibanaPrivileges } from './privileges';
+import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 
 interface Props {
@@ -40,14 +39,14 @@ interface Props {
   runAsUsers: string[];
   indexPatterns: string[];
   httpClient: any;
-  rbacEnabled: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
-  kibanaAppPrivileges: KibanaPrivilege[];
+  privileges: RawKibanaPrivileges;
   spaces?: Space[];
   spacesEnabled: boolean;
-  userProfile: UserProfile;
   intl: InjectedIntl;
+  uiCapabilities: UICapabilities;
+  features: Feature[];
 }
 
 interface State {
@@ -119,7 +118,7 @@ class EditRolePageUI extends Component<Props, State> {
     );
   }
 
-  public getFormTitle = () => {
+  private getFormTitle = () => {
     let titleText;
     const props: HTMLProps<HTMLDivElement> = {
       tabIndex: 0,
@@ -157,8 +156,8 @@ class EditRolePageUI extends Component<Props, State> {
     );
   };
 
-  public getActionButton = () => {
-    if (this.editingExistingRole() && !isReservedRole(this.props.role)) {
+  private getActionButton = () => {
+    if (this.editingExistingRole() && !isReadOnlyRole(this.props.role)) {
       return (
         <EuiFlexItem grow={false}>
           <DeleteRoleButton canDelete={true} onDelete={this.handleDeleteRole} />
@@ -169,7 +168,7 @@ class EditRolePageUI extends Component<Props, State> {
     return null;
   };
 
-  public getRoleName = () => {
+  private getRoleName = () => {
     return (
       <EuiPanel>
         <EuiFormRow
@@ -203,7 +202,7 @@ class EditRolePageUI extends Component<Props, State> {
     );
   };
 
-  public onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+  private onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
     const name = rawValue.replace(/\s/g, '_');
 
@@ -215,13 +214,13 @@ class EditRolePageUI extends Component<Props, State> {
     });
   };
 
-  public getElasticsearchPrivileges() {
+  private getElasticsearchPrivileges() {
     return (
       <div>
         <EuiSpacer />
         <ElasticsearchPrivileges
           role={this.state.role}
-          editable={!isReservedRole(this.state.role)}
+          editable={!isReadOnlyRole(this.state.role)}
           httpClient={this.props.httpClient}
           onChange={this.onRoleChange}
           runAsUsers={this.props.runAsUsers}
@@ -234,42 +233,59 @@ class EditRolePageUI extends Component<Props, State> {
     );
   }
 
-  public onRoleChange = (role: Role) => {
+  private onRoleChange = (role: Role) => {
     this.setState({
       role,
     });
   };
 
-  public getKibanaPrivileges = () => {
+  private getKibanaPrivileges = () => {
     return (
       <div>
         <EuiSpacer />
-        <KibanaPrivileges
-          kibanaAppPrivileges={this.props.kibanaAppPrivileges}
+        <KibanaPrivilegesRegion
+          kibanaPrivileges={new KibanaPrivileges(this.props.privileges)}
           spaces={this.props.spaces}
           spacesEnabled={this.props.spacesEnabled}
-          userProfile={this.props.userProfile}
-          editable={!isReservedRole(this.state.role)}
+          features={this.props.features}
+          uiCapabilities={this.props.uiCapabilities}
+          editable={!isReadOnlyRole(this.state.role)}
           role={this.state.role}
           onChange={this.onRoleChange}
           validator={this.validator}
+          intl={this.props.intl}
         />
       </div>
     );
   };
 
-  public getFormButtons = () => {
-    if (isReservedRole(this.props.role)) {
-      return (
-        <EuiButton onClick={this.backToRoleList}>
-          <FormattedMessage
-            id="xpack.security.management.editRole.returnToRoleListButtonLabel"
-            defaultMessage="Return to role list"
-          />
-        </EuiButton>
-      );
+  private getFormButtons = () => {
+    if (isReadOnlyRole(this.props.role)) {
+      return this.getReturnToRoleListButton();
     }
 
+    return (
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem grow={false}>{this.getSaveButton()}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{this.getCancelButton()}</EuiFlexItem>
+        <EuiFlexItem grow={true} />
+        {this.getActionButton()}
+      </EuiFlexGroup>
+    );
+  };
+
+  private getReturnToRoleListButton = () => {
+    return (
+      <EuiButton onClick={this.backToRoleList} data-test-subj="roleFormReturnButton">
+        <FormattedMessage
+          id="xpack.security.management.editRole.returnToRoleListButtonLabel"
+          defaultMessage="Return to role list"
+        />
+      </EuiButton>
+    );
+  };
+
+  private getSaveButton = () => {
     const saveText = this.editingExistingRole() ? (
       <FormattedMessage
         id="xpack.security.management.editRole.updateRoleText"
@@ -283,40 +299,33 @@ class EditRolePageUI extends Component<Props, State> {
     );
 
     return (
-      <EuiFlexGroup responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj={`roleFormSaveButton`}
-            fill
-            onClick={this.saveRole}
-            disabled={isReservedRole(this.props.role)}
-          >
-            {saveText}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty data-test-subj={`roleFormCancelButton`} onClick={this.backToRoleList}>
-            <FormattedMessage
-              id="xpack.security.management.editRole.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={true} />
-        {this.getActionButton()}
-      </EuiFlexGroup>
+      <EuiButton
+        data-test-subj={`roleFormSaveButton`}
+        fill
+        onClick={this.saveRole}
+        disabled={isReservedRole(this.props.role)}
+      >
+        {saveText}
+      </EuiButton>
     );
   };
 
-  public editingExistingRole = () => {
+  private getCancelButton = () => {
+    return (
+      <EuiButtonEmpty data-test-subj={`roleFormCancelButton`} onClick={this.backToRoleList}>
+        <FormattedMessage
+          id="xpack.security.management.editRole.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      </EuiButtonEmpty>
+    );
+  };
+
+  private editingExistingRole = () => {
     return !!this.props.role.name;
   };
 
-  public isPlaceholderPrivilege = (indexPrivilege: IndexPrivilege) => {
-    return indexPrivilege.names.length === 0;
-  };
-
-  public saveRole = () => {
+  private saveRole = () => {
     this.validator.enableValidation();
 
     const result = this.validator.validateForSave(this.state.role);
@@ -329,18 +338,9 @@ class EditRolePageUI extends Component<Props, State> {
         formError: null,
       });
 
-      const { httpClient, intl } = this.props;
+      const { httpClient, intl, spacesEnabled } = this.props;
 
-      const role = {
-        ...this.state.role,
-      };
-
-      role.elasticsearch.indices = role.elasticsearch.indices.filter(
-        i => !this.isPlaceholderPrivilege(i)
-      );
-      role.elasticsearch.indices.forEach(index => index.query || delete index.query);
-
-      saveRole(httpClient, role)
+      saveRole(httpClient, this.state.role, spacesEnabled)
         .then(() => {
           toastNotifications.addSuccess(
             intl.formatMessage({
@@ -356,7 +356,7 @@ class EditRolePageUI extends Component<Props, State> {
     }
   };
 
-  public handleDeleteRole = () => {
+  private handleDeleteRole = () => {
     const { httpClient, role, intl } = this.props;
 
     deleteRole(httpClient, role.name)
@@ -374,7 +374,7 @@ class EditRolePageUI extends Component<Props, State> {
       });
   };
 
-  public backToRoleList = () => {
+  private backToRoleList = () => {
     window.location.hash = ROLES_PATH;
   };
 }

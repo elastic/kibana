@@ -17,10 +17,12 @@
  * under the License.
  */
 import { Server } from '../../server/kbn_server';
+import { Capabilities } from '../../../core/public';
 
 export type InitPluginFunction = (server: Server) => void;
 export interface UiExports {
   injectDefaultVars: (server: Server) => { [key: string]: any };
+  styleSheetPaths?: string;
 }
 
 export interface PluginSpecOptions {
@@ -28,5 +30,7 @@ export interface PluginSpecOptions {
   require: string[];
   publicDir: string;
   uiExports?: UiExports;
+  uiCapabilities?: Capabilities;
   init: InitPluginFunction;
+  config: any;
 }

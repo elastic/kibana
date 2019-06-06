@@ -136,7 +136,7 @@ class JobFilterBarUI extends Component {
 
     return (
       <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem data-test-subj="mlJobListSearchBar" grow={false}>
           <EuiSearchBar
             box={{
               incremental: true,

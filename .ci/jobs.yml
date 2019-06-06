@@ -9,36 +9,6 @@ JOB:
   - kibana-intake-8
   - kibana-intake-9
   - kibana-intake-10
-  - kibana-intake-11
-  - kibana-intake-12
-  - kibana-intake-13
-  - kibana-intake-14
-  - kibana-intake-15
-  - kibana-intake-16
-  - kibana-intake-17
-  - kibana-intake-18
-  - kibana-intake-19
-  - kibana-intake-20
-  - kibana-intake-21
-  - kibana-intake-22
-  - kibana-intake-23
-  - kibana-intake-24
-  - kibana-intake-25
-  - kibana-intake-26
-  - kibana-intake-27
-  - kibana-intake-28
-  - kibana-intake-29
-  - kibana-intake-30
-  - kibana-intake-31
-  - kibana-intake-32
-  - kibana-intake-33
-  - kibana-intake-34
-  - kibana-intake-35
-  - kibana-intake-36
-  - kibana-intake-37
-  - kibana-intake-38
-  - kibana-intake-39
-  - kibana-intake-40
 
 # `~` is yaml for `null`
 exclude: ~

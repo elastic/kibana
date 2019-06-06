@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { StringMap } from './common';
 
 declare module 'elasticsearch' {
   // extending SearchResponse to be able to have typed aggregations
-  export interface AggregationSearchResponse<T, U = void>
-    extends SearchResponse<T> {
-    aggregations: U;
+  export interface AggregationSearchResponse<Hits = unknown, Aggs = unknown>
+    extends SearchResponse<Hits> {
+    aggregations: Aggs;
   }
 
   export interface BucketAgg<T = string> {

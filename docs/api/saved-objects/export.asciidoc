@@ -16,6 +16,8 @@ Note: You cannot access this endpoint via the Console in Kibana.
   (array|string) The saved object type(s) that the export should be limited to
 `objects` (optional)::
   (array) A list of objects to export
+`includeReferencesDeep` (optional)::
+  (boolean) This will make the exported objects include all the referenced objects needed
 
 Note: At least `type` or `objects` must be passed in.
 
@@ -31,9 +33,25 @@ The following example exports all index pattern saved objects.
 --------------------------------------------------
 POST api/saved_objects/_export
 {
-  "type": "index-patterns"
+  "type": "index-pattern"
 }
 --------------------------------------------------
 // KIBANA
 
 A successful call returns a response code of `200` along with the exported objects as the response body.
+
+The following example exports specific saved objects.
+
+[source,js]
+--------------------------------------------------
+POST api/saved_objects/_export
+{
+  "objects": [
+    {
+      "type": "dashboard",
+      "id": "be3733a0-9efe-11e7-acb3-3dab96693fab"
+    }
+  ]
+}
+--------------------------------------------------
+// KIBANA

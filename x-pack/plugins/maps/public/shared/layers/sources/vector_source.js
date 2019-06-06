@@ -6,11 +6,13 @@
 
 
 import { VectorLayer } from '../vector_layer';
+import { TooltipProperty } from '../tooltips/tooltip_property';
 import { VectorStyle } from '../styles/vector_style';
 import { AbstractSource } from './source';
 import * as topojson from 'topojson-client';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { VECTOR_SHAPE_TYPES } from './vector_feature_types';
 
 export class AbstractVectorSource extends AbstractSource {
 
@@ -57,11 +59,11 @@ export class AbstractVectorSource extends AbstractSource {
 
   createDefaultLayer(options, mapColors) {
     const layerDescriptor = this._createDefaultLayerDescriptor(options, mapColors);
-    const style = new VectorStyle(layerDescriptor.style);
+    const style = new VectorStyle(layerDescriptor.style, this);
     return new VectorLayer({
       layerDescriptor: layerDescriptor,
       source: this,
-      style: style
+      style
     });
   }
 
@@ -82,7 +84,7 @@ export class AbstractVectorSource extends AbstractSource {
     return [];
   }
 
-  async getStringFields() {
+  async getLeftJoinFields() {
     return [];
   }
 
@@ -96,15 +98,14 @@ export class AbstractVectorSource extends AbstractSource {
 
   // Allow source to filter and format feature properties before displaying to user
   async filterAndFormatPropertiesToHtml(properties) {
-    //todo :this is quick hack... should revise (should model proeprties explicitly in vector_layer
-    const props = {};
+    const tooltipProperties = [];
     for (const key in properties) {
       if (key.startsWith('__kbn')) {//these are system properties and should be ignored
         continue;
       }
-      props[key] = _.escape(properties[key]);
+      tooltipProperties.push(new TooltipProperty(key, properties[key]));
     }
-    return props;
+    return tooltipProperties;
   }
 
   async isTimeAware() {
@@ -113,5 +114,17 @@ export class AbstractVectorSource extends AbstractSource {
 
   isJoinable() {
     return true;
+  }
+
+  async getSupportedShapeTypes() {
+    return [
+      VECTOR_SHAPE_TYPES.POINT,
+      VECTOR_SHAPE_TYPES.LINE,
+      VECTOR_SHAPE_TYPES.POLYGON
+    ];
+  }
+
+  getSourceTooltipContent(/* sourceDataRequest */) {
+    return null;
   }
 }

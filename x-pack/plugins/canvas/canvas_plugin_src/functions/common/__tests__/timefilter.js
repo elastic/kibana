@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { timefilter } from '../timefilter';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../strings';
 import { emptyFilter } from './fixtures/test_filters';
+
+const errors = getFunctionErrors().timefilter;
 
 let clock = null;
 
@@ -87,9 +90,9 @@ describe('timefilter', () => {
       });
 
       it('throws when provided an invalid date string', () => {
-        expect(() => fn(emptyFilter, { from: '2018-13-42T15:00:00.950Z' })).to.throwException(e => {
-          expect(e.message).to.be.equal(`Invalid date/time string: '2018-13-42T15:00:00.950Z'`);
-        });
+        expect(() => fn(emptyFilter, { from: '2018-13-42T15:00:00.950Z' })).to.throwException(
+          new RegExp(errors.invalidString('2018-13-42T15:00:00.950Z').message)
+        );
       });
     });
   });

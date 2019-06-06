@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import { flatten } from 'lodash';
-// @ts-ignore
+import { InternalCoreSetup } from 'src/core/server';
 import { initErrorsApi } from '../errors';
 import { initServicesApi } from '../services';
-// @ts-ignore
-import { initStatusApi } from '../status_check';
 import { initTracesApi } from '../traces';
 
 describe('route handlers should fail with a Boom error', () => {
   let consoleErrorSpy: any;
 
-  async function testRouteFailures(init: (server: Server) => void) {
+  async function testRouteFailures(init: (core: InternalCoreSetup) => void) {
     const mockServer = { route: jest.fn() };
-    init((mockServer as unknown) as Server);
+    const mockCore = ({
+      http: {
+        server: mockServer
+      }
+    } as unknown) as InternalCoreSetup;
+    init(mockCore);
     expect(mockServer.route).toHaveBeenCalled();
 
     const mockCluster = {
@@ -69,10 +71,6 @@ describe('route handlers should fail with a Boom error', () => {
 
   describe('service routes', async () => {
     await testRouteFailures(initServicesApi);
-  });
-
-  describe('status check routes', async () => {
-    await testRouteFailures(initStatusApi);
   });
 
   describe('trace routes', async () => {

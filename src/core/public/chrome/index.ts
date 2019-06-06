@@ -17,4 +17,13 @@
  * under the License.
  */
 
-export { Breadcrumb, ChromeService, ChromeSetup, Brand, HelpExtension } from './chrome_service';
+export {
+  ChromeBadge,
+  ChromeBreadcrumb,
+  ChromeService,
+  ChromeSetup,
+  ChromeStart,
+  ChromeBrand,
+  ChromeHelpExtension,
+} from './chrome_service';
+export { ChromeNavLink } from './nav_links';

@@ -19,14 +19,14 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesEditor from '../series_editor';
+import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
-import ColorRules from '../color_rules';
-import ColorPicker from '../color_picker';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { ColorRules } from '../color_rules';
+import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
-import YesNo from '../yes_no';
+import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -38,15 +38,18 @@ import {
   EuiFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
   EuiFieldNumber,
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+const { QueryBarInput } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 
 class GaugePanelConfigUi extends Component {
-
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -74,7 +77,7 @@ class GaugePanelConfigUi extends Component {
     const { intl } = this.props;
     const defaults = {
       gauge_max: '',
-      filter: '',
+      filter: { query: '', language: getDefaultQueryLanguage() },
       gauge_style: 'circle',
       gauge_inner_width: '',
       gauge_width: ''
@@ -107,6 +110,7 @@ class GaugePanelConfigUi extends Component {
           limit={1}
           model={this.props.model}
           name={this.props.name}
+          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -142,10 +146,15 @@ class GaugePanelConfigUi extends Component {
                   />)}
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBarInput
+                    query={{
+                      language: model.filter.language || getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    appName={'VisEditor'}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -340,7 +349,7 @@ GaugePanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
+  visData$: PropTypes.object,
 };
 
-const GaugePanelConfig = injectI18n(GaugePanelConfigUi);
-export default GaugePanelConfig;
+export const GaugePanelConfig = injectI18n(GaugePanelConfigUi);

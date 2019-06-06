@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { groupBy } from 'lodash';
 import { move, pushAll, organizeBy } from '../collection';
 

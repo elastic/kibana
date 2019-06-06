@@ -7,6 +7,9 @@
 /**
  * Represents status that `AuthenticationResult` can be in.
  */
+import { AuthenticatedUser } from '../../../common/model';
+import { getErrorStatusCode } from '../errors';
+
 enum AuthenticationResultStatus {
   /**
    * Authentication of the user can't be handled (e.g. supported credentials
@@ -38,9 +41,10 @@ enum AuthenticationResultStatus {
  */
 interface AuthenticationOptions {
   error?: Error;
+  challenges?: string[];
   redirectURL?: string;
   state?: unknown;
-  user?: unknown;
+  user?: AuthenticatedUser;
 }
 
 /**
@@ -60,7 +64,7 @@ export class AuthenticationResult {
    * @param user User information retrieved as a result of successful authentication attempt.
    * @param [state] Optional state to be stored and reused for the next request.
    */
-  public static succeeded(user: unknown, state?: unknown) {
+  public static succeeded(user: AuthenticatedUser, state?: unknown) {
     if (!user) {
       throw new Error('User should be specified.');
     }
@@ -71,13 +75,21 @@ export class AuthenticationResult {
   /**
    * Produces `AuthenticationResult` for the case when authentication fails.
    * @param error Error that occurred during authentication attempt.
+   * @param [challenges] Optional list of the challenges that will be returned to the user within
+   * `WWW-Authenticate` HTTP header. Multiple challenges will result in multiple headers (one per
+   * challenge) as it's better supported by the browsers than comma separated list within a single
+   * header. Challenges can only be set for errors with `401` error status.
    */
-  public static failed(error: Error) {
+  public static failed(error: Error, challenges?: string[]) {
     if (!error) {
       throw new Error('Error should be specified.');
     }
 
-    return new AuthenticationResult(AuthenticationResultStatus.Failed, { error });
+    if (challenges != null && getErrorStatusCode(error) !== 401) {
+      throw new Error('Challenges can only be provided with `401 Unauthorized` errors.');
+    }
+
+    return new AuthenticationResult(AuthenticationResultStatus.Failed, { error, challenges });
   }
 
   /**
@@ -113,6 +125,13 @@ export class AuthenticationResult {
    */
   public get error() {
     return this.options.error;
+  }
+
+  /**
+   * Challenges that need to be sent to the user within `WWW-Authenticate` HTTP header.
+   */
+  public get challenges() {
+    return this.options.challenges;
   }
 
   /**
@@ -159,5 +178,20 @@ export class AuthenticationResult {
    */
   public redirected() {
     return this.status === AuthenticationResultStatus.Redirected;
+  }
+
+  /**
+   * Checks whether authentication result implies state update.
+   */
+  public shouldUpdateState() {
+    // State shouldn't be updated in case it wasn't set or was specifically set to `null`.
+    return this.options.state != null;
+  }
+
+  /**
+   * Checks whether authentication result implies state clearing.
+   */
+  public shouldClearState() {
+    return this.options.state === null;
   }
 }

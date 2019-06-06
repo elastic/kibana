@@ -5,13 +5,14 @@
  */
 
 import { get } from 'lodash';
+import { AllowUnknownProperties } from '../typings/common';
 import { APMError } from '../typings/es_schemas/ui/APMError';
 import { Span } from '../typings/es_schemas/ui/Span';
 import { Transaction } from '../typings/es_schemas/ui/Transaction';
 import * as fieldnames from './elasticsearch_fieldnames';
 
 describe('Transaction', () => {
-  const transaction: Transaction = {
+  const transaction: AllowUnknownProperties<Transaction> = {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
     observer: 'whatever',
@@ -23,7 +24,7 @@ describe('Transaction', () => {
       request: { method: 'GET' },
       response: { status_code: 200 }
     },
-    url: { full: 'http://www.elastic.co' },
+    url: { full: 'http://www.elastic.co', domain: 'www.elastic.co' },
     service: {
       name: 'service name',
       language: { name: 'nodejs', version: 'v1337' }
@@ -58,7 +59,7 @@ describe('Transaction', () => {
 });
 
 describe('Span', () => {
-  const span: Span = {
+  const span: AllowUnknownProperties<Span> = {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
     observer: 'whatever',
@@ -103,7 +104,7 @@ describe('Span', () => {
 });
 
 describe('Error', () => {
-  const errorDoc: APMError = {
+  const errorDoc: AllowUnknownProperties<APMError> = {
     '@metadata': 'whatever',
     observer: 'whatever',
     agent: {
@@ -156,7 +157,9 @@ describe('Error', () => {
   matchSnapshot(errorDoc);
 });
 
-function matchSnapshot(obj: Span | Transaction | APMError) {
+function matchSnapshot(
+  obj: AllowUnknownProperties<Span | Transaction | APMError>
+) {
   Object.entries(fieldnames).forEach(([key, longKey]) => {
     const value = get(obj, longKey);
     it(key, () => {

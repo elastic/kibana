@@ -58,6 +58,7 @@ export class DeleteRuleModal extends Component {
             />}
             onCancel={this.closeModal}
             onConfirm={this.deleteRule}
+            buttonColor="danger"
             cancelButtonText={<FormattedMessage
               id="xpack.ml.ruleEditor.deleteRuleModal.cancelButtonLabel"
               defaultMessage="Cancel"

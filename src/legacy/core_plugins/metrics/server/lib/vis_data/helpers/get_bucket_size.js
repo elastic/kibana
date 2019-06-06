@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import calculateAuto from './calculate_auto';
+import { calculateAuto } from './calculate_auto';
 import moment from 'moment';
-import unitToSeconds from './unit_to_seconds';
+import { getUnitValue } from './unit_to_seconds';
 import {
   INTERVAL_STRING_RE,
   GTE_INTERVAL_RE,
@@ -29,7 +29,7 @@ const calculateBucketData = (timeInterval, capabilities) => {
   const intervalString = capabilities ? capabilities.getValidTimeInterval(timeInterval) : timeInterval;
   const intervalStringMatch = intervalString.match(INTERVAL_STRING_RE);
 
-  let bucketSize = Number(intervalStringMatch[1]) * unitToSeconds(intervalStringMatch[2]);
+  let bucketSize = Number(intervalStringMatch[1]) * getUnitValue(intervalStringMatch[2]);
 
   // don't go too small
   if (bucketSize < 1) {
@@ -50,7 +50,7 @@ const getTimeRangeBucketSize = ({ min, max }) => {
   return calculateAuto.near(100, duration).asSeconds();
 };
 
-export default (req, interval, capabilities) => {
+export const getBucketSize = (req, interval, capabilities) => {
   const bucketSize = getTimeRangeBucketSize(req.payload.timerange);
   let intervalString = `${bucketSize}s`;
 

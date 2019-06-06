@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import {
   VisualizeConstants
@@ -44,10 +44,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visualize.saveVisualizationExpectSuccess('visualization from add new link');
 
-        return retry.try(async () => {
+        await retry.try(async () => {
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.eql(originalPanelCount + 1);
         });
+        await PageObjects.dashboard.waitForRenderComplete();
       });
 
       it('saves the saved visualization url to the app link', async () => {

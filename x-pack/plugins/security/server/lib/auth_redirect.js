@@ -16,36 +16,48 @@ import { wrapError } from './errors';
  */
 export function authenticateFactory(server) {
   return async function authenticate(request, h) {
-    // If security is disabled or license is basic, continue with no user credentials
+    // If security is disabled continue with no user credentials
     // and delete the client cookie as well.
     const xpackInfo = server.plugins.xpack_main.info;
-    if (xpackInfo.isAvailable()
-        && (!xpackInfo.feature('security').isEnabled() || xpackInfo.license.isOneOf('basic'))) {
+    if (xpackInfo.isAvailable() && !xpackInfo.feature('security').isEnabled()) {
       return h.authenticated({ credentials: {} });
     }
 
     let authenticationResult;
     try {
       authenticationResult = await server.plugins.security.authenticate(request);
-    } catch(err) {
+    } catch (err) {
       server.log(['error', 'authentication'], err);
       return wrapError(err);
     }
 
     if (authenticationResult.succeeded()) {
       return h.authenticated({ credentials: authenticationResult.user });
-    } else if (authenticationResult.redirected()) {
+    }
+
+    if (authenticationResult.redirected()) {
       // Some authentication mechanisms may require user to be redirected to another location to
       // initiate or complete authentication flow. It can be Kibana own login page for basic
       // authentication (username and password) or arbitrary external page managed by 3rd party
       // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
       // decides what location user should be redirected to.
       return h.redirect(authenticationResult.redirectURL).takeover();
-    } else if (authenticationResult.failed()) {
-      server.log(['info', 'authentication'], `Authentication attempt failed: ${authenticationResult.error.message}`);
-      return wrapError(authenticationResult.error);
-    } else {
-      return Boom.unauthorized();
     }
+
+    if (authenticationResult.failed()) {
+      server.log(
+        ['info', 'authentication'],
+        `Authentication attempt failed: ${authenticationResult.error.message}`
+      );
+
+      const error = wrapError(authenticationResult.error);
+      if (authenticationResult.challenges) {
+        error.output.headers['WWW-Authenticate'] = authenticationResult.challenges;
+      }
+
+      return error;
+    }
+
+    return Boom.unauthorized();
   };
 }

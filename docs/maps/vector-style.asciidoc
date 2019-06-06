@@ -1,20 +1,76 @@
+[role="xpack"]
 [[vector-style]]
-=== Vector style
+=== Vector styling
 
-*Border color*:: Defines the border color of the vector features.
+When styling a vector layer, you can customize your data by property, such as size and color.
+For each property, you can specify whether to use a constant or dynamic value for the style.
 
-*Border width*:: Defines the border width of the vector features.
+[float]
+[[maps-vector-style-properties]]
+==== Style properties
 
-*Fill color*:: Defines the fill color of the vector features.
+You can configure the following properties.
 
-*Symbol size*:: Defines the symbol size of point features.
+*Fill color*:: The fill color of the vector features.
++
+NOTE: *LineString* and *MultiLineString* geometries do not have fill and do not use the fill color property.
+Set border color to style line geometries.
 
-Click the *link* button to toggle between static styling and data-driven styling.
+*Border color*:: The border color of the vector features.
+
+*Border width*:: The border width of the vector features.
+
+*Symbol size*:: The symbol size of point features.
+
+
+[float]
+[[maps-vector-style-static]]
+==== Static styling
+
+Use static styling to specificy a constant value for a style property.
+
+The image below shows an example of static styling using the <<add-sample-data, Kibana sample web logs>> data set.
+The *kibana_sample_data_logs* layer uses static styling for all properties.
 
 [role="screenshot"]
 image::maps/images/vector_style_static.png[]
 
+[float]
+[[maps-vector-style-data-driven]]
+==== Data driven styling
+
+Use data driven styling to symbolize features from a range of numeric property values.
+To enable data driven styling, click image:maps/images/gs_link_icon.png[] next to the property.
+
+NOTE: The image:maps/images/gs_link_icon.png[] button is only available for vector features that contain numeric properties.
+
+The image below shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
+The *kibana_sample_data_logs* layer uses data driven styling for fill color and symbol size style properties.
+
+* The `hour_of_day` property determines the fill color for each feature based on where the value fits on a linear scale.
+Light green circles symbolize documents that occur earlier in the day, and dark green circles symbolize documents that occur later in the day.
+
+* The `bytes` property determines the size of each symbol based on where the value fits on a linear scale.
+Smaller circles symbolize documents with smaller payloads, and larger circles symbolize documents with larger payloads.
+
 [role="screenshot"]
 image::maps/images/vector_style_dynamic.png[]
 
-NOTE: The *link* button is only available when your vector features contain numeric properties.
+
+[float]
+[[maps-vector-style-class]]
+==== Class styling
+
+Class styling symbolizes features by class and requires multiple layers.
+Use <<maps-layer-based-filtering, layer filtering>> to define the class for each layer, and <<maps-vector-style-static, static styling>> to symbolize each class.
+
+The image below shows an example of class styling using the <<add-sample-data, Kibana sample web logs>> data set.
+
+* The *Mac OS requests* layer applies the filter `machine.os : osx` so the layer only contains Mac OS requests.
+The fill color is a static value of green.
+
+* The *Window OS requests* layer applies the filter `machine.os : win*` so the layer only contains Window OS requests.
+The fill color is a static value of red.
+
+[role="screenshot"]
+image::maps/images/vector_style_class.png[]

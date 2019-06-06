@@ -5,6 +5,7 @@
  */
 
 import React, { PureComponent } from 'react';
+import { get } from 'lodash';
 import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import { ClusterStatus } from '..//cluster_status';
@@ -114,12 +115,12 @@ class ListingUI extends PureComponent {
     const columns = this.getColumns();
     const flattenedData = data.map(item => ({
       ...item,
-      name: item.logstash.name,
-      cpu_usage: item.process.cpu.percent,
-      load_average: item.os.cpu.load_average['1m'],
-      jvm_heap_used: item.jvm.mem.heap_used_percent,
-      events_ingested: item.events.out,
-      version: item.logstash.version,
+      name: get(item, 'logstash.name', 'N/A'),
+      cpu_usage: get(item, 'process.cpu.percent', 'N/A'),
+      load_average: get(item, 'os.cpu.load_average.1m', 'N/A'),
+      jvm_heap_used: get(item, 'jvm.mem.heap_used_percent', 'N/A'),
+      events_out: get(item, 'events.out', 'N/A'),
+      version: get(item, 'logstash.version', 'N/A'),
     }));
 
     return (

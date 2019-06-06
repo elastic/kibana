@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
@@ -129,7 +129,6 @@ describe('context app', function () {
               constant_score: {
                 filter: {
                   ids: {
-                    type: 'doc',
                     values: ['id'],
                   },
                 }

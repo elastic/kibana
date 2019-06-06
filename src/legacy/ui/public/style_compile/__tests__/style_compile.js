@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 describe('styleCompile directive', function () {
 

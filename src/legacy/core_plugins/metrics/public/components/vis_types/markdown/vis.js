@@ -23,14 +23,14 @@ import uuid from 'uuid';
 import { get } from 'lodash';
 import { Markdown } from 'ui/markdown/markdown';
 
-import ErrorComponent from '../../error';
-import replaceVars from '../../lib/replace_vars';
-import convertSeriesToVars from '../../lib/convert_series_to_vars';
+import { ErrorComponent } from '../../error';
+import { replaceVars } from '../../lib/replace_vars';
+import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
 import { isBackgroundInverted } from '../../../../common/set_is_reversed';
 
 const getMarkdownId = id => `markdown-${id}`;
 
-function MarkdownVisualization(props) {
+export function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;
   const series = get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, dateFormat, props.getConfig);
@@ -98,5 +98,3 @@ MarkdownVisualization.propTypes = {
   dateFormat: PropTypes.string,
   getConfig: PropTypes.func
 };
-
-export default MarkdownVisualization;

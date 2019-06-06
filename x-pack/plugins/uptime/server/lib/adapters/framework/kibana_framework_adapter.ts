@@ -37,6 +37,9 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
           schema,
         }),
         path: routePath,
+        route: {
+          tags: ['access:uptime'],
+        },
       },
       plugin: uptimeGraphQLHapiPlugin,
     });

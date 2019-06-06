@@ -15,7 +15,7 @@ jest.mock('../../../services', () => {
   const services = require.requireActual('../../../services');
   return {
     ...services,
-    trackUserAction: jest.fn(),
+    trackUiMetric: jest.fn(),
   };
 });
 
@@ -33,7 +33,7 @@ const defaultProps = {
   sortChanged: () => {},
 };
 
-const initTestBed = registerTestBed(JobTable, defaultProps, rollupJobsStore);
+const initTestBed = registerTestBed(JobTable, { defaultProps, store: rollupJobsStore });
 
 describe('<JobTable />', () => {
   describe('table rows', () => {

@@ -67,12 +67,30 @@ describe('Saved Objects Mixin', () => {
           hiddentype: {
             hidden: true,
           },
+          doc1: {
+            indexPattern: 'other-index',
+          },
         },
         savedObjectMappings: [
           {
             pluginId: 'testtype',
             properties: {
               testtype: {
+                properties: {
+                  name: { type: 'keyword' },
+                },
+              },
+            },
+          },
+          {
+            pluginId: 'testtype2',
+            properties: {
+              doc1: {
+                properties: {
+                  name: { type: 'keyword' },
+                },
+              },
+              doc2: {
                 properties: {
                   name: { type: 'keyword' },
                 },
@@ -104,15 +122,15 @@ describe('Saved Objects Mixin', () => {
         'kibanaMigrator',
         expect.any(Object)
       );
-      expect(mockServer.decorate).toHaveBeenCalledTimes(1);
+      expect(mockServer.decorate).toHaveBeenCalledTimes(2);
       expect(mockServer.route).not.toHaveBeenCalled();
     });
   });
 
   describe('Routes', () => {
-    it('should create 10 routes', () => {
+    it('should create 11 routes', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledTimes(10);
+      expect(mockServer.route).toHaveBeenCalledTimes(11);
     });
     it('should add POST /api/saved_objects/_bulk_create', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
@@ -177,6 +195,12 @@ describe('Saved Objects Mixin', () => {
         })
       );
     });
+    it('should add POST /api/saved_objects/_log_legacy_import', () => {
+      savedObjectsMixin(mockKbnServer, mockServer);
+      expect(mockServer.route).toHaveBeenCalledWith(
+        expect.objectContaining({ path: '/api/saved_objects/_log_legacy_import', method: 'POST' })
+      );
+    });
   });
 
   describe('Saved object service', () => {
@@ -192,7 +216,7 @@ describe('Saved Objects Mixin', () => {
 
     it('should return all but hidden types', () => {
       expect(service).toBeDefined();
-      expect(service.types).toEqual(['config', 'testtype']);
+      expect(service.types).toEqual(['config', 'testtype', 'doc1', 'doc2']);
     });
 
     const mockCallEs = jest.fn();
@@ -206,7 +230,7 @@ describe('Saved Objects Mixin', () => {
       it('should create a repository without hidden types', () => {
         const repository = service.getSavedObjectsRepository(mockCallEs);
         expect(repository).toBeDefined();
-        expect(repository._allowedTypes).toEqual(['config', 'testtype']);
+        expect(repository._allowedTypes).toEqual(['config', 'testtype', 'doc1', 'doc2']);
       });
 
       it('should create a repository with a unique list of allowed types', () => {
@@ -215,7 +239,7 @@ describe('Saved Objects Mixin', () => {
           'config',
           'config',
         ]);
-        expect(repository._allowedTypes).toEqual(['config', 'testtype']);
+        expect(repository._allowedTypes).toEqual(['config', 'testtype', 'doc1', 'doc2']);
       });
 
       it('should create a repository with extraTypes minus duplicate', () => {
@@ -223,7 +247,13 @@ describe('Saved Objects Mixin', () => {
           'hiddentype',
           'hiddentype',
         ]);
-        expect(repository._allowedTypes).toEqual(['config', 'testtype', 'hiddentype']);
+        expect(repository._allowedTypes).toEqual([
+          'config',
+          'testtype',
+          'doc1',
+          'doc2',
+          'hiddentype',
+        ]);
       });
 
       it('should not allow a repository without a callCluster function', () => {

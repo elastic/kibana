@@ -16,60 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-jest.useFakeTimers();
-
-import { EventEmitter } from 'events';
+import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.test.mocks';
 
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';
 import { RequestHandlerParams, Vis } from '../../vis';
 import { VisResponseData } from './types';
-
-jest.mock('ui/notify', () => ({
-  toastNotifications: jest.fn(),
-}));
-
-jest.mock('./utils', () => ({
-  queryGeohashBounds: jest.fn(),
-}));
-
-jest.mock('./pipeline_helpers/utilities', () => ({
-  getFormat: jest.fn(),
-  getTableAggs: jest.fn(),
-}));
-
-const timefilter = new EventEmitter();
-jest.mock('../../timefilter', () => ({ timefilter }));
-
-jest.mock('../../inspector', () => ({
-  Inspector: {
-    open: jest.fn(),
-    isAvailable: jest.fn(),
-  },
-}));
-
-const mockDataLoaderFetch = jest.fn().mockReturnValue({
-  as: 'visualization',
-  value: {
-    visType: 'histogram',
-    visData: {},
-    visConfig: {},
-    params: {},
-  },
-});
-const MockDataLoader = class {
-  public async fetch(data: any) {
-    return await mockDataLoaderFetch(data);
-  }
-};
-
-jest.mock('./pipeline_data_loader', () => ({
-  PipelineDataLoader: MockDataLoader,
-}));
-jest.mock('./visualize_data_loader', () => ({
-  VisualizeDataLoader: MockDataLoader,
-}));
 
 import { Inspector } from '../../inspector';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';

@@ -24,8 +24,8 @@
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
-import tickFormatter from './lib/tick_formatter';
-import convertSeriesToVars from './lib/convert_series_to_vars';
+import { tickFormatter } from './lib/tick_formatter';
+import { convertSeriesToVars } from './lib/convert_series_to_vars';
 import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
@@ -40,7 +40,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-class MarkdownEditor extends Component {
+export class MarkdownEditor extends Component {
   state = {
     visData: null,
   };
@@ -158,7 +158,7 @@ class MarkdownEditor extends Component {
                 {handlebarLink} on the available expressions."
                 values={{
                   handlebarLink: (
-                    <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
+                    <a href="http://handlebarsjs.com/expressions.html" target="_BLANK" rel="noreferrer noopener">
                       <FormattedMessage
                         id="tsvb.markdownEditor.howUseVariablesInMarkdownDescription.documentationLinkText"
                         defaultMessage="Click here for documentation"
@@ -207,7 +207,7 @@ class MarkdownEditor extends Component {
               <FormattedMessage
                 id="tsvb.markdownEditor.howToAccessEntireTreeDescription"
                 defaultMessage="There is also a special variable named {all} which you can use to access the entire tree. This is useful for
-                creating lists with data from a group by…"
+                creating lists with data from a group by:"
                 values={{ all: (<code>_all</code>) }}
               />
             </p>
@@ -234,5 +234,3 @@ MarkdownEditor.propTypes = {
   dateFormat: PropTypes.string,
   visData$: PropTypes.object,
 };
-
-export default MarkdownEditor;

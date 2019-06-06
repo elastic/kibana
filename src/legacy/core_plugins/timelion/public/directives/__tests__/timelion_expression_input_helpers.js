@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import PEG from 'pegjs';
 import grammar from 'raw-loader!../../chain.peg';
 import {

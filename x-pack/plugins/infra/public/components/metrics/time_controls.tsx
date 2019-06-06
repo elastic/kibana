@@ -4,226 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import moment, { Moment } from 'moment';
+import dateMath from '@elastic/datemath';
+import { EuiSuperDatePicker, OnRefreshChangeProps, OnTimeChangeProps } from '@elastic/eui';
+import moment from 'moment';
 import React from 'react';
-import styled from 'styled-components';
+import euiStyled from '../../../../../common/eui_styled_components';
+import { InfraTimerangeInput } from '../../graphql/types';
 
-import { RangeDatePicker, RecentlyUsed } from '../range_date_picker';
-
-import { metricTimeActions } from '../../store';
+const EuiSuperDatePickerAbsoluteFormat = 'YYYY-MM-DDTHH:mm:ss.sssZ';
 
 interface MetricsTimeControlsProps {
-  currentTimeRange: metricTimeActions.MetricRangeTimeState;
+  currentTimeRange: InfraTimerangeInput;
   isLiveStreaming?: boolean;
-  onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
-  startLiveStreaming?: () => void;
-  stopLiveStreaming?: () => void;
+  refreshInterval?: number | null;
+  onChangeTimeRange: (time: InfraTimerangeInput) => void;
+  setRefreshInterval: (refreshInterval: number) => void;
+  setAutoReload: (isAutoReloading: boolean) => void;
 }
 
-interface MetricsTimeControlsState {
-  showGoButton: boolean;
-  to: moment.Moment | undefined;
-  from: moment.Moment | undefined;
-  recentlyUsed: RecentlyUsed[];
-}
-
-export class MetricsTimeControls extends React.Component<
-  MetricsTimeControlsProps,
-  MetricsTimeControlsState
-> {
-  public dateRangeRef: React.RefObject<any> = React.createRef();
-  public readonly state = {
-    showGoButton: false,
-    to: moment().millisecond(this.props.currentTimeRange.to),
-    from: moment().millisecond(this.props.currentTimeRange.from),
-    recentlyUsed: [],
-  };
+export class MetricsTimeControls extends React.Component<MetricsTimeControlsProps> {
   public render() {
-    const { currentTimeRange, isLiveStreaming } = this.props;
-    const { showGoButton, to, from, recentlyUsed } = this.state;
-
-    const liveStreamingButton = (
-      <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
-        <EuiFlexItem grow={false}>
-          {isLiveStreaming ? (
-            <EuiButton
-              color="primary"
-              iconSide="left"
-              iconType="pause"
-              onClick={this.stopLiveStreaming}
-            >
-              <FormattedMessage
-                id="xpack.infra.metricsTimeControls.stopRefreshingButtonLabel"
-                defaultMessage="Stop refreshing"
-              />
-            </EuiButton>
-          ) : (
-            <EuiButton iconSide="left" iconType="play" onClick={this.startLiveStreaming}>
-              <FormattedMessage
-                id="xpack.infra.metricsTimeControls.autoRefreshButtonLabel"
-                defaultMessage="Auto-refresh"
-              />
-            </EuiButton>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={this.resetSearch}>
-            <FormattedMessage
-              id="xpack.infra.metricsTimeControls.resetButtonLabel"
-              defaultMessage="Reset"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-
-    const goColor = from && to && from > to ? 'danger' : 'primary';
-    const appendButton = showGoButton ? (
-      <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
-        <EuiFlexItem grow={false}>
-          <EuiButton color={goColor} fill onClick={this.searchRangeTime}>
-            <FormattedMessage
-              id="xpack.infra.metricsTimeControls.goButtonLabel"
-              defaultMessage="Go"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={this.cancelSearch}>
-            <FormattedMessage
-              id="xpack.infra.metricsTimeControls.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ) : (
-      liveStreamingButton
-    );
-
+    const { currentTimeRange, isLiveStreaming, refreshInterval } = this.props;
     return (
       <MetricsTimeControlsContainer>
-        <RangeDatePicker
-          key={`${currentTimeRange.from}-${currentTimeRange.to}`}
-          startDate={moment(currentTimeRange.from)}
-          endDate={moment(currentTimeRange.to)}
-          onChangeRangeTime={this.handleChangeDate}
-          isLoading={isLiveStreaming}
-          disabled={isLiveStreaming}
-          recentlyUsed={recentlyUsed}
-          ref={this.dateRangeRef}
+        <EuiSuperDatePicker
+          start={moment(currentTimeRange.from).format(EuiSuperDatePickerAbsoluteFormat)}
+          end={moment(currentTimeRange.to).format(EuiSuperDatePickerAbsoluteFormat)}
+          isPaused={!isLiveStreaming}
+          refreshInterval={refreshInterval ? refreshInterval : 0}
+          onTimeChange={this.handleTimeChange}
+          onRefreshChange={this.handleRefreshChange}
         />
-        {appendButton}
       </MetricsTimeControlsContainer>
     );
   }
 
-  private handleChangeDate = (
-    from: Moment | undefined,
-    to: Moment | undefined,
-    search: boolean
-  ) => {
-    const { onChangeRangeTime } = this.props;
-    const duration = moment.duration(from && to ? from.diff(to) : 0);
-    const milliseconds = duration.asMilliseconds();
-    if (to && from && onChangeRangeTime && search && to > from) {
-      this.setState({
-        showGoButton: false,
-        to,
-        from,
-      });
-      onChangeRangeTime({
-        to: to && to.valueOf(),
-        from: from && from.valueOf(),
-      } as metricTimeActions.MetricRangeTimeState);
-    } else if (milliseconds !== 0) {
-      this.setState({
-        showGoButton: true,
-        to,
-        from,
+  private handleTimeChange = ({ start, end }: OnTimeChangeProps) => {
+    const parsedStart = dateMath.parse(start);
+    const parsedEnd = dateMath.parse(end, { roundUp: true });
+
+    if (parsedStart && parsedEnd) {
+      this.props.onChangeTimeRange({
+        from: parsedStart.valueOf(),
+        to: parsedEnd.valueOf(),
+        interval: '>=1m',
       });
     }
   };
 
-  private searchRangeTime = () => {
-    const { onChangeRangeTime } = this.props;
-    const { to, from, recentlyUsed } = this.state;
-    if (to && from && onChangeRangeTime && to > from) {
-      this.setState({
-        ...this.state,
-        showGoButton: false,
-        recentlyUsed: [
-          ...recentlyUsed,
-          ...[
-            {
-              type: 'date-range',
-              text: [from.format('L LTS'), to.format('L LTS')],
-            },
-          ],
-        ],
-      });
-      onChangeRangeTime({
-        to: to.valueOf(),
-        from: from.valueOf(),
-      } as metricTimeActions.MetricRangeTimeState);
-    }
-  };
-
-  private startLiveStreaming = () => {
-    const { startLiveStreaming } = this.props;
-
-    if (startLiveStreaming) {
-      startLiveStreaming();
-    }
-  };
-
-  private stopLiveStreaming = () => {
-    const { stopLiveStreaming } = this.props;
-
-    if (stopLiveStreaming) {
-      stopLiveStreaming();
-    }
-  };
-
-  private cancelSearch = () => {
-    const { onChangeRangeTime } = this.props;
-    const to = moment(this.props.currentTimeRange.to);
-    const from = moment(this.props.currentTimeRange.from);
-
-    this.setState({
-      ...this.state,
-      showGoButton: false,
-      to,
-      from,
-    });
-    this.dateRangeRef.current.resetRangeDate(from, to);
-    if (onChangeRangeTime) {
-      onChangeRangeTime({
-        to: to && to.valueOf(),
-        from: from && from.valueOf(),
-      } as metricTimeActions.MetricRangeTimeState);
-    }
-  };
-
-  private resetSearch = () => {
-    const { onChangeRangeTime } = this.props;
-    const to = moment();
-    const from = moment().subtract(1, 'hour');
-    if (onChangeRangeTime) {
-      onChangeRangeTime({
-        to: to.valueOf(),
-        from: from.valueOf(),
-      } as metricTimeActions.MetricRangeTimeState);
+  private handleRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
+    if (isPaused) {
+      this.props.setAutoReload(false);
+    } else {
+      this.props.setRefreshInterval(refreshInterval);
+      this.props.setAutoReload(true);
     }
   };
 }
-const MetricsTimeControlsContainer = styled.div`
-  display: flex;
-  justify-content: right;
-  flex-flow: row wrap;
-  & > div:first-child {
-    margin-right: 0.5rem;
-  }
+
+const MetricsTimeControlsContainer = euiStyled.div`
+  max-width: 750px;
 `;

@@ -12,8 +12,8 @@ import {
   SPAN_NAME,
   SPAN_SUBTYPE,
   SPAN_TYPE
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+} from '../../../../../../../../common/elasticsearch_fieldnames';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { asMillis, asPercent } from '../../../../../../../utils/formatters';
 import { StickyProperties } from '../../../../../../shared/StickyProperties';

@@ -22,7 +22,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import { VislibLibErrorHandlerProvider } from '../_error_handler';
 import { VislibLibAxisTitleProvider } from './axis_title';
-import { VislibAxisLabelsProvider } from './axis_labels';
+import { AxisLabels } from './axis_labels';
 import { VislibAxisScaleProvider } from './axis_scale';
 import { VislibLibAxisConfigProvider } from './axis_config';
 import { VislibError } from '../../../errors';
@@ -30,7 +30,6 @@ import { VislibError } from '../../../errors';
 export function VislibLibAxisProvider(Private) {
   const ErrorHandler = Private(VislibLibErrorHandlerProvider);
   const AxisTitle = Private(VislibLibAxisTitleProvider);
-  const AxisLabels = Private(VislibAxisLabelsProvider);
   const AxisScale = Private(VislibAxisScaleProvider);
   const AxisConfig = Private(VislibLibAxisConfigProvider);
 
@@ -96,11 +95,21 @@ export function VislibLibAxisProvider(Private) {
       const position = this.axisConfig.get('position');
       const axisFormatter = this.axisConfig.get('labels.axisFormatter');
 
-      return d3.svg.axis()
+      const d3Axis = d3.svg
+        .axis()
         .scale(scale)
         .tickFormat(axisFormatter)
-        .ticks(this.tickScale(length))
         .orient(position);
+
+      if (this.axisConfig.isTimeDomain()) {
+        // use custom overwritten tick function on time domains to get nice
+        // tick positions (e.g. at the start of the day) even for custom timezones
+        d3Axis.tickValues(scale.timezoneCorrectedTicks(this.tickScale(length)));
+      } else {
+        d3Axis.ticks(this.tickScale(length));
+      }
+
+      return d3Axis;
     }
 
     getScale() {

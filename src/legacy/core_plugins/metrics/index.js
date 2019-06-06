@@ -19,8 +19,8 @@
 
 import { resolve } from 'path';
 
-import fieldsRoutes from './server/routes/fields';
-import visDataRoutes from './server/routes/vis';
+import { fieldsRoutes } from './server/routes/fields';
+import { visDataRoutes } from './server/routes/vis';
 import { SearchStrategiesRegister } from './server/lib/search_strategies/search_strategies_register';
 
 export default function (kibana) {
@@ -31,6 +31,7 @@ export default function (kibana) {
       visTypes: [
         'plugins/metrics/kbn_vis_types',
       ],
+      interpreter: ['plugins/metrics/tsvb_fn'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
 

@@ -32,7 +32,7 @@ Drawer.
 Add a `debugger` line to create a breakpoint, and then:
 
   ```
-  gulp sync && mocha debug --compilers js:babel-register /pathto/kibana/plugins/monitoring/pathto/__tests__/testfile.js
+  gulp sync && mocha debug --compilers js:@babel/register /pathto/kibana/plugins/monitoring/pathto/__tests__/testfile.js
   ```
 
 ## Multicluster Setup for Development

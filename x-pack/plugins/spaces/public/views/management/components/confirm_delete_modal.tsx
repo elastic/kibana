@@ -5,6 +5,7 @@
  */
 
 import {
+  CommonProps,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -17,6 +18,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiModalProps,
   EuiOverlayMask,
   EuiText,
 } from '@elastic/eui';
@@ -74,9 +76,15 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
     // This is largely the same as the built-in EuiConfirmModal component, but we needed the ability
     // to disable the buttons since this could be a long-running operation
 
+    const modalProps: EuiModalProps & CommonProps = {
+      onClose: onCancel,
+      className: 'spcConfirmDeleteModal',
+      initialFocus: 'input[name="confirmDeleteSpaceInput"]',
+    };
+
     return (
       <EuiOverlayMask>
-        <EuiModal onClose={onCancel} className={'spcConfirmDeleteModal'}>
+        <EuiModal {...modalProps}>
           <EuiModalHeader>
             <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
               <FormattedMessage
@@ -110,7 +118,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
               <EuiFormRow
                 label={intl.formatMessage({
                   id: 'xpack.spaces.management.confirmDeleteModal.confirmSpaceNameFormRowLabel',
-                  defaultMessage: 'Confirm space name',
+                  defaultMessage: 'Confirm space name to delete',
                 })}
                 isInvalid={!!this.state.error}
                 error={intl.formatMessage({
@@ -119,6 +127,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
                 })}
               >
                 <EuiFieldText
+                  name="confirmDeleteSpaceInput"
                   value={this.state.confirmSpaceName}
                   onChange={this.onSpaceNameChange}
                   disabled={this.state.deleteInProgress}

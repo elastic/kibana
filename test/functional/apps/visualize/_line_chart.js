@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }) {
       const expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
 
       log.debug('Order By = Term');
-      await PageObjects.visualize.selectOrderBy('_key');
+      await PageObjects.visualize.selectOrderByMetric(2, '_key');
       await PageObjects.visualize.clickGo();
       await retry.try(async function () {
         const data = await PageObjects.visualize.getLineChartData();

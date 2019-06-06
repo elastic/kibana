@@ -1,13 +1,14 @@
+[role="xpack"]
 [[maps-getting-started]]
 == Getting started with Maps
 
-You work with *Maps* by adding layers. The data for a layer can come from 
-sources such as {es} documents, vector sources, tile map services, web map 
-services, and more. You can symbolize the data in different ways. 
-For example, you might show which airports have the longest flight 
-delays by using circles from small to big. Or, 
-you might show the amount of web log traffic by shading countries from 
-light to dark. 
+You work with *Maps* by adding layers. The data for a layer can come from
+sources such as {es} documents, vector sources, tile map services, web map
+services, and more. You can symbolize the data in different ways.
+For example, you might show which airports have the longest flight
+delays by using circles from small to big. Or,
+you might show the amount of web log traffic by shading countries from
+light to dark.
 
 [role="screenshot"]
 image::maps/images/sample_data_web_logs.png[]
@@ -15,7 +16,7 @@ image::maps/images/sample_data_web_logs.png[]
 [float]
 === Prerequisites
 Before you start this tutorial, <<add-sample-data, add the web logs sample data set>>. Each
-sample data set includes a map to go along with the data. Once you've added the data, open *Maps* and 
+sample data set includes a map to go along with the data. Once you've added the data, open *Maps* and
 explore the different layers of the *[Logs] Total Requests and Bytes* map.
 You'll re-create this map in this tutorial.
 
@@ -28,25 +29,28 @@ In this tutorial, you'll learn to:
 * Use symbols, colors, and labels to style a layer
 * Create layers for {es} data
 
-
+[role="xpack"]
+[[maps-create]]
 === Creating a new map
 
 The first thing to do is to create a new map.
 
-. If you haven't already, open *Maps*. 
+. If you haven't already, open *Maps*.
 . On the maps list page, click *Create map*.
+. Set the time range to *Last 7 days*.
 +
 A new map is created using a base tile layer.
 +
 [role="screenshot"]
 image::maps/images/gs_create_new_map.png[]
 
-
+[role="xpack"]
+[[maps-add-choropleth-layer]]
 === Adding a choropleth layer
 
 Now that you have a map, you'll want to add layers to it.
-The first layer you'll add is a choropleth layer to shade world countries 
-by web log traffic. Darker shades symbolize countries with more web log traffic, 
+The first layer you'll add is a choropleth layer to shade world countries
+by web log traffic. Darker shades symbolize countries with more web log traffic,
 and lighter shades symbolize countries with less traffic.
 
 ==== Add a vector layer from the Elastic Maps Service source
@@ -60,10 +64,10 @@ and lighter shades symbolize countries with less traffic.
 
 ===== Join the vector layer with the sample web log index
 
-You must add the web log traffic property to the world countries so
-that the property is available for styling.
-You'll create a <<terms-join, terms join>> to link the vector source *World Countries* to 
-the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src. 
+You now have a vector layer containing the world countries.
+To symbolize countries by web traffic, you'll need to augment the world country features with the count of Elasticsearch weblog documents originating from each country.
+To do this, you'll create a <<terms-join, terms join>> to link the vector source *World Countries* to
+the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 
 . Click plus image:maps/images/gs_plus_icon.png[] to the right of *Term Joins* label.
 . Click *Join --select--*
@@ -73,8 +77,8 @@ the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 
 ===== Set the vector style
 
-The final step is to set the vector fill color to shade 
-the countries by web log traffic.
+All of the world countries are still a single color because the layer is using <<maps-vector-style-static, static styling>>.
+To shade the world countries based on which country is sending the most requests, you'll need to use <<maps-vector-style-data-driven, data driven styling>>.
 
 . Click image:maps/images/gs_link_icon.png[] to the right of *Fill color*.
 . Select the grey color ramp.
@@ -86,39 +90,47 @@ Your map now looks like this:
 [role="screenshot"]
 image::maps/images/gs_add_cloropeth_layer.png[]
 
+[role="xpack"]
+[[maps-add-elasticsearch-layer]]
 === Adding layers for {es} data
 
-You'll add two layers for {es} data. The first layer displays documents, and the
-second layer displays aggregated data.
-The raw documents appear when you zoom in the map to show smaller regions.
-The aggregated data 
-appears when you zoom out the map to show larger amounts of the globe.
+To avoid overwhelming the user with too much data at once, you'll add two layers for {es} data.
+
+* The first layer will display individual documents.
+The layer will appear when the user zooms in the map to show smaller regions.
+* The second layer will show aggregated data that represents many documents.
+The layer will appear when the user zooms out the map to show larger amounts of the globe.
 
 ==== Add a vector layer from the document source
 
 This layer displays web log documents as points.
-The layer is only visible when you zoom in the map past zoom level 9.
+The layer is only visible when users zoom in the map past zoom level 9.
 
 . In the map legend, click *Add layer*.
 . Click the *Documents* data source.
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
 . Set *Layer name* to `Actual Requests`.
-. Set *Min zoom* to 9 and *Max zoom* to 24.
+. Set *Zoom range for layer visibility* to the range [9, 24].
 . Set *Layer transparency* to 1.
 . Set *Fill color* to *#2200ff*.
 . Click *Save & close*.
++
+Your map now looks like this between zoom levels 9 and 24:
++
+[role="screenshot"]
+image::maps/images/gs_add_es_document_layer.png[]
 
 ==== Add a vector layer from the grid aggregation source
 
-Aggregations group {es} documents into grids. You can calculate metrics 
-for each gridded cell. 
+Aggregations group {es} documents into grids. You can calculate metrics
+for each gridded cell.
 
-You'll create a layer for aggregated data and make it visible only when the map 
-is zoomed out past zoom level 9. Darker colors will symbolize grids 
-with more web log traffic, and lighter colors will symbolize grids with less 
-traffic. Larger circles will symbolize grids with 
-more total bytes transferred, and smaller circles will symbolize 
+You'll create a layer for aggregated data and make it visible only when the map
+is zoomed out past zoom level 9. Darker colors will symbolize grids
+with more web log traffic, and lighter colors will symbolize grids with less
+traffic. Larger circles will symbolize grids with
+more total bytes transferred, and smaller circles will symbolize
 grids with less bytes transferred.
 
 [role="screenshot"]
@@ -131,7 +143,7 @@ image::maps/images/grid_metrics_both.png[]
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
 . Set *Layer name* to `Total Requests and Bytes`.
-. Set *Min zoom* to 0 and *Max zoom* to 9.
+. Set *Zoom range for layer visibility* to the range [0, 9].
 . Set *Layer transparency* to 1.
 
 ===== Configure the aggregation metrics
@@ -148,24 +160,74 @@ image::maps/images/grid_metrics_both.png[]
   .. In the field select, select *sum of bytes*.
 . Click *Save & close* button.
 +
-Your map now looks like this:
+Your map now looks like this between zoom levels 0 and 9:
 +
 [role="screenshot"]
 image::maps/images/gs_add_es_layer.png[]
 
+[role="xpack"]
+[[maps-save]]
 === Saving the map
 Now that your map is complete, you'll want to save it so others can use it.
 
 . In the application toolbar, click *Save*.
 . Enter `Tutorial web logs map` for the title.
 . Click *Confirm Save*.
++
+You have completed the steps for re-creating the sample data map.
 
-You're now ready to start creating maps using your own data. You might find 
-these resources helpful:
+*Next steps:*
 
-* <<heatmap-layer, Heat map layer>>
-* <<tile-layer, Tile layer>>
-* <<vector-layer, Vector layer>>
+* Continue with this tutorial and <<maps-embedding, use your map in a Kibana dashboard>>.
+* Create a map using your own data. You might find these resources helpful:
+** <<heatmap-layer, Heat map layer>>
+** <<tile-layer, Tile layer>>
+** <<vector-layer, Vector layer>>
 
+[role="xpack"]
+[[maps-embedding]]
+=== Adding the map to a dashboard
+You can add your saved map to a {kibana-ref}/dashboard.html[dashboard] and view your geospatial data alongside bar charts, pie charts, and other visualizations.
 
+. In the side navigation, click *Dashboard*.
+. Click *Create new dashboard*.
+. Set the time range to *Last 7 days*.
+. Click *Add*.
++
+A panel opens with a list of objects that you can add to the dashboard.  You'll add a map and two visualizations.
++
+. Set the *Types* select to *Map*.
+. Click the name of your saved map or the *[Logs] Total Requests and Bytes* map included with the sample data set to add a map to the dashboard.
+. Set the *Types* select to *Visualization*.
+. Click *[Logs] Heatmap* to add a heatmap to the dashboard.
+. Click *[Logs] Visitors by OS* to add a pie chart to the dashboard.
+. Close the panel.
++
+Your dashboard should look like this:
++
+[role="screenshot"]
+image::maps/images/gs_dashboard_with_map.png[]
+
+==== Exploring your data using filters
+
+You can apply filters to your dashboard to hone in on the data that you are most interested in.
+The dashboard is interactive--you can quickly create filters by clicking on the desired data in the map and visualizations.
+The panels are linked, so that when you apply a filter in one panel, the filter is applied to all panels on the dashboard.
+
+. In the *[Logs] Visitors by OS* visualization, click on the *osx* pie slice.
++
+Both the visualizations and map are filtered to only show documents where *machine.os.keyword* is *osx*.
+The *machine.os.keyword: osx* filter appears in the dashboard query bar.
++
+. Click the *x* to remove the *machine.os.keyword: osx* filter.
+. In the map, click in the United States vector.
+. Click plus image:maps/images/gs_plus_icon.png[] to the right of *iso2* row in the tooltip.
++
+Both the visualizations and the map are filtered to only show documents where *geo.src* is *US*.
+The *geo.src: US* filter appears in the dashboard query bar.
++
+Your dashboard should look like this:
++
+[role="screenshot"]
+image::maps/images/gs_dashboard_with_terms_filter.png[]
 

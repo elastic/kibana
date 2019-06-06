@@ -6,11 +6,12 @@
 
 import { connect } from 'react-redux';
 import { compose, branch, renderComponent } from 'recompose';
-import { selectElement } from '../../../state/actions/transient';
+import { selectToplevelNodes } from '../../../state/actions/transient';
 import { canUserWrite, getAppReady } from '../../../state/selectors/app';
 import { getWorkpad, isWriteable } from '../../../state/selectors/workpad';
 import { LoadWorkpad } from './load_workpad';
 import { WorkpadApp as Component } from './workpad_app';
+import { withElementsLoadedTelemetry } from './workpad_telemetry';
 
 const mapStateToProps = state => {
   const appReady = getAppReady(state);
@@ -25,7 +26,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   deselectElement(ev) {
     ev && ev.stopPropagation();
-    dispatch(selectElement(null));
+    dispatch(selectToplevelNodes([]));
   },
 });
 
@@ -36,5 +37,6 @@ export const WorkpadApp = compose(
     mapStateToProps,
     mapDispatchToProps
   ),
-  ...branches
+  ...branches,
+  withElementsLoadedTelemetry
 )(Component);

@@ -27,13 +27,13 @@ import {
 } from '@elastic/eui';
 
 import {
-  UA_DETAIL_PANEL_SUMMARY_TAB_CLICK,
-  UA_DETAIL_PANEL_TERMS_TAB_CLICK,
-  UA_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
-  UA_DETAIL_PANEL_METRICS_TAB_CLICK,
-  UA_DETAIL_PANEL_JSON_TAB_CLICK,
+  UIM_DETAIL_PANEL_SUMMARY_TAB_CLICK,
+  UIM_DETAIL_PANEL_TERMS_TAB_CLICK,
+  UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
+  UIM_DETAIL_PANEL_METRICS_TAB_CLICK,
+  UIM_DETAIL_PANEL_JSON_TAB_CLICK,
 } from '../../../../../common';
-import { trackUserAction } from '../../../services';
+import { trackUiMetric } from '../../../services';
 
 import {
   JobActionMenu,
@@ -54,12 +54,12 @@ export const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_JSON,
 ];
 
-const tabToUserActionMap = {
-  [JOB_DETAILS_TAB_SUMMARY]: UA_DETAIL_PANEL_SUMMARY_TAB_CLICK,
-  [JOB_DETAILS_TAB_TERMS]: UA_DETAIL_PANEL_TERMS_TAB_CLICK,
-  [JOB_DETAILS_TAB_HISTOGRAM]: UA_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
-  [JOB_DETAILS_TAB_METRICS]: UA_DETAIL_PANEL_METRICS_TAB_CLICK,
-  [JOB_DETAILS_TAB_JSON]: UA_DETAIL_PANEL_JSON_TAB_CLICK,
+const tabToUiMetricMap = {
+  [JOB_DETAILS_TAB_SUMMARY]: UIM_DETAIL_PANEL_SUMMARY_TAB_CLICK,
+  [JOB_DETAILS_TAB_TERMS]: UIM_DETAIL_PANEL_TERMS_TAB_CLICK,
+  [JOB_DETAILS_TAB_HISTOGRAM]: UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
+  [JOB_DETAILS_TAB_METRICS]: UIM_DETAIL_PANEL_METRICS_TAB_CLICK,
+  [JOB_DETAILS_TAB_JSON]: UIM_DETAIL_PANEL_JSON_TAB_CLICK,
 };
 
 export class DetailPanelUi extends Component {
@@ -114,7 +114,7 @@ export class DetailPanelUi extends Component {
       renderedTabs.push(
         <EuiTab
           onClick={() => {
-            trackUserAction(tabToUserActionMap[tab]);
+            trackUiMetric(tabToUiMetricMap[tab]);
             openDetailPanel({ panelType: tab, jobId: id });
           }}
           isSelected={isSelected}

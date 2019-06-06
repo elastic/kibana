@@ -17,23 +17,43 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { AggParamEditorProps } from '../../vis/editors/default';
 
-function StringParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<string>) {
+function StringParamEditor({
+  agg,
+  aggParam,
+  showValidation,
+  value,
+  setValidity,
+  setValue,
+  setTouched,
+}: AggParamEditorProps<string>) {
+  const isValid = aggParam.required ? !!value : true;
+
+  useEffect(
+    () => {
+      setValidity(isValid);
+    },
+    [isValid]
+  );
+
   return (
     <EuiFormRow
       label={aggParam.displayName || aggParam.name}
-      className="form-group"
       fullWidth={true}
+      className="visEditorSidebar__aggParamFormRow"
+      isInvalid={showValidation ? !isValid : false}
     >
       <EuiFieldText
         value={value || ''}
         data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
+        onBlur={setTouched}
+        isInvalid={showValidation ? !isValid : false}
       />
     </EuiFormRow>
   );

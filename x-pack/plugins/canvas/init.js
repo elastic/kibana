@@ -35,6 +35,31 @@ export default async function(server /*options*/) {
     };
   });
 
+  server.plugins.xpack_main.registerFeature({
+    id: 'canvas',
+    name: 'Canvas',
+    icon: 'canvasApp',
+    navLinkId: 'canvas',
+    app: ['canvas', 'kibana'],
+    catalogue: ['canvas'],
+    privileges: {
+      all: {
+        savedObject: {
+          all: ['canvas-workpad', 'canvas-element'],
+          read: ['index-pattern'],
+        },
+        ui: ['save', 'show'],
+      },
+      read: {
+        savedObject: {
+          all: [],
+          read: ['index-pattern', 'canvas-workpad', 'canvas-element'],
+        },
+        ui: ['show'],
+      },
+    },
+  });
+
   registerCanvasUsageCollector(server);
   loadSampleData(server);
   routes(server);

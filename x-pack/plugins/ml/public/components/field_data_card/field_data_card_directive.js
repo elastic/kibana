@@ -12,8 +12,8 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
+import moment from 'moment';
 import chrome from 'ui/chrome';
-import 'ui/filters/moment';
 
 import template from './field_data_card.html';
 import { ML_JOB_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
@@ -22,7 +22,7 @@ import { mlEscape } from 'plugins/ml/util/string_utils';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlFieldDataCard', function () {
+module.directive('mlFieldDataCard', function (config) {
 
   function link(scope, element) {
     scope.ML_JOB_FIELD_TYPES = ML_JOB_FIELD_TYPES;
@@ -54,6 +54,10 @@ module.directive('mlFieldDataCard', function () {
         }
       }, true);
     }
+
+    scope.toMoment = function (datetime) {
+      return moment(datetime).format(config.get('dateFormat'));
+    };
 
     scope.getCardUrl = function () {
       const urlBasePath = chrome.getBasePath();

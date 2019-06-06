@@ -5,25 +5,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import { idx } from 'x-pack/plugins/apm/common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { ESResponse } from './fetcher';
-
-export interface IBucket {
-  key: number;
-  count: number;
-  sample?: IBucketSample;
-}
-
-interface IBucketSample {
-  traceId?: string;
-  transactionId?: string;
-}
-
-interface IBucketsResponse {
-  totalHits: number;
-  buckets: IBucket[];
-  defaultSample?: IBucketSample;
-}
 
 function getDefaultSample(buckets: IBucket[]) {
   const samples = buckets
@@ -38,21 +21,26 @@ function getDefaultSample(buckets: IBucket[]) {
   return samples[middleIndex];
 }
 
-export function bucketTransformer(response: ESResponse): IBucketsResponse {
-  const buckets = response.aggregations.distribution.buckets.map(bucket => {
-    const sampleSource = idx(bucket, _ => _.sample.hits.hits[0]._source);
-    const isSampled = idx(sampleSource, _ => _.transaction.sampled);
-    const sample = {
-      traceId: idx(sampleSource, _ => _.trace.id),
-      transactionId: idx(sampleSource, _ => _.transaction.id)
-    };
+export type IBucket = ReturnType<typeof getBucket>;
+function getBucket(
+  bucket: ESResponse['aggregations']['distribution']['buckets'][0]
+) {
+  const sampleSource = idx(bucket, _ => _.sample.hits.hits[0]._source);
+  const isSampled = idx(sampleSource, _ => _.transaction.sampled);
+  const sample = {
+    traceId: idx(sampleSource, _ => _.trace.id),
+    transactionId: idx(sampleSource, _ => _.transaction.id)
+  };
 
-    return {
-      key: bucket.key,
-      count: bucket.doc_count,
-      sample: isSampled ? sample : undefined
-    };
-  });
+  return {
+    key: bucket.key,
+    count: bucket.doc_count,
+    sample: isSampled ? sample : undefined
+  };
+}
+
+export function bucketTransformer(response: ESResponse) {
+  const buckets = response.aggregations.distribution.buckets.map(getBucket);
 
   return {
     totalHits: response.hits.total,

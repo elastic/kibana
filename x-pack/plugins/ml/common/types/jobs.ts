@@ -43,6 +43,7 @@ export function isMlJob(arg: any): arg is MlJob {
   return typeof arg.job_id === 'string';
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MlJobs extends Array<MlJob> {}
 
 export function isMlJobs(arg: any): arg is MlJobs {

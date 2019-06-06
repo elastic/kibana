@@ -56,10 +56,7 @@ export function NoServicesMessage({ historicalDataFound }: Props) {
                 defaultMessage:
                   'You may also have old data that needs to be migrated.'
               })}{' '}
-              <KibanaLink
-                pathname="/app/kibana"
-                hash="/management/elasticsearch/upgrade_assistant"
-              >
+              <KibanaLink path="/management/elasticsearch/upgrade_assistant">
                 {i18n.translate(
                   'xpack.apm.servicesTable.UpgradeAssistantLink',
                   {

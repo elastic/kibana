@@ -19,7 +19,7 @@
 
 import d3 from 'd3';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import $ from 'jquery';
 import { VislibLibLayoutSplitsColumnChartChartSplitProvider } from '../../../../../lib/layout/splits/column_chart/chart_split';
 import { VislibLibLayoutSplitsColumnChartChartTitleSplitProvider } from '../../../../../lib/layout/splits/column_chart/chart_title_split';

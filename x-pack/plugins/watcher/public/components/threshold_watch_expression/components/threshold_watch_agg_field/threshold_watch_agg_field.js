@@ -5,6 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import template from './threshold_watch_agg_field.html';
 import { ThresholdWatchBaseController } from '../threshold_watch_base';
 import 'plugins/watcher/services/html_id_generator';
@@ -12,7 +13,7 @@ import 'plugins/watcher/components/xpack_aria_describes';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('thresholdWatchAggField', function ($injector, i18n) {
+app.directive('thresholdWatchAggField', function ($injector) {
   const htmlIdGeneratorFactory = $injector.get('xpackWatcherHtmlIdGeneratorFactory');
 
   return {
@@ -51,13 +52,13 @@ app.directive('thresholdWatchAggField', function ($injector, i18n) {
           }
         });
 
-        this.itemDescription = i18n('xpack.watcher.thresholdWatchExpression.aggField.itemDescription', {
+        this.itemDescription = i18n.translate('xpack.watcher.thresholdWatchExpression.aggField.itemDescription', {
           defaultMessage: 'Of',
         });
       }
 
       get itemValue() {
-        return this.aggField ? this.aggField.name : i18n(
+        return this.aggField ? this.aggField.name : i18n.translate(
           'xpack.watcher.thresholdWatchExpression.aggField.selectFieldTextMessage', {
             defaultMessage: 'select a field',
           });

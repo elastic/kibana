@@ -64,6 +64,9 @@ export default async function ({ readConfigFile }) {
     },
 
     apps: {
+      kibana: {
+        pathname: '/app/kibana',
+      },
       status_page: {
         pathname: '/status',
       },
@@ -104,7 +107,10 @@ export default async function ({ readConfigFile }) {
       },
     },
     junit: {
-      reportName: 'UI Functional Tests'
+      reportName: 'Chrome UI Functional Tests'
+    },
+    browser: {
+      type: 'chrome'
     }
   };
 }

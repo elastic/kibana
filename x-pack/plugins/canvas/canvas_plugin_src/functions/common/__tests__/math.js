@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { math } from '../math';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../strings';
 import { emptyTable, testTable } from './fixtures/test_tables';
+
+const errors = getFunctionErrors().math;
 
 describe('math', () => {
   const fn = functionWrapper(math);
@@ -51,11 +54,7 @@ describe('math', () => {
     it('throws when expression evaluates to an array', () => {
       expect(fn)
         .withArgs(testTable, { expression: 'multiply(price, 2)' })
-        .to.throwException(e => {
-          expect(e.message).to.be(
-            'Expressions must return a single number. Try wrapping your expression in mean() or sum()'
-          );
-        });
+        .to.throwException(new RegExp(errors.tooManyResults().message.replace(/[()]/g, '\\$&')));
     });
 
     it('throws when using an unknown context variable', () => {
@@ -69,40 +68,28 @@ describe('math', () => {
     it('throws when using non-numeric data', () => {
       expect(fn)
         .withArgs(testTable, { expression: 'mean(name)' })
-        .to.throwException(e => {
-          expect(e.message).to.be('Failed to execute math expression. Check your column names');
-        });
+        .to.throwException(new RegExp(errors.executionFailed().message));
       expect(fn)
         .withArgs(testTable, { expression: 'mean(in_stock)' })
-        .to.throwException(e => {
-          expect(e.message).to.be('Failed to execute math expression. Check your column names');
-        });
+        .to.throwException(new RegExp(errors.executionFailed().message));
     });
 
     it('throws when missing expression', () => {
       expect(fn)
         .withArgs(testTable)
-        .to.throwException(e => {
-          expect(e.message).to.be('Empty expression');
-        });
+        .to.throwException(new RegExp(errors.emptyExpression().message));
       expect(fn)
         .withArgs(testTable, { expression: '' })
-        .to.throwException(e => {
-          expect(e.message).to.be('Empty expression');
-        });
+        .to.throwException(new RegExp(errors.emptyExpression().message));
       expect(fn)
         .withArgs(testTable, { expression: ' ' })
-        .to.throwException(e => {
-          expect(e.message).to.be('Empty expression');
-        });
+        .to.throwException(new RegExp(errors.emptyExpression().message));
     });
 
     it('throws when passing a context variable from an empty datatable', () => {
       expect(fn)
         .withArgs(emptyTable, { expression: 'mean(foo)' })
-        .to.throwException(e => {
-          expect(e.message).to.be('Empty datatable');
-        });
+        .to.throwException(new RegExp(errors.emptyDatatable().message));
     });
   });
 });

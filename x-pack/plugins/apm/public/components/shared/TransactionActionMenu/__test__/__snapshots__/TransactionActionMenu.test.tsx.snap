@@ -1,209 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TransactionActionMenu component should render with data 1`] = `
-<EuiPopover
-  anchorPosition="downRight"
-  button={
-    <ActionMenuButton
-      onClick={[Function]}
-    />
-  }
-  closePopover={[Function]}
-  hasArrow={true}
-  id="transactionActionMenu"
-  isOpen={false}
-  ownFocus={false}
-  panelPaddingSize="none"
->
-  <EuiContextMenuPanel
-    hasFocus={true}
-    items={
-      Array [
-        <EuiContextMenuItem
-          href="/app/infra#/link-to/pod-logs/pod123456abcdef?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now-24h,to:now))"
-          icon="loggingApp"
-          layoutAlign="center"
-          toolTipPosition="right"
+exports[`TransactionActionMenu component should match the snapshot 1`] = `
+<div>
+  <div
+    class="euiPopover euiPopover--anchorDownRight"
+    id="transactionActionMenu"
+  >
+    <div
+      class="euiPopover__anchor"
+    >
+      <button
+        class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
+        type="button"
+      >
+        <span
+          class="euiButtonEmpty__content"
         >
-          <EuiFlexGroup
-            gutterSize="s"
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon-isLoaded euiButtonEmpty__icon"
+            focusable="false"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <EuiFlexItem>
-              <EuiLink
-                color="primary"
-                type="button"
-              >
-                Show pod logs
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                type="popout"
+            <defs>
+              <path
+                d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                id="arrow_down-a"
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          href="/app/infra#/link-to/container-logs/container123456abcdef?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now-24h,to:now))"
-          icon="loggingApp"
-          layoutAlign="center"
-          toolTipPosition="right"
-        >
-          <EuiFlexGroup
-            gutterSize="s"
+            </defs>
+            <use
+              fill-rule="nonzero"
+              xlink:href="#arrow_down-a"
+            />
+          </svg>
+          <span
+            class="euiButtonEmpty__text"
           >
-            <EuiFlexItem>
-              <EuiLink
-                color="primary"
-                type="button"
-              >
-                Show container logs
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                type="popout"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          href="/app/infra#/link-to/host-logs/227453131a17?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now-24h,to:now))"
-          icon="loggingApp"
-          layoutAlign="center"
-          toolTipPosition="right"
-        >
-          <EuiFlexGroup
-            gutterSize="s"
-          >
-            <EuiFlexItem>
-              <EuiLink
-                color="primary"
-                type="button"
-              >
-                Show host logs
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                type="popout"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          href="/app/infra#/link-to/pod-detail/pod123456abcdef?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now-24h,to:now))"
-          icon="infraApp"
-          layoutAlign="center"
-          toolTipPosition="right"
-        >
-          <EuiFlexGroup
-            gutterSize="s"
-          >
-            <EuiFlexItem>
-              <EuiLink
-                color="primary"
-                type="button"
-              >
-                Show pod metrics
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                type="popout"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          href="/app/infra#/link-to/container-detail/container123456abcdef?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now-24h,to:now))"
-          icon="infraApp"
-          layoutAlign="center"
-          toolTipPosition="right"
-        >
-          <EuiFlexGroup
-            gutterSize="s"
-          >
-            <EuiFlexItem>
-              <EuiLink
-                color="primary"
-                type="button"
-              >
-                Show container metrics
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                type="popout"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          href="/app/infra#/link-to/host-detail/227453131a17?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now-24h,to:now))"
-          icon="infraApp"
-          layoutAlign="center"
-          toolTipPosition="right"
-        >
-          <EuiFlexGroup
-            gutterSize="s"
-          >
-            <EuiFlexItem>
-              <EuiLink
-                color="primary"
-                type="button"
-              >
-                Show host metrics
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                type="popout"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          href="/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now-24h,to:now))&_a=(interval:auto,query:(language:lucene,query:'processor.event:\\"transaction\\" AND transaction.id:\\"8b60bd32ecc6e150\\" AND trace.id:\\"8b60bd32ecc6e1506735a8b6cfcf175c\\"'))"
-          icon="discoverApp"
-          layoutAlign="center"
-          toolTipPosition="right"
-        >
-          <EuiFlexGroup
-            gutterSize="s"
-          >
-            <EuiFlexItem>
-              <EuiLink
-                color="primary"
-                type="button"
-              >
-                View sample document
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                type="popout"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiContextMenuItem>,
-      ]
-    }
-    title="Actions"
-  />
-</EuiPopover>
+            Actions
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
 `;

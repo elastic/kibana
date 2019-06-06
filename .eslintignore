@@ -2,6 +2,7 @@ node_modules
 bower_components
 /data
 /build
+/target
 /.es
 /plugins
 /optimize
@@ -18,9 +19,7 @@ bower_components
 /src/core/lib/kbn_internal_native_observable
 /packages/*/target
 /packages/eslint-config-kibana
-/packages/eslint-plugin-kibana-custom
 /packages/kbn-es-query/src/kuery/ast/kuery.js
-/packages/kbn-es-query/src/kuery/ast/legacy_kuery.js
 /packages/kbn-pm/dist
 /packages/kbn-plugin-generator/sao_template/template
 /packages/kbn-ui-framework/dist
@@ -32,6 +31,11 @@ bower_components
 /x-pack/plugins/**/__tests__/fixtures/**
 /packages/kbn-interpreter/src/common/lib/grammar.js
 /x-pack/plugins/canvas/canvas_plugin
+/x-pack/plugins/canvas/storybook
 /x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts
+/x-pack/plugins/infra/common/graphql/types.ts
+/x-pack/plugins/infra/public/graphql/types.ts
+/x-pack/plugins/infra/server/graphql/types.ts
+**/graphql/types.ts
 **/*.js.snap
 !/.eslintrc.js

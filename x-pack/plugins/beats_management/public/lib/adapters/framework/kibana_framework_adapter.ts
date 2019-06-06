@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable max-classes-per-file */
 import { IScope } from 'angular';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as React from 'react';
@@ -130,7 +131,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
                 <div id="management-sidenav" class="euiPageSideBar" style="position: static;"></div>
                 <div id="${this.PLUGIN_ID}ReactRoot" />
                </kbn-management-app>`,
-        // tslint:disable-next-line: max-classes-per-file
+        // eslint-disable-next-line max-classes-per-file
         controller: ($scope: any, $route: any) => {
           try {
             $scope.$$postDigest(() => {
@@ -220,7 +221,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 }
 
-// tslint:disable-next-line: max-classes-per-file
 class KibanaAdapterServiceProvider {
   public serviceRefs: KibanaAdapterServiceRefs | null = null;
   public bufferedCalls: Array<BufferedKibanaServiceCall<KibanaAdapterServiceRefs>> = [];

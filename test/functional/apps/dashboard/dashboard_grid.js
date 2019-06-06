@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard']);
 
-  describe('dashboard grid', () => {
+  describe('dashboard grid', function () {
+    this.tags(['skipFirefox']);
+
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('few panels');

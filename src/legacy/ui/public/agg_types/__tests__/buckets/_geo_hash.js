@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { geoHashBucketAgg } from '../../buckets/geo_hash';
 import * as AggConfigModule from '../../../vis/agg_config';
@@ -94,7 +94,7 @@ describe('Geohash Agg', () => {
 
   describe('precision parameter', () => {
 
-    const PRECISION_PARAM_INDEX = 7;
+    const PRECISION_PARAM_INDEX = 2;
     let precisionParam;
     beforeEach(() => {
       precisionParam = geoHashBucketAgg.params[PRECISION_PARAM_INDEX];

@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KpiNetwork Component rendering it renders loading icons 1`] = `
+<pure(Component)
+  data={
+    Object {
+      "activeAgents": 60015,
+      "dnsQueries": 278,
+      "networkEvents": 16,
+      "tlsHandshakes": 10000,
+      "uniqueDestinationPrivateIps": 18,
+      "uniqueFlowId": 10277307,
+      "uniqueSourcePrivateIps": 383,
+    }
+  }
+  loading={true}
+/>
+`;
+
+exports[`KpiNetwork Component rendering it renders the default widget 1`] = `
+<pure(Component)
+  data={
+    Object {
+      "activeAgents": 60015,
+      "dnsQueries": 278,
+      "networkEvents": 16,
+      "tlsHandshakes": 10000,
+      "uniqueDestinationPrivateIps": 18,
+      "uniqueFlowId": 10277307,
+      "uniqueSourcePrivateIps": 383,
+    }
+  }
+  loading={false}
+/>
+`;

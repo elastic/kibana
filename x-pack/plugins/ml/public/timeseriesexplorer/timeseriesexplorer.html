@@ -1,12 +1,8 @@
 <ml-nav-menu name="timeseriesexplorer"></ml-nav-menu>
 <ml-chart-tooltip></ml-chart-tooltip>
 <div class="ml-time-series-explorer" ng-controller="MlTimeSeriesExplorerController">
-  <navbar ng-show="jobs.length > 0 && chrome.getVisible()">
-    <job-select-button
-      timeseriesonly="true"
-      single-selection="true">
-    </job-select-button>
-  </navbar>
+
+  <ml-job-selector-react-wrapper timeseriesonly="true" singleselection="true" />
 
   <div class="no-results-container" ng-if="jobs.length === 0 && loading === false">
     <div class="no-results">
@@ -71,7 +67,8 @@
     is-loading="loading === true"
   />
 
-  <div class="no-results-container" ng-show="jobs.length > 0 && loading === false && hasResults === false">
+  <div class="no-results-container"
+    ng-show="jobs.length > 0 && loading === false && hasResults === false && dataNotChartable === false">
     <div class="no-results">
       <div
         i18n-id="xpack.ml.timeSeriesExplorer.noResultsFoundLabel"
@@ -81,6 +78,24 @@
       <div
         i18n-id="xpack.ml.timeSeriesExplorer.tryWideningTheTimeSelectionDescription"
         i18n-default-message="Try widening the time selection or moving further back in time"
+      ></div>
+    </div>
+  </div>
+
+  <div class="no-results-container"
+    ng-show="jobs.length > 0 && loading === false && hasResults === false && dataNotChartable === true">
+    <div class="no-results">
+      <div
+        i18n-id="xpack.ml.timeSeriesExplorer.noResultsFoundLabel"
+        i18n-default-message="{icon} No results found"
+        i18n-values="{ html_icon: '<i class=\'fa fa-info-circle\'></i>' }"
+      ></div>
+      <div
+        i18n-id="xpack.ml.timeSeriesExplorer.dataNotChartableDescription"
+        i18n-default-message="Model plot is not collected for the selected {entityCount, plural, one {entity} other {entities}} and the source data cannot be plotted for this detector"
+        i18n-values="{
+          entityCount: entities.length
+        }"
       ></div>
     </div>
   </div>
@@ -103,10 +118,11 @@
         <span
           ng-repeat="countData in chartDetails.entityData.entities"
           i18n-id="xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription"
-          i18n-default-message="{openBrace}{cardinality} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}"
+          i18n-default-message="{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}"
           i18n-values="{
             openBrace: $first ? '(' : '',
             closeBrace: $last ? ')' : ', ',
+            cardinalityValue: countData.cardinality === 0 ? allValuesLabel : countData.cardinality,
             cardinality: countData.cardinality,
             fieldName: countData.fieldName
           }"
@@ -189,7 +205,7 @@
           i18n-id="xpack.ml.timeSeriesExplorer.annotationsTitle"
           i18n-default-message="Annotations"
         ></span>
-  
+
         <ml-annotation-table
           annotations="focusAnnotationData"
           drill-down="false"

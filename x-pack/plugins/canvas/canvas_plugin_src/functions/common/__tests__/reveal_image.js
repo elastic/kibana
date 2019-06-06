@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { revealImage } from '../revealImage';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { elasticLogo } from '../../../lib/elastic_logo';
+import { getFunctionErrors } from '../../../strings';
+
+const errors = getFunctionErrors().revealImage;
 
 describe('revealImage', () => {
   const fn = functionWrapper(revealImage);
@@ -28,9 +31,7 @@ describe('revealImage', () => {
           emptyImage: elasticOutline,
           origin: 'top',
         })
-        .to.throwException(e => {
-          expect(e.message).to.be.equal(`Invalid value: '10'. Percentage must be between 0 and 1`);
-        });
+        .to.throwException(new RegExp(errors.invalidPercent(10).message));
 
       expect(fn)
         .withArgs(-0.1, {
@@ -38,11 +39,7 @@ describe('revealImage', () => {
           emptyImage: elasticOutline,
           origin: 'top',
         })
-        .to.throwException(e => {
-          expect(e.message).to.be.equal(
-            `Invalid value: '-0.1'. Percentage must be between 0 and 1`
-          );
-        });
+        .to.throwException(new RegExp(errors.invalidPercent(-0.1).message));
     });
   });
 

@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { validateModelMemoryLimit } from '../validate_model_memory_limit';
 
 describe('ML - validateModelMemoryLimit', () => {
@@ -26,6 +26,22 @@ describe('ML - validateModelMemoryLimit', () => {
     },
     limits: {
       max_model_memory_limit: '30mb'
+    }
+  };
+
+  // mock field caps response
+  const fieldCapsResponse = {
+    indices: [
+      'cloudwatch'
+    ],
+    fields: {
+      instance: {
+        keyword: {
+          type: 'keyword',
+          searchable: true,
+          aggregatable: true
+        }
+      }
     }
   };
 
@@ -52,9 +68,10 @@ describe('ML - validateModelMemoryLimit', () => {
   };
 
   // mock callWithRequest
-  // used in two places:
+  // used in three places:
   // - to retrieve the info endpoint
   // - to search for cardinality of split field
+  // - to retrieve field capabilities used in search for split field cardinality
   function callWithRequest(call) {
     if (typeof call === undefined) {
       return Promise.reject();
@@ -65,6 +82,8 @@ describe('ML - validateModelMemoryLimit', () => {
       response = mlInfoResponse;
     } else if(call === 'search') {
       response = cardinalitySearchResponse;
+    } else if (call === 'fieldCaps') {
+      response = fieldCapsResponse;
     }
     return Promise.resolve(response);
   }

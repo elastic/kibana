@@ -19,7 +19,7 @@
 
 import { resolve } from 'path';
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 import { PluginPack } from '../../plugin_pack';

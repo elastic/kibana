@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { TabbedAggResponseWriter } from '../_response_writer';
 import { VisProvider } from '../../../vis';
