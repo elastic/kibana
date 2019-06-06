@@ -7,20 +7,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink } from '@elastic/eui';
+// @ts-ignore untyped local
 import { Popover } from '../popover';
-import { ShapePicker } from '../shape_picker/';
+import { ShapePicker } from '../shape_picker';
 import { ShapePreview } from '../shape_preview';
 
-export const ShapePickerMini = ({ shapes, onChange, value, anchorPosition }) => {
-  const button = handleClick => (
+interface Props {
+  shapes: {
+    [key: string]: string;
+  };
+  onChange?: (key: string) => void;
+  value?: string;
+  anchorPosition?: 'top' | 'bottom' | 'left' | 'right';
+}
+
+export const ShapePickerPopover = ({ shapes, onChange, value, anchorPosition }: Props) => {
+  const button = (handleClick: () => unknown) => (
     <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
-      <ShapePreview shape={shapes[value]} />
+      <ShapePreview shape={value ? shapes[value] : undefined} />
     </EuiLink>
   );
 
   return (
     <Popover
-      panelClassName="canvas canvasShapePickerMini--popover"
+      panelClassName="canvas canvasPopover--popover"
       button={button}
       anchorPosition={anchorPosition}
     >
@@ -29,7 +39,7 @@ export const ShapePickerMini = ({ shapes, onChange, value, anchorPosition }) => 
   );
 };
 
-ShapePickerMini.propTypes = {
+ShapePickerPopover.propTypes = {
   shapes: PropTypes.object.isRequired,
   value: PropTypes.string,
   onChange: PropTypes.func,

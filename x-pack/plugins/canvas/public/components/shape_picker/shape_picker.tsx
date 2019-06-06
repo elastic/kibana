@@ -9,9 +9,16 @@ import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { ShapePreview } from '../shape_preview';
 
-export const ShapePicker = ({ shapes, onChange }) => {
+interface Props {
+  shapes: {
+    [key: string]: string;
+  };
+  onChange?: (key: string) => void;
+}
+
+export const ShapePicker = ({ shapes, onChange = () => {} }: Props) => {
   return (
-    <EuiFlexGrid gutterSize="s" columns={4}>
+    <EuiFlexGrid gutterSize="s" columns={4} className="canvasShapePicker">
       {Object.keys(shapes)
         .sort()
         .map(shapeKey => (
