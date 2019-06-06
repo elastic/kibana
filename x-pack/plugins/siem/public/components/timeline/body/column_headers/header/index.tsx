@@ -149,7 +149,7 @@ export class Header extends React.PureComponent<Props> {
   private onClick = () => {
     const { header, isLoading, onColumnSorted, sort } = this.props;
 
-    if (!isLoading) {
+    if (!isLoading && header.aggregatable) {
       onColumnSorted!({
         columnId: header.id,
         sortDirection: getNewSortDirectionOnClick({

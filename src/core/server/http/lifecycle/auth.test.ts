@@ -19,12 +19,11 @@
 
 import Boom from 'boom';
 import { adoptToHapiAuthFormat } from './auth';
+import { httpServerMock } from '../http_server.mocks';
 
 const SessionStorageMock = {
   asScoped: () => null as any,
 };
-const requestMock = {} as any;
-const createResponseToolkit = (customization = {}): any => ({ ...customization });
 
 describe('adoptToHapiAuthFormat', () => {
   it('Should allow authenticating a user identity with given credentials', async () => {
@@ -35,8 +34,8 @@ describe('adoptToHapiAuthFormat', () => {
       SessionStorageMock
     );
     await onAuth(
-      requestMock,
-      createResponseToolkit({
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit({
         authenticated: authenticatedMock,
       })
     );
@@ -54,8 +53,8 @@ describe('adoptToHapiAuthFormat', () => {
     const takeoverSymbol = {};
     const redirectMock = jest.fn(() => ({ takeover: () => takeoverSymbol }));
     const result = await onAuth(
-      requestMock,
-      createResponseToolkit({
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit({
         redirect: redirectMock,
       })
     );
@@ -69,7 +68,10 @@ describe('adoptToHapiAuthFormat', () => {
       async (req, sessionStorage, t) => t.rejected(new Error('not found'), { statusCode: 404 }),
       SessionStorageMock
     );
-    const result = (await onAuth(requestMock, createResponseToolkit())) as Boom;
+    const result = (await onAuth(
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit()
+    )) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toBe('not found');
@@ -80,7 +82,10 @@ describe('adoptToHapiAuthFormat', () => {
     const onAuth = adoptToHapiAuthFormat(async (req, sessionStorage, t) => {
       throw new Error('unknown error');
     }, SessionStorageMock);
-    const result = (await onAuth(requestMock, createResponseToolkit())) as Boom;
+    const result = (await onAuth(
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit()
+    )) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toBe('unknown error');
@@ -92,7 +97,10 @@ describe('adoptToHapiAuthFormat', () => {
       async (req, sessionStorage, t) => undefined as any,
       SessionStorageMock
     );
-    const result = (await onAuth(requestMock, createResponseToolkit())) as Boom;
+    const result = (await onAuth(
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit()
+    )) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toBe(

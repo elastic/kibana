@@ -17,17 +17,14 @@
  * under the License.
  */
 
-import { httpServiceMock } from '../../../../../core/public/mocks';
-import { __newPlatformSetup__, initChromeBasePathApi } from './base_path';
+import { newPlatformHttp } from './base_path.test.mocks';
+import { initChromeBasePathApi } from './base_path';
 
 function initChrome() {
   const chrome: any = {};
   initChromeBasePathApi(chrome);
   return chrome;
 }
-
-const newPlatformHttp = httpServiceMock.createSetupContract();
-__newPlatformSetup__(newPlatformHttp);
 
 newPlatformHttp.getBasePath.mockImplementation(() => 'gotBasePath');
 newPlatformHttp.prependBasePath.mockImplementation(() => 'addedToPath');
