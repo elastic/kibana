@@ -49,6 +49,20 @@ const dateMathExpressionToEpoch = (dateMathExpression: string, roundUp = false):
   return dateObj.valueOf();
 };
 
+export const createNodeDetailLink = (
+  nodeType: InfraNodeType,
+  nodeId: string,
+  from: string,
+  to: string
+) => {
+  return getNodeDetailUrl({
+    nodeType,
+    nodeId,
+    from: dateMathExpressionToEpoch(from),
+    to: dateMathExpressionToEpoch(to, true),
+  });
+};
+
 export const MetricsExplorerChartContextMenu = injectI18n(
   ({ intl, onFilter, options, series, source, timeRange }: Props) => {
     const [isPopoverOpen, setPopoverState] = useState(false);
@@ -93,12 +107,7 @@ export const MetricsExplorerChartContextMenu = injectI18n(
               { name: nodeType }
             ),
             icon: 'infraApp',
-            href: getNodeDetailUrl({
-              nodeType,
-              nodeId: series.id,
-              from: dateMathExpressionToEpoch(timeRange.from),
-              to: dateMathExpressionToEpoch(timeRange.to, true),
-            }),
+            href: createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to),
           },
         ]
       : [];
