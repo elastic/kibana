@@ -45,7 +45,7 @@
   @include euiPanel($selector: 'card-contents');
 
   .card-contents {
-    height: 393px;
+    height: 400px;
     border-radius: 0px 0px $euiBorderRadius $euiBorderRadius;
     overflow: hidden;
   }
@@ -66,6 +66,15 @@
   .stat.min, .stat.max, .stat.median {
     width: 30%;
     display: inline-block;
+  }
+
+  .stat.min.value, .stat.max.value, .stat.median.value {
+    font-size: $euiFontSizeS;
+    @include euiTextTruncate;
+  }
+
+  .valueWrapper {
+    display: inline;
   }
 
   .not-exist-message {

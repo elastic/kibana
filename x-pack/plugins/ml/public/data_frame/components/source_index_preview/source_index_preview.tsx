@@ -5,6 +5,7 @@
  */
 
 import React, { FunctionComponent, useContext, useState } from 'react';
+import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
 
@@ -36,7 +37,9 @@ interface ExpandableTableProps extends EuiInMemoryTableProps {
 
 const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
 
+import { KBN_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { Dictionary } from '../../../../common/types/common';
+import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
 import { isKibanaContext, KibanaContext, PivotQuery } from '../../common';
 
@@ -44,7 +47,6 @@ import {
   EsDoc,
   EsFieldName,
   getSourceIndexDevConsoleStatement,
-  getSelectableFields,
   MAX_COLUMNS,
   toggleSelectedField,
 } from './common';
@@ -199,24 +201,32 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
   let docFields: EsFieldName[] = [];
   let docFieldsCount = 0;
   if (tableItems.length > 0) {
-    docFields = getSelectableFields(tableItems);
+    docFields = Object.keys(tableItems[0]._source);
     docFields.sort();
     docFieldsCount = docFields.length;
   }
 
   const columns = selectedFields.map(k => {
     const column = {
-      field: `_source.${k}`,
+      field: `_source["${k}"]`,
       name: k,
-      render: undefined,
       sortable: true,
       truncateText: true,
     } as Dictionary<any>;
 
+    const field = indexPattern.fields.find(f => f.name === k);
+    const render = (d: string) => {
+      return field !== undefined && field.type === KBN_FIELD_TYPES.DATE
+        ? formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000)
+        : d;
+    };
+
+    column.render = render;
+
     if (CELL_CLICK_ENABLED && cellClick) {
       column.render = (d: string) => (
         <EuiButtonEmpty size="xs" onClick={() => cellClick(`${k}:(${d})`)}>
-          {d}
+          {render(d)}
         </EuiButtonEmpty>
       );
     }
@@ -235,28 +245,26 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     };
   }
 
-  if (docFieldsCount > MAX_COLUMNS || docFieldsCount > selectedFields.length) {
-    columns.unshift({
-      align: RIGHT_ALIGNMENT,
-      width: '40px',
-      isExpander: true,
-      render: (item: EsDoc) => (
-        <EuiButtonIcon
-          onClick={() => toggleDetails(item)}
-          aria-label={
-            itemIdToExpandedRowMap[item._id]
-              ? i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowCollapse', {
-                  defaultMessage: 'Collapse',
-                })
-              : i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowExpand', {
-                  defaultMessage: 'Expand',
-                })
-          }
-          iconType={itemIdToExpandedRowMap[item._id] ? 'arrowUp' : 'arrowDown'}
-        />
-      ),
-    });
-  }
+  columns.unshift({
+    align: RIGHT_ALIGNMENT,
+    width: '40px',
+    isExpander: true,
+    render: (item: EsDoc) => (
+      <EuiButtonIcon
+        onClick={() => toggleDetails(item)}
+        aria-label={
+          itemIdToExpandedRowMap[item._id]
+            ? i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowCollapse', {
+                defaultMessage: 'Collapse',
+              })
+            : i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowExpand', {
+                defaultMessage: 'Expand',
+              })
+        }
+        iconType={itemIdToExpandedRowMap[item._id] ? 'arrowUp' : 'arrowDown'}
+      />
+    ),
+  });
 
   const euiCopyText = i18n.translate('xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip', {
     defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',

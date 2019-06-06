@@ -6,5 +6,13 @@
 
 import React from 'react';
 import { pure } from 'recompose';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const NotFoundPage = pure(() => <div>No content found</div>);
+export const NotFoundPage = pure(() => (
+  <div>
+    <FormattedMessage
+      id="xpack.siem.pages.fourohfour.noContentFoundDescription"
+      defaultMessage="No content found"
+    />
+  </div>
+));

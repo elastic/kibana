@@ -67,10 +67,10 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     const selectedTabId = this.mapLocationToTab(pathname);
 
     if (this.state.selectedTabId !== selectedTabId) {
-      this.setState({
-        ...this.state,
+      this.setState(prevState => ({
+        ...prevState,
         selectedTabId,
-      });
+      }));
     }
   }
   public render() {
@@ -86,10 +86,10 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     }, '');
 
   private handleTabClick = (href: string, id: string) => {
-    this.setState({
-      ...this.state,
+    this.setState(prevState => ({
+      ...prevState,
       selectedTabId: id,
-    });
+    }));
     track(`tab_${id}`);
     window.location.assign(href);
   };

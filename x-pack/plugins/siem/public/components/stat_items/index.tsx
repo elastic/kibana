@@ -11,28 +11,15 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiTitle,
+  IconType,
 } from '@elastic/eui';
 import React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { EuiText } from '@elastic/eui';
-import { BarChart } from './barchart';
-import { AreaChart } from './areachart';
+import { BarChart } from '../charts/barchart';
+import { AreaChart } from '../charts/areachart';
 import { getEmptyTagValue } from '../empty_value';
-
-export const WrappedByAutoSizer = styled.div`
-  height: 100px;
-  position: relative;
-
-  &:hover {
-    z-index: 100;
-  }
-`;
-
-const FlexGroup = styled(EuiFlexGroup)`
-  height: 100%;
-`;
+import { AreaChartData, BarChartData } from '../charts/common';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -49,26 +36,8 @@ export interface StatItem {
   description?: string;
   value: number | undefined | null;
   color?: string;
-  icon?: 'storage' | 'cross' | 'check' | 'visMapCoordinate';
+  icon?: IconType;
   name?: string;
-}
-
-export interface AreaChartData {
-  key: string;
-  value: ChartData[] | [] | null;
-  color?: string | undefined;
-}
-
-export interface ChartData {
-  x: number | string | null;
-  y: number | string | null;
-  y0?: number;
-}
-
-export interface BarChartData {
-  key: string;
-  value: [ChartData] | [] | null;
-  color?: string | undefined;
 }
 
 export interface StatItems {
@@ -85,8 +54,8 @@ export interface StatItemsProps extends StatItems {
   barChart?: BarChartData[];
 }
 
-export const StatItemsComponent = pure<StatItemsProps>(
-  ({ fields, description, key, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
+export const StatItemsComponent = React.memo<StatItemsProps>(
+  ({ fields, description, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
     const isBarChartDataAbailable =
       barChart &&
       barChart.length &&
@@ -96,7 +65,7 @@ export const StatItemsComponent = pure<StatItemsProps>(
       areaChart.length &&
       areaChart.every(item => item.value != null && item.value.length > 0);
     return (
-      <FlexItem key={`stat-items-${key}`} grow={grow}>
+      <FlexItem grow={grow}>
         <EuiPanel>
           <EuiTitle size="xxxs">
             <h6>{description}</h6>
@@ -149,14 +118,4 @@ export const StatItemsComponent = pure<StatItemsProps>(
       </FlexItem>
     );
   }
-);
-
-export const ChartHolder = () => (
-  <FlexGroup justifyContent="center" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiText size="s" textAlign="center" color="subdued">
-        Chart Data Not Available
-      </EuiText>
-    </EuiFlexItem>
-  </FlexGroup>
 );

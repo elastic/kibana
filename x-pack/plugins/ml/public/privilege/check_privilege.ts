@@ -71,7 +71,7 @@ export function checkGetDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileges>
       if (privileges.canGetDataFrameJobs) {
         return resolve(privileges);
       } else {
-        kbnUrl.redirect('/access-denied');
+        kbnUrl.redirect('/data_frames/access-denied');
         return reject();
       }
     });

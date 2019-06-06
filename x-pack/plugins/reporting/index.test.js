@@ -7,6 +7,18 @@
 import { reporting } from './index';
 import { getConfigSchema } from '../../test_utils';
 
+// The snapshot records the number of cpus available
+// to make the snapshot deterministic `os.cpus` needs to be mocked
+// but the other members on `os` must remain untouched
+jest.mock(
+  'os',
+  () => {
+    const os = jest.requireActual('os');
+    os.cpus = () => [{}, {}, {}, {}];
+    return os;
+  }
+);
+
 const describeWithContext = describe.each([
   [{ dev: false, dist: false }],
   [{ dev: true, dist: false }],

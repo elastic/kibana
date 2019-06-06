@@ -17,7 +17,6 @@ import { ConsoleLogger } from '../utils/console_logger';
 describe('repository service test', () => {
   const log = new ConsoleLogger();
   const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
-  log.debug(baseDir);
   const repoDir = path.join(baseDir, 'repo');
   const credsDir = path.join(baseDir, 'credentials');
   // @ts-ignore

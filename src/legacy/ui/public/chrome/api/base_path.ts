@@ -17,17 +17,9 @@
  * under the License.
  */
 
-import { HttpSetup } from '../../../../../core/public';
+import { npSetup } from 'ui/new_platform';
 
-let newPlatformHttp: HttpSetup;
-
-export function __newPlatformSetup__(instance: HttpSetup) {
-  if (newPlatformHttp) {
-    throw new Error('ui/chrome/api/http is already initialized');
-  }
-
-  newPlatformHttp = instance;
-}
+const newPlatformHttp = npSetup.core.http;
 
 export function initChromeBasePathApi(chrome: { [key: string]: any }) {
   chrome.getBasePath = newPlatformHttp.getBasePath.bind(newPlatformHttp);

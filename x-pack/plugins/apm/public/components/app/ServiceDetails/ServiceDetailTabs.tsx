@@ -17,7 +17,7 @@ interface Props {
   transactionTypes: string[];
   urlParams: IUrlParams;
   isRumAgent?: boolean;
-  agentName: string;
+  agentName?: string;
 }
 
 export function ServiceDetailTabs({

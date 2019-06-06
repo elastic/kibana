@@ -3,7 +3,6 @@
 exports[`anomalyAggsFetcher when ES returns valid response should call client with correct query 1`] = `
 Array [
   Array [
-    "search",
     Object {
       "body": Object {
         "aggs": Object {

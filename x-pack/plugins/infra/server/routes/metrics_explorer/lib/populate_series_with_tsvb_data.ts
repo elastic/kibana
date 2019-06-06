@@ -23,6 +23,15 @@ export const populateSeriesWithTSVBData = (
   options: MetricsExplorerRequest,
   framework: InfraBackendFrameworkAdapter
 ) => async (series: MetricsExplorerSeries) => {
+  // IF there are no metrics selected then we should return an empty result.
+  if (options.metrics.length === 0) {
+    return {
+      ...series,
+      columns: [],
+      rows: [],
+    };
+  }
+
   // Set the filter for the group by or match everything
   const filters = options.groupBy ? [{ match: { [options.groupBy]: series.id } }] : [];
   const timerange = { min: options.timerange.from, max: options.timerange.to };
