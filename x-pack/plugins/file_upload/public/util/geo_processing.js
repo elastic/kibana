@@ -37,7 +37,8 @@ export function getGeoIndexTypesForFeatures(featureTypes) {
   }
 }
 
-function geoJsonToEs(parsedGeojson, datatype) {
+// Reduces & flattens geojson to coordinates and properties (if any)
+export function geoJsonToEs(parsedGeojson, datatype) {
   if (!parsedGeojson) {
     return [];
   }

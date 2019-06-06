@@ -188,7 +188,9 @@ export class JsonUploadAndParse extends Component {
         switch (transformDetails) {
           case 'geo':
             const featureTypes = _.uniq(
-              parsedFile.features.map(({ geometry }) => geometry.type)
+              parsedFile.features
+                ? parsedFile.features.map(({ geometry }) => geometry.type)
+                : [ parsedFile.geometry.type ]
             );
             this.setState({
               indexTypes: getGeoIndexTypesForFeatures(featureTypes)
@@ -268,4 +270,5 @@ JsonUploadAndParse.propTypes = {
   ]),
   onIndexReadyStatusChange: PropTypes.func,
   onIndexingComplete: PropTypes.func,
+  onFileUpload: PropTypes.func
 };
