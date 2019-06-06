@@ -169,6 +169,15 @@
       {
         packagePatterns: ['^@kbn/.*'],
         enabled: false,
+      },
+
+      // docs generator
+      {
+        packagePatterns: [
+          '@microsoft/api-documenter',
+          '@microsoft/api-extractor'
+        ],
+        enabled: false,
       }
     ],
   },
