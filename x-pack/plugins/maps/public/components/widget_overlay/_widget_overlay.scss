@@ -10,6 +10,7 @@
   top: $euiSizeM;
   right: $euiSizeM;
   bottom: $euiSizeM;
+  left: 0; // Necessary to have a left value for IE
   pointer-events: none; /* 1 */
 }
 
