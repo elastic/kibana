@@ -48,20 +48,20 @@ exports[`IndexPatternDimensionPanel should render a dimension panel 1`] = `
             options={
               Array [
                 Object {
-                  "label": "timestamp",
-                  "value": "0value",
-                },
-                Object {
                   "label": "bytes",
                   "value": "1value",
+                },
+                Object {
+                  "label": "documents",
+                  "value": "count",
                 },
                 Object {
                   "label": "source",
                   "value": "2value",
                 },
                 Object {
-                  "label": "documents",
-                  "value": "count",
+                  "label": "timestamp",
+                  "value": "0value",
                 },
               ]
             }

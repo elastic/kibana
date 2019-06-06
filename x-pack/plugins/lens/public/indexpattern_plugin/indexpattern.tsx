@@ -201,6 +201,7 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
     },
 
     toExpression,
+
     renderDataPanel(
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>

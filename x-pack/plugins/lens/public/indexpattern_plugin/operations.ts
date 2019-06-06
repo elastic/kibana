@@ -6,8 +6,13 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DataType } from '../types';
-import { IndexPatternField, OperationType } from './indexpattern';
+import { DataType, DimensionPriority } from '../types';
+import {
+  IndexPatternColumn,
+  IndexPatternField,
+  IndexPatternPrivateState,
+  OperationType,
+} from './indexpattern';
 
 export function getOperations(): OperationType[] {
   return ['value', 'terms', 'date_histogram', 'sum', 'avg', 'min', 'max', 'count'];
@@ -151,4 +156,66 @@ export function getOperationResultType({ type }: IndexPatternField, op: Operatio
     case 'terms':
       return 'string';
   }
+}
+
+export function getPotentialColumns(
+  state: IndexPatternPrivateState,
+  suggestedOrder?: DimensionPriority
+): IndexPatternColumn[] {
+  const fields = state.indexPatterns[state.currentIndexPatternId].fields;
+
+  const operationPanels = getOperationDisplay();
+
+  const columns: IndexPatternColumn[] = fields
+    .map((field, index) => {
+      const validOperations = getOperationTypesForField(field);
+
+      return validOperations.map(op => ({
+        operationId: `${index}${op}`,
+        label: operationPanels[op].ofName(field.name),
+        dataType: getOperationResultType(field, op),
+        isBucketed: op === 'terms' || op === 'date_histogram',
+
+        operationType: op,
+        sourceField: field.name,
+        suggestedOrder,
+      }));
+    })
+    .reduce((prev, current) => prev.concat(current));
+
+  columns.push({
+    operationId: 'count',
+    label: i18n.translate('xpack.lens.indexPatternOperations.countOfDocuments', {
+      defaultMessage: 'Count of Documents',
+    }),
+    dataType: 'number',
+    isBucketed: false,
+
+    operationType: 'count',
+    sourceField: 'documents',
+    suggestedOrder,
+  });
+
+  columns.sort(({ sourceField }, { sourceField: sourceField2 }) =>
+    sourceField.localeCompare(sourceField2)
+  );
+
+  return columns;
+}
+
+export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
+  const entries = Object.entries(columns);
+
+  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
+
+  return aggregations
+    .sort(([id, col], [id2, col2]) => {
+      return (
+        // Sort undefined orders last
+        (col.suggestedOrder !== undefined ? col.suggestedOrder : Number.MAX_SAFE_INTEGER) -
+        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : Number.MAX_SAFE_INTEGER)
+      );
+    })
+    .map(([id]) => id)
+    .concat(metrics.map(([id]) => id));
 }
