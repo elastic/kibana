@@ -147,11 +147,11 @@ describe('Header', () => {
   describe('onColumnSorted', () => {
     test('it invokes the onColumnSorted callback when the header is clicked', () => {
       const mockOnColumnSorted = jest.fn();
-
+      const headerSortable = { ...columnHeader, aggregatable: true };
       const wrapper = mount(
         <TestProviders>
           <Header
-            header={columnHeader}
+            header={headerSortable}
             isLoading={false}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
@@ -171,6 +171,81 @@ describe('Header', () => {
         columnId: columnHeader.id,
         sortDirection: 'asc', // (because the previous state was Direction.desc)
       });
+    });
+
+    test('it does NOT invoke the onColumnSorted callback when the header is clicked and aggregatable is false', () => {
+      const mockOnColumnSorted = jest.fn();
+      const headerSortable = { ...columnHeader, aggregatable: false };
+      const wrapper = mount(
+        <TestProviders>
+          <Header
+            header={headerSortable}
+            isLoading={false}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={mockOnColumnSorted}
+            sort={sort}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('[data-test-subj="header"]')
+        .first()
+        .simulate('click');
+
+      expect(mockOnColumnSorted).not.toHaveBeenCalled();
+    });
+
+    test('it does NOT invoke the onColumnSorted callback when the header is clicked and aggregatable is missing', () => {
+      const mockOnColumnSorted = jest.fn();
+      const headerSortable = { ...columnHeader };
+      const wrapper = mount(
+        <TestProviders>
+          <Header
+            header={headerSortable}
+            isLoading={false}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={mockOnColumnSorted}
+            sort={sort}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('[data-test-subj="header"]')
+        .first()
+        .simulate('click');
+
+      expect(mockOnColumnSorted).not.toHaveBeenCalled();
+    });
+
+    test('it does NOT invoke the onColumnSorted callback when the header is clicked and aggregatable is undefined', () => {
+      const mockOnColumnSorted = jest.fn();
+      const headerSortable = { ...columnHeader, aggregatable: undefined };
+      const wrapper = mount(
+        <TestProviders>
+          <Header
+            header={headerSortable}
+            isLoading={false}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={mockOnColumnSorted}
+            sort={sort}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find('[data-test-subj="header"]')
+        .first()
+        .simulate('click');
+
+      expect(mockOnColumnSorted).not.toHaveBeenCalled();
     });
   });
 

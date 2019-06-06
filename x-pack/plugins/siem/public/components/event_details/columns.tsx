@@ -25,6 +25,7 @@ import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard'
 import { WithHoverActions } from '../with_hover_actions';
 
 import * as i18n from './translations';
+import { OverflowField } from '../tables/helpers';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -135,23 +136,27 @@ export const getColumns = ({
                     </EuiToolTip>
                   </HoverActionsContainer>
                 }
-                render={() => (
-                  <DefaultDraggable
-                    data-test-subj="ip"
-                    field={data.field}
-                    id={`event-details-field-value-${eventId}-${data.field}-${i}-${value}`}
-                    tooltipContent={data.field}
-                    value={value}
-                  >
-                    <FormattedFieldValue
-                      contextId={'event-details-field-value'}
-                      eventId={eventId}
-                      fieldName={data.field}
-                      fieldType={data.type}
+                render={() =>
+                  data.field === 'message' ? (
+                    <OverflowField value={value} />
+                  ) : (
+                    <DefaultDraggable
+                      data-test-subj="ip"
+                      field={data.field}
+                      id={`event-details-field-value-${eventId}-${data.field}-${i}-${value}`}
+                      tooltipContent={data.field}
                       value={value}
-                    />
-                  </DefaultDraggable>
-                )}
+                    >
+                      <FormattedFieldValue
+                        contextId={'event-details-field-value'}
+                        eventId={eventId}
+                        fieldName={data.field}
+                        fieldType={data.type}
+                        value={value}
+                      />
+                    </DefaultDraggable>
+                  )
+                }
               />
             </EuiFlexItem>
           ))}

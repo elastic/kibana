@@ -153,7 +153,7 @@ class JobsListUI extends Component {
         }),
         sortable: true,
         field: 'description',
-        render: (description, item) => ( // eslint-disable-line no-unused-vars
+        render: (description, item) => (
           <JobDescription job={item} />
         ),
         textOnly: true,
@@ -199,7 +199,7 @@ class JobsListUI extends Component {
         truncateText: false,
         field: 'latestTimestampSortValue',
         sortable: true,
-        render: (time, item) => ( // eslint-disable-line no-unused-vars
+        render: (time, item) => (
           <span className="euiTableCellContent__text">
             {
               (item.latestTimestampMs === undefined) ? '' : moment(item.latestTimestampMs).format(TIME_FORMAT)

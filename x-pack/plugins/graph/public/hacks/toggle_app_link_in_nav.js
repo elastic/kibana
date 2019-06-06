@@ -5,7 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { onStart } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
@@ -22,5 +22,5 @@ uiModules.get('xpack/graph')
       navLinkUpdates.tooltip = xpackInfo.get('features.graph.message');
     }
 
-    onStart(({ core }) => core.chrome.navLinks.update('graph', navLinkUpdates));
+    npStart.core.chrome.navLinks.update('graph', navLinkUpdates);
   });

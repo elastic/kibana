@@ -21,12 +21,26 @@ import { Url } from 'url';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
+import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { filterHeaders, Headers } from './headers';
-import { RouteSchemas } from './route';
+import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
 
 const requestSymbol = Symbol('request');
 
-/** @public */
+/**
+ * Request specific route information exposed to a handler.
+ * @public
+ * */
+export interface KibanaRequestRoute {
+  path: string;
+  method: RouteMethod | 'patch' | 'options';
+  options: Required<RouteConfigOptions>;
+}
+
+/**
+ * Kibana specific abstraction for an incoming request.
+ * @public
+ * */
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /**
    * Factory for creating requests. Validates the request before creating an
@@ -34,7 +48,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    */
   public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     req: Request,
-    routeSchemas: RouteSchemas<P, Q, B> | undefined
+    routeSchemas?: RouteSchemas<P, Q, B>
   ) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
     return new KibanaRequest(req, requestParts.params, requestParts.query, requestParts.body);
@@ -72,8 +86,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   }
 
   public readonly headers: Headers;
-  public readonly path: string;
   public readonly url: Url;
+  public readonly route: RecursiveReadonly<KibanaRequestRoute>;
 
   protected readonly [requestSymbol]: Request;
 
@@ -84,14 +98,26 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     readonly body: Body
   ) {
     this.headers = request.headers;
-    this.path = request.path;
     this.url = request.url;
 
     this[requestSymbol] = request;
+    this.route = deepFreeze(this.getRouteInfo());
   }
 
   public getFilteredHeaders(headersToKeep: string[]) {
     return filterHeaders(this.headers, headersToKeep);
+  }
+
+  private getRouteInfo() {
+    const request = this[requestSymbol];
+    return {
+      path: request.path,
+      method: request.method,
+      options: {
+        authRequired: request.route.settings.auth !== false,
+        tags: request.route.settings.tags || [],
+      },
+    };
   }
 }
 

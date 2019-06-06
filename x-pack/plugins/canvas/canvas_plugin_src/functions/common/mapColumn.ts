@@ -6,7 +6,8 @@
 
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
-import { ContextFunction, Datatable } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -14,7 +15,7 @@ interface Arguments {
   expression: (datatable: Datatable) => Promise<boolean | number | string | null>;
 }
 
-export function mapColumn(): ContextFunction<
+export function mapColumn(): ExpressionFunction<
   'mapColumn',
   Datatable,
   Arguments,

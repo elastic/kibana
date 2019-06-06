@@ -19,9 +19,7 @@
 
 import Boom from 'boom';
 import { adoptToHapiAuthFormat } from './auth';
-
-const requestMock = {} as any;
-const createResponseToolkit = (customization = {}): any => ({ ...customization });
+import { httpServerMock } from '../http_server.mocks';
 
 describe('adoptToHapiAuthFormat', () => {
   it('Should allow authenticating a user identity with given credentials', async () => {
@@ -29,8 +27,8 @@ describe('adoptToHapiAuthFormat', () => {
     const authenticatedMock = jest.fn();
     const onAuth = adoptToHapiAuthFormat((req, t) => t.authenticated(credentials));
     await onAuth(
-      requestMock,
-      createResponseToolkit({
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit({
         authenticated: authenticatedMock,
       })
     );
@@ -45,8 +43,8 @@ describe('adoptToHapiAuthFormat', () => {
     const takeoverSymbol = {};
     const redirectMock = jest.fn(() => ({ takeover: () => takeoverSymbol }));
     const result = await onAuth(
-      requestMock,
-      createResponseToolkit({
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit({
         redirect: redirectMock,
       })
     );
@@ -59,7 +57,10 @@ describe('adoptToHapiAuthFormat', () => {
     const onAuth = adoptToHapiAuthFormat((req, t) =>
       t.rejected(new Error('not found'), { statusCode: 404 })
     );
-    const result = (await onAuth(requestMock, createResponseToolkit())) as Boom;
+    const result = (await onAuth(
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit()
+    )) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toBe('not found');
@@ -70,7 +71,10 @@ describe('adoptToHapiAuthFormat', () => {
     const onAuth = adoptToHapiAuthFormat((req, t) => {
       throw new Error('unknown error');
     });
-    const result = (await onAuth(requestMock, createResponseToolkit())) as Boom;
+    const result = (await onAuth(
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit()
+    )) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toBe('unknown error');
@@ -78,8 +82,11 @@ describe('adoptToHapiAuthFormat', () => {
   });
 
   it('Should return Boom.internal error if interceptor returns unexpected result', async () => {
-    const onAuth = adoptToHapiAuthFormat((req, t) => undefined as any);
-    const result = (await onAuth(requestMock, createResponseToolkit())) as Boom;
+    const onAuth = adoptToHapiAuthFormat(async (req, t) => undefined as any);
+    const result = (await onAuth(
+      httpServerMock.createRawRequest(),
+      httpServerMock.createRawResponseToolkit()
+    )) as Boom;
 
     expect(result).toBeInstanceOf(Boom);
     expect(result.message).toBe(

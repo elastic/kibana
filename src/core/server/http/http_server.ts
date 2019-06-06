@@ -157,13 +157,14 @@ export class HttpServer {
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
-        const isAuthRequired = Boolean(this.authRegistered && route.authRequired);
+        const { authRequired = true, tags } = route.options;
         this.server.route({
           handler: route.handler,
           method: route.method,
           path: this.getRouteFullPath(router.path, route.path),
           options: {
-            auth: isAuthRequired ? undefined : false,
+            auth: authRequired ? undefined : false,
+            tags: tags ? Array.from(tags) : undefined,
           },
         });
       }
