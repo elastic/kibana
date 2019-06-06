@@ -175,7 +175,7 @@ function groupCapabilities(list) {
   const options = list.map(({ path, value }) => {
     const title = path[path.length - 1];
     const hierachyWithTitle = rootCommonPath.length === path.length
-      ? path.join(' - ')
+      ? title // entire path is common, only use title
       : path.splice(rootCommonPath.length).join(' - ');
     const label = title === value
       ? hierachyWithTitle
