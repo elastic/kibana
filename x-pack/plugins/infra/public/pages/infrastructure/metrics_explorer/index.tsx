@@ -91,6 +91,7 @@ export const MetricsExplorerPage = injectI18n(
             onFilter={handleFilterQuerySubmit}
             onRefetch={handleRefresh}
             onTimeChange={handleTimeChange}
+            derivedIndexPattern={derivedIndexPattern}
           />
         )}
       </div>

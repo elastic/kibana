@@ -17,6 +17,7 @@ import {
   MetricsExplorerWrappedRequest,
 } from '../types';
 import { createMetricModel } from './create_metrics_model';
+import { JsonObject } from '../../../../common/typed_json';
 
 export const populateSeriesWithTSVBData = (
   req: InfraFrameworkRequest<MetricsExplorerWrappedRequest>,
@@ -33,7 +34,22 @@ export const populateSeriesWithTSVBData = (
   }
 
   // Set the filter for the group by or match everything
-  const filters = options.groupBy ? [{ match: { [options.groupBy]: series.id } }] : [];
+  const filters = options.groupBy
+    ? [{ match: { [options.groupBy]: series.id } } as JsonObject]
+    : [];
+  if (options.filterQuery) {
+    try {
+      const filterQuery = JSON.parse(options.filterQuery);
+      filters.push(filterQuery);
+    } catch (error) {
+      filters.push({
+        query_string: {
+          query: options.filterQuery,
+          analyze_wildcard: true,
+        },
+      } as JsonObject);
+    }
+  }
   const timerange = { min: options.timerange.from, max: options.timerange.to };
 
   // Create the TSVB model based on the request options

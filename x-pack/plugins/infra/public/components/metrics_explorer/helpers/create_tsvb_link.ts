@@ -6,6 +6,7 @@
 
 import { encode } from 'rison-node';
 import uuid from 'uuid';
+import { StaticIndexPattern } from 'ui/index_patterns';
 import { colorTransformer, MetricsExplorerColor } from '../../../../common/color_palette';
 import {
   MetricsExplorerSeries,
@@ -20,6 +21,7 @@ import { metricToFormat } from './metric_to_format';
 import { InfraFormatterType } from '../../../lib/lib';
 import { SourceQuery } from '../../../graphql/types';
 import { createMetricLabel } from './create_metric_label';
+// import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
 export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {
   if (metric.aggregation === MetricsExplorerAggregation.rate) {
@@ -88,16 +90,17 @@ const createFilterFromOptions = (
     filters.push(options.filterQuery);
   }
   if (options.groupBy) {
-    filters.push(`${options.groupBy}: ${series.id}`);
+    filters.push(`${options.groupBy} : "${series.id}"`);
   }
-  return filters.join(' AND ');
+  return { language: 'kuery', query: filters.join(' and ') };
 };
 
 export const createTSVBLink = (
   source: SourceQuery.Query['source']['configuration'] | undefined,
   options: MetricsExplorerOptions,
   series: MetricsExplorerSeries,
-  timeRange: MetricsExplorerTimeOptions
+  timeRange: MetricsExplorerTimeOptions,
+  derivedIndexPattern: StaticIndexPattern
 ) => {
   const appState = {
     filters: [],
