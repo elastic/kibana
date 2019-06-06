@@ -3,10 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { ContainerStyle } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 // @ts-ignore untyped local
 import { isValidUrl } from '../../../common/lib/url';
 
@@ -21,6 +20,7 @@ export function containerStyle(): ExpressionFunction<
   Return
 > {
   const { help, args: argHelp } = getFunctionHelp().containerStyle;
+  const errors = getFunctionErrors().containerStyle;
 
   return {
     name: 'containerStyle',
@@ -82,7 +82,7 @@ export function containerStyle(): ExpressionFunction<
 
       if (backgroundImage) {
         if (!isValidUrl(backgroundImage)) {
-          throw new Error('Invalid backgroundImage. Please provide an asset or a URL.');
+          throw errors.invalidBackgroundImage();
         }
 
         style.backgroundImage = `url(${backgroundImage})`;
