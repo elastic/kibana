@@ -215,7 +215,7 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
         if (resp.forecast_id !== undefined) {
           this.waitForForecastResults(resp.forecast_id, closeJobAfterRunning);
         } else {
-          this.runForecastErrorHandler(resp);
+          this.runForecastErrorHandler(resp, closeJobAfterRunning);
         }
       })
       .catch(resp => this.runForecastErrorHandler(resp, closeJobAfterRunning));
