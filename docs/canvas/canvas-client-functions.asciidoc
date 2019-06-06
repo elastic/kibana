@@ -86,7 +86,7 @@ Default: `{<<font_fn>>}`
 [[timelion_fn]]
 === `timelion`
 
-Uses Timelion to extract one or more time series from m`any` sources.
+Uses Timelion to extract one or more time series from many sources.
 
 *Accepts:* `filter`
 
@@ -96,7 +96,7 @@ Uses Timelion to extract one or more time series from m`any` sources.
 
 |_Unnamed_ 
 
-Aliases: `query`, `q`
+Aliases: `q`, `query` 
 |`string`
 |A Timelion query 
 
