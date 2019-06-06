@@ -46,15 +46,13 @@ const htmlId = htmlIdGenerator();
 const isEntireTimeRangeActive = (model, isTimeSeries) =>
   !isTimeSeries && model[TIME_RANGE_MODE_KEY] === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
 
-export const IndexPattern = props => {
-  const { fields, prefix } = props;
-  const handleSelectChange = createSelectHandler(props.onChange);
-  const handleTextChange = createTextHandler(props.onChange);
+export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model }) => {
+  const handleSelectChange = createSelectHandler(onChange);
+  const handleTextChange = createTextHandler(onChange);
   const timeFieldName = `${prefix}time_field`;
   const indexPatternName = `${prefix}index_pattern`;
   const intervalName = `${prefix}interval`;
   const dropBucketName = `${prefix}drop_last_bucket`;
-
   const uiRestrictions = useContext(UIRestrictionsContext);
 
   const timeRangeOptions = [
@@ -74,8 +72,6 @@ export const IndexPattern = props => {
     },
   ];
 
-  console.log({ uiRestrictions });
-
   const defaults = {
     default_index_pattern: '',
     [indexPatternName]: '*',
@@ -84,7 +80,7 @@ export const IndexPattern = props => {
     [TIME_RANGE_MODE_KEY]: timeRangeOptions[0].value,
   };
 
-  const model = { ...defaults, ...props.model };
+  const model = { ...defaults, ..._model };
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const selectedTimeRangeOption = timeRangeOptions.find(
     ({ value }) => model[TIME_RANGE_MODE_KEY] === value
@@ -111,7 +107,7 @@ export const IndexPattern = props => {
                 selectedOptions={selectedTimeRangeOption ? [selectedTimeRangeOption] : []}
                 onChange={handleSelectChange(TIME_RANGE_MODE_KEY)}
                 singleSelection={{ asPlainText: true }}
-                isDisabled={props.disabled}
+                isDisabled={disabled}
               />
             </EuiFormRow>
             <EuiText size="xs" style={{ margin: 0 }}>
@@ -137,7 +133,7 @@ export const IndexPattern = props => {
           >
             <EuiFieldText
               data-test-subj="metricsIndexPatternInput"
-              disabled={props.disabled}
+              disabled={disabled}
               placeholder={model.default_index_pattern}
               onChange={handleTextChange(indexPatternName, '*')}
               value={model[indexPatternName]}
@@ -155,7 +151,7 @@ export const IndexPattern = props => {
               data-test-subj="metricsIndexPatternFieldsSelect"
               restrict={RESTRICT_FIELDS}
               value={model[timeFieldName]}
-              disabled={props.disabled}
+              disabled={disabled}
               onChange={handleSelectChange(timeFieldName)}
               indexPattern={model[indexPatternName]}
               fields={fields}
@@ -176,7 +172,7 @@ export const IndexPattern = props => {
             })}
           >
             <EuiFieldText
-              disabled={props.disabled || isEntireTimeRangeActive(model, isTimeSeries)}
+              disabled={disabled || isEntireTimeRangeActive(model, isTimeSeries)}
               onChange={handleTextChange(intervalName, 'auto')}
               value={model[intervalName]}
               placeholder={'auto'}
@@ -193,8 +189,8 @@ export const IndexPattern = props => {
             <YesNo
               value={model[dropBucketName]}
               name={dropBucketName}
-              onChange={props.onChange}
-              disabled={isEntireTimeRangeActive(model, isTimeSeries) || props.disabled}
+              onChange={onChange}
+              disabled={isEntireTimeRangeActive(model, isTimeSeries) || disabled}
             />
           </EuiFormRow>
         </EuiFlexItem>
