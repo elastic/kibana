@@ -98,6 +98,27 @@ const overviewHostStats = (data: OverviewHostData) => [
       />
     ),
   },
+  {
+    description:
+      has('filebeatSystemModule', data) && data.filebeatSystemModule !== null
+        ? numeral(data.filebeatSystemModule).format('0,0')
+        : getEmptyTagValue(),
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.filebeatSystemModuleTitle"
+        defaultMessage="Filebeat System Module"
+      />
+    ),
+  },
+  {
+    description:
+      has('winlogbeat', data) && data.winlogbeat !== null
+        ? numeral(data.winlogbeat).format('0,0')
+        : getEmptyTagValue(),
+    title: (
+      <FormattedMessage id="xpack.siem.overview.winlogbeatTitle" defaultMessage="Winlogbeat" />
+    ),
+  },
 ];
 
 export const DescriptionListDescription = styled(EuiDescriptionListDescription)`
