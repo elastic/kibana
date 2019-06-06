@@ -17,15 +17,10 @@
  * under the License.
  */
 
-
-export function getSavedDashboardMock(config) {
-  const defaults = {
-    id: '123',
-    title: 'my dashboard',
-    panelsJSON: '[]',
-    searchSource: {
-      getOwnField: (param) => param
-    }
+/* global jest */
+export function getEmbeddableFactoryMock(config?: any) {
+  const embeddableFactoryMockDefaults = {
+    create: jest.fn(() => Promise.resolve({})),
   };
-  return Object.assign(defaults, config);
+  return Object.assign(embeddableFactoryMockDefaults, config);
 }
