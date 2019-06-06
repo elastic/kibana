@@ -10,3 +10,5 @@ export const API_ROOT = `/api/${ID}`;
 export const API_INTEGRATIONS_LIST = `${API_ROOT}/list`;
 export const API_INTEGRATIONS_INFO = `${API_ROOT}/package/{pkgkey}`;
 export const API_INTEGRATIONS_FILE = `${API_ROOT}/package/{pkgkey}/get`;
+export const API_SAVED_OBJECTS_ROOT = `${API_ROOT}/saved_objects`;
+export const API_SAVED_OBJECTS_DETAIL = `${API_ROOT}/saved_objects/{oid}`;

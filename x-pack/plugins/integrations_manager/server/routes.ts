@@ -5,10 +5,11 @@
  */
 import {
   ID,
-  API_ROOT,
   API_INTEGRATIONS_LIST,
   API_INTEGRATIONS_INFO,
   API_INTEGRATIONS_FILE,
+  API_SAVED_OBJECTS_DETAIL,
+  API_SAVED_OBJECTS_ROOT,
   SAVED_OBJECT_TYPE,
 } from '../common/constants';
 import { Request } from '../common/types';
@@ -47,19 +48,19 @@ export const routes = [
   },
   {
     method: 'GET',
-    path: `${API_ROOT}/saved_objects`,
+    path: API_SAVED_OBJECTS_ROOT,
     options: { tags: [`access:${ID}`] },
     handler: async (req: Request) => getClient(req).find({ type: SAVED_OBJECT_TYPE }),
   },
   {
     method: 'GET',
-    path: `${API_ROOT}/saved_objects/{oid}`,
+    path: API_SAVED_OBJECTS_DETAIL,
     options: { tags: [`access:${ID}`] },
     handler: async (req: Request) => getClient(req).get(SAVED_OBJECT_TYPE, req.params.oid),
   },
   {
     method: 'POST',
-    path: `${API_ROOT}/saved_objects`,
+    path: API_SAVED_OBJECTS_ROOT,
     options: { tags: [`access:${ID}`] },
     handler: async (req: PostRequest) =>
       getClient(req).create(
