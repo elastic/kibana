@@ -78,7 +78,7 @@ export const integrationsManager: LegacyPluginInitializer = kibana => {
         http: {
           route: server.route.bind(server),
         },
-      } as CoreSetup;
+      };
       const initializerContext = {} as PluginInitializerContext;
       new Plugin(initializerContext).setup(coreSetup);
     },
