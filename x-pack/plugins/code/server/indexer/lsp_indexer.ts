@@ -193,16 +193,16 @@ export class LspIndexer extends AbstractIndexer {
     const lstat = util.promisify(fs.lstat);
     const stat = await lstat(localFilePath);
 
+    if (stat.size > TEXT_FILE_LIMIT) {
+      this.log.debug(`File size exceeds limit. Skip index.`);
+      return stats;
+    }
+
     const readLink = util.promisify(fs.readlink);
     const readFile = util.promisify(fs.readFile);
     const content = stat.isSymbolicLink()
       ? await readLink(localFilePath, 'utf8')
       : await readFile(localFilePath, 'utf8');
-
-    if (content.length > TEXT_FILE_LIMIT) {
-      this.log.debug(`File size exceeds limit. Skip index.`);
-      return stats;
-    }
 
     try {
       const lang = detectLanguageByFilename(filePath);
