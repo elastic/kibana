@@ -5,45 +5,46 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { AuthenticatedUser, Role, User } from '../../common/model';
+import { AuthenticatedUser, Role, User, EditUser } from '../../common/model';
 
 const usersUrl = '/api/security/v1/users';
 const rolesUrl = '/api/security/role';
 
 export class UserAPIClient {
-  public static async getCurrentUser(): Promise<AuthenticatedUser> {
+  public async getCurrentUser(): Promise<AuthenticatedUser> {
     return await kfetch({ pathname: `/api/security/v1/me` });
   }
 
-  public static async getUsers(): Promise<User[]> {
+  public async getUsers(): Promise<User[]> {
     return await kfetch({ pathname: usersUrl });
   }
 
-  public static async getUser(username: string): Promise<User> {
+  public async getUser(username: string): Promise<User> {
     const url = `${usersUrl}/${encodeURIComponent(username)}`;
     return await kfetch({ pathname: url });
   }
 
-  public static async deleteUser(username: string) {
+  public async deleteUser(username: string) {
     const url = `${usersUrl}/${encodeURIComponent(username)}`;
     await kfetch({ pathname: url, method: 'DELETE' }, {});
   }
 
-  public static async saveUser(user: User) {
+  public async saveUser(user: EditUser) {
     const url = `${usersUrl}/${encodeURIComponent(user.username)}`;
+
     await kfetch({ pathname: url, body: JSON.stringify(user), method: 'POST' });
   }
 
-  public static async getRoles(): Promise<Role[]> {
+  public async getRoles(): Promise<Role[]> {
     return await kfetch({ pathname: rolesUrl });
   }
 
-  public static async getRole(name: string): Promise<Role> {
+  public async getRole(name: string): Promise<Role> {
     const url = `${rolesUrl}/${encodeURIComponent(name)}`;
     return await kfetch({ pathname: url });
   }
 
-  public static async changePassword(username: string, password: string, currentPassword: string) {
+  public async changePassword(username: string, password: string, currentPassword: string) {
     const data: Record<string, string> = {
       newPassword: password,
     };

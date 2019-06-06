@@ -3,7 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+jest.mock('ui/kfetch', () => ({
+  kfetch: () => Promise.resolve([{ id: 'foo', name: 'foo', app: [], privileges: {} }]),
+}));
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
@@ -19,11 +21,9 @@ const space = {
   name: 'My Space',
   disabledFeatures: [],
 };
-const buildMockChrome = () => {
-  return {
-    addBasePath: (path: string) => path,
-  };
-};
+const buildMockChrome = () => ({
+  addBasePath: (path: string) => path,
+});
 
 describe('ManageSpacePage', () => {
   it('allows a space to be created', async () => {
@@ -44,10 +44,12 @@ describe('ManageSpacePage', () => {
       <ManageSpacePage.WrappedComponent
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
-        features={[{ id: 'foo', name: 'foo', app: [], privileges: {} }]}
         intl={null as any}
       />
     );
+
+    await waitForDataLoad(wrapper);
+
     const nameInput = wrapper.find('input[name="name"]');
     const descriptionInput = wrapper.find('textarea[name="description"]');
 
@@ -70,8 +72,8 @@ describe('ManageSpacePage', () => {
 
   it('allows a space to be updated', async () => {
     const mockHttp = {
-      get: jest.fn(async () => {
-        return Promise.resolve({
+      get: jest.fn(async () =>
+        Promise.resolve({
           data: {
             id: 'existing-space',
             name: 'Existing Space',
@@ -80,8 +82,8 @@ describe('ManageSpacePage', () => {
             initials: 'AB',
             disabledFeatures: [],
           },
-        });
-      }),
+        })
+      ),
       delete: jest.fn(() => Promise.resolve()),
     };
     const mockChrome = buildMockChrome();
@@ -99,12 +101,11 @@ describe('ManageSpacePage', () => {
         spaceId={'existing-space'}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
-        features={[{ id: 'foo', name: 'foo', app: [], privileges: {} }]}
         intl={null as any}
       />
     );
 
-    await Promise.resolve();
+    await waitForDataLoad(wrapper);
 
     expect(mockHttp.get).toHaveBeenCalledWith('/api/spaces/space/existing-space');
 
@@ -128,8 +129,8 @@ describe('ManageSpacePage', () => {
 
   it('warns when updating features in the active space', async () => {
     const mockHttp = {
-      get: jest.fn(async () => {
-        return Promise.resolve({
+      get: jest.fn(async () =>
+        Promise.resolve({
           data: {
             id: 'my-space',
             name: 'Existing Space',
@@ -138,8 +139,8 @@ describe('ManageSpacePage', () => {
             initials: 'AB',
             disabledFeatures: [],
           },
-        });
-      }),
+        })
+      ),
       delete: jest.fn(() => Promise.resolve()),
     };
     const mockChrome = buildMockChrome();
@@ -157,12 +158,11 @@ describe('ManageSpacePage', () => {
         spaceId={'my-space'}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
-        features={[{ id: 'foo', name: 'foo', app: [], privileges: {} }]}
         intl={null as any}
       />
     );
 
-    await Promise.resolve();
+    await waitForDataLoad(wrapper);
 
     expect(mockHttp.get).toHaveBeenCalledWith('/api/spaces/space/my-space');
 
@@ -195,8 +195,8 @@ describe('ManageSpacePage', () => {
 
   it('does not warn when features are left alone in the active space', async () => {
     const mockHttp = {
-      get: jest.fn(async () => {
-        return Promise.resolve({
+      get: jest.fn(async () =>
+        Promise.resolve({
           data: {
             id: 'my-space',
             name: 'Existing Space',
@@ -205,8 +205,8 @@ describe('ManageSpacePage', () => {
             initials: 'AB',
             disabledFeatures: [],
           },
-        });
-      }),
+        })
+      ),
       delete: jest.fn(() => Promise.resolve()),
     };
     const mockChrome = buildMockChrome();
@@ -224,12 +224,11 @@ describe('ManageSpacePage', () => {
         spaceId={'my-space'}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
-        features={[{ id: 'foo', name: 'foo', app: [], privileges: {} }]}
         intl={null as any}
       />
     );
 
-    await Promise.resolve();
+    await waitForDataLoad(wrapper);
 
     expect(mockHttp.get).toHaveBeenCalledWith('/api/spaces/space/my-space');
 
@@ -284,5 +283,11 @@ async function clickSaveButton(wrapper: ReactWrapper<any, any>) {
 
   await Promise.resolve();
 
+  wrapper.update();
+}
+
+async function waitForDataLoad(wrapper: ReactWrapper<any, any>) {
+  await Promise.resolve();
+  await Promise.resolve();
   wrapper.update();
 }

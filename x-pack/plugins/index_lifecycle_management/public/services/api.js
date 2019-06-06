@@ -41,7 +41,7 @@ export async function loadIndexTemplate(templateName, httpClient = getHttpClient
   if (!templateName) {
     return {};
   }
-  const response = await httpClient.get(`${apiPrefix}/template/${templateName}`);
+  const response = await httpClient.get(`${apiPrefix}/templates/${templateName}`);
   return response.data;
 }
 
@@ -50,23 +50,15 @@ export async function loadPolicies(withIndices, httpClient = getHttpClient()) {
   return response.data;
 }
 
+export async function savePolicy(policy, httpClient = getHttpClient()) {
+  const response = await httpClient.post(`${apiPrefix}/policies`, policy);
+  return response.data;
+}
+
 export async function deletePolicy(policyName, httpClient = getHttpClient()) {
   const response = await httpClient.delete(`${apiPrefix}/policies/${encodeURIComponent(policyName)}`);
   // Only track successful actions.
   trackUiMetric(UIM_POLICY_DELETE);
-  return response.data;
-}
-
-export async function saveLifecycle(lifecycle, httpClient = getHttpClient()) {
-  const response = await httpClient.post(`${apiPrefix}/lifecycle`, { lifecycle });
-  return response.data;
-}
-
-export async function getAffectedIndices(indexTemplateName, policyName, httpClient = getHttpClient()) {
-  const path = policyName
-    ? `${apiPrefix}/indices/affected/${indexTemplateName}/${encodeURIComponent(policyName)}`
-    : `${apiPrefix}/indices/affected/${indexTemplateName}`;
-  const response = await httpClient.get(path);
   return response.data;
 }
 

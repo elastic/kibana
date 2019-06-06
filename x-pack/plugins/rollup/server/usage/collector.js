@@ -168,6 +168,7 @@ export function registerRollupUsageCollector(server) {
 
   const collector = server.usage.collectorSet.makeUsageCollector({
     type: ROLLUP_USAGE_TYPE,
+    isReady: () => true,
     fetch: async callCluster => {
       const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, callCluster);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);

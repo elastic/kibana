@@ -12,11 +12,11 @@ import {
   DataFrameJobListRow,
   DataFrameJobState,
   DataFrameJobStats,
-  jobId,
+  JobId,
 } from '../common';
 
 interface DataFrameJobStateStats {
-  id: jobId;
+  id: JobId;
   state: DataFrameJobState;
   stats: DataFrameJobStats;
 }
@@ -31,31 +31,41 @@ interface GetDataFrameTransformsStatsResponse {
   transforms: DataFrameJobStateStats[];
 }
 
+export type GetJobs = (forceRefresh?: boolean) => void;
+
 export const getJobsFactory = (
-  setDataFrameJobs: React.Dispatch<React.SetStateAction<DataFrameJobListRow[]>>
-) => async () => {
-  try {
-    const jobConfigs: GetDataFrameTransformsResponse = await ml.dataFrame.getDataFrameTransforms();
-    const jobStats: GetDataFrameTransformsStatsResponse = await ml.dataFrame.getDataFrameTransformsStats();
+  setDataFrameJobs: React.Dispatch<React.SetStateAction<DataFrameJobListRow[]>>,
+  blockRefresh: boolean
+): GetJobs => async (forceRefresh = false) => {
+  if (forceRefresh === true || blockRefresh === false) {
+    try {
+      const jobConfigs: GetDataFrameTransformsResponse = await ml.dataFrame.getDataFrameTransforms();
+      const jobStats: GetDataFrameTransformsStatsResponse = await ml.dataFrame.getDataFrameTransformsStats();
 
-    const tableRows = jobConfigs.transforms.map(config => {
-      const stats = jobStats.transforms.find(d => config.id === d.id);
+      const tableRows = jobConfigs.transforms.reduce(
+        (reducedtableRows, config) => {
+          const stats = jobStats.transforms.find(d => config.id === d.id);
 
-      if (stats === undefined) {
-        throw new Error('job stats not available');
-      }
+          // A newly created job might not have corresponding stats yet.
+          // If that's the case we just skip the job and don't add it to the jobs list yet.
+          if (stats === undefined) {
+            return reducedtableRows;
+          }
+          // Table with expandable rows requires `id` on the outer most level
+          reducedtableRows.push({ config, id: config.id, state: stats.state, stats: stats.stats });
+          return reducedtableRows;
+        },
+        [] as DataFrameJobListRow[]
+      );
 
-      // table with expandable rows requires `id` on the outer most level
-      return { config, id: config.id, state: stats.state, stats: stats.stats };
-    });
-
-    setDataFrameJobs(tableRows);
-  } catch (e) {
-    toastNotifications.addDanger(
-      i18n.translate('xpack.ml.dataframe.jobsList.errorGettingDataFrameJobsList', {
-        defaultMessage: 'An error occurred getting the data frame jobs list: {error}',
-        values: { error: JSON.stringify(e) },
-      })
-    );
+      setDataFrameJobs(tableRows);
+    } catch (e) {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.jobsList.errorGettingDataFrameJobsList', {
+          defaultMessage: 'An error occurred getting the data frame jobs list: {error}',
+          values: { error: JSON.stringify(e) },
+        })
+      );
+    }
   }
 };

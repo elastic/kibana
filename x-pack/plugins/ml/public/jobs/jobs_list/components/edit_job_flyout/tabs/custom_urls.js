@@ -36,6 +36,7 @@ import {
   loadSavedDashboards,
   loadIndexPatterns,
 } from '../edit_utils';
+import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -135,7 +136,7 @@ class CustomUrlsUI extends Component {
       .then((customUrl) => {
         getTestUrl(job, customUrl)
           .then((testUrl) => {
-            window.open(testUrl, '_blank');
+            openCustomUrlWindow(testUrl, customUrl);
           })
           .catch((resp) => {
             console.log('Error obtaining URL for test:', resp);

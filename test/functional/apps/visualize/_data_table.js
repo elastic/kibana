@@ -349,13 +349,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickBucket('Split Rows');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('geo.dest');
-        await PageObjects.visualize.setSize(3);
+        await PageObjects.visualize.setSize(3, 3);
         await PageObjects.visualize.toggleOpenEditor(3, 'false');
         await PageObjects.visualize.clickAddBucket();
         await PageObjects.visualize.clickBucket('Split Rows');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('geo.src');
-        await PageObjects.visualize.setSize(3);
+        await PageObjects.visualize.setSize(3, 4);
         await PageObjects.visualize.toggleOpenEditor(4, 'false');
         await PageObjects.visualize.clickGo();
       });

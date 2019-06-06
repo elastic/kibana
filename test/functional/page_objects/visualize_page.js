@@ -380,22 +380,32 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getMetric() {
-      const metricElement = await find.byCssSelector('div[ng-controller="KbnMetricVisController"]');
-      return await metricElement.getVisibleText();
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .mtrVis__container');
+      const values = await Promise.all(elements.map(async element => {
+        const text = await element.getVisibleText();
+        return text;
+      }));
+      return values.filter(item => item.length > 0).reduce((arr, item) => arr.concat(item.split('\n')), []);
     }
 
     async getGaugeValue() {
-      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg text');
       const values = await Promise.all(elements.map(async element => {
         const text = await element.getVisibleText();
-        return text.split('\n');
+        return text;
       }));
-      // .flat() replacement
-      return values.reduce((acc, val) => [...acc, ...val], []);
+      return values.filter(item => item.length > 0);
     }
 
     async clickMetricEditor() {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
+    }
+
+    async clickMetricByIndex(index) {
+      log.debug(`clickMetricByIndex(${index})`);
+      const metrics = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .mtrVis .mtrVis__container');
+      expect(metrics.length).greaterThan(index);
+      await metrics[index].click();
     }
 
     async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
@@ -414,8 +424,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setValue(newValue) {
-      await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
-      const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
+      const input = await find.byCssSelector('[data-test-subj="visEditorPercentileRanks"] input');
       await input.clearValue();
       await input.type(newValue);
     }
@@ -551,39 +560,18 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await find.clickByCssSelector(`#${id} > option[label="${fieldValue}"]`);
     }
 
-    async orderBy(fieldValue) {
-      await find.clickByCssSelector(
-        'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"]'
-        + `option:contains("${fieldValue}")`);
-    }
-
-    async selectOrderBy(fieldValue) {
-      await find.clickByCssSelector(`select[name="orderBy"] > option[value="${fieldValue}"]`);
-    }
-
-    async getInputTypeParam(paramName) {
-      const input = await find.byCssSelector(`input[ng-model="agg.params.${paramName}"]`);
-      return await input.getProperty('value');
-    }
-
     async getInterval() {
-      const intervalElement = await find.byCssSelector(
-        `select[ng-model="agg.params.interval"] option[selected]`);
-      return await intervalElement.getProperty('label');
+      return await comboBox.getComboBoxSelectedOptions('visEditorInterval');
     }
 
     async setInterval(newValue) {
       log.debug(`Visualize.setInterval(${newValue})`);
-      const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      const option = await input.findByCssSelector(`option[label="${newValue}"]`);
-      await option.click();
+      return await comboBox.set('visEditorInterval', newValue);
     }
 
     async setCustomInterval(newValue) {
-      await this.setInterval('Custom');
-      const input = await find.byCssSelector('input[name="customInterval"]');
-      await input.clearValue();
-      await input.type(newValue);
+      log.debug(`Visualize.setCustomInterval(${newValue})`);
+      return await comboBox.setCustom('visEditorInterval', newValue);
     }
 
     async getNumericInterval(agg = 2) {
@@ -599,10 +587,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
     }
 
-    async setSize(newValue) {
-      const input = await find.byCssSelector(`vis-editor-agg-params[aria-hidden="false"] input[name="size"]`);
-      await input.clearValue();
-      await input.type(String(newValue));
+    async setSize(newValue, aggId) {
+      const dataTestSubj = aggId ? `aggregationEditor${aggId} sizeParamEditor` : 'sizeParamEditor';
+      await testSubjects.setValue(dataTestSubj, String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
@@ -685,10 +672,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const lastRow = await table.findByCssSelector('tr:last-child');
       const fromCell = await lastRow.findByCssSelector('td:first-child input');
       await fromCell.clearValue();
-      await fromCell.type(`${from}`);
+      await fromCell.type(`${from}`, { charByChar: true });
       const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
       await toCell.clearValue();
-      await toCell.type(`${to}`);
+      await toCell.type(`${to}`, { charByChar: true });
     }
 
     async clickYAxisOptions(axisId) {
@@ -1245,13 +1232,14 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return errorMessage;
     }
 
-    async selectSortMetric(agg, metric) {
-      const sortMetric = await find.byCssSelector(`[data-test-subj="visEditorOrder${agg}-${metric}"]`);
-      return await sortMetric.click();
+    async selectOrderByMetric(agg, metric) {
+      const sortSelect = await testSubjects.find(`visEditorOrderBy${agg}`);
+      const sortMetric = await sortSelect.findByCssSelector(`option[value="${metric}"]`);
+      await sortMetric.click();
     }
 
     async selectCustomSortMetric(agg, metric, field) {
-      await this.selectSortMetric(agg, 'custom');
+      await this.selectOrderByMetric(agg, 'custom');
       await this.selectAggregation(metric, 'groupName');
       await this.selectField(field, 'groupName');
     }

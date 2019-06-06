@@ -9,20 +9,25 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import url from 'url';
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
-import { Repository } from '../../../model';
+import { EuiTab, EuiTabs } from '@elastic/eui';
+import { Repository, SearchOptions, SearchScope } from '../../../model';
+import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
+import { SearchBar } from '../search_bar';
 import { EmptyProject } from './empty_project';
 import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
 
 enum AdminTabs {
-  projects = 'Projects',
+  projects = 'Repos',
   roles = 'Roles',
   languageServers = 'LanguageServers',
 }
 
 interface Props extends RouteComponentProps {
+  searchOptions: SearchOptions;
+  query: string;
+  onSearchScopeChanged: (s: SearchScope) => void;
   repositories: Repository[];
   repositoryLoading: boolean;
 }
@@ -45,6 +50,9 @@ class AdminPage extends React.PureComponent<Props, State> {
       tab: getTab() as AdminTabs,
     };
   }
+
+  public searchBar: any = null;
+
   public tabs = [
     {
       id: AdminTabs.projects,
@@ -114,19 +122,40 @@ class AdminPage extends React.PureComponent<Props, State> {
 
   public render() {
     return (
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem className="codeContainer__adminWrapper">
-          {this.renderTabs()}
-          {this.renderTabContent()}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <div className="codeContainer__root">
+        <div className="codeContainer__rootInner">
+          <div className="codeContainer__adminWrapper">
+            <SearchBar
+              searchOptions={this.props.searchOptions}
+              query={this.props.query}
+              onSearchScopeChanged={this.props.onSearchScopeChanged}
+              enableSubmitWhenOptionsChanged={false}
+              ref={element => (this.searchBar = element)}
+            />
+            <div className="codeContainer__adminMain">
+              {this.renderTabs()}
+              {this.renderTabContent()}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 }
 
 const mapStateToProps = (state: RootState) => ({
+  ...state.search,
   repositories: state.repository.repositories,
   repositoryLoading: state.repository.loading,
 });
 
-export const Admin = withRouter(connect(mapStateToProps)(AdminPage));
+const mapDispatchToProps = {
+  onSearchScopeChanged: changeSearchScope,
+};
+
+export const Admin = withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(AdminPage)
+);

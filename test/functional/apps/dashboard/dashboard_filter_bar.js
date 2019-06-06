@@ -50,7 +50,9 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter editor field list', async () => {
+    describe('filter editor field list', async function () {
+      this.tags(['skipFirefox']);
+
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();

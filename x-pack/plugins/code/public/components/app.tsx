@@ -18,8 +18,6 @@ import { Route } from './route';
 import * as ROUTES from './routes';
 import { Search } from './search_page/search';
 
-const Empty = () => null;
-
 const RooComponent = (props: { setupOk?: boolean }) => {
   if (props.setupOk) {
     return <Redirect to={'/admin'} />;
@@ -32,6 +30,8 @@ const mapStateToProps = (state: RootState) => ({
 });
 
 const Root = connect(mapStateToProps)(RooComponent);
+
+const Empty = () => null;
 
 export const App = () => {
   return (

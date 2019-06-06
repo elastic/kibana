@@ -7,12 +7,15 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
+import {
+  InternalCoreSetup,
+  PluginInitializerContext
+} from '../../../src/core/server';
+import { LegacyPluginInitializer } from '../../../src/legacy/types';
 import mappings from './mappings.json';
 import { plugin } from './server/new-platform/index';
 
-// TODO: get proper types
-export function apm(kibana: any) {
+export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
     id: 'apm',
@@ -106,8 +109,8 @@ export function apm(kibana: any) {
         http: {
           server
         }
-      } as CoreSetup;
+      } as InternalCoreSetup;
       plugin(initializerContext).setup(core);
     }
   });
-}
+};

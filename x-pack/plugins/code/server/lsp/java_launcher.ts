@@ -13,73 +13,41 @@ import path from 'path';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
-import { ILanguageServerLauncher } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
+import { AbstractLauncher } from './abstract_launcher';
 
-export class JavaLauncher implements ILanguageServerLauncher {
-  private isRunning: boolean = false;
-  constructor(
+const JAVA_LANG_DETACH_PORT = 2090;
+
+export class JavaLauncher extends AbstractLauncher {
+  private needModuleArguments: boolean = true;
+  public constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
-  ) {}
-  public get running(): boolean {
-    return this.isRunning;
+  ) {
+    super('java', targetHost, options, loggerFactory);
   }
 
-  public async launch(builtinWorkspace: boolean, maxWorkspace: number, installationPath: string) {
-    let port = 2090;
-
-    if (!this.options.lsp.detach) {
-      port = await getPort();
-    }
-    const log = this.loggerFactory.getLogger(['code', `java@${this.targetHost}:${port}`]);
-    const proxy = new LanguageServerProxy(port, this.targetHost, log, this.options.lsp);
-    proxy.awaitServerConnection();
-    if (this.options.lsp.detach) {
-      // detach mode
-      proxy.onConnected(() => {
-        this.isRunning = true;
-      });
-      proxy.onDisconnected(() => {
-        this.isRunning = false;
-        if (!proxy.isClosed) {
-          proxy.awaitServerConnection();
-        }
-      });
-    } else {
-      let child = await this.spawnJava(installationPath, port, log);
-      proxy.onDisconnected(async () => {
-        if (!proxy.isClosed) {
-          child.kill();
-          proxy.awaitServerConnection();
-          log.warn('language server disconnected, restarting it');
-          child = await this.spawnJava(installationPath, port, log);
-        } else {
-          child.kill();
-        }
-      });
-      proxy.onExit(() => {
-        if (child) {
-          child.kill();
-        }
-      });
-    }
-    proxy.listen();
-    return new Promise<RequestExpander>(resolve => {
-      proxy.onConnected(() => {
-        resolve(
-          new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
-            settings: {
-              'java.import.gradle.enabled': this.options.security.enableGradleImport,
-              'java.import.maven.enabled': this.options.security.enableMavenImport,
-              'java.autobuild.enabled': false,
-            },
-          })
-        );
-      });
+  createExpander(proxy: LanguageServerProxy, builtinWorkspace: boolean, maxWorkspace: number) {
+    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
+      settings: {
+        'java.import.gradle.enabled': this.options.security.enableGradleImport,
+        'java.import.maven.enabled': this.options.security.enableMavenImport,
+        'java.autobuild.enabled': false,
+      },
     });
+  }
+
+  startConnect(proxy: LanguageServerProxy) {
+    proxy.awaitServerConnection();
+  }
+
+  async getPort(): Promise<number> {
+    if (!this.options.lsp.detach) {
+      return await getPort();
+    }
+    return JAVA_LANG_DETACH_PORT;
   }
 
   private async getJavaHome(installationPath: string, log: Logger) {
@@ -115,15 +83,23 @@ export class JavaLauncher implements ILanguageServerLauncher {
 
     if (this.getSystemJavaHome()) {
       const javaHomePath = this.getSystemJavaHome();
-      if (await this.checkJavaVersion(javaHomePath)) {
+      const javaVersion = await this.getJavaVersion(javaHomePath);
+      if (javaVersion > 8) {
+        // for JDK's versiob > 8, we need extra arguments as default
         return javaHomePath;
+      } else if (javaVersion === 8) {
+        // JDK's version = 8, needn't extra arguments
+        this.needModuleArguments = false;
+        return javaHomePath;
+      } else {
+        // JDK's version < 8, use bundled JDK instead, whose version > 8, so need extra arguments as default
       }
     }
 
     return bundledJavaHome;
   }
 
-  private async spawnJava(installationPath: string, port: number, log: Logger) {
+  async spawnProcess(installationPath: string, port: number, log: Logger) {
     const launchersFound = glob.sync('**/plugins/org.eclipse.equinox.launcher_*.jar', {
       cwd: installationPath,
     });
@@ -142,41 +118,48 @@ export class JavaLauncher implements ILanguageServerLauncher {
       process.platform === 'win32' ? 'java.exe' : 'java'
     );
 
-    const p = spawn(
-      javaPath,
-      [
-        '-Declipse.application=org.elastic.jdt.ls.core.id1',
-        '-Dosgi.bundles.defaultStartLevel=4',
-        '-Declipse.product=org.elastic.jdt.ls.core.product',
-        '-Dlog.level=ALL',
-        '-noverify',
-        '-Xmx4G',
-        '-jar',
-        path.resolve(installationPath, launchersFound[0]),
-        '-configuration',
-        this.options.jdtConfigPath,
-        '-data',
-        this.options.jdtWorkspacePath,
-      ],
-      {
-        detached: false,
-        stdio: 'pipe',
-        env: {
-          ...process.env,
-          CLIENT_HOST: '127.0.0.1',
-          CLIENT_PORT: port.toString(),
-          JAVA_HOME: javaHomePath,
-        },
-      }
-    );
+    const params: string[] = [
+      '-Declipse.application=org.elastic.jdt.ls.core.id1',
+      '-Dosgi.bundles.defaultStartLevel=4',
+      '-Declipse.product=org.elastic.jdt.ls.core.product',
+      '-Dlog.level=ALL',
+      '-Dfile.encoding=utf8',
+      '-noverify',
+      '-Xmx4G',
+      '-jar',
+      path.resolve(installationPath, launchersFound[0]),
+      '-configuration',
+      this.options.jdtConfigPath,
+      '-data',
+      this.options.jdtWorkspacePath,
+    ];
+
+    if (this.needModuleArguments) {
+      params.push(
+        '--add-modules=ALL-SYSTEM',
+        '--add-opens',
+        'java.base/java.util=ALL-UNNAMED',
+        '--add-opens',
+        'java.base/java.lang=ALL-UNNAMED'
+      );
+    }
+
+    const p = spawn(javaPath, params, {
+      detached: false,
+      stdio: 'pipe',
+      env: {
+        ...process.env,
+        CLIENT_HOST: '127.0.0.1',
+        CLIENT_PORT: port.toString(),
+        JAVA_HOME: javaHomePath,
+      },
+    });
     p.stdout.on('data', data => {
       log.stdout(data.toString());
     });
     p.stderr.on('data', data => {
       log.stderr(data.toString());
     });
-    this.isRunning = true;
-    p.on('exit', () => (this.isRunning = false));
     log.info(
       `Launch Java Language Server at port ${port.toString()}, pid:${
         p.pid
@@ -201,7 +184,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     return '';
   }
 
-  private checkJavaVersion(javaHome: string): Promise<boolean> {
+  private getJavaVersion(javaHome: string): Promise<number> {
     return new Promise((resolve, reject) => {
       execFile(
         path.resolve(javaHome, 'bin', process.platform === 'win32' ? 'java.exe' : 'java'),
@@ -209,11 +192,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
         {},
         (error, stdout, stderr) => {
           const javaVersion = this.parseMajorVersion(stderr);
-          if (javaVersion < 8) {
-            resolve(false);
-          } else {
-            resolve(true);
-          }
+          resolve(javaVersion);
         }
       );
     });

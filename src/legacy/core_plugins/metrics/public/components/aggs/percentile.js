@@ -20,14 +20,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
-import AggRow from './agg_row';
-import * as collectionActions from '../lib/collection_actions';
-import AddDeleteButtons from '../add_delete_buttons';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
+import { AggRow } from './agg_row';
+import { collectionActions } from '../lib/collection_actions';
+import { AddDeleteButtons } from '../add_delete_buttons';
 import uuid from 'uuid';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
   EuiSpacer,
@@ -39,10 +39,13 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../../common/es_types';
 
 const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
+
+const RESTRICT_FIELDS = [ES_TYPES.NUMBER];
 
 class PercentilesUi extends Component {
 
@@ -204,7 +207,7 @@ PercentilesUi.propTypes = {
 
 const Percentiles = injectI18n(PercentilesUi);
 
-class PercentileAgg extends Component { // eslint-disable-line react/no-multi-comp
+export class PercentileAgg extends Component { // eslint-disable-line react/no-multi-comp
 
   componentWillMount() {
     if (!this.props.model.percentiles) {
@@ -229,6 +232,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}
+        dragHandleProps={this.props.dragHandleProps}
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
@@ -257,7 +261,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
               <FieldSelect
                 fields={fields}
                 type={model.type}
-                restrict="numeric"
+                restrict={RESTRICT_FIELDS}
                 indexPattern={indexPattern}
                 value={model.field}
                 onChange={handleSelectChange('field')}
@@ -292,5 +296,3 @@ PercentileAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
-
-export default PercentileAgg;

@@ -9,13 +9,14 @@ import { FollowerIndicesList } from '../../../public/app/sections/home/follower_
 import { ccrStore } from '../../../public/app/store';
 import routing from '../../../public/app/services/routing';
 
-const testBedOptions = {
+const testBedConfig = {
+  store: ccrStore,
   memoryRouter: {
     onRouter: (router) => routing.reactRouter = router
   }
 };
 
-const initTestBed = registerTestBed(FollowerIndicesList, { options: testBedOptions, store: ccrStore });
+const initTestBed = registerTestBed(FollowerIndicesList, testBedConfig);
 
 export const setup = (props) => {
   const testBed = initTestBed(props);

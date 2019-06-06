@@ -6,12 +6,15 @@
 
 import { ElementSpec } from '../../canvas_plugin_src/elements/types';
 import defaultHeader from './default_header.png';
+import { tagsRegistry } from './tags_registry';
 
 export class Element {
   /** The name of the Element. This must match the name of the function that is used to create the `type: render` object  */
   public name: string;
   /** A more friendly name for the Element */
   public displayName: string;
+  /** Relevant labels to help identify the elements */
+  public tags: string[];
   /** An image to use in the Element type selector */
   public image: string;
   /** A sentence or few about what this Element does */
@@ -25,7 +28,7 @@ export class Element {
   public height?: number;
 
   constructor(config: ElementSpec) {
-    const { name, image, displayName, expression, filter, help, width, height } = config;
+    const { name, image, displayName, tags, expression, filter, help, width, height } = config;
     this.name = name;
     this.displayName = displayName || name;
     this.image = image || defaultHeader;
@@ -35,6 +38,13 @@ export class Element {
       throw new Error('Element types must have a default expression');
     }
 
+    this.tags = tags || [];
+
+    this.tags.forEach(tag => {
+      if (!tagsRegistry.get(tag)) {
+        tagsRegistry.register(() => ({ name: tag, color: '#666666' }));
+      }
+    });
     this.expression = expression;
     this.filter = filter;
     this.width = width || 500;

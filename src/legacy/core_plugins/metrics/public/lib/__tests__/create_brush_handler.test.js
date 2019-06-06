@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import createBrushHandler from '../create_brush_handler';
+import { brushHandler } from '../create_brush_handler';
 import moment from 'moment';
 import { expect } from 'chai';
 
-describe('createBrushHandler', () => {
+describe('brushHandler', () => {
   let mockTimefilter;
   let onBrush;
   let range;
@@ -31,7 +31,7 @@ describe('createBrushHandler', () => {
       time: {},
       setTime: function (time) { this.time = time; }
     };
-    onBrush = createBrushHandler(mockTimefilter);
+    onBrush = brushHandler(mockTimefilter);
   });
 
   test('returns brushHandler() that updates timefilter', () => {

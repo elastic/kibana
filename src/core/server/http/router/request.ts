@@ -17,21 +17,36 @@
  * under the License.
  */
 
+import { Url } from 'url';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
+import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { filterHeaders, Headers } from './headers';
-import { RouteSchemas } from './route';
+import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
 
-/** @public */
-export class KibanaRequest<Params, Query, Body> {
+/**
+ * Request specific route information exposed to a handler.
+ * @public
+ * */
+export interface KibanaRequestRoute {
+  path: string;
+  method: RouteMethod | 'patch' | 'options';
+  options: Required<RouteConfigOptions>;
+}
+
+/**
+ * Kibana specific abstraction for an incoming request.
+ * @public
+ * */
+export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
    */
   public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     req: Request,
-    routeSchemas: RouteSchemas<P, Q, B> | undefined
+    routeSchemas?: RouteSchemas<P, Q, B>
   ) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
     return new KibanaRequest(req, requestParts.params, requestParts.query, requestParts.body);
@@ -69,14 +84,37 @@ export class KibanaRequest<Params, Query, Body> {
   }
 
   public readonly headers: Headers;
-  public readonly path: string;
+  public readonly url: Url;
+  public readonly route: RecursiveReadonly<KibanaRequestRoute>;
 
-  constructor(req: Request, readonly params: Params, readonly query: Query, readonly body: Body) {
-    this.headers = req.headers;
-    this.path = req.path;
+  constructor(
+    private readonly request: Request,
+    readonly params: Params,
+    readonly query: Query,
+    readonly body: Body
+  ) {
+    this.headers = request.headers;
+    this.url = request.url;
+    this.route = deepFreeze(this.getRouteInfo());
   }
 
   public getFilteredHeaders(headersToKeep: string[]) {
     return filterHeaders(this.headers, headersToKeep);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  public unstable_getIncomingMessage() {
+    return this.request.raw.req;
+  }
+
+  private getRouteInfo() {
+    return {
+      path: this.request.path,
+      method: this.request.method,
+      options: {
+        authRequired: this.request.route.settings.auth !== false,
+        tags: this.request.route.settings.tags || [],
+      },
+    };
   }
 }

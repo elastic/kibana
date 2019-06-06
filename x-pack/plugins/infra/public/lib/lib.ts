@@ -102,6 +102,7 @@ export interface InfraWaffleMapNode {
   pathId: string;
   id: string;
   name: string;
+  ip?: string | null;
   path: InfraSnapshotNodePath[];
   metric: InfraSnapshotNodeMetric;
 }

@@ -18,34 +18,6 @@
   flex-direction: column;
 }
 
-
-// MapBox
-
-.mapContainer {
-  flex-grow: 1;
-}
-
-.mapboxgl-popup {
-  z-index: 100;
-  border-color: $euiColorEmptyShade;
-}
-
-.mapboxgl-popup-content {
-  background-color: $euiColorEmptyShade;
-}
-
-.mapboxgl-popup-tip {
-  border-top-color: $euiColorEmptyShade !important;
-}
-
-// This is not good practice to create such a generic class.
-// I can't seem to find it being applied anywhere in GIS
-// .hidden {
-//   display: none
-// }
-
-// EUIFIXTODO:
-
 .euiColorPicker__emptySwatch {
   position: relative;
 }

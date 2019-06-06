@@ -12,6 +12,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import moment from 'moment';
 
@@ -26,7 +27,7 @@ import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlDocumentCountChart', function (Private, i18n) {
+module.directive('mlDocumentCountChart', function (Private) {
   function link(scope, element, attrs) {
     const svgWidth = attrs.width ? +attrs.width : 400;
     const svgHeight = scope.height = attrs.height ? +attrs.height : 400;
@@ -157,7 +158,7 @@ module.directive('mlDocumentCountChart', function (Private, i18n) {
 
       function showChartTooltip(data, rect) {
         const formattedDate = formatHumanReadableDateTime(data.time);
-        const contents = i18n('xpack.ml.fieldDataCard.documentCountChart.chartTooltip', {
+        const contents = i18n.translate('xpack.ml.fieldDataCard.documentCountChart.chartTooltip', {
           defaultMessage: '{formattedDate}{br}{hr}count: {dataValue}',
           values: {
             formattedDate,

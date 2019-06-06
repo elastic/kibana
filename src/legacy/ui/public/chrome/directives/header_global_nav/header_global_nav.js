@@ -22,6 +22,7 @@ import { uiModules } from '../../../modules';
 import { Header } from './components/header';
 import { wrapInI18nContext } from 'ui/i18n';
 import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
+import { npStart } from '../../../new_platform';
 
 const module = uiModules.get('kibana');
 
@@ -41,9 +42,9 @@ module.directive('headerGlobalNav', (reactDirective, chrome, Private, uiCapabili
     badge$: chrome.badge.get$(),
     breadcrumbs$: chrome.breadcrumbs.get$(),
     helpExtension$: chrome.helpExtension.get$(),
-    navLinks$: chrome.getNavLinks$(),
+    navLinks$: npStart.core.chrome.navLinks.getNavLinks$(),
     recentlyAccessed$: recentlyAccessed.get$(),
-    forceAppSwitcherNavigation$: chrome.getForceAppSwitcherNavigation$(),
+    forceAppSwitcherNavigation$: npStart.core.chrome.navLinks.getForceAppSwitcherNavigation$(),
     navControls,
     homeHref,
     uiCapabilities,

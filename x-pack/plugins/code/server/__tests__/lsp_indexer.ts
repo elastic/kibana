@@ -39,7 +39,7 @@ function prepareProject(url: string, p: string) {
   const opts: CloneOptions = {
     fetchOpts: {
       callbacks: {
-        certificateCheck: () => 1,
+        certificateCheck: () => 0,
       },
     },
   };
@@ -57,7 +57,7 @@ function prepareProject(url: string, p: string) {
   });
 }
 
-const repoUri = 'github.com/Microsoft/TypeScript-Node-Starter';
+const repoUri = 'github.com/elastic/TypeScript-Node-Starter';
 
 const serverOptions = createTestServerOption();
 
@@ -73,7 +73,7 @@ function setupEsClientSpy() {
     Promise.resolve({
       _source: {
         [RepositoryGitStatusReservedField]: {
-          uri: 'github.com/Microsoft/TypeScript-Node-Starter',
+          uri: repoUri,
           progress: WorkerReservedProgress.COMPLETED,
           timestamp: new Date(),
           cloneProgress: {
@@ -124,7 +124,10 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
     })
   );
 }
-describe('lsp_indexer unit tests', () => {
+
+describe('lsp_indexer unit tests', function(this: any) {
+  this.timeout(20000);
+
   // @ts-ignore
   before(async () => {
     return new Promise(resolve => {
@@ -136,7 +139,7 @@ describe('lsp_indexer unit tests', () => {
     // @ts-ignore
     this.timeout(200000);
     return await prepareProject(
-      'https://github.com/Microsoft/TypeScript-Node-Starter.git',
+      `https://${repoUri}.git`,
       path.join(serverOptions.repoPath, repoUri)
     );
   });
@@ -168,10 +171,18 @@ describe('lsp_indexer unit tests', () => {
       new RepositoryConfigController(esClient as EsClient)
     );
 
-    lspservice.sendRequest = setupLsServiceSendRequestSpy();
+    const lspSendRequestSpy = setupLsServiceSendRequestSpy();
+    lspservice.sendRequest = lspSendRequestSpy;
+    const supportLanguageSpy = sinon.stub();
+
+    // Setup supported languages, so that unsupported source files won't be
+    // sent for lsp requests.
+    supportLanguageSpy.withArgs('javascript').returns(true);
+    supportLanguageSpy.withArgs('typescript').returns(true);
+    lspservice.supportLanguage = supportLanguageSpy;
 
     const indexer = new LspIndexer(
-      'github.com/Microsoft/TypeScript-Node-Starter',
+      repoUri,
       'master',
       lspservice,
       serverOptions,
@@ -189,11 +200,14 @@ describe('lsp_indexer unit tests', () => {
     assert.strictEqual(createSpy.callCount, 3);
     assert.strictEqual(putAliasSpy.callCount, 3);
 
-    // There are 22 files in the repo. 1 file + 1 symbol + 1 reference = 3 objects to
-    // index for each file. Total doc indexed should be 3 * 22 = 66, which can be
-    // fitted into a single batch index.
+    // There are 22 files which are written in supported languages in the repo. 1 file + 1 symbol + 1 reference = 3 objects to
+    // index for each file. Total doc indexed for these files should be 3 * 22 = 66.
+    // The rest 158 files will only be indexed for document.
+    // There are also 10 binary files to be excluded.
+    // So the total number of index requests will be 66 + 158 - 10 = 214.
     assert.ok(bulkSpy.calledOnce);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 66 * 2);
+    assert.strictEqual(lspSendRequestSpy.callCount, 22);
+    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 214 * 2);
     // @ts-ignore
   }).timeout(20000);
 
@@ -219,7 +233,7 @@ describe('lsp_indexer unit tests', () => {
     lspservice.sendRequest = setupLsServiceSendRequestSpy();
 
     const indexer = new LspIndexer(
-      'github.com/Microsoft/TypeScript-Node-Starter',
+      repoUri,
       'master',
       lspservice,
       serverOptions,
@@ -263,11 +277,19 @@ describe('lsp_indexer unit tests', () => {
       new RepositoryConfigController(esClient as EsClient)
     );
 
-    lspservice.sendRequest = setupLsServiceSendRequestSpy();
+    const lspSendRequestSpy = setupLsServiceSendRequestSpy();
+    lspservice.sendRequest = lspSendRequestSpy;
+    const supportLanguageSpy = sinon.stub();
+
+    // Setup supported languages, so that unsupported source files won't be
+    // sent for lsp requests.
+    supportLanguageSpy.withArgs('javascript').returns(true);
+    supportLanguageSpy.withArgs('typescript').returns(true);
+    lspservice.supportLanguage = supportLanguageSpy;
 
     const indexer = new LspIndexer(
-      'github.com/Microsoft/TypeScript-Node-Starter',
-      '46971a8',
+      repoUri,
+      '261557d',
       lspservice,
       serverOptions,
       esClient as EsClient,
@@ -278,7 +300,7 @@ describe('lsp_indexer unit tests', () => {
     await indexer.start(undefined, {
       repoUri: '',
       filePath: 'src/public/js/main.ts',
-      revision: '46971a8',
+      revision: '261557d',
       localRepoPath: '',
     });
 
@@ -291,13 +313,15 @@ describe('lsp_indexer unit tests', () => {
     assert.strictEqual(createSpy.callCount, 0);
     assert.strictEqual(putAliasSpy.callCount, 0);
 
-    // There are 22 files in the repo, but only 11 files after the checkpoint.
-    // 1 file + 1 symbol + 1 reference = 3 objects to index for each file.
-    // Total doc indexed should be 3 * 11 = 33, which can be fitted into a
-    // single batch index.
+    // There are 22 files with supported language in the repo, but only 11
+    // files after the checkpoint. 1 file + 1 symbol + 1 reference = 3 objects
+    // to index for each file. Total doc indexed for these files should be
+    // 3 * 11 = 33. Also there are 15 files without supported language. Only one
+    // document will be index for these files. So total index requests would be
+    // 33 + 15 = 48.
     assert.ok(bulkSpy.calledOnce);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 33 * 2);
+    assert.strictEqual(lspSendRequestSpy.callCount, 11);
+    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 48 * 2);
     // @ts-ignore
   }).timeout(20000);
-  // @ts-ignore
-}).timeout(20000);
+});

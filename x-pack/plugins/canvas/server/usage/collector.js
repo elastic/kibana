@@ -136,6 +136,7 @@ export function registerCanvasUsageCollector(server) {
   const index = server.config().get('kibana.index');
   const collector = server.usage.collectorSet.makeUsageCollector({
     type: CANVAS_USAGE_TYPE,
+    isReady: () => true,
     fetch: async callCluster => {
       const searchParams = {
         size: 10000, // elasticsearch index.max_result_window default value

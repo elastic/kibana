@@ -153,3 +153,9 @@ export enum SearchScope {
   REPOSITORY = 'repository', // Only search repositories
   FILE = 'file', // Only search files
 }
+
+export interface SearchOptions {
+  repoScope: Repository[];
+  defaultRepoScopeOn: boolean;
+  defaultRepoScope?: Repository;
+}

@@ -27,21 +27,26 @@ export interface TestBed<T> {
   /** The comonent under test */
   component: ReactWrapper;
   /**
-   * Look in the component if a data test subject exists, and return true or false
+   * Pass it a `data-test-subj` and it will return true if it exists or false if it does not exist.
    *
-   * @param testSubject The data test subject to look for
+   * @param testSubject The data test subject to look for (can be a nested path. e.g. "detailPanel.mySection").
    * @param count The number of times the subject needs to appear in order to return "true"
    */
   exists: (testSubject: T, count?: number) => boolean;
   /**
-   * Look for a data test subject in the component and return it.
-   * It is possible to target a nested test subject by separating it with a dot ('.');
+   * Pass it a `data-test-subj` and it will return an Enzyme reactWrapper of the node.
+   * You can target a nested test subject by separating it with a dot ('.');
    *
    * @param testSubject The data test subject to look for
    *
    * @example
-   * find('nameInput'); // if there is only 1 form, this is enough
-   * find('myForm.nameInput'); // if there are multiple forms, specify the test subject of the form
+   *
+```ts
+find('nameInput');
+// or more specific,
+// "nameInput" is a child of "myForm"
+find('myForm.nameInput');
+```
    */
   find: (testSubject: T) => ReactWrapper;
   /**
@@ -59,7 +64,7 @@ export interface TestBed<T> {
      * still need to wait until the next tick before the DOM updates.
      * Setting isAsync to "true" takes care of that.
      *
-     * @param input The form input. Can either be a data-test-subj or a reactWrapper
+     * @param input The form input. Can either be a data-test-subj or a reactWrapper (can be a nested path. e.g. "myForm.myInput").
      * @param value The value to set
      * @param isAsync If set to true will return a Promise that resolves on the next "tick"
      */
@@ -71,26 +76,26 @@ export interface TestBed<T> {
     /**
      * Select or unselect a form checkbox.
      *
-     * @param dataTestSubject The test subject of the checkbox
+     * @param dataTestSubject The test subject of the checkbox (can be a nested path. e.g. "myForm.mySelect").
      * @param isChecked Defines if the checkobx is active or not
      */
     selectCheckBox: (checkboxTestSubject: T, isChecked?: boolean) => void;
     /**
      * Toggle the EuiSwitch
      *
-     * @param switchTestSubject The test subject of the EuiSwitch
+     * @param switchTestSubject The test subject of the EuiSwitch (can be a nested path. e.g. "myForm.mySwitch").
      */
     toggleEuiSwitch: (switchTestSubject: T) => void;
     /**
      * The EUI ComboBox is a special input as it needs the ENTER key to be pressed
      * in order to register the value set. This helpers automatically does that.
      *
-     * @param comboBoxTestSubject The data test subject of the EuiComboBox
+     * @param comboBoxTestSubject The data test subject of the EuiComboBox (can be a nested path. e.g. "myForm.myComboBox").
      * @param value The value to set
      */
     setComboBoxValue: (comboBoxTestSubject: T, value: string) => void;
     /**
-     * Get a list of the form error messages that are visible in the DOM of the component
+     * Get a list of the form error messages that are visible in the DOM.
      */
     getErrorsMessages: () => string[];
   };
@@ -100,17 +105,23 @@ export interface TestBed<T> {
 }
 
 export interface TestBedConfig {
-  defaultProps: Record<string, any>;
-  options: TestBedOptions;
-  store: (() => Store) | Store | null;
+  /** The default props to pass to the mounted component. */
+  defaultProps?: Record<string, any>;
+  /** Configuration object for the react-router `MemoryRouter. */
+  memoryRouter?: MemoryRouterConfig;
+  /** An optional redux store. You can also provide a function that returns a store. */
+  store?: (() => Store) | Store | null;
 }
 
-export interface TestBedOptions {
-  memoryRouter: {
-    wrapComponent: boolean;
-    initialEntries?: string[];
-    initialIndex?: number;
-    componentRoutePath?: string;
-    onRouter?: (router: any) => void;
-  };
+export interface MemoryRouterConfig {
+  /** Flag to add or not the `MemoryRouter`. If set to `false`, there won't be any router and the component won't be wrapped on a `<Route />`. */
+  wrapComponent?: boolean;
+  /** The React Router **initial entries** setting ([see documentation](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)) */
+  initialEntries?: string[];
+  /** The React Router **initial index** setting ([see documentation](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)) */
+  initialIndex?: number;
+  /** The route **path** for the mounted component (defaults to `"/"`) */
+  componentRoutePath?: string;
+  /** A callBack that will be called with the React Router instance once mounted  */
+  onRouter?: (router: any) => void;
 }

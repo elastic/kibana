@@ -29,7 +29,7 @@ import { DOC_LINK_VERSION } from 'ui/documentation_links';
 
 const module = require('ui/modules').get('app/sense');
 
-module.run(function (Private, $rootScope) {
+module.run(function ($rootScope) {
   module.setupResizeCheckerForRootEditors = ($el, ...editors) => {
     return applyResizeCheckerToEditors($rootScope, $el, ...editors);
   };

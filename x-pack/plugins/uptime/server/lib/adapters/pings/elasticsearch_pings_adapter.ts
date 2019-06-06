@@ -11,6 +11,7 @@ import { DocCount, HistogramDataPoint, Ping, PingResults } from '../../../../com
 import { formatEsBucketsForHistogram, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
+import { getHistogramInterval } from '../../helper/get_histogram_interval';
 
 export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   private database: DatabaseAdapter;
@@ -36,7 +37,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     monitorId?: string | null,
     status?: string | null,
     sort: string | null = 'desc',
-    size?: number | null
+    size?: number | null,
+    location?: string | null
   ): Promise<PingResults> {
     const sortParam = { sort: [{ '@timestamp': { order: sort } }] };
     const sizeParam = size ? { size } : undefined;
@@ -46,6 +48,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     }
     if (status) {
       filter.push({ term: { 'monitor.status': status } });
+    }
+    if (location) {
+      filter.push({ term: { 'observer.geo.name': location } });
     }
     const queryContext = { bool: { filter } };
     const params = {
@@ -86,12 +91,10 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    monitorId?: string | null
+    monitorId?: string | null,
+    location?: string | null
   ): Promise<Ping[]> {
-    const filter: any[] = [];
-    if (monitorId) {
-      filter.push({ term: { 'monitor.id': monitorId } });
-    }
+    // TODO: Write tests for this function
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -106,6 +109,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
                   },
                 },
               },
+              ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
+              ...(location ? [{ term: { 'observer.geo.name': location } }] : []),
             ],
           },
         },
@@ -130,10 +135,6 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         },
       },
     };
-
-    if (filter.length) {
-      params.body.query.bool.filter.push(...filter);
-    }
 
     const result = await this.database.search(request, params);
     const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
@@ -176,9 +177,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         size: 0,
         aggs: {
           timeseries: {
-            auto_date_histogram: {
+            date_histogram: {
               field: '@timestamp',
-              buckets: 25,
+              fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
             },
             aggs: {
               down: {

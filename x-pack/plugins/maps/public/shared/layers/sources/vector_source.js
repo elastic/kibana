@@ -12,6 +12,7 @@ import { AbstractSource } from './source';
 import * as topojson from 'topojson-client';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { VECTOR_SHAPE_TYPES } from './vector_feature_types';
 
 export class AbstractVectorSource extends AbstractSource {
 
@@ -58,11 +59,11 @@ export class AbstractVectorSource extends AbstractSource {
 
   createDefaultLayer(options, mapColors) {
     const layerDescriptor = this._createDefaultLayerDescriptor(options, mapColors);
-    const style = new VectorStyle(layerDescriptor.style);
+    const style = new VectorStyle(layerDescriptor.style, this);
     return new VectorLayer({
       layerDescriptor: layerDescriptor,
       source: this,
-      style: style
+      style
     });
   }
 
@@ -113,5 +114,17 @@ export class AbstractVectorSource extends AbstractSource {
 
   isJoinable() {
     return true;
+  }
+
+  async getSupportedShapeTypes() {
+    return [
+      VECTOR_SHAPE_TYPES.POINT,
+      VECTOR_SHAPE_TYPES.LINE,
+      VECTOR_SHAPE_TYPES.POLYGON
+    ];
+  }
+
+  getSourceTooltipContent(/* sourceDataRequest */) {
+    return null;
   }
 }

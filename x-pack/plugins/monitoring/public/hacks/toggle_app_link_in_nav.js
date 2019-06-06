@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
+import { npStart } from 'ui/new_platform';
 
 uiModules.get('monitoring/hacks').run((monitoringUiEnabled) => {
-  if (monitoringUiEnabled || !chrome.navLinkExists('monitoring')) {
+  if (monitoringUiEnabled) {
     return;
   }
 
-  chrome.getNavLinkById('monitoring').hidden = true;
+  npStart.core.chrome.navLinks.update('monitoring', { hidden: true });
 });

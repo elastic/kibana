@@ -19,6 +19,7 @@
 
 import angular from 'angular';
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { SearchSource } from 'ui/courier';
 import {
   ContainerState,
@@ -89,6 +90,9 @@ export class SearchEmbeddable extends Embeddable {
     super({
       title: savedSearch.title,
       editUrl,
+      editLabel: i18n.translate('kbn.embeddable.search.editLabel', {
+        defaultMessage: 'Edit saved search',
+      }),
       editable,
       indexPatterns: _.compact([savedSearch.searchSource.getField('index')]),
     });
@@ -104,6 +108,10 @@ export class SearchEmbeddable extends Embeddable {
 
   public getInspectorAdapters() {
     return this.inspectorAdaptors;
+  }
+
+  public getPanelTitle() {
+    return this.panelTitle;
   }
 
   public onContainerStateChanged(containerState: ContainerState) {

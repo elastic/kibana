@@ -11,6 +11,7 @@ import header from './header.png';
 export const horizontalProgressPill: ElementFactory = () => ({
   name: 'horizontalProgressPill',
   displayName: 'Horizontal progress pill',
+  tags: ['chart', 'proportion'],
   help: 'Displays progress as a portion of a horizontal pill',
   width: 400,
   height: 30,

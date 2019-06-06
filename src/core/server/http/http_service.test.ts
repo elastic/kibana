@@ -22,7 +22,7 @@ import { mockHttpServer } from './http_service.test.mocks';
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { HttpService, Router } from '.';
-import { HttpConfigType } from './http_config';
+import { HttpConfigType, config } from './http_config';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
@@ -30,16 +30,19 @@ import { getEnvOptions } from '../config/__mocks__/env';
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
 
-const createConfigService = (value: Partial<HttpConfigType> = {}) =>
-  new ConfigService(
+const createConfigService = (value: Partial<HttpConfigType> = {}) => {
+  const configService = new ConfigService(
     new BehaviorSubject<Config>(
       new ObjectToConfigAdapter({
-        http: value,
+        server: value,
       })
     ),
     env,
     logger
   );
+  configService.setSchema(config.path, config.schema);
+  return configService;
+};
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -71,6 +74,46 @@ test('creates and sets up http server', async () => {
 
   await service.start();
   expect(httpServer.start).toHaveBeenCalledTimes(1);
+});
+
+// this is an integration test!
+test('creates and sets up second http server', async () => {
+  const configService = createConfigService({
+    host: 'localhost',
+    port: 1234,
+  });
+  const { HttpServer } = jest.requireActual('./http_server');
+
+  mockHttpServer.mockImplementation((...args) => new HttpServer(...args));
+
+  const service = new HttpService({ configService, env, logger });
+  const serverSetup = await service.setup();
+  const cfg = { port: 2345 };
+  await serverSetup.createNewServer(cfg);
+  const server = await service.start();
+  expect(server.isListening()).toBeTruthy();
+  expect(server.isListening(cfg.port)).toBeTruthy();
+
+  try {
+    await serverSetup.createNewServer(cfg);
+  } catch (err) {
+    expect(err.message).toBe('port 2345 is already in use');
+  }
+
+  try {
+    await serverSetup.createNewServer({ port: 1234 });
+  } catch (err) {
+    expect(err.message).toBe('port 1234 is already in use');
+  }
+
+  try {
+    await serverSetup.createNewServer({ host: 'example.org' });
+  } catch (err) {
+    expect(err.message).toBe('port must be defined');
+  }
+  await service.stop();
+  expect(server.isListening()).toBeFalsy();
+  expect(server.isListening(cfg.port)).toBeFalsy();
 });
 
 test('logs error if already set up', async () => {
@@ -115,7 +158,7 @@ test('stops http server', async () => {
 });
 
 test('register route handler', async () => {
-  const configService = createConfigService({});
+  const configService = createConfigService();
 
   const registerRouterMock = jest.fn();
   const httpServer = {
@@ -150,12 +193,13 @@ test('returns http server contract on setup', async () => {
   }));
 
   const service = new HttpService({ configService, env, logger });
-
-  expect(await service.setup()).toBe(httpServer);
+  const { createNewServer, ...setupHttpServer } = await service.setup();
+  expect(createNewServer).toBeDefined();
+  expect(setupHttpServer).toEqual(httpServer);
 });
 
 test('does not start http server if process is dev cluster master', async () => {
-  const configService = createConfigService({});
+  const configService = createConfigService();
   const httpServer = {
     isListening: () => false,
     setup: noop,
@@ -190,7 +234,7 @@ test('does not start http server if configured with `autoListen:false`', async (
 
   const service = new HttpService({
     configService,
-    env: new Env('.', getEnvOptions({ isDevClusterMaster: true })),
+    env: new Env('.', getEnvOptions()),
     logger,
   });
 

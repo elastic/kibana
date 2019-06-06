@@ -7,8 +7,7 @@
 import { InfraSnapshotResponseResolvers, InfraSourceResolvers } from '../../graphql/types';
 import { InfraSnapshotRequestOptions } from '../../lib/snapshot';
 import { InfraSnapshot } from '../../lib/snapshot';
-// TODO: enable after UI has been changed to use this resolver
-// import { UsageCollector } from '../../usage/usage_collector';
+import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { ChildResolverOf, InfraResolverOf, ResultOf } from '../../utils/typed_resolvers';
 import { QuerySourceResolver } from '../sources/resolvers';
@@ -55,8 +54,7 @@ export const createSnapshotResolvers = (
   InfraSnapshotResponse: {
     async nodes(snapshotResponse, args, { req }) {
       const { source, timerange, filterQuery } = snapshotResponse;
-      // TODO: see above
-      // UsageCollector.countNode(args.type);
+      UsageCollector.countNode(args.type);
       const options: InfraSnapshotRequestOptions = {
         filterQuery: parseFilterQuery(filterQuery),
         nodeType: args.type,

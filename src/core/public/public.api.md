@@ -7,15 +7,33 @@
 import * as CSS from 'csstype';
 import { default } from 'react';
 import { IconType } from '@elastic/eui';
+import { Observable } from 'rxjs';
 import * as PropTypes from 'prop-types';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
-// @public
-export interface BasePathSetup {
-    addToPath(path: string): string;
-    get(): string;
-    removeFromPath(path: string): string;
+// @public (undocumented)
+export interface ApplicationSetup {
+    // Warning: (ae-forgotten-export) The symbol "App" needs to be exported by the entry point index.d.ts
+    registerApp(app: App): void;
+    // Warning: (ae-forgotten-export) The symbol "LegacyApp" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal
+    registerLegacyApp(app: LegacyApp): void;
+}
+
+// Warning: (ae-missing-release-tag) "ApplicationStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface ApplicationStart {
+    // Warning: (ae-forgotten-export) The symbol "CapabilitiesStart" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    availableApps: CapabilitiesStart['availableApps'];
+    // (undocumented)
+    capabilities: CapabilitiesStart['capabilities'];
+    // (undocumented)
+    mount: (mountHandler: Function) => void;
 }
 
 // @public
@@ -26,11 +44,6 @@ export interface Capabilities {
         [sectionId: string]: Record<string, boolean>;
     };
     navLinks: Record<string, boolean>;
-}
-
-// @public
-export interface CapabilitiesStart {
-    getCapabilities: () => Capabilities;
 }
 
 // @public (undocumented)
@@ -65,7 +78,29 @@ export interface ChromeBreadcrumb {
 export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 
 // @public (undocumented)
+export interface ChromeNavLink {
+    readonly active?: boolean;
+    readonly baseUrl: string;
+    readonly disabled?: boolean;
+    readonly euiIconType?: string;
+    readonly hidden?: boolean;
+    readonly icon?: string;
+    readonly id: string;
+    readonly linkToLastSubUrl?: boolean;
+    readonly order: number;
+    readonly subUrlBase?: string;
+    readonly title: string;
+    readonly tooltip?: string;
+    readonly url?: string;
+}
+
+// Warning: (ae-forgotten-export) The symbol "ChromeService" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
 export type ChromeSetup = ReturnType<ChromeService['setup']>;
+
+// @public (undocumented)
+export type ChromeStart = ReturnType<ChromeService['start']>;
 
 // @internal (undocumented)
 export interface CoreContext {
@@ -73,8 +108,6 @@ export interface CoreContext {
 
 // @public
 export interface CoreSetup {
-    // (undocumented)
-    basePath: BasePathSetup;
     // (undocumented)
     chrome: ChromeSetup;
     // (undocumented)
@@ -84,21 +117,21 @@ export interface CoreSetup {
     // (undocumented)
     i18n: I18nSetup;
     // (undocumented)
-    injectedMetadata: InjectedMetadataSetup;
-    // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
     uiSettings: UiSettingsSetup;
 }
 
-// @public (undocumented)
+// @public
 export interface CoreStart {
     // (undocumented)
-    capabilities: CapabilitiesStart;
+    application: Pick<ApplicationStart, 'capabilities'>;
+    // (undocumented)
+    chrome: ChromeStart;
+    // (undocumented)
+    http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
-    // (undocumented)
-    injectedMetadata: InjectedMetadataStart;
     // (undocumented)
     notifications: NotificationsStart;
     // (undocumented)
@@ -107,10 +140,11 @@ export interface CoreStart {
 
 // @internal
 export class CoreSystem {
+    // Warning: (ae-forgotten-export) The symbol "Params" needs to be exported by the entry point index.d.ts
     constructor(params: Params);
     // (undocumented)
     setup(): Promise<{
-        fatalErrors: import(".").FatalErrorsSetup;
+        fatalErrors: FatalErrorsSetup;
     } | undefined>;
     // (undocumented)
     start(): Promise<void>;
@@ -118,21 +152,91 @@ export class CoreSystem {
     stop(): void;
     }
 
+// Warning: (ae-missing-release-tag) "ErrorToastOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface ErrorToastOptions {
+    title: string;
+    toastMessage?: string;
+}
+
+// @public
+export interface FatalErrorInfo {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    stack: string | undefined;
+}
+
 // @public
 export interface FatalErrorsSetup {
     add: (error: string | Error, source?: string) => never;
-    get$: () => Rx.Observable<ErrorInfo>;
-}
-
-// @public
-export class FlyoutRef {
-    constructor();
-    close(): Promise<void>;
-    readonly onClose: Promise<void>;
+    get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
 // @public (undocumented)
-export type HttpSetup = ReturnType<HttpService['setup']>;
+export interface HttpInterceptor {
+    // Warning: (ae-forgotten-export) The symbol "HttpInterceptController" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    request?(request: Request, controller: HttpInterceptController): Promise<Request> | Request | void;
+    // Warning: (ae-forgotten-export) The symbol "HttpErrorRequest" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    requestError?(httpErrorRequest: HttpErrorRequest, controller: HttpInterceptController): Promise<Request> | Request | void;
+    // Warning: (ae-forgotten-export) The symbol "HttpResponse" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    response?(httpResponse: HttpResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+    // Warning: (ae-forgotten-export) The symbol "HttpErrorResponse" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    responseError?(httpErrorResponse: HttpErrorResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+}
+
+// @public (undocumented)
+export interface HttpServiceBase {
+    // (undocumented)
+    addLoadingCount(count$: Observable<number>): void;
+    // (undocumented)
+    delete: HttpHandler;
+    // Warning: (ae-forgotten-export) The symbol "HttpHandler" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    fetch: HttpHandler;
+    // (undocumented)
+    get: HttpHandler;
+    // (undocumented)
+    getBasePath(): string;
+    // (undocumented)
+    getLoadingCount$(): Observable<number>;
+    // (undocumented)
+    head: HttpHandler;
+    // (undocumented)
+    intercept(interceptor: HttpInterceptor): () => void;
+    // (undocumented)
+    options: HttpHandler;
+    // (undocumented)
+    patch: HttpHandler;
+    // (undocumented)
+    post: HttpHandler;
+    // (undocumented)
+    prependBasePath(path: string): string;
+    // (undocumented)
+    put: HttpHandler;
+    // (undocumented)
+    removeAllInterceptors(): void;
+    // (undocumented)
+    removeBasePath(path: string): string;
+    // (undocumented)
+    stop(): void;
+}
+
+// @public (undocumented)
+export type HttpSetup = HttpServiceBase;
+
+// @public (undocumented)
+export type HttpStart = HttpServiceBase;
 
 // @public
 export interface I18nSetup {
@@ -145,109 +249,87 @@ export interface I18nSetup {
 export type I18nStart = I18nSetup;
 
 // @internal (undocumented)
-export interface InjectedMetadataParams {
+export interface InternalCoreSetup extends CoreSetup {
     // (undocumented)
-    injectedMetadata: {
-        version: string;
-        buildNumber: number;
-        basePath: string;
-        csp: {
-            warnLegacyBrowsers: boolean;
-        };
-        vars: {
-            [key: string]: unknown;
-        };
-        uiPlugins: Array<{
-            id: PluginName;
-            plugin: DiscoveredPlugin;
-        }>;
-        legacyMetadata: {
-            app: unknown;
-            translations: unknown;
-            bundleId: string;
-            nav: unknown;
-            version: string;
-            branch: string;
-            buildNum: number;
-            buildSha: string;
-            basePath: string;
-            serverName: string;
-            devMode: boolean;
-            uiSettings: {
-                defaults: UiSettingsState;
-                user?: UiSettingsState;
-            };
-        };
-    };
+    application: ApplicationSetup;
+    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    injectedMetadata: InjectedMetadataSetup;
 }
 
-// @public
-export interface InjectedMetadataSetup {
+// @internal (undocumented)
+export interface InternalCoreStart extends CoreStart {
     // (undocumented)
-    getBasePath: () => string;
+    application: ApplicationStart;
+    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    getCspConfig: () => {
-        warnLegacyBrowsers: boolean;
-    };
-    // (undocumented)
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    // (undocumented)
-    getInjectedVars: () => {
-        [key: string]: unknown;
-    };
-    // (undocumented)
-    getKibanaVersion: () => string;
-    // (undocumented)
-    getLegacyMetadata: () => {
-        app: unknown;
-        translations: unknown;
-        bundleId: string;
-        nav: unknown;
-        version: string;
-        branch: string;
-        buildNum: number;
-        buildSha: string;
-        basePath: string;
-        serverName: string;
-        devMode: boolean;
-        uiSettings: {
-            defaults: UiSettingsState;
-            user?: UiSettingsState | undefined;
-        };
-    };
-    getPlugins: () => Array<{
-        id: string;
-        plugin: DiscoveredPlugin;
-    }>;
+    injectedMetadata: InjectedMetadataStart;
 }
 
 // @public (undocumented)
-export type InjectedMetadataStart = InjectedMetadataSetup;
+export interface LegacyNavLink {
+    // (undocumented)
+    euiIconType?: string;
+    // (undocumented)
+    icon?: string;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    order: number;
+    // (undocumented)
+    title: string;
+    // (undocumented)
+    url: string;
+}
 
 // @public (undocumented)
 export interface NotificationsSetup {
+    // Warning: (ae-forgotten-export) The symbol "ToastsSetup" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    toasts: ToastsApi;
+    toasts: ToastsSetup;
 }
 
 // @public (undocumented)
-export type NotificationsStart = NotificationsSetup;
+export interface NotificationsStart {
+    // Warning: (ae-forgotten-export) The symbol "ToastsStart" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    toasts: ToastsStart;
+}
+
+// Warning: (ae-missing-release-tag) "OverlayRef" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface OverlayRef {
+    close(): Promise<void>;
+    onClose: Promise<void>;
+}
 
 // @public (undocumented)
 export interface OverlayStart {
+    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
-    }) => FlyoutRef;
+    }) => OverlayRef;
+    // (undocumented)
+    openModal: (modalChildren: React.ReactNode, modalProps?: {
+        closeButtonAriaLabel?: string;
+        'data-test-subj'?: string;
+    }) => OverlayRef;
 }
 
 // @public
 export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> {
     // (undocumented)
-    setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
     // (undocumented)
-    start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
+    start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
     // (undocumented)
     stop?: () => void;
 }
@@ -259,33 +341,32 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<strin
 export interface PluginInitializerContext {
 }
 
-// @public
-export interface PluginSetupContext {
-    // (undocumented)
-    basePath: BasePathSetup;
-    // (undocumented)
-    chrome: ChromeSetup;
-    // (undocumented)
-    fatalErrors: FatalErrorsSetup;
-    // (undocumented)
-    i18n: I18nSetup;
-    // (undocumented)
-    notifications: NotificationsSetup;
-    // (undocumented)
-    uiSettings: UiSettingsSetup;
-}
+// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
+    [K in keyof T]: RecursiveReadonly<T[K]>;
+}> : T;
 
 export { Toast }
 
+// Warning: (ae-forgotten-export) The symbol "ToastInputFields" needs to be exported by the entry point index.d.ts
+// 
 // @public (undocumented)
-export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 
 // @public (undocumented)
 export class ToastsApi {
+    constructor(deps: {
+        uiSettings: UiSettingsSetup;
+        i18n: I18nSetup;
+    });
     // (undocumented)
     add(toastOrTitle: ToastInput): Toast;
     // (undocumented)
     addDanger(toastOrTitle: ToastInput): Toast;
+    // (undocumented)
+    addError(error: Error, options: ErrorToastOptions): Toast;
     // (undocumented)
     addSuccess(toastOrTitle: ToastInput): Toast;
     // (undocumented)
@@ -293,11 +374,14 @@ export class ToastsApi {
     // (undocumented)
     get$(): Rx.Observable<Toast[]>;
     // (undocumented)
+    registerOverlays(overlays: OverlayStart): void;
+    // (undocumented)
     remove(toast: Toast): void;
     }
 
 // @public (undocumented)
 export class UiSettingsClient {
+    // Warning: (ae-forgotten-export) The symbol "UiSettingsClientParams" needs to be exported by the entry point index.d.ts
     constructor(params: UiSettingsClientParams);
     get$(key: string, defaultOverride?: any): Rx.Observable<any>;
     get(key: string, defaultOverride?: any): any;
@@ -318,8 +402,6 @@ export class UiSettingsClient {
     isDefault(key: string): boolean;
     isOverridden(key: string): boolean;
     overrideLocalDefault(key: string, newDefault: any): void;
-    // (undocumented)
-    readonly params: UiSettingsClientParams;
     remove(key: string): Promise<boolean>;
     set(key: string, val: any): Promise<boolean>;
     stop(): void;
@@ -330,11 +412,12 @@ export type UiSettingsSetup = UiSettingsClient;
 
 // @public (undocumented)
 export interface UiSettingsState {
+    // Warning: (ae-forgotten-export) The symbol "InjectedUiSettingsDefault" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "InjectedUiSettingsUser" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     [key: string]: InjectedUiSettingsDefault & InjectedUiSettingsUser;
 }
 
-
-// (No @packageDocumentation comment for this package)
 
 ```

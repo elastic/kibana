@@ -26,7 +26,7 @@ import {
 
 import { toastNotifications } from 'ui/notify';
 
-import { isValidLabel } from '../../../util/custom_url_utils';
+import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from '../../../jobs/components/custom_url_editor/utils';
 
 import { parseInterval } from '../../../../common/util/parse_interval';
@@ -107,7 +107,7 @@ export const CustomUrlList = injectI18n(class CustomUrlList extends Component {
     if (index < customUrls.length) {
       getTestUrl(job, customUrls[index])
         .then((testUrl) => {
-          window.open(testUrl, '_blank');
+          openCustomUrlWindow(testUrl, customUrls[index]);
         })
         .catch((resp) => {
           console.log('Error obtaining URL for test:', resp);

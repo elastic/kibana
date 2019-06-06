@@ -41,7 +41,7 @@ export class UiSettingsClient {
   private readonly defaults: UiSettingsState;
   private cache: UiSettingsState;
 
-  constructor(readonly params: UiSettingsClientParams) {
+  constructor(params: UiSettingsClientParams) {
     this.api = params.api;
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));

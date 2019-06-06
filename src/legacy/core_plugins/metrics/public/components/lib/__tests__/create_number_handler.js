@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import { expect } from 'chai';
-import createNumberHandler from '../create_number_handler';
+import { createNumberHandler } from '../create_number_handler';
 
 describe('createNumberHandler()', () => {
 

@@ -6,26 +6,37 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiText,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
-import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
+import { DataFrameJobListColumn, DataFrameJobListRow, JobId } from './common';
 import { getActions } from './actions';
 
 export const getColumns = (
   getJobs: () => void,
-  itemIdToExpandedRowMap: ItemIdToExpandedRowMap,
-  setItemIdToExpandedRowMap: React.Dispatch<React.SetStateAction<ItemIdToExpandedRowMap>>
+  expandedRowItemIds: JobId[],
+  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<JobId[]>>
 ) => {
   const actions = getActions(getJobs);
 
   function toggleDetails(item: DataFrameJobListRow) {
-    if (itemIdToExpandedRowMap[item.config.id]) {
-      delete itemIdToExpandedRowMap[item.config.id];
+    const index = expandedRowItemIds.indexOf(item.config.id);
+    if (index !== -1) {
+      expandedRowItemIds.splice(index, 1);
+      setExpandedRowItemIds([...expandedRowItemIds]);
     } else {
-      itemIdToExpandedRowMap[item.config.id] = <div>EXPAND {item.config.id}</div>;
+      expandedRowItemIds.push(item.config.id);
     }
-    // spread to a new object otherwise the component wouldn't re-render
-    setItemIdToExpandedRowMap({ ...itemIdToExpandedRowMap });
+
+    // spread to a new array otherwise the component wouldn't re-render
+    setExpandedRowItemIds([...expandedRowItemIds]);
   }
 
   return [
@@ -37,15 +48,17 @@ export const getColumns = (
         <EuiButtonIcon
           onClick={() => toggleDetails(item)}
           aria-label={
-            itemIdToExpandedRowMap[item.config.id]
+            expandedRowItemIds.includes(item.config.id)
               ? i18n.translate('xpack.ml.dataframe.jobsList.rowCollapse', {
-                  defaultMessage: 'Collapse',
+                  defaultMessage: 'Hide details for {jobId}',
+                  values: { jobId: item.config.id },
                 })
               : i18n.translate('xpack.ml.dataframe.jobsList.rowExpand', {
-                  defaultMessage: 'Expand',
+                  defaultMessage: 'Show details for {jobId}',
+                  values: { jobId: item.config.id },
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.config.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
         />
       ),
     },
@@ -66,6 +79,40 @@ export const getColumns = (
       name: i18n.translate('xpack.ml.dataframe.targetIndex', { defaultMessage: 'Target index' }),
       sortable: true,
       truncateText: true,
+    },
+    {
+      name: i18n.translate('xpack.ml.dataframe.status', { defaultMessage: 'Status' }),
+      sortable: true,
+      truncateText: true,
+      render(item: DataFrameJobListRow) {
+        const color = item.state.task_state === 'started' ? 'primary' : 'hollow';
+        return <EuiBadge color={color}>{item.state.task_state}</EuiBadge>;
+      },
+    },
+    {
+      name: i18n.translate('xpack.ml.dataframe.progress', { defaultMessage: 'Progress' }),
+      sortable: true,
+      truncateText: true,
+      render(item: DataFrameJobListRow) {
+        let progress = 0;
+
+        if (item.state.progress !== undefined) {
+          progress = Math.round(item.state.progress.percent_complete);
+        }
+
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiProgress value={progress} max={100} color="primary" size="m">
+                {progress}%
+              </EuiProgress>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="xs">{`${progress}%`}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       name: i18n.translate('xpack.ml.dataframe.tableActionLabel', { defaultMessage: 'Actions' }),

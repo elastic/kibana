@@ -87,10 +87,17 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       return [];
     },
     privileges() {
-      return  kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
+      return kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
     },
     features() {
-      return kfetch({ method: 'get', pathname: '/api/features/v1' });
+      return kfetch({ method: 'get', pathname: '/api/features/v1' }).catch(e => {
+        // TODO: This check can be removed once all of these `resolve` entries are moved out of Angular and into the React app.
+        const unauthorizedForFeatures = _.get(e, 'body.statusCode') === 404;
+        if (unauthorizedForFeatures) {
+          return [];
+        }
+        throw e;
+      });
     }
   },
   controllerAs: 'editRole',

@@ -44,6 +44,9 @@ export function LoadingIndicatorProvider({
   const [statuses, dispatchStatus] = useReducer(reducer, {});
   const isLoading = useMemo(() => getIsAnyLoading(statuses), [statuses]);
   const shouldShowLoadingIndicator = useDelayedVisibility(isLoading);
+  const contextValue = React.useMemo(() => ({ statuses, dispatchStatus }), [
+    statuses
+  ]);
 
   return (
     <Fragment>
@@ -54,7 +57,7 @@ export function LoadingIndicatorProvider({
       )}
 
       <LoadingIndicatorContext.Provider
-        value={{ statuses, dispatchStatus }}
+        value={contextValue}
         children={children}
       />
     </Fragment>

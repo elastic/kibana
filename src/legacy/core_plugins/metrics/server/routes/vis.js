@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import getVisData from '../lib/get_vis_data';
+import { getVisData } from '../lib/get_vis_data';
 import Boom from 'boom';
-export default (server) => {
+
+export const visDataRoutes = (server) => {
 
   server.route({
     path: '/api/metrics/vis/data',

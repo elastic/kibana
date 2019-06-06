@@ -28,10 +28,11 @@ type Props = MonitorStatusBarProps & UptimeGraphQLQueryProps<MonitorStatusBarQue
 
 export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
   if (data && data.monitorStatus && data.monitorStatus.length) {
-    const { monitor, timestamp } = data.monitorStatus[0];
+    const { monitor, observer, timestamp } = data.monitorStatus[0];
     const duration = get(monitor, 'duration.us', undefined);
     const status = get<'up' | 'down'>(monitor, 'status', 'down');
     const full = get(data.monitorStatus[0], 'url.full');
+    const location = get(observer, 'geo.name');
     return (
       <EuiPanel>
         <EuiFlexGroup gutterSize="l">
@@ -97,6 +98,16 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
           >
             {moment(new Date(timestamp).valueOf()).fromNow()}
           </EuiFlexItem>
+          {!!location && (
+            <EuiFlexItem
+              aria-label={i18n.translate('xpack.uptime.monitorStatusBar.locationName', {
+                defaultMessage: 'Location',
+              })}
+              grow={false}
+            >
+              {location}
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
     );

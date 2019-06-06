@@ -12,8 +12,8 @@ import { TooltipAnnotation } from '../../tooltip_annotation';
 import { RotationHandle } from '../../rotation_handle';
 import { BorderConnection } from '../../border_connection';
 import { BorderResizeHandle } from '../../border_resize_handle';
+import { WorkpadShortcuts } from '../../workpad_shortcuts';
 import { interactiveWorkpadPagePropTypes } from '../prop_types';
-import { WorkpadShortcuts } from './workpad_shortcuts';
 
 export class InteractiveWorkpadPage extends PureComponent {
   static propTypes = interactiveWorkpadPagePropTypes;
@@ -44,23 +44,21 @@ export class InteractiveWorkpadPage extends PureComponent {
       insertNodes,
       removeNodes,
       elementLayer,
-      groupNodes,
-      ungroupNodes,
       canvasOrigin,
       saveCanvasOrigin,
+      commit,
     } = this.props;
 
     let shortcuts = null;
 
     const shortcutProps = {
       elementLayer,
-      groupNodes,
       insertNodes,
       pageId,
       removeNodes,
       selectedNodes,
       selectToplevelNodes,
-      ungroupNodes,
+      commit,
     };
     shortcuts = <WorkpadShortcuts {...shortcutProps} />;
 

@@ -11,6 +11,7 @@ import header from './header.png';
 export const progressSemicircle: ElementFactory = () => ({
   name: 'progressSemicircle',
   displayName: 'Progress semicircle',
+  tags: ['chart', 'proportion'],
   help: 'Displays progress as a portion of a semicircle',
   width: 200,
   height: 100,

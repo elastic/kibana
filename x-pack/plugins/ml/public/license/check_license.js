@@ -6,7 +6,7 @@
 
 
 import React from 'react';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { XPackInfoProvider } from '../../../xpack_main/public/services/xpack_info';
 import { banners, addAppRedirectMessageToUrl } from 'ui/notify';
 import { LICENSE_TYPE } from '../../common/constants/license';
 

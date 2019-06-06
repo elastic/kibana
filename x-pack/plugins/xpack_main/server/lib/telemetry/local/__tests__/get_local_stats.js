@@ -29,10 +29,10 @@ const getMockServer = (getCluster = sinon.stub(), kibanaUsage = {}) => ({
   },
 });
 
-function mockGetLocalStats(callCluster, clusterInfo, clusterStats, license, usage) {
-  mockGetClusterInfo(callCluster, clusterInfo);
-  mockGetClusterStats(callCluster, clusterStats);
-  mockGetXPack(callCluster, license, usage);
+function mockGetLocalStats(callCluster, clusterInfo, clusterStats, license, usage, req) {
+  mockGetClusterInfo(callCluster, clusterInfo, req);
+  mockGetClusterStats(callCluster, clusterStats, req);
+  mockGetXPack(callCluster, license, usage, req);
 }
 
 describe('get_local_stats', () => {
@@ -196,7 +196,29 @@ describe('get_local_stats', () => {
         Promise.resolve(xpack)
       );
 
-      const result = await getLocalStats(req);
+      const result = await getLocalStats(req, { useInternalUser: true });
+      expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
+      expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
+      expect(result.version).to.eql(combinedStatsResult.version);
+      expect(result.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
+    });
+    it('uses callWithRequest from data cluster', async () => {
+      const getCluster = sinon.stub();
+      const req = { server: getMockServer(getCluster) };
+      const callWithRequest = sinon.stub();
+
+      getCluster.withArgs('data').returns({ callWithRequest });
+
+      mockGetLocalStats(
+        callWithRequest,
+        Promise.resolve(clusterInfo),
+        Promise.resolve(clusterStats),
+        Promise.resolve(license),
+        Promise.resolve(xpack),
+        req
+      );
+
+      const result = await getLocalStats(req, { useInternalUser: false });
       expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
       expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
       expect(result.version).to.eql(combinedStatsResult.version);

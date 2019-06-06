@@ -11,24 +11,7 @@ exports[`LayerTOC is rendered 1`] = `
       droppableId="mapLayerTOC"
       spacing="none"
     >
-      <EuiDraggable
-        customDragHandle={true}
-        draggableId="2"
-        index={0}
-        key="2"
-        spacing="none"
-      >
-        <Component />
-      </EuiDraggable>
-      <EuiDraggable
-        customDragHandle={true}
-        draggableId="1"
-        index={1}
-        key="1"
-        spacing="none"
-      >
-        <Component />
-      </EuiDraggable>
+      <Component />
     </EuiDroppable>
   </EuiDragDropContext>
 </div>

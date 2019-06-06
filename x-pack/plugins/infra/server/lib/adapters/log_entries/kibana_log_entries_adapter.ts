@@ -34,6 +34,7 @@ interface LogItemHit {
   _index: string;
   _id: string;
   _source: JsonObject;
+  sort: [number, number];
 }
 
 export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
@@ -173,6 +174,10 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       terminate_after: 1,
       body: {
         size: 1,
+        sort: [
+          { [sourceConfiguration.fields.timestamp]: 'desc' },
+          { [sourceConfiguration.fields.tiebreaker]: 'desc' },
+        ],
         query: {
           ids: {
             values: [id],

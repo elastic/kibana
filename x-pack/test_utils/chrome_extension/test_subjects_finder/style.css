@@ -1,0 +1,110 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  padding: 16px;
+  width: 300px;
+}
+h1 {
+  font-size: 1rem;
+  margin: 0 0 16px;
+  text-align: center;
+}
+
+.form-control {
+  margin-bottom: 16px;
+}
+
+.form-control__label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.form-control__input {
+  width: 100%;
+  height: 40px;
+  background-color: #fbfcfd;
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  box-shadow: 0 1px 1px -1px rgba(152, 162, 179, 0.2), 0 3px 2px -2px rgba(152, 162, 179, 0.2), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  transition: background-color 150ms ease-in, background-image 150ms ease-in, background-size 150ms ease-in, -webkit-box-shadow 150ms ease-in;
+  transition: box-shadow 150ms ease-in, background-color 150ms ease-in, background-image 150ms ease-in, background-size 150ms ease-in;
+  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-weight: 400;
+  letter-spacing: -.005em;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-kerning: normal;
+  font-kerning: normal;
+  font-size: 14px;
+  line-height: 1em;
+  color: #343741;
+  border: none;
+  border-radius: 0;
+  padding: 12px;
+  margin-bottom: 4px;
+}
+
+.form-control__helper-text {
+    font-size: 0.7rem;
+    color: #666;
+}
+
+.form-control__select {
+  width: 100%;
+  padding: 4px;
+  margin-bottom: 4px;
+}
+
+.form-actions {
+  border-top: 1px solid #ddd;
+  padding-top: 24px;
+  text-align: center;
+}
+
+button {
+  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-weight: 400;
+  letter-spacing: -.005em;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-kerning: normal;
+  font-kerning: normal;
+  font-size: 1rem;
+  line-height: 1.5;
+  display: inline-block;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  height: 40px;
+  line-height: 40px;
+  text-decoration: none;
+  border: solid 1px transparent;
+  text-align: center;
+  transition: all 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
+  white-space: nowrap;
+  max-width: 100%;
+  vertical-align: middle;
+  box-shadow: 0 2px 2px -1px rgba(152, 162, 179, 0.3);
+  border-radius: 4px;
+  min-width: 112px;
+  background-color: #017D73;
+  border-color: #017D73;
+  color: #FFF;
+  box-shadow: 0 2px 2px -1px rgba(39, 87, 83, 0.3);
+}
+
+.is-tracking .track-config {
+  display: none;
+}
+
+#stopTrackingButton {
+  display: none;
+}
+
+.is-tracking #stopTrackingButton {
+  display: inline;
+}
+
+.is-tracking #startTrackingButton {
+  display: none;
+}

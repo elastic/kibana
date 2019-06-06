@@ -21,13 +21,13 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import uuid from 'uuid';
-import AggRow from './agg_row';
-import AggSelect from './agg_select';
+import { AggRow } from './agg_row';
+import { AggSelect } from './agg_select';
 
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
-import Vars from './vars';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { CalculationVars } from './vars';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -40,7 +40,7 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
-class CalculationAgg extends Component {
+export class CalculationAgg extends Component {
 
   componentWillMount() {
     if (!this.props.model.variables) {
@@ -69,6 +69,7 @@ class CalculationAgg extends Component {
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}
+        dragHandleProps={this.props.dragHandleProps}
       >
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem>
@@ -94,7 +95,7 @@ class CalculationAgg extends Component {
                 defaultMessage="Variables"
               />
             </EuiFormLabel>
-            <Vars
+            <CalculationVars
               id={htmlId('variables')}
               metrics={siblings}
               onChange={handleChange}
@@ -151,5 +152,3 @@ CalculationAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
-
-export default CalculationAgg;

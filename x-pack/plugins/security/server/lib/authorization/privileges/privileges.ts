@@ -36,7 +36,7 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
         flatten(
           features.map(feature =>
             Object.entries(feature.privileges).reduce<string[]>((acc, [privilegeId, privilege]) => {
-              if (privilegeId !== 'read' && !Boolean(privilege.grantWithBaseRead)) {
+              if (privilegeId !== 'read') {
                 return acc;
               }
 
@@ -62,6 +62,7 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
           all: [
             actions.login,
             actions.version,
+            actions.api.get('features'),
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             ...allActions,

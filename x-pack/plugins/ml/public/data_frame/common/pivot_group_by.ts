@@ -5,8 +5,10 @@
  */
 
 import { Dictionary } from '../../../common/types/common';
+import { KBN_FIELD_TYPES } from '../../../common/constants/field_types';
 
-import { AggName, FieldName } from './aggregations';
+import { AggName } from './aggregations';
+import { FieldName } from './fields';
 
 export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {
   DATE_HISTOGRAM = 'date_histogram',
@@ -19,13 +21,35 @@ export type PivotSupportedGroupByAggs =
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
 
+export const pivotSupportedGroupByAggs: PivotSupportedGroupByAggs[] = [
+  PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
+];
+
 export type PivotSupportedGroupByAggsWithInterval =
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
 
+export const pivotGroupByFieldSupport = {
+  [KBN_FIELD_TYPES.ATTACHMENT]: [],
+  [KBN_FIELD_TYPES.BOOLEAN]: [],
+  [KBN_FIELD_TYPES.DATE]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM],
+  [KBN_FIELD_TYPES.GEO_POINT]: [],
+  [KBN_FIELD_TYPES.GEO_SHAPE]: [],
+  [KBN_FIELD_TYPES.IP]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS],
+  [KBN_FIELD_TYPES.MURMUR3]: [],
+  [KBN_FIELD_TYPES.NUMBER]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM],
+  [KBN_FIELD_TYPES.STRING]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS],
+  [KBN_FIELD_TYPES._SOURCE]: [],
+  [KBN_FIELD_TYPES.UNKNOWN]: [],
+  [KBN_FIELD_TYPES.CONFLICT]: [],
+};
+
 interface GroupByConfigBase {
   field: FieldName;
   aggName: AggName;
+  dropDownName: string;
 }
 
 // Don't allow an interval of '0', but allow a float interval of '0.1' with a leading zero.
@@ -46,7 +70,7 @@ export enum DATE_HISTOGRAM_FORMAT {
 interface GroupByDateHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
   format?: DATE_HISTOGRAM_FORMAT;
-  interval: string;
+  calendar_interval: string;
 }
 
 interface GroupByHistogram extends GroupByConfigBase {
@@ -62,7 +86,11 @@ export type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;
 export type PivotGroupByConfig = GroupByDateHistogram | GroupByHistogram | GroupByTerms;
 export type PivotGroupByConfigDict = Dictionary<PivotGroupByConfig>;
 
-export function groupByConfigHasInterval(arg: any): arg is GroupByConfigWithInterval {
+export function isGroupByDateHistogram(arg: any): arg is GroupByDateHistogram {
+  return arg.hasOwnProperty('calendar_interval');
+}
+
+export function isGroupByHistogram(arg: any): arg is GroupByHistogram {
   return arg.hasOwnProperty('interval');
 }
 
@@ -83,7 +111,7 @@ export interface DateHistogramAgg {
   date_histogram: {
     field: FieldName;
     format?: DATE_HISTOGRAM_FORMAT;
-    interval: string;
+    calendar_interval: string;
   };
 }
 

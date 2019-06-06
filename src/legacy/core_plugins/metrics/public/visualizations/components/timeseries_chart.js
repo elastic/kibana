@@ -23,8 +23,8 @@ import classNames from 'classnames';
 import { isBackgroundInverted, isBackgroundDark } from '../../../common/set_is_reversed';
 import moment from 'moment';
 import reactcss from 'reactcss';
-import FlotChart from './flot_chart';
-import Annotation from './annotation';
+import { FlotChart } from './flot_chart';
+import { Annotation } from './annotation';
 import { EuiIcon } from '@elastic/eui';
 
 export function scaleUp(value) {
@@ -35,7 +35,7 @@ export function scaleDown(value) {
   return value / window.devicePixelRatio;
 }
 
-class TimeseriesChart extends Component {
+export class TimeseriesChart extends Component {
 
   constructor(props) {
     super(props);
@@ -219,5 +219,3 @@ TimeseriesChart.propTypes = {
   xaxisLabel: PropTypes.string,
   dateFormat: PropTypes.string
 };
-
-export default TimeseriesChart;

@@ -99,12 +99,12 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
     pageData: getPageData
   },
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const config = $injector.get('config');
       const dateFormat = config.get('dateFormat');
 
       super({
-        title: i18n('xpack.monitoring.logstash.pipeline.routeTitle', {
+        title: i18n.translate('xpack.monitoring.logstash.pipeline.routeTitle', {
           defaultMessage: 'Logstash - Pipeline'
         }),
         storageKey: 'logstash.pipelines',

@@ -10,6 +10,7 @@ import header from './header.png';
 export const lineChart: ElementFactory = () => ({
   name: 'lineChart',
   displayName: 'Line chart',
+  tags: ['chart'],
   help: 'A customizable line chart',
   image: header,
   expression: `filters

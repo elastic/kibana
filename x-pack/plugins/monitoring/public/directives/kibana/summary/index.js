@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { DetailStatus } from 'plugins/monitoring/components/kibana/detail_status';
 import { I18nContext } from 'ui/i18n';
@@ -18,6 +18,7 @@ uiModule.directive('monitoringKibanaSummary', () => {
       kibana: '='
     },
     link(scope, $el) {
+      scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
       scope.$watch('kibana', kibana => {
         render(<I18nContext><DetailStatus stats={kibana} /></I18nContext>, $el[0]);
       });

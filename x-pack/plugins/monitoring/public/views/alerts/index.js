@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { render } from 'react-dom';
 import { find, get } from 'lodash';
 import uiRoutes from 'ui/routes';
@@ -51,7 +52,7 @@ uiRoutes.when('/alerts', {
   },
   controllerAs: 'alerts',
   controller: class AlertsView extends MonitoringViewBaseEuiTableController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       const kbnUrl = $injector.get('kbnUrl');
@@ -60,10 +61,11 @@ uiRoutes.when('/alerts', {
       $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
 
       super({
-        title: i18n('xpack.monitoring.alerts.clusterAlertsTitle', { defaultMessage: 'Cluster Alerts' }),
+        title: i18n.translate('xpack.monitoring.alerts.clusterAlertsTitle', { defaultMessage: 'Cluster Alerts' }),
         getPageData,
         $scope,
-        $injector
+        $injector,
+        reactNodeId: 'monitoringAlertsApp'
       });
 
       this.data = $route.current.locals.alerts;

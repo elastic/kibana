@@ -9,6 +9,7 @@ import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { syncFilterExpression } from '../../../public/lib/sync_filter_expression';
 import { RendererFactory } from '../types';
 import { DropdownFilter } from './component';
 
@@ -20,7 +21,19 @@ interface Config {
    * @default []
    */
   choices: string[];
+  filterGroup: string;
 }
+
+const MATCH_ALL = '%%CANVAS_MATCH_ALL%%';
+
+const getFilterValue = (filterExpression: string) => {
+  if (filterExpression === '') {
+    return MATCH_ALL;
+  }
+
+  const filterAST = fromExpression(filterExpression);
+  return get(filterAST, 'chain[0].arguments.value[0]', MATCH_ALL) as string;
+};
 
 export const dropdownFilter: RendererFactory<Config> = () => ({
   name: 'dropdown_filter',
@@ -29,11 +42,16 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
   reuseDomNode: true,
   height: 50,
   render(domNode, config, handlers) {
-    const { column, choices } = config;
-    let value = '%%CANVAS_MATCH_ALL%%';
-    if (handlers.getFilter() !== '') {
-      const filterAST = fromExpression(handlers.getFilter());
-      value = get(filterAST, 'chain[0].arguments.value[0]');
+    const filterExpression = handlers.getFilter();
+
+    if (filterExpression !== '') {
+      // NOTE: setFilter() will cause a data refresh, avoid calling unless required
+      // compare expression and filter, update filter if needed
+      const { changed, newAst } = syncFilterExpression(config, filterExpression, ['filterGroup']);
+
+      if (changed) {
+        handlers.setFilter(toExpression(newAst));
+      }
     }
 
     const commit = (commitValue: string) => {
@@ -48,19 +66,24 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
               function: 'exactly',
               arguments: {
                 value: [commitValue],
-                column: [column],
+                column: [config.column],
+                filterGroup: [config.filterGroup],
               },
             },
           ],
         };
 
-        const filter = toExpression(newFilterAST);
-        handlers.setFilter(filter);
+        const newFilter = toExpression(newFilterAST);
+        handlers.setFilter(newFilter);
       }
     };
 
     ReactDOM.render(
-      <DropdownFilter commit={commit} choices={choices || []} value={value} />,
+      <DropdownFilter
+        commit={commit}
+        choices={config.choices || []}
+        value={getFilterValue(filterExpression)}
+      />,
       domNode,
       () => handlers.done()
     );
