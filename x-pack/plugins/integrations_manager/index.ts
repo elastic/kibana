@@ -17,9 +17,8 @@ import { ID } from './common/constants';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 
 const ICON = 'merge';
-const PREFIX = `xpack.${ID}`;
 const ROOT = `plugins/${ID}`;
-const pluginTitle = i18n.translate(`${PREFIX}.pluginTitle`, {
+const pluginTitle = i18n.translate('xpack.integrationsManager.pluginTitle', {
   defaultMessage: 'Integrations Manager',
 });
 
@@ -27,7 +26,7 @@ export const integrationsManager: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     id: ID,
-    configPrefix: PREFIX,
+    configPrefix: 'xpack.integrationsManager',
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {

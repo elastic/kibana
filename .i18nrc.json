@@ -32,6 +32,7 @@
     "xpack.idxMgmt": "x-pack/plugins/index_management",
     "xpack.indexLifecycleMgmt": "x-pack/plugins/index_lifecycle_management",
     "xpack.infra": "x-pack/plugins/infra",
+    "xpack.integrationsManager": "x-pack/plugins/integrations_manager",
     "xpack.kueryAutocomplete": "x-pack/plugins/kuery_autocomplete",
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
     "xpack.maps": "x-pack/plugins/maps",
