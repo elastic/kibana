@@ -27,9 +27,13 @@ import { DashboardViewMode } from './dashboard_view_mode';
  * end of the title.
  * @returns {string} A title to display to the user based on the above parameters.
  */
-export function getDashboardTitle(title, viewMode, isDirty) {
+export function getDashboardTitle(
+  title: string,
+  viewMode: DashboardViewMode,
+  isDirty: boolean
+): string {
   const isEditMode = viewMode === DashboardViewMode.EDIT;
-  let displayTitle;
+  let displayTitle: string;
 
   if (isEditMode && isDirty) {
     displayTitle = i18n.translate('kbn.dashboard.strings.dashboardUnsavedEditTitle', {
