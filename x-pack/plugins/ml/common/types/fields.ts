@@ -5,9 +5,11 @@
  */
 
 import { ES_FIELD_TYPES } from '../../common/constants/field_types';
+import { ML_JOB_AGGREGATION } from '../../common/constants/aggregation_types';
 
 export type FieldId = string;
-export type AggId = string;
+export type AggId = ML_JOB_AGGREGATION;
+export type SplitField = Field | null;
 
 export interface Field {
   id: FieldId;
