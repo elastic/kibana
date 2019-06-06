@@ -337,6 +337,13 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<strin
 export interface PluginInitializerContext {
 }
 
+// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
+    [K in keyof T]: RecursiveReadonly<T[K]>;
+}> : T;
+
 export { Toast }
 
 // Warning: (ae-forgotten-export) The symbol "ToastInputFields" needs to be exported by the entry point index.d.ts
