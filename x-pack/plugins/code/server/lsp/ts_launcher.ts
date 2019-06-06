@@ -43,15 +43,11 @@ export class TypescriptServerLauncher extends AbstractLauncher {
     });
   }
   async spawnProcess(installationPath: string, port: number, log: Logger): Promise<ChildProcess> {
-    const p = spawn(
-      process.execPath,
-      ['--max_old_space_size=4096', installationPath, '-p', port.toString(), '-c', '1'],
-      {
-        detached: false,
-        stdio: 'pipe',
-        cwd: resolve(installationPath, '../..'),
-      }
-    );
+    const p = spawn(process.execPath, [installationPath, '-p', port.toString(), '-c', '1'], {
+      detached: false,
+      stdio: 'pipe',
+      cwd: resolve(installationPath, '../..'),
+    });
     p.stdout.on('data', data => {
       log.stdout(data.toString());
     });
