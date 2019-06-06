@@ -17,11 +17,21 @@
  * under the License.
  */
 
-declare class Metadata {
-  public branch: string;
-  public version: string;
-}
+import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
 
-declare const metadata: Metadata;
+jest.doMock('ui/new_platform', () => ({
+  npSetup: {
+    core: {
+      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+      notifications: notificationServiceMock.createSetupContract(),
+    }
+  },
+}));
 
-export { metadata };
+// Make importing the ui/notify module work in jest
+jest.doMock('ui/metadata', () => ({
+  metadata: {
+    branch: 'my-metadata-branch',
+    version: 'my-metadata-version'
+  }
+}));
