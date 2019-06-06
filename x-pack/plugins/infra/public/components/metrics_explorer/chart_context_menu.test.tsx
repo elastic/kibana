@@ -10,8 +10,13 @@ import { mountWithIntl } from '../../utils/enzyme_helpers';
 import { options, source, timeRange } from '../../utils/fixtures/metrics_explorer';
 import { InfraNodeType } from '../../graphql/types';
 import DateMath from '@elastic/datemath';
+import { ReactWrapper } from 'enzyme';
 
 const series = { id: 'exmaple-01', rows: [], columns: [] };
+
+const getTestSubject = (component: ReactWrapper, name: string) => {
+  return component.find(`[data-test-subj="${name}"]`).hostNodes();
+};
 
 describe('MetricsExplorerChartContextMenu', () => {
   describe('component', () => {
@@ -28,11 +33,9 @@ describe('MetricsExplorerChartContextMenu', () => {
       );
 
       component.find('button').simulate('click');
-      const menuItems = component.find('.euiContextMenuItem__text');
-      expect(menuItems.length).toBe(3);
-      expect(menuItems.at(0).text()).toBe('Add filter');
-      expect(menuItems.at(1).text()).toBe('Open in Visualize');
-      expect(menuItems.at(2).text()).toBe('View metrics for host');
+      expect(getTestSubject(component, 'metricsExplorerAction-AddFilter').length).toBe(1);
+      expect(getTestSubject(component, 'metricsExplorerAction-OpenInTSVB').length).toBe(1);
+      expect(getTestSubject(component, 'metricsExplorerAction-ViewNodeMetrics').length).toBe(1);
     });
 
     it('should not display View metrics for incompatible groupBy', async () => {
@@ -49,10 +52,7 @@ describe('MetricsExplorerChartContextMenu', () => {
       );
 
       component.find('button').simulate('click');
-      const menuItems = component.find('.euiContextMenuItem__text');
-      expect(menuItems.length).toBe(2);
-      expect(menuItems.at(0).text()).toBe('Add filter');
-      expect(menuItems.at(1).text()).toBe('Open in Visualize');
+      expect(getTestSubject(component, 'metricsExplorerAction-ViewNodeMetrics').length).toBe(0);
     });
 
     it('should not display "Add Filter" without onFilter', async () => {
@@ -66,10 +66,7 @@ describe('MetricsExplorerChartContextMenu', () => {
       );
 
       component.find('button').simulate('click');
-      const menuItems = component.find('.euiContextMenuItem__text');
-      expect(menuItems.length).toBe(2);
-      expect(menuItems.at(0).text()).toBe('Open in Visualize');
-      expect(menuItems.at(1).text()).toBe('View metrics for host');
+      expect(getTestSubject(component, 'metricsExplorerAction-AddFilter').length).toBe(0);
     });
 
     it('should not display "Add Filter" without options.groupBy', async () => {
@@ -86,9 +83,7 @@ describe('MetricsExplorerChartContextMenu', () => {
       );
 
       component.find('button').simulate('click');
-      const menuItems = component.find('.euiContextMenuItem__text');
-      expect(menuItems.length).toBe(1);
-      expect(menuItems.at(0).text()).toBe('Open in Visualize');
+      expect(getTestSubject(component, 'metricsExplorerAction-AddFilter').length).toBe(0);
     });
 
     it('should disable "Open in Visualize" when options.metrics is empty', async () => {
@@ -103,9 +98,9 @@ describe('MetricsExplorerChartContextMenu', () => {
       );
 
       component.find('button').simulate('click');
-      const menuItems = component.find('button.euiContextMenuItem');
-      expect(menuItems.length).toBe(1);
-      expect(menuItems.at(0).prop('disabled')).toBeTruthy();
+      expect(
+        getTestSubject(component, 'metricsExplorerAction-OpenInTSVB').prop('disabled')
+      ).toBeTruthy();
     });
   });
 

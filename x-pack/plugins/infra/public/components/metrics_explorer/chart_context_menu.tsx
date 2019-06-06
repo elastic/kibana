@@ -91,6 +91,7 @@ export const MetricsExplorerChartContextMenu = injectI18n(
             }),
             icon: 'infraApp',
             onClick: handleFilter,
+            'data-test-subj': 'metricsExplorerAction-AddFilter',
           },
         ]
       : [];
@@ -108,6 +109,7 @@ export const MetricsExplorerChartContextMenu = injectI18n(
             ),
             icon: 'infraApp',
             href: createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to),
+            'data-test-subj': 'metricsExplorerAction-ViewNodeMetrics',
           },
         ]
       : [];
@@ -126,6 +128,7 @@ export const MetricsExplorerChartContextMenu = injectI18n(
             href: tsvbUrl,
             icon: 'visualizeApp',
             disabled: options.metrics.length === 0,
+            'data-test-subj': 'metricsExplorerAction-OpenInTSVB',
           },
           ...viewNodeDetail,
         ],
