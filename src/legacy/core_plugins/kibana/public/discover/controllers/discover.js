@@ -42,7 +42,6 @@ import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import { DocTitleProvider } from 'ui/doc_title';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
@@ -50,7 +49,7 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from '../index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-import { FilterManagerProvider } from 'ui/filter_manager';
+import { FilterManager, FilterManagerProvider, FilterStateManager } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
@@ -184,7 +183,10 @@ function discoverController(
   $scope,
   $timeout,
   $window,
+  getAppState,
+  globalState,
   AppState,
+  indexPatterns,
   Private,
   Promise,
   config,
@@ -197,11 +199,14 @@ function discoverController(
   let visualizeHandler;
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
-  const queryFilter = Private(FilterBarQueryFilterProvider);
   const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
   const filterManager = Private(FilterManagerProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
+
+  const filterStateManager = new FilterStateManager(globalState, getAppState);
+  const queryFilter = new FilterManager(indexPatterns, filterStateManager);
+
   const inspectorAdapters = {
     requests: new RequestAdapter()
   };
