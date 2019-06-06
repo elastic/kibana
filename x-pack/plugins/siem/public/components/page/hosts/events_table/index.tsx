@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import moment from 'moment';
@@ -18,12 +17,11 @@ import { hostsModel, hostsSelectors, State } from '../../../../store';
 import { getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-
-import * as i18n from './translations';
-import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
+import { getRowItemDraggable, getRowItemDraggables, OverflowField } from '../../../tables/helpers';
 import { PreferenceFormattedDate } from '../../../formatted_date';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
-import { MoreRowItems } from '../../index';
+
+import * as i18n from './translations';
 
 interface OwnProps {
   data: Ecs[];
@@ -232,25 +230,11 @@ const getEventsColumns = (
     width: '25%',
     render: ({ node }) => {
       const message = getOr(null, 'message[0]', node);
-      const overflowLength = 50;
-      return message != null
-        ? getRowItemDraggable({
-            rowItem: message,
-            attrName: 'message',
-            idPrefix: `host-${pageType}-events-table-${node._id}`,
-            dragDisplayValue: message.substring(0, overflowLength),
-            render: () => (
-              <>
-                {message.substring(0, overflowLength)}
-                {message.length > overflowLength && (
-                  <EuiToolTip content={message}>
-                    <MoreRowItems type="boxesHorizontal" />
-                  </EuiToolTip>
-                )}
-              </>
-            ),
-          })
-        : getEmptyTagValue();
+      return message != null ? (
+        <OverflowField value={message} showToolTip={false} />
+      ) : (
+        getEmptyTagValue()
+      );
     },
   },
 ];
