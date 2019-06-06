@@ -45,7 +45,7 @@ export function getSavedObjectsClient(
   savedObjects: SavedObjectsService
 ): any {
   const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
-  const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin); // TODO: check this
+  const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
   return new SavedObjectsClient(internalRepository);
 }
