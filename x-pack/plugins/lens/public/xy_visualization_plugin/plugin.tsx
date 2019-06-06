@@ -14,7 +14,8 @@ import {
   // @ts-ignore untyped dependency
 } from '../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { ExpressionFunction } from '../../../../../src/legacy/core_plugins/interpreter/public';
-import { legendConfig, xConfig, yConfig, xyChart, xyChartRenderer } from './xy_expression';
+import { xyChart, xyChartRenderer } from './xy_expression';
+import { legendConfig, xConfig, yConfig } from './types';
 
 // TODO these are intermediary types because interpreter is not typed yet
 // They can get replaced by references to the real interfaces as soon as they

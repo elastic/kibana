@@ -39,59 +39,7 @@ describe('native_renderer', () => {
     expect(renderSpy).toHaveBeenCalledWith(containerElement, testProps);
   });
 
-  it('should not render again if props do not change', () => {
-    const renderSpy = jest.fn();
-    const testProps = { a: 'abc' };
-
-    renderAndTriggerHooks(
-      <NativeRenderer render={renderSpy} nativeProps={testProps} />,
-      mountpoint
-    );
-    renderAndTriggerHooks(
-      <NativeRenderer render={renderSpy} nativeProps={testProps} />,
-      mountpoint
-    );
-    expect(renderSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not render again if props do not change shallowly', () => {
-    const renderSpy = jest.fn();
-    const testProps = { a: 'abc' };
-
-    renderAndTriggerHooks(
-      <NativeRenderer render={renderSpy} nativeProps={testProps} />,
-      mountpoint
-    );
-    renderAndTriggerHooks(
-      <NativeRenderer render={renderSpy} nativeProps={{ ...testProps }} />,
-      mountpoint
-    );
-    expect(renderSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not render again for unchanged callback functions', () => {
-    const renderSpy = jest.fn();
-    const testCallback = () => {};
-    const testState = { a: 'abc' };
-
-    render(
-      <NativeRenderer
-        render={renderSpy}
-        nativeProps={{ state: testState, setState: testCallback }}
-      />,
-      mountpoint
-    );
-    render(
-      <NativeRenderer
-        render={renderSpy}
-        nativeProps={{ state: testState, setState: testCallback }}
-      />,
-      mountpoint
-    );
-    expect(renderSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('should render again once if props change', () => {
+  it('should render again if props change', () => {
     const renderSpy = jest.fn();
     const testProps = { a: 'abc' };
 
@@ -107,12 +55,12 @@ describe('native_renderer', () => {
       <NativeRenderer render={renderSpy} nativeProps={{ a: 'def' }} />,
       mountpoint
     );
-    expect(renderSpy).toHaveBeenCalledTimes(2);
+    expect(renderSpy).toHaveBeenCalledTimes(3);
     const containerElement = mountpoint.firstElementChild;
     expect(renderSpy).lastCalledWith(containerElement, { a: 'def' });
   });
 
-  it('should render again once if props is just a string', () => {
+  it('should render again if props is just a string', () => {
     const renderSpy = jest.fn();
     const testProps = 'abc';
 
@@ -122,7 +70,7 @@ describe('native_renderer', () => {
     );
     renderAndTriggerHooks(<NativeRenderer render={renderSpy} nativeProps="def" />, mountpoint);
     renderAndTriggerHooks(<NativeRenderer render={renderSpy} nativeProps="def" />, mountpoint);
-    expect(renderSpy).toHaveBeenCalledTimes(2);
+    expect(renderSpy).toHaveBeenCalledTimes(3);
     const containerElement = mountpoint.firstElementChild;
     expect(renderSpy).lastCalledWith(containerElement, 'def');
   });
