@@ -390,6 +390,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
   columns={
     Array [
       Object {
+        "aggregatable": true,
         "category": "base",
         "columnHeaderType": "not-filtered",
         "description": "Date/time when the event originated.
@@ -401,6 +402,7 @@ Required field for all events.",
         "width": 240,
       },
       Object {
+        "aggregatable": true,
         "category": "event",
         "columnHeaderType": "not-filtered",
         "description": "Severity describes the severity of the event. What the different severity values mean can very different between use cases. It's up to the implementer to make sure severities are consistent across events.",
@@ -410,6 +412,7 @@ Required field for all events.",
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "event",
         "columnHeaderType": "not-filtered",
         "description": "Event category.
@@ -420,6 +423,7 @@ This contains high-level information about the contents of the event. It is more
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "event",
         "columnHeaderType": "not-filtered",
         "description": "The action captured by the event.
@@ -430,6 +434,7 @@ This describes the information in the event. It is more specific than \`event.ca
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "host",
         "columnHeaderType": "not-filtered",
         "description": "Name of the host.
@@ -440,6 +445,7 @@ It can contain what \`hostname\` returns on Unix systems, the fully qualified do
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "source",
         "columnHeaderType": "not-filtered",
         "description": "IP address of the source.
@@ -450,6 +456,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "destination",
         "columnHeaderType": "not-filtered",
         "description": "IP address of the destination.
@@ -460,6 +467,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "user",
         "columnHeaderType": "not-filtered",
         "description": "Short name or login of the user.",
@@ -469,6 +477,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "width": 180,
       },
       Object {
+        "aggregatable": true,
         "category": "base",
         "columnHeaderType": "not-filtered",
         "description": "Each document has an _id that uniquely identifies it",
