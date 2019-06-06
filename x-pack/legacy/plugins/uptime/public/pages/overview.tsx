@@ -64,14 +64,8 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
   };
 
   const updateQuery: UptimeSearchBarQueryChangeHandler = ({ queryText }) => {
-    try {
-      if (!!queryText) {
-        updateUrl({ search: queryText });
-      }
-      refreshApp();
-    } catch (e) {
-      updateUrl({ search: '' });
-    }
+    updateUrl({ search: queryText || '' });
+    refreshApp();
   };
 
   const linkParameters = stringifyUrlParams(params);
