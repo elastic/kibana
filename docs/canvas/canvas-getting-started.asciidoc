@@ -2,31 +2,97 @@
 [[canvas-getting-started]]
 == Getting started with Canvas
 
-Your best bet to getting started with Canvas is to check out one 
-(or all) of the sample data sets that ship with {kib}. 
+//Short description.
 
-. Click the {kib} logo in the upper left hand corner of your browser to navigate 
-to the {kib} home page.
-. Click *Load a data set and a Kibana dashboard*. This also loads a 
-Canvas workpad to go with the data set.
-. Pick a data set. Let’s go with the eCommerce one for this example, but while you're 
-here, feel free to click *Add* on all of the available sample data sets.
-. Click the Canvas icon in the left hand navigation menu.
-. Find the *[eCommerce] Revenue Tracking* workpad and click on its name to open it.
+With Canvas, you can:
 
-[role="screenshot"]
-image::images/canvas-ecommerce.png[]
+* Create a space for your own text, visualizations, and visual assets using a workpad. With workpads, you can experiment with backgrounds, borders, colors, fonts, and more.
 
-You’re in! The first thing to do is to make a copy of this 
-workpad so you can come back to it later if needed. We’ll be making a mess 
-of it in this tutorial. 
+* Show off your data with charts, graphs, and progress monitors.
 
-. Click the name of the workpad in the lower left hand corner. 
+* 
+
+[float]
+=== Before you begin
+
+For this tutorial, you'll use the {kibana-ref}/add-sample-data.html[*Sample eCommerce orders* data].
+
+=== Create and personalize your workpad
+
+Your first step to working with Canvas is to create a workpad. 
+
+. Open *Canvas*.
+
+. Click *Create workpad*.
+
+. To personalize the workpad and page, use the editor on the right.
+
+.. Enter a *Name* for your workpad. For example, `Welcome to Canvas`.
+
+.. Change the page *Background color* to light gray.
+
+=== Add visualizations with elements
+
+Canvas ships with a variety of visualizations, called _elements_, that you can add to your workpad.
+
+. Click *Add element*, then select *Image*.
 +
-You’ll notice this is similar to the first screen. You could switch to a new 
-workpad from here, but let's not for now.
+The default Elastic logo image appears on your page.
 
-. Click the *Clone* icon in the *[eCommerce] Revenue Tracking* row.
+. To replace the Elastic logo with your own image, use the editor on the right, then click and drag the image to your preferred location.
 +
-You now have a new workpad called *[eCommerce] Revenue Tracking - Copy*.
+You'll notice that the image is tagged as an asset, which allows you to reuse the image from *Manage assets*.
 
+TIP: Want to delete an element? Click the back button on your browser window.
+
+//Add image
+
+=== Show off your data with the metric element
+
+Metric elements include charts, graphs, and progress monitors. For this example, we'll use the *Metric* element, which is good for displaying a single value. 
+
+. Click *Add element*, then select *Metric*. 
++
+By default, the *Metric* element is connected to a demo data source, which enables you to experiment with the element before you connect it to your own data source.
+
+. To connect the element to your own data source, click *Data*, then click *Change your data source*.
+
+.. Click *Elasticsearch SQL*.
+
+.. Copy and paste `SELECT sum(taxless_total_price) AS sum_total_price FROM "kibana_sample_data_ecommerce"` into the *Elasticsearch SQL query* field.
++
+The query selects the total price field and sets it to the sum_total_price field. You're pulling these fields from the kibana_sample_data_ecommerce index that you installed.
+
+//Add image
+
+. To verify that the data is correct, click *Preview*. If you like what you see, click *Save*.
++
+At this point, the element displays an error.
+
+. Specify how to process and display the data.
+
+.. Click *Display*
+
+.. Under *Number*, select *Value* from the function drop-down list, then select *sum_total_price* from the column drop-down list.
+
+//Add image
+
+.. Change the *Label* to 'Total sales'.
++
+The error is gone, but the number needs some formatting.
+
+. To format the number, use the Canvas expression language.
+
+.. In the lower right corner, click *Expression editor*.
++
+You're now looking at the raw data syntax that Canvas uses to display the element.
+
+.. Look for `math "sum_total_price"`, then add `| formatNumber "$0a"`.
+
+.. To update the number, click *Run*.
+
+//Add image
+
+.. When you are done, click *Close* on the *Expression editor*.
+
+=== Display your 
