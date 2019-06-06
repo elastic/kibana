@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Function } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
-export function browser(): Function<'browser', {}, any> {
+export function browser(): ExpressionFunction<'browser', any, {}, any> {
   const { help } = getFunctionHelp().browser;
 
   return {

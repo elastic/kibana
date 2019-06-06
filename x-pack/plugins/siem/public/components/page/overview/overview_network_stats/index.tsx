@@ -40,6 +40,42 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
   },
   {
     description:
+      has('filebeatCisco', data) && data.filebeatCisco !== null
+        ? numeral(data.filebeatCisco).format('0,0')
+        : getEmptyTagValue(),
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.filebeatCiscoTitle"
+        defaultMessage="Filebeat Cisco"
+      />
+    ),
+  },
+  {
+    description:
+      has('filebeatNetflow', data) && data.filebeatNetflow !== null
+        ? numeral(data.filebeatNetflow).format('0,0')
+        : getEmptyTagValue(),
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.filebeatNetflowTitle"
+        defaultMessage="Filebeat Netflow"
+      />
+    ),
+  },
+  {
+    description:
+      has('filebeatPanw', data) && data.filebeatPanw !== null
+        ? numeral(data.filebeatPanw).format('0,0')
+        : getEmptyTagValue(),
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.filebeatPanwTitle"
+        defaultMessage="Filebeat Palo Alto Network"
+      />
+    ),
+  },
+  {
+    description:
       has('filebeatSuricata', data) && data.filebeatSuricata !== null
         ? numeral(data.filebeatSuricata).format('0,0')
         : getEmptyTagValue(),
@@ -80,6 +116,18 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
       <FormattedMessage
         id="xpack.siem.overview.packetBeatFlowTitle"
         defaultMessage="Packetbeat Flow"
+      />
+    ),
+  },
+  {
+    description:
+      has('packetbeatTLS', data) && data.packetbeatTLS !== null
+        ? numeral(data.packetbeatTLS).format('0,0')
+        : getEmptyTagValue(),
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.packetbeatTLSTitle"
+        defaultMessage="Packetbeat TLS"
       />
     ),
   },

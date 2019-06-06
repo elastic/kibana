@@ -24,6 +24,10 @@ export const COPY_TO_CLIPBOARD = i18n.translate('xpack.siem.fieldBrowser.copyToC
   defaultMessage: 'Copy to Clipboard',
 });
 
+export const CUSTOMIZE_COLUMNS = i18n.translate('xpack.siem.fieldBrowser.customizeColumnsTitle', {
+  defaultMessage: 'Customize Columns',
+});
+
 export const DESCRIPTION = i18n.translate('xpack.siem.fieldBrowser.descriptionLabel', {
   defaultMessage: 'Description',
 });
@@ -60,10 +64,6 @@ export const NO_FIELDS_MATCH_INPUT = (searchInput: string) =>
 
 export const RESET_FIELDS = i18n.translate('xpack.siem.fieldBrowser.resetFieldsLink', {
   defaultMessage: 'Reset Fields',
-});
-
-export const SELECT_FIELDS = i18n.translate('xpack.siem.fieldBrowser.selectFieldsTitle', {
-  defaultMessage: 'Select Fields',
 });
 
 export const VIEW_CATEGORY = (categoryId: string) =>

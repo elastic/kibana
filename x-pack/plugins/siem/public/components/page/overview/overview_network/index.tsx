@@ -37,10 +37,7 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
           />
         }
         title={
-          <FormattedMessage
-            id="xpack.siem.overview.networkTitle"
-            defaultMessage="Network Beats Events"
-          />
+          <FormattedMessage id="xpack.siem.overview.networkTitle" defaultMessage="Network Events" />
         }
       >
         <EuiButton href="#/link-to/network/">
