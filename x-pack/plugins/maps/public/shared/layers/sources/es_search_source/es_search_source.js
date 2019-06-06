@@ -336,7 +336,7 @@ export class ESSearchSource extends AbstractESSource {
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 
     if (this._isTopHits()) {
-      const entitiesFoundMsg = i18n.translate('xpack.maps.esSearch.featureCountMsg', {
+      const entitiesFoundMsg = i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
         defaultMessage: `Found {entityCount} entities.`,
         values: { entityCount: meta.entityCount }
       });
