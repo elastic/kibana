@@ -41,7 +41,7 @@ export async function getActionsForTrigger(
       throw new Error(`Action ${id} does not exist`);
     }
 
-    if (!context || (await action.isCompatible(context))) {
+    if (await action.isCompatible(context)) {
       actions.push(action);
     }
   });
