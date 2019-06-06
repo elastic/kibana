@@ -53,10 +53,9 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   onClose,
 }) => {
   const {
-    core: {
-      i18n: { FormattedMessage, translate },
-    },
+    core: { i18n },
   } = useAppDependencies();
+  const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
   const { error, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
 
@@ -131,7 +130,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     const errorObject = notFound
       ? {
           data: {
-            error: translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
+            error: i18n.translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
               defaultMessage: `Either the snapshot '{snapshotId}' doesn't exist in the repository '{repositoryName}' or the repository doesn't exist.`,
               values: {
                 snapshotId,

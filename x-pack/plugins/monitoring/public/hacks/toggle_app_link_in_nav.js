@@ -5,12 +5,12 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { onStart } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 uiModules.get('monitoring/hacks').run((monitoringUiEnabled) => {
   if (monitoringUiEnabled) {
     return;
   }
 
-  onStart(({ core }) => core.chrome.navLinks.update('monitoring', { hidden: true }));
+  npStart.core.chrome.navLinks.update('monitoring', { hidden: true });
 });

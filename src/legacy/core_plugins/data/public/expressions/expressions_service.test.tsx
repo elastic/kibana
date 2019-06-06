@@ -110,37 +110,40 @@ describe('expressions_service', () => {
       expect(response).toBe(expressionResult);
     });
 
-    it('should call on render failure if the response is not valid', async () => {
-      const errorResult = { type: 'error', error: {} };
-      interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
-      const renderFailureSpy = jest.fn();
-      const response = await api.run(testAst, {
-        element: document.createElement('div'),
-        onRenderFailure: renderFailureSpy,
-      });
-      expect(renderFailureSpy).toHaveBeenCalledWith(errorResult);
-      expect(response).toBe(response);
+    it('should reject the promise if the response is not renderable but an element is passed', async () => {
+      const unexpectedResult = { type: 'datatable', value: {} };
+      interpretAstMock.mockReturnValue(Promise.resolve(unexpectedResult));
+      expect(
+        api.run(testAst, {
+          element: document.createElement('div'),
+        })
+      ).rejects.toBe(unexpectedResult);
     });
 
-    it('should call on render failure if the renderer is not known', async () => {
-      const errorResult = { type: 'render', as: 'unknown_id' };
-      interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
-      const renderFailureSpy = jest.fn();
-      const response = await api.run(testAst, {
-        element: document.createElement('div'),
-        onRenderFailure: renderFailureSpy,
-      });
-      expect(renderFailureSpy).toHaveBeenCalledWith(errorResult);
-      expect(response).toBe(response);
+    it('should reject the promise if the renderer is not known', async () => {
+      const unexpectedResult = { type: 'render', as: 'unknown_id' };
+      interpretAstMock.mockReturnValue(Promise.resolve(unexpectedResult));
+      expect(
+        api.run(testAst, {
+          element: document.createElement('div'),
+        })
+      ).rejects.toBe(unexpectedResult);
     });
 
-    it('should not call on render failure if the runner does not render', async () => {
+    it('should not reject the promise on unknown renderer if the runner is not rendering', async () => {
+      const unexpectedResult = { type: 'render', as: 'unknown_id' };
+      interpretAstMock.mockReturnValue(Promise.resolve(unexpectedResult));
+      expect(api.run(testAst, {})).resolves.toBe(unexpectedResult);
+    });
+
+    it('should reject the promise if the response is an error', async () => {
       const errorResult = { type: 'error', error: {} };
       interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
-      const renderFailureSpy = jest.fn();
-      const response = await api.run(testAst, { onRenderFailure: renderFailureSpy });
-      expect(renderFailureSpy).not.toHaveBeenCalled();
-      expect(response).toBe(response);
+      expect(api.run(testAst, {})).rejects.toBe(errorResult);
+    });
+
+    it('should reject the promise if there are syntax errors', async () => {
+      expect(api.run('|||', {})).rejects.toBeInstanceOf(Error);
     });
 
     it('should call the render function with the result and element', async () => {
@@ -254,6 +257,20 @@ describe('expressions_service', () => {
 
       expect(renderFunctionMock.render).toHaveBeenCalledTimes(1);
       expect(interpreterMock.interpretAst).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call onRenderFailure if the result can not be rendered', async () => {
+      const errorResult = { type: 'error', error: {} };
+      interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
+      const renderFailureSpy = jest.fn();
+
+      const ExpressionRenderer = api.ExpressionRenderer;
+
+      mount(<ExpressionRenderer expression={testExpression} onRenderFailure={renderFailureSpy} />);
+
+      await waitForInterpreterRun();
+
+      expect(renderFailureSpy).toHaveBeenCalledWith(errorResult);
     });
   });
 });
