@@ -395,7 +395,6 @@ exports[`FilterBar component renders the component's error state when an error p
           ]
         }
         onChange={[MockFunction]}
-        query=""
         schema={
           Object {
             "fields": Object {
