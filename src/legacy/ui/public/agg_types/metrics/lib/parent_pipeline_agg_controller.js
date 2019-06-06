@@ -52,7 +52,7 @@ const parentPipelineAggController = function ($scope) {
       if (lastBucket) {
         const type = $scope.agg.type.title;
         lastBucket.error = i18n.translate('common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage', {
-          defaultMessage: 'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation!',
+          defaultMessage: 'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation.',
           values: { type },
           description: 'Date Histogram and Histogram should not be translated'
         });

@@ -210,7 +210,6 @@
     "common.ui.aggTypes.metrics.topHitTitle": "トップヒット",
     "common.ui.aggTypes.metrics.uniqueCountLabel": "{field} のユニークカウント",
     "common.ui.aggTypes.metrics.uniqueCountTitle": "ユニークカウント",
-    "common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage": "「{type}」メトリック集約を使用する場合、最後のバケットアグリゲーションは「Date Histogram」または「Histogram」でなければなりません！",
     "common.ui.aggTypes.numberInterval.minimumIntervalLabel": "最低間隔",
     "common.ui.aggTypes.numberInterval.minimumIntervalTooltip": "入力された値により高度な設定の {histogramMaxBars} で指定されたよりも多くのバケットが作成される場合、間隔は自動的にスケーリングされます。",
     "common.ui.aggTypes.numberInterval.selectIntervalPlaceholder": "間隔を入力",
