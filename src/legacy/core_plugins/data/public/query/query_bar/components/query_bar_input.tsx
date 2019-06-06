@@ -28,7 +28,7 @@ import {
   AutocompleteSuggestionType,
   getAutocompleteProvider,
 } from 'ui/autocomplete_providers';
-import { debounce, compact, isEqual } from 'lodash';
+import { debounce, compact, isEqual, omit } from 'lodash';
 import { IndexPattern, StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedLog } from 'ui/persisted_log';
 import chrome from 'ui/chrome';
@@ -47,7 +47,6 @@ interface Props {
   intl: InjectedIntl;
   query: Query;
   appName: string;
-  id?: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   prepend?: any;
@@ -427,6 +426,22 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 
   public render() {
+    const rest = omit(this.props, [
+      'indexPatterns',
+      'intl',
+      'query',
+      'appName',
+      'disableAutoFocus',
+      'screenTitle',
+      'prepend',
+      'store',
+      'persistedLog',
+      'bubbleSubmitEvent',
+      'languageSwitcherPopoverAnchorPosition',
+      'onChange',
+      'onSubmit',
+    ]);
+
     return (
       <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
         <div
@@ -440,7 +455,6 @@ export class QueryBarInputUI extends Component<Props, State> {
           <div role="search">
             <div className="kuiLocalSearchAssistedInput">
               <EuiFieldText
-                id={this.props.id}
                 placeholder={this.props.intl.formatMessage({
                   id: 'data.query.queryBar.searchInputPlaceholder',
                   defaultMessage: 'Search',
@@ -490,6 +504,7 @@ export class QueryBarInputUI extends Component<Props, State> {
                     onSelectLanguage={this.onSelectLanguage}
                   />
                 }
+                {...rest}
               />
             </div>
           </div>
