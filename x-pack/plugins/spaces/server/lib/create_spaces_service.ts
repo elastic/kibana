@@ -10,6 +10,7 @@ import { getSpaceIdFromPath } from './spaces_url_parser';
 export interface SpacesService {
   isInDefaultSpace: (req: any) => boolean;
   getSpaceId: (req: any) => string;
+  setSpaceId: (req: any, spaceId: string) => void;
 }
 
 export function createSpacesService(server: any): SpacesService {
@@ -26,6 +27,10 @@ export function createSpacesService(server: any): SpacesService {
     return spaceId;
   }
 
+  function setSpaceId(request: any, spaceId: string) {
+    populateCache(request, spaceId);
+  }
+
   function isInDefaultSpace(request: any) {
     if (!contextCache.has(request)) {
       populateCache(request);
@@ -34,9 +39,10 @@ export function createSpacesService(server: any): SpacesService {
     return contextCache.get(request).isInDefaultSpace;
   }
 
-  function populateCache(request: any) {
-    const spaceId = getSpaceIdFromPath(request.getBasePath(), serverBasePath);
-
+  function populateCache(
+    request: any,
+    spaceId: string = getSpaceIdFromPath(request.getBasePath(), serverBasePath)
+  ) {
     contextCache.set(request, {
       spaceId,
       isInDefaultSpace: spaceId === DEFAULT_SPACE_ID,
@@ -45,6 +51,7 @@ export function createSpacesService(server: any): SpacesService {
 
   return {
     getSpaceId,
+    setSpaceId,
     isInDefaultSpace,
   };
 }

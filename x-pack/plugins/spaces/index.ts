@@ -164,7 +164,7 @@ export const spaces = (kibana: Record<string, any>) =>
         types,
       } = server.savedObjects as SavedObjectsService;
       addScopedSavedObjectsClientWrapperFactory(
-        Number.MAX_SAFE_INTEGER - 1,
+        Number.MIN_SAFE_INTEGER,
         spacesSavedObjectsClientWrapperFactory(spacesService, types)
       );
 
