@@ -18,22 +18,20 @@ import {
   MetricsExplorerTimeOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
-import { SourceQuery, InfraNodeType } from '../../graphql/types';
+import { InfraNodeType } from '../../graphql/types';
 import { getNodeDetailUrl } from '../../pages/link_to/redirect_to_node_detail';
+import { SourceConfiguration } from '../../utils/source_configuration';
 
 interface Props {
   intl: InjectedIntl;
   options: MetricsExplorerOptions;
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
-  source: SourceQuery.Query['source']['configuration'] | undefined;
+  source: SourceConfiguration;
   timeRange: MetricsExplorerTimeOptions;
 }
 
-const fieldToNodeType = (
-  source: SourceQuery.Query['source']['configuration'],
-  field: string
-): InfraNodeType | undefined => {
+const fieldToNodeType = (source: SourceConfiguration, field: string): InfraNodeType | undefined => {
   if (source.fields.host === field) {
     return InfraNodeType.host;
   }
