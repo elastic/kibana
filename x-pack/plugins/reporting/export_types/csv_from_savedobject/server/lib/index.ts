@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './index.d';
+export * from './types';
 export { createGenerateCsv } from './generate_csv';

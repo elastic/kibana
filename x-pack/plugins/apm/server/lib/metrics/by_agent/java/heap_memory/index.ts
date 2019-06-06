@@ -25,7 +25,7 @@ const chartBase: ChartBase<HeapMemoryMetrics> = {
       title: i18n.translate(
         'xpack.apm.agentMetrics.java.heapMemorySeriesUsed',
         {
-          defaultMessage: 'Used'
+          defaultMessage: 'Avg. used'
         }
       ),
       color: theme.euiColorVis0
@@ -34,18 +34,15 @@ const chartBase: ChartBase<HeapMemoryMetrics> = {
       title: i18n.translate(
         'xpack.apm.agentMetrics.java.heapMemorySeriesCommitted',
         {
-          defaultMessage: 'Committed'
+          defaultMessage: 'Avg. committed'
         }
       ),
       color: theme.euiColorVis1
     },
     heapMemoryMax: {
-      title: i18n.translate(
-        'xpack.apm.agentMetrics.java.nonHeapMemorySeriesMax',
-        {
-          defaultMessage: 'Max'
-        }
-      ),
+      title: i18n.translate('xpack.apm.agentMetrics.java.heapMemorySeriesMax', {
+        defaultMessage: 'Avg. limit'
+      }),
       color: theme.euiColorVis2
     }
   }

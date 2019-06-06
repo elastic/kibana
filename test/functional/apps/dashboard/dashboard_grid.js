@@ -24,7 +24,9 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard']);
 
-  describe('dashboard grid', () => {
+  describe('dashboard grid', function () {
+    this.tags(['skipFirefox']);
+
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('few panels');

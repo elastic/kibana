@@ -23,7 +23,10 @@ import {
 const ROOT_ELEMENT_ID = 'react-siem-root';
 const BREADCRUMBS_ELEMENT_ID = 'react-siem-breadcrumbs';
 
+export const KibanaConfigContext = React.createContext<Partial<AppKibanaFrameworkAdapter>>({});
+
 export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
+  public bytesFormat?: string;
   public dateFormat?: string;
   public dateFormatTz?: string;
   public darkMode?: boolean;
@@ -131,6 +134,7 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
     ) => {
       this.timezone = Private(this.timezoneProvider)();
       this.kbnVersion = kbnVersion;
+      this.bytesFormat = config.get('format:bytes:defaultPattern');
       this.dateFormat = config.get('dateFormat');
       this.dateFormatTz = config.get('dateFormat:tz');
       try {

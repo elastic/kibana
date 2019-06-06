@@ -5,7 +5,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { isString, flow } from 'lodash/fp';
+import { isEmpty, isString, flow } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { KueryFilterQuery } from '../../store';
@@ -25,6 +25,9 @@ export const convertKueryToElasticSearchQuery = (
 
 export const escapeQueryValue = (val: number | string = ''): string | number => {
   if (isString(val)) {
+    if (isEmpty(val)) {
+      return '""';
+    }
     return escapeKuery(val);
   }
 

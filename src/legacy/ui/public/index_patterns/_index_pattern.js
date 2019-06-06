@@ -308,6 +308,11 @@ export function IndexPatternProvider(Private, config, Promise) {
       return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
     }
 
+    isTimeNanosBased() {
+      const timeField = this.getTimeField();
+      return timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1;
+    }
+
     isTimeBasedWildcard() {
       return this.isTimeBased() && this.isWildcard();
     }

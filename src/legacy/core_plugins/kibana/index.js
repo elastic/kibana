@@ -201,7 +201,7 @@ export default function (kibana) {
           defaultSearchField: 'url',
           isImportableAndExportable: true,
           getTitle(obj) {
-            return obj.attributes.url;
+            return `/goto/${encodeURIComponent(obj.id)}`;
           },
         },
         config: {

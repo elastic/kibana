@@ -45,6 +45,16 @@ export async function fetch(setup: Setup, serviceName: string) {
             {
               range: rangeFilter(start, end)
             },
+            {
+              exists: {
+                field: METRIC_SYSTEM_FREE_MEMORY
+              }
+            },
+            {
+              exists: {
+                field: METRIC_SYSTEM_TOTAL_MEMORY
+              }
+            },
             ...uiFiltersES
           ]
         }

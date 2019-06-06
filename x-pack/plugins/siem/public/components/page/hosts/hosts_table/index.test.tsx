@@ -19,10 +19,10 @@ import {
   TestProviders,
 } from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
-import { KibanaConfigContext } from '../../../formatted_date';
 
 import { HostsTable } from './index';
 import { mockData } from './mock';
+import { KibanaConfigContext } from '../../../../lib/adapters/framework/kibana_framework_adapter';
 
 describe('Load More Table Component', () => {
   const loadMore = jest.fn();
