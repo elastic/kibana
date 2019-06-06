@@ -38,7 +38,7 @@ describe('FilterBar component', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it(`renders the component's error state when an error occurs`, () => {
+  it(`renders the component's error state when an error prop is passed`, () => {
     const component = shallowWithIntl(
       <FilterBar
         currentQuery="foo:bar:isInvalid"
