@@ -30,7 +30,6 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { HttpConfig, Router } from '.';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
-import { KibanaRequest } from './router';
 
 const chance = new Chance();
 
