@@ -18,7 +18,6 @@ import {
   EuiFormRow,
   EuiOverlayMask,
   EuiSpacer,
-  // @ts-ignore
   EuiSuperSelect,
   EuiText,
   EuiTitle,
@@ -261,10 +260,14 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               },
             ]}
             hasDividers
-            valueOfSelected={`basePrivilege_${this.getDisplayedBasePrivilege(
-              allowedPrivileges,
-              baseExplanation
-            )}`}
+            valueOfSelected={
+              this.getDisplayedBasePrivilege(allowedPrivileges, baseExplanation)
+                ? `basePrivilege_${this.getDisplayedBasePrivilege(
+                    allowedPrivileges,
+                    baseExplanation
+                  )}`
+                : undefined
+            }
             disabled={!hasSelectedSpaces}
           />
         </EuiFormRow>
