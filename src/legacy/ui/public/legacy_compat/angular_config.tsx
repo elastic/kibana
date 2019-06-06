@@ -41,7 +41,7 @@ import { capabilities } from 'ui/capabilities';
 import { modifyUrl } from 'ui/url';
 // @ts-ignore
 import { UrlOverflowServiceProvider } from '../error_url_overflow';
-import { getNewPlatform } from '../new_platform';
+import { npSetup } from '../new_platform';
 import { toastNotifications } from '../notify';
 // @ts-ignore
 import { isSystemApiRequest } from '../system_api';
@@ -49,7 +49,7 @@ import { isSystemApiRequest } from '../system_api';
 const URL_LIMIT_WARN_WITHIN = 1000;
 
 export const configureAppAngularModule = (angularModule: IModule) => {
-  const newPlatform = getNewPlatform().setup.core;
+  const newPlatform = npSetup.core;
   const legacyMetadata = newPlatform.injectedMetadata.getLegacyMetadata();
 
   forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
