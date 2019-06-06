@@ -116,10 +116,19 @@ export class WorkspaceHandler {
   public async listWorkspaceFolders(repoUri: string) {
     const workspaceDir = await this.workspaceDir(repoUri);
     const isDir = (source: string) => fs.lstatSync(source).isDirectory();
-    return fs
-      .readdirSync(workspaceDir)
-      .map(name => path.join(workspaceDir, name))
-      .filter(isDir);
+    try {
+      return fs
+        .readdirSync(workspaceDir)
+        .map(name => path.join(workspaceDir, name))
+        .filter(isDir);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        this.log.debug('Cannot find workspace dirs');
+        return [];
+      } else {
+        throw error;
+      }
+    }
   }
 
   public async clearWorkspace(repoUri: string) {

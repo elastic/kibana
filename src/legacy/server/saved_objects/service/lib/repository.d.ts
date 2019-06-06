@@ -26,7 +26,22 @@ export interface SavedObjectsRepositoryOptions {
   schema: unknown;
   serializer: unknown;
   migrator: unknown;
-  onBeforeWrite: unknown;
+  onBeforeWrite?: (
+    action: 'create' | 'index' | 'update' | 'bulk' | 'delete' | 'deleteByQuery',
+    params: {
+      index: string;
+      id?: string;
+      body: any;
+    }
+  ) => void;
+  onBeforeRead?: (
+    action: 'get' | 'bulk',
+    params: {
+      index: string;
+      id?: string;
+      body: any;
+    }
+  ) => void;
 }
 
 export declare class SavedObjectsRepository {

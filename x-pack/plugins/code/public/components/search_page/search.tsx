@@ -177,32 +177,30 @@ class SearchPage extends React.PureComponent<Props, State> {
           <div className="codeContainer__search--results">{resultComps}</div>
         </div>
       );
-    } else if (
-      scope === SearchScope.DEFAULT &&
-      documentSearchResults &&
-      (documentSearchResults.total > 0 || languages!.size > 0 || repositories!.size > 0)
-    ) {
+    } else if (scope === SearchScope.DEFAULT && documentSearchResults) {
       const { stats, results } = documentSearchResults!;
       const { total, from, to, page, totalPage } = stats!;
       languageStats = stats!.languageStats;
       repoStats = stats!.repoStats;
-      const statsComp = (
-        <EuiTitle size="m">
-          <h1>
-            Showing {total > 0 ? from : 0} - {to} of {total} results.
-          </h1>
-        </EuiTitle>
-      );
-      mainComp = (
-        <div className="codeContainer__search--inner">
-          {statsComp}
-          <EuiSpacer />
-          <div className="codeContainer__search--results">
-            <CodeResult results={results!} />
+      if (documentSearchResults.total > 0) {
+        const statsComp = (
+          <EuiTitle size="m">
+            <h1>
+              Showing {total > 0 ? from : 0} - {to} of {total} results.
+            </h1>
+          </EuiTitle>
+        );
+        mainComp = (
+          <div className="codeContainer__search--inner">
+            {statsComp}
+            <EuiSpacer />
+            <div className="codeContainer__search--results">
+              <CodeResult results={results!} />
+            </div>
+            <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
           </div>
-          <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
-        </div>
-      );
+        );
+      }
     }
 
     return (

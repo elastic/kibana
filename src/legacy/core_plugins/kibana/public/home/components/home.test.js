@@ -32,6 +32,15 @@ jest.mock(
   { virtual: true }
 );
 
+jest.mock(
+  'ui/capabilities',
+  () => ({
+    catalogue: {},
+    management: {},
+    navLinks: {}
+  })
+);
+
 describe('home', () => {
   let defaultProps;
 

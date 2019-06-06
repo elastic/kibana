@@ -49,10 +49,10 @@ export const getFlotAxisConfig = (
       position && acceptedPositions.includes(position) ? position : acceptedPositions[0];
 
     if (axisType === 'number' || axisType === 'date') {
-      if (min !== null) {
+      if (min != null) {
         config.min = min;
       }
-      if (max !== null) {
+      if (max != null) {
         config.max = max;
       }
     }

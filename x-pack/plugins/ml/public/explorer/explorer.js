@@ -12,7 +12,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import DragSelect from 'dragselect';
+import DragSelect from 'dragselect/dist/ds.min.js';
 import { map } from 'rxjs/operators';
 
 import {

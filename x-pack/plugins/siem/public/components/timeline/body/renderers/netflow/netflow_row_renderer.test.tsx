@@ -129,6 +129,6 @@ describe('netflowRowRenderer', () => {
         .find('[data-test-subj="destination-bytes"]')
         .first()
         .text()
-    ).toEqual('40.000 B');
+    ).toEqual('40B');
   });
 });
