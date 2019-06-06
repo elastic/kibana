@@ -32,7 +32,7 @@ export default function ({ getService, loadTestFile }) {
     });
 
     describe('visual console', function () {
-      this.tags('ciGroupVisual100');
+      this.tags('ciGroup100');
       loadTestFile(require.resolve('./visual_console'));
     });
 

@@ -30,8 +30,8 @@ const pkg = require('../../../package.json');
 const { JOB } = jsYaml.safeLoad(readFileSync(resolve(ROOT_DIR, '.ci/jobs.yml'), 'utf8'));
 
 // +2 is necessary to account for extra execution of PERCY_BIN in test/scripts/jenkins_ci_group.sh
-// Remove +2 ? ld 
-const ciGroupCount = JOB.filter(id => id.includes('ciGroupVisual')).length;
+// Remove +2 ? ld and includes needs to change back
+const ciGroupCount = JOB.filter(id => id.includes('ciGroup100')).length;
 
 const { stdout: commit } = execa.sync('git', ['rev-parse', 'HEAD']);
 const shortCommit = commit.slice(0, 8);
