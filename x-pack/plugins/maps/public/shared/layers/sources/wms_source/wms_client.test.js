@@ -196,6 +196,14 @@ describe('getCapabilities', () => {
                     <Title>defaultStyle</Title>
                   </Style>
                 </Layer>
+                <Layer>
+                  <Title>mylayer</Title>
+                  <Name>my_layer</Name>
+                  <Style>
+                    <Name>default</Name>
+                    <Title>defaultStyle</Title>
+                  </Style>
+                </Layer>
               </Capability>
             </WMT_MS_Capabilities>
           `;
@@ -206,6 +214,7 @@ describe('getCapabilities', () => {
     expect(capabilities.layers).toEqual([
       { label: 'mylayer (my_layer)', value: 'my_layer' },
       { label: 'mylayer (my_layer):1', value: 'my_layer' },
+      { label: 'mylayer (my_layer):2', value: 'my_layer' },
     ]);
   });
 
