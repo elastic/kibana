@@ -33,30 +33,33 @@ export function registerSaveRoute(server) {
     method: 'PUT',
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
+      const watchPayload = request.payload;
 
-      const watch = Watch.fromDownstreamJson(request.payload);
+      // For new watches, verify watch with the same ID doesn't already exist
+      if (watchPayload.isNew) {
+        const conflictError = wrapCustomError(
+          new Error(`There is already a watch with ID '${watchPayload.id}'.`),
+          409
+        );
 
-      const conflictError = wrapCustomError(
-        new Error(`There is already a watch with ID '${watch.id}'.`),
-        409
-      );
+        try {
+          const existingWatch = await fetchWatch(callWithRequest, watchPayload.id);
 
-      // Check that a watch with the same ID doesn't already exist
-      try {
-        const existingWatch = await fetchWatch(callWithRequest, watch.id);
-
-        if (existingWatch.found) {
-          throw conflictError;
-        }
-      } catch (e) {
-        // Rethrow conflict error but silently swallow all others
-        if (e === conflictError) {
-          throw e;
+          if (existingWatch.found) {
+            throw conflictError;
+          }
+        } catch (e) {
+          // Rethrow conflict error but silently swallow all others
+          if (e === conflictError) {
+            throw e;
+          }
         }
       }
 
-      // Otherwise create new watch
-      return saveWatch(callWithRequest, watch.upstreamJson)
+      const watchFromDownstream = Watch.fromDownstreamJson(watchPayload);
+
+      // Create new watch
+      return saveWatch(callWithRequest, watchFromDownstream.upstreamJson)
         .catch(err => {
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {

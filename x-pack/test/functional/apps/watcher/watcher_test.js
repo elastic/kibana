@@ -38,6 +38,8 @@ export default function ({ getService, getPageObjects }) {
       const errorCallout = await testSubjects.find('sectionErrorMessage');
       const errorCalloutText = await errorCallout.getVisibleText();
       expect(errorCalloutText).to.be(`There is already a watch with ID '${watchID}'.`);
+      // Cancel create and navigate back to the watch list page
+      await testSubjects.click('btnCancelWatch');
     });
 
     //delete the watch

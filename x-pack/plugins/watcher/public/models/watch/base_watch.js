@@ -114,6 +114,7 @@ export class BaseWatch {
       id: this.id,
       name: this.name,
       type: this.type,
+      isNew: this.isNew,
       actions: map(this.actions, action => action.upstreamJson)
     };
   }
