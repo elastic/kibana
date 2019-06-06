@@ -5,8 +5,7 @@
  */
 
 import React from 'react';
-import { Route } from 'react-router-dom';
-import { generatePath } from 'react-router-dom';
+import { generatePath, Route } from 'react-router-dom';
 import { Detail } from './screens/detail';
 import { Home } from './screens/home';
 import { PLUGIN_ID } from '../common/constants';
