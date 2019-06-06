@@ -1180,29 +1180,41 @@ export interface NetworkDnsItem {
 }
 
 export interface OverviewNetworkData {
-  packetbeatFlow: number;
+  auditbeatSocket: number;
 
-  packetbeatDNS: number;
+  filebeatCisco: number;
+
+  filebeatNetflow: number;
+
+  filebeatPanw: number;
 
   filebeatSuricata: number;
 
-  filebeatZeek?: number | null;
+  filebeatZeek: number;
 
-  auditbeatSocket?: number | null;
+  packetbeatDNS: number;
+
+  packetbeatFlow: number;
+
+  packetbeatTLS: number;
 }
 
 export interface OverviewHostData {
-  auditbeatAuditd?: number | null;
+  auditbeatAuditd: number;
 
-  auditbeatFIM?: number | null;
+  auditbeatFIM: number;
 
-  auditbeatLogin?: number | null;
+  auditbeatLogin: number;
 
-  auditbeatPackage?: number | null;
+  auditbeatPackage: number;
 
-  auditbeatProcess?: number | null;
+  auditbeatProcess: number;
 
-  auditbeatUser?: number | null;
+  auditbeatUser: number;
+
+  filebeatSystemModule: number;
+
+  winlogbeat: number;
 }
 
 export interface UncommonProcessesData {
@@ -3230,17 +3242,21 @@ export namespace GetOverviewHostQuery {
   export type OverviewHost = {
     __typename?: 'OverviewHostData';
 
-    auditbeatAuditd?: number | null;
+    auditbeatAuditd: number;
 
-    auditbeatFIM?: number | null;
+    auditbeatFIM: number;
 
-    auditbeatLogin?: number | null;
+    auditbeatLogin: number;
 
-    auditbeatPackage?: number | null;
+    auditbeatPackage: number;
 
-    auditbeatProcess?: number | null;
+    auditbeatProcess: number;
 
-    auditbeatUser?: number | null;
+    auditbeatUser: number;
+
+    filebeatSystemModule: number;
+
+    winlogbeat: number;
   };
 }
 
@@ -3269,15 +3285,23 @@ export namespace GetOverviewNetworkQuery {
   export type OverviewNetwork = {
     __typename?: 'OverviewNetworkData';
 
-    packetbeatFlow: number;
+    auditbeatSocket: number;
 
-    packetbeatDNS: number;
+    filebeatCisco: number;
+
+    filebeatNetflow: number;
+
+    filebeatPanw: number;
 
     filebeatSuricata: number;
 
-    filebeatZeek?: number | null;
+    filebeatZeek: number;
 
-    auditbeatSocket?: number | null;
+    packetbeatDNS: number;
+
+    packetbeatFlow: number;
+
+    packetbeatTLS: number;
   };
 }
 
