@@ -19,13 +19,17 @@
 
 import { Server, ServerOptions } from 'hapi';
 import { HttpService } from './http_service';
-import { HttpConfig } from './http_config';
 import { HttpServerSetup } from './http_server';
 import { HttpServiceSetup } from './http_service';
 
+type ServiceSetupMockType = jest.Mocked<HttpServiceSetup> & {
+  basePath: jest.Mocked<HttpServiceSetup['basePath']>;
+};
 const createSetupContractMock = () => {
-  const setupContract: Required<HttpServiceSetup> = {
+  const setupContract: ServiceSetupMockType = {
     options: ({} as unknown) as ServerOptions,
+    // we can mock some hapi server method when we need it
+    server: {} as Server,
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
@@ -36,15 +40,13 @@ const createSetupContractMock = () => {
       prepend: jest.fn(),
       remove: jest.fn(),
     },
-    // we can mock some hapi server method when we need it
-    server: {} as Server,
     auth: {
       get: jest.fn(),
       isAuthenticated: jest.fn(),
     },
-    createNewServer: async (cfg: Partial<HttpConfig>): Promise<HttpServerSetup> =>
-      ({} as HttpServerSetup),
+    createNewServer: jest.fn(),
   };
+  setupContract.createNewServer.mockResolvedValue({} as HttpServerSetup);
   return setupContract;
 };
 
