@@ -13,11 +13,11 @@ import {
   Server,
 } from './common/types';
 import { Plugin } from './server/plugin';
-import { ID, REQUIRED_PLUGINS } from './common/constants';
+import { PLUGIN_ID, REQUIRED_PLUGINS } from './common/constants';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 
 const ICON = 'merge';
-const ROOT = `plugins/${ID}`;
+const ROOT = `plugins/${PLUGIN_ID}`;
 const pluginTitle = i18n.translate('xpack.integrationsManager.pluginTitle', {
   defaultMessage: 'Integrations Manager',
 });
@@ -25,7 +25,7 @@ const pluginTitle = i18n.translate('xpack.integrationsManager.pluginTitle', {
 export const integrationsManager: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     require: REQUIRED_PLUGINS,
-    id: ID,
+    id: PLUGIN_ID,
     configPrefix: 'xpack.integrationsManager',
     publicDir: resolve(__dirname, 'public'),
 
@@ -45,16 +45,16 @@ export const integrationsManager: LegacyPluginInitializer = kibana => {
 
     init(server: Server) {
       server.plugins.xpack_main.registerFeature({
-        id: ID,
+        id: PLUGIN_ID,
         name: pluginTitle,
         icon: ICON,
-        navLinkId: ID,
-        app: [ID, 'kibana'],
-        catalogue: [ID],
+        navLinkId: PLUGIN_ID,
+        app: [PLUGIN_ID, 'kibana'],
+        catalogue: [PLUGIN_ID],
         privileges: {
           all: {
-            api: [ID],
-            catalogue: [ID],
+            api: [PLUGIN_ID],
+            catalogue: [PLUGIN_ID],
             savedObject: {
               all: [],
               read: [],
@@ -62,8 +62,8 @@ export const integrationsManager: LegacyPluginInitializer = kibana => {
             ui: ['show', 'save'],
           },
           read: {
-            api: [ID],
-            catalogue: [ID],
+            api: [PLUGIN_ID],
+            catalogue: [PLUGIN_ID],
             savedObject: {
               all: [],
               read: [],

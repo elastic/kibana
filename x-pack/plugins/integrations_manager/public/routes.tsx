@@ -9,9 +9,9 @@ import { Route } from 'react-router-dom';
 import { generatePath } from 'react-router-dom';
 import { Detail } from './screens/detail';
 import { Home } from './screens/home';
-import { ID } from '../common/constants';
+import { PLUGIN_ID } from '../common/constants';
 
-export const APP_ROOT = `/app/${ID}`;
+export const APP_ROOT = `/app/${PLUGIN_ID}`;
 
 // the `*_VIEW` routes are relative to `APP_ROOT`
 export const LIST_VIEW = '/';

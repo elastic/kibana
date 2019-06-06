@@ -5,11 +5,11 @@
  */
 import manifest from '../kibana.json';
 
-export const ID = manifest.id;
+export const PLUGIN_ID = manifest.id;
 export const REQUIRED_PLUGINS = manifest.requiredPlugins;
 
 export const SAVED_OBJECT_TYPE = 'integrations-manager';
-export const API_ROOT = `/api/${ID}`;
+export const API_ROOT = `/api/${PLUGIN_ID}`;
 export const API_INTEGRATIONS_LIST = `${API_ROOT}/list`;
 export const API_INTEGRATIONS_INFO = `${API_ROOT}/package/{pkgkey}`;
 export const API_INTEGRATIONS_FILE = `${API_ROOT}/package/{pkgkey}/get`;

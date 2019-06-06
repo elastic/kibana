@@ -14,9 +14,9 @@ import { I18nContext } from 'ui/i18n';
 import { HashRouter, Switch } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
 import { routes } from './routes';
-import { ID } from '../common/constants';
+import { PLUGIN_ID } from '../common/constants';
 
-const REACT_APP_ROOT_ID = `react-${ID}-root`;
+const REACT_APP_ROOT_ID = `react-${PLUGIN_ID}-root`;
 const template = `<div id="${REACT_APP_ROOT_ID}" class="integrationsManagerReactRoot"></div>`;
 
 function App() {
