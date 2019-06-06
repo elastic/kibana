@@ -45,9 +45,9 @@ const fieldToNodeType = (
   }
 };
 
-const dateMathToEpoch = (dateMath: string, roundUp = false): number => {
-  const dateObj = DateMath.parse(dateMath, { roundUp });
-  if (!dateObj) throw new Error(`"${dateMath}" is not a valid time string`);
+const dateMathExpressionToEpoch = (dateMathExpression: string, roundUp = false): number => {
+  const dateObj = DateMath.parse(dateMathExpression, { roundUp });
+  if (!dateObj) throw new Error(`"${dateMathExpression}" is not a valid time string`);
   return dateObj.valueOf();
 };
 
@@ -98,8 +98,8 @@ export const MetricsExplorerChartContextMenu = injectI18n(
             href: getNodeDetailUrl({
               nodeType,
               nodeId: series.id,
-              from: dateMathToEpoch(timeRange.from),
-              to: dateMathToEpoch(timeRange.to, true),
+              from: dateMathExpressionToEpoch(timeRange.from),
+              to: dateMathExpressionToEpoch(timeRange.to, true),
             }),
           },
         ]
