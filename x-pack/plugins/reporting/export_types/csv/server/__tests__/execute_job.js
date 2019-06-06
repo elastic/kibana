@@ -9,7 +9,7 @@ import Puid from 'puid';
 import sinon from 'sinon';
 import nodeCrypto from '@elastic/node-crypto';
 
-import { CancellationToken } from '../../../../server/lib/esqueue/helpers/cancellation_token';
+import { CancellationToken } from '../../../../common/cancellation_token';
 import { FieldFormat } from  '../../../../../../../src/legacy/ui/field_formats/field_format.js';
 import { FieldFormatsService } from  '../../../../../../../src/legacy/ui/field_formats/field_formats_service.js';
 import { createStringFormat } from  '../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/string.js';

@@ -2,11 +2,18 @@
 
 [Home](./index) &gt; [kibana-plugin-server](./kibana-plugin-server.md) &gt; [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md)
 
-## HttpServiceSetup type
+## HttpServiceSetup interface
 
 
 <b>Signature:</b>
 
 ```typescript
-export declare type HttpServiceSetup = HttpServerSetup;
+export interface HttpServiceSetup extends HttpServerSetup 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [createNewServer](./kibana-plugin-server.httpservicesetup.createnewserver.md) | <code>(cfg: Partial&lt;HttpConfig&gt;) =&gt; Promise&lt;HttpServerSetup&gt;</code> |  |
+

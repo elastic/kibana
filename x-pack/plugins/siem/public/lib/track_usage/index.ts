@@ -6,6 +6,6 @@
 
 // @ts-ignore
 import { trackUiMetric } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
-import { APP_ID } from '../../..';
+import { APP_ID } from '../../../common/constants';
 
 export const trackUiAction = (metricType: string) => trackUiMetric(APP_ID, metricType);

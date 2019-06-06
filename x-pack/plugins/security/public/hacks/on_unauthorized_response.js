@@ -20,7 +20,7 @@ function isUnauthorizedResponseAllowed(response) {
 }
 
 const module = uiModules.get('security');
-module.factory('onUnauthorizedResponse', ($q, $window, $injector, Private, autoLogout) => {
+module.factory('onUnauthorizedResponse', ($q, Private, autoLogout) => {
   const isUnauthenticated = Private(PathProvider).isUnauthenticated();
   function interceptorFactory(responseHandler) {
     return function interceptor(response) {

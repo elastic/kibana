@@ -14,17 +14,23 @@ export const PAGE_SUBTITLE = i18n.translate('xpack.siem.overview.pageSubtitle', 
   defaultMessage: 'Security Information & Event Management with the Elastic Stack',
 });
 
-export const NO_FILEBEAT_INDICES = i18n.translate(
-  'xpack.siem.overview.network.noFilebeatIndicies',
-  {
-    defaultMessage: "Looks like you don't have any Filebeat and Auditbeat indices.",
-  }
-);
-
-export const LETS_ADD_SOME = i18n.translate('xpack.siem.overview.letsAddSome.description', {
-  defaultMessage: "Let's add some!",
+export const PAGE_BADGE_LABEL = i18n.translate('xpack.siem.overview.pageBadgeLabel', {
+  defaultMessage: 'Beta',
 });
 
-export const SETUP_INSTRUCTIONS = i18n.translate('xpack.siem.overview.setupInstructions', {
-  defaultMessage: 'Setup Instructions',
+export const PAGE_BADGE_TOOLTIP = i18n.translate('xpack.siem.overview.pageBadgeTooltip', {
+  defaultMessage:
+    'SIEM is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
+});
+
+export const EMPTY_TITLE = i18n.translate('xpack.siem.overview.emptyTitle', {
+  defaultMessage: 'It looks like you don’t have any indices relevant to the SIEM application',
+});
+
+export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.overview.emptyActionPrimary', {
+  defaultMessage: 'View setup instructions',
+});
+
+export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.overview.emptyActionSecondary', {
+  defaultMessage: 'Go to documentation',
 });

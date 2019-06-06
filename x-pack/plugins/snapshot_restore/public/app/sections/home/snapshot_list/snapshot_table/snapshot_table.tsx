@@ -31,16 +31,15 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   repositoryFilter,
 }) => {
   const {
-    core: {
-      i18n: { FormattedMessage, translate },
-    },
+    core: { i18n },
   } = useAppDependencies();
+  const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
 
   const columns = [
     {
       field: 'snapshot',
-      name: translate('xpack.snapshotRestore.snapshotList.table.snapshotColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.snapshotColumnTitle', {
         defaultMessage: 'Snapshot',
       }),
       truncateText: true,
@@ -56,7 +55,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'repository',
-      name: translate('xpack.snapshotRestore.snapshotList.table.repositoryColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.repositoryColumnTitle', {
         defaultMessage: 'Repository',
       }),
       truncateText: true,
@@ -67,7 +66,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'startTimeInMillis',
-      name: translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
         defaultMessage: 'Date created',
       }),
       truncateText: true,
@@ -78,7 +77,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'durationInMillis',
-      name: translate('xpack.snapshotRestore.snapshotList.table.durationColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.durationColumnTitle', {
         defaultMessage: 'Duration',
       }),
       truncateText: true,
@@ -101,7 +100,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'indices',
-      name: translate('xpack.snapshotRestore.snapshotList.table.indicesColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.indicesColumnTitle', {
         defaultMessage: 'Indices',
       }),
       truncateText: true,
@@ -111,7 +110,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'shards.total',
-      name: translate('xpack.snapshotRestore.snapshotList.table.shardsColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.shardsColumnTitle', {
         defaultMessage: 'Shards',
       }),
       truncateText: true,
@@ -121,7 +120,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'shards.failed',
-      name: translate('xpack.snapshotRestore.snapshotList.table.failedShardsColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.failedShardsColumnTitle', {
         defaultMessage: 'Failed shards',
       }),
       truncateText: true,

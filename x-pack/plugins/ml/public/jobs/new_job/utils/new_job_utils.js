@@ -15,7 +15,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 
 // Provider for creating the items used for searching and job creation.
 // Uses the $route object to retrieve the indexPattern and savedSearch from the url
-export function SearchItemsProvider(Private, $route, config) {
+export function SearchItemsProvider($route, config) {
 
   function createSearchItems() {
     let indexPattern = $route.current.locals.indexPattern;

@@ -22,7 +22,8 @@ export async function fetch(setup: Setup, serviceName: string) {
   const { start, end, uiFiltersES, client, config } = setup;
 
   const aggs = {
-    threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } }
+    threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
+    threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } }
   };
 
   const params = {
@@ -35,9 +36,7 @@ export async function fetch(setup: Setup, serviceName: string) {
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [PROCESSOR_EVENT]: 'metric' } },
             { term: { [SERVICE_AGENT_NAME]: 'java' } },
-            {
-              range: rangeFilter(start, end)
-            },
+            { range: rangeFilter(start, end) },
             ...uiFiltersES
           ]
         }
@@ -52,5 +51,5 @@ export async function fetch(setup: Setup, serviceName: string) {
     }
   };
 
-  return client<void, MetricsAggs<ThreadCountMetrics>>('search', params);
+  return client.search<void, MetricsAggs<ThreadCountMetrics>>(params);
 }

@@ -62,14 +62,14 @@ export class ApmCpuUtilizationMetric extends ApmMetric {
       bucketSizeInSeconds
     ) => {
       if (metricDeriv) {
-        const { normalized_value: metricDerivNormalizedValue } = metricDeriv;
+        const { value: metricDerivValue } = metricDeriv;
         const bucketSizeInMillis = bucketSizeInSeconds * 1000;
 
         if (
-          metricDerivNormalizedValue >= 0 &&
-          metricDerivNormalizedValue !== null
+          metricDerivValue >= 0 &&
+          metricDerivValue !== null
         ) {
-          return metricDerivNormalizedValue / bucketSizeInMillis * 100;
+          return metricDerivValue / bucketSizeInMillis * 100;
         }
       }
       return null;

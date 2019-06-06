@@ -55,7 +55,7 @@ export function getSplits(resp, panel, series, meta) {
         bucket.id = `${series.id}:${filter.id}`;
         bucket.key = filter.id;
         bucket.color = filter.color;
-        bucket.label = filter.label || filter.filter || '*';
+        bucket.label = filter.label || filter.filter.query || '*';
         bucket.meta = meta;
         return bucket;
       });

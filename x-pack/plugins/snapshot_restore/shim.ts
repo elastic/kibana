@@ -29,6 +29,7 @@ export interface Plugins {
     };
   };
   xpack_main: any;
+  elasticsearch: any;
 }
 
 export function createShim(
@@ -52,6 +53,7 @@ export function createShim(
         },
       },
       xpack_main: server.plugins.xpack_main,
+      elasticsearch: server.plugins.elasticsearch,
     },
   };
 }

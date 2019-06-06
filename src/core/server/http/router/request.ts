@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Url } from 'url';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
@@ -70,6 +71,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
 
   public readonly headers: Headers;
   public readonly path: string;
+  public readonly url: Url;
 
   constructor(
     private readonly request: Request,
@@ -79,6 +81,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   ) {
     this.headers = request.headers;
     this.path = request.path;
+    this.url = request.url;
   }
 
   public getFilteredHeaders(headersToKeep: string[]) {

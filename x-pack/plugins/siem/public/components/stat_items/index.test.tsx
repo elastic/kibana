@@ -9,8 +9,8 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { StatItemsComponent, StatItemsProps } from '.';
-import { BarChart } from './barchart';
-import { AreaChart } from './areachart';
+import { BarChart } from '../charts/barchart';
+import { AreaChart } from '../charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 describe('Stat Items', () => {
