@@ -18,12 +18,15 @@
  */
 // @ts-check
 
-
 // @ts-ignore
 import { SearchSourceProvider } from 'ui/courier';
-import moment from 'moment';
-
 import { reverseSortDirection } from './utils/sorting';
+import {
+  extractNanoSeconds,
+  convertIsoToNanosAsStr,
+  convertIsoToMillis,
+  convertTimeValueToIso
+} from './utils/date_conversion';
 
 /**
  * @typedef {Object} SearchResult
@@ -42,68 +45,14 @@ import { reverseSortDirection } from './utils/sorting';
  * @typedef {'asc' | 'desc'} SortDirection
  */
 
+/**
+ * @typedef {'successors' |'predecessors'} SurroundingDocType
+ */
+
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
 // look from 1 day up to 10000 days into the past and future
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS);
-
-/**
- * extract nanoseconds if available in ISO timestamp
- * returns the nanos like this:
- * 9ns -> 000000009
- * 10000ns -> 0000010000
- * @param {string} timeFieldValue
- * @returns {string}
- */
-function extractNanoSeconds(timeFieldValue = '') {
-  const fractionSeconds = timeFieldValue
-    .split('.')[1]
-    .replace('Z', '');
-  return (fractionSeconds.length !== 9)
-    ? fractionSeconds.padEnd(9, '0')
-    : fractionSeconds;
-}
-
-function convertIsoToNanosAsStr(isoValue) {
-  const nanos = extractNanoSeconds(isoValue);
-  const millis = convertIsoToMillis(isoValue);
-  return `${millis}${nanos.substr(3, 6)}`;
-}
-
-/**
- * convert an iso formatted string to number of milliseconds since
- * 1970-01-01T00:00:00.000Z
- * @param {string} isoValue
- * @returns {number}
- */
-function convertIsoToMillis(isoValue) {
-  const date = new Date(isoValue);
-  return date.getTime();
-}
-/**
- * the given time value in milliseconds is converted to a ISO formatted string
- * if nanosValue is provided, the given value replaces the fractional seconds part
- * of the formated string since moment.js doesn't support formatting timestamps
- * with a higher precision then microseconds
- * The browser rounds date nanos values:
- * 2019-09-18T06:50:12.999999999 -> browser rounds to 1568789413000000000
- * 2019-09-18T06:50:59.999999999 -> browser rounds to 1568789460000000000
- * 2017-12-31T23:59:59.999999999 -> browser rounds 1514761199999999999 to 1514761200000000000
- * @param {number} timeValueMillis
- * @param {string} nanosValue
- */
-function convertTimeValueToIso(timeValueMillis, nanosValue) {
-  if(!timeValueMillis) {
-    return null;
-  }
-  const isoString = moment(timeValueMillis).toISOString();
-  if(!isoString) {
-    return null;
-  } else if(nanosValue !== '') {
-    return `${isoString.substring(0, isoString.length - 4)}${nanosValue}Z`;
-  }
-  return isoString;
-}
 
 function fetchContextProvider(indexPatterns, Private) {
   /**
@@ -112,16 +61,17 @@ function fetchContextProvider(indexPatterns, Private) {
   const SearchSource = Private(SearchSourceProvider);
 
   return {
-    // @ts-ignore
+    // @ts-ignore / for testing
     fetchPredecessors: (...args) => fetchSurroundingDocs('predecessors', ...args),
-    // @ts-ignore
+    // @ts-ignore / for testing
     fetchSuccessors: (...args) => fetchSurroundingDocs('successors', ...args),
+    fetchSurroundingDocs,
   };
 
   /**
    * Fetch successor or predecessor documents of a given anchor document
    *
-   * @param {string} type - `successors` or `predecessors`
+   * @param {SurroundingDocType} type - `successors` or `predecessors`
    * @param {string} indexPatternId
    * @param {string} timeFieldName - name of the timefield, that's sorted on
    * @param {SortDirection} timeFieldSortDir - direction of sorting
@@ -151,7 +101,9 @@ function fetchContextProvider(indexPatterns, Private) {
     const nanoSeconds = indexPattern.isTimeNanosBased() ? extractNanoSeconds(timeFieldIsoValue) : '';
     const timeValueMillis = nanoSeconds !== '' ? convertIsoToMillis(timeFieldIsoValue) : timeFieldNumValue;
 
-    const offsetSign = (sortDir === 'desc') ? 1 : -1;
+    const offsetSign = (timeFieldSortDir === 'asc' && type === 'successors' || timeFieldSortDir === 'desc' && type === 'predecessors')
+      ? 1
+      : -1;
 
     // ending with `null` opens the last interval
     const intervals = asPairs([...LOOKUP_OFFSETS.map(offset => timeValueMillis + offset * offsetSign), null]);
