@@ -95,4 +95,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   }
 }
 
+/**
+ * Returns underlying Hapi Request object for KibanaRequest
+ * @internal
+ */
 export const toRawRequest = (request: KibanaRequest) => request[requestSymbol];
