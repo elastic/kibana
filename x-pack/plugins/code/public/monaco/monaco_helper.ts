@@ -68,6 +68,7 @@ export class MonacoHelper {
           scrollBeyondLastLine: false,
           renderIndentGuides: false,
           automaticLayout: false,
+          lineDecorationsWidth: 16,
         },
         {
           textModelService: new TextModelResolverService(monaco),

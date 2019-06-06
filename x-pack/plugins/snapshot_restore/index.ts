@@ -31,7 +31,7 @@ export function snapshotRestore(kibana: any) {
       plugins.license.registerLicenseChecker(
         server,
         PLUGIN.ID,
-        PLUGIN.getI18nName(i18n.translate),
+        PLUGIN.getI18nName(i18n),
         PLUGIN.MINIMUM_LICENSE_REQUIRED
       );
     },
