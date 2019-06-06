@@ -13,12 +13,20 @@ case "$JOB" in
 kibana-intake)
   ./test/scripts/jenkins_unit.sh
   ;;
+kibana-ciGroupVisual*)
+  export CI_GROUP="${JOB##kibana-ciGroupVisual}"
+  ./test/scripts/jenkins_ci_group.sh
+  ;;
 kibana-ciGroup*)
   export CI_GROUP="${JOB##kibana-ciGroup}"
   ./test/scripts/jenkins_ci_group.sh
   ;;
 x-pack-intake)
   ./test/scripts/jenkins_xpack.sh
+  ;;
+x-pack-ciGroupVisual*)
+  export CI_GROUP="${JOB##x-pack-ciGroupVisual}"
+  ./test/scripts/jenkins_xpack_ci_group.sh
   ;;
 x-pack-ciGroup*)
   export CI_GROUP="${JOB##x-pack-ciGroup}"

@@ -38,7 +38,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const visualTesting = getService('visualTesting');
   const PageObjects = getPageObjects(['common', 'console']);
 
-  describe('visual console app', function describeIndexTests() {
+  describe('console app', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');

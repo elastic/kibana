@@ -98,7 +98,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     });
 
     describe('visual using current data', function () {
-      this.tags('ciGroup100');
+      this.tags('ciGroupVisual100');
       before(loadCurrentData);
       after(unloadCurrentData);
 
