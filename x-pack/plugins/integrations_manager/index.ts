@@ -13,7 +13,7 @@ import {
   Server,
 } from './common/types';
 import { Plugin } from './server/plugin';
-import { ID } from './common/constants';
+import { ID, REQUIRED_PLUGINS } from './common/constants';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 
 const ICON = 'merge';
@@ -24,7 +24,7 @@ const pluginTitle = i18n.translate('xpack.integrationsManager.pluginTitle', {
 
 export const integrationsManager: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: REQUIRED_PLUGINS,
     id: ID,
     configPrefix: 'xpack.integrationsManager',
     publicDir: resolve(__dirname, 'public'),

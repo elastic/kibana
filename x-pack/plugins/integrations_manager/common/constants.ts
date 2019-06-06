@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import manifest from '../kibana.json';
+
 export const ID = manifest.id;
+export const REQUIRED_PLUGINS = manifest.requiredPlugins;
+
 export const SAVED_OBJECT_TYPE = 'integrations-manager';
 export const API_ROOT = `/api/${ID}`;
 export const API_INTEGRATIONS_LIST = `${API_ROOT}/list`;
