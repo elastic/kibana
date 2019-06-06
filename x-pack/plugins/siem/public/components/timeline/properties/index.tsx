@@ -59,6 +59,7 @@ const DescriptionPopoverMenuContainer = styled.div`
 `;
 
 const SettingsIcon = styled(EuiIcon)`
+  margin-left: 4px;
   cursor: pointer;
 `;
 
