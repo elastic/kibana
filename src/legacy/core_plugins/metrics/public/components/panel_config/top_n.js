@@ -43,6 +43,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UIRestrictionsContext } from '../../contexts/ui_restriction_context';
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+const { QueryBarInput } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
 
 export class TopNPanelConfig extends Component {
   constructor(props) {
@@ -65,7 +70,7 @@ export class TopNPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { drilldown_url: '', filter: '' };
+    const defaults = { drilldown_url: '', filter: { query: '', language: getDefaultQueryLanguage() } };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
     const handleTextChange = createTextHandler(this.props.onChange);
@@ -142,10 +147,15 @@ export class TopNPanelConfig extends Component {
                   }
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBarInput
+                    query={{
+                      language: model.filter.language ? model.filter.language : getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    appName={'VisEditor'}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

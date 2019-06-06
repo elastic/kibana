@@ -6,7 +6,8 @@
 
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
-import { Datatable, ContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -15,7 +16,7 @@ interface Arguments {
 
 type Context = string | boolean | number | null;
 
-export function asFn(): ContextFunction<'as', Context, Arguments, Datatable> {
+export function asFn(): ExpressionFunction<'as', Context, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().as;
 
   return {

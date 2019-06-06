@@ -173,3 +173,24 @@ export const getRowItemOverflow = (
     </>
   );
 };
+
+export const OverflowField = React.memo<{
+  value: string;
+  showToolTip?: boolean;
+  overflowLength?: number;
+}>(({ value, showToolTip = true, overflowLength = 50 }) => (
+  <span>
+    {showToolTip ? (
+      <EuiToolTip data-test-subj={'message-tooltip'} content={'message'}>
+        <>{value.substring(0, overflowLength)}</>
+      </EuiToolTip>
+    ) : (
+      <>{value.substring(0, overflowLength)}</>
+    )}
+    {value.length > overflowLength && (
+      <EuiToolTip content={value}>
+        <MoreRowItems type="boxesHorizontal" />
+      </EuiToolTip>
+    )}
+  </span>
+));

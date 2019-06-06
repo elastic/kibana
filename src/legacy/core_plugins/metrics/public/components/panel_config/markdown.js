@@ -23,7 +23,6 @@ import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import 'brace/mode/less';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { createTextHandler } from '../lib/create_text_handler';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
 import { MarkdownEditor } from '../markdown_editor';
@@ -39,7 +38,6 @@ import {
   EuiFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
   EuiTitle,
   EuiHorizontalRule,
   EuiCodeEditor,
@@ -47,6 +45,11 @@ import {
 const lessC = less(window, { env: 'production' });
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { UIRestrictionsContext } from '../../contexts/ui_restriction_context';
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+const { QueryBarInput } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
 
 class MarkdownPanelConfigUi extends Component {
   constructor(props) {
@@ -74,11 +77,10 @@ class MarkdownPanelConfigUi extends Component {
   }
 
   render() {
-    const defaults = { filter: '' };
+    const defaults = { filter: { query: '', language: getDefaultQueryLanguage() } };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const handleTextChange = createTextHandler(this.props.onChange);
     const { intl } = this.props;
 
     const htmlId = htmlIdGenerator();
@@ -159,10 +161,15 @@ class MarkdownPanelConfigUi extends Component {
                   }
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBarInput
+                    query={{
+                      language: model.filter.language ? model.filter.language : getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    appName={'VisEditor'}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
