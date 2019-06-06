@@ -104,4 +104,6 @@ export function VisualizeListingController($injector, createNewVis) {
       defaultMessage: 'Visualize',
     })
   }]);
+
+  this.listingLimit = config.get('savedObjects:listingLimit');
 }
