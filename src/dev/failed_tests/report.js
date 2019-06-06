@@ -84,7 +84,7 @@ const filterFailures = createMapStream((testSuite) => {
 
 
       if (isLikelyIrrelevant(failureCase)) {
-        console.log(`Ingoring likely irrelevant failure: ${failureCase.classname} - ${failureCase.name}\n${indent(failureCase.failure)}`);
+        console.log(`Ignoring likely irrelevant failure: ${failureCase.classname} - ${failureCase.name}\n${indent(failureCase.failure)}`);
         continue;
       }
 
