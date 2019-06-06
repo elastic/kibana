@@ -11,4 +11,11 @@ export const documentationLinks = {
   code: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code.html`,
   codeIntelligence: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code.html`,
   gitFormat: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/code.html`,
+  codeInstallLangServer: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-install-language-server.html`,
+  codeGettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-getting-started.html`,
+  codeRepoManagement: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-repo-management.html`,
+  codeSearch: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-search.html`,
+  codeOtherFeatures: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-other-navigation-features.html`,
+  semanticNavigation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-semantic-code-navigation.html`,
+  kibanaRoleManagement: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/_kibana_role_management.html`,
 };

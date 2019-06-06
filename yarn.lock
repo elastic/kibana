@@ -3376,10 +3376,10 @@
   resolved "https://registry.yarnpkg.com/@types/delete-empty/-/delete-empty-2.0.0.tgz#1647ae9e68f708a6ba778531af667ec55bc61964"
   integrity sha512-sq+kwx8zA9BSugT9N+Jr8/uWjbHMZ+N/meJEzRyT3gmLq/WMtx/iSIpvdpmBUi/cvXl6Kzpvve8G2ESkabFwmg==
 
-"@types/elasticsearch@^5.0.30":
-  version "5.0.30"
-  resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.30.tgz#3c52f7119e3a20a47e2feb8e2b4cc54030a54e23"
-  integrity sha512-swxiNcLOtnHhJhAE5HcUL3WsKLHr8rEQ+fwpaJ0x4dfEE3oK2kGUoyz4wCcQfvulcMm2lShyxZ+2E4BQJzsAlg==
+"@types/elasticsearch@^5.0.33":
+  version "5.0.33"
+  resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.33.tgz#b0fd37dc674f498223b6d68c313bdfd71f4d812b"
+  integrity sha512-n/g9pqJEpE4fyUE8VvHNGtl7E2Wv8TCroNwfgAeJKRV4ghDENahtrAo1KMsFNIejBD2gDAlEUa4CM4oEEd8p9Q==
 
 "@types/enzyme@^3.1.12":
   version "3.1.18"
@@ -3624,6 +3624,11 @@
   integrity sha512-XENN3YzEB8D6TiUww0O8SRznzy1v+77lH7UmuN54xq/IHIsyWjWOzZuFFTtoiRuaE782uAoRwBe/wwow+vQXZw==
   dependencies:
     "@types/node" "*"
+
+"@types/license-checker@15.0.0":
+  version "15.0.0"
+  resolved "https://registry.yarnpkg.com/@types/license-checker/-/license-checker-15.0.0.tgz#685d69e2cf61ffd862320434601f51c85e28bba1"
+  integrity sha512-dHZdn+VxvPGwKyKUlqi6Dj/t3Q4KFmbmPpsCOwagytr8P98jmz/nXzyxzz9wbfgpw72mVMx7PMlR/PT0xNsF7A==
 
 "@types/listr@^0.14.0":
   version "0.14.0"
@@ -10310,10 +10315,10 @@ download@^5.0.3:
     mkdirp "^0.5.1"
     pify "^2.3.0"
 
-dragselect@1.12.2:
-  version "1.12.2"
-  resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-1.12.2.tgz#255e770cf78241e96b161715b898b5d32e8d6f52"
-  integrity sha512-B+0Zxws7uvufI6oQKTtTfKdK1lh2NY1NFlDOa2epvIlH1BujoGjRY1alHjSNNYBSgVKK3vP1TrQ1hfLY96lmlg==
+dragselect@1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-1.8.1.tgz#63f71a6f980f710c87e28b328e175b7afc9e162b"
+  integrity sha512-4YbJCcS6zwK8vMX2GiIX3tUrXFSo9a6xmV2z66EIJ8nj+iMHP1o4j0PeFdf5zjfhqVZJi+6zuVKPZInnrTLMbw==
 
 dragula@3.7.2:
   version "3.7.2"
@@ -26639,10 +26644,20 @@ typescript-fsa@^2.0.0, typescript-fsa@^2.5.0:
   resolved "https://registry.yarnpkg.com/typescript-fsa/-/typescript-fsa-2.5.0.tgz#1baec01b5e8f5f34c322679d1327016e9e294faf"
   integrity sha1-G67AG16PXzTDImedEycBbp4pT68=
 
-typescript@^3.3.3333, typescript@~3.0.3, typescript@~3.3.3333, typescript@~3.4.3:
+typescript@^3.3.3333, typescript@~3.3.3333:
   version "3.3.3333"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.3.3333.tgz#171b2c5af66c59e9431199117a3bcadc66fdcfd6"
   integrity sha512-JjSKsAfuHBE/fB2oZ8NxtRTk5iGcg6hkYXMnZ3Wc+b2RSqejEqTaem11mHASMnFilHrax3sLK0GDzcJrekZYLw==
+
+typescript@~3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.3.tgz#4853b3e275ecdaa27f78fda46dc273a7eb7fc1c8"
+  integrity sha512-kk80vLW9iGtjMnIv11qyxLqZm20UklzuR2tL0QAnDIygIUIemcZMxlMWudl9OOt76H3ntVzcTiddQ1/pAAJMYg==
+
+typescript@~3.4.3:
+  version "3.4.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.4.5.tgz#2d2618d10bb566572b8d7aad5180d84257d70a99"
+  integrity sha512-YycBxUb49UUhdNMU5aJ7z5Ej2XGmaIBL0x34vZ82fn3hGvD+bgrMrVDpatgz2f7YxUMJxMkbWxJZeAvDxVe7Vw==
 
 typings-tester@^0.3.2:
   version "0.3.2"
