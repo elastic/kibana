@@ -14,7 +14,6 @@ import { niceTimeFormatByDay } from '@elastic/charts/dist/utils/data/formatters'
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import moment from 'moment';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
@@ -39,7 +38,6 @@ interface Props {
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
   onTimeChange: (start: string, end: string) => void;
-  derivedIndexPattern: StaticIndexPattern;
 }
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
@@ -55,7 +53,6 @@ export const MetricsExplorerChart = injectI18n(
     width = '100%',
     timeRange,
     onTimeChange,
-    derivedIndexPattern,
   }: Props) => {
     const { metrics } = options;
     const handleTimeChange = (from: number, to: number) => {
@@ -89,7 +86,6 @@ export const MetricsExplorerChart = injectI18n(
                 series={series}
                 source={source}
                 timeRange={timeRange}
-                derivedIndexPattern={derivedIndexPattern}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

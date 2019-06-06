@@ -11,7 +11,6 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
@@ -27,11 +26,10 @@ interface Props {
   series: MetricsExplorerSeries;
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
-  derivedIndexPattern: StaticIndexPattern;
 }
 
 export const MetricsExplorerChartContextMenu = injectI18n(
-  ({ intl, onFilter, options, series, source, timeRange, derivedIndexPattern }: Props) => {
+  ({ intl, onFilter, options, series, source, timeRange }: Props) => {
     const [isPopoverOpen, setPopoverState] = useState(false);
     const supportFiltering = options.groupBy != null && onFilter != null;
     const handleFilter = useCallback(
@@ -46,7 +44,7 @@ export const MetricsExplorerChartContextMenu = injectI18n(
       [supportFiltering, options.groupBy, series.id, onFilter]
     );
 
-    const tsvbUrl = createTSVBLink(source, options, series, timeRange, derivedIndexPattern);
+    const tsvbUrl = createTSVBLink(source, options, series, timeRange);
 
     // Only display the "Add Filter" option if it's supported
     const filterByItem = supportFiltering

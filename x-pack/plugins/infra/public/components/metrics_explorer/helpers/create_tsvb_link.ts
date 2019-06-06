@@ -6,7 +6,6 @@
 
 import { encode } from 'rison-node';
 import uuid from 'uuid';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { colorTransformer, MetricsExplorerColor } from '../../../../common/color_palette';
 import {
   MetricsExplorerSeries,
@@ -99,8 +98,7 @@ export const createTSVBLink = (
   source: SourceQuery.Query['source']['configuration'] | undefined,
   options: MetricsExplorerOptions,
   series: MetricsExplorerSeries,
-  timeRange: MetricsExplorerTimeOptions,
-  derivedIndexPattern: StaticIndexPattern
+  timeRange: MetricsExplorerTimeOptions
 ) => {
   const appState = {
     filters: [],
