@@ -45,6 +45,7 @@ export class FilterManager {
   indexPatterns: any;
   filters: Filter[] = [];
   updated$: Subject<any> = new Subject();
+  fetch$: Subject<any> = new Subject();
 
   constructor(indexPatterns: any, filterState: FilterStateManager) {
     this.indexPatterns = indexPatterns;
@@ -78,6 +79,8 @@ export class FilterManager {
   }
 
   private shouldFetch(newFilters: Filter[]) {
+    // This is legacy optimization logic.
+    // TODO: What it does is - ----------
     return !onlyDisabled(newFilters, this.filters) && !onlyStateChanged(newFilters, this.filters);
   }
 
@@ -86,16 +89,6 @@ export class FilterManager {
     // uniqFilters will throw out duplicates from the back of the array,
     // but we want newer filters to overwrite previously created filters.
     return uniqFilters(newFilters.concat(oldFilters));
-  }
-
-  private emitUpdateIfChanged(newFilters: Filter[]) {
-    // This is an optimization
-    const shouldFetch = this.shouldFetch(newFilters);
-    if (this.filtersUpdated(newFilters)) {
-      this.updated$.next({
-        shouldFetch,
-      });
-    }
   }
 
   private static partitionFilters(filters: Filter[]): PartitionedFilters {
@@ -115,9 +108,10 @@ export class FilterManager {
     this.filters = newFilters;
     if (filtersUpdated) {
       this.filterState.updateAppState(FilterManager.partitionFilters(newFilters));
-      this.updated$.next({
-        shouldFetch: this.shouldFetch(newFilters),
-      });
+      this.updated$.next();
+      if (this.shouldFetch(newFilters)) {
+        this.fetch$.next();
+      }
     }
   }
 
@@ -143,6 +137,10 @@ export class FilterManager {
 
   public getUpdates$() {
     return this.updated$.asObservable();
+  }
+
+  public getFetches$() {
+    return this.fetch$.asObservable();
   }
 
   /* Setters */

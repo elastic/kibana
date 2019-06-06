@@ -17,34 +17,16 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
-
 import { FilterManager } from './new_filter_manager';
 import { FilterStateManager } from './filter_state_manager';
 
 export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalState) {
-  const queryFilter = {};
-
-  const update$ = new Subject();
-  const fetch$ = new Subject();
-
   const filterStateManager = new FilterStateManager(globalState, getAppState);
   const filterManager = new FilterManager(indexPatterns, filterStateManager);
-  filterManager.getUpdates$().subscribe((shouldFetch) => {
-    update$.next();
-    if (shouldFetch) {
-      fetch$.next();
-    }
-  });
 
-  queryFilter.getUpdates$ = function () {
-    return update$.asObservable();
-  };
-
-  queryFilter.getFetches$ = function () {
-    return fetch$.asObservable();
-  };
-
+  const queryFilter = {};
+  queryFilter.getUpdates$ = filterManager.getUpdates$.bind(filterManager);
+  queryFilter.getFetches$ = filterManager.getFetches$.bind(filterManager);
   queryFilter.getFilters = filterManager.getFilters.bind(filterManager);
   queryFilter.getAppFilters = filterManager.getAppFilters.bind(filterManager);
   queryFilter.getGlobalFilters = filterManager.getGlobalFilters.bind(filterManager);
