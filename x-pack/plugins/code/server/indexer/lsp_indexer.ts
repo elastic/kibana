@@ -31,7 +31,13 @@ import { ALL_RESERVED, DocumentIndexName, ReferenceIndexName, SymbolIndexName } 
 
 export class LspIndexer extends AbstractIndexer {
   protected type: string = 'lsp';
-  protected batchIndexHelper: BatchIndexHelper;
+  // Batch index helper for symbols/references
+  protected lspBatchIndexHelper: BatchIndexHelper;
+  // Batch index helper for documents
+  protected docBatchIndexHelper: BatchIndexHelper;
+
+  private LSP_BATCH_INDEX_SIZE = 1000;
+  private DOC_BATCH_INDEX_SIZE = 50;
 
   constructor(
     protected readonly repoUri: RepositoryUri,
@@ -43,7 +49,8 @@ export class LspIndexer extends AbstractIndexer {
   ) {
     super(repoUri, revision, client, log);
 
-    this.batchIndexHelper = new BatchIndexHelper(client, log);
+    this.lspBatchIndexHelper = new BatchIndexHelper(client, log, this.LSP_BATCH_INDEX_SIZE);
+    this.docBatchIndexHelper = new BatchIndexHelper(client, log, this.DOC_BATCH_INDEX_SIZE);
   }
 
   public async start(progressReporter?: ProgressReporter, checkpointReq?: LspIndexRequest) {
@@ -52,13 +59,15 @@ export class LspIndexer extends AbstractIndexer {
     } finally {
       if (!this.isCancelled()) {
         // Flush all the index request still in the cache for bulk index.
-        this.batchIndexHelper.flush();
+        this.lspBatchIndexHelper.flush();
+        this.docBatchIndexHelper.flush();
       }
     }
   }
 
   public cancel() {
-    this.batchIndexHelper.cancel();
+    this.lspBatchIndexHelper.cancel();
+    this.docBatchIndexHelper.cancel();
     super.cancel();
   }
 
@@ -218,13 +227,13 @@ export class LspIndexer extends AbstractIndexer {
         if (response && response.result && response.result.length > 0 && response.result[0]) {
           const { symbols, references } = response.result[0];
           for (const symbol of symbols) {
-            await this.batchIndexHelper.index(SymbolIndexName(repoUri), symbol);
+            await this.lspBatchIndexHelper.index(SymbolIndexName(repoUri), symbol);
             symbolNames.add(symbol.symbolInformation.name);
           }
           stats.set(IndexStatsKey.Symbol, symbols.length);
 
           for (const ref of references) {
-            await this.batchIndexHelper.index(ReferenceIndexName(repoUri), ref);
+            await this.lspBatchIndexHelper.index(ReferenceIndexName(repoUri), ref);
           }
           stats.set(IndexStatsKey.Reference, references.length);
         } else {
@@ -251,7 +260,7 @@ export class LspIndexer extends AbstractIndexer {
       language,
       qnames: Array.from(symbolNames),
     };
-    await this.batchIndexHelper.index(DocumentIndexName(repoUri), body);
+    await this.docBatchIndexHelper.index(DocumentIndexName(repoUri), body);
     stats.set(IndexStatsKey.File, 1);
     return stats;
   }
