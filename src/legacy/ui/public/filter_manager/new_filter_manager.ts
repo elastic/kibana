@@ -38,21 +38,38 @@ import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
 import { PartitionedFilters } from './partitioned_filters';
-
-interface DelayedChangeNotification {
-  update: (() => void) | undefined;
-}
+import { FilterStateManager } from './filter_state_manager';
 
 export class FilterManager {
+  filterState: FilterStateManager;
   indexPatterns: any;
   filters: Filter[] = [];
   updated$: Subject<any> = new Subject();
 
-  constructor(indexPatterns: any, partitionedFilters: PartitionedFilters) {
+  constructor(indexPatterns: any, filterState: FilterStateManager) {
     this.indexPatterns = indexPatterns;
-    this.filters = this.mergeFilters(
-      partitionedFilters.appFilters,
-      partitionedFilters.globalFilters
+    this.filterState = filterState;
+
+    this.watchFilterState();
+  }
+
+  private watchFilterState() {
+    this.filterState.getStateUpdated$().subscribe((partitionedFilters: PartitionedFilters) => {
+      if (!this.haveFiltersChanged(partitionedFilters)) return;
+
+      const newFilters = this.mergeFilters(
+        partitionedFilters.appFilters,
+        partitionedFilters.globalFilters
+      );
+
+      this.setFilters(newFilters);
+    });
+  }
+
+  private haveFiltersChanged(partitionedFilters: PartitionedFilters) {
+    return (
+      !_.isEqual(partitionedFilters.appFilters || [], this.getAppFilters()) ||
+      !_.isEqual(partitionedFilters.globalFilters || [], this.getGlobalFilters())
     );
   }
 
@@ -81,6 +98,31 @@ export class FilterManager {
     }
   }
 
+  private static partitionFilters(filters: Filter[]): PartitionedFilters {
+    const [globalFilters, appFilters] = _.partition(filters, filter => {
+      return filter.$state.store === FilterStateStore.GLOBAL_STATE;
+    });
+
+    return {
+      globalFilters,
+      appFilters,
+    };
+  }
+
+  private handleStateUpdate(newFilters: Filter[]) {
+    // This is where the angular update magic \ syncing diget happens
+    const filtersUpdated = this.filtersUpdated(newFilters);
+    this.filters = newFilters;
+    if (filtersUpdated) {
+      this.filterState.updateAppState(FilterManager.partitionFilters(newFilters));
+      this.updated$.next({
+        shouldFetch: this.shouldFetch(newFilters),
+      });
+    }
+  }
+
+  /* Getters */
+
   public getFilters() {
     return this.filters;
   }
@@ -96,25 +138,16 @@ export class FilterManager {
   }
 
   public getPartitionedFilters(): PartitionedFilters {
-    const [globalFilters, appFilters] = _.partition(this.filters, filter => {
-      return filter.$state.store === FilterStateStore.GLOBAL_STATE;
-    });
-
-    return {
-      globalFilters,
-      appFilters,
-    };
+    return FilterManager.partitionFilters(this.filters);
   }
 
   public getUpdates$() {
     return this.updated$.asObservable();
   }
 
-  public async addFilters(
-    filters: Filter[],
-    pinFilterStatus?: boolean,
-    emitChanged?: boolean
-  ): Promise<DelayedChangeNotification> {
+  /* Setters */
+
+  public async addFilters(filters: Filter[], pinFilterStatus?: boolean) {
     const { uiSettings } = getNewPlatform().setup.core;
     if (pinFilterStatus === undefined) {
       pinFilterStatus = uiSettings.get('filters:pinnedByDefault');
@@ -125,6 +158,7 @@ export class FilterManager {
     }
 
     // set the store of all filters
+    // TODO: is this necessary?
     _.map(filters, filter => {
       filter.$state = {
         store: pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
@@ -132,87 +166,24 @@ export class FilterManager {
     });
 
     const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, filters);
-
     const newFilters = this.mergeFilters(mappedFilters, this.filters);
-
-    let delayChangeNotification: DelayedChangeNotification = {
-      update: undefined,
-    };
-
-    if (emitChanged === false) {
-      const filtersUpdated = this.filtersUpdated(newFilters);
-      this.filters = newFilters;
-      if (filtersUpdated) {
-        delayChangeNotification = {
-          update: () => {
-            this.updated$.next();
-          },
-        };
-      }
-    } else {
-      this.emitUpdateIfChanged(newFilters);
-      this.filters = newFilters;
-    }
-
-    return delayChangeNotification;
+    this.handleStateUpdate(newFilters);
   }
 
-  public async setFilters(
-    newFilters: Filter[],
-    emitChanged?: boolean
-  ): Promise<DelayedChangeNotification> {
-    let delayChangeNotification: DelayedChangeNotification = {
-      update: undefined,
-    };
-
+  public async setFilters(newFilters: Filter[]) {
     const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, newFilters);
-
-    if (emitChanged === false) {
-      const filtersUpdated = this.filtersUpdated(mappedFilters);
-      this.filters = mappedFilters;
-      if (filtersUpdated) {
-        delayChangeNotification = {
-          update: () => {
-            this.updated$.next();
-          },
-        };
-      }
-    } else {
-      this.emitUpdateIfChanged(mappedFilters);
-      this.filters = mappedFilters;
-    }
-
-    return delayChangeNotification;
+    this.handleStateUpdate(mappedFilters);
   }
 
-  public removeFilter(filter: Filter, emitChanged?: boolean): DelayedChangeNotification {
-    let delayChangeNotification: DelayedChangeNotification = {
-      update: undefined,
-    };
-
+  public removeFilter(filter: Filter) {
     const filterIndex = _.findIndex(this.filters, item => {
       return _.isEqual(item.meta, filter.meta) && _.isEqual(item.query, filter.query);
     });
 
-    const newFilters = this.filters.slice(filterIndex, 1);
-
     if (filterIndex >= 0) {
-      if (emitChanged === false) {
-        const filtersUpdated = this.filtersUpdated(newFilters);
-        this.filters = newFilters;
-        if (filtersUpdated) {
-          delayChangeNotification = {
-            update: () => {
-              this.updated$.next();
-            },
-          };
-        }
-      } else {
-        this.emitUpdateIfChanged(newFilters);
-        this.filters = newFilters;
-      }
+      const newFilters = this.filters.slice(filterIndex, 1);
+      this.handleStateUpdate(newFilters);
     }
-    return delayChangeNotification;
   }
 
   public invertFilter(filter: Filter) {
@@ -223,12 +194,9 @@ export class FilterManager {
     this.setFilters([]);
   }
 
-  public async addFiltersAndChangeTimeFilter(
-    filters: Filter[],
-    emitChanged?: boolean
-  ): Promise<DelayedChangeNotification> {
+  public async addFiltersAndChangeTimeFilter(filters: Filter[]) {
     const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
     if (timeFilter) changeTimeFilter(timeFilter);
-    return this.addFilters(filters.filter(filter => filter !== timeFilter), undefined, emitChanged);
+    this.addFilters(filters.filter(filter => filter !== timeFilter));
   }
 }

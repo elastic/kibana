@@ -37,7 +37,7 @@ export class FilterStateManager {
 
   private watchFilterState() {
     // This is a temporary solution to remove rootscope.
-    // Moving forward, new filters will be explicitly pushed into the filter manager.
+    // Moving forward, state should provide observable subscriptions.
     setInterval(() => {
       const appState = this.getAppState();
       if (!appState || !this.globalState) return;
@@ -49,19 +49,21 @@ export class FilterStateManager {
     }, 50);
   }
 
+  private saveState() {
+    const appState = this.getAppState();
+    if (appState) appState.save();
+    this.globalState.save();
+  }
+
   public getStateUpdated$(): Observable<PartitionedFilters> {
     return this.stateUpdated$.asObservable();
   }
 
   public updateAppState(partitionedFilters: PartitionedFilters) {
+    // Update Angular state before saving State objects (which save it to URL)
     const appState = this.getAppState();
     appState.filters = partitionedFilters.appFilters;
     this.globalState.filters = partitionedFilters.globalFilters;
-  }
-
-  public saveState() {
-    const appState = this.getAppState();
-    if (appState) appState.save();
-    this.globalState.save();
+    this.saveState();
   }
 }

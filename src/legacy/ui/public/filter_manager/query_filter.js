@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { Subject } from 'rxjs';
 
 import { FilterManager } from './new_filter_manager';
@@ -26,24 +25,17 @@ import { FilterStateManager } from './filter_state_manager';
 export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalState) {
   const queryFilter = {};
 
-  let filterManager;
-  let filterStateUpdateSubscription$;
-
-  const filterStateManager = new FilterStateManager(globalState, getAppState);
-  filterStateManager.getStateUpdated$().subscribe((partitionedFilters) => {
-    const filtersChanged = (!filterManager ||
-      !_.isEqual(partitionedFilters.appFilters || [], filterManager.getAppFilters()) ||
-      !_.isEqual(partitionedFilters.globalFilters || [], filterManager.getGlobalFilters()));
-
-    if (!filtersChanged) return;
-
-    setupFilterManager(partitionedFilters);
-  });
-
-  filterStateManager.watchFilterState();
-
   const update$ = new Subject();
   const fetch$ = new Subject();
+
+  const filterStateManager = new FilterStateManager(globalState, getAppState);
+  const filterManager = new FilterManager(indexPatterns, filterStateManager);
+  filterManager.getUpdates$().subscribe((shouldFetch) => {
+    update$.next();
+    if (shouldFetch) {
+      fetch$.next();
+    }
+  });
 
   queryFilter.getUpdates$ = function () {
     return update$.asObservable();
@@ -53,73 +45,15 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
     return fetch$.asObservable();
   };
 
-  queryFilter.getFilters = function () {
-    return filterManager ? filterManager.getFilters() : [];
-  };
-
-  queryFilter.getAppFilters = function () {
-    return filterManager ? filterManager.getAppFilters() : [];
-  };
-
-  queryFilter.getGlobalFilters = function () {
-    return filterManager ? filterManager.getGlobalFilters() : [];
-  };
-
-  queryFilter.addFilters = function (filters, addToGlobalState) {
-    return filterManager.addFilters(filters, addToGlobalState, false)
-      .then(function (delayedChangeUpdate) {
-        filterStateManager.updateAppState(filterManager.getPartitionedFilters());
-        delayedChangeUpdate.update && delayedChangeUpdate.update();
-      });
-  };
-
-  queryFilter.setFilters = filters => {
-    return filterManager.setFilters(filters, false)
-      .then(delayedChangeUpdate => {
-        filterStateManager.updateAppState(filterManager.getPartitionedFilters());
-        delayedChangeUpdate.update && delayedChangeUpdate.update();
-      });
-  };
-
-  queryFilter.removeFilter = function (matchFilter) {
-    const delayedChangeUpdate = filterManager.removeFilter(matchFilter, false);
-    filterStateManager.updateAppState(filterManager.getPartitionedFilters());
-    delayedChangeUpdate.update && delayedChangeUpdate.update();
-  };
-
-  queryFilter.removeAll = function () {
-    queryFilter.setFilters([]);
-  };
-
-  queryFilter.invertFilter = function (filter) {
-    return filterManager.invertFilter(filter);
-  };
-
-  queryFilter.addFiltersAndChangeTimeFilter = async filters => {
-    return filterManager.addFiltersAndChangeTimeFilter(filters, false)
-      .then(function (delayedChangeUpdate) {
-        filterStateManager.updateAppState(filterManager.getPartitionedFilters());
-        delayedChangeUpdate.update && delayedChangeUpdate.update();
-      });
-  };
+  queryFilter.getFilters = filterManager.getFilters.bind(filterManager);
+  queryFilter.getAppFilters = filterManager.getAppFilters.bind(filterManager);
+  queryFilter.getGlobalFilters = filterManager.getGlobalFilters.bind(filterManager);
+  queryFilter.addFilters = filterManager.addFilters.bind(filterManager);
+  queryFilter.setFilters = filterManager.setFilters.bind(filterManager);
+  queryFilter.removeFilter = filterManager.removeFilter.bind(filterManager);
+  queryFilter.invertFilter = filterManager.invertFilter.bind(filterManager);
+  queryFilter.addFiltersAndChangeTimeFilter = filterManager.addFiltersAndChangeTimeFilter.bind(filterManager);
+  queryFilter.removeAll = filterManager.removeAll.bind(filterManager);
 
   return queryFilter;
-
-  function setupFilterManager(partitionedFilters) {
-    if (filterStateUpdateSubscription$) {
-      filterStateUpdateSubscription$.unsubscribe();
-    }
-
-    filterManager = new FilterManager(indexPatterns, partitionedFilters);
-    update$.next();
-    fetch$.next();
-
-    filterStateUpdateSubscription$ = filterManager.getUpdates$().subscribe((shouldFetch) => {
-      filterStateManager.saveState();
-      update$.next();
-      if (shouldFetch) {
-        fetch$.next();
-      }
-    });
-  }
 }
