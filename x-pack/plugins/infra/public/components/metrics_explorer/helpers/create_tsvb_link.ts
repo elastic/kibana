@@ -20,7 +20,6 @@ import { metricToFormat } from './metric_to_format';
 import { InfraFormatterType } from '../../../lib/lib';
 import { SourceQuery } from '../../../graphql/types';
 import { createMetricLabel } from './create_metric_label';
-// import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
 export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {
   if (metric.aggregation === MetricsExplorerAggregation.rate) {
