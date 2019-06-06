@@ -26,8 +26,8 @@ const parentPipelineAggController = function ($scope) {
 
   $scope.$on('$destroy', function () {
     const lastBucket = _.findLast($scope.state.aggs, agg => agg.type && agg.type.type === 'buckets');
-    if ($scope.aggForm && $scope.aggForm.agg) {
-      $scope.aggForm.agg.$setValidity('bucket', true);
+    if ($scope.aggForm) {
+      $scope.aggForm.$setValidity('bucket', true);
     }
     if (lastBucket && lastBucket.error) {
       delete lastBucket.error;
