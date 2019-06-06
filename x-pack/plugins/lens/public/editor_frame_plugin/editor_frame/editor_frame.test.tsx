@@ -252,9 +252,6 @@ Object {
           state: updatedState,
         })
       );
-
-      // don't re-render datasource when visulization changes
-      expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(1);
     });
 
     it('should re-render data panel after state update', async () => {
