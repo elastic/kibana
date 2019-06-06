@@ -17,5 +17,12 @@
  * under the License.
  */
 
-export { SavedObjectsClient } from './saved_objects_client';
-export { SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './lib';
+export { SavedObjectsRepository, SavedObjectsRepositoryOptions } from './repository';
+export {
+  SavedObjectsClientWrapperFactory,
+  SavedObjectsClientWrapperOptions,
+  ScopedSavedObjectsClientProvider,
+} from './scoped_client_provider';
+
+import * as errors from './errors';
+export { errors };

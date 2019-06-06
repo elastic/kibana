@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { SavedObjectsClient } from '../service/saved_objects_client';
+import { SavedObjectsClientContract } from '../';
 import { injectNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
 
@@ -30,7 +30,7 @@ interface ObjectToExport {
 interface ExportObjectsOptions {
   types?: string[];
   objects?: ObjectToExport[];
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
   exportSizeLimit: number;
   includeReferencesDeep?: boolean;
 }
@@ -44,7 +44,7 @@ async function fetchObjectsToExport({
   objects?: ObjectToExport[];
   types?: string[];
   exportSizeLimit: number;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }) {
   if (objects) {
     if (objects.length > exportSizeLimit) {
