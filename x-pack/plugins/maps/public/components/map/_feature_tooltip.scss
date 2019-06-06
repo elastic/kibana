@@ -1,5 +1,22 @@
 
-.mapFeatureTooltip__filterButton,
-.mapFeatureTooltip__lineDescription {
+.mapFeatureTooltip__filterButton {
   display: inline;
+}
+
+.mapFeatureTooltip_table {
+  margin: $euiSizeS $euiSizeS;
+
+  td {
+    padding: $euiSizeXS;
+  }
+}
+
+.mapFeatureTooltip__propertyLabel {
+  max-width: $euiSizeXL * 3;
+  font-weight: $euiFontWeightSemiBold;
+}
+
+.mapFeatureTooltip__propertyValue {
+  display: inline;
+  max-width: $euiSizeXL * 5;
 }
