@@ -12,7 +12,17 @@ import { getFilteredQuery } from './get_filtered_query';
  * @param clauseToCheck an object that may be a status filter
  */
 const isStatusFilter = (clauseToCheck: any): boolean =>
-  !!(clauseToCheck.match && clauseToCheck.match['monitor.status']) || false;
+  !!(clauseToCheck.match && clauseToCheck.match['monitor.status']);
+
+/**
+ * This function will reduce an array of query clauses to a single boolean value indicating
+ * if the clause has a status filter, or not.
+ * @param clauseToCheck a list of filter clauses
+ */
+const hasNestedStatusFilter = (clauseToCheck: any[]): boolean =>
+  clauseToCheck
+    .map(childClause => isStatusFilter(childClause))
+    .reduce((prev, cur) => prev || cur, false);
 
 /**
  * Checks for a status filter object, or if the given parameter is an array with
@@ -22,18 +32,13 @@ const isStatusFilter = (clauseToCheck: any): boolean =>
  */
 const hasStatusFilter = (filterClause: any): boolean => {
   const mustClause = get<object | undefined>(filterClause, 'bool.must');
-  if (Array.isArray(mustClause)) {
-    return mustClause
-      .map(childClause => isStatusFilter(childClause))
-      .reduce((prev, cur) => prev || cur, false);
-  }
-
-  return isStatusFilter(filterClause);
+  return Array.isArray(mustClause)
+    ? hasNestedStatusFilter(mustClause)
+    : isStatusFilter(filterClause);
 };
 
 /**
- * This code will find and return the monitor.status query value from
- * the supplied object.
+ * Finds the monitor.status query value from the supplied object.
  * @param statusFilter the list of objects containing the status filter.
  * @example
  * // returns 'down'

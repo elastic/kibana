@@ -8,30 +8,28 @@ import { get, set } from 'lodash';
 import { QUERY } from '../../../common/constants';
 
 /**
- * Checks if a clause is attempting to match on the monitor.status field.
- * @param clause the POJO to test for a status filter
+ * Returns true if the given clause is not targeting a monitor's status.
+ * @param clause the object containing filter criteria
  */
-const identifyStatusClause = (clause: any) => !get(clause, ['match', 'monitor.status']);
+const isNotStatusClause = (clause: any) => !get(clause, ['match', 'monitor.status']);
 
 /**
- * Handles cases where the status filter is nested within a list of `must` or `should` clauses.
- * If the supplied value is not an array, it is simply returned as-is.
+ * This function identifies and filters cases where the status filter is nested within a list of `must` or `should` clauses.
+ * If the supplied value is not an array, the original query is returned.
  * @param query the query to filter
  */
-const removeNestedStatusQuery = (query: any) => {
-  if (Array.isArray(query)) {
-    return query.map((clauses: any) => {
-      if (clauses.bool && clauses.bool.must) {
-        clauses.bool.must = get<any[]>(clauses, 'bool.must', []).filter(identifyStatusClause);
-      }
-      if (clauses.bool && clauses.bool.should) {
-        clauses.bool.should = get<any[]>(clauses, 'bool.should', []).filter(identifyStatusClause);
-      }
-      return clauses;
-    });
-  }
-  return query;
-};
+const removeNestedStatusQuery = (query: any) =>
+  Array.isArray(query)
+    ? query.map((clauses: any) => {
+        if (clauses.bool && clauses.bool.must) {
+          clauses.bool.must = get<any[]>(clauses, 'bool.must', []).filter(isNotStatusClause);
+        }
+        if (clauses.bool && clauses.bool.should) {
+          clauses.bool.should = get<any[]>(clauses, 'bool.should', []).filter(isNotStatusClause);
+        }
+        return clauses;
+      })
+    : query;
 
 /**
  * The purpose of this function is to return a filter query without a clause
