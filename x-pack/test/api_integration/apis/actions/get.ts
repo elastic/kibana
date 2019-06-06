@@ -28,10 +28,10 @@ export default function getActionTests({ getService }: KibanaFunctionalTestDefau
             references: [],
             version: resp.body.version,
             attributes: {
-              actionTypeId: 'test',
+              actionTypeId: 'test.index-record',
               description: 'My action',
               actionTypeConfig: {
-                unencrypted: 'unencrypted text',
+                unencrypted: `This value shouldn't get encrypted`,
               },
             },
           });

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ES_ARCHIVER_ACTION_ID = '8978428d-6890-43f7-b4a6-e7a4064c33f7';
+export const ES_ARCHIVER_ACTION_ID = '9597aa29-5d74-485b-af1d-4b7fdfd079e4';

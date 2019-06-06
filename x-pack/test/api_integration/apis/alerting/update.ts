@@ -42,8 +42,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           alertTypeParams: {
-            server: '4.3.2.1',
-            threshold: 75,
+            foo: true,
           },
           interval: 12000,
           actions: [
@@ -52,7 +51,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
               id: ES_ARCHIVER_ACTION_ID,
               params: {
                 message:
-                  'UPDATED: The server {{context.server}} has a high CPU usage of {{state.lastCpuUsage}}% which is above the {{context.threshold}}% threshold',
+                  'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
               },
             },
           ],
@@ -62,8 +61,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
           expect(resp.body).to.eql({
             id: createdAlert.id,
             alertTypeParams: {
-              server: '4.3.2.1',
-              threshold: 75,
+              foo: true,
             },
             interval: 12000,
             actions: [
@@ -72,7 +70,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
                 id: ES_ARCHIVER_ACTION_ID,
                 params: {
                   message:
-                    'UPDATED: The server {{context.server}} has a high CPU usage of {{state.lastCpuUsage}}% which is above the {{context.threshold}}% threshold',
+                    'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
                 },
               },
             ],

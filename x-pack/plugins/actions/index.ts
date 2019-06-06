@@ -8,7 +8,7 @@ import { Root } from 'joi';
 import mappings from './mappings.json';
 import { init } from './server';
 
-export { ActionsPlugin, ActionsClient } from './server';
+export { ActionsPlugin, ActionsClient, ActionTypeExecutorOptions } from './server';
 
 export function actions(kibana: any) {
   return new kibana.Plugin({

@@ -46,7 +46,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
     it('decrypts attributes and joins on actionTypeConfig when firing', async () => {
       await supertest
-        .post(`/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7/fire`)
+        .post(`/api/action/9597aa29-5d74-485b-af1d-4b7fdfd079e4/fire`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

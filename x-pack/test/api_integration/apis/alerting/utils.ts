@@ -6,9 +6,11 @@
 
 import { ES_ARCHIVER_ACTION_ID } from './constants';
 
+const esTestIndexName = '.kibaka-alerting-test-data';
+
 export function getTestAlertData(attributeOverwrites = {}) {
   return {
-    alertTypeId: 'test-cpu-check',
+    alertTypeId: 'test.noop',
     interval: 10 * 1000,
     actions: [
       {
@@ -16,14 +18,48 @@ export function getTestAlertData(attributeOverwrites = {}) {
         id: ES_ARCHIVER_ACTION_ID,
         params: {
           message:
-            'The server {{context.server}} has a high CPU usage of {{state.lastCpuUsage}}% which is above the {{context.threshold}}% threshold',
+            'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
         },
       },
     ],
-    alertTypeParams: {
-      server: '1.2.3.4',
-      threshold: 80,
-    },
+    alertTypeParams: {},
     ...attributeOverwrites,
   };
+}
+
+export async function setupEsTestIndex(es: any) {
+  await es.indices.create({
+    index: esTestIndexName,
+    body: {
+      mappings: {
+        properties: {
+          source: {
+            type: 'keyword',
+          },
+          reference: {
+            type: 'keyword',
+          },
+          params: {
+            enabled: false,
+            type: 'object',
+          },
+          config: {
+            enabled: false,
+            type: 'object',
+          },
+          state: {
+            enabled: false,
+            type: 'object',
+          },
+        },
+      },
+    },
+  });
+  return {
+    name: esTestIndexName,
+  };
+}
+
+export async function destroyEsTestIndex(es: any) {
+  await es.indices.delete({ index: esTestIndexName });
 }

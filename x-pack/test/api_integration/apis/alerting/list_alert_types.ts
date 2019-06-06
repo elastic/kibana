@@ -17,12 +17,10 @@ export default function listAlertTypes({ getService }: KibanaFunctionalTestDefau
         .get('/api/alert/types')
         .expect(200)
         .then((resp: any) => {
-          const fixtureAlertType = resp.body.find(
-            (alertType: any) => alertType.id === 'test-cpu-check'
-          );
+          const fixtureAlertType = resp.body.find((alertType: any) => alertType.id === 'test.noop');
           expect(fixtureAlertType).to.eql({
-            id: 'test-cpu-check',
-            description: 'Check CPU Usage',
+            id: 'test.noop',
+            description: 'Test: Noop',
           });
         });
     });

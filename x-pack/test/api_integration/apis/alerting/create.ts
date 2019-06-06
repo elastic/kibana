@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { getTestAlertData } from './utils';
+import { getTestAlertData, setupEsTestIndex, destroyEsTestIndex } from './utils';
 import { ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
@@ -16,27 +16,12 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
   const es = getService('es');
   const retry = getService('retry');
 
-  const esTestIndexName = '.kibaka-index-action-data';
-
   describe('create', () => {
+    let esTestIndexName: string;
     const createdAlertIds: string[] = [];
 
     before(async () => {
-      await es.indices.create({
-        index: esTestIndexName,
-        body: {
-          mappings: {
-            properties: {
-              reference: {
-                type: 'keyword',
-              },
-              message: {
-                type: 'text',
-              },
-            },
-          },
-        },
-      });
+      ({ name: esTestIndexName } = await setupEsTestIndex(es));
       await esArchiver.load('actions/basic');
     });
     after(async () => {
@@ -49,7 +34,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
         })
       );
       await esArchiver.unload('actions/basic');
-      await es.indices.delete({ index: esTestIndexName });
+      await destroyEsTestIndex(es);
     });
 
     async function getScheduledTask(id: string) {
@@ -75,57 +60,46 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
                 id: ES_ARCHIVER_ACTION_ID,
                 params: {
                   message:
-                    'The server {{context.server}} has a high CPU usage of {{state.lastCpuUsage}}% which is above the {{context.threshold}}% threshold',
+                    'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
                 },
               },
             ],
-            alertTypeId: 'test-cpu-check',
-            alertTypeParams: {
-              server: '1.2.3.4',
-              threshold: 80,
-            },
+            alertTypeId: 'test.noop',
+            alertTypeParams: {},
             interval: 10000,
             scheduledTaskId: resp.body.scheduledTaskId,
           });
           expect(typeof resp.body.scheduledTaskId).to.be('string');
           const { _source: taskRecord } = await getScheduledTask(resp.body.scheduledTaskId);
           expect(taskRecord.type).to.eql('task');
-          expect(taskRecord.task.taskType).to.eql('alerting:test-cpu-check');
+          expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
           expect(JSON.parse(taskRecord.task.params)).to.eql({
             alertId: resp.body.id,
-          });
-          const state = JSON.parse(taskRecord.task.state);
-          expect(state).to.eql({
-            // Verify at least these attributes have values set
-            alertTypeState: state.alertTypeState,
-            scheduledRunAt: state.scheduledRunAt,
-            previousRange: {
-              from: state.previousRange.from,
-              to: state.previousRange.to,
-            },
-            alertInstances: state.alertInstances,
           });
         });
     });
 
-    it('should schedule task, run and fire actions', async () => {
+    it('should schedule task, run alert and fire actions', async () => {
       await supertest
         .post('/api/alert')
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
             interval: 100,
+            alertTypeId: 'test.always-firing',
+            alertTypeParams: {
+              index: esTestIndexName,
+              reference: 'create-test-1',
+            },
             actions: [
               {
                 group: 'default',
-                id: '2fe13e69-4561-420f-b61c-ce82a8a1a31f',
+                id: '9597aa29-5d74-485b-af1d-4b7fdfd079e4',
                 params: {
                   index: esTestIndexName,
-                  body: {
-                    reference: 'create-test-1',
-                    message:
-                      'The server {{context.server}} has a high CPU usage of {{state.lastCpuUsage}}% which is above the {{context.threshold}}% threshold',
-                  },
+                  reference: 'create-test-1',
+                  message:
+                    'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
                 },
               },
             ],
@@ -135,13 +109,18 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
         .then((resp: any) => {
           createdAlertIds.push(resp.body.id);
         });
-      const createdRecord = await retry.tryForTime(5000, async () => {
+      const alertTestRecord = await retry.tryForTime(5000, async () => {
         const searchResult = await es.search({
           index: esTestIndexName,
           body: {
             query: {
               bool: {
                 must: [
+                  {
+                    term: {
+                      source: 'alert:test.always-firing',
+                    },
+                  },
                   {
                     term: {
                       reference: 'create-test-1',
@@ -155,9 +134,52 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
         expect(searchResult.hits.total.value).to.eql(1);
         return searchResult.hits.hits[0];
       });
-      expect(createdRecord._source).to.eql({
+      expect(alertTestRecord._source).to.eql({
+        source: 'alert:test.always-firing',
         reference: 'create-test-1',
-        message: 'The server 1.2.3.4 has a high CPU usage of 100% which is above the 80% threshold',
+        state: {},
+        params: {
+          index: esTestIndexName,
+          reference: 'create-test-1',
+        },
+      });
+      const actionTestRecord = await retry.tryForTime(5000, async () => {
+        const searchResult = await es.search({
+          index: esTestIndexName,
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      source: 'action:test.index-record',
+                    },
+                  },
+                  {
+                    term: {
+                      reference: 'create-test-1',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        expect(searchResult.hits.total.value).to.eql(1);
+        return searchResult.hits.hits[0];
+      });
+      expect(actionTestRecord._source).to.eql({
+        config: {
+          encrypted: 'This value should be encrypted',
+          unencrypted: `This value shouldn't get encrypted`,
+        },
+        params: {
+          index: esTestIndexName,
+          reference: 'create-test-1',
+          message: 'instanceContextValue: true, instanceStateValue: true',
+        },
+        reference: 'create-test-1',
+        source: 'action:test.index-record',
       });
     });
   });

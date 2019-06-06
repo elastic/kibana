@@ -43,7 +43,7 @@ export default function createGetTests({ getService }: KibanaFunctionalTestDefau
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: alertId,
-            alertTypeId: 'test-cpu-check',
+            alertTypeId: 'test.noop',
             interval: 10000,
             actions: [
               {
@@ -51,14 +51,11 @@ export default function createGetTests({ getService }: KibanaFunctionalTestDefau
                 id: ES_ARCHIVER_ACTION_ID,
                 params: {
                   message:
-                    'The server {{context.server}} has a high CPU usage of {{state.lastCpuUsage}}% which is above the {{context.threshold}}% threshold',
+                    'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
                 },
               },
             ],
-            alertTypeParams: {
-              server: '1.2.3.4',
-              threshold: 80,
-            },
+            alertTypeParams: {},
             scheduledTaskId: resp.body.scheduledTaskId,
           });
         });

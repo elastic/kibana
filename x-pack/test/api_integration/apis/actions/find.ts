@@ -19,7 +19,7 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
 
     it('should return 200 with individual responses', async () => {
       await supertest
-        .get('/api/action/_find?search=test&search_fields=actionTypeId&fields=description')
+        .get('/api/action/_find?fields=description')
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
@@ -43,7 +43,7 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
 
     it('should not return encrypted attributes', async () => {
       await supertest
-        .get('/api/action/_find?search=test&search_fields=actionTypeId')
+        .get('/api/action/_find')
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
@@ -58,9 +58,9 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
                 references: [],
                 attributes: {
                   description: 'My action',
-                  actionTypeId: 'test',
+                  actionTypeId: 'test.index-record',
                   actionTypeConfig: {
-                    unencrypted: 'unencrypted text',
+                    unencrypted: `This value shouldn't get encrypted`,
                   },
                 },
               },

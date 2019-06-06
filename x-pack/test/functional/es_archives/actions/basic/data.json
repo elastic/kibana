@@ -1,31 +1,15 @@
 {
   "value": {
-    "id": "action:8978428d-6890-43f7-b4a6-e7a4064c33f7",
+    "id": "action:9597aa29-5d74-485b-af1d-4b7fdfd079e4",
     "index": ".kibana",
     "source": {
       "action": {
         "description": "My action",
-        "actionTypeId": "test",
+        "actionTypeId": "test.index-record",
         "actionTypeConfig": {
-          "unencrypted" : "unencrypted text"
+          "unencrypted" : "This value shouldn't get encrypted"
         },
-        "actionTypeConfigSecrets": "2EwBKlUB5B2WzdFrW7IkaAf6UqciGwMPugR/Homp9nSxsfHsd01wmqe2r6iKsqwhewUkiYZQ4DRpLf/tR78eWXIGjOV9PAOq6UzMO4cHSBmTdtvQ1smP3UegFKFSvTOnXkQ1yYvih5eURFVgXJrGpXNz2XB3yLoKo4uulhPxjg=="
-      },
-      "type": "action",
-      "migrationVersion": {}
-    }
-  }
-}
-
-{
-  "value": {
-    "id": "action:2fe13e69-4561-420f-b61c-ce82a8a1a31f",
-    "index": ".kibana",
-    "source": {
-      "action": {
-        "description": "Index to ES",
-        "actionTypeId": "test-index-record",
-        "actionTypeConfig": {}
+        "actionTypeConfigSecrets": "Mmgawi5/C8zhwTnEUAjNtV/i/b8HTX+HonYMKGp4iKMAD0AIJ9K/dSZGtDHpPMkvGoAZNx7TCIk8+wnDZcMq38gMw3rk2HNFeoD9KrQe90auV+mB9uSSUBpvnSPfXoHp/Dj+xO9EjQYwnF8TB6tFzbcW4sA3ee+UQbZn1DXjNrZOqSX7oX7ERJ8A"
       },
       "type": "action",
       "migrationVersion": {}

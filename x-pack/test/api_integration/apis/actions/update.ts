@@ -23,9 +23,12 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test',
+            actionTypeId: 'test.index-record',
             description: 'My action updated',
-            actionTypeConfig: {},
+            actionTypeConfig: {
+              unencrypted: `This value shouldn't get encrypted`,
+              encrypted: 'This value should be encrypted',
+            },
           },
         })
         .expect(200)
@@ -37,9 +40,11 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             version: resp.body.version,
             updated_at: resp.body.updated_at,
             attributes: {
-              actionTypeId: 'test',
+              actionTypeId: 'test.index-record',
               description: 'My action updated',
-              actionTypeConfig: {},
+              actionTypeConfig: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
             },
           });
         });
@@ -51,7 +56,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test',
+            actionTypeId: 'test.index-record',
             description: 'My action updated again',
           },
         })
@@ -67,10 +72,10 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             version: resp.body.version,
             updated_at: resp.body.updated_at,
             attributes: {
-              actionTypeId: 'test',
+              actionTypeId: 'test.index-record',
               description: 'My action updated again',
               actionTypeConfig: {
-                unencrypted: 'unencrypted text',
+                unencrypted: `This value shouldn't get encrypted`,
               },
             },
           });
@@ -83,7 +88,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test',
+            actionTypeId: 'test.index-record',
             description: 'My action updated',
             actionTypeConfig: null,
           },
@@ -109,11 +114,11 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test',
+            actionTypeId: 'test.index-record',
             description: 'My action updated',
             actionTypeConfig: {
-              unencrypted: 'unencrypted text',
-              encrypted: 'something encrypted',
+              unencrypted: `This value shouldn't get encrypted`,
+              encrypted: 'This value should be encrypted',
             },
           },
         })
@@ -126,10 +131,10 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             version: resp.body.version,
             updated_at: resp.body.updated_at,
             attributes: {
-              actionTypeId: 'test',
+              actionTypeId: 'test.index-record',
               description: 'My action updated',
               actionTypeConfig: {
-                unencrypted: 'unencrypted text',
+                unencrypted: `This value shouldn't get encrypted`,
               },
             },
           });
@@ -142,9 +147,12 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test',
+            actionTypeId: 'test.index-record',
             description: 'My action updated',
-            actionTypeConfig: {},
+            actionTypeConfig: {
+              unencrypted: `This value shouldn't get encrypted`,
+              encrypted: 'This value should be encrypted',
+            },
           },
         })
         .expect(404)
