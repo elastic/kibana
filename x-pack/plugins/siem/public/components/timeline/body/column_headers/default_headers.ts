@@ -18,7 +18,7 @@ export const defaultHeaders: ColumnHeader[] = [
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'event.severity',
+    id: 'message',
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {

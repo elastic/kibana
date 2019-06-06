@@ -904,6 +904,8 @@ export interface IpOverviewData {
 
   destination?: Overview | null;
 
+  host: HostEcsFields;
+
   server?: Overview | null;
 
   source?: Overview | null;
@@ -915,8 +917,6 @@ export interface Overview {
   lastSeen?: Date | null;
 
   autonomousSystem: AutonomousSystem;
-
-  host: HostEcsFields;
 
   geo: GeoEcsFields;
 }
@@ -1180,29 +1180,41 @@ export interface NetworkDnsItem {
 }
 
 export interface OverviewNetworkData {
-  packetbeatFlow: number;
+  auditbeatSocket: number;
 
-  packetbeatDNS: number;
+  filebeatCisco: number;
+
+  filebeatNetflow: number;
+
+  filebeatPanw: number;
 
   filebeatSuricata: number;
 
-  filebeatZeek?: number | null;
+  filebeatZeek: number;
 
-  auditbeatSocket?: number | null;
+  packetbeatDNS: number;
+
+  packetbeatFlow: number;
+
+  packetbeatTLS: number;
 }
 
 export interface OverviewHostData {
-  auditbeatAuditd?: number | null;
+  auditbeatAuditd: number;
 
-  auditbeatFIM?: number | null;
+  auditbeatFIM: number;
 
-  auditbeatLogin?: number | null;
+  auditbeatLogin: number;
 
-  auditbeatPackage?: number | null;
+  auditbeatPackage: number;
 
-  auditbeatProcess?: number | null;
+  auditbeatProcess: number;
 
-  auditbeatUser?: number | null;
+  auditbeatUser: number;
+
+  filebeatSystemModule: number;
+
+  winlogbeat: number;
 }
 
 export interface UncommonProcessesData {
@@ -2767,6 +2779,8 @@ export namespace GetIpOverviewQuery {
     source?: _Source | null;
 
     destination?: Destination | null;
+
+    host: Host;
   };
 
   export type _Source = {
@@ -2779,8 +2793,6 @@ export namespace GetIpOverviewQuery {
     autonomousSystem: AutonomousSystem;
 
     geo: Geo;
-
-    host: Host;
   };
 
   export type AutonomousSystem = {
@@ -2819,36 +2831,6 @@ export namespace GetIpOverviewQuery {
     lon?: ToNumberArray | null;
   };
 
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    architecture?: ToStringArray | null;
-
-    id?: ToStringArray | null;
-
-    ip?: ToStringArray | null;
-
-    mac?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    os?: Os | null;
-
-    type?: ToStringArray | null;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    family?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    platform?: ToStringArray | null;
-
-    version?: ToStringArray | null;
-  };
-
   export type Destination = {
     __typename?: 'Overview';
 
@@ -2859,8 +2841,6 @@ export namespace GetIpOverviewQuery {
     autonomousSystem: _AutonomousSystem;
 
     geo: _Geo;
-
-    host: _Host;
   };
 
   export type _AutonomousSystem = {
@@ -2899,7 +2879,7 @@ export namespace GetIpOverviewQuery {
     lon?: ToNumberArray | null;
   };
 
-  export type _Host = {
+  export type Host = {
     __typename?: 'HostEcsFields';
 
     architecture?: ToStringArray | null;
@@ -2912,12 +2892,12 @@ export namespace GetIpOverviewQuery {
 
     name?: ToStringArray | null;
 
-    os?: _Os | null;
+    os?: Os | null;
 
     type?: ToStringArray | null;
   };
 
-  export type _Os = {
+  export type Os = {
     __typename?: 'OsEcsFields';
 
     family?: ToStringArray | null;
@@ -3262,17 +3242,21 @@ export namespace GetOverviewHostQuery {
   export type OverviewHost = {
     __typename?: 'OverviewHostData';
 
-    auditbeatAuditd?: number | null;
+    auditbeatAuditd: number;
 
-    auditbeatFIM?: number | null;
+    auditbeatFIM: number;
 
-    auditbeatLogin?: number | null;
+    auditbeatLogin: number;
 
-    auditbeatPackage?: number | null;
+    auditbeatPackage: number;
 
-    auditbeatProcess?: number | null;
+    auditbeatProcess: number;
 
-    auditbeatUser?: number | null;
+    auditbeatUser: number;
+
+    filebeatSystemModule: number;
+
+    winlogbeat: number;
   };
 }
 
@@ -3301,15 +3285,23 @@ export namespace GetOverviewNetworkQuery {
   export type OverviewNetwork = {
     __typename?: 'OverviewNetworkData';
 
-    packetbeatFlow: number;
+    auditbeatSocket: number;
 
-    packetbeatDNS: number;
+    filebeatCisco: number;
+
+    filebeatNetflow: number;
+
+    filebeatPanw: number;
 
     filebeatSuricata: number;
 
-    filebeatZeek?: number | null;
+    filebeatZeek: number;
 
-    auditbeatSocket?: number | null;
+    packetbeatDNS: number;
+
+    packetbeatFlow: number;
+
+    packetbeatTLS: number;
   };
 }
 
