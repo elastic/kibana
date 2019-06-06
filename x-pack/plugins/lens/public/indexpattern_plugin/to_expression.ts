@@ -19,9 +19,16 @@ export function toExpression(state: IndexPatternPrivateState) {
   const indexName = state.indexPatterns[state.currentIndexPatternId].title;
 
   if (sortedColumns.every(({ operationType }) => operationType === 'value')) {
+    const idMap = fieldNames.reduce(
+      (currentIdMap, fieldName, index) => ({
+        ...currentIdMap,
+        [fieldName]: state.columnOrder[index],
+      }),
+      {} as Record<string, string>
+    );
     return `esdocs index="${indexName}" fields="${fieldNames.join(', ')}" sort="${
       fieldNames[0]
-    }, DESC"`;
+    }, DESC" | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
   } else if (sortedColumns.length) {
     const aggs = sortedColumns
       .map((col, index) => {
@@ -83,12 +90,20 @@ export function toExpression(state: IndexPatternPrivateState) {
       })
       .map(agg => JSON.stringify(agg));
 
+    const idMap = state.columnOrder.reduce(
+      (currentIdMap, columnId, index) => ({
+        ...currentIdMap,
+        [`col-${index}-${columnId}`]: columnId,
+      }),
+      {} as Record<string, string>
+    );
+
     return `esaggs
       index="${state.currentIndexPatternId}"
       metricsAtAllLevels="false"
       partialRows="false"
-      aggConfigs='[${aggs.join(',')}]'`;
+      aggConfigs='[${aggs.join(',')}]' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
   }
 
-  return '';
+  return null;
 }

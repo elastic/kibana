@@ -8,6 +8,7 @@ import { xyVisualization } from './xy_visualization';
 import { Position } from '@elastic/charts';
 import { State } from './types';
 import { createMockDatasource } from '../editor_frame_plugin/mocks';
+import { DatasourcePublicAPI } from '../types';
 
 function exampleState(): State {
   return {
@@ -82,6 +83,14 @@ Object {
   describe('#getPersistableState', () => {
     it('persists the state as given', () => {
       expect(xyVisualization.getPersistableState(exampleState())).toEqual(exampleState());
+    });
+  });
+
+  describe('#toExpression', () => {
+    it('should map to a valid AST', () => {
+      expect(
+        xyVisualization.toExpression(exampleState(), {} as DatasourcePublicAPI)
+      ).toMatchSnapshot();
     });
   });
 });
