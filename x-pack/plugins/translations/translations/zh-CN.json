@@ -5746,7 +5746,6 @@
     "xpack.ml.timeSeriesExplorer.anomaliesTitle": "异常",
     "xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText": "，自动选择第一个作业",
     "xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage": "您无法在此仪表板中查看请求的 {invalidIdsCount, plural, one {作业} other {作业}} {invalidIds}",
-    "xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription": "{openBrace}{cardinality} 个不同 {fieldName} {cardinality, plural, one {} other {值}}{closeBrace}",
     "xpack.ml.timeSeriesExplorer.createNewSingleMetricJobLinkText": "创建新的单指标作业",
     "xpack.ml.timeSeriesExplorer.deleteAnnotationModal.cancelButtonLabel": "取消",
     "xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteAnnotationTitle": "删除此注释？",
