@@ -223,9 +223,12 @@ export class FilterManager {
     this.setFilters([]);
   }
 
-  public async addFiltersAndChangeTimeFilter(filters: Filter[]) {
+  public async addFiltersAndChangeTimeFilter(
+    filters: Filter[],
+    emitChanged?: boolean
+  ): Promise<DelayedChangeNotification> {
     const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
     if (timeFilter) changeTimeFilter(timeFilter);
-    return this.addFilters(filters.filter(filter => filter !== timeFilter));
+    return this.addFilters(filters.filter(filter => filter !== timeFilter), undefined, emitChanged);
   }
 }

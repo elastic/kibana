@@ -96,7 +96,11 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
   };
 
   queryFilter.addFiltersAndChangeTimeFilter = async filters => {
-    this.filterManager.addFiltersAndChangeTimeFilter(filters);
+    return filterManager.addFiltersAndChangeTimeFilter(filters, false)
+      .then(function (delayedChangeUpdate) {
+        filterStateManager.updateAppState(filterManager.getPartitionedFilters());
+        delayedChangeUpdate.update && delayedChangeUpdate.update();
+      });
   };
 
   return queryFilter;
