@@ -1644,10 +1644,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@11.0.1":
-  version "11.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-11.0.1.tgz#fbf8650bd766f955b611d6aa9f652bab680a8874"
-  integrity sha512-/RJOFPTiFu1UIqhLEzsY0n3tv5XwXxH1W3dica8YtfaTl+6GvvQhYP9MAjqzOwDd0y8E7+130ZTFszwP+cyBcQ==
+"@elastic/eui@11.3.1":
+  version "11.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-11.3.1.tgz#7c011ff916d8e8bf4d9f735a3ca7bcb43eb45a59"
+  integrity sha512-Um+MMrfJVXiUsXhiKCroU+zmSjs+NGzW3XkdUG5AuZru6Bprm3dbJSX/O8zx/8c15N6NbPDV43y92XoZhXNz3Q==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -1662,7 +1662,6 @@
     prop-types "^15.6.0"
     react-ace "^5.5.0"
     react-beautiful-dnd "^10.1.0"
-    react-color "^2.13.8"
     react-focus-lock "^1.17.7"
     react-input-autosize "^2.2.1"
     react-is "~16.3.0"
@@ -26639,20 +26638,10 @@ typescript-fsa@^2.0.0, typescript-fsa@^2.5.0:
   resolved "https://registry.yarnpkg.com/typescript-fsa/-/typescript-fsa-2.5.0.tgz#1baec01b5e8f5f34c322679d1327016e9e294faf"
   integrity sha1-G67AG16PXzTDImedEycBbp4pT68=
 
-typescript@^3.3.3333, typescript@~3.3.3333:
+typescript@^3.3.3333, typescript@~3.0.3, typescript@~3.3.3333, typescript@~3.4.3:
   version "3.3.3333"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.3.3333.tgz#171b2c5af66c59e9431199117a3bcadc66fdcfd6"
   integrity sha512-JjSKsAfuHBE/fB2oZ8NxtRTk5iGcg6hkYXMnZ3Wc+b2RSqejEqTaem11mHASMnFilHrax3sLK0GDzcJrekZYLw==
-
-typescript@~3.0.3:
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.3.tgz#4853b3e275ecdaa27f78fda46dc273a7eb7fc1c8"
-  integrity sha512-kk80vLW9iGtjMnIv11qyxLqZm20UklzuR2tL0QAnDIygIUIemcZMxlMWudl9OOt76H3ntVzcTiddQ1/pAAJMYg==
-
-typescript@~3.4.3:
-  version "3.4.5"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.4.5.tgz#2d2618d10bb566572b8d7aad5180d84257d70a99"
-  integrity sha512-YycBxUb49UUhdNMU5aJ7z5Ej2XGmaIBL0x34vZ82fn3hGvD+bgrMrVDpatgz2f7YxUMJxMkbWxJZeAvDxVe7Vw==
 
 typings-tester@^0.3.2:
   version "0.3.2"
