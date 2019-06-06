@@ -18,7 +18,7 @@ export function routerProvider(routes) {
 
   const baseRouter = createRouter(routes);
   const history = historyProvider(getWindow());
-  let componentListener = null;
+  const componentListeners = [];
 
   const isPath = str => typeof str === 'string' && str.substr(0, 1) === '/';
 
@@ -57,10 +57,6 @@ export function routerProvider(routes) {
       updateLocation(name, params, state, true);
     },
     onPathChange(fn) {
-      if (componentListener != null) {
-        throw new Error('Only one route component listener is allowed');
-      }
-
       const execOnMatch = location => {
         const { pathname } = location;
         const match = this.match(pathname);
@@ -75,14 +71,20 @@ export function routerProvider(routes) {
       };
 
       // on path changes, fire the path change handler
-      componentListener = history.onChange((locationObj, prevLocationObj) => {
+      const unlisten = history.onChange((locationObj, prevLocationObj) => {
         if (locationObj.pathname !== prevLocationObj.pathname) {
           execOnMatch(locationObj);
         }
       });
 
+      // keep track of all change handler removal functions, for cleanup
+      // TODO: clean up listeners when baseRounter.stop is called
+      componentListeners.push(unlisten);
+
       // initially fire the path change handler
       execOnMatch(history.getLocation());
+
+      return unlisten; // return function to remove change handler
     },
   };
 
