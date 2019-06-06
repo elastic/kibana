@@ -33,3 +33,15 @@ export const help: FunctionHelp<FunctionFactory<typeof date>> = {
     }),
   },
 };
+
+export const errors = {
+  invalidDateInput: (dateStr: string | null) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.date.invalidDateInputErrorMessage', {
+        defaultMessage: 'Invalid date input: {date}',
+        values: {
+          date: dateStr,
+        },
+      })
+    ),
+};

@@ -5,13 +5,13 @@
  */
 import EventEmitter from 'events';
 import * as net from 'net';
+import { fileURLToPath } from 'url';
 import {
   createMessageConnection,
   MessageConnection,
   SocketMessageReader,
   SocketMessageWriter,
 } from 'vscode-jsonrpc';
-
 import { RequestMessage, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 import {
@@ -111,6 +111,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       workspaceFolders,
       rootUri,
       capabilities: clientCapabilities,
+      rootPath: fileURLToPath(rootUri),
     };
     return await clientConn
       .sendRequest(
@@ -159,19 +160,17 @@ export class LanguageServerProxy implements ILanguageServerHandler {
    * https://microsoft.github.io/language-server-protocol/specification#exit
    */
   public async exit() {
+    this.closed = true; // stop the socket reconnect
     if (this.clientConnection) {
       this.logger.info('sending `shutdown` request to language server.');
       const clientConn = this.clientConnection;
-      await clientConn.sendRequest('shutdown').then(() => {
-        this.logger.info('sending `exit` notification to language server.');
-
-        // @ts-ignore
-        // TODO fix this
-        clientConn.sendNotification(ExitNotification.type);
-        this.conn.dispose(); // stop listening
+      clientConn.sendRequest('shutdown').then(() => {
+        this.conn.dispose();
       });
+      this.logger.info('sending `exit` notification to language server.');
+      // @ts-ignore
+      clientConn.sendNotification(ExitNotification.type);
     }
-    this.closed = true; // stop the socket reconnect
     this.eventEmitter.emit('exit');
   }
 
@@ -263,9 +262,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   }
 
   private onSocketClosed() {
-    if (this.clientConnection) {
-      this.clientConnection.dispose();
-    }
     this.clientConnection = null;
     this.connectingPromise = null;
     this.eventEmitter.emit('close');
