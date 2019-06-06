@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { xyVisualization, State } from './xy_visualization';
+import { xyVisualization } from './xy_visualization';
 import { Position } from '@elastic/charts';
+import { State } from './types';
+import { createMockDatasource } from '../editor_frame_plugin/mocks';
 
 function exampleState(): State {
   return {
@@ -29,10 +31,20 @@ function exampleState(): State {
   };
 }
 
-describe('IndexPattern Data Source', () => {
+describe('xy_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
-      expect(xyVisualization.initialize()).toMatchInlineSnapshot(`
+      const mockDatasource = createMockDatasource();
+      mockDatasource.publicAPIMock.generateColumnId
+        .mockReturnValue('test-id1')
+        .mockReturnValueOnce('test-id2');
+      const initialState = xyVisualization.initialize(undefined, mockDatasource.publicAPIMock);
+
+      expect(initialState.x.accessor).toBeDefined();
+      expect(initialState.y.accessors[0]).toBeDefined();
+      expect(initialState.x.accessor).not.toEqual(initialState.y.accessors[0]);
+
+      expect(initialState).toMatchInlineSnapshot(`
 Object {
   "legend": Object {
     "isVisible": true,
@@ -41,25 +53,29 @@ Object {
   "seriesType": "line",
   "splitSeriesAccessors": Array [],
   "stackAccessors": Array [],
-  "title": "Empty line chart",
+  "title": "Empty XY Chart",
   "x": Object {
-    "accessor": "",
+    "accessor": "test-id2",
     "position": "bottom",
     "showGridlines": false,
-    "title": "Uknown",
+    "title": "X",
   },
   "y": Object {
-    "accessors": Array [],
+    "accessors": Array [
+      "test-id1",
+    ],
     "position": "left",
     "showGridlines": false,
-    "title": "Uknown",
+    "title": "Y",
   },
 }
 `);
     });
 
     it('loads from persisted state', () => {
-      expect(xyVisualization.initialize(exampleState())).toEqual(exampleState());
+      expect(
+        xyVisualization.initialize(exampleState(), createMockDatasource().publicAPIMock)
+      ).toEqual(exampleState());
     });
   });
 

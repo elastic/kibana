@@ -6,7 +6,7 @@
 
 import { ActionCreator } from 'typescript-fsa';
 import { connect } from 'react-redux';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
@@ -116,16 +116,18 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
     return (
       <>
         <FieldsBrowserButtonContainer>
-          <EuiButton
-            color="primary"
-            data-test-subj="show-field-browser"
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={this.toggleShow}
-            size="s"
-          >
-            {i18n.FIELDS}
-          </EuiButton>
+          <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
+            <EuiButton
+              color="primary"
+              data-test-subj="show-field-browser"
+              iconSide="right"
+              iconType="arrowDown"
+              onClick={this.toggleShow}
+              size="s"
+            >
+              {i18n.FIELDS}
+            </EuiButton>
+          </EuiToolTip>
         </FieldsBrowserButtonContainer>
 
         {show && (

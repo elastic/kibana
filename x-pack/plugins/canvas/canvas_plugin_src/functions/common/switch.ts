@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Function, Case } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Case } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -12,7 +12,7 @@ interface Arguments {
   default: () => any;
 }
 
-export function switchFn(): Function<'switch', Arguments, any> {
+export function switchFn(): ExpressionFunction<'switch', any, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().switch;
 
   return {

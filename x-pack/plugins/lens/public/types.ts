@@ -68,6 +68,7 @@ export interface Datasource<T = unknown, P = unknown> {
 export interface DatasourcePublicAPI {
   getTableSpec: () => TableSpec;
   getOperationForColumnId: (columnId: string) => Operation | null;
+  generateColumnId: () => string;
 
   // Render can be called many times
   renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
@@ -152,7 +153,7 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface Visualization<T = unknown, P = unknown> {
   // For initializing from saved object
-  initialize: (state?: P) => T;
+  initialize: (state: P | undefined, datasource: DatasourcePublicAPI) => T;
 
   getPersistableState: (state: T) => P;
 

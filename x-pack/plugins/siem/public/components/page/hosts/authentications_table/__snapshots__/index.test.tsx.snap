@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Authentication Table Component rendering it renders the default Authentication table 1`] = `
+exports[`Authentication Table Component rendering it renders the authentication table 1`] = `
 <Connect(pure(Component))
   data={
     Array [

@@ -16,6 +16,7 @@ import {
   DatasourceDataPanelProps,
   DimensionPriority,
 } from '../types';
+import uuid from 'uuid';
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
@@ -214,6 +215,10 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
         },
         getOperationForColumnId: (columnId: string) => {
           return columnToOperation(state.columns[columnId]);
+        },
+        generateColumnId: () => {
+          // TODO: Come up with a more compact form of generating unique column ids
+          return uuid.v4();
         },
 
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
