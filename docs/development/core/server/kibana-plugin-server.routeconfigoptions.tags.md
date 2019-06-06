@@ -4,7 +4,7 @@
 
 ## RouteConfigOptions.tags property
 
-Additional meta-data information to attach to the route.
+Additional metadata tag strings to attach to the route.
 
 <b>Signature:</b>
 
