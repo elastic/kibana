@@ -191,14 +191,11 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
 
   if (message) {
     try {
+      const toBeTranslated = shouldUsePseudoLocale ? translateUsingPseudoLocale(message) : message;
       // We should call `format` even for messages without any value references
       // to let it handle escaped curly braces `\\{` that are the part of the text itself
       // and not value reference boundaries.
-      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
-
-      return shouldUsePseudoLocale
-        ? translateUsingPseudoLocale(formattedMessage)
-        : formattedMessage;
+      return getMessageFormat(toBeTranslated, getLocale(), getFormats()).format(values);
     } catch (e) {
       throw new Error(
         `[I18n] Error formatting message: "${id}" for locale: "${getLocale()}".\n${e}`
