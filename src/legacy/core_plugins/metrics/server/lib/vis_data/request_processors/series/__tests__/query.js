@@ -26,9 +26,10 @@ describe('query(req, panel, series)', () => {
   let panel;
   let series;
   let req;
+
   const config = {
     allowLeadingWildcards: true,
-    queryStringOptions: {},
+    queryStringOptions: { analyze_wildcard: true }
   };
   beforeEach(() => {
     req = {
@@ -45,6 +46,7 @@ describe('query(req, panel, series)', () => {
       interval: '10s'
     };
     series = { id: 'test' };
+
   });
 
   it('calls next when finished', () => {
@@ -157,7 +159,7 @@ describe('query(req, panel, series)', () => {
   });
 
   it('returns doc with series filter', () => {
-    series.filter = 'host:web-server';
+    series.filter = { query: 'host:web-server', language: 'lucene' };
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
     expect(doc).to.eql({
@@ -176,11 +178,20 @@ describe('query(req, panel, series)', () => {
               }
             },
             {
-              query_string: {
-                query: series.filter,
-                analyze_wildcard: true
+              bool: {
+                filter: [],
+                must: [
+                  {
+                    query_string: {
+                      analyze_wildcard: true,
+                      query: series.filter.query,
+                    }
+                  },
+                ],
+                must_not: [],
+                should: [],
               }
-            },
+            }
           ],
           must_not: [],
           should: [],
@@ -202,7 +213,7 @@ describe('query(req, panel, series)', () => {
         }
       }
     ];
-    panel.filter = 'host:web-server';
+    panel.filter = { query: 'host:web-server', language: 'lucene' };
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
     expect(doc).to.eql({
@@ -232,9 +243,18 @@ describe('query(req, panel, series)', () => {
               }
             },
             {
-              query_string: {
-                query: panel.filter,
-                analyze_wildcard: true
+              bool: {
+                filter: [],
+                must: [
+                  {
+                    query_string: {
+                      query: panel.filter.query,
+                      analyze_wildcard: true
+                    }
+                  }
+                ],
+                must_not: [],
+                should: [],
               }
             }
           ],
@@ -259,7 +279,7 @@ describe('query(req, panel, series)', () => {
         }
       }
     ];
-    panel.filter = 'host:web-server';
+    panel.filter = { query: 'host:web-server', language: 'lucene' };
     panel.ignore_global_filter = true;
     const next = doc => doc;
     const doc = query(req, panel, series, config)(next)({});
@@ -279,11 +299,20 @@ describe('query(req, panel, series)', () => {
               }
             },
             {
-              query_string: {
-                query: panel.filter,
-                analyze_wildcard: true
+              bool: {
+                filter: [],
+                must: [
+                  {
+                    query_string: {
+                      query: panel.filter.query,
+                      analyze_wildcard: true
+                    }
+                  }
+                ],
+                must_not: [],
+                should: [],
               }
-            },
+            }
           ],
           must_not: [],
           should: [],

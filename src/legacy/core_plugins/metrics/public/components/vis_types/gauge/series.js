@@ -85,6 +85,7 @@ function GaugeSeriesUi(props) {
           fields={props.fields}
           model={props.model}
           onChange={props.onChange}
+          indexPatternForQuery={props.indexPatternForQuery}
         />
       );
     }
@@ -196,6 +197,7 @@ GaugeSeriesUi.propTypes = {
   visible: PropTypes.bool,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const GaugeSeries = injectI18n(GaugeSeriesUi);
