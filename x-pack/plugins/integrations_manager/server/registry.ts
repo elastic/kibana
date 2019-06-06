@@ -11,7 +11,7 @@ import http from 'http';
 import https from 'https';
 import { promisify } from 'util';
 import glob from 'glob';
-
+import Boom from 'boom';
 import { decompress } from './decompress';
 
 const REGISTRY = process.env.REGISTRY || 'http://localhost:8080';
@@ -56,7 +56,11 @@ function fetchZip(key: string): Promise<http.IncomingMessage> {
 
     lib
       .get(url)
-      .on('response', resolve)
+      .on('response', (response: http.IncomingMessage) =>
+        response.statusCode && response.statusCode === 200
+          ? resolve(response)
+          : reject(new Boom(response.statusMessage, { statusCode: response.statusCode }))
+      )
       .on('error', reject);
   });
 }
@@ -79,7 +83,7 @@ async function fetchFiles(key: string): Promise<void> {
 async function getOrFetchFiles(key: string): Promise<string[]> {
   const pattern = path.join(extractedZipTo(key), '**');
   const files = await globP(pattern);
-  return files.length ? files : fetchFiles(key).then(() => getOrFetchFiles(key));
+  return files.length ? files : fetchFiles(key).then(() => globP(pattern));
 }
 
 export async function getZipInfo(key: string): Promise<string[]> {
