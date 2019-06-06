@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { NullContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -13,7 +13,7 @@ interface Arguments {
   format: string;
 }
 
-export function date(): NullContextFunction<'date', Arguments, number> {
+export function date(): ExpressionFunction<'date', null, Arguments, number> {
   const { help, args: argHelp } = getFunctionHelp().date;
 
   return {

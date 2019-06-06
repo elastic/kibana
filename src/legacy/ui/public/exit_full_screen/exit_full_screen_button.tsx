@@ -17,39 +17,37 @@
  * under the License.
  */
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import chrome from 'ui/chrome';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  KuiButton,
-} from '@kbn/ui-framework/components';
+// @ts-ignore
+import { KuiButton } from '@kbn/ui-framework/components';
 
-import {
-  keyCodes,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import { EuiScreenReaderOnly, keyCodes } from '@elastic/eui';
 
-class ExitFullScreenButtonUi extends PureComponent {
+interface Props extends ReactIntl.InjectedIntlProps {
+  onExitFullScreenMode: () => void;
+}
 
-  onKeyDown = (e) => {
+class ExitFullScreenButtonUi extends PureComponent<Props> {
+  public onKeyDown = (e: KeyboardEvent) => {
     if (e.keyCode === keyCodes.ESCAPE) {
       this.props.onExitFullScreenMode();
     }
   };
 
-  componentWillMount() {
+  public componentWillMount() {
     document.addEventListener('keydown', this.onKeyDown, false);
     chrome.setVisible(false);
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     document.removeEventListener('keydown', this.onKeyDown, false);
     chrome.setVisible(true);
   }
 
-  render() {
+  public render() {
     const { intl } = this.props;
 
     return (
@@ -62,9 +60,7 @@ class ExitFullScreenButtonUi extends PureComponent {
             />
           </p>
         </EuiScreenReaderOnly>
-        <div
-          className="dshExitFullScreenButton"
-        >
+        <div className="dshExitFullScreenButton">
           <KuiButton
             type="hollow"
             aria-label={intl.formatMessage({
@@ -74,13 +70,16 @@ class ExitFullScreenButtonUi extends PureComponent {
             className="dshExitFullScreenButton__mode"
             onClick={this.props.onExitFullScreenMode}
           >
-            <span className="dshExitFullScreenButton__logo" data-test-subj="exitFullScreenModeLogo"/>
+            <span
+              className="dshExitFullScreenButton__logo"
+              data-test-subj="exitFullScreenModeLogo"
+            />
             <span className="dshExitFullScreenButton__text" data-test-subj="exitFullScreenModeText">
               <FormattedMessage
                 id="common.ui.exitFullScreenButton.exitFullScreenModeButtonLabel"
                 defaultMessage="Exit full screen"
               />
-              <span className="kuiIcon fa fa-angle-left"/>
+              <span className="kuiIcon fa fa-angle-left" />
             </span>
           </KuiButton>
         </div>
@@ -88,9 +87,5 @@ class ExitFullScreenButtonUi extends PureComponent {
     );
   }
 }
-
-ExitFullScreenButtonUi.propTypes = {
-  onExitFullScreenMode: PropTypes.func.isRequired,
-};
 
 export const ExitFullScreenButton = injectI18n(ExitFullScreenButtonUi);

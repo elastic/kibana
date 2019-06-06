@@ -5,7 +5,8 @@
  */
 
 import Papa from 'papaparse';
-import { Datatable, NullContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -14,7 +15,7 @@ interface Arguments {
   newline: string;
 }
 
-export function csv(): NullContextFunction<'csv', Arguments, Datatable> {
+export function csv(): ExpressionFunction<'csv', null, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().csv;
 
   return {

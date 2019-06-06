@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './common';
-export * from './functions';
-export * from './style';
+import * as React from 'react';
+
+export interface TimelineContextData {
+  isLoading: boolean;
+}
+
+export const TimelineContext = React.createContext<TimelineContextData>({ isLoading: false });

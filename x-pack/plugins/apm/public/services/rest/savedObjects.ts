@@ -5,7 +5,6 @@
  */
 
 import { memoize } from 'lodash';
-import chrome from 'ui/chrome';
 import { callApi } from './callApi';
 
 export interface ISavedObject {
@@ -16,25 +15,13 @@ export interface ISavedObject {
   type: string;
 }
 
-interface ISavedObjectAPIResponse {
-  saved_objects: ISavedObject[];
-}
-
 export const getAPMIndexPattern = memoize(async () => {
-  const apmIndexPatternTitle: string = chrome.getInjected(
-    'apmIndexPatternTitle'
-  );
-  const res = await callApi<ISavedObjectAPIResponse>({
-    pathname: `/api/saved_objects/_find`,
-    query: {
-      type: 'index-pattern',
-      search: `"${apmIndexPatternTitle}"`,
-      search_fields: 'title',
-      per_page: 200
-    }
-  });
-
-  return res.saved_objects.find(
-    savedObject => savedObject.attributes.title === apmIndexPatternTitle
-  );
+  try {
+    return await callApi<ISavedObject>({
+      method: 'GET',
+      pathname: `/api/apm/index_pattern`
+    });
+  } catch (error) {
+    return;
+  }
 });

@@ -5,7 +5,8 @@
  */
 
 import { omit } from 'lodash';
-import { ContextFunction, Datatable, DatatableColumn, DatatableColumnType } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable, DatatableColumn, DatatableColumnType } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -14,7 +15,7 @@ interface Arguments {
   name: string | null;
 }
 
-export function alterColumn(): ContextFunction<'alterColumn', Datatable, Arguments, Datatable> {
+export function alterColumn(): ExpressionFunction<'alterColumn', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().alterColumn;
 
   return {
