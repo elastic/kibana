@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }) {
   describe('watcher_test', function () {
     before('initialize tests', async () => {
       await browser.setWindowSize(1600, 1000);
-      await PageObjects.common.navigateToApp('settings');
-      await testSubjects.click('watcher');
+      await PageObjects.common.navigateToApp('watcher');
       await PageObjects.watcher.clearAllWatches();
     });
 
@@ -38,12 +37,12 @@ export default function ({ getService, getPageObjects }) {
       const errorCallout = await testSubjects.find('sectionErrorMessage');
       const errorCalloutText = await errorCallout.getVisibleText();
       expect(errorCalloutText).to.be(`There is already a watch with ID '${watchID}'.`);
-      // Cancel create and navigate back to the watch list page
-      await testSubjects.click('btnCancelWatch');
     });
 
     //delete the watch
     it('should delete the watch', async () => {
+      // Navigate to the main list page
+      await PageObjects.common.navigateToApp('watcher');
       const watchList = indexBy(await PageObjects.watcher.getWatches(), 'id');
       log.debug(watchList);
       expect(watchList.watchID.name).to.eql([watchName]);
