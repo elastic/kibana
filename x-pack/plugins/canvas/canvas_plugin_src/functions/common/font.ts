@@ -89,7 +89,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
 
       // the line height shouldn't ever be lower than the size, and apply as a
       // pixel setting
-      const lineHeight = args.lHeight ? `${args.lHeight}px` : 1;
+      const lineHeight = args.lHeight != null ? `${args.lHeight}px` : '1';
 
       const spec: CSSStyle = {
         fontFamily: args.family,
