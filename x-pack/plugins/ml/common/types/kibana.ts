@@ -15,13 +15,3 @@ export interface IndexPatternWithType extends IndexPattern {
 }
 
 export type IndexPatternTitle = string;
-
-export interface SavedSearch {
-  readonly id: string;
-  title: string;
-  searchSource: SearchSource;
-  description?: string;
-  columns: string[];
-  sort: string[];
-  destroy: () => void;
-}
