@@ -8,6 +8,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 
 import { isNumber } from 'lodash/fp';
+import { EuiToolTip } from '@elastic/eui';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 
 import { getOrEmptyTagFromValue } from '../../../empty_value';
@@ -17,6 +18,7 @@ import { Port, PORT_NAMES } from '../../../port';
 
 export const DATE_FIELD_TYPE = 'date';
 export const IP_FIELD_TYPE = 'ip';
+export const MESSAGE_FIELD_NAME = 'message';
 
 export const FormattedFieldValue = pure<{
   eventId: string;
@@ -43,6 +45,12 @@ export const FormattedFieldValue = pure<{
   } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
     return (
       <Duration contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+    );
+  } else if (fieldName === MESSAGE_FIELD_NAME && value != null && value !== '') {
+    return (
+      <EuiToolTip data-test-subj="message-tool-tip" content={value}>
+        <>{value}</>
+      </EuiToolTip>
     );
   } else {
     return getOrEmptyTagFromValue(value);
