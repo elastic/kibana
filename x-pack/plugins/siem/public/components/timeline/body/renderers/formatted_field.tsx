@@ -8,7 +8,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 
 import { isNumber } from 'lodash/fp';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 
 import { getOrEmptyTagFromValue } from '../../../empty_value';
@@ -48,7 +48,19 @@ export const FormattedFieldValue = pure<{
     );
   } else if (fieldName === MESSAGE_FIELD_NAME && value != null && value !== '') {
     return (
-      <EuiToolTip data-test-subj="message-tool-tip" content={value}>
+      <EuiToolTip
+        data-test-subj="message-tool-tip"
+        content={
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <span>{fieldName}</span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span>{value}</span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
         <>{value}</>
       </EuiToolTip>
     );
