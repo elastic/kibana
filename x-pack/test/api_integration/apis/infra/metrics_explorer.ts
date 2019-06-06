@@ -66,6 +66,48 @@ const metricsExplorerTest: KbnTestProvider = ({ getService }) => {
       });
     });
 
+    it('should apply filterQuery to data', async () => {
+      const postBody = {
+        timerange: {
+          field: '@timestamp',
+          to: max,
+          from: min,
+          interval: '>=1m',
+        },
+        indexPattern: 'metricbeat-*',
+        filterQuery:
+          '{"bool":{"should":[{"range":{"system.cpu.user.pct":{"gt":0.01}}}],"minimum_should_match":1}}',
+        metrics: [
+          {
+            aggregation: 'avg',
+            field: 'system.cpu.user.pct',
+            rate: false,
+          },
+        ],
+      };
+      const response = await supertest
+        .post('/api/infra/metrics_explorer')
+        .set('kbn-xsrf', 'xxx')
+        .send(postBody)
+        .expect(200);
+      const body: MetricsExplorerResponse = response.body;
+      expect(body).to.have.property('series');
+      expect(body.series).length(1);
+      const firstSeries = first(body.series);
+      expect(firstSeries).to.have.property('id', 'ALL');
+      expect(firstSeries).to.have.property('columns');
+      expect(firstSeries).to.have.property('rows');
+      expect(firstSeries!.columns).to.eql([
+        { name: 'timestamp', type: 'date' },
+        { name: 'metric_0', type: 'number' },
+      ]);
+      expect(firstSeries!.rows).to.have.length(9);
+      expect(firstSeries!.rows![1]).to.eql({
+        metric_0: 0.024,
+        timestamp: 1547571300000,
+      });
+    });
+
     it('should work for empty metrics', async () => {
       const postBody = {
         timerange: {
