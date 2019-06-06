@@ -18,7 +18,7 @@ interface MatchPackage {
 
 export function Detail({ match }: MatchPackage) {
   const { pkgkey } = match.params;
-  const [info, setInfo] = useState(({} = {} as IntegrationInfo));
+  const [info, setInfo] = useState<IntegrationInfo | null>(null);
 
   useEffect(
     () => {
