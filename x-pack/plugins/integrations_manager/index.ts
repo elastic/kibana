@@ -74,7 +74,7 @@ export const integrationsManager: LegacyPluginInitializer = kibana => {
       });
 
       // new Kibana platform shim starts here
-      const coreSetup = {
+      const coreSetup: CoreSetup = {
         http: {
           route: server.route.bind(server),
         },
