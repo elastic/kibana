@@ -21,6 +21,7 @@ export { Type, TypeOptions } from './type';
 export { AnyType } from './any_type';
 export { ArrayOptions, ArrayType } from './array_type';
 export { BooleanType } from './boolean_type';
+export { BufferOptions, BufferType } from './buffer_type';
 export { ByteSizeOptions, ByteSizeType } from './byte_size_type';
 export { ConditionalType, ConditionalTypeValue } from './conditional_type';
 export { DurationOptions, DurationType } from './duration_type';

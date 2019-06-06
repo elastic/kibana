@@ -170,7 +170,13 @@ export function parseElasticsearchClientConfig(
     config.ssl.certificateAuthorities !== undefined &&
     config.ssl.certificateAuthorities.length > 0
   ) {
-    esClientConfig.ssl.ca = config.ssl.certificateAuthorities.map(readFile);
+    esClientConfig.ssl.ca = config.ssl.certificateAuthorities.map(ca => {
+      if (Buffer.isBuffer(ca)) {
+        return ca.toString();
+      }
+
+      return readFile(ca);
+    });
   }
 
   // Add client certificate and key if required by elasticsearch

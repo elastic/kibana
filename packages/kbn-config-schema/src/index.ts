@@ -28,6 +28,8 @@ import {
   BooleanType,
   ByteSizeOptions,
   ByteSizeType,
+  BufferOptions,
+  BufferType,
   ConditionalType,
   ConditionalTypeValue,
   DurationOptions,
@@ -61,6 +63,10 @@ function any(options?: TypeOptions<any>) {
 
 function boolean(options?: TypeOptions<boolean>): Type<boolean> {
   return new BooleanType(options);
+}
+
+function buffer(options?: BufferOptions<Buffer>): BufferType<Buffer> {
+  return new BufferType(options);
 }
 
 function string(options?: StringOptions): Type<string> {
@@ -182,6 +188,7 @@ export const schema = {
   arrayOf,
   boolean,
   byteSize,
+  buffer,
   conditional,
   contextRef,
   duration,

@@ -26,7 +26,7 @@ const separator = '.';
  * @returns Same object instance with expanded properties.
  */
 export function ensureDeepObject(obj: any): any {
-  if (obj == null || typeof obj !== 'object') {
+  if (obj == null || typeof obj !== 'object' || Buffer.isBuffer(obj)) {
     return obj;
   }
 

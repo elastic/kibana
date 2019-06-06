@@ -56,7 +56,12 @@ export const config = {
         { defaultValue: 'full' }
       ),
       certificateAuthorities: schema.maybe(
-        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1 }),
+          schema.buffer(),
+          schema.arrayOf(schema.buffer(), { minSize: 1 }),
+        ])
       ),
       certificate: schema.maybe(schema.string()),
       key: schema.maybe(schema.string()),
@@ -151,7 +156,7 @@ export class ElasticsearchConfig {
   public readonly ssl: Pick<
     SslConfigSchema,
     Exclude<keyof SslConfigSchema, 'certificateAuthorities'>
-  > & { certificateAuthorities?: string[] };
+  > & { certificateAuthorities?: Array<string | Buffer> };
 
   /**
    * Header names and values to send to Elasticsearch with every request. These
@@ -180,7 +185,8 @@ export class ElasticsearchConfig {
 
     const certificateAuthorities = Array.isArray(rawConfig.ssl.certificateAuthorities)
       ? rawConfig.ssl.certificateAuthorities
-      : typeof rawConfig.ssl.certificateAuthorities === 'string'
+      : typeof rawConfig.ssl.certificateAuthorities === 'string' ||
+        Buffer.isBuffer(rawConfig.ssl.certificateAuthorities)
       ? [rawConfig.ssl.certificateAuthorities]
       : undefined;
 
