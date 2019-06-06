@@ -19,11 +19,10 @@
 
 import d3 from 'd3';
 import { VislibVisualizationsChartProvider } from './_chart';
-import { GaugeTypesProvider } from './gauges/gauge_types';
+import { gaugeTypes } from './gauges/gauge_types';
 
 export function GaugeChartProvider(Private) {
   const Chart = Private(VislibVisualizationsChartProvider);
-  const gaugeTypes = Private(GaugeTypesProvider);
 
   class GaugeChart extends Chart {
     constructor(handler, chartEl, chartData) {

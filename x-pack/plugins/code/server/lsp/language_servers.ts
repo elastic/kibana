@@ -10,6 +10,7 @@ import { GoLauncher } from './go_launcher';
 import { JavaLauncher } from './java_launcher';
 import { LauncherConstructor } from './language_server_launcher';
 import { TypescriptServerLauncher } from './ts_launcher';
+import { CtagsLauncher } from './ctags_launcher';
 
 export interface LanguageServerDefinition extends LanguageServer {
   builtinWorkspaceFolders: boolean;
@@ -49,5 +50,58 @@ export const GO: LanguageServerDefinition = {
   installationType: InstallationType.Plugin,
   installationPluginName: 'goLanguageServer',
 };
+export const CTAGS: LanguageServerDefinition = {
+  name: 'ctags',
+  builtinWorkspaceFolders: true,
+  languages: [
+    'ant',
+    'asm',
+    'asp',
+    'basic',
+    'beta',
+    'c',
+    'clojure',
+    'c++',
+    'c#',
+    'cobol',
+    'dosbatch',
+    'eiffel',
+    'erlang',
+    'flex',
+    'fortran',
+    'haskell',
+    'kotlin',
+    'lisp',
+    'lua',
+    'make',
+    'matlab',
+    'ocaml',
+    'pascal',
+    'perl',
+    'php',
+    'powershell',
+    'python',
+    'rexx',
+    'ruby',
+    'rust',
+    'scala',
+    'scheme',
+    'sh',
+    'slang',
+    'sml',
+    'sql',
+    'swift',
+    'tcl',
+    'tex',
+    'vera',
+    'verilog',
+    'vhdl',
+    'vim',
+    'yacc',
+  ],
+  launcher: CtagsLauncher,
+  installationType: InstallationType.Plugin,
+  installationPluginName: 'ctagsLanguageServer',
+};
 export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA];
-export const LanguageServersDeveloping: LanguageServerDefinition[] = [GO];
+export const LanguageServersDeveloping: LanguageServerDefinition[] = [GO, CTAGS];

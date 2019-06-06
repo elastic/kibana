@@ -17,5 +17,6 @@ export interface ColumnHeader {
   id: ColumnId;
   placeholder?: string;
   type?: string;
+  aggregatable?: boolean;
   width: number;
 }

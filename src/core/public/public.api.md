@@ -152,6 +152,14 @@ export class CoreSystem {
     stop(): void;
     }
 
+// Warning: (ae-missing-release-tag) "ErrorToastOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface ErrorToastOptions {
+    title: string;
+    toastMessage?: string;
+}
+
 // @public
 export interface FatalErrorInfo {
     // (undocumented)
@@ -278,12 +286,19 @@ export interface LegacyNavLink {
 
 // @public (undocumented)
 export interface NotificationsSetup {
+    // Warning: (ae-forgotten-export) The symbol "ToastsSetup" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    toasts: ToastsApi;
+    toasts: ToastsSetup;
 }
 
 // @public (undocumented)
-export type NotificationsStart = NotificationsSetup;
+export interface NotificationsStart {
+    // Warning: (ae-forgotten-export) The symbol "ToastsStart" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    toasts: ToastsStart;
+}
 
 // Warning: (ae-missing-release-tag) "OverlayRef" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
@@ -328,21 +343,31 @@ export interface PluginInitializerContext {
 
 export { Toast }
 
+// Warning: (ae-forgotten-export) The symbol "ToastInputFields" needs to be exported by the entry point index.d.ts
+// 
 // @public (undocumented)
-export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 
 // @public (undocumented)
 export class ToastsApi {
+    constructor(deps: {
+        uiSettings: UiSettingsSetup;
+        i18n: I18nSetup;
+    });
     // (undocumented)
     add(toastOrTitle: ToastInput): Toast;
     // (undocumented)
     addDanger(toastOrTitle: ToastInput): Toast;
+    // (undocumented)
+    addError(error: Error, options: ErrorToastOptions): Toast;
     // (undocumented)
     addSuccess(toastOrTitle: ToastInput): Toast;
     // (undocumented)
     addWarning(toastOrTitle: ToastInput): Toast;
     // (undocumented)
     get$(): Rx.Observable<Toast[]>;
+    // (undocumented)
+    registerOverlays(overlays: OverlayStart): void;
     // (undocumented)
     remove(toast: Toast): void;
     }

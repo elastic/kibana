@@ -25,7 +25,6 @@ import {
 } from '../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -36,8 +35,8 @@ export default function ({ getService, getPageObjects }) {
   describe('dashboard panel controls', function viewEditModeTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
-      await kibanaServer.uiSettings.disableToastAutohide();
       await browser.refresh();
+      await PageObjects.header.awaitKibanaChrome();
 
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like

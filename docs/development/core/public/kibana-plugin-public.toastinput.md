@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export declare type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 ```

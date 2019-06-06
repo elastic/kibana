@@ -7,9 +7,10 @@
 import Joi from 'joi';
 import { get } from 'lodash';
 import { REQUIRED_LICENSES } from '../../../common/constants';
+import { BeatTag } from '../../../common/domain_types';
+import { ReturnTypeUpsert } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
-import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: write to Kibana audit log file
 export const createSetTagRoute = (libs: CMServerLibs) => ({
@@ -28,7 +29,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
       }),
     },
   },
-  handler: async (request: FrameworkRequest) => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeUpsert<BeatTag>> => {
     const defaultConfig = {
       id: request.params.tagId,
       name: request.params.tagId,
@@ -37,13 +38,10 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
     };
     const config = { ...defaultConfig, ...get(request, 'payload', {}) };
 
-    try {
-      const id = await libs.tags.upsertTag(request.user, config);
+    const id = await libs.tags.upsertTag(request.user, config);
+    const tag = await libs.tags.getWithIds(request.user, [id]);
 
-      return { success: true, id };
-    } catch (err) {
-      // TODO move this to kibana route thing in adapter
-      return wrapEsError(err);
-    }
+    // TODO the action needs to be surfaced
+    return { success: true, item: tag[0], action: 'created' };
   },
 });

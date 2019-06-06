@@ -40,7 +40,6 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         'defaultIndex': 'logstash-*'
       });
-      await kibanaServer.uiSettings.disableToastAutohide();
       browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');

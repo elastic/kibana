@@ -5,14 +5,15 @@
  */
 
 import { take } from 'lodash';
-import { ContextFunction, Datatable } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   count: number;
 }
 
-export function head(): ContextFunction<'head', Datatable, Arguments, Datatable> {
+export function head(): ExpressionFunction<'head', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().head;
 
   return {
