@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { xyVisualization, State } from './xy_visualization';
+import { xyVisualization } from './xy_visualization';
 import { Position } from '@elastic/charts';
+import { State } from './types';
 
 function exampleState(): State {
   return {
@@ -32,7 +33,18 @@ function exampleState(): State {
 describe('IndexPattern Data Source', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
-      expect(xyVisualization.initialize()).toMatchInlineSnapshot(`
+      const initialState = xyVisualization.initialize();
+
+      expect(initialState.x.accessor).toBeDefined();
+      expect(initialState.y.accessors[0]).toBeDefined();
+      expect(initialState.x.accessor).not.toEqual(initialState.y.accessors[0]);
+
+      // These change with each generation, so we'll ignore them
+      // in our match snapshot test.
+      delete initialState.x.accessor;
+      delete initialState.y.accessors;
+
+      expect(initialState).toMatchInlineSnapshot(`
 Object {
   "legend": Object {
     "isVisible": true,
@@ -41,18 +53,16 @@ Object {
   "seriesType": "line",
   "splitSeriesAccessors": Array [],
   "stackAccessors": Array [],
-  "title": "Empty line chart",
+  "title": "Empty XY Chart",
   "x": Object {
-    "accessor": "",
     "position": "bottom",
     "showGridlines": false,
-    "title": "Uknown",
+    "title": "X",
   },
   "y": Object {
-    "accessors": Array [],
     "position": "left",
     "showGridlines": false,
-    "title": "Uknown",
+    "title": "Y",
   },
 }
 `);

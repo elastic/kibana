@@ -10,6 +10,7 @@ import { render } from 'react-dom';
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
+import uuid from 'uuid';
 import { Datasource, DataType } from '..';
 import {
   DatasourceDimensionPanelProps,
@@ -214,6 +215,10 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
         },
         getOperationForColumnId: (columnId: string) => {
           return columnToOperation(state.columns[columnId]);
+        },
+        generateColumnId: () => {
+          // TODO: Come up with a more compact form of generating unique column ids
+          return uuid.v4();
         },
 
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {

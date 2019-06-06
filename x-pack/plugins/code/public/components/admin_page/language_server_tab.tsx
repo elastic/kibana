@@ -162,7 +162,7 @@ class AdminLanguageSever extends React.PureComponent<Props, State> {
 }
 
 const SupportedOS = [
-  { id: 'win', name: 'Windows' },
+  { id: 'windows', name: 'Windows' },
   { id: 'linux', name: 'Linux' },
   { id: 'darwin', name: 'macOS' },
 ];
