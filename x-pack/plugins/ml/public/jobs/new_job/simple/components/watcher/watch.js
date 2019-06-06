@@ -81,7 +81,7 @@ export const watch = {
                       start: {
                         script: {
                           lang: 'painless',
-                          source: `LocalDateTime.ofEpochSecond((doc["timestamp"].date.getMillis()-((doc["bucket_span"].value * 1000)
+                          source: `LocalDateTime.ofEpochSecond((doc["timestamp"].value.getMillis()-((doc["bucket_span"].value * 1000)
  * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
                           params: {
                             'padding': 10
@@ -91,7 +91,7 @@ export const watch = {
                       end: {
                         script: {
                           lang: 'painless',
-                          source: `LocalDateTime.ofEpochSecond((doc["timestamp"].date.getMillis()+((doc["bucket_span"].value * 1000)
+                          source: `LocalDateTime.ofEpochSecond((doc["timestamp"].value.getMillis()+((doc["bucket_span"].value * 1000)
  * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
                           params: {
                             'padding': 10
@@ -101,13 +101,13 @@ export const watch = {
                       timestamp_epoch: {
                         script: {
                           lang: 'painless',
-                          source: 'doc["timestamp"].date.getMillis()/1000'
+                          source: 'doc["timestamp"].value.getMillis()/1000'
                         }
                       },
                       timestamp_iso8601: {
                         script: {
                           lang: 'painless',
-                          source: 'doc["timestamp"].date'
+                          source: 'doc["timestamp"].value'
                         }
                       },
                       score: {

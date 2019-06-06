@@ -13,7 +13,12 @@ import { HeaderPage } from './index';
 describe('rendering', () => {
   test('renders correctly', () => {
     const wrapper = shallow(
-      <HeaderPage subtitle="My Test Subtitle" title="My Test Title">
+      <HeaderPage
+        badgeLabel="Beta"
+        badgeTooltip="My test tooltip."
+        subtitle="My Test Subtitle"
+        title="My Test Title"
+      >
         <p>{'My test supplement.'}</p>
       </HeaderPage>
     );

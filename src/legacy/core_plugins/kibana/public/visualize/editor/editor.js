@@ -52,7 +52,7 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 
 uiRoutes
@@ -505,7 +505,7 @@ function VisEditor(
               // url, not the unsaved one.
               chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
 
-              const lastDashboardAbsoluteUrl = getNewPlatform().start.core.chrome.navLinks.get('kibana:dashboard').url;
+              const lastDashboardAbsoluteUrl = npStart.core.chrome.navLinks.get('kibana:dashboard').url;
               const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
               dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
               kbnUrl.change(dashboardParsedUrl.appPath);

@@ -185,7 +185,6 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
               onAddTimelinesToFavorites={undefined}
-              onDeleteSelected={this.onDeleteSelected}
               onlyFavorites={onlyFavorites}
               onOpenTimeline={this.openTimeline}
               onQueryChange={this.onQueryChange}
@@ -351,6 +350,7 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
         fetchPolicy: 'no-cache',
         variables: { id: timelineId },
       })
+      // eslint-disable-next-line
       .then(result => {
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)
@@ -379,6 +379,7 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
                       description: col.description != null ? col.description : undefined,
                       example: col.example != null ? col.example : undefined,
                       type: col.type != null ? col.type : undefined,
+                      aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
                       width:
                         col.id === '@timestamp'
                           ? DEFAULT_DATE_COLUMN_MIN_WIDTH

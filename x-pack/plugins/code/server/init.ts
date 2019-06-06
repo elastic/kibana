@@ -79,7 +79,7 @@ async function getCodeNodeUuid(url: string, log: Logger) {
 }
 
 export function init(server: Server, options: any) {
-  if (!options.enabled) {
+  if (!options.ui.enabled) {
     return;
   }
 
@@ -119,7 +119,7 @@ export function init(server: Server, options: any) {
   const kbnServer = this.kbnServer;
   kbnServer.ready().then(async () => {
     const serverUuid = await retryUntilAvailable(() => getServerUuid(server), 50);
-    // enable security check in routes
+
     const codeNodeUrl = serverOptions.codeNodeUrl;
     if (codeNodeUrl) {
       const codeNodeUuid = (await retryUntilAvailable(
@@ -149,6 +149,10 @@ async function initNonCodeNode(
 }
 
 async function initCodeNode(server: Server, serverOptions: ServerOptions, log: Logger) {
+  // wait until elasticsearch is ready
+  // @ts-ignore
+  await server.plugins.elasticsearch.waitUntilReady();
+
   log.info('Initializing Code plugin as code-node.');
   const queueIndex: string = server.config().get('xpack.code.queueIndex');
   const queueTimeout: number = server.config().get('xpack.code.queueTimeout');
@@ -177,6 +181,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     repoConfigController
   );
   server.events.on('stop', async () => {
+    log.debug('shutdown lsp process');
     await lspService.shutdown();
   });
   // Initialize indexing factories.
@@ -212,7 +217,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     esClient,
     serverOptions,
     indexWorker,
-    repoServiceFactory
+    repoServiceFactory,
+    cancellationService
   ).bind();
   const deleteWorker = new DeleteWorker(
     queue,
@@ -228,7 +234,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     log,
     esClient,
     serverOptions,
-    repoServiceFactory
+    repoServiceFactory,
+    cancellationService
   ).bind();
 
   // Initialize schedulers.
