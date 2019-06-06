@@ -12,7 +12,7 @@ import * as dnsQueryDsl from './query_dns.dsl';
 import * as generalQueryDsl from './query_general.dsl';
 import * as tlsHandshakesQueryDsl from './query_tls_handshakes.dsl';
 import * as uniquePrvateIpQueryDsl from './query_unique_private_ips.dsl';
-import { KpiNetworkMappedData } from './types';
+import { KpiNetworkData } from '../../graphql/types';
 
 describe('Network Kpi elasticsearch_adapter', () => {
   const mockCallWithRequest = jest.fn();
@@ -29,7 +29,7 @@ describe('Network Kpi elasticsearch_adapter', () => {
   let mockBuildDnsQuery: jest.SpyInstance;
   let mockBuildTlsHandshakeQuery: jest.SpyInstance;
   let EsKpiNetwork: ElasticsearchKpiNetworkAdapter;
-  let data: KpiNetworkMappedData;
+  let data: KpiNetworkData;
 
   describe('getKpiNetwork - call stack', () => {
     beforeAll(async () => {

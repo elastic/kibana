@@ -18,10 +18,9 @@ import {
   KpiNetworkESMSearchBody,
   KpiNetworkGeneralHit,
   KpiNetworkUniquePrivateIpsHit,
-  KpiNetworkMappedData,
 } from './types';
 import { TermAggregation } from '../types';
-import { KpiNetworkHistogramData } from '../../graphql/types';
+import { KpiNetworkHistogramData, KpiNetworkData } from '../../graphql/types';
 
 const formatHistogramData = (
   data: Array<{ key_as_string: string; count: { value: number } }>
@@ -42,7 +41,7 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
   public async getKpiNetwork(
     request: FrameworkRequest,
     options: RequestBasicOptions
-  ): Promise<KpiNetworkMappedData> {
+  ): Promise<KpiNetworkData> {
     const generalQuery: KpiNetworkESMSearchBody[] = buildGeneralQuery(options);
     const uniqueSourcePrivateIpsQuery: KpiNetworkESMSearchBody[] = buildUniquePrvateIpQuery(
       'source',

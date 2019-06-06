@@ -5,31 +5,10 @@
  */
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { MSearchHeader, SearchHit } from '../types';
-import { KpiNetworkHistogramData } from '../../graphql/types';
-
-export interface KpiNetworkMappedData {
-  networkEvents?: number | null;
-
-  uniqueFlowId?: number | null;
-
-  uniqueSourcePrivateIps?: number | null;
-
-  uniqueSourcePrivateIpsHistogram?: KpiNetworkHistogramData[] | null;
-
-  uniqueDestinationPrivateIps?: number | null;
-
-  uniqueDestinationPrivateIpsHistogram?: KpiNetworkHistogramData[] | null;
-
-  dnsQueries?: number | null;
-
-  tlsHandshakes?: number | null;
-}
+import { KpiNetworkHistogramData, KpiNetworkData } from '../../graphql/types';
 
 export interface KpiNetworkAdapter {
-  getKpiNetwork(
-    request: FrameworkRequest,
-    options: RequestBasicOptions
-  ): Promise<KpiNetworkMappedData>;
+  getKpiNetwork(request: FrameworkRequest, options: RequestBasicOptions): Promise<KpiNetworkData>;
 }
 
 export interface KpiNetworkHit {
