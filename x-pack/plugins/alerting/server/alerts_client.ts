@@ -5,14 +5,14 @@
  */
 
 import { omit } from 'lodash';
-import { SavedObjectsClient, SavedObjectReference } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract, SavedObjectReference } from 'src/legacy/server/saved_objects';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction } from './types';
 import { TaskManager } from '../../task_manager';
 import { TASK_MANAGER_SCOPE } from '../common/constants';
 
 interface ConstructorOptions {
   taskManager: TaskManager;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
 }
 
@@ -51,7 +51,7 @@ interface UpdateOptions {
 
 export class AlertsClient {
   private taskManager: TaskManager;
-  private savedObjectsClient: SavedObjectsClient;
+  private savedObjectsClient: SavedObjectsClientContract;
   private alertTypeRegistry: AlertTypeRegistry;
 
   constructor({ alertTypeRegistry, savedObjectsClient, taskManager }: ConstructorOptions) {
@@ -65,7 +65,7 @@ export class AlertsClient {
     this.alertTypeRegistry.get(data.alertTypeId);
     // Create alert
     const { alert: rawAlert, references } = this.getRawAlert(data);
-    const createdAlert = await this.savedObjectsClient.create<any>('alert', rawAlert, {
+    const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {
       ...options,
       references,
     });
@@ -113,7 +113,7 @@ export class AlertsClient {
 
   public async update({ id, data, options = {} }: UpdateOptions) {
     const { actions, references } = this.extractReferences(data.actions);
-    const updatedObject = await this.savedObjectsClient.update<any>(
+    const updatedObject = await this.savedObjectsClient.update(
       'alert',
       id,
       {
@@ -184,7 +184,17 @@ export class AlertsClient {
     }) as Alert['actions'];
   }
 
-  private getAlertFromRaw(id: string, rawAlert: RawAlert, references: SavedObjectReference[]) {
+  private getAlertFromRaw(
+    id: string,
+    rawAlert: Partial<RawAlert>,
+    references: SavedObjectReference[]
+  ) {
+    if (!rawAlert.actions) {
+      return {
+        id,
+        ...rawAlert,
+      };
+    }
     const actions = this.injectReferencesIntoActions(rawAlert.actions, references);
     return {
       id,
@@ -193,7 +203,7 @@ export class AlertsClient {
     };
   }
 
-  private getRawAlert(alert: Alert) {
+  private getRawAlert(alert: Alert): { alert: RawAlert; references: SavedObjectReference[] } {
     const { references, actions } = this.extractReferences(alert.actions);
     return {
       alert: {

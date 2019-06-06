@@ -9,13 +9,13 @@ jest.mock('./lib/get_create_task_runner_function', () => ({
 }));
 
 import { AlertTypeRegistry } from './alert_type_registry';
-import { savedObjectsClientMock } from './__mocks__/saved_objects_client.mock';
+import { SavedObjectsClientMock } from '../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 
 const alertTypeRegistryParams = {
   fireAction: jest.fn(),
   taskManager: taskManagerMock.create(),
-  savedObjectsClient: savedObjectsClientMock.create(),
+  savedObjectsClient: SavedObjectsClientMock.create(),
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -68,38 +68,17 @@ describe('registry()', () => {
   ],
 }
 `);
-    expect(getCreateTaskRunnerFunction).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "alertType": Object {
-          "description": "Test",
-          "execute": [MockFunction],
-          "id": "test",
-        },
-        "fireAction": [MockFunction],
-        "savedObjectsClient": Object {
-          "bulkCreate": [MockFunction],
-          "bulkGet": [MockFunction],
-          "create": [MockFunction],
-          "delete": [MockFunction],
-          "errors": Object {},
-          "find": [MockFunction],
-          "get": [MockFunction],
-          "update": [MockFunction],
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
-    },
-  ],
+    expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
+    const firstCall = getCreateTaskRunnerFunction.mock.calls[0][0];
+    expect(firstCall.alertType).toMatchInlineSnapshot(`
+Object {
+  "description": "Test",
+  "execute": [MockFunction],
+  "id": "test",
 }
 `);
+    expect(firstCall.savedObjectsClient).toBeTruthy();
+    expect(firstCall.fireAction).toMatchInlineSnapshot(`[MockFunction]`);
   });
 
   test('should throw an error if type is already registered', () => {

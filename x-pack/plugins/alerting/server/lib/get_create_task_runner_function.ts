@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
 import { ActionsPlugin } from '../../../actions';
 import { AlertType } from '../types';
 import { TaskInstance } from '../../../task_manager';
@@ -16,7 +16,7 @@ import { getNextRunAt } from './get_next_run_at';
 interface CreateTaskRunnerFunctionOptions {
   alertType: AlertType;
   fireAction: ActionsPlugin['fire'];
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface TaskRunnerOptions {

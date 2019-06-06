@@ -5,7 +5,7 @@
  */
 
 import { AlertExecuteOptions } from '../types';
-import { savedObjectsClientMock } from '../__mocks__/saved_objects_client.mock';
+import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 
 const mockedNow = new Date('2019-06-03T18:55:25.982Z');
@@ -23,7 +23,7 @@ const getCreateTaskRunnerFunctionParams = {
     execute: jest.fn(),
   },
   fireAction: jest.fn(),
-  savedObjectsClient: savedObjectsClientMock.create(),
+  savedObjectsClient: SavedObjectsClientMock.create(),
 };
 
 const mockedTaskInstance = {

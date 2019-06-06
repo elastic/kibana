@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
 import { AlertType } from './types';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
@@ -15,14 +15,14 @@ import { ActionsPlugin } from '../../actions';
 interface ConstructorOptions {
   taskManager: TaskManager;
   fireAction: ActionsPlugin['fire'];
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export class AlertTypeRegistry {
   private taskManager: TaskManager;
   private fireAction: ActionsPlugin['fire'];
   private alertTypes: Record<string, AlertType> = {};
-  private savedObjectsClient: SavedObjectsClient;
+  private savedObjectsClient: SavedObjectsClientContract;
 
   constructor({ savedObjectsClient, fireAction, taskManager }: ConstructorOptions) {
     this.taskManager = taskManager;

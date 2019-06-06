@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
 import { TASK_MANAGER_SCOPE } from '../common/constants';
 import { TaskManager } from '../../task_manager';
 
 interface CreateFireFunctionOptions {
   taskManager: TaskManager;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface FireOptions {

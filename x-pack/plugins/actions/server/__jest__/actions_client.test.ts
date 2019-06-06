@@ -9,17 +9,9 @@ import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsClient } from '../actions_client';
 import { taskManagerMock } from './task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 
-const savedObjectsClient = {
-  errors: {} as any,
-  bulkCreate: jest.fn(),
-  bulkGet: jest.fn(),
-  create: jest.fn(),
-  delete: jest.fn(),
-  find: jest.fn(),
-  get: jest.fn(),
-  update: jest.fn(),
-};
+const savedObjectsClient = SavedObjectsClientMock.create();
 
 const mockTaskManager = taskManagerMock.create();
 
@@ -41,7 +33,12 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('create()', () => {
   test('creates an action with all given properties', async () => {
-    const expectedResult = Symbol();
+    const expectedResult = {
+      id: '1',
+      type: 'type',
+      attributes: {},
+      references: [],
+    };
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -143,7 +140,12 @@ describe('create()', () => {
   });
 
   test('encrypts action type options unless specified not to', async () => {
-    const expectedResult = Symbol();
+    const expectedResult = {
+      id: '1',
+      type: 'type',
+      attributes: {},
+      references: [],
+    };
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -200,7 +202,12 @@ describe('create()', () => {
 
 describe('get()', () => {
   test('calls savedObjectsClient with id', async () => {
-    const expectedResult = Symbol();
+    const expectedResult = {
+      id: '1',
+      type: 'type',
+      attributes: {},
+      references: [],
+    };
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -230,7 +237,19 @@ describe('get()', () => {
 
 describe('find()', () => {
   test('calls savedObjectsClient with parameters', async () => {
-    const expectedResult = Symbol();
+    const expectedResult = {
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'type',
+          attributes: {},
+          references: [],
+        },
+      ],
+    };
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -291,7 +310,12 @@ describe('delete()', () => {
 
 describe('update()', () => {
   test('updates an action with all given properties', async () => {
-    const expectedResult = Symbol();
+    const expectedResult = {
+      id: '1',
+      type: 'type',
+      attributes: {},
+      references: [],
+    };
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -393,7 +417,12 @@ describe('update()', () => {
   });
 
   test('encrypts action type options unless specified not to', async () => {
-    const expectedResult = Symbol();
+    const expectedResult = {
+      id: '1',
+      type: 'type',
+      attributes: {},
+      references: [],
+    };
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',

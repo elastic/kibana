@@ -5,13 +5,13 @@
  */
 
 import { AlertsClient } from './alerts_client';
-import { savedObjectsClientMock } from './__mocks__/saved_objects_client.mock';
+import { SavedObjectsClientMock } from '../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 
 const alertsClientParams = {
   alertTypeRegistry: alertTypeRegistryMock.create(),
-  savedObjectsClient: savedObjectsClientMock.create(),
+  savedObjectsClient: SavedObjectsClientMock.create(),
   taskManager: taskManagerMock.create(),
 };
 
@@ -89,7 +89,20 @@ describe('create()', () => {
       state: {},
       params: {},
     });
-    alertsClientParams.savedObjectsClient.update.mockResolvedValueOnce({});
+    alertsClientParams.savedObjectsClient.update.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        scheduledTaskId: 'task-123',
+      },
+      references: [
+        {
+          id: '1',
+          name: 'action_0',
+          type: 'action',
+        },
+      ],
+    });
     const result = await alertsClient.create({ data });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -387,6 +400,9 @@ describe('find()', () => {
   test('calls saved objects client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     alertsClientParams.savedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10,
+      page: 1,
       saved_objects: [
         {
           id: '1',

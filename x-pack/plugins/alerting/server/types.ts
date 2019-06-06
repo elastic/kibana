@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectAttributes } from 'src/legacy/server/saved_objects';
 import { AlertInstance } from './lib';
 import { AlertTypeRegistry } from './alert_type_registry';
 
@@ -31,7 +32,7 @@ export interface AlertType {
   execute: ({ services, params, state }: AlertExecuteOptions) => Promise<State | void>;
 }
 
-export type AlertActionParams = Record<string, any>;
+export type AlertActionParams = SavedObjectAttributes;
 
 export interface AlertAction {
   group: string;
@@ -39,7 +40,7 @@ export interface AlertAction {
   params: AlertActionParams;
 }
 
-export interface RawAlertAction {
+export interface RawAlertAction extends SavedObjectAttributes {
   group: string;
   actionRef: string;
   params: AlertActionParams;
@@ -53,11 +54,11 @@ export interface Alert {
   scheduledTaskId?: string;
 }
 
-export interface RawAlert {
+export interface RawAlert extends SavedObjectAttributes {
   alertTypeId: string;
   interval: number;
   actions: RawAlertAction[];
-  alertTypeParams: Record<string, any>;
+  alertTypeParams: SavedObjectAttributes;
   scheduledTaskId?: string;
 }
 

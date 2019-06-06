@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/legacy/server/saved_objects';
 import { ActionTypeRegistry } from './action_type_registry';
 import { SavedObjectReference } from './types';
 import { throwIfActionTypeConfigInvalid } from './throw_if_action_type_config_invalid';
 
-interface Action {
+interface Action extends SavedObjectAttributes {
   description: string;
   actionTypeId: string;
-  actionTypeConfig: Record<string, any>;
+  actionTypeConfig: SavedObjectAttributes;
 }
 
 interface CreateOptions {
@@ -41,7 +41,7 @@ interface FindOptions {
 
 interface ConstructorOptions {
   actionTypeRegistry: ActionTypeRegistry;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface UpdateOptions {
@@ -51,7 +51,7 @@ interface UpdateOptions {
 }
 
 export class ActionsClient {
-  private savedObjectsClient: SavedObjectsClient;
+  private savedObjectsClient: SavedObjectsClientContract;
   private actionTypeRegistry: ActionTypeRegistry;
 
   constructor({ actionTypeRegistry, savedObjectsClient }: ConstructorOptions) {
@@ -105,7 +105,7 @@ export class ActionsClient {
       throwIfActionTypeConfigInvalid(actionType, data.actionTypeConfig);
       data = this.moveEncryptedAttributesToSecrets(data);
     }
-    return await this.savedObjectsClient.update<any>('action', id, data, options);
+    return await this.savedObjectsClient.update('action', id, data, options);
   }
 
   /**

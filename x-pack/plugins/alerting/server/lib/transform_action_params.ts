@@ -13,7 +13,7 @@ export function transformActionParams(params: AlertActionParams, state: State, c
   for (const key of Object.keys(params)) {
     const value = params[key];
     if (isPlainObject(value)) {
-      result[key] = transformActionParams(value, state, context);
+      result[key] = transformActionParams(value as AlertActionParams, state, context);
       continue;
     }
     if (typeof value !== 'string') {

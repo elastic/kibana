@@ -12,7 +12,7 @@ test('skips non string parameters', () => {
     number: 1,
     empty1: null,
     empty2: undefined,
-    date: new Date('2019-02-12T21:01:22.479Z'),
+    date: '2019-02-12T21:01:22.479Z',
   };
   const result = transformActionParams(params, {}, {});
   expect(result).toMatchInlineSnapshot(`
