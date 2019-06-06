@@ -21,7 +21,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import { createTextHandler } from '../lib/create_text_handler';
 import { ColorRules } from '../color_rules';
 import { YesNo } from '../yes_no';
 import uuid from 'uuid';
@@ -35,14 +34,18 @@ import {
   EuiFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export class MetricPanelConfig extends Component {
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+const { QueryBarInput } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
 
+export class MetricPanelConfig extends Component {
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -63,10 +66,9 @@ export class MetricPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { filter: '' };
+    const defaults = { filter: { query: '', language: getDefaultQueryLanguage() } };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
-    const handleTextChange = createTextHandler(this.props.onChange);
     let view;
     if (selectedTab === 'data') {
       view = (
@@ -112,10 +114,15 @@ export class MetricPanelConfig extends Component {
                   />)}
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBarInput
+                    query={{
+                      language: model.filter.language || getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    appName={'VisEditor'}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
