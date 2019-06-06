@@ -80,13 +80,13 @@ export const ml = (kibana) => {
       xpackMainPlugin.status.once('green', () => {
         // Register a function that is called whenever the xpack info changes,
         // to re-compute the license check results for this plugin
-        xpackMainPlugin.info.feature(thisPlugin.id).registerLicenseCheckResultsGenerator(checkLicense);
+        const mlFeature = xpackMainPlugin.info.feature(thisPlugin.id);
+        mlFeature.registerLicenseCheckResultsGenerator(checkLicense);
 
         // Add links to the Kibana sample data sets if ml is enabled
         // and there is a full license (trial or platinum).
-        const isEnabled = xpackMainPlugin.info.feature(thisPlugin.id).isEnabled();
-        if (isEnabled === true) {
-          const licenseCheckResults = xpackMainPlugin.info.feature(thisPlugin.id).getLicenseCheckResults();
+        if (mlFeature.isEnabled() === true) {
+          const licenseCheckResults = mlFeature.getLicenseCheckResults();
           if (licenseCheckResults.licenseType === LICENSE_TYPE.FULL) {
             addLinksToSampleDatasets(server);
           }
