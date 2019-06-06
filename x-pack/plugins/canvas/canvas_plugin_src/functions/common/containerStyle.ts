@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NullContextFunction, ContainerStyle } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ContainerStyle } from '../types';
 import { getFunctionHelp } from '../../strings';
 // @ts-ignore untyped local
 import { isValidUrl } from '../../../common/lib/url';
@@ -13,7 +14,12 @@ interface Return extends ContainerStyle {
   type: 'containerStyle';
 }
 
-export function containerStyle(): NullContextFunction<'containerStyle', ContainerStyle, Return> {
+export function containerStyle(): ExpressionFunction<
+  'containerStyle',
+  null,
+  ContainerStyle,
+  Return
+> {
   const { help, args: argHelp } = getFunctionHelp().containerStyle;
 
   return {

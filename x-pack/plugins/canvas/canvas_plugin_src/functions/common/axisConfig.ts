@@ -5,7 +5,8 @@
  */
 
 import moment from 'moment';
-import { ContextFunction, Datatable, Position } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable, Position } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -20,7 +21,7 @@ interface AxisConfig extends Arguments {
   type: 'axisConfig';
 }
 
-export function axisConfig(): ContextFunction<'axisConfig', Datatable, Arguments, AxisConfig> {
+export function axisConfig(): ExpressionFunction<'axisConfig', Datatable, Arguments, AxisConfig> {
   const { help, args: argHelp } = getFunctionHelp().axisConfig;
 
   return {

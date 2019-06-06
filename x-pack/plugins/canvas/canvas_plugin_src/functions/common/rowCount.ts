@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunction, Datatable } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable } from '../types';
 import { getFunctionHelp } from '../../strings';
 
-export function rowCount(): ContextFunction<'rowCount', Datatable, {}, number> {
+export function rowCount(): ExpressionFunction<'rowCount', Datatable, {}, number> {
   const { help } = getFunctionHelp().rowCount;
 
   return {

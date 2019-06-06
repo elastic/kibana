@@ -6,17 +6,10 @@
 
 // @ts-ignore no @typed def
 import inlineStyle from 'inline-style';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
 import { getFunctionHelp } from '../../strings';
-import {
-  CSSStyle,
-  FontFamily,
-  FontWeight,
-  NullContextFunction,
-  Style,
-  TextAlignment,
-  TEXT_ALIGNMENTS,
-} from '../types';
+import { CSSStyle, FontFamily, FontWeight, Style, TextAlignment, TEXT_ALIGNMENTS } from '../types';
 
 interface Arguments {
   align: TextAlignment;
@@ -29,7 +22,7 @@ interface Arguments {
   weight: FontWeight;
 }
 
-export function font(): NullContextFunction<'font', Arguments, Style> {
+export function font(): ExpressionFunction<'font', null, Arguments, Style> {
   const { help, args: argHelp } = getFunctionHelp().font;
 
   return {
