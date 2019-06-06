@@ -63,6 +63,7 @@ export const getColumnHeaderFromBrowserField = ({
   example: browserField.example != null ? `${browserField.example}` : undefined,
   id: browserField.name || '',
   type: browserField.type,
+  aggregatable: browserField.aggregatable,
   width,
 });
 

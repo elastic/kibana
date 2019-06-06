@@ -379,6 +379,7 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
                       description: col.description != null ? col.description : undefined,
                       example: col.example != null ? col.example : undefined,
                       type: col.type != null ? col.type : undefined,
+                      aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
                       width:
                         col.id === '@timestamp'
                           ? DEFAULT_DATE_COLUMN_MIN_WIDTH
