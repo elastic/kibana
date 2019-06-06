@@ -19,6 +19,7 @@ import {
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from '../events';
+import { TimelineContext } from '../timeline_context';
 
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
@@ -83,23 +84,27 @@ export const DataProviders = pure<Props>(
     show,
   }) => (
     <DropTargetDataProviders data-test-subj="dataProviders">
-      <DroppableWrapper isDropDisabled={!show} droppableId={getDroppableId(id)}>
-        {dataProviders != null && dataProviders.length ? (
-          <Providers
-            browserFields={browserFields}
-            id={id}
-            dataProviders={dataProviders}
-            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-            onDataProviderEdited={onDataProviderEdited}
-            onDataProviderRemoved={onDataProviderRemoved}
-            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-          />
-        ) : (
-          <Empty />
+      <TimelineContext.Consumer>
+        {({ isLoading }) => (
+          <DroppableWrapper isDropDisabled={!show || isLoading} droppableId={getDroppableId(id)}>
+            {dataProviders != null && dataProviders.length ? (
+              <Providers
+                browserFields={browserFields}
+                id={id}
+                dataProviders={dataProviders}
+                onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+                onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+                onDataProviderEdited={onDataProviderEdited}
+                onDataProviderRemoved={onDataProviderRemoved}
+                onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+                onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+              />
+            ) : (
+              <Empty />
+            )}
+          </DroppableWrapper>
         )}
-      </DroppableWrapper>
+      </TimelineContext.Consumer>
     </DropTargetDataProviders>
   )
 );

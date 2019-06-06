@@ -21,13 +21,13 @@ import { errors as esErrors } from 'elasticsearch';
 
 import { decorateEsError } from './decorate_es_error';
 import {
-  isEsUnavailableError,
-  isConflictError,
-  isNotAuthorizedError,
-  isForbiddenError,
-  isRequestEntityTooLargeError,
-  isNotFoundError,
   isBadRequestError,
+  isConflictError,
+  isEsUnavailableError,
+  isForbiddenError,
+  isNotAuthorizedError,
+  isNotFoundError,
+  isRequestEntityTooLargeError,
 } from './errors';
 
 describe('savedObjectsClient/decorateEsError', () => {

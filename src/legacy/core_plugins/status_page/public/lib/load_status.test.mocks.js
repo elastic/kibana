@@ -17,5 +17,21 @@
  * under the License.
  */
 
-export { SavedObjectsClient } from './saved_objects_client';
-export { SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './lib';
+import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
+
+jest.doMock('ui/new_platform', () => ({
+  npSetup: {
+    core: {
+      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+      notifications: notificationServiceMock.createSetupContract(),
+    }
+  },
+}));
+
+// Make importing the ui/notify module work in jest
+jest.doMock('ui/metadata', () => ({
+  metadata: {
+    branch: 'my-metadata-branch',
+    version: 'my-metadata-version'
+  }
+}));

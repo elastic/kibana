@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { onStart } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
-onStart(({ core }) => {
-  const codeUiEnabled = core.injectedMetadata.getInjectedVar('codeUiEnabled');
-  if (codeUiEnabled === false) {
-    core.chrome.navLinks.update('code', { hidden: true });
-  }
-});
+const codeUiEnabled = npStart.core.injectedMetadata.getInjectedVar('codeUiEnabled');
+if (codeUiEnabled === false) {
+  npStart.core.chrome.navLinks.update('code', { hidden: true });
+}

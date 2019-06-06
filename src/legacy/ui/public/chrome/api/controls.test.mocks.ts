@@ -17,11 +17,11 @@
  * under the License.
  */
 
-declare class Metadata {
-  public branch: string;
-  public version: string;
-}
+import { chromeServiceMock } from '../../../../../core/public/mocks';
 
-declare const metadata: Metadata;
-
-export { metadata };
+export const newPlatformChrome = chromeServiceMock.createSetupContract();
+jest.doMock('ui/new_platform', () => ({
+  npSetup: {
+    core: { chrome: newPlatformChrome },
+  },
+}));

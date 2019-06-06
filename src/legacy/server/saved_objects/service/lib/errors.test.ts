@@ -21,22 +21,22 @@ import Boom from 'boom';
 
 import {
   createBadRequestError,
+  createEsAutoCreateIndexError,
+  createGenericNotFoundError,
   createUnsupportedTypeError,
   decorateBadRequestError,
-  isBadRequestError,
-  decorateNotAuthorizedError,
-  isNotAuthorizedError,
-  decorateForbiddenError,
-  isForbiddenError,
-  createGenericNotFoundError,
-  isNotFoundError,
   decorateConflictError,
-  isConflictError,
   decorateEsUnavailableError,
-  isEsUnavailableError,
+  decorateForbiddenError,
   decorateGeneralError,
+  decorateNotAuthorizedError,
+  isBadRequestError,
+  isConflictError,
   isEsAutoCreateIndexError,
-  createEsAutoCreateIndexError,
+  isEsUnavailableError,
+  isForbiddenError,
+  isNotAuthorizedError,
+  isNotFoundError,
 } from './errors';
 
 describe('savedObjectsClient/errorTypes', () => {
@@ -354,6 +354,7 @@ describe('savedObjectsClient/errorTypes', () => {
     describe('createEsAutoCreateIndexError', () => {
       it('does not take an error argument', () => {
         const error = new Error();
+        // @ts-ignore
         expect(createEsAutoCreateIndexError(error)).not.toBe(error);
       });
 

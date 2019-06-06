@@ -5,8 +5,9 @@
  */
 
 import Papa from 'papaparse';
-import { Datatable, NullContextFunction } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable } from '../types';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   data: string;
@@ -14,8 +15,9 @@ interface Arguments {
   newline: string;
 }
 
-export function csv(): NullContextFunction<'csv', Arguments, Datatable> {
+export function csv(): ExpressionFunction<'csv', null, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().csv;
+  const errorMessages = getFunctionErrors().csv;
 
   return {
     name: 'csv',
@@ -62,7 +64,7 @@ export function csv(): NullContextFunction<'csv', Arguments, Datatable> {
       const { data, errors } = output;
 
       if (errors.length > 0) {
-        throw new Error('Error parsing input CSV.');
+        throw errorMessages.invalidInputCSV();
       }
 
       // output.data is an array of arrays, rows and values in each row
