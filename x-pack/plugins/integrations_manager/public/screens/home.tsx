@@ -10,7 +10,7 @@ import { IntegrationCard } from '../components/integration_card';
 import { IntegrationList } from '../../common/types';
 
 export function Home() {
-  const [list, setList] = useState([] as IntegrationList);
+  const [list, setList] = useState<IntegrationList>([]);
 
   useEffect(() => {
     getIntegrationsList().then(({ data }) => setList(data));
