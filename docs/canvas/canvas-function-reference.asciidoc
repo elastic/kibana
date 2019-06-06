@@ -1996,7 +1996,7 @@ Uses Timelion to extract one or more time series from many sources.
 
 |_Unnamed_ 
 
-Aliases: `query`, `q`
+Aliases: `q`, `query`
 |`string`
 |A Timelion query 
 
