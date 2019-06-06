@@ -16,11 +16,8 @@ import {
 // @ts-ignore: could not find declaration file for module
 import mappings from './mappings';
 
-export interface DependenciesSetup {
-  plugins: {
-    elasticsearch: any;
-    xpack_main: any;
-  };
+interface MlKbnServer extends KbnServer {
+  addAppLinksToSampleDataset: () => {};
 }
 
 export const ml = (kibana: any) => {
@@ -60,7 +57,7 @@ export const ml = (kibana: any) => {
     },
 
     async init(server: Server) {
-      const kbnServer = (server as unknown) as KbnServer;
+      const kbnServer = (server as unknown) as MlKbnServer;
 
       const initializerContext = ({
         legacyConfig: server.config(),
@@ -78,10 +75,8 @@ export const ml = (kibana: any) => {
 
       const core: MlCoreSetup = {
         addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
-        config: server.config, // TODO: remove this as it's in the initializerContext
         injectUiAppVars: server.injectUiAppVars,
         http: mlHttpService,
-        elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch, // TODO: check if this is needed
         savedObjects: server.savedObjects,
         usage: server.usage,
       };

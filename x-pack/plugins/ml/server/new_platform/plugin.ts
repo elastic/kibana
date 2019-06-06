@@ -8,12 +8,7 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ServerRoute } from 'hapi';
 import { KibanaConfig, SavedObjectsService } from 'src/legacy/server/kbn_server';
-import {
-  HttpServiceSetup,
-  Logger,
-  PluginInitializerContext,
-  ElasticsearchServiceSetup,
-} from 'src/core/server';
+import { HttpServiceSetup, Logger, PluginInitializerContext } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
@@ -65,13 +60,16 @@ import { initMlServerLog } from '../client/log';
 export interface MlHttpServiceSetup extends HttpServiceSetup {
   route(route: ServerRoute | ServerRoute[]): void;
 }
+
+export interface MlXpackMainPlugin extends XPackMainPlugin {
+  status: any;
+}
+
 export interface MlCoreSetup {
   addAppLinksToSampleDataset: () => any;
   injectUiAppVars: (id: string, callback: () => {}) => any;
-  config: () => any;
   http: MlHttpServiceSetup;
   savedObjects: SavedObjectsService;
-  elasticsearch: ElasticsearchServiceSetup;
   usage: {
     collectorSet: {
       makeUsageCollector: any;
@@ -85,7 +83,7 @@ export interface MlInitializerContext extends PluginInitializerContext {
 }
 export interface PluginsSetup {
   elasticsearch: ElasticsearchPlugin;
-  xpackMain: XPackMainPlugin;
+  xpackMain: MlXpackMainPlugin;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }
@@ -94,7 +92,7 @@ export interface RouteInitialization {
   config?: any;
   elasticsearchPlugin: ElasticsearchPlugin;
   route(route: ServerRoute | ServerRoute[]): void;
-  xpackMainPlugin?: XPackMainPlugin;
+  xpackMainPlugin?: MlXpackMainPlugin;
   savedObjects?: SavedObjectsService;
 }
 export interface UsageInitialization {
@@ -115,13 +113,13 @@ export class Plugin {
   private config: any;
   private log: Logger;
 
-  constructor(private readonly initializerContext: MlInitializerContext) {
+  constructor(initializerContext: MlInitializerContext) {
     this.config = initializerContext.legacyConfig;
     this.log = initializerContext.logger.get();
   }
 
   public setup(core: MlCoreSetup, plugins: PluginsSetup) {
-    const xpackMainPlugin: XPackMainPlugin = plugins.xpackMain;
+    const xpackMainPlugin: MlXpackMainPlugin = plugins.xpackMain;
     const { addAppLinksToSampleDataset, http, injectUiAppVars } = core;
     const pluginId = this.pluginId;
 
@@ -179,9 +177,8 @@ export class Plugin {
     };
 
     injectUiAppVars('ml', () => {
-      const config = core.config();
       return {
-        kbnIndex: config.get('kibana.index'),
+        kbnIndex: this.config.get('kibana.index'),
         mlAnnotationsEnabled: FEATURE_ANNOTATIONS_ENABLED,
       };
     });
