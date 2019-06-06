@@ -3,12 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React from 'react';
+import { EuiButton } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { uiModules } from 'ui/modules';
 import { isSystemApiRequest } from 'ui/system_api';
 import { PathProvider } from 'plugins/xpack_main/services/path';
+import { toastNotifications } from 'ui/notify';
 import 'plugins/security/services/auto_logout';
 
 /**
@@ -26,35 +29,55 @@ module.config(($httpProvider) => {
     $q,
     $injector,
     sessionTimeout,
-    Notifier,
     Private,
     autoLogout
   ) => {
+
+    function refreshSession() {
+      // Make a simple request to keep the session alive
+      $injector.get('es').ping();
+      clearNotifications();
+    }
+
     const isUnauthenticated = Private(PathProvider).isUnauthenticated();
-    const notifier = new Notifier();
     const notificationLifetime = 60 * 1000;
     const notificationOptions = {
-      type: 'warning',
-      content: i18n.translate('xpack.security.hacks.logoutNotification', {
-        defaultMessage: 'You will soon be logged out due to inactivity. Click OK to resume.'
-      }),
-      icon: 'warning',
+      color: 'warning',
+      text: (
+        <>
+          <p data-test-subj="errorToastMessage">
+            <FormattedMessage
+              id="xpack.security.hacks.logoutNotification"
+              defaultMessage="You will soon be logged out due to inactivity. Click OK to resume."
+            />
+          </p>
+          <div className="eui-textRight">
+            <EuiButton size="s" color="warning" onClick={() => refreshSession()}>
+              <FormattedMessage
+                id="xpack.security.hacks.sessionTimeout.okButtonText"
+                defaultMessage="OK"
+              />
+            </EuiButton>
+          </div>
+        </>
+      ),
       title: i18n.translate('xpack.security.hacks.warningTitle', {
         defaultMessage: 'Warning'
       }),
-      lifetime: Math.min(
+      toastLifeTimeMs: Math.min(
         (sessionTimeout - SESSION_TIMEOUT_GRACE_PERIOD_MS),
         notificationLifetime
       ),
-      actions: ['accept']
     };
 
     let pendingNotification;
     let activeNotification;
+    let pendingSessionExpiration;
 
     function clearNotifications() {
       if (pendingNotification) $timeout.cancel(pendingNotification);
-      if (activeNotification) activeNotification.clear();
+      if (pendingSessionExpiration) clearTimeout(pendingSessionExpiration);
+      if (activeNotification) toastNotifications.remove(activeNotification);
     }
 
     function scheduleNotification() {
@@ -62,14 +85,8 @@ module.config(($httpProvider) => {
     }
 
     function showNotification() {
-      activeNotification = notifier.add(notificationOptions, (action) => {
-        if (action === 'accept') {
-          // Make a simple request to keep the session alive
-          $injector.get('es').ping();
-        } else {
-          autoLogout();
-        }
-      });
+      activeNotification = toastNotifications.add(notificationOptions);
+      pendingSessionExpiration = setTimeout(() => autoLogout(), notificationOptions.toastLifeTimeMs);
     }
 
     function interceptorFactory(responseHandler) {
