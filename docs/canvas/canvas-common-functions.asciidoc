@@ -522,7 +522,7 @@ Default: `14`
 |`lHeight` 
 
 Alias: `lineHeight`
-|`number`
+|`number`, `null`
 |The line height in pixels
 
 |`family`
@@ -1498,7 +1498,7 @@ Sorts a `datatable on a column.`
 |===
 |Argument |Type |Description
 
-|_Unnamed_ *** 
+|_Unnamed_
 
 Alias: `column`
 |`string`
