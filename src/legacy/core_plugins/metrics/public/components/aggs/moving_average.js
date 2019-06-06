@@ -48,6 +48,8 @@ const DEFAULTS = {
   window: 10,
 };
 
+const isProperWindowValue = ({ window, period }) => window > (period * 2);
+
 export const MovingAverageAgg = props => {
   const { siblings } = props;
 
@@ -175,6 +177,9 @@ export const MovingAverageAgg = props => {
             label={i18n.translate('tsvb.movingAverage.windowSizeLabel', {
               defaultMessage: 'Window Size',
             })}
+            helpText={!isProperWindowValue(model) && i18n.translate('tsvb.movingAverage.windowSizeHint', {
+              defaultMessage: 'Window must be more than twice the size of the period',
+            })}
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -258,7 +263,7 @@ export const MovingAverageAgg = props => {
                       <EuiFormRow
                         id={htmlId('period')}
                         label={i18n.translate('tsvb.movingAverage.period', {
-                          defaultMessage: 'Period (days)',
+                          defaultMessage: 'Period',
                         })}
                       >
                         <EuiFieldNumber

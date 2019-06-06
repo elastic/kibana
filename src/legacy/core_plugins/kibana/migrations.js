@@ -293,25 +293,27 @@ function replaceMovAvgToMovFn(doc) {
       // Let it go, the data is invalid and we'll leave it as is
     }
 
-    if (newVisState.type === 'metrics') {
+    if (newVisState && newVisState.type === 'metrics') {
       const series = get(newVisState, 'params.series', []);
 
       series.forEach(part => {
-        (part.metrics || []).forEach(metric => {
-          if (metric.type === 'moving_average') {
-            metric.model_type = metric.model;
-            metric.alpha = 0;
-            metric.beta = 0;
-            metric.gamma = 0;
-            metric.period = 1;
-            metric.multiplicative = true;
+        if (part.metrics && Array.isArray(part.metrics)) {
+          part.forEach(metric => {
+            if (metric.type === 'moving_average') {
+              metric.model_type = metric.model;
+              metric.alpha = 0;
+              metric.beta = 0;
+              metric.gamma = 0;
+              metric.period = 1;
+              metric.multiplicative = true;
 
-            delete metric.minimize;
-            delete metric.model;
-            delete metric.settings;
-            delete metric.predict;
-          }
-        });
+              delete metric.minimize;
+              delete metric.model;
+              delete metric.settings;
+              delete metric.predict;
+            }
+          });
+        }
       });
 
       return {
