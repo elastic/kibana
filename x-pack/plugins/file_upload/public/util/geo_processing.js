@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { ES_GEO_FIELD_TYPE } from '../../common/constants/file_import';
+import { i18n } from '@kbn/i18n';
 
 const DEFAULT_SETTINGS = {
   number_of_shards: 1
@@ -47,22 +48,32 @@ export function geoJsonToEs(parsedGeojson, datatype) {
     : parsedGeojson.features;
 
   if (datatype === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
-    return features.reduce((accu, feature) => {
-      const properties = feature.properties;
+    return features.reduce((accu, { geometry, properties }) => {
+      const { coordinates } = geometry;
       accu.push({
         coordinates: {
-          'type': feature.geometry.type.toLowerCase(),
-          'coordinates': feature.geometry.coordinates
+          'type': geometry.type.toLowerCase(),
+          'coordinates': coordinates
         },
         ...(!_.isEmpty(properties) ? { ...properties } : {})
       });
       return accu;
     }, []);
   } else if (datatype === ES_GEO_FIELD_TYPE.GEO_POINT) {
-    return features.reduce((accu, feature) => {
-      const properties = feature.properties;
+    return features.reduce((accu, { geometry, properties }) => {
+      const { coordinates } = geometry;
+      if (Array.isArray(coordinates[0])) {
+        throw(
+          i18n.translate(
+            'xpack.fileUpload.geoProcessing.notPointError', {
+              defaultMessage: 'Coordinates {coordinates} does not contain point datatype',
+              values: { coordinates: coordinates.toString() }
+            })
+        );
+        return accu;
+      }
       accu.push({
-        coordinates: feature.geometry.coordinates,
+        coordinates,
         ...(!_.isEmpty(properties) ? { ...properties } : {})
       });
       return accu;

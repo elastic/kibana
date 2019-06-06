@@ -14,80 +14,21 @@ describe('geo_json_clean_and_validate', () => {
 
   const reader = new jsts.io.GeoJSONReader();
 
-  const goodFeatureGeoJson = {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[
-        [-104.05, 78.99],
-        [-87.22,  78.98],
-        [-86.58,  75.94],
-        [-104.03, 75.94],
-        [-104.05, 78.99]
-      ]]
-    },
-  };
-
-  const badFeaturesGeoJson = {
-    type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[
-            [0, 0],
-            [2, 2],
-            [0, 2],
-            [2, 0],
-            [0, 0]
-          ]]
-        }
-      },
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[
-            [2, 2],
-            [4, 0],
-            [2, 0],
-            [4, 2],
-            [2, 2]
-          ]]
-        }
-      }
-    ]
-  };
-
-  const counterClockwiseGeoJson = {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[
-        [100, 0],
-        [101, 0],
-        [101, 1],
-        [100, 1],
-        [100, 0]
-      ], [
-        [100.2, 0.2],
-        [100.8, 0.2],
-        [100.8, 0.8],
-        [100.2, 0.8],
-        [100.2, 0.2]
-      ]]
-    }
-  };
-
-  const invalidGeoJson = {
-    type: 'notMyType',
-    geometry: 'shmeometry'
-  };
-
-  const notEvenCloseToGeoJson = [1, 2, 3, 4];
-
   it('should not modify valid features', () => {
+    const goodFeatureGeoJson = {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [-104.05, 78.99],
+          [-87.22,  78.98],
+          [-86.58,  75.94],
+          [-104.03, 75.94],
+          [-104.05, 78.99]
+        ]]
+      },
+    };
+
     // Confirm valid geometry
     const geoJson = reader.read(goodFeatureGeoJson);
     const isSimpleOrValid = (geoJson.geometry.isSimple()
@@ -100,6 +41,40 @@ describe('geo_json_clean_and_validate', () => {
   });
 
   it('should modify incorrect features', () => {
+    // This feature collection contains polygons which cross over themselves,
+    // which is invalid for geojson
+    const badFeaturesGeoJson = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [0, 0],
+              [2, 2],
+              [0, 2],
+              [2, 0],
+              [0, 0]
+            ]]
+          }
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [2, 2],
+              [4, 0],
+              [2, 0],
+              [4, 2],
+              [2, 2]
+            ]]
+          }
+        }
+      ]
+    };
+
     // Confirm invalid geometry
     let geoJson = reader.read(badFeaturesGeoJson);
     let isSimpleOrValid;
@@ -123,6 +98,26 @@ describe('geo_json_clean_and_validate', () => {
   });
 
   it('should reverse counter-clockwise winding order', () => {
+    const counterClockwiseGeoJson = {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [100, 0],
+          [101, 0],
+          [101, 1],
+          [100, 1],
+          [100, 0]
+        ], [
+          [100.2, 0.2],
+          [100.8, 0.2],
+          [100.8, 0.8],
+          [100.2, 0.8],
+          [100.2, 0.2]
+        ]]
+      }
+    };
+
     // Confirm changes to object
     const clockwiseGeoJson = geoJsonCleanAndValidate(counterClockwiseGeoJson);
     expect(clockwiseGeoJson).not.toEqual(counterClockwiseGeoJson);
@@ -133,6 +128,13 @@ describe('geo_json_clean_and_validate', () => {
   });
 
   it('error out on invalid object', () => {
+    const invalidGeoJson = {
+      type: 'notMyType',
+      geometry: 'shmeometry'
+    };
+
+    const notEvenCloseToGeoJson = [1, 2, 3, 4];
+
     const badObjectPassed = () => geoJsonCleanAndValidate(invalidGeoJson);
     expect(badObjectPassed).toThrow();
 
