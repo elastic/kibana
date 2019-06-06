@@ -31,22 +31,18 @@ function exampleState(): State {
   };
 }
 
-describe('IndexPattern Data Source', () => {
+describe('xy_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
-      const initialState = xyVisualization.initialize(
-        undefined,
-        createMockDatasource().publicAPIMock
-      );
+      const mockDatasource = createMockDatasource();
+      mockDatasource.publicAPIMock.generateColumnId
+        .mockReturnValue('test-id1')
+        .mockReturnValueOnce('test-id2');
+      const initialState = xyVisualization.initialize(undefined, mockDatasource.publicAPIMock);
 
       expect(initialState.x.accessor).toBeDefined();
       expect(initialState.y.accessors[0]).toBeDefined();
       expect(initialState.x.accessor).not.toEqual(initialState.y.accessors[0]);
-
-      // These change with each generation, so we'll ignore them
-      // in our match snapshot test.
-      delete initialState.x.accessor;
-      delete initialState.y.accessors;
 
       expect(initialState).toMatchInlineSnapshot(`
 Object {
@@ -59,11 +55,15 @@ Object {
   "stackAccessors": Array [],
   "title": "Empty XY Chart",
   "x": Object {
+    "accessor": "test-id2",
     "position": "bottom",
     "showGridlines": false,
     "title": "X",
   },
   "y": Object {
+    "accessors": Array [
+      "test-id1",
+    ],
     "position": "left",
     "showGridlines": false,
     "title": "Y",
