@@ -70,6 +70,12 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
     }
     const root = embeddable.getRoot();
 
+    if (!this.isCompatible({ triggerContext, embeddable })) {
+      throw new IncompatibleActionError();
+    }
+
+    // This logic is duplicated from isCompatible only for typescript not to complain on the following line
+    // since this function is a type guard
     if (!containerAcceptsFilterInput(root)) {
       throw new IncompatibleActionError();
     }
