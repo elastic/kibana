@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunction, Datatable, Render, Style } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable, Render, Style } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -14,7 +15,7 @@ interface Arguments {
   showHeader: boolean;
 }
 
-export function table(): ContextFunction<'table', Datatable, Arguments, Render<Arguments>> {
+export function table(): ExpressionFunction<'table', Datatable, Arguments, Render<Arguments>> {
   const { help, args: argHelp } = getFunctionHelp().table;
 
   return {

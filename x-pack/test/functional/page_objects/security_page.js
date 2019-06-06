@@ -44,6 +44,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           await find.clickByCssSelector(rawDataTabLocator);
         }
         await retry.try(async () => {
+          if (await find.existsByCssSelector(rawDataTabLocator)) {
+            await find.clickByCssSelector(rawDataTabLocator);
+          }
           await PageObjects.error.expectForbidden();
         });
         log.debug(`Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`);
@@ -357,7 +360,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
             await testSubjects.click('restrictFieldsQuery0');
 
             // have to remove the '*'
-            return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"]')
+            return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"] svg.euiIcon')
               .then(function () {
                 return addGrantedField(userObj.elasticsearch.indices[0].field_security.grant);
               });
