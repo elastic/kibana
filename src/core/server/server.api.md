@@ -165,13 +165,13 @@ export interface InternalCoreStart {
     plugins: PluginsServiceStart;
 }
 
-// @public (undocumented)
+// @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     constructor(request: Request, params: Params, query: Query, body: Body);
     // (undocumented)
     readonly body: Body;
     // Warning: (ae-forgotten-export) The symbol "RouteSchemas" needs to be exported by the entry point index.d.ts
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas: RouteSchemas<P, Q, B> | undefined): KibanaRequest<P["type"], Q["type"], B["type"]>;
+    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>): KibanaRequest<P["type"], Q["type"], B["type"]>;
     // (undocumented)
     getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
     // (undocumented)
@@ -179,14 +179,24 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     // (undocumented)
     readonly params: Params;
     // (undocumented)
-    readonly path: string;
-    // (undocumented)
     readonly query: Query;
+    // (undocumented)
+    readonly route: RecursiveReadonly<KibanaRequestRoute>;
     // (undocumented)
     unstable_getIncomingMessage(): import("http").IncomingMessage;
     // (undocumented)
     readonly url: Url;
     }
+
+// @public
+export interface KibanaRequestRoute {
+    // (undocumented)
+    method: RouteMethod | 'patch' | 'options';
+    // (undocumented)
+    options: Required<RouteConfigOptions>;
+    // (undocumented)
+    path: string;
+}
 
 // @public
 export interface Logger {
@@ -334,6 +344,22 @@ export interface PluginsServiceStart {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
 }
+
+// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
+    [K in keyof T]: RecursiveReadonly<T[K]>;
+}> : T;
+
+// @public
+export interface RouteConfigOptions {
+    authRequired?: boolean;
+    tags?: ReadonlyArray<string>;
+}
+
+// @public
+export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
 
 // @public (undocumented)
 export class Router {
