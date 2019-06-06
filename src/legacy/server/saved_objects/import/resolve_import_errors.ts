@@ -18,7 +18,7 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObjectsClient } from '../service';
+import { SavedObjectsClientContract } from '../';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
 import { extractErrors } from './extract_errors';
@@ -29,7 +29,7 @@ import { validateReferences } from './validate_references';
 interface ResolveImportErrorsOptions {
   readStream: Readable;
   objectLimit: number;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
   retries: Retry[];
   supportedTypes: string[];
 }

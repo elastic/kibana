@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import errors from './errors';
+import {
+  fatalErrorsServiceMock,
+  notificationServiceMock,
+} from '../../../../../../../core/public/mocks';
 
-export { errors };
-
-export { SavedObjectsRepository, SavedObjectsRepositoryOptions } from './repository';
-
-export {
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
-  ScopedSavedObjectsClientProvider,
-} from './scoped_client_provider';
+jest.doMock('ui/new_platform', () => ({
+  npSetup: {
+    core: {
+      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+      notifications: notificationServiceMock.createSetupContract(),
+    },
+  },
+}));

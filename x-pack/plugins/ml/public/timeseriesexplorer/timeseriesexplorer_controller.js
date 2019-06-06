@@ -121,6 +121,13 @@ module.controller('MlTimeSeriesExplorerController', function (
 
   $scope.focusAnnotationData = [];
 
+  // Used in the template to indicate the chart is being plotted across
+  // all partition field values, where the cardinality of the field cannot be
+  // obtained as it is not aggregatable e.g. 'all distinct kpi_indicator values'
+  $scope.allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionValuesLabel', {
+    defaultMessage: 'all',
+  });
+
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
   const tzConfig = config.get('dateFormat:tz');
   const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();

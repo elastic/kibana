@@ -52,46 +52,6 @@ export const responseAggs: IpOverviewHit = {
         value: 1551388820000,
         value_as_string: '2019-02-28T21:20:20.000Z',
       },
-      host: {
-        doc_count: 882307,
-        results: {
-          hits: {
-            total: {
-              value: 882307,
-              relation: 'eq',
-            },
-            max_score: null,
-            hits: [
-              {
-                _index: 'packetbeat-8.0.0-2019.02.19-000001',
-                _type: '_doc',
-                _id: 'vX5Py2kBCQofM5eX2OEu',
-                _score: null,
-                _source: {
-                  host: {
-                    hostname: 'suricata-bangalore',
-                    os: {
-                      kernel: '4.15.0-45-generic',
-                      codename: 'bionic',
-                      name: 'Ubuntu',
-                      family: 'debian',
-                      version: '18.04.2 LTS (Bionic Beaver)',
-                      platform: 'ubuntu',
-                    },
-                    containerized: false,
-                    ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
-                    name: 'suricata-bangalore',
-                    id: '0a63559c1acf4c419d979c4b4d8b83ff',
-                    mac: ['ee:0b:1b:29:80:bd'],
-                    architecture: 'x86_64',
-                  },
-                },
-                sort: [1553894200003],
-              },
-            ],
-          },
-        },
-      },
       autonomous_system: {
         doc_count: 0,
         results: {
@@ -152,46 +112,6 @@ export const responseAggs: IpOverviewHit = {
         value: 1551388804322,
         value_as_string: '2019-02-28T21:20:04.322Z',
       },
-      host: {
-        doc_count: 1002234,
-        results: {
-          hits: {
-            total: {
-              value: 1002234,
-              relation: 'eq',
-            },
-            max_score: null,
-            hits: [
-              {
-                _index: 'packetbeat-8.0.0-2019.02.19-000001',
-                _type: '_doc',
-                _id: 'vn5Py2kBCQofM5eX2OEu',
-                _score: null,
-                _source: {
-                  host: {
-                    hostname: 'suricata-bangalore',
-                    os: {
-                      kernel: '4.15.0-45-generic',
-                      codename: 'bionic',
-                      name: 'Ubuntu',
-                      family: 'debian',
-                      version: '18.04.2 LTS (Bionic Beaver)',
-                      platform: 'ubuntu',
-                    },
-                    ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
-                    containerized: false,
-                    name: 'suricata-bangalore',
-                    id: '0a63559c1acf4c419d979c4b4d8b83ff',
-                    mac: ['ee:0b:1b:29:80:bd'],
-                    architecture: 'x86_64',
-                  },
-                },
-                sort: [1553894200003],
-              },
-            ],
-          },
-        },
-      },
       autonomous_system: {
         doc_count: 0,
         results: {
@@ -202,6 +122,49 @@ export const responseAggs: IpOverviewHit = {
             },
             max_score: null,
             hits: [],
+          },
+        },
+      },
+    },
+    host: {
+      doc_count: 1588091,
+      host: {
+        doc_count: 1588091,
+        results: {
+          hits: {
+            total: {
+              value: 1588091,
+              relation: 'eq',
+            },
+            max_score: null,
+            hits: [
+              {
+                _index: 'filebeat-8.0.0-2019.05.20-000004',
+                _type: '_doc',
+                _id: 'NU9dD2sB9v5HJNSHMMRc',
+                _score: null,
+                _source: {
+                  host: {
+                    hostname: 'suricata-iowa',
+                    os: {
+                      kernel: '4.15.0-1032-gcp',
+                      codename: 'bionic',
+                      name: 'Ubuntu',
+                      family: 'debian',
+                      version: '18.04.2 LTS (Bionic Beaver)',
+                      platform: 'ubuntu',
+                    },
+                    ip: ['10.128.0.4', 'fe80::4001:aff:fe80:4'],
+                    containerized: false,
+                    name: 'suricata-iowa',
+                    id: 'be1f3d767896212736b880e846876dcb',
+                    mac: ['42:01:0a:80:00:04'],
+                    architecture: 'x86_64',
+                  },
+                },
+                sort: [1559330892000],
+              },
+            ],
           },
         },
       },
@@ -230,23 +193,6 @@ export const formattedDestination = {
     firstSeen: '2019-02-28T21:20:20.000Z',
     lastSeen: '2019-03-29T22:56:20.003Z',
     autonomousSystem: {},
-    host: {
-      hostname: 'suricata-bangalore',
-      os: {
-        kernel: '4.15.0-45-generic',
-        codename: 'bionic',
-        name: 'Ubuntu',
-        family: 'debian',
-        version: '18.04.2 LTS (Bionic Beaver)',
-        platform: 'ubuntu',
-      },
-      containerized: false,
-      ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
-      name: 'suricata-bangalore',
-      id: '0a63559c1acf4c419d979c4b4d8b83ff',
-      mac: ['ee:0b:1b:29:80:bd'],
-      architecture: 'x86_64',
-    },
     geo: {
       continent_name: 'Asia',
       region_iso_code: 'IN-KA',
@@ -266,23 +212,6 @@ export const formattedSource = {
     firstSeen: '2019-02-28T21:20:04.322Z',
     lastSeen: '2019-03-29T22:56:20.003Z',
     autonomousSystem: {},
-    host: {
-      hostname: 'suricata-bangalore',
-      os: {
-        kernel: '4.15.0-45-generic',
-        codename: 'bionic',
-        name: 'Ubuntu',
-        family: 'debian',
-        version: '18.04.2 LTS (Bionic Beaver)',
-        platform: 'ubuntu',
-      },
-      containerized: false,
-      ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
-      name: 'suricata-bangalore',
-      id: '0a63559c1acf4c419d979c4b4d8b83ff',
-      mac: ['ee:0b:1b:29:80:bd'],
-      architecture: 'x86_64',
-    },
     geo: {
       continent_name: 'Asia',
       region_iso_code: 'IN-KA',
@@ -297,12 +226,31 @@ export const formattedSource = {
   },
 };
 
+export const formattedHost = {
+  host: {
+    hostname: 'suricata-iowa',
+    os: {
+      kernel: '4.15.0-1032-gcp',
+      codename: 'bionic',
+      name: 'Ubuntu',
+      family: 'debian',
+      version: '18.04.2 LTS (Bionic Beaver)',
+      platform: 'ubuntu',
+    },
+    ip: ['10.128.0.4', 'fe80::4001:aff:fe80:4'],
+    containerized: false,
+    name: 'suricata-iowa',
+    id: 'be1f3d767896212736b880e846876dcb',
+    mac: ['42:01:0a:80:00:04'],
+    architecture: 'x86_64',
+  },
+};
+
 export const formattedEmptySource = {
   source: {
     firstSeen: null,
     lastSeen: null,
     autonomousSystem: {},
-    host: {},
     geo: {},
   },
 };
