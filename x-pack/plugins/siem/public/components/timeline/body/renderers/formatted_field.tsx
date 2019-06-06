@@ -49,6 +49,7 @@ export const FormattedFieldValue = pure<{
   } else if (fieldName === MESSAGE_FIELD_NAME && value != null && value !== '') {
     return (
       <EuiToolTip
+        position="left"
         data-test-subj="message-tool-tip"
         content={
           <EuiFlexGroup direction="column" gutterSize="none">
