@@ -1,11 +1,4 @@
-
-.mapFeatureTooltip__filterButton {
-  display: inline;
-}
-
 .mapFeatureTooltip_table {
-  margin: $euiSizeS $euiSizeS;
-
   td {
     padding: $euiSizeXS;
   }
@@ -17,6 +10,5 @@
 }
 
 .mapFeatureTooltip__propertyValue {
-  display: inline;
   max-width: $euiSizeXL * 5;
 }

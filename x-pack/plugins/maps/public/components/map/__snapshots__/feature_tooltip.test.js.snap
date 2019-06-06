@@ -12,33 +12,18 @@ exports[`FeatureTooltip should not show close button and not show filter button 
 
 exports[`FeatureTooltip should show both filter buttons and close button 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
+  <EuiTextAlign
+    textAlign="center"
   >
-    <EuiFlexItem
-      grow={true}
-    >
-      <EuiFlexGroup
-        alignItems="flexEnd"
-        direction="row"
-        justifyContent="flexEnd"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonIcon
-            aria-label="Close tooltip"
-            color="primary"
-            iconSize="m"
-            iconType="cross"
-            onClick={[Function]}
-            type="button"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+    <EuiButtonIcon
+      aria-label="Close tooltip"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      type="button"
+    />
+  </EuiTextAlign>
   <table
     className="mapFeatureTooltip_table"
   >
@@ -96,33 +81,18 @@ exports[`FeatureTooltip should show both filter buttons and close button 1`] = `
 
 exports[`FeatureTooltip should show close button, but not filter button 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
+  <EuiTextAlign
+    textAlign="center"
   >
-    <EuiFlexItem
-      grow={true}
-    >
-      <EuiFlexGroup
-        alignItems="flexEnd"
-        direction="row"
-        justifyContent="flexEnd"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonIcon
-            aria-label="Close tooltip"
-            color="primary"
-            iconSize="m"
-            iconType="cross"
-            onClick={[Function]}
-            type="button"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+    <EuiButtonIcon
+      aria-label="Close tooltip"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      type="button"
+    />
+  </EuiTextAlign>
   <table
     className="mapFeatureTooltip_table"
   >
@@ -134,8 +104,8 @@ exports[`FeatureTooltip should show close button, but not filter button 1`] = `
 exports[`FeatureTooltip should show error message if unable to load tooltip content 1`] = `
 <EuiCallOut
   color="danger"
-  iconType="cross"
-  size="m"
+  iconType="alert"
+  size="s"
   title="Unable to load tooltip content"
 >
   <p>

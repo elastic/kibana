@@ -6,11 +6,10 @@
 
 import React, { Fragment } from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButtonIcon,
   EuiCallOut,
   EuiLoadingSpinner,
+  EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -90,6 +89,7 @@ export class FeatureTooltip extends React.Component {
     return (
       <td>
         <EuiButtonIcon
+          className="mapFeatureTooltip__filterButton"
           iconType="plusInCircle"
           title={i18n.translate('xpack.maps.tooltip.filterOnPropertyTitle', {
             defaultMessage: 'Filter on property'
@@ -102,7 +102,6 @@ export class FeatureTooltip extends React.Component {
           aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
             defaultMessage: 'Filter on property'
           })}
-          className="mapFeatureTooltip__filterButton"
         />
       </td>
     );
@@ -145,33 +144,28 @@ export class FeatureTooltip extends React.Component {
       return null;
     }
     return (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem grow={true}>
-          <EuiFlexGroup alignItems="flexEnd" direction="row" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                onClick={this.props.closeTooltip}
-                iconType="cross"
-                aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
-                  defaultMessage: 'Close tooltip'
-                })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTextAlign textAlign="center">
+        <EuiButtonIcon
+          onClick={this.props.closeTooltip}
+          iconType="cross"
+          aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
+            defaultMessage: 'Close tooltip'
+          })}
+        />
+      </EuiTextAlign>
     );
   }
 
   render() {
     if (!this.state.properties) {
       const loadingMsg = i18n.translate('xpack.maps.tooltip.loadingMsg', {
-        defaultMessage: 'loading content'
+        defaultMessage: 'Loading'
       });
       return (
-        <div>
-          <EuiLoadingSpinner size="m" /> {` ${loadingMsg}`}
-        </div>
+        <EuiTextAlign textAlign="center">
+          <EuiLoadingSpinner size="m" />
+          {loadingMsg}
+        </EuiTextAlign>
       );
     }
 
@@ -182,7 +176,8 @@ export class FeatureTooltip extends React.Component {
             defaultMessage: 'Unable to load tooltip content'
           })}
           color="danger"
-          iconType="cross"
+          iconType="alert"
+          size="s"
         >
           <p>
             {this.state.loadPropertiesErrorMsg}
