@@ -10,8 +10,10 @@ import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
 import { Datasource, DataType } from '..';
+import uuid from 'uuid';
 import { DatasourceDimensionPanelProps, DatasourceDataPanelProps } from '../types';
 import { getIndexPatterns } from './loader';
+import { ChildDragDropProvider, DragDrop, DragContextState } from '../drag_drop';
 
 type OperationType = 'value' | 'terms' | 'date_histogram';
 
@@ -55,7 +57,7 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
 
 export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
   return (
-    <div>
+    <ChildDragDropProvider {...props.dragDropContext}>
       Index Pattern Data Source
       <div>
         <EuiComboBox
@@ -86,16 +88,19 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
         <div>
           {props.state.currentIndexPatternId &&
             props.state.indexPatterns[props.state.currentIndexPatternId].fields.map(field => (
-              <div key={field.name}>{field.name}</div>
+              <DragDrop key={field.name} value={field} draggable>
+                {field.name}
+              </DragDrop>
             ))}
         </div>
       </div>
-    </div>
+    </ChildDragDropProvider>
   );
 }
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
+  dragDropContext: DragContextState;
   setState: (newState: IndexPatternPrivateState) => void;
 };
 
@@ -124,45 +129,73 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
 
   const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
 
-  return (
-    <div>
-      Dimension Panel
-      <EuiComboBox
-        data-test-subj="indexPattern-dimension"
-        options={filteredColumns.map(col => ({
-          label: col.label,
-          value: col.operationId,
-        }))}
-        selectedOptions={
-          selectedColumn
-            ? [
-                {
-                  label: selectedColumn.label,
-                  value: selectedColumn.operationId,
-                },
-              ]
-            : []
-        }
-        singleSelection={{ asPlainText: true }}
-        isClearable={false}
-        onChange={choices => {
-          const column: IndexPatternColumn = columns.find(
-            ({ operationId }) => operationId === choices[0].value
-          )!;
-          const newColumns: IndexPatternPrivateState['columns'] = {
-            ...props.state.columns,
-            [props.columnId]: column,
-          };
+  function canHandleDrop() {
+    const { dragging } = props.dragDropContext;
+    const field = dragging as IndexPatternField;
 
-          props.setState({
-            ...props.state,
-            columns: newColumns,
-            // Order is not meaningful until we aggregate
-            columnOrder: Object.keys(newColumns),
-          });
+    return (
+      !!field &&
+      !!field.type &&
+      filteredColumns.some(({ sourceField }) => sourceField === (field as IndexPatternField).name)
+    );
+  }
+
+  function changeColumn(column: IndexPatternColumn) {
+    const newColumns: IndexPatternPrivateState['columns'] = {
+      ...props.state.columns,
+      [props.columnId]: column,
+    };
+
+    props.setState({
+      ...props.state,
+      columns: newColumns,
+      // Order is not meaningful until we aggregate
+      columnOrder: Object.keys(newColumns),
+    });
+  }
+
+  return (
+    <ChildDragDropProvider {...props.dragDropContext}>
+      <DragDrop
+        droppable={canHandleDrop()}
+        onDrop={field => {
+          const column = columns.find(
+            ({ sourceField }) => sourceField === (field as IndexPatternField).name
+          );
+
+          if (!column) {
+            // TODO: What do we do if we couldn't find a column?
+            return;
+          }
+
+          changeColumn(column);
         }}
-      />
-    </div>
+      >
+        Dimension Panel
+        <EuiComboBox
+          data-test-subj="indexPattern-dimension"
+          options={filteredColumns.map(col => ({
+            label: col.label,
+            value: col.operationId,
+          }))}
+          selectedOptions={
+            selectedColumn
+              ? [
+                  {
+                    label: selectedColumn.label,
+                    value: selectedColumn.operationId,
+                  },
+                ]
+              : []
+          }
+          singleSelection={{ asPlainText: true }}
+          isClearable={false}
+          onChange={choices =>
+            changeColumn(columns.find(({ operationId }) => operationId === choices[0].value)!)
+          }
+        />
+      </DragDrop>
+    </ChildDragDropProvider>
   );
 }
 
@@ -231,6 +264,10 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
             dataType,
             isBucketed,
           };
+        },
+        generateColumnId: () => {
+          // TODO: Come up with a more compact form of generating unique column ids
+          return uuid.v4();
         },
 
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {

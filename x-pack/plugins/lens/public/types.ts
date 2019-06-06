@@ -5,6 +5,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
+import { DragContextState } from './drag_drop';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
@@ -68,6 +69,7 @@ export interface Datasource<T = unknown, P = unknown> {
 export interface DatasourcePublicAPI {
   getTableSpec: () => TableSpec;
   getOperationForColumnId: (columnId: string) => Operation | null;
+  generateColumnId: () => string;
 
   // Render can be called many times
   renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
@@ -79,6 +81,7 @@ export interface DatasourcePublicAPI {
 
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
+  dragDropContext: DragContextState;
   setState: (newState: T) => void;
 }
 
@@ -86,6 +89,8 @@ export interface DatasourceDataPanelProps<T = unknown> {
 export interface DatasourceDimensionPanelProps {
   // If no columnId is passed, it will render as empty
   columnId: string;
+
+  dragDropContext: DragContextState;
 
   // Visualizations can restrict operations based on their own rules
   filterOperations: (operation: Operation) => boolean;
@@ -132,6 +137,7 @@ export interface KibanaDatatable {
 }
 
 export interface VisualizationProps<T = unknown> {
+  dragDropContext: DragContextState;
   datasource: DatasourcePublicAPI;
   state: T;
   setState: (newState: T) => void;
