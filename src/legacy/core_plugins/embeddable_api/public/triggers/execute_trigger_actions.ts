@@ -49,6 +49,14 @@ export async function executeTriggerActions(
 
     const session = openContextMenu([panel]);
   } else if (actions.length === 1) {
-    actions[0].execute({ embeddable, triggerContext });
+    const href = actions[0].getHref({
+      embeddable,
+      triggerContext,
+    });
+    if (href) {
+      window.location.href = href;
+    } else {
+      actions[0].execute({ embeddable, triggerContext });
+    }
   }
 }
