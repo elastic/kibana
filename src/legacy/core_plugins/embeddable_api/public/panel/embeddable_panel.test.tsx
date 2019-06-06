@@ -67,8 +67,7 @@ test('HelloWorldContainer initializes embeddables', async done => {
       id: '123',
       panels: {
         '123': {
-          embeddableId: '123',
-          explicitInput: { firstName: 'Sam' },
+          explicitInput: { id: '123', firstName: 'Sam' },
           type: CONTACT_CARD_EMBEDDABLE,
         },
       },

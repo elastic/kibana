@@ -27,10 +27,13 @@ import {
 import { IEmbeddable } from '../embeddables/i_embeddable';
 import { IRegistry } from '../types';
 
-export interface PanelState<E extends { [key: string]: unknown } = { [key: string]: unknown }> {
+export interface PanelState<
+  E extends { [key: string]: unknown } & { id: string } = { [key: string]: unknown } & {
+    id: string;
+  }
+> {
   savedObjectId?: string;
 
-  embeddableId: string;
   // The type of embeddable in this panel. Will be used to find the factory in which to
   // load the embeddable.
   type: string;
@@ -38,7 +41,7 @@ export interface PanelState<E extends { [key: string]: unknown } = { [key: strin
   // Stores input for this embeddable that is specific to this embeddable. Other parts of embeddable input
   // will be derived from the container's input. **Any state in here will override any state derived from
   // the container.**
-  explicitInput: E; // TODO: rename explicitInput vs derivedInput that is taken from the container state.
+  explicitInput: E;
 }
 
 export interface ContainerOutput extends EmbeddableOutput {

@@ -41,7 +41,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
     super(props);
 
     Object.values(this.props.container.getInput().panels).forEach(panelState => {
-      this.roots[panelState.embeddableId] = React.createRef();
+      this.roots[panelState.explicitInput.id] = React.createRef();
     });
 
     this.state = {
@@ -92,10 +92,10 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
   private renderList() {
     const list = Object.values(this.state.panels).map(panelState => {
       const item = (
-        <EuiFlexItem key={panelState.embeddableId}>
+        <EuiFlexItem key={panelState.explicitInput.id}>
           <EmbeddableChildPanel
             container={this.props.container}
-            embeddableId={panelState.embeddableId}
+            embeddableId={panelState.explicitInput.id}
           />
         </EuiFlexItem>
       );

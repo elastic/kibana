@@ -27,26 +27,13 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
 } from '../embeddables';
-import { IContainer, ContainerInput, ContainerOutput } from './i_container';
+import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { IEmbeddable } from '../embeddables/i_embeddable';
 import { IRegistry } from '../types';
 import { PanelNotFoundError } from './panel_not_found_error';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
-export interface PanelState<TEmbeddableInput extends EmbeddableInput = EmbeddableInput> {
-  savedObjectId?: string;
-
-  embeddableId: string;
-  // The type of embeddable in this panel. Will be used to find the factory in which to
-  // load the embeddable.
-  type: string;
-
-  // Stores input for this embeddable that is specific to this embeddable. Other parts of embeddable input
-  // will be derived from the container's input. Any state in here will override any state derived from
-  // the container.
-  explicitInput: Partial<TEmbeddableInput>;
-}
 export abstract class Container<
   TChildInput extends Partial<EmbeddableInput> = {},
   TContainerInput extends ContainerInput = ContainerInput,
@@ -226,11 +213,10 @@ export abstract class Container<
 
     return {
       type: factory.type,
-      embeddableId,
       explicitInput: {
         id: embeddableId,
         ...explicitInput,
-      },
+      } as TEmbeddableInput,
     };
   }
 
@@ -258,11 +244,11 @@ export abstract class Container<
     this.updateInput({
       panels: {
         ...this.input.panels,
-        [panelState.embeddableId]: panelState,
+        [panelState.explicitInput.id]: panelState,
       },
     } as Partial<TContainerInput>);
 
-    return await this.untilEmbeddableLoaded<TEmbeddable>(panelState.embeddableId);
+    return await this.untilEmbeddableLoaded<TEmbeddable>(panelState.explicitInput.id);
   }
 
   private createNewExplicitEmbeddableInput<
@@ -313,11 +299,11 @@ export abstract class Container<
     this.updateOutput({
       embeddableLoaded: {
         ...this.output.embeddableLoaded,
-        [panel.embeddableId]: false,
+        [panel.explicitInput.id]: false,
       },
     } as Partial<TContainerOutput>);
     let embeddable: IEmbeddable | ErrorEmbeddable | undefined;
-    const inputForChild = this.getInputForChild(panel.embeddableId);
+    const inputForChild = this.getInputForChild(panel.explicitInput.id);
     try {
       const factory = this.embeddableFactories.get(panel.type);
       if (!factory) {
@@ -328,7 +314,7 @@ export abstract class Container<
         ? await factory.createFromSavedObject(panel.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);
     } catch (e) {
-      embeddable = new ErrorEmbeddable(e, { id: panel.embeddableId }, this);
+      embeddable = new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
     }
 
     // EmbeddableFactory.create can return undefined without throwing an error, which indicates that an embeddable
@@ -348,13 +334,13 @@ export abstract class Container<
         this.updateInput({
           panels: {
             ...this.input.panels,
-            [panel.embeddableId]: {
-              ...this.input.panels[panel.embeddableId],
+            [panel.explicitInput.id]: {
+              ...this.input.panels[panel.explicitInput.id],
               ...(embeddable.getOutput().savedObjectId
                 ? { savedObjectId: embeddable.getOutput().savedObjectId }
                 : undefined),
               explicitInput: {
-                ...this.input.panels[panel.embeddableId].explicitInput,
+                ...this.input.panels[panel.explicitInput.id].explicitInput,
                 ...newOrChangedInput,
               },
             },
@@ -366,11 +352,11 @@ export abstract class Container<
       this.updateOutput({
         embeddableLoaded: {
           ...this.output.embeddableLoaded,
-          [panel.embeddableId]: true,
+          [panel.explicitInput.id]: true,
         },
       } as Partial<TContainerOutput>);
     } else if (embeddable === undefined) {
-      this.removeEmbeddable(panel.embeddableId);
+      this.removeEmbeddable(panel.explicitInput.id);
     }
     return embeddable;
   }

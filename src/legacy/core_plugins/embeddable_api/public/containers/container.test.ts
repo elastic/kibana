@@ -81,8 +81,7 @@ test('Container initializes embeddables', async done => {
       id: 'hello',
       panels: {
         '123': {
-          embeddableId: '123',
-          explicitInput: { firstName: 'Sam', lastName: 'Tarley' },
+          explicitInput: { firstName: 'Sam', lastName: 'Tarley', id: '123' },
           type: CONTACT_CARD_EMBEDDABLE,
         },
       },
@@ -134,8 +133,7 @@ test('Container.removeEmbeddable removes and cleans up', async done => {
       id: 'hello',
       panels: {
         '123': {
-          embeddableId: '123',
-          explicitInput: { firstName: 'Sam', lastName: 'Tarley' },
+          explicitInput: { id: '123', firstName: 'Sam', lastName: 'Tarley' },
           type: CONTACT_CARD_EMBEDDABLE,
         },
       },
@@ -600,8 +598,7 @@ test('container stores ErrorEmbeddables when a factory for a child cannot be fou
       panels: {
         '123': {
           type: 'IDontExist',
-          explicitInput: {},
-          embeddableId: '123',
+          explicitInput: { id: '123' },
         },
       },
       viewMode: ViewMode.EDIT,
@@ -625,8 +622,7 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
       panels: {
         '123': {
           type: 'vis',
-          explicitInput: {},
-          embeddableId: '123',
+          explicitInput: { id: '123' },
           savedObjectId: '456',
         },
       },
@@ -651,8 +647,7 @@ test('ErrorEmbeddables get updated when parent does', async done => {
       panels: {
         '123': {
           type: 'vis',
-          explicitInput: {},
-          embeddableId: '123',
+          explicitInput: { id: '123' },
           savedObjectId: '456',
         },
       },
@@ -695,8 +690,7 @@ test('untilEmbeddableLoaded resolves if child is has an type that does not exist
       panels: {
         '123': {
           type: HELLO_WORLD_EMBEDDABLE_TYPE,
-          explicitInput: {},
-          embeddableId: '123',
+          explicitInput: { id: '123' },
         },
       },
     },
@@ -719,8 +713,7 @@ test('untilEmbeddableLoaded resolves if child is loaded in the container', async
       panels: {
         '123': {
           type: HELLO_WORLD_EMBEDDABLE_TYPE,
-          explicitInput: {},
-          embeddableId: '123',
+          explicitInput: { id: '123' },
         },
       },
     },
@@ -745,8 +738,7 @@ test('untilEmbeddableLoaded rejects with an error if child is subsequently remov
       id: 'hello',
       panels: {
         '123': {
-          embeddableId: '123',
-          explicitInput: { firstName: 'Sam', lastName: 'Tarley' },
+          explicitInput: { id: '123', firstName: 'Sam', lastName: 'Tarley' },
           type: CONTACT_CARD_EMBEDDABLE,
         },
       },

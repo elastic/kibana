@@ -47,21 +47,19 @@ export class HelloWorldContainerExample extends React.Component<Props> {
         id: 'helloWorldContainerExample',
         panels: {
           '1': {
-            embeddableId: '1',
             type: CONTACT_CARD_EMBEDDABLE,
             explicitInput: {
               firstName: 'Joe',
+              id: '1',
             },
           },
           '2': {
-            embeddableId: '2',
             type: HELLO_WORLD_EMBEDDABLE_TYPE,
-            explicitInput: {},
+            explicitInput: { id: '2' },
           },
           '3': {
-            embeddableId: '3',
             type: 'idontexist',
-            explicitInput: {},
+            explicitInput: { id: '3' },
           },
         },
       },
