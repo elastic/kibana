@@ -18,7 +18,7 @@
  */
 
 import Hapi from 'hapi';
-import { SavedObjectsClient } from '../';
+import { SavedObjectsClientContract } from '../';
 
 export interface SavedObjectReference {
   name: string;
@@ -29,7 +29,7 @@ export interface SavedObjectReference {
 export interface Prerequisites {
   getSavedObjectsClient: {
     assign: string;
-    method: (req: Hapi.Request) => SavedObjectsClient;
+    method: (req: Hapi.Request) => SavedObjectsClientContract;
   };
 }
 

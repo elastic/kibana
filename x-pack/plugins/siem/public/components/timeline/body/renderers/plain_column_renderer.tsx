@@ -7,6 +7,7 @@
 import { isNumber } from 'lodash/fp';
 import React from 'react';
 
+import { EuiText } from '@elastic/eui';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
@@ -19,6 +20,7 @@ import { IP_FIELD_TYPE, FormattedFieldValue } from './formatted_field';
 import { ColumnRenderer } from './column_renderer';
 import { parseQueryValue } from './parse_query_value';
 import { parseValue } from './parse_value';
+import { TruncatableText } from '../../../truncatable_text';
 
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex(item => item.field === columnName) !== -1;
@@ -72,6 +74,45 @@ export const plainColumnRenderer: ColumnRenderer = {
                 width={width}
               />
             );
+          }
+          if (!field.aggregatable) {
+            if (width != null) {
+              return (
+                <TruncatableText
+                  size="s"
+                  width={width}
+                  key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${
+                    field.id
+                  }--${value}`}
+                >
+                  <FormattedFieldValue
+                    eventId={eventId}
+                    contextId={contextId}
+                    fieldName={columnName}
+                    fieldType={field.type || ''}
+                    value={parseValue(value)}
+                  />
+                </TruncatableText>
+              );
+            } else {
+              return (
+                <EuiText
+                  data-test-subj="draggable-content"
+                  size="s"
+                  key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${
+                    field.id
+                  }--${value}`}
+                >
+                  <FormattedFieldValue
+                    eventId={eventId}
+                    contextId={contextId}
+                    fieldName={columnName}
+                    fieldType={field.type || ''}
+                    value={parseValue(value)}
+                  />
+                </EuiText>
+              );
+            }
           }
           // note: we use a raw DraggableWrapper here instead of a DefaultDraggable,
           // because we pass a width to enable text truncation, and we will show empty values

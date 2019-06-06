@@ -34,8 +34,15 @@
 // EUI issue for additional props https://github.com/elastic/eui/issues/1154
 // Per the issue, EUI will only be implementing a maxWidth prop while other
 // overrrides will need to be made via the style attribute or CSS classes.
+//
+// Size restrictions are limited to larger screen sizes so that the modal
+// fills the viewport on smaller screen sizes, as designed by EUI.
+// https://github.com/elastic/kibana/pull/37345
+
 .canvasModal--fixedSize {
-  width: 75vw;
-  height: 75vh;
-  max-height: 680px; // limit for large screen displays
+  @include euiBreakpoint('m', 'l', 'xl') {
+    width: 75vw;
+    height: 75vh;
+    max-height: 680px; // limit for large screen displays
+  }
 }
