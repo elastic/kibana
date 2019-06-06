@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { deepFreeze, RecursiveReadonly } from '../../utils/deep_freeze';
+import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { MixedApp } from '../application_service';
 import { InjectedMetadataStart } from '../../injected_metadata';
 

@@ -4,12 +4,15 @@
   flex-grow: 1;
 
   .mapboxgl-popup {
-    z-index: 100;
+    z-index: $euiZLevel2;
     border-color: $euiColorEmptyShade;
   }
 
   .mapboxgl-popup-content {
+    @include euiBottomShadow($color: #000);
     background-color: $euiColorEmptyShade;
+    padding: $euiSizeS;
+    overflow: hidden;
   }
 
   .mapboxgl-popup-tip {

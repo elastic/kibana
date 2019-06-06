@@ -96,6 +96,14 @@ export const CountBadge = styled(EuiBadge)`
   margin-left: 5px;
 `;
 
+export const Spacer = styled.span`
+  margin-left: 5px;
+`;
+
+export const Badge = styled(EuiBadge)`
+  vertical-align: top;
+`;
+
 export const MoreRowItems = styled(EuiIcon)`
   margin-left: 5px;
 `;

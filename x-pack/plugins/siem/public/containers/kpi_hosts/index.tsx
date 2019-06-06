@@ -17,7 +17,7 @@ import { createFilter } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
 import { kpiHostsQuery } from './index.gql_query';
-import { ChartData } from '../../components/stat_items';
+import { ChartData } from '../../components/charts/common';
 
 export interface KpiHostsArgs {
   id: string;

@@ -49,7 +49,12 @@ export const CloseButton = pure<{
       aria-label={i18n.REMOVE_COLUMN}
       data-test-subj="remove-column"
       iconType="cross"
-      onClick={() => onColumnRemoved(columnId)}
+      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+        // To avoid a re-sorting when you delete a column
+        event.preventDefault();
+        event.stopPropagation();
+        onColumnRemoved(columnId);
+      }}
     />
   </WrappedCloseButton>
 ));

@@ -30,6 +30,7 @@ import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
+import { mapToObject } from '../utils/';
 
 export class Server {
   public readonly configService: ConfigService;
@@ -73,23 +74,29 @@ export class Server {
       plugins: pluginsSetup,
     };
 
-    await this.legacy.setup(coreSetup);
+    await this.legacy.setup({
+      core: coreSetup,
+      plugins: mapToObject(pluginsSetup.contracts),
+    });
 
     return coreSetup;
   }
 
   public async start() {
     const httpStart = await this.http.start();
-    const plugins = await this.plugins.start({});
+    const pluginsStart = await this.plugins.start({});
 
-    const startDeps = {
+    const coreStart = {
       http: httpStart,
-      plugins,
+      plugins: pluginsStart,
     };
 
-    await this.legacy.start(startDeps);
+    await this.legacy.start({
+      core: coreStart,
+      plugins: mapToObject(pluginsStart.contracts),
+    });
 
-    return startDeps;
+    return coreStart;
   }
 
   public async stop() {

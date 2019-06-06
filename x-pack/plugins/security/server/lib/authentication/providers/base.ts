@@ -7,6 +7,14 @@
 import { Legacy } from 'kibana';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { LoginAttempt } from '../login_attempt';
+
+/**
+ * Describes a request complemented with `loginAttempt` method.
+ */
+export interface RequestWithLoginAttempt extends Legacy.Request {
+  loginAttempt: () => LoginAttempt;
+}
 
 /**
  * Represents available provider options.
@@ -40,7 +48,10 @@ export abstract class BaseAuthenticationProvider {
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  abstract authenticate(request: Legacy.Request, state?: unknown): Promise<AuthenticationResult>;
+  abstract authenticate(
+    request: RequestWithLoginAttempt,
+    state?: unknown
+  ): Promise<AuthenticationResult>;
 
   /**
    * Invalidates user session associated with the request.

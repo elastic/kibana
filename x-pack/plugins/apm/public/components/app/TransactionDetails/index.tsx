@@ -5,14 +5,12 @@
  */
 
 import { EuiPanel, EuiSpacer, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React from 'react';
 import { useTransactionDetailsCharts } from '../../../hooks/useTransactionDetailsCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
-import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { TransactionDistribution } from './Distribution';
 import { Transaction } from './Transaction';
@@ -52,29 +50,12 @@ export function TransactionDetails() {
         <TransactionDistribution
           distribution={distributionData}
           urlParams={urlParams}
-          location={location}
         />
       </EuiPanel>
 
       <EuiSpacer size="s" />
 
-      {!transaction ? (
-        <EmptyMessage
-          heading={i18n.translate(
-            'xpack.apm.transactionDetails.noTransactionTitle',
-            {
-              defaultMessage: 'No transaction sample available.'
-            }
-          )}
-          subheading={i18n.translate(
-            'xpack.apm.transactionDetails.noTransactionDescription',
-            {
-              defaultMessage:
-                'Try another time range, reset the search filter or select another bucket from the distribution histogram.'
-            }
-          )}
-        />
-      ) : (
+      {transaction && (
         <Transaction
           location={location}
           transaction={transaction}
