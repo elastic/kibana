@@ -17,51 +17,9 @@
  * under the License.
  */
 
-jest.mock('ui/metadata', () => ({
-  metadata: {
-    branch: 'my-metadata-branch',
-    version: 'my-metadata-version',
-  },
-}));
+import { getModalContents } from './add_panel.test.mocks';
 
-jest.mock(
-  'ui/notify',
-  () => ({
-    toastNotifications: {
-      addSuccess: () => {},
-    },
-  }),
-  { virtual: true }
-);
-
-jest.mock('ui/capabilities', () => ({
-  uiCapabilities: {
-    visualize: {
-      save: true,
-    },
-  },
-}));
-
-let modalContents: Component;
-const closeFn = jest.fn();
-
-const mockOpenModal = (component: Component) => {
-  modalContents = component;
-  return {
-    close: closeFn,
-  };
-};
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      overlays: {
-        openModal: mockOpenModal,
-      },
-    },
-  },
-}));
-
-import React, { Component } from 'react';
+import React from 'react';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
@@ -122,7 +80,7 @@ test('create new calls factory.adds a panel to the container', async done => {
 
   await nextTick();
 
-  (modalContents.props as ContactCardInitializerProps).onCreate({
+  (getModalContents().props as ContactCardInitializerProps).onCreate({
     firstName: 'Dany',
     lastName: 'Targaryan',
   });

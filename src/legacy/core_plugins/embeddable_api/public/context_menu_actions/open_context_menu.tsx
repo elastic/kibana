@@ -22,7 +22,6 @@ import React from 'react';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
-import { I18nContext } from 'ui/i18n';
 
 let activeSession: ContextMenuSession | null = null;
 
@@ -141,20 +140,18 @@ export function openContextMenu(
   };
 
   ReactDOM.render(
-    <I18nContext>
-      <EuiPopover
-        id="dashboardPanelContextMenu"
-        className="embPanel__optionsMenuPopover"
-        button={container}
-        isOpen={true}
-        closePopover={onClose}
-        panelPaddingSize="none"
-        anchorPosition="downRight"
-        withTitle
-      >
-        <EuiContextMenu initialPanelId="mainMenu" panels={panels} />
-      </EuiPopover>
-    </I18nContext>,
+    <EuiPopover
+      id="dashboardPanelContextMenu"
+      className="embPanel__optionsMenuPopover"
+      button={container}
+      isOpen={true}
+      closePopover={onClose}
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+      withTitle
+    >
+      <EuiContextMenu initialPanelId="mainMenu" panels={panels} />
+    </EuiPopover>,
     container
   );
 

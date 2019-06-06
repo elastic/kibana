@@ -17,30 +17,7 @@
  * under the License.
  */
 
-jest.mock('ui/metadata', () => ({
-  metadata: {
-    branch: 'my-metadata-branch',
-    version: 'my-metadata-version',
-  },
-}));
-
-jest.mock('ui/capabilities', () => ({
-  uiCapabilities: {
-    visualize: {
-      save: true,
-    },
-  },
-}));
-
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      overlays: {
-        openFlyout: jest.fn(),
-      },
-    },
-  },
-}));
+import './add_panel.test.mocks';
 
 import {
   FilterableContainer,
