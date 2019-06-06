@@ -125,3 +125,18 @@ exports[`Table Helpers #getRowItemOverflow it returns correctly against snapshot
   </EuiToolTip>
 </div>
 `;
+
+exports[`Table Helpers OverflowField it returns correctly against snapshot 1`] = `
+<span>
+  This string is exactly fifty-one chars in length!!
+  <EuiToolTip
+    content="This string is exactly fifty-one chars in length!!!"
+    delay="regular"
+    position="top"
+  >
+    <Styled(EuiIcon)
+      type="boxesHorizontal"
+    />
+  </EuiToolTip>
+</span>
+`;

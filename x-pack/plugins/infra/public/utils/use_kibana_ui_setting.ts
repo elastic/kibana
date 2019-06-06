@@ -6,7 +6,7 @@
 
 import { useCallback, useMemo } from 'react';
 
-import { getNewPlatform } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 import { useObservable } from './use_observable';
 
 /**
@@ -26,7 +26,7 @@ import { useObservable } from './use_observable';
  * because the underlying `UiSettingsClient` doesn't support that.
  */
 export const useKibanaUiSetting = (key: string, defaultValue?: any) => {
-  const uiSettingsClient = useMemo(() => getNewPlatform().setup.core.uiSettings, [getNewPlatform]);
+  const uiSettingsClient = npSetup.core.uiSettings;
 
   const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [uiSettingsClient]);
   const uiSetting = useObservable(uiSetting$);

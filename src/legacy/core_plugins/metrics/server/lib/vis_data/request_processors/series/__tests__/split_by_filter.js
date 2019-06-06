@@ -28,7 +28,7 @@ describe('splitByFilter(req, panel, series)', () => {
   let req;
   beforeEach(() => {
     panel = {};
-    series = { id: 'test', split_mode: 'filter', filter: 'host:example-01' };
+    series = { id: 'test', split_mode: 'filter', filter: { query: 'host:example-01', language: 'lucene' } };
     req = {
       payload: {
         timerange: {
@@ -52,9 +52,17 @@ describe('splitByFilter(req, panel, series)', () => {
       aggs: {
         test: {
           filter: {
-            query_string: {
-              query: 'host:example-01',
-              analyze_wildcard: true
+            bool: {
+              filter: [],
+              must: [
+                {
+                  query_string: {
+                    query: 'host:example-01'
+                  }
+                }
+              ],
+              must_not: [],
+              should: []
             }
           }
         }

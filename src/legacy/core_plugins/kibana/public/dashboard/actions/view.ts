@@ -108,4 +108,4 @@ export const updateRefreshConfig = createAction<RefreshConfig>(
   ViewActionTypeKeys.UPDATE_REFRESH_CONFIG
 );
 export const updateFilters = createAction<Filters>(ViewActionTypeKeys.UPDATE_FILTERS);
-export const updateQuery = createAction<Query>(ViewActionTypeKeys.UPDATE_QUERY);
+export const updateQuery = createAction<Query | string>(ViewActionTypeKeys.UPDATE_QUERY);
