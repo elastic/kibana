@@ -37,6 +37,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics');
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      if (browser.isFirefox) {
+        // https://github.com/elastic/kibana/issues/24058
+        await PageObjects.common.sleep(2000);
+      }
     }
 
     public async checkTabIsLoaded(testSubj: string, name: string) {
@@ -212,6 +216,18 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async applyChanges() {
       await testSubjects.clickWhenNotDisabled('applyBtn');
+    }
+
+    /**
+     * change the data formatter for template in an `options` label tab
+     *
+     * @param formatter - typeof formatter which you can use for presenting data. By default kibana show `Number` formatter
+     */
+    public async changeDataFormatter(
+      formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
+    ) {
+      const [formatterEl] = await find.allByCssSelector('.euiComboBox');
+      await comboBox.setElement(formatterEl, formatter);
     }
 
     /**

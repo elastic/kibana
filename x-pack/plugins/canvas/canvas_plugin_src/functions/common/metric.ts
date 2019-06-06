@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { ContextFunction, Render, Style } from '../types';
+import { Render, Style } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 type Context = string | null;
@@ -16,7 +17,7 @@ interface Arguments {
   labelFont: Style;
 }
 
-export function metric(): ContextFunction<'metric', Context, Arguments, Render<Arguments>> {
+export function metric(): ExpressionFunction<'metric', Context, Arguments, Render<Arguments>> {
   const { help, args: argHelp } = getFunctionHelp().metric;
 
   return {

@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { demodata } from '../../functions/server/demodata';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
+import { DemoRows } from '../../functions/server/demodata/get_demo_rows';
 
 export const help: FunctionHelp<FunctionFactory<typeof demodata>> = {
   help: i18n.translate('xpack.canvas.functions.demodataHelpText', {
@@ -22,4 +23,18 @@ export const help: FunctionHelp<FunctionFactory<typeof demodata>> = {
       defaultMessage: 'The name of the demo data set to use',
     }),
   },
+};
+
+export const errors = {
+  invalidDataSet: (arg: string | null) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.demodata.invalidDataSetErrorMessage', {
+        defaultMessage: "Invalid data set: '{arg}', use '{ci}' or '{shirts}'.",
+        values: {
+          arg,
+          ci: DemoRows.CI,
+          shirts: DemoRows.SHIRTS,
+        },
+      })
+    ),
 };

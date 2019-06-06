@@ -174,7 +174,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       };
 
       const generateStringSequenceOfNumbers = (total) => (
-        new Array(total).fill('').map((_, i) => i < 10 ? `0${i}` : i.toString()) // eslint-disable-line no-unused-vars
+        new Array(total).fill('').map((_, i) => i < 10 ? `0${i}` : i.toString())
       );
 
       describe('frequency', () => {

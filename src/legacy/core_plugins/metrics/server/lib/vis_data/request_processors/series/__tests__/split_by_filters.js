@@ -37,13 +37,13 @@ describe('splitByFilters(req, panel, series)', () => {
         {
           id: 'filter-1',
           color: '#F00',
-          filter: 'status_code:[* TO 200]',
+          filter: { query: 'status_code:[* TO 200]', language: 'lucene' },
           label: '200s'
         },
         {
           id: 'filter-2',
           color: '#0F0',
-          filter: 'status_code:[300 TO *]',
+          filter: { query: 'status_code:[300 TO *]', language: 'lucene' },
           label: '300s'
         }
 
@@ -75,15 +75,31 @@ describe('splitByFilters(req, panel, series)', () => {
           filters: {
             filters: {
               'filter-1': {
-                query_string: {
-                  query: 'status_code:[* TO 200]',
-                  analyze_wildcard: true
+                bool: {
+                  filter: [],
+                  must: [
+                    {
+                      query_string: {
+                        query: 'status_code:[* TO 200]',
+                      }
+                    }
+                  ],
+                  must_not: [],
+                  should: [],
                 }
               },
               'filter-2': {
-                query_string: {
-                  query: 'status_code:[300 TO *]',
-                  analyze_wildcard: true
+                bool: {
+                  filter: [],
+                  must: [
+                    {
+                      query_string: {
+                        query: 'status_code:[300 TO *]',
+                      }
+                    }
+                  ],
+                  must_not: [],
+                  should: [],
                 }
               }
             }

@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { RedirectWrapper } from './redirect_wrapper';
 
-export const RedirectToOverviewPage = () => <Redirect to={'/overview'} />;
+export const RedirectToOverviewPage = () => <RedirectWrapper to={'/overview'} />;
 
 export const getOverviewUrl = () => '#/link-to/overview';
