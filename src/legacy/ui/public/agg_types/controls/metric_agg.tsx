@@ -34,13 +34,12 @@ function MetricAggParamEditor({
   setValue,
   setValidity,
   setTouched,
-  state,
   responseValueAggs,
 }: AggParamEditorProps<string>) {
   const label = i18n.translate('common.ui.aggTypes.metricLabel', {
     defaultMessage: 'Metric',
   });
-  const isValid = value === 'custom';
+  const isValid = !!value;
 
   useEffect(
     () => {
@@ -51,22 +50,19 @@ function MetricAggParamEditor({
 
   useEffect(
     () => {
-      if (!isValid && !state.aggs.find(aggregation => aggregation.id === value)) {
-        setValue();
+      if (responseValueAggs && value && value !== 'custom') {
+        // ensure that metricAgg is set to a valid agg
+        const respAgg = responseValueAggs
+          .filter(isCompatibleAgg)
+          .find(aggregation => aggregation.id === value);
+
+        if (!respAgg) {
+          setValue();
+        }
       }
     },
-    [responseValueAggs, value]
+    [responseValueAggs]
   );
-
-  const defaultOptions = [
-    {
-      text: i18n.translate('common.ui.aggTypes.customMetricLabel', {
-        defaultMessage: 'Custom metric',
-      }),
-      value: 'custom',
-    },
-    { text: '', value: EMPTY_VALUE, disabled: true, hidden: true },
-  ];
 
   const options = responseValueAggs
     ? responseValueAggs
@@ -83,10 +79,22 @@ function MetricAggParamEditor({
         }))
     : [];
 
+  options.push({
+    text: i18n.translate('common.ui.aggTypes.customMetricLabel', {
+      defaultMessage: 'Custom metric',
+    }),
+    value: 'custom',
+    disabled: false,
+  });
+
+  if (!value) {
+    options.unshift({ text: '', value: EMPTY_VALUE, disabled: false });
+  }
+
   return (
     <EuiFormRow label={label} fullWidth={true} isInvalid={showValidation ? !isValid : false}>
       <EuiSelect
-        options={[...options, ...defaultOptions]}
+        options={options}
         value={value || EMPTY_VALUE}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}

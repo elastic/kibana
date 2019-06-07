@@ -26,9 +26,7 @@ const parentPipelineAggController = function ($scope) {
 
   $scope.$on('$destroy', function () {
     const lastBucket = _.findLast($scope.state.aggs, agg => agg.type && agg.type.type === 'buckets');
-    if ($scope.aggForm) {
-      $scope.aggForm.$setValidity('bucket', true);
-    }
+
     if (lastBucket && lastBucket.error) {
       delete lastBucket.error;
     }
@@ -43,9 +41,6 @@ const parentPipelineAggController = function ($scope) {
     // remove errors on all buckets
     _.each($scope.state.aggs, agg => { if (agg.error) delete agg.error; });
 
-    if ($scope.aggForm) {
-      $scope.aggForm.$setValidity('bucket', canUseAggregation);
-    }
     if (canUseAggregation) {
       lastBucket.params.min_doc_count = (lastBucket.type.name === 'histogram') ? 1 : 0;
     } else {
