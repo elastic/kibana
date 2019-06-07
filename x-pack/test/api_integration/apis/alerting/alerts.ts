@@ -140,7 +140,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
       });
     });
 
-    it('should retry failures', async () => {
+    it.skip('should retry failures', async () => {
       await supertest
         .post('/api/alert')
         .set('kbn-xsrf', 'foo')

@@ -18,7 +18,7 @@ test('skips non string parameters', () => {
   expect(result).toMatchInlineSnapshot(`
 Object {
   "boolean": true,
-  "date": 2019-02-12T21:01:22.479Z,
+  "date": "2019-02-12T21:01:22.479Z",
   "empty1": null,
   "empty2": undefined,
   "number": 1,

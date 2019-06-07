@@ -71,6 +71,8 @@ describe('register()', () => {
         },
         "encryptedSavedObjectsPlugin": Object {
           "getDecryptedAsInternalUser": [MockFunction],
+          "isEncryptionError": [MockFunction],
+          "registerType": [MockFunction],
         },
         "services": Object {
           "log": [MockFunction],

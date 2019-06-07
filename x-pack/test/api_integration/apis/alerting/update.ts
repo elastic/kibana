@@ -123,7 +123,8 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+            message:
+              'child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
             validation: {
               source: 'payload',
               keys: ['interval', 'alertTypeParams', 'actions'],

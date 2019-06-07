@@ -6,7 +6,7 @@
 
 import { ActionType } from '../../types';
 import { ActionTypeRegistry } from '../../action_type_registry';
-import { taskManagerMock } from '../../__jest__/task_manager.mock';
+import { taskManagerMock } from '../../../../task_manager/task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../../../encrypted_saved_objects';
 import { throwIfActionTypeParamsInvalid } from '../../throw_if_action_type_params_invalid';
 
