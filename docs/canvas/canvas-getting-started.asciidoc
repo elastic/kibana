@@ -33,35 +33,37 @@ Your first step to working with Canvas is to create a workpad.
 
 === Add visualizations with elements
 
-Canvas ships with a variety of visualizations, called _elements_, that you can add to your workpad.
+Canvas ships with a variety of visualizations, called _elements_, that you can add to your workpad. For this example, we'll use the *Image* element to add your own visualization.
 
 . Click *Add element*, then select *Image*.
 +
 The default Elastic logo image appears on your page.
 
-. To replace the Elastic logo with your own image, use the editor on the right, then click and drag the image to your preferred location.
+. To replace the Elastic logo with your own image, select the image, then use the editor on the right.
+
+. To move the image, click and drag it to your preferred location.
 +
 You'll notice that the image is tagged as an asset, which allows you to reuse the image from *Manage assets*.
 
-TIP: Want to delete an element? Click the back button on your browser window.
+TIP: Want to delete an element? Click the back button on your browser.
 
 //Add image
 
-=== Show off your data with the metric element
+=== Show off your data with metrics
 
-Metric elements include charts, graphs, and progress monitors. For this example, we'll use the *Metric* element, which is good for displaying a single value. 
+Metric elements include charts, graphs, and progress monitors. For this example, we'll an element that is good for displaying a single value. 
 
 . Click *Add element*, then select *Metric*. 
 +
 By default, the *Metric* element is connected to a demo data source, which enables you to experiment with the element before you connect it to your own data source.
 
-. To connect the element to your own data source, click *Data*, then click *Change your data source*.
+. To connect the element to your own data source, make sure that the element is selected, then click *Data*.
 
-.. Click *Elasticsearch SQL*.
+.. Click *Change your data source*, then click *Elasticsearch SQL*.
 
 .. Copy and paste `SELECT sum(taxless_total_price) AS sum_total_price FROM "kibana_sample_data_ecommerce"` into the *Elasticsearch SQL query* field.
 +
-The query selects the total price field and sets it to the sum_total_price field. You're pulling these fields from the kibana_sample_data_ecommerce index that you installed.
+The query selects the total price field and sets it to the sum_total_price field. These fields are pulled from the kibana_sample_data_ecommerce index that you installed.
 
 //Add image
 
@@ -79,7 +81,7 @@ At this point, the element displays an error.
 
 .. Change the *Label* to 'Total sales'.
 +
-The error is gone, but the number needs some formatting.
+You'll notice that the error is gone, but the number could use some formatting.
 
 . To format the number, use the Canvas expression language.
 
@@ -95,4 +97,12 @@ You're now looking at the raw data syntax that Canvas uses to display the elemen
 
 .. When you are done, click *Close* on the *Expression editor*.
 
-=== Display your 
+=== Show off your data with charts
+
+For this example, we'll use an element that is good for showing the total sales over time.
+
+. Click *Add element*, then select *Area chart*. 
+
+. Change to the *Elasticsearch SQL* data source.
+
+. Enter this query to obtain the taxless total price by date: SELECT order_date, taxless_total_price FROM "kibana_sample_data_ecommerce" ORDER BY order_date
