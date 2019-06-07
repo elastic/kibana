@@ -9,7 +9,7 @@ import { toastNotifications } from 'ui/notify';
 import { get } from 'lodash';
 import { ACTION_TYPES, WATCH_TYPES } from '../../../common/constants';
 import { BaseWatch } from '../../../common/types/watch_types';
-import { createWatch, loadWatch } from '../../lib/api';
+import { createWatch } from '../../lib/api';
 import { goToWatchList } from '../../lib/navigation';
 
 /**
@@ -65,7 +65,7 @@ function createActionsForWatch(watchInstance: BaseWatch) {
   return watchInstance;
 }
 
-export async function saveWatch(watch: BaseWatch) {
+export async function saveWatch(watch: BaseWatch): Promise<any> {
   try {
     await createWatch(watch);
     toastNotifications.addSuccess(
@@ -78,13 +78,16 @@ export async function saveWatch(watch: BaseWatch) {
     );
     goToWatchList();
   } catch (error) {
-    return toastNotifications.addDanger(error.data.message);
+    return { error };
   }
 }
 
-export async function validateActionsAndSaveWatch(watch: BaseWatch) {
-  if (watch.type === WATCH_TYPES.JSON) {
-    const actionsErrors = watch.actions.reduce((actionsErrorsAcc: any, action: any) => {
+export async function onWatchSave(watch: BaseWatch): Promise<any> {
+  const watchActions = watch.watch && watch.watch.actions;
+  const watchData = watchActions ? createActionsForWatch(watch) : watch;
+
+  if (watchData.type === WATCH_TYPES.JSON) {
+    const actionsErrors = watchData.actions.reduce((actionsErrorsAcc: any, action: any) => {
       if (action.validate) {
         const errors = action.validate();
         const errorKeys = Object.keys(errors);
@@ -101,56 +104,15 @@ export async function validateActionsAndSaveWatch(watch: BaseWatch) {
     }, []);
     if (actionsErrors.length > 0) {
       return {
-        validationError: {
-          type: 'error',
-          message: actionsErrors,
+        error: {
+          data: {
+            message: actionsErrors,
+            error: 'validation',
+          },
         },
       };
     }
-    return saveWatch(watch);
+    return saveWatch(watchData);
   }
-  return saveWatch(watch);
-}
-
-export async function onWatchSave(watch: BaseWatch): Promise<any> {
-  const watchActions = watch.watch && watch.watch.actions;
-  const watchData = watchActions ? createActionsForWatch(watch) : watch;
-  if (!watchData.isNew) {
-    return validateActionsAndSaveWatch(watch);
-  }
-  try {
-    const existingWatch = await loadWatch(watchData.id);
-    if (existingWatch) {
-      return {
-        validationError: {
-          type: 'warning',
-          title: i18n.translate(
-            'xpack.watcher.sections.watchEdit.json.saveConfirmModal.existingWatchTitleText',
-            {
-              defaultMessage: 'A watch with this ID already exists',
-            }
-          ),
-          message: i18n.translate(
-            'xpack.watcher.sections.watchEdit.json.saveConfirmModal.existingWatchDescriptionText',
-            {
-              defaultMessage: 'Saving this watch will overwrite previous content.',
-            }
-          ),
-          buttonLabel: i18n.translate(
-            'xpack.watcher.sections.watchEdit.json.saveConfirmModal.existingWatchButtonLabel',
-            {
-              defaultMessage: 'Overwrite',
-            }
-          ),
-          buttonType: 'danger',
-        },
-      };
-    }
-  } catch (error) {
-    // Confirms watcher does not already exist
-    if (error.status === 404) {
-      return validateActionsAndSaveWatch(watchData);
-    }
-    return toastNotifications.addDanger(error.data.message);
-  }
+  return saveWatch(watchData);
 }

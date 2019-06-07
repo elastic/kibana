@@ -28,13 +28,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 import { TIME_UNITS } from '../../../../../common/constants';
-import { ConfirmWatchesModal, ErrableFormRow } from '../../../../components';
+import { ErrableFormRow, SectionError } from '../../../../components';
 import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../../lib/api';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { groupByTypes } from '../../../../models/watch/group_by_types';
 import { comparators } from '../../../../models/watch/comparators';
 import { timeUnits } from '../../time_units';
-import { onWatchSave, saveWatch } from '../../watch_edit_actions';
+import { onWatchSave } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { WatchVisualization } from './watch_visualization';
 import { WatchActionsPanel } from './threshold_watch_action_panel';
@@ -140,7 +140,9 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
   const [watchThresholdPopoverOpen, setWatchThresholdPopoverOpen] = useState(false);
   const [watchDurationPopoverOpen, setWatchDurationPopoverOpen] = useState(false);
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
-  const [modal, setModal] = useState<{ title: string; message: string } | null>(null);
+  const [serverError, setServerError] = useState<{
+    data: { nessage: string; error: string };
+  } | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { watch, setWatchProperty } = useContext(WatchContext);
 
@@ -210,16 +212,21 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <ConfirmWatchesModal
-        modalOptions={modal}
-        callback={async isConfirmed => {
-          if (isConfirmed) {
-            saveWatch(watch);
-          }
-          setModal(null);
-        }}
-      />
       <EuiForm>
+        {serverError && (
+          <Fragment>
+            <SectionError
+              title={
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchEdit.json.saveWatchErrorTitle"
+                  defaultMessage="Error saving watch"
+                />
+              }
+              error={serverError}
+            />
+            <EuiSpacer />
+          </Fragment>
+        )}
         <ErrableFormRow
           id="watchName"
           label={
@@ -835,9 +842,9 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
               onClick={async () => {
                 setIsSaving(true);
                 const savedWatch = await onWatchSave(watch);
-                if (savedWatch && savedWatch.validationError) {
+                if (savedWatch && savedWatch.error) {
                   setIsSaving(false);
-                  return setModal(savedWatch.validationError);
+                  return setServerError(savedWatch.error);
                 }
               }}
             >
