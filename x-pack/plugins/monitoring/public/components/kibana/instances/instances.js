@@ -127,18 +127,7 @@ export class KibanaInstances extends PureComponent {
       onTableChange
     } = this.props;
 
-    const fakeInstances = [
-      ...instances,
-      {
-        ...instances[0],
-        kibana: {
-          ...instances[0].kibana,
-          uuid: '2'
-        }
-      }
-    ];
-
-    const dataFlattened = fakeInstances.map(item => ({
+    const dataFlattened = instances.map(item => ({
       ...item,
       name: item.kibana.name,
       status: item.kibana.status,
