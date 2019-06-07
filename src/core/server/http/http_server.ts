@@ -100,7 +100,6 @@ export class HttpServer {
     this.registeredRouters.add(router);
   }
 
-  // passing hapi Request works for BWC. can be deleted once we remove legacy server.
   public setup(config: HttpConfig): HttpServerSetup {
     const serverOptions = getServerOptions(config);
     this.server = createServer(serverOptions);

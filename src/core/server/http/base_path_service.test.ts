@@ -29,21 +29,21 @@ const reqMock = {
 
 describe('BasePath', () => {
   describe('#get()', () => {
-    it('returns base path associated with an incoming LP request', () => {
+    it('returns base path associated with an incoming Legacy.Request request', () => {
       const basePath = new BasePath();
 
       basePath.set(reqMock, '/baz/');
       expect(basePath.get(reqMock)).toBe('/baz/');
     });
 
-    it('returns base path associated with an incoming NP request', () => {
+    it('returns base path associated with an incoming KibanaRequest', () => {
       const basePath = new BasePath();
 
       basePath.set(KibanaRequest.from(reqMock, undefined), '/baz/');
       expect(basePath.get(KibanaRequest.from(reqMock, undefined))).toBe('/baz/');
     });
 
-    it('operates with both LP/NP requests', () => {
+    it('operates with both Legacy.Request/KibanaRequest requests', () => {
       const basePath = new BasePath();
 
       basePath.set(reqMock, '/baz/');
