@@ -2,7 +2,7 @@
 [[snapshot-repositories]]
 == Snapshot repositories
 
-Use *Snapshot Repository* to store backups of your 
+Use *Snapshot Repositories* to store backups of your 
 {es} indices and clusters. Snapshots are important because they provide 
 a copy of your data in case something goes wrong. If you need to roll 
 back to an older version of your data, you can restore a snapshot from the repository.
@@ -12,11 +12,11 @@ Before using this feature, you should be familiar with how snapshots work.
 more detailed information.
 
 To get started, go to *Management > Elasticsearch > Snapshot Repositories*.  You 
-begin with an overview of your repositories.  You can then use the UI to 
+begin with an overview of your repositories. You can then use the UI to 
 drill down into your repositories and snapshots.
 
 [role="screenshot"]
-image:management/snapshot-repositories/images/repository_list.png["Repository list"]
+image:management/snapshot-restore/images/repository_list.png["Repository list"]
 
 [float]
 === Registering a repository
@@ -25,7 +25,7 @@ You must have a registry before you can save your snapshots. If you don’t see 
 repository in the list, navigate to *Register repository* to create one. 
 
 [role="screenshot"]
-image:management/snapshot-repositories/images/register_repo.png["Register repository"]
+image:management/snapshot-restore/images/register_repo.png["Register repository"]
 
 {kib} supports three types of repositories on startup:
 
@@ -57,11 +57,11 @@ The snapshot process is "smart." Your first snapshot is a complete copy of data.
 All subsequent snapshots save the changes between the existing snapshots and 
 the new data.
 
-For an overview of the snapshots in your cluster, go to the *Snapshots* tab.
+For an overview of the snapshots in your cluster, go to the *Snapshots* tab in *Snapshot Repositories*.
 You can then drill down into the details for each snapshot.
 
 [role="screenshot"]
-image:management/snapshot-repositories/images/snapshot_details.png["Snapshot details"]
+image:management/snapshot-restore/images/snapshot_details.png["Snapshot details"]
 
 [float]
 === Example: Register a shared file system repository
@@ -89,11 +89,11 @@ Use *Snapshot Repositories* to register a repository.
 
 . Go to *Management > Elasticsearch > Snapshot Repositories*.
 . Click *Register a repository*.
-. Enter a name for your repository. For example, `my_backup.`
+. Enter a name for your repository. For example, `my_backup`.
 . Set *Repository type* to Shared file system.
 + 
 [role="screenshot"]
-image:management/snapshot-repositories/images/register_repo.png["Register repository"]
+image:management/snapshot-restore/images/register_repo.png["Register repository"]
 
 . Click *Next*.
 . In *Location*, enter the path to the snapshot repository, `/tmp/es-backups`.
@@ -110,7 +110,7 @@ The repository currently doesn’t have any snapshots.
 . Click *Verify repository* to view the repository connection status. 
 +
 [role="screenshot"]
-image:management/snapshot-repositories/images/verify_repository.png["Verify repository"]
+image:management/snapshot-restore/images/verify_repository.png["Verify repository"]
 
 [float]
 ==== Add a snapshot to the repository
@@ -123,7 +123,7 @@ In this example, the snapshot name is `2019-04-25_snapshot`. You can also
 use {ref}//date-math-index-names.html[date math expression] for the snapshot name.
 +
 [role="screenshot"]
-image:management/snapshot-repositories/images/create_snapshot.png["Create snapshot"]
+image:management/snapshot-restore/images/create_snapshot.png["Create snapshot"]
 +
 . Open *Snapshot Repositories*. 
 +
