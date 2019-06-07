@@ -6,6 +6,12 @@
 
 export * from './types';
 
+import 'ui/autoload/all';
+import 'uiExports/fieldFormats';
+import 'uiExports/search';
+import 'uiExports/visRequestHandlers';
+import 'uiExports/visResponseHandlers';
+
 import { render, unmountComponentAtNode } from 'react-dom';
 import { IScope } from 'angular';
 import chrome from 'ui/chrome';
