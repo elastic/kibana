@@ -2373,15 +2373,6 @@
     colors "~1.2.1"
     js-yaml "~3.13.1"
 
-"@microsoft/api-extractor-model@7.1.0":
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor-model/-/api-extractor-model-7.1.0.tgz#57e9805ba0f2322dd12945bb0588eeda522519cd"
-  integrity sha512-DvaJ1fEpwega9TVMR4xR0jeNV/9JHNMxN/t8TuBftZHSLZzTczh8HyqyFxKo2IwDDCoZy5FmXZsq/vo5JQvRMQ==
-  dependencies:
-    "@microsoft/node-core-library" "3.13.0"
-    "@microsoft/tsdoc" "0.12.9"
-    "@types/node" "8.5.8"
-
 "@microsoft/api-extractor-model@7.1.1":
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/@microsoft/api-extractor-model/-/api-extractor-model-7.1.1.tgz#17aa30fe641db7efbcfb779f4a87b8461d6a2322"
@@ -2391,14 +2382,14 @@
     "@microsoft/tsdoc" "0.12.9"
     "@types/node" "8.5.8"
 
-"@microsoft/api-extractor@7.1.1":
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor/-/api-extractor-7.1.1.tgz#b3a92be9fc813112ee0ea43f3ad8033730ff9fd7"
-  integrity sha512-U5gFHDxjyNBjpO+tXD87atxSVkwpgIw27c5vNvmn4z5CTk783fH1Gz4BEYdZecKHkb5xpuNBTOmEdulpBD5vyQ==
+"@microsoft/api-extractor@7.1.6":
+  version "7.1.6"
+  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor/-/api-extractor-7.1.6.tgz#1a1210acb0a3d01fef6e6f664d41961fc9705634"
+  integrity sha512-0oXmPnJyc7OXA/+TKHUPW/HWG9qLhjoz5uAvKoI/9csnH5a0mzO+5k1LitPhY/O0rWPz5lghX16JnSm6G4mJ2Q==
   dependencies:
-    "@microsoft/api-extractor-model" "7.1.0"
+    "@microsoft/api-extractor-model" "7.1.1"
     "@microsoft/node-core-library" "3.13.0"
-    "@microsoft/ts-command-line" "4.2.3"
+    "@microsoft/ts-command-line" "4.2.5"
     "@microsoft/tsdoc" "0.12.9"
     colors "~1.2.1"
     lodash "~4.17.5"
@@ -2419,16 +2410,6 @@
     fs-extra "~7.0.1"
     jju "~1.4.0"
     z-schema "~3.18.3"
-
-"@microsoft/ts-command-line@4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@microsoft/ts-command-line/-/ts-command-line-4.2.3.tgz#20d6a1684148b9fc0df25ee7335c3bb227d47d4f"
-  integrity sha512-SIs4q7RcG7efBbh5Ffrf6V4jVLxWihD4NDRY3+gPiOG8CYawBzE22tTEloZ1yj/FBvBZQkQ0GYwXoPhn6ElYXA==
-  dependencies:
-    "@types/argparse" "1.0.33"
-    "@types/node" "8.5.8"
-    argparse "~1.0.9"
-    colors "~1.2.1"
 
 "@microsoft/ts-command-line@4.2.5":
   version "4.2.5"
