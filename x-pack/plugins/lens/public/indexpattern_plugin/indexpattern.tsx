@@ -10,13 +10,13 @@ import { render } from 'react-dom';
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
+import uuid from 'uuid';
 import { Datasource, DataType } from '..';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
   DimensionPriority,
 } from '../types';
-import uuid from 'uuid';
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
@@ -201,6 +201,7 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
     },
 
     toExpression,
+
     renderDataPanel(
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>

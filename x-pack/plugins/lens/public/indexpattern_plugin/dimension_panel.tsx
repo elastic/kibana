@@ -15,78 +15,20 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { DatasourceDimensionPanelProps, DimensionPriority } from '../types';
+import { DatasourceDimensionPanelProps } from '../types';
 import { IndexPatternColumn, IndexPatternPrivateState, columnToOperation } from './indexpattern';
 
 import {
   getOperationDisplay,
   getOperations,
-  getOperationTypesForField,
-  getOperationResultType,
+  getPotentialColumns,
+  getColumnOrder,
 } from './operations';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
   setState: (newState: IndexPatternPrivateState) => void;
 };
-
-export function getPotentialColumns(
-  state: IndexPatternPrivateState,
-  suggestedOrder?: DimensionPriority
-): IndexPatternColumn[] {
-  const fields = state.indexPatterns[state.currentIndexPatternId].fields;
-
-  const operationPanels = getOperationDisplay();
-
-  const columns: IndexPatternColumn[] = fields
-    .map((field, index) => {
-      const validOperations = getOperationTypesForField(field);
-
-      return validOperations.map(op => ({
-        operationId: `${index}${op}`,
-        label: operationPanels[op].ofName(field.name),
-        dataType: getOperationResultType(field, op),
-        isBucketed: op === 'terms' || op === 'date_histogram',
-
-        operationType: op,
-        sourceField: field.name,
-        suggestedOrder,
-      }));
-    })
-    .reduce((prev, current) => prev.concat(current));
-
-  columns.push({
-    operationId: 'count',
-    label: i18n.translate('xpack.lens.indexPatternOperations.countOfDocuments', {
-      defaultMessage: 'Count of Documents',
-    }),
-    dataType: 'number',
-    isBucketed: false,
-
-    operationType: 'count',
-    sourceField: 'documents',
-    suggestedOrder,
-  });
-
-  return columns;
-}
-
-export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
-  const entries = Object.entries(columns);
-
-  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
-
-  return aggregations
-    .sort(([id, col], [id2, col2]) => {
-      return (
-        // Sort undefined orders last
-        (col.suggestedOrder !== undefined ? col.suggestedOrder : 3) -
-        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : 3)
-      );
-    })
-    .map(([id]) => id)
-    .concat(metrics.map(([id]) => id));
-}
 
 export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
   const [isOpen, setOpen] = useState(false);

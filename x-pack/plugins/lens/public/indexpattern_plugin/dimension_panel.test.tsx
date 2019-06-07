@@ -8,7 +8,10 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { IndexPatternPrivateState } from './indexpattern';
-import { getColumnOrder, getPotentialColumns, IndexPatternDimensionPanel } from './dimension_panel';
+import { getColumnOrder, getPotentialColumns } from './operations';
+import { IndexPatternDimensionPanel } from './dimension_panel';
+
+jest.mock('./operations');
 
 const expectedIndexPatterns = {
   1: {
@@ -50,7 +53,7 @@ describe('IndexPatternDimensionPanel', () => {
         col1: {
           operationId: 'op1',
           label: 'Value of timestamp',
-          dataType: 'string',
+          dataType: 'date',
           isBucketed: false,
 
           // Private
@@ -59,63 +62,8 @@ describe('IndexPatternDimensionPanel', () => {
         },
       },
     };
-  });
 
-  describe('getPotentialColumns', () => {
-    it('should include priority', () => {
-      const columns = getPotentialColumns(state, 1);
-
-      expect(columns.every(col => col.suggestedOrder === 1)).toEqual(true);
-    });
-
-    it('should list operations by field for a regular index pattern', () => {
-      const columns = getPotentialColumns(state);
-
-      expect(columns.map(col => [col.sourceField, col.operationType])).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "timestamp",
-    "value",
-  ],
-  Array [
-    "timestamp",
-    "date_histogram",
-  ],
-  Array [
-    "bytes",
-    "value",
-  ],
-  Array [
-    "bytes",
-    "sum",
-  ],
-  Array [
-    "bytes",
-    "avg",
-  ],
-  Array [
-    "bytes",
-    "min",
-  ],
-  Array [
-    "bytes",
-    "max",
-  ],
-  Array [
-    "source",
-    "value",
-  ],
-  Array [
-    "source",
-    "terms",
-  ],
-  Array [
-    "documents",
-    "count",
-  ],
-]
-`);
-    });
+    jest.clearAllMocks();
   });
 
   it('should render a dimension panel', () => {
@@ -148,6 +96,20 @@ Array [
     ).toEqual('Configure dimension');
   });
 
+  it('should pass the right arguments to getPotentialColumns', async () => {
+    shallow(
+      <IndexPatternDimensionPanel
+        state={state}
+        setState={() => {}}
+        columnId={'col1'}
+        filterOperations={() => true}
+        suggestedPriority={1}
+      />
+    );
+
+    expect(getPotentialColumns as jest.Mock).toHaveBeenCalledWith(state, 1);
+  });
+
   it('should call the filterOperations function', () => {
     const filterOperations = jest.fn().mockReturnValue(true);
 
@@ -176,7 +138,27 @@ Array [
     expect(wrapper.find(EuiComboBox)!.prop('options')!.length).toEqual(0);
   });
 
-  it("should disable functions that won't work with dates", () => {
+  it('should list all field names in sorted order', () => {
+    const wrapper = shallow(
+      <IndexPatternDimensionPanel
+        state={state}
+        setState={() => {}}
+        columnId={'col1'}
+        filterOperations={() => true}
+      />
+    );
+
+    const options = wrapper.find(EuiComboBox).prop('options');
+
+    expect(options!.map(({ label }) => label)).toEqual([
+      'bytes',
+      'documents',
+      'source',
+      'timestamp',
+    ]);
+  });
+
+  it("should disable functions that won't work with the current column", () => {
     const setState = jest.fn();
 
     const wrapper = shallow(
@@ -233,17 +215,35 @@ Array [
       ...state,
       columns: {
         ...state.columns,
-        col2: {
-          operationId: firstOption.value,
-          label: 'Value of timestamp',
-          dataType: 'date',
-          isBucketed: false,
-          operationType: 'value',
-          sourceField: 'timestamp',
-          suggestedOrder: 1,
-        },
+        col2: expect.objectContaining({
+          sourceField: firstOption.label,
+          // Other parts of this don't matter for this test
+        }),
       },
       columnOrder: ['col1', 'col2'],
+    });
+  });
+
+  it('should always request the new sort order when changing the function', () => {
+    const setState = jest.fn();
+
+    const wrapper = shallow(
+      <IndexPatternDimensionPanel
+        state={state}
+        setState={setState}
+        columnId={'col1'}
+        filterOperations={() => true}
+        suggestedPriority={1}
+      />
+    );
+
+    wrapper.find('[data-test-subj="lns-indexPatternDimension-date_histogram"]').simulate('click');
+
+    expect(getColumnOrder).toHaveBeenCalledWith({
+      col1: expect.objectContaining({
+        sourceField: 'timestamp',
+        operationType: 'date_histogram',
+      }),
     });
   });
 
@@ -268,14 +268,14 @@ Array [
       ...state,
       columns: {
         ...state.columns,
-        col2: {
+        col2: expect.objectContaining({
           operationId: firstField.value,
           label: 'Value of bytes',
           dataType: 'number',
           isBucketed: false,
           operationType: 'value',
           sourceField: 'bytes',
-        },
+        }),
       },
       columnOrder: ['col1', 'col2'],
     });
@@ -302,103 +302,5 @@ Array [
       columns: {},
       columnOrder: [],
     });
-  });
-});
-
-describe('getColumnOrder', () => {
-  it('should work for empty columns', () => {});
-
-  it('should work for one column', () => {
-    expect(
-      getColumnOrder({
-        col1: {
-          operationId: 'op1',
-          label: 'Value of timestamp',
-          dataType: 'string',
-          isBucketed: false,
-
-          // Private
-          operationType: 'value',
-          sourceField: 'timestamp',
-        },
-      })
-    ).toEqual(['col1']);
-  });
-
-  it('should put any number of aggregations before metrics', () => {
-    expect(
-      getColumnOrder({
-        col1: {
-          operationId: 'op1',
-          label: 'Top Values of category',
-          dataType: 'string',
-          isBucketed: true,
-
-          // Private
-          operationType: 'value',
-          sourceField: 'timestamp',
-        },
-        col2: {
-          operationId: 'op2',
-          label: 'Average of bytes',
-          dataType: 'number',
-          isBucketed: false,
-
-          // Private
-          operationType: 'value',
-          sourceField: 'bytes',
-        },
-        col3: {
-          operationId: 'op3',
-          label: 'Date Histogram of timestamp',
-          dataType: 'date',
-          isBucketed: true,
-
-          // Private
-          operationType: 'date_histogram',
-          sourceField: 'timestamp',
-        },
-      })
-    ).toEqual(['col1', 'col3', 'col2']);
-  });
-
-  it('should reorder aggregations based on suggested priority', () => {
-    expect(
-      getColumnOrder({
-        col1: {
-          operationId: 'op1',
-          label: 'Top Values of category',
-          dataType: 'string',
-          isBucketed: true,
-
-          // Private
-          operationType: 'value',
-          sourceField: 'timestamp',
-          suggestedOrder: 2,
-        },
-        col2: {
-          operationId: 'op2',
-          label: 'Average of bytes',
-          dataType: 'number',
-          isBucketed: false,
-
-          // Private
-          operationType: 'value',
-          sourceField: 'bytes',
-          suggestedOrder: 0,
-        },
-        col3: {
-          operationId: 'op3',
-          label: 'Date Histogram of timestamp',
-          dataType: 'date',
-          isBucketed: true,
-
-          // Private
-          operationType: 'date_histogram',
-          sourceField: 'timestamp',
-          suggestedOrder: 1,
-        },
-      })
-    ).toEqual(['col3', 'col1', 'col2']);
   });
 });
