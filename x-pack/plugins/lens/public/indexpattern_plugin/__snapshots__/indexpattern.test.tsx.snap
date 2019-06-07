@@ -5,6 +5,7 @@ exports[`IndexPattern Data Source #getPublicAPI renderDimensionPanel should rend
   setDragging={[MockFunction]}
 >
   <DragDrop
+    data-test-subj="indexPattern-dropTarget"
     droppable={false}
     onDrop={[Function]}
   >
