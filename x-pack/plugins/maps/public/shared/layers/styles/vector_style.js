@@ -415,7 +415,7 @@ export class VectorStyle extends AbstractStyle {
     return   [
       'interpolate',
       ['linear'],
-      ['feature-state', targetName],
+      ['coalesce', ['feature-state', targetName], 0],
       0, minSize,
       1, maxSize
     ];
