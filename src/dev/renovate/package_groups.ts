@@ -40,6 +40,16 @@ interface PackageGroup {
    * Extra labels to apply to PRs created for packages in this group
    */
   readonly extraLabels?: string[];
+
+  /**
+   * A flag that will prevent renovatebot from telling us when there
+   * are updates. This should only be used in very special cases, like
+   * when we intend to never update a package. To just prevent a version
+   * upgrade consider support for the `allowedVersions` config, or just
+   * closing PRs to communicate to renovate that the specific upgrade
+   * should be ignored.
+   */
+  readonly enabled?: false;
 }
 
 export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
@@ -121,6 +131,12 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
     name: 'dragselect',
     packageNames: ['dragselect'],
     extraLabels: [':ml'],
+  },
+
+  {
+    name: 'api-documenter',
+    packageNames: ['@microsoft/api-documenter', '@microsoft/api-extractor'],
+    enabled: false,
   },
 ];
 

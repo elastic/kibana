@@ -90,6 +90,7 @@ export const RENOVATE_CONFIG = {
         packagePatterns: maybeMap(group.packageWords, word => wordRegExp(word).source),
         packageNames: maybeFlatMap(group.packageNames, name => [name, `@types/${name}`]),
         labels: group.extraLabels && [...DEFAULT_LABELS, ...group.extraLabels],
+        enabled: group.enabled === false ? false : undefined,
       })),
 
       // internal/local packages
