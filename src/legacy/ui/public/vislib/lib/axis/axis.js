@@ -20,7 +20,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import { VislibLibErrorHandlerProvider } from '../_error_handler';
+import { ErrorHandler } from '../_error_handler';
 import { VislibLibAxisTitleProvider } from './axis_title';
 import { AxisLabels } from './axis_labels';
 import { VislibAxisScaleProvider } from './axis_scale';
@@ -28,7 +28,6 @@ import { VislibLibAxisConfigProvider } from './axis_config';
 import { VislibError } from '../../../errors';
 
 export function VislibLibAxisProvider(Private) {
-  const ErrorHandler = Private(VislibLibErrorHandlerProvider);
   const AxisTitle = Private(VislibLibAxisTitleProvider);
   const AxisScale = Private(VislibAxisScaleProvider);
   const AxisConfig = Private(VislibLibAxisConfigProvider);
