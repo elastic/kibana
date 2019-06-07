@@ -283,23 +283,24 @@ const executeMigrations720 = flow(migratePercentileRankAggregation, migrateDateH
 const executeMigrations730 = flow(migrateGaugeVerticalSplitToAlignment, transformFilterStringToQueryObject, replaceMovAvgToMovFn);
 
 function replaceMovAvgToMovFn(doc) {
-  const visState = get(doc, 'attributes.visState');
-  let newVisState;
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
 
-  if (visState) {
+  if (visStateJSON) {
     try {
-      newVisState = JSON.parse(visState);
+      visState = JSON.parse(visStateJSON);
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
     }
 
-    if (newVisState && newVisState.type === 'metrics') {
-      const series = get(newVisState, 'params.series', []);
+    if (visState && visState.type === 'metrics') {
+      const series = get(visState, 'params.series', []);
 
       series.forEach(part => {
         if (part.metrics && Array.isArray(part.metrics)) {
-          part.forEach(metric => {
+          part.metrics.forEach(metric => {
             if (metric.type === 'moving_average') {
+
               metric.model_type = metric.model;
               metric.alpha = 0;
               metric.beta = 0;
@@ -320,7 +321,7 @@ function replaceMovAvgToMovFn(doc) {
         ...doc,
         attributes: {
           ...doc.attributes,
-          visState: JSON.stringify(newVisState),
+          visState: JSON.stringify(visState),
         },
       };
     }
