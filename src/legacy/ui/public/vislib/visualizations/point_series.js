@@ -20,18 +20,16 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import { TooltipProvider } from '../../vis/components/tooltip';
+import { Tooltip } from '../../vis/components/tooltip';
 import { VislibVisualizationsChartProvider } from './_chart';
-import { VislibVisualizationsTimeMarkerProvider } from './time_marker';
-import { VislibVisualizationsSeriesTypesProvider } from './point_series/series_types';
+import { TimeMarker } from './time_marker';
+import { seriesTypes } from './point_series/series_types';
 import touchdownTmplHtml from '../partials/touchdown.tmpl.html';
 
 export function VislibVisualizationsPointSeriesProvider(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
-  const Tooltip = Private(TooltipProvider);
-  const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
-  const seriTypes = Private(VislibVisualizationsSeriesTypesProvider);
+  const seriTypes = seriesTypes;
   const touchdownTmpl = _.template(touchdownTmplHtml);
   /**
    * Line Chart Visualization

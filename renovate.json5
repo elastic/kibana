@@ -22,10 +22,20 @@
    */
   labels: [
     'release_note:skip',
-    ':Operations',
-    'chore',
-    'review'
+    'renovate',
+    'v8.0.0',
+    'v7.3.0'
   ],
+
+  major: {
+    labels: [
+      'release_note:skip',
+      'renovate',
+      'v8.0.0',
+      'v7.3.0',
+      'renovate:major',
+    ]
+  },
 
   /**
    * Enable creation of a "Master Issue" within the repository. This
@@ -95,6 +105,12 @@
         packagePatterns: ['\\bgrunt\\b'],
         groupName: 'grunt related packages',
         groupSlug: 'grunt',
+      },
+      {
+        packagePatterns: ['\\bangular\\b'],
+        groupName: 'angular related packages',
+        groupSlug: 'angular',
+        recreateClosed: false,
       },
       {
         packagePatterns: ['\\bd3\\b'],

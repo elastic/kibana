@@ -23,7 +23,7 @@ app.directive('kbnTab', function () {
     controllerAs: 'kbnTab',
     bindToController: true,
     controller: class KbnTabController {},
-    link: function ($scope, kbnTabs) {
+    link: function ($scope, $ele, attrs, kbnTabs) {
       $scope.kbnTabs = kbnTabs;
     }
   };

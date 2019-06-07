@@ -62,11 +62,54 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCount).to.be('53');
       });
 
-      it('should show the correct count in the legend with custom numeric template', async () => {
+      it('should open color picker, deactivate panel and clone series', async () => {
+        await visualBuilder.clickColorPicker();
+        await visualBuilder.checkColorPickerPopUpIsPresent();
+        await visualBuilder.clickColorPicker();
+
+        await visualBuilder.changePanelPreview();
+        await visualBuilder.checkPreviewIsDisabled();
+        await visualBuilder.changePanelPreview();
+
+        await visualBuilder.cloneSeries();
+        const legend = await visualBuilder.getLegentItems();
+        const series = await visualBuilder.getSeries();
+        expect(legend.length).to.be(2);
+        expect(series.length).to.be(2);
+      });
+
+      it('should show the correct count in the legend with custom numeric formatter', async () => {
         const expectedLegendValue = '$ 156';
 
         await visualBuilder.clickSeriesOption();
         await visualBuilder.enterSeriesTemplate('$ {{value}}');
+        const actualCount = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be(expectedLegendValue);
+      });
+
+      it('should show the correct count in the legend with percent formatter', async () => {
+        const expectedLegendValue = '15,600%';
+
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('Percent');
+        const actualCount = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be(expectedLegendValue);
+      });
+
+      it('should show the correct count in the legend with bytes formatter', async () => {
+        const expectedLegendValue = '156B';
+
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('Bytes');
+        const actualCount = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be(expectedLegendValue);
+      });
+
+      it('should show the correct count in the legend with duration formatter', async () => {
+        const expectedLegendValue = '156.00';
+
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('Duration');
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be(expectedLegendValue);
       });

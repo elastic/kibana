@@ -27,7 +27,7 @@ import { notify, addAppRedirectMessageToUrl, fatalError, toastNotifications } fr
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
@@ -774,7 +774,7 @@ app.controller('graphuiPlugin', function (
       .on('zoom', redraw));
 
 
-  const managementUrl = getNewPlatform().start.core.chrome.navLinks.get('kibana:management').url;
+  const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
   const url = `${managementUrl}/kibana/index_patterns`;
 
   if ($scope.indices.length === 0) {
