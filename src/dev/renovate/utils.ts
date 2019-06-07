@@ -34,3 +34,19 @@ export const getTypePackageName = (pkgName: string) => {
   const match = pkgName.match(scopedPkgRe);
   return `@types/${match ? `${match[1]}__${match[2]}` : pkgName}`;
 };
+
+export const unwrapTypesPackage = (pkgName: string) => {
+  if (!pkgName.startsWith('@types')) {
+    return;
+  }
+
+  const typesFor = pkgName.slice('@types/'.length);
+
+  if (!typesFor.includes('__')) {
+    return typesFor;
+  }
+
+  // @types packages use a convention for scoped packages, @types/org__name
+  const [org, name] = typesFor.split('__');
+  return `@${org}/${name}`;
+};

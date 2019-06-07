@@ -17,6 +17,12 @@
  * under the License.
  */
 
+import { readFileSync } from 'fs';
+
+import globby from 'globby';
+
+import { REPO_ROOT } from '../constants';
+
 export const PACKAGE_GLOBS = [
   'package.json',
   'x-pack/package.json',
@@ -25,3 +31,28 @@ export const PACKAGE_GLOBS = [
   'test/plugin_functional/plugins/*/package.json',
   'test/interpreter_functional/plugins/*/package.json',
 ];
+
+export function getAllDepNames() {
+  const depNames = new Set<string>();
+
+  for (const glob of PACKAGE_GLOBS) {
+    const files = globby.sync(glob, {
+      cwd: REPO_ROOT,
+      absolute: true,
+    });
+
+    for (const path of files) {
+      const pkg = JSON.parse(readFileSync(path, 'utf8'));
+      const deps = [
+        ...Object.keys(pkg.dependencies || {}),
+        ...Object.keys(pkg.devDependencies || {}),
+      ];
+
+      for (const dep of deps) {
+        depNames.add(dep);
+      }
+    }
+  }
+
+  return depNames;
+}

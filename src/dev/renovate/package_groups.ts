@@ -17,13 +17,8 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
-
-import globby from 'globby';
-
-import { PACKAGE_GLOBS } from './package_globs';
-import { wordRegExp } from './utils';
-import { REPO_ROOT } from '../constants';
+import { getAllDepNames } from './package_globs';
+import { wordRegExp, unwrapTypesPackage } from './utils';
 
 interface PackageGroup {
   /**
@@ -145,40 +140,13 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
   },
 ];
 
-const depNames = new Set<string>();
-for (const glob of PACKAGE_GLOBS) {
-  const files = globby.sync(glob, {
-    cwd: REPO_ROOT,
-    absolute: true,
-  });
-
-  for (const path of files) {
-    const pkg = JSON.parse(readFileSync(path, 'utf8'));
-    const deps = [
-      ...Object.keys(pkg.dependencies || {}),
-      ...Object.keys(pkg.devDependencies || {}),
-    ];
-
-    for (const dep of deps) {
-      depNames.add(dep);
-    }
-  }
-}
-
 /**
  * Auto-define package groups for any `@types/*` deps that are not already in a group
  */
-for (const dep of depNames) {
-  if (!dep.startsWith('@types/')) {
+for (const dep of getAllDepNames()) {
+  const typesFor = unwrapTypesPackage(dep);
+  if (!typesFor) {
     continue;
-  }
-
-  let typesFor = dep.slice('@types/'.length);
-
-  // @types packages use a convention for scoped packages, @types/org__name
-  if (typesFor.includes('__')) {
-    const [org, name] = typesFor.split('__');
-    typesFor = `@${org}/${name}`;
   }
 
   // determine if one of the existing groups has typesFor in its
