@@ -27,7 +27,11 @@ export interface IndexPattern {
   id: string;
   fields: Field[];
   title: string;
-  timeFieldName?: string;
+  isTimeNanosBased: () => boolean;
+}
+
+export interface IndexPatterns {
+  get: (id: string) => IndexPattern;
 }
 
 export interface StaticIndexPatternField {
