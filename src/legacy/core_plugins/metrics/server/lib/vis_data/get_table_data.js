@@ -30,7 +30,6 @@ export async function getTableData(req, panel) {
   const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
-  const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
 
   const meta = {
     type: panel.type,
@@ -38,6 +37,7 @@ export async function getTableData(req, panel) {
   };
 
   try {
+    const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
     const [resp] = await searchRequest.search([{
       body,
       index: panelIndexPattern,
@@ -49,7 +49,7 @@ export async function getTableData(req, panel) {
       series: buckets.map(processBucket(panel)),
     };
   } catch (err) {
-    if (err.body) {
+    if (err.body || err.name === 'KQLSyntaxError') {
       err.response = err.body;
 
       return {

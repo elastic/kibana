@@ -18,17 +18,17 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
 import { extractErrors } from './extract_errors';
 import { ImportError } from './types';
 import { validateReferences } from './validate_references';
+import { SavedObjectsClientContract } from '../';
 
 interface ImportSavedObjectsOptions {
   readStream: Readable;
   objectLimit: number;
   overwrite: boolean;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
   supportedTypes: string[];
 }
 

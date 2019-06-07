@@ -22,7 +22,7 @@ import uiRoutes from '../routes';
 import { KbnUrlProvider } from '../url';
 
 import template from './error_url_overflow.html';
-import { UrlOverflowServiceProvider } from './url_overflow_service';
+import { UrlOverflowService } from './url_overflow_service';
 
 export * from './url_overflow_service';
 
@@ -34,7 +34,7 @@ uiRoutes
     controller: class OverflowController {
       constructor(Private, config, $scope) {
         const kbnUrl = Private(KbnUrlProvider);
-        const urlOverflow = Private(UrlOverflowServiceProvider);
+        const urlOverflow = new UrlOverflowService();
 
         if (!urlOverflow.get()) {
           kbnUrl.redirectPath('/');

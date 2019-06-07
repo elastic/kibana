@@ -79,7 +79,7 @@ async function getCodeNodeUuid(url: string, log: Logger) {
 }
 
 export function init(server: Server, options: any) {
-  if (!options.enabled) {
+  if (!options.ui.enabled) {
     return;
   }
 

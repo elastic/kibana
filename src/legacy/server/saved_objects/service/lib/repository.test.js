@@ -1106,7 +1106,7 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledWith('deleteByQuery', {
         body: { conflicts: 'proceed' },
         ignore: [404],
-        index: ['beats', '.kibana-test'],
+        index: ['.kibana-test', 'beats'],
         refresh: 'wait_for',
       });
     });
@@ -1160,7 +1160,7 @@ describe('SavedObjectsRepository', () => {
         namespace: 'foo-namespace',
         search: 'foo*',
         searchFields: ['foo'],
-        type: 'bar',
+        type: ['bar'],
         sortField: 'name',
         sortOrder: 'desc',
         defaultSearchOperator: 'AND',
@@ -1559,6 +1559,90 @@ describe('SavedObjectsRepository', () => {
         type: 'config',
         error: { statusCode: 404, message: 'Not found' },
       });
+    });
+
+    it('returns errors when requesting unsupported types', async () => {
+      callAdminCluster.mockResolvedValue({
+        docs: [
+          {
+            _type: '_doc',
+            _id: 'one',
+            found: true,
+            ...mockVersionProps,
+            _source: { ...mockTimestampFields, config: { title: 'Test1' } },
+          },
+          {
+            _type: '_doc',
+            _id: 'three',
+            found: true,
+            ...mockVersionProps,
+            _source: { ...mockTimestampFields, config: { title: 'Test3' } },
+          },
+          {
+            _type: '_doc',
+            _id: 'five',
+            found: true,
+            ...mockVersionProps,
+            _source: { ...mockTimestampFields, config: { title: 'Test5' } },
+          },
+        ],
+      });
+
+      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet([
+        { id: 'one', type: 'config' },
+        { id: 'two', type: 'invalidtype' },
+        { id: 'three', type: 'config' },
+        { id: 'four', type: 'invalidtype' },
+        { id: 'five', type: 'config' },
+      ]);
+
+      expect(savedObjects).toEqual([
+        {
+          attributes: { title: 'Test1' },
+          id: 'one',
+          ...mockTimestampFields,
+          references: [],
+          type: 'config',
+          version: mockVersion,
+          migrationVersion: undefined,
+        },
+        {
+          attributes: { title: 'Test3' },
+          id: 'three',
+          ...mockTimestampFields,
+          references: [],
+          type: 'config',
+          version: mockVersion,
+          migrationVersion: undefined,
+        },
+        {
+          attributes: { title: 'Test5' },
+          id: 'five',
+          ...mockTimestampFields,
+          references: [],
+          type: 'config',
+          version: mockVersion,
+          migrationVersion: undefined,
+        },
+        {
+          error: {
+            error: 'Bad Request',
+            message: "Unsupported saved object type: 'invalidtype': Bad Request",
+            statusCode: 400,
+          },
+          id: 'two',
+          type: 'invalidtype',
+        },
+        {
+          error: {
+            error: 'Bad Request',
+            message: "Unsupported saved object type: 'invalidtype': Bad Request",
+            statusCode: 400,
+          },
+          id: 'four',
+          type: 'invalidtype',
+        },
+      ]);
     });
   });
 
@@ -2028,59 +2112,6 @@ describe('SavedObjectsRepository', () => {
       await expect(
         savedObjectsRepository.create('hiddenType', { title: 'some title' })
       ).rejects.toEqual(new Error("Unsupported saved object type: 'hiddenType': Bad Request"));
-    });
-
-    it("should return an error object when attempting to 'bulkGet' an unsupported type", async () => {
-      callAdminCluster.mockReturnValue({
-        docs: [
-          {
-            id: 'one',
-            type: 'config',
-            _primary_term: 1,
-            _seq_no: 1,
-            found: true,
-            _source: {
-              updated_at: mockTimestamp,
-            },
-          },
-          {
-            id: 'bad',
-            type: 'config',
-            found: false,
-          },
-        ],
-      });
-      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet([
-        { id: 'one', type: 'config' },
-        { id: 'bad', type: 'config' },
-        { id: 'four', type: 'hiddenType' },
-      ]);
-      expect(savedObjects).toEqual([
-        {
-          id: 'one',
-          type: 'config',
-          updated_at: mockTimestamp,
-          references: [],
-          version: 'WzEsMV0=',
-        },
-        {
-          error: {
-            message: 'Not found',
-            statusCode: 404,
-          },
-          id: 'bad',
-          type: 'config',
-        },
-        {
-          id: 'four',
-          error: {
-            error: 'Bad Request',
-            message: "Unsupported saved object type: 'hiddenType': Bad Request",
-            statusCode: 400,
-          },
-          type: 'hiddenType',
-        },
-      ]);
     });
 
     it("should not return hidden saved ojects when attempting to 'find' support and unsupported types", async () => {

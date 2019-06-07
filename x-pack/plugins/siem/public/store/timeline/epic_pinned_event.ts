@@ -23,7 +23,9 @@ import {
   startTimelineSaving,
 } from './actions';
 import { TimelineById } from './reducer';
-import { dispatcherTimelinePersistQueue, refetchQueries, myEpicTimelineId } from './epic';
+import { myEpicTimelineId } from './my_epic_timeline_id';
+import { refetchQueries } from './refetch_queries';
+import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 
 export const timelinePinnedEventActionsType = [pinEvent.type, unPinEvent.type];
 
