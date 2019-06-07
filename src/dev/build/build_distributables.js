@@ -69,7 +69,7 @@ export async function buildDistributables(options) {
     createDebPackage,
     createDockerPackage,
     versionQualifier,
-    targetAllPlatforms
+    targetAllPlatforms,
   } = options;
 
   log.verbose('building distributables with options:', {
@@ -86,7 +86,7 @@ export async function buildDistributables(options) {
   const config = await getConfig({
     isRelease,
     versionQualifier,
-    targetAllPlatforms,
+    targetAllPlatforms
   });
 
   const run = createRunner({
