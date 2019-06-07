@@ -124,8 +124,10 @@ export class RepositoryService {
     handler?: UpdateProgressHandler
   ): Promise<UpdateWorkerResult> {
     const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
+    let repo: Git.Repository | undefined;
+
     try {
-      const repo = await Git.Repository.open(localPath);
+      repo = await Git.Repository.open(localPath);
       const cbs: RemoteCallbacks = {
         transferProgress: (_: any) => {
           if (handler) {
@@ -183,6 +185,10 @@ export class RepositoryService {
         const msg = `update repository ${uri} error: ${error}`;
         this.log.error(msg);
         throw new Error(msg);
+      }
+    } finally {
+      if (repo) {
+        repo.cleanup();
       }
     }
   }
@@ -261,29 +267,37 @@ export class RepositoryService {
           return 0;
         };
       }
-      const gitRepo = await Git.Clone.clone(repo.url, localPath, {
-        bare: 1,
-        fetchOpts: {
-          callbacks: cbs,
-        },
-      });
-      const headCommit = await gitRepo.getHeadCommit();
-      const headRevision = headCommit.sha();
-      const currentBranch = await gitRepo.getCurrentBranch();
-      const currentBranchName = currentBranch.shorthand();
-      this.log.info(
-        `Clone repository from ${
-          repo.url
-        } done with head revision ${headRevision} and default branch ${currentBranchName}`
-      );
-      return {
-        uri: repo.uri,
-        repo: {
-          ...repo,
-          defaultBranch: currentBranchName,
-          revision: headRevision,
-        },
-      };
+      let gitRepo: Git.Repository | undefined;
+
+      try {
+        gitRepo = await Git.Clone.clone(repo.url, localPath, {
+          bare: 1,
+          fetchOpts: {
+            callbacks: cbs,
+          },
+        });
+        const headCommit = await gitRepo.getHeadCommit();
+        const headRevision = headCommit.sha();
+        const currentBranch = await gitRepo.getCurrentBranch();
+        const currentBranchName = currentBranch.shorthand();
+        this.log.info(
+          `Clone repository from ${
+            repo.url
+          } done with head revision ${headRevision} and default branch ${currentBranchName}`
+        );
+        return {
+          uri: repo.uri,
+          repo: {
+            ...repo,
+            defaultBranch: currentBranchName,
+            revision: headRevision,
+          },
+        };
+      } finally {
+        if (gitRepo) {
+          gitRepo.cleanup();
+        }
+      }
     } catch (error) {
       if (isCancelled(error)) {
         // Clone job was cancelled intentionally. Do not throw this error.
