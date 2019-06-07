@@ -831,20 +831,21 @@ Kibana provides ConfigService if a plugin developer may want to support adjustab
 In order to have access to a config, plugin *should*:
 - Declare plugin specific "configPath" (will fallback to plugin "id" if not specified) in `kibana.json` file.
 - Export schema validation for config from plugin's main file. Schema is mandatory. If a plugin reads from the config without schema declaration, ConfigService will throw an error.
-```js
+```typescript
 // my_plugin/server/index.ts
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 export const plugin = ...
 export const config = {
   schema: schema.object(...),
 };
+export type MyPluginConfigType = TypeOf<typeof config.schema>;
 ```
 - Read config value exposed via initializerContext. No config path is required.
-```js
+```typescript
 class MyPlugin {
   constructor(initializerContext: PluginInitializerContext) {
-    this.config$ = initializerContext.config.create();
+    this.config$ = initializerContext.config.create<MyPluginConfigType>();
     // or if config is optional:
-    this.config$ = initializerContext.config.createIfExists();
+    this.config$ = initializerContext.config.createIfExists<MyPluginConfigType>();
   }
 ```

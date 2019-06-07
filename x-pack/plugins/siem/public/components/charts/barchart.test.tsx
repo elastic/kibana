@@ -8,11 +8,11 @@ import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
 
 import { BarChartBaseComponent, BarChartWithCustomPrompt } from './barchart';
-import { BarChartData } from './common';
+import { ChartConfigsData } from './common';
 
 describe('BarChartBaseComponent', () => {
   let wrapper: ReactWrapper;
-  const mockBarChartData: BarChartData[] = [
+  const mockBarChartData: ChartConfigsData[] = [
     {
       key: 'uniqueSourceIps',
       value: [{ y: 1714, x: 'uniqueSourceIps', g: 'uniqueSourceIps' }],
@@ -155,7 +155,7 @@ describe.each([
       },
     ],
   ],
-])('renders prompt', (data: BarChartData[] | [] | null | undefined) => {
+])('renders prompt', (data: ChartConfigsData[] | [] | null | undefined) => {
   let wrapper: ReactWrapper;
   beforeAll(() => {
     wrapper = mount(<BarChartWithCustomPrompt height={100} width={120} data={data} />);
