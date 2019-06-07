@@ -18,16 +18,7 @@
  */
 
 import { RENOVATE_PACKAGE_GROUPS } from './package_groups';
-
-const maybeMap = <T, T2>(input: T[] | undefined, fn: (i: T) => T2) =>
-  input ? input.map(fn) : undefined;
-
-const maybeFlatMap = <T, T2>(input: T[] | undefined, fn: (i: T) => T2[]) => {
-  const array2d = maybeMap(input, fn);
-  if (array2d) {
-    return array2d.reduce((acc, arr) => [...acc, ...arr], [] as T2[]);
-  }
-};
+import { wordRegExp, maybeFlatMap, maybeMap } from './utils';
 
 const DEFAULT_LABELS = ['release_note:skip', 'renovate', 'v8.0.0', 'v7.3.0'];
 
@@ -96,7 +87,7 @@ export const RENOVATE_CONFIG = {
       ...RENOVATE_PACKAGE_GROUPS.map(group => ({
         groupSlug: group.name,
         groupName: `${group.name} related packages`,
-        packagePatterns: maybeMap(group.packageWords, word => `\\b${word}\\b`),
+        packagePatterns: maybeMap(group.packageWords, word => wordRegExp(word).source),
         packageNames: maybeFlatMap(group.packageNames, name => [name, `@types/${name}`]),
         labels: group.extraLabels && [...DEFAULT_LABELS, ...group.extraLabels],
       })),

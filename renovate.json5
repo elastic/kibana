@@ -46,14 +46,14 @@
         groupSlug: 'eslint',
         groupName: 'eslint related packages',
         packagePatterns: [
-          '\\beslint\\b',
+          '(\\b|_)eslint(\\b|_)',
         ],
       },
       {
         groupSlug: 'babel',
         groupName: 'babel related packages',
         packagePatterns: [
-          '\\bbabel\\b',
+          '(\\b|_)babel(\\b|_)',
         ],
         packageNames: [
           'core-js',
@@ -64,58 +64,58 @@
         groupSlug: 'jest',
         groupName: 'jest related packages',
         packagePatterns: [
-          '\\bjest\\b',
+          '(\\b|_)jest(\\b|_)',
         ],
       },
       {
         groupSlug: 'mocha',
         groupName: 'mocha related packages',
         packagePatterns: [
-          '\\bmocha\\b',
+          '(\\b|_)mocha(\\b|_)',
         ],
       },
       {
         groupSlug: 'karma',
         groupName: 'karma related packages',
         packagePatterns: [
-          '\\bkarma\\b',
+          '(\\b|_)karma(\\b|_)',
         ],
       },
       {
         groupSlug: 'gulp',
         groupName: 'gulp related packages',
         packagePatterns: [
-          '\\bgulp\\b',
+          '(\\b|_)gulp(\\b|_)',
         ],
       },
       {
         groupSlug: 'grunt',
         groupName: 'grunt related packages',
         packagePatterns: [
-          '\\bgrunt\\b',
+          '(\\b|_)grunt(\\b|_)',
         ],
       },
       {
         groupSlug: 'angular',
         groupName: 'angular related packages',
         packagePatterns: [
-          '\\bangular\\b',
+          '(\\b|_)angular(\\b|_)',
         ],
       },
       {
         groupSlug: 'd3',
         groupName: 'd3 related packages',
         packagePatterns: [
-          '\\bd3\\b',
+          '(\\b|_)d3(\\b|_)',
         ],
       },
       {
         groupSlug: 'react',
         groupName: 'react related packages',
         packagePatterns: [
-          '\\breact\\b',
-          '\\bredux\\b',
-          '\\benzyme\\b',
+          '(\\b|_)react(\\b|_)',
+          '(\\b|_)redux(\\b|_)',
+          '(\\b|_)enzyme(\\b|_)',
         ],
         packageNames: [
           'ngreact',
@@ -134,15 +134,15 @@
         groupSlug: 'graphql',
         groupName: 'graphql related packages',
         packagePatterns: [
-          '\\bgraphql\\b',
+          '(\\b|_)graphql(\\b|_)',
         ],
       },
       {
         groupSlug: 'webpack',
         groupName: 'webpack related packages',
         packagePatterns: [
-          '\\bwebpack\\b',
-          '\\bloader\\b',
+          '(\\b|_)webpack(\\b|_)',
+          '(\\b|_)loader(\\b|_)',
         ],
         packageNames: [
           'mini-css-extract-plugin',
@@ -167,7 +167,7 @@
         groupSlug: 'hapi',
         groupName: 'hapi related packages',
         packagePatterns: [
-          '\\bhapi\\b',
+          '(\\b|_)hapi(\\b|_)',
         ],
         packageNames: [
           'hapi',
@@ -201,6 +201,342 @@
           'v8.0.0',
           'v7.3.0',
           ':ml',
+        ],
+      },
+      {
+        groupSlug: 'json-stable-stringify',
+        groupName: 'json-stable-stringify related packages',
+        packageNames: [
+          'json-stable-stringify',
+          '@types/json-stable-stringify',
+        ],
+      },
+      {
+        groupSlug: 'lodash.clonedeep',
+        groupName: 'lodash.clonedeep related packages',
+        packageNames: [
+          'lodash.clonedeep',
+          '@types/lodash.clonedeep',
+        ],
+      },
+      {
+        groupSlug: 'bluebird',
+        groupName: 'bluebird related packages',
+        packageNames: [
+          'bluebird',
+          '@types/bluebird',
+        ],
+      },
+      {
+        groupSlug: 'chance',
+        groupName: 'chance related packages',
+        packageNames: [
+          'chance',
+          '@types/chance',
+        ],
+      },
+      {
+        groupSlug: 'cheerio',
+        groupName: 'cheerio related packages',
+        packageNames: [
+          'cheerio',
+          '@types/cheerio',
+        ],
+      },
+      {
+        groupSlug: 'chromedriver',
+        groupName: 'chromedriver related packages',
+        packageNames: [
+          'chromedriver',
+          '@types/chromedriver',
+        ],
+      },
+      {
+        groupSlug: 'classnames',
+        groupName: 'classnames related packages',
+        packageNames: [
+          'classnames',
+          '@types/classnames',
+        ],
+      },
+      {
+        groupSlug: 'dedent',
+        groupName: 'dedent related packages',
+        packageNames: [
+          'dedent',
+          '@types/dedent',
+        ],
+      },
+      {
+        groupSlug: 'delete-empty',
+        groupName: 'delete-empty related packages',
+        packageNames: [
+          'delete-empty',
+          '@types/delete-empty',
+        ],
+      },
+      {
+        groupSlug: 'elasticsearch',
+        groupName: 'elasticsearch related packages',
+        packageNames: [
+          'elasticsearch',
+          '@types/elasticsearch',
+        ],
+      },
+      {
+        groupSlug: 'execa',
+        groupName: 'execa related packages',
+        packageNames: [
+          'execa',
+          '@types/execa',
+        ],
+      },
+      {
+        groupSlug: 'fetch-mock',
+        groupName: 'fetch-mock related packages',
+        packageNames: [
+          'fetch-mock',
+          '@types/fetch-mock',
+        ],
+      },
+      {
+        groupSlug: 'getopts',
+        groupName: 'getopts related packages',
+        packageNames: [
+          'getopts',
+          '@types/getopts',
+        ],
+      },
+      {
+        groupSlug: 'glob',
+        groupName: 'glob related packages',
+        packageNames: [
+          'glob',
+          '@types/glob',
+        ],
+      },
+      {
+        groupSlug: 'globby',
+        groupName: 'globby related packages',
+        packageNames: [
+          'globby',
+          '@types/globby',
+        ],
+      },
+      {
+        groupSlug: 'has-ansi',
+        groupName: 'has-ansi related packages',
+        packageNames: [
+          'has-ansi',
+          '@types/has-ansi',
+        ],
+      },
+      {
+        groupSlug: 'humps',
+        groupName: 'humps related packages',
+        packageNames: [
+          'humps',
+          '@types/humps',
+        ],
+      },
+      {
+        groupSlug: 'jquery',
+        groupName: 'jquery related packages',
+        packageNames: [
+          'jquery',
+          '@types/jquery',
+        ],
+      },
+      {
+        groupSlug: 'js-yaml',
+        groupName: 'js-yaml related packages',
+        packageNames: [
+          'js-yaml',
+          '@types/js-yaml',
+        ],
+      },
+      {
+        groupSlug: 'json5',
+        groupName: 'json5 related packages',
+        packageNames: [
+          'json5',
+          '@types/json5',
+        ],
+      },
+      {
+        groupSlug: 'license-checker',
+        groupName: 'license-checker related packages',
+        packageNames: [
+          'license-checker',
+          '@types/license-checker',
+        ],
+      },
+      {
+        groupSlug: 'listr',
+        groupName: 'listr related packages',
+        packageNames: [
+          'listr',
+          '@types/listr',
+        ],
+      },
+      {
+        groupSlug: 'lodash',
+        groupName: 'lodash related packages',
+        packageNames: [
+          'lodash',
+          '@types/lodash',
+        ],
+      },
+      {
+        groupSlug: 'lru-cache',
+        groupName: 'lru-cache related packages',
+        packageNames: [
+          'lru-cache',
+          '@types/lru-cache',
+        ],
+      },
+      {
+        groupSlug: 'minimatch',
+        groupName: 'minimatch related packages',
+        packageNames: [
+          'minimatch',
+          '@types/minimatch',
+        ],
+      },
+      {
+        groupSlug: 'moment-timezone',
+        groupName: 'moment-timezone related packages',
+        packageNames: [
+          'moment-timezone',
+          '@types/moment-timezone',
+        ],
+      },
+      {
+        groupSlug: 'mustache',
+        groupName: 'mustache related packages',
+        packageNames: [
+          'mustache',
+          '@types/mustache',
+        ],
+      },
+      {
+        groupSlug: 'node',
+        groupName: 'node related packages',
+        packageNames: [
+          'node',
+          '@types/node',
+        ],
+      },
+      {
+        groupSlug: 'opn',
+        groupName: 'opn related packages',
+        packageNames: [
+          'opn',
+          '@types/opn',
+        ],
+      },
+      {
+        groupSlug: 'podium',
+        groupName: 'podium related packages',
+        packageNames: [
+          'podium',
+          '@types/podium',
+        ],
+      },
+      {
+        groupSlug: 'puppeteer-core',
+        groupName: 'puppeteer-core related packages',
+        packageNames: [
+          'puppeteer-core',
+          '@types/puppeteer-core',
+        ],
+      },
+      {
+        groupSlug: 'request',
+        groupName: 'request related packages',
+        packageNames: [
+          'request',
+          '@types/request',
+        ],
+      },
+      {
+        groupSlug: 'rimraf',
+        groupName: 'rimraf related packages',
+        packageNames: [
+          'rimraf',
+          '@types/rimraf',
+        ],
+      },
+      {
+        groupSlug: 'selenium-webdriver',
+        groupName: 'selenium-webdriver related packages',
+        packageNames: [
+          'selenium-webdriver',
+          '@types/selenium-webdriver',
+        ],
+      },
+      {
+        groupSlug: 'semver',
+        groupName: 'semver related packages',
+        packageNames: [
+          'semver',
+          '@types/semver',
+        ],
+      },
+      {
+        groupSlug: 'sinon',
+        groupName: 'sinon related packages',
+        packageNames: [
+          'sinon',
+          '@types/sinon',
+        ],
+      },
+      {
+        groupSlug: 'strip-ansi',
+        groupName: 'strip-ansi related packages',
+        packageNames: [
+          'strip-ansi',
+          '@types/strip-ansi',
+        ],
+      },
+      {
+        groupSlug: 'styled-components',
+        groupName: 'styled-components related packages',
+        packageNames: [
+          'styled-components',
+          '@types/styled-components',
+        ],
+      },
+      {
+        groupSlug: 'supertest',
+        groupName: 'supertest related packages',
+        packageNames: [
+          'supertest',
+          '@types/supertest',
+        ],
+      },
+      {
+        groupSlug: 'type-detect',
+        groupName: 'type-detect related packages',
+        packageNames: [
+          'type-detect',
+          '@types/type-detect',
+        ],
+      },
+      {
+        groupSlug: 'uuid',
+        groupName: 'uuid related packages',
+        packageNames: [
+          'uuid',
+          '@types/uuid',
+        ],
+      },
+      {
+        groupSlug: 'zen-observable',
+        groupName: 'zen-observable related packages',
+        packageNames: [
+          'zen-observable',
+          '@types/zen-observable',
         ],
       },
       {

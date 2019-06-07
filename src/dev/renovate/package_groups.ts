@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { pkg } from '../../legacy/utils/package_json';
+import { wordRegExp } from './utils';
+
 interface PackageGroup {
   /**
    * The group name, will be used for the branch name and in pr titles
@@ -32,12 +35,6 @@ interface PackageGroup {
    * Exact package names that should be included in this group
    */
   readonly packageNames?: string[];
-
-  /**
-   * Prevent `@types/*` packages matching the packageWords and packageNames from being included
-   * in this group
-   */
-  readonly excludeTypes?: true;
 
   /**
    * Extra labels to apply to PRs created for packages in this group
@@ -126,3 +123,37 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
     extraLabels: [':ml'],
   },
 ];
+
+/**
+ * Auto-define package groups for any `@types/*` deps that are not already in a group
+ */
+for (const dep of [...Object.keys(pkg.dependencies), ...Object.keys(pkg.devDependencies)]) {
+  if (!dep.startsWith('@types/')) {
+    continue;
+  }
+
+  let typesFor = dep.slice('@types/'.length);
+
+  // @types packages use a convention for scoped packages, @types/org__name
+  if (typesFor.includes('__')) {
+    const [org, name] = typesFor.split('__');
+    typesFor = `@${org}/${name}`;
+  }
+
+  // determine if one of the existing groups has typesFor in its pacakgeNames
+  // or if any of the packageWords is a word in typesFor
+  const existing = RENOVATE_PACKAGE_GROUPS.some(
+    group =>
+      (group.packageNames || []).includes(typesFor) ||
+      (group.packageWords || []).some(word => wordRegExp(word).test(typesFor))
+  );
+
+  if (existing) {
+    continue;
+  }
+
+  RENOVATE_PACKAGE_GROUPS.push({
+    name: typesFor,
+    packageNames: [typesFor],
+  });
+}
