@@ -21263,10 +21263,10 @@ pug@^2.0.3:
     pug-runtime "^2.0.4"
     pug-strip-comments "^1.0.3"
 
-puid@1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/puid/-/puid-1.0.5.tgz#8d387bf05fb239c5e6f45902c49470084009638c"
-  integrity sha1-jTh78F+yOcXm9FkCxJRwCEAJY4w=
+puid@1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/puid/-/puid-1.0.7.tgz#fa638a737d7b20419059d93965aed36ca20e1c84"
+  integrity sha1-+mOKc317IEGQWdk5Za7TbKIOHIQ=
 
 pump@^1.0.0:
   version "1.0.3"
