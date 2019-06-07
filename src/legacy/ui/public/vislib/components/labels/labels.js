@@ -32,4 +32,4 @@ import { uniqLabels as getArrOfUniqLabels } from './uniq_labels';
 export function labels(obj) {
   if (!_.isObject(obj)) { throw new TypeError('LabelUtil expects an object'); }
   return getArrOfUniqLabels(createArr(obj));
-};
+}
