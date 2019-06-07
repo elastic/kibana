@@ -44,6 +44,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
         <EuiComboBox
           noSuggestions
           fullWidth
+          data-test-subj="toEmailAddressInput"
           selectedOptions={toOptions}
           onCreateOption={(searchValue: string) => {
             const newOptions = [...toOptions, { label: searchValue }];
@@ -78,6 +79,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
         <EuiFieldText
           fullWidth
           name="subject"
+          data-test-subj="emailSubjectInput"
           value={subject || ''}
           onChange={e => {
             editAction({ key: 'subject', value: e.target.value });
@@ -102,6 +104,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
           fullWidth
           value={body || ''}
           name="body"
+          data-test-subj="emailBodyInput"
           onChange={e => {
             editAction({ key: 'body', value: e.target.value });
           }}

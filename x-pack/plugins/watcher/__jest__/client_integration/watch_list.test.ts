@@ -23,6 +23,8 @@ jest.mock('ui/chrome', () => ({
   addBasePath: (path: string) => path || '/api/watcher',
 }));
 
+jest.mock('ui/time_buckets', () => {});
+
 const { setup } = pageHelpers.watchList;
 
 describe('<WatchList />', () => {
@@ -53,6 +55,7 @@ describe('<WatchList />', () => {
         test('should display an empty prompt', async () => {
           const { component, exists } = await setup();
 
+          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -89,6 +92,7 @@ describe('<WatchList />', () => {
 
           testBed = await setup();
 
+          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             testBed.component.update();
@@ -190,7 +194,8 @@ describe('<WatchList />', () => {
             ).not.toBe(null);
 
             expect(
-              document.body.querySelector('[data-test-subj="deleteWatchesConfirmation"]')!.textContent
+              document.body.querySelector('[data-test-subj="deleteWatchesConfirmation"]')!
+                .textContent
             ).toContain('Delete watch');
           });
 
@@ -202,7 +207,9 @@ describe('<WatchList />', () => {
 
             await actions.clickWatchActionAt(0, 'delete');
 
-            const modal = document.body.querySelector('[data-test-subj="deleteWatchesConfirmation"]');
+            const modal = document.body.querySelector(
+              '[data-test-subj="deleteWatchesConfirmation"]'
+            );
             const confirmButton: HTMLButtonElement | null = modal!.querySelector(
               '[data-test-subj="confirmModalConfirmButton"]'
             );
@@ -214,6 +221,7 @@ describe('<WatchList />', () => {
               },
             });
 
+            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               confirmButton!.click();
               await nextTick();

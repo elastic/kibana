@@ -90,6 +90,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
           id={action.id}
           className="euiAccordionForm"
           buttonContentClassName="euiAccordionForm__button"
+          data-test-subj="watchActionAccordion"
           buttonContent={
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -199,6 +200,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
               type="submit"
               isDisabled={hasErrors}
               isLoading={isExecuting}
+              data-test-subj="simulateActionButton"
               onClick={async () => {
                 const selectedWatchAction = watch.actions.filter(
                   (watchAction: any) => watchAction.id === action.id
@@ -234,7 +236,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                   (actionItem: ActionType) => actionItem.id === action.id
                 );
 
-                if (actionStatus.lastExecutionSuccessful === false) {
+                if (actionStatus && actionStatus.lastExecutionSuccessful === false) {
                   const message = actionStatus.lastExecutionReason || action.simulateFailMessage;
                   return toastNotifications.addDanger(message);
                 }

@@ -48,7 +48,10 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
 
   const actions = Object.entries(allActionTypes).map(
     ([type, { typeName, iconClass, selectMessage }]) => {
-      const isEnabled = settings ? settings.actionTypes[type].enabled : true;
+      const isEnabled =
+        settings && settings.actionTypes[type] && settings.actionTypes[type].enabled
+          ? settings.actionTypes[type].enabled
+          : true;
       return {
         type,
         typeName,
@@ -90,6 +93,7 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
             <EuiContextMenuItem
               key={`${action.type}-${index}`}
               disabled={isActionDisabled}
+              data-test-subj={`${action.type}ActionButton`}
               onClick={() => {
                 addAction({ type: action.type, defaults: { isNew: true } });
                 setIsPopOverOpen(false);

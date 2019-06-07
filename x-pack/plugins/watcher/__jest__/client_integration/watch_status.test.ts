@@ -14,6 +14,8 @@ jest.mock('ui/chrome', () => ({
   addBasePath: (path: string) => path || '/api/watcher',
 }));
 
+jest.mock('ui/time_buckets', () => {});
+
 const { setup } = pageHelpers.watchStatus;
 
 describe('<WatchStatus />', () => {
@@ -36,6 +38,7 @@ describe('<WatchStatus />', () => {
 
       testBed = await setup();
 
+      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         await nextTick();
         testBed.component.update();

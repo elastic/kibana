@@ -101,7 +101,7 @@ const JsonWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
-            <h1>{pageTitle}</h1>
+            <h1 data-test-subj="pageTitle">{pageTitle}</h1>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -119,6 +119,7 @@ const JsonWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
             }}
             isSelected={tab.id === selectedTab}
             key={index}
+            data-test-subj="tab"
           >
             {tab.name}
           </EuiTab>

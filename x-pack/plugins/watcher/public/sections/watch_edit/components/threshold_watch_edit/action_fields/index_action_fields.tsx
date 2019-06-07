@@ -40,6 +40,7 @@ export const IndexActionFields: React.FunctionComponent<Props> = ({
       <EuiFieldText
         fullWidth
         name="index"
+        data-test-subj="indexInput"
         value={index || ''}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           editAction({ key: 'index', value: e.target.value });

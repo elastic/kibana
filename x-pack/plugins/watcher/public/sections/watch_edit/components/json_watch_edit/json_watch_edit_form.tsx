@@ -59,7 +59,11 @@ export const JsonWatchEditForm = () => {
 
   return (
     <Fragment>
-      <EuiForm isInvalid={hasActionErrors} error={validationError ? validationError : []}>
+      <EuiForm
+        isInvalid={hasActionErrors}
+        error={validationError ? validationError : []}
+        data-test-subj="jsonWatchForm"
+      >
         {serverError && (
           <Fragment>
             <SectionError
@@ -70,6 +74,7 @@ export const JsonWatchEditForm = () => {
                 />
               }
               error={serverError}
+              data-test-subj="sectionError"
             />
             <EuiSpacer />
           </Fragment>
@@ -84,6 +89,7 @@ export const JsonWatchEditForm = () => {
             id="watchName"
             name="name"
             value={watch.name || ''}
+            data-test-subj="nameInput"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const watchName = e.target.value;
               setWatchProperty('name', watchName);
@@ -107,6 +113,7 @@ export const JsonWatchEditForm = () => {
           <EuiFieldText
             id="id"
             name="id"
+            data-test-subj="idInput"
             value={watch.id || ''}
             readOnly={!watch.isNew}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,6 +152,7 @@ export const JsonWatchEditForm = () => {
             mode="json"
             width="100%"
             theme="github"
+            data-test-subj="jsonEditor"
             aria-label={i18n.translate(
               'xpack.watcher.sections.watchEdit.json.form.watchJsonAriaLabel',
               {
@@ -163,7 +171,7 @@ export const JsonWatchEditForm = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj="btnSaveWatch"
+              data-test-subj="saveWatchButton"
               fill
               color="secondary"
               type="submit"
@@ -178,7 +186,7 @@ export const JsonWatchEditForm = () => {
 
                   setIsSaving(false);
 
-                  if (data.error === 'validation') {
+                  if (data && data.error === 'validation') {
                     return setValidationError(data.message);
                   }
 

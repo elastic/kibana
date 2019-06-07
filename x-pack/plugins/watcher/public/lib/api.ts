@@ -180,7 +180,7 @@ export const loadSettings = () => {
     path: `${basePath}/settings`,
     method: 'get',
     processData: (data: {
-      actionTypes: {
+      action_types: {
         [key: string]: {
           enabled: boolean;
         };

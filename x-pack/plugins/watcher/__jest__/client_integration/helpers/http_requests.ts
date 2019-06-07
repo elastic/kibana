@@ -50,11 +50,57 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setSaveWatchResponse = (id: string, response?: HttpResponse, error?: any) => {
+    const status = error ? error.status || 400 : 200;
+    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+
+    server.respondWith('PUT', `${API_ROOT}/watch/${id}`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      body,
+    ]);
+  };
+
+  const setLoadExecutionResultResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { watchHistoryItem: {} };
+    server.respondWith('PUT', `${API_ROOT}/watch/execute`, mockResponse(defaultResponse, response));
+  };
+
+  const setLoadMatchingIndicesResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { indices: [] };
+    server.respondWith('POST', `${API_ROOT}/indices`, mockResponse(defaultResponse, response));
+  };
+
+  const setLoadEsFieldsResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { fields: [] };
+    server.respondWith('POST', `${API_ROOT}/fields`, mockResponse(defaultResponse, response));
+  };
+
+  const setLoadSettingsResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { action_types: {} };
+    server.respondWith('GET', `${API_ROOT}/settings`, mockResponse(defaultResponse, response));
+  };
+
+  const setLoadWatchVisualizeResponse = (response: HttpResponse = {}) => {
+    const defaultResponse = { visualizeData: {} };
+    server.respondWith(
+      'POST',
+      `${API_ROOT}/watch/visualize`,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
   return {
     setLoadWatchesResponse,
     setLoadWatchResponse,
     setLoadWatchHistoryResponse,
     setDeleteWatchResponse,
+    setSaveWatchResponse,
+    setLoadExecutionResultResponse,
+    setLoadMatchingIndicesResponse,
+    setLoadEsFieldsResponse,
+    setLoadSettingsResponse,
+    setLoadWatchVisualizeResponse,
   };
 };
 

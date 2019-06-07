@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-describe('<WatchEdit />', () => {
-  describe('on component mount', () => {
-    // TODO implement
-  });
-});
+declare module 'axios/lib/adapters/xhr';

@@ -45,6 +45,8 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
   const clickToggleActivationButton = async () => {
     const { component } = testBed;
     const button = testBed.find('toggleWatchActivationButton');
+
+    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       component.update();
@@ -54,6 +56,8 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
   const clickAcknowledgeButton = async () => {
     const { component } = testBed;
     const button = testBed.find('acknowledgeWatchButton');
+
+    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       component.update();
@@ -63,6 +67,8 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
   const clickDeleteWatchButton = async () => {
     const { component } = testBed;
     const button = testBed.find('deleteWatchButton');
+
+    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       component.update();
@@ -76,6 +82,7 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
     const firstColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
     const button = findTestSubject(firstColumn, `watchIdColumn-${tableCellText}`);
 
+    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       component.update();
