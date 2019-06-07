@@ -72,5 +72,24 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
           });
         });
     });
+
+    it(`should return 400 when alert type isn't registered`, async () => {
+      await supertest
+        .post('/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.unregistered-alert-type',
+          })
+        )
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'Alert type "test.unregistered-alert-type" is not registered.',
+          });
+        });
+    });
   });
 }
