@@ -51,5 +51,68 @@ export const xyVisualization: Visualization<State, PersistableState> = {
       domElement
     ),
 
-  toExpression: () => '',
+  toExpression: state => ({
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'lens_xy_chart',
+        arguments: {
+          seriesType: [state.seriesType],
+          title: [state.title],
+          legend: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_legendConfig',
+                  arguments: {
+                    isVisible: [state.legend.isVisible],
+                    position: [state.legend.position],
+                  },
+                },
+              ],
+            },
+          ],
+          x: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_xConfig',
+                  arguments: {
+                    title: [state.x.title],
+                    showGridlines: [state.x.showGridlines],
+                    position: [state.x.position],
+                    accessor: [state.x.accessor],
+                  },
+                },
+              ],
+            },
+          ],
+          y: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_yConfig',
+                  arguments: {
+                    title: [state.y.title],
+                    showGridlines: [state.y.showGridlines],
+                    position: [state.y.position],
+                    accessors: state.y.accessors,
+                  },
+                },
+              ],
+            },
+          ],
+          splitSeriesAccessors: state.splitSeriesAccessors,
+          stackAccessors: state.stackAccessors,
+        },
+      },
+    ],
+  }),
 };
