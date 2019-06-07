@@ -4,19 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
-import { Datasource, DataType } from '..';
 import uuid from 'uuid';
-import { DatasourceDimensionPanelProps, DatasourceDataPanelProps } from '../types';
+import { Datasource, DataType } from '..';
+import {
+  DatasourceDimensionPanelProps,
+  DatasourceDataPanelProps,
+  DimensionPriority,
+} from '../types';
 import { getIndexPatterns } from './loader';
+import { toExpression } from './to_expression';
+import { IndexPatternDimensionPanel } from './dimension_panel';
 
-type OperationType = 'value' | 'terms' | 'date_histogram';
+export type OperationType =
+  | 'value'
+  | 'terms'
+  | 'date_histogram'
+  | 'sum'
+  | 'avg'
+  | 'min'
+  | 'max'
+  | 'count';
 
-interface IndexPatternColumn {
+export interface IndexPatternColumn {
   // Public
   operationId: string;
   label: string;
@@ -26,13 +41,14 @@ interface IndexPatternColumn {
   // Private
   operationType: OperationType;
   sourceField: string;
+  suggestedOrder?: DimensionPriority;
 }
 
 export interface IndexPattern {
   id: string;
   fields: IndexPatternField[];
   title: string;
-  timeFieldName?: string;
+  timeFieldName?: string | null;
 }
 
 export interface IndexPatternField {
@@ -41,6 +57,19 @@ export interface IndexPatternField {
   esTypes?: string[];
   aggregatable: boolean;
   searchable: boolean;
+  aggregationRestrictions?: Partial<
+    Record<
+      string,
+      {
+        agg: string;
+        interval?: number;
+        fixed_interval?: string;
+        calendar_interval?: string;
+        delay?: string;
+        time_zone?: string;
+      }
+    >
+  >;
 }
 
 export interface IndexPatternPersistedState {
@@ -95,76 +124,50 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
   );
 }
 
-export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
-  state: IndexPatternPrivateState;
-  setState: (newState: IndexPatternPrivateState) => void;
-};
+export function columnToOperation(column: IndexPatternColumn) {
+  const { dataType, label, isBucketed, operationId } = column;
+  return {
+    id: operationId,
+    label,
+    dataType,
+    isBucketed,
+  };
+}
 
-export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
-  const fields = props.state.indexPatterns[props.state.currentIndexPatternId].fields;
-  const columns: IndexPatternColumn[] = fields.map((field, index) => ({
-    operationId: `${index}`,
-    label: `Value of ${field.name}`,
-    dataType: field.type as DataType,
-    isBucketed: false,
+type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
+type InferFromArray<T> = T extends Array<infer P> ? P : T;
 
-    operationType: 'value' as OperationType,
-    sourceField: field.name,
-  }));
+function addRestrictionsToFields(
+  indexPattern: InferFromArray<Exclude<UnwrapPromise<ReturnType<typeof getIndexPatterns>>, void>>
+): IndexPattern {
+  const { typeMeta } = indexPattern;
+  if (!typeMeta) {
+    return indexPattern;
+  }
 
-  const filteredColumns = columns.filter(col => {
-    const { operationId, label, dataType, isBucketed } = col;
+  const aggs = Object.keys(typeMeta.aggs);
 
-    return props.filterOperations({
-      id: operationId,
-      label,
-      dataType,
-      isBucketed,
+  const newFields = [...(indexPattern.fields as IndexPatternField[])];
+  newFields.forEach((field, index) => {
+    const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
+    aggs.forEach(agg => {
+      if (typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name]) {
+        restrictionsObj[agg] = typeMeta.aggs[agg][field.name];
+      }
     });
+    if (Object.keys(restrictionsObj).length) {
+      newFields[index] = { ...field, aggregationRestrictions: restrictionsObj };
+    }
   });
 
-  const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
+  const { id, title, timeFieldName } = indexPattern;
 
-  return (
-    <div>
-      Dimension Panel
-      <EuiComboBox
-        data-test-subj="indexPattern-dimension"
-        options={filteredColumns.map(col => ({
-          label: col.label,
-          value: col.operationId,
-        }))}
-        selectedOptions={
-          selectedColumn
-            ? [
-                {
-                  label: selectedColumn.label,
-                  value: selectedColumn.operationId,
-                },
-              ]
-            : []
-        }
-        singleSelection={{ asPlainText: true }}
-        isClearable={false}
-        onChange={choices => {
-          const column: IndexPatternColumn = columns.find(
-            ({ operationId }) => operationId === choices[0].value
-          )!;
-          const newColumns: IndexPatternPrivateState['columns'] = {
-            ...props.state.columns,
-            [props.columnId]: column,
-          };
-
-          props.setState({
-            ...props.state,
-            columns: newColumns,
-            // Order is not meaningful until we aggregate
-            columnOrder: Object.keys(newColumns),
-          });
-        }}
-      />
-    </div>
-  );
+  return {
+    id,
+    title,
+    timeFieldName: timeFieldName || undefined,
+    fields: newFields,
+  };
 }
 
 export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
@@ -176,7 +179,7 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
 
       if (indexPatternObjects) {
         indexPatternObjects.forEach(obj => {
-          indexPatterns[obj.id] = obj;
+          indexPatterns[obj.id] = addRestrictionsToFields(obj);
         });
       }
 
@@ -198,18 +201,7 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       return { currentIndexPatternId, columns, columnOrder };
     },
 
-    toExpression(state: IndexPatternPrivateState) {
-      if (state.columnOrder.length === 0) {
-        return null;
-      }
-
-      const fieldNames = state.columnOrder.map(col => state.columns[col].sourceField);
-      const expression = `esdocs index="${state.currentIndexPatternId}" fields="${fieldNames.join(
-        ', '
-      )}" sort="${fieldNames[0]}, DESC"`;
-
-      return expression;
-    },
+    toExpression,
 
     renderDataPanel(
       domElement: Element,
@@ -224,14 +216,7 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
           return state.columnOrder.map(colId => ({ columnId: colId }));
         },
         getOperationForColumnId: (columnId: string) => {
-          const column = state.columns[columnId];
-          const { dataType, label, isBucketed, operationId } = column;
-          return {
-            id: operationId,
-            label,
-            dataType,
-            isBucketed,
-          };
+          return columnToOperation(state.columns[columnId]);
         },
         generateColumnId: () => {
           // TODO: Come up with a more compact form of generating unique column ids
@@ -240,7 +225,11 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
 
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
-            <IndexPatternDimensionPanel state={state} setState={setState} {...props} />,
+            <IndexPatternDimensionPanel
+              state={state}
+              setState={newState => setState(newState)}
+              {...props}
+            />,
             domElement
           );
         },

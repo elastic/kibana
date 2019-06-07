@@ -7,6 +7,7 @@
 export * from './types';
 
 import 'ui/autoload/all';
+// Used to run esaggs queries
 import 'uiExports/fieldFormats';
 import 'uiExports/search';
 import 'uiExports/visRequestHandlers';
