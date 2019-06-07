@@ -4,67 +4,108 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchParams } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
-import { CANVAS_USAGE_TYPE, CANVAS_TYPE } from '../../common/lib/constants';
+import { CANVAS_TYPE } from '../../common/lib/constants';
+import { AST, collectFns } from './collector_helpers';
+import { TelemetryCollector } from './collector';
 
-/*
- * @param ast: an ast that includes functions to track
- * @param cb: callback to do something with a function that has been found
- */
-const collectFns = (ast, cb) => {
-  if (ast.type === 'expression') {
-    ast.chain.forEach(({ function: cFunction, arguments: cArguments }) => {
-      cb(cFunction);
+interface Element {
+  expression: string;
+}
 
-      // recurse the argumetns and update the set along the way
-      Object.keys(cArguments).forEach(argName => {
-        cArguments[argName].forEach(subAst => {
-          if (subAst != null) {
-            collectFns(subAst, cb);
-          }
-        });
-      });
-    });
-  }
-};
+interface Page {
+  elements: Element[];
+}
 
-export function handleResponse({ hits }) {
-  const workpadDocs = get(hits, 'hits', null);
-  if (workpadDocs == null) {
-    return;
-  }
+interface Workpad {
+  pages: Page[];
+  [s: string]: any; // Only concerned with the pages here, but allow workpads to have any values
+}
 
+interface WorkpadSearch {
+  [CANVAS_TYPE]: Workpad;
+}
+
+interface WorkpadTelemetry {
+  workpads?: {
+    total: number;
+  };
+  pages?: {
+    total: number;
+    per_workpad: {
+      avg: number;
+      min: number;
+      max: number;
+    };
+  };
+  elements?: {
+    total: number;
+    per_page: {
+      avg: number;
+      min: number;
+      max: number;
+    };
+  };
+  functions?: {
+    total: number;
+    in_use: string[];
+    per_element: {
+      avg: number;
+      min: number;
+      max: number;
+    };
+  };
+}
+
+/**
+  Gather statistic about the given workpads
+
+  @param workpadDocs a collection of workpad documents
+  @returns Workpad Telemetry Data
+*/
+export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
   const functionSet = new Set();
 
-  // make a summary of info about each workpad
-  const workpadsInfo = workpadDocs.map(hit => {
-    const workpad = hit._source[CANVAS_TYPE];
+  if (workpadDocs.length === 0) {
+    return {};
+  }
 
-    let pages;
+  // make a summary of info about each workpad
+  const workpadsInfo = workpadDocs.map(workpad => {
+    let pages = { count: 0 };
     try {
       pages = { count: workpad.pages.length };
     } catch (err) {
+      // eslint-disable-next-line
       console.warn(err, workpad);
     }
-    const elementCounts = workpad.pages.reduce(
+    const elementCounts = workpad.pages.reduce<number[]>(
       (accum, page) => accum.concat(page.elements.length),
       []
     );
-    const functionCounts = workpad.pages.reduce((accum, page) => {
+    const functionCounts = workpad.pages.reduce<number[]>((accum, page) => {
       return page.elements.map(element => {
-        const ast = fromExpression(element.expression);
+        const ast: AST = fromExpression(element.expression) as AST; // TODO: Remove once fromExpression is properly typed
         collectFns(ast, cFunction => {
           functionSet.add(cFunction);
         });
         return ast.chain.length; // get the number of parts in the expression
       });
     }, []);
+
     return { pages, elementCounts, functionCounts };
   });
 
   // combine together info from across the workpads
-  const combinedWorkpadsInfo = workpadsInfo.reduce(
+  const combinedWorkpadsInfo = workpadsInfo.reduce<{
+    pageMin: number;
+    pageMax: number;
+    pageCounts: number[];
+    elementCounts: number[];
+    functionCounts: number[];
+  }>(
     (accum, pageInfo) => {
       const { pages, elementCounts, functionCounts } = pageInfo;
 
@@ -132,29 +173,24 @@ export function handleResponse({ hits }) {
   };
 }
 
-export function registerCanvasUsageCollector(server) {
-  const index = server.config().get('kibana.index');
-  const collector = server.usage.collectorSet.makeUsageCollector({
-    type: CANVAS_USAGE_TYPE,
-    isReady: () => true,
-    fetch: async callCluster => {
-      const searchParams = {
-        size: 10000, // elasticsearch index.max_result_window default value
-        index,
-        ignoreUnavailable: true,
-        filterPath: [
-          'hits.hits._source.canvas-workpad',
-          '-hits.hits._source.canvas-workpad.assets',
-        ],
-        body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
-      };
+const workpadCollector: TelemetryCollector = async function(server, callCluster) {
+  const index = server.config().get<string>('kibana.index');
+  const searchParams: SearchParams = {
+    size: 10000, // elasticsearch index.max_result_window default value
+    index,
+    ignoreUnavailable: true,
+    filterPath: ['hits.hits._source.canvas-workpad', '-hits.hits._source.canvas-workpad.assets'],
+    body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
+  };
 
-      const esResponse = await callCluster('search', searchParams);
-      if (get(esResponse, 'hits.hits.length') > 0) {
-        return handleResponse(esResponse);
-      }
-    },
-  });
+  const esResponse = await callCluster<WorkpadSearch>('search', searchParams);
 
-  server.usage.collectorSet.register(collector);
-}
+  if (get(esResponse, 'hits.hits.length') > 0) {
+    const workpads = esResponse.hits.hits.map(hit => hit._source[CANVAS_TYPE]);
+    return summarizeWorkpads(workpads);
+  }
+
+  return {};
+};
+
+export { workpadCollector };
