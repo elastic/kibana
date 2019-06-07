@@ -308,6 +308,7 @@
     "@types/listr": "^0.14.0",
     "@types/lodash": "^3.10.1",
     "@types/lru-cache": "^5.1.0",
+    "@types/markdown-it": "^0.0.7",
     "@types/minimatch": "^2.0.29",
     "@types/mocha": "^5.2.6",
     "@types/moment-timezone": "^0.5.8",
