@@ -40,7 +40,7 @@ import { capabilities } from 'ui/capabilities';
 // @ts-ignore
 import { modifyUrl } from 'ui/url';
 // @ts-ignore
-import { UrlOverflowServiceProvider } from '../error_url_overflow';
+import { UrlOverflowService } from '../error_url_overflow';
 import { npSetup } from '../new_platform';
 import { toastNotifications } from '../notify';
 // @ts-ignore
@@ -291,7 +291,7 @@ const $setupUrlOverflowHandling = (newPlatform: InternalCoreSetup) => (
   Private: any,
   config: any
 ) => {
-  const urlOverflow = Private(UrlOverflowServiceProvider);
+  const urlOverflow = new UrlOverflowService();
   const check = () => {
     // disable long url checks when storing state in session storage
     if (config.get('state:storeInSessionStorage')) {

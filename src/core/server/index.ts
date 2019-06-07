@@ -54,11 +54,16 @@ export {
   AuthenticationHandler,
   AuthToolkit,
   KibanaRequest,
+  KibanaRequestRoute,
   OnPreAuthHandler,
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
   Router,
+  RouteMethod,
+  RouteConfigOptions,
+  SessionStorageFactory,
+  SessionStorage,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
@@ -69,6 +74,8 @@ export {
   PluginInitializerContext,
   PluginName,
 } from './plugins';
+
+export { RecursiveReadonly } from '../utils';
 
 /**
  * Context passed to the plugins `setup` method.

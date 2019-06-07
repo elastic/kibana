@@ -172,6 +172,7 @@ export const addFieldToTimelineColumns = ({
           example: isString(column.example) ? column.example : undefined,
           id: fieldId,
           type: column.type,
+          aggregatable: column.aggregatable,
           width: DEFAULT_COLUMN_MIN_WIDTH,
         },
         id: timeline,

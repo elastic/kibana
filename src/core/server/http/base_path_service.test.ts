@@ -17,52 +17,51 @@
  * under the License.
  */
 
-import { Request } from 'hapi';
 import { BasePath } from './base_path_service';
 import { KibanaRequest } from './router';
-
-const reqMock = {
-  raw: {
-    req: {},
-  },
-} as Request;
+import { httpServerMock } from './http_server.mocks';
 
 describe('BasePath', () => {
   describe('#get()', () => {
     it('returns base path associated with an incoming Legacy.Request request', () => {
-      const basePath = new BasePath();
+      const request = httpServerMock.createRawRequest();
 
-      basePath.set(reqMock, '/baz/');
-      expect(basePath.get(reqMock)).toBe('/baz/');
+      const basePath = new BasePath();
+      basePath.set(request, '/baz/');
+      expect(basePath.get(request)).toBe('/baz/');
     });
 
     it('returns base path associated with an incoming KibanaRequest', () => {
+      const request = httpServerMock.createRawRequest();
       const basePath = new BasePath();
 
-      basePath.set(KibanaRequest.from(reqMock, undefined), '/baz/');
-      expect(basePath.get(KibanaRequest.from(reqMock, undefined))).toBe('/baz/');
+      basePath.set(KibanaRequest.from(request, undefined), '/baz/');
+      expect(basePath.get(KibanaRequest.from(request, undefined))).toBe('/baz/');
     });
 
     it('operates with both Legacy.Request/KibanaRequest requests', () => {
+      const request = httpServerMock.createRawRequest();
       const basePath = new BasePath();
 
-      basePath.set(reqMock, '/baz/');
-      expect(basePath.get(KibanaRequest.from(reqMock, undefined))).toBe('/baz/');
+      basePath.set(request, '/baz/');
+      expect(basePath.get(KibanaRequest.from(request, undefined))).toBe('/baz/');
     });
 
     it('is based on server base path', () => {
+      const request = httpServerMock.createRawRequest();
       const basePath = new BasePath('/foo/bar');
 
-      basePath.set(reqMock, '/baz/');
-      expect(basePath.get(reqMock)).toBe('/foo/bar/baz/');
+      basePath.set(request, '/baz/');
+      expect(basePath.get(request)).toBe('/foo/bar/baz/');
     });
   });
 
   describe('#set()', () => {
     it('#set() cannot be set twice for one request', () => {
+      const request = httpServerMock.createRawRequest();
       const basePath = new BasePath('/foo/bar');
 
-      const setPath = () => basePath.set(reqMock, 'baz/');
+      const setPath = () => basePath.set(request, 'baz/');
       setPath();
 
       expect(setPath).toThrowErrorMatchingInlineSnapshot(
