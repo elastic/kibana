@@ -45,4 +45,148 @@ describe('getFilteredQueryAndStatusFilter', () => {
     const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
     expect(result).toMatchSnapshot();
   });
+
+  it('handles nested query strings', () => {
+    filters = `{
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "must": [
+                {
+                  "match": {
+                    "monitor.status": {
+                      "query": "up",
+                      "operator": "and"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                [
+                  {
+                    "bool": {
+                      "must": [
+                        {
+                          "match": {
+                            "monitor.name": {
+                              "query": "test-page",
+                              "operator": "and"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "bool": {
+                      "must": [
+                        {
+                          "match": {
+                            "monitor.name": {
+                              "query": "prod-site",
+                              "operator": "and"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }`;
+    const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
+    expect(result).toMatchSnapshot();
+  });
+
+  it('handles nested status queries with sibling clauses', () => {
+    filters = `{
+      "bool": {
+        "must": [
+          {
+            "bool": {
+              "must": [
+                {
+                  "match": {
+                    "monitor.type": {
+                      "query": "http",
+                      "operator": "and"
+                    }
+                  }
+                },
+                {
+                  "match": {
+                    "observer.geo.name": {
+                      "query": "Philadelphia",
+                      "operator": "and"
+                    }
+                  }
+                },
+                {
+                  "match": {
+                    "monitor.status": {
+                      "query": "down",
+                      "operator": "and"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                [
+                  {
+                    "bool": {
+                      "must": [
+                        {
+                          "match": {
+                            "monitor.name": {
+                              "query": "test-page",
+                              "operator": "and"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "bool": {
+                      "must": [
+                        {
+                          "match": {
+                            "monitor.name": {
+                              "query": "prod-site",
+                              "operator": "and"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }`;
+    const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
+    expect(result).toMatchSnapshot();
+  });
+
+  it('handles `match_phrase` queries', () => {
+    filters = `{"bool":{"must":[{"match_phrase":{"monitor.name":"icmp test"}}]}}`;
+    const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
+    expect(result).toMatchSnapshot();
+  });
 });
