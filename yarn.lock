@@ -23854,10 +23854,10 @@ rsvp@^3.3.3:
   resolved "https://registry.yarnpkg.com/rsvp/-/rsvp-3.6.2.tgz#2e96491599a96cde1b515d5674a8f7a91452926a"
   integrity sha512-OfWGQTb9vnwRjwtA2QwpG2ICclHC3pgXZO5xt8H2EfgDquO0qVdSb5T88L4qJVAEugbS56pAuV4XZM58UX8ulw==
 
-rsync@0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/rsync/-/rsync-0.4.0.tgz#0274f3163007a94396d88b1cdeb4bbde92cb9dc1"
-  integrity sha1-AnTzFjAHqUOW2Isc3rS73pLLncE=
+rsync@0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/rsync/-/rsync-0.6.1.tgz#3681a0098bd8750448f8bf9da1fee09f7763742b"
+  integrity sha1-NoGgCYvYdQRI+L+dof7gn3djdCs=
 
 run-async@^0.1.0:
   version "0.1.0"
