@@ -49,7 +49,6 @@ const parentPipelineAggHelper = {
     return [
       {
         name: 'metricAgg',
-        editor: metricAggTemplate,
         editorComponent: MetricAggParamEditor,
         default: 'custom',
         write: parentPipelineAggWriter
