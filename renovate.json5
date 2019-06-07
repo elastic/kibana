@@ -43,73 +43,75 @@
     },
     packageRules: [
       {
+        groupSlug: 'eslint',
+        groupName: 'eslint related packages',
         packagePatterns: [
           '\\beslint\\b',
         ],
-        groupName: 'eslint related packages',
-        groupSlug: 'eslint',
       },
       {
+        groupSlug: 'babel',
+        groupName: 'babel related packages',
         packagePatterns: [
           '\\bbabel\\b',
         ],
         packageNames: [
           'core-js',
+          '@types/core-js',
         ],
-        groupName: 'babel related packages',
-        groupSlug: 'babel',
       },
       {
+        groupSlug: 'jest',
+        groupName: 'jest related packages',
         packagePatterns: [
           '\\bjest\\b',
         ],
-        groupName: 'jest related packages',
-        groupSlug: 'jest',
       },
       {
+        groupSlug: 'mocha',
+        groupName: 'mocha related packages',
         packagePatterns: [
           '\\bmocha\\b',
         ],
-        groupName: 'mocha related packages',
-        groupSlug: 'mocha',
       },
       {
+        groupSlug: 'karma',
+        groupName: 'karma related packages',
         packagePatterns: [
           '\\bkarma\\b',
         ],
-        groupName: 'karma related packages',
-        groupSlug: 'karma',
       },
       {
+        groupSlug: 'gulp',
+        groupName: 'gulp related packages',
         packagePatterns: [
           '\\bgulp\\b',
         ],
-        groupName: 'gulp related packages',
-        groupSlug: 'gulp',
       },
       {
+        groupSlug: 'grunt',
+        groupName: 'grunt related packages',
         packagePatterns: [
           '\\bgrunt\\b',
         ],
-        groupName: 'grunt related packages',
-        groupSlug: 'grunt',
       },
       {
+        groupSlug: 'angular',
+        groupName: 'angular related packages',
         packagePatterns: [
           '\\bangular\\b',
         ],
-        groupName: 'angular related packages',
-        groupSlug: 'angular',
-        recreateClosed: false,
       },
       {
+        groupSlug: 'd3',
+        groupName: 'd3 related packages',
         packagePatterns: [
           '\\bd3\\b',
         ],
-        groupName: 'd3 related packages',
-        groupSlug: 'd3',
       },
       {
+        groupSlug: 'react',
+        groupName: 'react related packages',
         packagePatterns: [
           '\\breact\\b',
           '\\bredux\\b',
@@ -117,43 +119,56 @@
         ],
         packageNames: [
           'ngreact',
+          '@types/ngreact',
           'recompose',
+          '@types/recompose',
           'prop-types',
+          '@types/prop-types',
           'typescript-fsa-reducers',
+          '@types/typescript-fsa-reducers',
           'reselect',
+          '@types/reselect',
         ],
-        groupName: 'react related packages',
-        groupSlug: 'react',
       },
       {
+        groupSlug: 'graphql',
+        groupName: 'graphql related packages',
         packagePatterns: [
           '\\bgraphql\\b',
         ],
-        groupName: 'graphql related packages',
-        groupSlug: 'graphql',
       },
       {
+        groupSlug: 'webpack',
+        groupName: 'webpack related packages',
         packagePatterns: [
           '\\bwebpack\\b',
           '\\bloader\\b',
         ],
         packageNames: [
           'mini-css-extract-plugin',
+          '@types/mini-css-extract-plugin',
           'chokidar',
+          '@types/chokidar',
         ],
-        groupName: 'webpack related packages',
-        groupSlug: 'webpack',
       },
       {
+        groupSlug: 'language server',
+        groupName: 'language server related packages',
         packageNames: [
           'vscode-jsonrpc',
+          '@types/vscode-jsonrpc',
           'vscode-languageserver',
+          '@types/vscode-languageserver',
           'vscode-languageserver-types',
+          '@types/vscode-languageserver-types',
         ],
-        groupName: 'language server related packages',
-        groupSlug: 'language server',
       },
       {
+        groupSlug: 'hapi',
+        groupName: 'hapi related packages',
+        packagePatterns: [
+          '\\bhapi\\b',
+        ],
         packageNames: [
           'hapi',
           '@types/hapi',
@@ -164,15 +179,29 @@
           'hoek',
           '@types/hoek',
           'h2o2',
+          '@types/h2o2',
           '@elastic/good',
+          '@types/@elastic/good',
           'good-squeeze',
+          '@types/good-squeeze',
           'inert',
+          '@types/inert',
         ],
-        packagePatterns: [
-          '\\bhapi\\b',
+      },
+      {
+        groupSlug: 'dragselect',
+        groupName: 'dragselect related packages',
+        packageNames: [
+          'dragselect',
+          '@types/dragselect',
         ],
-        groupName: 'hapi related packages',
-        groupSlug: 'hapi',
+        labels: [
+          'release_note:skip',
+          'renovate',
+          'v8.0.0',
+          'v7.3.0',
+          ':ml',
+        ],
       },
       {
         packagePatterns: [
