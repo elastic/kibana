@@ -19,7 +19,7 @@ import 'plugins/security/services/shield_indices';
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { SpacesManager } from '../../../../../spaces/public/lib';
-import { EDIT_ROLES_PATH } from '../management_urls';
+import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
 import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';
 
 import { EditRolePage } from './components';
@@ -37,7 +37,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       : getCreateRoleBreadcrumbs
   ),
   resolve: {
-    role($route, ShieldRole, Promise) {
+    role($route, ShieldRole, Promise, kbnUrl) {
       const name = $route.current.params.name;
 
       let role;
@@ -45,7 +45,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       if (name != null) {
         role = ShieldRole.get({ name }).$promise
           .catch((response) => {
-
             if (response.status === 404) {
               toastNotifications.addDanger({
                 title: i18n.translate('xpack.security.management.roles.roleNotFound',
@@ -54,11 +53,11 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
                     values: { roleName: name }
                   }),
               });
+              kbnUrl.redirect(ROLES_PATH);
+            } else {
+              return fatalError(response);
             }
-
-            return fatalError(response);
           });
-
       } else {
         role = Promise.resolve(new ShieldRole({
           elasticsearch: {
