@@ -23,12 +23,12 @@ echo ""
 
 echo " -> Running jest tests"
 cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack Jest" node scripts/jest --ci --no-cache --verbose
+checks-reporter-with-killswitch "X-Pack Jest" node scripts/jest --ci --verbose
 echo ""
 echo ""
 
 # echo " -> Running jest integration tests"
 # cd "$XPACK_DIR"
-# node scripts/jest_integration --ci --no-cache --verbose
+# node scripts/jest_integration --ci --verbose
 # echo ""
 # echo ""

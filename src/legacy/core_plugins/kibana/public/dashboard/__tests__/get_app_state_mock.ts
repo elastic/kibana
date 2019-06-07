@@ -17,18 +17,32 @@
  * under the License.
  */
 
+import { AppStateClass } from 'ui/state_management/app_state';
+
 /**
- * Creates a new instance of AppState based of the saved dashboard.
- *
- * @param appState {AppState} AppState class to instantiate
+ * A poor excuse for a mock just to get some basic tests to run in jest without requiring the injector.
+ * This could be improved if we extract the appState and state classes externally of their angular providers.
+ * @return {AppStateMock}
  */
-export function migrateAppState(appState) {
-  // For BWC in pre 6.1 versions where uiState was stored at the dashboard level, not at the panel level.
-  if (appState.uiState) {
-    appState.panels.forEach(panel => {
-      panel.embeddableConfig = appState.uiState[`P-${panel.panelIndex}`];
-    });
-    delete appState.uiState;
-    appState.save();
+export function getAppStateMock(): AppStateClass {
+  class AppStateMock {
+    constructor(defaults: any) {
+      Object.assign(this, defaults);
+    }
+
+    on() {}
+    off() {}
+    toJSON() {
+      return '';
+    }
+    save() {}
+    translateHashToRison(stateHashOrRison: string | string[]) {
+      return stateHashOrRison;
+    }
+    getQueryParamName() {
+      return '';
+    }
   }
+
+  return AppStateMock;
 }
