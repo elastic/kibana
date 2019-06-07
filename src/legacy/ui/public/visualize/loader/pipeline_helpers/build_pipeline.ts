@@ -226,7 +226,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   },
   markdown: visState => {
     const { markdown, fontSize, openLinksInNewTab } = visState.params;
-    const escapedMarkdown = escapeString(markdown);
+    const escapedMarkdown = markdown ? escapeString(markdown) : '';
     let expr = `markdownvis '${escapedMarkdown}' `;
     if (fontSize) {
       expr += ` fontSize=${fontSize} `;
