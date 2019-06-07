@@ -18,6 +18,8 @@
  */
 
 import { Server } from 'http';
+import request from 'request';
+import Boom from 'boom';
 
 jest.mock('fs', () => ({
   readFileSync: jest.fn(),
@@ -586,17 +588,6 @@ test('returns server and connection options on start', async () => {
   expect(options).toMatchSnapshot();
 });
 
-test('registers auth request interceptor only once', async () => {
-  const { registerAuth } = await server.setup(config);
-  const doRegister = () =>
-    registerAuth(() => null as any, {
-      encryptionKey: 'any_password',
-    } as any);
-
-  await doRegister();
-  expect(doRegister()).rejects.toThrowError('Auth interceptor was already registered');
-});
-
 test('registers registerOnPostAuth interceptor several times', async () => {
   const { registerOnPostAuth } = await server.setup(config);
   const doRegister = () => registerOnPostAuth(() => null as any);
@@ -697,7 +688,150 @@ const cookieOptions = {
   isSecure: false,
 };
 
-test('Should enable auth for a route by default if registerAuth has been called', async () => {
+interface User {
+  id: string;
+  roles?: string[];
+}
+
+interface StorageData {
+  value: User;
+  expires: number;
+}
+
+describe('#registerAuth', () => {
+  it('registers auth request interceptor only once', async () => {
+    const { registerAuth } = await server.setup(config);
+    const doRegister = () =>
+      registerAuth(() => null as any, {
+        encryptionKey: 'any_password',
+      } as any);
+
+    await doRegister();
+    expect(doRegister()).rejects.toThrowError('Auth interceptor was already registered');
+  });
+
+  it('supports implementing custom authentication logic', async () => {
+    const router = new Router('');
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
+
+    const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+    const { sessionStorageFactory } = await registerAuth<StorageData>((req, t) => {
+      const user = { id: '42' };
+      const sessionStorage = sessionStorageFactory.asScoped(req);
+      sessionStorage.set({ value: user, expires: Date.now() + 1000 });
+      return t.authenticated(user);
+    }, cookieOptions);
+    registerRouter(router);
+    await server.start();
+
+    const response = await supertest(innerServer.listener)
+      .get('/')
+      .expect(200, { content: 'ok' });
+
+    expect(response.header['set-cookie']).toBeDefined();
+    const cookies = response.header['set-cookie'];
+    expect(cookies).toHaveLength(1);
+
+    const sessionCookie = request.cookie(cookies[0]);
+    if (!sessionCookie) {
+      throw new Error('session cookie expected to be defined');
+    }
+    expect(sessionCookie).toBeDefined();
+    expect(sessionCookie.key).toBe('sid');
+    expect(sessionCookie.value).toBeDefined();
+    expect(sessionCookie.path).toBe('/');
+    expect(sessionCookie.httpOnly).toBe(true);
+  });
+
+  it('supports rejecting a request from an unauthenticated user', async () => {
+    const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+    const router = new Router('');
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
+    registerRouter(router);
+
+    await registerAuth((req, t) => t.rejected(Boom.unauthorized()), cookieOptions);
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect(401);
+  });
+
+  it('supports redirecting', async () => {
+    const redirectTo = '/redirect-url';
+    const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+    const router = new Router('');
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
+    registerRouter(router);
+
+    await registerAuth((req, t) => {
+      return t.redirected(redirectTo);
+    }, cookieOptions);
+    await server.start();
+
+    const response = await supertest(innerServer.listener)
+      .get('/')
+      .expect(302);
+    expect(response.header.location).toBe(redirectTo);
+  });
+
+  it(`doesn't expose internal error details`, async () => {
+    const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+    const router = new Router('');
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
+    registerRouter(router);
+
+    await registerAuth((req, t) => {
+      throw new Error('sensitive info');
+    }, cookieOptions);
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect({
+        statusCode: 500,
+        error: 'Internal Server Error',
+        message: 'An internal server error occurred',
+      });
+  });
+
+  it(`allows manipulating cookies from route handler`, async () => {
+    const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+    const { sessionStorageFactory } = await registerAuth<StorageData>((req, t) => {
+      const user = { id: '42' };
+      const sessionStorage = sessionStorageFactory.asScoped(req);
+      sessionStorage.set({ value: user, expires: Date.now() + 1000 });
+      return t.authenticated();
+    }, cookieOptions);
+
+    const router = new Router('');
+    router.get({ path: '/', validate: false }, (req, res) => res.ok({ content: 'ok' }));
+    router.get({ path: '/with-cookie', validate: false }, (req, res) => {
+      const sessionStorage = sessionStorageFactory.asScoped(req);
+      sessionStorage.clear();
+      return res.ok({ content: 'ok' });
+    });
+    registerRouter(router);
+
+    await server.start();
+
+    const responseToSetCookie = await supertest(innerServer.listener)
+      .get('/')
+      .expect(200);
+
+    expect(responseToSetCookie.header['set-cookie']).toBeDefined();
+
+    const responseToResetCookie = await supertest(innerServer.listener)
+      .get('/with-cookie')
+      .expect(200);
+
+    expect(responseToResetCookie.header['set-cookie']).toEqual([
+      'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/',
+    ]);
+  });
+});
+
+test('enables auth for a route by default if registerAuth has been called', async () => {
   const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('');
@@ -706,9 +840,7 @@ test('Should enable auth for a route by default if registerAuth has been called'
   );
   registerRouter(router);
 
-  const authenticate = jest
-    .fn()
-    .mockImplementation((req, sessionStorage, t) => t.authenticated({}));
+  const authenticate = jest.fn().mockImplementation((req, t) => t.authenticated());
   await registerAuth(authenticate, cookieOptions);
 
   await server.start();
@@ -719,7 +851,7 @@ test('Should enable auth for a route by default if registerAuth has been called'
   expect(authenticate).toHaveBeenCalledTimes(1);
 });
 
-test('Should support disabling auth for a route explicitly', async () => {
+test('supports disabling auth for a route explicitly', async () => {
   const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('');
@@ -738,7 +870,7 @@ test('Should support disabling auth for a route explicitly', async () => {
   expect(authenticate).toHaveBeenCalledTimes(0);
 });
 
-test('Should support enabling auth for a route explicitly', async () => {
+test('supports enabling auth for a route explicitly', async () => {
   const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('');
@@ -746,9 +878,7 @@ test('Should support enabling auth for a route explicitly', async () => {
     res.ok({ authRequired: req.route.options.authRequired })
   );
   registerRouter(router);
-  const authenticate = jest
-    .fn()
-    .mockImplementation((req, sessionStorage, t) => t.authenticated({}));
+  const authenticate = jest.fn().mockImplementation((req, t) => t.authenticated({}));
   await registerAuth(authenticate, cookieOptions);
 
   await server.start();
@@ -759,7 +889,7 @@ test('Should support enabling auth for a route explicitly', async () => {
   expect(authenticate).toHaveBeenCalledTimes(1);
 });
 
-test('Should allow attaching metadata to attach meta-data tag strings to a route', async () => {
+test('allows attaching metadata to attach meta-data tag strings to a route', async () => {
   const tags = ['my:tag'];
   const { registerRouter, server: innerServer } = await server.setup(config);
 
@@ -782,7 +912,7 @@ test('Should allow attaching metadata to attach meta-data tag strings to a route
     .expect(200, { tags: [] });
 });
 
-test('Should expose route details of incoming request to a route handler', async () => {
+test('exposes route details of incoming request to a route handler', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('');
@@ -812,7 +942,7 @@ describe('#auth.isAuthenticated()', () => {
     );
     registerRouter(router);
 
-    await registerAuth((req, sessionStorage, t) => t.authenticated({}), cookieOptions);
+    await registerAuth((req, t) => t.authenticated(), cookieOptions);
 
     await server.start();
     await supertest(innerServer.listener)
@@ -829,7 +959,7 @@ describe('#auth.isAuthenticated()', () => {
     );
     registerRouter(router);
 
-    await registerAuth((req, sessionStorage, t) => t.authenticated({}), cookieOptions);
+    await registerAuth((req, t) => t.authenticated(), cookieOptions);
 
     await server.start();
     await supertest(innerServer.listener)
@@ -854,11 +984,11 @@ describe('#auth.isAuthenticated()', () => {
 });
 
 describe('#auth.get()', () => {
-  it('Should return authenticated status and allow associate auth state with request', async () => {
+  it('returns authenticated status and allow associate auth state with request', async () => {
     const user = { id: '42' };
     const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(config);
-    await registerAuth((req, sessionStorage, t) => {
-      sessionStorage.set({ value: user });
+    const { sessionStorageFactory } = await registerAuth<StorageData>((req, t) => {
+      sessionStorageFactory.asScoped(req).set({ value: user, expires: Date.now() + 1000 });
       return t.authenticated(user);
     }, cookieOptions);
 
@@ -872,7 +1002,7 @@ describe('#auth.get()', () => {
       .expect(200, { state: user, status: 'authenticated' });
   });
 
-  it('Should return correct authentication unknown status', async () => {
+  it('returns correct authentication unknown status', async () => {
     const { registerRouter, server: innerServer, auth } = await server.setup(config);
     const router = new Router('');
     router.get({ path: '/', validate: false }, (req, res) => res.ok(auth.get(req)));
@@ -884,7 +1014,7 @@ describe('#auth.get()', () => {
       .expect(200, { status: 'unknown' });
   });
 
-  it('Should return correct unauthenticated status', async () => {
+  it('returns correct unauthenticated status', async () => {
     const authenticate = jest.fn();
 
     const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(config);
