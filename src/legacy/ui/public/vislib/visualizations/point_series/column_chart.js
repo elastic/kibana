@@ -233,7 +233,7 @@ export class ColumnChart extends PointSeries {
 
     return bars;
   }
-  
+
   /**
    * Adds grouped bars to column chart visualization
    *
@@ -254,7 +254,7 @@ export class ColumnChart extends PointSeries {
     const isLabels = this.labelOptions.show;
     let barWidth;
     let gutterWidth;
-    
+
     if (isTimeScale) {
       const { min, interval } = this.handler.data.get('ordered');
       let intervalWidth = xScale(min + interval) - xScale(min);
@@ -346,7 +346,7 @@ export class ColumnChart extends PointSeries {
         .attr('display', labelDisplay);
     }
     return bars;
-  }  
+  }
 
   /**
    * Renders d3 visualization
