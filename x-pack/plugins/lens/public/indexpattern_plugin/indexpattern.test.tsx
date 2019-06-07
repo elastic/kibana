@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import {
@@ -15,6 +15,7 @@ import {
   IndexPatternDimensionPanel,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
+import { DropHandler } from '../drag_drop';
 
 jest.mock('./loader');
 
@@ -260,6 +261,178 @@ describe('IndexPattern Data Source', () => {
         );
 
         expect(wrapper).toMatchSnapshot();
+      });
+
+      describe('drag and drop', () => {
+        function dragDropState() {
+          return {
+            ...state,
+            currentIndexPatternId: 'foo',
+            indexPatterns: {
+              foo: {
+                id: 'foo',
+                title: 'Foo pattern',
+                fields: [{ aggregatable: true, name: 'bar', searchable: true, type: 'number' }],
+              },
+            },
+          };
+        }
+
+        it('is not droppable if no drag is happening', () => {
+          const component = mount(
+            <IndexPatternDimensionPanel
+              dragDropContext={dragDropContext}
+              state={dragDropState()}
+              setState={() => {}}
+              columnId={'col2'}
+              filterOperations={() => true}
+            />
+          );
+
+          const dropTarget = component
+            .find('[data-test-subj="indexPattern-dropTarget"]')
+            .first()
+            .props();
+
+          expect((dropTarget as { droppable: boolean }).droppable).toBeFalsy();
+        });
+
+        it('is not droppable if the dragged item has no type', () => {
+          const component = shallow(
+            <IndexPatternDimensionPanel
+              dragDropContext={{
+                ...dragDropContext,
+                dragging: { name: 'bar' },
+              }}
+              state={dragDropState()}
+              setState={() => {}}
+              columnId={'col2'}
+              filterOperations={() => true}
+            />
+          );
+
+          const dropTarget = component
+            .find('[data-test-subj="indexPattern-dropTarget"]')
+            .first()
+            .props();
+
+          expect((dropTarget as { droppable: boolean }).droppable).toBeFalsy();
+        });
+
+        it('is not droppable if field is not supported by filterOperations', () => {
+          const component = shallow(
+            <IndexPatternDimensionPanel
+              dragDropContext={{
+                ...dragDropContext,
+                dragging: { type: 'number', name: 'bar' },
+              }}
+              state={dragDropState()}
+              setState={() => {}}
+              columnId={'col2'}
+              filterOperations={() => false}
+            />
+          );
+
+          const dropTarget = component
+            .find('[data-test-subj="indexPattern-dropTarget"]')
+            .first()
+            .props();
+
+          expect((dropTarget as { droppable: boolean }).droppable).toBeFalsy();
+        });
+
+        it('is droppable if the field is supported by filterOperations', () => {
+          const component = shallow(
+            <IndexPatternDimensionPanel
+              dragDropContext={{
+                ...dragDropContext,
+                dragging: { type: 'number', name: 'bar' },
+              }}
+              state={dragDropState()}
+              setState={() => {}}
+              columnId={'col2'}
+              filterOperations={op => op.dataType === 'number'}
+            />
+          );
+
+          const dropTarget = component
+            .find('[data-test-subj="indexPattern-dropTarget"]')
+            .first()
+            .props();
+
+          expect((dropTarget as { droppable: boolean }).droppable).toBeTruthy();
+        });
+
+        it('appends the dropped column when a field is dropped', () => {
+          const dragging = { type: 'number', name: 'bar' };
+          const testState = dragDropState();
+          const setState = jest.fn();
+          const component = shallow(
+            <IndexPatternDimensionPanel
+              dragDropContext={{
+                ...dragDropContext,
+                dragging,
+              }}
+              state={testState}
+              setState={setState}
+              columnId={'col2'}
+              filterOperations={op => op.dataType === 'number'}
+            />
+          );
+
+          const dropTarget = component
+            .find('[data-test-subj="indexPattern-dropTarget"]')
+            .first()
+            .props();
+
+          const onDrop = (dropTarget as { onDrop: DropHandler }).onDrop;
+
+          onDrop(dragging);
+
+          expect(setState).toBeCalledTimes(1);
+          expect(setState.mock.calls).toMatchObject([
+            [
+              {
+                columns: {
+                  ...testState.columns,
+                  col2: {
+                    dataType: 'number',
+                    sourceField: 'bar',
+                  },
+                },
+              },
+            ],
+          ]);
+        });
+
+        it('ignores drops of unsupported fields', () => {
+          const dragging = { type: 'number', name: 'baz' };
+          const testState = dragDropState();
+          const setState = jest.fn();
+          const component = shallow(
+            <IndexPatternDimensionPanel
+              dragDropContext={{
+                ...dragDropContext,
+                dragging,
+              }}
+              state={testState}
+              setState={setState}
+              columnId={'col2'}
+              filterOperations={op => op.dataType === 'number'}
+            />
+          );
+
+          const dropTarget = component
+            .find('[data-test-subj="indexPattern-dropTarget"]')
+            .first()
+            .props();
+
+          const onDrop = (dropTarget as { onDrop: DropHandler }).onDrop;
+
+          onDrop(dragging);
+
+          expect(setState).not.toBeCalled();
+        });
       });
 
       it('should call the filterOperations function', () => {

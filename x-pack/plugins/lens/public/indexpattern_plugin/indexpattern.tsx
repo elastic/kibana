@@ -157,6 +157,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
   return (
     <ChildDragDropProvider {...props.dragDropContext}>
       <DragDrop
+        data-test-subj="indexPattern-dropTarget"
         droppable={canHandleDrop()}
         onDrop={field => {
           const column = columns.find(
