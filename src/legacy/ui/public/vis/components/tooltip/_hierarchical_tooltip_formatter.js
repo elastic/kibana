@@ -19,9 +19,9 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import collectBranch from './_collect_branch';
+import collectBranch from '../../../agg_response/hierarchical/_collect_branch';
 import numeral from 'numeral';
-import template from 'ui/agg_response/hierarchical/_tooltip.html';
+import template from './_hierarchical_tooltip.html';
 
 export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce) {
   const $tooltip = $(template);
@@ -61,3 +61,15 @@ export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce)
   };
 
 }
+
+let _tooltipFormatter;
+export const getHierarchicalTooltipFormatter = () => {
+  if (!_tooltipFormatter) {
+    throw new Error('tooltip formatter not initialized');
+  }
+  return _tooltipFormatter;
+};
+
+export const setHierarchicalTooltipFormatter = Private => {
+  _tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
+};
