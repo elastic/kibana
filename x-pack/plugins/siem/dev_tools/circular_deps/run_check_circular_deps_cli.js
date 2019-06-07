@@ -27,7 +27,6 @@ run(
     } else {
       log.success('No circular deps 👍');
     }
-
   },
   {
     description: 'Check the SIEM plugin for circular deps',
