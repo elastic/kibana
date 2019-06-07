@@ -169,9 +169,8 @@ export const getFilteredQueryAndStatusFilter = (
       bool: {
         must: filterObject.bool.must.filter(
           (filter: any) =>
-            (filter.match && !filter.match['monitor.status']) ||
-            filter.simple_query_string ||
-            filter.bool
+            // drop monitor.status filter clause
+            !get<any | undefined>(filter, ['match', 'monitor.status'], undefined)
         ),
       },
     });
