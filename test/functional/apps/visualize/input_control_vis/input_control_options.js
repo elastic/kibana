@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
 
   const FIELD_NAME = 'machine.os.raw';
 
-  describe('input control visualization', () => {
+  describe('input control options', () => {
 
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
@@ -181,113 +181,6 @@ export default function ({ getService, getPageObjects }) {
         // Expect control to have values for selected time filter
         const menu = await comboBox.getOptionsList('listControlSelect0');
         expect(menu.trim().split('\n').join()).to.equal('osx,win 7,win 8,win xp');
-      });
-    });
-
-    describe('dynamic options', () => {
-      beforeEach(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickInputControlVis();
-        await PageObjects.visualize.clickVisEditorTab('controls');
-
-        await PageObjects.visualize.addInputControl();
-        await comboBox.set('indexPatternSelect-0', 'logstash- ');
-        await comboBox.set('fieldSelect-0', 'geo.src');
-
-        await PageObjects.visualize.clickGo();
-      });
-
-      it('should fetch new options when string field is filtered', async () => {
-        const initialOptions = await comboBox.getOptionsList('listControlSelect0');
-        expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU,US');
-
-        await comboBox.filterOptionsList('listControlSelect0', 'R');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
-        expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RU,RW,TR');
-      });
-
-      it('should not fetch new options when non-string is filtered', async () => {
-        await comboBox.set('fieldSelect-0', 'clientip');
-        await PageObjects.visualize.clickGo();
-
-        const initialOptions = await comboBox.getOptionsList('listControlSelect0');
-        expect(initialOptions.trim().split('\n').join()).to.equal(
-          '135.206.117.161,177.194.175.66,18.55.141.62,243.158.217.196,32.146.206.24');
-
-        await comboBox.filterOptionsList('listControlSelect0', '17');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
-        expect(updatedOptions.trim().split('\n').join()).to.equal('135.206.117.161,177.194.175.66,243.158.217.196');
-      });
-    });
-
-    describe('chained controls', () => {
-
-      before(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickInputControlVis();
-        await PageObjects.visualize.clickVisEditorTab('controls');
-
-        await PageObjects.visualize.addInputControl();
-        await comboBox.set('indexPatternSelect-0', 'logstash- ');
-        await comboBox.set('fieldSelect-0', 'geo.src');
-
-        await PageObjects.visualize.addInputControl();
-        await comboBox.set('indexPatternSelect-1', 'logstash- ');
-        await comboBox.set('fieldSelect-1', 'clientip');
-        await PageObjects.visualize.setSelectByOptionText('parentSelect-1', 'geo.src');
-
-        await PageObjects.visualize.clickGo();
-      });
-
-      it('should disable child control when parent control is not set', async () => {
-        const parentControlMenu = await comboBox.getOptionsList('listControlSelect0');
-        expect(parentControlMenu.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU,US');
-
-        const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
-        const isDisabled = await childControlInput.getProperty('disabled');
-        expect(isDisabled).to.equal(true);
-      });
-
-      it('should filter child control options by parent control value', async () => {
-        await comboBox.set('listControlSelect0', 'BR');
-
-        const childControlMenu = await comboBox.getOptionsList('listControlSelect1');
-        expect(childControlMenu.trim().split('\n').join()).to.equal('14.61.182.136,3.174.21.181,6.183.121.70,71.241.97.89,9.69.255.135');
-      });
-
-      it('should create a seperate filter pill for parent control and child control', async () => {
-        await comboBox.set('listControlSelect1', '14.61.182.136');
-
-        await PageObjects.visualize.inputControlSubmit();
-
-        const hasParentControlFilter = await filterBar.hasFilter('geo.src', 'BR');
-        expect(hasParentControlFilter).to.equal(true);
-
-        const hasChildControlFilter = await filterBar.hasFilter('clientip', '14.61.182.136');
-        expect(hasChildControlFilter).to.equal(true);
-      });
-
-      it('should clear child control dropdown when parent control value is removed', async () => {
-        await comboBox.clear('listControlSelect0');
-        await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
-
-        const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
-        const isDisabled = await childControlInput.getProperty('disabled');
-        expect(isDisabled).to.equal(true);
-
-        await testSubjects.click('inputControlCancelBtn');
-      });
-
-      it('should clear child control dropdown when parent control filter pill removed', async () => {
-        await filterBar.removeFilter('geo.src');
-        await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
-
-        const hasValue = await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0');
-        expect(hasValue).to.equal(false);
       });
     });
   });
