@@ -417,7 +417,7 @@
     "postcss": "^7.0.5",
     "postcss-url": "^8.0.0",
     "prettier": "^1.14.3",
-    "proxyquire": "1.7.11",
+    "proxyquire": "1.8.0",
     "regenerate": "^1.4.0",
     "sass-lint": "^1.12.1",
     "selenium-webdriver": "^4.0.0-alpha.1",
