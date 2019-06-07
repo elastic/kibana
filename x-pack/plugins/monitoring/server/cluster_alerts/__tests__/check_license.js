@@ -67,7 +67,7 @@ describe('Monitoring Check License', () => {
           const result = checkLicense('platinum', true, 'test-cluster-pqr', false);
           expect(result).to.eql({
             clusterAlerts: { enabled: false },
-            message: 'Cluster alerts are not enabled because Watcher is disabled.'
+            message: 'Cluster Alerts are not enabled because Watcher is disabled.'
           });
         });
       });
