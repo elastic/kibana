@@ -82,7 +82,7 @@ export function EditorFrame(props: EditorFrameProps) {
       ) {
         const initialVisualizationState = props.visualizationMap[
           state.visualization.activeId
-        ].initialize(undefined, datasourcePublicAPI);
+        ].initialize(datasourcePublicAPI);
         dispatch({
           type: 'UPDATE_VISUALIZATION_STATE',
           newState: initialVisualizationState,

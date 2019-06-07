@@ -160,10 +160,7 @@ describe('editor_frame', () => {
 
       await waitForPromises();
 
-      expect(mockVisualization.initialize).toHaveBeenCalledWith(
-        undefined,
-        mockDatasource.publicAPIMock
-      );
+      expect(mockVisualization.initialize).toHaveBeenCalledWith(mockDatasource.publicAPIMock);
     });
 
     it('should render data panel after initialization is complete', async () => {
