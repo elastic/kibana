@@ -107,6 +107,12 @@
         groupSlug: 'grunt',
       },
       {
+        packagePatterns: ['\\bangular\\b'],
+        groupName: 'angular related packages',
+        groupSlug: 'angular',
+        recreateClosed: false,
+      },
+      {
         packagePatterns: ['\\bd3\\b'],
         groupName: 'd3 related packages',
         groupSlug: 'd3',
@@ -162,6 +168,15 @@
       // internal/local packages
       {
         packagePatterns: ['^@kbn/.*'],
+        enabled: false,
+      },
+
+      // docs generator
+      {
+        packageNames: [
+          '@microsoft/api-documenter',
+          '@microsoft/api-extractor'
+        ],
         enabled: false,
       }
     ],

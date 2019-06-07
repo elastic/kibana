@@ -19,7 +19,8 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiCallOut,
-  EuiButton
+  EuiButton,
+  EuiText
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
@@ -37,26 +38,29 @@ const getColumns = showCgroupMetricsElasticsearch => {
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.nameColumnTitle', {
       defaultMessage: 'Name',
     }),
+    width: '20%',
     field: 'name',
     sortable: true,
     render: (value, node) => (
       <div>
         <div className="monTableCell__name">
-          <EuiToolTip
-            position="bottom"
-            content={node.nodeTypeLabel}
-          >
-            <span className={`fa ${node.nodeTypeClass}`} />
-          </EuiToolTip>
-          &nbsp;
-          <span data-test-subj="name">
-            <EuiLink
-              href={`#/elasticsearch/nodes/${node.resolver}`}
-              data-test-subj={`nodeLink-${node.resolver}`}
+          <EuiText size="m">
+            <EuiToolTip
+              position="bottom"
+              content={node.nodeTypeLabel}
             >
-              {value}
-            </EuiLink>
-          </span>
+              <span className={`fa ${node.nodeTypeClass}`} />
+            </EuiToolTip>
+            &nbsp;
+            <span data-test-subj="name">
+              <EuiLink
+                href={`#/elasticsearch/nodes/${node.resolver}`}
+                data-test-subj={`nodeLink-${node.resolver}`}
+              >
+                {value}
+              </EuiLink>
+            </span>
+          </EuiText>
         </div>
         <div className="monTableCell__transportAddress">
           {extractIp(node.transport_address)}
@@ -86,6 +90,21 @@ const getColumns = showCgroupMetricsElasticsearch => {
           {status}
         </div>
       );
+    }
+  });
+
+  cols.push({
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.shardsColumnTitle', {
+      defaultMessage: 'Shards',
+    }),
+    field: 'shardCount',
+    sortable: true,
+    render: (value, node) => {
+      return node.isOnline ? (
+        <div className="monTableCell__number" data-test-subj="shards">
+          {value}
+        </div>
+      ) : <OfflineCell/>;
     }
   });
 
@@ -176,7 +195,6 @@ const getColumns = showCgroupMetricsElasticsearch => {
     }),
     field: 'node_free_space',
     sortable: getSortHandler('node_free_space'),
-    width: '300px',
     render: (value, node) => (
       <MetricCell
         isOnline={node.isOnline}
@@ -185,21 +203,6 @@ const getColumns = showCgroupMetricsElasticsearch => {
         data-test-subj="diskFreeSpace"
       />
     )
-  });
-
-  cols.push({
-    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.shardsColumnTitle', {
-      defaultMessage: 'Shards',
-    }),
-    field: 'shardCount',
-    sortable: true,
-    render: (value, node) => {
-      return node.isOnline ? (
-        <div className="monTableCell__number" data-test-subj="shards">
-          {value}
-        </div>
-      ) : <OfflineCell/>;
-    }
   });
 
   return cols;

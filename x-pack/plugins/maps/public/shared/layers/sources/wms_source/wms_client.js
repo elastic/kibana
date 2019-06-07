@@ -147,6 +147,13 @@ function groupCapabilities(list) {
     return [];
   }
 
+  let maxPathDepth = 0;
+  list.forEach(({ path }) => {
+    if (path.length > maxPathDepth) {
+      maxPathDepth = path.length;
+    }
+  });
+
   let rootCommonPath = list[0].path;
   for(let listIndex = 1; listIndex < list.length; listIndex++) {
     if (rootCommonPath.length === 0) {
@@ -164,16 +171,37 @@ function groupCapabilities(list) {
     }
   }
 
-  if (rootCommonPath.length === 0 || list.length === 1) {
-    return list.map(({ path, value }) => {
-      return { label: path.join(' - '), value };
-    });
+  const labelMap = new Map();
+  const options = list.map(({ path, value }) => {
+    const title = path[path.length - 1];
+    const hierachyWithTitle = rootCommonPath.length === path.length
+      ? title // entire path is common, only use title
+      : path.splice(rootCommonPath.length).join(' - ');
+    const label = title === value
+      ? hierachyWithTitle
+      : `${hierachyWithTitle} (${value})`;
+
+    // labels are used as keys in react elements so uniqueness must be guaranteed
+    let uniqueLabel;
+    if (labelMap.has(label)) {
+      const counter = labelMap.get(label);
+      const nextCounter = counter + 1;
+      labelMap.set(label, nextCounter);
+      uniqueLabel = `${label}:${nextCounter}`;
+    } else {
+      labelMap.set(label, 0);
+      uniqueLabel = label;
+    }
+    return { label: uniqueLabel, value };
+  });
+
+  // no common path or all at same depth path
+  if (rootCommonPath.length === 0 || rootCommonPath.length === maxPathDepth) {
+    return options;
   }
 
   return [{
     label: rootCommonPath.join(' - '),
-    options: list.map(({ path, value }) => {
-      return { label: path.splice(rootCommonPath.length).join(' - '), value };
-    })
+    options
   }];
 }

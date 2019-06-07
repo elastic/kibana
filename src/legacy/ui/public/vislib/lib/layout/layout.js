@@ -20,15 +20,13 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import { VislibLibLayoutLayoutTypesProvider } from './layout_types';
+import { layoutTypes } from './layout_types';
 import { VislibLibAxisProvider } from '../axis';
-import { VislibLibChartTitleProvider } from '../chart_title';
+import { ChartTitle } from '../chart_title';
 
 export function VislibLibLayoutLayoutProvider(Private) {
 
-  const layoutType = Private(VislibLibLayoutLayoutTypesProvider);
   const Axis = Private(VislibLibAxisProvider);
-  const ChartTitle = Private(VislibLibChartTitleProvider);
   /**
    * Builds the visualization DOM layout
    *
@@ -50,7 +48,7 @@ export function VislibLibLayoutLayoutProvider(Private) {
       this.el = config.get('el');
       this.data = config.data.data;
       this.opts = config;
-      this.layoutType = layoutType[config.get('type')](this.el, this.data);
+      this.layoutType = layoutTypes[config.get('type')](this.el, this.data);
     }
 
     // Render the layout
