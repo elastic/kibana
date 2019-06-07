@@ -333,7 +333,7 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
                     <React.Fragment>
                       <p>
                         <FormattedMessage
-                          defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                          defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
                           id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                           values={
                             Object {
@@ -439,7 +439,7 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
                           >
                             <p>
                               <FormattedMessage
-                                defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                                defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
                                 id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                                 values={
                                   Object {
@@ -479,7 +479,7 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
                                     </FormattedMessage>
                                   </a>
                                 </EuiLink>
-                                 to start logging uptime data.
+                                 to start collecting uptime data.
                               </FormattedMessage>
                             </p>
                           </div>
