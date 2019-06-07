@@ -21,7 +21,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { PointSeriesTooltipFormatter } from '../_tooltip_formatter';
+import { PointSeriesTooltipFormatterProvider } from '../_pointseries_tooltip_formatter';
 
 describe('tooltipFormatter', function () {
 
@@ -29,7 +29,7 @@ describe('tooltipFormatter', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    tooltipFormatter = Private(PointSeriesTooltipFormatter)();
+    tooltipFormatter = Private(PointSeriesTooltipFormatterProvider)();
   }));
 
   function cell($row, i) {
