@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 import { Listing } from './listing';
 
 const expectedData = [
@@ -63,7 +63,7 @@ describe('Listing', () => {
       }
     };
 
-    const component = shallowWithIntl(<Listing.WrappedComponent {...props} />);
+    const component = shallow(<Listing {...props} />);
     expect(component.find('EuiMonitoringTable')).toMatchSnapshot();
   });
 
@@ -82,7 +82,7 @@ describe('Listing', () => {
       }
     };
 
-    const component = shallowWithIntl(<Listing.WrappedComponent {...props} />);
+    const component = shallow(<Listing {...props} />);
     expect(component.find('EuiMonitoringTable')).toMatchSnapshot();
   });
 });
