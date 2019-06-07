@@ -197,8 +197,7 @@ export default async function ({ readConfigFile }) {
         '--stats.maximumWaitTimeForAllCollectorsInS=0',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.code.security.enableGitCertCheck=false', // Disable git certificate check
-        '--timelion.ui.enabled=true',
-        '--uiSettings.overrides.accessibility:disableAnimations=true'
+        '--timelion.ui.enabled=true'
       ],
     },
     uiSettings: {
