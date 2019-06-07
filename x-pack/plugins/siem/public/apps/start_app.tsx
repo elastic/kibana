@@ -21,7 +21,7 @@ import { ErrorToast } from '../components/error_toast';
 import { KibanaConfigContext } from '../lib/adapters/framework/kibana_framework_adapter';
 import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
-import { createStore } from '../store';
+import { createStore } from '../store/store';
 
 export const startApp = async (libs: AppFrontendLibs) => {
   const history = createHashHistory();

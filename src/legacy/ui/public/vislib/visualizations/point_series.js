@@ -24,12 +24,13 @@ import { Tooltip } from '../../vis/components/tooltip';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { TimeMarker } from './time_marker';
 import { seriesTypes } from './point_series/series_types';
+import touchdownTmplHtml from '../partials/touchdown.tmpl.html';
 
 export function VislibVisualizationsPointSeriesProvider(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
   const seriTypes = seriesTypes;
-  const touchdownTmpl = _.template(require('../partials/touchdown.tmpl.html'));
+  const touchdownTmpl = _.template(touchdownTmplHtml);
   /**
    * Line Chart Visualization
    *
