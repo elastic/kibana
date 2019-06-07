@@ -44,7 +44,6 @@ export const getGroupings = async (
                 exists: { field: m.field },
               })),
           ],
-          minimum_should_match: 1,
           filter: [
             {
               range: {
@@ -71,6 +70,10 @@ export const getGroupings = async (
       },
     },
   };
+
+  if (params.body.query.bool.should.length !== 0) {
+    set(params, 'body.query.bool.minimum_should_match', 1);
+  }
 
   if (options.afterKey) {
     set(params, 'body.aggs.groupings.composite.after', { groupBy: options.afterKey });
