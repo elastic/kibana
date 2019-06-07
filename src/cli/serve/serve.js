@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { statSync } from 'fs';
-import { resolve } from 'path';
+import { extname, resolve } from 'path';
 
 import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { getConfig } from '../../legacy/server/path';
@@ -198,6 +198,19 @@ export default function (program) {
           }
         } catch (err) {
           // ignore, kibana.dev.yml does not exist
+        }
+      }
+
+      // Look for ${filename}.tls.yml which exits in the same directory as the found configs
+      for(const config of opts.config) {
+        const extension = extname(config);
+        const tlsConfigPath = `${config.substring(0, config.length - extension.length)}.tls${extension}`;
+        try {
+          if (statSync(tlsConfigPath).isFile()) {
+            opts.config.push(tlsConfigPath);
+          }
+        } catch (err) {
+          // file does not exist
         }
       }
 
