@@ -173,7 +173,7 @@
 
       // docs generator
       {
-        packagePatterns: [
+        packageNames: [
           '@microsoft/api-documenter',
           '@microsoft/api-extractor'
         ],
