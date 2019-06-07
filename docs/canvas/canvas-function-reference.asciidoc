@@ -175,10 +175,6 @@ Default: `"left"`
 *Returns:* `axisConfig`
 
 [float]
-[[b_fns]]
-== B
-
-[float]
 [[c_fns]]
 == C
 [[case_fn]]
