@@ -181,7 +181,7 @@
           'h2o2',
           '@types/h2o2',
           '@elastic/good',
-          '@types/@elastic/good',
+          '@types/elastic__good',
           'good-squeeze',
           '@types/good-squeeze',
           'inert',
@@ -202,6 +202,17 @@
           'v7.3.0',
           ':ml',
         ],
+      },
+      {
+        groupSlug: 'api-documenter',
+        groupName: 'api-documenter related packages',
+        packageNames: [
+          '@microsoft/api-documenter',
+          '@types/microsoft__api-documenter',
+          '@microsoft/api-extractor',
+          '@types/microsoft__api-extractor',
+        ],
+        enabled: false,
       },
       {
         groupSlug: 'json-stable-stringify',
@@ -537,6 +548,286 @@
         packageNames: [
           'zen-observable',
           '@types/zen-observable',
+        ],
+      },
+      {
+        groupSlug: 'base64-js',
+        groupName: 'base64-js related packages',
+        packageNames: [
+          'base64-js',
+          '@types/base64-js',
+        ],
+      },
+      {
+        groupSlug: 'chroma-js',
+        groupName: 'chroma-js related packages',
+        packageNames: [
+          'chroma-js',
+          '@types/chroma-js',
+        ],
+      },
+      {
+        groupSlug: 'color',
+        groupName: 'color related packages',
+        packageNames: [
+          'color',
+          '@types/color',
+        ],
+      },
+      {
+        groupSlug: 'file-saver',
+        groupName: 'file-saver related packages',
+        packageNames: [
+          'file-saver',
+          '@types/file-saver',
+        ],
+      },
+      {
+        groupSlug: 'git-url-parse',
+        groupName: 'git-url-parse related packages',
+        packageNames: [
+          'git-url-parse',
+          '@types/git-url-parse',
+        ],
+      },
+      {
+        groupSlug: 'history',
+        groupName: 'history related packages',
+        packageNames: [
+          'history',
+          '@types/history',
+        ],
+      },
+      {
+        groupSlug: 'jsonwebtoken',
+        groupName: 'jsonwebtoken related packages',
+        packageNames: [
+          'jsonwebtoken',
+          '@types/jsonwebtoken',
+        ],
+      },
+      {
+        groupSlug: 'memoize-one',
+        groupName: 'memoize-one related packages',
+        packageNames: [
+          'memoize-one',
+          '@types/memoize-one',
+        ],
+      },
+      {
+        groupSlug: 'mime',
+        groupName: 'mime related packages',
+        packageNames: [
+          'mime',
+          '@types/mime',
+        ],
+      },
+      {
+        groupSlug: 'mkdirp',
+        groupName: 'mkdirp related packages',
+        packageNames: [
+          'mkdirp',
+          '@types/mkdirp',
+        ],
+      },
+      {
+        groupSlug: 'nock',
+        groupName: 'nock related packages',
+        packageNames: [
+          'nock',
+          '@types/nock',
+        ],
+      },
+      {
+        groupSlug: 'node-fetch',
+        groupName: 'node-fetch related packages',
+        packageNames: [
+          'node-fetch',
+          '@types/node-fetch',
+        ],
+      },
+      {
+        groupSlug: 'object-hash',
+        groupName: 'object-hash related packages',
+        packageNames: [
+          'object-hash',
+          '@types/object-hash',
+        ],
+      },
+      {
+        groupSlug: 'papaparse',
+        groupName: 'papaparse related packages',
+        packageNames: [
+          'papaparse',
+          '@types/papaparse',
+        ],
+      },
+      {
+        groupSlug: 'pngjs',
+        groupName: 'pngjs related packages',
+        packageNames: [
+          'pngjs',
+          '@types/pngjs',
+        ],
+      },
+      {
+        groupSlug: 'proper-lockfile',
+        groupName: 'proper-lockfile related packages',
+        packageNames: [
+          'proper-lockfile',
+          '@types/proper-lockfile',
+        ],
+      },
+      {
+        groupSlug: 'reduce-reducers',
+        groupName: 'reduce-reducers related packages',
+        packageNames: [
+          'reduce-reducers',
+          '@types/reduce-reducers',
+        ],
+      },
+      {
+        groupSlug: '@storybook/addon-actions',
+        groupName: '@storybook/addon-actions related packages',
+        packageNames: [
+          '@storybook/addon-actions',
+          '@types/storybook__addon-actions',
+        ],
+      },
+      {
+        groupSlug: '@storybook/addon-info',
+        groupName: '@storybook/addon-info related packages',
+        packageNames: [
+          '@storybook/addon-info',
+          '@types/storybook__addon-info',
+        ],
+      },
+      {
+        groupSlug: '@storybook/addon-knobs',
+        groupName: '@storybook/addon-knobs related packages',
+        packageNames: [
+          '@storybook/addon-knobs',
+          '@types/storybook__addon-knobs',
+        ],
+      },
+      {
+        groupSlug: 'tar-fs',
+        groupName: 'tar-fs related packages',
+        packageNames: [
+          'tar-fs',
+          '@types/tar-fs',
+        ],
+      },
+      {
+        groupSlug: 'tinycolor2',
+        groupName: 'tinycolor2 related packages',
+        packageNames: [
+          'tinycolor2',
+          '@types/tinycolor2',
+        ],
+      },
+      {
+        groupSlug: 'intl-relativeformat',
+        groupName: 'intl-relativeformat related packages',
+        packageNames: [
+          'intl-relativeformat',
+          '@types/intl-relativeformat',
+        ],
+      },
+      {
+        groupSlug: 'cmd-shim',
+        groupName: 'cmd-shim related packages',
+        packageNames: [
+          'cmd-shim',
+          '@types/cmd-shim',
+        ],
+      },
+      {
+        groupSlug: 'cpy',
+        groupName: 'cpy related packages',
+        packageNames: [
+          'cpy',
+          '@types/cpy',
+        ],
+      },
+      {
+        groupSlug: 'indent-string',
+        groupName: 'indent-string related packages',
+        packageNames: [
+          'indent-string',
+          '@types/indent-string',
+        ],
+      },
+      {
+        groupSlug: 'lodash.clonedeepwith',
+        groupName: 'lodash.clonedeepwith related packages',
+        packageNames: [
+          'lodash.clonedeepwith',
+          '@types/lodash.clonedeepwith',
+        ],
+      },
+      {
+        groupSlug: 'log-symbols',
+        groupName: 'log-symbols related packages',
+        packageNames: [
+          'log-symbols',
+          '@types/log-symbols',
+        ],
+      },
+      {
+        groupSlug: 'ncp',
+        groupName: 'ncp related packages',
+        packageNames: [
+          'ncp',
+          '@types/ncp',
+        ],
+      },
+      {
+        groupSlug: 'ora',
+        groupName: 'ora related packages',
+        packageNames: [
+          'ora',
+          '@types/ora',
+        ],
+      },
+      {
+        groupSlug: 'read-pkg',
+        groupName: 'read-pkg related packages',
+        packageNames: [
+          'read-pkg',
+          '@types/read-pkg',
+        ],
+      },
+      {
+        groupSlug: 'strong-log-transformer',
+        groupName: 'strong-log-transformer related packages',
+        packageNames: [
+          'strong-log-transformer',
+          '@types/strong-log-transformer',
+        ],
+      },
+      {
+        groupSlug: 'tempy',
+        groupName: 'tempy related packages',
+        packageNames: [
+          'tempy',
+          '@types/tempy',
+        ],
+      },
+      {
+        groupSlug: 'wrap-ansi',
+        groupName: 'wrap-ansi related packages',
+        packageNames: [
+          'wrap-ansi',
+          '@types/wrap-ansi',
+        ],
+      },
+      {
+        groupSlug: 'write-pkg',
+        groupName: 'write-pkg related packages',
+        packageNames: [
+          'write-pkg',
+          '@types/write-pkg',
         ],
       },
       {
