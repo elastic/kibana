@@ -205,7 +205,7 @@ output.elasticsearch:
             color="warning"
             title={i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.isInternalCollectorStatusTitle', {
               defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Elasticsearch.
-              We will continously check every {timePeriod} seconds in the background.`,
+              We will continuously check every {timePeriod} seconds in the background.`,
               values: {
                 timePeriod: autoCheckIntervalInMs / 1000,
               }

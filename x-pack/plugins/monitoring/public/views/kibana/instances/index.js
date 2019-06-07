@@ -51,6 +51,9 @@ uiRoutes.when('/kibana/instances', {
                   <KibanaInstances
                     instances={this.data.kibanas}
                     setupMode={setupMode}
+                    sorting={this.sorting}
+                    pagination={this.pagination}
+                    onTableChange={this.onTableChange}
                     clusterStatus={this.data.clusterStatus}
                     angular={{
                       $scope,

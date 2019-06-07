@@ -28,7 +28,7 @@ export function getElasticsearchInstructionsForDisablingInternalCollection(produ
 }) {
   const disableInternalCollectionStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollectionTitle', {
-      defaultMessage: 'Disable the default collection of Elasticsearch monitoring metrics'
+      defaultMessage: 'Disable internal collection of Elasticsearch monitoring metrics'
     }),
     children: (
       <Fragment>
@@ -36,7 +36,7 @@ export function getElasticsearchInstructionsForDisablingInternalCollection(produ
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollectionDescription"
-              defaultMessage="Disable the default collection of Elasticsearch monitoring metrics.
+              defaultMessage="Disable internal collection of Elasticsearch monitoring metrics.
             Set {monospace} to false on each server in the production cluster."
               values={{
                 monospace: (
@@ -94,9 +94,9 @@ PUT _cluster/settings
             color="warning"
             title={i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.partiallyMigratedStatusTitle',
               {
-                defaultMessage: `We still see data coming from the default collection of Elasticsearch.
+                defaultMessage: `We still see data coming from internal collection of Elasticsearch.
                 Note that it can take up to {secondsAgo} seconds to detect.
-                We will continously check every {timePeriod} seconds in the background.`,
+                We will continuously check every {timePeriod} seconds in the background.`,
                 values: {
                   secondsAgo: meta.secondsAgo,
                   timePeriod: autoCheckIntervalInMs / 1000,

@@ -57,7 +57,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
 
   const disableInternalCollectionStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.title', {
-      defaultMessage: 'Disable the default collection of Kibana monitoring metrics'
+      defaultMessage: 'Disable internal collection of Kibana monitoring metrics'
     }),
     children: (
       <Fragment>
@@ -133,9 +133,9 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
             color="warning"
             title={i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.partiallyMigratedStatusTitle',
               {
-                defaultMessage: `We still see data coming from the default collection of Kibana.
+                defaultMessage: `We still see data coming from internal collection of Kibana.
                 Note that it can take up to {secondsAgo} seconds to detect.
-                We will continously check every {timePeriod} seconds in the background.`,
+                We will continuously check every {timePeriod} seconds in the background.`,
                 values: {
                   secondsAgo: meta.secondsAgo,
                   timePeriod: autoCheckIntervalInMs / 1000,

@@ -84,17 +84,21 @@ export class Flyout extends Component {
     const nowDisableInternalStatus = this.state.checkedStatusByStep[INSTRUCTION_STEP_DISABLE_INTERNAL];
 
     const setupInterval = (nextEnableMbStatus && !nowEnableMbStatus) || (nextDisableInternalStatus && !nowDisableInternalStatus);
+    const removeInterval = thisActiveStep !== nextActiveStep;
+    if (removeInterval) {
+      clearInterval(this.checkInterval);
+      this.clearInterval = null;
+    }
+
     if (setupInterval) {
       this.checkInterval = setInterval(async () => {
         await this.checkForMigrationStatus();
       }, AUTO_CHECK_INTERVAL_IN_MS);
     }
+  }
 
-    const removeInterval = thisActiveStep !== nextActiveStep;
-    if (removeInterval && this.checkInterval) {
-      clearInterval(this.checkInterval);
-      this.checkInterval = null;
-    }
+  componentWillUnmount() {
+    clearInterval(this.checkInterval);
   }
 
   checkForMigrationStatus = async () => {
@@ -229,7 +233,7 @@ export class Flyout extends Component {
       let isDisabled = false;
       let nextStep = null;
       if (activeStep === INSTRUCTION_STEP_SET_MONITORING_URL) {
-        isDisabled = esMonitoringUrl.length === 0;
+        isDisabled = !esMonitoringUrl || esMonitoringUrl.length === 0;
         if (product.isPartiallyMigrated || product.isFullyMigrated) {
           nextStep = INSTRUCTION_STEP_DISABLE_INTERNAL;
         }
