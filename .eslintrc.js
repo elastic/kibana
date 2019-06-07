@@ -300,7 +300,7 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
-        'test/functional/services/visual_testing/take_percy_snapshot.js',
+        'test/visual_regression/services/visual_testing/take_percy_snapshot.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
