@@ -126,7 +126,7 @@ export class Plugin {
     );
 
     core.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
-      const spacesClient = spacesService.scopedClient(request);
+      const spacesClient = await spacesService.scopedClient(request);
       try {
         const activeSpace = await getActiveSpace(
           spacesClient,

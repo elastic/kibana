@@ -20,7 +20,7 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
     path: '/api/spaces/v1/space/{id}/select',
     async handler(request: any) {
       const { SavedObjectsClient } = savedObjects;
-      const spacesClient: SpacesClient = spacesService.scopedClient(request);
+      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
       const id = request.params.id;
 
       try {

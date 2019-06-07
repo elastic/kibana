@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs';
+import { map, take } from 'rxjs/operators';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { Legacy } from 'kibana';
 import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 import {
@@ -23,7 +23,7 @@ import { SpacesConfigType } from '../config';
 type RequestFacade = KibanaRequest | Legacy.Request;
 
 export interface SpacesServiceSetup {
-  scopedClient(request: RequestFacade): SpacesClient;
+  scopedClient(request: RequestFacade): Promise<SpacesClient>;
 
   getSpaceId(request: RequestFacade): string;
 
@@ -52,16 +52,6 @@ export class SpacesService {
     config$,
     spacesAuditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
-    let config: SpacesConfigType = await config$.pipe(first()).toPromise();
-
-    this.configSubscription$ = config$.subscribe({
-      next: updatedConfig => {
-        config = updatedConfig;
-      },
-    });
-
-    const adminClient = await elasticsearch.adminClient$.pipe(first()).toPromise();
-
     const getSpaceId = (request: RequestFacade) => {
       const isLegacyRequest = typeof (request as any).getBasePath === 'function';
 
@@ -81,29 +71,36 @@ export class SpacesService {
 
         return spaceId === DEFAULT_SPACE_ID;
       },
-      scopedClient: (request: RequestFacade) => {
-        const internalRepository = savedObjects.getSavedObjectsRepository(
-          adminClient.callAsInternalUser
-        );
+      scopedClient: async (request: RequestFacade) => {
+        return combineLatest(elasticsearch.adminClient$, config$)
+          .pipe(
+            map(([clusterClient, config]) => {
+              const internalRepository = savedObjects.getSavedObjectsRepository(
+                clusterClient.callAsInternalUser
+              );
 
-        const callCluster = adminClient.asScoped(request).callAsCurrentUser;
+              const callCluster = clusterClient.asScoped(request).callAsCurrentUser;
 
-        const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
+              const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
 
-        const security = getSecurity();
-        const authorization = security ? security.authorization : null;
+              const security = getSecurity();
+              const authorization = security ? security.authorization : null;
 
-        return new SpacesClient(
-          spacesAuditLogger,
-          (message: string) => {
-            this.log.debug(message);
-          },
-          authorization,
-          callWithRequestRepository,
-          config,
-          internalRepository,
-          request
-        );
+              return new SpacesClient(
+                spacesAuditLogger,
+                (message: string) => {
+                  this.log.debug(message);
+                },
+                authorization,
+                callWithRequestRepository,
+                config,
+                internalRepository,
+                request
+              );
+            }),
+            take(1)
+          )
+          .toPromise();
       },
     };
   }

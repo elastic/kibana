@@ -19,7 +19,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
     path: '/api/spaces/space/{id}',
     async handler(request: ExternalRouteRequestFacade) {
       const { SavedObjectsClient } = savedObjects;
-      const spacesClient: SpacesClient = spacesService.scopedClient(request);
+      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
       const space: Space = request.payload as Space;
       const id = request.params.id;

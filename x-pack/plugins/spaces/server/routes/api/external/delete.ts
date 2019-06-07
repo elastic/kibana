@@ -17,7 +17,7 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
     path: '/api/spaces/space/{id}',
     async handler(request: ExternalRouteRequestFacade, h: any) {
       const { SavedObjectsClient } = savedObjects;
-      const spacesClient: SpacesClient = spacesService.scopedClient(request);
+      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
       const id = request.params.id;
 

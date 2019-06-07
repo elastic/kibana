@@ -167,14 +167,16 @@ export function createTestHandler(
     });
 
     spacesService.scopedClient = jest.fn((req: any) => {
-      return new SpacesClient(
-        null as any,
-        () => null,
-        null,
-        mockSavedObjectsRepository,
-        { maxSpaces: 1000 },
-        mockSavedObjectsRepository,
-        req
+      return Promise.resolve(
+        new SpacesClient(
+          null as any,
+          () => null,
+          null,
+          mockSavedObjectsRepository,
+          { maxSpaces: 1000 },
+          mockSavedObjectsRepository,
+          req
+        )
       );
     });
 

@@ -19,7 +19,7 @@ export function initGetSpacesApi(deps: ExternalRouteDeps) {
     async handler(request: ExternalRouteRequestFacade) {
       log.debug(`Inside GET /api/spaces/space`);
 
-      const spacesClient: SpacesClient = spacesService.scopedClient(request);
+      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
       let spaces: Space[];
 
@@ -46,7 +46,7 @@ export function initGetSpacesApi(deps: ExternalRouteDeps) {
       const spaceId = request.params.id;
 
       const { SavedObjectsClient } = savedObjects;
-      const spacesClient: SpacesClient = spacesService.scopedClient(request);
+      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
       try {
         return await spacesClient.get(spaceId);

@@ -20,7 +20,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
     async handler(request: ExternalRouteRequestFacade) {
       log.debug(`Inside POST /api/spaces/space`);
       const { SavedObjectsClient } = savedObjects;
-      const spacesClient: SpacesClient = spacesService.scopedClient(request);
+      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
       const space = request.payload as Space;
 

@@ -81,7 +81,7 @@ export const spaces = (kibana: Record<string, any>) =>
         request: Record<string, any>,
         server: Record<string, any>
       ) {
-        const spacesClient = server.plugins.spaces.spacesClient.scopedClient(request);
+        const spacesClient = await server.plugins.spaces.spacesClient.scopedClient(request);
         try {
           vars.activeSpace = {
             valid: true,

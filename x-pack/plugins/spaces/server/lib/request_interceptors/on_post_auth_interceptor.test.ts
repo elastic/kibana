@@ -203,7 +203,7 @@ describe('onPostAuthRequestInterceptor', () => {
         config$: Rx.of({ maxSpaces: 1000 }),
       });
 
-      spacesService.scopedClient = jest.fn().mockReturnValue({
+      spacesService.scopedClient = jest.fn().mockResolvedValue({
         getAll() {
           return spaces.map(convertSavedObjectToSpace);
         },

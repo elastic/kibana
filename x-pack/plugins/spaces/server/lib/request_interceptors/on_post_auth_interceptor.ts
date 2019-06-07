@@ -40,7 +40,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
     const isRequestingKibanaRoot = path === '/';
     const isRequestingApplication = path.startsWith('/app');
 
-    const spacesClient = spacesService.scopedClient(request);
+    const spacesClient = await spacesService.scopedClient(request);
 
     // if requesting the application root, then show the Space Selector UI to allow the user to choose which space
     // they wish to visit. This is done "onPostAuth" to allow the Saved Objects Client to use the request's auth credentials,
