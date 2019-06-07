@@ -44,6 +44,7 @@ export const getGroupings = async (
                 exists: { field: m.field },
               })),
           ],
+          minimum_should_match: 1,
           filter: [
             {
               range: {
