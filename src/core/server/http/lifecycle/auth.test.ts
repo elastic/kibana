@@ -21,18 +21,11 @@ import Boom from 'boom';
 import { adoptToHapiAuthFormat } from './auth';
 import { httpServerMock } from '../http_server.mocks';
 
-const SessionStorageMock = {
-  asScoped: () => null as any,
-};
-
 describe('adoptToHapiAuthFormat', () => {
   it('Should allow authenticating a user identity with given credentials', async () => {
     const credentials = {};
     const authenticatedMock = jest.fn();
-    const onAuth = adoptToHapiAuthFormat(
-      async (req, sessionStorage, t) => t.authenticated(credentials),
-      SessionStorageMock
-    );
+    const onAuth = adoptToHapiAuthFormat((req, t) => t.authenticated(credentials));
     await onAuth(
       httpServerMock.createRawRequest(),
       httpServerMock.createRawResponseToolkit({
@@ -46,10 +39,7 @@ describe('adoptToHapiAuthFormat', () => {
 
   it('Should allow redirecting to specified url', async () => {
     const redirectUrl = '/docs';
-    const onAuth = adoptToHapiAuthFormat(
-      async (req, sessionStorage, t) => t.redirected(redirectUrl),
-      SessionStorageMock
-    );
+    const onAuth = adoptToHapiAuthFormat((req, t) => t.redirected(redirectUrl));
     const takeoverSymbol = {};
     const redirectMock = jest.fn(() => ({ takeover: () => takeoverSymbol }));
     const result = await onAuth(
@@ -64,9 +54,8 @@ describe('adoptToHapiAuthFormat', () => {
   });
 
   it('Should allow to specify statusCode and message for Boom error', async () => {
-    const onAuth = adoptToHapiAuthFormat(
-      async (req, sessionStorage, t) => t.rejected(new Error('not found'), { statusCode: 404 }),
-      SessionStorageMock
+    const onAuth = adoptToHapiAuthFormat((req, t) =>
+      t.rejected(new Error('not found'), { statusCode: 404 })
     );
     const result = (await onAuth(
       httpServerMock.createRawRequest(),
@@ -79,9 +68,9 @@ describe('adoptToHapiAuthFormat', () => {
   });
 
   it('Should return Boom.internal error error if interceptor throws', async () => {
-    const onAuth = adoptToHapiAuthFormat(async (req, sessionStorage, t) => {
+    const onAuth = adoptToHapiAuthFormat((req, t) => {
       throw new Error('unknown error');
-    }, SessionStorageMock);
+    });
     const result = (await onAuth(
       httpServerMock.createRawRequest(),
       httpServerMock.createRawResponseToolkit()
@@ -93,10 +82,7 @@ describe('adoptToHapiAuthFormat', () => {
   });
 
   it('Should return Boom.internal error if interceptor returns unexpected result', async () => {
-    const onAuth = adoptToHapiAuthFormat(
-      async (req, sessionStorage, t) => undefined as any,
-      SessionStorageMock
-    );
+    const onAuth = adoptToHapiAuthFormat(async (req, t) => undefined as any);
     const result = (await onAuth(
       httpServerMock.createRawRequest(),
       httpServerMock.createRawResponseToolkit()
