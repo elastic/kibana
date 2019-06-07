@@ -24,6 +24,7 @@ import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
+import { toastNotifications } from 'ui/notify';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
@@ -36,7 +37,6 @@ app.directive('visualizeListingTable', reactDirective => reactDirective(wrapInI1
 app.directive('newVisModal', reactDirective => reactDirective(wrapInI18nContext(NewVisModal)));
 
 export function VisualizeListingController($injector, createNewVis) {
-  const Notifier = $injector.get('Notifier');
   const Private = $injector.get('Private');
   const config = $injector.get('config');
   const kbnUrl = $injector.get('kbnUrl');
@@ -77,7 +77,6 @@ export function VisualizeListingController($injector, createNewVis) {
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
   const visualizationService = services.visualizations;
-  const notify = new Notifier({ location: 'Visualize' });
 
   this.fetchItems = (filter) => {
     const isLabsEnabled = config.get('visualize:enableLabs');
@@ -96,7 +95,13 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.deleteSelectedItems = function deleteSelectedItems(selectedIds) {
     return visualizationService.delete(selectedIds)
-      .catch(error => notify.error(error));
+      .catch(error => {
+        toastNotifications.addError(error, {
+          title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
+            defaultMessage: 'Error deleting visualization',
+          }),
+        });
+      });
   };
 
   chrome.breadcrumbs.set([{

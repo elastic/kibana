@@ -63,6 +63,7 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
+export { RecursiveReadonly } from '../utils';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
