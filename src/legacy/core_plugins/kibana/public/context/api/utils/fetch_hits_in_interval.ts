@@ -16,8 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { convertTimeValueToIso } from './date_conversion';
 import { SearchSource } from 'ui/courier';
+import { convertTimeValueToIso } from './date_conversion';
+import { SortDirection } from './sorting';
+
+interface RangeQuery {
+  format: string;
+  lte?: string | null;
+  gte?: string | null;
+}
 
 /**
  * Fetch the hits between `(afterTimeValue, tieBreakerValue)` and
@@ -28,37 +35,34 @@ import { SearchSource } from 'ui/courier';
  *
  * The `searchSource` is assumed to have the appropriate index pattern
  * and filters set.
- * @returns {Promise<object[]>}
  */
 export async function fetchHitsInInterval(
   searchSource: SearchSource,
   timeFieldName: string,
-  timeFieldSortDir: 'asc' | 'desc',
-  startRangeMillis: number,
+  sort: any,
+  sortDir: SortDirection,
+  startRangeMillis: number | null,
   endRangeMillis: number | null,
-  afterTimeValue: number | string,
-  tieBreakerField: string,
-  tieBreakerValue: number,
+  searchAfter: [number | string, number | string],
   maxCount: number,
   nanosValue: string
-): Promise<Object> {
-  
-  const startRange = {
-    [timeFieldSortDir === 'asc' ? 'gte' : 'lte']: convertTimeValueToIso(
+): Promise<Array<Record<string, any>>> {
+  const range: RangeQuery = {
+    format: 'strict_date_optional_time',
+  };
+  if (startRangeMillis) {
+    range[sortDir === SortDirection.asc ? 'gte' : 'lte'] = convertTimeValueToIso(
       startRangeMillis,
       nanosValue
-    ),
-  };
-  const endRange =
-    endRangeMillis === null
-      ? {}
-      : {
-        [timeFieldSortDir === 'asc' ? 'lte' : 'gte']: convertTimeValueToIso(
-          endRangeMillis,
-          nanosValue
-        ),
-      };
+    );
+  }
 
+  if (endRangeMillis) {
+    range[sortDir === SortDirection.asc ? 'lte' : 'gte'] = convertTimeValueToIso(
+      endRangeMillis,
+      nanosValue
+    );
+  }
   const response = await searchSource
     .setField('size', maxCount)
     .setField('query', {
@@ -66,22 +70,15 @@ export async function fetchHitsInInterval(
         constant_score: {
           filter: {
             range: {
-              [timeFieldName]: {
-                format: 'strict_date_optional_time',
-                ...startRange,
-                ...endRange,
-              },
+              [timeFieldName]: range,
             },
           },
         },
       },
       language: 'lucene',
     })
-    .setField('searchAfter', [afterTimeValue, tieBreakerValue])
-    .setField('sort', [
-      { [timeFieldName]: timeFieldSortDir },
-      { [tieBreakerField]: timeFieldSortDir },
-    ])
+    .setField('searchAfter', searchAfter)
+    .setField('sort', sort)
     .setField('version', true)
     .fetch();
 
