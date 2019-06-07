@@ -237,7 +237,7 @@ class CodeContent extends React.PureComponent<Props> {
     );
   }
 
-  public shouldRenderProgress() {
+  public shouldRenderCloneProgress() {
     if (!this.props.repoStatus) {
       return false;
     }
@@ -250,7 +250,7 @@ class CodeContent extends React.PureComponent<Props> {
     );
   }
 
-  public renderProgress() {
+  public renderCloneProgress() {
     if (!this.props.repoStatus) {
       return null;
     }
@@ -268,11 +268,14 @@ class CodeContent extends React.PureComponent<Props> {
   public renderContent() {
     const { file, match, tree, fileTreeLoadingPaths, isNotFound, notFoundDirs } = this.props;
     const { path, pathType, resource, org, repo, revision } = match.params;
+
+    // The clone progress rendering should come before the NotFound rendering.
+    if (this.shouldRenderCloneProgress()) {
+      return this.renderCloneProgress();
+    }
+
     if (isNotFound || notFoundDirs.includes(path || '')) {
       return <NotFound />;
-    }
-    if (this.shouldRenderProgress()) {
-      return this.renderProgress();
     }
 
     const repoUri = `${resource}/${org}/${repo}`;

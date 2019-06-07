@@ -27,7 +27,7 @@ import { VislibLibChartTitleProvider } from './chart_title';
 import { VislibLibAlertsProvider } from './alerts';
 import { VislibLibAxisProvider } from './axis/axis';
 import { VislibGridProvider } from './chart_grid';
-import { VislibVisualizationsVisTypesProvider } from '../visualizations/vis_types';
+import { visTypes as chartTypes } from '../visualizations/vis_types';
 import { dispatchRenderComplete } from '../../render_complete';
 
 const markdownIt = new MarkdownIt({
@@ -36,7 +36,6 @@ const markdownIt = new MarkdownIt({
 });
 
 export function VisHandlerProvider(Private) {
-  const chartTypes = Private(VislibVisualizationsVisTypesProvider);
   const Layout = Private(VislibLibLayoutLayoutProvider);
   const ChartTitle = Private(VislibLibChartTitleProvider);
   const Alerts = Private(VislibLibAlertsProvider);

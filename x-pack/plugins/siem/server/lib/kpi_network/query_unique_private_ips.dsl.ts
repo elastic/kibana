@@ -117,6 +117,19 @@ export const buildUniquePrvateIpQuery = (
             field: `${attrQuery}.ip`,
           },
         },
+        histogram: {
+          auto_date_histogram: {
+            field: '@timestamp',
+            buckets: '6',
+          },
+          aggs: {
+            count: {
+              cardinality: {
+                field: `${attrQuery}.ip`,
+              },
+            },
+          },
+        },
       },
       query: {
         bool: {

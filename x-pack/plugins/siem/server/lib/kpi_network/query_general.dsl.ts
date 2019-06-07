@@ -75,11 +75,6 @@ export const buildGeneralQuery = ({
             field: 'network.community_id',
           },
         },
-        active_agents: {
-          cardinality: {
-            field: 'agent.id',
-          },
-        },
       },
       query: {
         bool: {
