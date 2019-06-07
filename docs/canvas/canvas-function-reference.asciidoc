@@ -1,6 +1,6 @@
 [role="xpack"]
 [[canvas-function-reference]]
-== Canvas function reference
+= Canvas function reference
 
 Behind the scenes, Canvas is driven by a powerful expression language,
 with dozens of functions and other capabilities, including table transforms, 
@@ -13,10 +13,11 @@ A *** denotes a required argument.
 
 A *†* denotes an argument can be passed multiple times.
 
-<<a_fns,A>> | <<b_fns,B>> | <<c_fns,C>> | <<d_fns,D>> | <<e_fns,E>> | <<f_fns,F>> | <<g_fns,G>> | <<h_fns,H>> | <<i_fns,I>> | <<j_fns,J>> | <<k_fns,K>> | <<l_fns,L>> | <<m_fns,M>> | <<n_fns,N>> | <<o_fns,O>> | <<p_fns,P>> | <<q_fns,Q>> | <<r_fns,R>> | <<s_fns,S>> | <<t_fns,T>> | <<u_fns,U>> | <<v_fns,V>> | <<w_fns,W>> | <<x_fns,X>> | <<y_fns,Y>> | <<z_fns,Z>>
+<<a_fns>> | B | <<c_fns>> | <<d_fns>> | <<e_fns>> | <<f_fns>> | <<g_fns>> | <<h_fns>> | <<i_fns>> | J | K | <<l_fns>> | <<m_fns>> | <<n_fns>> | O | <<p_fns>> | Q | <<r_fns>> | <<s_fns>> | <<t_fns>> | <<u_fns>> | V | W | X | Y | Z
 
 [float]
 [[a_fns]]
+== A
 [[all_fn]]
 === `all`
 
@@ -173,9 +174,13 @@ Default: `"left"`
 
 *Returns:* `axisConfig`
 
+[float]
+[[b_fns]]
+== B
 
 [float]
 [[c_fns]]
+== C
 [[case_fn]]
 === `case`
 
@@ -370,6 +375,7 @@ Alias: `data`
 
 [float]
 [[d_fns]]
+== D
 [[date_fn]]
 === `date`
 
@@ -477,6 +483,7 @@ for the dropdown
 
 [float]
 [[e_fns]]
+== E
 [[eq_fn]]
 === `eq`
 
@@ -642,6 +649,7 @@ capitalization
 
 [float]
 [[f_fns]]
+== F
 [[filterrows_fn]]
 === `filterrows`
 
@@ -740,7 +748,6 @@ Default: `left`
 
 
 [float]
-[[f_fns]]
 [[formatdate_fn]]
 === `formatdate`
 
@@ -786,6 +793,7 @@ Alias: `format`
 
 [float]
 [[g_fns]]
+== G
 [[getCell_fn]]
 === `getCell`
 
@@ -861,6 +869,7 @@ Alias: `value`
 
 [float]
 [[h_fns]]
+== H
 [[head_fn]]
 === `head`
 
@@ -886,6 +895,7 @@ Default: `1`
 
 [float]
 [[i_fns]]
+== I
 [[if_fn]]
 === `if`
 
@@ -969,6 +979,7 @@ quite slow, but fairly accurate.
 
 [float]
 [[l_fns]]
+== L
 [[lt_fn]]
 === `lt`
 
@@ -1014,6 +1025,7 @@ Alias: `value`
 
 [float]
 [[m_fns]]
+== M
 [[mapColumn_fn]]
 === `mapColumn`
 
@@ -1132,6 +1144,7 @@ Default: `{<<font_fn>> size=14 family="'Open Sans', Helvetica, Arial, sans-serif
 
 [float]
 [[n_fns]]
+== N
 [[neq_fn]]
 === `neq`
 
@@ -1155,6 +1168,7 @@ Alias: `value`
 
 [float]
 [[p_fns]]
+== P
 [[palette_fn]]
 === `palette`
 
@@ -1458,6 +1472,7 @@ Default: `20`
 
 [float]
 [[r_fns]]
+== R
 [[render_fn]]
 === `render`
 
@@ -1654,6 +1669,7 @@ values, or combinations of unique column values.
 
 [float]
 [[s_fns]]
+== S
 [[seriesStyle_fn]]
 === `seriesStyle`
 
@@ -1867,6 +1883,7 @@ Alias: `finally`
 
 [float]
 [[t_fns]]
+== T
 [[table_fn]]
 === `table`
 
@@ -2072,6 +2089,7 @@ Alias: `type`
 
 [float]
 [[u_fns]]
+== U
 [[urlparam_fn]]
 === `urlparam`
 
