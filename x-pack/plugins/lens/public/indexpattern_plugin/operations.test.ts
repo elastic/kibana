@@ -82,7 +82,7 @@ describe('getOperationTypesForField', () => {
     });
   });
 
-  describe('with rollups', () => {
+  describe('with restrictions', () => {
     it('should return operations on strings', () => {
       expect(
         getOperationTypesForField({
@@ -90,7 +90,7 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          rollupRestrictions: {
+          aggregationRestrictions: {
             terms: {
               agg: 'terms',
             },
@@ -106,7 +106,7 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          rollupRestrictions: {
+          aggregationRestrictions: {
             min: {
               agg: 'min',
             },
@@ -125,7 +125,7 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          rollupRestrictions: {
+          aggregationRestrictions: {
             date_histogram: {
               agg: 'date_histogram',
               fixed_interval: '60m',

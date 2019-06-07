@@ -17,10 +17,7 @@ interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   typeMeta: string;
 }
 
-interface SavedRollupObject {
-  params: {
-    rollup_index: string;
-  };
+interface SavedRestrictionsObject {
   aggs: Record<
     string,
     Record<
@@ -35,7 +32,7 @@ interface SavedRollupObject {
     >
   >;
 }
-type SavedRollupInfo = SavedRollupObject | undefined;
+type SavedRestrictionsInfo = SavedRestrictionsObject | undefined;
 
 export const getIndexPatterns = (chrome: Chrome, toastNotifications: ToastNotifications) => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
@@ -47,7 +44,8 @@ export const getIndexPatterns = (chrome: Chrome, toastNotifications: ToastNotifi
     .then(resp => {
       return resp.savedObjects.map(savedObject => {
         const { id, attributes, type } = savedObject;
-        return Object.assign(attributes, {
+        return {
+          ...attributes,
           id,
           type,
           title: attributes.title,
@@ -56,9 +54,9 @@ export const getIndexPatterns = (chrome: Chrome, toastNotifications: ToastNotifi
               fieldType !== 'string' || (esTypes && esTypes.includes('keyword'))
           ),
           typeMeta: attributes.typeMeta
-            ? (JSON.parse(attributes.typeMeta) as SavedRollupInfo)
+            ? (JSON.parse(attributes.typeMeta) as SavedRestrictionsInfo)
             : undefined,
-        });
+        };
       });
     })
     .catch(err => {

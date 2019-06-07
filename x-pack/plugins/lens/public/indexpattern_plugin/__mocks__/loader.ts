@@ -34,7 +34,7 @@ export function getIndexPatterns() {
       },
       {
         id: '2',
-        title: 'my-fake-rollup-pattern',
+        title: 'my-fake-restricted-pattern',
         timeFieldName: 'timestamp',
         fields: [
           {
