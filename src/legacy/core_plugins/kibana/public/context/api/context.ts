@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-check
 
 // @ts-ignore
 import { SearchSourceProvider, SearchSource } from 'ui/courier';
+import { IPrivate } from 'ui/private';
+import { IndexPattern, IndexPatterns } from 'ui/index_patterns/_index_pattern';
 import { reverseSortDirection, SortDirection } from './utils/sorting';
+
 import {
   extractNanoSeconds,
   convertIsoToNanosAsStr,
@@ -28,8 +30,6 @@ import {
 } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
 import { generateIntervals } from './utils/generate_intervals';
-import { IPrivate } from 'ui/private';
-import { IndexPatterns } from 'ui/index_patterns/_index_pattern';
 
 type SurroundingDocType = 'successors' | 'predecessors';
 type EsHitRecord = Record<string, any>;
@@ -80,15 +80,13 @@ function fetchContextProvider(indexPatterns: IndexPatterns, Private: IPrivate) {
   ) {
     const indexPattern = await indexPatterns.get(indexPatternId);
     const searchSource = await createSearchSource(indexPattern, filters);
-    const sortDir = type === 'successors' 
-      ? timeFieldSortDir 
-      : reverseSortDirection(timeFieldSortDir);
+    const sortDir =
+      type === 'successors' ? timeFieldSortDir : reverseSortDirection(timeFieldSortDir);
     const nanoSeconds = indexPattern.isTimeNanosBased()
       ? extractNanoSeconds(timeFieldIsoValue)
       : '';
-    const timeValueMillis = nanoSeconds !== '' 
-      ? convertIsoToMillis(timeFieldIsoValue) 
-      : timeFieldNumValue;
+    const timeValueMillis =
+      nanoSeconds !== '' ? convertIsoToMillis(timeFieldIsoValue) : timeFieldNumValue;
 
     const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis, type, timeFieldSortDir);
 
@@ -124,15 +122,14 @@ function fetchContextProvider(indexPatterns: IndexPatterns, Private: IPrivate) {
         nanoSeconds
       );
 
-      documents = type === 'successors' 
-         ? [...documents, ...hits] 
-         : [...hits.slice().reverse(), ...documents];
+      documents =
+        type === 'successors' ? [...documents, ...hits] : [...hits.slice().reverse(), ...documents];
     }
 
     return documents;
   }
 
-  async function createSearchSource(indexPattern: Object, filters: any[]) {
+  async function createSearchSource(indexPattern: IndexPattern, filters: any[]) {
     return new SearchSourcePrivate()
       .setParent(false)
       .setField('index', indexPattern)
@@ -166,8 +163,8 @@ function getSearchAfter(
     return [afterTimeValue, afterTieBreakerValue];
   } else {
     if (nanoSeconds) {
-      //adapt timestamp value for sorting, since numeric value was rounded by browser
-      //ES search_after also works when number is provided as string
+      // adapt timestamp value for sorting, since numeric value was rounded by browser
+      // ES search_after also works when number is provided as string
       anchorSearchAfter[0] = convertIsoToNanosAsStr(anchorTimeIsoValue);
     }
     return anchorSearchAfter;
