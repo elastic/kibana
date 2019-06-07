@@ -20405,7 +20405,12 @@ pdfmake@0.1.33:
     lodash "^4.17.4"
     pdfkit "^0.8.3"
 
-pegjs@0.9.0, pegjs@~0.9.0:
+pegjs@0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.10.0.tgz#cf8bafae6eddff4b5a7efb185269eaaf4610ddbd"
+  integrity sha1-z4uvrm7d/0tafvsYUmnqr0YQ3b0=
+
+pegjs@~0.9.0:
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.9.0.tgz#f6aefa2e3ce56169208e52179dfe41f89141a369"
   integrity sha1-9q76LjzlYWkgjlIXnf5B+JFBo2k=

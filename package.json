@@ -198,7 +198,7 @@
     "node-fetch": "1.7.3",
     "opn": "^5.4.0",
     "oppsy": "^2.0.0",
-    "pegjs": "0.9.0",
+    "pegjs": "0.10.0",
     "postcss-loader": "3.0.0",
     "prop-types": "15.5.8",
     "proxy-from-env": "1.0.0",
