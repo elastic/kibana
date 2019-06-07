@@ -320,7 +320,7 @@
     "rimraf": "^2.6.2",
     "rison-node": "0.3.1",
     "rxjs": "^6.2.1",
-    "semver": "5.1.0",
+    "semver": "5.7.0",
     "squel": "^5.12.2",
     "stats-lite": "^2.2.0",
     "style-it": "^2.1.3",
