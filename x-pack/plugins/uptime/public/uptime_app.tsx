@@ -147,7 +147,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   }
 
   public render() {
-    const { isUsingK7Design, routerBasename, graphQLClient } = this.props;
+    const { basePath, isUsingK7Design, routerBasename, graphQLClient } = this.props;
     return (
       <I18nContext>
         <Router basename={routerBasename}>
