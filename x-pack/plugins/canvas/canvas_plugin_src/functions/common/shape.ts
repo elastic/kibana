@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NullContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 export enum Shape {
@@ -37,7 +37,7 @@ interface Return extends Arguments {
   type: 'shape';
 }
 
-export function shape(): NullContextFunction<'shape', Arguments, Return> {
+export function shape(): ExpressionFunction<'shape', null, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().shape;
 
   return {

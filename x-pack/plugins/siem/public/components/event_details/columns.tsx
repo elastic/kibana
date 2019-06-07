@@ -25,6 +25,9 @@ import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard'
 import { WithHoverActions } from '../with_hover_actions';
 
 import * as i18n from './translations';
+import { OverflowField } from '../tables/helpers';
+import { DATE_FIELD_TYPE, MESSAGE_FIELD_NAME } from '../timeline/body/renderers/constants';
+import { EVENT_DURATION_FIELD_NAME } from '../duration';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -75,14 +78,18 @@ export const getColumns = ({
     truncateText: false,
     render: (field: string, data: DetailItem) => (
       <DroppableWrapper
-        droppableId={getDroppableId(`event-details-${data.category}-${field}-${timelineId}`)}
+        droppableId={getDroppableId(
+          `event-details-${eventId}-${data.category}-${field}-${timelineId}`
+        )}
         key={`${data.category}-${field}-${timelineId}`}
         isDropDisabled={true}
         type={DRAG_TYPE_FIELD}
       >
         <Draggable
           draggableId={getDraggableFieldId({
-            contextId: `field-browser-category-${data.category}-field-${field}-${timelineId}`,
+            contextId: `field-browser-category-${eventId}-${
+              data.category
+            }-field-${field}-${timelineId}`,
             fieldId: field,
           })}
           index={0}
@@ -135,23 +142,31 @@ export const getColumns = ({
                     </EuiToolTip>
                   </HoverActionsContainer>
                 }
-                render={() => (
-                  <DefaultDraggable
-                    data-test-subj="ip"
-                    field={data.field}
-                    id={`event-details-field-value-${eventId}-${data.field}-${i}-${value}`}
-                    tooltipContent={data.field}
-                    value={value}
-                  >
-                    <FormattedFieldValue
-                      contextId={'event-details-field-value'}
-                      eventId={eventId}
-                      fieldName={data.field}
-                      fieldType={data.type}
+                render={() =>
+                  data.field === MESSAGE_FIELD_NAME ? (
+                    <OverflowField value={value} />
+                  ) : (
+                    <DefaultDraggable
+                      data-test-subj="ip"
+                      field={data.field}
+                      id={`event-details-field-value-${eventId}-${data.field}-${i}-${value}`}
+                      tooltipContent={
+                        data.type === DATE_FIELD_TYPE || data.field === EVENT_DURATION_FIELD_NAME
+                          ? null
+                          : data.field
+                      }
                       value={value}
-                    />
-                  </DefaultDraggable>
-                )}
+                    >
+                      <FormattedFieldValue
+                        contextId={'event-details-field-value'}
+                        eventId={eventId}
+                        fieldName={data.field}
+                        fieldType={data.type}
+                        value={value}
+                      />
+                    </DefaultDraggable>
+                  )
+                }
               />
             </EuiFlexItem>
           ))}

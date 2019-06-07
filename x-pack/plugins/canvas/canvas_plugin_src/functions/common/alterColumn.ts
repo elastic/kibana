@@ -5,8 +5,9 @@
  */
 
 import { omit } from 'lodash';
-import { ContextFunction, Datatable, DatatableColumn, DatatableColumnType } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable, DatatableColumn, DatatableColumnType } from '../types';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   column: string;
@@ -14,8 +15,9 @@ interface Arguments {
   name: string | null;
 }
 
-export function alterColumn(): ContextFunction<'alterColumn', Datatable, Arguments, Datatable> {
+export function alterColumn(): ExpressionFunction<'alterColumn', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().alterColumn;
+  const errors = getFunctionErrors().alterColumn;
 
   return {
     name: 'alterColumn',
@@ -49,7 +51,7 @@ export function alterColumn(): ContextFunction<'alterColumn', Datatable, Argumen
 
       const column = context.columns.find(col => col.name === args.column);
       if (!column) {
-        throw new Error(`Column not found: '${args.column}'`);
+        throw errors.columnNotFound(args.column);
       }
 
       const name = args.name || column.name;
@@ -85,7 +87,7 @@ export function alterColumn(): ContextFunction<'alterColumn', Datatable, Argumen
             case 'null':
               return () => null;
             default:
-              throw new Error(`Cannot convert to '${type}'`);
+              throw errors.cannotConvertType(type);
           }
         })();
       }

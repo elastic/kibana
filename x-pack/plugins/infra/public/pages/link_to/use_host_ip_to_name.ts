@@ -17,6 +17,7 @@ export const useHostIpToName = (ipAddress: string | null, indexPattern: string |
     () => {
       (async () => {
         setLoadingState(true);
+        setError(null);
         try {
           if (ipAddress && indexPattern) {
             const response = await fetch.post<IpToHostResponse>('../api/infra/ip_to_host', {

@@ -19,7 +19,7 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectAttributes, SavedObjectsClient } from '../';
+import { SavedObjectAttributes, SavedObjectsClientContract } from '../';
 import { Prerequisites, SavedObjectReference, WithoutQueryAndParams } from './types';
 
 interface SavedObject {
@@ -33,7 +33,7 @@ interface SavedObject {
 
 interface BulkCreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   pre: {
-    savedObjectsClient: SavedObjectsClient;
+    savedObjectsClient: SavedObjectsClientContract;
   };
   query: {
     overwrite: boolean;

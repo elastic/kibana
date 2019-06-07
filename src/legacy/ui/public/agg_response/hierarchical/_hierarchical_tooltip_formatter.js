@@ -21,9 +21,10 @@ import _ from 'lodash';
 import $ from 'jquery';
 import collectBranch from './_collect_branch';
 import numeral from 'numeral';
+import template from 'ui/agg_response/hierarchical/_tooltip.html';
 
 export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce) {
-  const $tooltip = $(require('ui/agg_response/hierarchical/_tooltip.html'));
+  const $tooltip = $(template);
   const $tooltipScope = $rootScope.$new();
 
   $compile($tooltip)($tooltipScope);

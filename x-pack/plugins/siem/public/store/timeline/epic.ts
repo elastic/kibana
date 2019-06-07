@@ -7,7 +7,7 @@
 import { get, has, merge as mergeObject, set, omit } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
-import { from, Observable, Subject, empty, merge } from 'rxjs';
+import { from, Observable, empty, merge } from 'rxjs';
 import {
   filter,
   map,
@@ -21,14 +21,11 @@ import {
 } from 'rxjs/operators';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
-import { DEFAULT_SORT_FIELD } from '../../components/open_timeline';
-import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {
   PersistTimelineMutation,
   TimelineInput,
   ResponseTimeline,
-  Direction,
   TimelineResult,
 } from '../../graphql/types';
 import { AppApolloClient } from '../../lib/lib';
@@ -65,7 +62,9 @@ import { epicPersistNote, timelineNoteActionsType } from './epic_note';
 import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_pinned_event';
 import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
 import { isNotNull } from './helpers';
-import { ManageEpicTimelineId } from './manage_timeline_id';
+import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
+import { refetchQueries } from './refetch_queries';
+import { myEpicTimelineId } from './my_epic_timeline_id';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
@@ -100,25 +99,6 @@ const timelineActionsType = [
   updateTitle.type,
   updateRange.type,
   upsertColumn.type,
-];
-
-export const dispatcherTimelinePersistQueue = new Subject();
-
-export const myEpicTimelineId = new ManageEpicTimelineId();
-
-export const refetchQueries = [
-  {
-    query: allTimelinesQuery,
-    variables: {
-      search: '',
-      pageInfo: {
-        pageIndex: 1,
-        pageSize: 10,
-      },
-      sort: { sortField: DEFAULT_SORT_FIELD, sortOrder: Direction.desc },
-      onlyUserFavorite: false,
-    },
-  },
 ];
 
 export const createTimelineEpic = <State>(): Epic<
