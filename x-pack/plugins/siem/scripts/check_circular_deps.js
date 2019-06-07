@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum CONSTANTS {
-  hostsDetails = 'hosts.details',
-  hostsPage = 'hosts.page',
-  kqlQuery = 'kqlQuery',
-  networkDetails = 'network.details',
-  networkPage = 'network.page',
-  timerange = 'timerange',
-}
+require('../../../../src/setup_node_env');
+require('../dev_tools/circular_deps/run_check_circular_deps_cli');
+
