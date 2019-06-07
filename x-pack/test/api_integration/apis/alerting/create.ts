@@ -91,5 +91,25 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
           });
         });
     });
+
+    it('should return 400 when payload is empty and invalid', async () => {
+      await supertest
+        .post('/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send({})
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'child "alertTypeId" fails because ["alertTypeId" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+            validation: {
+              source: 'payload',
+              keys: ['alertTypeId', 'interval', 'alertTypeParams', 'actions'],
+            },
+          });
+        });
+    });
   });
 }
