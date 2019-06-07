@@ -11087,10 +11087,10 @@ highlight.js@^9.12.0, highlight.js@~9.12.0:
   resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.12.0.tgz#e6d9dbe57cbefe60751f02af336195870c90c01e"
   integrity sha1-5tnb5Xy+/mB1HwKvM2GVhwyQwB4=
 
-history-extra@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/history-extra/-/history-extra-5.0.1.tgz#95a2e59dda526c4241d0ae1b124a77a5e4675ce8"
-  integrity sha512-6XV1L1lHgporVWgppa/Kq+Fnz4lhBew7iMxYCTfzVmoEywsAKJnTjdw1zOd+EGLHGYp0/V8jSVMEgqx4QbHLTw==
+history-extra@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/history-extra/-/history-extra-4.0.2.tgz#67b512c196e0a521be1d8ac83513f00ca761d9f3"
+  integrity sha512-Nia8vzQHyQcxKQUt5/vxZegurkG2K23TplaWLk1V6EWTuNdZMJUJ78anwGkBcHuLBia8TFUct/R/QDlgRUA42A==
 
 history@4.7.2, history@^4.7.2:
   version "4.7.2"
