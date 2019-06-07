@@ -202,5 +202,29 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
           });
         });
     });
+
+    it(`should return 400 when action type isn't registered`, async () => {
+      await supertest
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            actionTypeId: 'test.unregistered-action-type',
+            description: 'My action updated',
+            actionTypeConfig: {
+              unencrypted: `This value shouldn't get encrypted`,
+              encrypted: 'This value should be encrypted',
+            },
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'Action type "test.unregistered-action-type" is not registered.',
+          });
+        });
+    });
   });
 }
