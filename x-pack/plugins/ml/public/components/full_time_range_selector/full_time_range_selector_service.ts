@@ -12,8 +12,9 @@ import { IndexPattern } from 'ui/index_patterns';
 import { toastNotifications } from 'ui/notify';
 import { timefilter } from 'ui/timefilter';
 import { ml } from '../../services/ml_api_service';
+import { TimeRange } from './index';
 
-export function setFullTimeRange(indexPattern: IndexPattern, query: Query) {
+export function setFullTimeRange(indexPattern: IndexPattern, query: Query): Promise<TimeRange> {
   return ml
     .getTimeFieldRange({
       index: indexPattern.title,
@@ -21,10 +22,21 @@ export function setFullTimeRange(indexPattern: IndexPattern, query: Query) {
       query,
     })
     .then(resp => {
-      timefilter.setTime({
-        from: moment(resp.start.epoch).toISOString(),
-        to: moment(resp.end.epoch).toISOString(),
-      });
+      const start = resp.start.epoch;
+      const end = resp.end.epoch;
+
+      const duration = {
+        from: moment(start).toISOString(),
+        to: moment(end).toISOString(),
+      };
+      timefilter.setTime(duration);
+      return {
+        epoch: {
+          start,
+          end,
+        },
+        ...duration,
+      };
     })
     .catch(resp => {
       toastNotifications.addDanger(
@@ -32,5 +44,6 @@ export function setFullTimeRange(indexPattern: IndexPattern, query: Query) {
           defaultMessage: 'An error occurred setting the time range.',
         })
       );
+      return { epoch: { start: 0, end: 0 }, from: '', to: '' };
     });
 }
