@@ -29,6 +29,24 @@ const GITHUB_OWNER = 'elastic';
 const GITHUB_REPO = 'kibana';
 const BUILD_URL = process.env.BUILD_URL;
 
+const indent = text => (
+  `  ${text.split('\n').map(l => `  ${l}`).join('\n')}`
+);
+
+const isLikelyIrrelevant = ({ failure }) => {
+  if (failure.include('NoSuchSessionError: This driver instance does not have a valid session ID')) {
+    return true;
+  }
+
+  if (failure.includes('Error: No Living connections')) {
+    return true;
+  }
+
+  if (failure.includes('Unable to fetch Kibana status API response from Kibana')) {
+    return true;
+  }
+};
+
 /**
  * Parses junit XML files into JSON
  */
@@ -50,20 +68,29 @@ const filterFailures = createMapStream((testSuite) => {
     ? testSuite.testsuites.testsuite
     : [testSuite.testsuite];
 
-  const failures = testFiles.reduce((failures, testFile) => {
+  const failures = [];
+  for (const testFile of testFiles) {
     for (const testCase of testFile.testcase) {
-      if (testCase.failure) {
-        // unwrap xml weirdness
-        failures.push({
-          ...testCase.$,
-          // Strip ANSI color characters
-          failure: stripAnsi(testCase.failure[0])
-        });
+      if (!testCase.failure) {
+        continue;
       }
-    }
 
-    return failures;
-  }, []);
+      // unwrap xml weirdness
+      const failureCase = {
+        ...testCase.$,
+        // Strip ANSI color characters
+        failure: stripAnsi(testCase.failure[0])
+      };
+
+
+      if (isLikelyIrrelevant(failureCase)) {
+        console.log(`Ignoring likely irrelevant failure: ${failureCase.classname} - ${failureCase.name}\n${indent(failureCase.failure)}`);
+        continue;
+      }
+
+      failures.push(failureCase);
+    }
+  }
 
   console.log(`Found ${failures.length} test failures`);
 
