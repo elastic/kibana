@@ -42,8 +42,8 @@ export const routes = [
     options: { tags: [`access:${PLUGIN_ID}`] },
     handler: async (req: Request) => {
       const { pkgkey } = req.params;
-      const directory = await getZipInfo(pkgkey);
-      return { meta: { pkgkey, directory } };
+      const paths = await getZipInfo(pkgkey);
+      return { meta: { pkgkey, paths } };
     },
   },
   {

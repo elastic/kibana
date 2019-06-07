@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
 import http from 'http';
 import https from 'https';
-import { promisify } from 'util';
-import glob from 'glob';
 import Boom from 'boom';
-import { decompress } from './decompress';
+import yauzl, { Entry, ZipFile } from 'yauzl';
+import { Readable } from 'stream';
+// import { decompress } from './decompress';
 
 const REGISTRY = process.env.REGISTRY || 'http://localhost:8080';
-const globP = promisify(glob);
+const unzipFromBuffer = (buffer: Buffer): Promise<ZipFile> =>
+  new Promise((resolve, reject) =>
+    yauzl.fromBuffer(buffer, { lazyEntries: true }, (err?: Error, zipfile?: ZipFile) =>
+      err ? reject(err) : resolve(zipfile)
+    )
+  );
 
 export async function fetchList() {
   return fetchJson(`${REGISTRY}/list`);
@@ -49,49 +51,67 @@ async function fetchJson(url: string): Promise<object> {
   }
 }
 
-function fetchZip(key: string): Promise<http.IncomingMessage> {
-  return new Promise((resolve, reject) => {
-    const url = `${REGISTRY}/package/${key}/get`;
-    const lib = url.startsWith('https') ? https : http;
-
-    lib
-      .get(url)
-      .on('response', (response: http.IncomingMessage) =>
-        response.statusCode && response.statusCode === 200
-          ? resolve(response)
-          : reject(new Boom(response.statusMessage, { statusCode: response.statusCode }))
-      )
-      .on('error', reject);
-  });
-}
-
-function writeResponseToDisk(response: http.IncomingMessage, filepath: string): Promise<void> {
+async function fetchZipAsBuffer(key: string): Promise<Buffer> {
   return new Promise((resolve, reject) =>
-    response.pipe(fs.createWriteStream(filepath).on('finish', resolve)).on('error', reject)
+    http.get(`${REGISTRY}/package/${key}/get`, res => {
+      const chunks: Buffer[] = [];
+      res
+        .on('data', chunk => chunks.push(Buffer.from(chunk)))
+        .on('end', () => resolve(Buffer.concat(chunks)))
+        .on('error', reject);
+    })
   );
 }
 
-const zipLocation = (key: string): string => path.join(os.tmpdir(), `${key}.zip`);
-const extractedZipTo = (key: string): string => zipLocation(key).replace('.zip', '');
+const rejectUnless200 = async (response: http.IncomingMessage) =>
+  response.statusCode && response.statusCode === 200
+    ? response
+    : new Boom(response.statusMessage, { statusCode: response.statusCode });
 
-async function fetchFiles(key: string): Promise<void> {
-  const response = await fetchZip(key);
-  await writeResponseToDisk(response, zipLocation(key));
-  return decompress(zipLocation(key), os.tmpdir());
-}
+const cache: Map<string, Buffer> = new Map();
+const cacheGet = (key: string) => cache.get(key);
+const cacheSet = (key: string, value: Buffer) => cache.set(key, value);
+const cacheHas = (key: string) => cache.has(key);
+const cacheGetAll = () => cache.entries();
+const getArchiveKey = (key: string) => `${key}-archive`;
 
-async function getOrFetchFiles(key: string): Promise<string[]> {
-  const pattern = path.join(extractedZipTo(key), '**');
-  const files = await globP(pattern);
-  return files.length ? files : fetchFiles(key).then(() => globP(pattern));
+async function getOrFetchFiles(
+  key: string,
+  predicate = (entry: Entry): boolean => entry.fileName.startsWith(key)
+): Promise<string[]> {
+  const archiveKey = getArchiveKey(key);
+  if (!cacheHas(archiveKey)) {
+    await fetchZipAsBuffer(key).then(buffer => cacheSet(archiveKey, buffer));
+  }
+  const buffer = cacheGet(archiveKey);
+  if (!buffer) throw new Error(`no entry for ${key}`);
+  const zipfile = await unzipFromBuffer(buffer);
+  const files = [];
+  zipfile.readEntry();
+  zipfile.on('entry', async (entry: Entry) => {
+    if (!predicate(entry)) return zipfile.readEntry();
+    if (cacheHas(entry.fileName)) return files.push(entry.fileName) && zipfile.readEntry();
+
+    const chunks: Buffer[] = [];
+    const stream: Readable = await new Promise((resolve, reject) =>
+      zipfile.openReadStream(entry, (err?: Error, readStream?: Readable) =>
+        err ? reject(err) : resolve(readStream)
+      )
+    );
+    stream.on('data', chunk => chunks.push(Buffer.from(chunk)));
+    stream.on('end', () => {
+      cacheSet(entry.fileName, Buffer.concat(chunks));
+      files.push(entry.fileName);
+      zipfile.readEntry();
+    });
+  });
+  return new Promise(resolve => zipfile.on('end', () => resolve(files)));
 }
 
 export async function getZipInfo(key: string): Promise<string[]> {
   return (
     getOrFetchFiles(key)
       // quick hack to show processing & some info. won't really use/do this
-      .then(files =>
-        files.map(filepath => filepath.replace(extractedZipTo(key), '')).filter(Boolean)
-      )
+      .then(files => files.map(fileName => fileName.toUpperCase()))
   );
 }
