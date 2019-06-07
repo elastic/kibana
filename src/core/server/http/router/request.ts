@@ -45,6 +45,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
+   * @internal
    */
   public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     req: Request,
@@ -89,6 +90,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   public readonly url: Url;
   public readonly route: RecursiveReadonly<KibanaRequestRoute>;
 
+  /** @internal */
   protected readonly [requestSymbol]: Request;
 
   constructor(

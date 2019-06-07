@@ -22,7 +22,6 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [\_\_computed](./kibana-plugin-server.kibanarequest.__computed.md) |  | <code>Request</code> |  |
 |  [body](./kibana-plugin-server.kibanarequest.body.md) |  | <code>Body</code> |  |
 |  [headers](./kibana-plugin-server.kibanarequest.headers.md) |  | <code>Headers</code> |  |
 |  [params](./kibana-plugin-server.kibanarequest.params.md) |  | <code>Params</code> |  |
@@ -34,6 +33,5 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [from(req, routeSchemas)](./kibana-plugin-server.kibanarequest.from.md) | <code>static</code> | Factory for creating requests. Validates the request before creating an instance of a KibanaRequest. |
 |  [getFilteredHeaders(headersToKeep)](./kibana-plugin-server.kibanarequest.getfilteredheaders.md) |  |  |
 

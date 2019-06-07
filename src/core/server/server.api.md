@@ -166,12 +166,14 @@ export interface InternalCoreStart {
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
-    // (undocumented)
+    // @internal (undocumented)
     protected readonly [requestSymbol]: Request;
     constructor(request: Request, params: Params, query: Query, body: Body);
     // (undocumented)
     readonly body: Body;
     // Warning: (ae-forgotten-export) The symbol "RouteSchemas" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal
     static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>): KibanaRequest<P["type"], Q["type"], B["type"]>;
     // (undocumented)
     getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
