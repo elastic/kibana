@@ -17,12 +17,29 @@
  * under the License.
  */
 
-export let metadata = null;
+import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
-export function __newPlatformSetup__(legacyMetadata) {
-  if (metadata === null) {
-    metadata = legacyMetadata;
-  } else {
-    throw new Error('ui/metadata can only be initialized once');
-  }
+export function getSavedDashboardMock(
+  config?: Partial<SavedObjectDashboard>
+): SavedObjectDashboard {
+  return {
+    id: '123',
+    title: 'my dashboard',
+    panelsJSON: '[]',
+    searchSource: {
+      getOwnField: (param: any) => param,
+      setField: () => {},
+    },
+    copyOnSave: false,
+    timeRestore: false,
+    timeTo: 'now',
+    timeFrom: 'now-15m',
+    optionsJSON: '',
+    lastSavedTitle: '',
+    destroy: () => {},
+    save: () => {
+      return Promise.resolve('123');
+    },
+    ...config,
+  };
 }

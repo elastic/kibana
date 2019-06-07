@@ -57,6 +57,40 @@ export const buildOverviewNetworkQuery = ({
             term: { 'event.dataset': 'socket' },
           },
         },
+        unique_filebeat_count: {
+          filter: {
+            term: { 'agent.type': 'filebeat' },
+          },
+          aggs: {
+            unique_netflow_count: {
+              filter: {
+                term: { 'input.type': 'netflow' },
+              },
+            },
+            unique_panw_count: {
+              filter: {
+                term: { 'event.module': 'panw' },
+              },
+            },
+            unique_cisco_count: {
+              filter: {
+                term: { 'event.module': 'cisco' },
+              },
+            },
+          },
+        },
+        unique_packetbeat_count: {
+          filter: {
+            term: { 'agent.type': 'packetbeat' },
+          },
+          aggs: {
+            unique_tls_count: {
+              filter: {
+                term: { 'network.protocol': 'tls' },
+              },
+            },
+          },
+        },
       },
       query: {
         bool: {
@@ -111,6 +145,13 @@ export const buildOverviewHostQuery = ({
             },
           },
         },
+        winlog_count: {
+          filter: {
+            term: {
+              'agent.type': 'winlogbeat',
+            },
+          },
+        },
         system_module: {
           filter: {
             term: {
@@ -143,6 +184,13 @@ export const buildOverviewHostQuery = ({
               filter: {
                 term: {
                   'event.dataset': 'user',
+                },
+              },
+            },
+            filebeat_count: {
+              filter: {
+                term: {
+                  'agent.type': 'filebeat',
                 },
               },
             },

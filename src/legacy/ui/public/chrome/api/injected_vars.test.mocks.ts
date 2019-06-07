@@ -17,15 +17,12 @@
  * under the License.
  */
 
-
-export function getSavedDashboardMock(config) {
-  const defaults = {
-    id: '123',
-    title: 'my dashboard',
-    panelsJSON: '[]',
-    searchSource: {
-      getOwnField: (param) => param
-    }
-  };
-  return Object.assign(defaults, config);
-}
+export const newPlatformInjectedMetadata: any = {
+  getInjectedVars: jest.fn(),
+  getInjectedVar: jest.fn(),
+};
+jest.doMock('ui/new_platform', () => ({
+  npSetup: {
+    core: { injectedMetadata: newPlatformInjectedMetadata },
+  },
+}));
