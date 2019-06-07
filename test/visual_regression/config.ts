@@ -26,12 +26,15 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
 
-    testFiles: [require.resolve('./apps/console')],
+    testFiles: [
+      require.resolve('./tests/console_app'),
+      require.resolve('./tests/create_and_add_embeddables'),
+    ],
 
     services,
 
     junit: {
-      reportName: 'Visual Regression Tests',
+      reportName: 'Kibana Visual Regression Tests',
     },
   };
 }
