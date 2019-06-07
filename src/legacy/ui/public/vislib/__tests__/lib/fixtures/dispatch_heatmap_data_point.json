@@ -1,0 +1,465 @@
+{
+    "x": "Men's Shoes",
+    "y": 43,
+    "extraMetrics": [],
+    "seriesRaw": {
+        "table": {
+            "columns": [
+                {
+                    "id": "col-0-2",
+                    "name": "day_of_week: Descending"
+                },
+                {
+                    "id": "col-1-3",
+                    "name": "products.category.keyword: Descending"
+                },
+                {
+                    "id": "col-2-1",
+                    "name": "Count"
+                }
+            ],
+            "rows": [
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 125
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 109
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 87
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 73
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 43
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 98
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 84
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 55
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 49
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 37
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 70
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 66
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 39
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 28
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 24
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 71
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 52
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 32
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 31
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 27
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 71
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 58
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 32
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 29
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Men's Accessories",
+                    "col-2-1": 20
+                }
+            ]
+        },
+        "column": 0,
+        "row": 4,
+        "value": "Thursday"
+    },
+    "xRaw": {
+        "table": {
+            "columns": [
+                {
+                    "id": "col-0-2",
+                    "name": "day_of_week: Descending"
+                },
+                {
+                    "id": "col-1-3",
+                    "name": "products.category.keyword: Descending"
+                },
+                {
+                    "id": "col-2-1",
+                    "name": "Count"
+                }
+            ],
+            "rows": [
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 125
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 109
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 87
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 73
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 43
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 98
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 84
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 55
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 49
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 37
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 70
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 66
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 39
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 28
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 24
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 71
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 52
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 32
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 31
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 27
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 71
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 58
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 32
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 29
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Men's Accessories",
+                    "col-2-1": 20
+                }
+            ]
+        },
+        "column": 1,
+        "row": 4,
+        "value": "Men's Shoes"
+    },
+    "yRaw": {
+        "table": {
+            "columns": [
+                {
+                    "id": "col-0-2",
+                    "name": "day_of_week: Descending"
+                },
+                {
+                    "id": "col-1-3",
+                    "name": "products.category.keyword: Descending"
+                },
+                {
+                    "id": "col-2-1",
+                    "name": "Count"
+                }
+            ],
+            "rows": [
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 125
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 109
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 87
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 73
+                },
+                {
+                    "col-0-2": "Thursday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 43
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 98
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 84
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 55
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 49
+                },
+                {
+                    "col-0-2": "Friday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 37
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 70
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 66
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 39
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 28
+                },
+                {
+                    "col-0-2": "Tuesday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 24
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 71
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 52
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Men's Shoes",
+                    "col-2-1": 32
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 31
+                },
+                {
+                    "col-0-2": "Wednesday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 27
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Men's Clothing",
+                    "col-2-1": 71
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Women's Clothing",
+                    "col-2-1": 58
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Women's Shoes",
+                    "col-2-1": 32
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Women's Accessories",
+                    "col-2-1": 29
+                },
+                {
+                    "col-0-2": "Saturday",
+                    "col-1-3": "Men's Accessories",
+                    "col-2-1": 20
+                }
+            ]
+        },
+        "column": 2,
+        "row": 4,
+        "value": 43
+    },
+    "parent": {
+        "accessor": "col-0-2",
+        "column": 0,
+        "title": "day_of_week: Descending",
+        "format": {
+            "id": "terms",
+            "params": {
+                "id": "string",
+                "otherBucketLabel": "Other",
+                "missingBucketLabel": "Missing"
+            }
+        },
+        "params": {}
+    },
+    "series": "Thursday",
+    "seriesId": "Thursday-col-2-1"
+}

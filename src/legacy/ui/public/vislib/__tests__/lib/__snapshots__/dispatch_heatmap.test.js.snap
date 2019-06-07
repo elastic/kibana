@@ -1,0 +1,1119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Vislib event responses dispatcher - for heatmap return data for a heatmaop popover in percentage mode 1`] = `
+Object {
+  "color": undefined,
+  "config": Object {
+    "get": [Function],
+  },
+  "data": Object {
+    "hits": 25,
+    "series": Array [
+      Object {
+        "id": "1",
+        "label": "Thursday",
+        "rawId": "Thursday-col-2-1",
+        "values": Array [],
+      },
+      Object {
+        "id": "1",
+        "label": "Friday",
+        "rawId": "Friday-col-2-1",
+        "values": Array [],
+      },
+      Object {
+        "id": "1",
+        "label": "Tuesday",
+        "rawId": "Tuesday-col-2-1",
+        "values": Array [],
+      },
+      Object {
+        "id": "1",
+        "label": "Wednesday",
+        "rawId": "Wednesday-col-2-1",
+        "values": Array [],
+      },
+      Object {
+        "id": "1",
+        "label": "Saturday",
+        "rawId": "Saturday-col-2-1",
+        "values": Array [],
+      },
+    ],
+    "xAxisFormat": Object {
+      "id": "terms",
+      "params": Object {
+        "id": "string",
+        "missingBucketLabel": "Missing",
+        "otherBucketLabel": "Other",
+      },
+    },
+    "xAxisLabel": "products.category.keyword: Descending",
+    "xAxisOrderedValues": Array [
+      "Women's Clothing",
+      "Men's Clothing",
+      "Women's Shoes",
+      "Women's Accessories",
+      "Men's Shoes",
+      "Men's Accessories",
+    ],
+    "yAxisFormat": Object {
+      "id": "number",
+    },
+    "yAxisLabel": "Count",
+    "zAxisFormat": Object {
+      "id": "terms",
+      "params": Object {
+        "id": "string",
+        "missingBucketLabel": "Missing",
+        "otherBucketLabel": "Other",
+      },
+    },
+    "zAxisLabel": "",
+  },
+  "datum": Object {
+    "extraMetrics": Array [],
+    "parent": Object {
+      "accessor": "col-0-2",
+      "column": 0,
+      "format": Object {
+        "id": "terms",
+        "params": Object {
+          "id": "string",
+          "missingBucketLabel": "Missing",
+          "otherBucketLabel": "Other",
+        },
+      },
+      "params": Object {},
+      "title": "day_of_week: Descending",
+    },
+    "series": "Thursday",
+    "seriesId": "Thursday-col-2-1",
+    "seriesRaw": Object {
+      "column": 0,
+      "row": 4,
+      "table": Object {
+        "columns": Array [
+          Object {
+            "id": "col-0-2",
+            "name": "day_of_week: Descending",
+          },
+          Object {
+            "id": "col-1-3",
+            "name": "products.category.keyword: Descending",
+          },
+          Object {
+            "id": "col-2-1",
+            "name": "Count",
+          },
+        ],
+        "rows": Array [
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 125,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 109,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 87,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 73,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 43,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 98,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 84,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 55,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 49,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 37,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 70,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 66,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 39,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 28,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 24,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 52,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 31,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 27,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 58,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 29,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Accessories",
+            "col-2-1": 20,
+          },
+        ],
+      },
+      "value": "Thursday",
+    },
+    "x": "Men's Shoes",
+    "xRaw": Object {
+      "column": 1,
+      "row": 4,
+      "table": Object {
+        "columns": Array [
+          Object {
+            "id": "col-0-2",
+            "name": "day_of_week: Descending",
+          },
+          Object {
+            "id": "col-1-3",
+            "name": "products.category.keyword: Descending",
+          },
+          Object {
+            "id": "col-2-1",
+            "name": "Count",
+          },
+        ],
+        "rows": Array [
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 125,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 109,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 87,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 73,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 43,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 98,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 84,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 55,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 49,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 37,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 70,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 66,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 39,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 28,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 24,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 52,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 31,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 27,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 58,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 29,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Accessories",
+            "col-2-1": 20,
+          },
+        ],
+      },
+      "value": "Men's Shoes",
+    },
+    "y": 43,
+    "yRaw": Object {
+      "column": 2,
+      "row": 4,
+      "table": Object {
+        "columns": Array [
+          Object {
+            "id": "col-0-2",
+            "name": "day_of_week: Descending",
+          },
+          Object {
+            "id": "col-1-3",
+            "name": "products.category.keyword: Descending",
+          },
+          Object {
+            "id": "col-2-1",
+            "name": "Count",
+          },
+        ],
+        "rows": Array [
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 125,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 109,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 87,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 73,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 43,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 98,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 84,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 55,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 49,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 37,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 70,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 66,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 39,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 28,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 24,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 52,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 31,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 27,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 58,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 29,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Accessories",
+            "col-2-1": 20,
+          },
+        ],
+      },
+      "value": 43,
+    },
+  },
+  "e": Object {
+    "target": Object {
+      "nearestViewportElement": Object {
+        "__data__": Object {
+          "hits": 25,
+          "series": Array [
+            Object {
+              "id": "1",
+              "label": "Thursday",
+              "rawId": "Thursday-col-2-1",
+              "values": Array [],
+            },
+            Object {
+              "id": "1",
+              "label": "Friday",
+              "rawId": "Friday-col-2-1",
+              "values": Array [],
+            },
+            Object {
+              "id": "1",
+              "label": "Tuesday",
+              "rawId": "Tuesday-col-2-1",
+              "values": Array [],
+            },
+            Object {
+              "id": "1",
+              "label": "Wednesday",
+              "rawId": "Wednesday-col-2-1",
+              "values": Array [],
+            },
+            Object {
+              "id": "1",
+              "label": "Saturday",
+              "rawId": "Saturday-col-2-1",
+              "values": Array [],
+            },
+          ],
+          "xAxisFormat": Object {
+            "id": "terms",
+            "params": Object {
+              "id": "string",
+              "missingBucketLabel": "Missing",
+              "otherBucketLabel": "Other",
+            },
+          },
+          "xAxisLabel": "products.category.keyword: Descending",
+          "xAxisOrderedValues": Array [
+            "Women's Clothing",
+            "Men's Clothing",
+            "Women's Shoes",
+            "Women's Accessories",
+            "Men's Shoes",
+            "Men's Accessories",
+          ],
+          "yAxisFormat": Object {
+            "id": "number",
+          },
+          "yAxisLabel": "Count",
+          "zAxisFormat": Object {
+            "id": "terms",
+            "params": Object {
+              "id": "string",
+              "missingBucketLabel": "Missing",
+              "otherBucketLabel": "Other",
+            },
+          },
+          "zAxisLabel": "",
+        },
+      },
+    },
+  },
+  "handler": Object {
+    "data": Object {},
+    "visConfig": Object {
+      "get": [Function],
+    },
+  },
+  "isPercentageMode": false,
+  "label": "Thursday",
+  "point": Object {
+    "extraMetrics": Array [],
+    "parent": Object {
+      "accessor": "col-0-2",
+      "column": 0,
+      "format": Object {
+        "id": "terms",
+        "params": Object {
+          "id": "string",
+          "missingBucketLabel": "Missing",
+          "otherBucketLabel": "Other",
+        },
+      },
+      "params": Object {},
+      "title": "day_of_week: Descending",
+    },
+    "series": "Thursday",
+    "seriesId": "Thursday-col-2-1",
+    "seriesRaw": Object {
+      "column": 0,
+      "row": 4,
+      "table": Object {
+        "columns": Array [
+          Object {
+            "id": "col-0-2",
+            "name": "day_of_week: Descending",
+          },
+          Object {
+            "id": "col-1-3",
+            "name": "products.category.keyword: Descending",
+          },
+          Object {
+            "id": "col-2-1",
+            "name": "Count",
+          },
+        ],
+        "rows": Array [
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 125,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 109,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 87,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 73,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 43,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 98,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 84,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 55,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 49,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 37,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 70,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 66,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 39,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 28,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 24,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 52,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 31,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 27,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 58,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 29,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Accessories",
+            "col-2-1": 20,
+          },
+        ],
+      },
+      "value": "Thursday",
+    },
+    "x": "Men's Shoes",
+    "xRaw": Object {
+      "column": 1,
+      "row": 4,
+      "table": Object {
+        "columns": Array [
+          Object {
+            "id": "col-0-2",
+            "name": "day_of_week: Descending",
+          },
+          Object {
+            "id": "col-1-3",
+            "name": "products.category.keyword: Descending",
+          },
+          Object {
+            "id": "col-2-1",
+            "name": "Count",
+          },
+        ],
+        "rows": Array [
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 125,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 109,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 87,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 73,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 43,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 98,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 84,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 55,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 49,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 37,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 70,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 66,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 39,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 28,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 24,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 52,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 31,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 27,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 58,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 29,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Accessories",
+            "col-2-1": 20,
+          },
+        ],
+      },
+      "value": "Men's Shoes",
+    },
+    "y": 43,
+    "yRaw": Object {
+      "column": 2,
+      "row": 4,
+      "table": Object {
+        "columns": Array [
+          Object {
+            "id": "col-0-2",
+            "name": "day_of_week: Descending",
+          },
+          Object {
+            "id": "col-1-3",
+            "name": "products.category.keyword: Descending",
+          },
+          Object {
+            "id": "col-2-1",
+            "name": "Count",
+          },
+        ],
+        "rows": Array [
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 125,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 109,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 87,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 73,
+          },
+          Object {
+            "col-0-2": "Thursday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 43,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 98,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 84,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 55,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 49,
+          },
+          Object {
+            "col-0-2": "Friday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 37,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 70,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 66,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 39,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 28,
+          },
+          Object {
+            "col-0-2": "Tuesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 24,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 52,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Men's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 31,
+          },
+          Object {
+            "col-0-2": "Wednesday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 27,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Clothing",
+            "col-2-1": 71,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Clothing",
+            "col-2-1": 58,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Shoes",
+            "col-2-1": 32,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Women's Accessories",
+            "col-2-1": 29,
+          },
+          Object {
+            "col-0-2": "Saturday",
+            "col-1-3": "Men's Accessories",
+            "col-2-1": 20,
+          },
+        ],
+      },
+      "value": 43,
+    },
+  },
+  "pointIndex": 0,
+  "series": Array [
+    Object {
+      "id": "1",
+      "label": "Thursday",
+      "rawId": "Thursday-col-2-1",
+      "values": Array [],
+    },
+    Object {
+      "id": "1",
+      "label": "Friday",
+      "rawId": "Friday-col-2-1",
+      "values": Array [],
+    },
+    Object {
+      "id": "1",
+      "label": "Tuesday",
+      "rawId": "Tuesday-col-2-1",
+      "values": Array [],
+    },
+    Object {
+      "id": "1",
+      "label": "Wednesday",
+      "rawId": "Wednesday-col-2-1",
+      "values": Array [],
+    },
+    Object {
+      "id": "1",
+      "label": "Saturday",
+      "rawId": "Saturday-col-2-1",
+      "values": Array [],
+    },
+  ],
+  "slices": undefined,
+  "value": 43,
+}
+`;

@@ -1,0 +1,65 @@
+{
+    "xAxisOrderedValues": [
+        "Women's Clothing",
+        "Men's Clothing",
+        "Women's Shoes",
+        "Women's Accessories",
+        "Men's Shoes",
+        "Men's Accessories"
+    ],
+    "xAxisFormat": {
+        "id": "terms",
+        "params": {
+            "id": "string",
+            "otherBucketLabel": "Other",
+            "missingBucketLabel": "Missing"
+        }
+    },
+    "xAxisLabel": "products.category.keyword: Descending",
+    "yAxisFormat": {
+        "id": "number"
+    },
+    "yAxisLabel": "Count",
+    "zAxisFormat": {
+        "id": "terms",
+        "params": {
+            "id": "string",
+            "otherBucketLabel": "Other",
+            "missingBucketLabel": "Missing"
+        }
+    },
+    "zAxisLabel": "",
+    "series": [
+        {
+            "id": "1",
+            "rawId": "Thursday-col-2-1",
+            "label": "Thursday",
+            "values": []
+        },
+        {
+            "id": "1",
+            "rawId": "Friday-col-2-1",
+            "label": "Friday",
+            "values": []
+        },
+        {
+            "id": "1",
+            "rawId": "Tuesday-col-2-1",
+            "label": "Tuesday",
+            "values": []
+        },
+        {
+            "id": "1",
+            "rawId": "Wednesday-col-2-1",
+            "label": "Wednesday",
+            "values": []
+        },
+        {
+            "id": "1",
+            "rawId": "Saturday-col-2-1",
+            "label": "Saturday",
+            "values": []
+        }
+    ],
+    "hits": 25
+}

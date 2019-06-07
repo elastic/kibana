@@ -1,0 +1,205 @@
+{
+    "data": {
+        "uiState": {
+            "vis": {
+                "defaultColors": {
+                    "0% - 25%": "rgb(247,252,245)",
+                    "25% - 50%": "rgb(199,233,192)",
+                    "50% - 75%": "rgb(116,196,118)",
+                    "75% - 100%": "rgb(35,139,69)"
+                }
+            }
+        },
+        "data": {
+            "xAxisOrderedValues": [
+                "Women's Clothing",
+                "Men's Clothing",
+                "Women's Shoes",
+                "Women's Accessories",
+                "Men's Shoes",
+                "Men's Accessories"
+            ],
+            "xAxisFormat": {
+                "id": "terms",
+                "params": {
+                    "id": "string",
+                    "otherBucketLabel": "Other",
+                    "missingBucketLabel": "Missing"
+                }
+            },
+            "xAxisLabel": "products.category.keyword: Descending",
+            "yAxisFormat": {
+                "id": "number"
+            },
+            "yAxisLabel": "Count",
+            "zAxisFormat": {
+                "id": "terms",
+                "params": {
+                    "id": "string",
+                    "otherBucketLabel": "Other",
+                    "missingBucketLabel": "Missing"
+                }
+            },
+            "zAxisLabel": "",
+            "series":[],
+            "hits": 25
+        },
+        "type": "series",
+        "labels": [
+            "Thursday",
+            "Friday",
+            "Tuesday",
+            "Wednesday",
+            "Saturday"
+        ]
+    },
+    "_values": {
+        "addLegend": true,
+        "addTooltip": true,
+        "colorSchema": "Greens",
+        "colorsNumber": 4,
+        "colorsRange": [],
+        "dimensions": {
+            "x": {
+                "accessor": 1,
+                "format": {
+                    "id": "terms",
+                    "params": {
+                        "id": "string",
+                        "otherBucketLabel": "Other",
+                        "missingBucketLabel": "Missing"
+                    }
+                },
+                "params": {},
+                "aggType": "terms"
+            },
+            "y": [
+                {
+                    "accessor": 2,
+                    "format": {
+                        "id": "number"
+                    },
+                    "params": {},
+                    "aggType": "count"
+                }
+            ],
+            "series": [
+                {
+                    "accessor": 0,
+                    "format": {
+                        "id": "terms",
+                        "params": {
+                            "id": "string",
+                            "otherBucketLabel": "Other",
+                            "missingBucketLabel": "Missing"
+                        }
+                    },
+                    "params": {},
+                    "aggType": "terms"
+                }
+            ]
+        },
+        "enableHover": false,
+        "invertColors": false,
+        "legendPosition": "right",
+        "percentageMode": true,
+        "setColorRange": false,
+        "times": [],
+        "type": "point_series",
+        "valueAxes": [
+            {
+                "id": "ValueAxis-1",
+                "labels": {
+                    "color": "black",
+                    "overwriteColor": false,
+                    "rotate": 0,
+                    "show": false
+                },
+                "scale": {
+                    "defaultYExtents": false,
+                    "type": "linear"
+                },
+                "show": false,
+                "type": "value"
+            }
+        ],
+        "chartTitle": {},
+        "mode": "normal",
+        "tooltip": {
+            "show": true
+        },
+        "categoryAxes": [
+            {
+                "id": "CategoryAxis-1",
+                "type": "category",
+                "labels": {},
+                "scale": {},
+                "title": {
+                    "text": "products.category.keyword: Descending"
+                },
+                "style": {
+                    "rangePadding": 0,
+                    "rangeOuterPadding": 0
+                }
+            },
+            {
+                "id": "CategoryAxis-2",
+                "type": "category",
+                "position": "left",
+                "values": [
+                    "Thursday",
+                    "Friday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Saturday"
+                ],
+                "scale": {
+                    "inverted": true
+                },
+                "labels": {
+                    "filter": false
+                },
+                "style": {
+                    "rangePadding": 0,
+                    "rangeOuterPadding": 0
+                },
+                "title": {
+                    "text": ""
+                }
+            }
+        ],
+        "charts": [
+            {
+                "type": "point_series",
+                "series":[],
+                "width": 610,
+                "height": 124
+            }
+        ],
+        "style": {
+            "margin": {
+                "top": 10,
+                "right": 3,
+                "bottom": 5,
+                "left": 3
+            }
+        },
+        "alerts": [],
+        "grid": {},
+        "el": {},
+        "legend": {
+            "labels": [
+                "0% - 25%",
+                "25% - 50%",
+                "50% - 75%",
+                "75% - 100%"
+            ],
+            "colors": {
+                "0% - 25%": "rgb(247,252,245)",
+                "25% - 50%": "rgb(199,233,192)",
+                "50% - 75%": "rgb(116,196,118)",
+                "75% - 100%": "rgb(35,139,69)"
+            }
+        }
+    }
+}

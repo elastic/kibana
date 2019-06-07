@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import mockDispatchDataD3 from './fixtures/dispatch_d3.json';
+import mockDispatchDataD3 from './fixtures/dispatch_bar_chart_d3.json';
 jest.mock('d3', () => ({
   event: {
     target: {
@@ -28,8 +28,9 @@ jest.mock('d3', () => ({
 }));
 
 import { Dispatch } from '../../lib/dispatch';
-import mockdataPoint from './fixtures/dispatch_data_point.json';
-import mockConfig from './fixtures/dispatch_config.json';
+import mockdataPoint from './fixtures/dispatch_bar_chart_data_point.json';
+import mockConfigPercentage from './fixtures/dispatch_bar_chart_config_percentage.json';
+import mockConfigNormal from './fixtures/dispatch_bar_chart_config_normal.json';
 
 jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
@@ -49,7 +50,15 @@ function getHandlerMock(config = {}, data = {}) {
 describe('Vislib event responses dispatcher', () => {
   test('return data for a vertical bars popover in percentage mode', () => {
     const dataPoint = mockdataPoint;
-    const handlerMock = getHandlerMock(mockConfig);
+    const handlerMock = getHandlerMock(mockConfigPercentage);
+    const dispatch = new Dispatch(handlerMock);
+    const actual = dispatch.eventResponse(dataPoint, 0);
+    expect(actual).toMatchSnapshot();
+  });
+
+  test('return data for a vertical bars popover in normal mode', () => {
+    const dataPoint = mockdataPoint;
+    const handlerMock = getHandlerMock(mockConfigNormal);
     const dispatch = new Dispatch(handlerMock);
     const actual = dispatch.eventResponse(dataPoint, 0);
     expect(actual).toMatchSnapshot();
