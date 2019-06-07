@@ -201,11 +201,6 @@ export default async function ({ readConfigFile }) {
         '--uiSettings.overrides.accessibility:disableAnimations=true'
       ],
     },
-    uiSettings: {
-      defaults: {
-        'accessibility:disableAnimations': true,
-      },
-    },
     // the apps section defines the urls that
     // `PageObjects.common.navigateTo(appKey)` will use.
     // Merge urls for your plugin with the urls defined in
