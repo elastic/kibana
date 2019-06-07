@@ -14,13 +14,11 @@ import { FindOptions } from 'src/legacy/server/saved_objects/service';
 import { Pick3 } from '../../../common/utility_types';
 import { PageInfoNote, ResponseNote, ResponseNotes, SortNote } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
-import {
-  convertSavedObjectToSavedTimeline,
-  timelineSavedObjectType,
-  pickSavedTimeline,
-} from '../timeline';
 import { SavedNote, NoteSavedObjectRuntimeType, NoteSavedObject } from './types';
-import { noteSavedObjectType } from '.';
+import { noteSavedObjectType } from './saved_object_mappings';
+import { timelineSavedObjectType } from '../../saved_objects';
+import { pickSavedTimeline } from '../timeline/pick_saved_timeline';
+import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_object_to_savedtimeline';
 
 export class Note {
   constructor(

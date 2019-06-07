@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './model';
-export * from './reducer';
-export * from './selectors';
-
-import { createStore, getStore } from './store';
-
-export { createStore, getStore };
+export const DEFAULT_SORT_FIELD = 'updated';
+export const DEFAULT_SORT_DIRECTION = 'desc';
