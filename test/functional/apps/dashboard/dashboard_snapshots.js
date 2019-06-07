@@ -17,29 +17,29 @@
  * under the License.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
-  const visualTesting = getService('visualTesting');
+  const screenshot = getService('screenshots');
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('dashboard snapshots', () => {
-    before(async () => {
+  describe('dashboard snapshots', function describeIndexTests() {
+    before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setWindowSize(1000, 700);
     });
 
-    after(async () => {
+    after(async function () {
       await browser.setWindowSize(1300, 900);
       const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
       await PageObjects.dashboard.deleteDashboard('area', id);
     });
 
-    // Probably flaky: https://github.com/elastic/kibana/issues/19471
-    it('compare TSVB snapshot', async () => {
+    // Skip until https://github.com/elastic/kibana/issues/19471 is fixed
+    it.skip('compare TSVB snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
@@ -54,8 +54,11 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      await visualTesting.snapshot();
+      const percentDifference = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
+
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
+
+      expect(percentDifference).to.be.lessThan(0.05);
     });
 
     it('compare area chart snapshot', async () => {
@@ -70,8 +73,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      await visualTesting.snapshot();
+      const percentDifference = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
+
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
+
+      // Testing some OS/browser differences were shown to cause .009 percent difference.
+      expect(percentDifference).to.be.lessThan(0.05);
     });
   });
 }
