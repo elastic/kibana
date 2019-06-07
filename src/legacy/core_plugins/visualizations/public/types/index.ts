@@ -28,4 +28,5 @@ export {
   VisualizationController,
   VisType,
   VisTypesRegistry,
+  Status,
 } from './types_service';

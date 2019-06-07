@@ -19,13 +19,10 @@
 
 // @ts-ignore
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
-import { getUpdateStatus, Status } from 'ui/vis/update_status';
 // @ts-ignore
-import { updateOldState } from 'ui/vis/vis_update_state';
+import { VisProvider as Vis } from 'ui/vis/index.js';
 // @ts-ignore
-import { VisProvider } from 'ui/vis/index.js';
-// @ts-ignore
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { VisFactoryProvider as VisFactory } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 /**
@@ -36,15 +33,10 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 export class TypesService {
   public setup() {
     return {
-      VisProvider,
-      VisFactoryProvider,
+      Vis,
+      VisFactory,
       VisTypesRegistryProvider,
       defaultFeedbackMessage, // make default in base vis type, or move?
-      updateOldState, // convert to saved object migration?
-      updateStatus: {
-        getUpdateStatus,
-        Status,
-      },
     };
   }
 
@@ -57,10 +49,11 @@ export class TypesService {
 export type TypesSetup = ReturnType<TypesService['setup']>;
 
 /** @public types */
-export { Vis, VisParams, VisProvider, VisState } from 'ui/vis/vis';
-
-/** @public types */
+import * as types from 'ui/vis/vis';
+export type Vis = types.Vis;
+export type VisParams = types.VisParams;
+export type VisProvider = types.VisProvider;
+export type VisState = types.VisState;
 export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
-
-/** @public types */
 export { VisTypesRegistry } from 'ui/registry/vis_types';
+export { Status } from 'ui/vis/update_status';
