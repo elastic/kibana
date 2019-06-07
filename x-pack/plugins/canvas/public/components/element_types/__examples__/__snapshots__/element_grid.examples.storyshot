@@ -491,7 +491,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid with tags filter 1`] = `
           className="euiCard__footer"
         >
           <span
-            className="euiBadge"
+            className="euiBadge euiBadge--iconLeft"
             style={
               Object {
                 "backgroundColor": "#666666",
@@ -565,7 +565,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid with text filter 1`] = `
           className="euiCard__footer"
         >
           <span
-            className="euiBadge"
+            className="euiBadge euiBadge--iconLeft"
             style={
               Object {
                 "backgroundColor": "#666666",
@@ -639,7 +639,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
           className="euiCard__footer"
         >
           <span
-            className="euiBadge"
+            className="euiBadge euiBadge--iconLeft"
             style={
               Object {
                 "backgroundColor": "#666666",
@@ -698,7 +698,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
           className="euiCard__footer"
         >
           <span
-            className="euiBadge"
+            className="euiBadge euiBadge--iconLeft"
             style={
               Object {
                 "backgroundColor": "#666666",
@@ -757,7 +757,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
           className="euiCard__footer"
         >
           <span
-            className="euiBadge"
+            className="euiBadge euiBadge--iconLeft"
             style={
               Object {
                 "backgroundColor": "#666666",
