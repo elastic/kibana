@@ -17,17 +17,20 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
-  const browser = getService('browser');
+import { services } from './services';
 
-  describe('console app', function () {
-    this.tags('ciGroup1');
+export default function({ readConfigFile }) {
+  const functionalConfig = readConfigFile(require.resolve('../functional/config'));
 
-    before(async function () {
-      await browser.setWindowSize(1300, 1100);
-    });
+  return {
+    ...functionalConfig.getAll(),
 
-    loadTestFile(require.resolve('./_console'));
-  });
+    testFiles: [require.resolve('./apps/console')],
 
+    services,
+
+    junit: {
+      reportName: 'Visual Regression Tests',
+    },
+  };
 }

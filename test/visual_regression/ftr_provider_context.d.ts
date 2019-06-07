@@ -17,17 +17,13 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
-  const browser = getService('browser');
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
 
-  describe('console app', function () {
-    this.tags('ciGroup1');
+import { services as CommonServiceProviders } from '../common/services';
+import { pageObjects as FunctionalPageObjectProviders } from './page_objects';
+import { services as FunctionalServiceProviders } from './services';
 
-    before(async function () {
-      await browser.setWindowSize(1300, 1100);
-    });
+type ServiceProviders = typeof CommonServiceProviders & typeof FunctionalServiceProviders;
+type PageObjectProviders = typeof FunctionalPageObjectProviders;
 
-    loadTestFile(require.resolve('./_console'));
-  });
-
-}
+export type FtrProviderContext = GenericFtrProviderContext<ServiceProviders, PageObjectProviders>;

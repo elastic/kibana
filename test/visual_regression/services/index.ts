@@ -17,17 +17,10 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
-  const browser = getService('browser');
+import { services as functionalServices } from '../../functional/services';
+import { VisualTestingProvider } from './visual_testing';
 
-  describe('console app', function () {
-    this.tags('ciGroup1');
-
-    before(async function () {
-      await browser.setWindowSize(1300, 1100);
-    });
-
-    loadTestFile(require.resolve('./_console'));
-  });
-
-}
+export const services = {
+  ...functionalServices,
+  visualTesting: VisualTestingProvider,
+};
