@@ -223,7 +223,7 @@
     "request": "^2.88.0",
     "reselect": "^3.0.1",
     "resize-observer-polyfill": "^1.5.0",
-    "rimraf": "2.4.3",
+    "rimraf": "2.6.3",
     "rison-node": "1.0.0",
     "rxjs": "^6.2.1",
     "script-loader": "0.7.2",
