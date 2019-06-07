@@ -69,7 +69,7 @@ Generated plugins receive a handful of scripts that can be used during developme
 
   - `yarn build`
 
-    Build a distributable archive of your plugin.
+    Build a distributable archive of your plugin. IMPORTANT: change kibana version in package.json to match required target! 
 
   - `yarn test:browser`
 
