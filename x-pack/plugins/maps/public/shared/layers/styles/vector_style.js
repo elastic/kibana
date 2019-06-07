@@ -15,8 +15,13 @@ import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../../common/constan
 import { VectorIcon } from './components/vector/legend/vector_icon';
 import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
-import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON, DEFAULT_ICON_SIZE } from './vector_constants';
-import { getMakiSymbolAnchor } from './symbol_utils';
+import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
+import {
+  getMakiSymbolAnchor,
+  LARGE_MAKI_ICON_SIZE,
+  SMALL_MAKI_ICON_SIZE,
+  HALF_LARGE_MAKI_ICON_SIZE
+} from './symbol_utils';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -520,25 +525,38 @@ export class VectorStyle extends AbstractStyle {
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
 
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
-    mbMap.setLayoutProperty(symbolLayerId, 'icon-image', symbolId);
     mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
     const color = this._getMBColor(this._descriptor.properties.fillColor);
     // icon-color is only supported on SDF icons.
     mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
 
+    // circle sizing is by radius
+    // to make icons be similiar in size to circles then have to deal with icon in half width measurements
     const iconSize = this._descriptor.properties.iconSize;
     if (iconSize.type === VectorStyle.STYLE_TYPE.STATIC) {
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSize.options.size / DEFAULT_ICON_SIZE);
+      const iconPixels = iconSize.options.size >= HALF_LARGE_MAKI_ICON_SIZE
+        ? LARGE_MAKI_ICON_SIZE
+        : SMALL_MAKI_ICON_SIZE;
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
+
+      const halfIconPixels = iconPixels / 2;
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSize.options.size / halfIconPixels);
     } else if (this._isSizeDynamicConfigComplete(iconSize)) {
+      const iconPixels = iconSize.options.maxSize >= HALF_LARGE_MAKI_ICON_SIZE
+        ? LARGE_MAKI_ICON_SIZE
+        : SMALL_MAKI_ICON_SIZE;
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
+
+      const halfIconPixels = iconPixels / 2;
       const targetName = VectorStyle.getComputedFieldName(iconSize.options.field.name);
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
         ['linear'],
         ['get', targetName],
-        0, iconSize.options.minSize / DEFAULT_ICON_SIZE,
-        1, iconSize.options.maxSize / DEFAULT_ICON_SIZE
+        0, iconSize.options.minSize / halfIconPixels,
+        1, iconSize.options.maxSize / halfIconPixels
       ]);
     }
   }

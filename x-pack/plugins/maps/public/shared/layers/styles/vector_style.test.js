@@ -67,7 +67,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
       },
       symbol: {
         options: {
-          symbolId: 'airfield-15',
+          symbolId: 'airfield',
           symbolizeAs: 'circle',
         },
       },
