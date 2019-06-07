@@ -84,6 +84,7 @@ function MarkdownSeriesUi(props) {
           fields={props.fields}
           model={props.model}
           onChange={props.onChange}
+          indexPatternForQuery={props.indexPatternForQuery}
         />
       );
     }
@@ -190,6 +191,7 @@ MarkdownSeriesUi.propTypes = {
   visible: PropTypes.bool,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const MarkdownSeries = injectI18n(MarkdownSeriesUi);

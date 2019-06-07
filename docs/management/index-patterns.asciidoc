@@ -11,6 +11,17 @@ Use caution when modifying advanced options, as it's possible to set values that
 * Configure Kibana for a production environment
 
 [float]
+[[index-patterns-read-only-access]]
+=== [xpack]#Read only access#
+When you have insufficient privileges to create or save index patterns, the following 
+indicator in Kibana will be displayed. The buttons to create new index patterns or save
+existing index patterns won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::images/management-index-read-only-badge.png[Example of Index Pattern Management's read only access indicator in Kibana's header]
+
+[float]
 [[settings-create-pattern]]
 == Creating an Index Pattern to Connect to Elasticsearch
 An _index pattern_ identifies one or more Elasticsearch indices that you want to explore with Kibana. Kibana looks for

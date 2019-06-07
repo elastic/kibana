@@ -5,18 +5,18 @@
  */
 
 import { sortBy } from 'lodash';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore
 import { queryDatatable } from '../../../../common/lib/datatable/query';
-// @ts-ignore
-import { getDemoRows } from './get_demo_rows';
-import { ContextFunction, Filter, Datatable, DatatableColumn, DatatableRow } from '../../types';
+import { DemoRows, getDemoRows } from './get_demo_rows';
+import { Filter, Datatable, DatatableColumn, DatatableRow } from '../../types';
 import { getFunctionHelp } from '../../../strings';
 
 interface Arguments {
   type: string | null;
 }
 
-export function demodata(): ContextFunction<'demodata', Filter, Arguments, Datatable> {
+export function demodata(): ExpressionFunction<'demodata', Filter, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().demodata;
 
   return {
@@ -41,7 +41,7 @@ export function demodata(): ContextFunction<'demodata', Filter, Arguments, Datat
 
       let set = {} as { columns: DatatableColumn[]; rows: DatatableRow[] };
 
-      if (args.type === 'ci') {
+      if (args.type === DemoRows.CI) {
         set = {
           columns: [
             { name: '@timestamp', type: 'date' },
@@ -57,7 +57,7 @@ export function demodata(): ContextFunction<'demodata', Filter, Arguments, Datat
           ],
           rows: sortBy(demoRows, 'time'),
         };
-      } else if (args.type === 'shirts') {
+      } else if (args.type === DemoRows.SHIRTS) {
         set = {
           columns: [
             { name: 'size', type: 'string' },
