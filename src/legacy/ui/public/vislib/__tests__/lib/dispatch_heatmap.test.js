@@ -47,7 +47,8 @@ function getHandlerMock(config = {}, data = {}) {
 }
 
 describe('Vislib event responses dispatcher - for heatmap', () => {
-  test('return data for a heatmap popover in percentage mode', () => {
+  test('return valid data for a heatmap popover', () => {
+    // this is mainly a test that isPercentageMode doesn't fail with other data than vertical barcharts
     const dataPoint = mockdataPoint;
     const handlerMock = getHandlerMock(mockConfigPercentage);
     const dispatch = new Dispatch(handlerMock);

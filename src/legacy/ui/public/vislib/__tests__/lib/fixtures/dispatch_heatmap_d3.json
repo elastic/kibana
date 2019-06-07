@@ -1,34 +1,4 @@
 {
-    "xAxisOrderedValues": [
-        "Women's Clothing",
-        "Men's Clothing",
-        "Women's Shoes",
-        "Women's Accessories",
-        "Men's Shoes",
-        "Men's Accessories"
-    ],
-    "xAxisFormat": {
-        "id": "terms",
-        "params": {
-            "id": "string",
-            "otherBucketLabel": "Other",
-            "missingBucketLabel": "Missing"
-        }
-    },
-    "xAxisLabel": "products.category.keyword: Descending",
-    "yAxisFormat": {
-        "id": "number"
-    },
-    "yAxisLabel": "Count",
-    "zAxisFormat": {
-        "id": "terms",
-        "params": {
-            "id": "string",
-            "otherBucketLabel": "Other",
-            "missingBucketLabel": "Missing"
-        }
-    },
-    "zAxisLabel": "",
     "series": [
         {
             "id": "1",
@@ -60,6 +30,5 @@
             "label": "Saturday",
             "values": []
         }
-    ],
-    "hits": 25
+    ]
 }

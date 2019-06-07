@@ -53,7 +53,7 @@ describe('Vislib event responses dispatcher', () => {
     const handlerMock = getHandlerMock(mockConfigPercentage);
     const dispatch = new Dispatch(handlerMock);
     const actual = dispatch.eventResponse(dataPoint, 0);
-    expect(actual).toMatchSnapshot();
+    expect(actual.isPercentageMode).toBeTruthy();
   });
 
   test('return data for a vertical bars popover in normal mode', () => {
@@ -61,6 +61,7 @@ describe('Vislib event responses dispatcher', () => {
     const handlerMock = getHandlerMock(mockConfigNormal);
     const dispatch = new Dispatch(handlerMock);
     const actual = dispatch.eventResponse(dataPoint, 0);
-    expect(actual).toMatchSnapshot();
+    expect(actual.isPercentageMode).toBeFalsy();
+
   });
 });

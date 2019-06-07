@@ -1,39 +1,4 @@
 {
-    "xAxisOrderedValues": [
-        1559632200000,
-        1559632590000,
-        1559632680000,
-        1559632710000,
-        1559632740000,
-        1559633340000,
-        1559633370000
-    ],
-    "xAxisFormat": {
-        "id": "date",
-        "params": {
-            "pattern": "HH:mm:ss"
-        }
-    },
-    "xAxisLabel": "timestamp per 30 seconds",
-    "ordered": {
-        "interval": "PT30S",
-        "date": true,
-        "min": 1559632107789,
-        "max": 1559633555368
-    },
-    "yAxisFormat": {
-        "id": "number"
-    },
-    "yAxisLabel": "Count",
-    "zAxisFormat": {
-        "id": "terms",
-        "params": {
-            "id": "string",
-            "otherBucketLabel": "Other",
-            "missingBucketLabel": "Missing"
-        }
-    },
-    "zAxisLabel": "",
     "series": [
         {
             "id": "1",
@@ -50,6 +15,5 @@
             "rawId": "NAS Delay-col-2-1",
             "label": "NAS Delay"
         }
-    ],
-    "hits": 7
+    ]
 }
