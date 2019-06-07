@@ -51,13 +51,13 @@ const createCheckSavedObjectsPrivileges = (checkPrivilegesImpl: () => Promise<an
       actionsService: mockActions,
       auditLogger: mockAuditLogger,
       checkPrivilegesWithRequest: () => ({
-        atSpace: jest.fn().mockRejectedValue('atSpace should not be called'),
+        atSpace: jest.fn().mockImplementationOnce(checkPrivilegesImpl),
         atSpaces: jest.fn().mockRejectedValue('atSpaces should not be called'),
-        globally: jest.fn().mockImplementationOnce(checkPrivilegesImpl),
+        globally: jest.fn().mockRejectedValue('globally should not be called'),
       }),
       errors: mockErrors,
       request: null as any,
-      spacesEnabled: false,
+      spacesEnabled: true,
     })
   );
 
@@ -161,6 +161,43 @@ describe(`spaces disabled`, () => {
         }
       );
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockActions = createMockActions();
+      const mockBaseClient = ({
+        create: jest.fn().mockReturnValue(returnValue),
+      } as unknown) as SavedObjectsClientContract;
+
+      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(async () => ({
+        hasAllRequested: true,
+        username,
+        privileges: {
+          [mockActions.savedObject.get(type, 'create')]: true,
+        },
+      }));
+
+      const client = new SecureSavedObjectsClientWrapper({
+        baseClient: mockBaseClient,
+        checkSavedObjectsPrivileges,
+        errors: null,
+      });
+      const attributes = Symbol();
+      const options = {
+        namespace: 'my-namespace',
+      };
+
+      const result = await client.create(type, attributes as any, options);
+
+      expect(result).toBe(returnValue);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', options.namespace, {
+        attributes,
+        options,
+        type,
+      });
     });
 
     test(`returns result of baseClient.create when authorized`, async () => {
@@ -294,6 +331,54 @@ describe(`spaces disabled`, () => {
         'bulk_create',
         [type1, type2],
         [mockActions.savedObject.get(type1, 'bulk_create')],
+        {
+          objects,
+          options,
+        }
+      );
+    });
+
+    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+      const username = Symbol();
+      const type1 = 'foo';
+      const type2 = 'bar';
+      const returnValue = Symbol();
+      const mockBaseClient = ({
+        bulkCreate: jest.fn().mockReturnValue(returnValue),
+      } as unknown) as SavedObjectsClientContract;
+
+      const mockActions = createMockActions();
+      const mockCheckPrivileges = jest.fn(async () => ({
+        hasAllRequested: true,
+        username,
+        privileges: {
+          [mockActions.savedObject.get(type1, 'bulk_create')]: true,
+          [mockActions.savedObject.get(type2, 'bulk_create')]: true,
+        },
+      }));
+
+      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
+
+      const client = new SecureSavedObjectsClientWrapper({
+        baseClient: mockBaseClient,
+        checkSavedObjectsPrivileges,
+        errors: null,
+      });
+      const objects = [
+        { type: type1, otherThing: 'sup', attributes: {} },
+        { type: type2, otherThing: 'everyone', attributes: {} },
+      ];
+      const options = { namespace: 'my-namespace' };
+
+      const result = await client.bulkCreate(objects, options);
+
+      expect(result).toBe(returnValue);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+        [type1, type2],
+        'bulk_create',
+        options.namespace,
         {
           objects,
           options,
@@ -441,6 +526,43 @@ describe(`spaces disabled`, () => {
         }
       );
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockActions = createMockActions();
+      const mockBaseClient = ({
+        delete: jest.fn().mockReturnValue(returnValue),
+      } as unknown) as SavedObjectsClientContract;
+      const mockCheckPrivileges = jest.fn(async () => ({
+        hasAllRequested: true,
+        username,
+        privileges: {
+          [mockActions.savedObject.get(type, 'delete')]: true,
+        },
+      }));
+      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
+
+      const client = new SecureSavedObjectsClientWrapper({
+        baseClient: mockBaseClient,
+        checkSavedObjectsPrivileges,
+        errors: null,
+      });
+      const id = Symbol();
+      const options = { namespace: 'my-namespace' };
+
+      const result = await client.delete(type, id as any, options);
+
+      expect(result).toBe(returnValue);
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', options.namespace, {
+        type,
+        options,
+        id,
+      });
     });
 
     test(`returns result of internalRepository.delete when authorized`, async () => {
@@ -607,6 +729,40 @@ describe(`spaces disabled`, () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
+    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockActions = createMockActions();
+      const mockBaseClient = ({
+        find: jest.fn().mockReturnValue(returnValue),
+      } as unknown) as SavedObjectsClientContract;
+      const mockCheckPrivileges = jest.fn(async () => ({
+        hasAllRequested: true,
+        username,
+        privileges: {
+          [mockActions.savedObject.get(type, 'find')]: true,
+        },
+      }));
+      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
+      const client = new SecureSavedObjectsClientWrapper({
+        baseClient: mockBaseClient,
+        checkSavedObjectsPrivileges,
+        errors: null,
+      });
+      const options = { type, namespace: 'my-namespace' };
+
+      const result = await client.find(options);
+
+      expect(result).toBe(returnValue);
+
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', options.namespace, {
+        options,
+      });
+    });
+
     test(`returns result of baseClient.find when authorized`, async () => {
       const type = 'foo';
       const username = Symbol();
@@ -738,6 +894,49 @@ describe(`spaces disabled`, () => {
         }
       );
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+      const type1 = 'foo';
+      const type2 = 'bar';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockActions = createMockActions();
+      const mockBaseClient = ({
+        bulkGet: jest.fn().mockReturnValue(returnValue),
+      } as unknown) as SavedObjectsClientContract;
+      const mockCheckPrivileges = jest.fn(async () => ({
+        hasAllRequested: true,
+        username,
+        privileges: {
+          [mockActions.savedObject.get(type1, 'bulk_get')]: true,
+          [mockActions.savedObject.get(type2, 'bulk_get')]: true,
+        },
+      }));
+      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
+      const client = new SecureSavedObjectsClientWrapper({
+        baseClient: mockBaseClient,
+        checkSavedObjectsPrivileges,
+        errors: null,
+      });
+      const objects = [{ type: type1, id: 'foo-id' }, { type: type2, id: 'bar-id' }];
+      const options = { namespace: 'my-namespace' };
+
+      const result = await client.bulkGet(objects, options);
+
+      expect(result).toBe(returnValue);
+
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+        [type1, type2],
+        'bulk_get',
+        options.namespace,
+        {
+          objects,
+          options,
+        }
+      );
     });
 
     test(`returns result of baseClient.bulkGet when authorized`, async () => {
@@ -875,6 +1074,43 @@ describe(`spaces disabled`, () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
+    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockActions = createMockActions();
+      const mockBaseClient = ({
+        get: jest.fn().mockReturnValue(returnValue),
+      } as unknown) as SavedObjectsClientContract;
+      const mockCheckPrivileges = jest.fn(async () => ({
+        hasAllRequested: true,
+        username,
+        privileges: {
+          [mockActions.savedObject.get(type, 'get')]: true,
+        },
+      }));
+      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
+      const client = new SecureSavedObjectsClientWrapper({
+        baseClient: mockBaseClient,
+        checkSavedObjectsPrivileges,
+        errors: null,
+      });
+      const id = Symbol();
+      const options = { namespace: 'my-namespace' };
+
+      const result = await client.get(type, id as any, options);
+
+      expect(result).toBe(returnValue);
+
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', options.namespace, {
+        type,
+        id,
+        options,
+      });
+    });
+
     test(`returns result of baseClient.get when authorized`, async () => {
       const type = 'foo';
       const username = Symbol();
@@ -1010,6 +1246,44 @@ describe(`spaces disabled`, () => {
         }
       );
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockActions = createMockActions();
+      const mockBaseClient = ({
+        update: jest.fn().mockReturnValue(returnValue),
+      } as unknown) as SavedObjectsClientContract;
+      const mockCheckPrivileges = jest.fn(async () => ({
+        hasAllRequested: true,
+        username,
+        privileges: {
+          [mockActions.savedObject.get(type, 'update')]: true,
+        },
+      }));
+      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+        mockCheckPrivileges
+      );
+      const client = new SecureSavedObjectsClientWrapper({
+        baseClient: mockBaseClient,
+        checkSavedObjectsPrivileges,
+        errors: null,
+      });
+      const id = Symbol();
+      const attributes = Symbol();
+      const options = { namespace: 'my-namespace' };
+      const result = await client.update(type, id as any, attributes as any, options);
+
+      expect(result).toBe(returnValue);
+
+      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', options.namespace, {
+        type,
+        id,
+        options,
+        attributes,
+      });
     });
 
     test(`returns result of baseClient.update when authorized`, async () => {
