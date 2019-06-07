@@ -5,15 +5,14 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { uiModules } from 'ui/modules';
 import { isSystemApiRequest } from 'ui/system_api';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { toastNotifications } from 'ui/notify';
 import 'plugins/security/services/auto_logout';
+import { SessionExpirationWarning } from '../components/session_expiration_warning';
 
 /**
  * Client session timeout is decreased by this number so that Kibana server
@@ -45,22 +44,7 @@ module.config(($httpProvider) => {
     const notificationOptions = {
       color: 'warning',
       text: (
-        <>
-          <p data-test-subj="errorToastMessage">
-            <FormattedMessage
-              id="xpack.security.hacks.logoutNotification"
-              defaultMessage="You will soon be logged out due to inactivity. Click OK to resume."
-            />
-          </p>
-          <div className="eui-textRight">
-            <EuiButton size="s" color="warning" onClick={() => refreshSession()}>
-              <FormattedMessage
-                id="xpack.security.hacks.sessionTimeout.okButtonText"
-                defaultMessage="OK"
-              />
-            </EuiButton>
-          </div>
-        </>
+        <SessionExpirationWarning onRefreshSession={refreshSession} />
       ),
       title: i18n.translate('xpack.security.hacks.warningTitle', {
         defaultMessage: 'Warning'
