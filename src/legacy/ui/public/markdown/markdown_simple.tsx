@@ -17,17 +17,18 @@
  * under the License.
  */
 
-export { config, HttpConfig, HttpConfigType } from './http_config';
-export { HttpService, HttpServiceSetup, HttpServiceStart } from './http_service';
-export {
-  KibanaRequest,
-  KibanaRequestRoute,
-  Router,
-  RouteMethod,
-  RouteConfigOptions,
-} from './router';
-export { BasePathProxyServer } from './base_path_proxy_server';
-export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
-export { AuthenticationHandler, AuthToolkit } from './lifecycle/auth';
-export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
-export { SessionStorageFactory, SessionStorage } from './session_storage';
+import React, { Fragment } from 'react';
+import ReactMarkdown from 'react-markdown';
+
+const markdownRenderers = {
+  root: Fragment,
+};
+
+interface MarkdownSimpleProps {
+  children: string;
+}
+
+// Render markdown string into JSX inside of a Fragment.
+export const MarkdownSimple = ({ children }: MarkdownSimpleProps) => (
+  <ReactMarkdown renderers={markdownRenderers}>{children}</ReactMarkdown>
+);

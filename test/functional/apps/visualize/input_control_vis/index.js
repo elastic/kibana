@@ -17,19 +17,10 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
-import ReactMarkdown from 'react-markdown';
-
-const markdownRenderers = {
-  root: Fragment,
-};
-
-// Render markdown string into JSX inside of a Fragment.
-export const MarkdownSimple = ({ children }) => (
-  <ReactMarkdown renderers={markdownRenderers}>{children}</ReactMarkdown>
-);
-
-MarkdownSimple.propTypes = {
-  children: PropTypes.string,
-};
+export default function ({ loadTestFile }) {
+  describe('input controls', function () {
+    loadTestFile(require.resolve('./input_control_options'));
+    loadTestFile(require.resolve('./dynamic_options'));
+    loadTestFile(require.resolve('./chained_controls'));
+  });
+}
