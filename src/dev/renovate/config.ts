@@ -76,7 +76,7 @@ export const RENOVATE_CONFIG = {
   npm: {
     /**
      * This deletes and re-creates the lock file, which we will only want
-     * to turn on once we've updated all our deps
+     * to turn on once we've updated all our deps and enabled version pinning
      */
     lockFileMaintenance: { enabled: false },
 
