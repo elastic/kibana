@@ -19,6 +19,7 @@
 
 import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
+import mappings from './mappings.json';
 
 // eslint-disable-next-line import/no-default-export
 export default function DataPlugin(kibana: any) {
@@ -35,6 +36,7 @@ export default function DataPlugin(kibana: any) {
     uiExports: {
       injectDefaultVars: () => ({}),
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      mappings,
     },
   };
 
