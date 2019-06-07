@@ -82,9 +82,7 @@ class ObjectsTableUI extends Component {
 
   constructor(props) {
     super(props);
-    this.savedObjectTypes = POSSIBLE_TYPES.filter(type => {
-      return this.props.uiCapabilities.savedObjectsManagement[type].read;
-    });
+    this.savedObjectTypes = this.props.uiCapabilities.savedObjectsManagement.read ? POSSIBLE_TYPES : [];
 
     this.state = {
       totalCount: 0,
@@ -677,9 +675,7 @@ class ObjectsTableUI extends Component {
       view: `${type} (${savedObjectCounts[type] || 0})`,
     }));
 
-    const canDeleteSavedObjectTypes = POSSIBLE_TYPES.filter(type => {
-      return this.props.uiCapabilities.savedObjectsManagement[type].delete;
-    });
+    const canDeleteSavedObjectTypes = this.props.uiCapabilities.savedObjectsManagement.delete ? POSSIBLE_TYPES : [];
 
     return (
       <EuiPageContent
