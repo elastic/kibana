@@ -17,6 +17,9 @@ kibana-ciGroup*)
   export CI_GROUP="${JOB##kibana-ciGroup}"
   ./test/scripts/jenkins_ci_group.sh
   ;;
+kibana-visualRegression)
+  ./test/scripts/jenkins_visual_regression.sh
+  ;;
 x-pack-intake)
   ./test/scripts/jenkins_xpack.sh
   ;;
