@@ -195,7 +195,7 @@ class PipelineEditorUi extends React.Component {
     return licenseService.checkValidity().then(() => {
       toastNotifications.addError(err, {
         title: i18n.translate('xpack.logstash.pipelineEditor.errorHandlerToastTitle', {
-          defaultMessage: 'Error'
+          defaultMessage: 'Pipeline error'
         }),
       });
     });
