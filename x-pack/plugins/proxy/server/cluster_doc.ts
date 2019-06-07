@@ -5,12 +5,12 @@
  */
 
 import { v4 } from 'uuid';
-import { Observable, Subscription, from } from 'rxjs';
+import { Observable, Subscription, pairs } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 import { PluginInitializerContext, Logger, ClusterClient, CoreSetup } from 'src/core/server';
 
 import { ProxyPluginType } from './proxy';
-import { first } from 'rxjs/operators';
 
 export enum RouteState {
   Initializing,
@@ -30,24 +30,19 @@ interface LivenessNode {
 }
 
 interface ClusterDoc {
-  nodes: {
-    [key: string]: LivenessNode;
-  };
-  routing_table: {
-    [key: string]: RoutingNode;
-  };
+  nodes: NodeList;
+  routing_table: RoutingTable;
 }
 
-// convert a map<string, V> to a plain javascript object of {[key:string]: val}
-function map2obj<V>(map: Map<string, V>): { [key: string]: V } {
-  return [...map].reduce((a, [k, v]) => Object.assign(a, { [k]: v }), {});
+export interface RoutingTable {
+  [key: string]: RoutingNode;
 }
-
-export type RoutingTable = Map<string, RoutingNode>;
-type NodeList = Map<string, LivenessNode>;
+interface NodeList {
+  [key: string]: LivenessNode;
+}
 
 export class ClusterDocClient {
-  private routingTable: RoutingTable = new Map();
+  private routingTable: RoutingTable = {};
   private elasticsearch?: Observable<ClusterClient>;
   private updateInterval?: number;
   private timeoutThreshold: number = 15 * 1000;
@@ -68,11 +63,11 @@ export class ClusterDocClient {
 
   public async setup(core: CoreSetup) {
     this.elasticsearch = core.elasticsearch.dataClient$;
-    const config = await this.config$.pipe(first()).toPromise();
-    this.setConfig(config);
     this.configSubscription = this.config$.subscribe(config => {
       this.setConfig(config);
     });
+    const config = await this.config$.pipe(first()).toPromise();
+    this.setConfig(config);
   }
 
   public async start() {
@@ -86,7 +81,7 @@ export class ClusterDocClient {
     }
 
     const nodes = await this.getNodeList();
-    nodes.delete(this.nodeName);
+    delete nodes[this.nodeName];
     await this.updateNodeList(nodes);
 
     if (this.configSubscription === undefined) {
@@ -98,22 +93,22 @@ export class ClusterDocClient {
   }
 
   public getRoutingTable(): Observable<[string, RoutingNode]> {
-    return from(this.routingTable);
+    return pairs(this.routingTable);
   }
 
   public getNodeForResource(resource: string) {
-    return this.routingTable.get(resource);
+    return this.routingTable[resource];
   }
 
   public async assignResource(resource: string, data: RoutingNode) {
-    this.routingTable.set(resource, data);
+    this.routingTable[resource] = data;
     const nodes = await this.getNodeList();
     const currentTime = new Date().getTime();
     await this.updateNodeList(this.updateLocalNode(nodes, currentTime));
   }
 
   public async unassignResource(resource: string) {
-    this.routingTable.delete(resource);
+    delete this.routingTable[resource];
     const nodes = await this.getNodeList();
     const currentTime = new Date().getTime();
     await this.updateNodeList(this.updateLocalNode(nodes, currentTime));
@@ -134,15 +129,15 @@ export class ClusterDocClient {
   }
 
   private updateRoutingTable(routingTable: { [key: string]: RoutingNode }): void {
-    const currentRoutes = [...this.routingTable.keys()];
+    const currentRoutes = [...Object.keys(this.routingTable)];
     for (const [key, node] of Object.entries(routingTable)) {
-      this.routingTable.set(key, node);
+      this.routingTable[key] = node;
       const idx = currentRoutes.findIndex(k => k === key);
       if (idx) currentRoutes.splice(idx, 1);
     }
 
     for (const key of currentRoutes.values()) {
-      this.routingTable.delete(key);
+      delete this.routingTable[key];
     }
   }
 
@@ -158,7 +153,7 @@ export class ClusterDocClient {
     };
     const data: ClusterDoc = await client.callAsInternalUser('get', params);
     this.updateRoutingTable(data.routing_table);
-    const nodes: NodeList = new Map(Object.entries(data.nodes));
+    const nodes: NodeList = data.nodes;
     return nodes;
   }
 
@@ -167,8 +162,8 @@ export class ClusterDocClient {
       throw new Error('You must call setup first');
     }
     const doc = {
-      nodes: map2obj(nodes),
-      routing_table: map2obj(this.routingTable),
+      nodes: nodes,
+      routing_table: this.routingTable,
     };
     const client = await this.elasticsearch.pipe(first()).toPromise();
     const params = {
@@ -180,10 +175,10 @@ export class ClusterDocClient {
   }
 
   private updateLocalNode(nodes: NodeList, finishTime: number): NodeList {
-    nodes.set(this.nodeName, {
+    nodes[this.nodeName] = {
       lastChangedTime: finishTime,
       lastUpdate: finishTime,
-    });
+    };
     return nodes;
   }
 
@@ -191,12 +186,12 @@ export class ClusterDocClient {
     const nodes = await this.getNodeList();
     const finishTime = new Date().getTime();
 
-    for (const [key, node] of nodes.entries()) {
+    for (const [key, node] of Object.entries(nodes)) {
       if (!node || finishTime - node.lastUpdate > this.timeoutThreshold) {
-        nodes.delete(key);
+        delete nodes[key];
       } else {
         node.lastChangedTime = finishTime;
-        nodes.set(key, node);
+        nodes[key] = node;
       }
     }
 
