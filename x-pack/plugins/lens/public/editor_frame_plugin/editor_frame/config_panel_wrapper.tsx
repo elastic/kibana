@@ -45,7 +45,6 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
             // TODO we probably want to have a separate API to "force" a visualization switch
             // which isn't a result of a picked suggestion
             initialState: props.visualizationMap[e.target.value].initialize(
-              undefined,
               props.datasourcePublicAPI
             ),
           });

@@ -38,7 +38,7 @@ describe('xy_visualization', () => {
       mockDatasource.publicAPIMock.generateColumnId
         .mockReturnValue('test-id1')
         .mockReturnValueOnce('test-id2');
-      const initialState = xyVisualization.initialize(undefined, mockDatasource.publicAPIMock);
+      const initialState = xyVisualization.initialize(mockDatasource.publicAPIMock);
 
       expect(initialState.x.accessor).toBeDefined();
       expect(initialState.y.accessors[0]).toBeDefined();
@@ -74,7 +74,7 @@ Object {
 
     it('loads from persisted state', () => {
       expect(
-        xyVisualization.initialize(exampleState(), createMockDatasource().publicAPIMock)
+        xyVisualization.initialize(createMockDatasource().publicAPIMock, exampleState())
       ).toEqual(exampleState());
     });
   });

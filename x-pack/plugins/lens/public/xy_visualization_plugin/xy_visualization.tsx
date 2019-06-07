@@ -16,7 +16,7 @@ import { State, PersistableState } from './types';
 export const xyVisualization: Visualization<State, PersistableState> = {
   getSuggestions,
 
-  initialize(state, datasource) {
+  initialize(datasource, state) {
     return (
       state || {
         seriesType: 'line',
