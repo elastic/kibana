@@ -34,7 +34,7 @@ const indent = text => (
 );
 
 const isLikelyIrrelevant = ({ failure }) => {
-  if (failure.include('NoSuchSessionError: This driver instance does not have a valid session ID')) {
+  if (failure.includes('NoSuchSessionError: This driver instance does not have a valid session ID')) {
     return true;
   }
 
