@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Ip Details it matches the snapshot 1`] = `
+<Component
+  filterQuery="coolQueryhuh?"
+  flowTarget="source"
+  history={
+    Object {
+      "action": "POP",
+      "block": [MockFunction],
+      "createHref": [MockFunction],
+      "go": [MockFunction],
+      "goBack": [MockFunction],
+      "goForward": [MockFunction],
+      "length": 2,
+      "listen": [MockFunction],
+      "location": Object {
+        "hash": "",
+        "pathname": "/network/ip/123.456.78.90",
+        "search": "",
+        "state": "",
+      },
+      "push": [MockFunction],
+      "replace": [MockFunction],
+    }
+  }
+  location={
+    Object {
+      "hash": "",
+      "pathname": "/network/ip/123.456.78.90",
+      "search": "",
+      "state": "",
+    }
+  }
+  match={
+    Object {
+      "isExact": true,
+      "params": Object {
+        "ip": "123.456.78.90",
+      },
+      "path": "",
+      "url": "",
+    }
+  }
+/>
+`;

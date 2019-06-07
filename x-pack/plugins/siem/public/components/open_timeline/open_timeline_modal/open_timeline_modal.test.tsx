@@ -13,8 +13,7 @@ import { OpenTimelineResult } from '../types';
 import { TimelinesTableProps } from '../timelines_table';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { OpenTimelineModal } from './open_timeline_modal';
-
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 describe('OpenTimelineModal', () => {
   const title = 'All Timelines / Open Timelines';
