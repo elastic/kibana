@@ -140,7 +140,6 @@
     "common.ui.aggTypes.filters.addFilterButtonLabel": "フィルターを追加",
     "common.ui.aggTypes.filters.definiteFilterLabel": "{index} ラベルでフィルタリング",
     "common.ui.aggTypes.filters.filterLabel": "{index} でフィルタリング",
-    "common.ui.aggTypes.filters.filterPlaceholder": "Lucene またはクエリ DSL",
     "common.ui.aggTypes.filters.labelPlaceholder": "ラベル",
     "common.ui.aggTypes.filters.removeFilterButtonAriaLabel": "このフィルターを削除",
     "common.ui.aggTypes.filters.toggleFilterButtonAriaLabel": "フィルターラベルを切り替える",
