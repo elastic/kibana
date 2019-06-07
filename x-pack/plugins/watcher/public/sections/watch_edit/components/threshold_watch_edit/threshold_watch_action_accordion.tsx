@@ -85,7 +85,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
 
       return (
         <EuiAccordion
-          initialIsOpen={action.isNew}
+          initialIsOpen={action.isNew || hasErrors}
           key={action.id}
           id={action.id}
           className="euiAccordionForm"

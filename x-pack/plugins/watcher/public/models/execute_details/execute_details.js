@@ -47,8 +47,12 @@ export class ExecuteDetails {
   }
 
   get upstreamJson() {
-    const triggeredTime = this.triggeredTimeValue !== '' ? getDateMathFormat(this.triggeredTimeUnit, this.triggeredTimeValue) : undefined;
-    const scheduledTime = this.scheduledTimeValue !== '' ?  getDateMathFormat(this.scheduledTimeUnit, this.scheduledTimeValue) : undefined;
+    const triggeredTime = this.triggeredTimeValue && this.triggeredTimeValue !== ''
+      ? getDateMathFormat(this.triggeredTimeUnit, this.triggeredTimeValue)
+      : undefined;
+    const scheduledTime = this.scheduledTimeTime && this.scheduledTimeValue !== ''
+      ?  getDateMathFormat(this.scheduledTimeUnit, this.scheduledTimeValue)
+      : undefined;
 
     return {
       triggerData: {

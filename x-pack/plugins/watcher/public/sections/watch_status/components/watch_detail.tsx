@@ -47,6 +47,7 @@ const WatchDetailUi = () => {
     id: watchId,
     watchErrors: { actionErrors },
     watchStatus: { actionStatuses: currentActionStatuses },
+    isSystemWatch,
   } = watchDetail;
 
   const hasActionErrors = actionErrors && Object.keys(actionErrors).length > 0;
@@ -113,7 +114,7 @@ const WatchDetailUi = () => {
   const actionColumn = {
     actions: [
       {
-        available: (action: ActionStatus) => action.isAckable,
+        available: (action: ActionStatus) => action.isAckable && !isSystemWatch,
         render: (action: ActionStatus) => {
           const { id: actionId } = action;
           return (

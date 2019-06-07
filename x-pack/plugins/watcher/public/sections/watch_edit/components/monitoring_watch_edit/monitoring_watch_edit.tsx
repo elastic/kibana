@@ -16,12 +16,50 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { WatchContext } from '../../watch_context';
 
 const MonitoringWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
   const { watch } = useContext(WatchContext);
+
+  const editSystemWatchTitle = (
+    <FormattedMessage
+      id="xpack.watcher.sections.watchEdit.monitoring.edit.calloutTitleText"
+      defaultMessage="This watch cannot be edited."
+    />
+  );
+
+  const editSystemWatchMessage = (
+    <FormattedMessage
+      id="xpack.watcher.sections.watchEdit.monitoring.edit.calloutDescriptionText"
+      defaultMessage="Watch '{watchName}' is a system watch and cannot be edited. {watchStatusLink}"
+      values={{
+        watchName: watch.name,
+        watchStatusLink: (
+          <EuiLink href={`#/management/elasticsearch/watcher/watches/watch/${watch.id}/status`}>
+            <FormattedMessage
+              id="xpack.watcher.sections.watchEdit.monitoring.header.watchLinkTitle"
+              defaultMessage="View watch status."
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+
+  const createSystemWatchTitle = (
+    <FormattedMessage
+      id="xpack.watcher.sections.watchEdit.monitoring.create.calloutTitleText"
+      defaultMessage="Cannot create watch"
+    />
+  );
+
+  const createSystemWatchMessage = (
+    <FormattedMessage
+      id="xpack.watcher.sections.watchEdit.monitoring.create.calloutDescriptionText"
+      defaultMessage="System watches are read-only and cannot be created."
+    />
+  );
 
   return (
     <EuiPageContent>
@@ -34,31 +72,11 @@ const MonitoringWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiCallOut
-        title={i18n.translate('xpack.watcher.sections.watchEdit.monitoring.calloutTitleText', {
-          defaultMessage: 'This watch cannot be edited.',
-        })}
+        title={watch.isNew ? createSystemWatchTitle : editSystemWatchTitle}
         iconType="pin"
       >
         <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.watcher.sections.watchEdit.monitoring.header"
-              defaultMessage="Watch '{watchName}' is a system watch and cannot be edited. {watchStatusLink}"
-              values={{
-                watchName: watch.name,
-                watchStatusLink: (
-                  <EuiLink
-                    href={`#/management/elasticsearch/watcher/watches/watch/${watch.id}/status`}
-                  >
-                    <FormattedMessage
-                      id="xpack.watcher.sections.watchEdit.monitoring.header.watchLinkTitle"
-                      defaultMessage="View watch status."
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
+          <p>{watch.isNew ? createSystemWatchMessage : editSystemWatchMessage}</p>
         </EuiText>
       </EuiCallOut>
     </EuiPageContent>

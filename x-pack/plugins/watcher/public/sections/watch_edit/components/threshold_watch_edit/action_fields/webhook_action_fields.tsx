@@ -8,6 +8,7 @@ import React, { Fragment, useEffect } from 'react';
 import {
   EuiCodeEditor,
   EuiFieldNumber,
+  EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
   EuiSelect,
@@ -35,7 +36,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
   errors,
   hasErrors,
 }) => {
-  const { method, host, port, path, body } = action;
+  const { method, host, port, path, body, username, password } = action;
 
   useEffect(() => {
     editAction({ key: 'contentType', value: 'application/json' }); // set content-type for threshold watch to json by default
@@ -156,6 +157,54 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <ErrableFormRow
+            id="webhookBasicAuthUsername"
+            errorKey="username"
+            isShowingErrors={hasErrors}
+            errors={errors}
+            label={i18n.translate(
+              'xpack.watcher.sections.watchEdit.threshold.webhookAction.basicAuthUsername',
+              {
+                defaultMessage: 'Username (optional)',
+              }
+            )}
+          >
+            <EuiFieldText
+              name="username"
+              value={username || ''}
+              onChange={e => {
+                editAction({ key: 'username', value: e.target.value });
+              }}
+            />
+          </ErrableFormRow>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <ErrableFormRow
+            id="webhookBasicAuthPassword"
+            errorKey="password"
+            isShowingErrors={hasErrors}
+            errors={errors}
+            label={i18n.translate(
+              'xpack.watcher.sections.watchEdit.threshold.webhookAction.basicAuthPassword',
+              {
+                defaultMessage: 'Password (optional)',
+              }
+            )}
+          >
+            <EuiFieldPassword
+              name="password"
+              value={password || ''}
+              onChange={e => {
+                editAction({ key: 'password', value: e.target.value });
+              }}
+            />
+          </ErrableFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiSpacer size="s" />
 
       <ErrableFormRow
@@ -175,6 +224,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
           fullWidth
           mode="json"
           width="100%"
+          height="200px"
           theme="github"
           aria-label={i18n.translate(
             'xpack.watcher.sections.watchEdit.threshold.webhookAction.bodyCodeEditorAriaLabel',
