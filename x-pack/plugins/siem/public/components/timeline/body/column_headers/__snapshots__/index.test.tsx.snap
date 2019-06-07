@@ -397,7 +397,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
       },
       Object {
         "columnHeaderType": "not-filtered",
-        "id": "event.severity",
+        "id": "message",
         "width": 180,
       },
       Object {

@@ -202,11 +202,12 @@ describe('lsp_indexer unit tests', function(this: any) {
 
     // There are 22 files which are written in supported languages in the repo. 1 file + 1 symbol + 1 reference = 3 objects to
     // index for each file. Total doc indexed for these files should be 3 * 22 = 66.
-    // The rest 158 files will only be indexed for document. So the total number of index
-    // requests will be 66 + 158 = 224.
+    // The rest 158 files will only be indexed for document.
+    // There are also 10 binary files to be excluded.
+    // So the total number of index requests will be 66 + 158 - 10 = 214.
     assert.ok(bulkSpy.calledOnce);
     assert.strictEqual(lspSendRequestSpy.callCount, 22);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 224 * 2);
+    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 214 * 2);
     // @ts-ignore
   }).timeout(20000);
 
