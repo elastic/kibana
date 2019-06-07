@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { taskManagerMock } from './task_manager.mock';
+import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { createFireFunction } from '../create_fire_function';
 
 const mockTaskManager = taskManagerMock.create();

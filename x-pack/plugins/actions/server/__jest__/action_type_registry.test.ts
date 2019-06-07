@@ -8,15 +8,11 @@ jest.mock('../get_create_task_runner_function', () => ({
   getCreateTaskRunnerFunction: jest.fn(),
 }));
 
-import { taskManagerMock } from './task_manager.mock';
-import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { taskManagerMock } from '../../../task_manager/task_manager.mock';
+import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { ActionTypeRegistry } from '../action_type_registry';
 
 const mockTaskManager = taskManagerMock.create();
-
-const mockEncryptedSavedObjectsPlugin = {
-  getDecryptedAsInternalUser: jest.fn() as EncryptedSavedObjectsPlugin['getDecryptedAsInternalUser'],
-} as EncryptedSavedObjectsPlugin;
 
 const services = {
   log: jest.fn(),
@@ -24,7 +20,7 @@ const services = {
 const actionTypeRegistryParams = {
   services,
   taskManager: mockTaskManager,
-  encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
+  encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
 };
 
 beforeEach(() => jest.resetAllMocks());

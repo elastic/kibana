@@ -7,7 +7,7 @@
 import Joi from 'joi';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsClient } from '../actions_client';
-import { taskManagerMock } from './task_manager.mock';
+import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 
