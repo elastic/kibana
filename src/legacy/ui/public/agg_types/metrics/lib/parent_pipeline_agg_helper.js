@@ -47,7 +47,6 @@ const parentPipelineAggHelper = {
   }),
   params: function () {
     return [
-
       {
         name: 'metricAgg',
         editor: metricAggTemplate,
