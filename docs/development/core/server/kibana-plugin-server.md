@@ -43,6 +43,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginsServiceSetup](./kibana-plugin-server.pluginsservicesetup.md) |  |
 |  [PluginsServiceStart](./kibana-plugin-server.pluginsservicestart.md) |  |
 |  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Route specific configuration. |
+|  [SessionStorage](./kibana-plugin-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
+|  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
 
 ## Type Aliases
 
