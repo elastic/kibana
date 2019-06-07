@@ -48,7 +48,7 @@ const createMockClient = () => {
 ].forEach(currentSpace => {
   describe(`${currentSpace.id} space`, () => {
     describe('#get', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -108,7 +108,7 @@ const createMockClient = () => {
     });
 
     describe('#bulkGet', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -170,7 +170,7 @@ const createMockClient = () => {
     });
 
     describe('#find', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -290,7 +290,7 @@ const createMockClient = () => {
     });
 
     describe('#create', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -351,7 +351,7 @@ const createMockClient = () => {
     });
 
     describe('#bulkCreate', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -416,7 +416,7 @@ const createMockClient = () => {
     });
 
     describe('#update', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -479,7 +479,7 @@ const createMockClient = () => {
     });
 
     describe('#delete', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
