@@ -23,7 +23,7 @@ import MarkdownIt from 'markdown-it';
 import { NoResults } from '../../errors';
 import { Binder } from '../../binder';
 import { VislibLibLayoutLayoutProvider } from './layout/layout';
-import { VislibLibChartTitleProvider } from './chart_title';
+import { ChartTitle } from './chart_title';
 import { VislibLibAlertsProvider } from './alerts';
 import { VislibLibAxisProvider } from './axis/axis';
 import { VislibGridProvider } from './chart_grid';
@@ -38,7 +38,6 @@ const markdownIt = new MarkdownIt({
 export function VisHandlerProvider(Private) {
   const chartTypes = Private(VislibVisualizationsVisTypesProvider);
   const Layout = Private(VislibLibLayoutLayoutProvider);
-  const ChartTitle = Private(VislibLibChartTitleProvider);
   const Alerts = Private(VislibLibAlertsProvider);
   const Axis = Private(VislibLibAxisProvider);
   const Grid = Private(VislibGridProvider);
