@@ -7,7 +7,9 @@
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const visualTesting = getService('visualTesting');
-  const PageObjects = getPageObjects(['security']);
+  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common']);
 
   describe('Security', () => {
     describe('Login Page', () => {
@@ -25,20 +27,22 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('renders login page', async () => {
+        await PageObjects.common.navigateToApp('login');
+        await retry.waitFor('login page visible', async () => (
+          await testSubjects.exists('loginSubmit')
+        ));
+
         await visualTesting.snapshot();
       });
 
-      it('failed login', async () => {
+      it('renders failed login', async () => {
         await PageObjects.security.loginPage.login('wrong-user', 'wrong-password', {
           expectSuccess: false,
         });
 
-        await visualTesting.snapshot();
-      });
-
-      it('logout message', async () => {
-        await PageObjects.security.login();
-        await PageObjects.security.logout();
+        await retry.waitFor('login error visible', async () => (
+          await testSubjects.exists('loginErrorMessage')
+        ));
 
         await visualTesting.snapshot();
       });
