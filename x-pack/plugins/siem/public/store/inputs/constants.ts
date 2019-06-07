@@ -4,11 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum CONSTANTS {
-  hostsDetails = 'hosts.details',
-  hostsPage = 'hosts.page',
-  kqlQuery = 'kqlQuery',
-  networkDetails = 'network.details',
-  networkPage = 'network.page',
-  timerange = 'timerange',
-}
+export type InputsModelId = 'global' | 'timeline';
+export type TimeRangeKinds = 'absolute' | 'relative';

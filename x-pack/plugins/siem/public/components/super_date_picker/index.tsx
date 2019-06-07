@@ -19,6 +19,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { inputsModel, State } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
+import { InputsModelId } from '../../store/inputs/constants';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
@@ -52,26 +53,26 @@ interface SuperDatePickerStateRedux {
 
 interface SuperDatePickerDispatchProps {
   setAbsoluteSuperDatePicker: ActionCreator<{
-    id: inputsModel.InputsModelId;
+    id: InputsModelId;
     from: number;
     to: number;
     timelineId?: string;
   }>;
   setRelativeSuperDatePicker: ActionCreator<{
-    id: inputsModel.InputsModelId;
+    id: InputsModelId;
     fromStr: string;
     from: number;
     to: number;
     toStr: string;
     timelineId?: string;
   }>;
-  startAutoReload: ActionCreator<{ id: inputsModel.InputsModelId }>;
-  stopAutoReload: ActionCreator<{ id: inputsModel.InputsModelId }>;
-  setDuration: ActionCreator<{ id: inputsModel.InputsModelId; duration: number }>;
+  startAutoReload: ActionCreator<{ id: InputsModelId }>;
+  stopAutoReload: ActionCreator<{ id: InputsModelId }>;
+  setDuration: ActionCreator<{ id: InputsModelId; duration: number }>;
   updateTimelineRange: ActionCreator<{ id: string; start: number; end: number }>;
 }
 interface OwnProps {
-  id: inputsModel.InputsModelId;
+  id: InputsModelId;
   disabled?: boolean;
   timelineId?: string;
 }

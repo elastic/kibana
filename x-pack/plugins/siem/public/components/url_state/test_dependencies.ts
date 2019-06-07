@@ -6,9 +6,9 @@
 
 import { ActionCreator } from 'typescript-fsa';
 import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
-import { LocationTypesNoNull, UrlStateContainerPropTypes } from './types';
+import { UrlStateContainerPropTypes, LocationTypesNoNull } from './types';
 import { CONSTANTS } from './constants';
-import { InputsModelId } from '../../store/inputs/model';
+import { InputsModelId } from '../../store/inputs/constants';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
