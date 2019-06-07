@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { services as commonServiceProviders } from '../common/services';
+import { services as commonServiceProviders } from '../../common/services';
 
 import { AppsMenuProvider } from './apps_menu';
 import { BrowserProvider } from './browser';

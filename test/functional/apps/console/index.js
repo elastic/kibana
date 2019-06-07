@@ -29,5 +29,4 @@ export default function ({ getService, loadTestFile }) {
 
     loadTestFile(require.resolve('./_console'));
   });
-
 }
