@@ -17,21 +17,7 @@
  * under the License.
  */
 
-import { has } from 'lodash';
-import { Query } from 'plugins/data';
+import { Storage } from './storage';
 
-/**
- * Creates a standardized query object from old queries that were either strings or pure ES query DSL
- *
- * @param query - a legacy query, what used to be stored in SearchSource's query property
- * @return Object
- */
-
-export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
-  // Lucene was the only option before, so language-less queries are all lucene
-  if (!has(query, 'language')) {
-    return { query, language: 'lucene' };
-  }
-
-  return query as Query;
-}
+export const localStorage = new Storage(window.localStorage);
+export const sessionStorage = new Storage(window.sessionStorage);
