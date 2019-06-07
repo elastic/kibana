@@ -26,11 +26,11 @@ export type APICaller = (endpoint: string, clientParams: Record<string, unknown>
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type AuthenticationHandler<T> = (request: Request, sessionStorage: SessionStorage<T>, t: AuthToolkit) => Promise<AuthResult>;
+export type AuthenticationHandler<T> = (request: Readonly<Request>, sessionStorage: SessionStorage<T>, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
 
 // @public
 export interface AuthToolkit {
-    authenticated: (credentials: any) => AuthResult;
+    authenticated: (state: object) => AuthResult;
     redirected: (url: string) => AuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
@@ -84,8 +84,9 @@ export interface CoreSetup {
     };
     // (undocumented)
     http: {
+        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
         registerAuth: HttpServiceSetup['registerAuth'];
-        registerOnRequest: HttpServiceSetup['registerOnRequest'];
+        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         getBasePathFor: HttpServiceSetup['getBasePathFor'];
         setBasePathFor: HttpServiceSetup['setBasePathFor'];
         createNewServer: HttpServiceSetup['createNewServer'];
@@ -183,6 +184,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     readonly query: Query;
     // (undocumented)
     unstable_getIncomingMessage(): import("http").IncomingMessage;
+    // (undocumented)
+    readonly url: Url;
     }
 
 // @public
@@ -254,19 +257,34 @@ export interface LogRecord {
     timestamp: Date;
 }
 
-// Warning: (ae-forgotten-export) The symbol "OnRequestResult" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type OnRequestHandler<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: OnRequestToolkit) => OnRequestResult | Promise<OnRequestResult>;
+export type OnPostAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPostAuthToolkit) => OnPostAuthResult | Promise<OnPostAuthResult>;
 
 // @public
-export interface OnRequestToolkit {
-    next: () => OnRequestResult;
-    redirected: (url: string) => OnRequestResult;
+export interface OnPostAuthToolkit {
+    next: () => OnPostAuthResult;
+    redirected: (url: string) => OnPostAuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
-    }) => OnRequestResult;
-    setUrl: (newUrl: string | Url) => void;
+    }) => OnPostAuthResult;
+}
+
+// Warning: (ae-forgotten-export) The symbol "OnPreAuthResult" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type OnPreAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPreAuthToolkit) => OnPreAuthResult | Promise<OnPreAuthResult>;
+
+// @public
+export interface OnPreAuthToolkit {
+    next: () => OnPreAuthResult;
+    redirected: (url: string, options?: {
+        forward: boolean;
+    }) => OnPreAuthResult;
+    rejected: (error: Error, options?: {
+        statusCode?: number;
+    }) => OnPreAuthResult;
 }
 
 // @public

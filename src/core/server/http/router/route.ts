@@ -35,6 +35,15 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
    * To opt out of validating the request, specify `false`.
    */
   validate: RouteValidateFactory<P, Q, B> | false;
+
+  /**
+   * A flag shows that authentication for a route:
+   * enabled  when true
+   * disabled when false
+   *
+   * Enabled by default.
+   */
+  authRequired?: boolean;
 }
 
 export type RouteValidateFactory<
