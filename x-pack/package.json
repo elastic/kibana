@@ -189,7 +189,7 @@
     "angular-resource": "1.4.9",
     "angular-sanitize": "1.6.5",
     "angular-ui-ace": "0.2.3",
-    "apollo-cache-inmemory": "1.6.0",
+    "apollo-cache-inmemory": "1.6.2",
     "apollo-client": "^2.3.8",
     "apollo-link": "^1.2.3",
     "apollo-link-error": "^1.1.7",
