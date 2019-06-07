@@ -18,13 +18,10 @@ import {
   PinnedEventSavedObjectRuntimeType,
   SavedPinnedEvent,
 } from './types';
-import { pinnedEventSavedObjectType } from '.';
 import { PageInfoNote, SortNote } from '../../graphql/types';
-import {
-  convertSavedObjectToSavedTimeline,
-  timelineSavedObjectType,
-  pickSavedTimeline,
-} from '../timeline';
+import { pinnedEventSavedObjectType, timelineSavedObjectType } from '../../saved_objects';
+import { pickSavedTimeline } from '../timeline/pick_saved_timeline';
+import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_object_to_savedtimeline';
 
 export class PinnedEvent {
   constructor(

@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { SavedObject, SavedObjectsClient } from '../service';
+import { SavedObject, SavedObjectsClientContract } from '../';
 import { ImportError } from './types';
 
 const REF_TYPES_TO_VLIDATE = ['index-pattern', 'search'];
@@ -29,7 +29,7 @@ function filterReferencesToValidate({ type }: { type: string }) {
 
 export async function getNonExistingReferenceAsKeys(
   savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClient
+  savedObjectsClient: SavedObjectsClientContract
 ) {
   const collector = new Map();
   // Collect all references within objects
@@ -77,7 +77,7 @@ export async function getNonExistingReferenceAsKeys(
 
 export async function validateReferences(
   savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClient
+  savedObjectsClient: SavedObjectsClientContract
 ) {
   const errorMap: { [key: string]: ImportError } = {};
   const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(

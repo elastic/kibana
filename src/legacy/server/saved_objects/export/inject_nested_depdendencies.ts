@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { SavedObject, SavedObjectsClient } from '../service/saved_objects_client';
+import { SavedObject, SavedObjectsClientContract } from '../service/saved_objects_client';
 
 export function getObjectReferencesToFetch(savedObjectsMap: Map<string, SavedObject>) {
   const objectsToFetch = new Map<string, { type: string; id: string }>();
@@ -34,7 +34,7 @@ export function getObjectReferencesToFetch(savedObjectsMap: Map<string, SavedObj
 
 export async function injectNestedDependencies(
   savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClient
+  savedObjectsClient: SavedObjectsClientContract
 ) {
   const savedObjectsMap = new Map<string, SavedObject>();
   for (const savedObject of savedObjects) {
