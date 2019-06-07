@@ -24,4 +24,4 @@ function telemetryStart($injector) {
   }
 }
 
-uiModules.get('xpack_main/hacks').run(telemetryStart);
+uiModules.get('telemetry/hacks').run(telemetryStart);

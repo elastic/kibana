@@ -17,34 +17,22 @@
  * under the License.
  */
 
-import { CidrMask } from '../../utils/cidr_mask';
-import { uiModules } from '../../modules';
+export default async function ({ readConfigFile }) {
+  const defaultConfig = await readConfigFile(require.resolve('./config'));
 
-uiModules.get('kibana').directive('validateCidrMask', function () {
   return {
-    restrict: 'A',
-    require: 'ngModel',
-    scope: {
-      'ngModel': '='
+    ...defaultConfig.getAll(),
+
+    browser: {
+      type: 'firefox',
     },
-    link: function ($scope, elem, attr, ngModel) {
-      ngModel.$parsers.unshift(validateCidrMask);
-      ngModel.$formatters.unshift(validateCidrMask);
 
-      function validateCidrMask(mask) {
-        if (mask == null || mask === '') {
-          ngModel.$setValidity('cidrMaskInput', true);
-          return null;
-        }
+    suiteTags: {
+      exclude: ['skipFirefox'],
+    },
 
-        try {
-          mask = new CidrMask(mask);
-          ngModel.$setValidity('cidrMaskInput', true);
-          return mask.toString();
-        } catch (e) {
-          ngModel.$setValidity('cidrMaskInput', false);
-        }
-      }
-    }
+    junit: {
+      reportName: 'Firefox UI Functional Tests'
+    },
   };
-});
+}

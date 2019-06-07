@@ -35,6 +35,22 @@ export interface OverviewNetworkHit extends SearchHit {
     unique_socket_count: {
       doc_count: number;
     };
+    unique_filebeat_count: {
+      unique_netflow_count: {
+        doc_count: number;
+      };
+      unique_panw_count: {
+        doc_count: number;
+      };
+      unique_cisco_count: {
+        doc_count: number;
+      };
+    };
+    unique_packetbeat_count: {
+      unique_tls_count: {
+        doc_count: number;
+      };
+    };
   };
 }
 
@@ -59,6 +75,12 @@ export interface OverviewHostHit extends SearchHit {
       user_count: {
         doc_count: number;
       };
+      filebeat_count: {
+        doc_count: number;
+      };
+    };
+    winlog_count: {
+      doc_count: number;
     };
   };
 }

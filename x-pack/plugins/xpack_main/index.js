@@ -20,9 +20,11 @@ import {
 } from './server/routes/api/v1';
 import { i18n } from '@kbn/i18n';
 
-export { callClusterFactory } from './server/lib/call_cluster_factory';
 import { registerOssFeatures } from './server/lib/register_oss_features';
+import { uiCapabilitiesForFeatures } from './server/lib/ui_capabilities_for_features';
 
+
+export { callClusterFactory } from './server/lib/call_cluster_factory';
 export const xpackMain = (kibana) => {
   return new kibana.Plugin({
     id: 'xpack_main',

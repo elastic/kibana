@@ -13,6 +13,7 @@ import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { i18n } from '@kbn/i18n';
+import { REPORT_INTERVAL_MS } from './common/constants';
 import { createLocalizationUsageCollector, createTelemetryUsageCollector} from './server/collectors';
 
 function isTelemetryEnabled(config: KibanaConfig) {
@@ -28,7 +29,8 @@ export const telemetry = (kibana: any) => {
     id: 'telemetry',
     configPrefix: 'xpack.telemetry',
     publicDir: resolve(__dirname, 'public'),
-    require: ['elasticsearch'],
+    // require: ['elasticsearch'],
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
 
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
@@ -79,13 +81,16 @@ export const telemetry = (kibana: any) => {
       const initializerContext = {} as PluginInitializerContext;
       const coreSetup = {
         http: { server },
-      } as CoreSetup;
+      } as any as CoreSetup;
 
       plugin(initializerContext).setup(coreSetup);
 
       // register collectors
       server.usage.collectorSet.register(createLocalizationUsageCollector(server));
       server.usage.collectorSet.register(createTelemetryUsageCollector(server));
+
+      // expose
+      server.expose('telemetryCollectionInterval', REPORT_INTERVAL_MS);
     }
   });
 };

@@ -42,26 +42,14 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   >
                     <svg
                       aria-hidden="true"
-                      className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
                       focusable="false"
-                      height="16"
+                      height={16}
                       style={null}
                       viewBox="0 0 16 16"
-                      width="16"
+                      width={16}
                       xmlns="http://www.w3.org/2000/svg"
-                      xmlnsXlink="http://www.w3.org/1999/xlink"
-                    >
-                      <defs>
-                        <path
-                          d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
-                          id="arrow_down-a"
-                        />
-                      </defs>
-                      <use
-                        fillRule="nonzero"
-                        xlinkHref="#arrow_down-a"
-                      />
-                    </svg>
+                    />
                     <span
                       className="euiButtonEmpty__text"
                     >
@@ -190,18 +178,14 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                 </span>
                 <svg
                   aria-label="Sorted in descending order"
-                  className="euiIcon euiIcon--medium euiTableSortIcon"
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
                   focusable="false"
-                  height="16"
+                  height={16}
                   style={null}
                   viewBox="0 0 16 16"
-                  width="16"
+                  width={16}
                   xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7 11.692V3.556C7 3.249 7.224 3 7.5 3s.5.249.5.556v8.136l4.096-4.096a.5.5 0 0 1 .707.707l-4.242 4.243a1.494 1.494 0 0 1-.925.433.454.454 0 0 1-.272 0 1.494 1.494 0 0 1-.925-.433L2.197 8.303a.5.5 0 1 1 .707-.707L7 11.692z"
-                  />
-                </svg>
+                />
                 <span
                   className="euiScreenReaderOnly"
                 >
@@ -266,26 +250,14 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
                   focusable="false"
-                  height="16"
+                  height={16}
                   style={null}
                   viewBox="0 0 16 16"
-                  width="16"
+                  width={16}
                   xmlns="http://www.w3.org/2000/svg"
-                  xmlnsXlink="http://www.w3.org/1999/xlink"
-                >
-                  <defs>
-                    <path
-                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
-                      id="arrow_down-a"
-                    />
-                  </defs>
-                  <use
-                    fillRule="nonzero"
-                    xlinkHref="#arrow_down-a"
-                  />
-                </svg>
+                />
                 <span
                   className="euiButtonEmpty__text"
                 >
@@ -374,26 +346,14 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     <svg
                       aria-hidden="true"
-                      className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
                       focusable="false"
-                      height="16"
+                      height={16}
                       style={null}
                       viewBox="0 0 16 16"
-                      width="16"
+                      width={16}
                       xmlns="http://www.w3.org/2000/svg"
-                      xmlnsXlink="http://www.w3.org/1999/xlink"
-                    >
-                      <defs>
-                        <path
-                          d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
-                          id="arrow_down-a"
-                        />
-                      </defs>
-                      <use
-                        fillRule="nonzero"
-                        xlinkHref="#arrow_down-a"
-                      />
-                    </svg>
+                    />
                     <span
                       className="euiButtonEmpty__text"
                     >
@@ -522,18 +482,14 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 </span>
                 <svg
                   aria-label="Sorted in descending order"
-                  className="euiIcon euiIcon--medium euiTableSortIcon"
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
                   focusable="false"
-                  height="16"
+                  height={16}
                   style={null}
                   viewBox="0 0 16 16"
-                  width="16"
+                  width={16}
                   xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7 11.692V3.556C7 3.249 7.224 3 7.5 3s.5.249.5.556v8.136l4.096-4.096a.5.5 0 0 1 .707.707l-4.242 4.243a1.494 1.494 0 0 1-.925.433.454.454 0 0 1-.272 0 1.494 1.494 0 0 1-.925-.433L2.197 8.303a.5.5 0 1 1 .707-.707L7 11.692z"
-                  />
-                </svg>
+                />
                 <span
                   className="euiScreenReaderOnly"
                 >
@@ -1008,26 +964,14 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
                   focusable="false"
-                  height="16"
+                  height={16}
                   style={null}
                   viewBox="0 0 16 16"
-                  width="16"
+                  width={16}
                   xmlns="http://www.w3.org/2000/svg"
-                  xmlnsXlink="http://www.w3.org/1999/xlink"
-                >
-                  <defs>
-                    <path
-                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
-                      id="arrow_down-a"
-                    />
-                  </defs>
-                  <use
-                    fillRule="nonzero"
-                    xlinkHref="#arrow_down-a"
-                  />
-                </svg>
+                />
                 <span
                   className="euiButtonEmpty__text"
                 >

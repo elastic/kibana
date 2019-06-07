@@ -5,7 +5,9 @@
  */
 
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
+
+import { RedirectWrapper } from './redirect_wrapper';
 
 export type NetworkComponentProps = RouteComponentProps<{
   ip: string;
@@ -15,6 +17,6 @@ export const RedirectToNetworkPage = ({
   match: {
     params: { ip },
   },
-}: NetworkComponentProps) => <Redirect to={ip ? `/network/ip/${ip}` : '/network'} />;
+}: NetworkComponentProps) => <RedirectWrapper to={ip ? `/network/ip/${ip}` : '/network'} />;
 
 export const getNetworkUrl = () => '#/link-to/network';

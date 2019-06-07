@@ -17,12 +17,22 @@
  * under the License.
  */
 
-export let metadata = null;
+import * as React from 'react';
+import { KibanaReactContextValue, Core } from './types';
 
-export function __newPlatformSetup__(legacyMetadata) {
-  if (metadata === null) {
-    metadata = legacyMetadata;
-  } else {
-    throw new Error('ui/metadata can only be initialized once');
-  }
-}
+export const context = React.createContext<KibanaReactContextValue>({
+  core: {},
+});
+
+export const createContext = (core: Core, plugins?: any) => {
+  const value: KibanaReactContextValue = { core };
+  const Provider: React.FC = ({ children }) =>
+    React.createElement(context.Provider, { value, children });
+
+  return {
+    Provider,
+    Consumer: context.Consumer,
+  };
+};
+
+export const useKibana = (): KibanaReactContextValue => React.useContext(context);
