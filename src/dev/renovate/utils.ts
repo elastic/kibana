@@ -20,12 +20,8 @@
 export const maybeMap = <T, T2>(input: T[] | undefined, fn: (i: T) => T2) =>
   input ? input.map(fn) : undefined;
 
-export const maybeFlatMap = <T, T2>(input: T[] | undefined, fn: (i: T) => T2[]) => {
-  const array2d = maybeMap(input, fn);
-  if (array2d) {
-    return array2d.reduce((acc, arr) => [...acc, ...arr], [] as T2[]);
-  }
-};
+export const maybeFlatMap = <T, T2>(input: T[] | undefined, fn: (i: T) => T2[]) =>
+  input ? input.reduce((acc, i) => [...acc, ...fn(i)], [] as T2[]) : undefined;
 
 export const wordRegExp = (word: string) => new RegExp(`(\\b|_)${word}(\\b|_)`);
 
