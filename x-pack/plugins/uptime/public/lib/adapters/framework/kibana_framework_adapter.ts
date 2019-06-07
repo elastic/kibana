@@ -70,6 +70,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           } = persistedState;
           ReactDOM.render(
             renderComponent({
+              basePath,
               darkMode,
               isUsingK7Design: $scope.k7design,
               updateBreadcrumbs: chrome.breadcrumbs.set,
