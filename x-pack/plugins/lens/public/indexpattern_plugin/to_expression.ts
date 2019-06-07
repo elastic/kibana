@@ -13,8 +13,10 @@ export function toExpression(state: IndexPatternPrivateState) {
     return null;
   }
 
-  const fieldNames = state.columnOrder.map(col => state.columns[col].sourceField);
   const sortedColumns = state.columnOrder.map(col => state.columns[col]);
+  const fieldNames = sortedColumns.map(column =>
+    'sourceField' in column ? column.sourceField : undefined
+  );
 
   const indexName = state.indexPatterns[state.currentIndexPatternId].title;
 
@@ -39,7 +41,7 @@ export function toExpression(state: IndexPatternPrivateState) {
               to: 'now',
             },
             useNormalizedEsInterval: true,
-            interval: '1h',
+            interval: col.params.interval,
             drop_partials: false,
             min_doc_count: 1,
             extended_bounds: {},

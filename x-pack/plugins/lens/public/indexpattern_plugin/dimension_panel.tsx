@@ -16,7 +16,13 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { DatasourceDimensionPanelProps } from '../types';
-import { IndexPatternColumn, IndexPatternPrivateState, columnToOperation } from './indexpattern';
+import {
+  IndexPatternColumn,
+  IndexPatternPrivateState,
+  columnToOperation,
+  FieldBasedIndexPatternColumn,
+} from './indexpattern';
+import { getParamEditors } from './params';
 
 import {
   getOperationDisplay,
@@ -44,13 +50,23 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
 
   const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
 
-  const uniqueColumnsByField = _.uniq(filteredColumns, col => col.sourceField);
+  const fieldColumns = filteredColumns.filter(
+    col => 'sourceField' in col
+  ) as FieldBasedIndexPatternColumn[];
+
+  const uniqueColumnsByField = _.uniq(fieldColumns, col => col.sourceField);
 
   const functionsFromField = selectedColumn
     ? filteredColumns.filter(col => {
-        return col.sourceField === selectedColumn.sourceField;
+        return (
+          !('sourceField' in selectedColumn) ||
+          !('sourceField' in col) ||
+          col.sourceField === selectedColumn.sourceField
+        );
       })
     : filteredColumns;
+
+  const ParamEditor = selectedColumn && getParamEditors()[selectedColumn.operationType];
 
   return (
     <EuiFlexGroup>
@@ -85,42 +101,53 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
         >
           <EuiFlexGroup wrap={true}>
             <EuiFlexItem grow={2}>
-              <EuiComboBox
-                data-test-subj="indexPattern-dimension-field"
-                placeholder="Field"
-                options={uniqueColumnsByField.map(col => ({
-                  label: col.sourceField,
-                  value: col.operationId,
-                }))}
-                selectedOptions={
-                  selectedColumn
-                    ? [
-                        {
-                          label: selectedColumn.sourceField,
-                          value: selectedColumn.operationId,
-                        },
-                      ]
-                    : []
-                }
-                singleSelection={{ asPlainText: true }}
-                isClearable={false}
-                onChange={choices => {
-                  const column: IndexPatternColumn = columns.find(
-                    ({ operationId }) => operationId === choices[0].value
-                  )!;
-                  const newColumns: IndexPatternPrivateState['columns'] = {
-                    ...props.state.columns,
-                    [props.columnId]: column,
-                  };
+              {(!selectedColumn || 'sourceField' in selectedColumn) && (
+                <EuiComboBox
+                  data-test-subj="indexPattern-dimension-field"
+                  placeholder="Field"
+                  options={uniqueColumnsByField.map(col => ({
+                    label: col.sourceField,
+                    value: col.operationId,
+                  }))}
+                  selectedOptions={
+                    selectedColumn && 'sourceField' in selectedColumn
+                      ? [
+                          {
+                            label: selectedColumn.sourceField,
+                            value: selectedColumn.operationId,
+                          },
+                        ]
+                      : []
+                  }
+                  singleSelection={{ asPlainText: true }}
+                  isClearable={false}
+                  onChange={choices => {
+                    const column: IndexPatternColumn = columns.find(
+                      ({ operationId }) => operationId === choices[0].value
+                    )!;
+                    const newColumns: IndexPatternPrivateState['columns'] = {
+                      ...props.state.columns,
+                      [props.columnId]: column,
+                    };
 
-                  props.setState({
-                    ...props.state,
-                    columns: newColumns,
-                    columnOrder: getColumnOrder(newColumns),
-                  });
-                }}
-              />
+                    props.setState({
+                      ...props.state,
+                      columns: newColumns,
+                      columnOrder: getColumnOrder(newColumns),
+                    });
+                  }}
+                />
+              )}
             </EuiFlexItem>
+            {ParamEditor && (
+              <EuiFlexItem grow={2}>
+                <ParamEditor
+                  state={props.state}
+                  setState={props.setState}
+                  columnId={props.columnId}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={true}>
               <div>
                 {operations.map(o => (
@@ -132,13 +159,12 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
                     }
                     isDisabled={!functionsFromField.some(col => col.operationType === o)}
                     onClick={() => {
-                      if (!selectedColumn) {
-                        return;
-                      }
-
                       const newColumn: IndexPatternColumn = filteredColumns.find(
                         col =>
-                          col.operationType === o && col.sourceField === selectedColumn.sourceField
+                          col.operationType === o &&
+                          (!('sourceField' in col) ||
+                            !('sourceField' in selectedColumn) ||
+                            col.sourceField === selectedColumn.sourceField)
                       )!;
 
                       const newColumns = {

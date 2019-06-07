@@ -31,7 +31,18 @@ export type OperationType =
   | 'max'
   | 'count';
 
-export interface IndexPatternColumn {
+export type IndexPatternColumn =
+  | DateHistogramIndexPatternColumn
+  | TermsIndexPatternColumn
+  | ValueIndexPatternColumn
+  | SumIndexPatternColumn
+  | AvgIndexPatternColumn
+  | MinIndexPatternColumn
+  | MaxIndexPatternColumn
+  | SumIndexPatternColumn
+  | CountIndexPatternColumn;
+
+export interface BaseIndexPatternColumn {
   // Public
   operationId: string;
   label: string;
@@ -40,9 +51,43 @@ export interface IndexPatternColumn {
 
   // Private
   operationType: OperationType;
-  sourceField: string;
   suggestedOrder?: DimensionPriority;
 }
+
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
+type ParameterlessIndexPatternColumn<
+  TOperationType extends OperationType,
+  TBase extends BaseIndexPatternColumn = FieldBasedIndexPatternColumn
+> = Omit<TBase, 'operationType'> & { operationType: TOperationType };
+
+export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
+  sourceField: string;
+}
+
+export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
+  operationType: 'date_histogram';
+  params: {
+    interval: string;
+  };
+}
+
+export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
+  operationType: 'terms';
+  params: {
+    size: number;
+    orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+  };
+}
+
+export type ValueIndexPatternColumn = ParameterlessIndexPatternColumn<'value'>;
+export type CountIndexPatternColumn = ParameterlessIndexPatternColumn<
+  'count',
+  BaseIndexPatternColumn
+>;
+export type SumIndexPatternColumn = ParameterlessIndexPatternColumn<'sum'>;
+export type AvgIndexPatternColumn = ParameterlessIndexPatternColumn<'avg'>;
+export type MinIndexPatternColumn = ParameterlessIndexPatternColumn<'min'>;
+export type MaxIndexPatternColumn = ParameterlessIndexPatternColumn<'max'>;
 
 export interface IndexPattern {
   id: string;

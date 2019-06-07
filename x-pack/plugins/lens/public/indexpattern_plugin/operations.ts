@@ -141,10 +141,10 @@ export function getOperationTypesForField({
   return [];
 }
 
-export function getOperationResultType({ type }: IndexPatternField, op: OperationType): DataType {
+export function getOperationResultType(op: OperationType, field?: IndexPatternField): DataType {
   switch (op) {
     case 'value':
-      return type as DataType;
+      return field!.type as DataType;
     case 'avg':
     case 'min':
     case 'max':
@@ -158,28 +158,104 @@ export function getOperationResultType({ type }: IndexPatternField, op: Operatio
   }
 }
 
+function buildColumnForOperationType(
+  op: OperationType,
+  operationId: string,
+  suggestedOrder?: DimensionPriority,
+  field?: IndexPatternField
+): IndexPatternColumn {
+  const operationPanels = getOperationDisplay();
+  const baseColumn = {
+    operationId,
+    label: operationPanels[op].ofName(field ? field.name : ''),
+    dataType: getOperationResultType(op, field),
+    operationType: op,
+    suggestedOrder,
+  };
+
+  const fieldColumn = {
+    sourceField: field ? field.name : '',
+  };
+
+  switch (op) {
+    case 'avg':
+      return {
+        ...baseColumn,
+        ...fieldColumn,
+        isBucketed: false,
+        operationType: op,
+      };
+    case 'min':
+      return {
+        ...baseColumn,
+        ...fieldColumn,
+        isBucketed: false,
+        operationType: op,
+      };
+    case 'max':
+      return {
+        ...baseColumn,
+        ...fieldColumn,
+        isBucketed: false,
+        operationType: op,
+      };
+    case 'sum':
+      return {
+        ...baseColumn,
+        ...fieldColumn,
+        isBucketed: false,
+        operationType: op,
+      };
+    case 'count':
+      return {
+        ...baseColumn,
+        isBucketed: false,
+        operationType: op,
+      };
+    case 'value':
+      return {
+        ...baseColumn,
+        ...fieldColumn,
+        isBucketed: false,
+        operationType: op,
+      };
+    case 'date_histogram':
+      return {
+        ...baseColumn,
+        ...fieldColumn,
+        isBucketed: true,
+        operationType: op,
+        params: {
+          interval: '1h',
+        },
+      };
+    case 'terms':
+      return {
+        ...baseColumn,
+        ...fieldColumn,
+        isBucketed: true,
+        operationType: op,
+        params: {
+          size: 5,
+          orderBy: { type: 'alphabetical' },
+        },
+      };
+  }
+}
+
 export function getPotentialColumns(
   state: IndexPatternPrivateState,
   suggestedOrder?: DimensionPriority
 ): IndexPatternColumn[] {
   const fields = state.indexPatterns[state.currentIndexPatternId].fields;
 
-  const operationPanels = getOperationDisplay();
-
   const columns: IndexPatternColumn[] = fields
     .map((field, index) => {
       const validOperations = getOperationTypesForField(field);
 
-      return validOperations.map(op => ({
-        operationId: `${index}${op}`,
-        label: operationPanels[op].ofName(field.name),
-        dataType: getOperationResultType(field, op),
-        isBucketed: op === 'terms' || op === 'date_histogram',
-
-        operationType: op,
-        sourceField: field.name,
-        suggestedOrder,
-      }));
+      return validOperations.map(op =>
+        buildColumnForOperationType(op, `${op}${index}`, suggestedOrder, field)
+      );
     })
     .reduce((prev, current) => prev.concat(current));
 
@@ -192,13 +268,15 @@ export function getPotentialColumns(
     isBucketed: false,
 
     operationType: 'count',
-    sourceField: 'documents',
     suggestedOrder,
   });
 
-  columns.sort(({ sourceField }, { sourceField: sourceField2 }) =>
-    sourceField.localeCompare(sourceField2)
-  );
+  columns.sort((column1, column2) => {
+    if ('sourceField' in column1 && 'sourceField' in column2) {
+      return column1.sourceField.localeCompare(column2.sourceField);
+    }
+    return column1.operationType.localeCompare(column2.operationType);
+  });
 
   return columns;
 }
