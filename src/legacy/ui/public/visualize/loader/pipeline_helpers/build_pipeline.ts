@@ -202,7 +202,7 @@ export const prepareString = (variable: string, data: string): string => {
   return `${variable}='${escapeString(data)}' `;
 };
 
-export const escapeString = (data: string): string => {
+export const escapeString = (data: string | string): string => {
   return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
 };
 
@@ -226,7 +226,10 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   },
   markdown: visState => {
     const { markdown, fontSize, openLinksInNewTab } = visState.params;
-    const escapedMarkdown = markdown ? escapeString(markdown) : '';
+    let escapedMarkdown = '';
+    if (typeof markdown === 'string' || markdown instanceof String) {
+      escapedMarkdown = escapeString(markdown.toString());
+    }
     let expr = `markdownvis '${escapedMarkdown}' `;
     if (fontSize) {
       expr += ` fontSize=${fontSize} `;
