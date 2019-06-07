@@ -17,7 +17,7 @@
  * under the License.
  */
 
-require('symbol-observable').default;
+require('symbol-observable');
 require('./root');
 require('./node_version_validator');
 require('./babel_register');
