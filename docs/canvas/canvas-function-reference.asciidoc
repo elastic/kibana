@@ -13,7 +13,10 @@ A *** denotes a required argument.
 
 A *†* denotes an argument can be passed multiple times.
 
+<<a_fns,A>> | <<b_fns,B>> | <<c_fns,C>> | <<d_fns,D>> | <<e_fns,E>> | <<f_fns,F>> | <<g_fns,G>> | <<h_fns,H>> | <<i_fns,I>> | <<j_fns,J>> | <<k_fns,K>> | <<l_fns,L>> | <<m_fns,M>> | <<n_fns,N>> | <<o_fns,O>> | <<p_fns,P>> | <<q_fns,Q>> | <<r_fns,R>> | <<s_fns,S>> | <<t_fns,T>> | <<u_fns,U>> | <<v_fns,V>> | <<w_fns,W>> | <<x_fns,X>> | <<y_fns,Y>> | <<z_fns,Z>>
+
 [float]
+[[a_fns]]
 [[all_fn]]
 === `all`
 
@@ -172,6 +175,7 @@ Default: `"left"`
 
 
 [float]
+[[c_fns]]
 [[case_fn]]
 === `case`
 
@@ -365,6 +369,7 @@ Alias: `data`
 
 
 [float]
+[[d_fns]]
 [[date_fn]]
 === `date`
 
@@ -471,6 +476,7 @@ for the dropdown
 
 
 [float]
+[[e_fns]]
 [[eq_fn]]
 === `eq`
 
@@ -635,6 +641,7 @@ capitalization
 
 
 [float]
+[[f_fns]]
 [[filterrows_fn]]
 === `filterrows`
 
@@ -733,6 +740,7 @@ Default: `left`
 
 
 [float]
+[[f_fns]]
 [[formatdate_fn]]
 === `formatdate`
 
@@ -777,6 +785,7 @@ Alias: `format`
 
 
 [float]
+[[g_fns]]
 [[getCell_fn]]
 === `getCell`
 
@@ -851,6 +860,7 @@ Alias: `value`
 
 
 [float]
+[[h_fns]]
 [[head_fn]]
 === `head`
 
@@ -875,6 +885,7 @@ Default: `1`
 
 
 [float]
+[[i_fns]]
 [[if_fn]]
 === `if`
 
@@ -957,6 +968,7 @@ quite slow, but fairly accurate.
 
 
 [float]
+[[l_fns]]
 [[lt_fn]]
 === `lt`
 
@@ -1001,6 +1013,7 @@ Alias: `value`
 
 
 [float]
+[[m_fns]]
 [[mapColumn_fn]]
 === `mapColumn`
 
@@ -1118,6 +1131,7 @@ Default: `{<<font_fn>> size=14 family="'Open Sans', Helvetica, Arial, sans-serif
 
 
 [float]
+[[n_fns]]
 [[neq_fn]]
 === `neq`
 
@@ -1140,6 +1154,7 @@ Alias: `value`
 
 
 [float]
+[[p_fns]]
 [[palette_fn]]
 === `palette`
 
@@ -1442,6 +1457,7 @@ Default: `20`
 
 
 [float]
+[[r_fns]]
 [[render_fn]]
 === `render`
 
@@ -1637,6 +1653,7 @@ values, or combinations of unique column values.
 *Returns:* `number`
 
 [float]
+[[s_fns]]
 [[seriesStyle_fn]]
 === `seriesStyle`
 
@@ -1849,6 +1866,7 @@ Alias: `finally`
 
 
 [float]
+[[t_fns]]
 [[table_fn]]
 === `table`
 
@@ -2053,6 +2071,7 @@ Alias: `type`
 
 
 [float]
+[[u_fns]]
 [[urlparam_fn]]
 === `urlparam`
 
