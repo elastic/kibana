@@ -78,14 +78,18 @@ export const getColumns = ({
     truncateText: false,
     render: (field: string, data: DetailItem) => (
       <DroppableWrapper
-        droppableId={getDroppableId(`event-details-${data.category}-${field}-${timelineId}`)}
+        droppableId={getDroppableId(
+          `event-details-${eventId}-${data.category}-${field}-${timelineId}`
+        )}
         key={`${data.category}-${field}-${timelineId}`}
         isDropDisabled={true}
         type={DRAG_TYPE_FIELD}
       >
         <Draggable
           draggableId={getDraggableFieldId({
-            contextId: `field-browser-category-${data.category}-field-${field}-${timelineId}`,
+            contextId: `field-browser-category-${eventId}-${
+              data.category
+            }-field-${field}-${timelineId}`,
             fieldId: field,
           })}
           index={0}
