@@ -27,6 +27,7 @@ import {
   convertIsoToMillis,
 } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
+import { asPairs } from './utils/as_pairs';
 
 /**
  * @typedef {Object} SearchResult
@@ -152,23 +153,6 @@ function fetchContextProvider(indexPatterns, Private) {
       .setParent(false)
       .setField('index', indexPattern)
       .setField('filter', filters);
-  }
-}
-
-/**
- * Generate a sequence of pairs from the iterable that looks like
- * `[[x_0, x_1], [x_1, x_2], [x_2, x_3], ..., [x_(n-1), x_n]]`.
- *
- * @param {Iterable<any>} iterable
- * @returns {IterableIterator<(any[])>}
- */
-function* asPairs(iterable) {
-  let currentPair = [];
-  for (const value of iterable) {
-    currentPair = [...currentPair, value].slice(-2);
-    if (currentPair.length === 2) {
-      yield currentPair;
-    }
   }
 }
 
