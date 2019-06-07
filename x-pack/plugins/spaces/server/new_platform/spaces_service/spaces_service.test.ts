@@ -27,7 +27,7 @@ const createService = async () => {
 
   const httpSetup = httpServiceMock.createSetupContract();
   httpSetup.getBasePathFor = jest.fn().mockImplementation((request: KibanaRequest) => {
-    const spaceId = getSpaceIdFromPath(request.path);
+    const spaceId = getSpaceIdFromPath(request.url.path);
 
     if (spaceId !== DEFAULT_SPACE_ID) {
       return `/s/${spaceId}`;
@@ -55,7 +55,7 @@ describe('SpacesService', () => {
       const spacesServiceSetup = await createService();
 
       const request: KibanaRequest = {
-        path: '/app/kibana',
+        url: { path: '/app/kibana' },
       } as KibanaRequest;
 
       expect(spacesServiceSetup.getSpaceId(request)).toEqual(DEFAULT_SPACE_ID);
@@ -65,7 +65,7 @@ describe('SpacesService', () => {
       const spacesServiceSetup = await createService();
 
       const request: KibanaRequest = {
-        path: '/s/foo/app/kibana',
+        url: { path: '/s/foo/app/kibana' },
       } as KibanaRequest;
 
       expect(spacesServiceSetup.getSpaceId(request)).toEqual('foo');
@@ -77,7 +77,7 @@ describe('SpacesService', () => {
       const spacesServiceSetup = await createService();
 
       const request: KibanaRequest = {
-        path: '/app/kibana',
+        url: { path: '/app/kibana' },
       } as KibanaRequest;
 
       expect(spacesServiceSetup.isInDefaultSpace(request)).toEqual(true);
@@ -87,7 +87,7 @@ describe('SpacesService', () => {
       const spacesServiceSetup = await createService();
 
       const request: KibanaRequest = {
-        path: '/s/foo/app/kibana',
+        url: { path: '/s/foo/app/kibana' },
       } as KibanaRequest;
 
       expect(spacesServiceSetup.isInDefaultSpace(request)).toEqual(false);

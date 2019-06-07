@@ -57,13 +57,13 @@ describe('onRequestInterceptor', () => {
       const router = new Router('/');
 
       router.get({ path: '/foo', validate: false }, (req: KibanaRequest, h: any) => {
-        return h.ok({ path: req.path, basePath: http.getBasePathFor(req) });
+        return h.ok({ path: req.url.pathname, basePath: http.getBasePathFor(req) });
       });
 
       router.get(
         { path: '/some/path/s/foo/bar', validate: false },
         (req: KibanaRequest, h: any) => {
-          return h.ok({ path: req.path, basePath: http.getBasePathFor(req) });
+          return h.ok({ path: req.url.pathname, basePath: http.getBasePathFor(req) });
         }
       );
 
@@ -81,7 +81,11 @@ describe('onRequestInterceptor', () => {
           },
         },
         (req: KibanaRequest, h: any) => {
-          return h.ok({ path: req.path, basePath: http.getBasePathFor(req), query: req.query });
+          return h.ok({
+            path: req.url.pathname,
+            basePath: http.getBasePathFor(req),
+            query: req.query,
+          });
         }
       );
 
@@ -128,7 +132,10 @@ describe('onRequestInterceptor', () => {
 
       const path = '/s/foo-space/foo';
 
-      await kbnTestServer.request.get(root, path).expect(200, {
+      const resp = await kbnTestServer.request.get(root, path);
+
+      expect(resp.status).toEqual(200);
+      expect(resp.body).toEqual({
         path: '/foo',
         basePath: '/s/foo-space',
       });

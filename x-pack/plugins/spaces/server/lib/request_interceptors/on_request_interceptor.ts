@@ -21,7 +21,7 @@ export function initSpacesOnRequestInterceptor({ config, http }: OnRequestInterc
     request: KibanaRequest,
     toolkit: OnPreAuthToolkit
   ) {
-    const path = request.path;
+    const path = request.url.pathname;
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,
     // and rewrite the request to not include the space identifier in the URL.
@@ -32,7 +32,7 @@ export function initSpacesOnRequestInterceptor({ config, http }: OnRequestInterc
 
       http.setBasePathFor(request, reqBasePath);
 
-      const newLocation = path.substr(reqBasePath.length) || '/';
+      const newLocation = (path && path.substr(reqBasePath.length)) || '/';
 
       const newUrl = modifyUrl(format(request.url), parts => {
         return {
