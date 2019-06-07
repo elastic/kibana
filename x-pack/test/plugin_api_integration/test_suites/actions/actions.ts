@@ -109,7 +109,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       });
     });
 
-    it('should retry failures', async () => {
+    it.skip('should retry failures', async () => {
       await supertest
         .post('/api/action/08cca6da-60ed-49ca-85f6-641240300a3f/fire')
         .set('kbn-xsrf', 'foo')
