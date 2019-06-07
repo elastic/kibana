@@ -30,3 +30,4 @@ export { BasePathProxyServer } from './base_path_proxy_server';
 export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 export { AuthenticationHandler, AuthToolkit } from './lifecycle/auth';
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
+export { SessionStorageFactory, SessionStorage } from './session_storage';
