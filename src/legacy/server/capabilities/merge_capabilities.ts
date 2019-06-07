@@ -17,23 +17,8 @@
  * under the License.
  */
 
+import { merge } from 'lodash';
 import { Capabilities } from '../../../core/public';
 
 export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Capabilities =>
-  sources.reduce(
-    (capabilities: Capabilities, source) => {
-      Object.entries(source).forEach(([key, value = {}]) => {
-        capabilities[key] = {
-          ...value,
-          ...capabilities[key],
-        };
-      });
-
-      return capabilities;
-    },
-    {
-      navLinks: {},
-      management: {},
-      catalogue: {},
-    } as Capabilities
-  );
+  merge({}, ...sources);
