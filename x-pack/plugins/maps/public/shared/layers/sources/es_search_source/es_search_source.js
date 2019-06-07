@@ -175,7 +175,8 @@ export class ESSearchSource extends AbstractESSource {
     const allHits = [];
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
     entityBuckets.forEach(entityBucket => {
-      const { total, hits } = _.get(entityBucket, 'entityHits.hits', {});
+      const total = _.get(entityBucket, 'entityHits.hits.total', 0);
+      const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
       // Reverse hits list so they are drawn from oldest to newest (per entity) so newest events are on top
       allHits.push(...hits.reverse());
       if (total > hits.length) {
@@ -213,7 +214,7 @@ export class ESSearchSource extends AbstractESSource {
 
   _isTopHits() {
     const { useTopHits, topHitsSplitField, topHitsTimeField } = this._descriptor;
-    return useTopHits && topHitsSplitField && topHitsTimeField;
+    return !!(useTopHits && topHitsSplitField && topHitsTimeField);
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters) {
@@ -335,6 +336,10 @@ export class ESSearchSource extends AbstractESSource {
   getSourceTooltipContent(sourceDataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
+    if (!featureCollection || !meta) {
+      // no tooltip content needed when there is no feature collection or meta
+      return null;
+    }
 
     if (this._isTopHits()) {
       const entitiesFoundMsg = i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
