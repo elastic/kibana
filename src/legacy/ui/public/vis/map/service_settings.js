@@ -40,7 +40,6 @@ uiModules.get('kibana')
     class ServiceSettings {
 
       constructor() {
-
         this._showZoomMessage = true;
         this._emsClient = new EMSClient({
           language: i18n.getLocale(),

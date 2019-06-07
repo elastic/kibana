@@ -152,7 +152,6 @@ describe('Vislib Split Function Test Suite', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function () {
-
       el = d3.select('body').append('div')
         .attr('class', 'visualization')
         .datum(data);

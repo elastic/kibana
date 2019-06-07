@@ -21,7 +21,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { layoutTypes as layoutType } from '../../../../lib/layout/layout_types';
+import { layoutTypes } from '../../../../lib/layout/layout_types';
 
 describe('Vislib Column Layout Test Suite', function () {
   let columnLayout;
@@ -88,7 +88,7 @@ describe('Vislib Column Layout Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function () {
     el = d3.select('body').append('div').attr('class', 'visualization');
-    columnLayout = layoutType.point_series(el, data);
+    columnLayout = layoutTypes.point_series(el, data);
   }));
 
   afterEach(function () {
@@ -101,6 +101,6 @@ describe('Vislib Column Layout Test Suite', function () {
   });
 
   it('should throw an error when the wrong number or no arguments provided', function () {
-    expect(function () { layoutType.point_series(el); }).to.throwError();
+    expect(function () { layoutTypes.point_series(el); }).to.throwError();
   });
 });
