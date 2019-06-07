@@ -140,8 +140,8 @@ for (const dep of [...Object.keys(pkg.dependencies), ...Object.keys(pkg.devDepen
     typesFor = `@${org}/${name}`;
   }
 
-  // determine if one of the existing groups has typesFor in its pacakgeNames
-  // or if any of the packageWords is a word in typesFor
+  // determine if one of the existing groups has typesFor in its
+  // packageNames or if any of the packageWords is in typesFor
   const existing = RENOVATE_PACKAGE_GROUPS.some(
     group =>
       (group.packageNames || []).includes(typesFor) ||
