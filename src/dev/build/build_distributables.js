@@ -54,7 +54,6 @@ import {
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
   PathLengthTask,
-  SiemCycleTask,
   WriteShaSumsTask,
 } from './tasks';
 
@@ -70,7 +69,7 @@ export async function buildDistributables(options) {
     createDebPackage,
     createDockerPackage,
     versionQualifier,
-    targetAllPlatforms,
+    targetAllPlatforms
   } = options;
 
   log.verbose('building distributables with options:', {
@@ -139,8 +138,6 @@ export async function buildDistributables(options) {
   await run(CleanNodeBuildsTask);
 
   await run(PathLengthTask);
-
-  await run(SiemCycleTask);
 
   /**
    * package platform-specific builds into archives

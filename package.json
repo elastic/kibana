@@ -403,7 +403,6 @@
     "license-checker": "^16.0.0",
     "listr": "^0.14.1",
     "load-grunt-config": "0.19.2",
-    "madge": "3.4.4",
     "mocha": "3.5.3",
     "multistream": "^2.1.1",
     "murmurhash3js": "3.0.1",
