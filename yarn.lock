@@ -22999,10 +22999,10 @@ regjsparser@^0.6.0:
   dependencies:
     jsesc "~0.5.0"
 
-regression@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/regression/-/regression-2.0.0.tgz#0f23e4012f0a4c2b5ef828b4f4b4e39f72dfb96a"
-  integrity sha1-DyPkAS8KTCte+Ci09LTjn3LfuWo=
+regression@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/regression/-/regression-2.0.1.tgz#8d29c3e8224a10850c35e337e85a8b2fac3b0c87"
+  integrity sha1-jSnD6CJKEIUMNeM36FqLL6w7DIc=
 
 rehype-parse@^6.0.0:
   version "6.0.0"
