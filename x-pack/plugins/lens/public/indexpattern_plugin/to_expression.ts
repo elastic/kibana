@@ -25,7 +25,6 @@ export function toExpression(state: IndexPatternPrivateState) {
       fieldNames[0]
     }, DESC"`;
   } else if (sortedColumns.length) {
-    const firstMetric = sortedColumns.findIndex(({ isBucketed }) => !isBucketed);
     const aggs = sortedColumns.map((col, index) => {
       if (col.operationType === 'date_histogram') {
         return {
