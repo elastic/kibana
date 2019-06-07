@@ -17,7 +17,8 @@
               tooltip-append-to-body="1"
               ng-click="resetQuery()"
             >
-              <span class="kuiIcon fa-undo small"></span> Reload
+              <span class="kuiIcon fa-undo small"></span>
+              {{::'kbn.discover.reloadSavedSearchButton' | i18n: {defaultMessage: 'Reload'} }}
             </button>
           </span>
         </h1>
