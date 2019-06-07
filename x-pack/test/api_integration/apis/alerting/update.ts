@@ -77,5 +77,40 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
           });
         });
     });
+
+    it('should return 400 when attempting to change alert type', async () => {
+      await supertest
+        .put(`/api/alert/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          alertTypeId: '1',
+          alertTypeParams: {
+            foo: true,
+          },
+          interval: 12000,
+          actions: [
+            {
+              group: 'default',
+              id: ES_ARCHIVER_ACTION_ID,
+              params: {
+                message:
+                  'UPDATED: instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+              },
+            },
+          ],
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: '"alertTypeId" is not allowed',
+            validation: {
+              source: 'payload',
+              keys: ['alertTypeId'],
+            },
+          });
+        });
+    });
   });
 }
