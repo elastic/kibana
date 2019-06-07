@@ -10,9 +10,10 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { apolloClientObservable, mockGlobalState } from '../../mock';
-import { createStore, State } from '../../store';
+import { createStore } from '../../store/store';
 
 import { ErrorToast } from '.';
+import { State } from '../../store/reducer';
 
 describe('Error Toast', () => {
   const state: State = mockGlobalState;
