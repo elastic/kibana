@@ -10,10 +10,11 @@ import { createEpicMiddleware } from 'redux-observable';
 import { Observable } from 'rxjs';
 
 import { AppApolloClient } from '../lib/lib';
-import { initialState, reducer, State, createRootEpic } from '.';
 import { appSelectors } from './app';
 import { timelineSelectors } from './timeline';
 import { inputsSelectors } from './inputs';
+import { State, initialState, reducer } from './reducer';
+import { createRootEpic } from './epic';
 
 declare global {
   interface Window {

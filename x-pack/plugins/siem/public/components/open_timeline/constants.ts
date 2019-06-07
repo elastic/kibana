@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './saved_object';
-export * from './saved_object_mappings';
+export const DEFAULT_SORT_FIELD = 'updated';
+export const DEFAULT_SORT_DIRECTION = 'desc';

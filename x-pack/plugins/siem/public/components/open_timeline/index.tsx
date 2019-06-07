@@ -61,9 +61,7 @@ import { AllTimelinesQuery } from '../../containers/timeline/all';
 import { Direction } from '../../graphql/types';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-
-export const DEFAULT_SORT_FIELD = 'updated';
-export const DEFAULT_SORT_DIRECTION = 'desc';
+import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 
 export interface OpenTimelineState {
   /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
