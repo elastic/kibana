@@ -50,7 +50,7 @@ const isLikelyIrrelevant = ({ failure }) => {
 /**
  * Parses junit XML files into JSON
  */
-const mapXml = createMapStream((file) => new Promise((resolve, reject) => {
+export const mapXml = () => createMapStream((file) => new Promise((resolve, reject) => {
   xml2js.parseString(file.contents.toString(), (err, result) => {
     if (err) {
       return reject(err);
@@ -62,7 +62,7 @@ const mapXml = createMapStream((file) => new Promise((resolve, reject) => {
 /**
  * Filters all testsuites to find failed testcases
  */
-const filterFailures = createMapStream((testSuite) => {
+export const filterFailures = () => createMapStream((testSuite) => {
   // Grab the failures. Reporters may report multiple testsuites in a single file.
   const testFiles = testSuite.testsuites
     ? testSuite.testsuites.testsuite
@@ -172,8 +172,8 @@ export async function reportFailedTests() {
 
   vfs
     .src(['./target/junit/**/*.xml'])
-    .pipe(mapXml)
-    .pipe(filterFailures)
+    .pipe(mapXml())
+    .pipe(filterFailures())
     .pipe(updateGithubIssues(githubClient, issues))
     .on('done', () => console.log(`Finished reporting test failures.`));
 }
