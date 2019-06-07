@@ -45,7 +45,9 @@ export function checkSavedObjectsPrivilegesFactory(deps: Deps) {
   ) => {
     const types = normalizeTypes(typeOrTypes);
     const actionsToTypesMap = new Map(
-      types.map(type => [deps.actionsService.savedObject.get(type, action), type])
+      types.map(
+        type => [deps.actionsService.savedObject.get(type, action), type] as [string, string]
+      )
     );
     const actions = Array.from(actionsToTypesMap.keys());
 

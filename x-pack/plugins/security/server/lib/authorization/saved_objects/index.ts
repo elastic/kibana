@@ -9,4 +9,3 @@ export {
   CheckSavedObjectsPrivileges,
   SavedObjectsAction,
 } from './check_saved_objects_privileges';
-export { checkSavedObjectsPrivilegesMock } from './check_saved_objects_privileges.mock';
