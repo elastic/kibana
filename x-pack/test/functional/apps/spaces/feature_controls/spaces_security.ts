@@ -153,7 +153,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await testSubjects.existOrFail('homeApp');
       });
 
-      it(`can navigate to create new space page`, async () => {
+      it(`can't navigate to create new space page`, async () => {
         await PageObjects.common.navigateToActualUrl('kibana', 'management/spaces/create', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
@@ -162,7 +162,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await testSubjects.existOrFail('homeApp');
       });
 
-      it(`can navigate to edit space page`, async () => {
+      it(`can't navigate to edit space page`, async () => {
         await PageObjects.common.navigateToActualUrl('kibana', 'management/spaces/edit/default', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
