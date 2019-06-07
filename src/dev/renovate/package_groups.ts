@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { pkg } from '../../legacy/utils/package_json';
+import { readFileSync } from 'fs';
+
+import globby from 'globby';
+
+import { PACKAGE_GLOBS } from './package_globs';
 import { wordRegExp } from './utils';
+import { REPO_ROOT } from '../constants';
 
 interface PackageGroup {
   /**
@@ -140,10 +145,30 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
   },
 ];
 
+const depNames = new Set<string>();
+for (const glob of PACKAGE_GLOBS) {
+  const files = globby.sync(glob, {
+    cwd: REPO_ROOT,
+    absolute: true,
+  });
+
+  for (const path of files) {
+    const pkg = JSON.parse(readFileSync(path, 'utf8'));
+    const deps = [
+      ...Object.keys(pkg.dependencies || {}),
+      ...Object.keys(pkg.devDependencies || {}),
+    ];
+
+    for (const dep of deps) {
+      depNames.add(dep);
+    }
+  }
+}
+
 /**
  * Auto-define package groups for any `@types/*` deps that are not already in a group
  */
-for (const dep of [...Object.keys(pkg.dependencies), ...Object.keys(pkg.devDependencies)]) {
+for (const dep of depNames) {
   if (!dep.startsWith('@types/')) {
     continue;
   }

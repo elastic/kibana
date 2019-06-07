@@ -17,19 +17,11 @@
  * under the License.
  */
 
-export const maybeMap = <T, T2>(input: T[] | undefined, fn: (i: T) => T2) =>
-  input ? input.map(fn) : undefined;
-
-export const maybeFlatMap = <T, T2>(input: T[] | undefined, fn: (i: T) => T2[]) => {
-  const array2d = maybeMap(input, fn);
-  if (array2d) {
-    return array2d.reduce((acc, arr) => [...acc, ...arr], [] as T2[]);
-  }
-};
-
-export const wordRegExp = (word: string) => new RegExp(`(\\b|_)${word}(\\b|_)`);
-
-export const getTypePackageName = (pkgName: string) => {
-  const match = pkgName.match(/^@(.+?)\/(.+?)$/);
-  return `@types/${match ? `${match[1]}__${match[2]}` : pkgName}`;
-};
+export const PACKAGE_GLOBS = [
+  'package.json',
+  'x-pack/package.json',
+  'x-pack/plugins/*/package.json',
+  'packages/*/package.json',
+  'test/plugin_functional/plugins/*/package.json',
+  'test/interpreter_functional/plugins/*/package.json',
+];

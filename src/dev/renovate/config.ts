@@ -18,21 +18,15 @@
  */
 
 import { RENOVATE_PACKAGE_GROUPS } from './package_groups';
-import { wordRegExp, maybeFlatMap, maybeMap } from './utils';
+import { PACKAGE_GLOBS } from './package_globs';
+import { wordRegExp, maybeFlatMap, maybeMap, getTypePackageName } from './utils';
 
 const DEFAULT_LABELS = ['release_note:skip', 'renovate', 'v8.0.0', 'v7.3.0'];
 
 export const RENOVATE_CONFIG = {
   extends: ['config:base'],
 
-  includePaths: [
-    'package.json',
-    'x-pack/package.json',
-    'x-pack/plugins/*/package.json',
-    'packages/*/package.json',
-    'test/plugin_functional/plugins/*/package.json',
-    'test/interpreter_functional/plugins/*/package.json',
-  ],
+  includePaths: PACKAGE_GLOBS,
 
   /**
    * Only submit PRs to these branches, we will manually backport PRs for now
@@ -88,7 +82,7 @@ export const RENOVATE_CONFIG = {
         groupSlug: group.name,
         groupName: `${group.name} related packages`,
         packagePatterns: maybeMap(group.packageWords, word => wordRegExp(word).source),
-        packageNames: maybeFlatMap(group.packageNames, name => [name, `@types/${name}`]),
+        packageNames: maybeFlatMap(group.packageNames, name => [name, getTypePackageName(name)]),
         labels: group.extraLabels && [...DEFAULT_LABELS, ...group.extraLabels],
         enabled: group.enabled === false ? false : undefined,
       })),
