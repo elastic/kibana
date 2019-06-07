@@ -21,6 +21,7 @@ import d3 from 'd3';
 import { get } from 'lodash';
 import $ from 'jquery';
 import { SimpleEmitter } from '../../utils/simple_emitter';
+import chrome from 'ui/chrome';
 
 /**
  * Handles event responses
@@ -33,6 +34,7 @@ import { SimpleEmitter } from '../../utils/simple_emitter';
 export class Dispatch extends SimpleEmitter {
   constructor(handler) {
     super();
+    this.config = chrome.getUiSettingsClient();
     this.handler = handler;
     this._listeners = {};
   }
@@ -267,7 +269,7 @@ export class Dispatch extends SimpleEmitter {
     const label = this.getAttribute('data-label');
     if (!label) return;
 
-    const dimming = this.handler.config.get('dimmingOpacity');
+    const dimming = this.config.get('visualization:dimmingOpacity');
     $(element).parent().find('[data-label]')
       .css('opacity', 1)//Opacity 1 is needed to avoid the css application
       .not((els, el) => String($(el).data('label')) === label)
