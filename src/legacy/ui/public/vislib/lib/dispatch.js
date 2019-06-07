@@ -21,7 +21,6 @@ import d3 from 'd3';
 import { get } from 'lodash';
 import $ from 'jquery';
 import { SimpleEmitter } from '../../utils/simple_emitter';
-import chrome from 'ui/chrome';
 
 /**
  * Handles event responses
@@ -34,7 +33,6 @@ import chrome from 'ui/chrome';
 export class Dispatch extends SimpleEmitter {
   constructor(handler) {
     super();
-    this.config = chrome.getUiSettingsClient();
     this.handler = handler;
     this._listeners = {};
   }
@@ -170,7 +168,8 @@ export class Dispatch extends SimpleEmitter {
         self.addMousePointer.call(this, arguments);
       }
 
-      self.handler.highlight.call(this, $el);
+      const dimmingOpacity = self.handler.visConfig.get('dimmingOpacity');
+      self.handler.highlight.call(this, $el, dimmingOpacity);
       self.emit('hover', self.eventResponse(d, i));
     }
 
@@ -246,7 +245,6 @@ export class Dispatch extends SimpleEmitter {
 
     const xScale = this.handler.categoryAxes[0].getScale();
     this.createBrush(xScale, svg);
-
   }
 
   /**
@@ -265,15 +263,14 @@ export class Dispatch extends SimpleEmitter {
    * @param element {d3.Selection}
    * @method highlight
    */
-  highlight(element) {
+  highlight(element, dimmingOpacity) {
     const label = this.getAttribute('data-label');
     if (!label) return;
 
-    const dimming = this.config.get('visualization:dimmingOpacity');
     $(element).parent().find('[data-label]')
       .css('opacity', 1)//Opacity 1 is needed to avoid the css application
       .not((els, el) => String($(el).data('label')) === label)
-      .css('opacity', justifyOpacity(dimming));
+      .css('opacity', justifyOpacity(dimmingOpacity));
   }
 
   /**
