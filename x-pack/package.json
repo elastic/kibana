@@ -146,7 +146,7 @@
     "react-test-renderer": "^16.8.0",
     "react-testing-library": "^6.0.0",
     "redux-test-utils": "0.2.2",
-    "rsync": "0.4.0",
+    "rsync": "0.6.1",
     "run-sequence": "^2.2.1",
     "sass-loader": "^7.1.0",
     "sass-resources-loader": "^2.0.0",
