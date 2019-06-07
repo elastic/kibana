@@ -27,7 +27,7 @@ interface Props {
   options: MetricsExplorerOptions;
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
-  source: SourceConfiguration;
+  source?: SourceConfiguration;
   timeRange: MetricsExplorerTimeOptions;
 }
 
