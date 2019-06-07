@@ -17,21 +17,8 @@
  * under the License.
  */
 
-
-const { readFileSync } = require('fs');
-const { resolve } = require('path');
-
 const execa = require('execa');
-const jsYaml = require('js-yaml');
-
-const ROOT_DIR = resolve(__dirname, '../../..');
 const pkg = require('../../../package.json');
-
-const { JOB } = jsYaml.safeLoad(readFileSync(resolve(ROOT_DIR, '.ci/jobs.yml'), 'utf8'));
-
-// +2 is necessary to account for extra execution of PERCY_BIN in test/scripts/jenkins_ci_group.sh
-// Remove +2 ? ld and includes needs to change back
-const ciGroupCount = JOB.filter(id => id.includes('ciGroup100')).length;
 
 const { stdout: commit } = execa.sync('git', ['rev-parse', 'HEAD']);
 const shortCommit = commit.slice(0, 8);
@@ -39,5 +26,5 @@ const shortCommit = commit.slice(0, 8);
 const isPr = process.env.JOB_NAME.includes('elastic+kibana+pull-request');
 
 console.log(`export LOG_LEVEL=debug;`);
-console.log(`export PERCY_PARALLEL_TOTAL="${ciGroupCount}";`);
+console.log(`export PERCY_PARALLEL_TOTAL=2;`);
 console.log(`export PERCY_PARALLEL_NONCE="${shortCommit}/${isPr ? 'PR' : pkg.branch}/${process.env.BUILD_ID}";`);
