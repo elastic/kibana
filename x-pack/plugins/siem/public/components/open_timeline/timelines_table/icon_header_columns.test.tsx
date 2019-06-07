@@ -10,10 +10,10 @@ import 'jest-styled-components';
 import * as React from 'react';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '..';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { TimelinesTable } from '.';
 import { OpenTimelineResult } from '../types';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 describe('#getActionsColumns', () => {
   let mockResults: OpenTimelineResult[];
