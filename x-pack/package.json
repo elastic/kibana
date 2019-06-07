@@ -286,7 +286,7 @@
     "proper-lockfile": "^3.0.2",
     "puid": "1.0.5",
     "puppeteer-core": "^1.13.0",
-    "raw-loader": "2.0.0",
+    "raw-loader": "3.0.0",
     "react": "^16.8.0",
     "react-apollo": "^2.1.4",
     "react-beautiful-dnd": "^8.0.7",
