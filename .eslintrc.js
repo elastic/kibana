@@ -168,6 +168,7 @@ module.exports = {
         'x-pack/plugins/apm/**/*.js',
         'test/*/config.ts',
         'test/visual_regression/tests/**/*',
+        'x-pack/test/visual_regression/tests/**/*',
         'x-pack/test/*/config.ts',
       ],
       rules: {

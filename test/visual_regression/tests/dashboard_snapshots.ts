@@ -17,26 +17,29 @@
  * under the License.
  */
 
-export default function ({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
+  const visualTesting = getService('visualTesting');
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('dashboard snapshots', function describeIndexTests() {
-    before(async function () {
+  describe('dashboard snapshots', () => {
+    before(async () => {
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setWindowSize(1000, 700);
     });
 
-    after(async function () {
+    after(async () => {
       await browser.setWindowSize(1300, 900);
       const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
       await PageObjects.dashboard.deleteDashboard('area', id);
     });
 
-    // Skip until https://github.com/elastic/kibana/issues/19471 is fixed
-    it.skip('compare TSVB snapshot', async () => {
+    // Probably flaky: https://github.com/elastic/kibana/issues/19471
+    it('compare TSVB snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
@@ -51,6 +54,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
+      await visualTesting.snapshot();
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
     });
 
@@ -66,6 +70,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
+      await visualTesting.snapshot();
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
     });
   });
