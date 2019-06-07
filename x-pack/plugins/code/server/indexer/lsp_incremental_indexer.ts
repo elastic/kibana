@@ -182,13 +182,13 @@ export class LspIncrementalIndexer extends LspIndexer {
       if (response && response.result.length > 0) {
         const { symbols, references } = response.result[0];
         for (const symbol of symbols) {
-          await this.batchIndexHelper.index(SymbolIndexName(repoUri), symbol);
+          await this.lspBatchIndexHelper.index(SymbolIndexName(repoUri), symbol);
           symbolNames.add(symbol.symbolInformation.name);
         }
         stats.set(IndexStatsKey.Symbol, symbols.length);
 
         for (const ref of references) {
-          await this.batchIndexHelper.index(ReferenceIndexName(repoUri), ref);
+          await this.lspBatchIndexHelper.index(ReferenceIndexName(repoUri), ref);
         }
         stats.set(IndexStatsKey.Reference, references.length);
       } else {
@@ -217,7 +217,7 @@ export class LspIncrementalIndexer extends LspIndexer {
       language,
       qnames: Array.from(symbolNames),
     };
-    await this.batchIndexHelper.index(DocumentIndexName(repoUri), body);
+    await this.docBatchIndexHelper.index(DocumentIndexName(repoUri), body);
     stats.set(IndexStatsKey.File, 1);
   }
 
