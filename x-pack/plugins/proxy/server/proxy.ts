@@ -8,13 +8,19 @@ import { Agent as HTTPSAgent } from 'https';
 import { Agent as HTTPAgent } from 'http';
 import { URL } from 'url';
 
-import { Request, ResponseToolkit, ResponseObject } from 'hapi';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import Wreck from 'wreck';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { Plugin, PluginInitializerContext, Logger, CoreStart, CoreSetup } from 'src/core/server';
+import {
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+  CoreStart,
+  CoreSetup,
+  KibanaRequest,
+} from 'src/core/server';
 
 import { HttpServerSetup } from 'src/core/server/http/http_server';
 
@@ -24,7 +30,7 @@ export interface ProxyServiceSetup {
   httpSetup: HttpServerSetup;
 }
 
-type ProxyRequest = (req: Request, h: ResponseToolkit) => Promise<ResponseObject>;
+type ProxyRequest = (req: KibanaRequest) => Promise<any>;
 
 export interface ProxyServiceStart {
   assignResource: (resource: string, data: RoutingNode) => Promise<void>;
@@ -39,14 +45,17 @@ export const ProxyConfig = {
     updateInterval: schema.number(),
     timeoutThreshold: schema.number(),
     port: schema.number(),
+    maxRetry: schema.number(),
+    requestBackoff: schema.number(),
   }),
 };
 export type ProxyPluginType = TypeOf<typeof ProxyConfig.schema>;
 
 export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart> {
-  private port: number = 5602;
   private configSubscription?: Subscription;
   private clusterDocClient: ClusterDocClient;
+  private maxRetry = 0;
+  private requestBackoff = 0;
 
   private readonly httpsAgent: HTTPSAgent;
   private readonly httpAgent: HTTPAgent;
@@ -88,7 +97,8 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   }
 
   private setConfig(config: ProxyPluginType) {
-    this.port = config.port || this.port;
+    this.maxRetry = config.maxRetry;
+    this.requestBackoff = config.requestBackoff;
   }
 
   public async start(core: CoreStart) {
@@ -122,49 +132,59 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   }
 
   public proxyResource(resource: string): ProxyRequest {
-    return (req: Request, h: ResponseToolkit) => {
-      return this.proxyRequest(req, h, resource);
+    return (req: KibanaRequest) => {
+      return this.proxyRequest(req, resource);
     };
   }
 
-  // @TODO update to use KibanaRequest object: https://github.com/restrry/kibana/blob/f1a1a3dfbe2d19e241a20b6f71ef98f0fb999e7c/src/core/server/http/router/request.ts#L28
   // @TODO update to allow passing of request parametsrs
-  // @TODO update to allow passing of http method
-  public async proxyRequest(req: Request, h: ResponseToolkit, resource?: string) {
+  public async proxyRequest(req: KibanaRequest, resource?: string, retryCount = 0): Promise<any> {
+    const method = req.route.method;
     const url = new URL(req.url.toString());
+    const headers = req.headers;
+    const body = req.body;
     resource = resource || url.pathname;
     const node = this.clusterDocClient.getNodeForResource(resource);
 
     if (!node) {
-      this.log.debug(`No node was found for resource ${resource}`);
-      const res = h.response('Not found');
-      res.code(404);
-      return res;
+      const msg = `No node was found for resource ${resource}`;
+      this.log.debug(msg);
+      throw new Error(msg);
     }
 
-    if (node.state !== RouteState.Started) {
+    if (node.state === RouteState.Initializing) {
       this.log.warn(
-        `Unable to foward request for ${resource} to ${node.node} because node was ${node.state}`
+        `${node.node} is still starting retry ${retryCount}/${this.maxRetry} in ${
+          this.requestBackoff
+        }`
       );
-      const res = h.response('Service Unavailable');
-      res.code(503);
-      return res;
+      if (retryCount <= this.maxRetry) {
+        return await new Promise(resolve => {
+          setTimeout(async () => {
+            await this.proxyRequest(req, resource, ++retryCount);
+            resolve();
+          }, this.requestBackoff);
+        });
+      } else {
+        throw new Error(`maxRetries exceeded and node has not yet initialized`);
+      }
     }
 
     url.hostname = node.node;
     try {
-      const { payload } = await this.wreck.get(url.toString(), { json: true });
-      const res = h.response(payload);
-      res.code(200);
-      res.header('content-type', 'application/json');
-      return res;
+      const opts = {
+        headers,
+        payload: body,
+      };
+      const res = await this.wreck.request(method, url.toString(), opts);
+      const data = Wreck.read(res, {});
+      return data;
     } catch (err) {
-      this.log.warn(
-        `Unable to complete request to ${node.node} for ${resource} because ${err.message}`
-      );
-      const res = h.response('Internal server error');
-      res.code(500);
-      return res;
+      const msg = `Unable to complete request to ${node.node} for ${resource} because ${
+        err.message
+      }`;
+      this.log.warn(msg);
+      throw new Error(msg);
     }
   }
 

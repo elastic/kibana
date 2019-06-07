@@ -162,7 +162,7 @@ export class ClusterDocClient {
       throw new Error('You must call setup first');
     }
     const doc = {
-      nodes: nodes,
+      nodes,
       routing_table: this.routingTable,
     };
     const client = await this.elasticsearch.pipe(first()).toPromise();
