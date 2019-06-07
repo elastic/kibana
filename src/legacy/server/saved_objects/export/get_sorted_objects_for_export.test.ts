@@ -18,18 +18,10 @@
  */
 
 import { getSortedObjectsForExport } from './get_sorted_objects_for_export';
+import { SavedObjectsClientMock } from '../service/saved_objects_client.mock';
 
 describe('getSortedObjectsForExport()', () => {
-  const savedObjectsClient = {
-    errors: {} as any,
-    find: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    bulkCreate: jest.fn(),
-    delete: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = SavedObjectsClientMock.create();
 
   afterEach(() => {
     savedObjectsClient.find.mockReset();
@@ -48,8 +40,10 @@ describe('getSortedObjectsForExport()', () => {
         {
           id: '2',
           type: 'search',
+          attributes: {},
           references: [
             {
+              name: 'name',
               type: 'index-pattern',
               id: '1',
             },
@@ -58,9 +52,12 @@ describe('getSortedObjectsForExport()', () => {
         {
           id: '1',
           type: 'index-pattern',
+          attributes: {},
           references: [],
         },
       ],
+      per_page: 1,
+      page: 0,
     });
     const response = await getSortedObjectsForExport({
       savedObjectsClient,
@@ -70,15 +67,18 @@ describe('getSortedObjectsForExport()', () => {
     expect(response).toMatchInlineSnapshot(`
 Array [
   Object {
+    "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
   },
   Object {
+    "attributes": Object {},
     "id": "2",
     "references": Array [
       Object {
         "id": "1",
+        "name": "name",
         "type": "index-pattern",
       },
     ],
@@ -118,9 +118,11 @@ Array [
         {
           id: '2',
           type: 'search',
+          attributes: {},
           references: [
             {
               type: 'index-pattern',
+              name: 'name',
               id: '1',
             },
           ],
@@ -128,9 +130,12 @@ Array [
         {
           id: '1',
           type: 'index-pattern',
+          attributes: {},
           references: [],
         },
       ],
+      per_page: 1,
+      page: 0,
     });
     await expect(
       getSortedObjectsForExport({
@@ -147,16 +152,19 @@ Array [
         {
           id: '2',
           type: 'search',
+          attributes: {},
           references: [
             {
-              type: 'index-pattern',
               id: '1',
+              name: 'name',
+              type: 'index-pattern',
             },
           ],
         },
         {
           id: '1',
           type: 'index-pattern',
+          attributes: {},
           references: [],
         },
       ],
@@ -179,15 +187,18 @@ Array [
     expect(response).toMatchInlineSnapshot(`
 Array [
   Object {
+    "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
   },
   Object {
+    "attributes": Object {},
     "id": "2",
     "references": Array [
       Object {
         "id": "1",
+        "name": "name",
         "type": "index-pattern",
       },
     ],
@@ -227,9 +238,11 @@ Array [
         {
           id: '2',
           type: 'search',
+          attributes: {},
           references: [
             {
               type: 'index-pattern',
+              name: 'name',
               id: '1',
             },
           ],
@@ -241,6 +254,7 @@ Array [
         {
           id: '1',
           type: 'index-pattern',
+          attributes: {},
           references: [],
         },
       ],
@@ -260,15 +274,18 @@ Array [
     expect(response).toMatchInlineSnapshot(`
 Array [
   Object {
+    "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
   },
   Object {
+    "attributes": Object {},
     "id": "2",
     "references": Array [
       Object {
         "id": "1",
+        "name": "name",
         "type": "index-pattern",
       },
     ],
