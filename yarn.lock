@@ -14081,10 +14081,10 @@ highlight.js@^9.12.0, highlight.js@~9.12.0:
   resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.12.0.tgz#e6d9dbe57cbefe60751f02af336195870c90c01e"
   integrity sha1-5tnb5Xy+/mB1HwKvM2GVhwyQwB4=
 
-history-extra@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/history-extra/-/history-extra-4.0.2.tgz#67b512c196e0a521be1d8ac83513f00ca761d9f3"
-  integrity sha512-Nia8vzQHyQcxKQUt5/vxZegurkG2K23TplaWLk1V6EWTuNdZMJUJ78anwGkBcHuLBia8TFUct/R/QDlgRUA42A==
+history-extra@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/history-extra/-/history-extra-5.0.1.tgz#95a2e59dda526c4241d0ae1b124a77a5e4675ce8"
+  integrity sha512-6XV1L1lHgporVWgppa/Kq+Fnz4lhBew7iMxYCTfzVmoEywsAKJnTjdw1zOd+EGLHGYp0/V8jSVMEgqx4QbHLTw==
 
 history@4.9.0:
   version "4.9.0"
@@ -18670,10 +18670,10 @@ moment@^2.10.6:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.21.0.tgz#2a114b51d2a6ec9e6d83cf803f838a878d8a023a"
   integrity sha512-TCZ36BjURTeFTM/CwRcViQlfkMvL1/vFISuNLO5GkcVm1+QHfbSiNqZuWeMFjj1/3+uAjXswgRk30j1kkLYJBQ==
 
-monaco-editor@^0.14.3:
-  version "0.14.3"
-  resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.14.3.tgz#7cc4a4096a3821f52fea9b10489b527ef3034e22"
-  integrity sha512-RhaO4xXmWn/p0WrkEOXe4PoZj6xOcvDYjoAh0e1kGUrQnP1IOpc0m86Ceuaa2CLEMDINqKijBSmqhvBQnsPLHQ==
+monaco-editor@^0.17.0:
+  version "0.17.0"
+  resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.17.0.tgz#d1d035c6f512ab88503cbee8213cab34b85ab954"
+  integrity sha512-8BQQHCFxy3DF0GYFOy5BmcCWlwm/XaTMPbPbN4gwItFGctZErSfX82uQSBpojJSlPNyudB5Q5qnukoorD3/UuA==
 
 monocle-ts@^1.0.0:
   version "1.7.1"
