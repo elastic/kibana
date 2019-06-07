@@ -16,17 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SortDirection } from './sorting';
+
+type InterableValue = number | null;
 
 /**
  * Generate a sequence of pairs from the iterable that looks like
  * `[[x_0, x_1], [x_1, x_2], [x_2, x_3], ..., [x_(n-1), x_n]]`.
  */
-export function* asPairs(iterable: Iterable<number>): IterableIterator<number[]> {
-  let currentPair: number[] = [];
+export function* asPairs(iterable: Iterable<InterableValue>): IterableIterator<InterableValue[]> {
+  let currentPair: InterableValue[] = [];
   for (const value of iterable) {
     currentPair = [...currentPair, value].slice(-2);
     if (currentPair.length === 2) {
       yield currentPair;
     }
   }
+}
+
+/**
+ * Returns a iterable containing intervals `[start,end]` for Elasticsearch date range queries
+ * depending on type (`successors` or `predecessors`) and sort (`asc`, `desc`) these are ascending or descending intervals.
+ */
+export function generateIntervals(
+  offsets: number[],
+  startTime: number,
+  type: string,
+  sort: SortDirection
+): IterableIterator<InterableValue[]> {
+  const offsetSign =
+    (sort === SortDirection.asc && type === 'successors') ||
+    (sort === SortDirection.desc && type === 'predecessors')
+      ? 1
+      : -1;
+  // ending with `null` opens the last interval
+  return asPairs([...offsets.map(offset => startTime + offset * offsetSign), null]);
 }
