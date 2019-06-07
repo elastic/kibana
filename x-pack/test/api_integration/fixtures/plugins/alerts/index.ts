@@ -49,6 +49,31 @@ export default function(kibana: any) {
           });
         },
       });
+      server.plugins.actions.registerType({
+        id: 'test.failing',
+        name: 'Test: Failing',
+        validate: {
+          params: Joi.object()
+            .keys({
+              index: Joi.string().required(),
+              reference: Joi.string().required(),
+            })
+            .required(),
+        },
+        async executor({ actionTypeConfig, params }: ActionTypeExecutorOptions) {
+          await callWithInternalUser('index', {
+            index: params.index,
+            refresh: 'wait_for',
+            body: {
+              params,
+              config: actionTypeConfig,
+              reference: params.reference,
+              source: 'action:test.failing',
+            },
+          });
+          throw new Error('Failed to execute action type');
+        },
+      });
 
       // Alert types
       server.plugins.alerting.registerType({

@@ -14,22 +14,30 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   const es = getService('es');
   const retry = getService('retry');
 
-  const esTestIndexName = '.kibaka-index-action-data';
+  const esTestIndexName = '.kibaka-alerting-test-data';
 
-  describe('encrypted attributes', () => {
+  describe('actions', () => {
     before(async () => {
       await es.indices.create({
         index: esTestIndexName,
         body: {
           mappings: {
             properties: {
+              source: {
+                type: 'keyword',
+              },
               reference: {
                 type: 'keyword',
               },
-              message: {
-                type: 'text',
+              params: {
+                enabled: false,
+                type: 'object',
               },
-              actionTypeConfig: {
+              config: {
+                enabled: false,
+                type: 'object',
+              },
+              state: {
                 enabled: false,
                 type: 'object',
               },
@@ -51,10 +59,8 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         .send({
           params: {
             index: esTestIndexName,
-            body: {
-              reference: 'actions-fire-1',
-              message: 'Testing 123',
-            },
+            reference: 'actions-fire-1',
+            message: 'Testing 123',
           },
         })
         .expect(200)
@@ -72,6 +78,11 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 must: [
                   {
                     term: {
+                      source: 'action:test.index-record',
+                    },
+                  },
+                  {
+                    term: {
                       reference: 'actions-fire-1',
                     },
                   },
@@ -84,12 +95,54 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         return searchResult.hits.hits[0];
       });
       expect(indexedRecord._source).to.eql({
-        reference: 'actions-fire-1',
-        message: 'Testing 123',
-        actionTypeConfig: {
-          unencrypted: 'unencrypted text',
-          encrypted: 'something encrypted',
+        params: {
+          index: esTestIndexName,
+          reference: 'actions-fire-1',
+          message: 'Testing 123',
         },
+        config: {
+          unencrypted: `This value shouldn't get encrypted`,
+          encrypted: 'This value should be encrypted',
+        },
+        reference: 'actions-fire-1',
+        source: 'action:test.index-record',
+      });
+    });
+
+    it('should retry failures', async () => {
+      await supertest
+        .post('/api/action/08cca6da-60ed-49ca-85f6-641240300a3f/fire')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            index: esTestIndexName,
+            reference: 'retry-action-1',
+          },
+        })
+        .expect(200);
+      await retry.tryForTime(5000, async () => {
+        const searchResult = await es.search({
+          index: esTestIndexName,
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      source: 'action:test.failing',
+                    },
+                  },
+                  {
+                    term: {
+                      reference: 'retry-action-1',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        expect(searchResult.hits.total.value).to.greaterThan(1);
       });
     });
   });

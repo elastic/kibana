@@ -3,6 +3,8 @@
     "id": "action:9597aa29-5d74-485b-af1d-4b7fdfd079e4",
     "index": ".kibana",
     "source": {
+      "type": "action",
+      "migrationVersion": {},
       "action": {
         "description": "My action",
         "actionTypeId": "test.index-record",
@@ -10,9 +12,23 @@
           "unencrypted" : "This value shouldn't get encrypted"
         },
         "actionTypeConfigSecrets": "Mmgawi5/C8zhwTnEUAjNtV/i/b8HTX+HonYMKGp4iKMAD0AIJ9K/dSZGtDHpPMkvGoAZNx7TCIk8+wnDZcMq38gMw3rk2HNFeoD9KrQe90auV+mB9uSSUBpvnSPfXoHp/Dj+xO9EjQYwnF8TB6tFzbcW4sA3ee+UQbZn1DXjNrZOqSX7oX7ERJ8A"
-      },
+      }
+    }
+  }
+}
+
+{
+  "value": {
+    "id": "action:08cca6da-60ed-49ca-85f6-641240300a3f",
+    "index": ".kibana",
+    "source": {
       "type": "action",
-      "migrationVersion": {}
+      "migrationVersion": {},
+      "action": {
+        "description": "My failing action",
+        "actionTypeId": "test.failing",
+        "actionTypeConfig": {}
+      }
     }
   }
 }
