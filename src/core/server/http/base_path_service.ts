@@ -27,13 +27,13 @@ const getIncomingMessage = (request: KibanaRequest | Request) =>
 export class BasePath {
   private readonly basePathCache = new WeakMap<ReturnType<typeof getIncomingMessage>, string>();
 
-  constructor(private readonly basePath?: string) {}
+  constructor(private readonly serverBasePath?: string) {}
 
   public get = (request: KibanaRequest | Request) => {
     const incomingMessage = getIncomingMessage(request);
 
     const requestScopePath = this.basePathCache.get(incomingMessage) || '';
-    const serverBasePath = this.basePath || '';
+    const serverBasePath = this.serverBasePath || '';
     return `${serverBasePath}${requestScopePath}`;
   };
 
@@ -50,25 +50,25 @@ export class BasePath {
   };
 
   public prepend = (path: string): string => {
-    if (!this.basePath) return path;
+    if (!this.serverBasePath) return path;
     return modifyUrl(path, parts => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
-        parts.pathname = `${this.basePath}${parts.pathname}`;
+        parts.pathname = `${this.serverBasePath}${parts.pathname}`;
       }
     });
   };
 
   public remove = (path: string): string => {
-    if (!this.basePath) {
+    if (!this.serverBasePath) {
       return path;
     }
 
-    if (path === this.basePath) {
+    if (path === this.serverBasePath) {
       return '/';
     }
 
-    if (path.startsWith(`${this.basePath}/`)) {
-      return path.slice(this.basePath.length);
+    if (path.startsWith(`${this.serverBasePath}/`)) {
+      return path.slice(this.serverBasePath.length);
     }
 
     return path;
