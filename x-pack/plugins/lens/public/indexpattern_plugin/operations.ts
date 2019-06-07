@@ -18,6 +18,11 @@ export function getOperations(): OperationType[] {
   return ['value', 'terms', 'date_histogram', 'sum', 'avg', 'min', 'max', 'count'];
 }
 
+export function isMetricOperation(operationType: OperationType) {
+  const metricOpTypes: OperationType[] = ['sum', 'avg', 'min', 'max', 'count'];
+  return metricOpTypes.includes(operationType);
+}
+
 export function getOperationDisplay(): Record<
   OperationType,
   {

@@ -6,12 +6,14 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { EuiForm, EuiFormRow, EuiRange } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
 import {
   IndexPatternPrivateState,
   OperationType,
   DateHistogramIndexPatternColumn,
+  TermsIndexPatternColumn,
 } from './indexpattern';
+import { isMetricOperation } from './operations';
 
 export interface ParamEditorProps {
   state: IndexPatternPrivateState;
@@ -24,7 +26,7 @@ type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 // Add ticks to EuiRange component props
 const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
   PropType<typeof EuiRange> & {
-    ticks: Array<{
+    ticks?: Array<{
       label: string;
       value: number;
     }>;
@@ -69,6 +71,90 @@ const paramEditors: Partial<Record<OperationType, React.ComponentType<ParamEdito
               })
             }
             aria-label="Level of Detail"
+          />
+        </EuiFormRow>
+      </EuiForm>
+    );
+  },
+  terms: ({ state, setState, columnId: currentColumnId }) => {
+    const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
+    function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
+      if (orderBy.type === 'alphabetical') {
+        return orderBy.type;
+      }
+      return `${orderBy.type}-${orderBy.columnId}`;
+    }
+
+    function fromValue(value: string): TermsIndexPatternColumn['params']['orderBy'] {
+      if (value === 'alphabetical') {
+        return { type: 'alphabetical' };
+      }
+      const parts = value.split('-');
+      return {
+        type: 'column',
+        columnId: parts[1],
+      };
+    }
+
+    const orderOptions = Object.entries(state.columns)
+      .filter(([_columnId, column]) => isMetricOperation(column.operationType))
+      .map(([columnId, column]) => {
+        return {
+          value: toValue({ type: 'column', columnId }),
+          text: column.label,
+        };
+      });
+    orderOptions.push({
+      value: toValue({ type: 'alphabetical' }),
+      text: 'Alphabetical',
+    });
+
+    return (
+      <EuiForm>
+        <EuiFormRow label="Number of values">
+          <FixedEuiRange
+            min={1}
+            max={20}
+            step={1}
+            value={currentColumn.params.size}
+            showInput
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setState({
+                ...state,
+                columns: {
+                  ...state.columns,
+                  [currentColumnId]: {
+                    ...currentColumn,
+                    params: {
+                      ...currentColumn.params,
+                      size: Number(e.target.value),
+                    },
+                  },
+                },
+              })
+            }
+            aria-label="Number of values"
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Order by">
+          <EuiSelect
+            options={orderOptions}
+            value={toValue(currentColumn.params.orderBy)}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setState({
+                ...state,
+                columns: {
+                  ...state.columns,
+                  [currentColumnId]: {
+                    ...currentColumn,
+                    params: {
+                      ...currentColumn.params,
+                      orderBy: fromValue(e.target.value),
+                    },
+                  },
+                },
+              })
+            }
           />
         </EuiFormRow>
       </EuiForm>

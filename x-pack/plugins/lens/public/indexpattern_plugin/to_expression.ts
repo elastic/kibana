@@ -55,9 +55,10 @@ export function toExpression(state: IndexPatternPrivateState) {
           schema: 'segment',
           params: {
             field: col.sourceField,
-            orderBy: state.columnOrder[firstMetric] || undefined,
+            orderBy:
+              col.params.orderBy.type === 'alphabetical' ? '_key' : col.params.orderBy.columnId,
             order: 'desc',
-            size: 5,
+            size: col.params.size,
             otherBucket: false,
             otherBucketLabel: 'Other',
             missingBucket: false,
