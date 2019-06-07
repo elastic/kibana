@@ -10,10 +10,10 @@ import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer } fr
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import { ClusterStatus } from '..//cluster_status';
 import { EuiMonitoringTable } from '../../table';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-class ListingUI extends PureComponent {
+export class Listing extends PureComponent {
   getColumns() {
     const { kbnUrl, scope } = this.props.angular;
 
@@ -111,7 +111,7 @@ class ListingUI extends PureComponent {
     ];
   }
   render() {
-    const { data, stats, sorting, pagination, onTableChange, intl } = this.props;
+    const { data, stats, sorting, pagination, onTableChange } = this.props;
     const columns = this.getColumns();
     const flattenedData = data.map(item => ({
       ...item,
@@ -146,8 +146,7 @@ class ListingUI extends PureComponent {
               search={{
                 box: {
                   incremental: true,
-                  placeholder: intl.formatMessage({
-                    id: 'xpack.monitoring.logstash.filterNodesPlaceholder',
+                  placeholder: i18n.translate('xpack.monitoring.logstash.filterNodesPlaceholder', {
                     defaultMessage: 'Filter Nodes…'
                   })
                 },
@@ -163,5 +162,3 @@ class ListingUI extends PureComponent {
     );
   }
 }
-
-export const Listing = injectI18n(ListingUI);
