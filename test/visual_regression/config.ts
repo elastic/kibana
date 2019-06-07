@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 
-export default function({ readConfigFile }) {
-  const functionalConfig = readConfigFile(require.resolve('../functional/config'));
+export default async function({ readConfigFile }: FtrConfigProviderContext) {
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
     ...functionalConfig.getAll(),

@@ -163,7 +163,12 @@ module.exports = {
      * Allow default exports
      */
     {
-      files: ['x-pack/test/functional/apps/**/*.js', 'x-pack/plugins/apm/**/*.js'],
+      files: [
+        'x-pack/test/functional/apps/**/*.js',
+        'x-pack/plugins/apm/**/*.js',
+        'test/*/config.ts',
+        'x-pack/test/*/config.ts',
+      ],
       rules: {
         'import/no-default-export': 'off',
         'import/no-named-as-default': 'off',
