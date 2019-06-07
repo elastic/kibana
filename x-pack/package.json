@@ -282,7 +282,7 @@
     "popper.js": "^1.14.3",
     "prop-types": "^15.6.0",
     "proper-lockfile": "^3.0.2",
-    "puid": "1.0.5",
+    "puid": "1.0.7",
     "puppeteer-core": "^1.13.0",
     "raw-loader": "3.0.0",
     "react": "^16.8.0",
