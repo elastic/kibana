@@ -335,7 +335,7 @@ export class ESSearchSource extends AbstractESSource {
 
   getSourceTooltipContent(sourceDataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
-    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     if (!featureCollection || !meta) {
       // no tooltip content needed when there is no feature collection or meta
       return null;
