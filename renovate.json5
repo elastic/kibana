@@ -407,6 +407,14 @@
         ],
       },
       {
+        groupSlug: 'markdown-it',
+        groupName: 'markdown-it related packages',
+        packageNames: [
+          'markdown-it',
+          '@types/markdown-it',
+        ],
+      },
+      {
         groupSlug: 'minimatch',
         groupName: 'minimatch related packages',
         packageNames: [
