@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { DatasourceDataPanelProps, Datasource } from '../..';
 import { NativeRenderer } from '../../native_renderer';
@@ -18,7 +18,7 @@ interface DataPanelWrapperProps {
   dispatch: (action: Action) => void;
 }
 
-export function DataPanelWrapper(props: DataPanelWrapperProps) {
+export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const setDatasourceState = useMemo(
     () => (newState: unknown) => {
       props.dispatch({
@@ -55,4 +55,4 @@ export function DataPanelWrapper(props: DataPanelWrapperProps) {
       )}
     </>
   );
-}
+});

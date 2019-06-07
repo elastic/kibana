@@ -8,12 +8,13 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EditorFrame } from './editor_frame';
-import { Visualization, Datasource, DatasourcePublicAPI, DatasourceSuggestion } from '../../types';
+import { Visualization, DatasourcePublicAPI, DatasourceSuggestion } from '../../types';
 import { act } from 'react-dom/test-utils';
 import {
   createMockVisualization,
   createMockDatasource,
   createExpressionRendererMock,
+  DatasourceMock,
 } from '../mocks';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
 
@@ -34,10 +35,10 @@ function generateSuggestion(datasourceSuggestionId = 1, state = {}): DatasourceS
 
 describe('editor_frame', () => {
   let mockVisualization: Visualization;
-  let mockDatasource: Datasource;
+  let mockDatasource: DatasourceMock;
 
   let mockVisualization2: Visualization;
-  let mockDatasource2: Datasource;
+  let mockDatasource2: DatasourceMock;
 
   let expressionRendererMock: ExpressionRenderer;
 
@@ -52,7 +53,7 @@ describe('editor_frame', () => {
   });
 
   describe('initialization', () => {
-    it('should initialize initial datasource and visualization if present', () => {
+    it('should initialize initial datasource', () => {
       act(() => {
         mount(
           <EditorFrame
@@ -69,7 +70,6 @@ describe('editor_frame', () => {
         );
       });
 
-      expect(mockVisualization.initialize).toHaveBeenCalled();
       expect(mockDatasource.initialize).toHaveBeenCalled();
     });
 
@@ -113,6 +113,54 @@ describe('editor_frame', () => {
 
       expect(mockVisualization.renderConfigPanel).not.toHaveBeenCalled();
       expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
+    });
+
+    it('should not initialize visualization before datasource is initialized', async () => {
+      act(() => {
+        mount(
+          <EditorFrame
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
+
+      expect(mockVisualization.initialize).not.toHaveBeenCalled();
+
+      await waitForPromises();
+
+      expect(mockVisualization.initialize).toHaveBeenCalled();
+    });
+
+    it('should pass the public datasource api into visualization initialize', async () => {
+      act(() => {
+        mount(
+          <EditorFrame
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
+
+      expect(mockVisualization.initialize).not.toHaveBeenCalled();
+
+      await waitForPromises();
+
+      expect(mockVisualization.initialize).toHaveBeenCalledWith(mockDatasource.publicAPIMock);
     });
 
     it('should render data panel after initialization is complete', async () => {
@@ -306,7 +354,7 @@ Object {
 
       const updatedPublicAPI = {};
       mockDatasource.getPublicAPI = jest.fn(
-        () => (updatedPublicAPI as unknown) as DatasourcePublicAPI
+        _ => (updatedPublicAPI as unknown) as DatasourcePublicAPI
       );
 
       const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
@@ -327,10 +375,6 @@ Object {
 
   describe('datasource public api communication', () => {
     it('should pass the datasource api to the visualization', async () => {
-      const publicAPI = ({} as unknown) as DatasourcePublicAPI;
-
-      mockDatasource.getPublicAPI = () => publicAPI;
-
       mount(
         <EditorFrame
           visualizationMap={{
@@ -349,13 +393,13 @@ Object {
 
       expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
-        expect.objectContaining({ datasource: publicAPI })
+        expect.objectContaining({ datasource: mockDatasource.publicAPIMock })
       );
     });
 
     it('should give access to the datasource state in the datasource factory function', async () => {
       const datasourceState = {};
-      mockDatasource.initialize = () => Promise.resolve(datasourceState);
+      mockDatasource.initialize.mockResolvedValue(datasourceState);
 
       mount(
         <EditorFrame
@@ -453,7 +497,7 @@ Object {
 
     it('should call datasource render with new state on switch', async () => {
       const initialState = {};
-      mockDatasource2.initialize = () => Promise.resolve(initialState);
+      mockDatasource2.initialize.mockResolvedValue(initialState);
 
       instance
         .find('select[data-test-subj="datasource-switch"]')
