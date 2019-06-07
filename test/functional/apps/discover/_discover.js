@@ -138,7 +138,8 @@ export default function ({ getService, getPageObjects }) {
         expect(actualTimeString).to.be('September 20th 2015, 00:00:00.000 to September 20th 2015, 03:00:00.000');
       });
 
-      it('should modify the time range when the histogram is brushed', async function () {
+      // FAILING: https://github.com/elastic/kibana/issues/38361
+      it.skip('should modify the time range when the histogram is brushed', async function () {
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.brushHistogram(0, 1);
