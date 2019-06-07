@@ -27,6 +27,9 @@ x-pack-ciGroup*)
   export CI_GROUP="${JOB##x-pack-ciGroup}"
   ./test/scripts/jenkins_xpack_ci_group.sh
   ;;
+x-pack-visualRegression)
+  ./test/scripts/jenkins_xpack_visual_regression.sh
+  ;;
 *)
   echo "JOB '$JOB' is not implemented."
   exit 1

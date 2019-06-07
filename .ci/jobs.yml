@@ -26,6 +26,7 @@ JOB:
   - x-pack-ciGroup8
   - x-pack-ciGroup9
   - x-pack-ciGroup10
+  - x-pack-visualRegression
 
 # `~` is yaml for `null`
 exclude: ~
