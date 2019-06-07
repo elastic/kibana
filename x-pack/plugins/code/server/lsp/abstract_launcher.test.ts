@@ -16,6 +16,7 @@ import { RequestExpander } from './request_expander';
 import { LanguageServerProxy } from './proxy';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { Logger } from '../log';
+import getPort from 'get-port';
 
 jest.setTimeout(10000);
 
@@ -42,7 +43,7 @@ class MockLauncher extends AbstractLauncher {
   }
 
   async getPort() {
-    return 19999;
+    return await getPort();
   }
 
   async spawnProcess(installationPath: string, port: number, log: Logger): Promise<ChildProcess> {
@@ -53,17 +54,17 @@ class MockLauncher extends AbstractLauncher {
       console.log(msg);
       mockMonitor(msg);
     });
-    childProcess.send(`port ${await this.getPort()}`);
+    childProcess.send(`port ${port}`);
     childProcess.send(`host ${this.targetHost}`);
     childProcess.send('listen');
     return childProcess;
   }
 
-  protected killProcess(child: ChildProcess, log: Logger): Promise<boolean> {
+  protected killProcess(child: ChildProcess): Promise<boolean> {
     // don't kill the process so fast, otherwise no normal exit can happen
     return new Promise<boolean>(resolve => {
       setTimeout(async () => {
-        const killed = await super.killProcess(child, log);
+        const killed = await super.killProcess(child);
         resolve(killed);
       }, 100);
     });
@@ -95,7 +96,7 @@ class PassiveMockLauncher extends MockLauncher {
       console.log(msg);
       mockMonitor(msg);
     });
-    this.childProcess.send(`port ${await this.getPort()}`);
+    this.childProcess.send(`port ${port}`);
     this.childProcess.send(`host ${this.targetHost}`);
     if (this.dieFirstTime) {
       this.childProcess!.send('quit');
