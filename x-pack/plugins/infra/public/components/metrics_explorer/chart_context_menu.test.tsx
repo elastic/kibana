@@ -106,11 +106,8 @@ describe('MetricsExplorerChartContextMenu', () => {
 
   describe('helpers', () => {
     test('createNodeDetailLink()', () => {
-      const to = DateMath.parse('now', { roundUp: true });
-      const from = DateMath.parse('now-1h');
-      if (!to || !from) {
-        throw new Error('This should never happen');
-      }
+      const to = DateMath.parse('now', { roundUp: true })!;
+      const from = DateMath.parse('now-1h')!;
       const link = createNodeDetailLink(InfraNodeType.host, 'example-01', 'now-1h', 'now');
       expect(link).toBe(
         `#/link-to/host-detail/example-01?to=${to.valueOf()}&from=${from.valueOf()}`
