@@ -49,7 +49,7 @@ export function image(): ExpressionFunction<'image', null, Arguments, Return> {
         default: elasticLogo,
       },
       mode: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.mode,
         default: 'contain',
         options: Object.values(ImageMode),
