@@ -167,6 +167,22 @@ export class ColumnChart extends PointSeries {
       return yScale(d.y0 + d.y);
     }
 
+    function labelX(d, i) {
+      return x(d, i) + widthFunc(d, i) / 2;
+    }
+
+    function labelY(d) {
+      return y(d) + heightFunc(d) / 2;
+    }
+
+    function labelDisplay(d, i) {
+      if (isHorizontal && this.getBBox().width > widthFunc(d, i)) return 'none';
+      if (!isHorizontal && this.getBBox().width > heightFunc(d)) return 'none';
+      if (isHorizontal && this.getBBox().height > heightFunc(d)) return 'none';
+      if (!isHorizontal && this.getBBox().height > widthFunc(d, i)) return 'none';
+      return 'block';
+    }
+
     function widthFunc(d, i) {
       if (isTimeScale) {
         return datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount);
@@ -180,16 +196,7 @@ export class ColumnChart extends PointSeries {
       if (d.y0 === 0 && yMin > 0) {
         return yScale(yMin) - yScale(d.y);
       }
-
       return Math.abs(yScale(d.y0) - yScale(d.y0 + d.y));
-    }
-
-    function hideText(d, i, selector) {
-      if (isHorizontal && selector.getBBox().width > widthFunc(d, i)) return true;
-      if (!isHorizontal && selector.getBBox().width > heightFunc(d)) return true;
-      if (isHorizontal && selector.getBBox().height > heightFunc(d)) return true;
-      if (!isHorizontal && selector.getBBox().height > widthFunc(d, i)) return true;
-      return false;
     }
 
     function formatValue(d) {
@@ -203,43 +210,25 @@ export class ColumnChart extends PointSeries {
       .attr('y', isHorizontal ? y : x)
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
-      const data = this.chartData;
-      const color = this.handler.data.getColorFunc();
-      const layer = d3.select(bars[0].parentNode);
-      const barLabels = layer.selectAll('text').data(data.values.filter(function (d) {
-        return !_.isNull(d.y);
-      }));
-
-    barLabels
-      .exit()
-      .remove();
+    const data = this.chartData;
+    const color = this.handler.data.getColorFunc();
+    const layer = d3.select(bars[0].parentNode);
+    const barLabels = layer.selectAll('text').data(data.values.filter(function (d) {
+      return !_.isNull(d.y);
+    }));
 
     if (isLabels) {
-      if (isHorizontal) {
-        barLabels
-          .enter()
-          .append('text')
-          .text(formatValue)
-          .attr('x', (d, i) => x(d, i) + widthFunc(d, i) / 2)
-          .attr('y', (d) => y(d) + heightFunc(d) / 2)
-          .attr('dominant-baseline', 'central')
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '8pt')
-          .attr('fill', () => invertColor(color(data.label)))
-          .attr('display', function (d, i) { return hideText(d, i, this) ? 'none' : 'block'; });
-      } else {
-        barLabels
-          .enter()
-          .append('text')
-          .text(formatValue)
-          .attr('x', (d) => y(d) + heightFunc(d) / 2)
-          .attr('y', (d, i) => x(d, i) + widthFunc(d, i) / 2)
-          .attr('dominant-baseline', 'central')
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '8pt')
-          .attr('fill', () => invertColor(color(data.label)))
-          .attr('display', function (d, i) { return hideText(d, i, this) ? 'none' : 'block'; });
-      }
+      barLabels
+        .enter()
+        .append('text')
+        .text(formatValue)
+        .attr('x', isHorizontal ? labelX : labelY)
+        .attr('y', isHorizontal ? labelY : labelX)
+        .attr('dominant-baseline', 'central')
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '8pt')
+        .attr('fill', () => invertColor(color(data.label)))
+        .attr('display', labelDisplay);
     }
 
     return bars;
@@ -286,10 +275,29 @@ export class ColumnChart extends PointSeries {
       if ((isHorizontal && d.y < 0) || (!isHorizontal && d.y > 0)) {
         return yScale(0);
       }
-
       return yScale(d.y);
     }
 
+    function labelX(d, i) {
+      return x(d, i) + widthFunc(d, i) / 2;
+    }
+
+    function labelY(d) {
+      if (isHorizontal) {
+        return y(d) - 4;
+      }
+      return y(d) + heightFunc(d) + 4;
+    }
+
+    function labelDisplay(d, i) {
+      if (isHorizontal && this.getBBox().width > widthFunc(d, i)) {
+        return 'none';
+      }
+      if (!isHorizontal && this.getBBox().height > widthFunc(d)) {
+        return 'none';
+      }
+      return 'block';
+    }
     function widthFunc(d, i) {
       if (isTimeScale) {
         return datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount);
@@ -300,12 +308,6 @@ export class ColumnChart extends PointSeries {
     function heightFunc(d) {
       const baseValue = isLogScale ? 1 : 0;
       return Math.abs(yScale(baseValue) - yScale(d.y));
-    }
-    
-    function hideText(d, i, selector) {
-      if (isHorizontal && selector.getBBox().width > widthFunc(d, i)) return true;
-      if (!isHorizontal && selector.getBBox().height > widthFunc(d)) return true;
-      return false;
     }
 
     function formatValue(d) {
@@ -331,31 +333,17 @@ export class ColumnChart extends PointSeries {
       .remove();
 
     if (isLabels) {
-      if (isHorizontal) {
-        barLabels
-          .enter()
-          .append('text')
-          .text(formatValue)
-          .attr('x', (d, i) => x(d, i) + widthFunc(d, i) / 2)
-          .attr('y', (d, i) => y(d, i) - 4)
-          .attr('dominant-baseline', 'auto')
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '8pt')
-          .attr('fill', () => color(data.label))
-          .attr('display', function (d, i) { return hideText(d, i, this) ? 'none' : 'block'; });
-      } else {
-        barLabels
-          .enter()
-          .append('text')
-          .text(formatValue)
-          .attr('x', (d) => y(d) + heightFunc(d) + 4)
-          .attr('y', (d, i) => x(d, i) + widthFunc(d, i) / 2)
-          .attr('dominant-baseline', 'central')
-          .attr('text-anchor', 'start')
-          .attr('font-size', '8pt')
-          .attr('fill', () => color(data.label))
-          .attr('display', function (d, i) { return hideText(d, i, this) ? 'none' : 'block'; });
-      }
+      barLabels
+        .enter()
+        .append('text')
+        .text(formatValue)
+        .attr('font-size', '8pt')
+        .attr('x', isHorizontal ? labelX : labelY)
+        .attr('y', isHorizontal ? labelY : labelX)
+        .attr('dominant-baseline', isHorizontal ? 'auto' : 'central')
+        .attr('text-anchor', isHorizontal ? 'middle' : 'start')
+        .attr('fill', () => color(data.label))
+        .attr('display', labelDisplay);
     }
     return bars;
   }  
