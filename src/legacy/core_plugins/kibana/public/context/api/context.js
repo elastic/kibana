@@ -25,8 +25,8 @@ import {
   extractNanoSeconds,
   convertIsoToNanosAsStr,
   convertIsoToMillis,
-  convertTimeValueToIso
 } from './utils/date_conversion';
+import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
 
 /**
  * @typedef {Object} SearchResult
@@ -152,80 +152,6 @@ function fetchContextProvider(indexPatterns, Private) {
       .setParent(false)
       .setField('index', indexPattern)
       .setField('filter', filters);
-  }
-
-  /**
-   * Fetch the hits between `(afterTimeValue, tieBreakerValue)` and
-   * `endRangeMillis` from the `searchSource` using the given `timeField` and
-   * `tieBreakerField` fields up to a maximum of `maxCount` documents. The
-   * documents are sorted by `(timeField, tieBreakerField)` using the
-   * `timeSortDirection` for both fields
-   *
-   * The `searchSource` is assumed to have the appropriate index pattern
-   * and filters set.
-   *
-   * @param {SearchSourceT} searchSource
-   * @param {string} timeFieldName
-   * @param {SortDirection} timeFieldSortDir
-   * @param {number} startRangeMillis
-   * @param {number | null} endRangeMillis
-   * @param {number| string} afterTimeValue
-   * @param {string} tieBreakerField
-   * @param {number} tieBreakerValue
-   * @param {number} maxCount
-   * @param {string} nanosValue
-   * @returns {Promise<object[]>}
-   */
-  async function fetchHitsInInterval(
-    searchSource,
-    timeFieldName,
-    timeFieldSortDir,
-    startRangeMillis,
-    endRangeMillis,
-    afterTimeValue,
-    tieBreakerField,
-    tieBreakerValue,
-    maxCount,
-    nanosValue
-  ) {
-
-    const startRange = {
-      [timeFieldSortDir === 'asc' ? 'gte' : 'lte']: convertTimeValueToIso(startRangeMillis, nanosValue),
-    };
-    const endRange = endRangeMillis === null ? {} : {
-      [timeFieldSortDir === 'asc' ? 'lte' : 'gte']: convertTimeValueToIso(endRangeMillis, nanosValue),
-    };
-
-    const response = await searchSource
-      .setField('size', maxCount)
-      .setField('query', {
-        query: {
-          constant_score: {
-            filter: {
-              range: {
-                [timeFieldName]: {
-                  format: 'strict_date_optional_time',
-                  ...startRange,
-                  ...endRange,
-                }
-              },
-            },
-          },
-        },
-        language: 'lucene'
-      })
-      .setField('searchAfter', [
-        afterTimeValue,
-        tieBreakerValue
-      ])
-      .setField('sort', [
-        { [timeFieldName]: timeFieldSortDir },
-        { [tieBreakerField]: timeFieldSortDir },
-      ])
-      .setField('version', true)
-      .fetch();
-
-    return response.hits ? response.hits.hits : [];
   }
 }
 
