@@ -861,11 +861,9 @@ configService.atPath.mockReturnValue(config$);
 …
 const plugin = new MyPlugin({ configService }, …)
 ```
-This is not mandatory, but we strongly recommended to export your plugin mocks as well in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root level of the plugin.
+However it's not mandatory, we strongly recommended to export your plugin mocks as well, in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root level of the plugin. Plugin mocks should consist of mocks for *public API only*: setup/start/stop contracts. Mocks aren't necessary for pure functions as other plugins can call original implementation in tests.
 ```typescript
 // my_plugin/server/mocks.ts
-type MyPluginContract = PublicMethodsOf<MyPlugin>;
-
 const createSetupContractMock = () => {
   const startContract: jest.Mocked<MyPluginStartContract>= {
     isValid: jest.fn();
@@ -875,18 +873,8 @@ const createSetupContractMock = () => {
   return startContract;
 }
 
-const createMyPluginMock = () => {
-  const mocked: jest.Mocked<MyPluginContract> = {
-    setup: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
-  // here we already type check as TS infers to the correct type declared above
-  mocked.setup.mockResolvedValue(createSetupContractMock());
-  return mocked;
-};
-
 export const myPluginMocks = {
-  create: createMyPluginMock
+  createSetup: createSetupContractMock,
+  createStart: ...
 } 
 ```
