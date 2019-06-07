@@ -711,7 +711,7 @@ describe('#registerAuth', () => {
     expect(doRegister()).rejects.toThrowError('Auth interceptor was already registered');
   });
 
-  it('Should support implementing custom authentication logic', async () => {
+  it('supports implementing custom authentication logic', async () => {
     const router = new Router('');
     router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
 
@@ -744,7 +744,7 @@ describe('#registerAuth', () => {
     expect(sessionCookie.httpOnly).toBe(true);
   });
 
-  it('Should support rejecting a request from an unauthenticated user', async () => {
+  it('supports rejecting a request from an unauthenticated user', async () => {
     const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
     const router = new Router('');
     router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
@@ -758,7 +758,7 @@ describe('#registerAuth', () => {
       .expect(401);
   });
 
-  it('Should support redirecting', async () => {
+  it('supports redirecting', async () => {
     const redirectTo = '/redirect-url';
     const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
     const router = new Router('');
@@ -776,7 +776,7 @@ describe('#registerAuth', () => {
     expect(response.header.location).toBe(redirectTo);
   });
 
-  it(`Shouldn't expose internal error details`, async () => {
+  it(`doesn't expose internal error details`, async () => {
     const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
     const router = new Router('');
     router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
@@ -796,7 +796,7 @@ describe('#registerAuth', () => {
       });
   });
 
-  it(`Should let to manipulate cookies from route handler`, async () => {
+  it(`allows manipulating cookies from route handler`, async () => {
     const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
     const { sessionStorageFactory } = await registerAuth<StorageData>((req, t) => {
       const user = { id: '42' };
@@ -832,7 +832,7 @@ describe('#registerAuth', () => {
   });
 });
 
-test('Should enable auth for a route by default if registerAuth has been called', async () => {
+test('enables auth for a route by default if registerAuth has been called', async () => {
   const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('');
@@ -852,7 +852,7 @@ test('Should enable auth for a route by default if registerAuth has been called'
   expect(authenticate).toHaveBeenCalledTimes(1);
 });
 
-test('Should support disabling auth for a route explicitly', async () => {
+test('supports disabling auth for a route explicitly', async () => {
   const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('');
@@ -871,7 +871,7 @@ test('Should support disabling auth for a route explicitly', async () => {
   expect(authenticate).toHaveBeenCalledTimes(0);
 });
 
-test('Should support enabling auth for a route explicitly', async () => {
+test('supports enabling auth for a route explicitly', async () => {
   const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('');
@@ -890,7 +890,7 @@ test('Should support enabling auth for a route explicitly', async () => {
   expect(authenticate).toHaveBeenCalledTimes(1);
 });
 
-test('Should allow attaching metadata to attach meta-data tag strings to a route', async () => {
+test('allows attaching metadata to attach meta-data tag strings to a route', async () => {
   const tags = ['my:tag'];
   const { registerRouter, server: innerServer } = await server.setup(config);
 
@@ -913,7 +913,7 @@ test('Should allow attaching metadata to attach meta-data tag strings to a route
     .expect(200, { tags: [] });
 });
 
-test('Should expose route details of incoming request to a route handler', async () => {
+test('exposes route details of incoming request to a route handler', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('');
@@ -985,7 +985,7 @@ describe('#auth.isAuthenticated()', () => {
 });
 
 describe('#auth.get()', () => {
-  it('Should return authenticated status and allow associate auth state with request', async () => {
+  it('returns authenticated status and allow associate auth state with request', async () => {
     const user = { id: '42' };
     const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(config);
     const { sessionStorageFactory } = await registerAuth<StorageData>((req, t) => {
@@ -1003,7 +1003,7 @@ describe('#auth.get()', () => {
       .expect(200, { state: user, status: 'authenticated' });
   });
 
-  it('Should return correct authentication unknown status', async () => {
+  it('returns correct authentication unknown status', async () => {
     const { registerRouter, server: innerServer, auth } = await server.setup(config);
     const router = new Router('');
     router.get({ path: '/', validate: false }, (req, res) => res.ok(auth.get(req)));
@@ -1015,7 +1015,7 @@ describe('#auth.get()', () => {
       .expect(200, { status: 'unknown' });
   });
 
-  it('Should return correct unauthenticated status', async () => {
+  it('returns correct unauthenticated status', async () => {
     const authenticate = jest.fn();
 
     const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(config);
