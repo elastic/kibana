@@ -21,7 +21,7 @@ const reactRootNodeId = 'manageSpacesReactRoot';
 routes.when('/management/spaces/list', {
   template,
   k7Breadcrumbs: getListBreadcrumbs,
-  requireUICapability: 'manage.spaces',
+  requireUICapability: 'spaces.manage',
   controller(
     $scope: any,
     $http: any,
@@ -54,7 +54,7 @@ routes.when('/management/spaces/list', {
 routes.when('/management/spaces/create', {
   template,
   k7Breadcrumbs: getCreateBreadcrumbs,
-  requireUICapability: 'manage.spaces',
+  requireUICapability: 'spaces.manage',
   controller(
     $scope: any,
     $http: any,
@@ -91,7 +91,7 @@ routes.when('/management/spaces/edit', {
 routes.when('/management/spaces/edit/:spaceId', {
   template,
   k7Breadcrumbs: () => getEditBreadcrumbs(),
-  requireUICapability: 'manage.spaces',
+  requireUICapability: 'spaces.manage',
   controller(
     $scope: any,
     $http: any,
