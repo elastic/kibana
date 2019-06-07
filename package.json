@@ -220,7 +220,7 @@
     "redux": "4.0.0",
     "redux-actions": "2.2.1",
     "redux-thunk": "2.3.0",
-    "regression": "2.0.0",
+    "regression": "2.0.1",
     "request": "^2.88.0",
     "reselect": "^3.0.1",
     "resize-observer-polyfill": "^1.5.0",
