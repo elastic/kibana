@@ -458,13 +458,13 @@ export class VectorLayer extends AbstractLayer {
     if (this._style.arePointsSymbolizedAsCircles()) {
       layerId = pointLayerId;
       if (symbolLayer) {
-        mbMap.removeLayer(symbolLayerId);
+        mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
       }
       this._setMbCircleProperties(mbMap);
     } else {
       layerId = symbolLayerId;
       if (pointLayer) {
-        mbMap.removeLayer(pointLayerId);
+        mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
       }
       this._setMbSymbolProperties(mbMap);
     }
