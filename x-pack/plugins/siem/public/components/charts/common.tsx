@@ -6,9 +6,16 @@
 import { EuiFlexGroup, EuiText, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { CustomSeriesColorsMap, DataSeriesColorsValues, getSpecId } from '@elastic/charts';
+import {
+  CustomSeriesColorsMap,
+  DataSeriesColorsValues,
+  getSpecId,
+  mergeWithDefaultTheme,
+  PartialTheme,
+} from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 
+const chartHeight = 74;
 const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
@@ -25,12 +32,6 @@ export const ChartHolder = () => (
   </FlexGroup>
 );
 
-export interface AreaChartData {
-  key: string;
-  value: ChartData[] | [] | null;
-  color?: string | undefined;
-}
-
 export interface ChartData {
   x: number | string | null;
   y: number | string | null;
@@ -38,14 +39,14 @@ export interface ChartData {
   g?: number | string;
 }
 
-export interface BarChartData {
+export interface ChartConfigsData {
   key: string;
-  value: [ChartData] | [] | null;
+  value: ChartData[] | [] | null;
   color?: string | undefined;
 }
 
 export const WrappedByAutoSizer = styled.div`
-  height: 100px;
+  height: ${chartHeight}px;
   position: relative;
 
   &:hover {
@@ -63,6 +64,7 @@ export enum SeriesType {
   LINE = 'line',
 }
 
+// Customize colors: https://ela.st/custom-colors
 export const getSeriesStyle = (
   seriesKey: string,
   color: string | undefined,
@@ -78,4 +80,27 @@ export const getSeriesStyle = (
   customSeriesColors.set(dataSeriesColorValues, color);
 
   return customSeriesColors;
+};
+
+// Apply margins and paddings: https://ela.st/charts-spacing
+export const getTheme = () => {
+  const theme: PartialTheme = {
+    chartMargins: {
+      left: 0,
+      right: 0,
+      // Apply some paddings to the top to avoid chopping the y tick https://ela.st/chopping-edge
+      top: 4,
+      bottom: 0,
+    },
+    chartPaddings: {
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+    },
+    scales: {
+      barsPadding: 0.5,
+    },
+  };
+  return mergeWithDefaultTheme(theme);
 };

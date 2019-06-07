@@ -13,14 +13,16 @@ import {
   getSpecId,
   Position,
   ScaleType,
+  Settings,
 } from '@elastic/charts';
 import '@elastic/charts/dist/style.css';
 import {
-  AreaChartData,
+  ChartConfigsData,
   ChartHolder,
   getSeriesStyle,
   numberFormatter,
   WrappedByAutoSizer,
+  getTheme,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -28,6 +30,7 @@ const dateFormatter = (d: string) => {
   return d.toLocaleString().split('T')[0];
 };
 
+// custom series styles: https://ela.st/areachart-styling
 const getSeriesLineStyle = (color: string | undefined) => {
   return color
     ? {
@@ -57,14 +60,16 @@ const getSeriesLineStyle = (color: string | undefined) => {
     : undefined;
 };
 
+// https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = React.memo<{
-  data: AreaChartData[];
+  data: ChartConfigsData[];
   width: number | null | undefined;
   height: number | null | undefined;
 }>(({ data, ...chartConfigs }) => {
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
+        <Settings theme={getTheme()} />
         {data.map(series => {
           const seriesKey = series.key;
           const seriesSpecId = getSpecId(seriesKey);
@@ -103,7 +108,7 @@ export const AreaChartBaseComponent = React.memo<{
 });
 
 export const AreaChartWithCustomPrompt = React.memo<{
-  data: AreaChartData[] | null | undefined;
+  data: ChartConfigsData[] | null | undefined;
   height: number | null | undefined;
   width: number | null | undefined;
 }>(({ data, height, width }) => {
@@ -121,7 +126,7 @@ export const AreaChartWithCustomPrompt = React.memo<{
   );
 });
 
-export const AreaChart = React.memo<{ areaChart: AreaChartData[] | null | undefined }>(
+export const AreaChart = React.memo<{ areaChart: ChartConfigsData[] | null | undefined }>(
   ({ areaChart }) => (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
