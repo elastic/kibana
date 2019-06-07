@@ -31,7 +31,12 @@ export const OverviewComponent = pure(() => {
 
   return (
     <>
-      <HeaderPage subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE} />
+      <HeaderPage
+        badgeLabel={i18n.PAGE_BADGE_LABEL}
+        badgeTooltip={i18n.PAGE_BADGE_TOOLTIP}
+        subtitle={i18n.PAGE_SUBTITLE}
+        title={i18n.PAGE_TITLE}
+      />
 
       <WithSource sourceId="default">
         {({ indicesExist }) =>

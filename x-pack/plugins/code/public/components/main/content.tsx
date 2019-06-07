@@ -53,8 +53,8 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   onSearchScopeChanged: (s: SearchScope) => void;
   repoScope: string[];
   notFoundDirs: string[];
+  fileTreeLoadingPaths: string[];
   searchOptions: SearchOptions;
-  fileTreeLoading: boolean;
   query: string;
 }
 const LANG_MD = 'markdown';
@@ -237,7 +237,7 @@ class CodeContent extends React.PureComponent<Props> {
     );
   }
 
-  public shouldRenderProgress() {
+  public shouldRenderCloneProgress() {
     if (!this.props.repoStatus) {
       return false;
     }
@@ -250,7 +250,7 @@ class CodeContent extends React.PureComponent<Props> {
     );
   }
 
-  public renderProgress() {
+  public renderCloneProgress() {
     if (!this.props.repoStatus) {
       return null;
     }
@@ -266,13 +266,16 @@ class CodeContent extends React.PureComponent<Props> {
   }
 
   public renderContent() {
-    const { file, match, tree, fileTreeLoading, isNotFound, notFoundDirs } = this.props;
+    const { file, match, tree, fileTreeLoadingPaths, isNotFound, notFoundDirs } = this.props;
     const { path, pathType, resource, org, repo, revision } = match.params;
+
+    // The clone progress rendering should come before the NotFound rendering.
+    if (this.shouldRenderCloneProgress()) {
+      return this.renderCloneProgress();
+    }
+
     if (isNotFound || notFoundDirs.includes(path || '')) {
       return <NotFound />;
-    }
-    if (this.shouldRenderProgress()) {
-      return this.renderProgress();
     }
 
     const repoUri = `${resource}/${org}/${repo}`;
@@ -281,7 +284,7 @@ class CodeContent extends React.PureComponent<Props> {
         const node = this.findNode(path ? path.split('/') : [], tree);
         return (
           <div className="codeContainer__directoryView">
-            <Directory node={node} loading={fileTreeLoading} />
+            <Directory node={node} loading={fileTreeLoadingPaths.includes(path)} />
             <CommitHistory
               repoUri={repoUri}
               header={
@@ -390,7 +393,7 @@ const mapStateToProps = (state: RootState) => ({
   notFoundDirs: state.file.notFoundDirs,
   file: state.file.file,
   tree: state.file.tree,
-  fileTreeLoading: state.file.fileTreeLoading,
+  fileTreeLoadingPaths: state.file.fileTreeLoadingPaths,
   currentTree: currentTreeSelector(state),
   branches: state.file.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),

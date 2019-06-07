@@ -14,13 +14,13 @@ import { IpDetails } from './ip_details';
 import { KpiHosts } from './kpi_hosts';
 import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
-import { Note } from './note';
-import { PinnedEvent } from './pinned_event';
 import { Overview } from './overview';
 import { SourceStatus } from './source_status';
 import { Sources, SourceConfiguration } from './sources';
 import { UncommonProcesses } from './uncommon_processes';
-import { Timeline } from './timeline';
+import { Note } from './note/saved_object';
+import { PinnedEvent } from './pinned_event/saved_object';
+import { Timeline } from './timeline/saved_object';
 
 export * from './hosts';
 

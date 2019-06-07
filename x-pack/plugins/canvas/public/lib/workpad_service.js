@@ -9,6 +9,7 @@ import {
   API_ROUTE_WORKPAD,
   API_ROUTE_WORKPAD_ASSETS,
   API_ROUTE_WORKPAD_STRUCTURES,
+  DEFAULT_WORKPAD_CSS,
 } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
 
@@ -22,7 +23,10 @@ export function create(workpad) {
 }
 
 export function get(workpadId) {
-  return fetch.get(`${apiPath}/${workpadId}`).then(({ data: workpad }) => workpad);
+  return fetch.get(`${apiPath}/${workpadId}`).then(({ data: workpad }) => {
+    // shim old workpads with new properties
+    return { css: DEFAULT_WORKPAD_CSS, ...workpad };
+  });
 }
 
 export function update(id, workpad) {

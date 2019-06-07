@@ -28,12 +28,12 @@ import {
   GuideText,
 } from '../../components';
 
-const titleHtml = require('./title.html');
-const subTitleHtml = require('./sub_title.html');
-const textTitleHtml = require('./text_title.html');
-const textHtml = require('./text.html');
-const subTextHtml = require('./sub_text.html');
-const subduedHtml = require('./subdued_type.html');
+import titleHtml from './title.html';
+import subTitleHtml from './sub_title.html';
+import textTitleHtml from './text_title.html';
+import textHtml from './text.html';
+import subTextHtml from './sub_text.html';
+import subduedHtml from './subdued_type.html';
 
 export default props => (
   <GuidePage title={props.route.name}>

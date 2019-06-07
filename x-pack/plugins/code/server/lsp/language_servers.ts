@@ -24,7 +24,7 @@ export interface LanguageServerDefinition extends LanguageServer {
 export const TYPESCRIPT: LanguageServerDefinition = {
   name: 'TypeScript',
   builtinWorkspaceFolders: false,
-  languages: ['typescript', 'javascript', 'html'],
+  languages: ['typescript', 'javascript'],
   launcher: TypescriptServerLauncher,
   installationType: InstallationType.Embed,
   embedPath: require.resolve('@elastic/javascript-typescript-langserver/lib/language-server.js'),
