@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createHashHistory } from 'history';
-
-// Make history singleton available across APM project
-// TODO: Explore using React context or hook instead?
-const history = createHashHistory();
-
-export { history };
+export const DEFAULT_SORT_FIELD = 'updated';
+export const DEFAULT_SORT_DIRECTION = 'desc';

@@ -8,7 +8,3 @@ import * as timelineActions from './actions';
 import * as timelineSelectors from './selectors';
 
 export { timelineActions, timelineSelectors };
-export * from './epic';
-export * from './epic_favorite';
-export * from './epic_note';
-export * from './epic_pinned_event';
