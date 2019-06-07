@@ -30,6 +30,7 @@ export const maybeFlatMap = <T, T2>(input: T[] | undefined, fn: (i: T) => T2[]) 
 export const wordRegExp = (word: string) => new RegExp(`(\\b|_)${word}(\\b|_)`);
 
 export const getTypePackageName = (pkgName: string) => {
-  const match = pkgName.match(/^@(.+?)\/(.+?)$/);
+  const scopedPkgRe = /^@(.+?)\/(.+?)$/;
+  const match = pkgName.match(scopedPkgRe);
   return `@types/${match ? `${match[1]}__${match[2]}` : pkgName}`;
 };
