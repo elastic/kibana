@@ -20,21 +20,26 @@ import expect from '@kbn/expect';
 
 export function ErrorPageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   class ErrorPage {
     async expectForbidden() {
-      const title = await testSubjects.getVisibleText('unavailable-unauthorized-title');
-      const message = await testSubjects.getVisibleText('unavailable-unauthorized-message');
+      await retry.try(async () => {
+        const title = await testSubjects.getVisibleText('unavailable-unauthorized-title');
+        const message = await testSubjects.getVisibleText('unavailable-unauthorized-message');
 
-      expect(title).to.eql('No access to Kibana');
-      expect(message).to.eql('Your account does not have access to Kibana.');
+        expect(title).to.eql('No access to Kibana');
+        expect(message).to.eql('Your account does not have access to Kibana.');
+      });
     }
     async expectNotFound() {
-      const title = await testSubjects.getVisibleText('unavailable-notFound-title');
-      const message = await testSubjects.getVisibleText('unavailable-notFound-message');
+      await retry.try(async () => {
+        const title = await testSubjects.getVisibleText('unavailable-notFound-title');
+        const message = await testSubjects.getVisibleText('unavailable-notFound-message');
 
-      expect(title).to.eql('Not found');
-      expect(message).to.eql('Sorry, the requested resource was not found.');
+        expect(title).to.eql('Not found');
+        expect(message).to.eql('Sorry, the requested resource was not found.');
+      });
     }
   }
 
