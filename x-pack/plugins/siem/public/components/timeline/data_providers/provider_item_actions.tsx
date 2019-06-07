@@ -30,6 +30,7 @@ interface OwnProps {
   kqlQuery: string;
   isEnabled: boolean;
   isExcluded: boolean;
+  isLoading: boolean;
   isOpen: boolean;
   onDataProviderEdited?: OnDataProviderEdited;
   operator: QueryOperator;
@@ -52,6 +53,7 @@ export const getProviderActions = ({
   field,
   isEnabled,
   isExcluded,
+  isLoading,
   operator,
   onDataProviderEdited,
   onFilterForFieldPresent,
@@ -67,6 +69,7 @@ export const getProviderActions = ({
   field: string;
   isEnabled: boolean;
   isExcluded: boolean;
+  isLoading: boolean;
   onDataProviderEdited?: OnDataProviderEdited;
   onFilterForFieldPresent: () => void;
   operator: QueryOperator;
@@ -81,30 +84,35 @@ export const getProviderActions = ({
     items: [
       {
         className: EDIT_CLASS_NAME,
+        disabled: isLoading,
         icon: 'pencil',
         name: i18n.EDIT_MENU_ITEM,
         panel: 1,
       },
       {
         className: EXCLUDE_CLASS_NAME,
+        disabled: isLoading,
         icon: `${isExcluded ? 'plusInCircle' : 'minusInCircle'}`,
         name: isExcluded ? i18n.INCLUDE_DATA_PROVIDER : i18n.EXCLUDE_DATA_PROVIDER,
         onClick: toggleExcluded,
       },
       {
         className: ENABLE_CLASS_NAME,
+        disabled: isLoading,
         icon: `${isEnabled ? 'eyeClosed' : 'eye'}`,
         name: isEnabled ? i18n.TEMPORARILY_DISABLE_DATA_PROVIDER : i18n.RE_ENABLE_DATA_PROVIDER,
         onClick: toggleEnabled,
       },
       {
         className: FILTER_FOR_FIELD_PRESENT_CLASS_NAME,
+        disabled: isLoading,
         icon: 'logstashFilter',
         name: i18n.FILTER_FOR_FIELD_PRESENT,
         onClick: onFilterForFieldPresent,
       },
       {
         className: DELETE_CLASS_NAME,
+        disabled: isLoading,
         icon: 'trash',
         name: i18n.DELETE_DATA_PROVIDER,
         onClick: deleteItem,
@@ -143,6 +151,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       field,
       isEnabled,
       isExcluded,
+      isLoading,
       isOpen,
       operator,
       providerId,
@@ -159,6 +168,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       field,
       isEnabled,
       isExcluded,
+      isLoading,
       onDataProviderEdited: this.onDataProviderEdited,
       onFilterForFieldPresent: this.onFilterForFieldPresent,
       operator,

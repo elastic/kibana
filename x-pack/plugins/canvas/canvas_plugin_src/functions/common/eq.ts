@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Function } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -12,7 +12,7 @@ interface Arguments {
 
 type Return = boolean | number | string | null;
 
-export function eq(): Function<'eq', Arguments, Return> {
+export function eq(): ExpressionFunction<'eq', any, Arguments, Return> {
   const { help, args: argHelp } = getFunctionHelp().eq;
 
   return {
