@@ -6,8 +6,8 @@
 import { ServerRoute } from 'hapi';
 
 export { Request, Server, ServerRoute } from 'hapi';
-export { LegacyPluginInitializer } from 'src/legacy/types';
 export { PluginInitializerContext } from 'src/core/server';
+export { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
 
 export interface CoreSetup {
   http: { route(route: ServerRoute | ServerRoute[]): void };

@@ -26,6 +26,9 @@ export function Detail({ match }: MatchPackage) {
     },
     [pkgkey]
   );
+
+  // don't have designs for loading/empty states
+  if (!info) return null;
   const { description, name, version } = info;
 
   return (
