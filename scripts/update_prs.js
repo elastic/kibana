@@ -17,19 +17,5 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
-import ReactMarkdown from 'react-markdown';
-
-const markdownRenderers = {
-  root: Fragment,
-};
-
-// Render markdown string into JSX inside of a Fragment.
-export const MarkdownSimple = ({ children }) => (
-  <ReactMarkdown renderers={markdownRenderers}>{children}</ReactMarkdown>
-);
-
-MarkdownSimple.propTypes = {
-  children: PropTypes.string,
-};
+require('../src/setup_node_env');
+require('../src/dev/prs/run_update_prs_cli');

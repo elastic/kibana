@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './saved_object';
-export * from './saved_object_mappings';
+import { ManageEpicTimelineId } from './manage_timeline_id';
+
+export const myEpicTimelineId = new ManageEpicTimelineId();

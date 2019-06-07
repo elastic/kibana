@@ -18,12 +18,13 @@
  */
 
 import $ from 'jquery';
-import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
+import { getFormat } from '../../../visualize/loader/pipeline_helpers/utilities';
+import template from './_pointseries_tooltip.html';
 
-export function PointSeriesTooltipFormatter($compile, $rootScope) {
+export function PointSeriesTooltipFormatterProvider($compile, $rootScope) {
 
   const $tooltipScope = $rootScope.$new();
-  const $tooltip = $(require('ui/agg_response/point_series/_tooltip.html'));
+  const $tooltip = $(template);
   $compile($tooltip)($tooltipScope);
 
   return function () {
@@ -67,3 +68,15 @@ export function PointSeriesTooltipFormatter($compile, $rootScope) {
     };
   };
 }
+
+let _tooltipFormatter;
+export const getPointSeriesTooltipFormatter = () => {
+  if (!_tooltipFormatter) {
+    throw new Error('tooltip formatter not initialized');
+  }
+  return _tooltipFormatter;
+};
+
+export const setPointSeriesTooltipFormatter = Private => {
+  _tooltipFormatter = Private(PointSeriesTooltipFormatterProvider);
+};
