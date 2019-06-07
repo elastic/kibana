@@ -10,7 +10,7 @@ import { IndexPatternPrivateState } from './indexpattern';
 
 export function toExpression(state: IndexPatternPrivateState) {
   if (state.columnOrder.length === 0) {
-    return '';
+    return null;
   }
 
   const fieldNames = state.columnOrder.map(col => state.columns[col].sourceField);
