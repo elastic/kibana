@@ -19,6 +19,8 @@ import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status'
 // @ts-ignore: could not find declaration file for module
 import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flags';
 // @ts-ignore: could not find declaration file for module
+import { LICENSE_TYPE } from '../../common/constants/license';
+// @ts-ignore: could not find declaration file for module
 import { annotationRoutes } from '../routes/annotations';
 // @ts-ignore: could not find declaration file for module
 import { jobRoutes } from '../routes/anomaly_detectors';
@@ -62,7 +64,7 @@ export interface MlHttpServiceSetup extends HttpServiceSetup {
 }
 
 export interface MlXpackMainPlugin extends XPackMainPlugin {
-  status: any;
+  status?: any;
 }
 
 export interface MlCoreSetup {
@@ -84,6 +86,7 @@ export interface MlInitializerContext extends PluginInitializerContext {
 export interface PluginsSetup {
   elasticsearch: ElasticsearchPlugin;
   xpackMain: MlXpackMainPlugin;
+  security: any;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }

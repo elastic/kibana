@@ -16,7 +16,7 @@ import {
 // @ts-ignore: could not find declaration file for module
 import mappings from './mappings';
 
-interface MlKbnServer extends KbnServer {
+interface MlServer extends Server {
   addAppLinksToSampleDataset: () => {};
 }
 
@@ -56,8 +56,8 @@ export const ml = (kibana: any) => {
       },
     },
 
-    async init(server: Server) {
-      const kbnServer = (server as unknown) as MlKbnServer;
+    async init(server: MlServer) {
+      const kbnServer = (server as unknown) as KbnServer;
 
       const initializerContext = ({
         legacyConfig: server.config(),
