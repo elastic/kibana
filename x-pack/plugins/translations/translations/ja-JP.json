@@ -8639,7 +8639,7 @@
     "xpack.security.account.passwordsDoNotMatch": "パスワードが一致していません。",
     "xpack.security.account.usernameGroupDescription": "この情報は変更できません。",
     "xpack.security.account.usernameGroupTitle": "ユーザー名とメールアドレス",
-    "xpack.security.hacks.logoutNotification": "操作がないため間もなくログアウトします。再開するには [OK] をクリックしてくださ。",
+    "xpack.security.components.sessionExpiration.logoutNotification": "操作がないため間もなくログアウトします。再開するには [OK] をクリックしてくださ。",
     "xpack.security.hacks.warningTitle": "警告",
     "xpack.security.loggedOut.login": "ログイン",
     "xpack.security.loggedOut.title": "ログアウト完了",

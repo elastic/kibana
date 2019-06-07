@@ -7284,7 +7284,7 @@
     "xpack.searchProfiler.upgradeLicenseMessage": "Search Profiler 不可用于当前的{licenseInfo}许可。请升级您的许可。",
     "xpack.security.account.changePasswordNotSupportedText": "不能更改此帐户的密码。",
     "xpack.security.account.noEmailMessage": "（无电子邮件）",
-    "xpack.security.hacks.logoutNotification": "由于处于不活动状态，您即将退出。单击“确定”可以恢复。",
+    "xpack.security.components.sessionExpiration.logoutNotification": "由于处于不活动状态，您即将退出。单击“确定”可以恢复。",
     "xpack.security.hacks.warningTitle": "警告",
     "xpack.security.loggedOut.login": "登录",
     "xpack.security.loggedOut.title": "已成功退出",
