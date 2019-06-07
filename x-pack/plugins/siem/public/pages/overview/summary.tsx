@@ -39,10 +39,10 @@ export const Summary = pure(() => (
               </EuiLink>
             ),
             siemSolution: (
-              <EuiLink href="https://www.elastic.co/solutions/security-analytics" target="blank">
+              <EuiLink href="https://www.elastic.co/solutions/siem" target="blank">
                 <FormattedMessage
                   id="xpack.siem.overview.startedText.siemSolutionLinkText"
-                  defaultMessage="Security Analytics"
+                  defaultMessage="SIEM Solution"
                 />
               </EuiLink>
             ),

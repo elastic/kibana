@@ -110,7 +110,7 @@ app.directive('dashboardApp', function ($injector) {
 
       const dashboardStateManager = new DashboardStateManager({
         savedDashboard: dash,
-        AppState,
+        AppStateClass: AppState,
         hideWriteControls: dashboardConfig.getHideWriteControls(),
         addFilter: ({ field, value, operator, index }) => {
           filterActions.addFilter(field, value, operator, index, dashboardStateManager.getAppState(), filterManager);
@@ -119,8 +119,6 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.getDashboardState = () => dashboardStateManager;
       $scope.appState = dashboardStateManager.getAppState();
-      $scope.refreshInterval = timefilter.getRefreshInterval();
-
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.

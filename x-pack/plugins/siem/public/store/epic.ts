@@ -5,13 +5,10 @@
  */
 
 import { combineEpics } from 'redux-observable';
-
-import {
-  createTimelineEpic,
-  createTimelineFavoriteEpic,
-  createTimelineNoteEpic,
-  createTimelinePinnedEventEpic,
-} from './timeline';
+import { createTimelineEpic } from './timeline/epic';
+import { createTimelineFavoriteEpic } from './timeline/epic_favorite';
+import { createTimelineNoteEpic } from './timeline/epic_note';
+import { createTimelinePinnedEventEpic } from './timeline/epic_pinned_event';
 
 export const createRootEpic = <State>() =>
   combineEpics(

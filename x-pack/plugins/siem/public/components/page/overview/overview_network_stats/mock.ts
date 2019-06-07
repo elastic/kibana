@@ -8,10 +8,14 @@ import { OverviewNetworkData } from '../../../../graphql/types';
 
 export const mockData: { OverviewNetwork: OverviewNetworkData } = {
   OverviewNetwork: {
-    packetbeatFlow: 16,
-    packetbeatDNS: 10277307,
+    auditbeatSocket: 12,
+    filebeatCisco: 999,
+    filebeatNetflow: 7777,
+    filebeatPanw: 66,
     filebeatSuricata: 60015,
     filebeatZeek: 2003,
-    auditbeatSocket: 12,
+    packetbeatDNS: 10277307,
+    packetbeatFlow: 16,
+    packetbeatTLS: 3400000,
   },
 };
