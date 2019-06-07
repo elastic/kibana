@@ -61,7 +61,7 @@ export class EuiMonitoringTable extends React.PureComponent {
             statusBadge = (
               <EuiHealth color="danger">
                 {i18n.translate('xpack.monitoring.euiTable.isInternalCollectorLabel', {
-                  defaultMessage: 'Default collection'
+                  defaultMessage: 'Internal collection'
                 })}
               </EuiHealth>
             );
@@ -70,7 +70,7 @@ export class EuiMonitoringTable extends React.PureComponent {
             statusBadge = (
               <EuiHealth color="warning">
                 {i18n.translate('xpack.monitoring.euiTable.isPartiallyMigratedLabel', {
-                  defaultMessage: 'Default collection and Metricbeat collection'
+                  defaultMessage: 'Internal collection and Metricbeat collection'
                 })}
               </EuiHealth>
             );
