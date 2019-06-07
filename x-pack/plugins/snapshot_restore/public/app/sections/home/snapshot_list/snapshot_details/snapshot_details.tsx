@@ -22,7 +22,7 @@ import {
 import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { SectionError, SectionLoading } from '../../../../components';
+import { SectionError, SectionLoading, SnapshotDeleteProvider } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 import {
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
@@ -37,6 +37,7 @@ interface Props extends RouteComponentProps {
   repositoryName: string;
   snapshotId: string;
   onClose: () => void;
+  onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
 }
 
 const TAB_SUMMARY = 'summary';
@@ -51,6 +52,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   repositoryName,
   snapshotId,
   onClose,
+  onSnapshotDeleted,
 }) => {
   const {
     core: { i18n },
@@ -180,6 +182,36 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
+
+        {snapshotDetails ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <SnapshotDeleteProvider>
+                  {deleteSnapshotPrompt => {
+                    return (
+                      <EuiButtonEmpty
+                        color="danger"
+                        data-test-subj="srSnapshotDetailsDeleteActionButton"
+                        onClick={() =>
+                          deleteSnapshotPrompt(
+                            [{ repository: repositoryName, snapshot: snapshotId }],
+                            onSnapshotDeleted
+                          )
+                        }
+                      >
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.snapshotDetails.deleteButtonLabel"
+                          defaultMessage="Delete"
+                        />
+                      </EuiButtonEmpty>
+                    );
+                  }}
+                </SnapshotDeleteProvider>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   };

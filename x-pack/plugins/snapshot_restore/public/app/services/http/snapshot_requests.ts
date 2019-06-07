@@ -26,11 +26,13 @@ export const loadSnapshot = (repositoryName: string, snapshotId: string) =>
     method: 'get',
   });
 
-export const deleteSnapshots = async (snapshotIds: string[]) => {
+export const deleteSnapshots = async (
+  snapshotIds: Array<{ snapshot: string; repository: string }>
+) => {
   return sendRequest({
     path: httpService.addBasePath(
       `${API_BASE_PATH}snapshots/${snapshotIds
-        .map(snapshotId => encodeURIComponent(snapshotId))
+        .map(({ snapshot, repository }) => encodeURIComponent(`${repository}/${snapshot}`))
         .join(',')}`
     ),
     method: 'delete',

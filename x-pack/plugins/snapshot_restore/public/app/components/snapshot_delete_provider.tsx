@@ -13,9 +13,14 @@ interface Props {
   children: (deleteSnapshot: DeleteSnapshot) => React.ReactElement;
 }
 
-export type DeleteSnapshot = (ids: string[], onSuccess?: OnSuccessCallback) => void;
+export type DeleteSnapshot = (
+  ids: Array<{ snapshot: string; repository: string }>,
+  onSuccess?: OnSuccessCallback
+) => void;
 
-type OnSuccessCallback = (snapshotsDeleted: string[]) => void;
+type OnSuccessCallback = (
+  snapshotsDeleted: Array<{ snapshot: string; repository: string }>
+) => void;
 
 export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
   const {
@@ -25,8 +30,11 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
     },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const [snapshotIds, setSnapshotIds] = useState<string[]>([]);
+  const [snapshotIds, setSnapshotIds] = useState<Array<{ snapshot: string; repository: string }>>(
+    []
+  );
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
 
   const deleteSnapshotPrompt: DeleteSnapshot = (ids, onSuccess = () => undefined) => {
@@ -45,7 +53,12 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
 
   const deleteSnapshot = () => {
     const snapshotsToDelete = [...snapshotIds];
+    setIsDeleting(true);
     deleteSnapshots(snapshotsToDelete).then(({ data: { itemsDeleted, errors }, error }) => {
+      // Wait until request is done to close modal; deleting snapshots take longer due to their sequential nature
+      closeModal();
+      setIsDeleting(false);
+
       // Surface success notifications
       if (itemsDeleted && itemsDeleted.length) {
         const hasMultipleSuccesses = itemsDeleted.length > 1;
@@ -59,7 +72,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
             )
           : i18n.translate('xpack.snapshotRestore.deleteSnapshot.successSingleNotificationTitle', {
               defaultMessage: "Deleted snapshot '{name}'",
-              values: { name: itemsDeleted[0] },
+              values: { name: itemsDeleted[0].snapshot },
             });
         toastNotifications.addSuccess(successMessage);
         if (onSuccessCallback.current) {
@@ -82,12 +95,11 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
             })
           : i18n.translate('xpack.snapshotRestore.deleteSnapshot.errorSingleNotificationTitle', {
               defaultMessage: "Error deleting snapshot '{name}'",
-              values: { name: (errors && errors[0].name) || snapshotsToDelete[0] },
+              values: { name: (errors && errors[0].id.snapshot) || snapshotsToDelete[0].snapshot },
             });
         toastNotifications.addDanger(errorMessage);
       }
     });
-    closeModal();
   };
 
   const renderModal = () => {
@@ -105,7 +117,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
               <FormattedMessage
                 id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteSingleTitle"
                 defaultMessage="Delete snapshot '{name}'?"
-                values={{ name: snapshotIds[0] }}
+                values={{ name: snapshotIds[0].snapshot }}
               />
             ) : (
               <FormattedMessage
@@ -136,6 +148,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
               />
             )
           }
+          confirmButtonDisabled={isDeleting}
           buttonColor="danger"
           data-test-subj="srdeleteSnapshotConfirmationModal"
         >
@@ -155,8 +168,8 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
                 />
               </p>
               <ul>
-                {snapshotIds.map(name => (
-                  <li key={name}>{name}</li>
+                {snapshotIds.map(({ snapshot, repository }) => (
+                  <li key={`${repository}/${snapshot}`}>{snapshot}</li>
                 ))}
               </ul>
               <p>

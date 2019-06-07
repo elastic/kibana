@@ -61,6 +61,23 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     history.push(`${BASE_PATH}/snapshots`);
   };
 
+  const onSnapshotDeleted = (
+    snapshotsDeleted: Array<{ snapshot: string; repository: string }>
+  ): void => {
+    if (
+      repositoryName &&
+      snapshotId &&
+      snapshotsDeleted.find(
+        ({ snapshot, repository }) => snapshot === snapshotId && repository === repositoryName
+      )
+    ) {
+      closeSnapshotDetails();
+    }
+    if (snapshotsDeleted.length) {
+      reload();
+    }
+  };
+
   // Allow deeplinking to list pre-filtered by repository name
   const [filteredRepository, setFilteredRepository] = useState<string | undefined>(undefined);
   useEffect(() => {
@@ -266,6 +283,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           repositories={repositories}
           reload={reload}
           openSnapshotDetailsUrl={openSnapshotDetailsUrl}
+          onSnapshotDeleted={onSnapshotDeleted}
           repositoryFilter={filteredRepository}
         />
       </Fragment>
@@ -279,6 +297,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           repositoryName={repositoryName}
           snapshotId={snapshotId}
           onClose={closeSnapshotDetails}
+          onSnapshotDeleted={onSnapshotDeleted}
         />
       ) : null}
       {content}

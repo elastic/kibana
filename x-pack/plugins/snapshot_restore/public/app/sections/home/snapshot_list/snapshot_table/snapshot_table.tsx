@@ -29,6 +29,7 @@ interface Props {
   reload: () => Promise<void>;
   openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
   repositoryFilter?: string;
+  onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
 }
 
 export const SnapshotTable: React.FunctionComponent<Props> = ({
@@ -36,6 +37,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   repositories,
   reload,
   openSnapshotDetailsUrl,
+  onSnapshotDeleted,
   repositoryFilter,
 }) => {
   const {
@@ -143,36 +145,30 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       }),
       actions: [
         {
-          render: ({ snapshot }: SnapshotDetails) => {
+          render: ({ snapshot, repository }: SnapshotDetails) => {
             return (
               <SnapshotDeleteProvider>
                 {deleteSnapshotPrompt => {
-                  const label = true // name !== managedRepository
-                    ? i18n.translate(
-                        'xpack.snapshotRestore.snapshotList.table.actionRemoveTooltip',
-                        { defaultMessage: 'Remove' }
-                      )
-                    : i18n.translate(
-                        'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositoryTooltip',
-                        {
-                          defaultMessage: 'You cannot delete a managed repository.',
-                        }
-                      );
+                  const label = i18n.translate(
+                    'xpack.snapshotRestore.snapshotList.table.actionDeleteTooltip',
+                    { defaultMessage: 'Delete' }
+                  );
                   return (
                     <EuiToolTip content={label} delay="long">
                       <EuiButtonIcon
                         aria-label={i18n.translate(
-                          'xpack.snapshotRestore.snapshotList.table.actionRemoveAriaLabel',
+                          'xpack.snapshotRestore.snapshotList.table.actionDeleteAriaLabel',
                           {
-                            defaultMessage: 'Remove snapshot `{name}`',
+                            defaultMessage: 'Delete snapshot `{name}`',
                             values: { name: snapshot },
                           }
                         )}
                         iconType="trash"
                         color="danger"
                         data-test-subj="srsnapshotListDeleteActionButton"
-                        onClick={() => deleteSnapshotPrompt([snapshot], () => {})}
-                        // isDisabled={Boolean(name === managedRepository)}
+                        onClick={() =>
+                          deleteSnapshotPrompt([{ snapshot, repository }], onSnapshotDeleted)
+                        }
                       />
                     </EuiToolTip>
                   );
@@ -216,14 +212,17 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       <SnapshotDeleteProvider>
         {(
           deleteSnapshotPrompt: (
-            ids: string[],
-            onSuccess?: (snapshotsDeleted: string[]) => void
+            ids: Array<{ snapshot: string; repository: string }>,
+            onSuccess?: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void
           ) => void
         ) => {
           return (
             <EuiButton
               onClick={() =>
-                deleteSnapshotPrompt(selectedItems.map(({ snapshot }) => snapshot), () => {})
+                deleteSnapshotPrompt(
+                  selectedItems.map(({ snapshot, repository }) => ({ snapshot, repository })),
+                  onSnapshotDeleted
+                )
               }
               color="danger"
               data-test-subj="srSnapshotListBulkDeleteActionButton"
@@ -231,12 +230,12 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
               {selectedItems.length === 1 ? (
                 <FormattedMessage
                   id="xpack.snapshotRestore.snapshotList.table.deleteSingleRepositoryButton"
-                  defaultMessage="Remove snapshot"
+                  defaultMessage="Delete snapshot"
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.snapshotRestore.snapshotList.table.deleteMultipleRepositoriesButton"
-                  defaultMessage="Remove snapshots"
+                  defaultMessage="Delete snapshots"
                 />
               )}
             </EuiButton>
