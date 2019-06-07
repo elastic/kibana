@@ -183,6 +183,7 @@ export const mockResponseSearchTimelineDetails = {
 export const mockOptions: RequestDetailsOptions = {
   indexName: 'auditbeat-8.0.0-2019.03.29-000003',
   eventId: 'TUfUymkBCQofM5eXGBYL',
+  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
 };
 
 export const mockRequest = {

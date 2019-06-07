@@ -22,19 +22,32 @@ export const help: FunctionHelp<FunctionFactory<typeof compare>> = {
   args: {
     op: i18n.translate('xpack.canvas.functions.compare.args.opHelpText', {
       defaultMessage:
-        'The operator to use in the comparison: {eq} (equal), {ne} (not equal), {lt} (less than), {gt} (greater ' +
-        'than), {lte} (less than equal), {gte} (greater than eq)',
+        'The operator to use in the comparison: {eq} (equal to), {gt} (greater than), {gte} (greater than or equal to)' +
+        ', {lt} (less than), {lte} (less than or equal to), {ne} (not equal to)',
       values: {
         eq: Operation.EQ,
-        ne: Operation.NE,
-        lt: Operation.LT,
         gt: Operation.GT,
-        lte: Operation.LTE,
         gte: Operation.GTE,
+        lt: Operation.LT,
+        lte: Operation.LTE,
+        ne: Operation.NE,
       },
     }),
     to: i18n.translate('xpack.canvas.functions.compare.args.toHelpText', {
       defaultMessage: 'The value to compare the context to, usually returned by a subexpression',
     }),
   },
+};
+
+export const errors = {
+  invalidCompareOperator: (op: string, ops: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.compare.invalidCompareOperatorErrorMessage', {
+        defaultMessage: "Invalid compare operator: '{op}'. Use {ops}",
+        values: {
+          op,
+          ops,
+        },
+      })
+    ),
 };

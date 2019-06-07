@@ -62,7 +62,6 @@ describe('DefaultSearchStrategy', () => {
     expect(value.isViable).toBe(true);
     expect(value.capabilities).toEqual({
       request: req,
-      batchRequestsSupport: true,
       fieldsCapabilities: {},
     });
   });

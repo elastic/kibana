@@ -14,6 +14,7 @@ import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { APMLink } from '../../../shared/Links/APMLink';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
+import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 
 interface Props {
   items?: ServiceListAPIResponse['items'];
@@ -47,7 +48,7 @@ export const SERVICE_COLUMNS: Array<
     name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
       defaultMessage: 'Name'
     }),
-    width: '50%',
+    width: '40%',
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
@@ -55,6 +56,17 @@ export const SERVICE_COLUMNS: Array<
           {formatString(serviceName)}
         </AppLink>
       </EuiToolTip>
+    )
+  },
+  {
+    field: 'environments',
+    name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
+      defaultMessage: 'Environment'
+    }),
+    width: '20%',
+    sortable: true,
+    render: (environments: string[]) => (
+      <EnvironmentBadge environments={environments} />
     )
   },
   {

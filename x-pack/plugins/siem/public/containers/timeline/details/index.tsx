@@ -5,9 +5,12 @@
  */
 
 import { getOr } from 'lodash/fp';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
+import chrome from 'ui/chrome';
 
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { DetailItem, GetTimelineDetailsQuery } from '../../../graphql/types';
 
 import { timelineDetailsQuery } from './index.gql_query';
@@ -26,19 +29,36 @@ export interface TimelineDetailsProps {
 }
 
 export class TimelineDetailsComponentQuery extends React.PureComponent<TimelineDetailsProps> {
+  private memoizedDetailsEvents: (variables: string, detail: DetailItem[]) => DetailItem[];
+
+  constructor(props: TimelineDetailsProps) {
+    super(props);
+    this.memoizedDetailsEvents = memoizeOne(this.getDetailsEvent);
+  }
+
   public render() {
     const { children, indexName, eventId, executeQuery, sourceId } = this.props;
+    const variables: GetTimelineDetailsQuery.Variables = {
+      sourceId,
+      indexName,
+      eventId,
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+    };
+
     return executeQuery ? (
       <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>
         query={timelineDetailsQuery}
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
-        variables={{ sourceId, indexName, eventId }}
+        variables={variables}
       >
         {({ data, loading, refetch }) => {
           return children!({
             loading,
-            detailsData: getOr([], 'source.TimelineDetails.data', data),
+            detailsData: this.memoizedDetailsEvents(
+              JSON.stringify(variables),
+              getOr([], 'source.TimelineDetails.data', data)
+            ),
           });
         }}
       </Query>
@@ -46,4 +66,6 @@ export class TimelineDetailsComponentQuery extends React.PureComponent<TimelineD
       children!({ loading: false, detailsData: null })
     );
   }
+
+  private getDetailsEvent = (variables: string, detail: DetailItem[]): DetailItem[] => detail;
 }

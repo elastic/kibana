@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import calculateBarWidth from '../calculate_bar_width';
+import { calculateBarWidth } from '../calculate_bar_width';
 
 describe('calculateBarWidth(series, divisor, multiplier)', () => {
 

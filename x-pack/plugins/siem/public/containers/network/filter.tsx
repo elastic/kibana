@@ -66,7 +66,7 @@ const NetworkFilterComponent = pure<NetworkFilterProps>(
         applyFilterQueryFromKueryExpression: (expression: string) =>
           applyNetworkFilterQuery({
             filterQuery: {
-              query: {
+              kuery: {
                 kind: 'kuery',
                 expression,
               },

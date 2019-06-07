@@ -5,17 +5,20 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { ContextFunction, Filter } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Filter } from '../types';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   column: string;
   from: string | null;
   to: string | null;
+  filterGroup: string | null;
 }
 
-export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, Filter> {
+export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments, Filter> {
   const { help, args: argHelp } = getFunctionHelp().timefilter;
+  const errors = getFunctionErrors().timefilter;
 
   return {
     name: 'timefilter',
@@ -42,6 +45,10 @@ export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, F
         aliases: ['t', 'end'],
         help: argHelp.to,
       },
+      filterGroup: {
+        types: ['string', 'null'],
+        help: 'Group name for the filter',
+      },
     },
     fn: (context, args) => {
       if (!args.from && !args.to) {
@@ -59,7 +66,7 @@ export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, F
         const moment = dateMath.parse(str);
 
         if (!moment || !moment.isValid()) {
-          throw new Error(`Invalid date/time string: '${str}'`);
+          throw errors.invalidString(str);
         }
 
         return moment.toISOString();

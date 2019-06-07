@@ -37,6 +37,7 @@ function FieldSelectUi({
   onChange,
   disabled,
   restrict,
+  placeholder,
   uiRestrictions,
   ...rest
 }) {
@@ -76,9 +77,7 @@ function FieldSelectUi({
 
   return (
     <EuiComboBox
-      placeholder={i18n.translate('tsvb.fieldSelect.selectFieldPlaceholder', {
-        defaultMessage: 'Select field...',
-      })}
+      placeholder={placeholder}
       isDisabled={disabled}
       options={options}
       selectedOptions={selectedOptions}
@@ -93,6 +92,9 @@ FieldSelectUi.defaultProps = {
   indexPattern: '*',
   disabled: false,
   restrict: [],
+  placeholder: i18n.translate('tsvb.fieldSelect.selectFieldPlaceholder', {
+    defaultMessage: 'Select field...',
+  })
 };
 
 FieldSelectUi.propTypes = {
@@ -105,7 +107,7 @@ FieldSelectUi.propTypes = {
   type: PropTypes.string,
   value: PropTypes.string,
   uiRestrictions: PropTypes.object,
+  placeholder: PropTypes.string,
 };
 
-const FieldSelect = injectI18n(FieldSelectUi);
-export default FieldSelect;
+export const FieldSelect = injectI18n(FieldSelectUi);

@@ -10,13 +10,13 @@ import 'jest-styled-components';
 import * as React from 'react';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '..';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { TimelinesTable } from '.';
-import { TimelineResult } from '../types';
+import { OpenTimelineResult } from '../types';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 describe('#getActionsColumns', () => {
-  let mockResults: TimelineResult[];
+  let mockResults: OpenTimelineResult[];
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
@@ -147,7 +147,7 @@ describe('#getActionsColumns', () => {
   });
 
   test('it renders an empty star when favorite is undefined', () => {
-    const undefinedFavorite: TimelineResult[] = [omit('favorite', { ...mockResults[0] })];
+    const undefinedFavorite: OpenTimelineResult[] = [omit('favorite', { ...mockResults[0] })];
 
     const wrapper = mountWithIntl(
       <TimelinesTable
@@ -173,7 +173,7 @@ describe('#getActionsColumns', () => {
   });
 
   test('it renders an empty star when favorite is null', () => {
-    const nullFavorite: TimelineResult[] = [{ ...mockResults[0], favorite: null }];
+    const nullFavorite: OpenTimelineResult[] = [{ ...mockResults[0], favorite: null }];
 
     const wrapper = mountWithIntl(
       <TimelinesTable
@@ -199,7 +199,7 @@ describe('#getActionsColumns', () => {
   });
 
   test('it renders an empty star when favorite is empty', () => {
-    const emptyFavorite: TimelineResult[] = [{ ...mockResults[0], favorite: [] }];
+    const emptyFavorite: OpenTimelineResult[] = [{ ...mockResults[0], favorite: [] }];
 
     const wrapper = mountWithIntl(
       <TimelinesTable
@@ -225,7 +225,7 @@ describe('#getActionsColumns', () => {
   });
 
   test('it renders an filled star when favorite has one entry', () => {
-    const emptyFavorite: TimelineResult[] = [
+    const emptyFavorite: OpenTimelineResult[] = [
       {
         ...mockResults[0],
         favorite: [
@@ -261,7 +261,7 @@ describe('#getActionsColumns', () => {
   });
 
   test('it renders an filled star when favorite has more than one entry', () => {
-    const emptyFavorite: TimelineResult[] = [
+    const emptyFavorite: OpenTimelineResult[] = [
       {
         ...mockResults[0],
         favorite: [

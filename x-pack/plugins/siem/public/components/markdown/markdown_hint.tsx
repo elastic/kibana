@@ -61,11 +61,11 @@ export const MarkdownHint = pure<{ show: boolean }>(({ show }) => (
     <TrailingWhitespace>{i18n.MARKDOWN_HINT_BULLET}</TrailingWhitespace>
     <Code data-test-subj="preformatted-hint">{i18n.MARKDOWN_HINT_PREFORMATTED}</Code>
     <TrailingWhitespace>{i18n.MARKDOWN_HINT_QUOTE}</TrailingWhitespace>
-    ~~
+    {'~~'}
     <Strikethrough data-test-subj="strikethrough-hint">
       {i18n.MARKDOWN_HINT_STRIKETHROUGH}
     </Strikethrough>
-    ~~
+    {'~~'}
     <ImageUrl>{i18n.MARKDOWN_HINT_IMAGE_URL}</ImageUrl>
   </MarkdownHintContainer>
 ));

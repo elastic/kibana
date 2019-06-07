@@ -28,15 +28,15 @@ describe('ems_client', () => {
     const emsClient = getEMSClient();
     const tiles = await emsClient.getTMSServices();
 
-    expect(tiles.length).to.be(1);
+    expect(tiles.length).to.be(3);
 
 
     const tileService = tiles[0];
-    expect(tileService.getUrlTemplate()).to.be('https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
+    expect(await tileService.getUrlTemplate()).to.be('https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
 
-    expect (tileService.getHTMLAttribution()).to.be('<p>© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>\n');
-    expect (tileService.getMinZoom()).to.be(0);
-    expect (tileService.getMaxZoom()).to.be(10);
+    expect (tileService.getHTMLAttribution()).to.be('<p><a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>');
+    expect (await tileService.getMinZoom()).to.be(0);
+    expect (await tileService.getMaxZoom()).to.be(10);
     expect (tileService.hasId('road_map')).to.be(true);
 
 
@@ -49,23 +49,23 @@ describe('ems_client', () => {
 
 
     const tilesBefore = await emsClient.getTMSServices();
-    const urlBefore = tilesBefore[0].getUrlTemplate();
-    expect(urlBefore).to.be('https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
+    const urlBefore = await tilesBefore[0].getUrlTemplate();
+    expect(urlBefore).to.be('https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
 
     emsClient.addQueryParams({
       'foo': 'bar'
     });
     let tiles = await emsClient.getTMSServices();
-    let url = tiles[0].getUrlTemplate();
-    expect(url).to.be('https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x&foo=bar');
+    let url = await tiles[0].getUrlTemplate();
+    expect(url).to.be('https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x&foo=bar');
 
     emsClient.addQueryParams({
       'foo': 'schmoo',
       'bar': 'foo'
     });
     tiles = await emsClient.getTMSServices();
-    url = tiles[0].getUrlTemplate();
-    expect(url).to.be('https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x&foo=schmoo&bar=foo');
+    url = await tiles[0].getUrlTemplate();
+    expect(url).to.be('https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x&foo=schmoo&bar=foo');
 
 
   });
@@ -122,7 +122,7 @@ describe('ems_client', () => {
     { name: 'name', description: 'nom', type: 'property' } ]);
 
     expect(layer.getDefaultFormatType()).to.be('geojson');
-    expect(layer.getDefaultFormatUrl()).to.be('https://vector-staging.maps.elastic.co/files/world_countries_v1.geo.json?elastic_tile_service_tos=agree&my_app_version=7.x.x&foo=bar');
+    expect(layer.getDefaultFormatUrl()).to.be('https://vector-staging.maps.elastic.co/files/world_countries_v1.geo.json?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x&foo=bar');
 
 
   });

@@ -127,7 +127,7 @@ export const destroyReact = id => {
 
 uiModules
   .get('apps/management')
-  .directive('kbnManagementApp', function (Private, $location) {
+  .directive('kbnManagementApp', function ($location) {
     return {
       restrict: 'E',
       template: appTemplate,

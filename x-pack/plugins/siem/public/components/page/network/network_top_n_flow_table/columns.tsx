@@ -14,6 +14,7 @@ import {
   FlowTarget,
   TopNFlowNetworkEcsField,
   NetworkTopNFlowEdges,
+  TopNFlowItem,
 } from '../../../../graphql/types';
 import { assertUnreachable } from '../../../../lib/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';
@@ -23,11 +24,13 @@ import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { IPDetailsLink } from '../../../links';
 import { Columns } from '../../../load_more_table';
+import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
+import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 
 export const getNetworkTopNFlowColumns = (
   indexPattern: StaticIndexPattern,
@@ -40,8 +43,8 @@ export const getNetworkTopNFlowColumns = (
   Columns<NetworkTopNFlowEdges>,
   Columns<TopNFlowNetworkEcsField['direction']>,
   Columns<TopNFlowNetworkEcsField['bytes']>,
-  Columns<TopNFlowNetworkEcsField['bytes']>,
-  Columns<TopNFlowNetworkEcsField['bytes']>
+  Columns<TopNFlowNetworkEcsField['packets']>,
+  Columns<TopNFlowItem['count']>
 ] => [
   {
     name: getIpTitle(flowTarget),
@@ -62,7 +65,7 @@ export const getNetworkTopNFlowColumns = (
               name: ip,
               excluded: false,
               kqlQuery: '',
-              queryMatch: { field: ipAttr, value: ip },
+              queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -118,7 +121,7 @@ export const getNetworkTopNFlowColumns = (
               key={escapeDataProviderId(
                 `${tableId}-table-${flowTarget}-${flowDirection}-direction-${direction}`
               )}
-              expression={`network.direction: ${escapeQueryValue(direction)}`}
+              expression={`network.direction: "${escapeQueryValue(direction)}"`}
               componentFilterType="network"
               type={type}
             >
@@ -137,7 +140,7 @@ export const getNetworkTopNFlowColumns = (
     sortable: true,
     render: bytes => {
       if (bytes != null) {
-        return numeral(bytes).format('0.000b');
+        return <PreferenceFormattedBytes value={bytes} />;
       } else {
         return getEmptyTagValue();
       }

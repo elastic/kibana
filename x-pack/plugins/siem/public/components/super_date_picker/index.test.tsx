@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { mockGlobalState } from '../../mock';
+import { apolloClientObservable, mockGlobalState } from '../../mock';
 import { createStore, State } from '../../store';
 
 import { SuperDatePicker } from '.';
@@ -16,11 +16,11 @@ import { SuperDatePicker } from '.';
 describe('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
     const state: State = mockGlobalState;
-    let store = createStore(state);
+    let store = createStore(state, apolloClientObservable);
 
     beforeEach(() => {
       jest.clearAllMocks();
-      store = createStore(state);
+      store = createStore(state, apolloClientObservable);
     });
 
     describe('Pick Relative Date', () => {

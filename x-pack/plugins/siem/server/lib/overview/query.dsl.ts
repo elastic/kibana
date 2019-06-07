@@ -9,12 +9,9 @@ import { RequestBasicOptions } from '../framework';
 export const buildOverviewNetworkQuery = ({
   filterQuery,
   timerange: { from, to },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    auditbeatAlias,
-    logAlias,
-    packetbeatAlias,
-    winlogbeatAlias,
   },
 }: RequestBasicOptions) => {
   const filter = [
@@ -31,7 +28,7 @@ export const buildOverviewNetworkQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [auditbeatAlias, logAlias, packetbeatAlias, winlogbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {
@@ -60,6 +57,40 @@ export const buildOverviewNetworkQuery = ({
             term: { 'event.dataset': 'socket' },
           },
         },
+        unique_filebeat_count: {
+          filter: {
+            term: { 'agent.type': 'filebeat' },
+          },
+          aggs: {
+            unique_netflow_count: {
+              filter: {
+                term: { 'input.type': 'netflow' },
+              },
+            },
+            unique_panw_count: {
+              filter: {
+                term: { 'event.module': 'panw' },
+              },
+            },
+            unique_cisco_count: {
+              filter: {
+                term: { 'event.module': 'cisco' },
+              },
+            },
+          },
+        },
+        unique_packetbeat_count: {
+          filter: {
+            term: { 'agent.type': 'packetbeat' },
+          },
+          aggs: {
+            unique_tls_count: {
+              filter: {
+                term: { 'network.protocol': 'tls' },
+              },
+            },
+          },
+        },
       },
       query: {
         bool: {
@@ -77,11 +108,9 @@ export const buildOverviewNetworkQuery = ({
 export const buildOverviewHostQuery = ({
   filterQuery,
   timerange: { from, to },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    auditbeatAlias,
-    logAlias,
-    packetbeatAlias,
   },
 }: RequestBasicOptions) => {
   const filter = [
@@ -98,7 +127,7 @@ export const buildOverviewHostQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [auditbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {
@@ -113,6 +142,13 @@ export const buildOverviewHostQuery = ({
           filter: {
             term: {
               'event.module': 'file_integrity',
+            },
+          },
+        },
+        winlog_count: {
+          filter: {
+            term: {
+              'agent.type': 'winlogbeat',
             },
           },
         },
@@ -148,6 +184,13 @@ export const buildOverviewHostQuery = ({
               filter: {
                 term: {
                   'event.dataset': 'user',
+                },
+              },
+            },
+            filebeat_count: {
+              filter: {
+                term: {
+                  'agent.type': 'filebeat',
                 },
               },
             },

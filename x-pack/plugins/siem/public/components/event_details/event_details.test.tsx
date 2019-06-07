@@ -12,6 +12,7 @@ import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail
 import { TestProviders } from '../../mock/test_providers';
 
 import { EventDetails } from './event_details';
+import { mockBrowserFields } from '../../containers/source/mock';
 
 describe('EventDetails', () => {
   describe('rendering', () => {
@@ -19,10 +20,14 @@ describe('EventDetails', () => {
       const wrapper = shallow(
         <TestProviders>
           <EventDetails
+            browserFields={mockBrowserFields}
             data={mockDetailItemData}
             id={mockDetailItemDataId}
+            isLoading={false}
             view="table-view"
+            onUpdateColumns={jest.fn()}
             onViewSelected={jest.fn()}
+            timelineId="test"
           />
         </TestProviders>
       );
@@ -36,10 +41,14 @@ describe('EventDetails', () => {
         const wrapper = mount(
           <TestProviders>
             <EventDetails
+              browserFields={mockBrowserFields}
               data={mockDetailItemData}
               id={mockDetailItemDataId}
+              isLoading={false}
               view="table-view"
+              onUpdateColumns={jest.fn()}
               onViewSelected={jest.fn()}
+              timelineId="test"
             />
           </TestProviders>
         );
@@ -57,10 +66,14 @@ describe('EventDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <EventDetails
+            browserFields={mockBrowserFields}
             data={mockDetailItemData}
             id={mockDetailItemDataId}
+            isLoading={false}
             view="table-view"
+            onUpdateColumns={jest.fn()}
             onViewSelected={jest.fn()}
+            timelineId="test"
           />
         </TestProviders>
       );

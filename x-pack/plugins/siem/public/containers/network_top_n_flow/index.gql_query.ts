@@ -15,6 +15,7 @@ export const networkTopNFlowQuery = gql`
     $sort: NetworkTopNFlowSortField!
     $flowTarget: FlowTarget!
     $timerange: TimerangeInput!
+    $defaultIndex: [String!]!
   ) {
     source(id: $sourceId) {
       id
@@ -25,6 +26,7 @@ export const networkTopNFlowQuery = gql`
         pagination: $pagination
         sort: $sort
         timerange: $timerange
+        defaultIndex: $defaultIndex
       ) {
         totalCount
         edges {

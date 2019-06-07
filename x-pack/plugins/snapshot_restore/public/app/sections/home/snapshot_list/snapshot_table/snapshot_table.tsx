@@ -8,17 +8,18 @@ import React from 'react';
 import { EuiButton, EuiInMemoryTable, EuiLink, Query, EuiLoadingSpinner } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
-import { SNAPSHOT_STATE } from '../../../../constants';
+import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
+import { uiMetricService } from '../../../../services/ui_metric';
 import { DataPlaceholder } from '../../../../components';
 
 interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
   reload: () => Promise<void>;
-  openSnapshotDetails: (repositoryName: string, snapshotId: string) => void;
+  openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
   repositoryFilter?: string;
 }
 
@@ -26,32 +27,35 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   snapshots,
   repositories,
   reload,
-  openSnapshotDetails,
+  openSnapshotDetailsUrl,
   repositoryFilter,
 }) => {
   const {
-    core: {
-      i18n: { FormattedMessage, translate },
-    },
+    core: { i18n },
   } = useAppDependencies();
+  const { FormattedMessage } = i18n;
+  const { trackUiMetric } = uiMetricService;
 
   const columns = [
     {
       field: 'snapshot',
-      name: translate('xpack.snapshotRestore.snapshotList.table.snapshotColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.snapshotColumnTitle', {
         defaultMessage: 'Snapshot',
       }),
       truncateText: true,
       sortable: true,
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
-        <EuiLink onClick={() => openSnapshotDetails(snapshot.repository, snapshotId)}>
+        <EuiLink
+          onClick={() => trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
+          href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}
+        >
           {snapshotId}
         </EuiLink>
       ),
     },
     {
       field: 'repository',
-      name: translate('xpack.snapshotRestore.snapshotList.table.repositoryColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.repositoryColumnTitle', {
         defaultMessage: 'Repository',
       }),
       truncateText: true,
@@ -62,7 +66,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'startTimeInMillis',
-      name: translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
         defaultMessage: 'Date created',
       }),
       truncateText: true,
@@ -73,7 +77,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'durationInMillis',
-      name: translate('xpack.snapshotRestore.snapshotList.table.durationColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.durationColumnTitle', {
         defaultMessage: 'Duration',
       }),
       truncateText: true,
@@ -96,7 +100,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'indices',
-      name: translate('xpack.snapshotRestore.snapshotList.table.indicesColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.indicesColumnTitle', {
         defaultMessage: 'Indices',
       }),
       truncateText: true,
@@ -106,7 +110,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'shards.total',
-      name: translate('xpack.snapshotRestore.snapshotList.table.shardsColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.shardsColumnTitle', {
         defaultMessage: 'Shards',
       }),
       truncateText: true,
@@ -116,7 +120,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'shards.failed',
-      name: translate('xpack.snapshotRestore.snapshotList.table.failedShardsColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.failedShardsColumnTitle', {
         defaultMessage: 'Failed shards',
       }),
       truncateText: true,

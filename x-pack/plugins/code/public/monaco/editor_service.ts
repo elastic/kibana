@@ -19,7 +19,10 @@ interface IResourceInput {
 }
 
 export class EditorService extends StandaloneCodeEditorServiceImpl {
-  public static async handleSymbolUri(qname: string) {
+  constructor(private readonly getUrlQuery: () => string) {
+    super();
+  }
+  public static async handleSymbolUri(qname: string, getUrlQuery: () => string) {
     const result = await EditorService.findSymbolByQname(qname);
     if (result.symbols.length > 0) {
       const symbol = result.symbols[0].symbolInformation;
@@ -27,7 +30,7 @@ export class EditorService extends StandaloneCodeEditorServiceImpl {
       if (schema === 'git:') {
         const { line, character } = symbol.location.range.start;
         const url = uri + `!L${line + 1}:${character + 1}`;
-        history.push(url);
+        history.push(`${url}${getUrlQuery()}`);
       }
     }
   }
@@ -52,7 +55,7 @@ export class EditorService extends StandaloneCodeEditorServiceImpl {
   ) {
     const { scheme, authority, path } = input.resource;
     if (scheme === 'symbol') {
-      await EditorService.handleSymbolUri(authority);
+      await EditorService.handleSymbolUri(authority, this.getUrlQuery);
     } else {
       const uri = `/${authority}${path}`;
       if (input.options && input.options.selection) {
@@ -62,7 +65,7 @@ export class EditorService extends StandaloneCodeEditorServiceImpl {
         if (currentPath === url) {
           this.helper!.revealPosition(startLineNumber, startColumn);
         } else {
-          history.push(url);
+          history.push(`${url}${this.getUrlQuery()}`);
         }
       }
     }

@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import SeriesAgg from './_series_agg';
+import { SeriesAgg } from './_series_agg';
 import _ from 'lodash';
-import calculateLabel from '../../../../../common/calculate_label';
-export default function seriesAgg(resp, panel, series) {
+import { calculateLabel } from '../../../../../common/calculate_label';
+
+export function seriesAgg(resp, panel, series) {
   return next => results => {
     if (series.aggregate_by && series.aggregate_function) {
 

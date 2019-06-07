@@ -25,6 +25,7 @@ export interface Args {
   pagination?: PaginationInput | null;
   filterQuery?: string | null;
   sortField?: SortField | null;
+  defaultIndex: string[];
 }
 
 export const createOptions = (
@@ -35,6 +36,7 @@ export const createOptions = (
 ): RequestOptions => {
   const fields = getFields(getOr([], 'fieldNodes[0]', info));
   return {
+    defaultIndex: args.defaultIndex,
     sourceConfiguration: source.configuration,
     timerange: args.timerange!,
     pagination: args.pagination!,

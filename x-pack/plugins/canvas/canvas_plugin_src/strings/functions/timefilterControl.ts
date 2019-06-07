@@ -23,5 +23,8 @@ export const help: FunctionHelp<FunctionFactory<typeof timefilterControl>> = {
     compact: i18n.translate('xpack.canvas.functions.timefilterControl.args.compactHelpText', {
       defaultMessage: 'Show the time filter as a button that triggers a popover',
     }),
+    filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
+      defaultMessage: 'Group name for the filter',
+    }),
   },
 };

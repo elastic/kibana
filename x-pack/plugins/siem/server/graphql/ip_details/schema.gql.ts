@@ -17,19 +17,24 @@ const ipOverviewSchema = gql`
     firstSeen: Date
     lastSeen: Date
     autonomousSystem: AutonomousSystem!
-    host: HostEcsFields!
     geo: GeoEcsFields!
   }
 
   type IpOverviewData {
     client: Overview
     destination: Overview
+    host: HostEcsFields!
     server: Overview
     source: Overview
   }
 
   extend type Source {
-    IpOverview(id: String, filterQuery: String, ip: String!): IpOverviewData
+    IpOverview(
+      id: String
+      filterQuery: String
+      ip: String!
+      defaultIndex: [String!]!
+    ): IpOverviewData
   }
 `;
 
@@ -92,6 +97,7 @@ const domainsSchema = gql`
       flowDirection: FlowDirection!
       flowTarget: FlowTarget!
       timerange: TimerangeInput!
+      defaultIndex: [String!]!
     ): DomainsData!
   }
 `;
@@ -108,6 +114,7 @@ const firstLastSeenSchema = gql`
       ip: String!
       domainName: String!
       flowTarget: FlowTarget!
+      defaultIndex: [String!]!
     ): FirstLastSeenDomain!
   }
 `;
@@ -147,6 +154,7 @@ const tlsSchema = gql`
       sort: TlsSortField!
       flowTarget: FlowTarget!
       timerange: TimerangeInput!
+      defaultIndex: [String!]!
     ): TlsData!
   }
 `;
@@ -196,6 +204,7 @@ const usersSchema = gql`
       sort: UsersSortField!
       flowTarget: FlowTarget!
       timerange: TimerangeInput!
+      defaultIndex: [String!]!
     ): UsersData!
   }
 `;

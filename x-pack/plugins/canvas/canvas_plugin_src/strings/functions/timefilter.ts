@@ -36,5 +36,20 @@ export const help: FunctionHelp<FunctionFactory<typeof timefilter>> = {
         dm: 'datemath',
       },
     }),
+    filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
+      defaultMessage: 'Group name for the filter',
+    }),
   },
+};
+
+export const errors = {
+  invalidString: (str: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.timefilter.invalidStringErrorMessage', {
+        defaultMessage: "Invalid date/time string: '{str}'",
+        values: {
+          str,
+        },
+      })
+    ),
 };

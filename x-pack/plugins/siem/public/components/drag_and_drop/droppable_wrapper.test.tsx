@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
+import { MockedProvider } from 'react-apollo/test-utils';
 
-import { createStore } from '../../store';
+import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
+import { TestProviders } from '../../mock';
 
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DroppableWrapper } from './droppable_wrapper';
@@ -20,16 +19,15 @@ describe('DroppableWrapper', () => {
   describe('rendering', () => {
     test('it renders against the snapshot', () => {
       const message = 'draggable wrapper content';
-      const store = createStore();
 
       const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <DragDropContextWrapper>
+        <TestProviders>
+          <MockedProvider mocks={{}} addTypename={false}>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DroppableWrapper droppableId="testing">{message}</DroppableWrapper>
             </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+          </MockedProvider>
+        </TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -37,16 +35,15 @@ describe('DroppableWrapper', () => {
 
     test('it renders the children', () => {
       const message = 'draggable wrapper content';
-      const store = createStore();
 
       const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <DragDropContextWrapper>
+        <TestProviders>
+          <MockedProvider mocks={mocksSource} addTypename={false}>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DroppableWrapper droppableId="testing">{message}</DroppableWrapper>
             </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+          </MockedProvider>
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(message);

@@ -19,18 +19,14 @@
 
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
+import './kfetch.test.mocks';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { __newPlatformSetup__, addInterceptor, kfetch, KFetchOptions } from '.';
+import { addInterceptor, kfetch, KFetchOptions } from '.';
 import { Interceptor, resetInterceptors, withDefaultOptions } from './kfetch';
 import { KFetchError } from './kfetch_error';
-import { setup } from '../../../../test_utils/public/kfetch_test_setup';
 
 describe('kfetch', () => {
-  beforeAll(() => {
-    __newPlatformSetup__(setup().http);
-  });
-
   afterEach(() => {
     fetchMock.restore();
     resetInterceptors();
@@ -46,7 +42,7 @@ describe('kfetch', () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: '/my/path', headers: { 'Content-Type': 'CustomContentType' } });
     expect(fetchMock.lastOptions()!.headers).toMatchObject({
-      'Content-Type': 'CustomContentType',
+      'content-type': 'CustomContentType',
     });
   });
 
@@ -64,9 +60,9 @@ describe('kfetch', () => {
     });
 
     expect(fetchMock.lastOptions()!.headers).toEqual({
-      'Content-Type': 'application/json',
+      'content-type': 'application/json',
       'kbn-version': 'kibanaVersion',
-      myHeader: 'foo',
+      myheader: 'foo',
     });
   });
 
@@ -92,11 +88,11 @@ describe('kfetch', () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: '/my/path' });
 
+    expect(fetchMock.lastCall()!.request.credentials).toBe('same-origin');
     expect(fetchMock.lastOptions()!).toMatchObject({
       method: 'GET',
-      credentials: 'same-origin',
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         'kbn-version': 'kibanaVersion',
       },
     });
@@ -359,7 +355,7 @@ describe('kfetch', () => {
       addInterceptor({
         request: config => ({
           ...config,
-          addedByRequestInterceptor: true,
+          pathname: '/my/intercepted-route',
         }),
         response: res => ({
           ...res,
@@ -371,8 +367,8 @@ describe('kfetch', () => {
     });
 
     it('should modify request', () => {
+      expect(fetchMock.lastUrl()).toContain('/my/intercepted-route');
       expect(fetchMock.lastOptions()!).toMatchObject({
-        addedByRequestInterceptor: true,
         method: 'GET',
       });
     });
@@ -393,7 +389,7 @@ describe('kfetch', () => {
         request: config =>
           Promise.resolve({
             ...config,
-            addedByRequestInterceptor: true,
+            pathname: '/my/intercepted-route',
           }),
         response: res =>
           Promise.resolve({
@@ -406,8 +402,8 @@ describe('kfetch', () => {
     });
 
     it('should modify request', () => {
+      expect(fetchMock.lastUrl()).toContain('/my/intercepted-route');
       expect(fetchMock.lastOptions()!).toMatchObject({
-        addedByRequestInterceptor: true,
         method: 'GET',
       });
     });

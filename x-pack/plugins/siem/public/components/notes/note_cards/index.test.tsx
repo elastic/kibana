@@ -20,14 +20,18 @@ describe('NoteCards', () => {
       id: 'abc',
       lastEdit: null,
       note: 'a fake note',
+      saveObjectId: null,
       user: 'elastic',
+      version: null,
     },
     {
       created: new Date(),
       id: 'def',
       lastEdit: null,
       note: 'another fake note',
+      saveObjectId: null,
       user: 'elastic',
+      version: null,
     },
   ];
 

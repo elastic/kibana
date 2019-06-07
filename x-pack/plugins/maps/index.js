@@ -44,9 +44,10 @@ export function maps(kibana) {
         return {
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
+          emsTileLayerId: mapConfig.emsTileLayerId,
           proxyElasticMapsServiceInMaps: mapConfig.proxyElasticMapsServiceInMaps,
           emsManifestServiceUrl: mapConfig.manifestServiceUrl,
-          emsLandingPageUrl: mapConfig.manifestServiceUrl,
+          emsLandingPageUrl: mapConfig.emsLandingPageUrl,
           kbnPkgVersion: serverConfig.get('pkg.version'),
           regionmapLayers: _.get(mapConfig, 'regionmap.layers', []),
           tilemap: _.get(mapConfig, 'tilemap', [])

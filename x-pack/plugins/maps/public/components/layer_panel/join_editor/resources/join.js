@@ -44,7 +44,7 @@ export class Join extends Component {
   }
 
   componentDidUpdate() {
-    if (!this.state.rigthFields && getIndexPatternId(this.props)) {
+    if (!this.state.rightFields && getIndexPatternId(this.props) && !this.state.loadError) {
       this._loadRightFields(getIndexPatternId(this.props));
     }
   }

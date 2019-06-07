@@ -10,24 +10,27 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { mockGlobalState } from '../../../../mock';
+import { apolloClientObservable, mockGlobalState } from '../../../../mock';
+import { EcsEdges } from '../../../../graphql/types';
 import { createStore, hostsModel, State } from '../../../../store';
+import { Columns } from '../../../load_more_table';
 
-import { EventsTable } from './index';
+import { EventsTable, getEventsColumnsCurated } from '.';
 import { mockData } from './mock';
+import * as i18n from './translations';
 
 describe('Load More Events Table Component', () => {
   const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
-  let store = createStore(state);
+  let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state);
+    store = createStore(state, apolloClientObservable);
   });
 
   describe('rendering', () => {
-    test('it renders the default Events table', () => {
+    test('it renders the events table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <EventsTable
@@ -44,6 +47,24 @@ describe('Load More Events Table Component', () => {
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
+    });
+  });
+
+  describe('columns', () => {
+    test('on hosts page, we expect to get all columns', () => {
+      expect(getEventsColumnsCurated(hostsModel.HostsType.page).length).toEqual(8);
+    });
+
+    test('on host details page, we expect to remove one column', () => {
+      const columns = getEventsColumnsCurated(hostsModel.HostsType.details);
+      expect(columns.length).toEqual(7);
+    });
+
+    test('on host details page, we should not have Host Name column', () => {
+      const columns = getEventsColumnsCurated(hostsModel.HostsType.details);
+      expect(columns.includes((col: Columns<EcsEdges>) => col.name === i18n.HOST_NAME)).toEqual(
+        false
+      );
     });
   });
 });

@@ -7,26 +7,12 @@
 import gql from 'graphql-tag';
 
 export const sourceQuery = gql`
-  query SourceQuery($sourceId: ID = "default", $indexTypes: [IndexType!]) {
+  query SourceQuery($sourceId: ID = "default", $defaultIndex: [String!]!) {
     source(id: $sourceId) {
       id
-      configuration {
-        auditbeatAlias
-        logAlias
-        packetbeatAlias
-        winlogbeatAlias
-      }
       status {
-        auditbeatIndicesExist
-        auditbeatAliasExists
-        auditbeatIndices
-        filebeatIndicesExist
-        filebeatAliasExists
-        filebeatIndices
-        winlogbeatIndicesExist
-        winlogbeatAliasExists
-        winlogbeatIndices
-        indexFields(indexTypes: $indexTypes) {
+        indicesExist(defaultIndex: $defaultIndex)
+        indexFields(defaultIndex: $defaultIndex) {
           category
           description
           example

@@ -29,7 +29,7 @@ import { DOC_LINK_VERSION } from 'ui/documentation_links';
 
 const module = require('ui/modules').get('app/sense');
 
-module.run(function (Private, $rootScope) {
+module.run(function ($rootScope) {
   module.setupResizeCheckerForRootEditors = ($el, ...editors) => {
     return applyResizeCheckerToEditors($rootScope, $el, ...editors);
   };
@@ -40,6 +40,11 @@ module.controller('SenseController', function SenseController(Private, $scope, $
   docTitle.change('Console');
 
   $scope.topNavController = Private(SenseTopNavController);
+
+  // Since we pass this callback via reactDirective into a react component, which has the function defined as required
+  // in it's prop types, we should set this initially (before it's set in the $timeout below). Without this line
+  // the component we pass this in will throw an propType validation error.
+  $scope.getRequestsAsCURL = () => '';
 
   // We need to wait for these elements to be rendered before we can select them with jQuery
   // and then initialize this app

@@ -32,6 +32,7 @@ export const uncommonProcessesSchema = gql`
       timerange: TimerangeInput!
       pagination: PaginationInput!
       filterQuery: String
+      defaultIndex: [String!]!
     ): UncommonProcessesData!
   }
 `;

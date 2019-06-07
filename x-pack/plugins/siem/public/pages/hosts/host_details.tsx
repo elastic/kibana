@@ -10,11 +10,10 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
-import chrome, { Breadcrumb } from 'ui/chrome';
+import { Breadcrumb } from 'ui/chrome';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ESTermQuery } from '../../../common/typed_json';
-import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -29,14 +28,15 @@ import { GlobalTime } from '../../containers/global_time';
 import { HostOverviewByNameQuery } from '../../containers/hosts/overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
-import { IndexType, LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../graphql/types';
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
 import { hostsModel, hostsSelectors, State } from '../../store';
 
+import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
+import { UrlStateContainer } from '../../components/url_state';
 
-const basePath = chrome.getBasePath();
 const type = hostsModel.HostsType.details;
 
 const HostOverviewManage = manageQuery(HostOverview);
@@ -50,8 +50,6 @@ interface HostDetailsComponentReduxProps {
 
 type HostDetailsComponentProps = HostDetailsComponentReduxProps & HostComponentProps;
 
-const indexTypes = [IndexType.AUDITBEAT];
-
 const HostDetailsComponent = pure<HostDetailsComponentProps>(
   ({
     match: {
@@ -59,12 +57,13 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
     },
     filterQueryExpression,
   }) => (
-    <WithSource sourceId="default" indexTypes={indexTypes}>
-      {({ auditbeatIndicesExist, indexPattern }) =>
-        indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
+    <WithSource sourceId="default">
+      {({ indicesExist, indexPattern }) =>
+        indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
           <StickyContainer>
             <FiltersGlobal>
               <HostsKql indexPattern={indexPattern} type={type} />
+              <UrlStateContainer indexPattern={indexPattern} />
             </FiltersGlobal>
 
             <HeaderPage
@@ -190,12 +189,11 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
             </GlobalTime>
           </StickyContainer>
         ) : (
-          <EmptyPage
-            title={i18n.NO_AUDITBEAT_INDICES}
-            message={i18n.LETS_ADD_SOME}
-            actionLabel={i18n.SETUP_INSTRUCTIONS}
-            actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-          />
+          <>
+            <HeaderPage title={hostName} />
+
+            <HostsEmptyPage />
+          </>
         )
       }
     </WithSource>
@@ -213,7 +211,7 @@ export const HostDetails = connect(makeMapStateToProps)(HostDetailsComponent);
 
 export const getBreadcrumbs = (hostId: string): Breadcrumb[] => [
   {
-    text: i18n.HOSTS,
+    text: i18n.PAGE_TITLE,
     href: getHostsUrl(),
   },
   {
@@ -232,7 +230,7 @@ const getFilterQuery = (
       : ''
     : convertKueryToElasticSearchQuery(
         `${filterQueryExpression} ${
-          hostName ? `and host.name: ${escapeQueryValue(hostName)}` : ''
+          hostName ? `and host.name: "${escapeQueryValue(hostName)}"` : ''
         }`,
         indexPattern
       );

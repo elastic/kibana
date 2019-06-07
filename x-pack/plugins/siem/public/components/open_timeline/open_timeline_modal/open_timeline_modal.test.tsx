@@ -9,17 +9,16 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
-import { TimelineResult } from '../types';
+import { OpenTimelineResult } from '../types';
 import { TimelinesTableProps } from '../timelines_table';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { OpenTimelineModal } from './open_timeline_modal';
-
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 describe('OpenTimelineModal', () => {
   const title = 'All Timelines / Open Timelines';
 
-  let mockResults: TimelineResult[];
+  let mockResults: OpenTimelineResult[];
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);

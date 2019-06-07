@@ -16,8 +16,8 @@ import { NoIndexPatternCallout } from '../../../components/no_index_pattern_call
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { kfetch } from 'ui/kfetch';
-import { ES_GEO_FIELD_TYPE, GIS_API_PATH } from '../../../../../common/constants';
-import { DEFAULT_ES_DOC_LIMIT, DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
+import { ES_GEO_FIELD_TYPE, GIS_API_PATH, DEFAULT_ES_DOC_LIMIT } from '../../../../../common/constants';
+import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
 function filterGeoField(field) {
   return [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(field.type);

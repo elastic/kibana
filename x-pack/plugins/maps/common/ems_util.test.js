@@ -38,7 +38,7 @@ describe('ems util test', () => {
     const useProxy = false;
     const resources = await getEMSResources(emsClient, isEmsEnabled, licenseId, useProxy);
 
-    expect(resources.tmsServices[0].url.startsWith('https://tiles-stage.elastic.co/')).toBe(true);
+    expect(resources.tmsServices[0].url.startsWith('https://raster-style.foobar/')).toBe(true);
     expect(resources.fileLayers[0].url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
     expect(resources.fileLayers[1].url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
   });

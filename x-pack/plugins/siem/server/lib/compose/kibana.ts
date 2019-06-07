@@ -26,17 +26,24 @@ import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs, Configuration } from '../types';
 import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../uncommon_processes';
+import { Note } from '../note/saved_object';
+import { PinnedEvent } from '../pinned_event/saved_object';
+import { Timeline } from '../timeline/saved_object';
 
 export function compose(server: Server): AppBackendLibs {
   const configuration = new KibanaConfigurationAdapter<Configuration>(server);
   const framework = new KibanaBackendFrameworkAdapter(server);
   const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
-  const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework), sources);
+  const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
+
+  const timeline = new Timeline({ savedObjects: framework.getSavedObjectsService() });
+  const note = new Note({ savedObjects: framework.getSavedObjectsService() });
+  const pinnedEvent = new PinnedEvent({ savedObjects: framework.getSavedObjectsService() });
 
   const domainLibs: AppDomainLibs = {
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),
-    fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework), sources),
+    fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
     ipDetails: new IpDetails(new ElasticsearchIpOverviewAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
@@ -52,6 +59,9 @@ export function compose(server: Server): AppBackendLibs {
     sourceStatus,
     sources,
     ...domainLibs,
+    timeline,
+    note,
+    pinnedEvent,
   };
 
   return libs;

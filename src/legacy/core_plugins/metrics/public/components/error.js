@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 const guidPattern = /\[[[a-f\d-\\]{36}\]/g;
 
-function ErrorComponent(props) {
+export function ErrorComponent(props) {
   const { error } = props;
   let additionalInfo;
   const type = _.get(error, 'error.caused_by.type') || _.get(error, 'error.type');
@@ -79,5 +79,3 @@ function ErrorComponent(props) {
 ErrorComponent.propTypes = {
   error: PropTypes.object
 };
-
-export default ErrorComponent;

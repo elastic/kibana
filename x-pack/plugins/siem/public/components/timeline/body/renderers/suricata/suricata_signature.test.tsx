@@ -21,7 +21,12 @@ describe('SuricataSignature', () => {
   describe('rendering', () => {
     test('it renders the default SuricataSignature', () => {
       const wrapper = shallow(
-        <SuricataSignature id="doc-id-123" signatureId={123} signature="ET SCAN ATTACK Hello" />
+        <SuricataSignature
+          contextId="test"
+          id="doc-id-123"
+          signatureId={123}
+          signature="ET SCAN ATTACK Hello"
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });

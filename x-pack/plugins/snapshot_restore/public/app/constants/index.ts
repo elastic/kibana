@@ -30,3 +30,18 @@ export enum SNAPSHOT_STATE {
   PARTIAL = 'PARTIAL',
   INCOMPATIBLE = 'INCOMPATIBLE',
 }
+
+// UI Metric constants
+export const UIM_APP_NAME = 'snapshot_restore';
+export const UIM_REPOSITORY_LIST_LOAD = 'repository_list_load';
+export const UIM_REPOSITORY_CREATE = 'repository_create';
+export const UIM_REPOSITORY_UPDATE = 'repository_update';
+export const UIM_REPOSITORY_DELETE = 'repository_delete';
+export const UIM_REPOSITORY_DELETE_MANY = 'repository_delete_many';
+export const UIM_REPOSITORY_SHOW_DETAILS_CLICK = 'repository_show_details_click';
+export const UIM_REPOSITORY_DETAIL_PANEL_VERIFY = 'repository_detail_panel_verify';
+export const UIM_SNAPSHOT_LIST_LOAD = 'snapshot_list_load';
+export const UIM_SNAPSHOT_SHOW_DETAILS_CLICK = 'snapshot_show_details_click';
+export const UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB = 'snapshot_detail_panel_summary_tab';
+export const UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB =
+  'snapshot_detail_panel_failed_indices_tab';

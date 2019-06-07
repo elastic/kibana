@@ -7,9 +7,10 @@
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { MockedProvider } from 'react-apollo/test-utils';
 
-import { createStore } from '../../store';
+import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
+import { TestProviders } from '../../mock';
 
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 
@@ -18,11 +19,14 @@ describe('DragDropContextWrapper', () => {
     test('it renders against the snapshot', () => {
       const message = 'Drag drop context wrapper children';
 
-      const store = createStore();
       const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>{message}</DragDropContextWrapper>
-        </ReduxStoreProvider>
+        <TestProviders>
+          <MockedProvider mocks={{}} addTypename={false}>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
+              {message}
+            </DragDropContextWrapper>
+          </MockedProvider>
+        </TestProviders>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -30,11 +34,14 @@ describe('DragDropContextWrapper', () => {
     test('it renders the children', () => {
       const message = 'Drag drop context wrapper children';
 
-      const store = createStore();
       const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>{message}</DragDropContextWrapper>
-        </ReduxStoreProvider>
+        <TestProviders>
+          <MockedProvider mocks={mocksSource} addTypename={false}>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
+              {message}
+            </DragDropContextWrapper>
+          </MockedProvider>
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(message);

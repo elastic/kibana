@@ -9,6 +9,8 @@ import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
 
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetTimelineQuery,
   PageInfo,
@@ -69,6 +71,7 @@ export class TimelineQuery extends QueryTemplate<
       sourceId,
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
     };
     return (
       <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>

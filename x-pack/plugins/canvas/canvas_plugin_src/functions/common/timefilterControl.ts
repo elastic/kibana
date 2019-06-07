@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NullContextFunction, Render } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Render } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   column: string;
   compact: boolean;
+  filterGroup: string | null;
 }
-export function timefilterControl(): NullContextFunction<
+export function timefilterControl(): ExpressionFunction<
   'timefilterControl',
+  null,
   Arguments,
   Render<Arguments>
 > {
@@ -37,6 +40,10 @@ export function timefilterControl(): NullContextFunction<
         help: argHelp.compact,
         default: true,
         options: [true, false],
+      },
+      filterGroup: {
+        types: ['string', 'null'],
+        help: argHelp.filterGroup,
       },
     },
     fn: (_context, args) => {

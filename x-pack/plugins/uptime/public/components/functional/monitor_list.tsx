@@ -147,19 +147,6 @@ export const MonitorListComponent = ({
                 <EuiLink href={url} target="_blank" color="text">
                   {url} <EuiIcon size="s" type="popout" color="subdued" />
                 </EuiLink>
-              </div>
-            ),
-          },
-          {
-            field: 'ping.url.full',
-            name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
-              defaultMessage: 'URL',
-            }),
-            render: (url: string, monitor: LatestMonitor) => (
-              <div>
-                <EuiLink href={url} target="_blank" color="text">
-                  {url} <EuiIcon size="s" type="popout" color="subdued" />
-                </EuiLink>
                 {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.ip ? (
                   <EuiText size="xs" color="subdued">
                     {monitor.ping.monitor.ip}
@@ -189,12 +176,7 @@ export const MonitorListComponent = ({
                 'The heading column of some action buttons that will take users to other Obsevability apps',
             }),
             render: (ping: Ping, monitor: LatestMonitor) => (
-              <MonitorListActionsPopover
-                basePath={basePath}
-                dateRangeStart={dateRangeStart}
-                dateRangeEnd={dateRangeEnd}
-                monitor={monitor}
-              />
+              <MonitorListActionsPopover monitor={monitor} />
             ),
           },
         ]}

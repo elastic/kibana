@@ -57,7 +57,6 @@ export interface OverviewHit {
   };
   doc_count: number;
   geo: ResultHit<object>;
-  host: ResultHit<object>;
   autonomous_system: ResultHit<object>;
   firstSeen: {
     value: number;
@@ -69,10 +68,25 @@ export interface OverviewHit {
   };
 }
 
+export interface OverviewHostHit {
+  took?: number;
+  timed_out?: boolean;
+  _scroll_id?: string;
+  _shards?: ShardsResponse;
+  timeout?: number;
+  hits?: {
+    total: number;
+    hits: Hit[];
+  };
+  doc_count: number;
+  host: ResultHit<object>;
+}
+
 export interface IpOverviewHit {
   aggregations: {
     destination?: OverviewHit;
     source?: OverviewHit;
+    host: OverviewHostHit;
   };
   _shards: {
     total: number;
@@ -158,6 +172,7 @@ export interface DomainFirstLastSeenRequestOptions {
   domainName: string;
   flowTarget: FlowTarget;
   sourceConfiguration: SourceConfiguration;
+  defaultIndex: string[];
 }
 
 export interface DomainFirstLastSeenItem {

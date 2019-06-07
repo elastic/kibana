@@ -21,9 +21,15 @@ const chartBase: ChartBase<ThreadCountMetrics> = {
   series: {
     threadCount: {
       title: i18n.translate('xpack.apm.agentMetrics.java.threadCount', {
-        defaultMessage: 'Count'
+        defaultMessage: 'Avg. count'
       }),
       color: theme.euiColorVis0
+    },
+    threadCountMax: {
+      title: i18n.translate('xpack.apm.agentMetrics.java.threadCountMax', {
+        defaultMessage: 'Max count'
+      }),
+      color: theme.euiColorVis1
     }
   }
 };

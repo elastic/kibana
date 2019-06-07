@@ -13,6 +13,7 @@ export const HostsTableQuery = gql`
     $pagination: PaginationInput!
     $sort: HostsSortField!
     $filterQuery: String
+    $defaultIndex: [String!]!
   ) {
     source(id: $sourceId) {
       id
@@ -21,6 +22,7 @@ export const HostsTableQuery = gql`
         pagination: $pagination
         sort: $sort
         filterQuery: $filterQuery
+        defaultIndex: $defaultIndex
       ) {
         totalCount
         edges {

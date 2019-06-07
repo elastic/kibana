@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { onStart } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
-onStart(({ core }) => {
-  const apmUiEnabled = core.injectedMetadata.getInjectedVar('apmUiEnabled');
-  if (apmUiEnabled === false) {
-    core.chrome.navLinks.update('apm', { hidden: true });
-  }
-});
+const apmUiEnabled = npStart.core.injectedMetadata.getInjectedVar(
+  'apmUiEnabled'
+);
+if (apmUiEnabled === false) {
+  npStart.core.chrome.navLinks.update('apm', { hidden: true });
+}

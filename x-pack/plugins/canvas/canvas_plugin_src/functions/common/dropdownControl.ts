@@ -5,12 +5,14 @@
  */
 
 import { uniq } from 'lodash';
-import { ContextFunction, Datatable, Render } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable, Render } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   filterColumn: string;
   valueColumn: string;
+  filterGroup: string | null;
 }
 
 interface Return {
@@ -18,7 +20,7 @@ interface Return {
   choices: any;
 }
 
-export function dropdownControl(): ContextFunction<
+export function dropdownControl(): ExpressionFunction<
   'dropdownControl',
   Datatable,
   Arguments,
@@ -43,8 +45,12 @@ export function dropdownControl(): ContextFunction<
         types: ['string'],
         help: argHelp.valueColumn,
       },
+      filterGroup: {
+        types: ['string', 'null'],
+        help: argHelp.filterGroup,
+      },
     },
-    fn: (context, { valueColumn, filterColumn }) => {
+    fn: (context, { valueColumn, filterColumn, filterGroup }) => {
       let choices = [];
 
       if (context.rows[0][valueColumn]) {
@@ -59,6 +65,7 @@ export function dropdownControl(): ContextFunction<
         value: {
           column,
           choices,
+          filterGroup,
         },
       };
     },

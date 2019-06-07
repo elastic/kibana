@@ -11,11 +11,12 @@ import { parse } from 'querystring';
 import { EuiButton, EuiCallOut, EuiIcon, EuiLink, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 
 import { SectionError, SectionLoading } from '../../../components';
-import { BASE_PATH } from '../../../constants';
+import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { documentationLinksService } from '../../../services/documentation';
 import { loadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
+import { uiMetricService } from '../../../services/ui_metric';
 
 import { SnapshotDetails } from './snapshot_details';
 import { SnapshotTable } from './snapshot_table';
@@ -45,12 +46,15 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     request: reload,
   } = loadSnapshots();
 
-  const openSnapshotDetails = (repositoryNameToOpen: string, snapshotIdToOpen: string) => {
-    history.push(
-      `${BASE_PATH}/snapshots/${encodeURIComponent(repositoryNameToOpen)}/${encodeURIComponent(
-        snapshotIdToOpen
-      )}`
-    );
+  const openSnapshotDetailsUrl = (
+    repositoryNameToOpen: string,
+    snapshotIdToOpen: string
+  ): string => {
+    return history.createHref({
+      pathname: `${BASE_PATH}/snapshots/${encodeURIComponent(
+        repositoryNameToOpen
+      )}/${encodeURIComponent(snapshotIdToOpen)}`,
+    });
   };
 
   const closeSnapshotDetails = () => {
@@ -67,6 +71,12 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         history.replace(`${BASE_PATH}/snapshots`);
       }
     }
+  }, []);
+
+  // Track component loaded
+  const { trackUiMetric } = uiMetricService;
+  useEffect(() => {
+    trackUiMetric(UIM_SNAPSHOT_LIST_LOAD);
   }, []);
 
   let content;
@@ -254,7 +264,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           snapshots={snapshots}
           repositories={repositories}
           reload={reload}
-          openSnapshotDetails={openSnapshotDetails}
+          openSnapshotDetailsUrl={openSnapshotDetailsUrl}
           repositoryFilter={filteredRepository}
         />
       </Fragment>

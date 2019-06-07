@@ -179,7 +179,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
           timeseries: {
             date_histogram: {
               field: '@timestamp',
-              interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
+              fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
             },
             aggs: {
               down: {

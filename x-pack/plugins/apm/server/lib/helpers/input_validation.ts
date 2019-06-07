@@ -14,7 +14,7 @@ export const withDefaultValidators = (validators = {}) => {
     _debug: Joi.bool(),
     start: dateValidation,
     end: dateValidation,
-    esFilterQuery: Joi.string().allow(''),
+    uiFiltersES: Joi.string(),
     ...validators
   });
 };

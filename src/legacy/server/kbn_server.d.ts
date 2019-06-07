@@ -21,12 +21,10 @@ import { ResponseObject, Server } from 'hapi';
 
 import {
   ElasticsearchServiceSetup,
-  HttpServiceSetup,
-  HttpServiceStart,
   ConfigService,
   LoggerFactory,
-  PluginsServiceSetup,
-  PluginsServiceStart,
+  InternalCoreSetup,
+  InternalCoreStart,
 } from '../../core/server';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
@@ -39,6 +37,7 @@ import {
   SavedObjectsSchema,
   SavedObjectsManagement,
 } from './saved_objects';
+import { Capabilities } from '../../core/public';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -71,12 +70,14 @@ declare module 'hapi' {
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
     savedObjectsManagement(): SavedObjectsManagement;
+    getUiNavLinks(): Array<{ _id: string }>;
   }
 
   interface Request {
     getSavedObjectsClient(): SavedObjectsClient;
     getBasePath(): string;
     getUiSettingsService(): any;
+    getCapabilities(): Promise<Capabilities>;
   }
 
   interface ResponseToolkit {
@@ -93,17 +94,12 @@ export default class KbnServer {
       logger: LoggerFactory;
     };
     setup: {
-      core: {
-        elasticsearch: ElasticsearchServiceSetup;
-        http: HttpServiceSetup;
-      };
-      plugins: PluginsServiceSetup;
+      core: InternalCoreSetup;
+      plugins: Record<string, unknown>;
     };
     start: {
-      core: {
-        http: HttpServiceStart;
-      };
-      plugins: PluginsServiceStart;
+      core: InternalCoreStart;
+      plugins: Record<string, unknown>;
     };
     stop: null;
     params: {

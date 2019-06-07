@@ -41,18 +41,19 @@ export  async function getEMSResources(emsClient, includeElasticMapsService, lic
     };
   });
 
-  const tmsServices = tmsServicesObjs.map(tmsService => {
+  const tmsServices = await Promise.all(tmsServicesObjs.map(async tmsService => {
     return {
+      name: tmsService.getDisplayName(),
       origin: tmsService.getOrigin(),
       id: tmsService.getId(),
-      minZoom: tmsService.getMinZoom(),
-      maxZoom: tmsService.getMaxZoom(),
+      minZoom: await tmsService.getMinZoom(),
+      maxZoom: await tmsService.getMaxZoom(),
       attribution: tmsService.getHTMLAttribution(),
       attributionMarkdown: tmsService.getMarkdownAttribution(),
       // eslint-disable-next-line max-len
-      url: useRelativePathToProxy ?   `../${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}` : tmsService.getUrlTemplate()
+      url: useRelativePathToProxy ?   `../${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}` : await tmsService.getUrlTemplate()
     };
-  });
+  }));
 
   return { fileLayers, tmsServices };
 }

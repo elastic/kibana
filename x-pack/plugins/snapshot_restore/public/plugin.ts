@@ -15,13 +15,14 @@ import { breadcrumbService } from './app/services/navigation';
 import { documentationLinksService } from './app/services/documentation';
 import { httpService } from './app/services/http';
 import { textService } from './app/services/text';
+import { uiMetricService } from './app/services/ui_metric';
 
 const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {
     const { i18n, routing, http, chrome, notification, documentation } = core;
-    const { management } = plugins;
+    const { management, uiMetric } = plugins;
 
     // Register management section
     const esSection = management.sections.getSection('elasticsearch');
@@ -38,6 +39,7 @@ export class Plugin {
     textService.init(i18n);
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
     documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
+    uiMetricService.init(uiMetric.track);
 
     const unmountReactApp = (): void => {
       const elem = document.getElementById(REACT_ROOT_ID);

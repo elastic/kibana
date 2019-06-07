@@ -7,7 +7,7 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { mockGlobalState, TestProviders } from '../../../../mock';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, State } from '../../../../store';
 
 import { FlowTargetSelectConnected } from './index';
@@ -15,10 +15,10 @@ import { IpOverviewId } from '../../../field_renderers/field_renderers';
 
 describe('Flow Target Select Connected', () => {
   const state: State = mockGlobalState;
-  let store = createStore(state);
+  let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state);
+    store = createStore(state, apolloClientObservable);
   });
   test('Pick Relative Date', () => {
     const wrapper = mount(

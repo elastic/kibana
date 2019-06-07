@@ -13,6 +13,7 @@ exports[`plain_column_renderer rendering renders correctly against snapshot 1`] 
         "name": "event.category: Access",
         "queryMatch": Object {
           "field": "event.category",
+          "operator": ":",
           "value": "Access",
         },
       }

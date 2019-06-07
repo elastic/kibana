@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { basePathServiceMock } from './base_path/base_path_service.mock';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
@@ -72,12 +71,6 @@ export const MockHttpService = httpServiceMock.create();
 export const HttpServiceConstructor = jest.fn().mockImplementation(() => MockHttpService);
 jest.doMock('./http', () => ({
   HttpService: HttpServiceConstructor,
-}));
-
-export const MockBasePathService = basePathServiceMock.create();
-export const BasePathServiceConstructor = jest.fn().mockImplementation(() => MockBasePathService);
-jest.doMock('./base_path', () => ({
-  BasePathService: BasePathServiceConstructor,
 }));
 
 export const MockUiSettingsService = uiSettingsServiceMock.create();

@@ -19,7 +19,8 @@
 
 import _ from 'lodash';
 import { detectIE } from './detect_ie';
-export default (handleChange) => {
+
+export const createNumberHandler = (handleChange) => {
   return (name, defaultValue) => (e) => {
     if (!detectIE() || e.keyCode === 13) e.preventDefault();
 

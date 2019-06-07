@@ -8,6 +8,8 @@ import ApolloClient from 'apollo-client';
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetHostFirstLastSeenQuery } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
 import { QueryTemplateProps } from '../../query_template';
@@ -44,7 +46,11 @@ export function useFirstLastSeenHostQuery<TCache = object>(
       .query<GetHostFirstLastSeenQuery.Query, GetHostFirstLastSeenQuery.Variables>({
         query: HostFirstLastSeenGqlQuery,
         fetchPolicy: 'cache-first',
-        variables: { sourceId, hostName },
+        variables: {
+          sourceId,
+          hostName,
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        },
       })
       .then(
         result => {

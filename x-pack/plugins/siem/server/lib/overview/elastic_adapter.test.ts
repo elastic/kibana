@@ -32,6 +32,7 @@ describe('Siem Overview elasticsearch_adapter', () => {
         exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
+        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -54,6 +55,11 @@ describe('Siem Overview elasticsearch_adapter', () => {
       mockNoDataResponse.aggregations.unique_suricata_count.doc_count = 0;
       mockNoDataResponse.aggregations.unique_zeek_count.doc_count = 0;
       mockNoDataResponse.aggregations.unique_socket_count.doc_count = 0;
+      mockNoDataResponse.aggregations.unique_zeek_count.doc_count = 0;
+      mockNoDataResponse.aggregations.unique_packetbeat_count.unique_tls_count.doc_count = 0;
+      mockNoDataResponse.aggregations.unique_filebeat_count.unique_cisco_count.doc_count = 0;
+      mockNoDataResponse.aggregations.unique_filebeat_count.unique_netflow_count.doc_count = 0;
+      mockNoDataResponse.aggregations.unique_filebeat_count.unique_panw_count.doc_count = 0;
       const mockCallWithRequest = jest.fn();
       mockCallWithRequest.mockResolvedValue(mockNoDataResponse);
       const mockFramework: FrameworkAdapter = {
@@ -62,6 +68,7 @@ describe('Siem Overview elasticsearch_adapter', () => {
         exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
+        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -74,11 +81,15 @@ describe('Siem Overview elasticsearch_adapter', () => {
           mockOptionsNetwork
         );
         expect(data).toEqual({
-          packetbeatFlow: 0,
-          packetbeatDNS: 0,
+          auditbeatSocket: 0,
+          filebeatCisco: 0,
+          filebeatNetflow: 0,
+          filebeatPanw: 0,
           filebeatSuricata: 0,
           filebeatZeek: 0,
-          auditbeatSocket: 0,
+          packetbeatDNS: 0,
+          packetbeatFlow: 0,
+          packetbeatTLS: 0,
         });
       });
     });
@@ -93,6 +104,7 @@ describe('Siem Overview elasticsearch_adapter', () => {
         exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
+        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -116,6 +128,8 @@ describe('Siem Overview elasticsearch_adapter', () => {
       mockNoDataResponse.aggregations.system_module.package_count.doc_count = 0;
       mockNoDataResponse.aggregations.system_module.process_count.doc_count = 0;
       mockNoDataResponse.aggregations.system_module.user_count.doc_count = 0;
+      mockNoDataResponse.aggregations.system_module.filebeat_count.doc_count = 0;
+      mockNoDataResponse.aggregations.winlog_count.doc_count = 0;
       const mockCallWithRequest = jest.fn();
       mockCallWithRequest.mockResolvedValue(mockNoDataResponse);
       const mockFramework: FrameworkAdapter = {
@@ -124,6 +138,7 @@ describe('Siem Overview elasticsearch_adapter', () => {
         exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
+        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -142,6 +157,8 @@ describe('Siem Overview elasticsearch_adapter', () => {
           auditbeatPackage: 0,
           auditbeatProcess: 0,
           auditbeatUser: 0,
+          filebeatSystemModule: 0,
+          winlogbeat: 0,
         });
       });
     });

@@ -36,6 +36,7 @@ export const mockFirstLastSeenDomainQuery: MockFirstLastSeenDomainQuery[] = [
         ip: '10.10.10.10',
         domainName: 'example.com',
         flowTarget: FlowTarget.source,
+        defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       },
     },
     result: {

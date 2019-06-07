@@ -17,19 +17,12 @@
  * under the License.
  */
 
-import { BasePathSetup } from '../../../../../core/public';
-let newPlatformBasePath: BasePathSetup;
+import { npSetup } from 'ui/new_platform';
 
-export function __newPlatformSetup__(instance: BasePathSetup) {
-  if (newPlatformBasePath) {
-    throw new Error('ui/chrome/api/base_path is already initialized');
-  }
-
-  newPlatformBasePath = instance;
-}
+const newPlatformHttp = npSetup.core.http;
 
 export function initChromeBasePathApi(chrome: { [key: string]: any }) {
-  chrome.getBasePath = () => newPlatformBasePath.get();
-  chrome.addBasePath = (path: string) => newPlatformBasePath.addToPath(path);
-  chrome.removeBasePath = (path: string) => newPlatformBasePath.removeFromPath(path);
+  chrome.getBasePath = newPlatformHttp.getBasePath.bind(newPlatformHttp);
+  chrome.addBasePath = newPlatformHttp.prependBasePath.bind(newPlatformHttp);
+  chrome.removeBasePath = newPlatformHttp.removeBasePath.bind(newPlatformHttp);
 }

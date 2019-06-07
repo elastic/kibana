@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KpiNetworkData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 
 import { KpiNetworkAdapter } from './types';
+import { KpiNetworkData } from '../../graphql/types';
 
 export class KpiNetwork {
   constructor(private readonly adapter: KpiNetworkAdapter) {}

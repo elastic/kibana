@@ -6,6 +6,7 @@
 import { Request, ResponseToolkit } from 'hapi';
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import {
+  registerRepositoriesRoutes,
   createHandler,
   deleteHandler,
   getAllHandler,
@@ -18,6 +19,30 @@ import {
 describe('[Snapshot and Restore API Routes] Repositories', () => {
   const mockRequest = {} as Request;
   const mockResponseToolkit = {} as ResponseToolkit;
+  const mockCallWithInternalUser = jest.fn().mockReturnValue({
+    persistent: {
+      'cluster.metadata.managed_repository': 'found-snapshots',
+    },
+  });
+
+  registerRepositoriesRoutes(
+    {
+      // @ts-ignore
+      get: () => {},
+      // @ts-ignore
+      post: () => {},
+      // @ts-ignore
+      put: () => {},
+      // @ts-ignore
+      delete: () => {},
+      // @ts-ignore
+      patch: () => {},
+    },
+    {
+      cloud: { config: { isCloudEnabled: false } },
+      elasticsearch: { getCluster: () => ({ callWithInternalUser: mockCallWithInternalUser }) },
+    }
+  );
 
   describe('getAllHandler()', () => {
     it('should arrify repositories returned from ES', async () => {
@@ -39,6 +64,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
             settings: {},
           },
         ],
+        managedRepository: 'found-snapshots',
       };
       await expect(
         getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
@@ -50,6 +76,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
       const expectedResponse = {
         repositories: [],
+        managedRepository: 'found-snapshots',
       };
       await expect(
         getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
@@ -82,6 +109,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         .mockResolvedValueOnce({});
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
+        isManagedRepository: false,
         snapshots: { count: null },
       };
       await expect(
@@ -117,6 +145,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         .mockResolvedValueOnce(mockEsSnapshotResponse);
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
+        isManagedRepository: false,
         snapshots: {
           count: 2,
         },
@@ -137,6 +166,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         .mockRejectedValueOnce(mockEsSnapshotError);
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
+        isManagedRepository: false,
         snapshots: {
           count: null,
         },
@@ -188,7 +218,8 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
   describe('getTypesHandler()', () => {
     it('should return default types if no repository plugins returned from ES', async () => {
       const mockEsResponse = {};
-      const callWithRequest = jest.fn().mockReturnValue(mockEsResponse);
+      const callWithRequest = jest.fn();
+      mockCallWithInternalUser.mockReturnValueOnce(mockEsResponse);
       const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
       await expect(
         getTypesHandler(mockRequest, callWithRequest, mockResponseToolkit)
@@ -199,7 +230,8 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const pluginNames = Object.keys(REPOSITORY_PLUGINS_MAP);
       const pluginTypes = Object.entries(REPOSITORY_PLUGINS_MAP).map(([key, value]) => value);
       const mockEsResponse = [...pluginNames.map(key => ({ component: key }))];
-      const callWithRequest = jest.fn().mockReturnValue(mockEsResponse);
+      const callWithRequest = jest.fn();
+      mockCallWithInternalUser.mockReturnValueOnce(mockEsResponse);
       const expectedResponse = [...DEFAULT_REPOSITORY_TYPES, ...pluginTypes];
       await expect(
         getTypesHandler(mockRequest, callWithRequest, mockResponseToolkit)
@@ -209,7 +241,8 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     it('should not return non-repository plugins returned from ES', async () => {
       const pluginNames = ['foo-plugin', 'bar-plugin'];
       const mockEsResponse = [...pluginNames.map(key => ({ component: key }))];
-      const callWithRequest = jest.fn().mockReturnValue(mockEsResponse);
+      const callWithRequest = jest.fn();
+      mockCallWithInternalUser.mockReturnValueOnce(mockEsResponse);
       const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
       await expect(
         getTypesHandler(mockRequest, callWithRequest, mockResponseToolkit)

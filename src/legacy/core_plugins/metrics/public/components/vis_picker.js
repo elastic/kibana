@@ -46,7 +46,7 @@ VisPickerItem.propTypes = {
   selected: PropTypes.bool
 };
 
-const VisPicker = injectI18n(function (props) {
+export const VisPicker = injectI18n(function (props) {
   const handleChange = (type) => {
     props.onChange({ type });
   };
@@ -82,5 +82,3 @@ VisPicker.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func
 };
-
-export default VisPicker;

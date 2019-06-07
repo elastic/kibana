@@ -13,11 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import {
-  fromQuery,
-  toQuery,
-  legacyEncodeURIComponent
-} from '../Links/url_helpers';
+import { fromQuery, toQuery } from '../Links/url_helpers';
 import { KibanaLink } from '../Links/KibanaLink';
 // @ts-ignore
 import { Typeahead } from './Typeahead';
@@ -130,7 +126,7 @@ export function KueryBar() {
         ...location,
         search: fromQuery({
           ...toQuery(location.search),
-          kuery: legacyEncodeURIComponent(inputValue.trim())
+          kuery: encodeURIComponent(inputValue.trim())
         })
       });
     } catch (e) {

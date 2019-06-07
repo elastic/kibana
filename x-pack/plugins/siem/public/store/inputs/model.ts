@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface AbsoluteTimeRange {
+import { CONSTANTS } from '../../components/url_state/constants';
+
+export interface AbsoluteTimeRange {
   kind: 'absolute';
   fromStr: undefined;
   toStr: undefined;
@@ -12,7 +14,7 @@ interface AbsoluteTimeRange {
   to: number;
 }
 
-interface RelativeTimeRange {
+export interface RelativeTimeRange {
   kind: 'relative';
   fromStr: string;
   toStr: string;
@@ -21,6 +23,8 @@ interface RelativeTimeRange {
 }
 
 export type InputsModelId = 'global' | 'timeline';
+
+export type TimeRangeKinds = 'absolute' | 'relative';
 
 export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
 
@@ -43,7 +47,19 @@ export interface InputsRange {
   linkTo: InputsModelId[];
 }
 
+export interface LinkTo {
+  linkTo: InputsModelId[];
+}
+
 export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
+}
+export interface UrlInputsModelInputs {
+  linkTo: InputsModelId[];
+  [CONSTANTS.timerange]: TimeRange;
+}
+export interface UrlInputsModel {
+  global: UrlInputsModelInputs;
+  timeline: UrlInputsModelInputs;
 }

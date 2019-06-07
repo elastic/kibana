@@ -49,7 +49,12 @@ describe('useSourceIndexData', () => {
   test('indexPattern set triggers loading', () => {
     testHook(() => {
       act(() => {
-        sourceIndexObj = useSourceIndexData({ title: 'lorem', fields: [] }, query, [], () => {});
+        sourceIndexObj = useSourceIndexData(
+          { id: 'the-id', title: 'the-title', fields: [] },
+          query,
+          [],
+          () => {}
+        );
       });
     });
 

@@ -13,11 +13,10 @@ export const buildQuery = ({
   fields,
   filterQuery,
   timerange: { from, to },
+  defaultIndex,
   pagination: { limit },
   sourceConfiguration: {
     fields: { timestamp },
-    auditbeatAlias,
-    winlogbeatAlias,
   },
 }: RequestOptions) => {
   const processUserFields = reduceFields(fields, { ...processFieldsMap, ...userFieldsMap });
@@ -44,7 +43,7 @@ export const buildQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [auditbeatAlias, winlogbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {

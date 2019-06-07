@@ -20,7 +20,7 @@ export async function calculateBucketSize(
   transactionType: string,
   setup: Setup
 ) {
-  const { start, end, esFilterQuery, client, config } = setup;
+  const { start, end, uiFiltersES, client, config } = setup;
 
   const params: SearchParams = {
     index: config.get('apm_oss.transactionIndices'),
@@ -41,7 +41,8 @@ export async function calculateBucketSize(
                   format: 'epoch_millis'
                 }
               }
-            }
+            },
+            ...uiFiltersES
           ]
         }
       },
@@ -55,17 +56,13 @@ export async function calculateBucketSize(
     }
   };
 
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
-
   interface Aggs {
     stats: {
       max: number;
     };
   }
 
-  const resp = await client<void, Aggs>('search', params);
+  const resp = await client.search<void, Aggs>(params);
   const minBucketSize: number = config.get('xpack.apm.minimumBucketSize');
   const bucketTargetCount: number = config.get('xpack.apm.bucketTargetCount');
   const max = resp.aggregations.stats.max;

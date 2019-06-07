@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import metricBuckets from '../metric_buckets';
+import { metricBuckets } from '../metric_buckets';
 import { expect } from 'chai';
 import sinon from 'sinon';
 

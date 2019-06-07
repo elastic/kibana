@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { mockGlobalState } from '../../../mock';
+import { mockGlobalState, apolloClientObservable } from '../../../mock';
 import { createStore, State } from '../../../store';
 
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
@@ -17,11 +17,11 @@ describe('Properties', () => {
   const usersViewing = ['elastic'];
 
   const state: State = mockGlobalState;
-  let store = createStore(state);
+  let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(state);
+    store = createStore(state, apolloClientObservable);
   });
 
   test('renders correctly', () => {

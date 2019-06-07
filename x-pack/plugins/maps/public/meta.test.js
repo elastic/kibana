@@ -57,7 +57,7 @@ describe('default use without proxy', () => {
 
 
     const resources = await getEMSDataSources();
-    expect(resources.ems.tms[0].url.startsWith('https://tiles-stage.elastic.co/')).toBe(true);
+    expect(resources.ems.tms[0].url.startsWith('https://raster-style.foobar')).toBe(true);
     expect(resources.ems.file[0].url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
     expect(resources.ems.file[1].url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
   });

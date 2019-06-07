@@ -13,7 +13,7 @@ import { ACTIONS_COLUMN_WIDTH } from '../helpers';
 import { Actions } from '.';
 
 describe('Actions', () => {
-  test('it renders a checkbox for selecting the event', () => {
+  test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
@@ -28,6 +28,7 @@ describe('Actions', () => {
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={jest.fn()}
+          showCheckboxes={true}
           showNotes={false}
           toggleShowNotes={jest.fn()}
           updateNote={jest.fn()}
@@ -36,6 +37,32 @@ describe('Actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="select-event"]').exists()).toEqual(true);
+  });
+
+  test('it does NOT render a checkbox for selecting the event when `showCheckboxes` is `false`', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          loading={false}
+          noteIds={[]}
+          onEventToggled={jest.fn()}
+          onPinClicked={jest.fn()}
+          showCheckboxes={false}
+          showNotes={false}
+          toggleShowNotes={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
   });
 
   test('it renders a button for expanding the event', () => {
@@ -53,6 +80,7 @@ describe('Actions', () => {
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={jest.fn()}
+          showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={jest.fn()}
           updateNote={jest.fn()}
@@ -80,6 +108,7 @@ describe('Actions', () => {
           noteIds={[]}
           onEventToggled={onEventToggled}
           onPinClicked={jest.fn()}
+          showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={jest.fn()}
           updateNote={jest.fn()}
@@ -112,6 +141,7 @@ describe('Actions', () => {
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={onPinClicked}
+          showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={jest.fn()}
           updateNote={jest.fn()}
@@ -144,6 +174,7 @@ describe('Actions', () => {
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={jest.fn()}
+          showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={toggleShowNotes}
           updateNote={jest.fn()}

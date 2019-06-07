@@ -11,12 +11,12 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Ecs } from '../../../../../graphql/types';
-import { escapeQueryValue } from '../../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../drag_and_drop/helpers';
 import { ExternalLinkIcon } from '../../../../external_link_icon';
 import { GoogleLink, VirusTotalLink } from '../../../../links';
 import { Provider } from '../../../../timeline/data_providers/provider';
+import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 import * as i18n from './translations';
 
@@ -74,7 +74,8 @@ export const DraggableZeekElement = pure<{
           kqlQuery: '',
           queryMatch: {
             field,
-            value: escapeQueryValue(value),
+            value,
+            operator: IS_OPERATOR,
           },
         }}
         render={(dataProvider, _, snapshot) =>
