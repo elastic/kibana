@@ -155,7 +155,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
 
   log.info('Initializing Code plugin as code-node.');
   const queueIndex: string = server.config().get('xpack.code.queueIndex');
-  const queueTimeout: number = server.config().get('xpack.code.queueTimeout');
+  const queueTimeoutMs: number = server.config().get('xpack.code.queueTimeoutMs');
   const devMode: boolean = server.config().get('env.dev');
 
   const esClient: EsClient = new EsClientWithInternalRequest(server);
@@ -198,7 +198,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   // Initialize queue.
   const queue = new Esqueue(queueIndex, {
     client: esClient,
-    timeout: queueTimeout,
+    timeout: queueTimeoutMs,
   });
   const indexWorker = new IndexWorker(
     queue,
