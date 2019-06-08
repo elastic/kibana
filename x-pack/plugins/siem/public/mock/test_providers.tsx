@@ -46,7 +46,7 @@ export const TestProviders = pure<Props>(
     children,
     store = createStore(state, apolloClientObservable),
     mockFramework = mockFrameworks.default_UTC,
-    onDragEnd = jest.fn(),
+    onDragEnd = typeof jest === 'object' ? jest.fn() : () => {},
   }) => (
     <I18nProvider>
       <ApolloProvider client={apolloClient}>
