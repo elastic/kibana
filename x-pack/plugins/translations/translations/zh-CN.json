@@ -2356,8 +2356,6 @@
     "kbn.visualize.listing.createNew.title": "创建首个可视化",
     "kbn.visualize.listing.experimentalTitle": "实验性",
     "kbn.visualize.listing.experimentalTooltip": "未来版本可能会更改或删除此可视化，其不受支持 SLA 的约束。",
-    "kbn.visualize.listing.listingLimitAdvancedSettingsLinkText": "高级设置",
-    "kbn.visualize.listing.listingLimitHelpText": "您有 {totalItems} 个可视化，但“listingLimit”设置使得下表最多只能显示 {listingLimit} 个。此设置可在以下选项下更改：",
     "kbn.visualize.listing.noItemsMessage": "看起来您还没有任何可视化。",
     "kbn.visualize.listing.noVisualizations.createVisualizationButtonLabel": "创建可视化",
     "kbn.visualize.listing.noVisualizationsText": "看起来您还没有任何可视化。开始创建一些吧！",
