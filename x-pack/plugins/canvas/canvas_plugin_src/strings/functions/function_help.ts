@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { AvailableFunctions } from '../../functions/types';
+import { CanvasFunction } from '../../functions/types';
 import { UnionToIntersection } from '../../functions/types';
 
 import { help as all } from './all';
@@ -74,8 +74,32 @@ import { help as timefilterControl } from './timefilterControl';
 import { help as urlparam } from './urlparam';
 
 /**
- * This type infers Function argument types.  This allows for validation that every
- * function argument has the correct help strings.
+ * This type defines an entry in the `FunctionHelpMap`.  It uses 
+ * an `ExpressionFunction` to infer its `Arguments` in order to strongly-type that 
+ * entry.
+ * 
+ * For example:
+ * 
+```
+   interface Arguments {
+     bar: string;
+     baz: number;
+   }
+
+   function foo(): ExpressionFunction<'foo', Context, Arguments, Return> {
+     // ...
+   }
+
+   const help: FunctionHelp<typeof foo> = {
+     help: 'Some help for foo',
+     args: {
+       bar: 'Help for bar.', // pass; error if missing
+       baz: 'Help for baz.', // pass; error if missing
+       zap: 'Help for zap.`, // error: zap doesn't exist
+     }
+   };
+```
+ * T
  */
 export type FunctionHelp<T> = T extends ExpressionFunction<
   infer Name,
@@ -105,7 +129,7 @@ type FunctionHelpMap<T> = T extends ExpressionFunction<
 //
 // This type indexes the existing function factories, reverses the union to an
 // intersection, and produces the dictionary of strings.
-type FunctionHelpDict = UnionToIntersection<FunctionHelpMap<AvailableFunctions>>;
+type FunctionHelpDict = UnionToIntersection<FunctionHelpMap<CanvasFunction>>;
 
 /**
  * Help text for Canvas Functions should be properly localized. This function will
