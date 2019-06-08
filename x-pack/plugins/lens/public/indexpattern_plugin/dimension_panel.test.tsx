@@ -66,19 +66,6 @@ describe('IndexPatternDimensionPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('should render a dimension panel', () => {
-    const wrapper = shallow(
-      <IndexPatternDimensionPanel
-        state={state}
-        setState={() => {}}
-        columnId={'col2'}
-        filterOperations={() => true}
-      />
-    );
-
-    expect(wrapper).toMatchSnapshot();
-  });
-
   it('should display a call to action in the popover button', () => {
     const wrapper = mount(
       <IndexPatternDimensionPanel

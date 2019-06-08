@@ -48,7 +48,7 @@ export interface IndexPattern {
   id: string;
   fields: IndexPatternField[];
   title: string;
-  timeFieldName?: string;
+  timeFieldName?: string | null;
 }
 
 export interface IndexPatternField {
@@ -57,7 +57,7 @@ export interface IndexPatternField {
   esTypes?: string[];
   aggregatable: boolean;
   searchable: boolean;
-  rollupRestrictions?: Partial<
+  aggregationRestrictions?: Partial<
     Record<
       string,
       {
@@ -137,25 +137,26 @@ export function columnToOperation(column: IndexPatternColumn) {
 type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
 type InferFromArray<T> = T extends Array<infer P> ? P : T;
 
-function addRollupInfoToFields(
+function addRestrictionsToFields(
   indexPattern: InferFromArray<Exclude<UnwrapPromise<ReturnType<typeof getIndexPatterns>>, void>>
 ): IndexPattern {
-  if (!indexPattern.typeMeta || typeof indexPattern.fields === 'string') {
+  const { typeMeta } = indexPattern;
+  if (!typeMeta) {
     return indexPattern;
   }
 
-  const aggs = Object.keys(indexPattern.typeMeta.aggs);
+  const aggs = Object.keys(typeMeta.aggs);
 
   const newFields = [...(indexPattern.fields as IndexPatternField[])];
   newFields.forEach((field, index) => {
-    const restrictionsObj: IndexPatternField['rollupRestrictions'] = {};
+    const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
     aggs.forEach(agg => {
-      if (indexPattern.typeMeta.aggs[agg] && indexPattern.typeMeta.aggs[agg][field.name]) {
-        restrictionsObj[agg] = indexPattern.typeMeta.aggs[agg][field.name];
+      if (typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name]) {
+        restrictionsObj[agg] = typeMeta.aggs[agg][field.name];
       }
     });
     if (Object.keys(restrictionsObj).length) {
-      newFields[index] = { ...field, rollupRestrictions: restrictionsObj };
+      newFields[index] = { ...field, aggregationRestrictions: restrictionsObj };
     }
   });
 
@@ -178,7 +179,7 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
 
       if (indexPatternObjects) {
         indexPatternObjects.forEach(obj => {
-          indexPatterns[obj.id] = addRollupInfoToFields(obj);
+          indexPatterns[obj.id] = addRestrictionsToFields(obj);
         });
       }
 
