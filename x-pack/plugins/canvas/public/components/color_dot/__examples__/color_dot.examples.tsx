@@ -8,7 +8,7 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ColorDot } from '../color_dot';
 
-storiesOf('components/ColorDot', module)
+storiesOf('components/Color/ColorDot', module)
   .addParameters({ info: { propTablesExclude: [EuiIcon] } })
   .add('color dots', () => [
     <ColorDot key="1" value="white" />,

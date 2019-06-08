@@ -52,7 +52,7 @@ class Interactive extends React.Component<
   }
 }
 
-storiesOf('components/ColorPickerPopover', module)
+storiesOf('components/Color/ColorPickerPopover', module)
   .addParameters({
     info: {
       inline: true,
