@@ -42,7 +42,7 @@ uiModules
           return movable;
         };
       },
-      link($scope, $el, draggableController) {
+      link($scope, $el, attr, draggableController) {
         draggableController.linkDraggableItem($el.get(0), $scope);
       }
     };

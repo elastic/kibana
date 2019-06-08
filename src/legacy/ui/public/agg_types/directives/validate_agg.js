@@ -29,7 +29,7 @@ uiModules
         'ngModel': '=',
         'agg': '='
       },
-      link: function ($scope, ngModel) {
+      link: function ($scope, elem, attr, ngModel) {
         function validateAgg(aggValue) {
           if (aggValue == null || aggValue === 'custom') {
             ngModel.$setValidity('aggInput', true);

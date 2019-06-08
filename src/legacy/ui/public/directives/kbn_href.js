@@ -28,7 +28,7 @@ export function kbnUrlDirective(name) {
     .directive(name, function (chrome) {
       return {
         restrict: 'A',
-        link: function ($attr) {
+        link: function ($scope, $el, $attr) {
           $attr.$observe(name, function (val) {
             $attr.$set(attr, chrome.addBasePath(val));
           });

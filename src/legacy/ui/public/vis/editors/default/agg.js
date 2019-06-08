@@ -33,7 +33,7 @@ uiModules
       restrict: 'A',
       template: aggTemplate,
       require: 'form',
-      link: function ($scope, kbnForm) {
+      link: function ($scope, $el, attrs, kbnForm) {
         $scope.editorOpen = !!$scope.agg.brandNew;
 
         $scope.$watch('editorOpen', function (open) {

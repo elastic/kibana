@@ -25,7 +25,7 @@ uiModules
     return {
       restrict: 'A',
       require: '^draggableItem',
-      link($el, ctrl) {
+      link($scope, $el, attr, ctrl) {
         ctrl.registerHandle($el);
         $el.addClass('gu-handle');
       }

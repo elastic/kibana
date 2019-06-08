@@ -38,7 +38,7 @@ uiModules
       restrict: 'E',
       template: aggGroupTemplate,
       scope: true,
-      link: function ($scope, attr) {
+      link: function ($scope, $el, attr) {
         $scope.groupName = attr.groupName;
         $scope.groupNameLabel = aggGroupNameMaps()[$scope.groupName];
         $scope.$bind('group', 'state.aggs.bySchemaGroup["' + $scope.groupName + '"]');
