@@ -5,7 +5,7 @@
  */
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Datatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   column: string;
@@ -14,6 +14,7 @@ interface Arguments {
 
 export function getCell(): ExpressionFunction<'getCell', Datatable, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().getCell;
+  const errors = getFunctionErrors().getCell;
 
   return {
     name: 'getCell',
@@ -37,14 +38,14 @@ export function getCell(): ExpressionFunction<'getCell', Datatable, Arguments, a
     fn: (context, args) => {
       const row = context.rows[args.row];
       if (!row) {
-        throw new Error(`Row not found: '${args.row}'`);
+        throw errors.rowNotFound(args.row);
       }
 
       const { column = context.columns[0].name } = args;
       const value = row[column];
 
       if (typeof value === 'undefined') {
-        throw new Error(`Column not found: '${column}'`);
+        throw errors.columnNotFound(column);
       }
 
       return value;
