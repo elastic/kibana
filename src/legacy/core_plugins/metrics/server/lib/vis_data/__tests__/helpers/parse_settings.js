@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import parseSettings from '../../helpers/parse_settings';
+import { parseSettings } from '../../helpers/parse_settings';
 
 describe('parseSettings', () => {
   it('returns the true for "true"', () => {

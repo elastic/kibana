@@ -19,10 +19,10 @@ export const SavedPinnedEventRuntimeType = runtimeTypes.intersection([
     eventId: runtimeTypes.string,
   }),
   runtimeTypes.partial({
-    created: runtimeTypes.number,
-    createdBy: runtimeTypes.string,
-    updated: runtimeTypes.number,
-    updatedBy: runtimeTypes.string,
+    created: unionWithNullType(runtimeTypes.number),
+    createdBy: unionWithNullType(runtimeTypes.string),
+    updated: unionWithNullType(runtimeTypes.number),
+    updatedBy: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 

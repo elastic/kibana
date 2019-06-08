@@ -20,14 +20,18 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import * as collectionActions from './lib/collection_actions';
+import { collectionActions } from './lib/collection_actions';
 import { ES_TYPES } from '../../common/es_types';
-import AddDeleteButtons from './add_delete_buttons';
-import ColorPicker from './color_picker';
-import FieldSelect from './aggs/field_select';
+import { AddDeleteButtons } from './add_delete_buttons';
+import { ColorPicker } from './color_picker';
+import { FieldSelect } from './aggs/field_select';
 import uuid from 'uuid';
-import IconSelect from './icon_select';
-import YesNo from './yes_no';
+import { IconSelect } from './icon_select';
+import { YesNo } from './yes_no';
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+const { QueryBarInput } = data.query.ui;
+import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 import {
   htmlIdGenerator,
@@ -58,8 +62,8 @@ function newAnnotation() {
 
 const RESTRICT_FIELDS = [ES_TYPES.DATE];
 
-class AnnotationsEditor extends Component {
-
+const localStorage = new Storage(window.localStorage);
+export class AnnotationsEditor extends Component {
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
@@ -73,9 +77,20 @@ class AnnotationsEditor extends Component {
       handleChange(_.assign({}, item, part));
     };
   }
-
+  handleQueryChange = (model, filter) => {
+    const part = { query_string: filter };
+    collectionActions.handleChange(this.props, {
+      ...model,
+      ...part
+    });
+  };
   renderRow(row) {
-    const defaults = { fields: '', template: '', index_pattern: '*', query_string: '' };
+    const defaults = {
+      fields: '',
+      template: '',
+      index_pattern: '*',
+      query_string: { query: '', language: getDefaultQueryLanguage() }
+    };
     const model = { ...defaults, ...row };
     const handleChange = (part) => {
       const fn = collectionActions.handleChange.bind(null, this.props);
@@ -154,10 +169,16 @@ class AnnotationsEditor extends Component {
                   />)}
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={this.handleChange(model, 'query_string')}
-                    value={model.query_string}
-                    fullWidth
+                  <QueryBarInput
+                    query={{
+                      language: model.query_string.language || getDefaultQueryLanguage(),
+                      query: model.query_string.query || '',
+                    }}
+                    onChange={query => this.handleQueryChange(model, query)}
+                    appName={'VisEditor'}
+                    indexPatterns={[model.index_pattern]}
+                    store={localStorage}
+                    showDatePicker={false}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -250,7 +271,6 @@ class AnnotationsEditor extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
-
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -312,7 +332,6 @@ class AnnotationsEditor extends Component {
       </div>
     );
   }
-
 }
 
 AnnotationsEditor.defaultProps = {
@@ -325,5 +344,3 @@ AnnotationsEditor.propTypes = {
   name: PropTypes.string,
   onChange: PropTypes.func
 };
-
-export default AnnotationsEditor;

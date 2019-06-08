@@ -19,7 +19,7 @@
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { extractIndexPatterns } from './extract_index_patterns';
+import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
 export async function fetchFields(indexPatterns = ['*']) {
   const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];

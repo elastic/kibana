@@ -71,7 +71,7 @@ function find(rules, check, last) {
   };
 }
 
-export default {
+export const calculateAuto = {
   near: find(revRoundingRules, function near(bound, interval, target) {
     if (bound > target) return interval;
   }, true),

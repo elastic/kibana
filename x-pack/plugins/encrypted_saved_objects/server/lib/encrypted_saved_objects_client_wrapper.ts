@@ -8,23 +8,21 @@ import uuid from 'uuid';
 import {
   BaseOptions,
   BulkCreateObject,
-  BulkCreateResponse,
-  BulkGetObjects,
-  BulkGetResponse,
+  BulkGetObject,
+  BulkResponse,
   CreateOptions,
-  CreateResponse,
   FindOptions,
   FindResponse,
-  GetResponse,
   SavedObjectAttributes,
-  SavedObjectsClient,
+  SavedObjectsClientContract,
   UpdateOptions,
   UpdateResponse,
-} from 'src/legacy/server/saved_objects/service/saved_objects_client';
+  SavedObject,
+} from 'src/legacy/server/saved_objects';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 
 interface EncryptedSavedObjectsClientOptions {
-  baseClient: SavedObjectsClient;
+  baseClient: SavedObjectsClientContract;
   service: Readonly<EncryptedSavedObjectsService>;
 }
 
@@ -36,10 +34,10 @@ function generateID() {
   return uuid.v4();
 }
 
-export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
+export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientContract {
   constructor(
     private readonly options: EncryptedSavedObjectsClientOptions,
-    public readonly errors: SavedObjectsClient['errors'] = options.baseClient.errors
+    public readonly errors = options.baseClient.errors
   ) {}
 
   public async create<T extends SavedObjectAttributes>(
@@ -119,7 +117,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
     );
   }
 
-  public async bulkGet(objects: BulkGetObjects = [], options?: BaseOptions) {
+  public async bulkGet(objects: BulkGetObject[] = [], options?: BaseOptions) {
     return this.stripEncryptedAttributesFromBulkResponse(
       await this.options.baseClient.bulkGet(objects, options)
     );
@@ -159,9 +157,9 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
    * registered, response is returned as is.
    * @param response Raw response returned by the underlying base client.
    */
-  private stripEncryptedAttributesFromResponse<
-    T extends UpdateResponse | CreateResponse | GetResponse
-  >(response: T): T {
+  private stripEncryptedAttributesFromResponse<T extends UpdateResponse | SavedObject>(
+    response: T
+  ): T {
     if (this.options.service.isRegistered(response.type)) {
       response.attributes = this.options.service.stripEncryptedAttributes(
         response.type,
@@ -177,9 +175,9 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
    * response portion isn't registered, it is returned as is.
    * @param response Raw response returned by the underlying base client.
    */
-  private stripEncryptedAttributesFromBulkResponse<
-    T extends BulkCreateResponse | BulkGetResponse | FindResponse
-  >(response: T): T {
+  private stripEncryptedAttributesFromBulkResponse<T extends BulkResponse | FindResponse>(
+    response: T
+  ): T {
     for (const savedObject of response.saved_objects) {
       if (this.options.service.isRegistered(savedObject.type)) {
         savedObject.attributes = this.options.service.stripEncryptedAttributes(

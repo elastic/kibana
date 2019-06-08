@@ -5,7 +5,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import { uniq } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -16,12 +15,13 @@ import { DefaultDraggable, DraggableBadge } from '../draggables';
 
 import * as i18n from './translations';
 import {
-  NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_BYTES_FIELD_NAME,
-  NETWORK_PACKETS_FIELD_NAME,
   NETWORK_COMMUNITY_ID_FIELD_NAME,
+  NETWORK_PACKETS_FIELD_NAME,
+  NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
+import { PreferenceFormattedBytes } from '../formatted_bytes';
 
 const EuiFlexItemMarginRight = styled(EuiFlexItem)`
   margin-right: 3px;
@@ -78,7 +78,9 @@ export const Network = pure<{
                 value={b}
               >
                 <Stats size="xs">
-                  <span data-test-subj="network-bytes">{numeral(b).format('0.000 b')}</span>
+                  <span data-test-subj="network-bytes">
+                    <PreferenceFormattedBytes value={b} />
+                  </span>
                 </Stats>
               </DefaultDraggable>
             </EuiFlexItemMarginRight>

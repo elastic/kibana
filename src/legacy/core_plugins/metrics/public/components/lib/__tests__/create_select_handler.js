@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import { expect } from 'chai';
-import createSelectHandler from '../create_select_handler';
+import { createSelectHandler } from '../create_select_handler';
 
 describe('createSelectHandler()', () => {
   let handleChange;

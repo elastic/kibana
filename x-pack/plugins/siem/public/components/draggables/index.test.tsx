@@ -29,7 +29,7 @@ describe('draggables', () => {
           value="some-value"
           queryValue="some-query-value"
         >
-          <span>A child of this</span>
+          <span>{'A child of this'}</span>
         </DefaultDraggable>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -45,7 +45,7 @@ describe('draggables', () => {
           queryValue="some-query-value"
           iconType="number"
         >
-          <span>A child of this</span>
+          <span>{'A child of this'}</span>
         </DraggableBadge>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -62,7 +62,7 @@ describe('draggables', () => {
     });
 
     test('returns false if the tooltip is a ReactNode', () => {
-      expect(tooltipContentIsExplicitlyNull(<span>be a good node</span>)).toBe(false);
+      expect(tooltipContentIsExplicitlyNull(<span>{'be a good node'}</span>)).toBe(false);
     });
 
     test('returns true if the tooltip is null', () => {
@@ -91,9 +91,9 @@ describe('draggables', () => {
       expect(
         getDefaultWhenTooltipIsUnspecified({
           field: 'source.bytes',
-          tooltipContent: <span>the universe</span>,
+          tooltipContent: <span>{'the universe'}</span>,
         })
-      ).toEqual(<span>the universe</span>);
+      ).toEqual(<span>{'the universe'}</span>);
     });
   });
 
@@ -166,7 +166,7 @@ describe('draggables', () => {
           <DefaultDraggable
             id="draggable-id"
             field="source.bytes"
-            tooltipContent={<span>default draggable tooltip</span>}
+            tooltipContent={<span>{'default draggable tooltip'}</span>}
             value="a default draggable"
           />
         </TestProviders>
@@ -177,7 +177,7 @@ describe('draggables', () => {
           .find('[data-test-subj="source.bytes-tooltip"]')
           .first()
           .props().content
-      ).toEqual(<span>default draggable tooltip</span>);
+      ).toEqual(<span>{'default draggable tooltip'}</span>);
     });
 
     test('it does NOT render a tooltip when tooltipContent is null', () => {
@@ -314,7 +314,7 @@ describe('draggables', () => {
             field="some-field"
             value="some value"
             iconType="number"
-            tooltipContent={<span>draggable badge tooltip</span>}
+            tooltipContent={<span>{'draggable badge tooltip'}</span>}
           />
         </TestProviders>
       );
@@ -324,7 +324,7 @@ describe('draggables', () => {
           .find('[data-test-subj="some-field-tooltip"]')
           .first()
           .props().content
-      ).toEqual(<span>draggable badge tooltip</span>);
+      ).toEqual(<span>{'draggable badge tooltip'}</span>);
     });
 
     test('it does NOT render a tooltip when tooltipContent is null', () => {

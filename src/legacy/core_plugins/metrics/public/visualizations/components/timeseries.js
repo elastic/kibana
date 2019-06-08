@@ -21,14 +21,14 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import _ from 'lodash';
-import getLastValue from '../../../common/get_last_value';
+import { getLastValue } from '../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../common/set_is_reversed';
-import TimeseriesChart from './timeseries_chart';
-import Legend from './legend';
-import eventBus from '../lib/events';
+import { TimeseriesChart } from './timeseries_chart';
+import { Legend } from './legend';
+import { eventBus } from '../lib/events';
 import reactcss from 'reactcss';
 
-class Timeseries extends Component {
+export class Timeseries extends Component {
 
   constructor(props) {
     super(props);
@@ -196,5 +196,3 @@ Timeseries.propTypes = {
   xaxisLabel: PropTypes.string,
   dateFormat: PropTypes.string
 };
-
-export default Timeseries;

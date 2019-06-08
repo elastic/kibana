@@ -26,15 +26,13 @@ import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
-import 'ui/apply_filters';
-
 import { panelActionsStore } from './store/panel_actions_store';
 
 import { getDashboardTitle } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { DocTitleProvider } from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
@@ -58,8 +56,6 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
-import { data } from 'plugins/data';
-data.search.loadLegacyDirectives();
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -114,7 +110,7 @@ app.directive('dashboardApp', function ($injector) {
 
       const dashboardStateManager = new DashboardStateManager({
         savedDashboard: dash,
-        AppState,
+        AppStateClass: AppState,
         hideWriteControls: dashboardConfig.getHideWriteControls(),
         addFilter: ({ field, value, operator, index }) => {
           filterActions.addFilter(field, value, operator, index, dashboardStateManager.getAppState(), filterManager);
@@ -123,8 +119,6 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.getDashboardState = () => dashboardStateManager;
       $scope.appState = dashboardStateManager.getAppState();
-      $scope.refreshInterval = timefilter.getRefreshInterval();
-
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.

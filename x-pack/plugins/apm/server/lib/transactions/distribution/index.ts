@@ -10,16 +10,23 @@ import { calculateBucketSize } from './calculate_bucket_size';
 import { getBuckets } from './get_buckets';
 
 export type ITransactionDistributionAPIResponse = PromiseReturnType<
-  typeof getDistribution
+  typeof getTransactionDistribution
 >;
-export async function getDistribution(
-  serviceName: string,
-  transactionName: string,
-  transactionType: string,
-  transactionId: string,
-  traceId: string,
-  setup: Setup
-) {
+export async function getTransactionDistribution({
+  serviceName,
+  transactionName,
+  transactionType,
+  transactionId,
+  traceId,
+  setup
+}: {
+  serviceName: string;
+  transactionName: string;
+  transactionType: string;
+  transactionId: string;
+  traceId: string;
+  setup: Setup;
+}) {
   const bucketSize = await calculateBucketSize(
     serviceName,
     transactionName,

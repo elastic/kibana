@@ -20,20 +20,20 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { find } from 'lodash';
-import reIdSeries from './lib/re_id_series';
-import Series from './series';
+import { reIdSeries } from './lib/re_id_series';
+import { Series } from './series';
 import {
   handleAdd,
   handleDelete,
   handleChange,
 } from './lib/collection_actions';
-import newSeriesFn from './lib/new_series_fn';
+import { newSeriesFn } from './lib/new_series_fn';
 import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 import { reorder } from './lib/reorder';
 
 const DROPPABLE_ID = 'series_editor_dnd';
 
-class SeriesEditor extends Component {
+export class SeriesEditor extends Component {
 
   handleClone = series => {
     const newSeries = reIdSeries(series);
@@ -141,5 +141,3 @@ SeriesEditor.propTypes = {
   onChange: PropTypes.func,
   visData$: PropTypes.object,
 };
-
-export default SeriesEditor;

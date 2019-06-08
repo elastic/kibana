@@ -11,7 +11,7 @@ import { ErrorIcon } from '../shared/icons';
 
 export const ErrorPanel = (props: { title: ReactNode; content: string }) => {
   return (
-    <div className="codePanel__error">
+    <div className="codePanel__error" data-test-subj="codeNotFoundErrorPage">
       <EuiPanel>
         <EuiSpacer />
         <EuiText textAlign="center">

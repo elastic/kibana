@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createHistory from 'history/createHashHistory';
+import { createHashHistory } from 'history';
 
 // Make history singleton available across APM project
 // TODO: Explore using React context or hook instead?
-const history = createHistory();
+const history = createHashHistory();
 
 export { history };

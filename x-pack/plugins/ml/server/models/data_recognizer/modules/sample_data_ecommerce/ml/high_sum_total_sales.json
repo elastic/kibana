@@ -1,6 +1,6 @@
 {
-  "groups": ["kibana_sample_data"],
-  "description": "Kibana sample eCommerce data: detect anomalies in total sales",
+  "groups": ["kibana_sample_data", "kibana_sample_ecommerce"],
+  "description": "Find customers spending an unusually high amount in an hour",
   "analysis_config": {
     "bucket_span": "1h",
     "detectors": [

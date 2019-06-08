@@ -9,7 +9,6 @@ import { mergeCapabilitiesWithFields } from '../merge_capabilities_with_fields';
 import { getCapabilitiesForRollupIndices } from '../map_capabilities';
 
 const ROLLUP_INDEX_CAPABILITIES_METHOD = 'rollup.rollupIndexCapabilities';
-const batchRequestsSupport = false;
 
 const getRollupIndices = rollupData => Object.keys(rollupData);
 
@@ -47,7 +46,7 @@ export const getRollupSearchStrategy = (AbstractSearchStrategy, RollupSearchRequ
           const [rollupIndex] = rollupIndices;
           const fieldsCapabilities = getCapabilitiesForRollupIndices(rollupData);
 
-          capabilities = new RollupSearchCapabilities(req, batchRequestsSupport, fieldsCapabilities, rollupIndex);
+          capabilities = new RollupSearchCapabilities(req, fieldsCapabilities, rollupIndex);
         }
       }
 

@@ -7,7 +7,8 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 
 // eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
-  describe('feature controls', () => {
+  describe('feature controls', function() {
+    this.tags(['skipFirefox']);
     loadTestFile(require.resolve('./dashboard_security'));
     loadTestFile(require.resolve('./dashboard_spaces'));
   });

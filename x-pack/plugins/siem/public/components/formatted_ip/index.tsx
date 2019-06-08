@@ -8,7 +8,6 @@ import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { escapeQueryValue } from '../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getOrEmptyTagFromValue } from '../empty_value';
@@ -54,7 +53,7 @@ const getDataProvider = ({
   name: `${fieldName}: ${parseQueryValue(address)}`,
   queryMatch: {
     field: fieldName,
-    value: escapeQueryValue(parseQueryValue(address)),
+    value: parseQueryValue(address),
     operator: IS_OPERATOR,
   },
   excluded: false,

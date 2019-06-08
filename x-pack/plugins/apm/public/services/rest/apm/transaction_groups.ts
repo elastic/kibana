@@ -25,10 +25,11 @@ export async function loadTransactionList({
   uiFilters: UIFilters;
 }) {
   return await callApi<TransactionListAPIResponse>({
-    pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}`,
+    pathname: `/api/apm/services/${serviceName}/transaction_groups`,
     query: {
       start,
       end,
+      transactionType,
       uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
@@ -54,12 +55,12 @@ export async function loadTransactionDistribution({
   uiFilters: UIFilters;
 }) {
   return callApi<ITransactionDistributionAPIResponse>({
-    pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/${encodeURIComponent(
-      transactionName
-    )}/distribution`,
+    pathname: `/api/apm/services/${serviceName}/transaction_groups/distribution`,
     query: {
       start,
       end,
+      transactionType,
+      transactionName,
       transactionId,
       traceId,
       uiFiltersES: await getUiFiltersES(uiFilters)
@@ -67,7 +68,7 @@ export async function loadTransactionDistribution({
   });
 }
 
-export async function loadTransactionDetailsCharts({
+export async function loadTransactionCharts({
   serviceName,
   start,
   end,
@@ -78,44 +79,17 @@ export async function loadTransactionDetailsCharts({
   serviceName: string;
   start: string;
   end: string;
-  transactionType: string;
-  transactionName: string;
-  uiFilters: UIFilters;
-}) {
-  return callApi<TimeSeriesAPIResponse>({
-    pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/${encodeURIComponent(
-      transactionName
-    )}/charts`,
-    query: {
-      start,
-      end,
-      uiFiltersES: await getUiFiltersES(uiFilters)
-    }
-  });
-}
-
-export async function loadTransactionOverviewCharts({
-  serviceName,
-  start,
-  end,
-  uiFilters,
-  transactionType
-}: {
-  serviceName: string;
-  start: string;
-  end: string;
   transactionType?: string;
+  transactionName?: string;
   uiFilters: UIFilters;
 }) {
-  const pathname = transactionType
-    ? `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/charts`
-    : `/api/apm/services/${serviceName}/transaction_groups/charts`;
-
   return callApi<TimeSeriesAPIResponse>({
-    pathname,
+    pathname: `/api/apm/services/${serviceName}/transaction_groups/charts`,
     query: {
       start,
       end,
+      transactionType,
+      transactionName,
       uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
