@@ -6,8 +6,8 @@
 
 import chrome from 'ui/chrome';
 
-export function PathProvider($window) {
-  const path = chrome.removeBasePath($window.location.pathname);
+export function PathProvider() {
+  const path = chrome.removeBasePath(window.location.pathname);
   return {
     isUnauthenticated() {
       return path === '/login' || path === '/logout' || path === '/logged_out' || path === '/status';
