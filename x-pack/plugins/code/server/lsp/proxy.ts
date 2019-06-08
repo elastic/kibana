@@ -5,13 +5,13 @@
  */
 import EventEmitter from 'events';
 import * as net from 'net';
+import { fileURLToPath } from 'url';
 import {
   createMessageConnection,
   MessageConnection,
   SocketMessageReader,
   SocketMessageWriter,
 } from 'vscode-jsonrpc';
-
 import { RequestMessage, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 import {
@@ -32,6 +32,7 @@ import { HttpMessageReader } from './http_message_reader';
 import { HttpMessageWriter } from './http_message_writer';
 import { HttpRequestEmitter } from './http_request_emitter';
 import { createRepliesMap } from './replies_map';
+import { Cancelable } from '../utils/cancelable';
 
 export interface ILanguageServerHandler {
   lastAccess?: number;
@@ -54,13 +55,13 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   private httpEmitter = new HttpRequestEmitter();
   private replies = createRepliesMap();
   private readonly targetHost: string;
-  private readonly targetPort: number;
+  private targetPort: number;
   private readonly logger: Logger;
   private readonly lspOptions: LspOptions;
   private eventEmitter = new EventEmitter();
   private passiveConnection: boolean = false;
 
-  private connectingPromise: Promise<MessageConnection> | null = null;
+  private connectingPromise: Cancelable<MessageConnection> | null = null;
 
   constructor(targetPort: number, targetHost: string, logger: Logger, lspOptions: LspOptions) {
     this.targetHost = targetHost;
@@ -111,6 +112,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       workspaceFolders,
       rootUri,
       capabilities: clientCapabilities,
+      rootPath: fileURLToPath(rootUri),
     };
     return await clientConn
       .sendRequest(
@@ -177,7 +179,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     // prevent calling this method multiple times which may cause 'port already in use' error
     if (!this.connectingPromise) {
       this.passiveConnection = true;
-      this.connectingPromise = new Promise((res, rej) => {
+      this.connectingPromise = new Cancelable((res, rej, onCancel) => {
         const server = net.createServer(socket => {
           this.initialized = false;
           server.close();
@@ -198,9 +200,13 @@ export class LanguageServerProxy implements ILanguageServerHandler {
           server.removeListener('error', rej);
           this.logger.info('Wait langserver connection on port ' + this.targetPort);
         });
+        onCancel!(() => {
+          server.close();
+          rej('canceled');
+        });
       });
     }
-    return this.connectingPromise;
+    return this.connectingPromise.promise;
   }
 
   /**
@@ -229,7 +235,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     }
     this.closed = false;
     if (!this.connectingPromise) {
-      this.connectingPromise = new Promise(resolve => {
+      this.connectingPromise = new Cancelable((resolve, reject, onCancel) => {
         this.socket = new net.Socket();
 
         this.socket.on('connect', () => {
@@ -251,9 +257,12 @@ export class LanguageServerProxy implements ILanguageServerHandler {
           this.targetPort,
           this.targetHost
         );
+        onCancel!(() => {
+          reject('canceled');
+        });
       });
     }
-    return this.connectingPromise;
+    return this.connectingPromise.promise;
   }
 
   public unloadWorkspace(workspaceDir: string): Promise<void> {
@@ -299,6 +308,18 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   }
 
   private tryConnect() {
-    return this.passiveConnection ? this.awaitServerConnection() : this.connect();
+    return this.passiveConnection
+      ? ((this.connectingPromise as unknown) as Promise<MessageConnection>)
+      : this.connect();
+  }
+
+  public changePort(port: number) {
+    if (port !== this.targetPort) {
+      this.targetPort = port;
+      if (this.connectingPromise) {
+        this.connectingPromise.cancel();
+        this.connectingPromise = null;
+      }
+    }
   }
 }

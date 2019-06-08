@@ -48,7 +48,11 @@ export class TopBar extends React.Component<Props, { value: string }> {
           enableSubmitWhenOptionsChanged={false}
           searchOptions={this.props.searchOptions}
         />
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexGroup
+          gutterSize="none"
+          justifyContent="spaceBetween"
+          className="codeTopBar__toolbar"
+        >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem

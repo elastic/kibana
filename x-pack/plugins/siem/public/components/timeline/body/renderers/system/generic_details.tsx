@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -13,14 +12,16 @@ import { pure } from 'recompose';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
+import { OverflowField } from '../../../../tables/helpers';
 
 import * as i18n from './translations';
 import { NetflowRenderer } from '../netflow';
 import { UserHostWorkingDir } from '../user_host_working_dir';
-import { TokensFlexItem, Details } from '../helpers';
+import { Details, TokensFlexItem } from '../helpers';
 import { ProcessDraggable } from '../process_draggable';
 import { Package } from './package';
 import { AuthSsh } from './auth_ssh';
+import { Badge } from '../../../../page';
 
 interface Props {
   contextId: string;
@@ -114,14 +115,9 @@ export const SystemGenericLine = pure<Props>(
           <EuiSpacer size="xs" />
           <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
             <TokensFlexItem grow={false} component="span">
-              <DraggableBadge
-                contextId={contextId}
-                eventId={id}
-                field="message"
-                queryValue={message}
-                value={message}
-                iconType="editorComment"
-              />
+              <Badge iconType="editorComment" color="hollow">
+                <OverflowField value={message} />
+              </Badge>
             </TokensFlexItem>
           </EuiFlexGroup>
         </>

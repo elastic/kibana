@@ -27,7 +27,7 @@ import { notify, addAppRedirectMessageToUrl, fatalError, toastNotifications } fr
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
@@ -51,6 +51,10 @@ import {
   getOutlinkEncoders,
 } from './services/outlink_encoders';
 import { capabilities } from 'ui/capabilities';
+
+import saveTemplate from './templates/save_workspace.html';
+import loadTemplate from './templates/load_workspace.html';
+import settingsTemplate from './templates/settings.html';
 
 const app = uiModules.get('app/graph');
 
@@ -770,7 +774,7 @@ app.controller('graphuiPlugin', function (
       .on('zoom', redraw));
 
 
-  const managementUrl = getNewPlatform().start.core.chrome.navLinks.get('kibana:management').url;
+  const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
   const url = `${managementUrl}/kibana/index_patterns`;
 
   if ($scope.indices.length === 0) {
@@ -833,7 +837,7 @@ app.controller('graphuiPlugin', function (
           defaultMessage: 'Save this workspace',
         }),
         disableButton: function () {return $scope.selectedFields.length === 0;},
-        template: require('./templates/save_workspace.html'),
+        template: saveTemplate,
         testId: 'graphSaveButton',
       });
     } else {
@@ -864,7 +868,7 @@ app.controller('graphuiPlugin', function (
     tooltip: i18n.translate('xpack.graph.topNavMenu.loadWorkspaceTooltip', {
       defaultMessage: 'Load a saved workspace',
     }),
-    template: require('./templates/load_workspace.html'),
+    template: loadTemplate,
     testId: 'graphOpenButton',
   });
   // if deleting is disabled using uiCapabilities, we don't want to render the delete
@@ -942,7 +946,7 @@ app.controller('graphuiPlugin', function (
     description: i18n.translate('xpack.graph.topNavMenu.settingsAriaLabel', {
       defaultMessage: 'Settings',
     }),
-    template: require('./templates/settings.html')
+    template: settingsTemplate
   });
 
 
