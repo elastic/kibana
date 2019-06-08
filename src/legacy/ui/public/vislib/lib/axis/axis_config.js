@@ -91,7 +91,8 @@ const verticalDefaults = {
 
 export class AxisConfig {
   constructor(chartConfig, axisConfigArgs) {
-    const typeDefaults = axisConfigArgs.type === 'category' ? categoryDefaults : valueDefaults;
+    const isCategoryType = axisConfigArgs.type === 'category';
+    const typeDefaults = isCategoryType ? _.cloneDeep(categoryDefaults) : _.cloneDeep(valueDefaults);
     // _.defaultsDeep mutates axisConfigArgs nested values so we clone it first
     const axisConfigArgsClone = _.cloneDeep(axisConfigArgs);
     const isCategoryAxis = axisConfigArgsClone.type === 'category';
