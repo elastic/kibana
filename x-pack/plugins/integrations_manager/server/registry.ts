@@ -9,15 +9,36 @@ import https from 'https';
 import Boom from 'boom';
 import yauzl, { Entry, ZipFile } from 'yauzl';
 import { Readable } from 'stream';
-// import { decompress } from './decompress';
 
 const REGISTRY = process.env.REGISTRY || 'http://localhost:8080';
+
+const cache: Map<string, Buffer> = new Map();
+const cacheGet = (key: string) => cache.get(key);
+const cacheSet = (key: string, value: Buffer) => cache.set(key, value);
+const cacheHas = (key: string) => cache.has(key);
+const cacheGetAll = () => cache.entries();
+const getArchiveKey = (key: string) => `${key}-archive`;
+
 const unzipFromBuffer = (buffer: Buffer): Promise<ZipFile> =>
   new Promise((resolve, reject) =>
     yauzl.fromBuffer(buffer, { lazyEntries: true }, (err?: Error, zipfile?: ZipFile) =>
       err ? reject(err) : resolve(zipfile)
     )
   );
+
+function getResponse(url: string): Promise<http.IncomingMessage> {
+  const lib = url.startsWith('https') ? https : http;
+  return new Promise((resolve, reject) =>
+    lib
+      .get(url, (response: http.IncomingMessage) => {
+        if (response.statusCode && response.statusCode === 200) {
+          return resolve(response);
+        }
+        return reject(new Boom(response.statusMessage, { statusCode: response.statusCode }));
+      })
+      .on('error', reject)
+  );
+}
 
 export async function fetchList() {
   return fetchJson(`${REGISTRY}/list`);
@@ -27,17 +48,13 @@ export async function fetchInfo(key: string) {
   return fetchJson(`${REGISTRY}/package/${key}`);
 }
 
-function fetchUrl(url: string): Promise<string> {
+async function fetchUrl(url: string): Promise<string> {
+  const response = await getResponse(url);
   return new Promise((resolve, reject) => {
-    const lib = url.startsWith('https') ? https : http;
-
-    const request = lib.get(url, response => {
-      const body: string[] = [];
-      response.on('data', (chunk: string) => body.push(chunk));
-      response.on('end', () => resolve(body.join('')));
-    });
-
-    request.on('error', reject);
+    const body: string[] = [];
+    response.on('data', (chunk: string) => body.push(chunk));
+    response.on('end', () => resolve(body.join('')));
+    response.on('error', reject);
   });
 }
 
@@ -52,41 +69,22 @@ async function fetchJson(url: string): Promise<object> {
 }
 
 async function fetchZipAsBuffer(key: string): Promise<Buffer> {
-  return new Promise((resolve, reject) =>
-    http.get(`${REGISTRY}/package/${key}/get`, res => {
-      const chunks: Buffer[] = [];
-      res
-        .on('data', chunk => chunks.push(Buffer.from(chunk)))
-        .on('end', () => resolve(Buffer.concat(chunks)))
-        .on('error', reject);
-    })
-  );
+  const response = await getResponse(`${REGISTRY}/package/${key}/get`);
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    response
+      .on('data', chunk => chunks.push(Buffer.from(chunk)))
+      .on('end', () => resolve(Buffer.concat(chunks)))
+      .on('error', reject);
+  });
 }
 
-const rejectUnless200 = async (response: http.IncomingMessage) =>
-  response.statusCode && response.statusCode === 200
-    ? response
-    : new Boom(response.statusMessage, { statusCode: response.statusCode });
-
-const cache: Map<string, Buffer> = new Map();
-const cacheGet = (key: string) => cache.get(key);
-const cacheSet = (key: string, value: Buffer) => cache.set(key, value);
-const cacheHas = (key: string) => cache.has(key);
-const cacheGetAll = () => cache.entries();
-const getArchiveKey = (key: string) => `${key}-archive`;
-
-async function getOrFetchFiles(
-  key: string,
-  predicate = (entry: Entry): boolean => entry.fileName.startsWith(key)
+async function filesFromBuffer(
+  buffer: Buffer,
+  predicate = (entry: Entry): boolean => true
 ): Promise<string[]> {
-  const archiveKey = getArchiveKey(key);
-  if (!cacheHas(archiveKey)) {
-    await fetchZipAsBuffer(key).then(buffer => cacheSet(archiveKey, buffer));
-  }
-  const buffer = cacheGet(archiveKey);
-  if (!buffer) throw new Error(`no entry for ${key}`);
   const zipfile = await unzipFromBuffer(buffer);
-  const files = [];
+  const files: string[] = [];
   zipfile.readEntry();
   zipfile.on('entry', async (entry: Entry) => {
     if (!predicate(entry)) return zipfile.readEntry();
@@ -108,10 +106,32 @@ async function getOrFetchFiles(
   return new Promise(resolve => zipfile.on('end', () => resolve(files)));
 }
 
+async function getFiles(
+  key: string,
+  predicate = (entry: Entry): boolean => true
+): Promise<string[]> {
+  const archiveBuffer = await getOrFetchArchiveBuffer(key);
+  const files = await filesFromBuffer(archiveBuffer, predicate);
+
+  return files;
+}
+
+async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
+  const archiveKey = getArchiveKey(key);
+  if (!cacheHas(archiveKey)) {
+    await fetchZipAsBuffer(key).then(buffer => cacheSet(archiveKey, buffer));
+  }
+
+  const buffer = cacheGet(archiveKey);
+  if (!buffer) throw new Error(`no archive buffer for ${key}`);
+
+  return buffer;
+}
+
 export async function getZipInfo(key: string): Promise<string[]> {
-  return (
-    getOrFetchFiles(key)
-      // quick hack to show processing & some info. won't really use/do this
-      .then(files => files.map(fileName => fileName.toUpperCase()))
-  );
+  // quick hack to show processing & some info. won't really use/do this
+  const stripRoot = (fileName: string) => fileName.replace(key, '');
+  const isThisPackage = (entry: Entry) => entry.fileName.startsWith(key);
+
+  return getFiles(key, isThisPackage).then(files => files.map(stripRoot));
 }
