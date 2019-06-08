@@ -6,13 +6,16 @@
 
 import { Action } from 'redux-actions';
 import { put, select, takeEvery } from 'redux-saga/effects';
-import { WorkerReservedProgress } from '../../model';
+import { RepositoryUri, WorkerReservedProgress } from '../../model';
 import {
   deleteRepoFinished,
   Match,
   routeChange,
   updateCloneProgress,
   updateDeleteProgress,
+  pollRepoCloneStatusStop,
+  pollRepoDeleteStatusStop,
+  pollRepoIndexStatusStop,
 } from '../actions';
 import * as ROUTES from '../components/routes';
 import { RootState } from '../reducers';
@@ -26,6 +29,24 @@ export const cloneCompletedPattern = (action: Action<any>) =>
 const deleteCompletedPattern = (action: Action<any>) =>
   action.type === String(updateDeleteProgress) &&
   action.payload.progress === WorkerReservedProgress.COMPLETED;
+
+export const cloneRepoStatusPollingStopPattern = (repoUri: RepositoryUri) => {
+  return (action: Action<any>) => {
+    return action.type === String(pollRepoCloneStatusStop) && action.payload === repoUri;
+  };
+};
+
+export const indexRepoStatusPollingStopPattern = (repoUri: RepositoryUri) => {
+  return (action: Action<any>) => {
+    return action.type === String(pollRepoIndexStatusStop) && action.payload === repoUri;
+  };
+};
+
+export const deleteRepoStatusPollingStopPattern = (repoUri: RepositoryUri) => {
+  return (action: Action<any>) => {
+    return action.type === String(pollRepoDeleteStatusStop) && action.payload === repoUri;
+  };
+};
 
 function* handleRepoCloneSuccess() {
   const match: Match = yield select(matchSelector);

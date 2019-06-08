@@ -195,8 +195,13 @@ describe('lsp_incremental_indexer unit tests', () => {
     // There are 3 MODIFIED items. 1 file + 1 symbol + 1 reference = 3 objects to
     // index for each item. Total doc indexed should be 3 * 3 = 9, which can be
     // fitted into a single batch index.
-    assert.ok(bulkSpy.calledOnce);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 9 * 2);
+    assert.strictEqual(bulkSpy.callCount, 2);
+    let total = 0;
+    for (let i = 0; i < bulkSpy.callCount; i++) {
+      total += bulkSpy.getCall(i).args[0].body.length;
+    }
+    assert.strictEqual(total, 9 * 2);
+
     // @ts-ignore
   }).timeout(20000);
 
@@ -294,8 +299,12 @@ describe('lsp_incremental_indexer unit tests', () => {
     // There are 3 MODIFIED items, but 1 item after the checkpoint. 1 file
     // + 1 symbol + 1 ref = 3 objects to be indexed for each item. Total doc
     // indexed should be 3 * 2 = 2, which can be fitted into a single batch index.
-    assert.ok(bulkSpy.calledOnce);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 3 * 2);
+    assert.strictEqual(bulkSpy.callCount, 2);
+    let total = 0;
+    for (let i = 0; i < bulkSpy.callCount; i++) {
+      total += bulkSpy.getCall(i).args[0].body.length;
+    }
+    assert.strictEqual(total, 3 * 2);
     assert.strictEqual(deleteByQuerySpy.callCount, 2);
     // @ts-ignore
   }).timeout(20000);

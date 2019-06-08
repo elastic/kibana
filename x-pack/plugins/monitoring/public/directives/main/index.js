@@ -152,7 +152,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
             pipelineId: attributes.pipelineId,
             pipelineHash: attributes.pipelineHash,
             pipelineVersions: get(scope, 'pageData.versions'),
-            isCcrEnabled: attributes.isCcrEnabled
+            isCcrEnabled: attributes.isCcrEnabled === 'true' || attributes.isCcrEnabled === true
           },
           clusterName: get(scope, 'cluster.cluster_name')
         };

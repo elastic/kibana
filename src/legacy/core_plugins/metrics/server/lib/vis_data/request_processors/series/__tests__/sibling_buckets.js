@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import siblingBuckets from '../sibling_buckets';
+import { siblingBuckets } from '../sibling_buckets';
 import { expect } from 'chai';
 import sinon from 'sinon';
 

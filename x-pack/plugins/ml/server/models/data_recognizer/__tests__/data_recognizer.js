@@ -20,7 +20,6 @@ describe('ML - data recognizer', () => {
     'metricbeat_system_ecs',
     'nginx_ecs',
     'sample_data_ecommerce',
-    'sample_data_flights',
     'sample_data_weblogs',
   ];
 

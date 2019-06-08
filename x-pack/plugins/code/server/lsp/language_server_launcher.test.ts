@@ -29,7 +29,7 @@ function delay(seconds: number) {
   });
 }
 
-test('typescript language server could be shutdown', async () => {
+test.skip('typescript language server could be shutdown', async () => {
   const tsLauncher = new TypescriptServerLauncher('localhost', options, new ConsoleLoggerFactory());
   const proxy = await tsLauncher.launch(true, 1, TYPESCRIPT.embedPath!);
   await proxy.initialize(options.workspacePath);

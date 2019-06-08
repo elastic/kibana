@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Action } from 'redux-actions';
+
 import { Match, routeChange } from '../actions';
 import { PathTypes } from '../common/types';
 import * as ROUTES from '../components/routes';

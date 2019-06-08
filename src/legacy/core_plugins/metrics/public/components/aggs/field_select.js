@@ -110,5 +110,4 @@ FieldSelectUi.propTypes = {
   placeholder: PropTypes.string,
 };
 
-const FieldSelect = injectI18n(FieldSelectUi);
-export default FieldSelect;
+export const FieldSelect = injectI18n(FieldSelectUi);

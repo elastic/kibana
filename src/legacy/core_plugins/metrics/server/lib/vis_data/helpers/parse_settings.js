@@ -38,7 +38,7 @@ function castBasedOnKey(key, val) {
   }
   return val;
 }
-export default (settingsStr) => {
+export const parseSettings = (settingsStr) => {
   return settingsStr.split(/\s/).reduce((acc, value) => {
     const [key, val] = value.split(/=/);
     acc[key] = castBasedOnKey(key, val);

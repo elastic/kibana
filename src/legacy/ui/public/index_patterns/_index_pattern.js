@@ -22,7 +22,7 @@ import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 
 import angular from 'angular';
 import { fieldFormats } from '../registry/field_formats';
 import UtilsMappingSetupProvider from '../utils/mapping_setup';
-import { Notifier, toastNotifications } from '../notify';
+import { toastNotifications } from '../notify';
 
 import { getComputedFields } from './_get_computed_fields';
 import { formatHit } from './_format_hit';
@@ -46,7 +46,7 @@ export function getRoutes() {
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
-export function IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl) {
+export function IndexPatternProvider(Private, config, Promise) {
   const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetProvider)('id');
   const fieldsFetcher = Private(FieldsFetcherProvider);
@@ -57,7 +57,6 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
   const fieldformats = fieldFormats;
 
   const type = 'index-pattern';
-  const notify = new Notifier();
   const configWatchers = new WeakMap();
 
   const mapping = mappingSetup.expandShorthand({
@@ -308,6 +307,11 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
     }
 
+    isTimeNanosBased() {
+      const timeField = this.getTimeField();
+      return timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1;
+    }
+
     isTimeBasedWildcard() {
       return this.isTimeBased() && this.isWildcard();
     }
@@ -338,7 +342,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return body;
     }
 
-    async create(allowOverride = false, showOverridePrompt = false) {
+    async create(allowOverride = false) {
       const _create = async (duplicateId) => {
         if (duplicateId) {
           const duplicatePattern = new IndexPattern(duplicateId);
@@ -358,40 +362,9 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
       // We found a duplicate but we aren't allowing override, show the warn modal
       if (!allowOverride) {
-        const confirmMessage = i18n.translate('common.ui.indexPattern.titleExistsLabel', { values: { title: this.title },
-          defaultMessage: 'An index pattern with the title \'{title}\' already exists.' });
-        try {
-          await confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
-          return kbnUrl.redirect('/management/kibana/index_patterns/{{id}}', { id: potentialDuplicateByTitle.id });
-        } catch (err) {
-          return false;
-        }
-      }
-
-      // We can override, but we do not want to see a prompt, so just do it
-      if (!showOverridePrompt) {
-        return await _create(potentialDuplicateByTitle.id);
-      }
-
-      // We can override and we want to prompt for confirmation
-      try {
-        await confirmModalPromise(
-          i18n.translate('common.ui.indexPattern.confirmOverwriteLabel', { values: { title: this.title },
-            defaultMessage: 'Are you sure you want to overwrite \'{title}\'?' }),
-          {
-            title: i18n.translate('common.ui.indexPattern.confirmOverwriteTitle', {
-              defaultMessage: 'Overwrite {type}?',
-              values: { type },
-            }),
-            confirmButtonText: i18n.translate('common.ui.indexPattern.confirmOverwriteButton', { defaultMessage: 'Overwrite' }),
-          }
-        );
-      } catch (err) {
-        // They changed their mind
         return false;
       }
 
-      // Let's do it!
       return await _create(potentialDuplicateByTitle.id);
     }
 
@@ -461,7 +434,6 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return fetchFields(this)
         .then(() => this.save())
         .catch((err) => {
-          notify.error(err);
           // https://github.com/elastic/kibana/issues/9224
           // This call will attempt to remap fields from the matching
           // ES index which may not actually exist. In that scenario,
@@ -469,9 +441,15 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
           // but we do not want to potentially make any pages unusable
           // so do not rethrow the error here
           if (err instanceof IndexPatternMissingIndices) {
+            toastNotifications.addDanger(err.message);
             return [];
           }
 
+          toastNotifications.addError(err, {
+            title: i18n.translate('common.ui.indexPattern.fetchFieldErrorTitle', {
+              defaultMessage: 'Error fetching fields',
+            }),
+          });
           throw err;
         });
     }

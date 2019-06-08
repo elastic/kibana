@@ -63,7 +63,7 @@ export const getHostsColumns = (
               ) : (
                 <AddToKql
                   indexPattern={indexPattern}
-                  expression={`host.name: ${escapeQueryValue(hostName[0])}`}
+                  expression={`host.name: "${escapeQueryValue(hostName[0])}"`}
                   componentFilterType="hosts"
                   type={type}
                 >
@@ -112,7 +112,7 @@ export const getHostsColumns = (
         return (
           <AddToKql
             indexPattern={indexPattern}
-            expression={`host.os.name: ${escapeQueryValue(hostOsName)}`}
+            expression={`host.os.name: "${escapeQueryValue(hostOsName)}"`}
             componentFilterType="hosts"
             type={type}
           >
@@ -134,7 +134,7 @@ export const getHostsColumns = (
         return (
           <AddToKql
             indexPattern={indexPattern}
-            expression={`host.os.version: ${escapeQueryValue(hostOsVersion)}`}
+            expression={`host.os.version: "${escapeQueryValue(hostOsVersion)}"`}
             componentFilterType="hosts"
             type={type}
           >

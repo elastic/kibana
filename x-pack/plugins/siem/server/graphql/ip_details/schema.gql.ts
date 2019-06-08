@@ -17,13 +17,13 @@ const ipOverviewSchema = gql`
     firstSeen: Date
     lastSeen: Date
     autonomousSystem: AutonomousSystem!
-    host: HostEcsFields!
     geo: GeoEcsFields!
   }
 
   type IpOverviewData {
     client: Overview
     destination: Overview
+    host: HostEcsFields!
     server: Overview
     source: Overview
   }

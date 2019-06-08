@@ -10,7 +10,7 @@ exports[`Data Frame: <GroupByLabelSummary /> Date histogram aggregation 1`] = `
     className="mlGroupByLabel--text"
   >
     <span
-      className="mlGroupByLabel__text"
+      className="eui-textTruncate"
     >
       the-options-data-id
     </span>
@@ -20,10 +20,10 @@ exports[`Data Frame: <GroupByLabelSummary /> Date histogram aggregation 1`] = `
     grow={false}
   >
     <EuiTextColor
-      className="mlGroupByLabel__text"
+      className="eui-textTruncate"
       color="subdued"
     >
-      10m
+      1m
     </EuiTextColor>
   </EuiFlexItem>
 </EuiFlexGroup>
@@ -39,7 +39,7 @@ exports[`Data Frame: <GroupByLabelSummary /> Histogram aggregation 1`] = `
     className="mlGroupByLabel--text"
   >
     <span
-      className="mlGroupByLabel__text"
+      className="eui-textTruncate"
     >
       the-options-data-id
     </span>
@@ -49,7 +49,7 @@ exports[`Data Frame: <GroupByLabelSummary /> Histogram aggregation 1`] = `
     grow={false}
   >
     <EuiTextColor
-      className="mlGroupByLabel__text"
+      className="eui-textTruncate"
       color="subdued"
     >
       100
@@ -68,7 +68,7 @@ exports[`Data Frame: <GroupByLabelSummary /> Terms aggregation 1`] = `
     className="mlGroupByLabel--text"
   >
     <span
-      className="mlGroupByLabel__text"
+      className="eui-textTruncate"
     >
       the-options-data-id
     </span>

@@ -11,28 +11,17 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiTitle,
+  IconType,
 } from '@elastic/eui';
-import React from 'react';
-import { pure } from 'recompose';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { EuiText } from '@elastic/eui';
-import { BarChart } from './barchart';
-import { AreaChart } from './areachart';
+import { get, getOr } from 'lodash/fp';
+import { BarChart } from '../charts/barchart';
+import { AreaChart } from '../charts/areachart';
 import { getEmptyTagValue } from '../empty_value';
-
-export const WrappedByAutoSizer = styled.div`
-  height: 100px;
-  position: relative;
-
-  &:hover {
-    z-index: 100;
-  }
-`;
-
-const FlexGroup = styled(EuiFlexGroup)`
-  height: 100%;
-`;
+import { ChartConfigsData, ChartData } from '../charts/common';
+import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -44,34 +33,17 @@ const StatValue = styled(EuiTitle)`
   white-space: nowrap;
 `;
 
-export interface StatItem {
+interface StatItem {
   key: string;
   description?: string;
   value: number | undefined | null;
   color?: string;
-  icon?: 'storage' | 'cross' | 'check' | 'visMapCoordinate';
+  icon?: IconType;
   name?: string;
 }
 
-export interface AreaChartData {
-  key: string;
-  value: ChartData[] | [] | null;
-  color?: string | undefined;
-}
-
-export interface ChartData {
-  x: number | string | null;
-  y: number | string | null;
-  y0?: number;
-}
-
-export interface BarChartData {
-  key: string;
-  value: [ChartData] | [] | null;
-  color?: string | undefined;
-}
-
 export interface StatItems {
+  key: string;
   fields: StatItem[];
   description?: string;
   enableAreaChart?: boolean;
@@ -80,13 +52,83 @@ export interface StatItems {
 }
 
 export interface StatItemsProps extends StatItems {
-  key: string;
-  areaChart?: AreaChartData[];
-  barChart?: BarChartData[];
+  areaChart?: ChartConfigsData[];
+  barChart?: ChartConfigsData[];
 }
 
-export const StatItemsComponent = pure<StatItemsProps>(
-  ({ fields, description, key, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
+export const addValueToFields = (
+  fields: StatItem[],
+  data: KpiHostsData | KpiNetworkData
+): StatItem[] => fields.map(field => ({ ...field, value: get(field.key, data) }));
+
+export const addValueToAreaChart = (
+  fields: StatItem[],
+  data: KpiHostsData | KpiNetworkData
+): ChartConfigsData[] =>
+  fields
+    .filter(field => get(`${field.key}Histogram`, data) != null)
+    .map(field => ({
+      ...field,
+      value: get(`${field.key}Histogram`, data),
+      key: `${field.key}Histogram`,
+    }));
+
+export const addValueToBarChart = (
+  fields: StatItem[],
+  data: KpiHostsData | KpiNetworkData
+): ChartConfigsData[] => {
+  if (fields.length === 0) return [];
+  return fields.reduce((acc: ChartConfigsData[], field: StatItem, idx: number) => {
+    const { key, color } = field;
+    const y: number | null = getOr(null, key, data);
+    const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
+    const value: [ChartData] = [
+      {
+        x,
+        y,
+        g: key,
+      },
+    ];
+
+    return [
+      ...acc,
+      {
+        key,
+        color,
+        value,
+      },
+    ];
+  }, []);
+};
+
+export const useKpiMatrixStatus = (
+  mappings: Readonly<StatItems[]>,
+  data: KpiHostsData | KpiNetworkData
+): StatItemsProps[] => {
+  const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);
+
+  useEffect(
+    () => {
+      setStatItemsProps(
+        mappings.map(stat => {
+          return {
+            ...stat,
+            key: `kpi-summary-${stat.key}`,
+            fields: addValueToFields(stat.fields, data),
+            areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
+            barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
+          };
+        })
+      );
+    },
+    [data]
+  );
+
+  return statItemsProps;
+};
+
+export const StatItemsComponent = React.memo<StatItemsProps>(
+  ({ fields, description, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
     const isBarChartDataAbailable =
       barChart &&
       barChart.length &&
@@ -96,7 +138,7 @@ export const StatItemsComponent = pure<StatItemsProps>(
       areaChart.length &&
       areaChart.every(item => item.value != null && item.value.length > 0);
     return (
-      <FlexItem key={`stat-items-${key}`} grow={grow}>
+      <FlexItem grow={grow}>
         <EuiPanel>
           <EuiTitle size="xxxs">
             <h6>{description}</h6>
@@ -149,14 +191,4 @@ export const StatItemsComponent = pure<StatItemsProps>(
       </FlexItem>
     );
   }
-);
-
-export const ChartHolder = () => (
-  <FlexGroup justifyContent="center" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiText size="s" textAlign="center" color="subdued">
-        Chart Data Not Available
-      </EuiText>
-    </EuiFlexItem>
-  </FlexGroup>
 );

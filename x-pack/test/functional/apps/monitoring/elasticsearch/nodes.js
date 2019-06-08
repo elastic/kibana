@@ -12,7 +12,10 @@ export default function ({ getService, getPageObjects }) {
   const nodesList = getService('monitoringElasticsearchNodes');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
 
-  describe('Elasticsearch nodes listing', () => {
+  describe('Elasticsearch nodes listing', function () {
+    // FF issue: https://github.com/elastic/kibana/issues/35551
+    this.tags(['skipFirefox']);
+
     describe('with offline node', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 

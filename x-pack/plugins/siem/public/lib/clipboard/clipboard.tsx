@@ -82,9 +82,9 @@ export class Clipboard extends React.PureComponent<Props, State> {
     }
 
     if (isSuccess) {
-      this.setState({
-        toasts: [...this.state.toasts, getSuccessToast({ titleSummary })],
-      });
+      this.setState(prevState => ({
+        toasts: [...prevState.toasts, getSuccessToast({ titleSummary })],
+      }));
     }
   };
 

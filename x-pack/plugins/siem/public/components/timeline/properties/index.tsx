@@ -17,7 +17,6 @@ import * as React from 'react';
 import styled, { injectGlobal } from 'styled-components';
 
 import { Note } from '../../../lib/note';
-import { inputsModel } from '../../../store';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { SuperDatePicker } from '../../super_date_picker';
 
@@ -31,12 +30,13 @@ import {
 } from './styles';
 import * as i18n from './translations';
 import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal';
+import { InputsModelId } from '../../../store/inputs/constants';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
-type ToggleLock = ({ linkToId }: { linkToId: inputsModel.InputsModelId }) => void;
+type ToggleLock = ({ linkToId }: { linkToId: InputsModelId }) => void;
 
 // SIDE EFFECT: the following `injectGlobal` overrides `EuiPopover`
 // and `EuiToolTip` global styles:
@@ -59,6 +59,7 @@ const DescriptionPopoverMenuContainer = styled.div`
 `;
 
 const SettingsIcon = styled(EuiIcon)`
+  margin-left: 4px;
   cursor: pointer;
 `;
 
@@ -109,9 +110,9 @@ export class Properties extends React.PureComponent<Props, State> {
   }
 
   public onButtonClick = () => {
-    this.setState({
-      showActions: !this.state.showActions,
-    });
+    this.setState(prevState => ({
+      showActions: !prevState.showActions,
+    }));
   };
 
   public onToggleShowNotes = () => {

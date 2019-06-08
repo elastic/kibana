@@ -25,6 +25,7 @@ import { textService } from '../../services/text';
 
 interface Props {
   repository: Repository;
+  isManagedRepository?: boolean;
   isEditing?: boolean;
   isSaving: boolean;
   onSave: () => void;
@@ -36,6 +37,7 @@ interface Props {
 
 export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   repository,
+  isManagedRepository,
   isEditing,
   isSaving,
   onSave,
@@ -144,10 +146,10 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
         )}
         <EuiFlexItem grow={false}>
           <EuiButton
-            color="secondary"
+            color={isManagedRepository ? 'warning' : 'secondary'}
             iconType="check"
             onClick={onSave}
-            fill
+            fill={isManagedRepository ? false : true}
             data-test-subj="srRepositoryFormSubmitButton"
             isLoading={isSaving}
           >

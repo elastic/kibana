@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import mapBucket from '../../helpers/map_bucket';
+import { mapBucket } from '../../helpers/map_bucket';
 import { expect } from 'chai';
 
 describe('mapBucket(metric)', () => {

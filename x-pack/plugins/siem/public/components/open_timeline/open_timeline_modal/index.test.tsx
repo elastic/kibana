@@ -17,8 +17,10 @@ import * as i18n from '../translations';
 import { OpenTimelineModalButton } from '.';
 
 const getStateChildComponent = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
-): React.Component<{}, {}, any> =>
+): // eslint-disable-next-line @typescript-eslint/no-explicit-any
+React.Component<{}, {}, any> =>
   wrapper
     .childAt(0)
     .childAt(0)

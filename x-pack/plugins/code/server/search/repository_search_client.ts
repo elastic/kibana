@@ -28,6 +28,8 @@ export class RepositorySearchClient extends AbstractSearchClient {
       ? RepositorySearchIndexWithScope(req.repoScope)
       : `${RepositoryIndexNamePrefix}*`;
 
+    const queryStr = req.query.toLowerCase();
+
     const rawRes = await this.client.search({
       index,
       body: {
@@ -38,7 +40,7 @@ export class RepositorySearchClient extends AbstractSearchClient {
             should: [
               {
                 simple_query_string: {
-                  query: req.query,
+                  query: queryStr,
                   fields: [
                     `${RepositoryReservedField}.name^1.0`,
                     `${RepositoryReservedField}.org^1.0`,
@@ -53,7 +55,7 @@ export class RepositorySearchClient extends AbstractSearchClient {
               {
                 prefix: {
                   [`${RepositoryReservedField}.name`]: {
-                    value: req.query,
+                    value: queryStr,
                     boost: 100.0,
                   },
                 },

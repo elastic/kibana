@@ -16,45 +16,47 @@ import { App } from './components/app';
 import { HelpMenu } from './components/help_menu';
 import { store } from './stores';
 
-const app = uiModules.get('apps/code');
+if (chrome.getInjected('codeUiEnabled')) {
+  const app = uiModules.get('apps/code');
 
-app.config(($locationProvider: any) => {
-  $locationProvider.html5Mode({
-    enabled: false,
-    requireBase: false,
-    rewriteLinks: false,
+  app.config(($locationProvider: any) => {
+    $locationProvider.html5Mode({
+      enabled: false,
+      requireBase: false,
+      rewriteLinks: false,
+    });
   });
-});
-app.config((stateManagementConfigProvider: any) => stateManagementConfigProvider.disable());
+  app.config((stateManagementConfigProvider: any) => stateManagementConfigProvider.disable());
 
-function RootController($scope: any, $element: any, $http: any) {
-  const domNode = $element[0];
+  function RootController($scope: any, $element: any, $http: any) {
+    const domNode = $element[0];
 
-  // render react to DOM
-  render(
-    <Provider store={store}>
-      <App />
-    </Provider>,
-    domNode
-  );
+    // render react to DOM
+    render(
+      <Provider store={store}>
+        <App />
+      </Provider>,
+      domNode
+    );
 
-  // unmount react on controller destroy
-  $scope.$on('$destroy', () => {
-    unmountComponentAtNode(domNode);
+    // unmount react on controller destroy
+    $scope.$on('$destroy', () => {
+      unmountComponentAtNode(domNode);
+    });
+  }
+
+  chrome.setRootController('code', RootController);
+  chrome.breadcrumbs.set([
+    {
+      text: 'Code (Beta)',
+      href: '#/',
+    },
+  ]);
+
+  chrome.helpExtension.set(domNode => {
+    render(<HelpMenu />, domNode);
+    return () => {
+      unmountComponentAtNode(domNode);
+    };
   });
 }
-
-chrome.setRootController('code', RootController);
-chrome.breadcrumbs.set([
-  {
-    text: 'Code (Beta)',
-    href: '#/',
-  },
-]);
-
-chrome.helpExtension.set(domNode => {
-  render(<HelpMenu />, domNode);
-  return () => {
-    unmountComponentAtNode(domNode);
-  };
-});
