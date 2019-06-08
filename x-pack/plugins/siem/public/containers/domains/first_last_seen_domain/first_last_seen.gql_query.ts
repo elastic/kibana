@@ -12,10 +12,16 @@ export const DomainFirstLastSeenGqlQuery = gql`
     $ip: String!
     $domainName: String!
     $flowTarget: FlowTarget!
+    $defaultIndex: [String!]!
   ) {
     source(id: $sourceId) {
       id
-      DomainFirstLastSeen(ip: $ip, domainName: $domainName, flowTarget: $flowTarget) {
+      DomainFirstLastSeen(
+        ip: $ip
+        domainName: $domainName
+        flowTarget: $flowTarget
+        defaultIndex: $defaultIndex
+      ) {
         firstSeen
         lastSeen
       }

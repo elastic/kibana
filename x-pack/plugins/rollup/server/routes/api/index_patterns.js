@@ -69,7 +69,7 @@ export function registerFieldsForWildcardRoute(server) {
         const mergedRollupFields = mergeCapabilitiesWithFields(rollupIndexCapabilities, fieldsFromFieldCapsApi, rollupFields);
 
         return {
-          fields: [ ...rollupFields, ...mergedRollupFields ]
+          fields: mergedRollupFields
         };
       } catch(err) {
         if (isEsError(err)) {

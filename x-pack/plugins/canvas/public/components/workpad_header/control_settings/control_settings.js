@@ -6,45 +6,29 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { Popover } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
+import { KioskControls } from './kiosk_controls';
 
-const getRefreshInterval = (val = '') => {
-  // if it's a number, just use it directly
-  if (!isNaN(Number(val))) {
-    return val;
-  }
-
-  // if it's a string, try to parse out the shorthand duration value
-  const match = String(val).match(/^([0-9]{1,})([hmsd])$/);
-
-  // TODO: do something better with improper input, like show an error...
-  if (!match) {
-    return;
-  }
-
-  switch (match[2]) {
-    case 's':
-      return match[1] * 1000;
-    case 'm':
-      return match[1] * 1000 * 60;
-    case 'h':
-      return match[1] * 1000 * 60 * 60;
-    case 'd':
-      return match[1] * 1000 * 60 * 60 * 24;
-  }
-};
-
-export const ControlSettings = ({ setRefreshInterval, refreshInterval }) => {
-  const setRefresh = val => setRefreshInterval(getRefreshInterval(val));
+export const ControlSettings = ({
+  setRefreshInterval,
+  refreshInterval,
+  autoplayEnabled,
+  autoplayInterval,
+  enableAutoplay,
+  setAutoplayInterval,
+}) => {
+  const setRefresh = val => setRefreshInterval(val);
 
   const disableInterval = () => {
     setRefresh(0);
   };
 
   const popoverButton = handleClick => (
-    <EuiButtonIcon iconType="gear" aria-label="Control settings" onClick={handleClick} />
+    <EuiToolTip position="bottom" content="Control settings">
+      <EuiButtonIcon iconType="gear" aria-label="Control settings" onClick={handleClick} />
+    </EuiToolTip>
   );
 
   return (
@@ -54,19 +38,21 @@ export const ControlSettings = ({ setRefreshInterval, refreshInterval }) => {
       anchorPosition="rightUp"
       panelClassName="canvasControlSettings__popover"
     >
-      {({ closePopover }) => (
+      {() => (
         <EuiFlexGroup>
           <EuiFlexItem>
             <AutoRefreshControls
               refreshInterval={refreshInterval}
-              setRefresh={val => {
-                setRefresh(val);
-                closePopover();
-              }}
-              disableInterval={() => {
-                disableInterval();
-                closePopover();
-              }}
+              setRefresh={val => setRefresh(val)}
+              disableInterval={() => disableInterval()}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <KioskControls
+              autoplayEnabled={autoplayEnabled}
+              autoplayInterval={autoplayInterval}
+              onSetInterval={setAutoplayInterval}
+              onSetEnabled={enableAutoplay}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -78,4 +64,8 @@ export const ControlSettings = ({ setRefreshInterval, refreshInterval }) => {
 ControlSettings.propTypes = {
   refreshInterval: PropTypes.number,
   setRefreshInterval: PropTypes.func.isRequired,
+  autoplayEnabled: PropTypes.bool,
+  autoplayInterval: PropTypes.number,
+  enableAutoplay: PropTypes.func.isRequired,
+  setAutoplayInterval: PropTypes.func.isRequired,
 };

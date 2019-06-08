@@ -189,6 +189,7 @@ module.exports = function (grunt) {
       flags: [
         ...browserTestServerFlags,
         '--dev',
+        '--no-dev-config',
         '--no-watch',
         '--no-base-path',
         '--optimize.watchPort=5611',
@@ -268,7 +269,15 @@ module.exports = function (grunt) {
       ],
     }),
 
-    licenses: gruntTaskWithGithubChecks('Licenses', 'licenses'),
+    licenses: scriptWithGithubChecks({
+      title: 'Check licenses',
+      cmd: NODE,
+      args: [
+        'scripts/check_licenses',
+        '--dev',
+      ],
+    }),
+
     verifyDependencyVersions:
       gruntTaskWithGithubChecks('Verify dependency versions', 'verifyDependencyVersions'),
     test_server:

@@ -35,7 +35,7 @@ interface SnapshotPageProps {
 export const SnapshotPage = injectUICapabilities(
   injectI18n((props: SnapshotPageProps) => {
     const { intl, uiCapabilities } = props;
-    const { show } = useContext(SourceConfigurationFlyoutState.Context);
+    const { showIndicesConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
     const {
       derivedIndexPattern,
       hasFailedLoadingSource,
@@ -119,7 +119,7 @@ export const SnapshotPage = injectUICapabilities(
                         <EuiButton
                           data-test-subj="configureSourceButton"
                           color="primary"
-                          onClick={show}
+                          onClick={showIndicesConfiguration}
                         >
                           {intl.formatMessage({
                             id: 'xpack.infra.configureSourceActionLabel',

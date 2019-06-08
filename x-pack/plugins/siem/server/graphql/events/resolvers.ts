@@ -11,6 +11,7 @@ import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 import { SourceResolvers } from '../types';
+import { LastEventTimeRequestOptions } from '../../lib/events/types';
 
 type QueryEventsResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.EventsResolver>,
@@ -58,14 +59,16 @@ export const createEventsResolvers = (
         fieldRequested: args.fieldRequested,
       });
     },
-    async TimelineDetails(source, args, { req }, info) {
+    async TimelineDetails(source, args, { req }) {
       return libs.events.getTimelineDetails(req, {
         indexName: args.indexName,
         eventId: args.eventId,
+        defaultIndex: args.defaultIndex,
       });
     },
     async LastEventTime(source, args, { req }) {
-      const options = {
+      const options: LastEventTimeRequestOptions = {
+        defaultIndex: args.defaultIndex,
         sourceConfiguration: source.configuration,
         indexKey: args.indexKey,
         details: args.details,

@@ -20,12 +20,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import uuid from 'uuid';
-import DataFormatPicker from '../../data_format_picker';
-import createSelectHandler from '../../lib/create_select_handler';
-import createTextHandler from '../../lib/create_text_handler';
-import FieldSelect from '../../aggs/field_select';
-import YesNo from '../../yes_no';
-import ColorRules from '../../color_rules';
+import { DataFormatPicker } from '../../data_format_picker';
+import { createSelectHandler } from '../../lib/create_select_handler';
+import { createTextHandler } from '../../lib/create_text_handler';
+import { FieldSelect } from '../../aggs/field_select';
+import { YesNo } from '../../yes_no';
+import { ColorRules } from '../../color_rules';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -40,8 +40,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-
-class TableSeriesConfig extends Component {
+import { data } from 'plugins/data';
+import { Storage } from 'ui/storage';
+import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
+const { QueryBarInput } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
+class TableSeriesConfigUI extends Component {
 
   componentWillMount() {
     const { model } = this.props;
@@ -124,10 +128,15 @@ class TableSeriesConfig extends Component {
               />)}
               fullWidth
             >
-              <EuiFieldText
-                onChange={handleTextChange('filter')}
-                value={model.filter}
-                fullWidth
+              <QueryBarInput
+                query={{
+                  language: (model.filter && model.filter.language) ? model.filter.language : getDefaultQueryLanguage(),
+                  query: (model.filter && model.filter.query) ? model.filter.query : ''
+                }}
+                onChange={filter => this.props.onChange({ filter })}
+                appName={'VisEditor'}
+                indexPatterns={[this.props.indexPatternForQuery]}
+                store={localStorage}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -213,12 +222,13 @@ class TableSeriesConfig extends Component {
 
 }
 
-TableSeriesConfig.propTypes = {
+TableSeriesConfigUI.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  indexPatternForQuery: PropTypes.string
 };
 
-export default injectI18n(TableSeriesConfig);
+export const TableSeriesConfig = injectI18n(TableSeriesConfigUI);
 
 

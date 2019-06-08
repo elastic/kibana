@@ -36,13 +36,13 @@ export function InfraSourceConfigurationFlyoutProvider({
     /**
      * Indices and fields
      */
-    async getNameInput() {
+    async getNameInput(): Promise<WebElementWrapper> {
       return await testSubjects.findDescendant('nameInput', await this.getFlyout());
     },
-    async getLogIndicesInput() {
+    async getLogIndicesInput(): Promise<WebElementWrapper> {
       return await testSubjects.findDescendant('logIndicesInput', await this.getFlyout());
     },
-    async getMetricIndicesInput() {
+    async getMetricIndicesInput(): Promise<WebElementWrapper> {
       return await testSubjects.findDescendant('metricIndicesInput', await this.getFlyout());
     },
 
@@ -85,7 +85,7 @@ export function InfraSourceConfigurationFlyoutProvider({
     /**
      * Form and flyout
      */
-    async getFlyout() {
+    async getFlyout(): Promise<WebElementWrapper> {
       return await testSubjects.find('sourceConfigurationFlyout');
     },
     async saveConfiguration() {

@@ -18,7 +18,7 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { FieldsAdapter, IndexFieldDescriptor } from './types';
 
-type IndexesAliasIndices = Record<IndexAlias, string[]>;
+type IndexesAliasIndices = Record<string, string[]>;
 
 export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -27,7 +27,7 @@ export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
     const indexPatternsService = this.framework.getIndexPatternsService(request);
     const indexesAliasIndices: IndexesAliasIndices = indices.reduce(
       (accumulator: IndexesAliasIndices, indice: string) => {
-        const key: IndexAlias = getIndexAlias(indice);
+        const key: string = getIndexAlias(request.payload.variables.defaultIndex, indice);
         if (get(key, accumulator)) {
           accumulator[key] = [...accumulator[key], indice];
         } else {

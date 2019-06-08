@@ -10,11 +10,11 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
 
 import { mockTimelineResults } from '../../../mock/timeline_results';
-import { TimelineResult, TimelineResultNote } from '../types';
+import { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
 
 describe('NotePreviews', () => {
-  let mockResults: TimelineResult[];
+  let mockResults: OpenTimelineResult[];
   let note1updated: number;
   let note2updated: number;
   let note3updated: number;
@@ -31,7 +31,7 @@ describe('NotePreviews', () => {
   });
 
   test('it renders a note preview for each note when isModal is false', () => {
-    const hasNotes: TimelineResult[] = [{ ...mockResults[0] }];
+    const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
     const wrapper = mountWithIntl(<NotePreviews isModal={false} notes={hasNotes[0].notes} />);
 
@@ -41,7 +41,7 @@ describe('NotePreviews', () => {
   });
 
   test('it renders a note preview for each note when isModal is true', () => {
-    const hasNotes: TimelineResult[] = [{ ...mockResults[0] }];
+    const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
     const wrapper = mountWithIntl(<NotePreviews isModal={true} notes={hasNotes[0].notes} />);
 

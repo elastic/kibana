@@ -39,6 +39,7 @@ export const authenticationsSchema = gql`
       timerange: TimerangeInput!
       pagination: PaginationInput!
       filterQuery: String
+      defaultIndex: [String!]!
     ): AuthenticationsData!
   }
 `;

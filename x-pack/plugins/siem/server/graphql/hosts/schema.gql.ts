@@ -82,8 +82,14 @@ export const hostsSchema = gql`
       pagination: PaginationInput!
       sort: HostsSortField!
       filterQuery: String
+      defaultIndex: [String!]!
     ): HostsData!
-    HostOverview(id: String, hostName: String!, timerange: TimerangeInput!): HostItem!
-    HostFirstLastSeen(id: String, hostName: String!): FirstLastSeenHost!
+    HostOverview(
+      id: String
+      hostName: String!
+      timerange: TimerangeInput!
+      defaultIndex: [String!]!
+    ): HostItem!
+    HostFirstLastSeen(id: String, hostName: String!, defaultIndex: [String!]!): FirstLastSeenHost!
   }
 `;

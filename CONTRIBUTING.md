@@ -221,7 +221,7 @@ Start the development server.
 yarn start
 ```
 
-> On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
+> On Windows, you'll need to use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
 Now you can point your web browser to http://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
 
@@ -278,6 +278,17 @@ IntelliJ   | Settings » Languages & Frameworks » JavaScript » Code Quality To
 `vi`       | [scrooloose/syntastic](https://github.com/scrooloose/syntastic)
 
 Another tool we use for enforcing consistent coding style is EditorConfig, which can be set up by installing a plugin in your editor that dynamically updates its configuration. Take a look at the [EditorConfig](http://editorconfig.org/#download) site to find a plugin for your editor, and browse our [`.editorconfig`](https://github.com/elastic/kibana/blob/master/.editorconfig) file to see what config rules we set up.
+
+Note that for VSCode, to enable "live" linting of TypeScript (and other) file types, you will need to modify your local settings, as shown below.  The default for the ESLint extension is to only lint JavaScript file types.
+
+```json
+   "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact",
+    ]
+```
 
 ### Internationalization
 

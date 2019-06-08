@@ -2,236 +2,171 @@
 
 exports[`FeatureTooltip should not show close button and not show filter button 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
+  <table
+    className="mapFeatureTooltip_table"
   >
-    <EuiFlexItem>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
+    <tbody />
+  </table>
 </Fragment>
 `;
 
 exports[`FeatureTooltip should show both filter buttons and close button 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
+  <EuiTextAlign
+    textAlign="center"
   >
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
-    >
-      <EuiFlexItem
-        grow={true}
+    <EuiButtonIcon
+      aria-label="Close tooltip"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      type="button"
+    />
+  </EuiTextAlign>
+  <table
+    className="mapFeatureTooltip_table"
+  >
+    <tbody>
+      <tr
+        key="foo"
       >
-        <EuiFlexGroup
-          alignItems="flexEnd"
-          direction="row"
-          justifyContent="flexEnd"
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
         >
-          <EuiFlexItem
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Close tooltip"
-              color="primary"
-              iconSize="m"
-              iconType="cross"
-              onClick={[Function]}
-              type="button"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexItem>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
+          foo
+        </td>
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "bar",
+            }
+          }
+        />
+        <td>
+          <EuiButtonIcon
+            aria-label="Filter on property"
+            className="mapFeatureTooltip__filterButton"
+            color="primary"
+            iconSize="m"
+            iconType="plusInCircle"
+            onClick={[Function]}
+            title="Filter on property"
+            type="button"
+          />
+        </td>
+      </tr>
+      <tr
+        key="foo"
       >
-        <EuiFlexGroup
-          key="0"
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
         >
-          <EuiFlexItem
-            grow={4}
-          >
-            <strong>
-              foo
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={6}
-          >
-            <span
-              dangerouslySetInnerHTML={
-                Object {
-                  "__html": "bar",
-                }
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Filter on property"
-              className="mapFeatureTooltipFilterButton"
-              color="primary"
-              iconSize="m"
-              iconType="plusInCircle"
-              onClick={[Function]}
-              title="Filter on property"
-              type="button"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup
-          key="1"
-        >
-          <EuiFlexItem
-            grow={4}
-          >
-            <strong>
-              foo
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={6}
-          >
-            <span
-              dangerouslySetInnerHTML={
-                Object {
-                  "__html": "bar",
-                }
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+          foo
+        </td>
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "bar",
+            }
+          }
+        />
+      </tr>
+    </tbody>
+  </table>
 </Fragment>
 `;
 
 exports[`FeatureTooltip should show close button, but not filter button 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
+  <EuiTextAlign
+    textAlign="center"
   >
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
-    >
-      <EuiFlexItem
-        grow={true}
-      >
-        <EuiFlexGroup
-          alignItems="flexEnd"
-          direction="row"
-          justifyContent="flexEnd"
-        >
-          <EuiFlexItem
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Close tooltip"
-              color="primary"
-              iconSize="m"
-              iconType="cross"
-              onClick={[Function]}
-              type="button"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexItem>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
+    <EuiButtonIcon
+      aria-label="Close tooltip"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      type="button"
+    />
+  </EuiTextAlign>
+  <table
+    className="mapFeatureTooltip_table"
+  >
+    <tbody />
+  </table>
 </Fragment>
+`;
+
+exports[`FeatureTooltip should show error message if unable to load tooltip content 1`] = `
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  size="s"
+  title="Unable to load tooltip content"
+>
+  <p>
+    Simulated load properties error
+  </p>
+</EuiCallOut>
 `;
 
 exports[`FeatureTooltip should show only filter button for filterable properties 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
+  <table
+    className="mapFeatureTooltip_table"
   >
-    <EuiFlexItem>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
+    <tbody>
+      <tr
+        key="foo"
       >
-        <EuiFlexGroup
-          key="0"
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
         >
-          <EuiFlexItem
-            grow={4}
-          >
-            <strong>
-              foo
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={6}
-          >
-            <span
-              dangerouslySetInnerHTML={
-                Object {
-                  "__html": "bar",
-                }
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Filter on property"
-              className="mapFeatureTooltipFilterButton"
-              color="primary"
-              iconSize="m"
-              iconType="plusInCircle"
-              onClick={[Function]}
-              title="Filter on property"
-              type="button"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup
-          key="1"
+          foo
+        </td>
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "bar",
+            }
+          }
+        />
+        <td>
+          <EuiButtonIcon
+            aria-label="Filter on property"
+            className="mapFeatureTooltip__filterButton"
+            color="primary"
+            iconSize="m"
+            iconType="plusInCircle"
+            onClick={[Function]}
+            title="Filter on property"
+            type="button"
+          />
+        </td>
+      </tr>
+      <tr
+        key="foo"
+      >
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
         >
-          <EuiFlexItem
-            grow={4}
-          >
-            <strong>
-              foo
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={6}
-          >
-            <span
-              dangerouslySetInnerHTML={
-                Object {
-                  "__html": "bar",
-                }
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+          foo
+        </td>
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "bar",
+            }
+          }
+        />
+      </tr>
+    </tbody>
+  </table>
 </Fragment>
 `;

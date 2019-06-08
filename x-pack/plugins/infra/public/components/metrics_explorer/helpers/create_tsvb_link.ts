@@ -79,6 +79,20 @@ const mapMetricToSeries = (metric: MetricsExplorerOptionsMetric) => {
   };
 };
 
+const createFilterFromOptions = (
+  options: MetricsExplorerOptions,
+  series: MetricsExplorerSeries
+) => {
+  const filters = [];
+  if (options.filterQuery) {
+    filters.push(options.filterQuery);
+  }
+  if (options.groupBy) {
+    filters.push(`${options.groupBy}: ${series.id}`);
+  }
+  return filters.join(' AND ');
+};
+
 export const createTSVBLink = (
   source: SourceQuery.Query['source']['configuration'] | undefined,
   options: MetricsExplorerOptions,
@@ -105,7 +119,7 @@ export const createTSVBLink = (
         show_legend: 1,
         time_field: (source && source.fields.timestamp) || '@timestamp',
         type: 'timeseries',
-        filter: options.groupBy ? `${options.groupBy}: ${series.id}` : '',
+        filter: createFilterFromOptions(options, series),
       },
       title: series.id,
       type: 'metrics',

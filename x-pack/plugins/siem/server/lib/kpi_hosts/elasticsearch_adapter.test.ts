@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KpiHostsData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchKpiHostsAdapter } from './elasticsearch_adapter';
@@ -19,6 +18,7 @@ import {
 } from './mock';
 import * as authQueryDsl from './query_authentication.dsl';
 import * as generalQueryDsl from './query_general.dsl';
+import { KpiHostsMappedData } from './types';
 
 describe('Hosts Kpi elasticsearch_adapter', () => {
   const mockCallWithRequest = jest.fn();
@@ -28,11 +28,12 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
     exposeStaticDir: jest.fn(),
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),
+    getSavedObjectsService: jest.fn(),
   };
   let mockBuildQuery: jest.SpyInstance;
   let mockBuildAuthQuery: jest.SpyInstance;
   let EsKpiHosts: ElasticsearchKpiHostsAdapter;
-  let data: KpiHostsData;
+  let data: KpiHostsMappedData;
 
   describe('getKpiHosts - call stack', () => {
     beforeAll(async () => {

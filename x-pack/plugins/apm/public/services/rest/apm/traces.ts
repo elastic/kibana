@@ -7,7 +7,8 @@
 import { TraceListAPIResponse } from '../../../../server/lib/traces/get_top_traces';
 import { TraceAPIResponse } from '../../../../server/lib/traces/get_trace';
 import { callApi } from '../callApi';
-import { getEncodedEsQuery } from './apm';
+import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
+import { UIFilters } from '../../../../typings/ui-filters';
 
 export async function loadTrace({
   traceId,
@@ -30,18 +31,18 @@ export async function loadTrace({
 export async function loadTraceList({
   start,
   end,
-  kuery
+  uiFilters
 }: {
   start: string;
   end: string;
-  kuery: string | undefined;
+  uiFilters: UIFilters;
 }) {
   return callApi<TraceListAPIResponse>({
     pathname: '/api/apm/traces',
     query: {
       start,
       end,
-      esFilterQuery: await getEncodedEsQuery(kuery)
+      uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });
 }

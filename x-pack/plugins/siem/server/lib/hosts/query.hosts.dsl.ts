@@ -17,12 +17,9 @@ export const buildHostsQuery = ({
   filterQuery,
   pagination: { limit, cursor },
   sort,
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    logAlias,
-    auditbeatAlias,
-    packetbeatAlias,
-    winlogbeatAlias,
   },
   timerange: { from, to },
 }: HostsRequestOptions) => {
@@ -44,7 +41,7 @@ export const buildHostsQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggregations: {

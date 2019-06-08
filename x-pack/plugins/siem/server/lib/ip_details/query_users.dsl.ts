@@ -15,11 +15,9 @@ export const buildUsersQuery = ({
   filterQuery,
   flowTarget,
   pagination: { limit },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
-    auditbeatAlias,
-    packetbeatAlias,
-    winlogbeatAlias,
   },
   timerange: { from, to },
 }: UsersRequestOptions) => {
@@ -31,7 +29,7 @@ export const buildUsersQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: [auditbeatAlias, packetbeatAlias, winlogbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggs: {

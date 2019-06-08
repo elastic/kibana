@@ -9,8 +9,9 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
-import { FlowTarget } from '../../../server/graphql/types';
-import { TlsEdges, TlsSortField, GetTlsQuery, PageInfo } from '../../graphql/types';
+import chrome from 'ui/chrome';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import { FlowTarget, PageInfo, TlsEdges, TlsSortField, GetTlsQuery } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
@@ -76,6 +77,7 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
             tiebreaker: null,
           },
           filterQuery: createFilter(filterQuery),
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {

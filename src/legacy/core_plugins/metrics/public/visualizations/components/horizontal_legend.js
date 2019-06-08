@@ -19,12 +19,12 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import createLegendSeries from '../lib/create_legend_series';
+import { createLegendSeries } from '../lib/create_legend_series';
 import reactcss from 'reactcss';
 import { htmlIdGenerator, EuiButtonIcon } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
-const HorizontalLegend = injectI18n(function (props) {
+export const HorizontalLegend = injectI18n(function (props) {
   const rows = props.series.map(createLegendSeries(props));
   const htmlId = htmlIdGenerator();
   const styles = reactcss({
@@ -69,5 +69,3 @@ HorizontalLegend.propTypes = {
   seriesFilter: PropTypes.array,
   tickFormatter: PropTypes.func
 };
-
-export default HorizontalLegend;

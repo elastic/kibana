@@ -19,11 +19,13 @@ import { HelpMenu } from '../../components/help_menu';
 import { LinkToPage } from '../../components/link_to';
 import { SiemNavigation } from '../../components/navigation';
 import { StatefulTimeline } from '../../components/timeline';
+import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning';
 import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
 import { Timelines } from '../timelines';
+import { WithSource } from '../../containers/source';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -68,56 +70,64 @@ export const HomePage = pure(() => (
         <Page data-test-subj="pageContainer">
           <HelpMenu />
 
-          <DragDropContextWrapper>
-            <Flyout
-              flyoutHeight={calculateFlyoutHeight({
-                globalHeaderSize: globalHeaderHeightPx,
-                windowHeight,
-              })}
-              headerHeight={flyoutHeaderHeight}
-              timelineId="timeline-1"
-              usersViewing={usersViewing}
-            >
-              <StatefulTimeline
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                flyoutHeight={calculateFlyoutHeight({
-                  globalHeaderSize: globalHeaderHeightPx,
-                  windowHeight,
-                })}
-                id="timeline-1"
-              />
-            </Flyout>
+          <WithSource sourceId="default">
+            {({ browserFields }) => (
+              <DragDropContextWrapper browserFields={browserFields}>
+                <AutoSaveWarningMsg />
+                <Flyout
+                  flyoutHeight={calculateFlyoutHeight({
+                    globalHeaderSize: globalHeaderHeightPx,
+                    windowHeight,
+                  })}
+                  headerHeight={flyoutHeaderHeight}
+                  timelineId="timeline-1"
+                  usersViewing={usersViewing}
+                >
+                  <StatefulTimeline
+                    flyoutHeaderHeight={flyoutHeaderHeight}
+                    flyoutHeight={calculateFlyoutHeight({
+                      globalHeaderSize: globalHeaderHeightPx,
+                      windowHeight,
+                    })}
+                    id="timeline-1"
+                  />
+                </Flyout>
 
-            <EuiPageBody>
-              <NavGlobal>
-                <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
-                  <EuiFlexItem>
-                    <SiemNavigation />
-                  </EuiFlexItem>
+                <EuiPageBody>
+                  <NavGlobal>
+                    <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
+                      <EuiFlexItem>
+                        <SiemNavigation />
+                      </EuiFlexItem>
 
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="add-data"
-                      href="kibana#home/tutorial_directory/security"
-                      iconType="plusInCircle"
-                    >
-                      <FormattedMessage id="xpack.siem.global.addData" defaultMessage="Add data" />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </NavGlobal>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          data-test-subj="add-data"
+                          href="kibana#home/tutorial_directory/security"
+                          iconType="plusInCircle"
+                        >
+                          <FormattedMessage
+                            id="xpack.siem.global.addData"
+                            defaultMessage="Add data"
+                          />
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </NavGlobal>
 
-              <Switch>
-                <Redirect from="/" exact={true} to="/overview" />
-                <Route path="/overview" component={Overview} />
-                <Route path="/hosts" component={HostsContainer} />
-                <Route path="/network" component={NetworkContainer} />
-                <Route path="/timelines" component={Timelines} />
-                <Route path="/link-to" component={LinkToPage} />
-                <Route component={NotFoundPage} />
-              </Switch>
-            </EuiPageBody>
-          </DragDropContextWrapper>
+                  <Switch>
+                    <Redirect from="/" exact={true} to="/overview" />
+                    <Route path="/overview" component={Overview} />
+                    <Route path="/hosts" component={HostsContainer} />
+                    <Route path="/network" component={NetworkContainer} />
+                    <Route path="/timelines" component={Timelines} />
+                    <Route path="/link-to" component={LinkToPage} />
+                    <Route component={NotFoundPage} />
+                  </Switch>
+                </EuiPageBody>
+              </DragDropContextWrapper>
+            )}
+          </WithSource>
         </Page>
       </WrappedByAutoSizer>
     )}

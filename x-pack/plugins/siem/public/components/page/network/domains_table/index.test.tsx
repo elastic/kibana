@@ -12,7 +12,12 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTarget } from '../../../../graphql/types';
-import { mockIndexPattern, mockGlobalState, TestProviders } from '../../../../mock';
+import {
+  apolloClientObservable,
+  mockIndexPattern,
+  mockGlobalState,
+  TestProviders,
+} from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { DomainsTable } from '.';
@@ -23,10 +28,10 @@ describe('Domains Table Component', () => {
   const ip = '10.10.10.10';
   const state: State = mockGlobalState;
 
-  let store = createStore(state);
+  let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state);
+    store = createStore(state, apolloClientObservable);
   });
 
   describe('Rendering', () => {

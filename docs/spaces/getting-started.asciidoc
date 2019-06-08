@@ -1,8 +1,0 @@
-[role="xpack"]
-[[spaces-getting-started]]
-=== Getting Started
-
-Spaces are automatically enabled in {kib}. If you don't wish to use this feature, you can disable it
-by setting `xpack.spaces.enabled` to `false` in your `kibana.yml` configuration file.
-
-{kib} automatically creates a default space for you. If you are upgrading from another version of {kib}, then the default space will contain all of your existing saved objects. Although you can't delete the default space, you can customize it to your liking.

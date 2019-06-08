@@ -37,7 +37,11 @@ interface MonitorPageProps {
 }
 
 export const MonitorPage = ({ history, location, query, setBreadcrumbs }: MonitorPageProps) => {
-  const [monitorId] = useState<string>(location.pathname.replace(/^(\/monitor\/)/, ''));
+  const parsedPath = location.pathname.replace(/^(\/monitor\/)/, '').split('/');
+  const [monitorId] = useState<string>(decodeURI(parsedPath[0]));
+  const [geoLocation] = useState<string | undefined>(
+    parsedPath[1] ? decodeURI(parsedPath[1]) : undefined
+  );
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
   const [params, updateUrlParams] = useUrlParams(history, location);
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
@@ -66,16 +70,14 @@ export const MonitorPage = ({ history, location, query, setBreadcrumbs }: Monito
     },
     [params]
   );
+  const sharedVariables = { dateRangeStart, dateRangeEnd, location: geoLocation, monitorId };
   return (
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
       <EuiSpacer size="s" />
-      <MonitorStatusBar
-        monitorId={monitorId}
-        variables={{ dateRangeStart, dateRangeEnd, monitorId }}
-      />
+      <MonitorStatusBar monitorId={monitorId} variables={sharedVariables} />
       <EuiSpacer size="s" />
-      <MonitorCharts {...colors} variables={{ dateRangeStart, dateRangeEnd, monitorId }} />
+      <MonitorCharts {...colors} variables={sharedVariables} />
       <EuiSpacer size="s" />
       <PingList
         onSelectedStatusUpdate={(selectedStatus: string | null) =>
@@ -84,9 +86,7 @@ export const MonitorPage = ({ history, location, query, setBreadcrumbs }: Monito
         onUpdateApp={refreshApp}
         selectedOption={selectedPingStatus}
         variables={{
-          dateRangeStart,
-          dateRangeEnd,
-          monitorId,
+          ...sharedVariables,
           status: selectedPingStatus,
         }}
       />

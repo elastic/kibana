@@ -5,7 +5,7 @@
  */
 
 import { get, omit } from 'lodash';
-import { safeElementFromExpression } from '@kbn/interpreter/common';
+import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 
@@ -114,17 +114,95 @@ export function getElementStats(state) {
   return get(state, 'transient.elementStats');
 }
 
-export function getGlobalFilterExpression(state) {
-  return getAllElements(state)
-    .reduce((acc, el) => {
-      // check that a filter is defined
-      if (el.filter != null && el.filter.length) {
-        return acc.concat(el.filter);
-      }
+export function getGlobalFilters(state) {
+  return getAllElements(state).reduce((acc, el) => {
+    // check that a filter is defined
+    if (el.filter != null && el.filter.length) {
+      return acc.concat(el.filter);
+    }
 
-      return acc;
-    }, [])
-    .join(' | ');
+    return acc;
+  }, []);
+}
+
+function buildGroupValues(args, onValue) {
+  const argNames = Object.keys(args);
+
+  return argNames.reduce((values, argName) => {
+    // we only care about group values
+    if (argName !== '_' && argName !== 'group') {
+      return values;
+    }
+
+    return args[argName].reduce((acc, argValue) => {
+      // delegate to passed function to buyld list
+      return acc.concat(onValue(argValue, argName, args) || []);
+    }, values);
+  }, []);
+}
+
+function extractFilterGroups(ast) {
+  if (ast.type !== 'expression') {
+    throw new Error('AST must be an expression');
+  }
+
+  return ast.chain.reduce((groups, item) => {
+    // TODO: we always get a function here, right?
+    const { function: fn, arguments: args } = item;
+
+    if (fn === 'filters') {
+      // we have a filter function, extract groups from args
+      return groups.concat(
+        buildGroupValues(args, argValue => {
+          // this only handles simple values
+          if (argValue !== null && typeof argValue !== 'object') {
+            return argValue;
+          }
+        })
+      );
+    } else {
+      // dig into other functions, looking for filters function
+      return groups.concat(
+        buildGroupValues(args, argValue => {
+          // recursively collect filter groups
+          if (argValue !== null && typeof argValue === 'object' && argValue.type === 'expression') {
+            return extractFilterGroups(argValue);
+          }
+        })
+      );
+    }
+  }, []);
+}
+
+export function getGlobalFilterGroups(state) {
+  const filterGroups = getAllElements(state).reduce((acc, el) => {
+    // check that a filter is defined
+    if (el.filter != null && el.filter.length) {
+      // extract the filter group
+      const filterAst = fromExpression(el.filter);
+      const filterGroup = get(filterAst, `chain[0].arguments.filterGroup[0]`);
+
+      // add any new group to the array
+      if (filterGroup && filterGroup !== '' && !acc.includes(filterGroup)) {
+        acc.push(String(filterGroup));
+      }
+    }
+
+    // extract groups from all expressions that use filters function
+    if (el.expression != null && el.expression.length) {
+      const expressionAst = fromExpression(el.expression);
+      const groups = extractFilterGroups(expressionAst);
+      groups.forEach(group => {
+        if (!acc.includes(group)) {
+          acc.push(group);
+        }
+      });
+    }
+
+    return acc;
+  }, []);
+
+  return filterGroups.sort();
 }
 
 // element getters
@@ -239,4 +317,8 @@ export function getContextForIndex(state, index) {
 
 export function getRefreshInterval(state) {
   return get(state, 'transient.refresh.interval', 0);
+}
+
+export function getAutoplay(state) {
+  return get(state, 'transient.autoplay');
 }

@@ -5,14 +5,13 @@
  */
 
 import { EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useContext } from 'react';
 
-import { Source } from '../../containers/source';
 import { SourceConfigurationFlyoutState } from './source_configuration_flyout_state';
 
 export const SourceConfigurationButton: React.FunctionComponent = () => {
   const { toggleIsVisible } = useContext(SourceConfigurationFlyoutState.Context);
-  const { source } = useContext(Source.Context);
 
   return (
     <EuiButtonEmpty
@@ -21,8 +20,12 @@ export const SourceConfigurationButton: React.FunctionComponent = () => {
       data-test-subj="configureSourceButton"
       iconType="gear"
       onClick={toggleIsVisible}
+      size="xs"
     >
-      {source && source.configuration && source.configuration.name}
+      <FormattedMessage
+        id="xpack.infra.sourceConfiguration.sourceConfigurationButtonLabel"
+        defaultMessage="Configuration"
+      />
     </EuiButtonEmpty>
   );
 };

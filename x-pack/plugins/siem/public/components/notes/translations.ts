@@ -18,11 +18,13 @@ export const ADDED_A_NOTE = i18n.translate('xpack.siem.notes.addedANoteLabel', {
   defaultMessage: 'Added a Note',
 });
 
-export const NOTE = (totalCount: number) =>
-  i18n.translate('xpack.siem.notes.noteTitle', {
-    values: { totalCount },
-    defaultMessage: '{totalCount, plural, =1 {Note} other {Notes}}',
-  });
+export const NOTE = i18n.translate('xpack.siem.notes.noteLabel', {
+  defaultMessage: 'Note',
+});
+
+export const NOTES = i18n.translate('xpack.siem.notes.notesTitle', {
+  defaultMessage: 'Notes',
+});
 
 export const PREVIEW_MARKDOWN = i18n.translate('xpack.siem.notes.previewMarkdownTitle', {
   defaultMessage: 'Preview (Markdown)',

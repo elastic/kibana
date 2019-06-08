@@ -18,10 +18,10 @@ import { createTelemetryUsageCollector } from './server/lib/telemetry';
 import { uiCapabilitiesForFeatures } from './server/lib/ui_capabilities_for_features';
 import {
   xpackInfoRoute,
-  telemetryRoute,
   featuresRoute,
   settingsRoute,
 } from './server/routes/api/v1';
+import { telemetryRoute } from './server/routes/api/v2';
 import {
   CONFIG_TELEMETRY,
   getConfigTelemetryDesc,
@@ -57,8 +57,8 @@ export const xpackMain = (kibana) => {
           enabled: Joi.boolean().default(true),
           url: Joi.when('$dev', {
             is: true,
-            then: Joi.string().default('https://telemetry-staging.elastic.co/xpack/v1/send'),
-            otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v1/send')
+            then: Joi.string().default('https://telemetry-staging.elastic.co/xpack/v2/send'),
+            otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v2/send')
           }),
         }).default(),
         xpack_api_polling_frequency_millis: Joi.number().default(XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS),

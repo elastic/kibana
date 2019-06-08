@@ -33,13 +33,11 @@ import { ElasticsearchService } from './elasticsearch_service';
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(
-  new BehaviorSubject(
-    new ElasticsearchConfig({
-      hosts: ['http://1.2.3.4'],
-      healthCheck: {},
-      ssl: {},
-    } as any)
-  )
+  new BehaviorSubject({
+    hosts: ['http://1.2.3.4'],
+    healthCheck: {},
+    ssl: {},
+  } as any)
 );
 
 let env: Env;

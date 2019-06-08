@@ -24,21 +24,14 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           query: sourceQuery,
           variables: {
             sourceId: 'default',
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
         })
         .then(resp => {
-          const sourceConfiguration = resp.data.source.configuration;
           const sourceStatus = resp.data.source.status;
-
-          // shipped default values
-          expect(sourceConfiguration.auditbeatAlias).to.be('auditbeat-*');
-          expect(sourceConfiguration.logAlias).to.be('filebeat-*');
-
           // test data in x-pack/test/functional/es_archives/auditbeat_test_data/data.json.gz
           expect(sourceStatus.indexFields.length).to.be(349);
-          expect(sourceStatus.auditbeatIndices.length).to.be(1);
-          expect(sourceStatus.auditbeatIndicesExist).to.be(true);
-          expect(sourceStatus.auditbeatAliasExists).to.be(true);
+          expect(sourceStatus.indicesExist).to.be(true);
         });
     });
   });

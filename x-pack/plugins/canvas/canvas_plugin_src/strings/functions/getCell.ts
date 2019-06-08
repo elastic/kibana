@@ -10,7 +10,7 @@ import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
-  help: i18n.translate('xpack.canvas.functions.vHelpText', {
+  help: i18n.translate('xpack.canvas.functions.getCellHelpText', {
     defaultMessage: 'Fetch a single cell in a table',
   }),
   args: {
@@ -21,4 +21,25 @@ export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
       defaultMessage: 'The row number, starting at 0',
     }),
   },
+};
+
+export const errors = {
+  rowNotFound: (row: number) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.getCell.rowNotFoundErrorMessage', {
+        defaultMessage: "Row not found: '{row}'",
+        values: {
+          row,
+        },
+      })
+    ),
+  columnNotFound: (column: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.getCell.columnNotFoundErrorMessage', {
+        defaultMessage: "Column not found: '{column}'",
+        values: {
+          column,
+        },
+      })
+    ),
 };

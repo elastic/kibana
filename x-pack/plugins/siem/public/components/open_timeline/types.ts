@@ -4,6 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ActionCreator } from 'typescript-fsa';
+
+import { AllTimelinesVariables } from '../../containers/timeline/all';
+import { Note } from '../../lib/note';
+import { TimelineModel } from '../../store/timeline/model';
+import { SerializedFilterQuery, KueryFilterQuery } from '../../store';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
   userId?: number | null;
@@ -19,7 +27,7 @@ export interface TimelineResultNote {
 }
 
 /** The results of the query run by the OpenTimeline component */
-export interface TimelineResult {
+export interface OpenTimelineResult {
   created?: number | null;
   description?: string | null;
   eventIdToNoteIds?: Readonly<Record<string, string[]>> | null;
@@ -43,13 +51,14 @@ export interface EuiSearchBarQuery {
 }
 
 /** Performs IO to delete the specified timelines */
-export type DeleteTimelines = (timelineIds: string[]) => void;
+export type DeleteTimelines = (timelineIds: string[], variables?: AllTimelinesVariables) => void;
 
 /** Invoked when the user clicks the action make the selected timelines favorites */
 export type OnAddTimelinesToFavorites = () => void;
 
 /** Invoked when the user clicks the action to delete the selected timelines */
 export type OnDeleteSelected = () => void;
+export type OnDeleteOneTimeline = (timelineIds: string[]) => void;
 
 /** Invoked when the user clicks on the name of a timeline to open it */
 export type OnOpenTimeline = (
@@ -60,7 +69,7 @@ export type OnOpenTimeline = (
 export type OnQueryChange = (query: EuiSearchBarQuery) => void;
 
 /** Invoked when the user selects (or de-selects) timelines in the table */
-export type OnSelectionChange = (selectedItems: TimelineResult[]) => void;
+export type OnSelectionChange = (selectedItems: OpenTimelineResult[]) => void;
 
 /** Invoked when the user toggles the option to only view favorite timelines */
 export type OnToggleOnlyFavorites = () => void;
@@ -117,9 +126,9 @@ export interface OpenTimelineProps {
   /** The currently applied search criteria */
   query: string;
   /** The results of executing a search */
-  searchResults: TimelineResult[];
+  searchResults: OpenTimelineResult[];
   /** the currently-selected timelines in the table */
-  selectedItems: TimelineResult[];
+  selectedItems: OpenTimelineResult[];
   /** the requested sort direction of the query results */
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */
@@ -128,4 +137,31 @@ export interface OpenTimelineProps {
   title: string;
   /** The total (server-side) count of the search results */
   totalSearchResultsCount: number;
+}
+
+export interface OpenTimelineDispatchProps {
+  setKqlFilterQueryDraft: ActionCreator<{
+    id: string;
+    filterQueryDraft: KueryFilterQuery;
+  }>;
+  applyKqlFilterQuery: ActionCreator<{
+    id: string;
+    filterQuery: SerializedFilterQuery;
+  }>;
+  addTimeline: ActionCreator<{ id: string; timeline: TimelineModel }>;
+  addNotes: ActionCreator<{ notes: Note[] }>;
+  createNewTimeline: ActionCreator<{
+    id: string;
+    columns: ColumnHeader[];
+    show?: boolean;
+  }>;
+  setTimelineRangeDatePicker: ActionCreator<{
+    from: number;
+    to: number;
+  }>;
+  updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
+}
+
+export interface OpenTimelineReduxProps {
+  timeline: TimelineModel;
 }

@@ -5,6 +5,24 @@
  */
 
 /** Represents the Timeline data providers */
+
+/** The `is` operator in a KQL query */
+export const IS_OPERATOR = ':';
+
+/** The `exists` operator in a KQL query */
+export const EXISTS_OPERATOR = ':*';
+
+/** The operator applied to a field */
+export type QueryOperator = ':' | ':*';
+
+export interface QueryMatch {
+  field: string;
+  displayField?: string;
+  value: string | number;
+  displayValue?: string | number;
+  operator: QueryOperator;
+}
+
 export interface DataProvider {
   /** Uniquely identifies a data provider */
   id: string;
@@ -27,14 +45,11 @@ export interface DataProvider {
   /**
    * Returns a query properties that, when executed, returns the data for this provider
    */
-  queryMatch: {
-    field: string;
-    displayField?: string;
-    value: string | number;
-    displayValue?: string | number;
-  };
+  queryMatch: QueryMatch;
   /**
    * Additional query clauses that are ANDed with this query to narrow results
    */
-  and: DataProvider[];
+  and: DataProvidersAnd[];
 }
+
+export type DataProvidersAnd = Pick<DataProvider, Exclude<keyof DataProvider, 'and'>>;

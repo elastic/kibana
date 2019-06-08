@@ -16,9 +16,15 @@ const selectGlobal = (state: State): InputsRange => state.inputs.global;
 
 const selectTimeline = (state: State): InputsRange => state.inputs.timeline;
 
-export const inpustSelector = createSelector(
-  selectInputs,
-  inputs => inputs
+export const inputsSelector = () =>
+  createSelector(
+    selectInputs,
+    inputs => inputs
+  );
+
+export const timelineTimeRangeSelector = createSelector(
+  selectTimeline,
+  timeline => timeline.timerange
 );
 
 export const globalTimeRangeSelector = createSelector(

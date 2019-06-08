@@ -10,19 +10,18 @@
   top: $euiSizeM;
   right: $euiSizeM;
   bottom: $euiSizeM;
+  left: 0; // Necessary to have a left value for IE
   pointer-events: none; /* 1 */
-}
-
-.mapWidgetOverlay__rightSideWrapper {
-  overflow: hidden; // Fixes Chrome overflow
-}
-
-.mapWidgetOverlay__rightSide {
-  width: $euiSize * 20;
 }
 
 .mapWidgetOverlay__layerWrapper {
   align-items: flex-end;
+  width: $euiSize * 20;
+  min-height: 0; // Fixes scroll in Firefox
+}
+
+.mapWidgetControl__headerFlexItem {
+  flex-shrink: 0;
 }
 
 .mapWidgetControl {
@@ -45,5 +44,3 @@
   flex-shrink: 0;
   text-transform: uppercase;
 }
-
-

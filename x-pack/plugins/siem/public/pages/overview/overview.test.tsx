@@ -14,8 +14,6 @@ import { TestProviders } from '../../mock';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { cloneDeep } from 'lodash/fp';
 
-import * as i18n from './translations';
-
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
     kibana: 'http://www.example.com',
@@ -28,9 +26,7 @@ let localSource: Array<{
     data: {
       source: {
         status: {
-          auditbeatIndicesExist: boolean;
-          filebeatIndicesExist: boolean;
-          winlogbeatIndicesExist: boolean;
+          indicesExist: boolean;
         };
       };
     };
@@ -44,9 +40,7 @@ describe('Overview', () => {
     });
 
     test('it renders the Setup Instructions text when no index is available', async () => {
-      localSource[0].result.data.source.status.auditbeatIndicesExist = false;
-      localSource[0].result.data.source.status.filebeatIndicesExist = false;
-      localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
+      localSource[0].result.data.source.status.indicesExist = false;
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
@@ -57,13 +51,11 @@ describe('Overview', () => {
       // Why => https://github.com/apollographql/react-apollo/issues/1711
       await new Promise(resolve => setTimeout(resolve));
       wrapper.update();
-      expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
+      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
     });
 
-    test('it renders the Setup Instructions text when only filebeat index is available', async () => {
-      localSource[0].result.data.source.status.auditbeatIndicesExist = false;
-      localSource[0].result.data.source.status.filebeatIndicesExist = true;
-      localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
+    test('it DOES NOT render the Getting started text when an index is available', async () => {
+      localSource[0].result.data.source.status.indicesExist = true;
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
@@ -74,41 +66,7 @@ describe('Overview', () => {
       // Why => https://github.com/apollographql/react-apollo/issues/1711
       await new Promise(resolve => setTimeout(resolve));
       wrapper.update();
-      expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
-    });
-
-    test('it renders the Setup Instructions text when only audit beat index is available', async () => {
-      localSource[0].result.data.source.status.auditbeatIndicesExist = true;
-      localSource[0].result.data.source.status.filebeatIndicesExist = false;
-      localSource[0].result.data.source.status.winlogbeatIndicesExist = false;
-      const wrapper = mount(
-        <TestProviders>
-          <MockedProvider mocks={localSource} addTypename={false}>
-            <Overview />
-          </MockedProvider>
-        </TestProviders>
-      );
-      // Why => https://github.com/apollographql/react-apollo/issues/1711
-      await new Promise(resolve => setTimeout(resolve));
-      wrapper.update();
-      expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
-    });
-
-    test('it DOES NOT render the Getting started text when both packetbeat and filebeat index is available', async () => {
-      localSource[0].result.data.source.status.auditbeatIndicesExist = true;
-      localSource[0].result.data.source.status.filebeatIndicesExist = true;
-      localSource[0].result.data.source.status.winlogbeatIndicesExist = true;
-      const wrapper = mount(
-        <TestProviders>
-          <MockedProvider mocks={localSource} addTypename={false}>
-            <Overview />
-          </MockedProvider>
-        </TestProviders>
-      );
-      // Why => https://github.com/apollographql/react-apollo/issues/1711
-      await new Promise(resolve => setTimeout(resolve));
-      wrapper.update();
-      expect(wrapper.text()).not.toContain(i18n.SETUP_INSTRUCTIONS);
+      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
     });
   });
 });

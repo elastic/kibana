@@ -5,10 +5,11 @@
  */
 
 
-import { GIS_API_PATH } from '../common/constants';
+import { EMS_DATA_FILE_PATH, EMS_DATA_TMS_PATH, EMS_META_PATH, GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { getEMSResources } from '../common/ems_util';
+import Boom from 'boom';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -26,37 +27,99 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/data/ems`,
+    path: `${ROOT}/${EMS_DATA_FILE_PATH}`,
     handler: async (request) => {
+
+      if (!mapConfig.proxyElasticMapsServiceInMaps) {
+        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
+        throw Boom.notFound();
+      }
 
       if (!request.query.id) {
         server.log('warning', 'Must supply id parameters to retrieve EMS file');
         return null;
       }
 
-      const ems = await getEMSResources(licenseUid);
-
+      const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, false);
       const layer = ems.fileLayers.find(layer => layer.id === request.query.id);
       if (!layer) {
         return null;
       }
 
-      const file = await fetch(layer.url);
-      return await file.json();
+      try {
+        const file = await fetch(layer.url);
+        return await file.json();
+      } catch(e) {
+        server.log('warning', `Cannot connect to EMS for file, error: ${e.message}`);
+        throw Boom.badRequest(`Cannot connect to EMS`);
+      }
 
+    }
+  });
+
+
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/${EMS_DATA_TMS_PATH}`,
+    handler: async (request, h) => {
+
+      if (!mapConfig.proxyElasticMapsServiceInMaps) {
+        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
+        throw Boom.notFound();
+      }
+
+      if (!request.query.id ||
+        typeof parseInt(request.query.x, 10) !== 'number' ||
+        typeof parseInt(request.query.y, 10) !== 'number' ||
+        typeof parseInt(request.query.z, 10) !== 'number'
+      ) {
+        server.log('warning', 'Must supply id/x/y/z parameters to retrieve EMS tile');
+        return null;
+      }
+
+      const ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, false);
+      const tmsService = ems.tmsServices.find(layer => layer.id === request.query.id);
+      if (!tmsService) {
+        return null;
+      }
+
+      const url = tmsService.url
+        .replace('{x}', request.query.x)
+        .replace('{y}', request.query.y)
+        .replace('{z}', request.query.z);
+
+      try {
+        const tile = await fetch(url);
+        const arrayBuffer = await tile.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        let response = h.response(buffer);
+        response = response.bytes(buffer.length);
+        response = response.header('Content-Disposition', 'inline');
+        response = response.header('Content-type', 'image/png');
+        response = response.encoding('binary');
+        return response;
+      } catch(e) {
+        server.log('warning', `Cannot connect to EMS for tile, error: ${e.message}`);
+        throw Boom.badRequest(`Cannot connect to EMS`);
+      }
     }
   });
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/meta`,
+    path: `${ROOT}/${EMS_META_PATH}`,
     handler: async () => {
+
+      if (!mapConfig.proxyElasticMapsServiceInMaps) {
+        server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
+        throw Boom.notFound();
+      }
 
       let ems;
       try {
-        ems = await getEMSResources(licenseUid);
+        ems = await getEMSResources(emsClient, mapConfig.includeElasticMapsService, licenseUid, true);
       } catch (e) {
-        server.log('warning', `Cannot connect to EMS, error: ${e}`);
+        server.log('warning', `Cannot connect to EMS, error: ${e.message}`);
         ems = {
           fileLayers: [],
           tmsServices: []
@@ -64,15 +127,9 @@ export function initRoutes(server, licenseUid) {
       }
 
       return ({
-        data_sources: {
-          ems: {
-            file: ems.fileLayers,
-            tms: ems.tmsServices
-          },
-          kibana: {
-            regionmap: _.get(mapConfig, 'regionmap.layers', []),
-            tilemap: _.get(mapConfig, 'tilemap', [])
-          }
+        ems: {
+          file: ems.fileLayers,
+          tms: ems.tmsServices
         }
       });
     }
@@ -93,57 +150,9 @@ export function initRoutes(server, licenseUid) {
       try {
         const { count } = await callWithRequest(request, 'count', { index: query.index });
         return { count };
-      } catch(error) {
+      } catch (error) {
         return h.response().code(400);
       }
     }
   });
-
-  async function getEMSResources(licenseUid) {
-
-    if (!mapConfig.includeElasticMapsService) {
-      return {
-        fileLayers: [],
-        tmsServices: []
-      };
-    }
-
-    emsClient.addQueryParams({ license: licenseUid });
-    const fileLayerObjs = await emsClient.getFileLayers();
-    const tmsServicesObjs = await emsClient.getTMSServices();
-
-    const fileLayers = fileLayerObjs.map(fileLayer => {
-      //backfill to static settings
-      const format = fileLayer.getDefaultFormatType();
-      const meta = fileLayer.getDefaultFormatMeta();
-
-      return {
-        name: fileLayer.getDisplayName(),
-        origin: fileLayer.getOrigin(),
-        id: fileLayer.getId(),
-        created_at: fileLayer.getCreatedAt(),
-        attribution: fileLayer.getHTMLAttribution(),
-        attributions: fileLayer.getAttributions(),
-        fields: fileLayer.getFieldsInLanguage(),
-        url: fileLayer.getDefaultFormatUrl(),
-        format: format, //legacy: format and meta are split up
-        meta: meta, //legacy, format and meta are split up,
-        emsLink: fileLayer.getEMSHotLink()
-      };
-    });
-
-    const tmsServices = tmsServicesObjs.map(tmsService => {
-      return {
-        origin: tmsService.getOrigin(),
-        id: tmsService.getId(),
-        minZoom: tmsService.getMinZoom(),
-        maxZoom: tmsService.getMaxZoom(),
-        attribution: tmsService.getHTMLAttribution(),
-        attributionMarkdown: tmsService.getMarkdownAttribution(),
-        url: tmsService.getUrlTemplate()
-      };
-    });
-
-    return { fileLayers, tmsServices };
-  }
 }

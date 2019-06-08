@@ -19,214 +19,219 @@
 
 import _ from 'lodash';
 
-export function VislibTypesPointSeries() {
 
-  const createSeriesFromParams = (cfg, seri) => {
-    const matchingSeriesParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
-      return seri.id === seriConfig.data.id;
-    }) : null;
+const createSeriesFromParams = (cfg, seri) => {
+  //percentile data id format is {mainId}.{percentileValue}, this has to be cleaned
+  //up to match with ids in cfg.seriesParams entry that contain only {mainId}
+  const seriId = seri.id && seri.id.indexOf('.') !== -1
+    ? seri.id.split('.')[0]
+    : seri.id;
+  const matchingSeriesParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
+    return seriId === seriConfig.data.id;
+  }) : null;
 
+  const interpolate = cfg.smoothLines ? 'cardinal' : cfg.interpolate;
 
-    const interpolate = cfg.smoothLines ? 'cardinal' : cfg.interpolate;
-
-    if (!matchingSeriesParams) {
-      const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(cfg.mode);
-      return {
-        show: true,
-        type: cfg.type || 'line',
-        mode: stacked ? 'stacked' : 'normal',
-        interpolate: interpolate,
-        drawLinesBetweenPoints: cfg.drawLinesBetweenPoints,
-        showCircles: cfg.showCircles,
-        radiusRatio: cfg.radiusRatio,
-        data: seri
-      };
-    }
-
+  if (!matchingSeriesParams) {
+    const seriesParams0 = Array.isArray(cfg.seriesParams) && cfg.seriesParams[0]
+      ? cfg.seriesParams[0]
+      : cfg;
+    const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(cfg.mode);
     return {
-      ...matchingSeriesParams,
-      data: seri,
-      radiusRatio: cfg.radiusRatio
-    };
-  };
-
-  const createSeries = (cfg, series) => {
-    return {
-      type: 'point_series',
-      addTimeMarker: cfg.addTimeMarker,
-      series: _.map(series, (seri) => {
-        return createSeriesFromParams(cfg, seri);
-      })
-    };
-  };
-
-  const createCharts = (cfg, data) => {
-    if (data.rows || data.columns) {
-      const charts = data.rows ? data.rows : data.columns;
-      return charts.map(chart => {
-        return createSeries(cfg, chart.series);
-      });
-    }
-
-    return [createSeries(cfg, data.series)];
-  };
-  /*
-   * Create handlers for Area, Column, and Line charts which
-   * are all nearly the same minus a few details
-   */
-  function create(opts) {
-    opts = opts || {};
-
-    return function (cfg, data) {
-      const isUserDefinedYAxis = cfg.setYExtents;
-      const config = _.cloneDeep(cfg);
-      _.defaultsDeep(config, {
-        chartTitle: {},
-        mode: 'normal'
-      }, opts);
-
-      config.type = 'point_series';
-
-      if (!config.tooltip) {
-        config.tooltip = {
-          show: cfg.addTooltip
-        };
-      }
-
-      if (!config.valueAxes) {
-        let mode = config.mode;
-        if (['stacked', 'overlap'].includes(mode)) mode = 'normal';
-        config.valueAxes = [
-          {
-            id: 'ValueAxis-1',
-            type: 'value',
-            scale: {
-              type: config.scale,
-              setYExtents: config.setYExtents,
-              defaultYExtents: config.defaultYExtents,
-              min: isUserDefinedYAxis ? config.yAxis.min : undefined,
-              max: isUserDefinedYAxis ? config.yAxis.max : undefined,
-              mode: mode
-            },
-            labels: {
-              axisFormatter: data.data.yAxisFormatter || data.get('yAxisFormatter')
-            },
-            title: {
-              text: data.get('yAxisLabel')
-            }
-          }
-        ];
-      } else {
-        config.valueAxes.forEach(axis => {
-          if (axis.labels) {
-            axis.labels.axisFormatter = data.data.yAxisFormatter || data.get('yAxisFormatter');
-          }
-        });
-      }
-
-      if (!config.categoryAxes) {
-        config.categoryAxes = [
-          {
-            id: 'CategoryAxis-1',
-            type: 'category',
-            labels: {
-              axisFormatter: data.data.xAxisFormatter || data.get('xAxisFormatter')
-            },
-            scale: {
-              expandLastBucket: opts.expandLastBucket
-            },
-            title: {
-              text: data.get('xAxisLabel')
-            }
-          }
-        ];
-      } else {
-        const categoryAxis1 = config.categoryAxes.find((categoryAxis) => {
-          return categoryAxis.id === 'CategoryAxis-1';
-        });
-        if (categoryAxis1) {
-          categoryAxis1.title.text = data.get('xAxisLabel');
-        }
-      }
-
-      if (!config.charts) {
-        config.charts = createCharts(cfg, data.data);
-      }
-
-      if (typeof config.enableHover === 'undefined') config.enableHover = true;
-
-      return config;
+      show: true,
+      type: cfg.type || 'line',
+      mode: stacked ? 'stacked' : 'normal',
+      interpolate: interpolate,
+      drawLinesBetweenPoints: seriesParams0.drawLinesBetweenPoints,
+      showCircles: seriesParams0.showCircles,
+      radiusRatio: cfg.radiusRatio,
+      data: seri
     };
   }
 
   return {
-    line: create(),
+    ...matchingSeriesParams,
+    data: seri,
+    radiusRatio: cfg.radiusRatio
+  };
+};
 
-    column: create({
-      expandLastBucket: true
-    }),
+const createSeries = (cfg, series) => {
+  return {
+    type: 'point_series',
+    addTimeMarker: cfg.addTimeMarker,
+    series: _.map(series, (seri) => {
+      return createSeriesFromParams(cfg, seri);
+    })
+  };
+};
 
-    area: create({
-      alerts: [
+const createCharts = (cfg, data) => {
+  if (data.rows || data.columns) {
+    const charts = data.rows ? data.rows : data.columns;
+    return charts.map(chart => {
+      return createSeries(cfg, chart.series);
+    });
+  }
+
+  return [createSeries(cfg, data.series)];
+};
+/*
+ * Create handlers for Area, Column, and Line charts which
+ * are all nearly the same minus a few details
+ */
+function create(opts) {
+  opts = opts || {};
+
+  return function (cfg, data) {
+    const isUserDefinedYAxis = cfg.setYExtents;
+    const config = _.cloneDeep(cfg);
+    _.defaultsDeep(config, {
+      chartTitle: {},
+      mode: 'normal'
+    }, opts);
+
+    config.type = 'point_series';
+
+    if (!config.tooltip) {
+      config.tooltip = {
+        show: cfg.addTooltip
+      };
+    }
+
+    if (!config.valueAxes) {
+      let mode = config.mode;
+      if (['stacked', 'overlap'].includes(mode)) mode = 'normal';
+      config.valueAxes = [
         {
-          type: 'warning',
-          msg: 'Positive and negative values are not accurately represented by stacked ' +
-               'area charts. Either changing the chart mode to "overlap" or using a ' +
-               'bar chart is recommended.',
-          test: function (vis, data) {
-            if (!data.shouldBeStacked() || data.maxNumberOfSeries() < 2) return;
-
-            const hasPos = data.getYMax(data._getY) > 0;
-            const hasNeg = data.getYMin(data._getY) < 0;
-            return (hasPos && hasNeg);
-          }
-        },
-        {
-          type: 'warning',
-          msg: 'Parts of or the entire area chart might not be displayed due to null ' +
-          'values in the data. A line chart is recommended when displaying data ' +
-          'with null values.',
-          test: function (vis, data) {
-            return data.hasNullValues();
+          id: 'ValueAxis-1',
+          type: 'value',
+          scale: {
+            type: config.scale,
+            setYExtents: config.setYExtents,
+            defaultYExtents: config.defaultYExtents,
+            min: isUserDefinedYAxis ? config.yAxis.min : undefined,
+            max: isUserDefinedYAxis ? config.yAxis.max : undefined,
+            mode: mode
+          },
+          labels: {
+            axisFormatter: data.data.yAxisFormatter || data.get('yAxisFormatter')
+          },
+          title: {
+            text: data.get('yAxisLabel')
           }
         }
-      ]
-    }),
-
-    heatmap: (cfg, data) => {
-      const defaults = create()(cfg, data);
-      const seriesLimit = 25;
-      const hasCharts = defaults.charts.length;
-      const tooManySeries = defaults.charts.length && defaults.charts[0].series.length > seriesLimit;
-      if (hasCharts && tooManySeries) {
-        defaults.error = 'There are too many series defined.';
-      }
-      defaults.valueAxes[0].show = false;
-      defaults.categoryAxes[0].style = {
-        rangePadding: 0,
-        rangeOuterPadding: 0
-      };
-      defaults.categoryAxes.push({
-        id: 'CategoryAxis-2',
-        type: 'category',
-        position: 'left',
-        values: data.getLabels(),
-        scale: {
-          inverted: true
-        },
-        labels: {
-          filter: false,
-          axisFormatter: function (val) { return val; }
-        },
-        style: {
-          rangePadding: 0,
-          rangeOuterPadding: 0
-        },
-        title: {
-          text: data.get('zAxisLabel') || ''
+      ];
+    } else {
+      config.valueAxes.forEach(axis => {
+        if (axis.labels) {
+          axis.labels.axisFormatter = data.data.yAxisFormatter || data.get('yAxisFormatter');
         }
       });
-      return defaults;
     }
+
+    if (!config.categoryAxes) {
+      config.categoryAxes = [
+        {
+          id: 'CategoryAxis-1',
+          type: 'category',
+          labels: {
+            axisFormatter: data.data.xAxisFormatter || data.get('xAxisFormatter')
+          },
+          scale: {
+            expandLastBucket: opts.expandLastBucket
+          },
+          title: {
+            text: data.get('xAxisLabel')
+          }
+        }
+      ];
+    } else {
+      const categoryAxis1 = config.categoryAxes.find((categoryAxis) => {
+        return categoryAxis.id === 'CategoryAxis-1';
+      });
+      if (categoryAxis1) {
+        categoryAxis1.title.text = data.get('xAxisLabel');
+      }
+    }
+
+    if (!config.charts) {
+      config.charts = createCharts(cfg, data.data);
+    }
+
+    if (typeof config.enableHover === 'undefined') config.enableHover = true;
+
+    return config;
   };
 }
+
+export const vislibPointSeriesTypes = {
+  line: create(),
+
+  column: create({
+    expandLastBucket: true
+  }),
+
+  area: create({
+    alerts: [
+      {
+        type: 'warning',
+        msg: 'Positive and negative values are not accurately represented by stacked ' +
+             'area charts. Either changing the chart mode to "overlap" or using a ' +
+             'bar chart is recommended.',
+        test: function (vis, data) {
+          if (!data.shouldBeStacked() || data.maxNumberOfSeries() < 2) return;
+
+          const hasPos = data.getYMax(data._getY) > 0;
+          const hasNeg = data.getYMin(data._getY) < 0;
+          return (hasPos && hasNeg);
+        }
+      },
+      {
+        type: 'warning',
+        msg: 'Parts of or the entire area chart might not be displayed due to null ' +
+        'values in the data. A line chart is recommended when displaying data ' +
+        'with null values.',
+        test: function (vis, data) {
+          return data.hasNullValues();
+        }
+      }
+    ]
+  }),
+
+  heatmap: (cfg, data) => {
+    const defaults = create()(cfg, data);
+    const seriesLimit = 25;
+    const hasCharts = defaults.charts.length;
+    const tooManySeries = defaults.charts.length && defaults.charts[0].series.length > seriesLimit;
+    if (hasCharts && tooManySeries) {
+      defaults.error = 'There are too many series defined.';
+    }
+    defaults.valueAxes[0].show = false;
+    defaults.categoryAxes[0].style = {
+      rangePadding: 0,
+      rangeOuterPadding: 0
+    };
+    defaults.categoryAxes.push({
+      id: 'CategoryAxis-2',
+      type: 'category',
+      position: 'left',
+      values: data.getLabels(),
+      scale: {
+        inverted: true
+      },
+      labels: {
+        filter: false,
+        axisFormatter: function (val) { return val; }
+      },
+      style: {
+        rangePadding: 0,
+        rangeOuterPadding: 0
+      },
+      title: {
+        text: data.get('zAxisLabel') || ''
+      }
+    });
+    return defaults;
+  }
+};

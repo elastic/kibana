@@ -16,8 +16,11 @@ import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
 import { Overview } from './overview';
 import { SourceStatus } from './source_status';
-import { SourceConfigurations, Sources } from './sources';
+import { Sources, SourceConfiguration } from './sources';
 import { UncommonProcesses } from './uncommon_processes';
+import { Note } from './note/saved_object';
+import { PinnedEvent } from './pinned_event/saved_object';
+import { Timeline } from './timeline/saved_object';
 
 export * from './hosts';
 
@@ -39,6 +42,9 @@ export interface AppBackendLibs extends AppDomainLibs {
   framework: FrameworkAdapter;
   sources: Sources;
   sourceStatus: SourceStatus;
+  timeline: Timeline;
+  note: Note;
+  pinnedEvent: PinnedEvent;
 }
 
 export interface Configuration {
@@ -47,7 +53,7 @@ export interface Configuration {
     partitionSize: number;
     partitionFactor: number;
   };
-  sources: SourceConfigurations;
+  sources: Record<string, SourceConfiguration>;
 }
 
 export interface SiemContext {

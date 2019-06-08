@@ -19,17 +19,17 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
-import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ES_TYPES } from '../../../common/es_types';
 import { METRIC_TYPES } from '../../../common/metric_types';
 
-function StandardAgg(props) {
+export function StandardAgg(props) {
   const { model, panel, series, fields, uiRestrictions } = props;
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -110,5 +110,3 @@ StandardAgg.propTypes = {
   siblings: PropTypes.array,
   uiRestrictions: PropTypes.object,
 };
-
-export default StandardAgg;

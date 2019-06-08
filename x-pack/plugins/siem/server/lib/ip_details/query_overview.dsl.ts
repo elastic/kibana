@@ -45,26 +45,6 @@ const getAggs = (type: string, ip: string) => {
             },
           },
         },
-        host: {
-          filter: {
-            exists: {
-              field: 'host',
-            },
-          },
-          aggs: {
-            results: {
-              top_hits: {
-                size: 1,
-                _source: ['host'],
-                sort: [
-                  {
-                    '@timestamp': 'desc',
-                  },
-                ],
-              },
-            },
-          },
-        },
         geo: {
           filter: {
             exists: {
@@ -90,23 +70,50 @@ const getAggs = (type: string, ip: string) => {
   };
 };
 
-export const buildOverviewQuery = ({
-  filterQuery,
-  sourceConfiguration: {
-    fields: { timestamp },
-    logAlias,
-    packetbeatAlias,
-  },
-  ip,
-}: IpOverviewRequestOptions) => {
+const getHostAggs = (ip: string) => {
+  return {
+    host: {
+      filter: {
+        term: {
+          'host.ip': ip,
+        },
+      },
+      aggs: {
+        host: {
+          filter: {
+            exists: {
+              field: 'host',
+            },
+          },
+          aggs: {
+            results: {
+              top_hits: {
+                size: 1,
+                _source: ['host'],
+                sort: [
+                  {
+                    '@timestamp': 'desc',
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+};
+
+export const buildOverviewQuery = ({ defaultIndex, ip }: IpOverviewRequestOptions) => {
   const dslQuery = {
     allowNoIndices: true,
-    index: [logAlias, packetbeatAlias],
+    index: defaultIndex,
     ignoreUnavailable: true,
     body: {
       aggs: {
         ...getAggs('source', ip),
         ...getAggs('destination', ip),
+        ...getHostAggs(ip),
       },
       query: {
         bool: {

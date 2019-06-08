@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as _ from 'lodash';
 import { Server } from 'hapi';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +31,7 @@ import { IndexScheduler, UpdateScheduler } from './scheduler';
 import { CodeServerRouter } from './security';
 import { ServerOptions } from './server_options';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
+import { EsClientWithInternalRequest } from './utils/esclient_with_internal_request';
 
 async function retryUntilAvailable<T>(
   func: () => Promise<T>,
@@ -77,7 +79,7 @@ async function getCodeNodeUuid(url: string, log: Logger) {
 }
 
 export function init(server: Server, options: any) {
-  if (!options.enabled) {
+  if (!options.ui.enabled) {
     return;
   }
 
@@ -117,7 +119,7 @@ export function init(server: Server, options: any) {
   const kbnServer = this.kbnServer;
   kbnServer.ready().then(async () => {
     const serverUuid = await retryUntilAvailable(() => getServerUuid(server), 50);
-    // enable security check in routes
+
     const codeNodeUrl = serverOptions.codeNodeUrl;
     if (codeNodeUrl) {
       const codeNodeUuid = (await retryUntilAvailable(
@@ -147,14 +149,16 @@ async function initNonCodeNode(
 }
 
 async function initCodeNode(server: Server, serverOptions: ServerOptions, log: Logger) {
+  // wait until elasticsearch is ready
+  // @ts-ignore
+  await server.plugins.elasticsearch.waitUntilReady();
+
   log.info('Initializing Code plugin as code-node.');
   const queueIndex: string = server.config().get('xpack.code.queueIndex');
-  const queueTimeout: number = server.config().get('xpack.code.queueTimeout');
+  const queueTimeoutMs: number = server.config().get('xpack.code.queueTimeoutMs');
   const devMode: boolean = server.config().get('env.dev');
-  const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
-  // @ts-ignore
-  const esClient: EsClient = adminCluster.clusterClient.client;
+  const esClient: EsClient = new EsClientWithInternalRequest(server);
   const repoConfigController = new RepositoryConfigController(esClient);
 
   server.injectUiAppVars('code', () => ({
@@ -163,6 +167,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   // Enable the developing language servers in development mode.
   if (devMode === true) {
     LanguageServers.push(...LanguageServersDeveloping);
+    const JavaLanguageServer = LanguageServers.find(d => d.name === 'Java');
+    JavaLanguageServer!.downloadUrl = _.partialRight(JavaLanguageServer!.downloadUrl!, devMode);
   }
 
   const installManager = new InstallManager(server, serverOptions);
@@ -175,6 +181,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     repoConfigController
   );
   server.events.on('stop', async () => {
+    log.debug('shutdown lsp process');
     await lspService.shutdown();
   });
   // Initialize indexing factories.
@@ -191,7 +198,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   // Initialize queue.
   const queue = new Esqueue(queueIndex, {
     client: esClient,
-    timeout: queueTimeout,
+    timeout: queueTimeoutMs,
   });
   const indexWorker = new IndexWorker(
     queue,
@@ -210,7 +217,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     esClient,
     serverOptions,
     indexWorker,
-    repoServiceFactory
+    repoServiceFactory,
+    cancellationService
   ).bind();
   const deleteWorker = new DeleteWorker(
     queue,
@@ -226,7 +234,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     log,
     esClient,
     serverOptions,
-    repoServiceFactory
+    repoServiceFactory,
+    cancellationService
   ).bind();
 
   // Initialize schedulers.

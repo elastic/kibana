@@ -2,6 +2,8 @@
 
 exports[`rendering renders correctly 1`] = `
 <Component
+  badgeLabel="Beta"
+  badgeTooltip="My test tooltip."
   subtitle="My Test Subtitle"
   title="My Test Title"
 >

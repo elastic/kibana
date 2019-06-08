@@ -9,11 +9,8 @@ import { Direction, FlowDirection, FlowTarget, NetworkTopNFlowFields } from '../
 import { NetworkTopNFlowRequestOptions } from '.';
 
 export const mockOptions: NetworkTopNFlowRequestOptions = {
+  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   sourceConfiguration: {
-    logAlias: 'filebeat-*',
-    auditbeatAlias: 'auditbeat-*',
-    packetbeatAlias: 'packetbeat-*',
-    winlogbeatAlias: 'winlogbeat-*',
     fields: {
       container: 'docker.container.name',
       host: 'beat.hostname',

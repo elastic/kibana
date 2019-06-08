@@ -214,7 +214,7 @@ export function SingleMetricJobServiceProvider() {
             buckets: {
               date_histogram: {
                 field: formConfig.timeField,
-                interval: interval
+                fixed_interval: `${interval}ms`
               },
               aggregations: {
                 [formConfig.timeField]: {
@@ -237,7 +237,7 @@ export function SingleMetricJobServiceProvider() {
             buckets: {
               date_histogram: {
                 field: formConfig.timeField,
-                interval: ((interval / 100) * 10) // use 10% of bucketSpan to allow for better sampling
+                fixed_interval: `${((interval / 100) * 10)}ms` // use 10% of bucketSpan to allow for better sampling
               },
               aggregations: {
                 [dtr.field_name]: {
@@ -261,7 +261,7 @@ export function SingleMetricJobServiceProvider() {
             buckets: {
               date_histogram: {
                 field: formConfig.timeField,
-                interval: interval
+                fixed_interval: `${interval}ms`
               },
               aggregations: {
                 [formConfig.timeField]: {

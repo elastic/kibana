@@ -5,6 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import template from './threshold_watch_group_by.html';
 import { ThresholdWatchBaseController } from '../threshold_watch_base';
 import 'plugins/watcher/services/html_id_generator';
@@ -12,7 +13,7 @@ import 'plugins/watcher/components/xpack_aria_describes';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('thresholdWatchGroupBy', function ($injector, i18n) {
+app.directive('thresholdWatchGroupBy', function ($injector) {
   const htmlIdGeneratorFactory = $injector.get('xpackWatcherHtmlIdGeneratorFactory');
 
   return {
@@ -58,10 +59,10 @@ app.directive('thresholdWatchGroupBy', function ($injector, i18n) {
 
       get itemDescription() {
         const itemDescription = (this.groupByType && this.groupByType.sizeRequired)
-          ? i18n('xpack.watcher.thresholdWatchExpression.groupBy.groupedItemDescription', {
+          ? i18n.translate('xpack.watcher.thresholdWatchExpression.groupBy.groupedItemDescription', {
             defaultMessage: 'Grouped over',
           })
-          : i18n('xpack.watcher.thresholdWatchExpression.groupBy.itemDescription', {
+          : i18n.translate('xpack.watcher.thresholdWatchExpression.groupBy.itemDescription', {
             defaultMessage: 'Over',
           });
 

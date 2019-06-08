@@ -8,42 +8,58 @@ import { EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
 
 import { AndOrBadge } from '../../and_or_badge';
+import { BrowserFields } from '../../../containers/source';
 import {
   OnChangeDataProviderKqlQuery,
+  OnDataProviderEdited,
   OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from '../events';
 
-import { DataProvider } from './data_provider';
+import { DataProvidersAnd, IS_OPERATOR } from './data_provider';
 import { ProviderItemBadge } from './provider_item_badge';
 
 interface ProviderItemAndPopoverProps {
-  dataProvidersAnd: DataProvider[];
-  providerId: string;
+  browserFields: BrowserFields;
+  dataProvidersAnd: DataProvidersAnd[];
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
+  onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
+  providerId: string;
+  timelineId: string;
 }
 
 export class ProviderItemAnd extends React.PureComponent<ProviderItemAndPopoverProps> {
   public render() {
-    const { dataProvidersAnd, providerId } = this.props;
+    const {
+      browserFields,
+      dataProvidersAnd,
+      onDataProviderEdited,
+      providerId,
+      timelineId,
+    } = this.props;
 
-    return dataProvidersAnd.map((providerAnd: DataProvider, index: number) => (
+    return dataProvidersAnd.map((providerAnd: DataProvidersAnd, index: number) => (
       <React.Fragment key={`provider-item-and-${providerId}-${providerAnd.id}`}>
         <EuiFlexItem>
           <AndOrBadge type="and" />
         </EuiFlexItem>
         <EuiFlexItem>
           <ProviderItemBadge
+            andProviderId={providerAnd.id}
+            browserFields={browserFields}
             deleteProvider={() => this.deleteAndProvider(providerId, providerAnd.id)}
             field={providerAnd.queryMatch.displayField || providerAnd.queryMatch.field}
             kqlQuery={providerAnd.kqlQuery}
             isEnabled={providerAnd.enabled}
             isExcluded={providerAnd.excluded}
-            providerId={`${providerId}.${providerAnd.id}`}
+            onDataProviderEdited={onDataProviderEdited}
+            operator={providerAnd.queryMatch.operator || IS_OPERATOR}
+            providerId={providerId}
+            timelineId={timelineId}
             toggleEnabledProvider={() =>
               this.toggleEnabledAndProvider(providerId, !providerAnd.enabled, providerAnd.id)
             }

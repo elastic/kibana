@@ -6,7 +6,8 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { InputsModelId, Refetch } from './model';
+import { Refetch } from './model';
+import { InputsModelId } from './constants';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/inputs');
 
@@ -15,6 +16,11 @@ export const setAbsoluteRangeDatePicker = actionCreator<{
   from: number;
   to: number;
 }>('SET_ABSOLUTE_RANGE_DATE_PICKER');
+
+export const setTimelineRangeDatePicker = actionCreator<{
+  from: number;
+  to: number;
+}>('SET_TIMELINE_RANGE_DATE_PICKER');
 
 export const setRelativeRangeDatePicker = actionCreator<{
   id: InputsModelId;

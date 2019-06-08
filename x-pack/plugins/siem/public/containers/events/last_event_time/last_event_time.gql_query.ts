@@ -11,10 +11,11 @@ export const LastEventTimeGqlQuery = gql`
     $sourceId: ID!
     $indexKey: LastEventIndexKey!
     $details: LastTimeDetails!
+    $defaultIndex: [String!]!
   ) {
     source(id: $sourceId) {
       id
-      LastEventTime(indexKey: $indexKey, details: $details) {
+      LastEventTime(indexKey: $indexKey, details: $details, defaultIndex: $defaultIndex) {
         lastSeen
       }
     }

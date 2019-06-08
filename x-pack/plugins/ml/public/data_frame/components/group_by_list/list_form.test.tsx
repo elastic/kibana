@@ -16,7 +16,8 @@ describe('Data Frame: <GroupByListForm />', () => {
     const item: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
-      aggName: 'the-group-by-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
     };
     const props = {
       list: { 'the-options-data-id': item },

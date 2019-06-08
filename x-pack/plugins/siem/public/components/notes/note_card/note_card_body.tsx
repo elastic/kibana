@@ -36,7 +36,7 @@ export const NoteCardBody = pure<{ rawNote: string }>(({ rawNote }) => (
       hoverContent={
         <HoverActionsContainer data-test-subj="hover-actions-container">
           <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-            <WithCopyToClipboard text={rawNote} titleSummary={i18n.NOTE(1)} />
+            <WithCopyToClipboard text={rawNote} titleSummary={i18n.NOTE.toLowerCase()} />
           </EuiToolTip>
         </HoverActionsContainer>
       }

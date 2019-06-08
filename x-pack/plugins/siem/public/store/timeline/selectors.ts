@@ -10,12 +10,19 @@ import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
 import { timelineDefaults, TimelineModel } from './model';
-import { TimelineById } from './reducer';
+import { TimelineById, AutoSavedWarningMsg } from './types';
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
 
+const selectAutoSaveMsg = (state: State): AutoSavedWarningMsg => state.timeline.autoSavedWarningMsg;
+
 export const selectTimeline = (state: State, timelineId: string): TimelineModel =>
   state.timeline.timelineById[timelineId];
+
+export const autoSaveMsgSelector = createSelector(
+  selectAutoSaveMsg,
+  autoSaveMsg => autoSaveMsg
+);
 
 export const timelineByIdSelector = createSelector(
   selectTimelineById,
@@ -32,8 +39,11 @@ export const getKqlFilterQuerySelector = () =>
   createSelector(
     selectTimeline,
     timeline =>
-      timeline && timeline.kqlQuery && timeline.kqlQuery.filterQuery
-        ? timeline.kqlQuery.filterQuery.query.expression
+      timeline &&
+      timeline.kqlQuery &&
+      timeline.kqlQuery.filterQuery &&
+      timeline.kqlQuery.filterQuery.kuery
+        ? timeline.kqlQuery.filterQuery.kuery.expression
         : null
   );
 

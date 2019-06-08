@@ -9,7 +9,6 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
-import { IndexType } from '../../graphql/types';
 import { wait } from '../../lib/helpers';
 
 import { WithSource } from '.';
@@ -19,7 +18,7 @@ describe('Index Fields & Browser Fields', () => {
   test('Index Fields', async () => {
     mount(
       <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default" indexTypes={[IndexType.ANY]}>
+        <WithSource sourceId="default">
           {({ indexPattern }) => {
             if (!isEqual(indexPattern.fields, [])) {
               expect(indexPattern.fields).toEqual(mockIndexFields);
@@ -38,7 +37,7 @@ describe('Index Fields & Browser Fields', () => {
   test('Browser Fields', async () => {
     mount(
       <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default" indexTypes={[IndexType.ANY]}>
+        <WithSource sourceId="default">
           {({ browserFields }) => {
             if (!isEqual(browserFields, {})) {
               expect(browserFields).toEqual(mockBrowserFields);

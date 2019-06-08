@@ -10,7 +10,7 @@ import { set } from 'lodash/fp';
 import * as React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
-import { mockGlobalState, TestProviders } from '../../mock';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
 import { createStore, State } from '../../store';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
 
@@ -60,7 +60,7 @@ describe('Flyout', () => {
 
     test('it renders the title field when its state is set to flyout is true', () => {
       const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
-      const storeShowIsTrue = createStore(stateShowIsTrue);
+      const storeShowIsTrue = createStore(stateShowIsTrue, apolloClientObservable);
 
       const wrapper = mount(
         <TestProviders store={storeShowIsTrue}>
@@ -83,7 +83,7 @@ describe('Flyout', () => {
 
     test('it does NOT render the fly out button when its state is set to flyout is true', () => {
       const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
-      const storeShowIsTrue = createStore(stateShowIsTrue);
+      const storeShowIsTrue = createStore(stateShowIsTrue, apolloClientObservable);
 
       const wrapper = mount(
         <TestProviders store={storeShowIsTrue}>
@@ -101,7 +101,7 @@ describe('Flyout', () => {
 
     test('it renders the flyout body', () => {
       const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
-      const storeShowIsTrue = createStore(stateShowIsTrue);
+      const storeShowIsTrue = createStore(stateShowIsTrue, apolloClientObservable);
 
       const wrapper = mount(
         <TestProviders store={storeShowIsTrue}>
@@ -111,7 +111,7 @@ describe('Flyout', () => {
             timelineId="test"
             usersViewing={usersViewing}
           >
-            <p>Fake flyout body</p>
+            <p>{'Fake flyout body'}</p>
           </Flyout>
         </TestProviders>
       );
@@ -130,7 +130,7 @@ describe('Flyout', () => {
         mockDataProviders,
         state
       );
-      const storeWithDataProviders = createStore(stateWithDataProviders);
+      const storeWithDataProviders = createStore(stateWithDataProviders, apolloClientObservable);
 
       const wrapper = mount(
         <TestProviders store={storeWithDataProviders}>
@@ -152,7 +152,7 @@ describe('Flyout', () => {
         mockDataProviders,
         state
       );
-      const storeWithDataProviders = createStore(stateWithDataProviders);
+      const storeWithDataProviders = createStore(stateWithDataProviders, apolloClientObservable);
 
       const wrapper = mount(
         <TestProviders store={storeWithDataProviders}>
@@ -214,7 +214,7 @@ describe('Flyout', () => {
 
     test('should call the onClose when the close button is clicked', () => {
       const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
-      const storeShowIsTrue = createStore(stateShowIsTrue);
+      const storeShowIsTrue = createStore(stateShowIsTrue, apolloClientObservable);
 
       const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
       const wrapper = mount(

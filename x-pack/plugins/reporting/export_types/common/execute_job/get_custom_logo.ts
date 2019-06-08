@@ -3,15 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
-import { ConditionalHeaders, KbnServer, ReportingJob } from '../../../types';
+import { ConditionalHeaders, JobDocPayload, KbnServer } from '../../../types';
 
 export const getCustomLogo = async ({
   job,
   conditionalHeaders,
   server,
 }: {
-  job: ReportingJob;
+  job: JobDocPayload;
   conditionalHeaders: ConditionalHeaders;
   server: KbnServer;
 }) => {

@@ -15,7 +15,8 @@ describe('Data Frame: Aggregation <PopoverForm />', () => {
   test('Minimal initialization', () => {
     const defaultData: PivotAggsConfig = {
       agg: PIVOT_SUPPORTED_AGGS.CARDINALITY,
-      aggName: 'the-agg-name',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
       field: 'the-field',
     };
     const otherAggNames: AggName[] = [];

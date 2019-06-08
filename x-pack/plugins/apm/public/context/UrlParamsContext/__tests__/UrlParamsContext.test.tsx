@@ -7,19 +7,22 @@
 import * as React from 'react';
 import { UrlParamsContext, UrlParamsProvider } from '..';
 import { mount } from 'enzyme';
-import * as hooks from '../../../hooks/useLocation';
-import { Location } from 'history';
+import { Location, History } from 'history';
+import { MemoryRouter, Router } from 'react-router-dom';
 import { IUrlParams } from '../types';
+import { tick } from '../../../utils/testHelpers';
 
-function mountParams() {
+function mountParams(location: Location) {
   return mount(
-    <UrlParamsProvider>
-      <UrlParamsContext.Consumer>
-        {({ urlParams }: { urlParams: IUrlParams }) => (
-          <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
-        )}
-      </UrlParamsContext.Consumer>
-    </UrlParamsProvider>
+    <MemoryRouter initialEntries={[location]}>
+      <UrlParamsProvider>
+        <UrlParamsContext.Consumer>
+          {({ urlParams }: { urlParams: IUrlParams }) => (
+            <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
+          )}
+        </UrlParamsContext.Consumer>
+      </UrlParamsProvider>
+    </MemoryRouter>
   );
 }
 
@@ -28,22 +31,13 @@ function getDataFromOutput(wrapper: ReturnType<typeof mount>) {
 }
 
 describe('UrlParamsContext', () => {
-  let mockLocation: Location;
-
-  beforeEach(() => {
-    mockLocation = { pathname: '/test/pathname' } as Location;
-    jest.spyOn(hooks, 'useLocation').mockImplementation(() => mockLocation);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   it('should have default params', () => {
+    const location = { pathname: '/test/pathname' } as Location;
+
     jest
       .spyOn(Date, 'now')
       .mockImplementation(() => new Date('2000-06-15T12:00:00Z').getTime());
-    const wrapper = mountParams();
+    const wrapper = mountParams(location);
     const params = getDataFromOutput(wrapper);
 
     expect(params).toEqual({
@@ -60,21 +54,27 @@ describe('UrlParamsContext', () => {
   });
 
   it('should read values in from location', () => {
-    mockLocation.search =
-      '?rangeFrom=2010-03-15T12:00:00Z&rangeTo=2010-04-10T12:00:00Z&transactionId=123abc';
-    const wrapper = mountParams();
+    const location = {
+      pathname: '/test/pathname',
+      search:
+        '?rangeFrom=2010-03-15T12:00:00Z&rangeTo=2010-04-10T12:00:00Z&transactionId=123abc'
+    } as Location;
+
+    const wrapper = mountParams(location);
     const params = getDataFromOutput(wrapper);
     expect(params.start).toEqual('2010-03-15T12:00:00.000Z');
     expect(params.end).toEqual('2010-04-10T12:00:00.000Z');
   });
 
   it('should update param values if location has changed', () => {
-    const wrapper = mountParams();
-    mockLocation = {
+    const location = {
       pathname: '/test/updated',
       search:
         '?rangeFrom=2009-03-15T12:00:00Z&rangeTo=2009-04-10T12:00:00Z&transactionId=UPDATED'
     } as Location;
+
+    const wrapper = mountParams(location);
+
     // force an update
     wrapper.setProps({ abc: 123 });
     const params = getDataFromOutput(wrapper);
@@ -82,31 +82,52 @@ describe('UrlParamsContext', () => {
     expect(params.end).toEqual('2009-04-10T12:00:00.000Z');
   });
 
-  it('should refresh the time range with new values', () => {
+  it('should refresh the time range with new values', async () => {
+    const calls = [];
+    const history = ({
+      location: {
+        pathname: '/test'
+      },
+      listen: jest.fn()
+    } as unknown) as History;
+
     const wrapper = mount(
-      <UrlParamsProvider>
-        <UrlParamsContext.Consumer>
-          {({ urlParams, refreshTimeRange }) => {
-            return (
-              <React.Fragment>
-                <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
-                <button
-                  onClick={() =>
-                    refreshTimeRange({
-                      rangeFrom: '2005-09-20T12:00:00Z',
-                      rangeTo: '2005-10-21T12:00:00Z'
-                    })
-                  }
-                />
-              </React.Fragment>
-            );
-          }}
-        </UrlParamsContext.Consumer>
-      </UrlParamsProvider>
+      <Router history={history}>
+        <UrlParamsProvider>
+          <UrlParamsContext.Consumer>
+            {({ urlParams, refreshTimeRange }) => {
+              calls.push({ urlParams });
+              return (
+                <React.Fragment>
+                  <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
+                  <button
+                    onClick={() =>
+                      refreshTimeRange({
+                        rangeFrom: '2005-09-20T12:00:00Z',
+                        rangeTo: '2005-10-21T12:00:00Z'
+                      })
+                    }
+                  />
+                </React.Fragment>
+              );
+            }}
+          </UrlParamsContext.Consumer>
+        </UrlParamsProvider>
+      </Router>
     );
+
+    await tick();
+
+    expect(calls.length).toBe(1);
+
     wrapper.find('button').simulate('click');
-    const data = getDataFromOutput(wrapper);
-    expect(data.start).toEqual('2005-09-20T12:00:00.000Z');
-    expect(data.end).toEqual('2005-10-21T12:00:00.000Z');
+
+    await tick();
+
+    expect(calls.length).toBe(2);
+
+    const params = getDataFromOutput(wrapper);
+    expect(params.start).toEqual('2005-09-20T12:00:00.000Z');
+    expect(params.end).toEqual('2005-10-21T12:00:00.000Z');
   });
 });

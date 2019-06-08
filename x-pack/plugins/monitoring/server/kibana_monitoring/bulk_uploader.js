@@ -69,7 +69,6 @@ export class BulkUploader {
     this._log.info('Starting monitoring stats collection');
     const filterCollectorSet = _collectorSet => {
       const filterUsage = this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
-      this._lastFetchWithUsage = !filterUsage;
       if (!filterUsage) {
         this._lastFetchUsageTime = Date.now();
       }
@@ -123,6 +122,16 @@ export class BulkUploader {
    * @return {Promise} - resolves to undefined
    */
   async _fetchAndUpload(collectorSet) {
+    const collectorsReady = await collectorSet.areAllCollectorsReady();
+    if (!collectorsReady) {
+      this._log.debug('Skipping bulk uploading because not all collectors are ready');
+      if (collectorSet.some(collectorSet.isUsageCollector)) {
+        this._lastFetchUsageTime = null;
+        this._log.debug('Resetting lastFetchWithUsage because not all collectors are ready');
+      }
+      return;
+    }
+
     const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
     const payload = this.toBulkUploadFormat(compact(data), collectorSet);
 

@@ -9,6 +9,7 @@ import { noop } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
 
+import { FieldNameContainer } from '../../../../draggables/field_badge';
 import { OnResize, Resizeable } from '../../../../resize_handle';
 import {
   CELL_RESIZE_HANDLE_WIDTH,
@@ -26,6 +27,9 @@ import { HeaderToolTipContent } from '../header_tooltip_content';
 
 import { getNewSortDirectionOnClick } from './helpers';
 
+const TITLE_PADDING = 10; // px
+const RESIZE_HANDLE_HEIGHT = 35; // px
+
 const HeaderContainer = styled(EuiFlexGroup)<{ width: string }>`
   display: flex;
   height: 100%;
@@ -38,7 +42,7 @@ const HeaderFlexItem = styled(EuiFlexItem)<{ width: string }>`
 `;
 
 const HeaderDiv = styled.div<{ isLoading: boolean }>`
-  cursor: ${({ isLoading }) => (isLoading ? 'default' : 'pointer')};
+  cursor: ${({ isLoading }) => (isLoading ? 'default' : 'grab')};
   display: flex;
   height: 100%;
   flex-direction: row;
@@ -47,7 +51,7 @@ const HeaderDiv = styled.div<{ isLoading: boolean }>`
 
 const TruncatableHeaderText = styled(TruncatableText)`
   font-weight: bold;
-  padding-left: 5px;
+  padding: 5px;
 `;
 
 interface Props {
@@ -79,7 +83,7 @@ export class Header extends React.PureComponent<Props> {
               <ColumnHeaderResizeHandle />
             </FullHeightFlexItem>
           }
-          height="100%"
+          height={`${RESIZE_HANDLE_HEIGHT}px`}
           id={header.id}
           render={this.renderActions}
           onResize={this.onResize}
@@ -111,20 +115,23 @@ export class Header extends React.PureComponent<Props> {
                     gutterSize="none"
                   >
                     <EuiFlexItem grow={false}>
-                      <TruncatableHeaderText
-                        data-test-subj="header-text"
-                        size="xs"
-                        width={`${header.width - ACTIONS_WIDTH - CELL_RESIZE_HANDLE_WIDTH}px`}
-                      >
-                        {header.id}
-                      </TruncatableHeaderText>
+                      <FieldNameContainer>
+                        <TruncatableHeaderText
+                          data-test-subj="header-text"
+                          size="xs"
+                          width={`${header.width -
+                            (ACTIONS_WIDTH + CELL_RESIZE_HANDLE_WIDTH + TITLE_PADDING)}px`}
+                        >
+                          {header.id}
+                        </TruncatableHeaderText>
+                      </FieldNameContainer>
                     </EuiFlexItem>
                     <FullHeightFlexItem>
                       <Actions
                         header={header}
                         isLoading={isLoading}
                         onColumnRemoved={onColumnRemoved}
-                        show={showHoverContent}
+                        show={header.id !== '@timestamp' ? showHoverContent : false}
                         sort={sort}
                       />
                     </FullHeightFlexItem>
@@ -142,7 +149,7 @@ export class Header extends React.PureComponent<Props> {
   private onClick = () => {
     const { header, isLoading, onColumnSorted, sort } = this.props;
 
-    if (!isLoading) {
+    if (!isLoading && header.aggregatable) {
       onColumnSorted!({
         columnId: header.id,
         sortDirection: getNewSortDirectionOnClick({

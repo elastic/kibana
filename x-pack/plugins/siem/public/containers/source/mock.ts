@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexType } from '../../graphql/types';
-
 import { BrowserFields } from '.';
 import { sourceQuery } from './index.gql_query';
 
@@ -15,24 +13,16 @@ export const mocksSource = [
       query: sourceQuery,
       variables: {
         sourceId: 'default',
-        indexTypes: [IndexType.ANY],
+        defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       },
     },
     result: {
       data: {
         source: {
           id: 'default',
-          configuration: {
-            auditbeatAlias: 'auditbeat-*',
-            logAlias: 'filebeat-*',
-            packetbeatAlias: 'packetbeat-*',
-            winlogbeatAlias: 'winlogbeat-*',
-          },
+          configuration: {},
           status: {
-            auditbeatIndicesExist: true,
-            auditbeatAliasExists: true,
-            winlogbeatAliasExists: true,
-            winlogbeatIndicesExist: true,
+            indicesExist: true,
             winlogbeatIndices: [
               'winlogbeat-7.0.0-2019.02.17',
               'winlogbeat-7.0.0-2019.02.18',
@@ -53,8 +43,6 @@ export const mocksSource = [
               'auditbeat-7.0.0-2019.02.22',
               'auditbeat-8.0.0-2019.02.19-000001',
             ],
-            filebeatIndicesExist: true,
-            filebeatAliasExists: true,
             filebeatIndices: [
               'filebeat-7.0.0-iot-2019.06',
               'filebeat-7.0.0-iot-2019.07',
@@ -313,6 +301,17 @@ export const mocksSource = [
                 searchable: true,
                 type: 'long',
               },
+              {
+                aggregatable: true,
+                category: 'event',
+                description:
+                  'event.end contains the date when the event ended or when the activity was last observed.',
+                example: null,
+                indexes: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+                name: 'event.end',
+                searchable: true,
+                type: 'date',
+              },
             ],
           },
         },
@@ -346,6 +345,7 @@ export const mockIndexFields = [
   { aggregatable: true, name: 'destination.port', searchable: true, type: 'long' },
   { aggregatable: true, name: 'source.ip', searchable: true, type: 'ip' },
   { aggregatable: true, name: 'source.port', searchable: true, type: 'long' },
+  { aggregatable: true, name: 'event.end', searchable: true, type: 'date' },
 ];
 
 export const mockBrowserFields: BrowserFields = {
@@ -602,6 +602,21 @@ export const mockBrowserFields: BrowserFields = {
         name: 'destination.port',
         searchable: true,
         type: 'long',
+      },
+    },
+  },
+  event: {
+    fields: {
+      'event.end': {
+        category: 'event',
+        description:
+          'event.end contains the date when the event ended or when the activity was last observed.',
+        example: null,
+        indexes: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        name: 'event.end',
+        searchable: true,
+        type: 'date',
+        aggregatable: true,
       },
     },
   },

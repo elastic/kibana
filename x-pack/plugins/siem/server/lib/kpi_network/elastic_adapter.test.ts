@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KpiNetworkData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchKpiNetworkAdapter } from './elasticsearch_adapter';
@@ -13,6 +12,7 @@ import * as dnsQueryDsl from './query_dns.dsl';
 import * as generalQueryDsl from './query_general.dsl';
 import * as tlsHandshakesQueryDsl from './query_tls_handshakes.dsl';
 import * as uniquePrvateIpQueryDsl from './query_unique_private_ips.dsl';
+import { KpiNetworkData } from '../../graphql/types';
 
 describe('Network Kpi elasticsearch_adapter', () => {
   const mockCallWithRequest = jest.fn();
@@ -22,6 +22,7 @@ describe('Network Kpi elasticsearch_adapter', () => {
     exposeStaticDir: jest.fn(),
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),
+    getSavedObjectsService: jest.fn(),
   };
   let mockBuildQuery: jest.SpyInstance;
   let mockBuildUniquePrvateIpsQuery: jest.SpyInstance;
@@ -117,9 +118,10 @@ describe('Network Kpi elasticsearch_adapter', () => {
       expect(data).toEqual({
         networkEvents: null,
         uniqueFlowId: null,
-        activeAgents: null,
         uniqueSourcePrivateIps: null,
+        uniqueSourcePrivateIpsHistogram: null,
         uniqueDestinationPrivateIps: null,
+        uniqueDestinationPrivateIpsHistogram: null,
         dnsQueries: null,
         tlsHandshakes: null,
       });

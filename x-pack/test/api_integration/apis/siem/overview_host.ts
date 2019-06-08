@@ -26,6 +26,8 @@ const overviewHostTests: KbnTestProvider = ({ getService }) => {
         auditbeatPackage: 3,
         auditbeatProcess: 7,
         auditbeatUser: 6,
+        filebeatSystemModule: 0,
+        winlogbeat: 0,
         __typename: 'OverviewHostData',
       };
 
@@ -40,6 +42,7 @@ const overviewHostTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             },
           })
           .then(resp => {

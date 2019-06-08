@@ -5,6 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import moment from 'moment-timezone';
 import { toastNotifications } from 'ui/notify';
@@ -24,7 +25,7 @@ import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('watchDetail', function ($injector, i18n) {
+app.directive('watchDetail', function ($injector) {
   const watchService = $injector.get('xpackWatcherWatchService');
   const licenseService = $injector.get('xpackWatcherLicenseService');
 
@@ -139,7 +140,7 @@ app.directive('watchDetail', function ($injector, i18n) {
           resolve: {
             params: function () {
               return {
-                title: i18n('xpack.watcher.sections.watchDetail.errorDisplayModalTitleText', {
+                title: i18n.translate('xpack.watcher.sections.watchDetail.errorDisplayModalTitleText', {
                   defaultMessage: 'Errors in the "{actionId}" action',
                   values: { actionId } }
                 ),
@@ -183,14 +184,14 @@ app.directive('watchDetail', function ($injector, i18n) {
 
       onWatchDelete = () => {
         const confirmModalOptions = {
-          confirmButtonText: i18n('xpack.watcher.sections.watchDetail.deleteConfirmModal.deleteWatchButtonLabel', {
+          confirmButtonText: i18n.translate('xpack.watcher.sections.watchDetail.deleteConfirmModal.deleteWatchButtonLabel', {
             defaultMessage: 'Delete Watch' }
           ),
           onConfirm: this.deleteWatch
         };
 
         return confirmModal(
-          i18n('xpack.watcher.sections.watchDetail.deleteConfirmModal.description', {
+          i18n.translate('xpack.watcher.sections.watchDetail.deleteConfirmModal.description', {
             defaultMessage: 'This will permanently delete the watch. Are you sure?' }
           ),
           confirmModalOptions);
@@ -200,7 +201,7 @@ app.directive('watchDetail', function ($injector, i18n) {
         return watchService.deleteWatch(this.watch.id)
           .then(() => {
             toastNotifications.addSuccess(
-              i18n('xpack.watcher.sections.watchDetail.deleteWatchSuccessNotificationText', {
+              i18n.translate('xpack.watcher.sections.watchDetail.deleteWatchSuccessNotificationText', {
                 defaultMessage: 'Deleted {watchName}',
                 values: { watchName: this.watch.displayName } }
               ),

@@ -43,7 +43,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
     return await supertest
-      .post(`${basePath}/api/telemetry/v1/optIn`)
+      .post(`${basePath}/api/telemetry/v2/optIn`)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
       .send({ enabled: true })

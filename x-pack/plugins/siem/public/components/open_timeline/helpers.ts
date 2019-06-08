@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineResult } from './types';
+import { OpenTimelineResult } from './types';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
 /** Returns a count of the pinned events in a timeline */
-export const getPinnedEventCount = ({ pinnedEventIds }: TimelineResult): number =>
+export const getPinnedEventCount = ({ pinnedEventIds }: OpenTimelineResult): number =>
   pinnedEventIds != null ? Object.keys(pinnedEventIds).length : 0;
 
 /** Returns the sum of all notes added to pinned events and notes applicable to the timeline */
-export const getNotesCount = ({ eventIdToNoteIds, noteIds }: TimelineResult): number => {
+export const getNotesCount = ({ eventIdToNoteIds, noteIds }: OpenTimelineResult): number => {
   const eventNoteCount =
     eventIdToNoteIds != null
       ? Object.keys(eventIdToNoteIds).reduce<number>(
@@ -28,5 +28,5 @@ export const getNotesCount = ({ eventIdToNoteIds, noteIds }: TimelineResult): nu
 };
 
 /** Returns true if the timeline is untitlied */
-export const isUntitled = ({ title }: TimelineResult): boolean =>
+export const isUntitled = ({ title }: OpenTimelineResult): boolean =>
   title == null || title.trim().length === 0;

@@ -134,8 +134,6 @@ const migrateDateHistogramAggregation = doc => {
   return doc;
 };
 
-const executeMigrations710 = flow(migratePercentileRankAggregation, migrateDateHistogramAggregation);
-
 function removeDateHistogramTimeZones(doc) {
   const visStateJSON = get(doc, 'attributes.visState');
   if (visStateJSON) {
@@ -162,6 +160,158 @@ function removeDateHistogramTimeZones(doc) {
   }
   return doc;
 }
+
+// migrate gauge verticalSplit to alignment
+// https://github.com/elastic/kibana/issues/34636
+function migrateGaugeVerticalSplitToAlignment(doc)  {
+  const visStateJSON = get(doc, 'attributes.visState');
+
+  if (visStateJSON) {
+    try {
+      const visState = JSON.parse(visStateJSON);
+      if (visState && visState.type === 'gauge') {
+
+        visState.params.gauge.alignment = visState.params.gauge.verticalSplit ? 'vertical' : 'horizontal';
+        delete visState.params.gauge.verticalSplit;
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            visState: JSON.stringify(visState),
+          },
+        };
+      }
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+  }
+  return doc;
+}
+// Migrate filters (string -> { query: string, language: lucene })
+/*
+  Enabling KQL in TSVB causes problems with savedObject visualizations when these are saved with filters.
+  In a visualisation type of saved object, if the visState param is of type metric, the filter is saved as a string that is not interpretted correctly as a lucene query in the visualization itself.
+  We need to transform the filter string into an object containing the original string as a query and specify the query language as lucene.
+  For Metrics visualizations (param.type === "metric"), filters can be applied to each series object in the series array within the SavedObject.visState.params object.
+  Path to the series array is thus:
+  attributes.visState.
+*/
+function transformFilterStringToQueryObject(doc) {
+  // Migrate filters
+  // If any filters exist and they are a string, we assume it to be lucene and transform the filter into an object accordingly
+  const newDoc = cloneDeep(doc);
+  const visStateJSON = get(doc, 'attributes.visState');
+  if (visStateJSON) {
+    let visState;
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState) {
+      const visType = get(visState, 'params.type');
+      const tsvbTypes = ['metric', 'markdown', 'top_n', 'gauge', 'table', 'timeseries'];
+      if (tsvbTypes.indexOf(visType) === -1) {
+        // skip
+        return doc;
+      }
+      // migrate the params fitler
+      const params = get(visState, 'params');
+      if (params.filter && typeof params.filter === 'string') {
+        const paramsFilterObject = {
+          query: params.filter,
+          language: 'lucene',
+        };
+        params.filter = paramsFilterObject;
+      }
+
+      // migrate the annotations query string:
+      const annotations = get(visState, 'params.annotations') || [];
+      annotations.forEach((item) => {
+        if (!item.query_string) {
+          // we don't need to transform anything if there isn't a filter at all
+          return;
+        }
+        if (typeof item.query_string === 'string') {
+          const itemQueryStringObject = {
+            query: item.query_string,
+            language: 'lucene',
+          };
+          item.query_string = itemQueryStringObject;
+        }
+      });
+      // migrate the series filters
+      const series = get(visState, 'params.series') || [];
+      series.forEach((item) => {
+        if (!item.filter) {
+          // we don't need to transform anything if there isn't a filter at all
+          return;
+        }
+        // series item filter
+        if (typeof item.filter === 'string') {
+          const itemfilterObject = {
+            query: item.filter,
+            language: 'lucene',
+          };
+          item.filter = itemfilterObject;
+        }
+        // series item split filters filter
+        if (item.split_filters) {
+          const splitFilters = get(item, 'split_filters') || [];
+          splitFilters.forEach((filter) => {
+            if (!filter.filter) {
+              // we don't need to transform anything if there isn't a filter at all
+              return;
+            }
+            if (typeof filter.filter === 'string') {
+              const filterfilterObject = {
+                query: filter.filter,
+                language: 'lucene',
+              };
+              filter.filter = filterfilterObject;
+            }
+          });
+        }
+      });
+      newDoc.attributes.visState = JSON.stringify(visState);
+    }
+  }
+  return newDoc;
+}
+
+function migrateFiltersAggQuery(doc) {
+  const visStateJSON = get(doc, 'attributes.visState');
+
+  if (visStateJSON) {
+    try {
+      const visState = JSON.parse(visStateJSON);
+      if (visState && visState.aggs) {
+        visState.aggs.forEach((agg) => {
+          if (agg.type !== 'filters') return;
+
+          agg.params.filters.forEach((filter) => {
+            if (filter.input.language) return filter;
+            filter.input.language = 'lucene';
+          });
+        });
+
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            visState: JSON.stringify(visState),
+          },
+        };
+      }
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+  }
+  return doc;
+}
+
+const executeMigrations720 = flow(migratePercentileRankAggregation, migrateDateHistogramAggregation);
+const executeMigrations730 = flow(migrateGaugeVerticalSplitToAlignment, transformFilterStringToQueryObject, migrateFiltersAggQuery);
 
 export const migrations = {
   'index-pattern': {
@@ -264,7 +414,8 @@ export const migrations = {
       }
     },
     '7.0.1': removeDateHistogramTimeZones,
-    '7.1.0': doc => executeMigrations710(doc)
+    '7.2.0': doc => executeMigrations720(doc),
+    '7.3.0': executeMigrations730,
   },
   dashboard: {
     '7.0.0': (doc) => {

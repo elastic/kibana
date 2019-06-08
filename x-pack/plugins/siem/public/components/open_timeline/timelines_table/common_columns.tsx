@@ -13,7 +13,7 @@ import { FormattedDate } from '../../formatted_date';
 import { getEmptyTagValue } from '../../empty_value';
 import { isUntitled } from '../helpers';
 import { NotePreviews } from '../note_previews';
-import { OnOpenTimeline, OnToggleShowNotes, TimelineResult } from '../types';
+import { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
 
 import * as i18n from '../translations';
 
@@ -45,7 +45,7 @@ export const getCommonColumns = ({
 }) => [
   {
     isExpander: true,
-    render: ({ notes, savedObjectId }: TimelineResult) =>
+    render: ({ notes, savedObjectId }: OpenTimelineResult) =>
       notes != null && notes.length > 0 && savedObjectId != null ? (
         <ExpandButtonContainer>
           <EuiButtonIcon
@@ -71,7 +71,7 @@ export const getCommonColumns = ({
     dataType: 'string',
     field: 'title',
     name: i18n.TIMELINE_NAME,
-    render: (title: string, timelineResult: TimelineResult) =>
+    render: (title: string, timelineResult: OpenTimelineResult) =>
       timelineResult.savedObjectId != null ? (
         <EuiLink
           data-test-subj={`title-${timelineResult.savedObjectId}`}
@@ -89,7 +89,7 @@ export const getCommonColumns = ({
           {isUntitled(timelineResult) ? i18n.UNTITLED_TIMELINE : title}
         </div>
       ),
-    sortable: true,
+    sortable: false,
   },
   {
     dataType: 'string',
@@ -100,14 +100,14 @@ export const getCommonColumns = ({
         {description != null && description.trim().length > 0 ? description : getEmptyTagValue()}
       </span>
     ),
-    sortable: true,
+    sortable: false,
     width: showExtendedColumnsAndActions ? EXTENDED_COLUMNS_DESCRIPTION_WIDTH : DESCRIPTION_WIDTH,
   },
   {
     dataType: 'date',
     field: 'updated',
     name: i18n.LAST_MODIFIED,
-    render: (date: number, timelineResult: TimelineResult) => (
+    render: (date: number, timelineResult: OpenTimelineResult) => (
       <div data-test-subj="updated">
         {timelineResult.updated != null ? (
           <FormattedDate fieldName="" value={date} />

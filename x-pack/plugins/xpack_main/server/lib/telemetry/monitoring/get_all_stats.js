@@ -24,10 +24,10 @@ import { getHighLevelStats } from './get_high_level_stats';
  * @param {Date} end The ending range to request data
  * @return {Promise} The array of clusters joined with the Kibana and Logstash instances.
  */
-export function getAllStats(req, start, end) {
+export function getAllStats(req, start, end, { useInternalUser = false } = {}) {
   const server = req.server;
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('monitoring');
-  const callCluster = (...args) => callWithRequest(req, ...args);
+  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster('monitoring');
+  const callCluster = useInternalUser ? callWithInternalUser : (...args) => callWithRequest(req, ...args);
 
   return getAllStatsWithCaller(server, callCluster, start, end);
 }

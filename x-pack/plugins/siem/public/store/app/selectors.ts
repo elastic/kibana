@@ -26,6 +26,11 @@ const getNotes = (notesById: NotesById, noteIds: string[]) =>
     return acc;
   }, []);
 
+export const selectNotesByIdSelector = createSelector(
+  selectNotesById,
+  (notesById: NotesById) => notesById
+);
+
 export const notesByIdsSelector = () =>
   createSelector(
     selectNotesById,

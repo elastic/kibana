@@ -5,10 +5,12 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiLink,
   EuiSpacer,
@@ -22,8 +24,13 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { SectionError, SectionLoading } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
+import {
+  UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
+  UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
+} from '../../../../constants';
 import { loadSnapshot } from '../../../../services/http';
 import { linkToRepository } from '../../../../services/navigation';
+import { uiMetricService } from '../../../../services/ui_metric';
 import { TabSummary, TabFailures } from './tabs';
 
 interface Props extends RouteComponentProps {
@@ -35,17 +42,21 @@ interface Props extends RouteComponentProps {
 const TAB_SUMMARY = 'summary';
 const TAB_FAILURES = 'failures';
 
+const panelTypeToUiMetricMap: { [key: string]: string } = {
+  [TAB_SUMMARY]: UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
+  [TAB_FAILURES]: UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
+};
+
 const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   repositoryName,
   snapshotId,
   onClose,
 }) => {
   const {
-    core: {
-      i18n: { FormattedMessage, translate },
-    },
+    core: { i18n },
   } = useAppDependencies();
-
+  const { FormattedMessage } = i18n;
+  const { trackUiMetric } = uiMetricService;
   const { error, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
 
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
@@ -94,7 +105,10 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
         <EuiTabs>
           {tabOptions.map(tab => (
             <EuiTab
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                trackUiMetric(panelTypeToUiMetricMap[tab.id]);
+                setActiveTab(tab.id);
+              }}
               isSelected={tab.id === activeTab}
               key={tab.id}
               data-test-subject={tab.testSubj}
@@ -116,7 +130,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     const errorObject = notFound
       ? {
           data: {
-            error: translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
+            error: i18n.translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
               defaultMessage: `Either the snapshot '{snapshotId}' doesn't exist in the repository '{repositoryName}' or the repository doesn't exist.`,
               values: {
                 snapshotId,
@@ -149,6 +163,26 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
       </SectionLoading>
     );
   }
+
+  const renderFooter = () => {
+    return (
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="cross"
+            flush="left"
+            onClick={onClose}
+            data-test-subj="srSnapshotDetailsFlyoutCloseButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotDetails.closeButtonLabel"
+              defaultMessage="Close"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   return (
     <EuiFlyout
@@ -187,6 +221,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody data-test-subj="srSnapshotDetailsContent">{content}</EuiFlyoutBody>
+      <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

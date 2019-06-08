@@ -21,7 +21,7 @@ jest.mock('ui/visualize/loader/visualize_loader', () => ({}));
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import VisEditorVisualization from './vis_editor_visualization';
+import { VisEditorVisualization } from './vis_editor_visualization';
 
 describe('getVisualizeLoader', () => {
   let updateStub;

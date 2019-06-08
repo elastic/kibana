@@ -6,7 +6,7 @@
 
 import { DefaultOperator } from 'elasticsearch';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
 import { dictionaryToArray } from '../../../common/types/common';
 
@@ -23,6 +23,7 @@ import {
 
 import { PivotAggDict, PivotAggsConfig } from './pivot_aggs';
 import { DateHistogramAgg, HistogramAgg, PivotGroupByDict, TermsAgg } from './pivot_group_by';
+import { SavedSearchQuery } from './kibana_context';
 
 export interface DataFramePreviewRequest {
   pivot: {
@@ -52,31 +53,48 @@ export interface SimpleQuery {
   };
 }
 
-export function getPivotQuery(search: string): SimpleQuery {
-  return {
-    query_string: {
-      query: search,
-      default_operator: 'AND',
-    },
-  };
+export type PivotQuery = SimpleQuery | SavedSearchQuery;
+
+export function getPivotQuery(search: string | SavedSearchQuery): PivotQuery {
+  if (typeof search === 'string') {
+    return {
+      query_string: {
+        query: search,
+        default_operator: 'AND',
+      },
+    };
+  }
+
+  return search;
+}
+
+export function isSimpleQuery(arg: any): arg is SimpleQuery {
+  return arg.query_string !== undefined;
+}
+
+export function isDefaultQuery(query: PivotQuery): boolean {
+  return isSimpleQuery(query) && query.query_string.query === '*';
 }
 
 export function getDataFramePreviewRequest(
-  indexPatternTitle: StaticIndexPattern['title'],
-  query: SimpleQuery,
+  indexPatternTitle: IndexPattern['title'],
+  query: PivotQuery,
   groupBy: PivotGroupByConfig[],
   aggs: PivotAggsConfig[]
 ): DataFramePreviewRequest {
   const request: DataFramePreviewRequest = {
     source: {
       index: indexPatternTitle,
-      query,
     },
     pivot: {
       group_by: {},
       aggregations: {},
     },
   };
+
+  if (!isDefaultQuery(query)) {
+    request.source.query = query;
+  }
 
   groupBy.forEach(g => {
     if (g.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS) {
@@ -98,7 +116,7 @@ export function getDataFramePreviewRequest(
       const dateHistogramAgg: DateHistogramAgg = {
         date_histogram: {
           field: g.field,
-          interval: g.interval,
+          calendar_interval: g.calendar_interval,
         },
       };
 
@@ -106,7 +124,7 @@ export function getDataFramePreviewRequest(
       // date_histrogram aggregation formats like 'yyyy-MM-dd'. The following code extracts
       // the interval unit from the configurations interval and adds a matching
       // aggregation format to the configuration.
-      const timeUnitMatch = g.interval.match(dateHistogramIntervalFormatRegex);
+      const timeUnitMatch = g.calendar_interval.match(dateHistogramIntervalFormatRegex);
       if (timeUnitMatch !== null && Array.isArray(timeUnitMatch) && timeUnitMatch.length === 2) {
         // the following is just a TS compatible way of using the
         // matched string like `d` as the property to access the enum.
@@ -132,7 +150,7 @@ export function getDataFramePreviewRequest(
 }
 
 export function getDataFrameRequest(
-  indexPatternTitle: StaticIndexPattern['title'],
+  indexPatternTitle: IndexPattern['title'],
   pivotState: DefinePivotExposedState,
   jobDetailsState: JobDetailsExposedState
 ): DataFrameRequest {

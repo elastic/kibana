@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormHelpText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText } from '@elastic/eui';
 import * as React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
@@ -18,22 +13,26 @@ import styled from 'styled-components';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
+  OnDataProviderEdited,
   OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from '../events';
 
-import { DataProvider } from './data_provider';
+import { BrowserFields } from '../../../containers/source';
+import { DataProvider, IS_OPERATOR } from './data_provider';
 import { Empty } from './empty';
 import { ProviderItemAndDragDrop } from './provider_item_and_drag_drop';
 import { ProviderItemBadge } from './provider_item_badge';
 import * as i18n from './translations';
 
 interface Props {
+  browserFields: BrowserFields;
   id: string;
   dataProviders: DataProvider[];
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
+  onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
@@ -96,10 +95,12 @@ export const getDraggableId = ({ id, dataProviderId }: GetDraggableIdParams): st
  */
 export const Providers = pure<Props>(
   ({
+    browserFields,
     id,
     dataProviders,
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
+    onDataProviderEdited,
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
@@ -148,6 +149,7 @@ export const Providers = pure<Props>(
                         data-test-subj="providerContainer"
                       >
                         <ProviderItemBadge
+                          browserFields={browserFields}
                           field={
                             dataProvider.queryMatch.displayField || dataProvider.queryMatch.field
                           }
@@ -155,6 +157,9 @@ export const Providers = pure<Props>(
                           isEnabled={dataProvider.enabled}
                           isExcluded={dataProvider.excluded}
                           deleteProvider={deleteProvider}
+                          operator={dataProvider.queryMatch.operator || IS_OPERATOR}
+                          onDataProviderEdited={onDataProviderEdited}
+                          timelineId={id}
                           toggleEnabledProvider={toggleEnabledProvider}
                           toggleExcludedProvider={toggleExcludedProvider}
                           providerId={dataProvider.id}
@@ -168,12 +173,15 @@ export const Providers = pure<Props>(
                 </PanelProviderItemContainer>
                 <EuiFlexItem grow={false}>
                   <ProviderItemAndDragDrop
+                    browserFields={browserFields}
                     dataProvider={dataProvider}
                     onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
                     onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+                    onDataProviderEdited={onDataProviderEdited}
                     onDataProviderRemoved={onDataProviderRemoved}
                     onToggleDataProviderEnabled={onToggleDataProviderEnabled}
                     onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+                    timelineId={id}
                   />
                 </EuiFlexItem>
               </PanelProviderGroupContainer>

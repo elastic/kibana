@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty, isEqual, noop } from 'lodash/fp';
+import { noop } from 'lodash/fp';
+import memoizeOne from 'memoize-one';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -19,13 +20,12 @@ import {
   OnColumnResized,
   OnColumnSorted,
   OnPinEvent,
-  OnRangeSelected,
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
 
 import { ColumnHeader } from './column_headers/column_header';
-import { defaultHeaders } from './column_headers/default_headers';
+import { getColumnHeaders } from './helpers';
 import { Body } from './index';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
@@ -73,10 +73,6 @@ interface DispatchProps {
     id: string;
     columns: ColumnHeader[];
   }>;
-  updateRange?: ActionCreator<{
-    id: string;
-    range: string;
-  }>;
   updateSort?: ActionCreator<{
     id: string;
     sort: Sort;
@@ -87,20 +83,6 @@ interface DispatchProps {
 type StatefulBodyComponentProps = OwnProps & ReduxProps & DispatchProps;
 
 class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentProps> {
-  public componentDidUpdate(prevProps: StatefulBodyComponentProps) {
-    const { columnHeaders, browserFields } = this.props;
-    const newHeaders = getColumnHeaders(
-      isEmpty(columnHeaders) ? defaultHeaders : columnHeaders,
-      browserFields
-    );
-    if (
-      isEmpty(columnHeaders) ||
-      (!isEmpty(prevProps.columnHeaders) && !isEqual(prevProps.columnHeaders, newHeaders))
-    ) {
-      this.onUpdateColumns(newHeaders);
-    }
-  }
-
   public render() {
     const {
       browserFields,
@@ -134,7 +116,7 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
         onColumnSorted={this.onColumnSorted}
         onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         onPinEvent={this.onPinEvent}
-        onRangeSelected={this.onRangeSelected}
+        onUpdateColumns={this.onUpdateColumns}
         onUnPinEvent={this.onUnPinEvent}
         pinnedEventIds={pinnedEventIds!}
         range={range!}
@@ -164,9 +146,6 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
   private onColumnResized: OnColumnResized = ({ columnId, delta }) =>
     this.props.applyDeltaToColumnWidth!({ id: this.props.id, columnId, delta });
 
-  private onRangeSelected: OnRangeSelected = selectedRange =>
-    this.props.updateRange!({ id: this.props.id, range: selectedRange });
-
   private onPinEvent: OnPinEvent = eventId => this.props.pinEvent!({ id: this.props.id, eventId });
 
   private onUnPinEvent: OnUnPinEvent = eventId =>
@@ -178,28 +157,20 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
     this.props.updateColumns!({ id: this.props.id, columns });
 }
 
-export const getColumnHeaders = (
-  headers: ColumnHeader[],
-  browserFields: BrowserFields
-): ColumnHeader[] => {
-  return headers.map(header => {
-    const splitHeader = header.id.split('.');
-    if (splitHeader.length > 1) {
-      return { ...header, ...get([splitHeader[0], 'fields', header.id], browserFields) };
-    }
-    return { ...header, ...get(['base', 'fields', header.id], browserFields) };
-  });
-};
-
 const makeMapStateToProps = () => {
+  const memoizedColumnHeaders: (
+    headers: ColumnHeader[],
+    browserFields: BrowserFields
+  ) => ColumnHeader[] = memoizeOne(getColumnHeaders);
+
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getNotesByIds = appSelectors.notesByIdsSelector();
-  const mapStateToProps = (state: State, { id }: OwnProps) => {
+  const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, id);
     const { columns, eventIdToNoteIds, pinnedEventIds } = timeline;
 
     return {
-      columnHeaders: columns,
+      columnHeaders: memoizedColumnHeaders(columns, browserFields),
       id,
       eventIdToNoteIds,
       getNotesByIds: getNotesByIds(state),
@@ -216,7 +187,6 @@ export const StatefulBody = connect(
     applyDeltaToColumnWidth: timelineActions.applyDeltaToColumnWidth,
     unPinEvent: timelineActions.unPinEvent,
     updateColumns: timelineActions.updateColumns,
-    updateRange: timelineActions.updateRange,
     updateSort: timelineActions.updateSort,
     pinEvent: timelineActions.pinEvent,
     removeColumn: timelineActions.removeColumn,

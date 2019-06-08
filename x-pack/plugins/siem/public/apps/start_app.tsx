@@ -13,16 +13,22 @@ import { ThemeProvider } from 'styled-components';
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { BehaviorSubject } from 'rxjs';
+import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
 
 import { ErrorToast } from '../components/error_toast';
-import { KibanaConfigContext } from '../components/formatted_date';
+import { KibanaConfigContext } from '../lib/adapters/framework/kibana_framework_adapter';
 import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
-import { store } from '../store';
+import { createStore } from '../store/store';
 
 export const startApp = async (libs: AppFrontendLibs) => {
   const history = createHashHistory();
+
+  const libs$ = new BehaviorSubject(libs);
+
+  const store = createStore(undefined, libs$.pipe(pluck('apolloClient')));
 
   libs.framework.render(
     <EuiErrorBoundary>

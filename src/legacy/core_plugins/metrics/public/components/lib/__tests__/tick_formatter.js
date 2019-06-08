@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import tickFormatter from '../tick_formatter';
+import { tickFormatter } from '../tick_formatter';
 
 describe('tickFormatter(format, template)', () => {
 

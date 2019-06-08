@@ -6,13 +6,19 @@
 
 import * as React from 'react';
 
+import { BrowserFields } from '../../containers/source';
 import { DetailItem } from '../../graphql/types';
+import { OnUpdateColumns } from '../timeline/events';
 
 import { EventDetails, View } from './event_details';
 
 interface Props {
+  browserFields: BrowserFields;
   data: DetailItem[];
   id: string;
+  isLoading: boolean;
+  onUpdateColumns: OnUpdateColumns;
+  timelineId: string;
 }
 
 interface State {
@@ -31,14 +37,18 @@ export class StatefulEventDetails extends React.PureComponent<Props, State> {
   };
 
   public render() {
-    const { data, id } = this.props;
+    const { browserFields, data, id, isLoading, onUpdateColumns, timelineId } = this.props;
 
     return (
       <EventDetails
+        browserFields={browserFields}
         data={data}
         id={id}
+        isLoading={isLoading}
         view={this.state.view}
+        onUpdateColumns={onUpdateColumns}
         onViewSelected={this.onViewSelected}
+        timelineId={timelineId}
       />
     );
   }

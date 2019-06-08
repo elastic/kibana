@@ -8,7 +8,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 
-import { groupByConfigHasInterval, PivotGroupByConfig } from '../../common';
+import { isGroupByDateHistogram, isGroupByHistogram, PivotGroupByConfig } from '../../common';
 
 interface Props {
   item: PivotGroupByConfig;
@@ -16,15 +16,23 @@ interface Props {
 }
 
 export const GroupByLabelSummary: React.SFC<Props> = ({ item, optionsDataId }) => {
+  let interval: string | undefined;
+
+  if (isGroupByDateHistogram(item)) {
+    interval = item.calendar_interval;
+  } else if (isGroupByHistogram(item)) {
+    interval = item.interval;
+  }
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem className="mlGroupByLabel--text">
-        <span className="mlGroupByLabel__text">{optionsDataId}</span>
+        <span className="eui-textTruncate">{optionsDataId}</span>
       </EuiFlexItem>
-      {groupByConfigHasInterval(item) && (
+      {interval !== undefined && (
         <EuiFlexItem grow={false} className="mlGroupByLabel--text mlGroupByLabel--interval">
-          <EuiTextColor color="subdued" className="mlGroupByLabel__text">
-            {item.interval}
+          <EuiTextColor color="subdued" className="eui-textTruncate">
+            {interval}
           </EuiTextColor>
         </EuiFlexItem>
       )}

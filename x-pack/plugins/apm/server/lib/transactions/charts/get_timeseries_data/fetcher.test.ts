@@ -20,11 +20,16 @@ describe('timeseriesFetcher', () => {
       setup: {
         start: 1528113600000,
         end: 1528977600000,
-        client: clientSpy,
+        client: { search: clientSpy } as any,
         config: {
           get: () => 'myIndex' as any,
           has: () => true
-        }
+        },
+        uiFiltersES: [
+          {
+            term: { 'service.environment': 'test' }
+          }
+        ]
       }
     });
   });
@@ -34,7 +39,7 @@ describe('timeseriesFetcher', () => {
   });
 
   it('should restrict results to only transaction documents', () => {
-    const query = clientSpy.mock.calls[0][1];
+    const query = clientSpy.mock.calls[0][0];
     expect(query.body.query.bool.filter).toEqual(
       expect.arrayContaining([
         {

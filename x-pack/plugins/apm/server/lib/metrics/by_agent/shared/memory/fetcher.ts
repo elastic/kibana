@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -27,18 +26,7 @@ const percentUsedScript = {
 };
 
 export async function fetch(setup: Setup, serviceName: string) {
-  const { start, end, esFilterQuery, client, config } = setup;
-  const filters: ESFilter[] = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: 'metric' } },
-    {
-      range: rangeFilter(start, end)
-    }
-  ];
-
-  if (esFilterQuery) {
-    filters.push(esFilterQuery);
-  }
+  const { start, end, uiFiltersES, client, config } = setup;
 
   const aggs = {
     memoryUsedAvg: { avg: { script: percentUsedScript } },
@@ -49,7 +37,28 @@ export async function fetch(setup: Setup, serviceName: string) {
     index: config.get<string>('apm_oss.metricsIndices'),
     body: {
       size: 0,
-      query: { bool: { filter: filters } },
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [PROCESSOR_EVENT]: 'metric' } },
+            {
+              range: rangeFilter(start, end)
+            },
+            {
+              exists: {
+                field: METRIC_SYSTEM_FREE_MEMORY
+              }
+            },
+            {
+              exists: {
+                field: METRIC_SYSTEM_TOTAL_MEMORY
+              }
+            },
+            ...uiFiltersES
+          ]
+        }
+      },
       aggs: {
         timeseriesData: {
           date_histogram: getMetricsDateHistogramParams(start, end),
@@ -60,5 +69,5 @@ export async function fetch(setup: Setup, serviceName: string) {
     }
   };
 
-  return client<void, MetricsAggs<MemoryMetrics>>('search', params);
+  return client.search<void, MetricsAggs<MemoryMetrics>>(params);
 }

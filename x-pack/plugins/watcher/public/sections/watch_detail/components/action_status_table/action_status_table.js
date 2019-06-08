@@ -5,11 +5,12 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import template from './action_status_table.html';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('actionStatusTable', function ($injector, i18n) {
+app.directive('actionStatusTable', function () {
   return {
     restrict: 'E',
     replace: true,
@@ -30,7 +31,7 @@ app.directive('actionStatusTable', function ($injector, i18n) {
         const errors = this.actionErrors[actionId];
         const total = errors.length;
 
-        const label = i18n('xpack.watcher.sections.watchDetail.actionStatusTotalErrors', {
+        const label = i18n.translate('xpack.watcher.sections.watchDetail.actionStatusTotalErrors', {
           defaultMessage: '{total, number} {total, plural, one {error} other {errors}}',
           values: {
             total,

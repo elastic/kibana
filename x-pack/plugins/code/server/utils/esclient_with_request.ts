@@ -51,4 +51,8 @@ export class EsClientWithRequest extends WithRequest implements EsClient {
   public update(params: AnyObject): Promise<any> {
     return this.callCluster('update', params);
   }
+
+  public updateByQuery(params: AnyObject): Promise<any> {
+    return this.callCluster('updateByQuery', params);
+  }
 }

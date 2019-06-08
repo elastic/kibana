@@ -47,7 +47,7 @@ export const getEcommerceSavedObjects = () => {
         }
       ],
       'migrationVersion': {
-        'map': '7.1.0'
+        'map': '7.2.0'
       },
       'attributes': {
         'title': i18n.translate('xpack.maps.sampleData.ecommerceSpec.mapsTitle', {

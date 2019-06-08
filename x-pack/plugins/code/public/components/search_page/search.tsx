@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import querystring from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -119,11 +119,22 @@ class SearchPage extends React.PureComponent<Props, State> {
       scope,
       documentSearchResults,
       languages,
+      isLoading,
       repositories,
       repositorySearchResults,
     } = this.props;
 
-    let mainComp = (
+    let mainComp = isLoading ? (
+      <div>
+        <EuiSpacer size="xl" />
+        <EuiSpacer size="xl" />
+        <EuiText textAlign="center">Loading...</EuiText>
+        <EuiSpacer size="m" />
+        <EuiText textAlign="center">
+          <EuiLoadingSpinner size="xl" />
+        </EuiText>
+      </div>
+    ) : (
       <EmptyPlaceholder
         query={query}
         toggleOptionsFlyout={() => {
@@ -166,32 +177,30 @@ class SearchPage extends React.PureComponent<Props, State> {
           <div className="codeContainer__search--results">{resultComps}</div>
         </div>
       );
-    } else if (
-      scope === SearchScope.DEFAULT &&
-      documentSearchResults &&
-      (documentSearchResults.total > 0 || languages!.size > 0 || repositories!.size > 0)
-    ) {
+    } else if (scope === SearchScope.DEFAULT && documentSearchResults) {
       const { stats, results } = documentSearchResults!;
       const { total, from, to, page, totalPage } = stats!;
       languageStats = stats!.languageStats;
       repoStats = stats!.repoStats;
-      const statsComp = (
-        <EuiTitle size="m">
-          <h1>
-            Showing {total > 0 ? from : 0} - {to} of {total} results.
-          </h1>
-        </EuiTitle>
-      );
-      mainComp = (
-        <div className="codeContainer__search--inner">
-          {statsComp}
-          <EuiSpacer />
-          <div className="codeContainer__search--results">
-            <CodeResult results={results!} />
+      if (documentSearchResults.total > 0) {
+        const statsComp = (
+          <EuiTitle size="m">
+            <h1>
+              Showing {total > 0 ? from : 0} - {to} of {total} results.
+            </h1>
+          </EuiTitle>
+        );
+        mainComp = (
+          <div className="codeContainer__search--inner">
+            {statsComp}
+            <EuiSpacer />
+            <div className="codeContainer__search--results">
+              <CodeResult results={results!} />
+            </div>
+            <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
           </div>
-          <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
-        </div>
-      );
+        );
+      }
     }
 
     return (
