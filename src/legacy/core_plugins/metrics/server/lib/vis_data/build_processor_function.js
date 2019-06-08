@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function buildProcessorFunction(chain, ...args) {
+export function buildProcessorFunction(chain, ...args) {
   return chain.reduceRight((next, fn) => {
     return fn(...args)(next);
   }, doc => doc);

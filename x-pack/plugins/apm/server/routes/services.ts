@@ -5,7 +5,6 @@
  */
 
 import Boom from 'boom';
-import Joi from 'joi';
 import { InternalCoreSetup } from 'src/core/server';
 import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
 import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
@@ -13,7 +12,6 @@ import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getService } from '../lib/services/get_service';
 import { getServices } from '../lib/services/get_services';
-import { getServiceEnvironments } from '../lib/services/get_service_environments';
 
 const ROOT = '/api/apm/services';
 const defaultErrorHandler = (err: Error) => {
@@ -61,28 +59,6 @@ export function initServicesApi(core: InternalCoreSetup) {
       const setup = setupRequest(req);
       const { serviceName } = req.params;
       return getService(serviceName, setup).catch(defaultErrorHandler);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/environments`,
-    options: {
-      validate: {
-        query: withDefaultValidators({
-          serviceName: Joi.string()
-        })
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName } = req.query as {
-        serviceName?: string;
-      };
-      return getServiceEnvironments(setup, serviceName).catch(
-        defaultErrorHandler
-      );
     }
   });
 }

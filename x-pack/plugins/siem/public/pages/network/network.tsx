@@ -10,9 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
-import chrome from 'ui/chrome';
 
-import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -28,10 +26,9 @@ import { LastEventIndexKey } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 
 import { NetworkKql } from './kql';
+import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 import { UrlStateContainer } from '../../components/url_state';
-
-const basePath = chrome.getBasePath();
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
@@ -53,7 +50,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
 
           <HeaderPage
             subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
-            title={i18n.NETWORK}
+            title={i18n.PAGE_TITLE}
           />
 
           <GlobalTime>
@@ -131,12 +128,11 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
           </GlobalTime>
         </StickyContainer>
       ) : (
-        <EmptyPage
-          title={i18n.NO_FILEBEAT_INDICES}
-          message={i18n.LETS_ADD_SOME}
-          actionLabel={i18n.SETUP_INSTRUCTIONS}
-          actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-        />
+        <>
+          <HeaderPage title={i18n.PAGE_TITLE} />
+
+          <NetworkEmptyPage />
+        </>
       )
     }
   </WithSource>

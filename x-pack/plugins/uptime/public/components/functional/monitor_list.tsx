@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiHealth,
   // @ts-ignore missing type definition
   EuiHistogramSeries,
   EuiIcon,
@@ -23,15 +22,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 import { get } from 'lodash';
 import moment from 'moment';
-import React from 'react';
 import { LatestMonitor, MonitorSeriesPoint, Ping } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorListQuery } from '../../queries';
 import { MonitorSparkline } from './monitor_sparkline';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
 import { MonitorPageLink } from './monitor_page_link';
+import { MonitorListStatusColumn } from './monitor_list_status_column';
 
 interface MonitorListQueryResult {
   // TODO: clean up this ugly result data shape, there should be no nesting
@@ -85,25 +85,16 @@ export const MonitorListComponent = ({
             name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
               defaultMessage: 'Status',
             }),
-            render: (status: string, monitor: LatestMonitor) => (
-              <div>
-                <EuiHealth
-                  color={status === 'up' ? 'success' : 'danger'}
-                  style={{ display: 'block' }}
-                >
-                  {status === 'up'
-                    ? i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
-                        defaultMessage: 'Up',
-                      })
-                    : i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
-                        defaultMessage: 'Down',
-                      })}
-                </EuiHealth>
-                <EuiText size="xs" color="subdued">
-                  {moment(get(monitor, 'ping.monitor.timestamp', undefined)).fromNow()}
-                </EuiText>
-              </div>
-            ),
+            render: (status: string, monitor: LatestMonitor) => {
+              const timestamp = moment(get<string>(monitor, 'ping.timestamp'));
+              return (
+                <MonitorListStatusColumn
+                  absoluteTime={timestamp.toLocaleString()}
+                  relativeTime={timestamp.fromNow()}
+                  status={status}
+                />
+              );
+            },
           },
           {
             field: 'ping.monitor.id',
@@ -178,18 +169,14 @@ export const MonitorListComponent = ({
           {
             align: 'right',
             field: 'ping',
+            width: '110px',
             name: i18n.translate('xpack.uptime.monitorList.observabilityIntegrationsColumnLabel', {
               defaultMessage: 'Integrations',
               description:
                 'The heading column of some action buttons that will take users to other Obsevability apps',
             }),
             render: (ping: Ping, monitor: LatestMonitor) => (
-              <MonitorListActionsPopover
-                basePath={basePath}
-                dateRangeStart={dateRangeStart}
-                dateRangeEnd={dateRangeEnd}
-                monitor={monitor}
-              />
+              <MonitorListActionsPopover monitor={monitor} />
             ),
           },
         ]}

@@ -6,8 +6,11 @@
 
 import fs from 'fs';
 import path from 'path';
+import { pathToFileURL } from 'url';
+
 import { ResponseError, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { DidChangeWorkspaceFoldersParams, InitializeResult } from 'vscode-languageserver-protocol';
+
 import { ServerNotInitialized } from '../../common/lsp_error_codes';
 import { LspRequest } from '../../model';
 import { ServerOptions } from '../server_options';
@@ -41,8 +44,9 @@ export class RequestExpander implements ILanguageServerHandler {
   private jobQueue: Job[] = [];
   // a map for workspacePath -> Workspace
   private workspaces: Map<string, Workspace> = new Map();
-  private workspaceRoot: string;
+  private readonly workspaceRoot: string;
   private running = false;
+  private exited = false;
 
   constructor(
     proxy: LanguageServerProxy,
@@ -62,6 +66,9 @@ export class RequestExpander implements ILanguageServerHandler {
   public handleRequest(request: LspRequest): Promise<ResponseMessage> {
     this.lastAccess = Date.now();
     return new Promise<ResponseMessage>((resolve, reject) => {
+      if (this.exited) {
+        reject(new Error('proxy is exited.'));
+      }
       this.jobQueue.push({
         request,
         resolve,
@@ -76,6 +83,7 @@ export class RequestExpander implements ILanguageServerHandler {
   }
 
   public async exit() {
+    this.exited = true;
     return this.proxy.exit();
   }
 
@@ -88,7 +96,7 @@ export class RequestExpander implements ILanguageServerHandler {
             removed: [
               {
                 name: workspacePath!,
-                uri: `file://${workspacePath}`,
+                uri: pathToFileURL(workspacePath).href,
               },
             ],
             added: [],
@@ -143,7 +151,7 @@ export class RequestExpander implements ILanguageServerHandler {
       [
         {
           name: workspacePath,
-          uri: `file://${workspacePath}`,
+          uri: pathToFileURL(workspacePath).href,
         },
       ],
       this.initialOptions
@@ -152,7 +160,7 @@ export class RequestExpander implements ILanguageServerHandler {
 
   private handle() {
     const job = this.jobQueue.shift();
-    if (job) {
+    if (job && !this.exited) {
       const { request, resolve, reject } = job;
       this.expand(request, job.startTime).then(
         value => {
@@ -191,8 +199,8 @@ export class RequestExpander implements ILanguageServerHandler {
 
         if (timeout > 0 && ws.initPromise) {
           try {
-            const elasped = Date.now() - startTime;
-            await promiseTimeout(timeout - elasped, ws.initPromise);
+            const elapsed = Date.now() - startTime;
+            await promiseTimeout(timeout - elapsed, ws.initPromise);
           } catch (e) {
             if (e.isTimeout) {
               throw InitializingError;
@@ -222,7 +230,7 @@ export class RequestExpander implements ILanguageServerHandler {
         added: [
           {
             name: workspacePath!,
-            uri: `file://${workspacePath}`,
+            uri: pathToFileURL(workspacePath).href,
           },
         ],
         removed: [],
@@ -242,7 +250,7 @@ export class RequestExpander implements ILanguageServerHandler {
       if (oldestWorkspace) {
         params.event.removed.push({
           name: oldestWorkspace,
-          uri: `file://${oldestWorkspace}`,
+          uri: pathToFileURL(oldestWorkspace).href,
         });
         this.removeWorkspace(oldestWorkspace);
       }

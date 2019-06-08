@@ -20,7 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { last } from 'lodash';
-import AddDeleteButtons from '../add_delete_buttons';
+import { AddDeleteButtons } from '../add_delete_buttons';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { SeriesDragHandler } from '../series_drag_handler';
@@ -72,5 +72,4 @@ AggRowUi.propTypes = {
   dragHandleProps: PropTypes.object,
 };
 
-const AggRow = injectI18n(AggRowUi);
-export default AggRow;
+export const AggRow = injectI18n(AggRowUi);

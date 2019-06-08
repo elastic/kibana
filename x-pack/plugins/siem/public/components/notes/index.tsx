@@ -5,10 +5,12 @@
  */
 
 import {
-  EuiHorizontalRule,
   // @ts-ignore
   EuiInMemoryTable,
+  EuiModalBody,
+  EuiModalHeader,
   EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
@@ -32,10 +34,6 @@ interface State {
   newNote: string;
 }
 
-const AddNoteContainer = styled.div`
-  margin-bottom: 5px;
-`;
-
 const NotesPanel = styled(EuiPanel)`
   height: ${NOTES_PANEL_HEIGHT}px;
   width: ${NOTES_PANEL_WIDTH}px;
@@ -43,11 +41,6 @@ const NotesPanel = styled(EuiPanel)`
   & thead {
     display: none;
   }
-`;
-
-const NotesContainer = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
 
 const InMemoryTable = styled(EuiInMemoryTable)`
@@ -69,18 +62,19 @@ export class Notes extends React.PureComponent<Props, State> {
 
     return (
       <NotesPanel>
-        <NotesContainer>
+        <EuiModalHeader>
           <NotesCount noteIds={noteIds} />
-          <EuiHorizontalRule margin="m" />
-          <AddNoteContainer>
-            <AddNote
-              associateNote={associateNote}
-              getNewNoteId={getNewNoteId}
-              newNote={this.state.newNote}
-              updateNewNote={this.updateNewNote}
-              updateNote={updateNote}
-            />
-          </AddNoteContainer>
+        </EuiModalHeader>
+
+        <EuiModalBody>
+          <AddNote
+            associateNote={associateNote}
+            getNewNoteId={getNewNoteId}
+            newNote={this.state.newNote}
+            updateNewNote={this.updateNewNote}
+            updateNote={updateNote}
+          />
+          <EuiSpacer size="s" />
           <InMemoryTable
             data-test-subj="notes-table"
             items={getNotesByIds(noteIds)}
@@ -89,7 +83,7 @@ export class Notes extends React.PureComponent<Props, State> {
             search={search}
             sorting={true}
           />
-        </NotesContainer>
+        </EuiModalBody>
       </NotesPanel>
     );
   }

@@ -16,8 +16,6 @@ import { TestProviders } from '../../mock';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { cloneDeep } from 'lodash/fp';
 
-import * as i18n from './translations';
-
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
     kibana: 'http://www.example.com',
@@ -90,7 +88,7 @@ describe('rendering - rendering', () => {
     // Why => https://github.com/apollographql/react-apollo/issues/1711
     await new Promise(resolve => setTimeout(resolve));
     wrapper.update();
-    expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
+    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
@@ -107,6 +105,6 @@ describe('rendering - rendering', () => {
     // Why => https://github.com/apollographql/react-apollo/issues/1711
     await new Promise(resolve => setTimeout(resolve));
     wrapper.update();
-    expect(wrapper.text()).not.toContain(i18n.SETUP_INSTRUCTIONS);
+    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
   });
 });

@@ -67,8 +67,7 @@ export async function getBuckets({
     };
   }
 
-  const resp = await client<void, Aggs>('search', params);
-
+  const resp = await client.search<void, Aggs>(params);
   const buckets = resp.aggregations.distribution.buckets.map(bucket => ({
     key: bucket.key,
     count: bucket.doc_count

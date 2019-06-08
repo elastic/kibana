@@ -35,9 +35,13 @@ export const repoUriSelector = (state: RootState) => {
   return `${resource}/${org}/${repo}`;
 };
 
+export const routeSelector = (state: RootState) => state.route.match;
+
 export const statusSelector = (state: RootState, repoUri: RepositoryUri) => {
   return state.status.status[repoUri];
 };
+
+export const allStatusSelector = (state: RootState) => state.status.status;
 
 export const treeCommitsSelector = (state: RootState) => {
   const path = state.file.currentPath;

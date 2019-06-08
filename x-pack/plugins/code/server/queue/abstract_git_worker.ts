@@ -34,6 +34,10 @@ export abstract class AbstractGitWorker extends AbstractWorker {
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
+    if (res.cancelled) {
+      // Skip updating job progress if the job is done because of cancellation.
+      return;
+    }
     await super.onJobCompleted(job, res);
 
     // Update the default branch.
@@ -85,9 +89,9 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     try {
       return await this.objectClient.updateRepositoryGitStatus(uri, p);
     } catch (err) {
-      // This is a warning since it's not blocking anything.
-      this.log.warn(`Update git clone progress error.`);
-      this.log.warn(err);
+      // Do nothing here since it's not blocking anything.
+      // this.log.warn(`Update git clone progress error.`);
+      // this.log.warn(err);
     }
   }
 }

@@ -24,13 +24,26 @@ export const Summary = pure(() => (
           values={{
             docs: (
               <EuiLink href={documentationLinks.siem} target="blank">
-                documentation
+                <FormattedMessage
+                  id="xpack.siem.overview.startedText.docsLinkText"
+                  defaultMessage="documentation"
+                />
               </EuiLink>
             ),
-            data: <EuiLink href="kibana#home/tutorial_directory/security">ingesting data</EuiLink>,
+            data: (
+              <EuiLink href="kibana#home/tutorial_directory/security">
+                <FormattedMessage
+                  id="xpack.siem.overview.startedText.dataLinkText"
+                  defaultMessage="ingesting data"
+                />
+              </EuiLink>
+            ),
             siemSolution: (
-              <EuiLink href="https://www.elastic.co/solutions/security-analytics" target="blank">
-                Security Analytics
+              <EuiLink href="https://www.elastic.co/solutions/siem" target="blank">
+                <FormattedMessage
+                  id="xpack.siem.overview.startedText.siemSolutionLinkText"
+                  defaultMessage="SIEM Solution"
+                />
               </EuiLink>
             ),
           }}
@@ -48,7 +61,10 @@ export const Summary = pure(() => (
           values={{
             feedback: (
               <EuiLink href="https://discuss.elastic.co/c/siem" target="blank">
-                submit feedback online
+                <FormattedMessage
+                  id="xpack.siem.overview.feedbackText.feedbackLinkText"
+                  defaultMessage="submit feedback online"
+                />
               </EuiLink>
             ),
           }}

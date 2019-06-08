@@ -20,14 +20,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
-import AggRow from './agg_row';
-import * as collectionActions from '../lib/collection_actions';
-import AddDeleteButtons from '../add_delete_buttons';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
+import { AggRow } from './agg_row';
+import { collectionActions } from '../lib/collection_actions';
+import { AddDeleteButtons } from '../add_delete_buttons';
 import uuid from 'uuid';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
   EuiSpacer,
@@ -207,7 +207,7 @@ PercentilesUi.propTypes = {
 
 const Percentiles = injectI18n(PercentilesUi);
 
-class PercentileAgg extends Component { // eslint-disable-line react/no-multi-comp
+export class PercentileAgg extends Component { // eslint-disable-line react/no-multi-comp
 
   componentWillMount() {
     if (!this.props.model.percentiles) {
@@ -296,5 +296,3 @@ PercentileAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
-
-export default PercentileAgg;

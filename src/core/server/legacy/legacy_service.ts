@@ -48,6 +48,16 @@ function getLegacyRawConfig(config: Config) {
   return rawConfig;
 }
 
+interface SetupDeps {
+  core: InternalCoreSetup;
+  plugins: Record<string, unknown>;
+}
+
+interface StartDeps {
+  core: InternalCoreStart;
+  plugins: Record<string, unknown>;
+}
+
 /** @internal */
 export class LegacyService implements CoreService {
   private readonly log: Logger;
@@ -55,7 +65,7 @@ export class LegacyService implements CoreService {
   private readonly httpConfig$: Observable<HttpConfig>;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
-  private setupDeps?: InternalCoreSetup;
+  private setupDeps?: SetupDeps;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('legacy-service');
@@ -66,10 +76,10 @@ export class LegacyService implements CoreService {
       .atPath<HttpConfigType>('server')
       .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
   }
-  public async setup(setupDeps: InternalCoreSetup) {
+  public async setup(setupDeps: SetupDeps) {
     this.setupDeps = setupDeps;
   }
-  public async start(startDeps: InternalCoreStart) {
+  public async start(startDeps: StartDeps) {
     const { setupDeps } = this;
     if (!setupDeps) {
       throw new Error('Legacy service is not setup yet.');
@@ -135,11 +145,7 @@ export class LegacyService implements CoreService {
     );
   }
 
-  private async createKbnServer(
-    config: Config,
-    setupDeps: InternalCoreSetup,
-    startDeps: InternalCoreStart
-  ) {
+  private async createKbnServer(config: Config, setupDeps: SetupDeps, startDeps: StartDeps) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
@@ -148,10 +154,10 @@ export class LegacyService implements CoreService {
       // bridge with the "legacy" Kibana. If server isn't run (e.g. if process is
       // managed by ClusterManager or optimizer) then we won't have that info,
       // so we can't start "legacy" server either.
-      serverOptions: startDeps.http.isListening()
+      serverOptions: startDeps.core.http.isListening()
         ? {
-            ...setupDeps.http.options,
-            listener: this.setupProxyListener(setupDeps.http.server),
+            ...setupDeps.core.http.options,
+            listener: this.setupProxyListener(setupDeps.core.http.server),
           }
         : { autoListen: false },
       handledConfigPaths: await this.coreContext.configService.getUsedPaths(),

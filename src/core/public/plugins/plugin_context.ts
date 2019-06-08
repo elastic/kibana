@@ -63,7 +63,6 @@ export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPlugins
 ): CoreSetup {
   return {
     http: deps.http,
-    basePath: deps.basePath,
     chrome: deps.chrome,
     fatalErrors: deps.fatalErrors,
     i18n: deps.i18n,
@@ -91,9 +90,8 @@ export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPlugins
     application: {
       capabilities: deps.application.capabilities,
     },
-    chrome: deps.chrome,
-    basePath: deps.basePath,
     http: deps.http,
+    chrome: deps.chrome,
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,

@@ -50,6 +50,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('query', function () {
+      this.tags(['skipFirefox']);
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {
@@ -437,6 +438,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
+        await PageObjects.header.awaitKibanaChrome();
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         const maxTicks = [

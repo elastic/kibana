@@ -11,9 +11,7 @@ import { Server } from 'hapi';
 import { initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
-export const APP_ID = 'siem';
-export const APP_NAME = 'SIEM';
-export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
+import { APP_ID, APP_NAME, DEFAULT_INDEX_KEY } from './common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {

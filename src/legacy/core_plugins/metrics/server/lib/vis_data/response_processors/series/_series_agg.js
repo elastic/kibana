@@ -48,7 +48,7 @@ const overall = fnName => targetSeries => {
 };
 
 
-export default {
+export const SeriesAgg = {
   sum: basic('sum'),
   max: basic('max'),
   min: basic('min'),

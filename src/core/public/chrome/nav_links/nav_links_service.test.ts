@@ -28,8 +28,8 @@ const mockAppService = {
   ],
 } as any;
 
-const mockBasePath = {
-  addToPath: (url: string) => `wow${url}`,
+const mockHttp = {
+  prependBasePath: (url: string) => `wow${url}`,
 } as any;
 
 describe('NavLinksService', () => {
@@ -38,7 +38,7 @@ describe('NavLinksService', () => {
 
   beforeEach(() => {
     service = new NavLinksService();
-    start = service.start({ application: mockAppService, basePath: mockBasePath });
+    start = service.start({ application: mockAppService, http: mockHttp });
   });
 
   describe('#getNavLinks$()', () => {

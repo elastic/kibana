@@ -35,13 +35,45 @@ exports[`Data Frame: Group By <PopoverForm /> Minimal initialization 1`] = `
     label="Interval"
     labelType="label"
   >
-    <EuiFieldText
+    <EuiSelect
       compressed={false}
-      defaultValue="10m"
       fullWidth={false}
-      isInvalid={false}
+      hasNoInitialSelection={false}
       isLoading={false}
       onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "1m",
+            "value": "1m",
+          },
+          Object {
+            "text": "1h",
+            "value": "1h",
+          },
+          Object {
+            "text": "1d",
+            "value": "1d",
+          },
+          Object {
+            "text": "1w",
+            "value": "1w",
+          },
+          Object {
+            "text": "1M",
+            "value": "1M",
+          },
+          Object {
+            "text": "1q",
+            "value": "1q",
+          },
+          Object {
+            "text": "1y",
+            "value": "1y",
+          },
+        ]
+      }
+      value="1m"
     />
   </EuiFormRow>
   <EuiFormRow

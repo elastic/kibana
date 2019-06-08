@@ -19,10 +19,10 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AddDeleteButtons from '../../add_delete_buttons';
+import { AddDeleteButtons } from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
-import Split from '../../split';
-import createTextHandler from '../../lib/create_text_handler';
+import { Split } from '../../split';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Aggs } from '../../aggs/aggs';
@@ -84,6 +84,7 @@ function MarkdownSeriesUi(props) {
           fields={props.fields}
           model={props.model}
           onChange={props.onChange}
+          indexPatternForQuery={props.indexPatternForQuery}
         />
       );
     }
@@ -190,7 +191,7 @@ MarkdownSeriesUi.propTypes = {
   visible: PropTypes.bool,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
-const MarkdownSeries = injectI18n(MarkdownSeriesUi);
-export default MarkdownSeries;
+export const MarkdownSeries = injectI18n(MarkdownSeriesUi);

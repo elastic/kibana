@@ -23,13 +23,19 @@ import { HttpService } from './http_service';
 const createSetupContractMock = () => {
   const setupContract = {
     options: {} as ServerOptions,
+    registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
-    registerOnRequest: jest.fn(),
+    registerOnPostAuth: jest.fn(),
     registerRouter: jest.fn(),
     getBasePathFor: jest.fn(),
     setBasePathFor: jest.fn(),
     // we can mock some hapi server method when we need it
     server: {} as Server,
+    auth: {
+      get: jest.fn(),
+      isAuthenticated: jest.fn(),
+    },
+    createNewServer: jest.fn().mockResolvedValue({}),
   };
   return setupContract;
 };

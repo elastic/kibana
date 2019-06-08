@@ -21,7 +21,8 @@
 
 import { createAction } from 'redux-actions';
 import { KibanaAction } from '../../selectors/types';
-import { PanelId, PanelsMap, PanelState } from '../selectors';
+import { PanelId } from '../selectors';
+import { SavedDashboardPanel, SavedDashboardPanelMap } from '../types';
 
 export enum PanelActionTypeKeys {
   DELETE_PANEL = 'DELETE_PANEL',
@@ -36,10 +37,10 @@ export interface DeletePanelAction
   extends KibanaAction<PanelActionTypeKeys.DELETE_PANEL, PanelId> {}
 
 export interface UpdatePanelAction
-  extends KibanaAction<PanelActionTypeKeys.UPDATE_PANEL, PanelState> {}
+  extends KibanaAction<PanelActionTypeKeys.UPDATE_PANEL, SavedDashboardPanel> {}
 
 export interface UpdatePanelsAction
-  extends KibanaAction<PanelActionTypeKeys.UPDATE_PANELS, PanelsMap> {}
+  extends KibanaAction<PanelActionTypeKeys.UPDATE_PANELS, SavedDashboardPanelMap> {}
 
 export interface ResetPanelTitleAction
   extends KibanaAction<PanelActionTypeKeys.RESET_PANEL_TITLE, PanelId> {}
@@ -52,7 +53,8 @@ export interface SetPanelTitleActionPayload {
 export interface SetPanelTitleAction
   extends KibanaAction<PanelActionTypeKeys.SET_PANEL_TITLE, SetPanelTitleActionPayload> {}
 
-export interface SetPanelsAction extends KibanaAction<PanelActionTypeKeys.SET_PANELS, PanelsMap> {}
+export interface SetPanelsAction
+  extends KibanaAction<PanelActionTypeKeys.SET_PANELS, SavedDashboardPanelMap> {}
 
 export type PanelActions =
   | DeletePanelAction
@@ -63,10 +65,10 @@ export type PanelActions =
   | SetPanelsAction;
 
 export const deletePanel = createAction<PanelId>(PanelActionTypeKeys.DELETE_PANEL);
-export const updatePanel = createAction<PanelState>(PanelActionTypeKeys.UPDATE_PANEL);
+export const updatePanel = createAction<SavedDashboardPanel>(PanelActionTypeKeys.UPDATE_PANEL);
 export const resetPanelTitle = createAction<PanelId>(PanelActionTypeKeys.RESET_PANEL_TITLE);
 export const setPanelTitle = createAction<SetPanelTitleActionPayload>(
   PanelActionTypeKeys.SET_PANEL_TITLE
 );
-export const updatePanels = createAction<PanelsMap>(PanelActionTypeKeys.UPDATE_PANELS);
-export const setPanels = createAction<PanelsMap>(PanelActionTypeKeys.SET_PANELS);
+export const updatePanels = createAction<SavedDashboardPanelMap>(PanelActionTypeKeys.UPDATE_PANELS);
+export const setPanels = createAction<SavedDashboardPanelMap>(PanelActionTypeKeys.SET_PANELS);

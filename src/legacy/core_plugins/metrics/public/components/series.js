@@ -21,12 +21,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { assign, get } from 'lodash';
 
-import timeseries from './vis_types/timeseries/series';
-import metric from './vis_types/metric/series';
-import topN from './vis_types/top_n/series';
-import table from './vis_types/table/series';
-import gauge from './vis_types/gauge/series';
-import markdown from './vis_types/markdown/series';
+import { TimeseriesSeries as timeseries } from './vis_types/timeseries/series';
+import { MetricSeries as metric } from './vis_types/metric/series';
+import { TopNSeries as topN } from './vis_types/top_n/series';
+import { TableSeries as table } from './vis_types/table/series';
+import { GaugeSeries as gauge } from './vis_types/gauge/series';
+import { MarkdownSeries as markdown } from './vis_types/markdown/series';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const lookup = {
@@ -38,7 +38,7 @@ const lookup = {
   markdown,
 };
 
-class Series extends Component {
+export class Series extends Component {
   constructor(props) {
     super(props);
 
@@ -112,8 +112,8 @@ class Series extends Component {
       togglePanelActivation: this.togglePanelActivation,
       visible: this.state.visible,
       dragHandleProps: this.props.dragHandleProps,
+      indexPatternForQuery: panel.index_pattern || panel.default_index_pattern,
     };
-
     return Boolean(Component) ?
       (<Component {...params}/>) :
       (<FormattedMessage
@@ -149,5 +149,3 @@ Series.propTypes = {
   visData$: PropTypes.object,
   dragHandleProps: PropTypes.object,
 };
-
-export default Series;

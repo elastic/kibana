@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import stdDeviationBands from '../std_deviation_bands';
+import { stdDeviationBands } from '../std_deviation_bands';
 import { expect } from 'chai';
 import sinon from 'sinon';
 

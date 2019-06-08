@@ -13,10 +13,9 @@ import { EmptyPage } from './index';
 test('renders correctly', () => {
   const EmptyComponent = shallow(
     <EmptyPage
+      actionPrimaryLabel="Do Something"
+      actionPrimaryUrl="my/url/from/nowwhere"
       title="My Super Title"
-      message="My awesome message"
-      actionLabel="Do Something"
-      actionUrl="my/url/from/nowwhere"
     />
   );
   expect(toJson(EmptyComponent)).toMatchSnapshot();

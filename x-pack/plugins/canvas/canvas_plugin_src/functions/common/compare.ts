@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ContextFunction } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 export enum Operation {
   EQ = 'eq',
@@ -22,8 +22,9 @@ interface Arguments {
 
 type Context = boolean | number | string | null;
 
-export function compare(): ContextFunction<'compare', Context, Arguments, boolean> {
+export function compare(): ExpressionFunction<'compare', Context, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().compare;
+  const errors = getFunctionErrors().compare;
 
   return {
     name: 'compare',
@@ -81,9 +82,7 @@ export function compare(): ContextFunction<'compare', Context, Arguments, boolea
           }
           return false;
         default:
-          throw new Error(
-            `Invalid compare operator: '${op}'. Use ${Object.values(Operation).join(', ')}`
-          );
+          throw errors.invalidCompareOperator(op, Object.values(Operation).join(', '));
       }
     },
   };

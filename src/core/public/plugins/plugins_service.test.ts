@@ -39,10 +39,9 @@ import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
-import { UiSettingsClient } from '../ui_settings';
 import { httpServiceMock } from '../http/http_service.mock';
+import { UiSettingsClient } from '../ui_settings';
 import { CoreSetup, CoreStart } from '..';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
@@ -74,11 +73,6 @@ beforeEach(() => {
       ]);
       return metadata;
     })(),
-    basePath: (function() {
-      const basePath = basePathServiceMock.createSetupContract();
-      basePath.addToPath.mockImplementation(path => path);
-      return basePath;
-    })(),
     chrome: chromeServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
@@ -89,9 +83,8 @@ beforeEach(() => {
   mockSetupContext = omit(mockSetupDeps, 'application', 'injectedMetadata');
   mockStartDeps = {
     application: applicationServiceMock.createStartContract(),
-    basePath: basePathServiceMock.createStartContract(),
-    chrome: chromeServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
+    chrome: chromeServiceMock.createStartContract(),
     i18n: i18nServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
@@ -171,14 +164,14 @@ test('`PluginsService.setup` fails if any plugin instance does not have a setup 
   );
 });
 
-test('`PluginsService.setup` calls loadPluginBundles with basePath and plugins', async () => {
+test('`PluginsService.setup` calls loadPluginBundles with http and plugins', async () => {
   const pluginsService = new PluginsService(mockCoreContext);
   await pluginsService.setup(mockSetupDeps);
 
   expect(mockLoadPluginBundle).toHaveBeenCalledTimes(3);
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.basePath.addToPath, 'pluginA');
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.basePath.addToPath, 'pluginB');
-  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.basePath.addToPath, 'pluginC');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.prependBasePath, 'pluginA');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.prependBasePath, 'pluginB');
+  expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.prependBasePath, 'pluginC');
 });
 
 test('`PluginsService.setup` initalizes plugins with CoreContext', async () => {

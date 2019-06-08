@@ -30,7 +30,7 @@ const aggFns = {
   avg: values => sum(values) / values.length,
 };
 
-export default (row, metric) => {
+export const getAggValue = (row, metric) => {
   // Extended Stats
   if (includes(EXTENDED_STATS_TYPES, metric.type)) {
     const isStdDeviation = /^std_deviation/.test(metric.type);

@@ -36,11 +36,11 @@ export const NewNote = pure<{
   const tabs = [
     {
       id: 'note',
-      name: i18n.NOTE(1),
+      name: i18n.NOTE,
       content: (
         <TextArea
           autoFocus
-          aria-label={i18n.NOTE(1)}
+          aria-label={i18n.NOTE}
           data-test-subj="add-a-note"
           fullWidth={true}
           height={noteInputHeight}

@@ -20,7 +20,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
-class Resize extends Component {
+
+export class Resize extends Component {
 
   constructor(props) {
     super(props);
@@ -81,5 +82,3 @@ Resize.propTypes = {
   frequency: PropTypes.number,
   onResize: PropTypes.func
 };
-
-export default Resize;

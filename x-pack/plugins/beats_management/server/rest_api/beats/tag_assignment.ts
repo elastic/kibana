@@ -6,10 +6,10 @@
 
 import Joi from 'joi';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
+import { ReturnTypeBulkAction } from '../../../common/return_types';
 import { BeatsTagAssignment } from '../../../public/lib/adapters/beats/adapter_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
-import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: write to Kibana audit log file https://github.com/elastic/kibana/issues/26024
 export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
@@ -29,15 +29,29 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: FrameworkRequest) => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkAction> => {
     const { assignments }: { assignments: BeatsTagAssignment[] } = request.payload;
 
-    try {
-      const response = await libs.beats.assignTagsToBeats(request.user, assignments);
-      return response;
-    } catch (err) {
-      // TODO move this to kibana route thing in adapter
-      return wrapEsError(err);
-    }
+    const response = await libs.beats.assignTagsToBeats(request.user, assignments);
+
+    return {
+      success: true,
+      results: response.assignments.map(assignment => ({
+        success: assignment.status && assignment.status >= 200 && assignment.status < 300,
+        error:
+          !assignment.status || assignment.status >= 300
+            ? {
+                code: assignment.status || 400,
+                message: assignment.result,
+              }
+            : undefined,
+        result:
+          assignment.status && assignment.status >= 200 && assignment.status < 300
+            ? {
+                message: assignment.result,
+              }
+            : undefined,
+      })),
+    } as ReturnTypeBulkAction;
   },
 });

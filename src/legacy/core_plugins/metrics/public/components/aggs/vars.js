@@ -20,9 +20,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import AddDeleteButtons from '../add_delete_buttons';
-import * as collectionActions from '../lib/collection_actions';
-import MetricSelect from './metric_select';
+import { AddDeleteButtons } from '../add_delete_buttons';
+import { collectionActions } from '../lib/collection_actions';
+import { MetricSelect } from './metric_select';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
@@ -106,5 +106,4 @@ CalculationVarsUi.propTypes = {
   includeSiblings: PropTypes.bool
 };
 
-const CalculationVars = injectI18n(CalculationVarsUi);
-export default CalculationVars;
+export const CalculationVars = injectI18n(CalculationVarsUi);

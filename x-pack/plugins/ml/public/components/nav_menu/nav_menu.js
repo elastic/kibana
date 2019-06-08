@@ -30,6 +30,7 @@ module.directive('mlNavMenu', function () {
         scope.name === 'datavisualizer' ||
         scope.name === 'filedatavisualizer' ||
         scope.name === 'timeseriesexplorer' ||
+        scope.name === 'access-denied' ||
         scope.name === 'explorer') {
         scope.showTabs = true;
       }
