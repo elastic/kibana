@@ -7,14 +7,12 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
-import { XPackInfoSignatureProvider } from 'plugins/xpack_main/services/xpack_info_signature';
+import { xpackInfoSignature } from 'plugins/xpack_main/services/xpack_info_signature';
 import { mockWindow } from './_mock_window';
 
 const XPACK_INFO_SIG_KEY = 'xpackMain.infoSignature';
 
 describe('xpack_info_signature service', () => {
-  let xpackInfoSignature;
-
   beforeEach(ngMock.module('kibana', () => {
     sinon.stub(sessionStorage, 'getItem')
       .callsFake(mockWindow.sessionStorage.getItem);
@@ -29,10 +27,6 @@ describe('xpack_info_signature service', () => {
     sessionStorage.setItem.restore();
     sessionStorage.removeItem.restore();
   });
-
-  beforeEach(ngMock.inject((Private) => {
-    xpackInfoSignature = Private(XPackInfoSignatureProvider);
-  }));
 
   it ('updates the stored xpack info signature', () => {
     const updatedXPackInfoSignature = 'foobar';
