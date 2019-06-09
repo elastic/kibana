@@ -14,7 +14,7 @@ uiModules
     return {
       restrict: 'A',
       require: 'ngModel',
-      link: function (scope, $el, attrs, ngModelCntrl) {
+      link: function (scope, attrs, ngModelCntrl) {
         ngModelCntrl.$formatters.push(toJSON);
         ngModelCntrl.$parsers.push(fromJSON);
 

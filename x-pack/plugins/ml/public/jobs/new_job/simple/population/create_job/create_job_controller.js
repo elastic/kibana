@@ -374,7 +374,7 @@ module
         chartDataUtils.loadDocCountData($scope.formConfig, $scope.chartData)
           .then((resp) => {
             if (thisLoadTimestamp === $scope.chartData.lastLoadTimestamp) {
-              _.each(dtrs, (dtr, id) => {
+              _.each(dtrs, (dtr, id) => { // eslint-disable-line no-unused-vars
                 const state = (resp.totalResults) ? CHART_STATE.LOADED : CHART_STATE.NO_RESULTS;
                 $scope.chartStates.fields[id] = state;
               });
@@ -396,7 +396,7 @@ module
     };
 
     function setFieldsChartStates(state) {
-      _.each($scope.chartStates.fields, (chart, key) => {
+      _.each($scope.chartStates.fields, (chart, key) => { // eslint-disable-line no-unused-vars
         $scope.chartStates.fields[key] = state;
       });
       $scope.$applyAsync();

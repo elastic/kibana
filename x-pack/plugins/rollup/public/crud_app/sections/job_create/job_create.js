@@ -114,7 +114,7 @@ export class JobCreateUi extends Component {
     this._isMounted = true;
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps, prevState) { // eslint-disable-line no-unused-vars
     const indexPattern = this.getIndexPattern();
     if (indexPattern !== this.getIndexPattern(prevState)) {
       // If the user hasn't entered anything, then skip validation.

@@ -26,7 +26,6 @@ const module = uiModules.get('security', []);
 module.config(($httpProvider) => {
   $httpProvider.interceptors.push((
     $timeout,
-    $window,
     $q,
     $injector,
     sessionTimeout,
