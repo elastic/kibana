@@ -6,21 +6,31 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
+import sinon from 'sinon';
 import { XPackInfoSignatureProvider } from 'plugins/xpack_main/services/xpack_info_signature';
-import { MockWindowProvider } from './_mock_window';
+import { mockWindow } from './_mock_window';
 
 const XPACK_INFO_SIG_KEY = 'xpackMain.infoSignature';
 
 describe('xpack_info_signature service', () => {
-  let mockWindow;
   let xpackInfoSignature;
 
-  beforeEach(ngMock.module('kibana', ($provide) => {
-    $provide.service('$window', MockWindowProvider);
+  beforeEach(ngMock.module('kibana', () => {
+    sinon.stub(sessionStorage, 'getItem')
+      .callsFake(mockWindow.sessionStorage.getItem);
+    sinon.stub(sessionStorage, 'setItem')
+      .callsFake(mockWindow.sessionStorage.setItem);
+    sinon.stub(sessionStorage, 'removeItem')
+      .callsFake(mockWindow.sessionStorage.removeItem);
   }));
 
-  beforeEach(ngMock.inject(($window, Private) => {
-    mockWindow = $window;
+  afterEach(() => {
+    sessionStorage.getItem.restore();
+    sessionStorage.setItem.restore();
+    sessionStorage.removeItem.restore();
+  });
+
+  beforeEach(ngMock.inject((Private) => {
     xpackInfoSignature = Private(XPackInfoSignatureProvider);
   }));
 
