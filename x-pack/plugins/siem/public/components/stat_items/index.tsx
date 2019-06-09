@@ -17,10 +17,12 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { get, getOr } from 'lodash/fp';
+import { ScaleType } from '@elastic/charts';
+import moment from 'moment';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { getEmptyTagValue } from '../empty_value';
-import { ChartConfigsData, ChartData } from '../charts/common';
+import { ChartConfigsData, ChartData, ChartSeriesConfigs } from '../charts/common';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 
 const FlexItem = styled(EuiFlexItem)`
@@ -49,12 +51,40 @@ export interface StatItems {
   enableAreaChart?: boolean;
   enableBarChart?: boolean;
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
+  areachartConfigs?: ChartSeriesConfigs;
+  barchartConfigs?: ChartSeriesConfigs;
 }
 
 export interface StatItemsProps extends StatItems {
   areaChart?: ChartConfigsData[];
   barChart?: ChartConfigsData[];
 }
+
+const numberFormatter = (value: string | number) => {
+  return value.toLocaleString && value.toLocaleString();
+};
+
+export const areachartConfigs = {
+  series: {
+    xScaleType: ScaleType.Time,
+    yScaleType: ScaleType.Linear,
+  },
+  axis: {
+    xTickFormatter: (value: number): string => {
+      return moment(value).format('YY-MM-DD HH:mm:ss');
+    },
+    yTickFormatter: numberFormatter,
+  },
+};
+export const barchartConfigs = {
+  series: {
+    xScaleType: ScaleType.Ordinal,
+    yScaleType: ScaleType.Linear,
+  },
+  axis: {
+    xTickFormatter: numberFormatter,
+  },
+};
 
 export const addValueToFields = (
   fields: StatItem[],
@@ -177,13 +207,13 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
           <EuiFlexGroup>
             {enableBarChart && (
               <FlexItem>
-                <BarChart barChart={barChart!} />
+                <BarChart barChart={barChart!} configs={barchartConfigs} />
               </FlexItem>
             )}
 
             {enableAreaChart && (
               <FlexItem>
-                <AreaChart areaChart={areaChart!} />
+                <AreaChart areaChart={areaChart!} configs={areachartConfigs} />
               </FlexItem>
             )}
           </EuiFlexGroup>

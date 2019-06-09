@@ -548,6 +548,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             },
                           ]
                         }
+                        configs={
+                          Object {
+                            "axis": Object {
+                              "xTickFormatter": [Function],
+                            },
+                            "series": Object {
+                              "xScaleType": "ordinal",
+                              "yScaleType": "linear",
+                            },
+                          }
+                        }
                       >
                         <AutoSizer
                           content={true}
@@ -560,6 +571,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               className="sc-bwzfXH ffMqh"
                             >
                               <Component
+                                configs={
+                                  Object {
+                                    "axis": Object {
+                                      "xTickFormatter": [Function],
+                                    },
+                                    "series": Object {
+                                      "xScaleType": "ordinal",
+                                      "yScaleType": "linear",
+                                    },
+                                  }
+                                }
                                 data={
                                   Array [
                                     Object {
@@ -586,6 +608,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                 }
                               >
                                 <Component
+                                  configs={
+                                    Object {
+                                      "axis": Object {
+                                        "xTickFormatter": [Function],
+                                      },
+                                      "series": Object {
+                                        "xScaleType": "ordinal",
+                                        "yScaleType": "linear",
+                                      },
+                                    }
+                                  }
                                   data={
                                     Array [
                                       Object {
@@ -667,6 +700,18 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             },
                           ]
                         }
+                        configs={
+                          Object {
+                            "axis": Object {
+                              "xTickFormatter": [Function],
+                              "yTickFormatter": [Function],
+                            },
+                            "series": Object {
+                              "xScaleType": "time",
+                              "yScaleType": "linear",
+                            },
+                          }
+                        }
                       >
                         <AutoSizer
                           content={true}
@@ -679,6 +724,18 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               className="sc-bwzfXH ffMqh"
                             >
                               <Component
+                                configs={
+                                  Object {
+                                    "axis": Object {
+                                      "xTickFormatter": [Function],
+                                      "yTickFormatter": [Function],
+                                    },
+                                    "series": Object {
+                                      "xScaleType": "time",
+                                      "yScaleType": "linear",
+                                    },
+                                  }
+                                }
                                 data={
                                   Array [
                                     Object {
@@ -721,6 +778,18 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                 }
                               >
                                 <Component
+                                  configs={
+                                    Object {
+                                      "axis": Object {
+                                        "xTickFormatter": [Function],
+                                        "yTickFormatter": [Function],
+                                      },
+                                      "series": Object {
+                                        "xScaleType": "time",
+                                        "yScaleType": "linear",
+                                      },
+                                    }
+                                  }
                                   data={
                                     Array [
                                       Object {

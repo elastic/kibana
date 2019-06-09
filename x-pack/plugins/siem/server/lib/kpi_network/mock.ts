@@ -221,15 +221,15 @@ export const mockResult = {
   uniqueDestinationPrivateIps: 878,
   uniqueDestinationPrivateIpsHistogram: [
     {
-      x: '2019-05-09T23:00:00.000Z',
+      x: 1557442800000,
       y: 11,
     },
     {
-      x: '2019-05-10T11:00:00.000Z',
+      x: 1557486000000,
       y: 877,
     },
     {
-      x: '2019-05-10T23:00:00.000Z',
+      x: 1557529200000,
       y: 7,
     },
   ],
@@ -237,15 +237,15 @@ export const mockResult = {
   uniqueSourcePrivateIps: 387,
   uniqueSourcePrivateIpsHistogram: [
     {
-      x: '2019-05-09T23:00:00.000Z',
+      x: 1557442800000,
       y: 14,
     },
     {
-      x: '2019-05-10T11:00:00.000Z',
+      x: 1557486000000,
       y: 385,
     },
     {
-      x: '2019-05-10T23:00:00.000Z',
+      x: 1557529200000,
       y: 7,
     },
   ],

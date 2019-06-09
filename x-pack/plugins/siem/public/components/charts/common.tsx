@@ -12,8 +12,10 @@ import {
   getSpecId,
   mergeWithDefaultTheme,
   PartialTheme,
+  ScaleType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { TickFormatter } from '@elastic/charts/dist/lib/series/specs';
 
 const chartHeight = 74;
 const FlexGroup = styled(EuiFlexGroup)`
@@ -39,10 +41,23 @@ export interface ChartData {
   g?: number | string;
 }
 
+export interface ChartSeriesConfigs {
+  series?: {
+    xScaleType?: ScaleType | undefined;
+    yScaleType?: ScaleType | undefined;
+  };
+  axis?: {
+    xTickFormatter?: TickFormatter | undefined;
+    yTickFormatter?: TickFormatter | undefined;
+  };
+}
+
 export interface ChartConfigsData {
   key: string;
   value: ChartData[] | [] | null;
   color?: string | undefined;
+  areachartConfigs?: ChartSeriesConfigs | undefined;
+  barchartConfigs?: ChartSeriesConfigs | undefined;
 }
 
 export const WrappedByAutoSizer = styled.div`
