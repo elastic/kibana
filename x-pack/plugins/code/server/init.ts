@@ -8,8 +8,10 @@ import * as _ from 'lodash';
 import { Server } from 'hapi';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
+
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { checkRepos } from './check_repos';
+import { GitOperations } from './git_operations';
 import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { EsClient, Esqueue } from './lib/esqueue';
 import { Logger } from './log';
@@ -171,10 +173,14 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     JavaLanguageServer!.downloadUrl = _.partialRight(JavaLanguageServer!.downloadUrl!, devMode);
   }
 
+  // Initialize git operations
+  const gitOps = new GitOperations(serverOptions.repoPath);
+
   const installManager = new InstallManager(server, serverOptions);
   const lspService = new LspService(
     '127.0.0.1',
     serverOptions,
+    gitOps,
     esClient,
     installManager,
     new ServerLoggerFactory(server),
@@ -185,7 +191,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     await lspService.shutdown();
   });
   // Initialize indexing factories.
-  const lspIndexerFactory = new LspIndexerFactory(lspService, serverOptions, esClient, log);
+  const lspIndexerFactory = new LspIndexerFactory(lspService, serverOptions, gitOps, esClient, log);
 
   const repoIndexInitializerFactory = new RepositoryIndexInitializerFactory(esClient, log);
 
@@ -205,7 +211,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     log,
     esClient,
     [lspIndexerFactory],
-    serverOptions,
+    gitOps,
     cancellationService
   ).bind();
 
@@ -216,6 +222,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     log,
     esClient,
     serverOptions,
+    gitOps,
     indexWorker,
     repoServiceFactory,
     cancellationService
@@ -225,6 +232,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     log,
     esClient,
     serverOptions,
+    gitOps,
     cancellationService,
     lspService,
     repoServiceFactory
@@ -234,6 +242,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     log,
     esClient,
     serverOptions,
+    gitOps,
     repoServiceFactory,
     cancellationService
   ).bind();
@@ -262,14 +271,15 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   repositorySearchRoute(codeServerRouter, log);
   documentSearchRoute(codeServerRouter, log);
   symbolSearchRoute(codeServerRouter, log);
-  fileRoute(codeServerRouter, serverOptions);
-  workspaceRoute(codeServerRouter, serverOptions);
+  fileRoute(codeServerRouter, gitOps);
+  workspaceRoute(codeServerRouter, serverOptions, gitOps);
   symbolByQnameRoute(codeServerRouter, log);
   installRoute(codeServerRouter, lspService);
   lspRoute(codeServerRouter, lspService, serverOptions);
   setupRoute(codeServerRouter);
 
   server.events.on('stop', () => {
+    gitOps.cleanAllRepo();
     if (!serverOptions.disableIndexScheduler) {
       indexScheduler.stop();
     }

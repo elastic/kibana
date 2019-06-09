@@ -36,18 +36,17 @@ import { LoggerFactory } from '../utils/log_factory';
 export const MAX_RESULT_COUNT = 20;
 
 export class WorkspaceHandler {
-  private git: GitOperations;
   private revisionMap: { [uri: string]: string } = {};
   private log: Logger;
   private readonly objectClient: RepositoryObjectClient | undefined = undefined;
 
   constructor(
-    readonly repoPath: string,
+    readonly gitOps: GitOperations,
     private readonly workspacePath: string,
     private readonly client: EsClient,
     loggerFactory: LoggerFactory
   ) {
-    this.git = new GitOperations(repoPath);
+    // this.git = new GitOperations(repoPath);
     this.log = loggerFactory.getLogger(['LSP', 'workspace']);
     if (this.client) {
       this.objectClient = new RepositoryObjectClient(this.client);
@@ -85,9 +84,9 @@ export class WorkspaceHandler {
       await tryGetGitStatus(0);
     }
 
-    const bareRepo = await this.git.openRepo(repositoryUri);
-    const targetCommit = await this.git.getCommit(bareRepo, revision);
-    const defaultBranch = await this.git.getDefaultBranch(repositoryUri);
+    const bareRepo = await this.gitOps.openRepo(repositoryUri);
+    const targetCommit = await this.gitOps.getCommit(repositoryUri, revision);
+    const defaultBranch = await this.gitOps.getDefaultBranch(repositoryUri);
     if (revision !== defaultBranch) {
       await this.checkCommit(bareRepo, targetCommit);
       revision = defaultBranch;

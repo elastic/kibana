@@ -27,7 +27,8 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     protected readonly queue: Esqueue,
     protected readonly log: Logger,
     protected readonly client: EsClient,
-    protected readonly serverOptions: ServerOptions
+    protected readonly serverOptions: ServerOptions,
+    protected readonly gitOps: GitOperations
   ) {
     super(queue, log);
     this.objectClient = new RepositoryObjectClient(client);
@@ -42,10 +43,8 @@ export abstract class AbstractGitWorker extends AbstractWorker {
 
     // Update the default branch.
     const repoUri = res.uri;
-    const localPath = RepositoryUtils.repositoryLocalPath(this.serverOptions.repoPath, repoUri);
-    const git = new GitOperations(localPath);
-    const revision = await git.getHeadRevision(repoUri);
-    const defaultBranch = await git.getDefaultBranch(repoUri);
+    const revision = await this.gitOps.getHeadRevision(repoUri);
+    const defaultBranch = await this.gitOps.getDefaultBranch(repoUri);
 
     // Update the repository data.
     try {

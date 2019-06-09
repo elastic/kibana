@@ -8,6 +8,7 @@ import moment from 'moment';
 
 import { RepositoryUri, WorkerReservedProgress } from '../../model';
 import { WorkerProgress } from '../../model/repository';
+import { GitOperations } from '../git_operations';
 import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from '../indexer/schema';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -28,6 +29,7 @@ export class DeleteWorker extends AbstractWorker {
     protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions,
+    protected readonly gitOps: GitOperations,
     private readonly cancellationService: CancellationSerivce,
     private readonly lspService: LspService,
     private readonly repoServiceFactory: RepositoryServiceFactory
@@ -44,7 +46,7 @@ export class DeleteWorker extends AbstractWorker {
     this.cancellationService.cancelUpdateJob(uri);
     this.cancellationService.cancelIndexJob(uri);
 
-    // 2. Delete repository on local fs.
+    // 2. Delete git repository and all related data.
     const repoService = this.repoServiceFactory.newInstance(
       this.serverOptions.repoPath,
       this.serverOptions.credsPath,
@@ -52,6 +54,12 @@ export class DeleteWorker extends AbstractWorker {
       this.serverOptions.security.enableGitCertCheck
     );
     const deleteRepoPromise = this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
+
+    const deleteWorkspacePromise = this.deletePromiseWrapper(
+      this.lspService.deleteWorkspace(uri),
+      'workspace',
+      uri
+    );
 
     // 3. Delete ES indices and aliases
     const deleteSymbolESIndexPromise = this.deletePromiseWrapper(
@@ -66,18 +74,15 @@ export class DeleteWorker extends AbstractWorker {
       uri
     );
 
-    const deleteWorkspacePromise = this.deletePromiseWrapper(
-      this.lspService.deleteWorkspace(uri),
-      'workspace',
-      uri
-    );
-
     try {
+      await deleteWorkspacePromise;
+
+      this.gitOps.cleanRepo(uri);
+
       await Promise.all([
         deleteRepoPromise,
         deleteSymbolESIndexPromise,
         deleteReferenceESIndexPromise,
-        deleteWorkspacePromise,
       ]);
 
       // 4. Delete the document index and alias where the repository document and all status reside,
