@@ -27,7 +27,7 @@ import { DetailSymbolInformation, Full } from '@elastic/lsp-extension';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
 import { LspRequest, WorkerReservedProgress } from '../../model';
-import { getDefaultBranch, GitOperations } from '../git_operations';
+import { GitOperations } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
@@ -87,7 +87,7 @@ export class WorkspaceHandler {
 
     const bareRepo = await this.git.openRepo(repositoryUri);
     const targetCommit = await this.git.getCommit(bareRepo, revision);
-    const defaultBranch = await getDefaultBranch(bareRepo.path());
+    const defaultBranch = await this.git.getDefaultBranch(repositoryUri);
     if (revision !== defaultBranch) {
       await this.checkCommit(bareRepo, targetCommit);
       revision = defaultBranch;

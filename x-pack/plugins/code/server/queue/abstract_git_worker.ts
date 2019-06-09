@@ -11,7 +11,7 @@ import {
   CloneWorkerResult,
   WorkerReservedProgress,
 } from '../../model';
-import { getDefaultBranch, getHeadRevision } from '../git_operations';
+import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
@@ -43,8 +43,9 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     // Update the default branch.
     const repoUri = res.uri;
     const localPath = RepositoryUtils.repositoryLocalPath(this.serverOptions.repoPath, repoUri);
-    const revision = await getHeadRevision(localPath);
-    const defaultBranch = await getDefaultBranch(localPath);
+    const git = new GitOperations(localPath);
+    const revision = await git.getHeadRevision(repoUri);
+    const defaultBranch = await git.getDefaultBranch(repoUri);
 
     // Update the repository data.
     try {

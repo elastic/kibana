@@ -119,6 +119,22 @@ export class GitOperations {
     return commit;
   }
 
+  public async getDefaultBranch(uri: RepositoryUri): Promise<string> {
+    const repo = await this.openRepo(uri);
+    const ref = await repo.getReference(HEAD);
+    const name = ref.name();
+    if (name.startsWith(REFS_HEADS)) {
+      return name.substr(REFS_HEADS.length);
+    }
+    return name;
+  }
+
+  public async getHeadRevision(uri: RepositoryUri): Promise<string> {
+    const repo = await this.openRepo(uri);
+    const commit = await repo.getHeadCommit();
+    return commit.sha();
+  }
+
   public async blame(uri: RepositoryUri, revision: string, path: string): Promise<GitBlame[]> {
     const repo = await this.openRepo(uri);
     const newestCommit = (await this.getCommit(repo, revision)).id();
@@ -560,20 +576,4 @@ export async function referenceInfo(ref: Reference): Promise<ReferenceInfo | nul
     commit,
     type,
   };
-}
-
-export async function getDefaultBranch(path: string): Promise<string> {
-  const repo = await Repository.open(path);
-  const ref = await repo.getReference(HEAD);
-  const name = ref.name();
-  if (name.startsWith(REFS_HEADS)) {
-    return name.substr(REFS_HEADS.length);
-  }
-  return name;
-}
-
-export async function getHeadRevision(path: string): Promise<string> {
-  const repo = await Repository.open(path);
-  const commit = await repo.getHeadCommit();
-  return commit.sha();
 }
