@@ -33,7 +33,7 @@ class CodeSideTabs extends React.PureComponent<Props> {
     if (search.charAt(0) === '?') {
       qs = search.substr(1);
     }
-    const tab = parseQuery(qs).tab;
+    const tab = parseQuery(qs).sideTab;
     return tab === Tabs.structure ? Tabs.structure : Tabs.file;
   }
 
@@ -69,9 +69,9 @@ class CodeSideTabs extends React.PureComponent<Props> {
     return [
       {
         id: Tabs.file,
-        name: 'File',
+        name: 'Files',
         content: fileTabContent,
-        'data-test-subj': 'codeFileTreeTab',
+        'data-test-subj': `codeFileTreeTab${this.sideTab === Tabs.file ? 'Active' : ''}`,
       },
       {
         id: Tabs.structure,
@@ -87,7 +87,7 @@ class CodeSideTabs extends React.PureComponent<Props> {
     const { history } = this.props;
     const { pathname, search } = history.location;
     // @ts-ignore
-    history.push(QueryString.replaceParamInUrl(`${pathname}${search}`, 'tab', tab));
+    history.push(QueryString.replaceParamInUrl(`${pathname}${search}`, 'sideTab', tab));
   };
 
   public render() {

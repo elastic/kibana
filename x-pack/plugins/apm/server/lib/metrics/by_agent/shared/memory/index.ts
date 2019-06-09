@@ -14,7 +14,7 @@ const chartBase: ChartBase<MemoryMetrics> = {
   title: i18n.translate(
     'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
     {
-      defaultMessage: 'Memory usage'
+      defaultMessage: 'System memory usage'
     }
   ),
   key: 'memory_usage_chart',
@@ -23,12 +23,12 @@ const chartBase: ChartBase<MemoryMetrics> = {
   series: {
     memoryUsedMax: {
       title: i18n.translate('xpack.apm.chart.memorySeries.systemMaxLabel', {
-        defaultMessage: 'System max'
+        defaultMessage: 'Max'
       })
     },
     memoryUsedAvg: {
       title: i18n.translate('xpack.apm.chart.memorySeries.systemAverageLabel', {
-        defaultMessage: 'System average'
+        defaultMessage: 'Average'
       })
     }
   }

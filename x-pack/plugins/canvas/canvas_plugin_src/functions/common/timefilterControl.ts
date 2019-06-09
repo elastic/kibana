@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NullContextFunction, Render } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Render } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   column: string;
   compact: boolean;
-  filterGroup: string | null;
+  filterGroup: string;
 }
-export function timefilterControl(): NullContextFunction<
+export function timefilterControl(): ExpressionFunction<
   'timefilterControl',
+  null,
   Arguments,
   Render<Arguments>
 > {
@@ -32,6 +34,7 @@ export function timefilterControl(): NullContextFunction<
         types: ['string'],
         aliases: ['field', 'c'],
         help: argHelp.column,
+        default: '@timestamp',
       },
       compact: {
         types: ['boolean'],
@@ -40,7 +43,7 @@ export function timefilterControl(): NullContextFunction<
         options: [true, false],
       },
       filterGroup: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.filterGroup,
       },
     },

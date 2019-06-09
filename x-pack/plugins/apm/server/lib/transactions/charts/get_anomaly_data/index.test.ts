@@ -24,7 +24,7 @@ describe('getAnomalySeries', () => {
       setup: {
         start: 0,
         end: 500000,
-        client: clientSpy,
+        client: { search: clientSpy } as any,
         config: {
           get: () => 'myIndex' as any,
           has: () => true

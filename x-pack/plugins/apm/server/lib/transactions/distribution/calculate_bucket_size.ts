@@ -62,7 +62,7 @@ export async function calculateBucketSize(
     };
   }
 
-  const resp = await client<void, Aggs>('search', params);
+  const resp = await client.search<void, Aggs>(params);
   const minBucketSize: number = config.get('xpack.apm.minimumBucketSize');
   const bucketTargetCount: number = config.get('xpack.apm.bucketTargetCount');
   const max = resp.aggregations.stats.max;

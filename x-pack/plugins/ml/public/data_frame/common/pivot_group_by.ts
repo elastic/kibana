@@ -70,7 +70,7 @@ export enum DATE_HISTOGRAM_FORMAT {
 interface GroupByDateHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
   format?: DATE_HISTOGRAM_FORMAT;
-  interval: string;
+  calendar_interval: string;
 }
 
 interface GroupByHistogram extends GroupByConfigBase {
@@ -86,7 +86,11 @@ export type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;
 export type PivotGroupByConfig = GroupByDateHistogram | GroupByHistogram | GroupByTerms;
 export type PivotGroupByConfigDict = Dictionary<PivotGroupByConfig>;
 
-export function groupByConfigHasInterval(arg: any): arg is GroupByConfigWithInterval {
+export function isGroupByDateHistogram(arg: any): arg is GroupByDateHistogram {
+  return arg.hasOwnProperty('calendar_interval');
+}
+
+export function isGroupByHistogram(arg: any): arg is GroupByHistogram {
   return arg.hasOwnProperty('interval');
 }
 
@@ -107,7 +111,7 @@ export interface DateHistogramAgg {
   date_histogram: {
     field: FieldName;
     format?: DATE_HISTOGRAM_FORMAT;
-    interval: string;
+    calendar_interval: string;
   };
 }
 

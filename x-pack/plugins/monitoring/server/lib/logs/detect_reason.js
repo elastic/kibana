@@ -88,7 +88,6 @@ async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, c
 
   const defaultParams = {
     size: 0,
-    terminate_after: 1,
   };
 
   const body = [

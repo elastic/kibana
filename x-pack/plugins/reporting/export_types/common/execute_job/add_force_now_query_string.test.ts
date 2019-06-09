@@ -15,7 +15,15 @@ beforeEach(() => {
 test(`fails if no URL is passed`, async () => {
   await expect(
     addForceNowQuerystring({
-      job: {},
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+      },
       server: mockServer,
     })
   ).rejects.toBeDefined();
@@ -24,7 +32,17 @@ test(`fails if no URL is passed`, async () => {
 test(`adds forceNow to hash's query, if it exists`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
   const { urls } = await addForceNowQuerystring({
-    job: { relativeUrl: '/app/kibana#/something', forceNow },
+    job: {
+      title: 'cool-job-bro',
+      type: 'csv',
+      jobParams: {
+        savedObjectId: 'abc-123',
+        isImmediate: false,
+        savedObjectType: 'search',
+      },
+      relativeUrl: '/app/kibana#/something',
+      forceNow,
+    },
     server: mockServer,
   });
 
@@ -38,6 +56,13 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
 
   const { urls } = await addForceNowQuerystring({
     job: {
+      title: 'cool-job-bro',
+      type: 'csv',
+      jobParams: {
+        savedObjectId: 'abc-123',
+        isImmediate: false,
+        savedObjectType: 'search',
+      },
       relativeUrl: '/app/kibana#/something?_g=something',
       forceNow,
     },
@@ -52,6 +77,13 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
 test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
   const { urls } = await addForceNowQuerystring({
     job: {
+      title: 'cool-job-bro',
+      type: 'csv',
+      jobParams: {
+        savedObjectId: 'abc-123',
+        isImmediate: false,
+        savedObjectType: 'search',
+      },
       relativeUrl: '/app/kibana#/something',
     },
     server: mockServer,

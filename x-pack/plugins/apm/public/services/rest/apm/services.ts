@@ -6,7 +6,6 @@
 
 import { ServiceAPIResponse } from '../../../../server/lib/services/get_service';
 import { ServiceListAPIResponse } from '../../../../server/lib/services/get_services';
-import { ServiceEnvironmentsAPIResponse } from '../../../../server/lib/services/get_service_environments';
 import { callApi } from '../callApi';
 import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
 import { UIFilters } from '../../../../typings/ui-filters';
@@ -47,26 +46,6 @@ export async function loadServiceDetails({
       start,
       end,
       uiFiltersES: await getUiFiltersES(uiFilters)
-    }
-  });
-}
-
-export async function loadServiceEnvironments({
-  serviceName,
-  start,
-  end
-}: {
-  serviceName?: string;
-  start: string;
-  end: string;
-}) {
-  const pathname = `/api/apm/services/environments`;
-  return callApi<ServiceEnvironmentsAPIResponse>({
-    pathname,
-    query: {
-      start,
-      end,
-      serviceName
     }
   });
 }

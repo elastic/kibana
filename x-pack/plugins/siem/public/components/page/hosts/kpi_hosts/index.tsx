@@ -5,26 +5,20 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { get, getOr } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { KpiHostsData } from '../../../../graphql/types';
 import {
-  AreaChartData,
-  BarChartData,
-  StatItem,
-  StatItems,
   StatItemsComponent,
   StatItemsProps,
+  useKpiMatrixStatus,
+  StatItems,
 } from '../../../stat_items';
 import * as i18n from './translations';
 
-interface KpiHostsProps {
-  data: KpiHostsData;
-  loading: boolean;
-}
+const kpiWidgetHeight = 247;
 
 const euiColorVis0 = '#00B3A4';
 const euiColorVis1 = '#3185FC';
@@ -32,8 +26,14 @@ const euiColorVis2 = '#DB1374';
 const euiColorVis3 = '#490092';
 const euiColorVis9 = '#920000';
 
-const fieldTitleMapping: StatItems[] = [
+interface KpiHostsProps {
+  data: KpiHostsData;
+  loading: boolean;
+}
+
+const fieldTitleMapping: Readonly<StatItems[]> = [
   {
+    key: 'hosts',
     fields: [
       {
         key: 'hosts',
@@ -47,6 +47,7 @@ const fieldTitleMapping: StatItems[] = [
     description: i18n.HOSTS,
   },
   {
+    key: 'authentication',
     fields: [
       {
         key: 'authSuccess',
@@ -69,6 +70,7 @@ const fieldTitleMapping: StatItems[] = [
     description: i18n.AUTHENTICATION,
   },
   {
+    key: 'uniqueIps',
     fields: [
       {
         key: 'uniqueSourceIps',
@@ -93,74 +95,25 @@ const fieldTitleMapping: StatItems[] = [
   },
 ];
 
-export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {
+const FlexGroupSpinner = styled(EuiFlexGroup)`
+   {
+    min-height: ${kpiWidgetHeight}px;
+  }
+`;
+
+export const KpiHostsComponent = ({ data, loading }: KpiHostsProps) => {
+  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldTitleMapping, data);
   return loading ? (
-    <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 247 }}>
+    <FlexGroupSpinner justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </FlexGroupSpinner>
   ) : (
     <EuiFlexGroup>
-      {fieldTitleMapping.map(stat => {
-        let statItemProps: StatItemsProps = {
-          ...stat,
-          key: `kpi-hosts-summary-${stat.description}`,
-        };
-
-        if (stat.fields != null)
-          statItemProps = {
-            ...statItemProps,
-            fields: addValueToFields(stat.fields, data),
-          };
-
-        if (stat.enableAreaChart)
-          statItemProps = {
-            ...statItemProps,
-            areaChart: addValueToAreaChart(stat.fields, data),
-          };
-
-        if (stat.enableBarChart != null)
-          statItemProps = {
-            ...statItemProps,
-            barChart: addValueToBarChart(stat.fields, data),
-          };
-
-        return <StatItemsComponent {...statItemProps} />;
+      {statItemsProps.map(mappedStatItemProps => {
+        return <StatItemsComponent {...mappedStatItemProps} />;
       })}
     </EuiFlexGroup>
   );
-});
-
-const addValueToFields = (fields: StatItem[], data: KpiHostsData): StatItem[] =>
-  fields.map(field => ({ ...field, value: get(field.key, data) }));
-
-const addValueToAreaChart = (fields: StatItem[], data: KpiHostsData): AreaChartData[] =>
-  fields
-    .filter(field => get(`${field.key}Histogram`, data) != null)
-    .map(field => ({
-      ...field,
-      value: get(`${field.key}Histogram`, data),
-      key: `${field.key}Histogram`,
-    }));
-
-const addValueToBarChart = (fields: StatItem[], data: KpiHostsData): BarChartData[] => {
-  if (fields.length === 0) return [];
-  return fields.reduce((acc: BarChartData[], field: StatItem, idx: number) => {
-    const key: string = get('key', field);
-    const x: number | null = getOr(null, key, data);
-    const y: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
-
-    return acc.concat([
-      {
-        ...field,
-        value: [
-          {
-            x,
-            y,
-          },
-        ],
-      },
-    ]);
-  }, []);
 };

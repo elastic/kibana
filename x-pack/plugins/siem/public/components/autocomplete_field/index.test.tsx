@@ -246,7 +246,8 @@ describe('Autocomplete', () => {
     const wrapperAutocompleteField = wrapper.find(AutocompleteField);
     wrapperAutocompleteField.setState({ selectedIndex: null });
     const wrapperFixedEuiFieldSearch = wrapper.find(EuiFieldSearch);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: FixedEuiFieldSearch fails to import
+    // TODO: FixedEuiFieldSearch fails to import
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (wrapperFixedEuiFieldSearch as any).props().onSearch();
     expect(onSubmit).toHaveBeenCalled();
   });

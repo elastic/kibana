@@ -5,6 +5,7 @@
  */
 
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { closeSymbolPath, openSymbolPath } from '../../actions';
 import { RootState } from '../../reducers';
 import { structureSelector } from '../../selectors';
@@ -20,7 +21,9 @@ const mapDispatchToProps = {
   closeSymbolPath,
 };
 
-export const SymbolTree = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(CodeSymbolTree);
+export const SymbolTree = withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(CodeSymbolTree)
+);

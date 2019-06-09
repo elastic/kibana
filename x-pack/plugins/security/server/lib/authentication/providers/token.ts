@@ -9,8 +9,7 @@ import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { LoginAttempt } from '../login_attempt';
-import { BaseAuthenticationProvider } from './base';
+import { BaseAuthenticationProvider, RequestWithLoginAttempt } from './base';
 
 /**
  * The state supported by the provider.
@@ -28,10 +27,6 @@ interface ProviderState {
    */
   refreshToken?: string;
 }
-
-type RequestWithLoginAttempt = Legacy.Request & {
-  loginAttempt: () => LoginAttempt;
-};
 
 /**
  * If request with access token fails with `401 Unauthorized` then this token is no
@@ -146,9 +141,8 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
         );
       }
 
-      return DeauthenticationResult.redirectTo(
-        `${this.options.basePath}/login${request.url.search || ''}`
-      );
+      const queryString = request.url.search || `?msg=LOGGED_OUT`;
+      return DeauthenticationResult.redirectTo(`${this.options.basePath}/login${queryString}`);
     } catch (err) {
       this.debug(`Failed invalidating user's access token: ${err.message}`);
       return DeauthenticationResult.failed(err);
@@ -160,7 +154,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * forward to Elasticsearch backend.
    * @param request Request instance.
    */
-  private async authenticateViaHeader(request: Legacy.Request) {
+  private async authenticateViaHeader(request: RequestWithLoginAttempt) {
     this.debug('Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
@@ -252,7 +246,10 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(request: Legacy.Request, { accessToken }: ProviderState) {
+  private async authenticateViaState(
+    request: RequestWithLoginAttempt,
+    { accessToken }: ProviderState
+  ) {
     this.debug('Trying to authenticate via state.');
 
     if (!accessToken) {
@@ -289,7 +286,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * @param state State value previously stored by the provider.
    */
   private async authenticateViaRefreshToken(
-    request: Legacy.Request,
+    request: RequestWithLoginAttempt,
     { refreshToken }: ProviderState
   ) {
     this.debug('Trying to refresh access token.');
@@ -357,7 +354,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * Constructs login page URL using current url path as `next` query string parameter.
    * @param request Request instance.
    */
-  private getLoginPageURL(request: Legacy.Request) {
+  private getLoginPageURL(request: RequestWithLoginAttempt) {
     const nextURL = encodeURIComponent(`${request.getBasePath()}${request.url.path}`);
     return `${this.options.basePath}/login?next=${nextURL}`;
   }

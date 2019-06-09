@@ -7,13 +7,14 @@ exports[`empty_column_renderer renders correctly against snapshot 1`] = `
       Object {
         "and": Array [],
         "enabled": true,
-        "excluded": false,
+        "excluded": true,
         "id": "id-timeline-column-source_ip-for-event-1-source_ip",
         "kqlQuery": "",
         "name": "source.ip: ",
         "queryMatch": Object {
+          "displayValue": "--",
           "field": "source.ip",
-          "operator": ":",
+          "operator": ":*",
           "value": "",
         },
       }

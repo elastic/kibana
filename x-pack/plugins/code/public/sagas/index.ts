@@ -25,9 +25,11 @@ import { watchLoadConfigs, watchSwitchProjectLanguageServer } from './project_co
 import {
   watchLoadRepoListStatus,
   watchLoadRepoStatus,
+  watchPollingRepoStatus,
   watchRepoCloneStatusPolling,
   watchRepoDeleteStatusPolling,
   watchRepoIndexStatusPolling,
+  watchResetPollingStatus,
 } from './project_status';
 import {
   watchAdminRouteChange,
@@ -83,8 +85,14 @@ export function* rootSaga() {
   yield fork(watchLoadConfigs);
   yield fork(watchLoadRepoListStatus);
   yield fork(watchLoadRepoStatus);
+
+  // Repository status polling sagas begin
+  yield fork(watchPollingRepoStatus);
+  yield fork(watchResetPollingStatus);
   yield fork(watchRepoDeleteStatusPolling);
   yield fork(watchRepoIndexStatusPolling);
   yield fork(watchRepoCloneStatusPolling);
+  // Repository status polling sagas end
+
   yield fork(watchRepoScopeSearch);
 }

@@ -22,13 +22,13 @@ import PropTypes from 'prop-types';
 import { findDOMNode } from 'react-dom';
 import _ from 'lodash';
 import $ from 'ui/flot-charts';
-import eventBus from '../lib/events';
-import Resize from './resize';
-import calculateBarWidth from '../lib/calculate_bar_width';
-import calculateFillColor from '../lib/calculate_fill_color';
-import colors from '../lib/colors';
+import { eventBus } from '../lib/events';
+import { Resize } from './resize';
+import { calculateBarWidth } from '../lib/calculate_bar_width';
+import { calculateFillColor } from '../lib/calculate_fill_color';
+import { COLORS } from '../lib/colors';
 
-class FlotChart extends Component {
+export class FlotChart extends Component {
   constructor(props) {
     super(props);
     this.handleResize = this.handleResize.bind(this);
@@ -154,8 +154,8 @@ class FlotChart extends Component {
   getOptions(props) {
     const yaxes = props.yaxes || [{}];
 
-    const lineColor = colors.lineColor;
-    const textColor = props.reversed ? colors.textColorReversed : colors.textColor;
+    const lineColor = COLORS.lineColor;
+    const textColor = props.reversed ? COLORS.textColorReversed : COLORS.textColor;
 
     const borderWidth = { bottom: 1, top: 0, left: 0, right: 0 };
 
@@ -344,5 +344,3 @@ FlotChart.propTypes = {
   showGrid: PropTypes.bool,
   yaxes: PropTypes.array
 };
-
-export default FlotChart;

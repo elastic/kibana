@@ -6,12 +6,13 @@
 
 import { Legacy } from 'kibana';
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { AuthScopeService, ScopesGetter } from '../auth_scope_service';
 import { getErrorStatusCode } from '../errors';
 import {
   AuthenticationProviderOptions,
   BaseAuthenticationProvider,
   BasicAuthenticationProvider,
+  KerberosAuthenticationProvider,
+  RequestWithLoginAttempt,
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
@@ -37,6 +38,7 @@ const providerMap = new Map<
   ) => BaseAuthenticationProvider
 >([
   ['basic', BasicAuthenticationProvider],
+  ['kerberos', KerberosAuthenticationProvider],
   ['saml', SAMLAuthenticationProvider],
   ['token', TokenAuthenticationProvider],
   ['oidc', OIDCAuthenticationProvider],
@@ -130,14 +132,9 @@ class Authenticator {
   /**
    * Instantiates Authenticator and bootstrap configured providers.
    * @param server Server instance.
-   * @param authScope AuthScopeService instance.
    * @param session Session instance.
    */
-  constructor(
-    private readonly server: Legacy.Server,
-    private readonly authScope: AuthScopeService,
-    private readonly session: Session
-  ) {
+  constructor(private readonly server: Legacy.Server, private readonly session: Session) {
     const config = this.server.config();
     const authProviders = config.get<string[]>('xpack.security.authProviders');
     if (authProviders.length === 0) {
@@ -163,7 +160,7 @@ class Authenticator {
    * Performs request authentication using configured chain of authentication providers.
    * @param request Request instance.
    */
-  async authenticate(request: Legacy.Request) {
+  async authenticate(request: RequestWithLoginAttempt) {
     assertRequest(request);
 
     const isSystemApiRequest = this.server.plugins.kibana.systemApi.isSystemApiRequest(request);
@@ -210,11 +207,7 @@ class Authenticator {
       }
 
       if (authenticationResult.succeeded()) {
-        return AuthenticationResult.succeeded({
-          ...authenticationResult.user,
-          // Complement user returned from the provider with scopes.
-          scope: await this.authScope.getForRequestAndUser(request, authenticationResult.user!),
-        } as any);
+        return AuthenticationResult.succeeded(authenticationResult.user!);
       } else if (authenticationResult.redirected()) {
         return authenticationResult;
       }
@@ -227,7 +220,7 @@ class Authenticator {
    * Deauthenticates current request.
    * @param request Request instance.
    */
-  async deauthenticate(request: Legacy.Request) {
+  async deauthenticate(request: RequestWithLoginAttempt) {
     assertRequest(request);
 
     const sessionValue = await this.getSessionValue(request);
@@ -295,8 +288,7 @@ class Authenticator {
 
 export async function initAuthenticator(server: Legacy.Server) {
   const session = await Session.create(server);
-  const authScope = new AuthScopeService();
-  const authenticator = new Authenticator(server, authScope, session);
+  const authenticator = new Authenticator(server, session);
 
   const loginAttempts = new WeakMap();
   server.decorate('request', 'loginAttempt', function(this: Legacy.Request) {
@@ -307,12 +299,11 @@ export async function initAuthenticator(server: Legacy.Server) {
     return loginAttempts.get(request);
   });
 
-  server.expose('authenticate', (request: Legacy.Request) => authenticator.authenticate(request));
-  server.expose('deauthenticate', (request: Legacy.Request) =>
-    authenticator.deauthenticate(request)
+  server.expose('authenticate', (request: RequestWithLoginAttempt) =>
+    authenticator.authenticate(request)
   );
-  server.expose('registerAuthScopeGetter', (scopeExtender: ScopesGetter) =>
-    authScope.registerGetter(scopeExtender)
+  server.expose('deauthenticate', (request: RequestWithLoginAttempt) =>
+    authenticator.deauthenticate(request)
   );
 
   server.expose('isAuthenticated', async (request: Legacy.Request) => {

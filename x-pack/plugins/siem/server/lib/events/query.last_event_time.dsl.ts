@@ -6,7 +6,7 @@
 
 import { LastEventTimeRequestOptions } from './types';
 import { LastEventIndexKey } from '../../graphql/types';
-import { assertUnreachable } from '../../../public/lib/helpers';
+import { assertUnreachable } from '../../utils/build_query';
 
 interface EventIndices {
   [key: string]: string[];

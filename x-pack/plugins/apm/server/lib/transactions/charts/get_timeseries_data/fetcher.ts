@@ -134,5 +134,5 @@ export function timeseriesFetcher({
     }
   };
 
-  return client<void, Aggs>('search', params);
+  return client.search<void, Aggs>(params);
 }

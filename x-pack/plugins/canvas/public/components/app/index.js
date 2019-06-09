@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getInterpreter } from 'plugins/interpreter/interpreter';
-import { registries } from 'plugins/interpreter/registries';
 import { register, addRegistries } from '@kbn/interpreter/common';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
+import { registries } from 'plugins/interpreter/registries';
+import { getInterpreter } from 'plugins/interpreter/interpreter';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
 import { elementsRegistry } from '../../lib/elements_registry';

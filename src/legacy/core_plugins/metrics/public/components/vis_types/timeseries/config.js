@@ -19,11 +19,14 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import DataFormatPicker from '../../data_format_picker';
-import createSelectHandler from '../../lib/create_select_handler';
-import YesNo from '../../yes_no';
-import createTextHandler from '../../lib/create_text_handler';
+import { DataFormatPicker } from '../../data_format_picker';
+import { createSelectHandler } from '../../lib/create_select_handler';
+import { YesNo } from '../../yes_no';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
+import { data } from 'plugins/data';
+const { QueryBarInput } = data.query.ui;
+import { Storage } from 'ui/storage';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -38,11 +41,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
+const localStorage = new Storage(window.localStorage);
 
-const TimeseriesConfig = injectI18n(function (props) {
+export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
-
   const defaults = {
     fill: '',
     line_width: '',
@@ -58,7 +62,6 @@ const TimeseriesConfig = injectI18n(function (props) {
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
   const { intl } = props;
-
   const stackedOptions = [
     { label: intl.formatMessage({ id: 'tsvb.timeSeries.noneLabel', defaultMessage: 'None' }), value: 'none' },
     { label: intl.formatMessage({ id: 'tsvb.timeSeries.stackedLabel', defaultMessage: 'Stacked' }), value: 'stacked' },
@@ -269,6 +272,9 @@ const TimeseriesConfig = injectI18n(function (props) {
 
   const disableSeparateYaxis = model.separate_axis ? false : true;
 
+  const seriesIndexPattern = (props.model.override_index_pattern && props.model.series_index_pattern) ?
+    props.model.series_index_pattern : props.indexPatternForQuery;
+
   return (
     <div className="tvbAggRow">
 
@@ -301,28 +307,35 @@ const TimeseriesConfig = injectI18n(function (props) {
               onChange={handleTextChange('value_template')}
               value={model.value_template}
               fullWidth
+              data-test-subj="tsvb_series_value"
             />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="s" />
-
-      <EuiFormRow
-        id={htmlId('series_filter')}
-        label={(<FormattedMessage
-          id="tsvb.timeSeries.filterLabel"
-          defaultMessage="Filter"
-        />)}
-        fullWidth
-      >
-        <EuiFieldText
-          onChange={handleTextChange('filter')}
-          value={model.filter}
+      <EuiFlexItem>
+        <EuiFormRow
+          id={htmlId('series_filter')}
+          label={(<FormattedMessage
+            id="tsvb.timeSeries.filterLabel"
+            defaultMessage="Filter"
+          />)}
           fullWidth
-        />
-      </EuiFormRow>
+        >
+          <QueryBarInput
+            query={{
+              language: (model.filter && model.filter.language) ? model.filter.language : getDefaultQueryLanguage(),
+              query: (model.filter && model.filter.query) ? model.filter.query : ''
+            }}
+            onChange={filter => props.onChange({ filter })}
+            appName={'VisEditor'}
+            indexPatterns={[seriesIndexPattern]}
+            store={localStorage}
+          />
 
+        </EuiFormRow>
+      </EuiFlexItem>
       <EuiHorizontalRule margin="s" />
 
       { type }
@@ -492,7 +505,6 @@ const TimeseriesConfig = injectI18n(function (props) {
 TimeseriesConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  indexPatternForQuery: PropTypes.string,
 };
-
-export default TimeseriesConfig;

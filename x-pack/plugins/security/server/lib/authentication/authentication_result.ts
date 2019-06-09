@@ -8,6 +8,7 @@
  * Represents status that `AuthenticationResult` can be in.
  */
 import { AuthenticatedUser } from '../../../common/model';
+import { getErrorStatusCode } from '../errors';
 
 enum AuthenticationResultStatus {
   /**
@@ -40,6 +41,7 @@ enum AuthenticationResultStatus {
  */
 interface AuthenticationOptions {
   error?: Error;
+  challenges?: string[];
   redirectURL?: string;
   state?: unknown;
   user?: AuthenticatedUser;
@@ -73,13 +75,21 @@ export class AuthenticationResult {
   /**
    * Produces `AuthenticationResult` for the case when authentication fails.
    * @param error Error that occurred during authentication attempt.
+   * @param [challenges] Optional list of the challenges that will be returned to the user within
+   * `WWW-Authenticate` HTTP header. Multiple challenges will result in multiple headers (one per
+   * challenge) as it's better supported by the browsers than comma separated list within a single
+   * header. Challenges can only be set for errors with `401` error status.
    */
-  public static failed(error: Error) {
+  public static failed(error: Error, challenges?: string[]) {
     if (!error) {
       throw new Error('Error should be specified.');
     }
 
-    return new AuthenticationResult(AuthenticationResultStatus.Failed, { error });
+    if (challenges != null && getErrorStatusCode(error) !== 401) {
+      throw new Error('Challenges can only be provided with `401 Unauthorized` errors.');
+    }
+
+    return new AuthenticationResult(AuthenticationResultStatus.Failed, { error, challenges });
   }
 
   /**
@@ -115,6 +125,13 @@ export class AuthenticationResult {
    */
   public get error() {
     return this.options.error;
+  }
+
+  /**
+   * Challenges that need to be sent to the user within `WWW-Authenticate` HTTP header.
+   */
+  public get challenges() {
+    return this.options.challenges;
   }
 
   /**
