@@ -39,7 +39,7 @@ import {
   focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
-import { MultiMetricJobServiceProvider } from './create_job_service';
+import { MultiMetricJobService } from './create_job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
@@ -71,7 +71,6 @@ module
     const MlTimeBuckets = Private(IntervalHelperProvider);
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
     const chartDataUtils = Private(ChartDataUtilsProvider);
-    const mlMultiMetricJobService = Private(MultiMetricJobServiceProvider);
     $scope.addNewJobToRecentlyAccessed = addNewJobToRecentlyAccessed;
 
     const stateDefaults = {
@@ -79,8 +78,8 @@ module
     };
     const appState = new AppState(stateDefaults);
 
-    mlMultiMetricJobService.clearChartData();
-    $scope.chartData = mlMultiMetricJobService.chartData;
+    MultiMetricJobService.clearChartData();
+    $scope.chartData = MultiMetricJobService.chartData;
 
     const PAGE_WIDTH = angular.element('.multi-metric-job-container').width();
     const BAR_TARGET = (PAGE_WIDTH > 1600) ? 800 : (PAGE_WIDTH / 2);
@@ -338,13 +337,13 @@ module
 
       showSparseDataCheckbox();
 
-      mlMultiMetricJobService.clearChartData();
+      MultiMetricJobService.clearChartData();
 
       setFieldsChartStates(CHART_STATE.LOADING);
 
       if (Object.keys($scope.formConfig.fields).length) {
         $scope.ui.showFieldCharts = true;
-        mlMultiMetricJobService.getLineChartResults($scope.formConfig, thisLoadTimestamp)
+        MultiMetricJobService.getLineChartResults($scope.formConfig, thisLoadTimestamp)
           .then((resp) => {
             $scope.$applyAsync();
             loadDocCountData(resp.detectors);
@@ -474,11 +473,11 @@ module
     // the job may fail to open, but the datafeed should still be created
     // if the job save was successful.
     $scope.createJob = function () {
-      const tempJob = mlMultiMetricJobService.getJobFromConfig($scope.formConfig);
+      const tempJob = MultiMetricJobService.getJobFromConfig($scope.formConfig);
       if (validateJob(tempJob, $scope.ui.validation.checks)) {
         msgs.clear();
         // create the new job
-        mlMultiMetricJobService.createJob($scope.formConfig)
+        MultiMetricJobService.createJob($scope.formConfig)
           .then((job) => {
             // if save was successful, open the job
             mlJobService.openJob(job.job_id)
@@ -527,7 +526,7 @@ module
         mlJobService.saveNewDatafeed(job.datafeed_config, job.job_id)
           .then(() => {
             if (startDatafeedAfterSave) {
-              mlMultiMetricJobService.startDatafeed($scope.formConfig)
+              MultiMetricJobService.startDatafeed($scope.formConfig)
                 .then(() => {
                   $scope.jobState = JOB_STATE.RUNNING;
                   refreshCounter = 0;
@@ -580,9 +579,9 @@ module
     };
 
     // expose this function so it can be used in the enable model plot checkbox directive
-    $scope.getJobFromConfig = mlMultiMetricJobService.getJobFromConfig;
+    $scope.getJobFromConfig = MultiMetricJobService.getJobFromConfig;
 
-    addJobValidationMethods($scope, mlMultiMetricJobService);
+    addJobValidationMethods($scope, MultiMetricJobService);
 
     function loadCharts() {
       let forceStop = globalForceStop;
@@ -694,7 +693,7 @@ module
     $scope.stopJob = function () {
     // setting the status to STOPPING disables the stop button
       $scope.jobState = JOB_STATE.STOPPING;
-      mlMultiMetricJobService.stopDatafeed($scope.formConfig)
+      MultiMetricJobService.stopDatafeed($scope.formConfig)
         .catch(() => {})
         .then(() => {
           $scope.$applyAsync();
@@ -702,7 +701,7 @@ module
     };
 
     $scope.moveToAdvancedJobCreation = function () {
-      const job = mlMultiMetricJobService.getJobFromConfig($scope.formConfig);
+      const job = MultiMetricJobService.getJobFromConfig($scope.formConfig);
       moveToAdvancedJobCreation(job);
     };
 
