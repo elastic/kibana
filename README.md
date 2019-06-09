@@ -1,7 +1,3 @@
-# Kibana
-
-Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for Elasticsearch.
-
 - [Getting Started](#getting-started)
   - [Using a Kibana Release](#using-a-kibana-release)
   - [Building and Running Kibana, and/or Contributing Code](#building-and-running-kibana-andor-contributing-code)
