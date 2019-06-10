@@ -1,0 +1,50 @@
+---
+
+##### GLOBAL METADATA
+
+- meta:
+    cluster: kibana-ci
+
+##### JOB DEFAULTS
+
+- job:
+    parameters:
+    - string:
+        name: qa-jenkinsfile-experiment
+        default: refs/heads/master
+        description: the Git branch specifier to build (&lt;branchName&gt;,
+          &lt;tagName&gt;, &lt;commitId&gt;, etc.)
+    properties:
+    - github:
+        url: https://github.com/elastic/kibana/
+    - inject:
+        properties-content: |-
+          HOME=$JENKINS_HOME
+    logrotate:
+      daysToKeep: 30
+      numToKeep: 100
+    node: linux
+    scm:
+    - git:
+        name: origin
+        url: git@github.com:elastic/kibana.git
+        # master node jenkins user ~/.ssh
+        credentials-id: f6c7695a-671e-4f4f-a331-acdce44ff9ba
+        skip-tag: true
+        reference-repo: /var/lib/jenkins/.git-references/kibana.git
+        branches:
+        - $branch_specifier
+    triggers:
+    - github
+    vault:
+      role_id: 90edc03f-753c-5780-0e31-27dee99d9654
+    wrappers:
+    - ansicolor
+    - timeout:
+        type: absolute
+        timeout: 360
+        fail: true
+    - timestamps
+    publishers:
+    - email:
+        recipients: wayne.seymour@elastic.co
