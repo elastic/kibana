@@ -35,6 +35,7 @@ export function sort(): ExpressionFunction<'sort', Datatable, Arguments, Datatab
         types: ['boolean'],
         help: argHelp.reverse,
         options: [true, false],
+        default: false,
       },
     },
     fn: (context, args) => {

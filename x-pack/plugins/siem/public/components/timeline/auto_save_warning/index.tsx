@@ -14,10 +14,10 @@ import { ActionCreator } from 'typescript-fsa';
 import { State, timelineSelectors } from '../../../store';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../store/inputs/actions';
 import { TimelineModel } from '../../../store/timeline/model';
-import { AutoSavedWarningMsg } from '../../../store/timeline/reducer';
 
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/timeline';
+import { AutoSavedWarningMsg } from '../../../store/timeline/types';
 
 interface ReduxProps {
   timelineId: string | null;

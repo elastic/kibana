@@ -21,10 +21,10 @@ import {
   updateTimeline,
   startTimelineSaving,
 } from './actions';
-import { TimelineById } from './reducer';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
+import { TimelineById } from './types';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 

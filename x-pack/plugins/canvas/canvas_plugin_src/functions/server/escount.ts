@@ -27,7 +27,7 @@ export function escount(): ExpressionFunction<'escount', Filter, Arguments, any>
     },
     args: {
       index: {
-        types: ['string', 'null'],
+        types: ['string'],
         default: '_all',
         help: argHelp.index,
       },

@@ -21,13 +21,11 @@ import d3 from 'd3';
 import _ from 'lodash';
 import { injectZeros } from '../components/zero_injection/inject_zeros';
 import { orderXValues } from '../components/zero_injection/ordered_x_keys';
-import { VislibComponentsLabelsLabelsProvider } from '../components/labels/labels';
+import { labels } from '../components/labels/labels';
 import { VislibComponentsColorColorProvider } from '../../vis/components/color/color';
 import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
 
 export function VislibLibDataProvider(Private) {
-
-  const getLabels = Private(VislibComponentsLabelsLabelsProvider);
   const color = Private(VislibComponentsColorColorProvider);
 
   /**
@@ -107,7 +105,7 @@ export function VislibLibDataProvider(Private) {
 
     _getLabels(data) {
       if (this.type === 'series') {
-        return getLabels(data);
+        return labels(data);
       }
       return [];
     }
@@ -451,7 +449,7 @@ export function VislibLibDataProvider(Private) {
      * @returns {Array} Array of labels (strings)
      */
     getLabels() {
-      return getLabels(this.data);
+      return labels(this.data);
     }
 
     /**
