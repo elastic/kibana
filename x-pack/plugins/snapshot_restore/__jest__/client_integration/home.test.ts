@@ -21,6 +21,8 @@ import { REPOSITORY_NAME } from './helpers/constant';
 
 const { setup } = pageHelpers.home;
 
+// We need to skip the tests until react 16.9.0 is released
+// which supports asynchronous code inside act()
 describe.skip('<SnapshotRestoreHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: HomeTestBed;
@@ -56,6 +58,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
       beforeEach(async () => {
         testBed = await setup();
 
+        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           await nextTick();
           testBed.component.update();
@@ -92,6 +95,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
       test('should display an empty prompt', async () => {
         const { component, exists } = await setup();
 
+        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           await nextTick();
           component.update();
@@ -124,6 +128,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
         testBed = await setup();
 
+        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           await nextTick();
           testBed.component.update();
@@ -164,6 +169,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
         const totalRequests = server.requests.length;
         expect(exists('reloadButton')).toBe(true);
 
+        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickReloadButton();
           await nextTick();
@@ -222,6 +228,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
             '[data-test-subj="confirmModalConfirmButton"]'
           );
 
+          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             confirmButton!.click();
             await nextTick();
@@ -300,6 +307,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
             const { exists, find, component, table } = testBed;
             expect(exists('repositoryDetail.verifyRepositoryButton')).toBe(true);
 
+            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               find('repositoryDetail.verifyRepositoryButton').simulate('click');
               await nextTick();
@@ -347,6 +355,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
       beforeEach(async () => {
         testBed = await setup();
 
+        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           testBed.actions.selectTab('snapshots');
           await nextTick(100);
@@ -378,6 +387,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
         testBed = await setup();
 
+        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           testBed.actions.selectTab('snapshots');
           await nextTick(2000);
@@ -418,6 +428,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
         testBed = await setup();
 
+        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           testBed.actions.selectTab('snapshots');
           await nextTick(2000);
@@ -450,6 +461,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
         const repositoryLink = findTestSubject(rows[0].reactWrapper, 'repositoryLink');
         const { href } = repositoryLink.props();
 
+        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           router.navigateTo(href!);
           await nextTick();
@@ -469,6 +481,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
         const totalRequests = server.requests.length;
         expect(exists('reloadButton')).toBe(true);
 
+        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickReloadButton();
           await nextTick();
@@ -521,6 +534,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
             const { href } = find('snapshotDetail.repositoryLink').props();
 
+            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               router.navigateTo(href);
               await nextTick();
