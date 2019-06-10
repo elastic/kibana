@@ -6,26 +6,22 @@
 [partintro]
 --
 
-Congratulations on finding the Canvas application in {kib}. You are in for a treat. 
-Canvas is a whole new way of making data look amazing. Canvas combines data with 
-colors, shapes, text, and your own imagination to bring dynamic, multi-page, 
-pixel-perfect, data displays to screens large and small. 
+Canvas is a data visualization and presentation tool that sits within Kibana. Backed by Elasticsearch, Canvas allows you to combine data with colors, images, text, and your imagination to bring dynamic, multi-page, pixel-perfect displays to screens large and small. If you are a little bit creative, a little bit technical, and a whole lot curious, then Canvas is for you. 
 
-We made Canvas for people like us. We figure, you are probably people like us: 
-you make neat stuff and you want to show that neat stuff to others. Canvas is 
-for makers who are a little bit creative, a little bit technical, and whole lot 
-of curious.
+With Canvas, you can:
 
-[role="screenshot"]
-image::images/canvas_workpad_weblog.png[]
+* Create and personalize your work space with backgrounds, borders, colors, fonts, and more. 
 
+* Customize your workpad with your own visualizations, such as images and text.
 
-We've put together <<canvas-getting-started, this Getting Started>> to get you
-up and running with Canvas. 
+* Show off your data with charts, graphs, progress monitors, and more.
 
-If you want to dig into the expression language and the functions that drive 
-Canvas, see the <<canvas-common-functions>> and 
-<<canvas-tinymath-functions>>.
+* Focus the data you want to display with filters.
+
+//<<link to some examples of Canvas in use>>
+
+For a quick overview of Canvas, watch link:https://www.youtube.com/watch?v=ZqvF_5-1xjQ[Stand out with Canvas].
+//When Dave moves these videos, update this link.
 
 --
 
