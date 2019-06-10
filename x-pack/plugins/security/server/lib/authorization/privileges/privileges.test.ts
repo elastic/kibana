@@ -318,7 +318,13 @@ describe('features', () => {
           actions.login,
           actions.version,
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
-          ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
+          ...(expectManageSpaces
+            ? [
+                actions.space.manage,
+                actions.ui.get('spaces', 'manage'),
+                actions.ui.get('management', 'kibana', 'spaces'),
+              ]
+            : []),
           actions.app.get('app-1'),
           actions.app.get('app-2'),
           actions.ui.get('catalogue', 'catalogue-1'),
@@ -403,7 +409,13 @@ describe('features', () => {
         actions.login,
         actions.version,
         ...(expectGetFeatures ? [actions.api.get('features')] : []),
-        ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
+        ...(expectManageSpaces
+          ? [
+              actions.space.manage,
+              actions.ui.get('spaces', 'manage'),
+              actions.ui.get('management', 'kibana', 'spaces'),
+            ]
+          : []),
         actions.ui.get('catalogue', 'bar-catalogue-1'),
         actions.ui.get('catalogue', 'bar-catalogue-2'),
         actions.ui.get('management', 'bar-management', 'bar-management-1'),
@@ -614,7 +626,13 @@ describe('features', () => {
         actions.login,
         actions.version,
         ...(expectGetFeatures ? [actions.api.get('features')] : []),
-        ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
+        ...(expectManageSpaces
+          ? [
+              actions.space.manage,
+              actions.ui.get('spaces', 'manage'),
+              actions.ui.get('management', 'kibana', 'spaces'),
+            ]
+          : []),
         actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
