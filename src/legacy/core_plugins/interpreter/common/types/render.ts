@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
+import { ExpressionTypeDef } from '../../types';
 
 const name = 'render';
 
@@ -30,7 +30,7 @@ export interface Render<T> {
   value: T;
 }
 
-export const render = (): ExpressionType<typeof name, Render<unknown>> => ({
+export const render = (): ExpressionTypeDef<typeof name, Render<unknown>> => ({
   name,
   from: {
     '*': <T>(v: T): Render<T> => ({

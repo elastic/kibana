@@ -18,15 +18,16 @@
  */
 
 /**
- * A generic type which represents a custom Expression Type definition.
- *
- * TODO: Add typings for the `availableTypes` parameter that's used by the from/to methods.
+ * A generic type which represents a custom Expression Type Definition that's
+ * registered to the Interpreter.
  */
-export interface ExpressionType<Name extends string, Type, SerializedType = undefined> {
+export interface ExpressionTypeDef<Name extends string, Type, SerializedType = undefined> {
   name: Name;
   validate?: (type: any) => void | Error;
   serialize?: (type: Type) => SerializedType;
   deserialize?: (type: SerializedType) => Type;
+  // TODO: Update typings for the `availableTypes` parameter once interfaces for this
+  // have been added elsewhere in the interpreter.
   from?: Record<string, (ctx: any, availableTypes: Record<string, any>) => Type>;
   to?: Record<string, (type: Type, availableTypes: Record<string, any>) => unknown>;
 }

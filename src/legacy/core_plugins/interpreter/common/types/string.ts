@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
+import { ExpressionTypeDef } from '../../types';
 import { Datatable } from './datatable';
 import { Render } from './render';
 
 const name = 'string';
 
-export const string = (): ExpressionType<typeof name, string> => ({
+export const string = (): ExpressionTypeDef<typeof name, string> => ({
   name,
   from: {
     null: () => '',

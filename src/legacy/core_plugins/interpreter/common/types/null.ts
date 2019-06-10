@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
+import { ExpressionTypeDef } from '../../types';
 
 const name = 'null';
 
-export const nullType = (): ExpressionType<typeof name, null> => ({
+export const nullType = (): ExpressionTypeDef<typeof name, null> => ({
   name,
   from: {
     '*': () => null,

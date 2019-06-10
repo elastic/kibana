@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
+import { ExpressionTypeDef } from '../../types';
 
 const name = 'filter';
 
@@ -34,7 +34,7 @@ export interface Filter {
   query?: string | null;
 }
 
-export const filter = (): ExpressionType<typeof name, Filter> => ({
+export const filter = (): ExpressionTypeDef<typeof name, Filter> => ({
   name,
   from: {
     null: () => {

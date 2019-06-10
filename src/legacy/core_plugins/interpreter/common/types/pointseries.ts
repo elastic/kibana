@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
+import { ExpressionTypeDef } from '../../types';
 import { Datatable } from './datatable';
 import { Render } from './render';
 
@@ -51,7 +51,7 @@ export interface PointSeries {
   rows: Array<Record<string, any>>;
 }
 
-export const pointseries = (): ExpressionType<typeof name, PointSeries> => ({
+export const pointseries = (): ExpressionTypeDef<typeof name, PointSeries> => ({
   name,
   from: {
     null: () => {

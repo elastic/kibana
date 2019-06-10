@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
+import { ExpressionTypeDef } from '../../types';
 import { Render } from './render';
 
 const name = 'error';
@@ -29,7 +29,7 @@ export interface InterpreterErrorType {
   info: unknown;
 }
 
-export const error = (): ExpressionType<typeof name, InterpreterErrorType> => ({
+export const error = (): ExpressionTypeDef<typeof name, InterpreterErrorType> => ({
   name,
   to: {
     render: (input): Render<Pick<InterpreterErrorType, 'error' | 'info'>> => {
