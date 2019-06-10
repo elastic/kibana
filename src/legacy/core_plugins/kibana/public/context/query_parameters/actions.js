@@ -74,7 +74,7 @@ export function QueryParameterActionsProvider(indexPatterns, Private) {
   const addFilter = (state) => async (field, values, operation) => {
     const indexPatternId = state.queryParameters.indexPatternId;
     const newFilters = filterGen.generate(field, values, operation, indexPatternId);
-    queryFilter.addFilter(newFilters);
+    queryFilter.addFilters(newFilters);
     const indexPattern = await indexPatterns.get(indexPatternId);
     indexPattern.popularizeField(field.name, 1);
   };
