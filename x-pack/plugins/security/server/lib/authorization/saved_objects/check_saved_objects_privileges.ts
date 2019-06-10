@@ -10,7 +10,7 @@ import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 import { CheckPrivilegesWithRequest, CheckPrivilegesAtResourceResponse } from '../check_privileges';
 import { Actions } from '../actions';
 
-export type SavedObjectsAction =
+export type SavedObjectsOperation =
   | 'create'
   | 'update'
   | 'delete'
@@ -20,7 +20,10 @@ export type SavedObjectsAction =
   | 'find';
 
 interface Deps {
-  errors: any;
+  errors: {
+    decorateGeneralError: (error: Error, reason: string) => Error;
+    decorateForbiddenError: (error: Error) => Error;
+  };
   spacesEnabled: boolean;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   request: Legacy.Request;
@@ -30,31 +33,32 @@ interface Deps {
 
 export type CheckSavedObjectsPrivileges = (
   typeOrTypes: string | string[] | undefined,
-  action: SavedObjectsAction,
+  action: SavedObjectsOperation,
   namespace: string | undefined,
   args: any
 ) => Promise<void>;
 
 export function checkSavedObjectsPrivilegesFactory(deps: Deps) {
   const checkPrivileges = deps.checkPrivilegesWithRequest(deps.request);
+
+  const { errors, spacesEnabled, actionsService, auditLogger } = deps;
+
   const checkSavedObjectsPrivileges: CheckSavedObjectsPrivileges = async (
     typeOrTypes: string | string[] | undefined,
-    action: SavedObjectsAction,
+    action: SavedObjectsOperation,
     namespace: string | undefined,
     args: any
   ) => {
     const types = normalizeTypes(typeOrTypes);
     const actionsToTypesMap = new Map(
-      types.map(
-        type => [deps.actionsService.savedObject.get(type, action), type] as [string, string]
-      )
+      types.map(type => [actionsService.savedObject.get(type, action), type] as [string, string])
     );
     const actions = Array.from(actionsToTypesMap.keys());
 
     let privilegeResponse: CheckPrivilegesAtResourceResponse;
 
     try {
-      if (deps.spacesEnabled) {
+      if (spacesEnabled) {
         const spaceId = namespaceToSpaceId(namespace);
         privilegeResponse = await checkPrivileges.atSpace(spaceId, actions);
       } else {
@@ -62,15 +66,15 @@ export function checkSavedObjectsPrivilegesFactory(deps: Deps) {
       }
     } catch (error) {
       const { reason } = get<Record<string, any>>(error, 'body.error', {});
-      throw deps.errors.decorateGeneralError(error, reason);
+      throw errors.decorateGeneralError(error, reason);
     }
 
     const { hasAllRequested, username, privileges } = privilegeResponse;
     if (hasAllRequested) {
-      deps.auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
+      auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
     } else {
       const missingPrivileges = getMissingPrivileges(privileges);
-      deps.auditLogger.savedObjectsAuthorizationFailure(
+      auditLogger.savedObjectsAuthorizationFailure(
         username,
         action,
         types,
@@ -82,7 +86,7 @@ export function checkSavedObjectsPrivilegesFactory(deps: Deps) {
         .map(privilege => actionsToTypesMap.get(privilege))
         .sort()
         .join(',')}`;
-      throw deps.errors.decorateForbiddenError(new Error(msg));
+      throw errors.decorateForbiddenError(new Error(msg));
     }
   };
 

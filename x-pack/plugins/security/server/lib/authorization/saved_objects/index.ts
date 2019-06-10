@@ -7,5 +7,5 @@
 export {
   checkSavedObjectsPrivilegesFactory,
   CheckSavedObjectsPrivileges,
-  SavedObjectsAction,
+  SavedObjectsOperation,
 } from './check_saved_objects_privileges';

@@ -18,7 +18,7 @@ import {
   SavedObject,
   UpdateOptions,
 } from 'src/legacy/server/saved_objects';
-import { CheckSavedObjectsPrivileges, SavedObjectsAction } from '../authorization/saved_objects';
+import { CheckSavedObjectsPrivileges, SavedObjectsOperation } from '../authorization/saved_objects';
 
 export interface SecureSavedObjectsClientWrapperDeps {
   baseClient: SavedObjectsClientContract;
@@ -112,7 +112,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private async ensureAuthorized(
     typeOrTypes: string | string[] | undefined,
-    action: SavedObjectsAction,
+    action: SavedObjectsOperation,
     namespace: string | undefined,
     args: any
   ) {
