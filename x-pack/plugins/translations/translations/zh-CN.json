@@ -139,7 +139,6 @@
     "common.ui.aggTypes.filters.addFilterButtonLabel": "添加筛选",
     "common.ui.aggTypes.filters.definiteFilterLabel": "筛选 {index} 标签",
     "common.ui.aggTypes.filters.filterLabel": "筛选 {index}",
-    "common.ui.aggTypes.filters.filterPlaceholder": "Lucene 或查询 DSL",
     "common.ui.aggTypes.filters.labelPlaceholder": "标签",
     "common.ui.aggTypes.filters.removeFilterButtonAriaLabel": "移除此筛选",
     "common.ui.aggTypes.filters.toggleFilterButtonAriaLabel": "切换筛选标签",
