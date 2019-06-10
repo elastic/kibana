@@ -72,29 +72,29 @@ type ToRender = Render<{
 
 export const datatable = (): ExpressionType<typeof name, Datatable, SerializedDatatable> => ({
   name,
-  validate: dtable => {
+  validate: table => {
     // TODO: Check columns types. Only string, boolean, number, date, allowed for now.
-    if (!dtable.columns) {
+    if (!table.columns) {
       throw new Error('datatable must have a columns array, even if it is empty');
     }
 
-    if (!dtable.rows) {
+    if (!table.rows) {
       throw new Error('datatable must have a rows array, even if it is empty');
     }
   },
-  serialize: dtable => {
-    const { columns, rows } = dtable;
+  serialize: table => {
+    const { columns, rows } = table;
     return {
-      ...dtable,
+      ...table,
       rows: rows.map(row => {
         return columns.map(column => row[column.name]);
       }),
     };
   },
-  deserialize: dtable => {
-    const { columns, rows } = dtable;
+  deserialize: table => {
+    const { columns, rows } = table;
     return {
-      ...dtable,
+      ...table,
       rows: rows.map((row: any) => {
         return zipObject(map(columns, 'name'), row);
       }),
@@ -119,24 +119,24 @@ export const datatable = (): ExpressionType<typeof name, Datatable, SerializedDa
     },
   },
   to: {
-    render: (dtable): ToRender => {
+    render: (table): ToRender => {
       return {
         type: 'render',
         as: 'table',
         value: {
-          datatable: dtable,
+          datatable: table,
           paginate: true,
           perPage: 10,
           showHeader: true,
         },
       };
     },
-    pointseries: (dtable): PointSeries => {
+    pointseries: (table): PointSeries => {
       // datatable columns are an array that looks like [{ name: "one", type: "string" }, { name: "two", type: "string" }]
       // rows look like [{ one: 1, two: 2}, { one: 3, two: 4}, ...]
       const validFields = ['x', 'y', 'color', 'size', 'text'];
-      const columns = dtable.columns.filter(column => validFields.includes(column.name));
-      const rows = dtable.rows.map(row => pick(row, validFields));
+      const columns = table.columns.filter(column => validFields.includes(column.name));
+      const rows = table.rows.map(row => pick(row, validFields));
 
       return {
         type: 'pointseries',
