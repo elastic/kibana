@@ -123,10 +123,6 @@ export class AddLayerPanel extends Component {
   }
 
   _renderFooter(buttonDescription) {
-    if (!this.state.sourceType) {
-      return null;
-    }
-
     const { importView, layer } = this.state;
     const { isIndexingReady, isIndexingSuccess } = this.props;
 
@@ -136,8 +132,9 @@ export class AddLayerPanel extends Component {
 
     return (
       <FlyoutFooter
-        onClick={this._layerAddHandler}
+        showNextButton={!!this.state.sourceType}
         disableNextButton={!buttonEnabled}
+        onClick={this._layerAddHandler}
         nextButtonText={buttonDescription}
       />
     );

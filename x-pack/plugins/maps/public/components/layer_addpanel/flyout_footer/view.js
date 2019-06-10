@@ -14,22 +14,25 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const FlyoutFooter = (
-  { onClick, disableNextButton, nextButtonText, closeFlyout, hasLayerSelected, isLoading }
-) => {
+export const FlyoutFooter = ({
+  onClick, showNextButton, disableNextButton, nextButtonText, closeFlyout,
+  hasLayerSelected, isLoading
+}) => {
 
-  const nextButton = (
-    <EuiButton
-      disabled={!hasLayerSelected || disableNextButton || isLoading}
-      isLoading={hasLayerSelected && isLoading}
-      iconSide="right"
-      iconType={'sortRight'}
-      onClick={onClick}
-      fill
-    >
-      {nextButtonText}
-    </EuiButton>
-  );
+  const nextButton = showNextButton
+    ? (
+      <EuiButton
+        disabled={!hasLayerSelected || disableNextButton || isLoading}
+        isLoading={hasLayerSelected && isLoading}
+        iconSide="right"
+        iconType={'sortRight'}
+        onClick={onClick}
+        fill
+      >
+        {nextButtonText}
+      </EuiButton>
+    )
+    : null;
 
   return (
     <EuiFlyoutFooter className="mapLayerPanel__footer">
