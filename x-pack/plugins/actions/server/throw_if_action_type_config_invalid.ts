@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { ActionType } from './types';
 
 export function throwIfActionTypeConfigInvalid(
@@ -14,7 +15,7 @@ export function throwIfActionTypeConfigInvalid(
   if (validator) {
     const { error } = validator.validate(config);
     if (error) {
-      throw error;
+      throw Boom.badRequest(`actionTypeConfig invalid: ${error.message}`);
     }
   }
 }

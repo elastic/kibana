@@ -40,7 +40,7 @@ export function createRoute(server: Hapi.Server) {
             .keys({
               description: Joi.string().required(),
               actionTypeId: Joi.string().required(),
-              actionTypeConfig: Joi.object(),
+              actionTypeConfig: Joi.object().required(),
             })
             .required(),
           migrationVersion: Joi.object().optional(),

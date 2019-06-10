@@ -166,5 +166,28 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
           });
         });
     });
+
+    it(`should return 400 when actionTypeConfig isn't valid`, async () => {
+      await supertest
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'My action updated',
+            actionTypeConfig: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'actionTypeConfig invalid: child "encrypted" fails because ["encrypted" is required]',
+          });
+        });
+    });
   });
 }

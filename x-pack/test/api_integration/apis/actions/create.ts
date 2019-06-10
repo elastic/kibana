@@ -102,11 +102,39 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'child "attributes" fails because [child "description" fails because ["description" is required], child "actionTypeId" fails because ["actionTypeId" is required]]',
+              'child "attributes" fails because [child "description" fails because ["description" is required], child "actionTypeId" fails because ["actionTypeId" is required], child "actionTypeConfig" fails because ["actionTypeConfig" is required]]',
             validation: {
               source: 'payload',
-              keys: ['attributes.description', 'attributes.actionTypeId'],
+              keys: [
+                'attributes.description',
+                'attributes.actionTypeId',
+                'attributes.actionTypeConfig',
+              ],
             },
+          });
+        });
+    });
+
+    it(`should return 400 when actionTypeConfig isn't valid`, async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'my description',
+            actionTypeId: 'test.index-record',
+            actionTypeConfig: {
+              unencrypted: 'my unencrypted text',
+            },
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'actionTypeConfig invalid: child "encrypted" fails because ["encrypted" is required]',
           });
         });
     });
