@@ -22,16 +22,17 @@ import { Render } from './render';
 
 const name = 'error';
 
-export interface InterpreterError {
+// TODO: Improve typings on this interface [#38553]
+export interface InterpreterErrorType {
   type: typeof name;
   error: unknown;
   info: unknown;
 }
 
-export const error = (): ExpressionType<typeof name, InterpreterError> => ({
+export const error = (): ExpressionType<typeof name, InterpreterErrorType> => ({
   name,
   to: {
-    render: (input): Render<{ error: unknown; info: unknown }> => {
+    render: (input): Render<Pick<InterpreterErrorType, 'error' | 'info'>> => {
       return {
         type: 'render',
         as: name,
