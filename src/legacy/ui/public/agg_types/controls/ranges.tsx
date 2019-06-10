@@ -34,7 +34,7 @@ import { isEqual, omit } from 'lodash';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 
 const generateId = htmlIdGenerator();
-const isNil = (value: any) => value === undefined || value === null;
+const isEmpty = (value: any) => value === undefined || value === null;
 
 interface RangeValues {
   from?: number;
@@ -96,8 +96,8 @@ function RangesParamEditor({ agg, value, setValue }: AggParamEditorProps<RangeVa
                   </EuiFormLabel>
                 }
                 aria-labelledby={`visEditorRangeFrom${agg.id}_${id}`}
-                value={isNil(from) ? '' : from}
-                placeholder="-∞"
+                value={isEmpty(from) ? '' : from}
+                placeholder="&minus;∞"
                 onChange={ev => onChangeRange(id, 'from', ev.target.value)}
                 fullWidth={true}
                 compressed={true}
@@ -111,7 +111,7 @@ function RangesParamEditor({ agg, value, setValue }: AggParamEditorProps<RangeVa
                   </EuiFormLabel>
                 }
                 aria-labelledby={`visEditorRangeTo${agg.id}_${id}`}
-                value={isNil(to) ? '' : to}
+                value={isEmpty(to) ? '' : to}
                 placeholder="+∞"
                 onChange={ev => onChangeRange(id, 'to', ev.target.value)}
                 fullWidth={true}
@@ -122,7 +122,7 @@ function RangesParamEditor({ agg, value, setValue }: AggParamEditorProps<RangeVa
               <EuiButtonIcon
                 aria-label={i18n.translate('common.ui.aggTypes.ranges.removeRangeButtonAriaLabel', {
                   defaultMessage: 'Remove the range of {from} to {to}',
-                  values: { from: from || '-∞', to: to || '+∞' },
+                  values: { from: isEmpty(from) ? '-∞' : from, to: isEmpty(to) ? '+∞' : to },
                 })}
                 disabled={value.length === 1}
                 color="danger"
