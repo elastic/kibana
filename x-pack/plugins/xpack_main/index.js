@@ -35,16 +35,6 @@ export const xpackMain = (kibana) => {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        telemetry: Joi.object({
-          // `config` is used internally and not intended to be set
-          config: Joi.string().default(Joi.ref('$defaultConfigPath')),
-          enabled: Joi.boolean().default(true),
-          url: Joi.when('$dev', {
-            is: true,
-            then: Joi.string().default('https://telemetry-staging.elastic.co/xpack/v2/send'),
-            otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v2/send')
-          }),
-        }).default(),
         xpack_api_polling_frequency_millis: Joi.number().default(XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS),
       }).default();
     },
@@ -67,14 +57,6 @@ export const xpackMain = (kibana) => {
           type: 'string', // TODO: Any way of ensuring this is a valid email address?
           value: null
         }
-      },
-      injectDefaultVars(server) {
-        const config = server.config();
-
-        return {
-          activeSpace: null,
-          spacesEnabled: config.get('xpack.spaces.enabled'),
-        };
       },
       hacks: [
         'plugins/xpack_main/hacks/check_xpack_info_change',
@@ -102,6 +84,11 @@ export const xpackMain = (kibana) => {
       xpackInfoRoute(server);
       settingsRoute(server, this.kbnServer);
       featuresRoute(server);
-    }
+    },
+    deprecations: ({ unused }) => [
+      unused('telemetry.config'),
+      unused('telemetry.url'),
+      unused('telemetry.enabled'),
+    ],
   });
 };

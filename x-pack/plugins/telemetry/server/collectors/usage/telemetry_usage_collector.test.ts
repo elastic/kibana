@@ -28,8 +28,8 @@ const serverWithConfig = (configPath: string): KibanaHapiServer & Server => {
     ...getMockServer(),
     config: () => ({
       get: (key: string) => {
-        if (key !== 'xpack.xpack_main.telemetry.config') {
-          throw new Error('Expected `xpack.xpack_main.telemetry.config`');
+        if (key !== 'xpack.telemetry.config') {
+          throw new Error('Expected `xpack.telemetry.config`');
         }
 
         return configPath;

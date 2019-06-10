@@ -85,7 +85,7 @@ export function createTelemetryUsageCollector(server: KibanaHapiServer) {
     type: 'static_telemetry',
     isReady: () => true,
     fetch: async () => {
-      const configPath: string = server.config().get('xpack.xpack_main.telemetry.config');
+      const configPath: string = server.config().get('xpack.telemetry.config');
       const telemetryPath = join(dirname(configPath), 'telemetry.yml');
       return await readTelemetryFile(telemetryPath);
     },

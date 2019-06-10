@@ -25,10 +25,10 @@ export function TelemetryOptInProvider($injector, chrome) {
         currentOptInStatus = enabled;
       } catch (error) {
         toastNotifications.addError(error, {
-          title: i18n.translate('xpack.main.telemetry.optInErrorToastTitle', {
+          title: i18n.translate('xpack.telemetry.optInErrorToastTitle', {
             defaultMessage: 'Error',
           }),
-          toastMessage: i18n.translate('xpack.main.telemetry.optInErrorToastText', {
+          toastMessage: i18n.translate('xpack.telemetry.optInErrorToastText', {
             defaultMessage: 'An error occured while trying to set the usage statistics preference.',
           }),
         });

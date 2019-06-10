@@ -18,7 +18,7 @@ exports[`TelemetryForm renders as expected 1`] = `
             <h2>
               <FormattedMessage
                 defaultMessage="Usage Data"
-                id="xpack.main.telemetry.usageDataTitle"
+                id="xpack.telemetry.usageDataTitle"
                 values={Object {}}
               />
             </h2>
@@ -47,7 +47,7 @@ exports[`TelemetryForm renders as expected 1`] = `
                 >
                   <FormattedMessage
                     defaultMessage="See an example of what we collect"
-                    id="xpack.main.telemetry.seeExampleOfWhatWeCollectLinkText"
+                    id="xpack.telemetry.seeExampleOfWhatWeCollectLinkText"
                     values={Object {}}
                   />
                 </EuiLink>
@@ -61,7 +61,7 @@ exports[`TelemetryForm renders as expected 1`] = `
                 >
                   <FormattedMessage
                     defaultMessage="Read our usage data privacy statement"
-                    id="xpack.main.telemetry.readOurUsageDataPrivacyStatementLinkText"
+                    id="xpack.telemetry.readOurUsageDataPrivacyStatementLinkText"
                     values={Object {}}
                   />
                 </EuiLink>

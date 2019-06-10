@@ -80,14 +80,14 @@ export class OptInExampleFlyout extends Component {
       return (
         <EuiCallOut
           title={<FormattedMessage
-            id="xpack.main.telemetry.callout.errorUnprivilegedUserTitle"
+            id="xpack.telemetry.callout.errorUnprivilegedUserTitle"
             defaultMessage="Error displaying cluster statistics"
           />}
           color="danger"
           iconType="cross"
         >
           <FormattedMessage
-            id="xpack.main.telemetry.callout.errorUnprivilegedUserDescription"
+            id="xpack.telemetry.callout.errorUnprivilegedUserDescription"
             defaultMessage="You do not have access to see unencrypted cluster statistics."
           />
         </EuiCallOut>
@@ -98,14 +98,14 @@ export class OptInExampleFlyout extends Component {
       return (
         <EuiCallOut
           title={<FormattedMessage
-            id="xpack.main.telemetry.callout.errorLoadingClusterStatisticsTitle"
+            id="xpack.telemetry.callout.errorLoadingClusterStatisticsTitle"
             defaultMessage="Error loading cluster statistics"
           />}
           color="danger"
           iconType="cross"
         >
           <FormattedMessage
-            id="xpack.main.telemetry.callout.errorLoadingClusterStatisticsDescription"
+            id="xpack.telemetry.callout.errorLoadingClusterStatisticsDescription"
             defaultMessage="An unexpected error occured while attempting to fetch the cluster statistics.
               This can occur because Elasticsearch failed, Kibana failed, or there is a network error.
               Check Kibana, then reload the page and try again."
@@ -133,7 +133,7 @@ export class OptInExampleFlyout extends Component {
             <EuiTitle>
               <h2>
                 <FormattedMessage
-                  id="xpack.main.telemetry.callout.clusterStatisticsTitle"
+                  id="xpack.telemetry.callout.clusterStatisticsTitle"
                   defaultMessage="Cluster statistics"
                 />
               </h2>
@@ -141,7 +141,7 @@ export class OptInExampleFlyout extends Component {
             <EuiTextColor color="subdued">
               <EuiText>
                 <FormattedMessage
-                  id="xpack.main.telemetry.callout.clusterStatisticsDescription"
+                  id="xpack.telemetry.callout.clusterStatisticsDescription"
                   defaultMessage="This is an example of the basic cluster statistics that we'll collect.
                   It includes the number of indices, shards, and nodes.
                   It also includes high-level usage statistics, such as whether monitoring is turned on."

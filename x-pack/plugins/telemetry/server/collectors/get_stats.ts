@@ -9,7 +9,13 @@ import { getAllStats } from './monitoring';
 // @ts-ignore
 import { getLocalStats } from './local';
 
-export async function getStats(req: any, config: any, start: any, end: any, { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = {}) {
+export async function getStats(
+  req: any,
+  config: any,
+  start: any,
+  end: any,
+  { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = {}
+) {
   let response = [];
 
   if (config.get('xpack.monitoring.enabled')) {

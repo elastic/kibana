@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CoreSetup } from 'src/core/server';
 import { registerOptInRoutes } from './opt_in';
 import { registerTelemetryDataRoutes } from './telemetry_stats';
-import { CoreSetup } from 'src/core/server';
 
 export function registerRoutes(core: CoreSetup) {
   registerOptInRoutes(core);

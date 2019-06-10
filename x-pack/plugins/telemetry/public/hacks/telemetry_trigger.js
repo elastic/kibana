@@ -8,9 +8,10 @@ import { uiModules } from 'ui/modules';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { Telemetry } from './telemetry';
 import { fetchTelemetry } from './fetch_telemetry';
+import { npStart } from 'ui/new_platform';
 
 function telemetryStart($injector) {
-  const telemetryEnabled = $injector.get('telemetryEnabled');
+  const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
 
   if (telemetryEnabled) {
     const Private = $injector.get('Private');

@@ -13,27 +13,31 @@ export function registerOptInRoutes(core: CoreSetup) {
 
   server.route({
     method: 'POST',
-    path: '/api/telemetry/v1/optIn',
+    path: '/api/telemetry/v2/optIn',
     options: {
       validate: {
         payload: Joi.object({
-          enabled: Joi.bool().required()
-        })
-      }
+          enabled: Joi.bool().required(),
+        }),
+      },
     },
     handler: async (req, h) => {
       const savedObjectsClient = req.getSavedObjectsClient();
       try {
-        await savedObjectsClient.create('telemetry', {
-          enabled: req.payload.enabled
-        }, {
-          id: 'telemetry',
-          overwrite: true,
-        });
+        await savedObjectsClient.create(
+          'telemetry',
+          {
+            enabled: req.payload.enabled,
+          },
+          {
+            id: 'telemetry',
+            overwrite: true,
+          }
+        );
       } catch (err) {
         return boomify(err);
       }
       return h.response({}).code(200);
-    }
+    },
   });
 }

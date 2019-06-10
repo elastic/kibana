@@ -8,7 +8,6 @@ import { resolve } from 'path';
 import JoiNamespace from 'joi';
 import { Server } from 'hapi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { i18n } from '@kbn/i18n';
 import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
@@ -19,11 +18,6 @@ import {
   createTelemetryUsageCollector,
 } from './server/collectors';
 
-function isTelemetryEnabled(config: KibanaConfig) {
-  const configPaths = ['xpack.telemetry.enabled', 'xpack.xpack_main.telemetry.enabled'];
-  return configPaths.some(configPath => !!config.get(configPath));
-}
-
 export const telemetry = (kibana: any) => {
   return new kibana.Plugin({
     id: 'telemetry',
@@ -33,10 +27,12 @@ export const telemetry = (kibana: any) => {
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        // `config` is used internally and not intended to be set
+        config: Joi.string().default(Joi.ref('$defaultConfigPath')),
         url: Joi.when('$dev', {
           is: true,
-          then: Joi.string().default('https://telemetry-staging.elastic.co/xpack/v1/send'),
-          otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v1/send'),
+          then: Joi.string().default('https://telemetry-staging.elastic.co/xpack/v2/send'),
+          otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v2/send'),
         }),
       }).default();
     },
@@ -63,7 +59,7 @@ export const telemetry = (kibana: any) => {
           activeSpace: null,
           spacesEnabled: config.get('xpack.spaces.enabled'),
           telemetryUrl: config.get('xpack.telemetry.url'),
-          telemetryEnabled: isTelemetryEnabled(config),
+          telemetryEnabled: config.get('xpack.telemetry.enabled'),
           telemetryOptedIn: null,
         };
       },

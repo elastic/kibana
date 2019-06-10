@@ -43,7 +43,7 @@ export async function clickBanner(
     _toastNotifications.addDanger({
       title: (
         <FormattedMessage
-          id="xpack.main.telemetry.telemetryErrorNotificationMessageTitle"
+          id="xpack.telemetry.telemetryErrorNotificationMessageTitle"
           defaultMessage="Telemetry Error"
         />
       ),
@@ -51,13 +51,13 @@ export async function clickBanner(
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.main.telemetry.telemetryErrorNotificationMessageDescription.unableToSaveTelemetryPreferenceText"
+              id="xpack.telemetry.telemetryErrorNotificationMessageDescription.unableToSaveTelemetryPreferenceText"
               defaultMessage="Unable to save telemetry preference."
             />
           </p>
           <EuiText size="xs">
             <FormattedMessage
-              id="xpack.main.telemetry.telemetryErrorNotificationMessageDescription.tryAgainText"
+              id="xpack.telemetry.telemetryErrorNotificationMessageDescription.tryAgainText"
               defaultMessage="Check that Kibana and Elasticsearch are still running, then try again."
             />
           </EuiText>

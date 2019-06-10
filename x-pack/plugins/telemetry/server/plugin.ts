@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerRoutes } from './routes'
 import { CoreSetup } from 'src/core/server';
+import { registerRoutes } from './routes';
 
 export class Plugin {
   public setup(core: CoreSetup) {

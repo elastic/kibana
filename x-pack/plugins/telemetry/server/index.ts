@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin } from './plugin';
 import { PluginInitializerContext } from 'src/core/server';
+import { Plugin } from './plugin';
 import * as constants from '../common/constants';
 
-export { getTelemetryOptIn } from './get_telemetry_opt_in'
+export { getTelemetryOptIn } from './get_telemetry_opt_in';
 export const plugin = (initializerContext: PluginInitializerContext) => new Plugin();
-export { constants }
+export { constants };

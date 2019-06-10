@@ -6,8 +6,8 @@
 
 import Joi from 'joi';
 import { boomify } from 'boom';
-import { getStats, encryptTelemetry } from '../collectors'
 import { CoreSetup } from 'src/core/server';
+import { getStats, encryptTelemetry } from '../collectors';
 
 export function registerTelemetryDataRoutes(core: CoreSetup) {
   const { server } = core.http;
@@ -20,10 +20,10 @@ export function registerTelemetryDataRoutes(core: CoreSetup) {
           unencrypted: Joi.bool(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+            max: Joi.date().required(),
+          }).required(),
+        }),
+      },
     },
     handler: async (req, h) => {
       const config = req.server.config();
@@ -41,11 +41,11 @@ export function registerTelemetryDataRoutes(core: CoreSetup) {
           // don't ignore errors when running in dev mode
           return boomify(err, { statusCode: err.status });
         } else {
-          const statusCode = (unencrypted && err.status === 403) ? 403 : 200;
+          const statusCode = unencrypted && err.status === 403 ? 403 : 200;
           // ignore errors and return empty set
           return h.response([]).code(statusCode);
         }
       }
-    }
+    },
   });
 }

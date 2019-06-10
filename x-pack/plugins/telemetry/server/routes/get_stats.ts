@@ -16,7 +16,14 @@ import { getAllStats, getLocalStats } from '../collectors';
  * @param {Boolean} unencrypted Is the request payload going to be unencrypted.
  * @return {Promise} An array of telemetry objects.
  */
-export async function getStats(req: any, config: any, start: string, end: string, unencrypted: boolean, statsGetters: any = {}) {
+export async function getStats(
+  req: any,
+  config: any,
+  start: string,
+  end: string,
+  unencrypted: boolean,
+  statsGetters: any = {}
+) {
   const { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = statsGetters;
   let response = [];
   const useInternalUser = !unencrypted;
