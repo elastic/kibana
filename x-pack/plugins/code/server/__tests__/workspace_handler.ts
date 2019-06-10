@@ -12,13 +12,16 @@ import mkdirp from 'mkdirp';
 import * as os from 'os';
 import rimraf from 'rimraf';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+
 import { LspRequest } from '../../model';
+import { GitOperations } from '../git_operations';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
 const workspaceDir = path.join(baseDir, 'workspace');
 const repoDir = path.join(baseDir, 'repo');
+const gitOps = new GitOperations(repoDir);
 
 describe('workspace_handler tests', () => {
   function handleResponseUri(wh: WorkspaceHandler, uri: string) {
@@ -60,7 +63,7 @@ describe('workspace_handler tests', () => {
 
   it('file system url should be converted', async () => {
     const workspaceHandler = new WorkspaceHandler(
-      repoDir,
+      gitOps,
       workspaceDir,
       // @ts-ignore
       null,
@@ -76,7 +79,7 @@ describe('workspace_handler tests', () => {
     fs.symlinkSync(workspaceDir, symlinkToWorkspace, 'dir');
     // @ts-ignore
     const workspaceHandler = new WorkspaceHandler(
-      repoDir,
+      gitOps,
       symlinkToWorkspace,
       // @ts-ignore
       null,
@@ -91,7 +94,7 @@ describe('workspace_handler tests', () => {
   it('should support spaces in workspace dir', async () => {
     const workspaceHasSpaces = path.join(baseDir, 'work  space');
     const workspaceHandler = new WorkspaceHandler(
-      repoDir,
+      gitOps,
       workspaceHasSpaces,
       // @ts-ignore
       null,
@@ -104,7 +107,7 @@ describe('workspace_handler tests', () => {
 
   it('should throw a error if url is invalid', async () => {
     const workspaceHandler = new WorkspaceHandler(
-      repoDir,
+      gitOps,
       workspaceDir,
       // @ts-ignore
       null,
@@ -141,7 +144,7 @@ describe('workspace_handler tests', () => {
 
   it('should throw a error if file path is external', async () => {
     const workspaceHandler = new WorkspaceHandler(
-      repoDir,
+      gitOps,
       workspaceDir,
       // @ts-ignore
       null,
