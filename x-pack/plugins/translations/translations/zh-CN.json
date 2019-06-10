@@ -7098,7 +7098,6 @@
     "xpack.ml.timeSeriesExplorer.refreshButtonAriLabel": "刷新",
     "xpack.ml.timeSeriesExplorer.requestedDetectorIndexNotValidWarningMessage": "请求的检测工具索引 {detectorIndex} 对于作业 {jobId} 无效",
     "xpack.ml.timeSeriesExplorer.runControls.durationLabel": "持续时间",
-    "xpack.ml.timeSeriesExplorer.runControls.forecastMaximumLengthHelpText": "预测的长度。使用 s 表示秒，m 表示分钟，h 表示小时，d 表示天，w 表示周。",
     "xpack.ml.timeSeriesExplorer.runControls.forecastsCanNotBeRunOnJobsTooltip": "{jobState} 作业上不能运行预测",
     "xpack.ml.timeSeriesExplorer.runControls.noMLNodesAvailableTooltip": "没有可用的 ML 节点。",
     "xpack.ml.timeSeriesExplorer.runControls.runButtonLabel": "运行",
