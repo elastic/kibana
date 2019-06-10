@@ -31,13 +31,6 @@ jest.mock('../../registry/field_formats', () => ({
   }
 }));
 
-jest.mock('../../utils/mapping_setup', {
-  expandShorthand: jest.fn().mockImplementation(() => ({
-    id: true,
-    title: true,
-  }))
-});
-
 jest.mock('../../notify', () => ({
   toastNotifications: {
     addDanger: jest.fn(),
