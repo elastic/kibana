@@ -90,7 +90,7 @@ function RangesParamEditor({ agg, value, setValue }: AggParamEditorProps<RangeVa
                 prepend={
                   <EuiFormLabel id={`visEditorRangeFrom${agg.id}_${id}`}>
                     <FormattedMessage
-                      id="common.ui.aggTypes.ranges.fromColumnLabel"
+                      id="common.ui.aggTypes.ranges.fromLabel"
                       defaultMessage="From"
                     />
                   </EuiFormLabel>
@@ -107,10 +107,7 @@ function RangesParamEditor({ agg, value, setValue }: AggParamEditorProps<RangeVa
               <EuiFieldNumber
                 prepend={
                   <EuiFormLabel id={`visEditorRangeTo${agg.id}_${id}`}>
-                    <FormattedMessage
-                      id="common.ui.aggTypes.ranges.toColumnLabel"
-                      defaultMessage="To"
-                    />
+                    <FormattedMessage id="common.ui.aggTypes.ranges.toLabel" defaultMessage="To" />
                   </EuiFormLabel>
                 }
                 aria-labelledby={`visEditorRangeTo${agg.id}_${id}`}
