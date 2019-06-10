@@ -236,7 +236,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
                 maxSnapshotBytesPerSec: e.target.value,
               });
             }}
-            data-test-subj="maxSnashotBytesInput"
+            data-test-subj="maxSnapshotBytesInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

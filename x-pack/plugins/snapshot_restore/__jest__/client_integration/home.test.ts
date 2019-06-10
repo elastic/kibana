@@ -7,6 +7,8 @@
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { SNAPSHOT_STATE } from '../../public/app/constants';
+import { API_BASE_PATH } from '../../common/constants';
+import { formatDate } from '../../public/app/services/text';
 import {
   setupEnvironment,
   pageHelpers,
@@ -158,19 +160,19 @@ describe('<SnapshotRestoreHome />', () => {
       });
 
       test('should have a button to reload the repositories', async () => {
-        const { component, exists, find } = testBed;
+        const { component, exists, find, actions } = testBed;
         const totalRequests = server.requests.length;
         expect(exists('reloadButton')).toBe(true);
 
         await act(async () => {
-          find('reloadButton').simulate('click');
+          actions.clickReloadButton();
           await nextTick();
           component.update();
         });
 
         expect(server.requests.length).toBe(totalRequests + 1);
         expect(server.requests[server.requests.length - 1].url).toBe(
-          '/api/snapshot_restore/repositories'
+          '${API_BASE_PATH}repositories'
         );
       });
 
@@ -230,7 +232,7 @@ describe('<SnapshotRestoreHome />', () => {
           const repositoryName = rows[0].columns[1].value;
 
           expect(latestRequest.method).toBe('DELETE');
-          expect(latestRequest.url).toBe(`/api/snapshot_restore/repositories/${repositoryName}`);
+          expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repositoryName}`);
         });
       });
 
@@ -253,7 +255,7 @@ describe('<SnapshotRestoreHome />', () => {
           expect(find('repositoryDetail.title').text()).toEqual(repo1.name);
         });
 
-        test('should show a loading while fetching the repository', async () => {
+        test('should show a loading state while fetching the repository', async () => {
           const { find, exists, actions } = testBed;
 
           // By providing undefined, the "loading section" will be displayed
@@ -309,9 +311,7 @@ describe('<SnapshotRestoreHome />', () => {
             const repositoryName = rows[0].columns[1].value;
 
             expect(latestRequest.method).toBe('GET');
-            expect(latestRequest.url).toBe(
-              `/api/snapshot_restore/repositories/${repositoryName}/verify`
-            );
+            expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repositoryName}/verify`);
           });
         });
 
@@ -434,7 +434,7 @@ describe('<SnapshotRestoreHome />', () => {
           expect(row).toEqual([
             snapshot.snapshot, // Snapshot
             REPOSITORY_NAME, // Repository
-            '23 May 2019 14:25:15', // Date created
+            formatDate(snapshot.startTimeInMillis), // Date created
             `${Math.ceil(snapshot.durationInMillis / 1000).toString()}s`, // Duration
             snapshot.indices.length.toString(), // Indices
             snapshot.shards.total.toString(), // Shards
@@ -465,20 +465,18 @@ describe('<SnapshotRestoreHome />', () => {
       });
 
       test('should have a button to reload the snapshots', async () => {
-        const { component, exists, find } = testBed;
+        const { component, exists, find, actions } = testBed;
         const totalRequests = server.requests.length;
         expect(exists('reloadButton')).toBe(true);
 
         await act(async () => {
-          find('reloadButton').simulate('click');
+          actions.clickReloadButton();
           await nextTick();
           component.update();
         });
 
         expect(server.requests.length).toBe(totalRequests + 1);
-        expect(server.requests[server.requests.length - 1].url).toBe(
-          '/api/snapshot_restore/snapshots'
-        );
+        expect(server.requests[server.requests.length - 1].url).toBe('${API_BASE_PATH}snapshots');
       });
 
       describe('detail panel', () => {

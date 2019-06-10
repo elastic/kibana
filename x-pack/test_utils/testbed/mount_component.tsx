@@ -22,13 +22,7 @@ interface Config {
   onRouter: (router: any) => void;
 }
 
-const getCompFromConfig = ({
-  Component,
-  memoryRouter,
-  store,
-  props,
-  onRouter,
-}: Config): ComponentType => {
+const getCompFromConfig = ({ Component, memoryRouter, store, onRouter }: Config): ComponentType => {
   const wrapWithRouter = memoryRouter.wrapComponent !== false;
 
   let Comp: ComponentType = store !== null ? WithStore(store)(Component) : Component;

@@ -29,6 +29,7 @@ const initTestBed = registerTestBed(WithProviders(SnapshotRestoreHome), testBedC
 
 export interface HomeTestBed extends TestBed<HomeTestSubjects> {
   actions: {
+    clickReloadButton: () => void;
     selectRepositoryAt: (index: number) => void;
     clickRepositoryAt: (index: number) => void;
     clickSnapshotAt: (index: number) => void;
@@ -42,32 +43,35 @@ export const setup = async (): Promise<HomeTestBed> => {
   const testBed = await initTestBed();
   const REPOSITORY_TABLE = 'repositoryTable';
   const SNAPSHOT_TABLE = 'snapshotTable';
+  const { find, table, router, component } = testBed;
 
   /**
    * User Actions
    */
+  const clickReloadButton = () => {
+    find('reloadButton').simulate('click');
+  };
 
   const selectRepositoryAt = (index: number) => {
-    const { rows } = testBed.table.getMetaData(REPOSITORY_TABLE);
+    const { rows } = table.getMetaData(REPOSITORY_TABLE);
     const row = rows[index];
     const checkBox = row.reactWrapper.find('input').hostNodes();
     checkBox.simulate('change', { target: { checked: true } });
   };
 
   const clickRepositoryAt = async (index: number) => {
-    const { rows } = testBed.table.getMetaData(REPOSITORY_TABLE);
+    const { rows } = table.getMetaData(REPOSITORY_TABLE);
     const repositoryLink = findTestSubject(rows[index].reactWrapper, 'repositoryLink');
 
     await act(async () => {
       const { href } = repositoryLink.props();
-      testBed.router.navigateTo(href!);
+      router.navigateTo(href!);
       await nextTick();
-      testBed.component.update();
+      component.update();
     });
   };
 
   const clickRepositoryActionAt = async (index: number, action: 'delete' | 'edit') => {
-    const { component, table } = testBed;
     const { rows } = table.getMetaData('repositoryTable');
     const currentRow = rows[index];
     const lastColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
@@ -80,14 +84,14 @@ export const setup = async (): Promise<HomeTestBed> => {
   };
 
   const clickSnapshotAt = async (index: number) => {
-    const { rows } = testBed.table.getMetaData(SNAPSHOT_TABLE);
+    const { rows } = table.getMetaData(SNAPSHOT_TABLE);
     const snapshotLink = findTestSubject(rows[index].reactWrapper, 'snapshotLink');
 
     await act(async () => {
       const { href } = snapshotLink.props();
-      testBed.router.navigateTo(href!);
+      router.navigateTo(href!);
       await nextTick(100);
-      testBed.component.update();
+      component.update();
     });
   };
 
@@ -112,6 +116,7 @@ export const setup = async (): Promise<HomeTestBed> => {
   return {
     ...testBed,
     actions: {
+      clickReloadButton,
       selectRepositoryAt,
       clickRepositoryAt,
       clickRepositoryActionAt,

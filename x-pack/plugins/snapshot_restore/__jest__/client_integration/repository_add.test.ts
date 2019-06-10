@@ -234,7 +234,7 @@ describe('<RepositoryAdd />', () => {
         form.selectCheckBox('compressToggle');
 
         const error = {
-          statusCode: 400,
+          status: 400,
           error: 'Bad request',
           message: 'Repository payload is invalid',
         };

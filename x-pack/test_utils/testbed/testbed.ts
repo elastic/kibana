@@ -230,10 +230,15 @@ export const registerTestBed = <T extends string = string>(
         return { rows, tableCellsValues };
       };
 
+      /**
+       * ----------------------------------------------------------------
+       * Router
+       * ----------------------------------------------------------------
+       */
       const navigateTo = (_url: string) => {
         const url =
           _url[0] === '#'
-            ? _url.replace('#', '') // remove the begging hash as the memory router does not understand them
+            ? _url.replace('#', '') // remove the beginning hash as the memory router does not understand them
             : _url;
         router.history.push(url);
       };

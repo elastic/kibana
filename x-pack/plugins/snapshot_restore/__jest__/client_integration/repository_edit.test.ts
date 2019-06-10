@@ -94,7 +94,7 @@ describe('<RepositoryEdit />', () => {
       expect(find('locationInput').props().defaultValue).toBe(settings.location);
       expect(find('compressToggle').props().checked).toBe(settings.compress);
       expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('maxSnashotBytesInput').props().defaultValue).toBe(
+      expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
         settings.maxSnapshotBytesPerSec
       );
       expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
@@ -200,7 +200,7 @@ describe('<RepositoryEdit />', () => {
 
       expect(find('uriInput').props().defaultValue).toBe('elastic.co');
       expect(find('pathInput').props().defaultValue).toBe(settings.path);
-      expect(find('loadDefaultToggle').props().checked).toBe(settings.loadDefault);
+      expect(find('loadDefaultsToggle').props().checked).toBe(settings.loadDefault);
       expect(find('compressToggle').props().checked).toBe(settings.compress);
       expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
       expect(find('securityPrincipalInput').props().defaultValue).toBe(

@@ -201,7 +201,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 loadDefaults: e.target.checked,
               });
             }}
-            data-test-subj="loadDefaultToggle"
+            data-test-subj="loadDefaultsToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
