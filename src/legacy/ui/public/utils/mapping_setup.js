@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import angular from 'angular';
+// import angular from 'angular';
 import _ from 'lodash';
 
 // eslint-disable-next-line import/no-default-export
@@ -26,7 +26,7 @@ export default function MappingSetupService() {
 
   const json = {
     _serialize: function (val) {
-      if (val != null) return angular.toJson(val);
+      if (val != null) return JSON.stringify(val);
     },
     _deserialize: function (val) {
       if (val != null) return JSON.parse(val);
