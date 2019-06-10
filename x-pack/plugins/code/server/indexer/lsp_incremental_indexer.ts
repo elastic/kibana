@@ -38,10 +38,11 @@ export class LspIncrementalIndexer extends LspIndexer {
     protected readonly originRevision: string,
     protected readonly lspService: LspService,
     protected readonly options: ServerOptions,
+    protected readonly gitOps: GitOperations,
     protected readonly client: EsClient,
     protected readonly log: Logger
   ) {
-    super(repoUri, revision, lspService, options, client, log);
+    super(repoUri, revision, lspService, options, gitOps, client, log);
   }
 
   public async start(progressReporter?: ProgressReporter, checkpointReq?: LspIncIndexRequest) {
@@ -150,9 +151,8 @@ export class LspIncrementalIndexer extends LspIndexer {
 
   protected async getIndexRequestCount(): Promise<number> {
     try {
-      const gitOperator = new GitOperations(this.options.repoPath);
       // cache here to avoid pulling the diff twice.
-      this.diff = await gitOperator.getDiff(this.repoUri, this.originRevision, this.revision);
+      this.diff = await this.gitOps.getDiff(this.repoUri, this.originRevision, this.revision);
       return this.diff.files.length;
     } catch (error) {
       this.log.error(`Get lsp incremental index requests count error.`);
