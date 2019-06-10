@@ -8,7 +8,7 @@
 import inlineStyle from 'inline-style';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 import {
   CSSStyle,
   FontFamily,
@@ -21,10 +21,10 @@ import {
 
 interface Arguments {
   align: TextAlignment;
-  color: string | null;
+  color: string;
   family: FontFamily;
   italic: boolean;
-  lHeight: number;
+  lHeight: number | null;
   size: number;
   underline: boolean;
   weight: FontWeight;
@@ -32,6 +32,7 @@ interface Arguments {
 
 export function font(): ExpressionFunction<'font', null, Arguments, Style> {
   const { help, args: argHelp } = getFunctionHelp().font;
+  const errors = getFunctionErrors().font;
 
   return {
     name: 'font',
@@ -50,7 +51,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       },
       color: {
         help: argHelp.color,
-        types: ['string', 'null'],
+        types: ['string'],
       },
       family: {
         default: `"${openSans.value}"`,
@@ -66,12 +67,12 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       lHeight: {
         aliases: ['lineHeight'],
         help: argHelp.lHeight,
-        types: ['number'],
+        types: ['number', 'null'],
       },
       size: {
+        types: ['number'],
         default: 14,
         help: argHelp.size,
-        types: ['number'],
       },
       underline: {
         default: false,
@@ -88,15 +89,15 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
     },
     fn: (_context, args) => {
       if (!Object.values(FontWeight).includes(args.weight)) {
-        throw new Error(`Invalid font weight: '${args.weight}'`);
+        throw errors.invalidFontWeight(args.weight);
       }
       if (!Object.values(TextAlignment).includes(args.align)) {
-        throw new Error(`Invalid text alignment: '${args.align}'`);
+        throw errors.invalidTextAlignment(args.align);
       }
 
       // the line height shouldn't ever be lower than the size, and apply as a
       // pixel setting
-      const lineHeight = args.lHeight ? `${args.lHeight}px` : 1;
+      const lineHeight = args.lHeight != null ? `${args.lHeight}px` : '1';
 
       const spec: CSSStyle = {
         fontFamily: args.family,

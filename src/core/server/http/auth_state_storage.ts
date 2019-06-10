@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Request } from 'hapi';
-import { KibanaRequest } from './router';
+import { KibanaRequest, toRawRequest } from './router';
 
 export enum AuthStatus {
   authenticated = 'authenticated',
@@ -25,17 +25,17 @@ export enum AuthStatus {
   unknown = 'unknown',
 }
 
-const toKey = (request: KibanaRequest | Request) =>
-  request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
+const getIncomingMessage = (request: KibanaRequest | Request) =>
+  request instanceof KibanaRequest ? toRawRequest(request).raw.req : request.raw.req;
 
 export class AuthStateStorage {
-  private readonly storage = new WeakMap<ReturnType<typeof toKey>, unknown>();
+  private readonly storage = new WeakMap<ReturnType<typeof getIncomingMessage>, unknown>();
   constructor(private readonly canBeAuthenticated: () => boolean) {}
   public set = (request: KibanaRequest | Request, state: unknown) => {
-    this.storage.set(toKey(request), state);
+    this.storage.set(getIncomingMessage(request), state);
   };
   public get = (request: KibanaRequest | Request) => {
-    const key = toKey(request);
+    const key = getIncomingMessage(request);
     const state = this.storage.get(key);
     const status: AuthStatus = this.storage.has(key)
       ? AuthStatus.authenticated
