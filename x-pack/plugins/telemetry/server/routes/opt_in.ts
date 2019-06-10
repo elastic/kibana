@@ -9,7 +9,7 @@ import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
 
 export function registerOptInRoutes(core: CoreSetup) {
-  const { server } = core.http;
+  const { server } = core.http as any;
 
   server.route({
     method: 'POST',
@@ -21,7 +21,7 @@ export function registerOptInRoutes(core: CoreSetup) {
         }),
       },
     },
-    handler: async (req, h) => {
+    handler: async (req: any, h: any) => {
       const savedObjectsClient = req.getSavedObjectsClient();
       try {
         await savedObjectsClient.create(

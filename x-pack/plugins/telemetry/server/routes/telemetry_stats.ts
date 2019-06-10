@@ -10,7 +10,8 @@ import { CoreSetup } from 'src/core/server';
 import { getStats, encryptTelemetry } from '../collectors';
 
 export function registerTelemetryDataRoutes(core: CoreSetup) {
-  const { server } = core.http;
+  const { server } = core.http as any;
+
   server.route({
     method: 'POST',
     path: '/api/telemetry/v2/clusters/_stats',
@@ -25,7 +26,7 @@ export function registerTelemetryDataRoutes(core: CoreSetup) {
         }),
       },
     },
-    handler: async (req, h) => {
+    handler: async (req: any, h: any) => {
       const config = req.server.config();
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
