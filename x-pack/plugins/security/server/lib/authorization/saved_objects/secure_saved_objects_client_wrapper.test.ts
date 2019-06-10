@@ -88,33 +88,6 @@ describe('#errors', () => {
 
 describe(`spaces disabled`, () => {
   describe('#create', () => {
-    test(`throws decorated GeneralError when checkPrivileges.globally rejects promise`, async () => {
-      const type = 'foo';
-      const {
-        mockErrors,
-        mockAuditLogger,
-        ensureSavedObjectsPrivileges,
-      } = createCheckSavedObjectsPrivileges(() => {
-        throw new Error('An actual error would happen here');
-      });
-
-      const client = new SecureSavedObjectsClientWrapper({
-        baseClient: (null as unknown) as SavedObjectsClientContract,
-        ensureSavedObjectsPrivileges,
-        errors: mockErrors as any,
-      });
-
-      await expect(client.create(type, {})).rejects.toThrowError(mockErrors.generalError);
-      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', undefined, {
-        attributes: {},
-        options: {},
-        type,
-      });
-      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
     test(`throws decorated ForbiddenError when unauthorized`, async () => {
       const type = 'foo';
       const username = Symbol();
@@ -250,39 +223,6 @@ describe(`spaces disabled`, () => {
   });
 
   describe('#bulkCreate', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const {
-        mockAuditLogger,
-        mockErrors,
-        ensureSavedObjectsPrivileges,
-      } = createCheckSavedObjectsPrivileges(async () => {
-        throw new Error('An actual error would happen here');
-      });
-
-      const client = new SecureSavedObjectsClientWrapper({
-        baseClient: (null as unknown) as SavedObjectsClientContract,
-        ensureSavedObjectsPrivileges,
-        errors: mockErrors as any,
-      });
-
-      const attributes = Symbol() as any;
-      const options = Symbol();
-      const objects = [{ type, attributes }];
-
-      await expect(client.bulkCreate(objects, options as any)).rejects.toThrowError(
-        mockErrors.generalError
-      );
-
-      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith([type], 'bulk_create', undefined, {
-        objects,
-        options,
-      });
-      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
     test(`throws decorated ForbiddenError when unauthorized`, async () => {
       const type1 = 'foo';
       const type2 = 'bar';
@@ -447,39 +387,6 @@ describe(`spaces disabled`, () => {
   });
 
   describe('#delete', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const mockCheckPrivileges = jest.fn(async () => {
-        throw new Error('An actual error would happen here');
-      });
-
-      const {
-        mockAuditLogger,
-        mockErrors,
-        ensureSavedObjectsPrivileges,
-      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
-
-      const id = Symbol() as any;
-      const options = Symbol() as any;
-
-      const client = new SecureSavedObjectsClientWrapper({
-        baseClient: (null as unknown) as SavedObjectsClientContract,
-        ensureSavedObjectsPrivileges,
-        errors: mockErrors as any,
-      });
-
-      await expect(client.delete(type, id, options)).rejects.toThrowError(mockErrors.generalError);
-
-      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', undefined, {
-        type,
-        id,
-        options,
-      });
-      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
     test(`throws decorated ForbiddenError when unauthorized`, async () => {
       const type = 'foo';
       const username = Symbol();
@@ -616,34 +523,6 @@ describe(`spaces disabled`, () => {
   });
 
   describe('#find', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const mockCheckPrivileges = jest.fn(async () => {
-        throw new Error('An actual error would happen here');
-      });
-
-      const {
-        mockAuditLogger,
-        mockErrors,
-        ensureSavedObjectsPrivileges,
-      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
-
-      const client = new SecureSavedObjectsClientWrapper({
-        baseClient: (null as unknown) as SavedObjectsClientContract,
-        ensureSavedObjectsPrivileges,
-        errors: mockErrors as any,
-      });
-
-      await expect(client.find({ type })).rejects.toThrowError(mockErrors.generalError);
-
-      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', undefined, {
-        options: { type },
-      });
-      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
     test(`throws decorated ForbiddenError when type's singular and unauthorized`, async () => {
       const type = 'foo';
       const username = Symbol();
@@ -809,36 +688,6 @@ describe(`spaces disabled`, () => {
   });
 
   describe('#bulkGet', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const mockCheckPrivileges = jest.fn(async () => {
-        throw new Error('An actual error would happen here');
-      });
-      const {
-        mockErrors,
-        mockAuditLogger,
-        ensureSavedObjectsPrivileges,
-      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
-
-      const client = new SecureSavedObjectsClientWrapper({
-        baseClient: (null as unknown) as SavedObjectsClientContract,
-        ensureSavedObjectsPrivileges,
-        errors: mockErrors as any,
-      });
-
-      const objects = [{ type, id: 'foo' }];
-      const options = Symbol() as any;
-      await expect(client.bulkGet(objects, options)).rejects.toThrowError(mockErrors.generalError);
-
-      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith([type], 'bulk_get', undefined, {
-        objects,
-        options,
-      });
-      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
     test(`throws decorated ForbiddenError when unauthorized`, async () => {
       const type1 = 'foo';
       const type2 = 'bar';
@@ -995,37 +844,6 @@ describe(`spaces disabled`, () => {
   });
 
   describe('#get', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const mockCheckPrivileges = jest.fn(async () => {
-        throw new Error('An actual error would happen here');
-      });
-      const {
-        mockAuditLogger,
-        mockErrors,
-        ensureSavedObjectsPrivileges,
-      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
-      const client = new SecureSavedObjectsClientWrapper({
-        baseClient: (null as unknown) as SavedObjectsClientContract,
-        ensureSavedObjectsPrivileges,
-        errors: mockErrors as any,
-      });
-
-      const id = Symbol() as any;
-      const options = Symbol() as any;
-
-      await expect(client.get(type, id, options)).rejects.toThrowError(mockErrors.generalError);
-
-      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', undefined, {
-        type,
-        id,
-        options,
-      });
-      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
     test(`throws decorated ForbiddenError when unauthorized`, async () => {
       const type = 'foo';
       const username = Symbol();
@@ -1162,41 +980,6 @@ describe(`spaces disabled`, () => {
   });
 
   describe('#update', () => {
-    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-      const type = 'foo';
-      const mockCheckPrivileges = jest.fn(async () => {
-        throw new Error('An actual error would happen here');
-      });
-      const {
-        mockAuditLogger,
-        mockErrors,
-        ensureSavedObjectsPrivileges,
-      } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
-      const client = new SecureSavedObjectsClientWrapper({
-        baseClient: (null as unknown) as SavedObjectsClientContract,
-        ensureSavedObjectsPrivileges,
-        errors: mockErrors as any,
-      });
-
-      const id = Symbol() as any;
-      const attributes = Symbol() as any;
-      const options = Symbol() as any;
-
-      await expect(client.update(type, id, attributes, options)).rejects.toThrowError(
-        mockErrors.generalError
-      );
-
-      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', undefined, {
-        type,
-        id,
-        attributes,
-        options,
-      });
-      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-    });
-
     test(`throws decorated ForbiddenError when unauthorized`, async () => {
       const type = 'foo';
       const username = Symbol();
