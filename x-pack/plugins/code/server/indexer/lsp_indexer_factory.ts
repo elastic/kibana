@@ -24,11 +24,16 @@ export class LspIndexerFactory implements IndexerFactory {
     this.objectClient = new RepositoryObjectClient(this.client);
   }
 
-  public async create(repoUri: RepositoryUri, revision: string): Promise<Indexer | undefined> {
+  public async create(
+    repoUri: RepositoryUri,
+    revision: string,
+    enforcedReindex: boolean = false
+  ): Promise<Indexer | undefined> {
     try {
       const repo = await this.objectClient.getRepository(repoUri);
       const indexedRevision = repo.indexedRevision;
-      if (indexedRevision) {
+      // Skip incremental indexer if enforced reindex.
+      if (!enforcedReindex && indexedRevision) {
         this.log.info(`Create indexer to index ${repoUri} from ${indexedRevision} to ${revision}`);
         // Create the indexer to index only the diff between these 2 revisions.
         return new LspIncrementalIndexer(
