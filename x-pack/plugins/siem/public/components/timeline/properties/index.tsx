@@ -303,6 +303,8 @@ export class Properties extends React.PureComponent<Props, State> {
 
           {title != null && title.length
             ? usersViewing.map(user => (
+                // Hide the hard-coded elastic user avatar as the 7.2 release does not implement
+                // support for multi-user-collaboration as proposed in elastic/ingest-dev#395
                 <HiddenFlexItem key={user}>
                   <EuiToolTip
                     data-test-subj="timeline-action-pin-tool-tip"
