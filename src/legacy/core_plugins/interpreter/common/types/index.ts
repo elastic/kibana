@@ -53,6 +53,7 @@ export const typeSpecs = [
 export * from './datatable';
 export * from './error';
 export * from './filter';
+export * from './image';
 export * from './kibana_context';
 export * from './kibana_datatable';
 export * from './pointseries';

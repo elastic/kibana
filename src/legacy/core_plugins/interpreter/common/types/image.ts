@@ -22,10 +22,16 @@ import { Render } from './render';
 
 const name = 'image';
 
-export const image = (): ExpressionTypeDef<typeof name, undefined> => ({
+export interface ExpressionImage {
+  type: 'image';
+  mode: string;
+  dataurl: string;
+}
+
+export const image = (): ExpressionTypeDef<typeof name, ExpressionImage> => ({
   name,
   to: {
-    render: <T>(input: T): Render<T> => {
+    render: (input): Render<Pick<ExpressionImage, 'mode' | 'dataurl'>> => {
       return {
         type: 'render',
         as: 'image',
