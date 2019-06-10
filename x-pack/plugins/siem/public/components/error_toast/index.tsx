@@ -26,7 +26,7 @@ interface DispatchProps {
 
 type Props = OwnProps & ReduxProps & DispatchProps;
 
-const ErrorToastComponent = ({ toastLifeTimeMs = 10000, errors = [], removeError }: Props) => {
+const ErrorToastComponent = ({ toastLifeTimeMs = 5000, errors = [], removeError }: Props) => {
   const [{ toasts }, dispatchToaster] = useStateToaster();
   useEffect(() => {
     errors.forEach(({ id, title, message }) => {

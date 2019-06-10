@@ -77,28 +77,11 @@ export const GlobalToaster = ({ toastLifeTimeMs = 5000 }: GlobalToasterProps) =>
     setIsShowing(!isShowing);
   };
 
-  let toastToShow: AppToast | null = null;
-  if (toasts != null && toasts.length > 0) {
-    toastToShow = toasts[0];
-    if (toastToShow != null && toastToShow.errors != null && toastToShow.errors.length > 0) {
-      toastToShow.text = (
-        <div style={{ textAlign: 'right' }}>
-          <EuiButton
-            size="s"
-            color="danger"
-            onClick={() => toastToShow != null && toggle(toastToShow)}
-          >
-            {i18n.SEE_ALL_ERRORS}
-          </EuiButton>
-        </div>
-      );
-    }
-  }
   return (
     <>
-      {toastToShow && !isShowing && (
+      {toasts != null && toasts.length > 0 && !isShowing && (
         <EuiGlobalToastList
-          toasts={[toastToShow]}
+          toasts={[formatToErrorToastIfNeeded(toasts[0], toggle)]}
           dismissToast={({ id }) => {
             dispatch({ type: 'deleteToaster', id });
           }}
@@ -110,4 +93,25 @@ export const GlobalToaster = ({ toastLifeTimeMs = 5000 }: GlobalToasterProps) =>
       )}
     </>
   );
+};
+
+const formatToErrorToastIfNeeded = (
+  toast: AppToast,
+  toggle: (toast: AppToast) => void
+): AppToast => {
+  if (toast != null && toast.errors != null && toast.errors.length > 0) {
+    toast.text = (
+      <div style={{ textAlign: 'right' }}>
+        <EuiButton
+          data-test-subj="toaster-show-all-error-modal"
+          size="s"
+          color="danger"
+          onClick={() => toast != null && toggle(toast)}
+        >
+          {i18n.SEE_ALL_ERRORS}
+        </EuiButton>
+      </div>
+    );
+  }
+  return toast;
 };

@@ -46,6 +46,7 @@ export const ModalAllErrors = ({ isShowing, toast, toggle }: FullErrorProps) =>
                 id="accordion1"
                 initialIsOpen={index === 0 ? true : false}
                 buttonContent={error.length > 100 ? `${error.substring(0, 100)} ...` : error}
+                data-test-subj="modal-all-errors-accordion"
               >
                 <EuiCodeBlock>{error}</EuiCodeBlock>
               </EuiAccordion>
@@ -53,7 +54,7 @@ export const ModalAllErrors = ({ isShowing, toast, toggle }: FullErrorProps) =>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButton onClick={() => toggle(toast)} fill>
+          <EuiButton onClick={() => toggle(toast)} fill data-test-subj="modal-all-errors-close">
             {i18n.CLOSE_ERROR_MODAL}
           </EuiButton>
         </EuiModalFooter>
