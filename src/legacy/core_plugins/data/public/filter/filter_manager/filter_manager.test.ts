@@ -97,7 +97,9 @@ describe('new_filter_manager', () => {
     test('should observe app state', done => {
       updateSubscription = filterManager.getUpdates$().subscribe(() => {
         expect(filterManager.getAppFilters()).toHaveLength(1);
-        updateSubscription && updateSubscription.unsubscribe();
+        if (updateSubscription) {
+          updateSubscription.unsubscribe();
+        }
         done();
       });
 
@@ -108,8 +110,9 @@ describe('new_filter_manager', () => {
     test('should observe global state', done => {
       updateSubscription = filterManager.getUpdates$().subscribe(() => {
         expect(filterManager.getGlobalFilters()).toHaveLength(1);
-        updateSubscription && updateSubscription.unsubscribe();
-        done();
+        if (updateSubscription) {
+          updateSubscription.unsubscribe();
+        }
       });
 
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
