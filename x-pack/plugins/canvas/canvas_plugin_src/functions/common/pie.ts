@@ -59,8 +59,8 @@ interface Pie {
 }
 
 interface Arguments {
-  palette: Palette | null;
-  seriesStyle: SeriesStyle[] | null;
+  palette: Palette;
+  seriesStyle: SeriesStyle[];
   radius: number | 'auto';
   hole: number;
   labels: boolean;
@@ -83,13 +83,13 @@ export function pie(): ExpressionFunction<'pie', PointSeries, Arguments, Render<
     },
     args: {
       palette: {
-        types: ['palette', 'null'],
+        types: ['palette'],
         help: argHelp.palette,
         default: '{palette}',
       },
       seriesStyle: {
         multi: true,
-        types: ['seriesStyle', 'null'],
+        types: ['seriesStyle'],
         help: argHelp.seriesStyle,
       },
       radius: {

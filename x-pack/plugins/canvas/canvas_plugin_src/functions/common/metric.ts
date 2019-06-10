@@ -9,7 +9,7 @@ import { openSans } from '../../../common/lib/fonts';
 import { Render, Style } from '../types';
 import { getFunctionHelp } from '../../strings';
 
-type Context = string | null;
+type Context = number | string | null;
 
 interface Arguments {
   label: string;
@@ -26,7 +26,7 @@ export function metric(): ExpressionFunction<'metric', Context, Arguments, Rende
     type: 'render',
     help,
     context: {
-      types: ['string', 'null'],
+      types: ['number', 'string', 'null'],
     },
     args: {
       label: {
