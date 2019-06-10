@@ -29,7 +29,7 @@ export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[
 
 const contextId = 'plain_column_renderer';
 
-// simple white-list to prevent dragging and dropping fields such as message name
+// simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
 export const plainColumnRenderer: ColumnRenderer = {
