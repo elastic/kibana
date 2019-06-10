@@ -102,14 +102,13 @@ export class I18nService {
             'Message when the color picker popover is opened. Describes the interaction with the elements in the popover.',
         }
       ),
-      'euiColorPicker.swatchAriaLabel': ({ swatch }: EuiValues) => (
-        <FormattedMessage
-          id="core.euiColorPicker.swatchAriaLabel"
-          defaultMessage="Select {swatch} as the color"
-          description="Screen reader text to describe the action and hex value of the selectable option"
-          values={{ swatch }}
-        />
-      ),
+      'euiColorPicker.swatchAriaLabel': ({ swatch }: EuiValues) =>
+        i18n.translate('core.euiColorPicker.swatchAriaLabel', {
+          defaultMessage: 'Select {swatch} as the color',
+          values: { swatch },
+          description:
+            'Screen reader text to describe the action and hex value of the selectable option',
+        }),
       'euiComboBoxOptionsList.allOptionsSelected': i18n.translate(
         'core.euiComboBoxOptionsList.allOptionsSelected',
         {
@@ -213,12 +212,9 @@ export class I18nService {
           defaultMessage: 'You are in a popup. To exit this popup, hit Escape.',
         }
       ),
-      'euiSaturation.roleDescription': () => (
-        <FormattedMessage
-          id="core.euiSaturation.roleDescription"
-          defaultMessage="HSV color mode saturation and value selection"
-        />
-      ),
+      'euiSaturation.roleDescription': i18n.translate('core.euiSaturation.roleDescription', {
+        defaultMessage: 'HSV color mode saturation and value selection',
+      }),
       'euiSaturation.screenReaderAnnouncement': i18n.translate(
         'core.euiSaturation.screenReaderAnnouncement',
         {
