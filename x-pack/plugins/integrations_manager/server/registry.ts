@@ -16,15 +16,33 @@ const cache: Map<string, Buffer> = new Map();
 const cacheGet = (key: string) => cache.get(key);
 const cacheSet = (key: string, value: Buffer) => cache.set(key, value);
 const cacheHas = (key: string) => cache.has(key);
-const cacheGetAll = () => cache.entries();
-const getArchiveKey = (key: string) => `${key}-archive`;
 
-const unzipFromBuffer = (buffer: Buffer): Promise<ZipFile> =>
-  new Promise((resolve, reject) =>
+function unzipFromBuffer(buffer: Buffer): Promise<ZipFile> {
+  return new Promise((resolve, reject) =>
     yauzl.fromBuffer(buffer, { lazyEntries: true }, (err?: Error, zipfile?: ZipFile) =>
       err ? reject(err) : resolve(zipfile)
     )
   );
+}
+
+function responseToString(response: http.IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const body: string[] = [];
+    response.on('data', (chunk: string) => body.push(chunk));
+    response.on('end', () => resolve(body.join('')));
+    response.on('error', reject);
+  });
+}
+
+function responseToBuffer(response: http.IncomingMessage): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    response
+      .on('data', chunk => chunks.push(Buffer.from(chunk)))
+      .on('end', () => resolve(Buffer.concat(chunks)))
+      .on('error', reject);
+  });
+}
 
 function getResponse(url: string): Promise<http.IncomingMessage> {
   const lib = url.startsWith('https') ? https : http;
@@ -49,13 +67,7 @@ export async function fetchInfo(key: string) {
 }
 
 async function fetchUrl(url: string): Promise<string> {
-  const response = await getResponse(url);
-  return new Promise((resolve, reject) => {
-    const body: string[] = [];
-    response.on('data', (chunk: string) => body.push(chunk));
-    response.on('end', () => resolve(body.join('')));
-    response.on('error', reject);
-  });
+  return getResponse(url).then(responseToString);
 }
 
 async function fetchJson(url: string): Promise<object> {
@@ -68,15 +80,8 @@ async function fetchJson(url: string): Promise<object> {
   }
 }
 
-async function fetchZipAsBuffer(key: string): Promise<Buffer> {
-  const response = await getResponse(`${REGISTRY}/package/${key}/get`);
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    response
-      .on('data', chunk => chunks.push(Buffer.from(chunk)))
-      .on('end', () => resolve(Buffer.concat(chunks)))
-      .on('error', reject);
-  });
+async function fetchArchiveBuffer(key: string): Promise<Buffer> {
+  return getResponse(`${REGISTRY}/package/${key}/get`).then(responseToBuffer);
 }
 
 async function filesFromBuffer(
@@ -117,9 +122,9 @@ async function getFiles(
 }
 
 async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
-  const archiveKey = getArchiveKey(key);
+  const archiveKey = `${key}-archive`;
   if (!cacheHas(archiveKey)) {
-    await fetchZipAsBuffer(key).then(buffer => cacheSet(archiveKey, buffer));
+    await fetchArchiveBuffer(key).then(buffer => cacheSet(archiveKey, buffer));
   }
 
   const buffer = cacheGet(archiveKey);

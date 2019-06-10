@@ -7,7 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Feature } from '../xpack_main/server/lib/feature_registry';
-import { CoreSetup, LegacyPluginInitializer, LegacyPluginOptions, Server } from './common/types';
+import {
+  CoreSetup,
+  LegacyPluginInitializer,
+  LegacyPluginOptions,
+  ServerPluginInitializerContext,
+  Server,
+} from './common/types';
 import { Plugin } from './server/plugin';
 import manifest from './kibana.json';
 import { PLUGIN_ID } from './common/constants';
@@ -79,7 +85,8 @@ const pluginOptions: LegacyPluginOptions = {
         route: server.route.bind(server),
       },
     };
-    new Plugin().setup(coreSetup);
+    const initializerContext: ServerPluginInitializerContext = {};
+    new Plugin(initializerContext).setup(coreSetup);
   },
   postInit: undefined,
   isEnabled: false,

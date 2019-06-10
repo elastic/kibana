@@ -6,8 +6,13 @@
 import { ServerRoute } from 'hapi';
 
 export { Request, Server, ServerRoute } from 'hapi';
-export { PluginInitializerContext } from 'src/core/server';
 export { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ClientPluginInitializerContext {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ServerPluginInitializerContext {}
 
 export interface CoreSetup {
   http: { route(route: ServerRoute | ServerRoute[]): void };

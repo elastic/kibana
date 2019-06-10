@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext } from '../common/types';
+import { ServerPluginInitializerContext } from '../common/types';
 import { Plugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin(initializerContext: ServerPluginInitializerContext) {
   return new Plugin(initializerContext);
 }
