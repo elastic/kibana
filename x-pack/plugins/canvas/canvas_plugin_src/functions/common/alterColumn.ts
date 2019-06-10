@@ -12,7 +12,7 @@ import { getFunctionHelp, getFunctionErrors } from '../../strings';
 interface Arguments {
   column: string;
   type: DatatableColumnType | null;
-  name: string | null;
+  name: string;
 }
 
 export function alterColumn(): ExpressionFunction<'alterColumn', Datatable, Arguments, Datatable> {
@@ -30,18 +30,17 @@ export function alterColumn(): ExpressionFunction<'alterColumn', Datatable, Argu
       column: {
         aliases: ['_'],
         types: ['string'],
+        required: true,
         help: argHelp.column,
       },
       type: {
         types: ['string'],
         help: argHelp.type,
-        default: null,
-        options: ['null', 'boolean', 'number', 'string'],
+        options: ['null', 'boolean', 'number', 'string', 'date'],
       },
       name: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.name,
-        default: null,
       },
     },
     fn: (context, args) => {

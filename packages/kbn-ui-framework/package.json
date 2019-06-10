@@ -22,7 +22,7 @@
     "react": "^16.2.0",
     "react-ace": "^5.9.0",
     "react-color": "^2.13.8",
-    "tabbable": "1.1.0",
+    "tabbable": "1.1.3",
     "uuid": "3.0.1"
   },
   "peerDependencies": {

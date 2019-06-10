@@ -195,6 +195,8 @@ export class LspIndexer extends AbstractIndexer {
       .set(IndexStatsKey.Reference, 0)
       .set(IndexStatsKey.File, 0);
     const { repoUri, revision, filePath, localRepoPath } = request;
+
+    this.log.debug(`Indexing ${filePath} at revision ${revision} for ${repoUri}`);
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const symbolNames = new Set<string>();
 

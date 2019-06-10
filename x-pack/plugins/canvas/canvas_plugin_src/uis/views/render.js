@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
+
 export const render = () => ({
   name: 'render',
   displayName: 'Element style',
@@ -20,9 +22,7 @@ export const render = () => ({
       displayName: 'CSS',
       help: 'A CSS stylesheet scoped to your element',
       argType: 'textarea',
-      default: `".canvasRenderEl {
-
-}"`,
+      default: `"${DEFAULT_ELEMENT_CSS}"`,
       options: {
         confirm: 'Apply stylesheet',
       },

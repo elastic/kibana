@@ -7,7 +7,7 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { DropdownFilter } from './dropdown_filter';
+import { DropdownFilter } from '../dropdown_filter';
 
 const choices = ['Item One', 'Item Two', 'Item Three'];
 
