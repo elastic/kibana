@@ -18,7 +18,7 @@ export const help: FunctionHelp<FunctionFactory<typeof markdown>> = {
     },
   }),
   args: {
-    expression: i18n.translate('xpack.canvas.functions.markdown.args.expressionHelpText', {
+    content: i18n.translate('xpack.canvas.functions.markdown.args.contentHelpText', {
       defaultMessage:
         'A {markdown} expression. You can pass this multiple times to achieve concatenation',
       values: {

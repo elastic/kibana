@@ -20,15 +20,15 @@ import { ElasticsearchIpOverviewAdapter, IpDetails } from '../ip_details';
 import { KpiNetwork } from '../kpi_network';
 import { ElasticsearchKpiNetworkAdapter } from '../kpi_network/elasticsearch_adapter';
 import { ElasticsearchNetworkAdapter, Network } from '../network';
-import { Note } from '../note';
-import { PinnedEvent } from '../pinned_event';
 import { Overview } from '../overview';
 import { ElasticsearchOverviewAdapter } from '../overview/elasticsearch_adapter';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs, Configuration } from '../types';
 import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../uncommon_processes';
-import { Timeline } from '../timeline';
+import { Note } from '../note/saved_object';
+import { PinnedEvent } from '../pinned_event/saved_object';
+import { Timeline } from '../timeline/saved_object';
 
 export function compose(server: Server): AppBackendLibs {
   const configuration = new KibanaConfigurationAdapter<Configuration>(server);

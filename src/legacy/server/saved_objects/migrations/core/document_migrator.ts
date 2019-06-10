@@ -64,7 +64,8 @@ import Boom from 'boom';
 import _ from 'lodash';
 import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
-import { MigrationVersion, RawSavedObjectDoc } from '../../serialization';
+import { RawSavedObjectDoc } from '../../serialization';
+import { MigrationVersion } from '../../';
 import { LogFn, Logger, MigrationLogger } from './migration_logger';
 
 export type TransformFn = (doc: RawSavedObjectDoc, log?: Logger) => RawSavedObjectDoc;

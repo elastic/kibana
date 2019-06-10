@@ -8,11 +8,11 @@ import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
 
 import { AreaChartBaseComponent, AreaChartWithCustomPrompt } from './areachart';
-import { AreaChartData } from './common';
+import { ChartConfigsData } from './common';
 
 describe('AreaChartBaseComponent', () => {
   let wrapper: ReactWrapper;
-  const mockAreaChartData: AreaChartData[] = [
+  const mockAreaChartData: ChartConfigsData[] = [
     {
       key: 'uniqueSourceIpsHistogram',
       value: [
@@ -99,7 +99,7 @@ describe('AreaChartWithCustomPrompt', () => {
         ],
       ],
     ],
-  ])('renders areachart', (data: AreaChartData[] | [] | null | undefined) => {
+  ])('renders areachart', (data: ChartConfigsData[] | [] | null | undefined) => {
     beforeAll(() => {
       wrapper = mount(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
     });
@@ -181,7 +181,7 @@ describe('AreaChartWithCustomPrompt', () => {
         },
       ],
     ],
-  ])('renders prompt', (data: AreaChartData[] | [] | null | undefined) => {
+  ])('renders prompt', (data: ChartConfigsData[] | [] | null | undefined) => {
     beforeAll(() => {
       wrapper = mount(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
     });
