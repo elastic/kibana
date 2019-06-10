@@ -14,7 +14,6 @@ import {
   GitOperations,
   referenceInfo,
 } from '../git_operations';
-import { ServerOptions } from '../server_options';
 import { extractLines } from '../utils/buffer';
 import { detectLanguage } from '../utils/detect_language';
 import { CodeServerRouter } from '../security';
@@ -22,7 +21,7 @@ import { RepositoryObjectClient } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { TEXT_FILE_LIMIT } from '../../common/file';
 
-export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
+export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
   async function repoExists(req: hapi.Request, repoUri: string) {
     const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
 
@@ -39,7 +38,6 @@ export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
     method: 'GET',
     async handler(req: hapi.Request) {
-      const fileResolver = new GitOperations(options.repoPath);
       const { uri, path, ref } = req.params;
       const queries = req.query as RequestQuery;
       const limit = queries.limit
@@ -55,16 +53,7 @@ export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
       }
 
       try {
-        return await fileResolver.fileTree(
-          uri,
-          path,
-          ref,
-          skip,
-          limit,
-          withParents,
-          depth,
-          flatten
-        );
+        return await gitOps.fileTree(uri, path, ref, skip, limit, withParents, depth, flatten);
       } catch (e) {
         if (e.isBoom) {
           return e;
@@ -79,14 +68,13 @@ export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
     path: '/api/code/repo/{uri*3}/blob/{ref}/{path*}',
     method: 'GET',
     async handler(req: hapi.Request, h: hapi.ResponseToolkit) {
-      const fileResolver = new GitOperations(options.repoPath);
       const { uri, path, ref } = req.params;
       const repoExist = await repoExists(req, uri);
       if (!repoExist) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       try {
-        const blob = await fileResolver.fileContent(uri, path, decodeURIComponent(ref));
+        const blob = await gitOps.fileContent(uri, path, decodeURIComponent(ref));
         if (blob.isBinary()) {
           const type = fileType(blob.content());
           if (type && type.mime && type.mime.startsWith('image/')) {
@@ -133,14 +121,13 @@ export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
     path: '/app/code/repo/{uri*3}/raw/{ref}/{path*}',
     method: 'GET',
     async handler(req, h: hapi.ResponseToolkit) {
-      const fileResolver = new GitOperations(options.repoPath);
       const { uri, path, ref } = req.params;
       const repoExist = await repoExists(req, uri);
       if (!repoExist) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       try {
-        const blob = await fileResolver.fileContent(uri, path, ref);
+        const blob = await gitOps.fileContent(uri, path, ref);
         if (blob.isBinary()) {
           return h.response(blob.content()).type('application/octet-stream');
         } else {
@@ -169,7 +156,6 @@ export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
   });
 
   async function historyHandler(req: hapi.Request) {
-    const gitOperations = new GitOperations(options.repoPath);
     const { uri, ref, path } = req.params;
     const queries = req.query as RequestQuery;
     const count = queries.count ? parseInt(queries.count as string, 10) : 10;
@@ -179,8 +165,8 @@ export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
       if (!repoExist) {
         return Boom.notFound(`repo ${uri} not found`);
       }
-      const repository = await gitOperations.openRepo(uri);
-      const commit = await gitOperations.getCommit(repository, decodeURIComponent(ref));
+      const repository = await gitOps.openRepo(uri);
+      const commit = await gitOps.getCommit(uri, decodeURIComponent(ref));
       const walk = repository.createRevWalk();
       walk.sorting(Revwalk.SORT.TIME);
       walk.push(commit.id());
@@ -211,14 +197,13 @@ export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
     path: '/api/code/repo/{uri*3}/references',
     method: 'GET',
     async handler(req) {
-      const gitOperations = new GitOperations(options.repoPath);
       const uri = req.params.uri;
       const repoExist = await repoExists(req, uri);
       if (!repoExist) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       try {
-        const repository = await gitOperations.openRepo(uri);
+        const repository = await gitOps.openRepo(uri);
         const references = await repository.getReferences(Reference.TYPE.DIRECT);
         const referenceInfos = await Promise.all(references.map(referenceInfo));
         return referenceInfos.filter(info => info !== null);
@@ -236,14 +221,13 @@ export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
     path: '/api/code/repo/{uri*3}/diff/{revision}',
     method: 'GET',
     async handler(req) {
-      const gitOperations = new GitOperations(options.repoPath);
       const { uri, revision } = req.params;
       const repoExist = await repoExists(req, uri);
       if (!repoExist) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       try {
-        const diff = await gitOperations.getCommitDiff(uri, revision);
+        const diff = await gitOps.getCommitDiff(uri, revision);
         return diff;
       } catch (e) {
         if (e.isBoom) {
@@ -259,14 +243,13 @@ export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
     path: '/api/code/repo/{uri*3}/blame/{revision}/{path*}',
     method: 'GET',
     async handler(req) {
-      const gitOperations = new GitOperations(options.repoPath);
       const { uri, path, revision } = req.params;
       const repoExist = await repoExists(req, uri);
       if (!repoExist) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       try {
-        const blames = await gitOperations.blame(uri, decodeURIComponent(revision), path);
+        const blames = await gitOps.blame(uri, decodeURIComponent(revision), path);
         return blames;
       } catch (e) {
         if (e.isBoom) {

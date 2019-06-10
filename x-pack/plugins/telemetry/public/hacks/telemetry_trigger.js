@@ -5,7 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { PathProvider } from 'plugins/xpack_main/services/path';
+import { Path } from 'plugins/xpack_main/services/path';
 import { Telemetry } from './telemetry';
 import { fetchTelemetry } from './fetch_telemetry';
 import { npStart } from 'ui/new_platform';
@@ -14,9 +14,8 @@ function telemetryStart($injector) {
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
 
   if (telemetryEnabled) {
-    const Private = $injector.get('Private');
     // no telemetry for non-logged in users
-    if (Private(PathProvider).isUnauthenticated()) { return; }
+    if (Path.isUnauthenticated()) { return; }
 
     const $http = $injector.get('$http');
     const sender = new Telemetry($injector, () => fetchTelemetry($http));
