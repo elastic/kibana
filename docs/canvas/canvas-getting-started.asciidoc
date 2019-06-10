@@ -2,27 +2,14 @@
 [[canvas-getting-started]]
 == Getting started with Canvas
 
-Canvas is a data visualization and presentation tool that sits within Kibana. Backed by Elasticsearch, Canvas allows you to combine data with colors, images, text, and your imagination to bring dynamic, multi-page, pixel-perfect displays to screens large and small. If you are a little bit creative, a little bit technical, and a whole lot curious, then Canvas is for you. 
-
-With Canvas, you can:
-
-* Create and personalize your work space with backgrounds, borders, colors, fonts, and more. 
-
-* Customize your workpad with your own visualizations, such as images and text.
-
-* Show off your data with charts, graphs, progress monitors, and more.
-
-* Focus the data you want to display with filters.
-
-<<link to some examples of Canvas in use>>
-
-For a quick overview of Canvas, watch this video: https://www.youtube.com/watch?v=ZqvF_5-1xjQ. 
+To get up and running with Canvas, use the following tutorial where you'll create a display for monitoring sales at an eCommerce store.
 
 [float]
 === Before you begin
 
-For this tutorial, you'll use the {kibana-ref}/add-sample-data.html[*Sample eCommerce orders* data].
+For this tutorial, you'll use the {kibana-ref}/add-sample-data.html[Sample eCommerce orders data].
 
+[float]
 === Create and personalize your workpad
 
 Your first step to working with Canvas is to create a workpad. 
@@ -37,6 +24,7 @@ Your first step to working with Canvas is to create a workpad.
 
 .. Change the page *Background color* to light gray.
 
+[float]
 === Customize your workpad
 
 To customize your workpad to look the way you want, add your own images and text.
@@ -51,8 +39,6 @@ The default Elastic logo image appears on your page.
 +
 You'll notice that the image is tagged as an asset, which allows you to reuse the image from *Manage assets*.
 
-//Add image
-
 . Click *Add element*, then click *Metric*. 
 +
 By default, the *Metric* element is connected to a demo data source, which enables you to experiment with the element before you connect it to your own data source.
@@ -61,11 +47,9 @@ By default, the *Metric* element is connected to a demo data source, which enabl
 
 .. Click *Change your data source*, then click *Elasticsearch SQL*.
 
-.. Copy and paste `SELECT sum(taxless_total_price) AS sum_total_price FROM "kibana_sample_data_ecommerce"` into the *Elasticsearch SQL query* field.
+.. In the *Elasticsearch SQL query* field, enter `SELECT sum(taxless_total_price) AS sum_total_price FROM "kibana_sample_data_ecommerce"`.
 +
 The query selects the total price field and sets it to the sum_total_price field. These fields are pulled from the kibana_sample_data_ecommerce index that you installed.
-
-//Add image
 
 .. To verify that the data is correct, click *Preview*. If you like what you see, click *Save*.
 +
@@ -76,8 +60,6 @@ At this point, the element displays an error.
 .. Click *Display*
 
 .. Under *Number*, select *Value* from the function drop-down list, then select *sum_total_price* from the column drop-down list.
-
-//Add image
 
 .. Change the *Label* to 'Total sales'.
 +
@@ -93,12 +75,12 @@ You're now looking at the raw data syntax that Canvas uses to display the elemen
 
 .. To update the number, click *Run*.
 
-//Add image
-
-.. When you are done, click *Close* on the *Expression editor*.
+[role="screenshot"]
+image::images/customize-your-workpad.png[]
 
 TIP: Want to delete an element? Click the back button on your browser.
 
+[float]
 === Show off your data
 
 To show what your data can do, add and customize charts, graphs, progress monitors, and more.
@@ -123,8 +105,7 @@ Although you used the Elasticsearch SQL data source for the metric and area char
 
 .. From the *Y-axis* drop-down lists, select *Value*, then select *taxless_total_price*.
 
-//Add image
-
+[float]
 === Show how your data changes over time
 
 To focus your data on a specific time range, apply a time filter. 
@@ -139,12 +120,33 @@ To focus your data on a specific time range, apply a time filter.
 +
 To see how the data changes, set the time filter to *Last 7 days*. As you change the time filter options, the metrics dynamically update.
 
-//Add image
-
 Your workpad is now complete! Use the icons in the upper left corner to:
 
 * Share your workpad
 
 * Display your workpad in fullscreen mode
 
-* Download your workpad as a PDF report or JSON object 
+* Download your workpad as a PDF report or JSON object
+
+[float]
+=== Next steps
+Now that you know the Canvas basics, you're ready to explore on your own. 
+
+Here are some things to try:
+
+* Play with the {kibana-ref}/add-sample-data.html[sample Canvas workpads]. 
+
+//* Learn more about:
+
+//** Workpads
+//** Assets
+//** Data sources
+//** Elements
+
+* Deep dive into the {kibana-ref}/canvas-function-reference.html[expression language and functions] that drive Canvas.
+
+
+
+
+
+
