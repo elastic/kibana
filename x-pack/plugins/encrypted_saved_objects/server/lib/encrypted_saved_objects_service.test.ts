@@ -327,7 +327,8 @@ describe('#encryptAttributes', () => {
   });
 });
 
-describe('#decryptAttributes', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/37518
+describe.skip('#decryptAttributes', () => {
   it('does not decrypt attributes for unknown types', async () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 

@@ -46,7 +46,7 @@ export class IndexWorker extends AbstractWorker {
 
   public async executeJob(job: Job) {
     const { payload, cancellationToken } = job;
-    const { uri, revision } = payload;
+    const { uri, revision, enforceReindex } = payload;
     const indexerNumber = this.indexerFactories.length;
 
     const workerProgress = (await this.objectClient.getRepositoryLspIndexStatus(
@@ -88,7 +88,7 @@ export class IndexWorker extends AbstractWorker {
     this.cancellationService.cancelIndexJob(uri);
     const indexPromises: Array<Promise<IndexStats>> = this.indexerFactories.map(
       async (indexerFactory: IndexerFactory, index: number) => {
-        const indexer = await indexerFactory.create(uri, revision);
+        const indexer = await indexerFactory.create(uri, revision, enforceReindex);
         if (!indexer) {
           this.log.info(`Failed to create indexer for ${uri}`);
           return new Map(); // return an empty map as stats.

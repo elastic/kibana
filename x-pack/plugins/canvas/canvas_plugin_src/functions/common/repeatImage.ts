@@ -15,7 +15,7 @@ import { getFunctionHelp } from '../../strings';
 interface Arguments {
   image: string | null;
   size: number;
-  max: number | null;
+  max: number;
   emptyImage: string | null;
 }
 
@@ -47,7 +47,7 @@ export function repeatImage(): ExpressionFunction<
         help: argHelp.size,
       },
       max: {
-        types: ['number', 'null'],
+        types: ['number'],
         help: argHelp.max,
         default: 1000,
       },
