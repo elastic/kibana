@@ -33,5 +33,3 @@ It’s a bit hard to differentiate the two series. Customize the labels in order
 
 image::images/timelion-create03.png[]
 {nbsp}
-
-Save the entire Timelion sheet as _Metricbeat Example_. As a best practice, you should be saving any significant changes made to this sheet as you progress through this tutorial.

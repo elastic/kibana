@@ -8,23 +8,26 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
-  condition: boolean[] | null;
+  condition: boolean[];
 }
 
-export function all(): ExpressionFunction<'all', any, Arguments, boolean> {
+export function all(): ExpressionFunction<'all', null, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().all;
 
   return {
     name: 'all',
     type: 'boolean',
     help,
+    context: {
+      types: ['null'],
+    },
     args: {
       condition: {
         aliases: ['_'],
-        types: ['boolean', 'null'],
+        types: ['boolean'],
+        help: argHelp.condition,
         required: true,
         multi: true,
-        help: argHelp.condition,
       },
     },
     fn: (_context, args) => {

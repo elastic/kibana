@@ -20,7 +20,7 @@ import { getFunctionHelp } from '../../../strings';
 import { AxisConfig, PointSeries, Render, SeriesStyle, Style, Palette, Legend } from '../../types';
 
 interface Arguments {
-  seriesStyle: SeriesStyle[] | null;
+  seriesStyle: SeriesStyle[];
   defaultStyle: SeriesStyle;
   palette: Palette;
   font: Style;
@@ -43,7 +43,7 @@ export function plot(): ExpressionFunction<'plot', PointSeries, Arguments, Rende
     args: {
       seriesStyle: {
         multi: true,
-        types: ['seriesStyle', 'null'],
+        types: ['seriesStyle'],
         help: argHelp.seriesStyle,
       },
       defaultStyle: {

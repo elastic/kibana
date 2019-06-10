@@ -33,7 +33,7 @@ export interface FilterMeta {
 
 export interface Filter {
   meta: FilterMeta;
-  query: object;
+  query?: object;
 }
 
 export type Filters = Filter[];

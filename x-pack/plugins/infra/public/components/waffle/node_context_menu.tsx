@@ -56,83 +56,69 @@ export const NodeContextMenu = injectUICapabilities(
         [InfraNodeType.pod]: 'kubernetes.pod.uid',
       };
 
-      const nodeLogsUrl =
-        node.id && uiCapabilities.logs.show
-          ? getNodeLogsUrl({
-              nodeType,
-              nodeId: node.id,
-              time: timeRange.to,
-            })
-          : undefined;
-      const nodeDetailUrl = node.id
-        ? getNodeDetailUrl({
-            nodeType,
-            nodeId: node.id,
-            from: timeRange.from,
-            to: timeRange.to,
-          })
-        : undefined;
+      const nodeLogsMenuItem = {
+        name: intl.formatMessage({
+          id: 'xpack.infra.nodeContextMenu.viewLogsName',
+          defaultMessage: 'View logs',
+        }),
+        href: getNodeLogsUrl({
+          nodeType,
+          nodeId: node.id,
+          time: timeRange.to,
+        }),
+        'data-test-subj': 'viewLogsContextMenuItem',
+      };
 
-      const apmTracesUrl =
-        uiCapabilities.apm && uiCapabilities.apm.show
-          ? {
-              name: intl.formatMessage(
-                {
-                  id: 'xpack.infra.nodeContextMenu.viewAPMTraces',
-                  defaultMessage: 'View {nodeType} APM traces',
-                },
-                { nodeType }
-              ),
-              href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${
-                node.id
-              }~22`,
-              'data-test-subj': 'viewApmTracesContextMenuItem',
-            }
-          : undefined;
+      const nodeDetailMenuItem = {
+        name: intl.formatMessage({
+          id: 'xpack.infra.nodeContextMenu.viewMetricsName',
+          defaultMessage: 'View metrics',
+        }),
+        href: getNodeDetailUrl({
+          nodeType,
+          nodeId: node.id,
+          from: timeRange.from,
+          to: timeRange.to,
+        }),
+      };
 
-      const uptimeUrl = node.ip
-        ? {
-            name: intl.formatMessage(
-              {
-                id: 'xpack.infra.nodeContextMenu.viewUptimeLink',
-                defaultMessage: 'View {nodeType} in Uptime',
-              },
-              { nodeType }
-            ),
-            href: createUptimeLink(options, nodeType, node),
-          }
-        : undefined;
+      const apmTracesMenuItem = {
+        name: intl.formatMessage(
+          {
+            id: 'xpack.infra.nodeContextMenu.viewAPMTraces',
+            defaultMessage: 'View {nodeType} APM traces',
+          },
+          { nodeType }
+        ),
+        href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
+        'data-test-subj': 'viewApmTracesContextMenuItem',
+      };
+
+      const uptimeMenuItem = {
+        name: intl.formatMessage(
+          {
+            id: 'xpack.infra.nodeContextMenu.viewUptimeLink',
+            defaultMessage: 'View {nodeType} in Uptime',
+          },
+          { nodeType }
+        ),
+        href: createUptimeLink(options, nodeType, node),
+      };
+
+      const showLogsLink = node.id && uiCapabilities.logs.show;
+      const showAPMTraceLink = uiCapabilities.apm && uiCapabilities.apm.show;
+      const showUptimeLink =
+        [InfraNodeType.pod, InfraNodeType.container].includes(nodeType) || node.ip;
 
       const panels: EuiContextMenuPanelDescriptor[] = [
         {
           id: 0,
           title: '',
           items: [
-            ...(nodeLogsUrl
-              ? [
-                  {
-                    name: intl.formatMessage({
-                      id: 'xpack.infra.nodeContextMenu.viewLogsName',
-                      defaultMessage: 'View logs',
-                    }),
-                    href: nodeLogsUrl,
-                    'data-test-subj': 'viewLogsContextMenuItem',
-                  },
-                ]
-              : []),
-            ...(nodeDetailUrl
-              ? [
-                  {
-                    name: intl.formatMessage({
-                      id: 'xpack.infra.nodeContextMenu.viewMetricsName',
-                      defaultMessage: 'View metrics',
-                    }),
-                    href: nodeDetailUrl,
-                  },
-                ]
-              : []),
-            ...(apmTracesUrl ? [apmTracesUrl] : []),
-            ...(uptimeUrl ? [uptimeUrl] : []),
+            ...(showLogsLink ? [nodeLogsMenuItem] : []),
+            nodeDetailMenuItem,
+            ...(showAPMTraceLink ? [apmTracesMenuItem] : []),
+            ...(showUptimeLink ? [uptimeMenuItem] : []),
           ],
         },
       ];
