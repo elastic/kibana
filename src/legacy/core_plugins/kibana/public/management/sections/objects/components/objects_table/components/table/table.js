@@ -36,6 +36,7 @@ import {
   EuiText
 } from '@elastic/eui';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../../lib';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class TableUI extends PureComponent {
@@ -254,8 +255,6 @@ class TableUI extends PureComponent {
       );
     }
 
-    const unableToDeleteSavedObjectTypes = this.props.canDelete ? [] : selectedSavedObjects.map(({ type }) => type);
-
     const button = (
       <EuiButton
         iconType="arrowDown"
@@ -284,10 +283,15 @@ class TableUI extends PureComponent {
               onClick={onDelete}
               isDisabled={
                 selectedSavedObjects.length === 0 ||
-                unableToDeleteSavedObjectTypes.length > 0
+                !this.props.canDelete
               }
               title={
-                unableToDeleteSavedObjectTypes.length > 0 ? `Unable to delete ${unableToDeleteSavedObjectTypes.join(', ')}` : undefined
+                this.props.canDelete
+                  ? undefined
+                  : i18n.translate(
+                    'kbn.management.objects.objectsTable.table.deleteButtonTitle',
+                    { defaultMessage: 'Unable to delete saved objects' }
+                  )
               }
               data-test-subj="savedObjectsManagementDelete"
             >

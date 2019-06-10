@@ -35,7 +35,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           isDisabled={true}
           onClick={[Function]}
           size="m"
-          title="Unable to delete visualization, search, index-pattern"
+          title="Unable to delete saved objects"
           type="button"
         >
           <FormattedMessage
