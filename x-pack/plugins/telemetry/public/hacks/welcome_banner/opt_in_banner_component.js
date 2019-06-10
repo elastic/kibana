@@ -58,7 +58,7 @@ export class OptInBanner extends Component {
         <EuiText>
           <p tabIndex="0">
             <FormattedMessage
-              id="xpack.main.welcomeBanner.telemetryConfigDetailsDescription"
+              id="xpack.telemetry.welcomeBanner.telemetryConfigDetailsDescription"
               defaultMessage="No information about the data you process or store will be sent. This feature
                 will periodically send basic feature usage statistics. See an {exampleLink} or read our {telemetryPrivacyStatementLink}.
                 You can disable this feature at any time."
@@ -66,7 +66,7 @@ export class OptInBanner extends Component {
                 exampleLink: (
                   <EuiLink onClick={() => this.setState({ showExample: !this.state.showExample })}>
                     <FormattedMessage
-                      id="xpack.main.welcomeBanner.telemetryConfigDetailsDescription.exampleLinkText"
+                      id="xpack.telemetry.welcomeBanner.telemetryConfigDetailsDescription.exampleLinkText"
                       defaultMessage="example"
                     />
                   </EuiLink>
@@ -74,7 +74,7 @@ export class OptInBanner extends Component {
                 telemetryPrivacyStatementLink: (
                   <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank" >
                     <FormattedMessage
-                      id="xpack.main.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
+                      id="xpack.telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
                       defaultMessage="telemetry privacy statement"
                     />
                   </EuiLink>
@@ -99,7 +99,7 @@ export class OptInBanner extends Component {
           {getConfigTelemetryDesc()} {(
             <EuiLink onClick={() => this.setState({ showDetails: true })}>
               <FormattedMessage
-                id="xpack.main.welcomeBanner.telemetryConfigDescription.readMoreLinkText"
+                id="xpack.telemetry.welcomeBanner.telemetryConfigDescription.readMoreLinkText"
                 defaultMessage="Read more"
               />
             </EuiLink>
@@ -124,7 +124,7 @@ export class OptInBanner extends Component {
               onClick={() => this.props.optInClick(true)}
             >
               <FormattedMessage
-                id="xpack.main.welcomeBanner.yesButtonLabel"
+                id="xpack.telemetry.welcomeBanner.yesButtonLabel"
                 defaultMessage="Yes"
               />
             </EuiButton>
@@ -135,7 +135,7 @@ export class OptInBanner extends Component {
               onClick={() => this.props.optInClick(false)}
             >
               <FormattedMessage
-                id="xpack.main.welcomeBanner.noButtonLabel"
+                id="xpack.telemetry.welcomeBanner.noButtonLabel"
                 defaultMessage="No"
               />
             </EuiButton>
