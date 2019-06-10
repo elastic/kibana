@@ -119,7 +119,10 @@ export class Timeline {
     return {
       savedObjectId: persistResponse.timeline.savedObjectId,
       version: persistResponse.timeline.version,
-      favorite: persistResponse.timeline.favorite != null ? persistResponse.timeline.favorite : [],
+      favorite:
+        persistResponse.timeline.favorite != null
+          ? persistResponse.timeline.favorite.filter(fav => fav.userName === userName)
+          : [],
     };
   }
 
@@ -203,6 +206,8 @@ export class Timeline {
   }
 
   private async getSavedTimeline(request: FrameworkRequest, timelineId: string) {
+    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
+
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
       request[internalFrameworkRequest]
     );
@@ -217,10 +222,12 @@ export class Timeline {
 
     const [notes, pinnedEvents, timeline] = timelineWithNotesAndPinnedEvents;
 
-    return timelineWithReduxProperties(notes, pinnedEvents, timeline);
+    return timelineWithReduxProperties(notes, pinnedEvents, timeline, userName);
   }
 
   private async getAllSavedTimeline(request: FrameworkRequest, options: FindOptions) {
+    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
+
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
       request[internalFrameworkRequest]
     );
@@ -254,7 +261,7 @@ export class Timeline {
     return {
       totalCount: savedObjects.total,
       timeline: timelinesWithNotesAndPinnedEvents.map(([notes, pinnedEvents, timeline]) =>
-        timelineWithReduxProperties(notes, pinnedEvents, timeline)
+        timelineWithReduxProperties(notes, pinnedEvents, timeline, userName)
       ),
     };
   }
@@ -270,9 +277,12 @@ export class Timeline {
 const timelineWithReduxProperties = (
   notes: NoteSavedObject[],
   pinnedEvents: PinnedEventSavedObject[],
-  timeline: TimelineSavedObject
+  timeline: TimelineSavedObject,
+  userName: string
 ): TimelineSavedObject => ({
   ...timeline,
+  favorite:
+    timeline.favorite != null ? timeline.favorite.filter(fav => fav.userName === userName) : [],
   eventIdToNoteIds: notes.filter(note => note.eventId != null),
   noteIds: notes
     .filter(note => note.eventId == null && note.noteId != null)
