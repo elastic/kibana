@@ -11,7 +11,10 @@ import { ResponseError } from 'vscode-jsonrpc';
 
 import { ProgressReporter } from '.';
 import { TEXT_FILE_LIMIT } from '../../common/file';
-import { LanguageServerNotInstalled } from '../../common/lsp_error_codes';
+import {
+  LanguageServerNotInstalled,
+  LanguageServerStartFailed,
+} from '../../common/lsp_error_codes';
 import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
@@ -248,6 +251,10 @@ export class LspIndexer extends AbstractIndexer {
       if (error instanceof ResponseError && error.code === LanguageServerNotInstalled) {
         // TODO maybe need to report errors to the index task and warn user later
         this.log.debug(`Index symbols or references error due to language server not installed`);
+      } else if (error instanceof ResponseError && error.code === LanguageServerStartFailed) {
+        this.log.debug(
+          `Index symbols or references error due to language server can't be started.`
+        );
       } else {
         this.log.error(`Index symbols or references error.`);
         this.log.error(error);
