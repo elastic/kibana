@@ -63,12 +63,12 @@ interface SerializedDatatable extends Datatable {
   rows: string[][];
 }
 
-type ToRender = Render<{
+interface RenderedDatatable {
   datatable: Datatable;
   paginate: boolean;
   perPage: number;
   showHeader: boolean;
-}>;
+}
 
 export const datatable = (): ExpressionType<typeof name, Datatable, SerializedDatatable> => ({
   name,
@@ -119,7 +119,7 @@ export const datatable = (): ExpressionType<typeof name, Datatable, SerializedDa
     },
   },
   to: {
-    render: (table): ToRender => {
+    render: (table): Render<RenderedDatatable> => {
       return {
         type: 'render',
         as: 'table',
