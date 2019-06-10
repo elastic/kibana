@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { ExpressionTypeDef } from '../../types';
+import { ExpressionType } from '../../types';
 import { Render } from './render';
 
 const name = 'shape';
 
-export const shape = (): ExpressionTypeDef<typeof name, undefined> => ({
+export const shape = (): ExpressionType<typeof name, undefined> => ({
   name,
   to: {
     render: <T>(input: T): Render<T> => {

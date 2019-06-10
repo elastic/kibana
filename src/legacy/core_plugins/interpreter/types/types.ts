@@ -21,7 +21,7 @@
  * A generic type which represents a custom Expression Type Definition that's
  * registered to the Interpreter.
  */
-export interface ExpressionTypeDef<Name extends string, Type, SerializedType = undefined> {
+export interface ExpressionType<Name extends string, Type, SerializedType = undefined> {
   name: Name;
   validate?: (type: any) => void | Error;
   serialize?: (type: Type) => SerializedType;
