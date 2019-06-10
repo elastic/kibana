@@ -17,6 +17,17 @@
  * under the License.
  */
 
+if (!process.env.JOB_NAME) {
+  console.log('Unable to determine job name');
+  process.exit(1);
+}
+
+const [org, proj, branch] = process.env.JOB_NAME.split('+');
+const masterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
+if (!(org === 'elastic' && proj === 'kibana' && masterOrVersion)) {
+  console.log('Failure issues only created on master/version branch jobs');
+  process.exit(0);
+}
 
 require('../../setup_node_env');
 require('./report').reportFailedTests();
