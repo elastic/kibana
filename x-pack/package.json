@@ -156,7 +156,7 @@
     "string-replace-loader": "^2.1.1",
     "supertest": "^3.1.0",
     "supertest-as-promised": "^4.0.2",
-    "tmp": "0.0.31",
+    "tmp": "0.1.0",
     "tree-kill": "^1.1.0",
     "typescript": "^3.3.3333",
     "vinyl-fs": "^3.0.2",
