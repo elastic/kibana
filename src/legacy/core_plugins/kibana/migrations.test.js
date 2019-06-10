@@ -896,6 +896,90 @@ Object {
 `);
     });
 
+    describe('filters agg query migration', () => {
+      const doc = {
+        attributes: {
+          visState: JSON.stringify({
+            aggs: [
+              {
+                type: 'filters',
+                params: {
+                  filters: [
+                    {
+                      input: {
+                        query: 'response:200',
+                      },
+                      label: '',
+                    },
+                    {
+                      input: {
+                        query: 'response:404',
+                      },
+                      label: 'bad response',
+                    },
+                    {
+                      input: {
+                        query: {
+                          exists: {
+                            field: 'phpmemory',
+                          },
+                        },
+                      },
+                      label: '',
+                    },
+                  ],
+                },
+              },
+            ],
+          }),
+        },
+      };
+
+      it('should add language property to filters without one, assuming lucene', () => {
+        const migrationResult = migrate(doc);
+        expect(migrationResult).toEqual({
+          attributes: {
+            visState: JSON.stringify({
+              aggs: [
+                {
+                  type: 'filters',
+                  params: {
+                    filters: [
+                      {
+                        input: {
+                          query: 'response:200',
+                          language: 'lucene',
+                        },
+                        label: '',
+                      },
+                      {
+                        input: {
+                          query: 'response:404',
+                          language: 'lucene',
+                        },
+                        label: 'bad response',
+                      },
+                      {
+                        input: {
+                          query: {
+                            exists: {
+                              field: 'phpmemory',
+                            },
+                          },
+                          language: 'lucene',
+                        },
+                        label: '',
+                      },
+                    ],
+                  },
+                },
+              ],
+            }),
+          },
+        });
+      });
+    });
+
     describe('replaceMovAvgToMovFn()', () => {
       let doc;
 

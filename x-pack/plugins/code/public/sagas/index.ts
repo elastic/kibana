@@ -21,7 +21,6 @@ import {
   watchFetchRootRepoTree,
 } from './file';
 import { watchInstallLanguageServer, watchLoadLanguageServers } from './language_server';
-import { watchLoadConfigs, watchSwitchProjectLanguageServer } from './project_config';
 import {
   watchLoadRepoListStatus,
   watchLoadRepoStatus,
@@ -81,8 +80,6 @@ export function* rootSaga() {
   yield fork(watchRepoDeleteFinished);
   yield fork(watchLoadLanguageServers);
   yield fork(watchInstallLanguageServer);
-  yield fork(watchSwitchProjectLanguageServer);
-  yield fork(watchLoadConfigs);
   yield fork(watchLoadRepoListStatus);
   yield fork(watchLoadRepoStatus);
 

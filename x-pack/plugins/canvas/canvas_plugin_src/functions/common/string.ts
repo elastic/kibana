@@ -10,11 +10,14 @@ interface Arguments {
   value: string[];
 }
 
-export function string(): ExpressionFunction<'string', any, Arguments, string> {
+export function string(): ExpressionFunction<'string', null, Arguments, string> {
   const { help, args: argHelp } = getFunctionHelp().string;
 
   return {
     name: 'string',
+    context: {
+      types: ['null'],
+    },
     aliases: [],
     type: 'string',
     help,

@@ -14,8 +14,7 @@ import styled from 'styled-components';
 import { DefaultDraggable } from '../draggables';
 
 import { CountryFlag } from './country_flag';
-import { SourceDestinationType } from './source_destination_ip';
-import { GeoFieldsProps } from './types';
+import { GeoFieldsProps, SourceDestinationType } from './types';
 
 export const SOURCE_GEO_CONTINENT_NAME_FIELD_NAME = 'source.geo.continent_name';
 export const SOURCE_GEO_COUNTRY_NAME_FIELD_NAME = 'source.geo.country_name';

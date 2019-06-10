@@ -13,10 +13,10 @@ import { CSSStyle, FontFamily, FontWeight, Style, TextAlignment, TEXT_ALIGNMENTS
 
 interface Arguments {
   align: TextAlignment;
-  color: string | null;
+  color: string;
   family: FontFamily;
   italic: boolean;
-  lHeight: number;
+  lHeight: number | null;
   size: number;
   underline: boolean;
   weight: FontWeight;
@@ -43,7 +43,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       },
       color: {
         help: argHelp.color,
-        types: ['string', 'null'],
+        types: ['string'],
       },
       family: {
         default: `"${openSans.value}"`,
@@ -59,12 +59,12 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       lHeight: {
         aliases: ['lineHeight'],
         help: argHelp.lHeight,
-        types: ['number'],
+        types: ['number', 'null'],
       },
       size: {
+        types: ['number'],
         default: 14,
         help: argHelp.size,
-        types: ['number'],
       },
       underline: {
         default: false,
@@ -89,7 +89,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
 
       // the line height shouldn't ever be lower than the size, and apply as a
       // pixel setting
-      const lineHeight = args.lHeight ? `${args.lHeight}px` : 1;
+      const lineHeight = args.lHeight != null ? `${args.lHeight}px` : '1';
 
       const spec: CSSStyle = {
         fontFamily: args.family,
