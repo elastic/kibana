@@ -4,9 +4,10 @@ pipeline {
     BASE_DIR = "."
   }
   stages {
-    stage('Build') {
+    stage('Checkout') {
       steps {
         echo 'Building..'
+        git 'git@github.com:elastic/kibana.git'
       }
     }
     stage('Test') {
