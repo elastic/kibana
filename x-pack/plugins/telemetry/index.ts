@@ -7,12 +7,14 @@
 import { resolve } from 'path';
 import JoiNamespace from 'joi';
 import { Server } from 'hapi';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
 import { plugin } from './server';
 import { REPORT_INTERVAL_MS } from './common/constants';
+import { checkDeprecated } from './common/check_deprecated';
+
 import {
   createLocalizationUsageCollector,
   createTelemetryUsageCollector,
@@ -56,11 +58,11 @@ export const telemetry = (kibana: any) => {
       injectDefaultVars(server: Server) {
         const config = server.config();
         return {
-          activeSpace: null,
+          telemetryEnabled: checkDeprecated(config, 'telemetry.enabled'),
+          telemetryUrl: checkDeprecated(config, 'telemetry.url'),
           spacesEnabled: config.get('xpack.spaces.enabled'),
-          telemetryUrl: config.get('xpack.telemetry.url'),
-          telemetryEnabled: config.get('xpack.telemetry.enabled'),
           telemetryOptedIn: null,
+          activeSpace: null,
         };
       },
       hacks: [

@@ -22,7 +22,15 @@ import { i18n } from '@kbn/i18n';
 
 import { registerOssFeatures } from './server/lib/register_oss_features';
 import { uiCapabilitiesForFeatures } from './server/lib/ui_capabilities_for_features';
+import { has } from 'lodash';
 
+function movedToTelemetry(configPath) {
+  return (settings, log) => {
+    if (has(settings, configPath)) {
+      log(`Config key ${configPath} is deprecated. Configuration can be inferred from the "telemetry" settings`);
+    }
+  };
+}
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 export const xpackMain = (kibana) => {
@@ -35,6 +43,11 @@ export const xpackMain = (kibana) => {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        telemetry: Joi.object({
+          config: Joi.string().default(),
+          enabled: Joi.boolean().default(),
+          url: Joi.string().default(),
+        }).default(), // deprecated
         xpack_api_polling_frequency_millis: Joi.number().default(XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS),
       }).default();
     },
@@ -85,10 +98,10 @@ export const xpackMain = (kibana) => {
       settingsRoute(server, this.kbnServer);
       featuresRoute(server);
     },
-    deprecations: ({ unused }) => [
-      unused('telemetry.config'),
-      unused('telemetry.url'),
-      unused('telemetry.enabled'),
+    deprecations: () => [
+      movedToTelemetry('telemetry.config'),
+      movedToTelemetry('telemetry.url'),
+      movedToTelemetry('telemetry.enabled'),
     ],
   });
 };

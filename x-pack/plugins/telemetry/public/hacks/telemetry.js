@@ -19,7 +19,6 @@ export class Telemetry {
     this._storage = $injector.get('localStorage');
     this._$http = $injector.get('$http');
     this._telemetryUrl = $injector.get('telemetryUrl');
-    // console.log('this._telemetryUrl::', this._telemetryUrl)
     this._telemetryOptedIn = $injector.get('telemetryOptedIn');
     this._fetchTelemetry = fetchTelemetry;
     this._sending = false;
