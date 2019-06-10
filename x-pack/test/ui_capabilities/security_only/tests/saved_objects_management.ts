@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { SavedObjectsManagementBuilder } from '../../common/saved_objects_management_builder';
 import {
@@ -14,7 +13,7 @@ import {
 } from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
 
-const savedObjectsManagementBuilder = new SavedObjectsManagementBuilder(false);
+const savedObjectsManagementBuilder = new SavedObjectsManagementBuilder();
 
 // eslint-disable-next-line import/no-default-export
 export default function savedObjectsManagementTests({
@@ -37,29 +36,24 @@ export default function savedObjectsManagementTests({
           case 'dual_privileges_all':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
+            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.uiCapabilities('all')
             );
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expected);
             break;
           case 'read':
           case 'dual_privileges_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            const expectedRead = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
+            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.uiCapabilities('read')
             );
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expectedRead);
             break;
           case 'foo_all':
           case 'foo_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.build({
-                all: [],
-                read: [],
-              })
+              savedObjectsManagementBuilder.uiCapabilities('none')
             );
             break;
           case 'no_kibana_privileges':
