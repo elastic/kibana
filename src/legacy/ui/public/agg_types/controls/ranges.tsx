@@ -45,8 +45,15 @@ interface RangeValuesModel extends RangeValues {
   id: string;
 }
 
-function RangesParamEditor({ agg, value, setValue }: AggParamEditorProps<RangeValues[]>) {
+function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<RangeValues[]>) {
   const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
+
+  // set up an initial range when there is no default range
+  useEffect(() => {
+    if (!value.length) {
+      onAddRange();
+    }
+  }, []);
 
   useEffect(
     () => {
