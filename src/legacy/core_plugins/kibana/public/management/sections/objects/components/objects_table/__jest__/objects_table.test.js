@@ -139,12 +139,7 @@ const defaultProps = {
       delete: false,
     }
   },
-  canDeleteSavedObjectTypes: [
-    'index-pattern',
-    'visualization',
-    'dashboard',
-    'search'
-  ]
+  canDelete: true,
 };
 
 beforeEach(() => {

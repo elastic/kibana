@@ -47,7 +47,7 @@ class TableUI extends PureComponent {
       onSelectionChange: PropTypes.func.isRequired,
     }).isRequired,
     filterOptions: PropTypes.array.isRequired,
-    canDeleteSavedObjectTypes: PropTypes.array.isRequired,
+    canDelete: PropTypes.bool.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     goInspectObject: PropTypes.func.isRequired,
@@ -254,9 +254,7 @@ class TableUI extends PureComponent {
       );
     }
 
-    const unableToDeleteSavedObjectTypes = selectedSavedObjects
-      .map(({ type }) => type)
-      .filter(type => !this.props.canDeleteSavedObjectTypes.includes(type));
+    const unableToDeleteSavedObjectTypes = this.props.canDelete ? [] : selectedSavedObjects.map(({ type }) => type);
 
     const button = (
       <EuiButton
