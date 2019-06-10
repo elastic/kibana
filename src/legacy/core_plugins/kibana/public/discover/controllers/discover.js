@@ -166,6 +166,34 @@ uiRoutes
             'search': '/discover',
             'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
           }));
+      },
+      savedQuery: function (AppState, Private) {
+        const appState = new AppState();
+        const savedQueryId = appState.savedQuery;
+        const savedObjectsClient = Private(SavedObjectsClientProvider);
+
+        if (savedQueryId) {
+          return savedObjectsClient.get('query', savedQueryId).then(savedQuery => {
+            if (savedQuery.error) return;
+
+            const time = JSON.parse(savedQuery.attributes.timefilter);
+
+            timefilter.setTime({
+              from: time.timeFrom,
+              to: time.timeTo,
+            });
+
+            if (time.refreshInterval) {
+              timefilter.setRefreshInterval(time.refreshInterval);
+            }
+
+            return {
+              ...savedQuery.attributes,
+              filters: JSON.parse(savedQuery.attributes.filters),
+              timefilter: time,
+            };
+          });
+        }
       }
     }
   });
@@ -488,15 +516,18 @@ function discoverController(
 
   function getStateDefaults() {
     return {
-      query: $scope.searchSource.getField('query') || {
-        query: '',
-        language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
-      },
+      query: ($route.current.locals.savedQuery && $route.current.locals.savedQuery.query)
+        || $scope.searchSource.getField('query')
+        || {
+          query: '',
+          language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+        },
       sort: getSort.array(savedSearch.sort, $scope.indexPattern, config.get('discover:sort:defaultOrder')),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.getOwnField('filter'))
+      filters: ($route.current.locals.savedQuery && $route.current.locals.savedQuery.filters)
+        || _.cloneDeep($scope.searchSource.getOwnField('filter'))
     };
   }
 

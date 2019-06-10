@@ -37,6 +37,22 @@ export default function DataPlugin(kibana: any) {
       injectDefaultVars: () => ({}),
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
+      savedObjectsManagement: {
+        query: {
+          icon: 'search',
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj: any) {
+            return obj.attributes.title;
+          },
+          getInAppUrl(obj: any) {
+            return {
+              path: `/app/kibana#/discover?_a=(savedQuery:'${encodeURIComponent(obj.id)}')`,
+              uiCapabilitiesPath: 'discover.show',
+            };
+          },
+        },
+      },
     },
   };
 
