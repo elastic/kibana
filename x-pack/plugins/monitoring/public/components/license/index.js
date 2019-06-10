@@ -10,10 +10,15 @@ import {
   EuiPageBody,
   EuiSpacer,
   EuiCodeBlock,
-  EuiPanel
+  EuiPanel,
+  EuiText,
+  EuiLink
 } from '@elastic/eui';
 import { LicenseStatus, AddLicense } from 'plugins/xpack_main/components';
 import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+
+const licenseManagement = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management`;
 
 const LicenseUpdateInfoForPrimary = ({ isPrimaryCluster, uploadLicensePath }) => {
   if (!isPrimaryCluster) {
@@ -53,21 +58,27 @@ const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }) => {
 export function License(props) {
   const { status, type, isExpired, expiryDate } = props;
   return (
-    <EuiPage className="licenseManagement">
+    <EuiPage>
       <EuiPageBody>
-        <div className="licManagement__contain">
-          <LicenseStatus
-            isExpired={isExpired}
-            status={status}
-            type={type}
-            expiryDate={expiryDate}
-          />
+        <LicenseStatus
+          isExpired={isExpired}
+          status={status}
+          type={type}
+          expiryDate={expiryDate}
+        />
+        <EuiSpacer />
 
-          <EuiSpacer />
-
-          <LicenseUpdateInfoForPrimary {...props} />
-          <LicenseUpdateInfoForRemote {...props} />
-        </div>
+        <LicenseUpdateInfoForPrimary {...props} />
+        <LicenseUpdateInfoForRemote {...props} />
+        <EuiSpacer />
+        <EuiText size="m" textAlign="center">
+          <p>
+            For more license options please visit&nbsp;
+            <EuiLink href={licenseManagement}>
+              License Management
+            </EuiLink>
+          </p>
+        </EuiText>
       </EuiPageBody>
     </EuiPage>
   );

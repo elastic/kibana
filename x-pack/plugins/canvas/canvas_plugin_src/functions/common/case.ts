@@ -37,6 +37,7 @@ export function caseFn(): ExpressionFunction<'case', any, Arguments, Promise<Cas
       },
       then: {
         resolve: false,
+        required: true,
         help: argHelp.then,
       },
     },

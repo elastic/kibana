@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { StatusIcon } from 'plugins/monitoring/components/status_icon';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function KibanaStatusIconUI({ status, availability = true, intl }) {
+export function KibanaStatusIcon({ status, availability = true }) {
   const type = (() => {
     if (!availability) {
       return StatusIcon.TYPES.GRAY;
@@ -21,13 +21,12 @@ function KibanaStatusIconUI({ status, availability = true, intl }) {
   return (
     <StatusIcon
       type={type}
-      label={intl.formatMessage({
-        id: 'xpack.monitoring.kibana.statusIconLabel',
-        defaultMessage: 'Health: {status}' }, {
-        status
+      label={i18n.translate('xpack.monitoring.kibana.statusIconLabel', {
+        defaultMessage: 'Health: {status}',
+        values: {
+          status
+        }
       })}
     />
   );
 }
-
-export const KibanaStatusIcon = injectI18n(KibanaStatusIconUI);

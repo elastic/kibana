@@ -10,7 +10,7 @@ import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
 import { timelineDefaults, TimelineModel } from './model';
-import { AutoSavedWarningMsg, TimelineById } from './reducer';
+import { TimelineById, AutoSavedWarningMsg } from './types';
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
 

@@ -65,7 +65,7 @@ exports[`CcrShard that it renders normally 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(StatusUI)
+    <Status
       formattedLeader="leader on remote"
       oldestStat={
         Object {
@@ -120,7 +120,7 @@ exports[`CcrShard that it renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <InjectIntl(MonitoringTimeseriesContainerUI) />
+          <MonitoringTimeseriesContainer />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
@@ -136,7 +136,7 @@ exports[`CcrShard that it renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <InjectIntl(MonitoringTimeseriesContainerUI) />
+          <MonitoringTimeseriesContainer />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

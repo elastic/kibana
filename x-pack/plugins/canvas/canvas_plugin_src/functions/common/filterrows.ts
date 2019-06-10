@@ -30,8 +30,9 @@ export function filterrows(): ExpressionFunction<
     args: {
       fn: {
         resolve: false,
-        aliases: ['_'],
+        aliases: ['_', 'exp', 'expression', 'function'],
         types: ['boolean'],
+        required: true,
         help: argHelp.fn,
       },
     },
