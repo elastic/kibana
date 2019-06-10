@@ -5,22 +5,22 @@
  */
 
 import { resolve } from 'path';
-import { plugin } from './server'
 import JoiNamespace from 'joi';
 import { Server } from 'hapi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
-import mappings from './mappings.json';
-import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { i18n } from '@kbn/i18n';
+import mappings from './mappings.json';
+import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
+import { plugin } from './server';
 import { REPORT_INTERVAL_MS } from './common/constants';
-import { createLocalizationUsageCollector, createTelemetryUsageCollector} from './server/collectors';
+import {
+  createLocalizationUsageCollector,
+  createTelemetryUsageCollector,
+} from './server/collectors';
 
 function isTelemetryEnabled(config: KibanaConfig) {
-  const configPaths = [
-    'xpack.telemetry.enabled',
-    'xpack.xpack_main.telemetry.enabled',
-  ]
+  const configPaths = ['xpack.telemetry.enabled', 'xpack.xpack_main.telemetry.enabled'];
   return configPaths.some(configPath => !!config.get(configPath));
 }
 
@@ -29,26 +29,23 @@ export const telemetry = (kibana: any) => {
     id: 'telemetry',
     configPrefix: 'xpack.telemetry',
     publicDir: resolve(__dirname, 'public'),
-    // require: ['elasticsearch'],
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
-
+    require: ['elasticsearch'],
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         url: Joi.when('$dev', {
           is: true,
           then: Joi.string().default('https://telemetry-staging.elastic.co/xpack/v1/send'),
-          otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v1/send')
+          otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v1/send'),
         }),
       }).default();
     },
-
     uiExports: {
       managementSections: ['plugins/telemetry/views/management'],
       uiSettingDefaults: {
         [CONFIG_TELEMETRY]: {
           name: i18n.translate('xpack.telemetry.telemetryConfigTitle', {
-            defaultMessage: 'Telemetry opt-in'
+            defaultMessage: 'Telemetry opt-in',
           }),
           description: getConfigTelemetryDesc(),
           value: false,
@@ -71,17 +68,16 @@ export const telemetry = (kibana: any) => {
         };
       },
       hacks: [
-        'plugins/telemerty/hacks/telemetry_opt_in',
-        'plugins/telemerty/hacks/telemetry_trigger',
+        'plugins/telemetry/hacks/telemetry_opt_in',
+        'plugins/telemetry/hacks/telemetry_trigger',
       ],
       mappings,
     },
-
     init(server: Server) {
       const initializerContext = {} as PluginInitializerContext;
-      const coreSetup = {
+      const coreSetup = ({
         http: { server },
-      } as any as CoreSetup;
+      } as any) as CoreSetup;
 
       plugin(initializerContext).setup(coreSetup);
 
@@ -91,6 +87,6 @@ export const telemetry = (kibana: any) => {
 
       // expose
       server.expose('telemetryCollectionInterval', REPORT_INTERVAL_MS);
-    }
+    },
   });
 };
