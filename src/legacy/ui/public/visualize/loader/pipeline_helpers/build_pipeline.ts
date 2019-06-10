@@ -202,7 +202,7 @@ export const prepareString = (variable: string, data: string): string => {
   return `${variable}='${escapeString(data)}' `;
 };
 
-export const escapeString = (data: string | string): string => {
+export const escapeString = (data: string): string => {
   return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
 };
 
