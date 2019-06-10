@@ -1,17 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-
-function report {
-  if [[ -z "$PR_SOURCE_BRANCH" ]]; then
-    cd "$KIBANA_DIR"
-    node src/dev/failed_tests/cli
-  else
-    echo "Failure issues not created on pull requests"
-  fi
-}
-
-trap report EXIT
+trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
 export TEST_BROWSER_HEADLESS=1
 
@@ -24,6 +14,12 @@ echo ""
 echo " -> Running jest tests"
 cd "$XPACK_DIR"
 checks-reporter-with-killswitch "X-Pack Jest" node scripts/jest --ci --verbose
+echo ""
+echo ""
+
+echo " -> Running SIEM cyclic dependency test"
+cd "$XPACK_DIR"
+checks-reporter-with-killswitch "X-Pack SIEM cyclic dependency test" node plugins/siem/scripts/check_circular_deps
 echo ""
 echo ""
 

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
 jest.mock('../stats', () => ({
   Stats: () => 'Stats',
@@ -41,8 +41,8 @@ describe('Overview', () => {
       beat_output_errors: 1
     };
 
-    const component = shallowWithIntl(
-      <BeatsOverview.WrappedComponent
+    const component = shallow(
+      <BeatsOverview
         latestActive={latestActive}
         latestTypes={latestTypes}
         latestVersions={latestVersions}
@@ -62,8 +62,8 @@ describe('Overview', () => {
       beat_output_errors: 1
     };
 
-    const component = shallowWithIntl(
-      <BeatsOverview.WrappedComponent
+    const component = shallow(
+      <BeatsOverview
         stats={[]}
         metrics={metrics}
       />

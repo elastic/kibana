@@ -11,7 +11,7 @@ import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects'
 const module = uiModules.get('app/maps');
 
 // This is the only thing that gets injected into controllers
-module.service('gisMapSavedObjectLoader', function (Private, SavedGisMap, kbnIndex, kbnUrl, $http, chrome) {
+module.service('gisMapSavedObjectLoader', function (Private, SavedGisMap, kbnUrl, chrome) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
   return new SavedObjectLoader(SavedGisMap, kbnUrl, chrome, savedObjectClient);
 });
