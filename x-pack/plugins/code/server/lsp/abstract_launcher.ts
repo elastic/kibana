@@ -12,25 +12,27 @@ import { Logger } from '../log';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
 
+let seqNo = 1;
+
 export abstract class AbstractLauncher implements ILanguageServerLauncher {
   running: boolean = false;
   private _currentPid: number = -1;
   private child: ChildProcess | null = null;
   private _startTime: number = -1;
   private _proxyConnected: boolean = false;
+  private readonly log: Logger;
   protected constructor(
     readonly name: string,
     readonly targetHost: string,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
-  ) {}
+  ) {
+    this.log = this.loggerFactory.getLogger([`${seqNo++}`, `${this.name}`, 'code']);
+  }
 
   public async launch(builtinWorkspace: boolean, maxWorkspace: number, installationPath: string) {
     const port = await this.getPort();
-    const log: Logger = this.loggerFactory.getLogger([
-      'code',
-      `${this.name}@${this.targetHost}:${port}`,
-    ]);
+    const log: Logger = this.log;
     let child: ChildProcess;
     const proxy = new LanguageServerProxy(port, this.targetHost, log, this.options.lsp);
     if (this.options.lsp.detach) {
@@ -42,7 +44,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
         this.running = false;
         if (!proxy.isClosed) {
           log.debug(`${this.name} language server disconnected, reconnecting`);
-          setTimeout(() => this.reconnect(proxy, installationPath, port, log), 1000);
+          setTimeout(() => this.reconnect(proxy, installationPath), 1000);
         }
       });
     } else {
@@ -52,17 +54,19 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
       this._currentPid = child.pid;
       this._startTime = Date.now();
       this.running = true;
-      this.onProcessExit(child, () => this.reconnect(proxy, installationPath, port, log));
+      this.onProcessExit(child, () => {
+        if (!proxy.isClosed) this.reconnect(proxy, installationPath);
+      });
       proxy.onDisconnected(async () => {
-        this._proxyConnected = true;
+        this._proxyConnected = false;
         if (!proxy.isClosed) {
           log.debug('proxy disconnected, reconnecting');
           setTimeout(async () => {
-            await this.reconnect(proxy, installationPath, port, log, child);
+            await this.reconnect(proxy, installationPath, child);
           }, 1000);
         } else if (this.child) {
           log.info('proxy closed, kill process');
-          await this.killProcess(this.child, log);
+          await this.killProcess(this.child);
         }
       });
     }
@@ -70,12 +74,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
       log.debug('proxy exited, is the process running? ' + this.running);
       if (this.child && this.running) {
         const p = this.child!;
-        setTimeout(async () => {
-          if (!p.killed) {
-            log.debug('killing the process after 1s');
-            await this.killProcess(p, log);
-          }
-        }, 1000);
+        this.killProcess(p);
       }
     });
     proxy.listen();
@@ -105,7 +104,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
   /**
    * proxy should be connected within this timeout, otherwise we reconnect.
    */
-  protected startupTimeout = 3000;
+  protected startupTimeout = 10000;
 
   /**
    * try reconnect the proxy when disconnected
@@ -113,11 +112,9 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
   public async reconnect(
     proxy: LanguageServerProxy,
     installationPath: string,
-    port: number,
-    log: Logger,
     child?: ChildProcess
   ) {
-    log.debug('reconnecting');
+    this.log.debug('reconnecting');
     if (this.options.lsp.detach) {
       this.startConnect(proxy);
     } else {
@@ -126,17 +123,17 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
         this.startConnect(proxy);
       } else {
         if (child && this.running) {
-          log.debug('killing the old process.');
-          await this.killProcess(child, log);
+          this.log.debug('killing the old process.');
+          await this.killProcess(child);
         }
-        this.child = await this.spawnProcess(installationPath, port, log);
-        log.debug('spawned a child process ' + this.child.pid);
+        const port = await this.getPort();
+        proxy.changePort(port);
+        this.child = await this.spawnProcess(installationPath, port, this.log);
+        this.log.debug('spawned a child process ' + this.child.pid);
         this._currentPid = this.child.pid;
         this._startTime = Date.now();
         this.running = true;
-        this.onProcessExit(this.child, () =>
-          this.reconnect(proxy, installationPath, port, log, child)
-        );
+        this.onProcessExit(this.child, () => this.reconnect(proxy, installationPath, child));
         this.startConnect(proxy);
       }
     }
@@ -164,7 +161,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     log: Logger
   ): Promise<ChildProcess>;
 
-  private killProcess(child: ChildProcess, log: Logger) {
+  protected killProcess(child: ChildProcess) {
     if (!child.killed) {
       return new Promise<boolean>((resolve, reject) => {
         // if not killed within 1s
@@ -174,12 +171,12 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
           resolve(true);
         });
         child.kill();
-        log.info('killed process ' + child.pid);
+        this.log.info('killed process ' + child.pid);
       })
         .catch(() => {
           // force kill
           child.kill('SIGKILL');
-          log.info('force killed process ' + child.pid);
+          this.log.info('force killed process ' + child.pid);
           return child.killed;
         })
         .finally(() => {

@@ -8,12 +8,26 @@ import { mount, ReactWrapper } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { StatItemsComponent, StatItemsProps } from '.';
+import {
+  StatItemsComponent,
+  StatItemsProps,
+  addValueToFields,
+  addValueToAreaChart,
+  addValueToBarChart,
+} from '.';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { fieldTitleChartMapping, KpiNetworkBaseComponent } from '../page/network/kpi_network';
+import {
+  mockData,
+  mockNoChartMappings,
+  mockDisableChartsInitialData,
+  mockEnableChartsData,
+  mockEnableChartsInitialData,
+} from '../page/network/kpi_network/mock';
 
-describe('Stat Items', () => {
+describe('Stat Items Component', () => {
   describe.each([
     [
       mount(
@@ -102,10 +116,10 @@ describe('Stat Items', () => {
         },
       ],
       barChart: [
-        { key: 'uniqueSourceIps', value: [{ x: 1714, y: 'uniqueSourceIps' }], color: '#DB1374' },
+        { key: 'uniqueSourceIps', value: [{ x: 'uniqueSourceIps', y: '1714' }], color: '#DB1374' },
         {
           key: 'uniqueDestinationIps',
-          value: [{ x: 2354, y: 'uniqueDestinationIps' }],
+          value: [{ x: 'uniqueDestinationIps', y: 2354 }],
           color: '#490092',
         },
       ],
@@ -139,5 +153,74 @@ describe('Stat Items', () => {
     test('should render separator', () => {
       expect(wrapper.find(EuiHorizontalRule)).toHaveLength(1);
     });
+  });
+});
+
+describe('addValueToFields', () => {
+  const mockNetworkMappings = fieldTitleChartMapping[0];
+  const mockKpiNetworkData = mockData.KpiNetwork;
+  test('should update value from data', () => {
+    const result = addValueToFields(mockNetworkMappings.fields, mockKpiNetworkData);
+    expect(result).toEqual(mockEnableChartsData.fields);
+  });
+});
+
+describe('addValueToAreaChart', () => {
+  const mockNetworkMappings = fieldTitleChartMapping[0];
+  const mockKpiNetworkData = mockData.KpiNetwork;
+  test('should add areaChart from data', () => {
+    const result = addValueToAreaChart(mockNetworkMappings.fields, mockKpiNetworkData);
+    expect(result).toEqual(mockEnableChartsData.areaChart);
+  });
+});
+
+describe('addValueToBarChart', () => {
+  const mockNetworkMappings = fieldTitleChartMapping[0];
+  const mockKpiNetworkData = mockData.KpiNetwork;
+  test('should add areaChart from data', () => {
+    const result = addValueToBarChart(mockNetworkMappings.fields, mockKpiNetworkData);
+    expect(result).toEqual(mockEnableChartsData.barChart);
+  });
+});
+
+describe('useKpiMatrixStatus', () => {
+  const mockNetworkMappings = fieldTitleChartMapping;
+  const mockKpiNetworkData = mockData.KpiNetwork;
+
+  test('it updates status correctly', () => {
+    const wrapper = mount(
+      <KpiNetworkBaseComponent fieldsMapping={mockNetworkMappings} data={{}} />
+    );
+    expect(wrapper.find(StatItemsComponent).get(0).props).toEqual(mockEnableChartsInitialData);
+    wrapper.setProps({ data: mockKpiNetworkData });
+    wrapper.update();
+
+    expect(wrapper.find(StatItemsComponent).get(0).props).toEqual(mockEnableChartsData);
+  });
+
+  test('it should not append areaChart if enableAreaChart is off', () => {
+    const mockNetworkMappingsNoAreaChart = mockNoChartMappings;
+
+    const wrapper = mount(
+      <KpiNetworkBaseComponent fieldsMapping={mockNetworkMappingsNoAreaChart} data={{}} />
+    );
+    expect(wrapper.find(StatItemsComponent).get(0).props).toEqual(mockDisableChartsInitialData);
+    wrapper.setProps({ data: mockKpiNetworkData });
+    wrapper.update();
+
+    expect(wrapper.find(StatItemsComponent).get(0).props.areaChart).toBeUndefined();
+  });
+
+  test('it should not append barChart if enableBarChart is off', () => {
+    const mockNetworkMappingsNoAreaChart = mockNoChartMappings;
+
+    const wrapper = mount(
+      <KpiNetworkBaseComponent fieldsMapping={mockNetworkMappingsNoAreaChart} data={{}} />
+    );
+    expect(wrapper.find(StatItemsComponent).get(0).props).toEqual(mockDisableChartsInitialData);
+    wrapper.setProps({ data: mockKpiNetworkData });
+    wrapper.update();
+
+    expect(wrapper.find(StatItemsComponent).get(0).props.barChart).toBeUndefined();
   });
 });

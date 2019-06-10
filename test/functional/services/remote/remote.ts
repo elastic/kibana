@@ -25,13 +25,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
-  const browserType: Browsers = (process.env.TEST_BROWSER_TYPE as Browsers) || Browsers.Chrome;
-
-  if (browserType !== Browsers.Chrome && browserType !== Browsers.Firefox) {
-    throw new Error(
-      `Unexpected TEST_BROWSER_TYPE "${browserType}", only "chrome" and "firefox" are supported`
-    );
-  }
+  const browserType: Browsers = config.get('browser.type');
 
   const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver(log, browserType);
   const caps = await driver.getCapabilities();

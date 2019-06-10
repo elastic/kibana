@@ -11,9 +11,10 @@ import { ApmStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function StatusUI({ stats, intl }) {
+export function Status({ stats }) {
   const {
     apms: {
       total
@@ -24,30 +25,28 @@ function StatusUI({ stats, intl }) {
 
   const metrics = [
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instances.status.serversLabel',
-        defaultMessage: 'Servers',
+      label: i18n.translate('xpack.monitoring.apm.instances.status.serversLabel', {
+        defaultMessage: 'Servers'
       }),
       value: total,
       'data-test-subj': 'total'
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instances.status.totalEventsLabel',
-        defaultMessage: 'Total Events',
+      label: i18n.translate('xpack.monitoring.apm.instances.status.totalEventsLabel', {
+        defaultMessage: 'Total Events'
       }),
       value: formatMetric(totalEvents, '0.[0]a'),
       'data-test-subj': 'totalEvents'
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instances.status.lastEventLabel',
-        defaultMessage: 'Last Event',
+      label: i18n.translate('xpack.monitoring.apm.instances.status.lastEventLabel', {
+        defaultMessage: 'Last Event'
       }),
-      value: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instances.status.lastEventDescription',
-        defaultMessage: '{timeOfLastEvent} ago' }, {
-        timeOfLastEvent: formatTimestampToDuration(+moment(timeOfLastEvent), CALCULATE_DURATION_SINCE)
+      value: i18n.translate('xpack.monitoring.apm.instances.status.lastEventDescription', {
+        defaultMessage: '{timeOfLastEvent} ago',
+        values: {
+          timeOfLastEvent: formatTimestampToDuration(+moment(timeOfLastEvent), CALCULATE_DURATION_SINCE)
+        }
       }),
       'data-test-subj': 'timeOfLastEvent',
     }
@@ -75,5 +74,3 @@ function StatusUI({ stats, intl }) {
     />
   );
 }
-
-export const Status = injectI18n(StatusUI);

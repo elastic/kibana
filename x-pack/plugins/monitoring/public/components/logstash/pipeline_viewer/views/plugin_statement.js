@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { formatMetric } from '../../../../lib/format_number';
 import { Metric } from './metric';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 function getInputStatementMetrics({ latestEventsPerSecond }) {
   return [
@@ -65,10 +65,9 @@ function renderPluginStatementMetrics(pluginType, vertex) {
     : getProcessorStatementMetrics(vertex);
 }
 
-function PluginStatementUi({
+export function PluginStatement({
   statement: { hasExplicitId, id, name, pluginType, vertex },
   onShowVertexDetails,
-  intl,
 }) {
   const statementMetrics = renderPluginStatementMetrics(pluginType, vertex);
   const onNameButtonClick = () => {
@@ -101,8 +100,8 @@ function PluginStatementUi({
             <EuiFlexItem grow={false}>
               <EuiBadge
                 onClick={onNameButtonClick}
-                onClickAriaLabel={intl.formatMessage({
-                  id: 'xpack.monitoring.logstash.pipelineStatement.viewDetailsAriaLabel', defaultMessage: 'View details'
+                onClickAriaLabel={i18n.translate('xpack.monitoring.logstash.pipelineStatement.viewDetailsAriaLabel', {
+                  defaultMessage: 'View details'
                 })}
               >
                 {id}
@@ -120,7 +119,7 @@ function PluginStatementUi({
   );
 }
 
-PluginStatementUi.propTypes = {
+PluginStatement.propTypes = {
   onShowVertexDetails: PropTypes.func.isRequired,
   statement: PropTypes.shape({
     hasExplicitId: PropTypes.bool.isRequired,
@@ -134,5 +133,3 @@ PluginStatementUi.propTypes = {
     }).isRequired,
   }).isRequired,
 };
-
-export const PluginStatement = injectI18n(PluginStatementUi);

@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { StatusIcon } from 'plugins/monitoring/components/status_icon';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function ApmStatusIconUI({ status, availability = true, intl }) {
+export function ApmStatusIcon({ status, availability = true }) {
   const type = (() => {
     if (!availability) {
       return StatusIcon.TYPES.GRAY;
@@ -21,13 +21,12 @@ function ApmStatusIconUI({ status, availability = true, intl }) {
   return (
     <StatusIcon
       type={type}
-      label={intl.formatMessage({
-        id: 'xpack.monitoring.apm.healthStatusLabel',
-        defaultMessage: 'Health: {status}' }, {
-        status
+      label={i18n.translate('xpack.monitoring.apm.healthStatusLabel', {
+        defaultMessage: 'Health: {status}',
+        values: {
+          status
+        }
       })}
     />
   );
 }
-
-export const ApmStatusIcon = injectI18n(ApmStatusIconUI);

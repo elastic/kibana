@@ -28,18 +28,18 @@ export async function getSeriesData(req, panel) {
   const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategyForPanel(req, panel);
   const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
-  const bodiesPromises = getActiveSeries(panel)
-    .map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));
-
-  const searches = (await Promise.all(bodiesPromises))
-    .reduce((acc, items) => acc.concat(items), []);
-
   const meta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
   };
 
   try {
+    const bodiesPromises = getActiveSeries(panel)
+      .map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));
+
+    const searches = (await Promise.all(bodiesPromises))
+      .reduce((acc, items) => acc.concat(items), []);
+
     const data = await searchRequest.search(searches);
     const series = data.map(handleResponseBody(panel));
 
@@ -66,7 +66,7 @@ export async function getSeriesData(req, panel) {
     };
 
   } catch (err) {
-    if (err.body) {
+    if (err.body || err.name === 'KQLSyntaxError') {
       err.response = err.body;
 
       return {
