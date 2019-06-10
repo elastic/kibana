@@ -17,14 +17,26 @@
  * under the License.
  */
 
-export { ArgumentType } from './arguments';
-export {
-  TypeToString,
-  KnownTypeToString,
-  TypeString,
-  UnmappedTypeStrings,
-  UnwrapPromise,
-} from './common';
-export { ExpressionFunction } from './functions';
-export { ExpressionType } from './types';
-export * from '../common/types';
+import { ExpressionType } from '../../types';
+import { Render } from './render';
+
+const name = 'image';
+
+export interface ExpressionImage {
+  type: 'image';
+  mode: string;
+  dataurl: string;
+}
+
+export const image = (): ExpressionType<typeof name, ExpressionImage> => ({
+  name,
+  to: {
+    render: (input): Render<Pick<ExpressionImage, 'mode' | 'dataurl'>> => {
+      return {
+        type: 'render',
+        as: 'image',
+        value: input,
+      };
+    },
+  },
+});

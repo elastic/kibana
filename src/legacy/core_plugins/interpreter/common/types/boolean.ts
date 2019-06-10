@@ -17,17 +17,32 @@
  * under the License.
  */
 
-export const filter = () => ({
-  name: 'filter',
+import { ExpressionType } from '../../types';
+import { Datatable } from './datatable';
+import { Render } from './render';
+
+const name = 'boolean';
+
+export const boolean = (): ExpressionType<typeof name, boolean> => ({
+  name,
   from: {
-    null: () => {
+    null: () => false,
+    number: n => Boolean(n),
+    string: s => Boolean(s),
+  },
+  to: {
+    render: (value): Render<{ text: string }> => {
+      const text = `${value}`;
       return {
-        type: 'filter',
-        // Any meta data you wish to pass along.
-        meta: {},
-        // And filters. If you need an "or", create a filter type for it.
-        and: [],
+        type: 'render',
+        as: 'text',
+        value: { text },
       };
     },
+    datatable: (value): Datatable => ({
+      type: 'datatable',
+      columns: [{ name: 'value', type: name }],
+      rows: [{ value }],
+    }),
   },
 });
