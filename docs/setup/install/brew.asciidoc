@@ -41,12 +41,11 @@ and data directory are stored in the following locations.
   | Binary scripts including `kibana` to start a node
     and `kibana-plugin` to install plugins
   | /usr/local/var/homebrew/linked/kibana/bin
-d|
+ d|
 
- | conf
+| conf
   | Configuration files including `kibana.yml`
   | /usr/local/etc/kibana
-  | <<config-files-location,KIB_PATH_CONF>>
 
 | data
   | The location of the data files of each index / shard allocated

@@ -58,7 +58,6 @@ IMPORTANT: If your Elasticsearch installation is protected by
 {kibana-ref}/using-kibana-with-security.html[Configuring Security in Kibana] for
 additional setup instructions.
 
-
 include::install/targz.asciidoc[]
 
 include::install/deb.asciidoc[]
