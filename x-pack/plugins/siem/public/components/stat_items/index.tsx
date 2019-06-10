@@ -60,9 +60,7 @@ export interface StatItemsProps extends StatItems {
   barChart?: ChartConfigsData[];
 }
 
-const numberFormatter = (value: string | number) => {
-  return value.toLocaleString && value.toLocaleString();
-};
+export const numberFormatter = (value: string | number): string => value.toLocaleString();
 
 export const areachartConfigs = {
   series: {
@@ -159,7 +157,7 @@ export const useKpiMatrixStatus = (
 
 export const StatItemsComponent = React.memo<StatItemsProps>(
   ({ fields, description, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
-    const isBarChartDataAbailable =
+    const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
       barChart.every(item => item.value != null && item.value.length > 0);
@@ -178,7 +176,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
             {fields.map(field => (
               <FlexItem key={`stat-items-field-${field.key}`}>
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  {(isAreaChartDataAvailable || isBarChartDataAbailable) && field.icon && (
+                  {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
                     <FlexItem grow={false}>
                       <EuiIcon
                         type={field.icon}
@@ -207,13 +205,13 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
           <EuiFlexGroup>
             {enableBarChart && (
               <FlexItem>
-                <BarChart barChart={barChart!} configs={barchartConfigs} />
+                <BarChart barChart={barChart} configs={barchartConfigs} />
               </FlexItem>
             )}
 
             {enableAreaChart && (
               <FlexItem>
-                <AreaChart areaChart={areaChart!} configs={areachartConfigs} />
+                <AreaChart areaChart={areaChart} configs={areachartConfigs} />
               </FlexItem>
             )}
           </EuiFlexGroup>

@@ -69,10 +69,6 @@ export const WrappedByAutoSizer = styled.div`
   }
 `;
 
-export const numberFormatter = (value: string | number) => {
-  return value.toLocaleString && value.toLocaleString();
-};
-
 export enum SeriesType {
   BAR = 'bar',
   AREA = 'area',
