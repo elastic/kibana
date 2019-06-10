@@ -23,7 +23,7 @@ export const help: FunctionHelp<FunctionFactory<typeof compare>> = {
     op: i18n.translate('xpack.canvas.functions.compare.args.opHelpText', {
       defaultMessage:
         'The operator to use in the comparison: {eq} (equal to), {gt} (greater than), {gte} (greater than or equal to)' +
-        ', {lt} (less than), {lte} (less than or equal to), {ne} (not equal to)',
+        ', {lt} (less than), {lte} (less than or equal to), {ne} or {neq} (not equal to)',
       values: {
         eq: Operation.EQ,
         gt: Operation.GT,
@@ -31,6 +31,7 @@ export const help: FunctionHelp<FunctionFactory<typeof compare>> = {
         lt: Operation.LT,
         lte: Operation.LTE,
         ne: Operation.NE,
+        neq: Operation.NEQ,
       },
     }),
     to: i18n.translate('xpack.canvas.functions.compare.args.toHelpText', {

@@ -180,7 +180,7 @@ export class VisualizeEmbeddable extends Embeddable {
       timeRange: containerState.timeRange,
       query: containerState.query,
       filters: containerState.filters,
-      cssClass: `panel-content panel-content--fullWidth`,
+      cssClass: `embPanel__content embPanel__content--fullWidth`,
       dataAttrs,
     };
 

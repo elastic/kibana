@@ -12,23 +12,58 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { UICapabilities } from 'ui/capabilities';
+import DateMath from '@elastic/datemath';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
-import { SourceQuery } from '../../graphql/types';
+import { InfraNodeType } from '../../graphql/types';
+import { getNodeDetailUrl } from '../../pages/link_to/redirect_to_node_detail';
+import { SourceConfiguration } from '../../utils/source_configuration';
 
 interface Props {
   intl: InjectedIntl;
   options: MetricsExplorerOptions;
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
-  source: SourceQuery.Query['source']['configuration'] | undefined;
+  source?: SourceConfiguration;
   timeRange: MetricsExplorerTimeOptions;
   uiCapabilities: UICapabilities;
 }
+
+const fieldToNodeType = (source: SourceConfiguration, field: string): InfraNodeType | undefined => {
+  if (source.fields.host === field) {
+    return InfraNodeType.host;
+  }
+  if (source.fields.pod === field) {
+    return InfraNodeType.pod;
+  }
+  if (source.fields.container === field) {
+    return InfraNodeType.container;
+  }
+};
+
+const dateMathExpressionToEpoch = (dateMathExpression: string, roundUp = false): number => {
+  const dateObj = DateMath.parse(dateMathExpression, { roundUp });
+  if (!dateObj) throw new Error(`"${dateMathExpression}" is not a valid time string`);
+  return dateObj.valueOf();
+};
+
+export const createNodeDetailLink = (
+  nodeType: InfraNodeType,
+  nodeId: string,
+  from: string,
+  to: string
+) => {
+  return getNodeDetailUrl({
+    nodeType,
+    nodeId,
+    from: dateMathExpressionToEpoch(from),
+    to: dateMathExpressionToEpoch(to, true),
+  });
+};
 
 export const MetricsExplorerChartContextMenu = injectI18n(
   ({ intl, onFilter, options, series, source, timeRange, uiCapabilities }: Props) => {
@@ -54,10 +89,29 @@ export const MetricsExplorerChartContextMenu = injectI18n(
           {
             name: intl.formatMessage({
               id: 'xpack.infra.metricsExplorer.filterByLabel',
-              defaultMessage: 'Add Filter',
+              defaultMessage: 'Add filter',
             }),
             icon: 'infraApp',
             onClick: handleFilter,
+            'data-test-subj': 'metricsExplorerAction-AddFilter',
+          },
+        ]
+      : [];
+
+    const nodeType = source && options.groupBy && fieldToNodeType(source, options.groupBy);
+    const viewNodeDetail = nodeType
+      ? [
+          {
+            name: intl.formatMessage(
+              {
+                id: 'xpack.infra.metricsExplorer.viewNodeDetail',
+                defaultMessage: 'View metrics for {name}',
+              },
+              { name: nodeType }
+            ),
+            icon: 'infraApp',
+            href: createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to),
+            'data-test-subj': 'metricsExplorerAction-ViewNodeMetrics',
           },
         ]
       : [];
@@ -72,11 +126,12 @@ export const MetricsExplorerChartContextMenu = injectI18n(
             href: tsvbUrl,
             icon: 'visualizeApp',
             disabled: options.metrics.length === 0,
+            'data-test-subj': 'metricsExplorerAction-OpenInTSVB',
           },
         ]
       : [];
 
-    const itemPanels = [...filterByItem, ...openInVisualize];
+    const itemPanels = [...filterByItem, ...openInVisualize, ...viewNodeDetail];
 
     // If there are no itemPanels then there is no reason to show the actions button.
     if (itemPanels.length === 0) return null;
