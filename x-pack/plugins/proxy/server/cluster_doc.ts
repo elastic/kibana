@@ -26,7 +26,6 @@ export interface RoutingNode {
 
 interface LivenessNode {
   lastUpdate: number;
-  lastChangedTime: number;
 }
 
 interface ClusterDoc {
@@ -176,7 +175,6 @@ export class ClusterDocClient {
 
   private updateLocalNode(nodes: NodeList, finishTime: number): NodeList {
     nodes[this.nodeName] = {
-      lastChangedTime: finishTime,
       lastUpdate: finishTime,
     };
     return nodes;
@@ -187,11 +185,10 @@ export class ClusterDocClient {
     const finishTime = new Date().getTime();
 
     for (const [key, node] of Object.entries(nodes)) {
-      if (!node || finishTime - node.lastUpdate > this.timeoutThreshold) {
+      const timeout = finishTime - node.lastUpdate;
+      if (!node || timeout > this.timeoutThreshold) {
+        this.log.warn(`Node ${key} has not updated in ${timeout}ms and has been dropped`);
         delete nodes[key];
-      } else {
-        node.lastChangedTime = finishTime;
-        nodes[key] = node;
       }
     }
 
