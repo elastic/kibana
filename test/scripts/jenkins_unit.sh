@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
 set -e
-trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
+# trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
-export TEST_BROWSER_HEADLESS=1
+# export TEST_BROWSER_HEADLESS=1
 
-"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;
+# "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;
+
+echo "\n\t### Hello from Tre"
