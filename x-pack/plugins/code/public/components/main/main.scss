@@ -124,7 +124,6 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: $euiSizeS;
   min-height: 80px;
   border-bottom: $euiBorderThin;
   nav {
@@ -135,6 +134,10 @@
       vertical-align: baseline;
     }
   }
+}
+
+.codeTopBar__toolbar {
+  padding: $euiSizeS;
 }
 
 .codeSearch__suggestion-item {

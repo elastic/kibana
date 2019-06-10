@@ -28,7 +28,7 @@ class Interactive extends React.Component<{}, { value: string }> {
   }
 }
 
-storiesOf('components/ColorPalette', module)
+storiesOf('components/Color/ColorPalette', module)
   .add('three colors', () => [
     <ColorPalette key="1" onChange={action('onChange')} colors={THREE_COLORS} />,
     <ColorPalette key="2" value="#fff" onChange={action('onChange')} colors={THREE_COLORS} />,

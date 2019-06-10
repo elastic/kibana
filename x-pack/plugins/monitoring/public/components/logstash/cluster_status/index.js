@@ -7,9 +7,9 @@
 import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function ClusterStatusUi({ stats, intl }) {
+export function ClusterStatus({ stats }) {
   const {
     node_count: nodeCount,
     avg_memory_used: avgMemoryUsed,
@@ -20,29 +20,29 @@ function ClusterStatusUi({ stats, intl }) {
 
   const metrics = [
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.clusterStatus.nodesLabel', defaultMessage: 'Nodes'
+      label: i18n.translate('xpack.monitoring.logstash.clusterStatus.nodesLabel', {
+        defaultMessage: 'Nodes'
       }),
       value: nodeCount,
       'data-test-subj': 'node_count'
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.clusterStatus.memoryLabel', defaultMessage: 'Memory'
+      label: i18n.translate('xpack.monitoring.logstash.clusterStatus.memoryLabel', {
+        defaultMessage: 'Memory'
       }),
       value: formatMetric(avgMemoryUsed, 'byte') + ' / ' + formatMetric(avgMemory, 'byte'),
       'data-test-subj': 'memory_used'
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.clusterStatus.eventsReceivedLabel', defaultMessage: 'Events Received'
+      label: i18n.translate('xpack.monitoring.logstash.clusterStatus.eventsReceivedLabel', {
+        defaultMessage: 'Events Received'
       }),
       value: formatMetric(eventsInTotal, '0.[0]a'),
       'data-test-subj': 'events_in_total'
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.clusterStatus.eventsEmittedLabel', defaultMessage: 'Events Emitted'
+      label: i18n.translate('xpack.monitoring.logstash.clusterStatus.eventsEmittedLabel', {
+        defaultMessage: 'Events Emitted'
       }),
       value: formatMetric(eventsOutTotal, '0.[0]a'),
       'data-test-subj': 'events_out_total'
@@ -56,5 +56,3 @@ function ClusterStatusUi({ stats, intl }) {
     />
   );
 }
-
-export const ClusterStatus = injectI18n(ClusterStatusUi);

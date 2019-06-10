@@ -38,9 +38,9 @@ export interface FilterMeta {
 }
 
 export interface Filter {
-  $state: FilterState;
+  $state?: FilterState;
   meta: FilterMeta;
-  query?: any;
+  query?: object;
 }
 
 export type Filters = Filter[];

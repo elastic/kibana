@@ -22,14 +22,12 @@ import {
 } from '../../store';
 import {
   AbsoluteTimeRange,
-  InputsModelId,
   LinkTo,
   RelativeTimeRange,
-  TimeRangeKinds,
   UrlInputsModel,
 } from '../../store/inputs/model';
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
-import { URL_STATE_KEYS, CONSTANTS, LOCATION_MAPPED_TO_MODEL, LOCATION_KEYS } from './constants';
+import { URL_STATE_KEYS, LOCATION_MAPPED_TO_MODEL, LOCATION_KEYS } from './types';
 import {
   decodeRisonUrlState,
   getCurrentLocation,
@@ -48,6 +46,8 @@ import {
   UrlStateContainerPropTypes,
   UrlStateProps,
 } from './types';
+import { CONSTANTS } from './constants';
+import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 
 export class UrlStateContainerLifecycle extends React.Component<UrlStateContainerPropTypes> {
   public render() {

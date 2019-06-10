@@ -29,10 +29,28 @@ const GITHUB_OWNER = 'elastic';
 const GITHUB_REPO = 'kibana';
 const BUILD_URL = process.env.BUILD_URL;
 
+const indent = text => (
+  `  ${text.split('\n').map(l => `  ${l}`).join('\n')}`
+);
+
+const isLikelyIrrelevant = ({ failure }) => {
+  if (failure.includes('NoSuchSessionError: This driver instance does not have a valid session ID')) {
+    return true;
+  }
+
+  if (failure.includes('Error: No Living connections')) {
+    return true;
+  }
+
+  if (failure.includes('Unable to fetch Kibana status API response from Kibana')) {
+    return true;
+  }
+};
+
 /**
  * Parses junit XML files into JSON
  */
-const mapXml = createMapStream((file) => new Promise((resolve, reject) => {
+export const mapXml = () => createMapStream((file) => new Promise((resolve, reject) => {
   xml2js.parseString(file.contents.toString(), (err, result) => {
     if (err) {
       return reject(err);
@@ -44,26 +62,35 @@ const mapXml = createMapStream((file) => new Promise((resolve, reject) => {
 /**
  * Filters all testsuites to find failed testcases
  */
-const filterFailures = createMapStream((testSuite) => {
+export const filterFailures = () => createMapStream((testSuite) => {
   // Grab the failures. Reporters may report multiple testsuites in a single file.
   const testFiles = testSuite.testsuites
     ? testSuite.testsuites.testsuite
     : [testSuite.testsuite];
 
-  const failures = testFiles.reduce((failures, testFile) => {
+  const failures = [];
+  for (const testFile of testFiles) {
     for (const testCase of testFile.testcase) {
-      if (testCase.failure) {
-        // unwrap xml weirdness
-        failures.push({
-          ...testCase.$,
-          // Strip ANSI color characters
-          failure: stripAnsi(testCase.failure[0])
-        });
+      if (!testCase.failure) {
+        continue;
       }
-    }
 
-    return failures;
-  }, []);
+      // unwrap xml weirdness
+      const failureCase = {
+        ...testCase.$,
+        // Strip ANSI color characters
+        failure: stripAnsi(testCase.failure[0])
+      };
+
+
+      if (isLikelyIrrelevant(failureCase)) {
+        console.log(`Ignoring likely irrelevant failure: ${failureCase.classname} - ${failureCase.name}\n${indent(failureCase.failure)}`);
+        continue;
+      }
+
+      failures.push(failureCase);
+    }
+  }
 
   console.log(`Found ${failures.length} test failures`);
 
@@ -145,8 +172,8 @@ export async function reportFailedTests() {
 
   vfs
     .src(['./target/junit/**/*.xml'])
-    .pipe(mapXml)
-    .pipe(filterFailures)
+    .pipe(mapXml())
+    .pipe(filterFailures())
     .pipe(updateGithubIssues(githubClient, issues))
     .on('done', () => console.log(`Finished reporting test failures.`));
 }
