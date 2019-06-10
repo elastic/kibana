@@ -27,6 +27,12 @@ checks-reporter-with-killswitch "X-Pack Jest" node scripts/jest --ci --verbose
 echo ""
 echo ""
 
+echo " -> Running SIEM cyclic dependency test"
+cd "$XPACK_DIR"
+checks-reporter-with-killswitch "X-Pack SIEM cyclic dependency test" node plugins/siem/scripts/check_circular_deps
+echo ""
+echo ""
+
 # echo " -> Running jest integration tests"
 # cd "$XPACK_DIR"
 # node scripts/jest_integration --ci --verbose

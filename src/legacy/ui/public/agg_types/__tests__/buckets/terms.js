@@ -28,7 +28,7 @@ describe('Terms Agg', function () {
 
     function init({ responseValueAggs = [], aggParams = {} }) {
       ngMock.module('kibana');
-      ngMock.inject(function (Private, $controller, _$rootScope_) {
+      ngMock.inject(function ($controller, _$rootScope_) {
         const terms = aggTypes.byName.terms;
         const orderAggController = terms.params.byName.orderAgg.controller;
 
