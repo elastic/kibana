@@ -442,6 +442,9 @@ class FilterEditorUI extends Component<Props, State> {
     } = this.state;
 
     const { store } = this.props.filter.$state;
+    if (!store) {
+      return; // typescript validation
+    }
     const alias = useCustomLabel ? customLabel : null;
 
     if (isCustomEditorOpen) {

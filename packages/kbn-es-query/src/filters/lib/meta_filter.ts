@@ -23,7 +23,7 @@ export enum FilterStateStore {
 }
 
 export interface FilterState {
-  store: FilterStateStore;
+  store?: FilterStateStore;
 }
 
 export interface FilterMeta {
@@ -38,7 +38,7 @@ export interface FilterMeta {
 }
 
 export interface Filter {
-  $state?: FilterState;
+  $state: FilterState;
   meta: FilterMeta;
   query?: object;
 }

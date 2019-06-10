@@ -157,10 +157,10 @@ export class FilterManager {
     // TODO: is this necessary?
     _.map(filters, filter => {
       // Override status only for filters that didn't have state in the first place.
-      if (filter.$state === undefined) {
-        filter.$state = {
-          store: pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
-        };
+      if (filter.$state.store === undefined) {
+        filter.$state.store = pinFilterStatus
+          ? FilterStateStore.GLOBAL_STATE
+          : FilterStateStore.APP_STATE;
       }
     });
 

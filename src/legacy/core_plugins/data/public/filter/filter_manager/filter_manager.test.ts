@@ -75,7 +75,7 @@ describe('new_filter_manager', () => {
     filterManager = new FilterManager(indexPatterns, filterManagerState);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     if (updateSubscription) {
       updateSubscription.unsubscribe();
     }
@@ -83,7 +83,7 @@ describe('new_filter_manager', () => {
       fetchSubscription.unsubscribe();
     }
 
-    filterManager.removeAll();
+    await filterManager.removeAll();
   });
 
   describe('observing', () => {
@@ -92,6 +92,19 @@ describe('new_filter_manager', () => {
       fetchSubscription = filterManager.getUpdates$().subscribe(() => {});
       expect(updateSubscription).toBeInstanceOf(Subscription);
       expect(fetchSubscription).toBeInstanceOf(Subscription);
+    });
+
+    test('should observe global state', done => {
+      updateSubscription = filterManager.getUpdates$().subscribe(() => {
+        expect(filterManager.getGlobalFilters()).toHaveLength(1);
+        if (updateSubscription) {
+          updateSubscription.unsubscribe();
+        }
+        done();
+      });
+
+      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'age', 34);
+      globalStateStub.filters.push(f1);
     });
 
     test('should observe app state', done => {
@@ -105,18 +118,6 @@ describe('new_filter_manager', () => {
 
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       appStateStub.filters.push(f1);
-    });
-
-    test('should observe global state', done => {
-      updateSubscription = filterManager.getUpdates$().subscribe(() => {
-        expect(filterManager.getGlobalFilters()).toHaveLength(1);
-        if (updateSubscription) {
-          updateSubscription.unsubscribe();
-        }
-      });
-
-      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-      globalStateStub.filters.push(f1);
     });
   });
 
@@ -268,13 +269,13 @@ describe('new_filter_manager', () => {
 
     test('add filter with no state, and force pin', async () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 38);
-      f1.$state = undefined;
+      f1.$state.store = undefined;
 
       await filterManager.addFilters([f1], true);
 
       // FILTER SHOULD BE GLOBAL
       const f1Output = filterManager.getFilters()[0];
-      expect(f1Output.$state).toBeDefined();
+      expect(f1Output.$state.store).toBeDefined();
       if (f1Output.$state) {
         expect(f1Output.$state.store).toBe(FilterStateStore.GLOBAL_STATE);
       }
@@ -282,13 +283,13 @@ describe('new_filter_manager', () => {
 
     test('add filter with no state, and dont force pin', async () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 38);
-      f1.$state = undefined;
+      f1.$state.store = undefined;
 
       await filterManager.addFilters([f1], false);
 
       // FILTER SHOULD BE APP
       const f1Output = filterManager.getFilters()[0];
-      expect(f1Output.$state).toBeDefined();
+      expect(f1Output.$state.store).toBeDefined();
       if (f1Output.$state) {
         expect(f1Output.$state.store).toBe(FilterStateStore.APP_STATE);
       }
