@@ -10,7 +10,8 @@ import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { formatDateTimeLocal } from '../../../../common/formatting';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
@@ -22,7 +23,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-function AlertsPanelUi({ alerts, changeUrl, intl }) {
+export function AlertsPanel({ alerts, changeUrl }) {
   const goToAlerts = () => changeUrl('/alerts');
 
   if (!alerts || !alerts.length) {
@@ -35,10 +36,11 @@ function AlertsPanelUi({ alerts, changeUrl, intl }) {
     const severityIcon = mapSeverity(item.metadata.severity);
 
     if (item.resolved_timestamp) {
-      severityIcon.title = intl.formatMessage({
-        id: 'xpack.monitoring.cluster.overview.alertsPanel.severityIconTitle',
-        defaultMessage: '{severityIconTitle} (resolved {time} ago)' },
-      { severityIconTitle: severityIcon.title, time: formatTimestampToDuration(item.resolved_timestamp, CALCULATE_DURATION_SINCE)
+      severityIcon.title = i18n.translate('xpack.monitoring.cluster.overview.alertsPanel.severityIconTitle', {
+        defaultMessage: '{severityIconTitle} (resolved {time} ago)',
+        values: {
+          severityIconTitle: severityIcon.title, time: formatTimestampToDuration(item.resolved_timestamp, CALCULATE_DURATION_SINCE)
+        }
       });
       severityIcon.color = 'success';
       severityIcon.iconType = 'check';
@@ -106,5 +108,3 @@ function AlertsPanelUi({ alerts, changeUrl, intl }) {
     </div>
   );
 }
-
-export const AlertsPanel = injectI18n(AlertsPanelUi);

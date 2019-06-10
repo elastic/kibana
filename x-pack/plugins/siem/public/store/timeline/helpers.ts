@@ -16,7 +16,7 @@ import {
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { KqlMode, timelineDefaults, TimelineModel } from './model';
-import { TimelineById, TimelineState } from './reducer';
+import { TimelineById, TimelineState } from './types';
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
