@@ -99,7 +99,8 @@ import { help as urlparam } from './urlparam';
      }
    };
 ```
- * T
+ * This allows one to ensure each argument is present, and no extraneous arguments
+ * remain.
  */
 export type FunctionHelp<T> = T extends ExpressionFunction<
   infer Name,
@@ -113,8 +114,21 @@ export type FunctionHelp<T> = T extends ExpressionFunction<
     }
   : never;
 
-// This type infers a Function name and Arguments to ensure every Function is defined
-// in the `dict` and all Arguments have help strings.
+// This internal type infers a Function name and uses `FunctionHelp` above to build
+// a dictionary entry.  This can be used  every Function is defined and all Arguments have help strings.
+//
+// For example:
+//
+// function foo(): ExpressionFunction<'foo', Context, Arguments, Return> {
+//   // ...
+// }
+//
+// const map: FunctionHelpMap<typeof foo> = {
+//   foo: FunctionHelp<typeof foo>
+// }
+//
+// Given a collection of functions, the map would contain each entry.
+//
 type FunctionHelpMap<T> = T extends ExpressionFunction<
   infer Name,
   infer Context,
@@ -124,8 +138,8 @@ type FunctionHelpMap<T> = T extends ExpressionFunction<
   ? { [key in Name]: FunctionHelp<T> }
   : never;
 
-// This type represents an exhaustive dictionary of Function help strings,
-// organized by Function and then Function Argument.
+// This type represents an exhaustive dictionary of `FunctionHelp` types,
+// organized by Function Name and then Function Argument.
 //
 // This type indexes the existing function factories, reverses the union to an
 // intersection, and produces the dictionary of strings.
@@ -133,8 +147,8 @@ type FunctionHelpDict = UnionToIntersection<FunctionHelpMap<CanvasFunction>>;
 
 /**
  * Help text for Canvas Functions should be properly localized. This function will
- * return a dictionary of help strings, organized by Canvas Function specification
- * and then by available arguments.
+ * return a dictionary of help strings, organized by `CanvasFunction` specification
+ * and then by available arguments within each `CanvasFunction`.
  *
  * This a function, rather than an object, to future-proof string initialization,
  * if ever necessary.
