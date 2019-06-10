@@ -23800,10 +23800,10 @@ rison-node@0.3.1:
   resolved "https://registry.yarnpkg.com/rison-node/-/rison-node-0.3.1.tgz#fc540015500fc146f3b27d8d25dd5742122552a6"
   integrity sha1-/FQAFVAPwUbzsn2NJd1XQhIlUqY=
 
-rison-node@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/rison-node/-/rison-node-1.0.0.tgz#935698d1172ef53f1964bd54732cd8349d56a064"
-  integrity sha1-k1aY0Rcu9T8ZZL1UcyzYNJ1WoGQ=
+rison-node@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/rison-node/-/rison-node-1.0.2.tgz#b7b5f37f39f5ae2a51a973a33c9aa17239a33e4b"
+  integrity sha1-t7Xzfzn1ripRqXOjPJqhcjmjPks=
 
 robust-orientation@^1.1.2, robust-orientation@^1.1.3:
   version "1.1.3"
