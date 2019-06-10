@@ -71,13 +71,9 @@ async function fetchUrl(url: string): Promise<string> {
 }
 
 async function fetchJson(url: string): Promise<object> {
-  try {
-    const json = await fetchUrl(url);
-    const data = JSON.parse(json);
-    return data;
-  } catch (e) {
-    throw e;
-  }
+  const json = await fetchUrl(url);
+  const data = JSON.parse(json);
+  return data;
 }
 
 async function fetchArchiveBuffer(key: string): Promise<Buffer> {
