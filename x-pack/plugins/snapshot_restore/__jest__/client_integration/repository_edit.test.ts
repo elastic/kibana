@@ -15,6 +15,11 @@ import { REPOSITORY_EDIT } from './helpers/constant';
 const { setup } = pageHelpers.repositoryEdit;
 const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
 
+jest.mock('ui/i18n', () => {
+  const I18nContext = ({ children }: any) => children;
+  return { I18nContext };
+});
+
 // We need to skip the tests until react 16.9.0 is released
 // which supports asynchronous code inside act()
 describe.skip('<RepositoryEdit />', () => {
