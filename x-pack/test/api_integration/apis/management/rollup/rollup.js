@@ -210,7 +210,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe.skip('actions', () => {
+    describe('actions', () => {
       describe('start', () => {
         let job;
 
