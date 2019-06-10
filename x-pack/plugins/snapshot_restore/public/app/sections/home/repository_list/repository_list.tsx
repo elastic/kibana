@@ -37,7 +37,10 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   const {
     error,
     loading,
-    data: { repositories } = { repositories: undefined },
+    data: { repositories, managedRepository } = {
+      repositories: undefined,
+      managedRepository: undefined,
+    },
     request: reload,
   } = loadRepositories();
 
@@ -133,6 +136,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     content = (
       <RepositoryTable
         repositories={repositories || []}
+        managedRepository={managedRepository}
         reload={reload}
         openRepositoryDetailsUrl={openRepositoryDetailsUrl}
         onRepositoryDeleted={onRepositoryDeleted}

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -27,6 +28,7 @@ import { uiMetricService } from '../../../../services/ui_metric';
 
 interface Props extends RouteComponentProps {
   repositories: Repository[];
+  managedRepository?: string;
   reload: () => Promise<void>;
   openRepositoryDetailsUrl: (name: Repository['name']) => string;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
@@ -34,6 +36,7 @@ interface Props extends RouteComponentProps {
 
 const RepositoryTableUi: React.FunctionComponent<Props> = ({
   repositories,
+  managedRepository,
   reload,
   openRepositoryDetailsUrl,
   onRepositoryDeleted,
@@ -54,15 +57,26 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (name: Repository['name'], repository: Repository) => {
+      render: (name: Repository['name']) => {
         return (
-          <EuiLink
-            onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
-            href={openRepositoryDetailsUrl(name)}
-            data-test-subj="repositoryLink"
-          >
-            {name}
-          </EuiLink>
+          <Fragment>
+            <EuiLink
+              onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
+              href={openRepositoryDetailsUrl(name)}
+              data-test-subj="repositoryLink"
+            >
+              {name}
+            </EuiLink>
+            &nbsp;&nbsp;
+            {managedRepository === name ? (
+              <EuiBadge color="primary">
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryList.table.managedRepositoryBadgeLabel"
+                  defaultMessage="Managed"
+                />
+              </EuiBadge>
+            ) : null}
+          </Fragment>
         );
       },
     },
@@ -116,10 +130,18 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
             return (
               <RepositoryDeleteProvider>
                 {deleteRepositoryPrompt => {
-                  const label = i18n.translate(
-                    'xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip',
-                    { defaultMessage: 'Remove' }
-                  );
+                  const label =
+                    name !== managedRepository
+                      ? i18n.translate(
+                          'xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip',
+                          { defaultMessage: 'Remove' }
+                        )
+                      : i18n.translate(
+                          'xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip',
+                          {
+                            defaultMessage: 'You cannot delete a managed repository.',
+                          }
+                        );
                   return (
                     <EuiToolTip content={label} delay="long">
                       <EuiButtonIcon
@@ -134,6 +156,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
                         color="danger"
                         data-test-subj="deleteRepositoryButton"
                         onClick={() => deleteRepositoryPrompt([name], onRepositoryDeleted)}
+                        isDisabled={Boolean(name === managedRepository)}
                       />
                     </EuiToolTip>
                   );
@@ -161,6 +184,17 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
 
   const selection = {
     onSelectionChange: (newSelectedItems: Repository[]) => setSelectedItems(newSelectedItems),
+    selectable: ({ name }: Repository) => Boolean(name !== managedRepository),
+    selectableMessage: (selectable: boolean) => {
+      if (!selectable) {
+        return i18n.translate(
+          'xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip',
+          {
+            defaultMessage: 'You cannot delete a managed repository.',
+          }
+        );
+      }
+    },
   };
 
   const search = {

@@ -28,16 +28,20 @@ import { renderersRegistry } from 'plugins/interpreter/registries';
 import { ExpressionsService, ExpressionsSetup } from './expressions';
 import { SearchService, SearchSetup } from './search';
 import { QueryService, QuerySetup } from './query';
+import { FilterService, FilterSetup } from './filter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
 class DataPlugin {
+  // Exposed services, sorted alphabetically
+  private readonly expressions: ExpressionsService;
+  private readonly filter: FilterService;
   private readonly indexPatterns: IndexPatternsService;
   private readonly search: SearchService;
   private readonly query: QueryService;
-  private readonly expressions: ExpressionsService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
+    this.filter = new FilterService();
     this.query = new QueryService();
     this.search = new SearchService();
     this.expressions = new ExpressionsService();
@@ -45,23 +49,25 @@ class DataPlugin {
 
   public setup(): DataSetup {
     return {
-      indexPatterns: this.indexPatterns.setup(),
-      search: this.search.setup(),
-      query: this.query.setup(),
       expressions: this.expressions.setup({
         interpreter: {
           getInterpreter,
           renderersRegistry,
         },
       }),
+      indexPatterns: this.indexPatterns.setup(),
+      filter: this.filter.setup(),
+      search: this.search.setup(),
+      query: this.query.setup(),
     };
   }
 
   public stop() {
+    this.expressions.stop();
     this.indexPatterns.stop();
+    this.filter.stop();
     this.search.stop();
     this.query.stop();
-    this.expressions.stop();
   }
 }
 
@@ -74,8 +80,9 @@ export const data = new DataPlugin().setup();
 
 /** @public */
 export interface DataSetup {
-  indexPatterns: IndexPatternsSetup;
   expressions: ExpressionsSetup;
+  indexPatterns: IndexPatternsSetup;
+  filter: FilterSetup;
   search: SearchSetup;
   query: QuerySetup;
 }
@@ -85,3 +92,4 @@ export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from '.
 
 /** @public types */
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
+export { Query } from './query';

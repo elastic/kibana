@@ -9,6 +9,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCodeEditor,
   EuiFlexGroup,
   EuiFlexItem,
@@ -163,7 +164,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   };
 
   const renderRepository = () => {
-    const { repository } = repositoryDetails;
+    const { repository, isManagedRepository } = repositoryDetails;
 
     if (!repository) {
       return null;
@@ -172,6 +173,22 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     const { type } = repository as Repository;
     return (
       <Fragment>
+        {isManagedRepository ? (
+          <Fragment>
+            <EuiCallOut
+              size="s"
+              color="warning"
+              iconType="iInCircle"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryDetails.managedRepositoryWarningTitle"
+                  defaultMessage="This is a managed repository used by other systems. Any changes you make might affect how these systems operate."
+                />
+              }
+            />
+            <EuiSpacer size="l" />
+          </Fragment>
+        ) : null}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
           <EuiFlexItem>
             <EuiTitle size="s">
@@ -336,6 +353,17 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
                         data-test-subj="srRepositoryDetailsDeleteActionButton"
                         onClick={() =>
                           deleteRepositoryPrompt([repositoryName], onRepositoryDeleted)
+                        }
+                        isDisabled={repositoryDetails.isManagedRepository}
+                        title={
+                          repositoryDetails.isManagedRepository
+                            ? i18n.translate(
+                                'xpack.snapshotRestore.repositoryDetails.removeManagedRepositoryButtonTitle',
+                                {
+                                  defaultMessage: 'You cannot delete a managed repository.',
+                                }
+                              )
+                            : null
                         }
                       >
                         <FormattedMessage

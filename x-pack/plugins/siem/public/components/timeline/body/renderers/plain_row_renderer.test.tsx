@@ -27,7 +27,7 @@ describe('plain_row_renderer', () => {
       browserFields: mockBrowserFields,
       data: mockDatum,
       width: 100,
-      children: <span>some children</span>,
+      children: <span>{'some children'}</span>,
     });
     const wrapper = shallow(<span>{children}</span>);
     expect(toJson(wrapper)).toMatchSnapshot();
@@ -42,7 +42,7 @@ describe('plain_row_renderer', () => {
       browserFields: mockBrowserFields,
       data: mockDatum,
       width: 100,
-      children: <span>some children</span>,
+      children: <span>{'some children'}</span>,
     });
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>

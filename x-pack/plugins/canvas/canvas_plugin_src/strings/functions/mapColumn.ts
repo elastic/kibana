@@ -17,7 +17,7 @@ export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
     name: i18n.translate('xpack.canvas.functions.mapColumn.args.nameHelpText', {
       defaultMessage: 'The name of the resulting column',
     }),
-    expression: i18n.translate('xpack.canvas.functions.mapColumn.args.nameHelpText', {
+    expression: i18n.translate('xpack.canvas.functions.mapColumn.args.expressionHelpText', {
       defaultMessage:
         'A canvas expression which will be passed each row as a single row {datatable}',
       values: {

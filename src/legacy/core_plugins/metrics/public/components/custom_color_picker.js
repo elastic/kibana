@@ -82,7 +82,7 @@ class CustomColorPickerUI extends Component {
     });
 
     return (
-      <div className="tvbColorPickerPopUp">
+      <div className="tvbColorPickerPopUp" data-test-subj="tvbColorPickerPopUp">
         <div className="tvbColorPickerPopUp__saturation">
           <Saturation
             style={styles.Saturation}

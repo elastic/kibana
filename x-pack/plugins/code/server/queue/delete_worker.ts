@@ -40,7 +40,8 @@ export class DeleteWorker extends AbstractWorker {
     const { uri } = job.payload;
 
     // 1. Cancel running workers
-    // TODO: Add support for clone/update worker.
+    this.cancellationService.cancelCloneJob(uri);
+    this.cancellationService.cancelUpdateJob(uri);
     this.cancellationService.cancelIndexJob(uri);
 
     // 2. Delete repository on local fs.

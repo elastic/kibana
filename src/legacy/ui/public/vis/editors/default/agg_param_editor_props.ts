@@ -26,14 +26,22 @@ import { EditorConfig } from '../config/types';
 // as there is currently a bug on babel typescript transform plugin for it
 // https://github.com/babel/babel/issues/7641
 //
-export interface AggParamEditorProps<T> {
+
+export interface AggParamCommonProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
+  config: any;
   editorConfig: EditorConfig;
   indexedFields?: FieldParamType[];
   showValidation: boolean;
   value: T;
+  responseValueAggs: AggConfig[] | null;
+  visName: string;
   setValidity(isValid: boolean): void;
-  setValue(value?: T): void;
   setTouched(): void;
+}
+
+export interface AggParamEditorProps<T> extends AggParamCommonProps<T> {
+  wrappedWithInlineComp?: boolean;
+  setValue(value?: T): void;
 }

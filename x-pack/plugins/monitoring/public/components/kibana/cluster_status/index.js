@@ -8,9 +8,9 @@ import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { KibanaStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function ClusterStatusUI({ stats, intl }) {
+export function ClusterStatus({ stats }) {
   const {
     concurrent_connections: connections,
     count: instances,
@@ -23,40 +23,35 @@ function ClusterStatusUI({ stats, intl }) {
 
   const metrics = [
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.kibana.clusterStatus.instancesLabel',
+      label: i18n.translate('xpack.monitoring.kibana.clusterStatus.instancesLabel', {
         defaultMessage: 'Instances'
       }),
       value: instances,
       'data-test-subj': 'instances'
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.kibana.clusterStatus.memoryLabel',
+      label: i18n.translate('xpack.monitoring.kibana.clusterStatus.memoryLabel', {
         defaultMessage: 'Memory'
       }),
       value: formatMetric(memSize, 'byte') + ' / ' + formatMetric(memLimit, 'byte'),
       'data-test-subj': 'memory'
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.kibana.clusterStatus.requestsLabel',
+      label: i18n.translate('xpack.monitoring.kibana.clusterStatus.requestsLabel', {
         defaultMessage: 'Requests'
       }),
       value: requests,
       'data-test-subj': 'requests'
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.kibana.clusterStatus.connectionsLabel',
+      label: i18n.translate('xpack.monitoring.kibana.clusterStatus.connectionsLabel', {
         defaultMessage: 'Connections'
       }),
       value: connections,
       'data-test-subj': 'connections'
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.kibana.clusterStatus.maxResponseTimeLabel',
+      label: i18n.translate('xpack.monitoring.kibana.clusterStatus.maxResponseTimeLabel', {
         defaultMessage: 'Max. Response Time'
       }),
       value: formatMetric(maxResponseTime, '0', 'ms'),
@@ -77,5 +72,3 @@ function ClusterStatusUI({ stats, intl }) {
     />
   );
 }
-
-export const ClusterStatus = injectI18n(ClusterStatusUI);

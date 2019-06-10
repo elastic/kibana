@@ -52,8 +52,9 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
   repoScope: string[];
+  notFoundDirs: string[];
+  fileTreeLoadingPaths: string[];
   searchOptions: SearchOptions;
-  fileTreeLoading: boolean;
   query: string;
 }
 const LANG_MD = 'markdown';
@@ -236,7 +237,7 @@ class CodeContent extends React.PureComponent<Props> {
     );
   }
 
-  public shouldRenderProgress() {
+  public shouldRenderCloneProgress() {
     if (!this.props.repoStatus) {
       return false;
     }
@@ -249,7 +250,7 @@ class CodeContent extends React.PureComponent<Props> {
     );
   }
 
-  public renderProgress() {
+  public renderCloneProgress() {
     if (!this.props.repoStatus) {
       return null;
     }
@@ -265,22 +266,25 @@ class CodeContent extends React.PureComponent<Props> {
   }
 
   public renderContent() {
-    if (this.props.isNotFound) {
-      return <NotFound />;
-    }
-    if (this.shouldRenderProgress()) {
-      return this.renderProgress();
+    const { file, match, tree, fileTreeLoadingPaths, isNotFound, notFoundDirs } = this.props;
+    const { path, pathType, resource, org, repo, revision } = match.params;
+
+    // The clone progress rendering should come before the NotFound rendering.
+    if (this.shouldRenderCloneProgress()) {
+      return this.renderCloneProgress();
     }
 
-    const { file, match, tree, fileTreeLoading } = this.props;
-    const { path, pathType, resource, org, repo, revision } = match.params;
+    if (isNotFound || notFoundDirs.includes(path || '')) {
+      return <NotFound />;
+    }
+
     const repoUri = `${resource}/${org}/${repo}`;
     switch (pathType) {
       case PathTypes.tree:
         const node = this.findNode(path ? path.split('/') : [], tree);
         return (
           <div className="codeContainer__directoryView">
-            <Directory node={node} loading={fileTreeLoading} />
+            <Directory node={node} loading={fileTreeLoadingPaths.includes(path)} />
             <CommitHistory
               repoUri={repoUri}
               header={
@@ -386,9 +390,10 @@ class CodeContent extends React.PureComponent<Props> {
 
 const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
+  notFoundDirs: state.file.notFoundDirs,
   file: state.file.file,
   tree: state.file.tree,
-  fileTreeLoading: state.file.fileTreeLoading,
+  fileTreeLoadingPaths: state.file.fileTreeLoadingPaths,
   currentTree: currentTreeSelector(state),
   branches: state.file.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),

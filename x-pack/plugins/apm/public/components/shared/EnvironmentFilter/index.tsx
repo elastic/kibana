@@ -78,12 +78,6 @@ export const EnvironmentFilter: React.FC = () => {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end, serviceName } = urlParams;
 
-  // TODO fix the bug in urlParams that this code defensively overcomes
-  let realServiceName = serviceName;
-  if (serviceName === 'services') {
-    realServiceName = undefined;
-  }
-
   const { environment } = uiFilters;
   const { data: environments = [], status = 'loading' } = useFetcher(
     () => {
@@ -91,11 +85,11 @@ export const EnvironmentFilter: React.FC = () => {
         return loadEnvironmentsFilter({
           start,
           end,
-          serviceName: realServiceName
+          serviceName
         });
       }
     },
-    [start, end, realServiceName]
+    [start, end, serviceName]
   );
 
   return (

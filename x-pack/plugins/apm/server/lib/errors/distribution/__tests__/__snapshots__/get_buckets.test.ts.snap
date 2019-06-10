@@ -3,7 +3,6 @@
 exports[`timeseriesFetcher should make the correct query 1`] = `
 Array [
   Array [
-    "search",
     Object {
       "body": Object {
         "aggs": Object {

@@ -257,30 +257,21 @@ Array [
                   class="euiSwitch__track"
                 >
                   <svg
-                    class="euiIcon euiIcon--medium euiSwitch__icon"
+                    class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
                     focusable="false"
                     height="16"
                     viewBox="0 0 16 16"
                     width="16"
                     xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                    />
-                  </svg>
+                  />
                   <svg
-                    class="euiIcon euiIcon--medium euiSwitch__icon euiSwitch__icon--checked"
+                    class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
                     focusable="false"
                     height="16"
                     viewBox="0 0 16 16"
                     width="16"
                     xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-                      fill-rule="evenodd"
-                    />
-                  </svg>
+                  />
                 </span>
               </span>
               <label
@@ -314,18 +305,13 @@ Array [
         >
           <svg
             aria-hidden="true"
-            class="euiIcon euiIcon--medium euiButton__icon"
+            class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
             focusable="false"
             height="16"
             viewBox="0 0 16 16"
             width="16"
             xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-              fill-rule="evenodd"
-            />
-          </svg>
+          />
           <span
             class="euiButton__text"
           >
@@ -488,30 +474,21 @@ Array [
           class="euiSwitch__track"
         >
           <svg
-            class="euiIcon euiIcon--medium euiSwitch__icon"
+            class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
             focusable="false"
             height="16"
             viewBox="0 0 16 16"
             width="16"
             xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-            />
-          </svg>
+          />
           <svg
-            class="euiIcon euiIcon--medium euiSwitch__icon euiSwitch__icon--checked"
+            class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
             focusable="false"
             height="16"
             viewBox="0 0 16 16"
             width="16"
             xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-              fill-rule="evenodd"
-            />
-          </svg>
+          />
         </span>
       </span>
       <label
@@ -531,17 +508,13 @@ Array [
     >
       <svg
         aria-hidden="true"
-        class="euiIcon euiIcon--medium euiCallOutHeader__icon"
+        class="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
         focusable="false"
         height="16"
         viewBox="0 0 16 16"
         width="16"
         xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-        />
-      </svg>
+      />
       <span
         class="euiCallOutHeader__title"
       >

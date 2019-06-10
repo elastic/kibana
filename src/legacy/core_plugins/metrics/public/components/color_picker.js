@@ -109,7 +109,7 @@ class ColorPickerUI extends Component {
       );
     }
     return (
-      <div className="tvbColorPicker">
+      <div className="tvbColorPicker" data-test-subj="tvbColorPicker">
         { swatch }
         { clear }
         {

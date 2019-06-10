@@ -16,8 +16,9 @@ import { RequestExpander } from './request_expander';
 import { LanguageServerProxy } from './proxy';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { Logger } from '../log';
+import getPort from 'get-port';
 
-jest.setTimeout(10000);
+jest.setTimeout(40000);
 
 // @ts-ignore
 const options: ServerOptions = createTestServerOption();
@@ -42,7 +43,7 @@ class MockLauncher extends AbstractLauncher {
   }
 
   async getPort() {
-    return 19999;
+    return await getPort();
   }
 
   async spawnProcess(installationPath: string, port: number, log: Logger): Promise<ChildProcess> {
@@ -53,10 +54,20 @@ class MockLauncher extends AbstractLauncher {
       console.log(msg);
       mockMonitor(msg);
     });
-    childProcess.send(`port ${await this.getPort()}`);
+    childProcess.send(`port ${port}`);
     childProcess.send(`host ${this.targetHost}`);
     childProcess.send('listen');
     return childProcess;
+  }
+
+  protected killProcess(child: ChildProcess): Promise<boolean> {
+    // don't kill the process so fast, otherwise no normal exit can happen
+    return new Promise<boolean>(resolve => {
+      setTimeout(async () => {
+        const killed = await super.killProcess(child);
+        resolve(killed);
+      }, 100);
+    });
   }
 }
 
@@ -85,7 +96,7 @@ class PassiveMockLauncher extends MockLauncher {
       console.log(msg);
       mockMonitor(msg);
     });
-    this.childProcess.send(`port ${await this.getPort()}`);
+    this.childProcess.send(`port ${port}`);
     this.childProcess.send(`host ${this.targetHost}`);
     if (this.dieFirstTime) {
       this.childProcess!.send('quit');
@@ -114,18 +125,33 @@ function delay(millis: number) {
   });
 }
 
+async function retryUtil(millis: number, testFn: () => void, interval = 1000) {
+  try {
+    testFn();
+  } catch (e) {
+    if (millis >= 0) {
+      await delay(interval);
+      await retryUtil(millis - interval, testFn);
+    } else {
+      throw e;
+    }
+  }
+}
+
 test('launcher can start and end a process', async () => {
   const launcher = new MockLauncher('mock', 'localhost', options);
   const proxy = await launcher.launch(false, 1, '');
-  await delay(100);
-  expect(mockMonitor.mock.calls[0][0]).toBe('process started');
-  expect(mockMonitor.mock.calls[1][0]).toBe('start listening');
-  expect(mockMonitor.mock.calls[2][0]).toBe('socket connected');
+  await retryUtil(1000, () => {
+    expect(mockMonitor.mock.calls[0][0]).toBe('process started');
+    expect(mockMonitor.mock.calls[1][0]).toBe('start listening');
+    expect(mockMonitor.mock.calls[2][0]).toBe('socket connected');
+  });
   await proxy.exit();
-  await delay(100);
-  expect(mockMonitor.mock.calls[3][0]).toMatchObject({ method: 'shutdown' });
-  expect(mockMonitor.mock.calls[4][0]).toMatchObject({ method: 'exit' });
-  expect(mockMonitor.mock.calls[5][0]).toBe('exit process with code 0');
+  await retryUtil(1000, () => {
+    expect(mockMonitor.mock.calls[3][0]).toMatchObject({ method: 'shutdown' });
+    expect(mockMonitor.mock.calls[4][0]).toMatchObject({ method: 'exit' });
+    expect(mockMonitor.mock.calls[5][0]).toBe('exit process with code 0');
+  });
 });
 
 test('launcher can force kill the process if langServer can not exit', async () => {
@@ -136,11 +162,12 @@ test('launcher can force kill the process if langServer can not exit', async () 
   launcher.childProcess!.send('noExit');
   mockMonitor.mockClear();
   await proxy.exit();
-  await delay(2000);
-  expect(mockMonitor.mock.calls[0][0]).toMatchObject({ method: 'shutdown' });
-  expect(mockMonitor.mock.calls[1][0]).toMatchObject({ method: 'exit' });
-  expect(mockMonitor.mock.calls[2][0]).toBe('noExit');
-  expect(launcher.childProcess!.killed).toBe(true);
+  await retryUtil(30000, () => {
+    expect(mockMonitor.mock.calls[0][0]).toMatchObject({ method: 'shutdown' });
+    expect(mockMonitor.mock.calls[1][0]).toMatchObject({ method: 'exit' });
+    expect(mockMonitor.mock.calls[2][0]).toBe('noExit');
+    expect(launcher.childProcess!.killed).toBe(true);
+  });
 });
 
 test('launcher can reconnect if process died', async () => {
@@ -150,11 +177,12 @@ test('launcher can reconnect if process died', async () => {
   mockMonitor.mockClear();
   // let the process quit
   launcher.childProcess!.send('quit');
-  await delay(5000);
-  // launcher should respawn a new process and connect
-  expect(mockMonitor.mock.calls[0][0]).toBe('process started');
-  expect(mockMonitor.mock.calls[1][0]).toBe('start listening');
-  expect(mockMonitor.mock.calls[2][0]).toBe('socket connected');
+  await retryUtil(30000, () => {
+    // launcher should respawn a new process and connect
+    expect(mockMonitor.mock.calls[0][0]).toBe('process started');
+    expect(mockMonitor.mock.calls[1][0]).toBe('start listening');
+    expect(mockMonitor.mock.calls[2][0]).toBe('socket connected');
+  });
   await proxy.exit();
   await delay(2000);
 });
@@ -162,25 +190,29 @@ test('launcher can reconnect if process died', async () => {
 test('passive launcher can start and end a process', async () => {
   const launcher = new PassiveMockLauncher('mock', 'localhost', options);
   const proxy = await launcher.launch(false, 1, '');
-  await delay(100);
-  expect(mockMonitor.mock.calls[0][0]).toBe('process started');
-  expect(mockMonitor.mock.calls[1][0]).toBe('start connecting');
-  expect(mockMonitor.mock.calls[2][0]).toBe('socket connected');
+  await retryUtil(30000, () => {
+    expect(mockMonitor.mock.calls[0][0]).toBe('process started');
+    expect(mockMonitor.mock.calls[1][0]).toBe('start connecting');
+    expect(mockMonitor.mock.calls[2][0]).toBe('socket connected');
+  });
   await proxy.exit();
-  await delay(100);
-  expect(mockMonitor.mock.calls[3][0]).toMatchObject({ method: 'shutdown' });
-  expect(mockMonitor.mock.calls[4][0]).toMatchObject({ method: 'exit' });
-  expect(mockMonitor.mock.calls[5][0]).toBe('exit process with code 0');
+  await retryUtil(30000, () => {
+    expect(mockMonitor.mock.calls[3][0]).toMatchObject({ method: 'shutdown' });
+    expect(mockMonitor.mock.calls[4][0]).toMatchObject({ method: 'exit' });
+    expect(mockMonitor.mock.calls[5][0]).toBe('exit process with code 0');
+  });
 });
 
 test('passive launcher should restart a process if a process died before connected', async () => {
   const launcher = new PassiveMockLauncher('mock', 'localhost', options, true);
   const proxy = await launcher.launch(false, 1, '');
   await delay(100);
-  expect(mockMonitor.mock.calls[0][0]).toBe('process started');
-  expect(mockMonitor.mock.calls[1][0]).toBe('process started');
-  expect(mockMonitor.mock.calls[2][0]).toBe('start connecting');
-  expect(mockMonitor.mock.calls[3][0]).toBe('socket connected');
+  await retryUtil(30000, () => {
+    expect(mockMonitor.mock.calls[0][0]).toBe('process started');
+    expect(mockMonitor.mock.calls[1][0]).toBe('process started');
+    expect(mockMonitor.mock.calls[2][0]).toBe('start connecting');
+    expect(mockMonitor.mock.calls[3][0]).toBe('socket connected');
+  });
   await proxy.exit();
   await delay(1000);
 });

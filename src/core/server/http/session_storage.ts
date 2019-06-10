@@ -18,8 +18,10 @@
  */
 
 import { Request } from 'hapi';
+import { KibanaRequest } from './router';
 /**
  * Provides an interface to store and retrieve data across requests.
+ * @public
  */
 export interface SessionStorage<T> {
   /**
@@ -37,6 +39,9 @@ export interface SessionStorage<T> {
   clear(): void;
 }
 
+/**
+ * SessionStorage factory to bind one to an incoming request
+ * @public */
 export interface SessionStorageFactory<T> {
-  asScoped: (request: Request) => SessionStorage<T>;
+  asScoped: (request: Readonly<Request> | KibanaRequest) => SessionStorage<T>;
 }

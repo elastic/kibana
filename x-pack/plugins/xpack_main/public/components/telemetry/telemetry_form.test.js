@@ -14,17 +14,11 @@ const buildTelemetryOptInProvider = () => {
     post: jest.fn()
   };
 
-  function mockNotifier() {
-    this.notify = jest.fn();
-  }
-
   const mockInjector = {
     get: (key) => {
       switch (key) {
         case '$http':
           return mockHttp;
-        case 'Notifier':
-          return mockNotifier;
         default:
           return null;
       }
