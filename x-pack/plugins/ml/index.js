@@ -9,7 +9,9 @@
 import { resolve } from 'path';
 import Boom from 'boom';
 import { checkLicense } from './server/lib/check_license';
+import { addLinksToSampleDatasets } from './server/lib/sample_data_sets';
 import { FEATURE_ANNOTATIONS_ENABLED } from './common/constants/feature_flags';
+import { LICENSE_TYPE } from './common/constants/license';
 
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { annotationRoutes } from './server/routes/annotations';
@@ -33,6 +35,7 @@ import { jobAuditMessagesRoutes } from './server/routes/job_audit_messages';
 import { fileDataVisualizerRoutes } from './server/routes/file_data_visualizer';
 import { i18n } from '@kbn/i18n';
 import { initMlServerLog } from './server/client/log';
+
 
 export const ml = (kibana) => {
   return new kibana.Plugin({
@@ -77,7 +80,17 @@ export const ml = (kibana) => {
       xpackMainPlugin.status.once('green', () => {
         // Register a function that is called whenever the xpack info changes,
         // to re-compute the license check results for this plugin
-        xpackMainPlugin.info.feature(thisPlugin.id).registerLicenseCheckResultsGenerator(checkLicense);
+        const mlFeature = xpackMainPlugin.info.feature(thisPlugin.id);
+        mlFeature.registerLicenseCheckResultsGenerator(checkLicense);
+
+        // Add links to the Kibana sample data sets if ml is enabled
+        // and there is a full license (trial or platinum).
+        if (mlFeature.isEnabled() === true) {
+          const licenseCheckResults = mlFeature.getLicenseCheckResults();
+          if (licenseCheckResults.licenseType === LICENSE_TYPE.FULL) {
+            addLinksToSampleDatasets(server);
+          }
+        }
       });
 
       xpackMainPlugin.registerFeature({
@@ -150,3 +163,4 @@ export const ml = (kibana) => {
 
   });
 };
+

@@ -3,6 +3,7 @@
 exports[`HistoryTabs should render correctly 1`] = `
 <Fragment>
   <EuiTabs
+    display="default"
     expand={false}
     size="m"
   >

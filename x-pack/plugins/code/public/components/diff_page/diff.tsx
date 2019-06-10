@@ -14,8 +14,7 @@ import { CommitDiff, FileDiff } from '../../../common/git_diff';
 import { SearchScope } from '../../../model';
 import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
-import { SearchBar } from '../search_page/search_bar';
-import { ShortcutsProvider } from '../shortcuts';
+// import { SearchBar } from '../search_bar';
 import { DiffEditor } from './diff_editor';
 
 const COMMIT_ID_LENGTH = 16;
@@ -192,11 +191,11 @@ export class DiffPage extends React.Component<Props> {
     ));
     return (
       <div className="diff">
-        <SearchBar
+        {/* <SearchBar
           repoScope={this.props.repoScope}
           query={this.props.query}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
-        />
+        /> */}
         {topBar}
         <Container>
           <EuiText>{commit.commit.message}</EuiText>
@@ -222,7 +221,6 @@ export class DiffPage extends React.Component<Props> {
           </EuiFlexGroup>
         </Container>
         <Container>{diffs}</Container>
-        <ShortcutsProvider />
       </div>
     );
   }

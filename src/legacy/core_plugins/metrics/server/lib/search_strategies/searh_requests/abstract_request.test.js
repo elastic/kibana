@@ -22,19 +22,16 @@ describe('AbstractSearchRequest', () => {
   let searchRequest;
   let req;
   let callWithRequest;
-  let indexPattern;
 
   beforeEach(() => {
     req = {};
     callWithRequest = jest.fn();
-    indexPattern = 'indexPattern';
-    searchRequest = new AbstractSearchRequest(req, callWithRequest, indexPattern);
+    searchRequest = new AbstractSearchRequest(req, callWithRequest);
   });
 
   test('should init an AbstractSearchRequest instance', () => {
     expect(searchRequest.req).toBe(req);
     expect(searchRequest.callWithRequest).toBe(callWithRequest);
-    expect(searchRequest.indexPattern).toBe(indexPattern);
     expect(searchRequest.search).toBeDefined();
   });
 

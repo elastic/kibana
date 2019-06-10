@@ -20,6 +20,7 @@ import {
   loadErrorGroupList
 } from '../../../services/rest/apm/error_groups';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { useUiFilters } from '../../../context/UrlParamsContext';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 
@@ -32,14 +33,8 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
   urlParams,
   location
 }) => {
-  const {
-    serviceName,
-    start,
-    end,
-    kuery,
-    sortField,
-    sortDirection
-  } = urlParams;
+  const { serviceName, start, end, sortField, sortDirection } = urlParams;
+  const uiFilters = useUiFilters(urlParams);
   const { data: errorDistributionData } = useFetcher(
     () => {
       if (serviceName && start && end) {
@@ -47,11 +42,11 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
           serviceName,
           start,
           end,
-          kuery
+          uiFilters
         });
       }
     },
-    [serviceName, start, end, kuery]
+    [serviceName, start, end, uiFilters]
   );
 
   const { data: errorGroupListData } = useFetcher(
@@ -63,11 +58,11 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
           end,
           sortField,
           sortDirection,
-          kuery
+          uiFilters
         });
       }
     },
-    [serviceName, start, end, sortField, sortDirection, kuery]
+    [serviceName, start, end, sortField, sortDirection, uiFilters]
   );
 
   if (!errorDistributionData || !errorGroupListData) {
@@ -92,7 +87,7 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       <EuiPanel>
         <EuiTitle size="xs">

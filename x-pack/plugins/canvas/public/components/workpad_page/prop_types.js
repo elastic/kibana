@@ -48,4 +48,5 @@ export const interactiveWorkpadPagePropTypes = {
   sendToBack: PropTypes.func,
   canvasOrigin: PropTypes.func,
   saveCanvasOrigin: PropTypes.func.isRequired,
+  commit: PropTypes.func.isRequired,
 };

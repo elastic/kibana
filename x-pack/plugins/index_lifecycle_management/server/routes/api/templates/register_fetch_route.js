@@ -11,18 +11,26 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
-import { any } from 'lodash';
 
-function isReservedSystemTemplate(templateName, indexPattens) {
+/**
+ * We don't want to output system template (whose name starts with a ".") which don't
+ * have a time base index pattern (with a wildcard in it) as those templates are already
+ * assigned to a single index.
+ *
+ * @param {String} templateName The index template
+ * @param {Array} indexPatterns Index patterns
+ */
+function isReservedSystemTemplate(templateName, indexPatterns) {
   return templateName.startsWith('kibana_index_template') ||
     (
       templateName.startsWith('.') &&
-        !any(indexPattens, (pattern) => {
-          return pattern.includes('*');
+        indexPatterns.every((pattern) => {
+          return !pattern.includes('*');
         })
     );
 }
-async function filterAndFormatTemplates(templates) {
+
+function filterAndFormatTemplates(templates) {
   const formattedTemplates = [];
   const templateNames = Object.keys(templates);
   for (const templateName of templateNames) {
@@ -63,9 +71,8 @@ export function registerFetchRoute(server) {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
-        const hits = await fetchTemplates(callWithRequest);
-        const templates = await filterAndFormatTemplates(hits);
-        return templates;
+        const templates = await fetchTemplates(callWithRequest);
+        return filterAndFormatTemplates(templates);
       } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);

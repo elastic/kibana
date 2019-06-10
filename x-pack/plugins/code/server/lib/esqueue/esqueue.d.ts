@@ -60,4 +60,5 @@ export class Esqueue extends EventEmitter {
     workerFn: WorkerFn<P, R>,
     opts?: Pick<WorkerOptions, Exclude<keyof WorkerOptions, 'logger'>>
   ): W;
+  public destroy(): void;
 }

@@ -34,6 +34,7 @@ import {
   createCreateIndexStream,
   createIndexDocRecordsStream,
   migrateKibanaIndex,
+  Progress,
 } from '../lib';
 
 // pipe a series of streams into each other so that data and errors
@@ -66,12 +67,16 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kib
     { objectMode: true }
   );
 
+  const progress = new Progress('load progress');
+  progress.activate(log);
+
   await createPromiseFromStreams([
     recordStream,
     createCreateIndexStream({ client, stats, skipExisting, log, kibanaUrl }),
-    createIndexDocRecordsStream(client, stats),
+    createIndexDocRecordsStream(client, stats, progress),
   ]);
 
+  progress.deactivate();
   const result = stats.toJSON();
 
   for (const [index, { docs }] of Object.entries(result)) {

@@ -20,7 +20,7 @@ import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { Component, Fragment } from 'react';
 import { capabilities } from 'ui/capabilities';
 import { Breadcrumb } from 'ui/chrome';
-// @ts-ignore
+import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
 import { Feature } from '../../../../../xpack_main/types';
 import { isReservedSpace } from '../../../../common';
@@ -41,12 +41,12 @@ interface Props {
   spaceId?: string;
   spacesNavState: SpacesNavState;
   intl: InjectedIntl;
-  features: Feature[];
   setBreadcrumbs?: (breadcrumbs: Breadcrumb[]) => void;
 }
 
 interface State {
   space: Partial<Space>;
+  features: Feature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
   isLoading: boolean;
@@ -61,51 +61,58 @@ class ManageSpacePageUI extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.validator = new SpaceValidator({ shouldValidate: false, features: props.features });
+    this.validator = new SpaceValidator({ shouldValidate: false });
     this.state = {
       isLoading: true,
       showAlteringActiveSpaceDialog: false,
       space: {},
+      features: [],
     };
   }
 
-  public componentDidMount() {
+  public async componentDidMount() {
+    if (!capabilities.get().spaces.manage) {
+      return;
+    }
+
     const { spaceId, spacesManager, intl, setBreadcrumbs } = this.props;
 
+    const getFeatures = kfetch({ method: 'get', pathname: '/api/features/v1' });
+
     if (spaceId) {
-      spacesManager
-        .getSpace(spaceId)
-        .then((result: any) => {
-          if (result.data) {
-            if (setBreadcrumbs) {
-              setBreadcrumbs(getEditBreadcrumbs(result.data));
-            }
-
-            this.setState({
-              space: result.data,
-              originalSpace: result.data,
-              isLoading: false,
-            });
+      try {
+        const [space, features] = await Promise.all([spacesManager.getSpace(spaceId), getFeatures]);
+        if (space) {
+          if (setBreadcrumbs) {
+            setBreadcrumbs(getEditBreadcrumbs(space));
           }
-        })
-        .catch(error => {
-          const { message = '' } = error.data || {};
 
-          toastNotifications.addDanger(
-            intl.formatMessage(
-              {
-                id: 'xpack.spaces.management.manageSpacePage.errorLoadingSpaceTitle',
-                defaultMessage: 'Error loading space: {message}',
-              },
-              {
-                message,
-              }
-            )
-          );
-          this.backToSpacesList();
-        });
+          this.setState({
+            space,
+            features: await features,
+            originalSpace: space,
+            isLoading: false,
+          });
+        }
+      } catch (error) {
+        const { message = '' } = error.data || {};
+
+        toastNotifications.addDanger(
+          intl.formatMessage(
+            {
+              id: 'xpack.spaces.management.manageSpacePage.errorLoadingSpaceTitle',
+              defaultMessage: 'Error loading space: {message}',
+            },
+            {
+              message,
+            }
+          )
+        );
+        this.backToSpacesList();
+      }
     } else {
-      this.setState({ isLoading: false });
+      const features = await getFeatures;
+      this.setState({ isLoading: false, features });
     }
   }
 
@@ -120,16 +127,14 @@ class ManageSpacePageUI extends Component<Props, State> {
     );
   }
 
-  public getLoadingIndicator = () => {
-    return (
-      <div>
-        <EuiLoadingSpinner size={'xl'} />{' '}
-        <EuiTitle>
-          <h1>Loading...</h1>
-        </EuiTitle>
-      </div>
-    );
-  };
+  public getLoadingIndicator = () => (
+    <div>
+      <EuiLoadingSpinner size={'xl'} />{' '}
+      <EuiTitle>
+        <h1>Loading...</h1>
+      </EuiTitle>
+    </div>
+  );
 
   public getForm = () => {
     if (!capabilities.get().spaces.manage) {
@@ -165,7 +170,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
         <EnabledFeatures
           space={this.state.space}
-          features={this.props.features}
+          features={this.state.features}
           uiCapabilities={capabilities.get()}
           onChange={this.onSpaceChange}
           intl={this.props.intl}
@@ -187,15 +192,13 @@ class ManageSpacePageUI extends Component<Props, State> {
     );
   };
 
-  public getFormHeading = () => {
-    return (
-      <EuiTitle size="m">
-        <h1>
-          {this.getTitle()} <ReservedSpaceBadge space={this.state.space as Space} />
-        </h1>
-      </EuiTitle>
-    );
-  };
+  public getFormHeading = () => (
+    <EuiTitle size="m">
+      <h1>
+        {this.getTitle()} <ReservedSpaceBadge space={this.state.space as Space} />
+      </h1>
+    </EuiTitle>
+  );
 
   public getTitle = () => {
     if (this.editingExistingSpace()) {

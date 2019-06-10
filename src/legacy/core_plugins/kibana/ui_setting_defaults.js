@@ -141,7 +141,7 @@ export function getUiSettingDefaults() {
                      'kbn.advancedSettings.dateFormat.optionsLinkText',
         values: {
           formatLink:
-            '<a href="http://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener noreferrer">' +
             i18n.translate('kbn.advancedSettings.dateFormat.optionsLinkText', {
               defaultMessage: 'format',
             }) +
@@ -207,6 +207,23 @@ export function getUiSettingDefaults() {
       }),
       type: 'select',
       options: weekdays
+    },
+    'dateNanosFormat': {
+      name: i18n.translate('kbn.advancedSettings.dateNanosFormatTitle', {
+        defaultMessage: 'Date with nanoseconds format',
+      }),
+      value: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+      description: i18n.translate('kbn.advancedSettings.dateNanosFormatText', {
+        defaultMessage: 'Used for the {dateNanosLink} datatype of Elasticsearch',
+        values: {
+          dateNanosLink:
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/date_nanos.html" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('kbn.advancedSettings.dateNanosLinkTitle', {
+              defaultMessage: 'date_nanos',
+            }) +
+            '</a>',
+        },
+      }),
     },
     'defaultIndex': {
       name: i18n.translate('kbn.advancedSettings.defaultIndexTitle', {
@@ -600,17 +617,6 @@ export function getUiSettingDefaults() {
           'patterns from which to query the field mapping',
       }),
     },
-    'indexPatterns:warnAboutUnsupportedTimePatterns': {
-      name: i18n.translate('kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningTitle', {
-        defaultMessage: 'Time pattern warning',
-      }),
-      value: false,
-      description: i18n.translate('kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningText', {
-        defaultMessage:
-          'When an index pattern is using the now unsupported "time pattern" format, a warning will ' +
-          'be displayed once per session that is using this pattern. Set this to false to disable that warning.',
-      }),
-    },
     'format:defaultTypeMap': {
       name: i18n.translate('kbn.advancedSettings.format.defaultTypeMapTitle', {
         defaultMessage: 'Field type format name',
@@ -619,6 +625,7 @@ export function getUiSettingDefaults() {
 `{
   "ip": { "id": "ip", "params": {} },
   "date": { "id": "date", "params": {} },
+  "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
   "number": { "id": "number", "params": {} },
   "boolean": { "id": "boolean", "params": {} },
   "_source": { "id": "_source", "params": {} },
@@ -775,6 +782,7 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsText', {
         defaultMessage: 'The timefilter selection to use when Kibana is started without one',
       }),
+      requiresPageReload: true,
     },
     'timepicker:refreshIntervalDefaults': {
       name: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
@@ -789,6 +797,7 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsText', {
         defaultMessage: `The timefilter's default refresh interval`,
       }),
+      requiresPageReload: true,
     },
     'timepicker:quickRanges': {
       name: i18n.translate('kbn.advancedSettings.timepicker.quickRangesTitle', {

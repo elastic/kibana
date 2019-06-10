@@ -136,24 +136,16 @@ export function getClockSkew(
     // transaction is the inital entry in a service. Calculate skew for this, and it will be propogated to all child spans
     case 'transaction': {
       const parentStart = parentItem.timestamp + parentItem.skew;
-      const parentEnd = parentStart + parentItem.duration;
 
       // determine if child starts before the parent
       const offsetStart = parentStart - item.timestamp;
-
-      // determine if child starts after the parent has ended
-      const offsetEnd = item.timestamp - parentEnd;
-
-      // child transaction starts before parent OR
-      // child transaction starts after parent has ended
-      if (offsetStart > 0 || offsetEnd > 0) {
+      if (offsetStart > 0) {
         const latency = Math.max(parentItem.duration - item.duration, 0) / 2;
         return offsetStart + latency;
-
-        // child transaction starts withing parent duration and no adjustment is needed
-      } else {
-        return 0;
       }
+
+      // child transaction starts after parent thus no adjustment is needed
+      return 0;
     }
   }
 }

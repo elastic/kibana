@@ -10,7 +10,8 @@ import { ccrStore } from '../../../public/app/store';
 import routing from '../../../public/app/services/routing';
 import { BASE_PATH } from '../../../common/constants';
 
-const testBedOptions = {
+const testBedConfig = {
+  store: ccrStore,
   memoryRouter: {
     initialEntries: [`${BASE_PATH}/follower_indices`],
     componentRoutePath: `${BASE_PATH}/:section`,
@@ -18,4 +19,4 @@ const testBedOptions = {
   }
 };
 
-export const setup = registerTestBed(CrossClusterReplicationHome, { options: testBedOptions, store: ccrStore });
+export const setup = registerTestBed(CrossClusterReplicationHome, testBedConfig);

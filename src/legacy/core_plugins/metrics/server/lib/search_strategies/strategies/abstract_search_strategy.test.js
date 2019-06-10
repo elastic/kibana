@@ -19,10 +19,9 @@
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 
 class SearchRequest {
-  constructor(req, callWithRequest, indexPattern) {
+  constructor(req, callWithRequest) {
     this.req = req;
     this.callWithRequest = callWithRequest;
-    this.indexPattern = indexPattern;
   }
 }
 
@@ -38,7 +37,6 @@ describe('AbstractSearchStrategy', () => {
     server = {};
     callWithRequestFactory = jest.fn().mockReturnValue('callWithRequest');
     mockedFields = {};
-    indexPattern = '*';
     req = {
       pre: {
         indexPatternsService: {
@@ -73,10 +71,9 @@ describe('AbstractSearchStrategy', () => {
   });
 
   test('should return a search request', () => {
-    const searchRequest = abstractSearchStrategy.getSearchRequest(req, indexPattern);
+    const searchRequest = abstractSearchStrategy.getSearchRequest(req);
 
     expect(searchRequest instanceof SearchRequest).toBe(true);
-    expect(searchRequest.indexPattern).toBe(indexPattern);
     expect(searchRequest.callWithRequest).toBe('callWithRequest');
     expect(searchRequest.req).toBe(req);
   });

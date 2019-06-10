@@ -16,7 +16,11 @@ import { checkLicenseExpired, checkBasicLicense } from 'plugins/ml/license/check
 import { getCreateJobBreadcrumbs, getDataVisualizerIndexOrSearchBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { getDataFrameIndexOrSearchBreadcrumbs } from 'plugins/ml/data_frame/breadcrumbs';
 import { preConfiguredJobRedirect } from 'plugins/ml/jobs/new_job/wizard/preconfigured_job_redirect';
-import { checkCreateJobsPrivilege, checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_privilege';
+import {
+  checkCreateJobsPrivilege,
+  checkFindFileStructurePrivilege,
+  checkCreateDataFrameJobsPrivilege
+} from 'plugins/ml/privilege/check_privilege';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import template from './index_or_search.html';
@@ -30,8 +34,8 @@ uiRoutes
   });
 
 uiRoutes
-  .when('/data_frame/new_job', {
-    redirectTo: '/data_frame/new_job/step/index_or_search'
+  .when('/data_frames/new_job', {
+    redirectTo: '/data_frames/new_job/step/index_or_search'
   });
 
 uiRoutes
@@ -61,14 +65,14 @@ uiRoutes
   });
 
 uiRoutes
-  .when('/data_frame/new_job/step/index_or_search', {
+  .when('/data_frames/new_job/step/index_or_search', {
     template,
     k7Breadcrumbs: getDataFrameIndexOrSearchBreadcrumbs,
     resolve: {
       CheckLicense: checkBasicLicense,
-      privileges: checkFindFileStructurePrivilege,
+      privileges: checkCreateDataFrameJobsPrivilege,
       indexPatterns: loadIndexPatterns,
-      nextStepPath: () => '#data_frame/new_job/step/pivot',
+      nextStepPath: () => '#data_frames/new_job/step/pivot',
     }
   });
 

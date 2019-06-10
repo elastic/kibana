@@ -6,7 +6,7 @@
 
 import { capitalize, get } from 'lodash';
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import {
   KuiTableRowCell,
@@ -23,7 +23,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { I18nContext } from 'ui/i18n';
 
 const filterFields = [ 'kibana.name', 'kibana.host', 'kibana.status', 'kibana.transport_address' ];
@@ -73,7 +73,7 @@ const instanceRowFactory = (scope, kbnUrl) => {
     });
   };
 
-  return injectI18n(function KibanaRow(props) {
+  return function KibanaRow(props) {
     return (
       <KuiTableRow>
         <KuiTableRowCell>
@@ -91,13 +91,12 @@ const instanceRowFactory = (scope, kbnUrl) => {
           <div
             className="monTableCell__status"
             title={
-              props.intl.formatMessage({
-                id: 'xpack.monitoring.kibana.listing.instanceStatusTitle',
-                defaultMessage: 'Instance status: {kibanaStatus}'
-              }, {
-                kibanaStatus: props.kibana.status
-              }
-              )
+              i18n.translate('xpack.monitoring.kibana.listing.instanceStatusTitle', {
+                defaultMessage: 'Instance status: {kibanaStatus}',
+                values: {
+                  kibanaStatus: props.kibana.status
+                }
+              })
             }
           >
             <KibanaStatusIcon status={props.kibana.status} availability={props.availability} />&nbsp;
@@ -134,11 +133,11 @@ const instanceRowFactory = (scope, kbnUrl) => {
         </KuiTableRowCell>
       </KuiTableRow>
     );
-  });
+  };
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringKibanaListing', (kbnUrl, i18n) => {
+uiModule.directive('monitoringKibanaListing', kbnUrl => {
   return {
     restrict: 'E',
     scope: {
@@ -150,7 +149,8 @@ uiModule.directive('monitoringKibanaListing', (kbnUrl, i18n) => {
       onNewState: '=',
     },
     link(scope, $el) {
-      const filterInstancesPlaceholder = i18n('xpack.monitoring.kibana.listing.filterInstancesPlaceholder', {
+      scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
+      const filterInstancesPlaceholder = i18n.translate('xpack.monitoring.kibana.listing.filterInstancesPlaceholder', {
         defaultMessage: 'Filter Instances…'
       });
 

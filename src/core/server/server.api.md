@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
 import { ObjectType } from '@kbn/config-schema';
@@ -16,22 +17,27 @@ import { Server } from 'hapi';
 import { ServerOptions } from 'hapi';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
+import { Url } from 'url';
 
 // @public (undocumented)
 export type APICaller = (endpoint: string, clientParams: Record<string, unknown>, options?: CallAPIOptions) => Promise<unknown>;
 
+// Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
+// 
 // @public (undocumented)
-export type AuthenticationHandler<T> = (request: Request, sessionStorage: SessionStorage<T>, t: AuthToolkit) => Promise<AuthResult>;
+export type AuthenticationHandler = (request: Readonly<Request>, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
 
 // @public
 export interface AuthToolkit {
-    authenticated: (credentials: any) => AuthResult;
+    authenticated: (state?: object) => AuthResult;
     redirected: (url: string) => AuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
     }) => AuthResult;
 }
 
+// Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
+// 
 // @internal (undocumented)
 export function bootstrap({ configs, cliArgs, applyConfigOverrides, features, }: BootstrapArgs): Promise<void>;
 
@@ -50,10 +56,12 @@ export class ClusterClient {
     close(): void;
     }
 
-// @public (undocumented)
+// @internal (undocumented)
 export class ConfigService {
+    // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "Env" needs to be exported by the entry point index.d.ts
     constructor(config$: Observable<Config>, env: Env, logger: LoggerFactory);
-    atPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig>;
+    atPath<TSchema>(path: ConfigPath): Observable<TSchema>;
     getConfig$(): Observable<Config>;
     // (undocumented)
     getUnusedPaths(): Promise<string[]>;
@@ -61,26 +69,34 @@ export class ConfigService {
     getUsedPaths(): Promise<string[]>;
     // (undocumented)
     isEnabledAtPath(path: ConfigPath): Promise<boolean>;
-    optionalAtPath<TSchema extends Type<any>, TConfig>(path: ConfigPath, ConfigClass: ConfigWithSchema<TSchema, TConfig>): Observable<TConfig | undefined>;
-}
+    optionalAtPath<TSchema>(path: ConfigPath): Observable<TSchema | undefined>;
+    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
+    setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
+    }
 
-// @public (undocumented)
+// @public
 export interface CoreSetup {
     // (undocumented)
-    elasticsearch: ElasticsearchServiceSetup;
+    elasticsearch: {
+        adminClient$: Observable<ClusterClient>;
+        dataClient$: Observable<ClusterClient>;
+    };
     // (undocumented)
-    http: HttpServiceSetup;
-    // (undocumented)
-    plugins: PluginsServiceSetup;
+    http: {
+        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
+        registerAuth: HttpServiceSetup['registerAuth'];
+        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
+        getBasePathFor: HttpServiceSetup['getBasePathFor'];
+        setBasePathFor: HttpServiceSetup['setBasePathFor'];
+        createNewServer: HttpServiceSetup['createNewServer'];
+    };
 }
 
-// @public (undocumented)
+// @public
 export interface CoreStart {
-    // (undocumented)
-    http: HttpServiceStart;
 }
 
-// @internal
+// @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
@@ -88,6 +104,8 @@ export interface DiscoveredPlugin {
     readonly requiredPlugins: ReadonlyArray<PluginName>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "ElasticsearchConfig" needs to be exported by the entry point index.d.ts
+// 
 // @public (undocumented)
 export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
@@ -113,20 +131,50 @@ export interface ElasticsearchServiceSetup {
 // @public (undocumented)
 export type Headers = Record<string, string | string[] | undefined>;
 
+// Warning: (ae-forgotten-export) The symbol "HttpServerSetup" needs to be exported by the entry point index.d.ts
+// 
 // @public (undocumented)
-export type HttpServiceSetup = HttpServerSetup;
+export interface HttpServiceSetup extends HttpServerSetup {
+    // Warning: (ae-forgotten-export) The symbol "HttpConfig" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
+}
 
 // @public (undocumented)
 export interface HttpServiceStart {
     isListening: () => boolean;
 }
 
+// @internal (undocumented)
+export interface InternalCoreSetup {
+    // (undocumented)
+    elasticsearch: ElasticsearchServiceSetup;
+    // (undocumented)
+    http: HttpServiceSetup;
+    // (undocumented)
+    plugins: PluginsServiceSetup;
+}
+
 // @public (undocumented)
-export class KibanaRequest<Params, Query, Body> {
-    constructor(req: Request, params: Params, query: Query, body: Body);
+export interface InternalCoreStart {
+    // (undocumented)
+    http: HttpServiceStart;
+    // (undocumented)
+    plugins: PluginsServiceStart;
+}
+
+// @public
+export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
+    // @internal (undocumented)
+    protected readonly [requestSymbol]: Request;
+    constructor(request: Request, params: Params, query: Query, body: Body);
     // (undocumented)
     readonly body: Body;
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas: RouteSchemas<P, Q, B> | undefined): KibanaRequest<P["type"], Q["type"], B["type"]>;
+    // Warning: (ae-forgotten-export) The symbol "RouteSchemas" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal
+    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>): KibanaRequest<P["type"], Q["type"], B["type"]>;
     // (undocumented)
     getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
     // (undocumented)
@@ -134,10 +182,22 @@ export class KibanaRequest<Params, Query, Body> {
     // (undocumented)
     readonly params: Params;
     // (undocumented)
-    readonly path: string;
-    // (undocumented)
     readonly query: Query;
+    // (undocumented)
+    readonly route: RecursiveReadonly<KibanaRequestRoute>;
+    // (undocumented)
+    readonly url: Url;
     }
+
+// @public
+export interface KibanaRequestRoute {
+    // (undocumented)
+    method: RouteMethod | 'patch' | 'options';
+    // (undocumented)
+    options: Required<RouteConfigOptions>;
+    // (undocumented)
+    path: string;
+}
 
 // @public
 export interface Logger {
@@ -167,6 +227,8 @@ export class LogLevel {
     // (undocumented)
     static readonly Fatal: LogLevel;
     static fromId(level: LogLevelId): LogLevel;
+    // Warning: (ae-forgotten-export) The symbol "LogLevelId" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     readonly id: LogLevelId;
     // (undocumented)
@@ -206,35 +268,55 @@ export interface LogRecord {
     timestamp: Date;
 }
 
+// Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
+// 
 // @public (undocumented)
-export type OnRequestHandler<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: OnRequestToolkit) => OnRequestResult | Promise<OnRequestResult>;
+export type OnPostAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPostAuthToolkit) => OnPostAuthResult | Promise<OnPostAuthResult>;
 
 // @public
-export interface OnRequestToolkit {
-    next: () => OnRequestResult;
-    redirected: (url: string) => OnRequestResult;
+export interface OnPostAuthToolkit {
+    next: () => OnPostAuthResult;
+    redirected: (url: string) => OnPostAuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
-    }) => OnRequestResult;
+    }) => OnPostAuthResult;
+}
+
+// Warning: (ae-forgotten-export) The symbol "OnPreAuthResult" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type OnPreAuthHandler<Params = any, Query = any, Body = any> = (request: KibanaRequest<Params, Query, Body>, t: OnPreAuthToolkit) => OnPreAuthResult | Promise<OnPreAuthResult>;
+
+// @public
+export interface OnPreAuthToolkit {
+    next: () => OnPreAuthResult;
+    redirected: (url: string, options?: {
+        forward: boolean;
+    }) => OnPreAuthResult;
+    rejected: (error: Error, options?: {
+        statusCode?: number;
+    }) => OnPreAuthResult;
 }
 
 // @public
-export interface Plugin<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> {
+export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<PluginName, unknown> = {}, TPluginsStart extends Record<PluginName, unknown> = {}> {
     // (undocumented)
-    setup: (pluginSetupContext: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    // (undocumented)
+    start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
     // (undocumented)
     stop?: () => void;
 }
 
 // @public
-export type PluginInitializer<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> = (coreContext: PluginInitializerContext) => Plugin<TSetup, TPluginsSetup>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<PluginName, unknown> = {}, TPluginsStart extends Record<PluginName, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext {
     // (undocumented)
     config: {
-        create: <Schema extends Type<any>, Config>(ConfigClass: ConfigWithSchema<Schema, Config>) => Observable<Config>;
-        createIfExists: <Schema extends Type<any>, Config>(ConfigClass: ConfigWithSchema<Schema, Config>) => Observable<Config | undefined>;
+        create: <Schema>() => Observable<Schema>;
+        createIfExists: <Schema>() => Observable<Schema | undefined>;
     };
     // (undocumented)
     env: {
@@ -247,21 +329,7 @@ export interface PluginInitializerContext {
 // @public
 export type PluginName = string;
 
-// @public
-export interface PluginSetupContext {
-    // (undocumented)
-    elasticsearch: {
-        adminClient$: Observable<ClusterClient>;
-        dataClient$: Observable<ClusterClient>;
-    };
-    // (undocumented)
-    http: {
-        registerAuth: HttpServiceSetup['registerAuth'];
-        registerOnRequest: HttpServiceSetup['registerOnRequest'];
-    };
-}
-
-// @internal (undocumented)
+// @public (undocumented)
 export interface PluginsServiceSetup {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
@@ -273,15 +341,41 @@ export interface PluginsServiceSetup {
 }
 
 // @public (undocumented)
+export interface PluginsServiceStart {
+    // (undocumented)
+    contracts: Map<PluginName, unknown>;
+}
+
+// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
+    [K in keyof T]: RecursiveReadonly<T[K]>;
+}> : T;
+
+// @public
+export interface RouteConfigOptions {
+    authRequired?: boolean;
+    tags?: ReadonlyArray<string>;
+}
+
+// @public
+export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
+
+// @public (undocumented)
 export class Router {
     constructor(path: string);
     delete<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    // Warning: (ae-forgotten-export) The symbol "RouteConfig" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "RequestHandler" needs to be exported by the entry point index.d.ts
     get<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
     getRoutes(): Readonly<RouterRoute>[];
     // (undocumented)
     readonly path: string;
     post<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
     put<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     routes: Array<Readonly<RouterRoute>>;
     }
@@ -293,7 +387,23 @@ export class ScopedClusterClient {
     callAsInternalUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
     }
 
+// @public
+export interface SessionStorage<T> {
+    clear(): void;
+    get(): Promise<T | null>;
+    set(sessionValue: T): void;
+}
 
-// (No @packageDocumentation comment for this package)
+// @public
+export interface SessionStorageFactory<T> {
+    // (undocumented)
+    asScoped: (request: Readonly<Request> | KibanaRequest) => SessionStorage<T>;
+}
+
+
+// Warnings were encountered during analysis:
+// 
+// src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 ```

@@ -24,14 +24,14 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
 
 import Boom from 'boom';
 import { createTestHandler, RequestRunner, TeardownFn } from '../__fixtures__';
-import { initPrivateSpacesApi } from './spaces';
+import { initInternalSpacesApi } from './spaces';
 
 describe('Spaces API', () => {
   let request: RequestRunner;
   let teardowns: TeardownFn[];
 
   beforeEach(() => {
-    const setup = createTestHandler(initPrivateSpacesApi);
+    const setup = createTestHandler(initInternalSpacesApi);
 
     request = setup.request;
     teardowns = setup.teardowns;

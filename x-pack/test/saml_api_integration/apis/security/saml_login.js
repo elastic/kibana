@@ -41,6 +41,27 @@ export default function ({ getService }) {
         .expect(401);
     });
 
+    it('does not prevent basic login', async () => {
+      const [username, password] = config.get('servers.elasticsearch.auth').split(':');
+      const response = await supertest
+        .post('/api/security/v1/login')
+        .set('kbn-xsrf', 'xxx')
+        .send({ username, password })
+        .expect(204);
+
+      const cookies = response.headers['set-cookie'];
+      expect(cookies).to.have.length(1);
+
+      const { body: user } = await supertest
+        .get('/api/security/v1/me')
+        .set('kbn-xsrf', 'xxx')
+        .set('Cookie', request.cookie(cookies[0]).cookieString())
+        .expect(200);
+
+      expect(user.username).to.eql(username);
+      expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+    });
+
     describe('initiating handshake', () => {
       it('should properly set cookie and redirect user', async () => {
         const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
@@ -130,7 +151,6 @@ export default function ({ getService }) {
           'full_name',
           'email',
           'roles',
-          'scope',
           'metadata',
           'enabled',
           'authentication_realm',
@@ -171,7 +191,6 @@ export default function ({ getService }) {
           'full_name',
           'email',
           'roles',
-          'scope',
           'metadata',
           'enabled',
           'authentication_realm',
@@ -504,7 +523,7 @@ export default function ({ getService }) {
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
         const esResponse = await getService('es').deleteByQuery({
-          index: '.security',
+          index: '.security-tokens',
           q: 'doc_type:token',
           refresh: true,
         });

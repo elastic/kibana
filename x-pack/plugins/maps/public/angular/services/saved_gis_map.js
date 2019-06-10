@@ -17,7 +17,7 @@ import {
   getRefreshConfig,
   getQuery,
 } from '../../selectors/map_selectors';
-import { getIsLayerTOCOpen } from '../../store/ui';
+import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../store/ui';
 import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
 import { copyPersistentState } from '../../store/util';
 import { extractReferences, injectReferences } from '../../../common/migrations/references';
@@ -101,7 +101,8 @@ module.factory('SavedGisMap', function (Private) {
     });
 
     this.uiStateJSON = JSON.stringify({
-      isLayerTOCOpen: getIsLayerTOCOpen(state)
+      isLayerTOCOpen: getIsLayerTOCOpen(state),
+      openTOCDetails: getOpenTOCDetails(state),
     });
 
     this.bounds = convertMapExtentToPolygon(getMapExtent(state));

@@ -10,7 +10,8 @@ import { registerRouter } from '../../../public/crud_app/services';
 import { createRollupJobsStore } from '../../../public/crud_app/store';
 import { JobList } from '../../../public/crud_app/sections/job_list';
 
-const testBedOptions = {
+const testBedConfig = {
+  store: createRollupJobsStore,
   memoryRouter: {
     onRouter: (router) =>  {
       // register our react memory router
@@ -19,4 +20,4 @@ const testBedOptions = {
   }
 };
 
-export const setup = registerTestBed(JobList, { options: testBedOptions, store: createRollupJobsStore });
+export const setup = registerTestBed(JobList, testBedConfig);

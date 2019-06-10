@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import percentile from '../percentile';
+import { percentile } from '../percentile';
 import { expect } from 'chai';
 import sinon from 'sinon';
 

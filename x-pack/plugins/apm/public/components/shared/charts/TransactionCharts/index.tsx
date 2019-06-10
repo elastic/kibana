@@ -27,6 +27,7 @@ import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import CustomPlot from '../CustomPlot';
 import { SyncChartGroup } from '../SyncChartGroup';
 import { LicenseContext } from '../../../../context/LicenseContext';
+import { getEmptySeries } from '../CustomPlot/getEmptySeries';
 
 interface TransactionChartProps {
   hasMLJob: boolean;
@@ -134,12 +135,12 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   public render() {
     const { charts, urlParams } = this.props;
     const { noHits, responseTimeSeries, tpmSeries } = charts;
-    const { transactionType } = urlParams;
+    const { transactionType, start, end } = urlParams;
 
     return (
       <SyncChartGroup
         render={hoverXHandlers => (
-          <EuiFlexGrid columns={2}>
+          <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
               <EuiPanel>
                 <React.Fragment>
@@ -157,7 +158,9 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   </EuiFlexGroup>
                   <CustomPlot
                     noHits={noHits}
-                    series={responseTimeSeries}
+                    series={
+                      noHits ? getEmptySeries(start, end) : responseTimeSeries
+                    }
                     {...hoverXHandlers}
                     tickFormatY={this.getResponseTimeTickFormatter}
                     formatTooltipValue={this.getResponseTimeTooltipFormatter}
@@ -174,7 +177,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   </EuiTitle>
                   <CustomPlot
                     noHits={noHits}
-                    series={tpmSeries}
+                    series={noHits ? getEmptySeries(start, end) : tpmSeries}
                     {...hoverXHandlers}
                     tickFormatY={this.getTPMFormatter}
                     formatTooltipValue={this.getTPMTooltipFormatter}

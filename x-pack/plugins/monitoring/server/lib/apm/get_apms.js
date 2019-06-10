@@ -14,7 +14,7 @@ import { getDiffCalculation } from './_apm_stats';
 export function handleResponse(response, start, end) {
   const hits = get(response, 'hits.hits', []);
   const initial = { ids: new Set(), beats: [] };
-  const { beats } = hits.reduceRight((accum, hit) => {
+  const { beats } = hits.reduce((accum, hit) => {
     const stats = get(hit, '_source.beats_stats');
     const uuid = get(stats, 'beat.uuid');
 

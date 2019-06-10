@@ -10,10 +10,12 @@ import { ml } from '../../../../../../services/ml_api_service';
 
 import { DataFrameJobListRow } from '../common';
 
-export const stopJobFactory = (getJobs: () => void) => async (d: DataFrameJobListRow) => {
+import { GetJobs } from './get_jobs';
+
+export const stopJobFactory = (getJobs: GetJobs) => async (d: DataFrameJobListRow) => {
   try {
     await ml.dataFrame.stopDataFrameTransformsJob(d.config.id);
-    getJobs();
+    getJobs(true);
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.jobsList.stopJobSuccessMessage', {
         defaultMessage: 'Data frame job {jobId} stopped successfully.',

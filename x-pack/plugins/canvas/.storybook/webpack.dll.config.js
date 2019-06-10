@@ -22,7 +22,6 @@ module.exports = {
   // which Storybook stories and their components would require, but don't
   // change during development.
   entry: [
-    '@elastic/eui',
     '@elastic/eui/dist/eui_theme_light.css',
     '@kbn/ui-framework/dist/kui_light.css',
     '@storybook/addon-actions',
@@ -37,12 +36,24 @@ module.exports = {
     '@storybook/core/dist/server/common/polyfills.js',
     '@storybook/react',
     '@storybook/theming',
+    'angular-mocks',
+    'angular',
     'chroma-js',
+    'html-entities',
+    'jquery',
+    'lodash.clone',
     'lodash',
+    'markdown-it',
+    'mocha',
     'prop-types',
     'react-dom',
+    'react-markdown',
     'react',
     'recompose',
+    'redux-actions',
+    'remark-parse',
+    'rxjs',
+    'sinon',
     'tinycolor2',
     // Include the DLL UI contexts from Kibana
     require.resolve('./dll_contexts'),
@@ -111,5 +122,9 @@ module.exports = {
         loader: 'file-loader',
       },
     ],
+  },
+  node: {
+    fs: 'empty',
+    child_process: 'empty',
   },
 };

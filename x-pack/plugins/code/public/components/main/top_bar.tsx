@@ -6,14 +6,13 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import React, { ChangeEvent } from 'react';
-import { SearchScope, Repository } from '../../../model';
+import { SearchOptions, SearchScope } from '../../../model';
 import { ReferenceInfo } from '../../../model/commit';
 import { MainRouteParams } from '../../common/types';
 import { encodeRevisionString } from '../../utils/url';
 import { history } from '../../utils/url';
 import { Breadcrumb } from './breadcrumb';
-import { SearchBar } from './search_bar';
-import { SearchOptions } from '../../actions';
+import { SearchBar } from '../search_bar';
 
 interface Props {
   routeParams: MainRouteParams;
@@ -21,7 +20,7 @@ interface Props {
   buttons: React.ReactNode;
   searchOptions: SearchOptions;
   branches: ReferenceInfo[];
-  defaultSearchScope?: Repository;
+  query: string;
 }
 
 export class TopBar extends React.Component<Props, { value: string }> {
@@ -44,11 +43,16 @@ export class TopBar extends React.Component<Props, { value: string }> {
     return (
       <div className="code-top-bar__container">
         <SearchBar
-          defaultSearchScope={this.props.defaultSearchScope}
+          query={this.props.query}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
+          enableSubmitWhenOptionsChanged={false}
           searchOptions={this.props.searchOptions}
         />
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexGroup
+          gutterSize="none"
+          justifyContent="spaceBetween"
+          className="codeTopBar__toolbar"
+        >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem

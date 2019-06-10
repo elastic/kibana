@@ -39,11 +39,9 @@ jest.mock('../../utils/mapping_setup', () => ({
 }));
 
 jest.mock('../../notify', () => ({
-  Notifier: jest.fn().mockImplementation(() => ({
-    error: jest.fn(),
-  })),
   toastNotifications: {
     addDanger: jest.fn(),
+    addError: jest.fn(),
   }
 }));
 
@@ -57,10 +55,6 @@ jest.mock('../_get', () => ({
   IndexPatternsGetProvider: jest.fn().mockImplementation(() => ({
     clearCache: jest.fn(),
   }))
-}));
-
-jest.mock('../_intervals', () => ({
-  IndexPatternsIntervalsProvider: jest.fn(),
 }));
 
 jest.mock('../_flatten_hit', () => ({
@@ -77,10 +71,6 @@ jest.mock('../fields_fetcher_provider', () => ({
   FieldsFetcherProvider: {
     fetch: jest.fn().mockImplementation(() => ([]))
   }
-}));
-
-jest.mock('../unsupported_time_patterns', () => ({
-  IsUserAwareOfUnsupportedTimePatternProvider: jest.fn(),
 }));
 
 

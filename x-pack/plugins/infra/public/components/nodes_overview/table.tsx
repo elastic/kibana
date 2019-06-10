@@ -69,6 +69,7 @@ export const TableView = injectI18n(
               timeRange={timeRange}
               isPopoverOpen={this.state.isPopoverOpen.includes(item.node.pathId)}
               options={options}
+              popoverPosition="rightCenter"
             >
               <EuiButtonEmpty onClick={this.openPopoverFor(item.node.pathId)}>
                 {value}

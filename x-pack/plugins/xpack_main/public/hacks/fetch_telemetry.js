@@ -15,8 +15,9 @@ import moment from 'moment';
  * @param {Function} _moment moment.js, but injectable for tests
  * @return {Promise} An array of cluster Telemetry objects.
  */
-export function fetchTelemetry($http, { basePath = uiChrome.getBasePath(), _moment = moment } = { }) {
-  return $http.post(`${basePath}/api/telemetry/v1/clusters/_stats`, {
+export function fetchTelemetry($http, { basePath = uiChrome.getBasePath(), _moment = moment, unencrypted = false } = { }) {
+  return $http.post(`${basePath}/api/telemetry/v2/clusters/_stats`, {
+    unencrypted,
     timeRange: {
       min: _moment().subtract(20, 'minutes').toISOString(),
       max: _moment().toISOString()

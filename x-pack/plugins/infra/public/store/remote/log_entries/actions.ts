@@ -11,6 +11,8 @@ import { loadMoreEntriesActionCreators } from './operations/load_more';
 
 const actionCreator = actionCreatorFactory('x-pack/infra/remote/log_entries');
 
+export const setSourceId = actionCreator<string>('SET_SOURCE_ID');
+
 export const loadEntries = loadEntriesActionCreators.resolve;
 export const loadMoreEntries = loadMoreEntriesActionCreators.resolve;
 

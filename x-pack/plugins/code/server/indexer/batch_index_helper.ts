@@ -50,7 +50,7 @@ export class BatchIndexHelper {
       return;
     }
     try {
-      this.log.info(`Batch indexed ${this.batch.length / 2} documents.`);
+      this.log.debug(`Batch indexed ${this.batch.length / 2} documents.`);
       return await this.client.bulk({ body: this.batch });
     } catch (error) {
       // TODO(mengwei): should we throw this exception again?

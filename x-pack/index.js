@@ -32,6 +32,7 @@ import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
 import { taskManager } from './plugins/task_manager';
 import { rollup } from './plugins/rollup';
+import { siem } from './plugins/siem';
 import { remoteClusters } from './plugins/remote_clusters';
 import { crossClusterReplication } from './plugins/cross_cluster_replication';
 import { translations } from './plugins/translations';
@@ -39,6 +40,8 @@ import { upgradeAssistant } from './plugins/upgrade_assistant';
 import { uptime } from './plugins/uptime';
 import { ossTelemetry } from './plugins/oss_telemetry';
 import { fileUpload } from './plugins/file_upload';
+import { encryptedSavedObjects } from './plugins/encrypted_saved_objects';
+import { snapshotRestore } from './plugins/snapshot_restore';
 
 module.exports = function (kibana) {
   return [
@@ -70,6 +73,7 @@ module.exports = function (kibana) {
     infra(kibana),
     taskManager(kibana),
     rollup(kibana),
+    siem(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),
     translations(kibana),
@@ -77,5 +81,7 @@ module.exports = function (kibana) {
     uptime(kibana),
     ossTelemetry(kibana),
     fileUpload(kibana),
+    encryptedSavedObjects(kibana),
+    snapshotRestore(kibana),
   ];
 };

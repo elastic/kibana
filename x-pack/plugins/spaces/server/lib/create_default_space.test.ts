@@ -8,14 +8,13 @@ jest.mock('../../../../server/lib/get_client_shield', () => ({
 }));
 
 import Boom from 'boom';
-// @ts-ignore
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { createDefaultSpace } from './create_default_space';
 
 let mockCallWithRequest;
 beforeEach(() => {
   mockCallWithRequest = jest.fn();
-  getClient.mockReturnValue({
+  (getClient as jest.Mock).mockReturnValue({
     callWithRequest: mockCallWithRequest,
   });
 });

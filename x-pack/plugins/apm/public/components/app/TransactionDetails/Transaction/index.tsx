@@ -109,7 +109,7 @@ export const Transaction: React.SFC<Props> = ({
     <EuiPanel paddingSize="m">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h5>
               {i18n.translate(
                 'xpack.apm.transactionDetails.transactionSampleTitle',
@@ -133,8 +133,6 @@ export const Transaction: React.SFC<Props> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer />
 
       <StickyTransactionProperties
         errorCount={

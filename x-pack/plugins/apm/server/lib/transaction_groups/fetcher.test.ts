@@ -15,7 +15,9 @@ describe('transactionGroupsFetcher', () => {
     const setup = {
       start: 1528113600000,
       end: 1528977600000,
-      client: clientSpy,
+      client: {
+        search: clientSpy
+      } as any,
       config: {
         get: jest.fn<any, string[]>((key: string) => {
           switch (key) {
@@ -26,7 +28,8 @@ describe('transactionGroupsFetcher', () => {
           }
         }),
         has: () => true
-      }
+      },
+      uiFiltersES: [{ term: { 'service.environment': 'test' } }]
     };
     const bodyQuery = { my: 'bodyQuery' };
     res = await transactionGroupsFetcher(setup, bodyQuery);

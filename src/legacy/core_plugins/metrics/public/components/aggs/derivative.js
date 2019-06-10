@@ -19,12 +19,12 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggSelect from './agg_select';
-import MetricSelect from './metric_select';
-import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { AggSelect } from './agg_select';
+import { MetricSelect } from './metric_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -54,6 +54,7 @@ export const DerivativeAgg = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>

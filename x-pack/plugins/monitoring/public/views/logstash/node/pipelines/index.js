@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -20,6 +21,7 @@ import { timefilter } from 'ui/timefilter';
 import { MonitoringViewBaseEuiTableController } from '../../../';
 import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../../components/logstash/pipeline_listing/pipeline_listing';
+import { DetailStatus } from '../../../../components/logstash/detail_status';
 
 const getPageData = ($injector) => {
   const $route = $injector.get('$route');
@@ -45,12 +47,12 @@ const getPageData = ($injector) => {
     });
 };
 
-function makeUpgradeMessage(logstashVersion, i18n) {
+function makeUpgradeMessage(logstashVersion) {
   if (isPipelineMonitoringSupportedInVersion(logstashVersion)) {
     return null;
   }
 
-  return i18n('xpack.monitoring.logstash.node.pipelines.notAvailableDescription', {
+  return i18n.translate('xpack.monitoring.logstash.node.pipelines.notAvailableDescription', {
     defaultMessage:
     'Pipeline monitoring is only available in Logstash version 6.0.0 or higher. This node is running version {logstashVersion}.',
     values: {
@@ -70,7 +72,7 @@ uiRoutes
       pageData: getPageData
     },
     controller: class extends MonitoringViewBaseEuiTableController {
-      constructor($injector, $scope, i18n) {
+      constructor($injector, $scope) {
         const kbnUrl = $injector.get('kbnUrl');
         const config = $injector.get('config');
 
@@ -87,7 +89,7 @@ uiRoutes
             return;
           }
 
-          this.setTitle(i18n('xpack.monitoring.logstash.node.pipelines.routeTitle', {
+          this.setTitle(i18n.translate('xpack.monitoring.logstash.node.pipelines.routeTitle', {
             defaultMessage: 'Logstash - {nodeName} - Pipelines',
             values: {
               nodeName: data.nodeSummary.name
@@ -100,6 +102,7 @@ uiRoutes
                 className="monitoringLogstashPipelinesTable"
                 onBrush={this.onBrush}
                 stats={data.nodeSummary}
+                statusComponent={DetailStatus}
                 data={data.pipelines}
                 sorting={this.sorting}
                 pagination={this.pagination}

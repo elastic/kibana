@@ -17,6 +17,20 @@ export class WorkpadApp extends React.PureComponent {
     deselectElement: PropTypes.func,
   };
 
+  interactivePageLayout = null; // future versions may enable editing on multiple pages => use array then
+
+  registerLayout(newLayout) {
+    if (this.interactivePageLayout !== newLayout) {
+      this.interactivePageLayout = newLayout;
+    }
+  }
+
+  unregisterLayout(oldLayout) {
+    if (this.interactivePageLayout === oldLayout) {
+      this.interactivePageLayout = null;
+    }
+  }
+
   render() {
     const { isWriteable, deselectElement } = this.props;
 
@@ -32,14 +46,17 @@ export class WorkpadApp extends React.PureComponent {
               <div className="canvasLayout__stageContent" onMouseDown={deselectElement}>
                 {/* NOTE: canvasWorkpadContainer is used for exporting */}
                 <div className="canvasWorkpadContainer canvasLayout__stageContentOverflow">
-                  <Workpad />
+                  <Workpad
+                    registerLayout={this.registerLayout.bind(this)}
+                    unregisterLayout={this.unregisterLayout.bind(this)}
+                  />
                 </div>
               </div>
             </div>
 
             {isWriteable && (
               <div className="canvasLayout__sidebar hide-for-sharing">
-                <Sidebar />
+                <Sidebar commit={this.interactivePageLayout || (() => {})} />
               </div>
             )}
           </div>

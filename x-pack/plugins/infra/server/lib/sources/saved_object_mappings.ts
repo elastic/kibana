@@ -45,6 +45,35 @@ export const infraSourceConfigurationSavedObjectMappings: {
           },
         },
       },
+      logColumns: {
+        type: 'nested',
+        properties: {
+          timestampColumn: {
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+            },
+          },
+          messageColumn: {
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+            },
+          },
+          fieldColumn: {
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+              field: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      },
     },
   },
 };

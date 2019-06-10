@@ -11,20 +11,20 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '../enzyme_helpers';
 import { WithMemoryRouter, WithRoute } from '../router_helpers';
 import { WithStore } from '../redux_helpers';
-import { TestBedOptions } from './types';
+import { MemoryRouterConfig } from './types';
 
 export const mountComponent = (
   Component: ComponentType,
-  options: TestBedOptions,
+  memoryRouter: MemoryRouterConfig,
   store: Store | null,
   props: any
 ): ReactWrapper => {
-  const wrapWithRouter = options.memoryRouter.wrapComponent !== false;
+  const wrapWithRouter = memoryRouter.wrapComponent !== false;
 
   let Comp;
 
   if (wrapWithRouter) {
-    const { componentRoutePath, onRouter, initialEntries, initialIndex } = options.memoryRouter;
+    const { componentRoutePath, onRouter, initialEntries, initialIndex } = memoryRouter!;
 
     // Wrap the componenet with a MemoryRouter and attach it to a react-router <Route />
     Comp = WithMemoryRouter(initialEntries, initialIndex)(

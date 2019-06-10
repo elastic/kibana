@@ -39,6 +39,17 @@ export function InfraOpsGraphQLClientFactoryProvider({ getService }) {
           introspectionQueryResultData,
         }),
       }),
+      defaultOptions: {
+        query: {
+          fetchPolicy: 'no-cache'
+        },
+        watchQuery: {
+          fetchPolicy: 'no-cache'
+        },
+        mutate: {
+          fetchPolicy: 'no-cache'
+        },
+      },
       link: httpLink,
     });
   };

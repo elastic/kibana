@@ -22,6 +22,7 @@ export const waffleNodesQuery = gql`
           path {
             value
             label
+            ip
           }
           metric {
             name

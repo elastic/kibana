@@ -12,20 +12,6 @@ describe('validateSpaceName', () => {
   beforeEach(() => {
     validator = new SpaceValidator({
       shouldValidate: true,
-      features: [
-        {
-          id: 'foo',
-          name: 'foo',
-          app: [],
-          privileges: {},
-        },
-        {
-          id: 'bar',
-          name: 'bar',
-          app: [],
-          privileges: {},
-        },
-      ],
     });
   });
 

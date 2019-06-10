@@ -5,6 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import template from './threshold_watch_time_window.html';
 import { TIME_UNITS } from 'plugins/watcher/../common/constants';
 import { getTimeUnitsLabel } from 'plugins/watcher/lib/get_time_units_label';
@@ -15,7 +16,7 @@ import 'plugins/watcher/components/xpack_aria_describes';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('thresholdWatchTimeWindow', function ($injector, i18n) {
+app.directive('thresholdWatchTimeWindow', function ($injector) {
   const htmlIdGeneratorFactory = $injector.get('xpackWatcherHtmlIdGeneratorFactory');
 
   return {
@@ -55,7 +56,7 @@ app.directive('thresholdWatchTimeWindow', function ($injector, i18n) {
       }
 
       get itemDescription() {
-        return i18n('xpack.watcher.thresholdWatchExpression.timeWindow.itemDescription', {
+        return i18n.translate('xpack.watcher.thresholdWatchExpression.timeWindow.itemDescription', {
           defaultMessage: 'For the last',
         });
       }

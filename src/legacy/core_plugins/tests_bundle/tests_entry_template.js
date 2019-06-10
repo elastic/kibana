@@ -35,8 +35,38 @@ import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
 import 'childnode-remove-polyfill';
+import fetchMock from 'fetch-mock/es5/client';
+import Symbol_observable from 'symbol-observable';
 
-import { CoreSystem } from '__kibanaCore__'
+import { CoreSystem } from '__kibanaCore__';
+
+// Fake uiCapabilities returned to Core in browser tests
+const uiCapabilities = {
+  navLinks: {
+    myLink: true,
+    notMyLink: true,
+  },
+  discover: {
+    showWriteControls: true
+  },
+  visualize: {
+    save: true
+  },
+  dashboard: {
+    showWriteControls: true
+  },
+  timelion: {
+    save: true
+  },
+};
+
+// Mock fetch for CoreSystem calls.
+fetchMock.config.fallbackToNetwork = true;
+fetchMock.post(/\\/api\\/capabilities/, {
+  status: 200,
+  body: JSON.stringify({ capabilities: uiCapabilities }),
+  headers: { 'Content-Type': 'application/json' },
+});
 
 // render the core system in a child of the body as the default children of the body
 // in the browser tests are needed for mocha and other test components to work
@@ -48,17 +78,20 @@ const coreSystem = new CoreSystem({
     version: '1.2.3',
     buildNumber: 1234,
     legacyMetadata: {
+      nav: [],
       version: '1.2.3',
       buildNum: 1234,
       devMode: true,
       uiSettings: {
         defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
         user: {}
-      }
+      },
+      nav: []
     },
     csp: {
       warnLegacyBrowsers: false,
     },
+    capabilities: uiCapabilities,
     uiPlugins: [],
     vars: {
       kbnIndex: '.kibana',
@@ -84,24 +117,6 @@ const coreSystem = new CoreSystem({
       vegaConfig: {
         enabled: true,
         enableExternalUrls: true
-      },
-      uiCapabilities: {
-        navLinks: {
-          myLink: true,
-          notMyLink: true,
-        },
-        discover: {
-          showWriteControls: true
-        },
-        visualize: {
-          save: true
-        },
-        dashboard: {
-          showWriteControls: true
-        },
-        timelion: {
-          save: true
-        },
       },
       interpreterConfig: {
         enableInVisualize: true

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { basePathServiceMock } from './base_path/base_path_service.mock';
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 export { httpServiceMock } from './http/http_service.mock';

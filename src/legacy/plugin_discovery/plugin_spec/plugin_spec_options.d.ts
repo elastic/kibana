@@ -17,6 +17,7 @@
  * under the License.
  */
 import { Server } from '../../server/kbn_server';
+import { Capabilities } from '../../../core/public';
 
 export type InitPluginFunction = (server: Server) => void;
 export interface UiExports {
@@ -29,6 +30,7 @@ export interface PluginSpecOptions {
   require: string[];
   publicDir: string;
   uiExports?: UiExports;
+  uiCapabilities?: Capabilities;
   init: InitPluginFunction;
   config: any;
 }

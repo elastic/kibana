@@ -16,6 +16,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const retry = getService('retry');
 
   describe('infrastructure security', () => {
     describe('global infrastructure all privileges', () => {
@@ -105,10 +106,12 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           });
 
           it(`does not show link to view logs`, async () => {
+            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
             await testSubjects.missingOrFail('viewLogsContextMenuItem');
           });
 
           it(`does not show link to view apm traces`, async () => {
+            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
             await testSubjects.missingOrFail('viewApmTracesContextMenuItem');
           });
         });
@@ -218,10 +221,12 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           });
 
           it(`does not show link to view logs`, async () => {
+            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
             await testSubjects.missingOrFail('viewLogsContextMenuItem');
           });
 
           it(`does not show link to view apm traces`, async () => {
+            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
             await testSubjects.missingOrFail('viewApmTracesContextMenuItem');
           });
         });
@@ -303,6 +308,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
           await testSubjects.existOrFail('waffleMap');
           await testSubjects.click('nodeContainer');
+          await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
           await testSubjects.click('viewLogsContextMenuItem');
           await testSubjects.existOrFail('infraLogsPage');
         });
@@ -368,6 +374,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
           await testSubjects.existOrFail('waffleMap');
           await testSubjects.click('nodeContainer');
+          await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
           await testSubjects.click('viewApmTracesContextMenuItem');
           await testSubjects.existOrFail('apmMainContainer');
         });
@@ -442,7 +449,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`infrastructure snapshot page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure/snapshot', {
+        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure/inventory', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });

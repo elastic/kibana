@@ -8,32 +8,47 @@ import { ComponentType, ReactWrapper } from 'enzyme';
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
 import { mountComponent, getJSXComponentWithProps } from './mount_component';
-import { TestBedConfig, TestBedOptions, TestBed, SetupFunc } from './types';
+import { TestBedConfig, TestBed, SetupFunc } from './types';
 
-const defaultOptions: TestBedOptions = {
+const defaultConfig: TestBedConfig = {
+  defaultProps: {},
   memoryRouter: {
     wrapComponent: true,
   },
+  store: null,
 };
 
 /**
- * Register a new test bed to test a React Component.
+ * Register a new Testbed to test a React Component.
  *
  * @param Component The component under test
- * @param defaultProps The default props to pass to the component on each mount
- * @param options An optional TestBedOptions object
- * @param store An optional Redux store. It accepts a store or a function that returns a store
+ * @param config An optional configuration object for the Testbed
  *
  * @example
- *
- * const setup = registerTestBed(MyComponent, {}, undefined, myReduxStore);
- * const { component } = setup(); // component is an Enzyme reactWrapper mounted and ready to be tested
+  ```typescript
+  import { registerTestBed } from '../../../../test_utils';
+  import { RemoteClusterList } from '../../app/sections/remote_cluster_list';
+  import { remoteClustersStore } from '../../app/store';
+
+  const setup = registerTestBed(RemoteClusterList, { store: remoteClustersStore });
+
+  describe('<RemoteClusterList />, () > {
+    test('it should have a table', () => {
+      const { exists } = setup();
+      expect(exists('remoteClustersTable')).toBe(true);
+    });
+  });
+  ```
  */
 export const registerTestBed = <T extends string = string>(
   Component: ComponentType<any>,
   config?: TestBedConfig
 ): SetupFunc<T> => {
-  const { defaultProps = {}, options = defaultOptions, store = null } = config || {};
+  const {
+    defaultProps = defaultConfig.defaultProps,
+    memoryRouter = defaultConfig.memoryRouter!,
+    store = defaultConfig.store,
+  } = config || {};
   /**
    * In some cases, component have some logic that interacts with the react router
    * _before_ the component is mounted.(Class constructor() I'm looking at you :)
@@ -41,15 +56,15 @@ export const registerTestBed = <T extends string = string>(
    * By adding the following lines, we make sure there is always a router available
    * when instantiating the Component.
    */
-  if (options.memoryRouter.onRouter) {
-    options.memoryRouter.onRouter(reactRouterMock);
+  if (memoryRouter.onRouter) {
+    memoryRouter.onRouter(reactRouterMock);
   }
 
   const setup: SetupFunc<T> = props => {
-    // If a function was provided to create the store, execute it
-    const storeToMount = typeof store === 'function' ? store() : store;
+    // If a function is provided we execute it
+    const storeToMount = typeof store === 'function' ? store() : store!;
 
-    const component = mountComponent(Component, options, storeToMount, {
+    const component = mountComponent(Component, memoryRouter, storeToMount, {
       ...defaultProps,
       ...props,
     });
@@ -80,7 +95,7 @@ export const registerTestBed = <T extends string = string>(
       find(testSubject).length === count;
 
     const setProps: TestBed<T>['setProps'] = updatedProps => {
-      if (options.memoryRouter.wrapComponent !== false) {
+      if (memoryRouter.wrapComponent !== false) {
         throw new Error(
           'setProps() can only be called on a component **not** wrapped by a router route.'
         );
@@ -146,7 +161,7 @@ export const registerTestBed = <T extends string = string>(
      */
 
     /**
-     * Parse an EUI table and return meta data information about its rows and colum content
+     * Parse an EUI table and return meta data information about its rows and colum content.
      *
      * @param tableTestSubject The data test subject of the EUI table
      */

@@ -19,8 +19,8 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FlyoutRef } from '../../../../core/public';
-import { getNewPlatform } from '../new_platform';
+import { OverlayRef } from '../../../../core/public';
+import { npStart } from '../new_platform';
 import { Adapters } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { viewRegistry } from './view_registry';
@@ -50,7 +50,7 @@ interface InspectorOptions {
   title?: string;
 }
 
-export type InspectorSession = FlyoutRef;
+export type InspectorSession = OverlayRef;
 
 /**
  * Opens the inspector panel for the given adapters and close any previously opened
@@ -73,7 +73,7 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
       if an inspector can be shown.`);
   }
 
-  return getNewPlatform().start.core.overlays.openFlyout(
+  return npStart.core.overlays.openFlyout(
     <InspectorPanel views={views} adapters={adapters} title={options.title} />,
     {
       'data-test-subj': 'inspectorPanel',

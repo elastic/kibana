@@ -18,18 +18,19 @@
  */
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import gaugeTemplate from './editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
-export default function GoalVisType(Private, i18n) {
+export default function GoalVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'goal',
-    title: i18n('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
+    title: i18n.translate('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
     icon: 'visGoal',
-    description: i18n('kbnVislibVisTypes.goal.goalDescription', {
+    description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
       defaultMessage: 'A goal chart indicates how close you are to your final goal.'
     }),
     visConfig: {
@@ -89,7 +90,7 @@ export default function GoalVisType(Private, i18n) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('kbnVislibVisTypes.goal.metricTitle', { defaultMessage: 'Metric' }),
+          title: i18n.translate('kbnVislibVisTypes.goal.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
           aggFilter: [
             '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
@@ -101,7 +102,7 @@ export default function GoalVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split Group' }),
+          title: i18n.translate('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split Group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']

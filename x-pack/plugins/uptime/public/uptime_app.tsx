@@ -44,8 +44,8 @@ export interface UptimeAppColors {
 
 export interface UptimeAppProps {
   basePath: string;
-  darkMode: boolean;
   client: UMGraphQLClient;
+  darkMode: boolean;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
@@ -61,6 +61,9 @@ const Application = (props: UptimeAppProps) => {
     basePath,
     client,
     darkMode,
+    isApmAvailable,
+    isInfraAvailable,
+    isLogsAvailable,
     renderGlobalHelpControls,
     routerBasename,
     setBreadcrumbs,
@@ -124,9 +127,12 @@ const Application = (props: UptimeAppProps) => {
                     autorefreshInterval,
                     autorefreshIsPaused,
                     basePath,
+                    colors,
                     dateRangeStart,
                     dateRangeEnd,
-                    colors,
+                    isApmAvailable,
+                    isInfraAvailable,
+                    isLogsAvailable,
                     refreshApp,
                     setHeadingText,
                   }}
@@ -162,7 +168,7 @@ const Application = (props: UptimeAppProps) => {
                             )}
                           />
                           <Route
-                            path="/monitor/:id"
+                            path="/monitor/:id/:location?"
                             render={routerProps => (
                               <MonitorPage
                                 query={client.query}

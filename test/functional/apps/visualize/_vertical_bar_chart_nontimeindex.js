@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Field = @timestamp');
       await PageObjects.visualize.selectField('@timestamp');
       await PageObjects.visualize.setCustomInterval('3h');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     };
 
 

@@ -24,7 +24,7 @@ describe('Transaction', () => {
       request: { method: 'GET' },
       response: { status_code: 200 }
     },
-    url: { full: 'http://www.elastic.co' },
+    url: { full: 'http://www.elastic.co', domain: 'www.elastic.co' },
     service: {
       name: 'service name',
       language: { name: 'nodejs', version: 'v1337' }

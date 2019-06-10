@@ -20,12 +20,11 @@
 import _ from 'lodash';
 import chrome from '../../chrome';
 import moment from 'moment-timezone';
-import '../directives/validate_date_interval';
 import { BucketAggType } from './_bucket_agg_type';
 import { TimeBuckets } from '../../time_buckets';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
-import intervalTemplate from '../controls/time_interval.html';
+import { TimeIntervalParamEditor } from '../controls/time_interval';
 import { timefilter } from '../../timefilter';
 import { DropPartialsParamEditor } from '../controls/drop_partials';
 import { i18n } from '@kbn/i18n';
@@ -35,11 +34,7 @@ const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
 
 function getInterval(agg) {
-  const interval = _.get(agg, ['params', 'interval']);
-  if (interval && interval.val === 'custom') {
-    return _.get(agg, ['params', 'customInterval']);
-  }
-  return interval;
+  return _.get(agg, ['params', 'interval']);
 }
 
 export function setBounds(agg, force) {
@@ -99,7 +94,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
         return agg.getIndexPattern().timeFieldName;
       },
       onChange: function (agg) {
-        if (_.get(agg, 'params.interval.val') === 'auto' && !agg.fieldIsTimeField()) {
+        if (_.get(agg, 'params.interval') === 'auto' && !agg.fieldIsTimeField()) {
           delete agg.params.interval;
         }
 
@@ -118,18 +113,24 @@ export const dateHistogramBucketAgg = new BucketAggType({
     },
     {
       name: 'interval',
-      type: 'optioned',
-      deserialize: function (state) {
+      editorComponent: TimeIntervalParamEditor,
+      deserialize: function (state, agg) {
+        // For upgrading from 7.0.x to 7.1.x - intervals are now stored as key of options or custom value
+        if (state === 'custom') {
+          return _.get(agg, 'params.customInterval');
+        }
+
         const interval = _.find(intervalOptions, { val: state });
-        return interval || _.find(intervalOptions, function (option) {
-          // For upgrading from 4.0.x to 4.1.x - intervals are now stored as 'y' instead of 'year',
-          // but this maps the old values to the new values
-          return Number(moment.duration(1, state)) === Number(moment.duration(1, option.val));
-        });
+
+        // For upgrading from 4.0.x to 4.1.x - intervals are now stored as 'y' instead of 'year',
+        // but this maps the old values to the new values
+        if (!interval && state === 'year') {
+          return 'y';
+        }
+        return state;
       },
       default: 'auto',
       options: intervalOptions,
-      editor: intervalTemplate,
       modifyAggConfigOnSearchRequestStart: function (agg) {
         setBounds(agg, true);
       },
@@ -185,12 +186,6 @@ export const dateHistogramBucketAgg = new BucketAggType({
         const field = agg.params.field;
         return field && field.name && field.name === agg.getIndexPattern().timeFieldName;
       },
-    },
-
-    {
-      name: 'customInterval',
-      default: '2h',
-      write: _.noop
     },
     {
       name: 'format'

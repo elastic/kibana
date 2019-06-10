@@ -15,3 +15,8 @@ export const NAME_FIELDS = {
   [InfraNodeType.pod]: 'kubernetes.pod.name',
   [InfraNodeType.container]: 'container.name',
 };
+export const IP_FIELDS = {
+  [InfraNodeType.host]: 'host.ip',
+  [InfraNodeType.pod]: 'kubernetes.pod.ip',
+  [InfraNodeType.container]: 'container.ip_address',
+};

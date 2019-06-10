@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kfetchAbortable } from 'ui/kfetch';
+import { kfetch } from 'ui/kfetch';
 import { SearchError, getSearchErrorType } from 'ui/courier';
 
 function getAllFetchParams(searchRequests, Promise) {
@@ -95,20 +95,18 @@ export const rollupSearchStrategy = {
       failedSearchRequests,
     } = await serializeAllFetchParams(allFetchParams, searchRequests);
 
-    const {
-      fetching,
-      abort,
-    } = kfetchAbortable({
+    const controller = new AbortController();
+    const promise = kfetch({
+      signal: controller.signal,
       pathname: '../api/rollup/search',
       method: 'POST',
       body: serializedFetchParams,
     });
 
     return {
-      searching: new Promise((resolve, reject) => {
-        fetching.then(result => {
-          resolve(shimHitsInFetchResponse(result));
-        }).catch(error => {
+      searching: promise
+        .then(shimHitsInFetchResponse)
+        .catch(error => {
           const {
             body: { statusText, error: title, message },
             res: { url },
@@ -123,10 +121,9 @@ export const rollupSearchStrategy = {
             type: getSearchErrorType({ message }),
           });
 
-          reject(searchError);
-        });
-      }),
-      abort,
+          return Promise.reject(searchError);
+        }),
+      abort: () => controller.abort(),
       failedSearchRequests,
     };
   },

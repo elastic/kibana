@@ -26,15 +26,17 @@ const initalData = {
 let hasDisplayedToast = false;
 
 export function ServiceOverview() {
-  const { urlParams } = useUrlParams();
-  const { start, end, kuery } = urlParams;
+  const {
+    urlParams: { start, end },
+    uiFilters
+  } = useUrlParams();
   const { data = initalData } = useFetcher(
     () => {
       if (start && end) {
-        return loadServiceList({ start, end, kuery });
+        return loadServiceList({ start, end, uiFilters });
       }
     },
-    [start, end, kuery]
+    [start, end, uiFilters]
   );
 
   useEffect(

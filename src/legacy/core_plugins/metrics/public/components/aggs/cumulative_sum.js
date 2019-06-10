@@ -19,15 +19,15 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggRow from './agg_row';
-import AggSelect from './agg_select';
-import MetricSelect from './metric_select';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import { AggRow } from './agg_row';
+import { AggSelect } from './agg_select';
+import { MetricSelect } from './metric_select';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
 
-function CumulativeSumAgg(props) {
+export function CumulativeSumAgg(props) {
   const { model, siblings } = props;
   const htmlId = htmlIdGenerator();
   const handleChange = createChangeHandler(props.onChange, model);
@@ -39,6 +39,7 @@ function CumulativeSumAgg(props) {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -89,5 +90,3 @@ CumulativeSumAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
-
-export default CumulativeSumAgg;

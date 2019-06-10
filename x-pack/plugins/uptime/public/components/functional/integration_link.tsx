@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface IntegrationLinkProps {
   ariaLabel: string;
-  href: string;
+  href: string | undefined;
   iconType: 'apmApp' | 'infraApp' | 'loggingApp';
   message: string;
   tooltipContent: string;
@@ -21,15 +22,31 @@ export const IntegrationLink = ({
   iconType,
   message,
   tooltipContent,
-}: IntegrationLinkProps) => (
-  <EuiLink aria-label={ariaLabel} color="subdued" href={href}>
+}: IntegrationLinkProps) =>
+  typeof href === 'undefined' ? (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={tooltipContent} position="top">
+        <EuiToolTip
+          content={i18n.translate('xpack.uptime.integrationLink.missingDataMessage', {
+            defaultMessage: 'Required data for this integration was not found.',
+          })}
+        >
           <EuiIcon type={iconType} />
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem>{message}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText color="subdued">{message}</EuiText>
+      </EuiFlexItem>
     </EuiFlexGroup>
-  </EuiLink>
-);
+  ) : (
+    <EuiLink aria-label={ariaLabel} href={href}>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={tooltipContent} position="top">
+            <EuiIcon type={iconType} />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem>{message}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiLink>
+  );

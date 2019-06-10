@@ -16,7 +16,8 @@ describe('Data Frame: <AggLabelForm />', () => {
     const item: PivotAggsConfig = {
       agg: PIVOT_SUPPORTED_AGGS.CARDINALITY,
       field: 'the-group-by-field',
-      aggName: 'the-group-by-label',
+      aggName: 'the-group-by-agg-name',
+      dropDownName: 'the-group-by-drop-down-name',
     };
     const props = {
       item,

@@ -21,7 +21,7 @@ import React from 'react';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 
-export default props => (row, index = 0) => {
+export const createLegendSeries = props => (row, index = 0) => {
 
   function tickFormatter(value) {
     if (_.isFunction(props.tickFormatter)) return props.tickFormatter(value);

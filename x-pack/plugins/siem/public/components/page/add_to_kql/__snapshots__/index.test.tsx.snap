@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddToKql Component Rendering 1`] = `
+<Component
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <pure(Component)
+    componentFilterType="hosts"
+    expression="host.name: siem-kibana"
+    indexPattern={
+      Object {
+        "fields": Array [
+          Object {
+            "aggregatable": true,
+            "name": "@timestamp",
+            "searchable": true,
+            "type": "date",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "@version",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.ephemeral_id",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.hostname",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.id",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test1",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test2",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test3",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test4",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test5",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test6",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test7",
+            "searchable": true,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "name": "agent.test8",
+            "searchable": true,
+            "type": "string",
+          },
+        ],
+        "title": "filebeat-*,auditbeat-*,packetbeat-*",
+      }
+    }
+    type="page"
+  >
+    siem-kibana
+  </pure(Component)>
+</Component>
+`;

@@ -7,13 +7,14 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FillableCircle, FillableVector } from '../../icons/additional_layer_icons';
-import { ColorGradient } from '../../icons/color_gradient';
-import { getHexColorRangeStrings } from '../../utils/color_utils';
+import { getColorRampStops } from './color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
-import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE } from '../../../../common/constants';
+import { VectorIcon } from './components/vector/legend/vector_icon';
+import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
+import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -24,16 +25,13 @@ export class VectorStyle extends AbstractStyle {
     return `__kbn__scaled(${fieldName})`;
   }
 
-  constructor(descriptor = {}) {
+  constructor(descriptor = {}, source) {
     super();
+    this._source = source;
     this._descriptor = {
       ...descriptor,
       ...VectorStyle.createDescriptor(descriptor.properties),
     };
-  }
-
-  static canEdit(styleInstance) {
-    return styleInstance.constructor === VectorStyle;
   }
 
   static createDescriptor(properties = {}) {
@@ -55,13 +53,12 @@ export class VectorStyle extends AbstractStyle {
 
   static description = '';
 
-  static renderEditor({ handleStyleChange, style, layer }) {
-
-    const styleProperties = { ...style.getProperties() };
+  renderEditor({ layer, onStyleDescriptorChange }) {
+    const styleProperties = { ...this.getProperties() };
     const handlePropertyChange = (propertyName, settings) => {
       styleProperties[propertyName] = settings;//override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(styleProperties);
-      handleStyleChange(vectorStyleDescriptor);
+      onStyleDescriptorChange(vectorStyleDescriptor);
     };
 
     return (
@@ -69,6 +66,8 @@ export class VectorStyle extends AbstractStyle {
         handlePropertyChange={handlePropertyChange}
         styleProperties={styleProperties}
         layer={layer}
+        loadIsPointsOnly={this._getIsPointsOnly}
+        loadIsLinesOnly={this._getIsLinesOnly}
       />
     );
   }
@@ -130,13 +129,13 @@ export class VectorStyle extends AbstractStyle {
     };
   }
 
-  pluckStyleMetaFromSourceDataRequest(sourceDataRequest) {
+  async pluckStyleMetaFromSourceDataRequest(sourceDataRequest) {
     const features = _.get(sourceDataRequest.getData(), 'features', []);
     if (features.length === 0) {
       return {};
     }
 
-    const scaledFields = this._getDynamicPropertiesArray()
+    const scaledFields = this.getDynamicPropertiesArray()
       .map(({ options }) => {
         return {
           name: options.field.name,
@@ -145,12 +144,29 @@ export class VectorStyle extends AbstractStyle {
         };
       });
 
-    let isPointsOnly = true;
+    const supportedFeatures = await this._source.getSupportedShapeTypes();
+    const isSingleFeatureType = supportedFeatures.length === 1;
+
+    if (scaledFields.length === 0 && isSingleFeatureType) {
+      // no meta data to pull from source data request.
+      return {};
+    }
+
+    let hasPoints = false;
+    let hasLines = false;
+    let hasPolygons = false;
     for (let i = 0; i < features.length; i++) {
       const feature = features[i];
-      if (isPointsOnly && feature.geometry.type !== 'Point') {
-        isPointsOnly = false;
+      if (!hasPoints && [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT].includes(feature.geometry.type)) {
+        hasPoints = true;
       }
+      if (!hasLines && [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING].includes(feature.geometry.type)) {
+        hasLines = true;
+      }
+      if (!hasPolygons && [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON].includes(feature.geometry.type)) {
+        hasPolygons = true;
+      }
+
       for (let j = 0; j < scaledFields.length; j++) {
         const scaledField = scaledFields[j];
         const newValue = parseFloat(feature.properties[scaledField.name]);
@@ -162,7 +178,11 @@ export class VectorStyle extends AbstractStyle {
     }
 
     const featuresMeta = {
-      isPointsOnly
+      hasFeatureType: {
+        [VECTOR_SHAPE_TYPES.POINT]: hasPoints,
+        [VECTOR_SHAPE_TYPES.LINE]: hasLines,
+        [VECTOR_SHAPE_TYPES.POLYGON]: hasPolygons
+      }
     };
 
     scaledFields.forEach(({ min, max, name }) => {
@@ -199,7 +219,7 @@ export class VectorStyle extends AbstractStyle {
     return this._descriptor.properties || {};
   }
 
-  _getDynamicPropertiesArray() {
+  getDynamicPropertiesArray() {
     const styles = this.getProperties();
     return Object.keys(styles)
       .map(styleName => {
@@ -220,8 +240,36 @@ export class VectorStyle extends AbstractStyle {
     return type === VectorStyle.STYLE_TYPE.DYNAMIC && options.field && options.field.name;
   }
 
-  _getIsPointsOnly = () => {
-    return _.get(this._descriptor, '__styleMeta.isPointsOnly', false);
+  _checkIfOnlyFeatureType = async (featureType) => {
+    const supportedFeatures = await this._source.getSupportedShapeTypes();
+
+    if (supportedFeatures.length === 1) {
+      return supportedFeatures[0] === featureType;
+    }
+
+    if (!this._descriptor.__styleMeta || !this._descriptor.__styleMeta.hasFeatureType) {
+      return false;
+    }
+
+    const featureTypes = Object.keys(this._descriptor.__styleMeta.hasFeatureType);
+    return featureTypes.reduce((isOnlySingleFeatureType, featureTypeKey) => {
+      const hasFeature = this._descriptor.__styleMeta.hasFeatureType[featureTypeKey];
+      return featureTypeKey === featureType
+        ? isOnlySingleFeatureType && hasFeature
+        : isOnlySingleFeatureType && !hasFeature;
+    }, true);
+  }
+
+  _getIsPointsOnly = async () => {
+    return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.POINT);
+  }
+
+  _getIsLinesOnly = async () => {
+    return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.LINE);
+  }
+
+  _getIsPolygonsOnly = async () => {
+    return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.POLYGON);
   }
 
   _getFieldRange = (fieldName) => {
@@ -229,56 +277,34 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getIcon = () => {
-    let style = {
-      stroke: 'grey',
-      strokeWidth: '1px',
-      fill: 'none'
-    };
-    const isDynamic = this._isPropertyDynamic('fillColor');
-    if (!isDynamic) {
-      const { fillColor, lineColor } = this._descriptor.properties;
-      const stroke = _.get(lineColor, 'options.color');
-      const fill = _.get(fillColor, 'options.color');
-
-      style = {
-        ...style,
-        ...stroke && { stroke },
-        ...fill && { fill },
-      };
-    }
-
+    const styles = this.getProperties();
     return (
-      this._getIsPointsOnly()
-        ? <FillableCircle style={style}/>
-        : <FillableVector style={style}/>
+      <VectorIcon
+        loadIsPointsOnly={this._getIsPointsOnly}
+        loadIsLinesOnly={this._getIsLinesOnly}
+        fillColor={styles.fillColor}
+        lineColor={styles.lineColor}
+      />
     );
   }
 
-  getColorRamp() {
-    const color = _.get(this._descriptor, 'properties.fillColor.options.color');
-    return color && this._isPropertyDynamic('fillColor')
-      ? <ColorGradient color={color}/>
-      : null;
+  getLegendDetails() {
+    const styles = this.getProperties();
+    const styleProperties = Object.keys(styles).map(styleName => {
+      const { type, options } = styles[styleName];
+      return {
+        name: styleName,
+        type,
+        options,
+        range: options && options.field && options.field.name ? this._getFieldRange(options.field.name) : null,
+      };
+    });
+
+    return (<VectorStyleLegend styleProperties={styleProperties}/>);
   }
 
-  getTOCDetails() {
-    const isDynamic = this._isPropertyDynamic('fillColor');
-    if (isDynamic) {
-      return (
-        <React.Fragment>
-          {this.getColorRamp()}
-        </React.Fragment>
-      );
-    }
-    return null;
-  }
-
-  addScaledPropertiesBasedOnStyle(featureCollection) {
-    if (!featureCollection || featureCollection.length === 0) {
-      return false;
-    }
-
-    const scaledFields = this._getDynamicPropertiesArray()
+  _getScaledFields() {
+    return this.getDynamicPropertiesArray()
       .map(({ options }) => {
         const name = options.field.name;
         return {
@@ -286,55 +312,80 @@ export class VectorStyle extends AbstractStyle {
           range: this._getFieldRange(name),
           computedName: VectorStyle.getComputedFieldName(name),
         };
-      })
-      .filter(({ range }) => {
-        return range;
       });
+  }
 
-    if (scaledFields.length === 0) {
-      return false;
+  clearFeatureState(featureCollection, mbMap, sourceId) {
+    const tmpFeatureIdentifier = {
+      source: null,
+      id: null
+    };
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      tmpFeatureIdentifier.source = sourceId;
+      tmpFeatureIdentifier.id = feature.id;
+      mbMap.removeFeatureState(tmpFeatureIdentifier);
+    }
+  }
+
+  setFeatureState(featureCollection, mbMap, sourceId) {
+
+    if (!featureCollection) {
+      return;
     }
 
+    const scaledFields  = this._getScaledFields();
+    if (scaledFields.length === 0) {
+      return;
+    }
+
+    const tmpFeatureIdentifier = {
+      source: null,
+      id: null
+    };
+    const tmpFeatureState = {};
+
     //scale to [0,1] domain
-    featureCollection.features.forEach(feature => {
-      scaledFields.forEach(({ name, range, computedName }) => {
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+
+      for (let j = 0; j < scaledFields.length; j++) {
+        const { name, range, computedName } = scaledFields[j];
         const unscaledValue = parseFloat(feature.properties[name]);
         let scaledValue;
-        if (isNaN(unscaledValue)) {//cannot scale
+        if (isNaN(unscaledValue) || !range) {//cannot scale
           scaledValue = -1;//put outside range
         } else if (range.delta === 0) {//values are identical
           scaledValue = 1;//snap to end of color range
         } else {
           scaledValue = (feature.properties[name] - range.min) / range.delta;
         }
-        feature.properties[computedName] = scaledValue;
-      });
-    });
-
-    return true;
+        tmpFeatureState[computedName] = scaledValue;
+      }
+      tmpFeatureIdentifier.source = sourceId;
+      tmpFeatureIdentifier.id = feature.id;
+      mbMap.setFeatureState(tmpFeatureIdentifier, tmpFeatureState);
+    }
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
-    const colorRange = getHexColorRangeStrings(color, 8)
-      .reduce((accu, curColor, idx, srcArr) => {
-        accu = [ ...accu, idx / srcArr.length, curColor ];
-        return accu;
-      }, []);
+    const colorStops = getColorRampStops(color);
     const targetName = VectorStyle.getComputedFieldName(fieldName);
     return [
       'interpolate',
       ['linear'],
-      ['coalesce', ['get', targetName], -1],
+      ['coalesce', ['feature-state', targetName], -1],
       -1, 'rgba(0,0,0,0)',
-      ...colorRange
+      ...colorStops
     ];
   }
 
   _getMbDataDrivenSize({ fieldName, minSize, maxSize }) {
     const targetName = VectorStyle.getComputedFieldName(fieldName);
-    return   ['interpolate',
+    return   [
+      'interpolate',
       ['linear'],
-      ['get', targetName],
+      ['feature-state', targetName],
       0, minSize,
       1, maxSize
     ];

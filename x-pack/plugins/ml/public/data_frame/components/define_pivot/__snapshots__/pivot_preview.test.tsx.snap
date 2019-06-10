@@ -5,8 +5,16 @@ exports[`Data Frame: <PivotPreview /> Minimal initialization 1`] = `
   <ContextProvider
     value={
       Object {
-        "fields": Array [],
-        "title": "the-index-pattern-title",
+        "combinedQuery": Object {},
+        "currentIndexPattern": Object {
+          "fields": Array [],
+          "id": "the-index-pattern-id",
+          "title": "the-index-pattern-title",
+        },
+        "currentSavedSearch": Object {},
+        "indexPatterns": Object {},
+        "kbnBaseUrl": "url",
+        "kibanaConfig": Object {},
       }
     }
   >
@@ -15,7 +23,8 @@ exports[`Data Frame: <PivotPreview /> Minimal initialization 1`] = `
         Object {
           "the-agg-name": Object {
             "agg": "avg",
-            "aggName": "the-agg-label",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
             "field": "the-agg-field",
           },
         }
@@ -24,7 +33,8 @@ exports[`Data Frame: <PivotPreview /> Minimal initialization 1`] = `
         Object {
           "the-group-by-name": Object {
             "agg": "terms",
-            "aggName": "the-group-by-label",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
             "field": "the-group-by-field",
           },
         }

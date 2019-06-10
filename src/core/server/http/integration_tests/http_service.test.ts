@@ -16,74 +16,54 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import Boom from 'boom';
 
-import path from 'path';
-import request from 'request';
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
 import { Router } from '../router';
-import { url as authUrl } from './__fixtures__/plugins/dummy_security/server/plugin';
-import { url as onReqUrl } from './__fixtures__/plugins/dummy_on_request/server/plugin';
+import * as kbnTestServer from '../../../../test_utils/kbn_server';
+
+interface User {
+  id: string;
+  roles?: string[];
+}
+
+interface StorageData {
+  value: User;
+  expires: number;
+}
 
 describe('http service', () => {
   describe('setup contract', () => {
     describe('#registerAuth()', () => {
-      const dummySecurityPlugin = path.resolve(__dirname, './__fixtures__/plugins/dummy_security');
+      const sessionDurationMs = 1000;
+      const cookieOptions = {
+        name: 'sid',
+        encryptionKey: 'something_at_least_32_characters',
+        validate: (session: StorageData) => true,
+        isSecure: false,
+        path: '/',
+      };
+
       let root: ReturnType<typeof kbnTestServer.createRoot>;
-      beforeAll(async () => {
-        root = kbnTestServer.createRoot(
-          {
-            plugins: { paths: [dummySecurityPlugin] },
-          },
-          {
-            dev: true,
-          }
-        );
-
-        const router = new Router('');
-        router.get({ path: authUrl.auth, validate: false }, async (req, res) =>
-          res.ok({ content: 'ok' })
-        );
-
-        const { http } = await root.setup();
-        http.registerRouter(router);
-        await root.start();
+      beforeEach(async () => {
+        root = kbnTestServer.createRoot();
       }, 30000);
 
-      afterAll(async () => await root.shutdown());
-
-      it('Should support implementing custom authentication logic', async () => {
-        const response = await kbnTestServer.request
-          .get(root, authUrl.auth)
-          .expect(200, { content: 'ok' });
-
-        expect(response.header['set-cookie']).toBeDefined();
-        const cookies = response.header['set-cookie'];
-        expect(cookies).toHaveLength(1);
-
-        const sessionCookie = request.cookie(cookies[0]);
-        if (!sessionCookie) {
-          throw new Error('session cookie expected to be defined');
-        }
-        expect(sessionCookie).toBeDefined();
-        expect(sessionCookie.key).toBe('sid');
-        expect(sessionCookie.value).toBeDefined();
-        expect(sessionCookie.path).toBe('/');
-        expect(sessionCookie.httpOnly).toBe(true);
-      });
-
-      it('Should support rejecting a request from an unauthenticated user', async () => {
-        await kbnTestServer.request
-          .get(root, authUrl.auth)
-          .unset('Authorization')
-          .expect(401);
-      });
-
-      it('Should support redirecting', async () => {
-        const response = await kbnTestServer.request.get(root, authUrl.authRedirect).expect(302);
-        expect(response.header.location).toBe(authUrl.redirectTo);
-      });
+      afterEach(async () => await root.shutdown());
 
       it('Should run auth for legacy routes and proxy request to legacy server route handlers', async () => {
+        const { http } = await root.setup();
+        const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
+          if (req.headers.authorization) {
+            const user = { id: '42' };
+            const sessionStorage = sessionStorageFactory.asScoped(req);
+            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
+            return t.authenticated(user);
+          } else {
+            return t.rejected(Boom.unauthorized());
+          }
+        }, cookieOptions);
+        await root.start();
+
         const legacyUrl = '/legacy';
         const kbnServer = kbnTestServer.getKbnServer(root);
         kbnServer.server.route({
@@ -99,65 +79,191 @@ describe('http service', () => {
         expect(response.header['set-cookie']).toBe(undefined);
       });
 
-      it(`Shouldn't expose internal error details`, async () => {
-        await kbnTestServer.request.get(root, authUrl.exception).expect({
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'An internal server error occurred',
+      it('Should pass associated auth state to Legacy platform', async () => {
+        const user = { id: '42' };
+
+        const { http } = await root.setup();
+        const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
+          if (req.headers.authorization) {
+            const sessionStorage = sessionStorageFactory.asScoped(req);
+            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
+            return t.authenticated(user);
+          } else {
+            return t.rejected(Boom.unauthorized());
+          }
+        }, cookieOptions);
+        await root.start();
+
+        const legacyUrl = '/legacy';
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: legacyUrl,
+          handler: kbnServer.newPlatform.setup.core.http.auth.get,
         });
+
+        const response = await kbnTestServer.request.get(root, legacyUrl).expect(200);
+        expect(response.body.state).toEqual(user);
+        expect(response.body.status).toEqual('authenticated');
+
+        expect(response.header['set-cookie']).toBe(undefined);
       });
     });
 
-    describe('#registerOnRequest()', () => {
-      const dummyOnRequestPlugin = path.resolve(
-        __dirname,
-        './__fixtures__/plugins/dummy_on_request'
-      );
+    describe('#registerOnPostAuth()', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
-      beforeAll(async () => {
-        root = kbnTestServer.createRoot(
-          {
-            plugins: { paths: [dummyOnRequestPlugin] },
-          },
-          {
-            dev: true,
-          }
-        );
+      beforeEach(async () => {
+        root = kbnTestServer.createRoot();
+      }, 30000);
+      afterEach(async () => await root.shutdown());
 
+      it('Should support passing request through to the route handler', async () => {
         const router = new Router('');
-        // routes with expected success status response should have handlers
-        [onReqUrl.root, onReqUrl.independentReq].forEach(url =>
-          router.get({ path: url, validate: false }, async (req, res) => res.ok({ content: 'ok' }))
-        );
+        router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
 
         const { http } = await root.setup();
+        http.registerOnPostAuth((req, t) => t.next());
+        http.registerOnPostAuth(async (req, t) => {
+          await Promise.resolve();
+          return t.next();
+        });
         http.registerRouter(router);
-
         await root.start();
-      }, 30000);
 
-      afterAll(async () => await root.shutdown());
-      it('Should support passing request through to the route handler', async () => {
-        await kbnTestServer.request.get(root, onReqUrl.root).expect(200, { content: 'ok' });
+        await kbnTestServer.request.get(root, '/').expect(200, { content: 'ok' });
       });
+
       it('Should support redirecting to configured url', async () => {
-        const response = await kbnTestServer.request.get(root, onReqUrl.redirect).expect(302);
-        expect(response.header.location).toBe(onReqUrl.redirectTo);
+        const redirectTo = '/redirect-url';
+        const { http } = await root.setup();
+        http.registerOnPostAuth(async (req, t) => t.redirected(redirectTo));
+        await root.start();
+
+        const response = await kbnTestServer.request.get(root, '/').expect(302);
+        expect(response.header.location).toBe(redirectTo);
       });
+
       it('Should failing a request with configured error and status code', async () => {
+        const { http } = await root.setup();
+        http.registerOnPostAuth(async (req, t) =>
+          t.rejected(new Error('unexpected error'), { statusCode: 400 })
+        );
+        await root.start();
+
         await kbnTestServer.request
-          .get(root, onReqUrl.failed)
+          .get(root, '/')
           .expect(400, { statusCode: 400, error: 'Bad Request', message: 'unexpected error' });
       });
+
       it(`Shouldn't expose internal error details`, async () => {
-        await kbnTestServer.request.get(root, onReqUrl.exception).expect({
+        const { http } = await root.setup();
+        http.registerOnPostAuth(async (req, t) => {
+          throw new Error('sensitive info');
+        });
+        await root.start();
+
+        await kbnTestServer.request.get(root, '/').expect({
           statusCode: 500,
           error: 'Internal Server Error',
           message: 'An internal server error occurred',
         });
       });
+
       it(`Shouldn't share request object between interceptors`, async () => {
-        await kbnTestServer.request.get(root, onReqUrl.independentReq).expect(200);
+        const { http } = await root.setup();
+        http.registerOnPostAuth(async (req, t) => {
+          // @ts-ignore. don't complain customField is not defined on Request type
+          req.customField = { value: 42 };
+          return t.next();
+        });
+        http.registerOnPostAuth((req, t) => {
+          // @ts-ignore don't complain customField is not defined on Request type
+          if (typeof req.customField !== 'undefined') {
+            throw new Error('Request object was mutated');
+          }
+          return t.next();
+        });
+        const router = new Router('');
+        router.get({ path: '/', validate: false }, async (req, res) =>
+          // @ts-ignore. don't complain customField is not defined on Request type
+          res.ok({ customField: String(req.customField) })
+        );
+        http.registerRouter(router);
+        await root.start();
+
+        await kbnTestServer.request.get(root, '/').expect(200, { customField: 'undefined' });
+      });
+    });
+
+    describe('#registerOnPostAuth() toolkit', () => {
+      let root: ReturnType<typeof kbnTestServer.createRoot>;
+      beforeEach(async () => {
+        root = kbnTestServer.createRoot();
+      }, 30000);
+
+      afterEach(async () => await root.shutdown());
+      it('supports Url change on the flight', async () => {
+        const { http } = await root.setup();
+        http.registerOnPreAuth((req, t) => {
+          return t.redirected('/new-url', { forward: true });
+        });
+
+        const router = new Router('/');
+        router.get({ path: '/new-url', validate: false }, async (req, res) =>
+          res.ok({ key: 'new-url-reached' })
+        );
+        http.registerRouter(router);
+
+        await root.start();
+
+        await kbnTestServer.request.get(root, '/').expect(200, { key: 'new-url-reached' });
+      });
+
+      it('url re-write works for legacy server as well', async () => {
+        const { http } = await root.setup();
+        const newUrl = '/new-url';
+        http.registerOnPreAuth((req, t) => {
+          return t.redirected(newUrl, { forward: true });
+        });
+
+        await root.start();
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: newUrl,
+          handler: () => 'ok-from-legacy',
+        });
+
+        await kbnTestServer.request.get(root, '/').expect(200, 'ok-from-legacy');
+      });
+    });
+
+    describe('#getBasePathFor()/#setBasePathFor()', () => {
+      let root: ReturnType<typeof kbnTestServer.createRoot>;
+      beforeEach(async () => {
+        root = kbnTestServer.createRoot();
+      }, 30000);
+
+      afterEach(async () => await root.shutdown());
+      it('basePath information for an incoming request is available in legacy server', async () => {
+        const reqBasePath = '/requests-specific-base-path';
+        const { http } = await root.setup();
+        http.registerOnPreAuth((req, t) => {
+          http.setBasePathFor(req, reqBasePath);
+          return t.next();
+        });
+
+        await root.start();
+
+        const legacyUrl = '/legacy';
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: legacyUrl,
+          handler: kbnServer.newPlatform.setup.core.http.getBasePathFor,
+        });
+
+        await kbnTestServer.request.get(root, legacyUrl).expect(200, reqBasePath);
       });
     });
   });

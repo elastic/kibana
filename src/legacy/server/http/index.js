@@ -31,7 +31,7 @@ export default async function (kbnServer, server, config) {
   kbnServer.server = new Hapi.Server(kbnServer.newPlatform.params.serverOptions);
   server = kbnServer.server;
 
-  setupBasePathProvider(server, config);
+  setupBasePathProvider(kbnServer);
 
   await registerHapiPlugins(server);
 

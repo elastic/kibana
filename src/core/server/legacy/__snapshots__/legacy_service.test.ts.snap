@@ -1,62 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`once LegacyService is set up in \`devClusterMaster\` mode creates ClusterManager with base path proxy.: cluster manager with base path proxy 1`] = `
-Array [
-  Array [
-    Object {
-      "basePath": true,
-      "dev": true,
-      "open": false,
-      "optimize": false,
-      "quiet": true,
-      "repl": false,
-      "silent": false,
-      "watch": false,
-    },
-    Object {
-      "server": Object {
-        "autoListen": true,
-      },
-    },
-    BasePathProxyServer {
-      "devConfig": Object {
-        "basePathProxyTargetPort": 100500,
-      },
-      "httpConfig": Object {
-        "basePath": "/abc",
-        "maxPayload": ByteSizeValue {
-          "valueInBytes": 1073741824,
-        },
-      },
-      "httpsAgent": undefined,
-      "log": Object {
-        "context": Array [
-          "server",
-        ],
-        "debug": [MockFunction] {
-          "calls": Array [
-            Array [
-              "starting legacy service",
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
-        "error": [MockFunction],
-        "fatal": [MockFunction],
-        "info": [MockFunction],
-        "log": [MockFunction],
-        "trace": [MockFunction],
-        "warn": [MockFunction],
-      },
-      "server": undefined,
-    },
-  ],
-]
+exports[`once LegacyService is set up in \`devClusterMaster\` mode creates ClusterManager with base path proxy.: cli args. cluster manager with base path proxy 1`] = `
+Object {
+  "basePath": true,
+  "dev": true,
+  "open": false,
+  "optimize": false,
+  "quiet": true,
+  "repl": false,
+  "silent": false,
+  "watch": false,
+}
+`;
+
+exports[`once LegacyService is set up in \`devClusterMaster\` mode creates ClusterManager with base path proxy.: config. cluster manager with base path proxy 1`] = `
+Object {
+  "server": Object {
+    "autoListen": true,
+  },
+}
 `;
 
 exports[`once LegacyService is set up in \`devClusterMaster\` mode creates ClusterManager without base path proxy.: cluster manager without base path proxy 1`] = `

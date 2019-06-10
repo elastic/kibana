@@ -21,6 +21,7 @@ import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { ApolloClientContext } from '../utils/apollo_context';
+import { HistoryContext } from '../utils/history_context';
 import { useKibanaUiSetting } from '../utils/use_kibana_ui_setting';
 
 export async function startApp(libs: InfraFrontendLibs) {
@@ -44,7 +45,9 @@ export async function startApp(libs: InfraFrontendLibs) {
                 <ApolloProvider client={libs.apolloClient}>
                   <ApolloClientContext.Provider value={libs.apolloClient}>
                     <EuiThemeProvider darkMode={darkMode}>
-                      <PageRouter history={history} />
+                      <HistoryContext.Provider value={history}>
+                        <PageRouter history={history} />
+                      </HistoryContext.Provider>
                     </EuiThemeProvider>
                   </ApolloClientContext.Provider>
                 </ApolloProvider>

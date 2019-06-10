@@ -17,6 +17,7 @@ export const snapshotSchema: any = gql`
   type InfraSnapshotNodePath {
     value: String!
     label: String!
+    ip: String
   }
 
   type InfraSnapshotNode {

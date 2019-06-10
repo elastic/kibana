@@ -11,7 +11,8 @@ import routing from '../../../public/app/services/routing';
 
 import { FOLLOWER_INDEX_EDIT_NAME } from './constants';
 
-const testBedOptions = {
+const testBedConfig = {
+  store: ccrStore,
   memoryRouter: {
     onRouter: (router) => routing.reactRouter = router,
     // The follower index id to fetch is read from the router ":id" param
@@ -22,7 +23,7 @@ const testBedOptions = {
   }
 };
 
-const initTestBed = registerTestBed(FollowerIndexEdit, { options: testBedOptions, store: ccrStore });
+const initTestBed = registerTestBed(FollowerIndexEdit, testBedConfig);
 
 export const setup = (props) => {
   const testBed = initTestBed(props);

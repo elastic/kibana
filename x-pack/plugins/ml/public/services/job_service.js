@@ -154,6 +154,18 @@ class JobService {
     });
   }
 
+  loadJobsWrapper = () => {
+    return this.loadJobs()
+      .then(function (resp) {
+        return resp;
+      })
+      .catch(function (error) {
+        console.log('Error loading jobs in route resolve.', error);
+        // Always resolve to ensure tab still works.
+        Promise.resolve([]);
+      });
+  }
+
   refreshJob(jobId) {
     return new Promise((resolve, reject) => {
       ml.getJobs({ jobId })
@@ -721,9 +733,15 @@ class JobService {
     return groups;
   }
 
+  createResultsUrlForJobs(jobsList, resultsPage) {
+    return createResultsUrlForJobs(jobsList, resultsPage);
+  }
+
   createResultsUrl(jobIds, from, to, resultsPage) {
     return createResultsUrl(jobIds, from, to, resultsPage);
   }
+
+
 }
 
 // private function used to check the job saving response
@@ -864,6 +882,29 @@ function createJobUrls(jobsList, jobUrls) {
       }
     }
   });
+}
+
+function createResultsUrlForJobs(jobsList, resultsPage) {
+  let from = undefined;
+  let to = undefined;
+  if (jobsList.length === 1) {
+    from = jobsList[0].earliestTimestampMs;
+    to = jobsList[0].latestTimestampMs;
+  } else {
+    const jobsWithData = jobsList.filter(j => (j.earliestTimestampMs !== undefined));
+    if (jobsWithData.length > 0) {
+      from = Math.min(...jobsWithData.map(j => j.earliestTimestampMs));
+      to = Math.max(...jobsWithData.map(j => j.latestTimestampMs));
+    }
+  }
+
+  const timeFormat = 'YYYY-MM-DD HH:mm:ss';
+
+  const fromString = moment(from).format(timeFormat);  // Defaults to 'now' if 'from' is undefined
+  const toString = moment(to).format(timeFormat);      // Defaults to 'now' if 'to' is undefined
+
+  const jobIds = jobsList.map(j => j.id);
+  return createResultsUrl(jobIds, fromString, toString, resultsPage);
 }
 
 function createResultsUrl(jobIds, start, end, resultsPage) {

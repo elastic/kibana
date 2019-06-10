@@ -13,6 +13,7 @@ import {
   EuiSteps,
   EuiText,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -22,79 +23,94 @@ import { RootState } from '../../reducers';
 
 const steps = [
   {
-    title: 'Configure Kibana Code Instance for Multiple Kibana Nodes',
+    title: 'Check if multiple Kibana instances are used as a cluster',
     children: (
       <EuiText>
+        <p>If you are using single Kibana instance, you can skip this step.</p>
         <p>
-          If you are using multiple Kibana nodes, then you need to configure 1 Kibana instance as
-          Code instance. Please add the following line of code into your kibana.yml file for every
-          instance to indicate your Code instance:
+          If you are using multiple Kibana instances, you need to assign one Kibana instance as
+          `Code node`. To do this, add the following line of code into your kibana.yml file of every
+          Kibana instance and restart the instances:
         </p>
         <pre>
           <code>xpack.code.codeNodeUrl: 'http://$YourCodeNodeAddress'</code>
         </pre>
-        <p>Then, restart every Kibana instance.</p>
-      </EuiText>
-    ),
-  },
-  {
-    title: 'Download and install language servers',
-    children: (
-      <EuiText>
         <p>
-          If you need code intelligence support for your repos, you need to install the language
-          server for the programming languages.
-        </p>
-        <p />
-        <h5>PRE-INSTALLED LANGUAGE SERVERS:</h5>
-        <p />
-        Typescript
-        <p />
-        <h5>AVAILABLE LANGUAGE SERVERS:</h5>
-        <p />
-        Java
-        <p />
-        <Link to="/admin?tab=LanguageServers">Manage language server installation</Link>
-      </EuiText>
-    ),
-  },
-  {
-    title: 'Import a repository from a git address',
-    children: (
-      <EuiText>
-        <p>
-          You can add a repo to Code by simply putting in the git address of the repo. Usually this
-          is the same git address you use to run the git clone command, you can find more details
-          about the formats of git addresses that Code accepts&nbsp;
-          <a href={documentationLinks.gitFormat}>here</a>.
+          Where `$YourCodeNoteAddress` is the URL of your assigned Code node accessible by other
+          Kibana instances.
         </p>
       </EuiText>
     ),
   },
   {
-    title: 'Verify that your repo has been successfully imported',
+    title: 'Install extra language support optionally',
     children: (
       <EuiText>
         <p>
-          Once the repo is added and indexed successfully, you can verify that the repo is
-          searchable and the code intelligence is available. You can find more details of how the
-          search and code intelligence work in{' '}
-          <a href={documentationLinks.codeIntelligence}>our docs</a>.
+          Look{' '}
+          <EuiLink href={documentationLinks.codeInstallLangServer} target="_blank">
+            here
+          </EuiLink>{' '}
+          to learn more about supported languages and language server installation.
+        </p>
+        <p>
+          If you need Java language support, you can manage language server installation{' '}
+          <Link to="/admin?tab=LanguageServers">here</Link>
+        </p>
+      </EuiText>
+    ),
+  },
+  {
+    title: 'Add a repository to Code',
+    children: (
+      <EuiText>
+        <p>
+          Import{' '}
+          <EuiLink href={documentationLinks.codeGettingStarted} target="_blank">
+            {' '}
+            a sample repo
+          </EuiLink>{' '}
+          or{' '}
+          <EuiLink href={documentationLinks.codeRepoManagement} target="_blank">
+            your own repo
+          </EuiLink>
+          . It is as easy as copy and paste git clone URLs to Code.
+        </p>
+      </EuiText>
+    ),
+  },
+  {
+    title: 'Verify the repo is successfully imported',
+    children: (
+      <EuiText>
+        <p>
+          You can verify your repo is successfully imported by{' '}
+          <EuiLink href={documentationLinks.codeSearch} target="_blank">
+            searching
+          </EuiLink>{' '}
+          and{' '}
+          <EuiLink href={documentationLinks.codeOtherFeatures} target="_blank">
+            navigating
+          </EuiLink>{' '}
+          the repo. If language support is available to the repo, also make sure{' '}
+          <EuiLink href={documentationLinks.semanticNavigation} target="_blank">
+            Semantic Navigation
+          </EuiLink>{' '}
+          is available as well.
         </p>
       </EuiText>
     ),
   },
 ];
 
-// TODO add link to learn more button
 const toastMessage = (
   <div>
     <p>
       We’ve made some changes to roles and permissions in Kibana. Read more about what these changes
       mean for you below.{' '}
     </p>
-    <EuiButton size="s" href="">
-      Learn More
+    <EuiButton size="s" href={documentationLinks.kibanaRoleManagement}>
+      Learn more
     </EuiButton>
   </div>
 );
@@ -134,17 +150,18 @@ class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideTo
             {this.props.setupOk === false && (
               <EuiCallOut title="Code instance not found." color="danger" iconType="cross">
                 <p>
-                  Please follow the guide below to configure your Kibana instance and then refresh
-                  this page.
+                  Please follow the guide below to configure your Kibana instance. Once configured,
+                  refresh this page.
                 </p>
               </EuiCallOut>
             )}
             {this.props.setupOk === true && (
               <React.Fragment>
-                <EuiSpacer size="xs" />
+                <EuiSpacer size="s" />
                 <EuiButton iconType="sortLeft">
-                  <Link to="/admin">Back To Project Dashboard</Link>
+                  <Link to="/admin">Back To project dashboard</Link>
                 </EuiButton>
+                <EuiSpacer size="s" />
               </React.Fragment>
             )}
             <EuiPanel>
@@ -158,7 +175,7 @@ class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideTo
         </div>
       );
     }
-    return <div className="condeContainer__setup">{setup}</div>;
+    return <div className="codeContainer__setup">{setup}</div>;
   }
 }
 

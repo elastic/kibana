@@ -8,6 +8,8 @@ import Boom from 'boom';
 import sinon from 'sinon';
 
 import { requestFixture } from '../../__tests__/__fixtures__/request';
+import { LoginAttempt } from '../login_attempt';
+import { mockAuthenticationProviderOptions } from './base.mock';
 
 import { SAMLAuthenticationProvider } from './saml';
 
@@ -16,19 +18,11 @@ describe('SAMLAuthenticationProvider', () => {
   let callWithRequest: sinon.SinonStub;
   let callWithInternalUser: sinon.SinonStub;
   beforeEach(() => {
-    callWithRequest = sinon.stub();
-    callWithInternalUser = sinon.stub();
+    const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
+    callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
+    callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
 
-    provider = new SAMLAuthenticationProvider({
-      client: { callWithRequest, callWithInternalUser } as any,
-      log() {
-        // no-op
-      },
-      protocol: 'test-protocol',
-      hostname: 'test-hostname',
-      port: 1234,
-      basePath: '/test-base-path',
-    });
+    provider = new SAMLAuthenticationProvider(providerOptions);
   });
 
   describe('`authenticate` method', () => {
@@ -37,6 +31,35 @@ describe('SAMLAuthenticationProvider', () => {
 
       const authenticationResult = await provider.authenticate(request, null);
 
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
+
+    it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
+      const request = requestFixture({ headers: { authorization: 'Basic some:credentials' } });
+
+      const authenticationResult = await provider.authenticate(request, {
+        accessToken: 'some-valid-token',
+        refreshToken: 'some-valid-refresh-token',
+      });
+
+      sinon.assert.notCalled(callWithRequest);
+      expect(request.headers.authorization).toBe('Basic some:credentials');
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
+
+    it('does not handle requests with non-empty `loginAttempt`.', async () => {
+      const request = requestFixture();
+
+      const loginAttempt = new LoginAttempt();
+      loginAttempt.setCredentials('user', 'password');
+      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
+
+      const authenticationResult = await provider.authenticate(request, {
+        accessToken: 'some-valid-token',
+        refreshToken: 'some-valid-refresh-token',
+      });
+
+      sinon.assert.notCalled(callWithRequest);
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
@@ -194,19 +217,6 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.state).toBeUndefined();
-    });
-
-    it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
-      const request = requestFixture({ headers: { authorization: 'Basic some:credentials' } });
-
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'some-valid-token',
-        refreshToken: 'some-valid-refresh-token',
-      });
-
-      sinon.assert.notCalled(callWithRequest);
-      expect(request.headers.authorization).toBe('Basic some:credentials');
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
