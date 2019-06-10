@@ -49,7 +49,7 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from '../index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-import { FilterManagerProvider } from 'ui/filter_manager';
+import { getFilterGenerator } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
@@ -200,12 +200,12 @@ function discoverController(
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
   const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
-  const filterManager = Private(FilterManagerProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
   const filterStateManager = new FilterStateManager(globalState, getAppState);
   const queryFilter = new FilterManager(indexPatterns, filterStateManager);
+  const filterGen = getFilterGenerator(queryFilter);
 
   const inspectorAdapters = {
     requests: new RequestAdapter()
@@ -866,7 +866,7 @@ function discoverController(
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    filterActions.addFilter(field, values, operation, $scope.indexPattern.id, $scope.state, filterManager);
+    filterActions.addFilter(field, values, operation, $scope.indexPattern.id, $scope.state, filterGen);
   };
 
   $scope.addColumn = function addColumn(columnName) {

@@ -47,7 +47,7 @@ import { showNewVisModal } from '../visualize/wizard';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
-import { FilterManagerProvider } from 'ui/filter_manager';
+import { getFilterGenerator } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -90,8 +90,8 @@ app.directive('dashboardApp', function ($injector) {
       dashboardConfig,
       localStorage
     ) {
-      const filterManager = Private(FilterManagerProvider);
       const queryFilter = Private(FilterBarQueryFilterProvider);
+      const filterGen = getFilterGenerator(queryFilter);
       const docTitle = Private(DocTitleProvider);
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const panelActionsRegistry = Private(ContextMenuActionsRegistryProvider);
@@ -113,7 +113,7 @@ app.directive('dashboardApp', function ($injector) {
         AppStateClass: AppState,
         hideWriteControls: dashboardConfig.getHideWriteControls(),
         addFilter: ({ field, value, operator, index }) => {
-          filterActions.addFilter(field, value, operator, index, dashboardStateManager.getAppState(), filterManager);
+          filterActions.addFilter(field, value, operator, index, dashboardStateManager.getAppState(), filterGen);
         }
       });
 
