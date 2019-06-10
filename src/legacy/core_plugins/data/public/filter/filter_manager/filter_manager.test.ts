@@ -21,13 +21,13 @@ import sinon from 'sinon';
 
 import { Subscription } from 'rxjs';
 import { FilterStateStore } from '@kbn/es-query';
-import { FilterStateManager } from './filter_state_manager';
 
-import { StubState } from './test_helpers/stub_state';
-import { FilterManager } from './new_filter_manager';
-import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
+import { FilterStateManager } from './filter_state_manager';
+import { FilterManager } from './filter_manager';
 
 import { getFilter } from './test_helpers/get_stub_filter';
+import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
+import { StubState } from './test_helpers/stub_state';
 
 jest.mock(
   'ui/chrome',

@@ -49,7 +49,7 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from '../index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-import { FilterManager, FilterManagerProvider, FilterStateManager } from 'ui/filter_manager';
+import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
@@ -69,7 +69,7 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
 
-import { data } from 'plugins/data';
+import { data, FilterManager, FilterStateManager } from 'plugins/data';
 data.search.loadLegacyDirectives();
 
 const fetchStatuses = {

@@ -21,7 +21,6 @@ import { Filter } from '@kbn/es-query';
 
 import _ from 'lodash';
 import { Observable, Subject } from 'rxjs';
-
 import { State } from 'ui/state_management/state';
 import { PartitionedFilters } from './partitioned_filters';
 

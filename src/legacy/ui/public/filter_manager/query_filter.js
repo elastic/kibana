@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { FilterManager } from './new_filter_manager';
-import { FilterStateManager } from './filter_state_manager';
+import { FilterManager, FilterStateManager } from 'plugins/data';
 
 export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalState) {
   const filterStateManager = new FilterStateManager(globalState, getAppState);

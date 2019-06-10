@@ -18,12 +18,13 @@
  */
 
 import _ from 'lodash';
-import { FilterBarQueryFilterProvider } from '../filter_manager/query_filter';
+import { FilterManager, FilterStateManager } from 'plugins/data';
 import { getPhraseScript } from '@kbn/es-query';
 
 // Adds a filter to a passed state
-export function FilterManagerProvider(Private) {
-  const queryFilter = Private(FilterBarQueryFilterProvider);
+export function FilterManagerProvider(Private, indexPatterns, globalState, getAppState) {
+  const filterStateManager = new FilterStateManager(globalState, getAppState);
+  const queryFilter = new FilterManager(indexPatterns, filterStateManager);
   const filterManager = {};
 
   filterManager.generate = (field, values, operation, index) => {

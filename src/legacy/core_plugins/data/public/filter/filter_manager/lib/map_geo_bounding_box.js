@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectNotFound } from '../../errors';
+import { SavedObjectNotFound } from 'ui/errors';
 
 function getParams(filter, indexPattern) {
   const type = 'geo_bounding_box';
