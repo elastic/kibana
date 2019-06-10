@@ -25650,20 +25650,15 @@ symbol.prototype.description@^1.0.0:
   dependencies:
     has-symbols "^1.0.0"
 
-tabbable@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-1.1.0.tgz#2c9a9c9f09db5bb0659f587d532548dd6ef2067b"
-  integrity sha512-35UF7YrX08Wj5+CFFwO5akQYE4UFICvOY/xQ7Dgduhxb5QW7IS/d0DeLO9DnRzwVyfyiz6vRPj3MYhPt/Zopiw==
+tabbable@1.1.3, tabbable@^1.1.0:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-1.1.3.tgz#0e4ee376f3631e42d7977a074dbd2b3827843081"
+  integrity sha512-nOWwx35/JuDI4ONuF0ZTo6lYvI0fY0tZCH1ErzY2EXfu4az50ZyiUX8X073FLiZtmWUVlkRnuXsehjJgCw9tYg==
 
 tabbable@^1.0.3:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-1.1.2.tgz#b171680aea6e0a3e9281ff23532e2e5de11c0d94"
   integrity sha512-77oqsKEPrxIwgRcXUwipkj9W5ItO97L6eUT1Ar7vh+El16Zm4M6V+YU1cbipHEa6q0Yjw8O3Hoh8oRgatV5s7A==
-
-tabbable@^1.1.0:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-1.1.3.tgz#0e4ee376f3631e42d7977a074dbd2b3827843081"
-  integrity sha512-nOWwx35/JuDI4ONuF0ZTo6lYvI0fY0tZCH1ErzY2EXfu4az50ZyiUX8X073FLiZtmWUVlkRnuXsehjJgCw9tYg==
 
 table@^3.7.8:
   version "3.8.3"
