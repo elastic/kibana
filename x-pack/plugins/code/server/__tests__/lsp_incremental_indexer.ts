@@ -13,6 +13,7 @@ import sinon from 'sinon';
 
 import { DiffKind } from '../../common/git_diff';
 import { WorkerReservedProgress } from '../../model';
+import { GitOperations } from '../git_operations';
 import { LspIncrementalIndexer } from '../indexer/lsp_incremental_indexer';
 import { RepositoryGitStatusReservedField } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
@@ -61,6 +62,7 @@ function prepareProject(url: string, p: string) {
 const repoUri = 'github.com/Microsoft/TypeScript-Node-Starter';
 
 const serverOptions = createTestServerOption();
+const gitOps = new GitOperations(serverOptions.repoPath);
 
 function cleanWorkspace() {
   return new Promise(resolve => {
@@ -164,6 +166,7 @@ describe('lsp_incremental_indexer unit tests', () => {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
@@ -178,6 +181,7 @@ describe('lsp_incremental_indexer unit tests', () => {
       '6206f643',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
@@ -218,6 +222,7 @@ describe('lsp_incremental_indexer unit tests', () => {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
@@ -232,6 +237,7 @@ describe('lsp_incremental_indexer unit tests', () => {
       '6206f643',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
@@ -263,6 +269,7 @@ describe('lsp_incremental_indexer unit tests', () => {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
@@ -277,6 +284,7 @@ describe('lsp_incremental_indexer unit tests', () => {
       '6206f643',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
