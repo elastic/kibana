@@ -98,11 +98,13 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIndexRequest> {
+    let repo;
     try {
       const {
         workspaceRepo,
         workspaceRevision,
       } = await this.lspService.workspaceHandler.openWorkspace(this.repoUri, 'head');
+      repo = workspaceRepo;
       const workspaceDir = workspaceRepo.workdir();
       const fileIterator = await this.gitOps.iterateRepo(this.repoUri, 'head');
       for await (const file of fileIterator) {
@@ -119,6 +121,10 @@ export class LspIndexer extends AbstractIndexer {
       this.log.error(`Prepare lsp indexing requests error.`);
       this.log.error(error);
       throw error;
+    } finally {
+      if (repo) {
+        repo.cleanup();
+      }
     }
   }
 
