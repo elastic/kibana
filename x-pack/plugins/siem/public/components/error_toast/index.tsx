@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiGlobalToastList, Toast } from '@elastic/eui';
-import React from 'react';
+import { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { appModel, appSelectors, State } from '../../store';
 import { appActions } from '../../store/app';
+import { useStateToaster } from '../toasters';
 
 interface OwnProps {
   toastLifeTimeMs?: number;
@@ -22,40 +21,33 @@ interface ReduxProps {
 }
 
 interface DispatchProps {
-  addError?: ActionCreator<{ id: string; title: string; message: string }>;
-  removeError?: ActionCreator<{ id: string }>;
+  removeError: ActionCreator<{ id: string }>;
 }
 
 type Props = OwnProps & ReduxProps & DispatchProps;
 
-const ErrorToastComponent = pure<Props>(({ toastLifeTimeMs = 10000, errors = [], removeError }) =>
-  globalListFromToasts(errorsToToasts(errors), removeError!, toastLifeTimeMs)
-);
-
-export const globalListFromToasts = (
-  toasts: Toast[],
-  removeError: ActionCreator<{ id: string }>,
-  toastLifeTimeMs: number
-) =>
-  toasts.length !== 0 ? (
-    <EuiGlobalToastList
-      toasts={toasts}
-      dismissToast={({ id }) => removeError({ id })}
-      toastLifeTimeMs={toastLifeTimeMs}
-    />
-  ) : null;
-
-export const errorsToToasts = (errors: appModel.Error[]): Toast[] =>
-  errors.map(({ id, title, message }) => {
-    const toast: Toast = {
-      id,
-      title,
-      color: 'danger',
-      iconType: 'alert',
-      text: <p>{message}</p>,
-    };
-    return toast;
+const ErrorToastComponent = ({ toastLifeTimeMs = 10000, errors = [], removeError }: Props) => {
+  const [{ toasts }, dispatchToaster] = useStateToaster();
+  useEffect(() => {
+    errors.forEach(({ id, title, message }) => {
+      if (toasts.filter(toast => toast.id === id).length === 0) {
+        dispatchToaster({
+          type: 'addToaster',
+          toast: {
+            color: 'danger',
+            id,
+            iconType: 'alert',
+            title,
+            errors: message,
+            toastLifeTimeMs,
+          },
+        });
+      }
+      removeError({ id });
+    });
   });
+  return null;
+};
 
 const makeMapStateToProps = () => {
   const getErrorSelector = appSelectors.errorsSelector();
