@@ -93,9 +93,9 @@ import { help as urlparam } from './urlparam';
    const help: FunctionHelp<typeof foo> = {
      help: 'Some help for foo',
      args: {
-       bar: 'Help for bar.', // pass; error if missing
-       baz: 'Help for baz.', // pass; error if missing
-       zap: 'Help for zap.`, // error: zap doesn't exist
+       bar: 'Help for bar.',   // pass; error if missing
+       baz: 'Help for baz.',   // pass; error if missing
+       zap: 'Help for zap.`,   // error: zap doesn't exist
      }
    };
 ```
@@ -115,7 +115,8 @@ export type FunctionHelp<T> = T extends ExpressionFunction<
   : never;
 
 // This internal type infers a Function name and uses `FunctionHelp` above to build
-// a dictionary entry.  This can be used  every Function is defined and all Arguments have help strings.
+// a dictionary entry.  This can be used to ensure every Function is defined and all
+// Arguments have help strings.
 //
 // For example:
 //
@@ -124,7 +125,7 @@ export type FunctionHelp<T> = T extends ExpressionFunction<
 // }
 //
 // const map: FunctionHelpMap<typeof foo> = {
-//   foo: FunctionHelp<typeof foo>
+//   foo: FunctionHelp<typeof foo>,
 // }
 //
 // Given a collection of functions, the map would contain each entry.
@@ -138,7 +139,7 @@ type FunctionHelpMap<T> = T extends ExpressionFunction<
   ? { [key in Name]: FunctionHelp<T> }
   : never;
 
-// This type represents an exhaustive dictionary of `FunctionHelp` types,
+// This internal type represents an exhaustive dictionary of `FunctionHelp` types,
 // organized by Function Name and then Function Argument.
 //
 // This type indexes the existing function factories, reverses the union to an
