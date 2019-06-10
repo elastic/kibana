@@ -20732,25 +20732,24 @@ pdfjs-dist@^2.0.943:
     node-ensure "^0.0.0"
     worker-loader "^2.0.0"
 
-pdfkit@^0.9.1:
-  version "0.9.1"
-  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.9.1.tgz#f07a66eebc64855f8345dccfd313f2d8f880f10f"
-  integrity sha512-45X/NjaynHVNd/866ETK9KmblL8Sqwmah1RPz04IzmZoEO+cvPid2UvkVfZQcS4Jeq/uWY+99qAq04NoigzWSA==
+pdfkit@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.10.0.tgz#88f2aa8e3cf9e1cc2caff6447b68dd4e435cb284"
+  integrity sha512-mRJ6iuDzpIQ4ftKp5GvijLXNVRK86xjnyIPBraYSPrUPubNqWM5/oYmc7FZKUWz3wusRTj3PLR9HJ1X5ooqfsg==
   dependencies:
     crypto-js "^3.1.9-1"
     fontkit "^1.0.0"
     linebreak "^0.3.0"
     png-js ">=0.1.0"
-    saslprep "1.0.1"
 
-pdfmake@0.1.56:
-  version "0.1.56"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.1.56.tgz#a4fcabe25fa5f04c07cb6e861c0abbf9ca5b33e9"
-  integrity sha512-c5fSj16VTQCrmTw02Mc+Oj3boRG+PGJuu7cGXAXXljI3bMNDifwmUs+3opEwRZbTWu9WhFKYbrs2Iq136UN/NQ==
+pdfmake@0.1.57:
+  version "0.1.57"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.1.57.tgz#408e9853777fb851eeb700aaa221905e135917a0"
+  integrity sha512-s6Bs71Ylh06yNgJfP61xicHZSEvFrwo8lvI/BOU4+6eDddO8lwOZi5A42RA0V8zQr6hrI1XYxtLkk/7oJ+5w+w==
   dependencies:
     iconv-lite "^0.4.24"
     linebreak "^0.3.0"
-    pdfkit "^0.9.1"
+    pdfkit "^0.10.0"
 
 pegjs@0.10.0:
   version "0.10.0"
@@ -24019,11 +24018,6 @@ sao@^0.22.12:
     update-notifier "^2.2.0"
     user-home "^2.0.0"
     yarn-install "^0.5.1"
-
-saslprep@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/saslprep/-/saslprep-1.0.1.tgz#b644e0ba25b156b652f3cb90df7542f896049ba6"
-  integrity sha512-ntN6SbE3hRqd45PKKadRPgA+xHPWg5lPSj2JWJdJvjTwXDDfkPVtXWvP8jJojvnm+rAsZ2b299C5NwZqq818EA==
 
 sass-graph@^2.2.4:
   version "2.2.4"
