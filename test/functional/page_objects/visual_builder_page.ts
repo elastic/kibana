@@ -22,7 +22,6 @@ import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
-  const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
