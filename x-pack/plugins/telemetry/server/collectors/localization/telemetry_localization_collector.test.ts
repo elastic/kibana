@@ -18,7 +18,7 @@ const createI18nLoaderMock = (translations: TranslationsMock) => {
   };
 };
 
-import { getTranslationCount } from './get_localization_usage_collector';
+import { getTranslationCount } from './telemetry_localization_collector';
 
 describe('getTranslationCount', () => {
   it('returns 0 if no translations registered', async () => {
