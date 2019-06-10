@@ -31,7 +31,7 @@ import {
   checkSavedObjectsPrivilegesFactory,
 } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
-import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
+import { SecureSavedObjectsClientWrapper } from './server/lib/authorization/saved_objects/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
 import { createOptionalPlugin } from './server/lib/optional_plugin';
 

@@ -9,8 +9,8 @@ import {
   SecureSavedObjectsClientWrapperDeps,
 } from './secure_saved_objects_client_wrapper';
 import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
-import { checkSavedObjectsPrivilegesFactory } from '../authorization/saved_objects';
-import { Actions } from '../authorization';
+import { checkSavedObjectsPrivilegesFactory } from './check_saved_objects_privileges';
+import { Actions } from '../actions';
 
 const createMockErrors = () => {
   const forbiddenError = new Error('Mock ForbiddenError');

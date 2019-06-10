@@ -7,5 +7,6 @@
 export {
   checkSavedObjectsPrivilegesFactory,
   CheckSavedObjectsPrivileges,
-  SavedObjectsOperation,
 } from './check_saved_objects_privileges';
+
+export { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';

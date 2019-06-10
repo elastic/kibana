@@ -18,7 +18,10 @@ import {
   SavedObject,
   UpdateOptions,
 } from 'src/legacy/server/saved_objects';
-import { CheckSavedObjectsPrivileges, SavedObjectsOperation } from '../authorization/saved_objects';
+import {
+  CheckSavedObjectsPrivileges,
+  SavedObjectsOperation,
+} from './check_saved_objects_privileges';
 
 export interface SecureSavedObjectsClientWrapperDeps {
   baseClient: SavedObjectsClientContract;
