@@ -10,10 +10,11 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { inputsModel } from '../../store';
 import { inputsActions } from '../../store/actions';
+import { InputsModelId } from '../../store/inputs/constants';
 
 interface TimelineRefetchDispatch {
   setTimelineQuery: ActionCreator<{
-    inputId: inputsModel.InputsModelId;
+    inputId: InputsModelId;
     id: string;
     loading: boolean;
     refetch: inputsModel.Refetch;

@@ -22,7 +22,6 @@ module.exports = {
   // which Storybook stories and their components would require, but don't
   // change during development.
   entry: [
-    '@elastic/eui',
     '@elastic/eui/dist/eui_theme_light.css',
     '@kbn/ui-framework/dist/kui_light.css',
     '@storybook/addon-actions',

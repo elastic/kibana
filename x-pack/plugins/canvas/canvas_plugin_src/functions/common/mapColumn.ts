@@ -41,8 +41,9 @@ export function mapColumn(): ExpressionFunction<
       expression: {
         types: ['boolean', 'number', 'string', 'null'],
         resolve: false,
-        aliases: ['exp', 'fn'],
+        aliases: ['exp', 'fn', 'function'],
         help: argHelp.expression,
+        required: true,
       },
     },
     fn: (context, args) => {

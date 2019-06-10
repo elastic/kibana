@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRowItemDraggables, getRowItemOverflow, getRowItemDraggable } from './helpers';
+import {
+  getRowItemDraggables,
+  getRowItemOverflow,
+  getRowItemDraggable,
+  OverflowField,
+} from './helpers';
 import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
@@ -200,6 +205,26 @@ describe('Table Helpers', () => {
       expect(JSON.stringify(wrapper.find('EuiToolTip').prop('content'))).toContain(
         'defaultMessage'
       );
+    });
+  });
+
+  describe('OverflowField', () => {
+    test('it returns correctly against snapshot', () => {
+      const overflowString = 'This string is exactly fifty-one chars in length!!!';
+      const wrapper = shallow(<OverflowField value={overflowString} showToolTip={false} />);
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
+    test('it does not truncates as per custom overflowLength value', () => {
+      const overflowString = 'This string is short';
+      const wrapper = mount(<OverflowField value={overflowString} overflowLength={20} />);
+      expect(wrapper.text()).toBe('This string is short');
+    });
+
+    test('it truncates as per custom overflowLength value', () => {
+      const overflowString = 'This string is exactly fifty-one chars in length!!!';
+      const wrapper = mount(<OverflowField value={overflowString} overflowLength={20} />);
+      expect(wrapper.text()).toBe('This string is exact');
     });
   });
 });

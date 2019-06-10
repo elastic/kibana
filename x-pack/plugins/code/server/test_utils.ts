@@ -20,7 +20,7 @@ export const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
 const TEST_OPTIONS = {
   enabled: true,
   queueIndex: '.code_internal-worker-queue',
-  queueTimeout: 60 * 60 * 1000, // 1 hour by default
+  queueTimeoutMs: 60 * 60 * 1000, // 1 hour by default
   updateFreqencyMs: 5 * 60 * 1000, // 5 minutes by default
   indexFrequencyMs: 24 * 60 * 60 * 1000, // 1 day by default
   lsp: {
