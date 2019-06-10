@@ -31,3 +31,5 @@ include::spans.asciidoc[]
 include::errors.asciidoc[]
 
 include::metrics.asciidoc[]
+
+include::advanced-queries.asciidoc[]
