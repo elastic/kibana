@@ -22,16 +22,20 @@ import { parseQueryValue } from './parse_query_value';
 import { parseValue } from './parse_value';
 import { TruncatableText } from '../../../truncatable_text';
 
-import { IP_FIELD_TYPE } from './constants';
+import { IP_FIELD_TYPE, MESSAGE_FIELD_NAME } from './constants';
 
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex(item => item.field === columnName) !== -1;
 
 const contextId = 'plain_column_renderer';
 
+// simple black-list to prevent dragging and dropping fields such as message name
+const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
+
 export const plainColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) =>
     dataExistsAtColumn(columnName, data),
+
   renderColumn: ({
     columnName,
     eventId,
@@ -77,7 +81,8 @@ export const plainColumnRenderer: ColumnRenderer = {
               />
             );
           }
-          if (!field.aggregatable) {
+
+          if (columnNamesNotDraggable.includes(columnName)) {
             if (width != null) {
               return (
                 <TruncatableText
