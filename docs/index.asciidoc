@@ -44,6 +44,8 @@ include::ml/index.asciidoc[]
 
 include::maps/index.asciidoc[]
 
+include::code/index.asciidoc[]
+
 include::infrastructure/index.asciidoc[]
 
 include::logs/index.asciidoc[]
