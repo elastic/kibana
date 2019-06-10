@@ -85,7 +85,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
 
       return (
         <EuiAccordion
-          initialIsOpen={action.isNew || hasErrors}
+          initialIsOpen={action.isNew || hasErrors} // If an action contains errors in edit mode, we want the accordion open so the user is aware
           key={action.id}
           id={action.id}
           className="euiAccordionForm"

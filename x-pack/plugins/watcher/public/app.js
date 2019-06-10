@@ -78,10 +78,10 @@ export const App = ({ licenseStatus }) => {
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
-    <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}watches`} />
     <Route exact path={`${BASE_PATH}watches`} component={WatchList} />
     <Route exact path={`${BASE_PATH}watches/watch/:id/status`} component={WatchStatus} />
     <Route exact path={`${BASE_PATH}watches/watch/:id/edit`} component={WatchEdit} />
-    <Route exact path={`${BASE_PATH}watches/new-watch/:type`} component={WatchEdit} />
+    <Route exact path={`${BASE_PATH}watches/new-watch/:type(json|threshold)`} component={WatchEdit} />
+    <Redirect from={BASE_PATH} to={`${BASE_PATH}watches`} />
   </Switch>
 );
