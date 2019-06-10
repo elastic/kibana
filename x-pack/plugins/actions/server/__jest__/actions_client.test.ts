@@ -267,7 +267,7 @@ describe('update()', () => {
   test('updates an action with all given properties', async () => {
     const expectedResult = {
       id: '1',
-      type: 'type',
+      type: 'action',
       attributes: {},
       references: [],
     };
@@ -281,12 +281,19 @@ describe('update()', () => {
       actionTypeRegistry,
       savedObjectsClient,
     });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+      },
+      references: [],
+    });
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.update({
       id: 'my-action',
       data: {
         description: 'my description',
-        actionTypeId: 'my-action-type',
         actionTypeConfig: {},
       },
       options: {},
@@ -304,6 +311,13 @@ Array [
     "description": "my description",
   },
   Object {},
+]
+`);
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "action",
+  "my-action",
 ]
 `);
   });
@@ -326,39 +340,25 @@ Array [
       },
       async executor() {},
     });
-    await expect(
-      actionsClient.update({
-        id: 'my-action',
-        data: {
-          description: 'my description',
-          actionTypeId: 'my-action-type',
-          actionTypeConfig: {},
-        },
-        options: {},
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
-    );
-  });
-
-  test(`throws an error when action type doesn't exist`, async () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    const actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      savedObjectsClient,
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+      },
+      references: [],
     });
     await expect(
       actionsClient.update({
         id: 'my-action',
         data: {
           description: 'my description',
-          actionTypeId: 'unregistered-action-type',
           actionTypeConfig: {},
         },
         options: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Action type \\"unregistered-action-type\\" is not registered."`
+      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
   });
 
@@ -380,12 +380,19 @@ Array [
       actionTypeRegistry,
       savedObjectsClient,
     });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+      },
+      references: [],
+    });
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.update({
       id: 'my-action',
       data: {
         description: 'my description',
-        actionTypeId: 'my-action-type',
         actionTypeConfig: {
           a: true,
           b: true,

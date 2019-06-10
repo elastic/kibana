@@ -117,7 +117,10 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         .send({
           attributes: {
             description: 'My action updated',
-            actionTypeId: 'test.index-record',
+            actionTypeConfig: {
+              unencrypted: `This value shouldn't get encrypted`,
+              encrypted: 'This value should be encrypted',
+            },
           },
         })
         .expect(200);
@@ -130,6 +133,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         attributes: {
           description: 'My action updated',
           actionTypeId: 'test.index-record',
+          actionTypeConfig: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
         },
       });
       await supertest

@@ -21,7 +21,6 @@ it('calls the update function with proper parameters', async () => {
     payload: {
       attributes: {
         description: 'My description',
-        actionTypeId: 'abc',
         actionTypeConfig: { foo: true },
       },
       version: '2',
@@ -48,7 +47,6 @@ Array [
       "actionTypeConfig": Object {
         "foo": true,
       },
-      "actionTypeId": "abc",
       "description": "My description",
     },
     "id": "1",

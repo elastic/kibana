@@ -46,7 +46,10 @@ interface ConstructorOptions {
 
 interface UpdateOptions {
   id: string;
-  data: Action;
+  data: {
+    description: string;
+    actionTypeConfig: SavedObjectAttributes;
+  };
   options: { version?: string; references?: SavedObjectReference[] };
 }
 
@@ -66,7 +69,10 @@ export class ActionsClient {
     const { actionTypeId } = data;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     throwIfActionTypeConfigInvalid(actionType, data.actionTypeConfig);
-    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);
+    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(
+      actionTypeId,
+      data
+    );
     return await this.savedObjectsClient.create('action', actionWithSplitActionTypeConfig, options);
   }
 
@@ -98,23 +104,23 @@ export class ActionsClient {
    * Update action
    */
   public async update({ id, data, options = {} }: UpdateOptions) {
-    const { actionTypeId } = data;
-    // Throws an error if action type is invalid
+    const existingObject = await this.savedObjectsClient.get('action', id);
+    const { actionTypeId } = existingObject.attributes;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    if (data.actionTypeConfig) {
-      throwIfActionTypeConfigInvalid(actionType, data.actionTypeConfig);
-      data = this.moveEncryptedAttributesToSecrets(data);
-    }
-    return await this.savedObjectsClient.update('action', id, data, options);
+
+    throwIfActionTypeConfigInvalid(actionType, data.actionTypeConfig);
+    data = this.moveEncryptedAttributesToSecrets(actionTypeId, data);
+    return await this.savedObjectsClient.update('action', id, { ...data, actionTypeId }, options);
   }
 
   /**
    * Set actionTypeConfigSecrets values on a given action
    */
-  private moveEncryptedAttributesToSecrets(action: Action) {
-    const unencryptedAttributes = this.actionTypeRegistry.getUnencryptedAttributes(
-      action.actionTypeId
-    );
+  private moveEncryptedAttributesToSecrets(
+    actionTypeId: string,
+    action: Action | UpdateOptions['data']
+  ) {
+    const unencryptedAttributes = this.actionTypeRegistry.getUnencryptedAttributes(actionTypeId);
     const config = { ...action.actionTypeConfig };
     const configSecrets: Record<string, any> = {};
     for (const key of Object.keys(config)) {

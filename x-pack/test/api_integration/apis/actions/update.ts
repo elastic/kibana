@@ -23,7 +23,6 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test.index-record',
             description: 'My action updated',
             actionTypeConfig: {
               unencrypted: `This value shouldn't get encrypted`,
@@ -50,45 +49,12 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         });
     });
 
-    it('should support partial updates', async () => {
-      await supertest
-        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            actionTypeId: 'test.index-record',
-            description: 'My action updated again',
-          },
-        })
-        .expect(200);
-      await supertest
-        .get(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            id: ES_ARCHIVER_ACTION_ID,
-            type: 'action',
-            references: [],
-            version: resp.body.version,
-            updated_at: resp.body.updated_at,
-            attributes: {
-              actionTypeId: 'test.index-record',
-              description: 'My action updated again',
-              actionTypeConfig: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-            },
-          });
-        });
-    });
-
     it('should not be able to pass null to actionTypeConfig', async () => {
       await supertest
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test.index-record',
             description: 'My action updated',
             actionTypeConfig: null,
           },
@@ -114,7 +80,6 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test.index-record',
             description: 'My action updated',
             actionTypeConfig: {
               unencrypted: `This value shouldn't get encrypted`,
@@ -147,7 +112,6 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test.index-record',
             description: 'My action updated',
             actionTypeConfig: {
               unencrypted: `This value shouldn't get encrypted`,
@@ -194,35 +158,11 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'child "attributes" fails because [child "description" fails because ["description" is required], child "actionTypeId" fails because ["actionTypeId" is required]]',
+              'child "attributes" fails because [child "description" fails because ["description" is required], child "actionTypeConfig" fails because ["actionTypeConfig" is required]]',
             validation: {
               source: 'payload',
-              keys: ['attributes.description', 'attributes.actionTypeId'],
+              keys: ['attributes.description', 'attributes.actionTypeConfig'],
             },
-          });
-        });
-    });
-
-    it(`should return 400 when action type isn't registered`, async () => {
-      await supertest
-        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            actionTypeId: 'test.unregistered-action-type',
-            description: 'My action updated',
-            actionTypeConfig: {
-              unencrypted: `This value shouldn't get encrypted`,
-              encrypted: 'This value should be encrypted',
-            },
-          },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: 'Action type "test.unregistered-action-type" is not registered.',
           });
         });
     });
