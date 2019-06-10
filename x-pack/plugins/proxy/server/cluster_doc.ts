@@ -119,6 +119,7 @@ export class ClusterDocClient {
   }
 
   private setTimer() {
+    console.log('in set timer, timer is', this.timer);
     if (this.timer) return;
     this.log.debug('Set timer to updateNodeMap');
     this.timer = setInterval(async () => {
@@ -180,7 +181,8 @@ export class ClusterDocClient {
     return nodes;
   }
 
-  private async mainLoop(): Promise<any> {
+  private async mainLoop(): Promise<void> {
+    console.log('in main loop');
     const nodes = await this.getNodeList();
     const finishTime = new Date().getTime();
 

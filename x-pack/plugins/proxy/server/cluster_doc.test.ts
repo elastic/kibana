@@ -25,7 +25,9 @@ const createConfigService = (value: Partial<ProxyPluginType> = {}) => {
   const configService = new ConfigService(
     new BehaviorSubject<Config>(
       new ObjectToConfigAdapter({
-        server: value,
+        xpack: {
+          proxy: value,
+        },
       })
     ),
     env,
@@ -35,9 +37,15 @@ const createConfigService = (value: Partial<ProxyPluginType> = {}) => {
   return configService;
 };
 
-let configService = {
-  create: () => createConfigService().getConfig$(),
-};
+function configService(value: Partial<ProxyPluginType>) {
+  return {
+    create: <ProxyPluginType>() =>
+      createConfigService(value).atPath('xpack.proxy') as Observable<ProxyPluginType>,
+    createIfExists: <ProxyPluginType>() =>
+      createConfigService(value).atPath('xpack.proxy') as Observable<ProxyPluginType>,
+  };
+}
+
 beforeEach(() => {
   jest.useFakeTimers();
 });
@@ -48,7 +56,11 @@ afterEach(() => {
 
 it('correctly instantiates', async () => {
   const elasticClient = elasticsearchServiceMock.create();
-  const clusterDoc = new ClusterDocClient({ config: configService, env, logger });
+  const config = configService({
+    updateInterval: 100,
+    timeoutThreshold: 100,
+  });
+  const clusterDoc = new ClusterDocClient({ config, env, logger });
   await clusterDoc.setup({ elasticsearch: elasticClient });
   await clusterDoc.start();
   expect(setTimeout).toHaveBeenCalledTimes(1);
