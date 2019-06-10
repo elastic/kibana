@@ -21,4 +21,11 @@ import { merge } from 'lodash';
 import { Capabilities } from '../../../core/public';
 
 export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Capabilities =>
-  merge({}, ...sources);
+  merge(
+    {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+    },
+    ...sources
+  );
