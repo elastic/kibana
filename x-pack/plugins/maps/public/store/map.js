@@ -110,7 +110,7 @@ const INITIAL_STATE = {
   selectedLayerId: null,
   __transientLayerId: null,
   layerList: [],
-  waitingForMapReadyLayerList: []
+  waitingForMapReadyLayerList: [],
 };
 
 
