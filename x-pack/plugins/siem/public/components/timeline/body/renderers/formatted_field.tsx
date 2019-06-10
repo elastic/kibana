@@ -16,9 +16,7 @@ import { FormattedDate } from '../../../formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
 import { Port, PORT_NAMES } from '../../../port';
 
-export const DATE_FIELD_TYPE = 'date';
-export const IP_FIELD_TYPE = 'ip';
-export const MESSAGE_FIELD_NAME = 'message';
+import { DATE_FIELD_TYPE, IP_FIELD_TYPE, MESSAGE_FIELD_NAME } from './constants';
 
 export const FormattedFieldValue = pure<{
   eventId: string;
