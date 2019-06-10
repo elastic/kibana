@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TelemetryForm } from './telemetry/telemetry_form';
-export { OptInExampleFlyout } from './telemetry/opt_in_details_component';
+export { TelemetryForm } from './telemetry_form';
+export { OptInExampleFlyout } from './opt_in_details_component';

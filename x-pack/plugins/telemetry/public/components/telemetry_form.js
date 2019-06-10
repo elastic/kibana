@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../../common/constants';
+import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../common/constants';
 import { OptInExampleFlyout } from './opt_in_details_component';
 import { Field } from 'ui/management';
 import { FormattedMessage } from '@kbn/i18n/react';
