@@ -33,7 +33,7 @@ interface Deps {
 
 export type CheckSavedObjectsPrivileges = (
   typeOrTypes: string | string[] | undefined,
-  action: SavedObjectsOperation,
+  operation: SavedObjectsOperation,
   namespace: string | undefined,
   args: any
 ) => Promise<void>;
@@ -45,13 +45,13 @@ export function checkSavedObjectsPrivilegesFactory(deps: Deps) {
 
   const checkSavedObjectsPrivileges: CheckSavedObjectsPrivileges = async (
     typeOrTypes: string | string[] | undefined,
-    action: SavedObjectsOperation,
+    operation: SavedObjectsOperation,
     namespace: string | undefined,
     args: any
   ) => {
     const types = normalizeTypes(typeOrTypes);
     const actionsToTypesMap = new Map(
-      types.map(type => [actionsService.savedObject.get(type, action), type] as [string, string])
+      types.map(type => [actionsService.savedObject.get(type, operation), type] as [string, string])
     );
     const actions = Array.from(actionsToTypesMap.keys());
 
@@ -71,18 +71,18 @@ export function checkSavedObjectsPrivilegesFactory(deps: Deps) {
 
     const { hasAllRequested, username, privileges } = privilegeResponse;
     if (hasAllRequested) {
-      auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
+      auditLogger.savedObjectsAuthorizationSuccess(username, operation, types, args);
     } else {
       const missingPrivileges = getMissingPrivileges(privileges);
       auditLogger.savedObjectsAuthorizationFailure(
         username,
-        action,
+        operation,
         types,
         missingPrivileges,
         args
       );
 
-      const msg = `Unable to ${action} ${missingPrivileges
+      const msg = `Unable to ${operation} ${missingPrivileges
         .map(privilege => actionsToTypesMap.get(privilege))
         .sort()
         .join(',')}`;
