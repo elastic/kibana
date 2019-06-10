@@ -7,13 +7,19 @@
 import { cloneDeep } from 'lodash';
 import ci from './ci.json';
 import shirts from './shirts.json';
+import { getFunctionErrors } from '../../../strings';
 
-export function getDemoRows(arg) {
-  if (arg === 'ci') {
+export enum DemoRows {
+  CI = 'ci',
+  SHIRTS = 'shirts',
+}
+
+export function getDemoRows(arg: string | null) {
+  if (arg === DemoRows.CI) {
     return cloneDeep(ci);
   }
-  if (arg === 'shirts') {
+  if (arg === DemoRows.SHIRTS) {
     return cloneDeep(shirts);
   }
-  throw new Error(`Invalid data set: '${arg}', use 'ci' or 'shirts'.`);
+  throw getFunctionErrors().demodata.invalidDataSet(arg);
 }

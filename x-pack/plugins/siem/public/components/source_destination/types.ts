@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SourceDestinationType } from './source_destination_ip';
+export type SourceDestinationType = 'source' | 'destination';
 
 export interface GeoFieldsProps {
   contextId: string;

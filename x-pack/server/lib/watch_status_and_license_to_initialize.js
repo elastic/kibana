@@ -42,7 +42,7 @@ export function watchStatusAndLicenseToInitialize(xpackMainPlugin, downstreamPlu
       message: upstreamStatus.message,
     });
   const newStatus$ = Rx
-    .fromEvent(upstreamStatus, 'change', null, (previousState, previousMsg, state, message) => {
+    .fromEvent(upstreamStatus, 'change', null, (previousState, previousMsg, state, message) => { // eslint-disable-line no-unused-vars
       return {
         state,
         message,

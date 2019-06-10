@@ -12,7 +12,7 @@ const INFLUENCER_LOW_THRESHOLD = 0;
 const INFLUENCER_HIGH_THRESHOLD = 4;
 const DETECTOR_FIELD_NAMES_THRESHOLD = 1;
 
-export async function validateInfluencers(callWithRequest, job) {
+export async function validateInfluencers(callWithRequest, job) { // eslint-disable-line no-unused-vars
   validateJobObject(job);
 
   const messages = [];

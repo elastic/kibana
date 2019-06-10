@@ -6,7 +6,7 @@
 
 
 
-export const elasticsearchJsPlugin = (Client, config, components) => {
+export const elasticsearchJsPlugin = (Client, config, components) => { // eslint-disable-line no-unused-vars
   const ca = components.clientAction.factory;
 
   Client.prototype.ml = components.clientAction.namespaceFactory();

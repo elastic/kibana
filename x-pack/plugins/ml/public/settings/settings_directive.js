@@ -50,7 +50,7 @@ module.directive('mlSettings', function () {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (scope, element) {
+    link: function (element) {
       timefilter.disableTimeRangeSelector();
       timefilter.disableAutoRefreshSelector();
 

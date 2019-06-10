@@ -3,10 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import * as _ from 'lodash';
+import crypto from 'crypto';
 import { Server } from 'hapi';
-import fetch from 'node-fetch';
+import * as _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { checkRepos } from './check_repos';
@@ -32,6 +31,7 @@ import { CodeServerRouter } from './security';
 import { ServerOptions } from './server_options';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
 import { EsClientWithInternalRequest } from './utils/esclient_with_internal_request';
+import { checkCodeNode, checkRoute } from './routes/check';
 
 async function retryUntilAvailable<T>(
   func: () => Promise<T>,
@@ -61,21 +61,6 @@ async function retryUntilAvailable<T>(
     });
     return await promise;
   }
-}
-
-function getServerUuid(server: Server): Promise<string> {
-  const uid = server.config().get('server.uuid') as string;
-  return Promise.resolve(uid);
-}
-
-async function getCodeNodeUuid(url: string, log: Logger) {
-  const res = await fetch(`${url}/api/stats`, {});
-  if (res.ok) {
-    return (await res.json()).kibana.uuid;
-  }
-
-  log.info(`Access code node ${url} failed, try again later.`);
-  return null;
 }
 
 export function init(server: Server, options: any) {
@@ -118,15 +103,15 @@ export function init(server: Server, options: any) {
   // @ts-ignore
   const kbnServer = this.kbnServer;
   kbnServer.ready().then(async () => {
-    const serverUuid = await retryUntilAvailable(() => getServerUuid(server), 50);
-
     const codeNodeUrl = serverOptions.codeNodeUrl;
+    const rndString = crypto.randomBytes(20).toString('hex');
+    checkRoute(server, rndString);
     if (codeNodeUrl) {
-      const codeNodeUuid = (await retryUntilAvailable(
-        async () => await getCodeNodeUuid(codeNodeUrl, log),
+      const checkResult = await retryUntilAvailable(
+        async () => await checkCodeNode(codeNodeUrl, log, rndString),
         5000
-      )) as string;
-      if (codeNodeUuid === serverUuid) {
+      );
+      if (checkResult.me) {
         await initCodeNode(server, serverOptions, log);
       } else {
         await initNonCodeNode(codeNodeUrl, server, serverOptions, log);

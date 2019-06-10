@@ -30,7 +30,7 @@ uiModules.get('xpack/watcher')
       transclude: true,
       replace: true,
       scope: true,
-      link: function ($scope, $el, attr) {
+      link: function ($scope, attr) {
         $scope.text = attr.text;
         $scope.placement = attr.placement || 'top';
         $scope.delay = attr.delay || 400;

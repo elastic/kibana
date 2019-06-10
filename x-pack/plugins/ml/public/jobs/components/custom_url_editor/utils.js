@@ -83,7 +83,7 @@ export function getQueryEntityFieldNames(job) {
     entityFieldNames.push(...influencers);
   }
 
-  detectors.forEach((detector, detectorIndex) => {
+  detectors.forEach((detector, detectorIndex) => { // eslint-disable-line no-unused-vars
     const partitioningFields = getPartitioningFieldNames(job, detectorIndex);
 
     partitioningFields.forEach((fieldName) => {
@@ -341,7 +341,7 @@ export function getTestUrl(job, customUrl) {
                 };
 
                 // Look for bucket aggregations which match the tokens in the URL.
-                urlValue.replace((/\$([^?&$\'"]{1,40})\$/g), (match, name) => {
+                urlValue.replace((/\$([^?&$\'"]{1,40})\$/g), (match, name) => { // eslint-disable-line no-unused-vars
                   if (name !== 'earliest' && name !== 'latest' && firstBucket[name] !== undefined) {
                     const tokenBuckets = firstBucket[name];
                     if (tokenBuckets.buckets) {
