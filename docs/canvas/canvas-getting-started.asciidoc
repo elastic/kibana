@@ -2,15 +2,21 @@
 [[canvas-getting-started]]
 == Getting started with Canvas
 
-//Short description.
+Canvas is a data visualization and presentation tool that sits within Kibana. Backed by Elasticsearch, Canvas allows you to combine data with colors, images, text, and your imagination to bring dynamic, multi-page, pixel-perfect displays to screens large and small. If you are a little bit creative, a little bit technical, and a whole lot curious, then Canvas is for you. 
 
 With Canvas, you can:
 
-* Create a space for your own text, visualizations, and visual assets using a workpad. With workpads, you can experiment with backgrounds, borders, colors, fonts, and more.
+* Create and personalize your work space with backgrounds, borders, colors, fonts, and more. 
 
-* Show off your data with charts, graphs, and progress monitors.
+* Customize your workpad with your own visualizations, such as images and text.
 
-* 
+* Show off your data with charts, graphs, progress monitors, and more.
+
+* Focus the data you want to display with filters.
+
+<<link to some examples of Canvas in use>>
+
+For a quick overview of Canvas, watch this video: https://www.youtube.com/watch?v=ZqvF_5-1xjQ. 
 
 [float]
 === Before you begin
@@ -31,11 +37,11 @@ Your first step to working with Canvas is to create a workpad.
 
 .. Change the page *Background color* to light gray.
 
-=== Add visualizations with elements
+=== Customize your workpad
 
-Canvas ships with a variety of visualizations, called _elements_, that you can add to your workpad. For this example, we'll use the *Image* element to add your own visualization.
+To customize your workpad to look the way you want, add your own images and text.
 
-. Click *Add element*, then select *Image*.
+. Click *Add element*, then click *Image*.
 +
 The default Elastic logo image appears on your page.
 
@@ -45,15 +51,9 @@ The default Elastic logo image appears on your page.
 +
 You'll notice that the image is tagged as an asset, which allows you to reuse the image from *Manage assets*.
 
-TIP: Want to delete an element? Click the back button on your browser.
-
 //Add image
 
-=== Show off your data with metrics
-
-Metric elements include charts, graphs, and progress monitors. For this example, we'll an element that is good for displaying a single value. 
-
-. Click *Add element*, then select *Metric*. 
+. Click *Add element*, then click *Metric*. 
 +
 By default, the *Metric* element is connected to a demo data source, which enables you to experiment with the element before you connect it to your own data source.
 
@@ -67,7 +67,7 @@ The query selects the total price field and sets it to the sum_total_price field
 
 //Add image
 
-. To verify that the data is correct, click *Preview*. If you like what you see, click *Save*.
+.. To verify that the data is correct, click *Preview*. If you like what you see, click *Save*.
 +
 At this point, the element displays an error.
 
@@ -97,12 +97,54 @@ You're now looking at the raw data syntax that Canvas uses to display the elemen
 
 .. When you are done, click *Close* on the *Expression editor*.
 
-=== Show off your data with charts
+TIP: Want to delete an element? Click the back button on your browser.
 
-For this example, we'll use an element that is good for showing the total sales over time.
+=== Show off your data
 
-. Click *Add element*, then select *Area chart*. 
+To show what your data can do, add and customize charts, graphs, progress monitors, and more.
 
-. Change to the *Elasticsearch SQL* data source.
+. Click *Add element*, then click *Area chart*. 
 
-. Enter this query to obtain the taxless total price by date: SELECT order_date, taxless_total_price FROM "kibana_sample_data_ecommerce" ORDER BY order_date
+. To connect the element to your own data source, make sure that the element is selected, then click *Data*.
+
+.. Click *Change your data source*, then click *Elasticsearch SQL*.
+
+.. To obtain the taxless total price by date, copy and paste `SELECT order_date, taxless_total_price FROM "kibana_sample_data_ecommerce" ORDER BY order_date` into the *Elasticsearch SQL query* field.
++
+Although you used the Elasticsearch SQL data source for the metric and area chart elements, each element can display a different data source. Pages and workpads often contain multiple data sources.
+
+.. To verify that the data is correct, click *Preview*. If you like what you see, click *Save*.
+
+. Specify how to display the data.
+
+.. Click *Display*
+
+.. From the *X-axis* drop-down lists, select *Value*, then select *order_date*.
+
+.. From the *Y-axis* drop-down lists, select *Value*, then select *taxless_total_price*.
+
+//Add image
+
+=== Show how your data changes over time
+
+To focus your data on a specific time range, apply a time filter. 
+
+. Click *Add element*, then click *Time filter*.
+
+. Specify how to display the data.
+
+.. Click *Display*
+
+.. To use the date time field from the sample data, enter `order_date` in the *Column* field, then click *Set*.
++
+To see how the data changes, set the time filter to *Last 7 days*. As you change the time filter options, the metrics dynamically update.
+
+//Add image
+
+Your workpad is now complete! Use the icons in the upper left corner to:
+
+* Share your workpad
+
+* Display your workpad in fullscreen mode
+
+* Download your workpad as a PDF report or JSON object 
