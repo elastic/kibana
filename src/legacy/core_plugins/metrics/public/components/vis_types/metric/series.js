@@ -85,6 +85,7 @@ function MetricSeriesUi(props) {
           fields={props.fields}
           model={props.model}
           onChange={props.onChange}
+          indexPatternForQuery={props.indexPatternForQuery}
         />
       );
     }
@@ -202,6 +203,7 @@ MetricSeriesUi.propTypes = {
   togglePanelActivation: PropTypes.func,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const MetricSeries = injectI18n(MetricSeriesUi);

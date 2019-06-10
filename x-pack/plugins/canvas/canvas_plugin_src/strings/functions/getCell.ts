@@ -22,3 +22,24 @@ export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
     }),
   },
 };
+
+export const errors = {
+  rowNotFound: (row: number) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.getCell.rowNotFoundErrorMessage', {
+        defaultMessage: "Row not found: '{row}'",
+        values: {
+          row,
+        },
+      })
+    ),
+  columnNotFound: (column: string) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.getCell.columnNotFoundErrorMessage', {
+        defaultMessage: "Column not found: '{column}'",
+        values: {
+          column,
+        },
+      })
+    ),
+};

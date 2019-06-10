@@ -46,6 +46,7 @@ export interface Filter {
  * Represents a function called by the `case` Function.
  */
 export interface Case {
+  type: 'case';
   matches: any;
   result: any;
 }
@@ -82,9 +83,9 @@ export interface DatatableColumn {
  * A `Datatable` in Canvas is a unique structure that represents tabulated data.
  */
 export interface Datatable {
+  type: 'datatable';
   columns: DatatableColumn[];
   rows: DatatableRow[];
-  type: 'datatable';
 }
 
 export enum Legend {
@@ -124,12 +125,13 @@ export type PointSeriesColumns = { [key in PointSeriesColumnName]: PointSeriesCo
  * A `PointSeries` in Canvas is a unique structure that represents dots on a chart.
  */
 export interface PointSeries {
+  type: 'pointseries';
   columns: PointSeriesColumns;
   rows: Array<Record<string, any>>;
-  type: 'pointseries';
 }
 
 export interface SeriesStyle {
+  type: 'seriesStyle';
   bars: number;
   color: string;
   fill: number;
@@ -138,7 +140,6 @@ export interface SeriesStyle {
   lines: number;
   points: number;
   stack: number;
-  type: 'seriesStyle';
 }
 
 export interface Palette {

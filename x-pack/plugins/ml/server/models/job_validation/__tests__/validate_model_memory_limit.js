@@ -29,6 +29,22 @@ describe('ML - validateModelMemoryLimit', () => {
     }
   };
 
+  // mock field caps response
+  const fieldCapsResponse = {
+    indices: [
+      'cloudwatch'
+    ],
+    fields: {
+      instance: {
+        keyword: {
+          type: 'keyword',
+          searchable: true,
+          aggregatable: true
+        }
+      }
+    }
+  };
+
   // mock cardinality search response
   const cardinalitySearchResponse = {
     took: 8,
@@ -52,9 +68,10 @@ describe('ML - validateModelMemoryLimit', () => {
   };
 
   // mock callWithRequest
-  // used in two places:
+  // used in three places:
   // - to retrieve the info endpoint
   // - to search for cardinality of split field
+  // - to retrieve field capabilities used in search for split field cardinality
   function callWithRequest(call) {
     if (typeof call === undefined) {
       return Promise.reject();
@@ -65,6 +82,8 @@ describe('ML - validateModelMemoryLimit', () => {
       response = mlInfoResponse;
     } else if(call === 'search') {
       response = cardinalitySearchResponse;
+    } else if (call === 'fieldCaps') {
+      response = fieldCapsResponse;
     }
     return Promise.resolve(response);
   }

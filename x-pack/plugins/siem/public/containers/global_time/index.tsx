@@ -10,6 +10,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
+import { InputsModelId } from '../../store/inputs/constants';
 
 interface GlobalTimeArgs {
   from: number;
@@ -25,12 +26,12 @@ interface OwnProps {
 
 interface GlobalTimeDispatch {
   setGlobalQuery: ActionCreator<{
-    inputId: inputsModel.InputsModelId;
+    inputId: InputsModelId;
     id: string;
     loading: boolean;
     refetch: inputsModel.Refetch;
   }>;
-  deleteAllQuery: ActionCreator<{ id: inputsModel.InputsModelId }>;
+  deleteAllQuery: ActionCreator<{ id: InputsModelId }>;
 }
 
 interface GlobalTimeReduxState {

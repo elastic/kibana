@@ -219,6 +219,18 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     /**
+     * change the data formatter for template in an `options` label tab
+     *
+     * @param formatter - typeof formatter which you can use for presenting data. By default kibana show `Number` formatter
+     */
+    public async changeDataFormatter(
+      formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
+    ) {
+      const [formatterEl] = await find.allByCssSelector('.euiComboBox');
+      await comboBox.setElement(formatterEl, formatter);
+    }
+
+    /**
      * write template for aggregation row in the `option` tab
      *
      * @param template always should contain `{{value}}`
