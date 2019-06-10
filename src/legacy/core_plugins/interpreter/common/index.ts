@@ -17,19 +17,21 @@
  * under the License.
  */
 
-export const error = () => ({
-  name: 'error',
-  to: {
-    render: input => {
-      const { error, info } = input;
-      return {
-        type: 'render',
-        as: 'error',
-        value: {
-          error,
-          info,
-        },
-      };
-    },
-  },
-});
+export {
+  Datatable,
+  DatatableColumn,
+  DatatableRow,
+  DatatableColumnType,
+  ExpressionImage,
+  Filter,
+  InterpreterErrorType,
+  isDatatable,
+  KibanaContext,
+  KibanaDatatable,
+  PointSeries,
+  PointSeriesColumns,
+  PointSeriesColumn,
+  PointSeriesColumnName,
+  Render,
+  Style,
+} from './types';
