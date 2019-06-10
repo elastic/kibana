@@ -236,7 +236,7 @@
     "tar": "4.4.10",
     "terser-webpack-plugin": "^1.1.0",
     "thread-loader": "^2.1.2",
-    "tinygradient": "0.3.0",
+    "tinygradient": "0.4.3",
     "tinymath": "1.2.1",
     "topojson-client": "3.0.0",
     "trunc-html": "1.0.2",
