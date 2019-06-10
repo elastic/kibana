@@ -55,7 +55,7 @@ const createCheckSavedObjectsPrivileges = (checkPrivilegesImpl: () => Promise<an
         atSpaces: jest.fn().mockRejectedValue('atSpaces should not be called'),
         globally: jest.fn().mockRejectedValue('globally should not be called'),
       }),
-      errors: mockErrors,
+      errors: mockErrors as any,
       request: null as any,
       spacesEnabled: true,
     })
@@ -101,7 +101,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
 
       await expect(client.create(type, {})).rejects.toThrowError(mockErrors.generalError);
@@ -134,7 +134,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
       const attributes = Symbol();
       const options = Symbol();
@@ -183,7 +183,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const attributes = Symbol();
       const options = {
@@ -221,7 +221,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const attributes = Symbol();
       const options = Symbol();
@@ -263,7 +263,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
 
       const attributes = Symbol() as any;
@@ -303,7 +303,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
       const objects = [
         { type: type1, attributes: {} },
@@ -364,7 +364,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const objects = [
         { type: type1, otherThing: 'sup', attributes: {} },
@@ -412,7 +412,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const objects = [
         { type: type1, otherThing: 'sup', attributes: {} },
@@ -465,7 +465,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
 
       await expect(client.delete(type, id, options)).rejects.toThrowError(mockErrors.generalError);
@@ -499,7 +499,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
       const id = Symbol();
       const options = Symbol();
@@ -550,7 +550,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const id = Symbol();
       const options = { namespace: 'my-namespace' };
@@ -587,7 +587,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const id = Symbol();
       const options = Symbol();
@@ -631,7 +631,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
 
       await expect(client.find({ type })).rejects.toThrowError(mockErrors.generalError);
@@ -664,7 +664,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
       const options = { type };
 
@@ -707,7 +707,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
       const options = { type: [type1, type2] };
 
@@ -750,7 +750,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const options = { type, namespace: 'my-namespace' };
 
@@ -784,7 +784,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const options = { type };
 
@@ -823,7 +823,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
 
       const objects = [{ type, id: 'foo' }];
@@ -860,7 +860,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
       const objects = [
         { type: type1, id: 'foo' },
@@ -919,7 +919,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const objects = [{ type: type1, id: 'foo-id' }, { type: type2, id: 'bar-id' }];
       const options = { namespace: 'my-namespace' };
@@ -962,7 +962,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const objects = [{ type: type1, id: 'foo-id' }, { type: type2, id: 'bar-id' }];
       const options = Symbol();
@@ -1008,7 +1008,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
 
       const id = Symbol() as any;
@@ -1045,7 +1045,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
       const id = Symbol();
       const options = Symbol();
@@ -1095,7 +1095,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const id = Symbol();
       const options = { namespace: 'my-namespace' };
@@ -1132,7 +1132,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const id = Symbol();
       const options = Symbol();
@@ -1175,7 +1175,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
 
       const id = Symbol() as any;
@@ -1216,7 +1216,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
         checkSavedObjectsPrivileges,
-        errors: mockErrors,
+        errors: mockErrors as any,
       });
       const id = Symbol();
       const attributes = Symbol();
@@ -1269,7 +1269,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const id = Symbol();
       const attributes = Symbol();
@@ -1307,7 +1307,7 @@ describe(`spaces disabled`, () => {
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
         checkSavedObjectsPrivileges,
-        errors: null,
+        errors: null as any,
       });
       const id = Symbol();
       const attributes = Symbol();

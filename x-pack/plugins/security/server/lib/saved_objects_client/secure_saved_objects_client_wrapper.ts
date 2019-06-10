@@ -23,14 +23,14 @@ import { CheckSavedObjectsPrivileges, SavedObjectsOperation } from '../authoriza
 export interface SecureSavedObjectsClientWrapperDeps {
   baseClient: SavedObjectsClientContract;
   checkSavedObjectsPrivileges: CheckSavedObjectsPrivileges;
-  errors: any;
+  errors: SavedObjectsClientContract['errors'];
 }
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private baseClient: SavedObjectsClientContract;
 
   private checkSavedObjectsPrivileges: CheckSavedObjectsPrivileges;
 
-  public errors: any;
+  public errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SecureSavedObjectsClientWrapperDeps) {
     const { baseClient, checkSavedObjectsPrivileges, errors } = options;
