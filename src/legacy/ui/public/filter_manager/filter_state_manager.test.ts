@@ -27,13 +27,8 @@ import { PartitionedFilters } from './partitioned_filters';
 
 import { StubState } from './test_helpers/stub_state';
 import { getFilter } from './test_helpers/get_stub_filter';
-// class StubIndexPatterns {
-//   get(index: any) {
-//     return null;
-//   }
-// }
 
-describe('new_filter_manager', () => {
+describe('filter_state_manager', () => {
   let appStateStub: StubState;
   let globalStateStub: StubState;
 

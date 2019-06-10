@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { Filter, toggleFilterNegated, FilterStateStore } from '@kbn/es-query';
+import { Filter, isFilterPinned, toggleFilterNegated, FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { getNewPlatform } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 
 // @ts-ignore
 import { onlyDisabled } from './lib/only_disabled';
@@ -92,9 +92,7 @@ export class FilterManager {
   }
 
   private static partitionFilters(filters: Filter[]): PartitionedFilters {
-    const [globalFilters, appFilters] = _.partition(filters, filter => {
-      return filter.$state.store === FilterStateStore.GLOBAL_STATE;
-    });
+    const [globalFilters, appFilters] = _.partition(filters, isFilterPinned);
 
     return {
       globalFilters,
@@ -145,22 +143,25 @@ export class FilterManager {
 
   /* Setters */
 
-  public async addFilters(filters: Filter[], pinFilterStatus?: boolean) {
-    const { uiSettings } = getNewPlatform().setup.core;
-    if (pinFilterStatus === undefined) {
-      pinFilterStatus = uiSettings.get('filters:pinnedByDefault');
-    }
-
+  public async addFilters(filters: Filter[] | Filter, pinFilterStatus?: boolean) {
     if (!Array.isArray(filters)) {
       filters = [filters];
+    }
+
+    const { uiSettings } = npSetup.core;
+    if (pinFilterStatus === undefined) {
+      pinFilterStatus = uiSettings.get('filters:pinnedByDefault');
     }
 
     // set the store of all filters
     // TODO: is this necessary?
     _.map(filters, filter => {
-      filter.$state = {
-        store: pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
-      };
+      // Override status only for filters that didn't have state in the first place.
+      if (filter.$state === undefined) {
+        filter.$state = {
+          store: pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
+        };
+      }
     });
 
     const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, filters);
@@ -179,7 +180,8 @@ export class FilterManager {
     });
 
     if (filterIndex >= 0) {
-      const newFilters = this.filters.slice(filterIndex, 1);
+      const newFilters = _.cloneDeep(this.filters);
+      newFilters.splice(filterIndex, 1);
       this.handleStateUpdate(newFilters);
     }
   }
@@ -189,12 +191,12 @@ export class FilterManager {
   }
 
   public removeAll() {
-    this.setFilters([]);
+    return this.setFilters([]);
   }
 
   public async addFiltersAndChangeTimeFilter(filters: Filter[]) {
     const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
     if (timeFilter) changeTimeFilter(timeFilter);
-    this.addFilters(filters.filter(filter => filter !== timeFilter));
+    return this.addFilters(filters.filter(filter => filter !== timeFilter));
   }
 }

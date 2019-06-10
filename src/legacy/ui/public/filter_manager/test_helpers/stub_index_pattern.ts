@@ -17,25 +17,8 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-
-import { Filter } from '@kbn/es-query';
-import { State } from 'ui/state_management/state';
-
-export class StubState implements State {
-  filters: Filter[];
-  save: sinon.SinonSpy<any[], any>;
-
-  constructor() {
-    this.save = sinon.stub();
-    this.filters = [];
-  }
-
-  getQueryParamName() {
-    return '_a';
-  }
-
-  translateHashToRison(stateHashOrRison: string | string[]): string | string[] {
-    return '';
+export class StubIndexPatterns {
+  async get(index: any) {
+    return;
   }
 }
