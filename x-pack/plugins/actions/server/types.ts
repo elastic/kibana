@@ -35,8 +35,8 @@ export interface ActionType {
   name: string;
   unencryptedAttributes?: string[];
   validate?: {
-    params?: Record<string, any>;
-    actionTypeConfig?: Record<string, any>;
+    params?: any;
+    actionTypeConfig?: any;
   };
   executor({ services, actionTypeConfig, params }: ActionTypeExecutorOptions): Promise<any>;
 }

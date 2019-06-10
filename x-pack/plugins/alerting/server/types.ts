@@ -29,6 +29,9 @@ export interface AlertExecuteOptions {
 export interface AlertType {
   id: string;
   description: string;
+  validate?: {
+    params?: any;
+  };
   execute: ({ services, params, state }: AlertExecuteOptions) => Promise<State | void>;
 }
 

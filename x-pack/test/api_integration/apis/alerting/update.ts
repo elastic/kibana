@@ -132,5 +132,36 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
           });
         });
     });
+
+    it(`should return 400 when alertTypeConfig isn't valid`, async () => {
+      const { body: customAlert } = await supertest
+        .post('/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.validation',
+            alertTypeParams: {
+              param1: 'test',
+            },
+          })
+        )
+        .expect(200);
+      await supertest
+        .put(`/api/alert/${customAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          interval: 10000,
+          alertTypeParams: {},
+          actions: [],
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'alertTypeParams invalid: child "param1" fails because ["param1" is required]',
+          });
+        });
+    });
   });
 }

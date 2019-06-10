@@ -9,6 +9,7 @@ import { SavedObjectsClientContract, SavedObjectReference } from 'src/legacy/ser
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction } from './types';
 import { TaskManager } from '../../task_manager';
 import { TASK_MANAGER_SCOPE } from '../common/constants';
+import { throwIfAlertTypeParamsInvalid } from './lib';
 
 interface ConstructorOptions {
   taskManager: TaskManager;
@@ -62,7 +63,9 @@ export class AlertsClient {
 
   public async create({ data, options }: CreateOptions) {
     // Throws an error if alert type isn't registered
-    this.alertTypeRegistry.get(data.alertTypeId);
+    const alertType = this.alertTypeRegistry.get(data.alertTypeId);
+    // Validate
+    throwIfAlertTypeParamsInvalid(alertType, data.alertTypeParams);
     // Create alert
     const { alert: rawAlert, references } = this.getRawAlert(data);
     const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {
@@ -112,6 +115,13 @@ export class AlertsClient {
   }
 
   public async update({ id, data, options = {} }: UpdateOptions) {
+    const existingObject = await this.savedObjectsClient.get('alert', id);
+    const { alertTypeId } = existingObject.attributes;
+    const alertType = this.alertTypeRegistry.get(alertTypeId);
+
+    // Validate
+    throwIfAlertTypeParamsInvalid(alertType, data.alertTypeParams);
+
     const { actions, references } = this.extractReferences(data.actions);
     const updatedObject = await this.savedObjectsClient.update(
       'alert',

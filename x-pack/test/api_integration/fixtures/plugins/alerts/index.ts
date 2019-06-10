@@ -139,6 +139,18 @@ export default function(kibana: any) {
         },
       });
       server.plugins.alerting.registerType({
+        id: 'test.validation',
+        description: 'Test: Validation',
+        validate: {
+          params: Joi.object()
+            .keys({
+              param1: Joi.string().required(),
+            })
+            .required(),
+        },
+        async execute({ services, params, state }: AlertExecuteOptions) {},
+      });
+      server.plugins.alerting.registerType({
         id: 'test.noop',
         description: 'Test: Noop',
         async execute({ services, params, state }: AlertExecuteOptions) {},

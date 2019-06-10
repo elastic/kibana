@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import { AlertsClient } from './alerts_client';
 import { SavedObjectsClientMock } from '../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
@@ -54,6 +55,11 @@ describe('create()', () => {
   test('creates an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      description: 'Test',
+      async execute() {},
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -203,9 +209,34 @@ Object {
 `);
   });
 
+  test('should validate alertTypeParams', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const data = getMockData();
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      description: 'Test',
+      validate: {
+        params: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+      async execute() {},
+    });
+    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"alertTypeParams invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+    );
+  });
+
   test('throws error if create saved object fails', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      description: 'Test',
+      async execute() {},
+    });
     savedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
@@ -216,6 +247,11 @@ Object {
   test('attempts to remove saved object if scheduling failed', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      description: 'Test',
+      async execute() {},
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -493,6 +529,19 @@ Array [
 describe('update()', () => {
   test('updates given parameters', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      description: 'Test',
+      async execute() {},
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+      },
+      references: [],
+    });
     savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -591,5 +640,54 @@ Object {
   "version": "123",
 }
 `);
+  });
+
+  it('should validate alertTypeParams', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      description: 'Test',
+      validate: {
+        params: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+      async execute() {},
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+      },
+      references: [],
+    });
+    await expect(
+      alertsClient.update({
+        id: '1',
+        data: {
+          interval: 10000,
+          alertTypeParams: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+        options: {
+          version: '123',
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"alertTypeParams invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+    );
   });
 });
