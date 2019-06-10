@@ -29,6 +29,7 @@ import { Storage } from 'ui/storage';
 
 import { Query, QueryBar } from '../../../query/query_bar';
 import { FilterBar } from '../../../filter/filter_bar';
+import { SavedQuery } from '../index';
 
 interface DateRange {
   from: string;
@@ -48,6 +49,7 @@ interface Props {
   indexPatterns: IndexPattern[];
   store: Storage;
   filters: Filter[];
+  savedQuery: SavedQuery;
   onFiltersUpdated: (filters: Filter[]) => void;
   showQueryBar: boolean;
   showFilterBar: boolean;

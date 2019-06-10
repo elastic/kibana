@@ -17,7 +17,25 @@
  * under the License.
  */
 
+import { Filter } from '@kbn/es-query';
+import { Query } from '../../query/query_bar';
+
 export { SearchBar } from './components';
 
 // @ts-ignore
 export { setupDirective } from './directive';
+
+interface RefreshInterval {
+  pause: boolean;
+  value: number;
+}
+
+export interface SavedQuery {
+  query: Query;
+  filters: Filter[];
+  timefilter: {
+    timeFrom: string;
+    timeTo: string;
+    refreshInterval: RefreshInterval;
+  };
+}
