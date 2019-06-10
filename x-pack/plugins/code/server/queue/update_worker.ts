@@ -6,6 +6,7 @@
 
 import { CloneWorkerResult, Repository } from '../../model';
 import { EsClient, Esqueue } from '../lib/esqueue';
+import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
@@ -21,10 +22,11 @@ export class UpdateWorker extends AbstractGitWorker {
     protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions,
+    protected readonly gitOps: GitOperations,
     protected readonly repoServiceFactory: RepositoryServiceFactory,
     private readonly cancellationService: CancellationSerivce
   ) {
-    super(queue, log, client, serverOptions);
+    super(queue, log, client, serverOptions, gitOps);
   }
 
   public async executeJob(job: Job) {

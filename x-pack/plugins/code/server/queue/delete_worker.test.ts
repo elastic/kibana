@@ -7,6 +7,7 @@
 import sinon from 'sinon';
 import { EsClient, Esqueue } from '../lib/esqueue';
 
+import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryServiceFactory } from '../repository_service_factory';
@@ -77,6 +78,7 @@ test('Execute delete job.', async () => {
         enableGitCertCheck: false,
       },
     } as ServerOptions,
+    {} as GitOperations,
     (cancellationService as any) as CancellationSerivce,
     (lspService as any) as LspService,
     (repoServiceFactory as any) as RepositoryServiceFactory
@@ -97,7 +99,7 @@ test('Execute delete job.', async () => {
   expect(newInstanceSpy.calledOnce).toBeTruthy();
   expect(removeSpy.calledOnce).toBeTruthy();
 
-  expect(deleteSpy.calledThrice).toBeTruthy();
+  expect(deleteSpy.calledTwice).toBeTruthy();
 
   expect(deleteWorkspaceSpy.calledOnce).toBeTruthy();
 });
@@ -115,6 +117,7 @@ test('On delete job enqueued.', async () => {
     log,
     esClient as EsClient,
     {} as ServerOptions,
+    {} as GitOperations,
     {} as CancellationSerivce,
     {} as LspService,
     {} as RepositoryServiceFactory
@@ -144,6 +147,7 @@ test('On delete job completed.', async () => {
     log,
     esClient as EsClient,
     {} as ServerOptions,
+    {} as GitOperations,
     {} as CancellationSerivce,
     {} as LspService,
     {} as RepositoryServiceFactory
