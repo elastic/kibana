@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from '../errors';
 import angular from 'angular';
 import { fieldFormats } from '../registry/field_formats';
-import UtilsMappingSetupProvider from '../utils/mapping_setup';
+import { mappingSetup } from '../utils/mapping_setup';
 import { toastNotifications } from '../notify';
 
 import { getComputedFields } from './_get_computed_fields';
@@ -50,7 +50,6 @@ export function IndexPatternProvider(Private, config, Promise) {
   const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetProvider)('id');
   const fieldsFetcher = Private(FieldsFetcherProvider);
-  const mappingSetup = Private(UtilsMappingSetupProvider);
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);

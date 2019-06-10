@@ -18,17 +18,10 @@
  */
 
 import _ from 'lodash';
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import UtilsMappingSetupProvider from '../mapping_setup';
-
-let mappingSetup;
+import { mappingSetup } from '../mapping_setup';
 
 describe('ui/utils/mapping_setup', function () {
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    mappingSetup = Private(UtilsMappingSetupProvider);
-  }));
 
   describe('#expandShorthand()', function () {
     it('allows shortcuts for field types by just setting the value to the type name', function () {
