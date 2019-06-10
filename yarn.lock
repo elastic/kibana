@@ -23854,10 +23854,10 @@ rsvp@^3.3.3:
   resolved "https://registry.yarnpkg.com/rsvp/-/rsvp-3.6.2.tgz#2e96491599a96cde1b515d5674a8f7a91452926a"
   integrity sha512-OfWGQTb9vnwRjwtA2QwpG2ICclHC3pgXZO5xt8H2EfgDquO0qVdSb5T88L4qJVAEugbS56pAuV4XZM58UX8ulw==
 
-rsync@0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/rsync/-/rsync-0.4.0.tgz#0274f3163007a94396d88b1cdeb4bbde92cb9dc1"
-  integrity sha1-AnTzFjAHqUOW2Isc3rS73pLLncE=
+rsync@0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/rsync/-/rsync-0.6.1.tgz#3681a0098bd8750448f8bf9da1fee09f7763742b"
+  integrity sha1-NoGgCYvYdQRI+L+dof7gn3djdCs=
 
 run-async@^0.1.0:
   version "0.1.0"
@@ -24512,10 +24512,12 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
   integrity sha1-tf3AjxKH6hF4Yo5BXiUTK3NkbG0=
 
-simple-git@1.37.0:
-  version "1.37.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-1.37.0.tgz#a5d522dd4e97c6091f657766c28a323738233f0f"
-  integrity sha1-pdUi3U6XxgkfZXdmwooyNzgjPw8=
+simple-git@1.113.0:
+  version "1.113.0"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-1.113.0.tgz#668989728a1e9cf4ec6c72b69ea2eecc93489bea"
+  integrity sha512-i9WVsrK2u0G/cASI9nh7voxOk9mhanWY9eGtWBDSYql6m49Yk5/Fan6uZsDr/xmzv8n+eQ8ahKCoEr8cvU3h+g==
+  dependencies:
+    debug "^4.0.1"
 
 simple-git@^1.91.0:
   version "1.92.0"

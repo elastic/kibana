@@ -7,7 +7,7 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { AdvancedFilter } from './advanced_filter';
+import { AdvancedFilter } from '../advanced_filter';
 
 storiesOf('renderers/AdvancedFilter', module)
   .add('default', () => <AdvancedFilter onChange={action('onChange')} commit={action('commit')} />)

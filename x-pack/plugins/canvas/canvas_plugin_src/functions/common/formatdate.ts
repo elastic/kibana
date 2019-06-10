@@ -26,6 +26,7 @@ export function formatdate(): ExpressionFunction<'formatdate', number | string, 
       format: {
         aliases: ['_'],
         types: ['string'],
+        required: true,
         help: argHelp.format,
       },
     },
