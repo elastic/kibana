@@ -62,30 +62,21 @@ describe('create()', () => {
       },
     });
     expect(result).toEqual(expectedResult);
-    expect(savedObjectsClient.create).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "action",
-      Object {
-        "actionTypeConfig": Object {},
-        "actionTypeConfigSecrets": Object {},
-        "actionTypeId": "my-action-type",
-        "description": "my description",
-      },
-      Object {
-        "migrationVersion": Object {},
-        "references": Array [],
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "action",
+  Object {
+    "actionTypeConfig": Object {},
+    "actionTypeConfigSecrets": Object {},
+    "actionTypeId": "my-action-type",
+    "description": "my description",
+  },
+  Object {
+    "migrationVersion": Object {},
+    "references": Array [],
+  },
+]
 `);
   });
 
@@ -170,32 +161,23 @@ describe('create()', () => {
       },
     });
     expect(result).toEqual(expectedResult);
-    expect(savedObjectsClient.create).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "action",
-      Object {
-        "actionTypeConfig": Object {
-          "a": true,
-          "c": true,
-        },
-        "actionTypeConfigSecrets": Object {
-          "b": true,
-        },
-        "actionTypeId": "my-action-type",
-        "description": "my description",
-      },
-      undefined,
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
+    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "action",
+  Object {
+    "actionTypeConfig": Object {
+      "a": true,
+      "c": true,
     },
-  ],
-}
+    "actionTypeConfigSecrets": Object {
+      "b": true,
+    },
+    "actionTypeId": "my-action-type",
+    "description": "my description",
+  },
+  undefined,
+]
 `);
   });
 });
@@ -216,21 +198,12 @@ describe('get()', () => {
     savedObjectsClient.get.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.get({ id: '1' });
     expect(result).toEqual(expectedResult);
-    expect(savedObjectsClient.get).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "action",
-      "1",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "action",
+  "1",
+]
 `);
   });
 });
@@ -258,22 +231,13 @@ describe('find()', () => {
     savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.find({});
     expect(result).toEqual(expectedResult);
-    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "type": "action",
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "type": "action",
+  },
+]
 `);
   });
 });
@@ -289,21 +253,12 @@ describe('delete()', () => {
     savedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
-    expect(savedObjectsClient.delete).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "action",
-      "1",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+    expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "action",
+  "1",
+]
 `);
   });
 });
@@ -337,28 +292,19 @@ describe('update()', () => {
       options: {},
     });
     expect(result).toEqual(expectedResult);
-    expect(savedObjectsClient.update).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "action",
-      "my-action",
-      Object {
-        "actionTypeConfig": Object {},
-        "actionTypeConfigSecrets": Object {},
-        "actionTypeId": "my-action-type",
-        "description": "my description",
-      },
-      Object {},
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "action",
+  "my-action",
+  Object {
+    "actionTypeConfig": Object {},
+    "actionTypeConfigSecrets": Object {},
+    "actionTypeId": "my-action-type",
+    "description": "my description",
+  },
+  Object {},
+]
 `);
   });
 
@@ -449,33 +395,24 @@ describe('update()', () => {
       options: {},
     });
     expect(result).toEqual(expectedResult);
-    expect(savedObjectsClient.update).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "action",
-      "my-action",
-      Object {
-        "actionTypeConfig": Object {
-          "a": true,
-          "c": true,
-        },
-        "actionTypeConfigSecrets": Object {
-          "b": true,
-        },
-        "actionTypeId": "my-action-type",
-        "description": "my description",
-      },
-      Object {},
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "action",
+  "my-action",
+  Object {
+    "actionTypeConfig": Object {
+      "a": true,
+      "c": true,
     },
-  ],
-}
+    "actionTypeConfigSecrets": Object {
+      "b": true,
+    },
+    "actionTypeId": "my-action-type",
+    "description": "my description",
+  },
+  Object {},
+]
 `);
   });
 });

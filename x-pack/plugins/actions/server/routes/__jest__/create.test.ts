@@ -42,39 +42,30 @@ it('creates an action with proper parameters', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
-  expect(actionsClient.create).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "data": Object {
-          "actionTypeConfig": Object {
-            "foo": true,
-          },
-          "actionTypeId": "abc",
-          "description": "My description",
-        },
-        "options": Object {
-          "migrationVersion": Object {
-            "abc": "1.2.3",
-          },
-          "references": Array [
-            Object {
-              "id": "234",
-              "name": "ref_0",
-              "type": "bcd",
-            },
-          ],
-        },
+  expect(actionsClient.create).toHaveBeenCalledTimes(1);
+  expect(actionsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "data": Object {
+      "actionTypeConfig": Object {
+        "foo": true,
       },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
+      "actionTypeId": "abc",
+      "description": "My description",
     },
-  ],
-}
+    "options": Object {
+      "migrationVersion": Object {
+        "abc": "1.2.3",
+      },
+      "references": Array [
+        Object {
+          "id": "234",
+          "name": "ref_0",
+          "type": "bcd",
+        },
+      ],
+    },
+  },
+]
 `);
 });

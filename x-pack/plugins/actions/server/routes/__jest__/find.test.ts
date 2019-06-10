@@ -33,34 +33,25 @@ it('sends proper arguments to action find function', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
-  expect(actionsClient.find).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "options": Object {
-          "defaultSearchOperator": "AND",
-          "fields": Array [
-            "description",
-          ],
-          "hasReference": undefined,
-          "page": 1,
-          "perPage": 1,
-          "search": "text*",
-          "searchFields": Array [
-            "description",
-          ],
-          "sortField": "description",
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
+  expect(actionsClient.find).toHaveBeenCalledTimes(1);
+  expect(actionsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "options": Object {
+      "defaultSearchOperator": "AND",
+      "fields": Array [
+        "description",
+      ],
+      "hasReference": undefined,
+      "page": 1,
+      "perPage": 1,
+      "search": "text*",
+      "searchFields": Array [
+        "description",
+      ],
+      "sortField": "description",
     },
-  ],
-}
+  },
+]
 `);
 });

@@ -41,21 +41,12 @@ test('calls get with proper parameters', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual(mockedAlert);
-  expect(alertsClient.get).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "id": "1",
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+  expect(alertsClient.get).toHaveBeenCalledTimes(1);
+  expect(alertsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+  },
+]
 `);
 });

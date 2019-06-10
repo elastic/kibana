@@ -25,17 +25,6 @@ it('calls the list function', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
-  expect(actionTypeRegistry.list).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+  expect(actionTypeRegistry.list).toHaveBeenCalledTimes(1);
+  expect(actionTypeRegistry.list.mock.calls[0]).toMatchInlineSnapshot(`Array []`);
 });

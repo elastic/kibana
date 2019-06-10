@@ -44,27 +44,18 @@ beforeEach(() => jest.resetAllMocks());
 test('calls fireAction per selected action', async () => {
   const fireHandler = createFireHandler(createFireHandlerParams);
   await fireHandler('default', {}, {});
-  expect(createFireHandlerParams.fireAction).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "id": "1",
-        "params": Object {
-          "contextVal": "My  goes here",
-          "foo": true,
-          "stateVal": "My  goes here",
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
+  expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
+  expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+    "params": Object {
+      "contextVal": "My  goes here",
+      "foo": true,
+      "stateVal": "My  goes here",
     },
-  ],
-}
+  },
+]
 `);
 });
 
@@ -77,54 +68,36 @@ test('limits fireAction per action group', async () => {
 test('context attribute gets parameterized', async () => {
   const fireHandler = createFireHandler(createFireHandlerParams);
   await fireHandler('default', { value: 'context-val' }, {});
-  expect(createFireHandlerParams.fireAction).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "id": "1",
-        "params": Object {
-          "contextVal": "My context-val goes here",
-          "foo": true,
-          "stateVal": "My  goes here",
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
+  expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
+  expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+    "params": Object {
+      "contextVal": "My context-val goes here",
+      "foo": true,
+      "stateVal": "My  goes here",
     },
-  ],
-}
+  },
+]
 `);
 });
 
 test('state attribute gets parameterized', async () => {
   const fireHandler = createFireHandler(createFireHandlerParams);
   await fireHandler('default', {}, { value: 'state-val' });
-  expect(createFireHandlerParams.fireAction).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "id": "1",
-        "params": Object {
-          "contextVal": "My  goes here",
-          "foo": true,
-          "stateVal": "My state-val goes here",
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
+  expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
+  expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+    "params": Object {
+      "contextVal": "My  goes here",
+      "foo": true,
+      "stateVal": "My state-val goes here",
     },
-  ],
-}
+  },
+]
 `);
 });
 

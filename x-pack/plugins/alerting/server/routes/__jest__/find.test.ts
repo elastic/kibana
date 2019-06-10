@@ -31,34 +31,25 @@ test('sends proper arguments to alert find function', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual([]);
-  expect(alertsClient.find).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "options": Object {
-          "defaultSearchOperator": "AND",
-          "fields": Array [
-            "description",
-          ],
-          "hasReference": undefined,
-          "page": 1,
-          "perPage": 1,
-          "search": "text*",
-          "searchFields": Array [
-            "description",
-          ],
-          "sortField": "description",
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
+  expect(alertsClient.find).toHaveBeenCalledTimes(1);
+  expect(alertsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "options": Object {
+      "defaultSearchOperator": "AND",
+      "fields": Array [
+        "description",
+      ],
+      "hasReference": undefined,
+      "page": 1,
+      "perPage": 1,
+      "search": "text*",
+      "searchFields": Array [
+        "description",
+      ],
+      "sortField": "description",
     },
-  ],
-}
+  },
+]
 `);
 });

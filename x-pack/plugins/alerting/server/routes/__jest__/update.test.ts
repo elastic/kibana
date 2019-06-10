@@ -56,36 +56,27 @@ test('calls the update function with proper parameters', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual(mockedResponse);
-  expect(alertsClient.update).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "data": Object {
-          "actions": Array [
-            Object {
-              "group": "default",
-              "id": "2",
-              "params": Object {
-                "baz": true,
-              },
-            },
-          ],
-          "alertTypeParams": Object {
-            "otherField": false,
+  expect(alertsClient.update).toHaveBeenCalledTimes(1);
+  expect(alertsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "data": Object {
+      "actions": Array [
+        Object {
+          "group": "default",
+          "id": "2",
+          "params": Object {
+            "baz": true,
           },
-          "interval": 12000,
         },
-        "id": "1",
+      ],
+      "alertTypeParams": Object {
+        "otherField": false,
       },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
+      "interval": 12000,
     },
-  ],
-}
+    "id": "1",
+  },
+]
 `);
 });

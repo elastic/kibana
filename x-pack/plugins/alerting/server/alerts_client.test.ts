@@ -9,10 +9,14 @@ import { SavedObjectsClientMock } from '../../../../src/legacy/server/saved_obje
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 
+const taskManager = taskManagerMock.create();
+const alertTypeRegistry = alertTypeRegistryMock.create();
+const savedObjectsClient = SavedObjectsClientMock.create();
+
 const alertsClientParams = {
-  alertTypeRegistry: alertTypeRegistryMock.create(),
-  savedObjectsClient: SavedObjectsClientMock.create(),
-  taskManager: taskManagerMock.create(),
+  taskManager,
+  alertTypeRegistry,
+  savedObjectsClient,
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -50,7 +54,7 @@ describe('create()', () => {
   test('creates an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
-    alertsClientParams.savedObjectsClient.create.mockResolvedValueOnce({
+    savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -77,7 +81,7 @@ describe('create()', () => {
         },
       ],
     });
-    alertsClientParams.taskManager.schedule.mockResolvedValueOnce({
+    taskManager.schedule.mockResolvedValueOnce({
       id: 'task-123',
       taskType: 'alerting:123',
       sequenceNumber: 1,
@@ -89,7 +93,7 @@ describe('create()', () => {
       state: {},
       params: {},
     });
-    alertsClientParams.savedObjectsClient.update.mockResolvedValueOnce({
+    savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -124,100 +128,75 @@ Object {
   "scheduledTaskId": "task-123",
 }
 `);
-    expect(alertsClientParams.savedObjectsClient.create).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "alert",
-      Object {
-        "actions": Array [
-          Object {
-            "actionRef": "action_0",
-            "group": "default",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ],
-        "alertTypeId": "123",
-        "alertTypeParams": Object {
-          "bar": true,
-        },
-        "interval": 10000,
-      },
-      Object {
-        "references": Array [
-          Object {
-            "id": "1",
-            "name": "action_0",
-            "type": "action",
-          },
-        ],
-      },
-    ],
-  ],
-  "results": Array [
+    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.create.mock.calls[0]).toHaveLength(3);
+    expect(savedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(savedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
+Object {
+  "actions": Array [
     Object {
-      "type": "return",
-      "value": Promise {},
+      "actionRef": "action_0",
+      "group": "default",
+      "params": Object {
+        "foo": true,
+      },
+    },
+  ],
+  "alertTypeId": "123",
+  "alertTypeParams": Object {
+    "bar": true,
+  },
+  "interval": 10000,
+}
+`);
+    expect(savedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+Object {
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "action_0",
+      "type": "action",
     },
   ],
 }
 `);
-    expect(alertsClientParams.taskManager.schedule).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "params": Object {
-          "alertId": "1",
-        },
-        "scope": Array [
-          "alerting",
-        ],
-        "state": Object {
-          "previousRange": Object {
-            "from": 2019-02-12T21:01:22.479Z,
-            "to": 2019-02-12T21:01:22.479Z,
-          },
-          "scheduledRunAt": 2019-02-12T21:01:22.479Z,
-        },
-        "taskType": "alerting:123",
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
+    expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "params": Object {
+      "alertId": "1",
     },
-  ],
+    "scope": Array [
+      "alerting",
+    ],
+    "state": Object {
+      "previousRange": Object {
+        "from": 2019-02-12T21:01:22.479Z,
+        "to": 2019-02-12T21:01:22.479Z,
+      },
+      "scheduledRunAt": 2019-02-12T21:01:22.479Z,
+    },
+    "taskType": "alerting:123",
+  },
+]
+`);
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
+    expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
+    expect(savedObjectsClient.update.mock.calls[0][1]).toEqual('1');
+    expect(savedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+Object {
+  "scheduledTaskId": "task-123",
 }
 `);
-    expect(alertsClientParams.savedObjectsClient.update).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "alert",
-      "1",
-      Object {
-        "scheduledTaskId": "task-123",
-      },
-      Object {
-        "references": Array [
-          Object {
-            "id": "1",
-            "name": "action_0",
-            "type": "action",
-          },
-        ],
-      },
-    ],
-  ],
-  "results": Array [
+    expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+Object {
+  "references": Array [
     Object {
-      "type": "return",
-      "value": Promise {},
+      "id": "1",
+      "name": "action_0",
+      "type": "action",
     },
   ],
 }
@@ -227,17 +206,17 @@ Object {
   test('throws error if create saved object fails', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
-    alertsClientParams.savedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
+    savedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
-    expect(alertsClientParams.taskManager.schedule).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
   test('attempts to remove saved object if scheduling failed', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
-    alertsClientParams.savedObjectsClient.create.mockResolvedValueOnce({
+    savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -264,33 +243,24 @@ Object {
         },
       ],
     });
-    alertsClientParams.taskManager.schedule.mockRejectedValueOnce(new Error('Test failure'));
-    alertsClientParams.savedObjectsClient.delete.mockResolvedValueOnce({});
+    taskManager.schedule.mockRejectedValueOnce(new Error('Test failure'));
+    savedObjectsClient.delete.mockResolvedValueOnce({});
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
-    expect(alertsClientParams.savedObjectsClient.delete).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "alert",
-      "1",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+    expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "alert",
+  "1",
+]
 `);
   });
 
   test('throws an error if alert type not registerd', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
-    alertsClientParams.alertTypeRegistry.get.mockImplementation(() => {
+    alertTypeRegistry.get.mockImplementation(() => {
       throw new Error('Invalid type');
     });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -302,7 +272,7 @@ Object {
 describe('get()', () => {
   test('calls saved objects client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    alertsClientParams.savedObjectsClient.get.mockResolvedValueOnce({
+    savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -349,27 +319,18 @@ Object {
   "interval": 10000,
 }
 `);
-    expect(alertsClientParams.savedObjectsClient.get).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "alert",
-      "1",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "alert",
+  "1",
+]
 `);
   });
 
   test(`throws an error when references aren't found`, async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    alertsClientParams.savedObjectsClient.get.mockResolvedValueOnce({
+    savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -399,7 +360,7 @@ Object {
 describe('find()', () => {
   test('calls saved objects client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    alertsClientParams.savedObjectsClient.find.mockResolvedValueOnce({
+    savedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
       per_page: 10,
       page: 1,
@@ -455,22 +416,13 @@ Array [
   },
 ]
 `);
-    expect(alertsClientParams.savedObjectsClient.find).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "type": "alert",
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "type": "alert",
+  },
+]
 `);
   });
 });
@@ -478,7 +430,7 @@ Array [
 describe('delete()', () => {
   test('successfully removes an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    alertsClientParams.savedObjectsClient.get.mockResolvedValueOnce({
+    savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -506,10 +458,10 @@ describe('delete()', () => {
         },
       ],
     });
-    alertsClientParams.savedObjectsClient.delete.mockResolvedValueOnce({
+    savedObjectsClient.delete.mockResolvedValueOnce({
       success: true,
     });
-    alertsClientParams.taskManager.remove.mockResolvedValueOnce({
+    taskManager.remove.mockResolvedValueOnce({
       index: '.task_manager',
       id: 'task-123',
       sequenceNumber: 1,
@@ -522,36 +474,18 @@ Object {
   "success": true,
 }
 `);
-    expect(alertsClientParams.savedObjectsClient.delete).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "alert",
-      "1",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+    expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "alert",
+  "1",
+]
 `);
-    expect(alertsClientParams.taskManager.remove).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "task-123",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+    expect(taskManager.remove).toHaveBeenCalledTimes(1);
+    expect(taskManager.remove.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "task-123",
+]
 `);
   });
 });
@@ -559,7 +493,7 @@ Object {
 describe('update()', () => {
   test('updates given parameters', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    alertsClientParams.savedObjectsClient.update.mockResolvedValueOnce({
+    savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -624,45 +558,37 @@ Object {
   "interval": 10000,
 }
 `);
-    expect(alertsClientParams.savedObjectsClient.update).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "alert",
-      "1",
-      Object {
-        "actions": Array [
-          Object {
-            "actionRef": "action_0",
-            "group": "default",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ],
-        "alertTypeParams": Object {
-          "bar": true,
-        },
-        "interval": 10000,
-      },
-      Object {
-        "references": Array [
-          Object {
-            "id": "1",
-            "name": "action_0",
-            "type": "action",
-          },
-        ],
-        "version": "123",
-      },
-    ],
-  ],
-  "results": Array [
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
+    expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
+    expect(savedObjectsClient.update.mock.calls[0][1]).toEqual('1');
+    expect(savedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+Object {
+  "actions": Array [
     Object {
-      "type": "return",
-      "value": Promise {},
+      "actionRef": "action_0",
+      "group": "default",
+      "params": Object {
+        "foo": true,
+      },
     },
   ],
+  "alertTypeParams": Object {
+    "bar": true,
+  },
+  "interval": 10000,
+}
+`);
+    expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+Object {
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "action_0",
+      "type": "action",
+    },
+  ],
+  "version": "123",
 }
 `);
   });

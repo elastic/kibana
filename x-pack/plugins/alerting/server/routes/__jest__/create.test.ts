@@ -62,36 +62,27 @@ Object {
   "interval": 10000,
 }
 `);
-  expect(alertsClient.create).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "data": Object {
-          "actions": Array [
-            Object {
-              "group": "default",
-              "id": "2",
-              "params": Object {
-                "foo": true,
-              },
-            },
-          ],
-          "alertTypeId": "1",
-          "alertTypeParams": Object {
-            "bar": true,
+  expect(alertsClient.create).toHaveBeenCalledTimes(1);
+  expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "data": Object {
+      "actions": Array [
+        Object {
+          "group": "default",
+          "id": "2",
+          "params": Object {
+            "foo": true,
           },
-          "interval": 10000,
         },
+      ],
+      "alertTypeId": "1",
+      "alertTypeParams": Object {
+        "bar": true,
       },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
+      "interval": 10000,
     },
-  ],
-}
+  },
+]
 `);
 });

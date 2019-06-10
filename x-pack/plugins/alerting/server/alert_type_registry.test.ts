@@ -12,9 +12,11 @@ import { AlertTypeRegistry } from './alert_type_registry';
 import { SavedObjectsClientMock } from '../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 
+const taskManager = taskManagerMock.create();
+
 const alertTypeRegistryParams = {
+  taskManager,
   fireAction: jest.fn(),
-  taskManager: taskManagerMock.create(),
   savedObjectsClient: SavedObjectsClientMock.create(),
 };
 
@@ -42,31 +44,23 @@ describe('registry()', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getCreateTaskRunnerFunction } = require('./lib/get_create_task_runner_function');
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    getCreateTaskRunnerFunction.mockReturnValue(jest.fn());
     registry.register({
       id: 'test',
       description: 'Test',
       execute: jest.fn(),
     });
-    expect(alertTypeRegistryParams.taskManager.registerTaskDefinitions).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "alerting:test": Object {
-          "createTaskRunner": undefined,
-          "title": "Test",
-          "type": "alerting:test",
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
+    expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+    expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "alerting:test": Object {
+      "createTaskRunner": [MockFunction],
+      "title": "Test",
+      "type": "alerting:test",
     },
-  ],
-}
+  },
+]
 `);
     expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
     const firstCall = getCreateTaskRunnerFunction.mock.calls[0][0];

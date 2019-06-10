@@ -23,21 +23,12 @@ test('deletes an alert with proper parameters', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({});
-  expect(alertsClient.delete).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "id": "1",
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+  expect(alertsClient.delete).toHaveBeenCalledTimes(1);
+  expect(alertsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+  },
+]
 `);
 });

@@ -40,38 +40,29 @@ it('calls the update function with proper parameters', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
-  expect(actionsClient.update).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "data": Object {
-          "actionTypeConfig": Object {
-            "foo": true,
-          },
-          "actionTypeId": "abc",
-          "description": "My description",
-        },
-        "id": "1",
-        "options": Object {
-          "references": Array [
-            Object {
-              "id": "234",
-              "name": "ref_0",
-              "type": "bcd",
-            },
-          ],
-          "version": "2",
-        },
+  expect(actionsClient.update).toHaveBeenCalledTimes(1);
+  expect(actionsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "data": Object {
+      "actionTypeConfig": Object {
+        "foo": true,
       },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
+      "actionTypeId": "abc",
+      "description": "My description",
     },
-  ],
-}
+    "id": "1",
+    "options": Object {
+      "references": Array [
+        Object {
+          "id": "234",
+          "name": "ref_0",
+          "type": "bcd",
+        },
+      ],
+      "version": "2",
+    },
+  },
+]
 `);
 });

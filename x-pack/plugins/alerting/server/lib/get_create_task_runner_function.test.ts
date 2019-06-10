@@ -16,6 +16,8 @@ const mockedLastRunAt = new Date('2019-06-03T18:55:20.982Z');
   }
 };
 
+const savedObjectsClient = SavedObjectsClientMock.create();
+
 const getCreateTaskRunnerFunctionParams = {
   alertType: {
     id: 'test',
@@ -23,7 +25,7 @@ const getCreateTaskRunnerFunctionParams = {
     execute: jest.fn(),
   },
   fireAction: jest.fn(),
-  savedObjectsClient: SavedObjectsClientMock.create(),
+  savedObjectsClient,
 };
 
 const mockedTaskInstance = {
@@ -73,9 +75,7 @@ beforeEach(() => jest.resetAllMocks());
 
 test('successfully executes the task', async () => {
   const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
-  getCreateTaskRunnerFunctionParams.savedObjectsClient.get.mockResolvedValueOnce(
-    mockedAlertTypeSavedObject
-  );
+  savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
   const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
   const runnerResult = await runner.run();
   expect(runnerResult).toMatchInlineSnapshot(`
@@ -92,32 +92,23 @@ Object {
   },
 }
 `);
-  expect(getCreateTaskRunnerFunctionParams.alertType.execute).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "params": Object {
-          "bar": true,
-        },
-        "range": Object {
-          "from": 2019-06-03T18:55:10.983Z,
-          "to": 2019-06-03T18:55:20.982Z,
-        },
-        "services": Object {
-          "alertInstanceFactory": [Function],
-        },
-        "state": Object {},
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
+  expect(getCreateTaskRunnerFunctionParams.alertType.execute).toHaveBeenCalledTimes(1);
+  expect(getCreateTaskRunnerFunctionParams.alertType.execute.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "params": Object {
+      "bar": true,
     },
-  ],
-}
+    "range": Object {
+      "from": 2019-06-03T18:55:10.983Z,
+      "to": 2019-06-03T18:55:20.982Z,
+    },
+    "services": Object {
+      "alertInstanceFactory": [Function],
+    },
+    "state": Object {},
+  },
+]
 `);
 });
 
@@ -128,30 +119,19 @@ test('fireAction is called per alert instance that fired', async () => {
     }
   );
   const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
-  getCreateTaskRunnerFunctionParams.savedObjectsClient.get.mockResolvedValueOnce(
-    mockedAlertTypeSavedObject
-  );
+  savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
   const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
   await runner.run();
-  expect(getCreateTaskRunnerFunctionParams.fireAction).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "id": "1",
-        "params": Object {
-          "foo": true,
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
+  expect(getCreateTaskRunnerFunctionParams.fireAction).toHaveBeenCalledTimes(1);
+  expect(getCreateTaskRunnerFunctionParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+    "params": Object {
+      "foo": true,
     },
-  ],
-}
+  },
+]
 `);
 });
 
@@ -162,9 +142,7 @@ test('persists alertInstances passed in from state, only if they fire', async ()
     }
   );
   const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
-  getCreateTaskRunnerFunctionParams.savedObjectsClient.get.mockResolvedValueOnce(
-    mockedAlertTypeSavedObject
-  );
+  savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
   const runner = createTaskRunner({
     taskInstance: {
       ...mockedTaskInstance,

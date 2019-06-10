@@ -38,55 +38,37 @@ describe('register()', () => {
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
-    expect(mockTaskManager.registerTaskDefinitions).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "actions:my-action-type": Object {
-          "createTaskRunner": [MockFunction],
-          "title": "My action type",
-          "type": "actions:my-action-type",
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
+    expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "actions:my-action-type": Object {
+      "createTaskRunner": [MockFunction],
+      "title": "My action type",
+      "type": "actions:my-action-type",
     },
-  ],
-}
+  },
+]
 `);
-    expect(getCreateTaskRunnerFunction).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "actionType": Object {
-          "executor": [MockFunction],
-          "id": "my-action-type",
-          "name": "My action type",
-        },
-        "encryptedSavedObjectsPlugin": Object {
-          "getDecryptedAsInternalUser": [MockFunction],
-          "isEncryptionError": [MockFunction],
-          "registerType": [MockFunction],
-        },
-        "services": Object {
-          "log": [MockFunction],
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": [MockFunction],
+    expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
+    expect(getCreateTaskRunnerFunction.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "actionType": Object {
+      "executor": [MockFunction],
+      "id": "my-action-type",
+      "name": "My action type",
     },
-  ],
-}
+    "encryptedSavedObjectsPlugin": Object {
+      "getDecryptedAsInternalUser": [MockFunction],
+      "isEncryptionError": [MockFunction],
+      "registerType": [MockFunction],
+    },
+    "services": Object {
+      "log": [MockFunction],
+    },
+  },
+]
 `);
   });
 

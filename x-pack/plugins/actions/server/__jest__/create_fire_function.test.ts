@@ -38,52 +38,34 @@ describe('fire()', () => {
       params: { baz: false },
       namespace: 'abc',
     });
-    expect(mockTaskManager.schedule).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "params": Object {
-          "actionTypeParams": Object {
-            "baz": false,
-          },
-          "id": "123",
-          "namespace": "abc",
-        },
-        "scope": Array [
-          "alerting",
-        ],
-        "state": Object {},
-        "taskType": "actions:mock-action",
+    expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "params": Object {
+      "actionTypeParams": Object {
+        "baz": false,
       },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
+      "id": "123",
+      "namespace": "abc",
     },
-  ],
-}
+    "scope": Array [
+      "alerting",
+    ],
+    "state": Object {},
+    "taskType": "actions:mock-action",
+  },
+]
 `);
-    expect(savedObjectsClient.get).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "action",
-      "123",
-      Object {
-        "namespace": "abc",
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  "action",
+  "123",
+  Object {
+    "namespace": "abc",
+  },
+]
 `);
   });
 });

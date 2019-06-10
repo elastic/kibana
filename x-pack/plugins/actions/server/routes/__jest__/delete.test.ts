@@ -25,21 +25,12 @@ it('deletes an action with proper parameters', async () => {
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual({ success: true });
-  expect(actionsClient.delete).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "id": "1",
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
+  expect(actionsClient.delete).toHaveBeenCalledTimes(1);
+  expect(actionsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+  },
+]
 `);
 });
