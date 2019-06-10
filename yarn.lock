@@ -26157,10 +26157,10 @@ tinygradient@0.3.0:
   dependencies:
     tinycolor2 "~1.0.0"
 
-tinymath@1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/tinymath/-/tinymath-1.1.1.tgz#67f42ee0bb351508fe3a9ce4cb8db019ac4500ca"
-  integrity sha512-dpnNUQvyO3AKvgJ5AtblOYuM/SJoSyjvhM7pstKzkVKUBRPMaSOi0+8h/QXMlfnOVFWV0qSpfxSAUAHKZ3XN2g==
+tinymath@1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/tinymath/-/tinymath-1.2.1.tgz#f97ed66c588cdbf3c19dfba2ae266ee323db7e47"
+  integrity sha512-8CYutfuHR3ywAJus/3JUhaJogZap1mrUQGzNxdBiQDhP3H0uFdQenvaXvqI8lMehX4RsanRZzxVfjMBREFdQaA==
 
 tinyqueue@^2.0.0:
   version "2.0.2"
