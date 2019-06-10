@@ -86,12 +86,35 @@ describe('new_filter_manager', () => {
     filterManager.removeAll();
   });
 
-  test('should return observable', () => {
-    // expect(true).toBeTruthy();
-    updateSubscription = filterManager.getUpdates$().subscribe(updateListener);
-    fetchSubscription = filterManager.getUpdates$().subscribe(updateListener);
-    expect(updateSubscription).toBeInstanceOf(Subscription);
-    expect(fetchSubscription).toBeInstanceOf(Subscription);
+  describe('observing', () => {
+    test('should return observable', () => {
+      updateSubscription = filterManager.getUpdates$().subscribe(updateListener);
+      fetchSubscription = filterManager.getUpdates$().subscribe(() => {});
+      expect(updateSubscription).toBeInstanceOf(Subscription);
+      expect(fetchSubscription).toBeInstanceOf(Subscription);
+    });
+
+    test('should observe app state', done => {
+      updateSubscription = filterManager.getUpdates$().subscribe(() => {
+        expect(filterManager.getAppFilters()).toHaveLength(1);
+        updateSubscription && updateSubscription.unsubscribe();
+        done();
+      });
+
+      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      appStateStub.filters.push(f1);
+    });
+
+    test('should observe global state', done => {
+      updateSubscription = filterManager.getUpdates$().subscribe(() => {
+        expect(filterManager.getGlobalFilters()).toHaveLength(1);
+        updateSubscription && updateSubscription.unsubscribe();
+        done();
+      });
+
+      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+      globalStateStub.filters.push(f1);
+    });
   });
 
   describe('get \\ set filters', () => {
