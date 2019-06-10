@@ -30,6 +30,7 @@ export function init(server: Legacy.Server) {
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'action',
     attributesToEncrypt: new Set(['actionTypeConfigSecrets']),
+    attributesToExcludeFromAAD: new Set(['description']),
   });
 
   const { taskManager } = server;

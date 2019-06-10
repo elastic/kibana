@@ -7,6 +7,8 @@
 import expect from '@kbn/expect';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
+export const ES_ARCHIVER_ACTION_ID = '19cfba7c-711a-4170-8590-9a99a281e85c';
+
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
@@ -17,6 +19,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   const esTestIndexName = '.kibaka-alerting-test-data';
 
   describe('actions', () => {
+    beforeEach(() => esArchiver.load('actions/basic'));
+    afterEach(() => esArchiver.unload('actions/basic'));
+
     before(async () => {
       await es.indices.create({
         index: esTestIndexName,
@@ -45,16 +50,12 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           },
         },
       });
-      await esArchiver.load('actions/basic');
     });
-    after(async () => {
-      await esArchiver.unload('actions/basic');
-      await es.indices.delete({ index: esTestIndexName });
-    });
+    after(() => es.indices.delete({ index: esTestIndexName }));
 
     it('decrypts attributes and joins on actionTypeConfig when firing', async () => {
       await supertest
-        .post(`/api/action/9597aa29-5d74-485b-af1d-4b7fdfd079e4/fire`)
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/fire`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -105,6 +106,84 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           encrypted: 'This value should be encrypted',
         },
         reference: 'actions-fire-1',
+        source: 'action:test.index-record',
+      });
+    });
+
+    it('encrypted attributes still available after update', async () => {
+      const { body: updatedAction } = await supertest
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'My action updated',
+            actionTypeId: 'test.index-record',
+          },
+        })
+        .expect(200);
+      expect(updatedAction).to.eql({
+        id: ES_ARCHIVER_ACTION_ID,
+        type: 'action',
+        updated_at: updatedAction.updated_at,
+        version: updatedAction.version,
+        references: [],
+        attributes: {
+          description: 'My action updated',
+          actionTypeId: 'test.index-record',
+        },
+      });
+      await supertest
+        .post(`/api/action/${ES_ARCHIVER_ACTION_ID}/fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            index: esTestIndexName,
+            reference: 'actions-fire-2',
+            message: 'Testing 123',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            success: true,
+          });
+        });
+      const indexedRecord = await retry.tryForTime(5000, async () => {
+        const searchResult = await es.search({
+          index: esTestIndexName,
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      source: 'action:test.index-record',
+                    },
+                  },
+                  {
+                    term: {
+                      reference: 'actions-fire-2',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        expect(searchResult.hits.total.value).to.eql(1);
+        return searchResult.hits.hits[0];
+      });
+      expect(indexedRecord._source).to.eql({
+        params: {
+          index: esTestIndexName,
+          reference: 'actions-fire-2',
+          message: 'Testing 123',
+        },
+        config: {
+          unencrypted: `This value shouldn't get encrypted`,
+          encrypted: 'This value should be encrypted',
+        },
+        reference: 'actions-fire-2',
         source: 'action:test.index-record',
       });
     });

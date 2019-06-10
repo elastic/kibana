@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { getTestAlertData, setupEsTestIndex, destroyEsTestIndex } from './utils';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { ES_ARCHIVER_ACTION_ID } from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: KibanaFunctionalTestDefaultProviders) {
@@ -51,7 +52,7 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
             actions: [
               {
                 group: 'default',
-                id: '9597aa29-5d74-485b-af1d-4b7fdfd079e4',
+                id: ES_ARCHIVER_ACTION_ID,
                 params: {
                   index: esTestIndexName,
                   reference: 'create-test-1',
