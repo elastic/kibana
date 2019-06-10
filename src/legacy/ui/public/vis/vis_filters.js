@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { pushFilterBarFilters } from '../filter_manager/push_filters';
+import { pushFilterBarFilters } from './push_filters';
 import { FilterBarQueryFilterProvider } from '../filter_manager/query_filter';
 import { onBrushEvent } from '../utils/brush_event';
 
