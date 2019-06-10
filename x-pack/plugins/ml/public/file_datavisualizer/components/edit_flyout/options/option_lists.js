@@ -13,6 +13,7 @@ export const FORMAT_OPTIONS = [
 ];
 
 export const TIMESTAMP_OPTIONS = [
+  'custom',
   'dd/MMM/yyyy:HH:mm:ss XX',
   'EEE MMM dd HH:mm zzz yyyy',
   'EEE MMM dd HH:mm:ss yyyy',

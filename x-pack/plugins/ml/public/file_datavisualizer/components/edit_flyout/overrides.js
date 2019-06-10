@@ -99,6 +99,7 @@ export class Overrides extends Component {
     return {
       originalColumnNames,
       customDelimiter: (customD === undefined) ? '' : customD,
+      customTimestampFormat: '',
       linesToSampleValid: true,
       overrides,
       ...state,
@@ -120,6 +121,9 @@ export class Overrides extends Component {
   applyOverrides = () => {
     const overrides = { ...this.state.overrides };
     overrides.delimiter = convertDelimiterBack(overrides.delimiter, this.state.customDelimiter);
+    if (overrides.timestampFormat === 'custom' && this.state.customTimestampFormat !== '') {
+      overrides.timestampFormat = this.state.customTimestampFormat;
+    }
 
     this.props.setOverrides(overrides);
   }
@@ -137,6 +141,10 @@ export class Overrides extends Component {
   onTimestampFormatChange = ([opt]) => {
     const timestampFormat = opt ? opt.label : '';
     this.setOverride({ timestampFormat });
+  }
+
+  onCustomTimestampFormatChange = (e) => {
+    this.setState({ customTimestampFormat: e.target.value });
   }
 
   onTimestampFieldChange = ([opt]) => {
@@ -199,6 +207,7 @@ export class Overrides extends Component {
     const { fields } = this.props;
     const {
       customDelimiter,
+      customTimestampFormat,
       originalColumnNames,
       linesToSampleValid,
       overrides,
@@ -375,6 +384,22 @@ export class Overrides extends Component {
             isClearable={false}
           />
         </EuiFormRow>
+        {
+          (timestampFormat === 'custom') &&
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.editFlyout.overrides.customTimestampFormatFormRowLabel"
+                defaultMessage="Custom timestamp format"
+              />
+            }
+          >
+            <EuiFieldText
+              value={customTimestampFormat}
+              onChange={this.onCustomTimestampFormatChange}
+            />
+          </EuiFormRow>
+        }
 
         <EuiFormRow
           label={
