@@ -63,6 +63,10 @@ const SettingsIcon = styled(EuiIcon)`
   cursor: pointer;
 `;
 
+const HiddenFlexItem = styled(EuiFlexItem)`
+  display: none;
+`;
+
 interface Props {
   associateNote: AssociateNote;
   createTimeline: CreateTimeline;
@@ -299,14 +303,14 @@ export class Properties extends React.PureComponent<Props, State> {
 
           {title != null && title.length
             ? usersViewing.map(user => (
-                <EuiFlexItem key={user}>
+                <HiddenFlexItem key={user}>
                   <EuiToolTip
                     data-test-subj="timeline-action-pin-tool-tip"
                     content={`${user} ${i18n.IS_VIEWING}`}
                   >
                     <Avatar data-test-subj="avatar" size="s" name={user} />
                   </EuiToolTip>
-                </EuiFlexItem>
+                </HiddenFlexItem>
               ))
             : null}
         </PropertiesRight>
