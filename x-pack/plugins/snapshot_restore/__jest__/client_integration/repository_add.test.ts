@@ -14,7 +14,7 @@ import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
 const { setup } = pageHelpers.repositoryAdd;
 const repositoryTypes = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];
 
-describe('<RepositoryAdd />', () => {
+describe.skip('<RepositoryAdd />', () => {
   let testBed: RepositoryAddTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();

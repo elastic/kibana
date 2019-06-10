@@ -15,7 +15,7 @@ import { REPOSITORY_EDIT } from './helpers/constant';
 const { setup } = pageHelpers.repositoryEdit;
 const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
 
-describe('<RepositoryEdit />', () => {
+describe.skip('<RepositoryEdit />', () => {
   let testBed: TestBed<RepositoryEditTestSubjects>;
   let testBedRepositoryAdd: TestBed<RepositoryAddTestSubjects>;
   const { server, httpRequestsMockHelpers } = setupEnvironment();

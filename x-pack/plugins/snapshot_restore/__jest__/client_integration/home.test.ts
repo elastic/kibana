@@ -21,7 +21,7 @@ import { REPOSITORY_NAME } from './helpers/constant';
 
 const { setup } = pageHelpers.home;
 
-describe('<SnapshotRestoreHome />', () => {
+describe.skip('<SnapshotRestoreHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: HomeTestBed;
 
