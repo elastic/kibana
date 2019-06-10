@@ -7,18 +7,18 @@
 import {
   BaseOptions,
   BulkCreateObject,
-  BulkGetObjects,
+  BulkGetObject,
   CreateOptions,
   FindOptions,
   SavedObjectAttributes,
-  SavedObjectsClient,
+  SavedObjectsClientContract,
   UpdateOptions,
-} from 'src/legacy/server/saved_objects/service/saved_objects_client';
+} from 'src/legacy/server/saved_objects';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SpacesService } from '../create_spaces_service';
 
 interface SpacesSavedObjectsClientOptions {
-  baseClient: SavedObjectsClient;
+  baseClient: SavedObjectsClientContract;
   request: any;
   spacesService: SpacesService;
   types: string[];
@@ -58,19 +58,19 @@ const throwErrorIfTypesContainsSpace = (types: string[]) => {
   }
 };
 
-export class SpacesSavedObjectsClient implements SavedObjectsClient {
-  public readonly errors: any;
-  private readonly client: SavedObjectsClient;
+export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
+  private readonly client: SavedObjectsClientContract;
   private readonly spaceId: string;
   private readonly types: string[];
+  public readonly errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SpacesSavedObjectsClientOptions) {
     const { baseClient, request, spacesService, types } = options;
 
-    this.errors = baseClient.errors;
     this.client = baseClient;
     this.spaceId = spacesService.getSpaceId(request);
     this.types = types;
+    this.errors = baseClient.errors;
   }
 
   /**
@@ -101,7 +101,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, extraDocumentProperties }]
+   * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @property {string} [options.namespace]
@@ -182,7 +182,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  public async bulkGet(objects: BulkGetObjects = [], options: BaseOptions = {}) {
+  public async bulkGet(objects: BulkGetObject[] = [], options: BaseOptions = {}) {
     throwErrorIfTypesContainsSpace(objects.map(object => object.type));
     throwErrorIfNamespaceSpecified(options);
 

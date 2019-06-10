@@ -112,7 +112,6 @@ export class IndexWorker extends AbstractWorker {
       stats: aggregateIndexStats(stats),
       cancelled,
     };
-    this.log.info(`Index worker finished with stats: ${JSON.stringify([...res.stats])}`);
     return res;
   }
 
@@ -128,6 +127,11 @@ export class IndexWorker extends AbstractWorker {
   }
 
   public async onJobCompleted(job: Job, res: IndexWorkerResult) {
+    if (res.cancelled) {
+      // Skip updating job progress if the job is done because of cancellation.
+      return;
+    }
+    this.log.info(`Index worker finished with stats: ${JSON.stringify([...res.stats])}`);
     await super.onJobCompleted(job, res);
     const { uri, revision } = job.payload;
     try {

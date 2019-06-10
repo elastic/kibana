@@ -10,7 +10,7 @@ import { createContext } from 'react';
 import { UptimeAppColors } from '../uptime_app';
 import { CONTEXT_DEFAULTS } from '../../common/constants';
 
-interface UMSettingsContext {
+export interface UMSettingsContext {
   absoluteStartDate: number;
   absoluteEndDate: number;
   autorefreshIsPaused: boolean;
@@ -19,6 +19,9 @@ interface UMSettingsContext {
   colors: UptimeAppColors;
   dateRangeStart: string;
   dateRangeEnd: string;
+  isApmAvailable: boolean;
+  isInfraAvailable: boolean;
+  isLogsAvailable: boolean;
   refreshApp: () => void;
   setHeadingText: (text: string) => void;
 }
@@ -53,6 +56,9 @@ const defaultContext: UMSettingsContext = {
   },
   dateRangeStart: DATE_RANGE_START,
   dateRangeEnd: DATE_RANGE_END,
+  isApmAvailable: true,
+  isInfraAvailable: true,
+  isLogsAvailable: true,
   refreshApp: () => {
     throw new Error('App refresh was not initialized, set it when you invoke the context');
   },

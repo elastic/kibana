@@ -41,7 +41,7 @@ import {
   upsertTimelineColumn,
 } from './helpers';
 import { timelineDefaults } from './model';
-import { TimelineById } from './reducer';
+import { TimelineById } from './types';
 
 const timelineByIdMock: TimelineById = {
   foo: {
@@ -171,6 +171,7 @@ describe('Timeline', () => {
         example: 'user-password-change',
         id: 'event.action',
         type: 'keyword',
+        aggregatable: true,
         width: DEFAULT_COLUMN_MIN_WIDTH,
       };
     });

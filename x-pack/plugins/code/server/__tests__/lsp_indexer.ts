@@ -202,11 +202,16 @@ describe('lsp_indexer unit tests', function(this: any) {
 
     // There are 22 files which are written in supported languages in the repo. 1 file + 1 symbol + 1 reference = 3 objects to
     // index for each file. Total doc indexed for these files should be 3 * 22 = 66.
-    // The rest 158 files will only be indexed for document. So the total number of index
-    // requests will be 66 + 158 = 224.
-    assert.ok(bulkSpy.calledOnce);
+    // The rest 158 files will only be indexed for document.
+    // There are also 10 binary files to be excluded.
+    // So the total number of index requests will be 66 + 158 - 10 = 214.
+    assert.strictEqual(bulkSpy.callCount, 5);
     assert.strictEqual(lspSendRequestSpy.callCount, 22);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 224 * 2);
+    let total = 0;
+    for (let i = 0; i < bulkSpy.callCount; i++) {
+      total += bulkSpy.getCall(i).args[0].body.length;
+    }
+    assert.strictEqual(total, 214 * 2);
     // @ts-ignore
   }).timeout(20000);
 
@@ -318,9 +323,13 @@ describe('lsp_indexer unit tests', function(this: any) {
     // 3 * 11 = 33. Also there are 15 files without supported language. Only one
     // document will be index for these files. So total index requests would be
     // 33 + 15 = 48.
-    assert.ok(bulkSpy.calledOnce);
+    assert.strictEqual(bulkSpy.callCount, 2);
     assert.strictEqual(lspSendRequestSpy.callCount, 11);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 48 * 2);
+    let total = 0;
+    for (let i = 0; i < bulkSpy.callCount; i++) {
+      total += bulkSpy.getCall(i).args[0].body.length;
+    }
+    assert.strictEqual(total, 48 * 2);
     // @ts-ignore
   }).timeout(20000);
 });

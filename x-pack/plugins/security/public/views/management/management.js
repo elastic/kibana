@@ -17,8 +17,22 @@ import { ROLES_PATH, USERS_PATH } from './management_urls';
 
 import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 
-routes.defaults(/\/management/, {
+routes.defaults(/^\/management\/security(\/|$)/, {
+  resolve: {
+    showLinks(kbnUrl, Promise, Private) {
+      const xpackInfo = Private(XPackInfoProvider);
+      if (!xpackInfo.get('features.security.showLinks')) {
+        toastNotifications.addDanger({
+          title: xpackInfo.get('features.security.linksMessage')
+        });
+        kbnUrl.redirect('/management');
+        return Promise.halt();
+      }
+    }
+  }
+}).defaults(/\/management/, {
   resolve: {
     securityManagementSection: function (ShieldUser, Private) {
       const xpackInfo = Private(XPackInfoProvider);

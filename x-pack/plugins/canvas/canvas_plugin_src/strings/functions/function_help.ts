@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AvailableFunctions, Function } from '../../functions/types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { AvailableFunctions } from '../../functions/types';
 import { UnionToIntersection } from '../../functions/types';
 
 import { help as all } from './all';
@@ -12,7 +13,6 @@ import { help as alterColumn } from './alterColumn';
 import { help as any } from './any';
 import { help as asFn } from './as';
 import { help as axisConfig } from './axisConfig';
-import { help as browser } from './browser';
 import { help as caseFn } from './case';
 import { help as clear } from './clear';
 import { help as columns } from './columns';
@@ -60,7 +60,6 @@ import { help as revealImage } from './revealImage';
 import { help as rounddate } from './rounddate';
 import { help as rowCount } from './rowCount';
 import { help as seriesStyle } from './seriesStyle';
-import { help as server } from './server';
 import { help as shape } from './shape';
 import { help as sort } from './sort';
 import { help as staticColumn } from './staticColumn';
@@ -76,7 +75,12 @@ import { help as urlparam } from './urlparam';
  * This type infers Function argument types.  This allows for validation that every
  * function argument has the correct help strings.
  */
-export type FunctionHelp<T> = T extends Function<infer Name, infer Arguments, infer Return>
+export type FunctionHelp<T> = T extends ExpressionFunction<
+  infer Name,
+  infer Context,
+  infer Arguments,
+  infer Return
+>
   ? {
       help: string;
       args: { [key in keyof Arguments]: string };
@@ -85,7 +89,12 @@ export type FunctionHelp<T> = T extends Function<infer Name, infer Arguments, in
 
 // This type infers a Function name and Arguments to ensure every Function is defined
 // in the `dict` and all Arguments have help strings.
-type FunctionHelpMap<T> = T extends Function<infer Name, infer Arguments, infer Return>
+type FunctionHelpMap<T> = T extends ExpressionFunction<
+  infer Name,
+  infer Context,
+  infer Arguments,
+  infer Return
+>
   ? { [key in Name]: FunctionHelp<T> }
   : never;
 
@@ -110,7 +119,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   any,
   as: asFn,
   axisConfig,
-  browser,
   case: caseFn,
   clear,
   columns,
@@ -158,7 +166,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   rounddate,
   rowCount,
   seriesStyle,
-  server,
   shape,
   sort,
   staticColumn,
