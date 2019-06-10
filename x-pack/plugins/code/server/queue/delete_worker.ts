@@ -75,15 +75,14 @@ export class DeleteWorker extends AbstractWorker {
     );
 
     try {
-      await deleteWorkspacePromise;
-
-      this.gitOps.cleanRepo(uri);
-
       await Promise.all([
-        deleteRepoPromise,
+        deleteWorkspacePromise,
         deleteSymbolESIndexPromise,
         deleteReferenceESIndexPromise,
       ]);
+
+      this.gitOps.cleanRepo(uri);
+      await deleteRepoPromise;
 
       // 4. Delete the document index and alias where the repository document and all status reside,
       // so that you won't be able to import the same repositories until they are
