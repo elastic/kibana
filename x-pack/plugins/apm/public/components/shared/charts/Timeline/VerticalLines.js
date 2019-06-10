@@ -5,19 +5,22 @@
  */
 
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import { XYPlot, VerticalGridLines } from 'react-vis';
-import { colors } from '../../../../style/variables';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
-export default class VerticalLines extends PureComponent {
+class VerticalLines extends PureComponent {
   render() {
+    const { traceRootDuration } = this.props;
     const {
       width,
       height,
       margins,
       xDomain,
-      tickValues,
-      xMax
+      tickValues
     } = this.props.plotValues;
+
+    const agentMarkTimes = this.props.agentMarks.map(({ us }) => us);
 
     return (
       <div
@@ -36,14 +39,33 @@ export default class VerticalLines extends PureComponent {
         >
           <VerticalGridLines
             tickValues={tickValues}
-            style={{ stroke: colors.gray5 }}
+            style={{ stroke: theme.euiColorLightestShade }}
           />
+
           <VerticalGridLines
-            tickValues={[xMax]}
-            style={{ stroke: colors.gray3 }}
+            tickValues={agentMarkTimes}
+            style={{ stroke: theme.euiColorMediumShade }}
           />
+
+          {traceRootDuration > 0 && (
+            <VerticalGridLines
+              tickValues={[traceRootDuration]}
+              style={{ stroke: theme.gray3euiColorMediumShade }}
+            />
+          )}
         </XYPlot>
       </div>
     );
   }
 }
+
+VerticalLines.propTypes = {
+  plotValues: PropTypes.object.isRequired,
+  agentMarks: PropTypes.array
+};
+
+VerticalLines.defaultProps = {
+  agentMarks: []
+};
+
+export default VerticalLines;

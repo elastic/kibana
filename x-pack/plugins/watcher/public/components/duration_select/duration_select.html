@@ -7,7 +7,7 @@
     min="0"
     required
     ng-model="durationSelect.size"
-    aria-label="Duration amount"
+    aria-label="{{ 'xpack.watcher.durationSelect.durationAmountAriaLabel' | i18n: { defaultMessage: 'Duration amount' } }}"
     aria-describedby="{{durationSelect.describedBy}}"
   >
 
@@ -18,7 +18,7 @@
     required
     ng-model="durationSelect.unit"
     ng-options="commonTimeUnit as timeUnit.labelPlural for (commonTimeUnit, timeUnit) in durationSelect.timeUnits"
-    aria-label="Duration time unit"
+    aria-label="{{ 'xpack.watcher.durationSelect.durationTimeUnitAriaLabel' | i18n: { defaultMessage: 'Duration time unit' } }}"
     aria-describedby="{{durationSelect.describedBy}}"
   ></select>
 <div>

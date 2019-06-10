@@ -1,0 +1,14 @@
+<div class="timCell col-md-12 col-sm-12 col-xs-12" timelion-grid timelion-grid-rows="1">
+  <div  chart="series" class="timChart" search="onSearch" interval="state.interval"></div>
+  <div class="timCell__actions">
+    <button
+      class="timCell__action"
+      ng-click="transient.fullscreen = false"
+      tooltip="{{ ::'timelion.fullscreen.exitTooltip' | i18n: { defaultMessage: 'Exit full screen' } }}"
+      tooltip-append-to-body="1"
+      aria-label="{{ ::'timelion.fullscreen.exitAriaLabel' | i18n: { defaultMessage: 'Exit full screen' } }}"
+    >
+      <span class="fa fa-compress"></span>
+    </button>
+  </div>
+</div>

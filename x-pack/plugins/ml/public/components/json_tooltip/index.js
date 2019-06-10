@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './json_tooltip';
+import './json_tooltip_directive';

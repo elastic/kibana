@@ -24,9 +24,7 @@ const LRU = require('lru-cache');
 
 const { isDirectory } = require('./get_path_type');
 
-const cache = process.env.KIBANA_RESOLVER_HARD_CACHE
-  ? new Map()
-  : new LRU({ max: 1000 });
+const cache = process.env.KIBANA_RESOLVER_HARD_CACHE ? new Map() : new LRU({ max: 1000 });
 
 function readShimNames(shimDirectory) {
   if (!isDirectory(shimDirectory)) {
@@ -47,12 +45,9 @@ function findRelativeWebpackShims(directory) {
   const ownShims = readShimNames(join(directory, 'webpackShims'));
 
   const parent = dirname(directory);
-  const parentShims =
-    parent !== directory ? findRelativeWebpackShims(parent) : [];
+  const parentShims = parent !== directory ? findRelativeWebpackShims(parent) : [];
 
-  const allShims = !ownShims.length
-    ? parentShims
-    : ownShims.concat(parentShims);
+  const allShims = !ownShims.length ? parentShims : ownShims.concat(parentShims);
 
   cache.set(directory, allShims);
   return allShims;

@@ -6,6 +6,4 @@
 
 
 
-import './styles/main.less';
 import './form_filter_input_directive';
-

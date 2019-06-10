@@ -13,7 +13,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 
 import { TimeBucketsCalcAutoIntervalProvider } from 'plugins/ml/util/ml_calc_auto_interval';
 import { inherits } from 'plugins/ml/util/inherits';
@@ -22,7 +22,7 @@ const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('w');    // Multiple units of week or longer converted to days for ES intervals.
 
 import { TimeBuckets } from 'ui/time_buckets';
-export function IntervalHelperProvider(Private, timefilter, config) {
+export function IntervalHelperProvider(Private, config) {
 
   const calcAuto = Private(TimeBucketsCalcAutoIntervalProvider);
   inherits(MlTimeBuckets, TimeBuckets);

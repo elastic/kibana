@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import { FieldFormat } from '../../../../../../../../src/ui/field_formats/field_format.js';
-import { FieldFormatsService } from '../../../../../../../../src/ui/field_formats/field_formats_service.js';
-import { createBytesFormat } from '../../../../../../../../src/core_plugins/kibana/common/field_formats/types/bytes.js';
-import { createNumberFormat } from '../../../../../../../../src/core_plugins/kibana/common/field_formats/types/number.js';
+import { FieldFormat } from '../../../../../../../../src/legacy/ui/field_formats/field_format.js';
+import { FieldFormatsService } from '../../../../../../../../src/legacy/ui/field_formats/field_formats_service.js';
+import { createBytesFormat } from '../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/bytes.js';
+import { createNumberFormat } from '../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/number.js';
 
 import { fieldFormatMapFactory } from '../field_format_map';
 
@@ -17,7 +17,7 @@ describe('field format map', function () {
   const indexPatternSavedObject = {
     id: 'logstash-*',
     type: 'index-pattern',
-    version: 4,
+    version: 'abc',
     attributes: {
       title: 'logstash-*',
       timeFieldName: '@timestamp',
@@ -28,7 +28,7 @@ describe('field format map', function () {
   };
   const configMock = {};
   configMock['format:defaultTypeMap'] = {
-    "number": { "id": "number", "params": {} }
+    'number': { 'id': 'number', 'params': {} }
   };
   configMock['format:number:defaultPattern'] = '0,0.[000]';
   const getConfig = (key) => configMock[key];

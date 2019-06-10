@@ -25,8 +25,7 @@ import { topologicallyBatchProjects } from '../utils/projects';
 import { ICommand } from './';
 
 export const RunCommand: ICommand = {
-  description:
-    'Run script defined in package.json in each package that contains that script.',
+  description: 'Run script defined in package.json in each package that contains that script.',
   name: 'run',
 
   async run(projects, projectGraph, { extraArgs }) {
@@ -41,11 +40,7 @@ export const RunCommand: ICommand = {
     const scriptArgs = extraArgs.slice(1);
 
     log.write(
-      chalk.bold(
-        `\nRunning script [${chalk.green(
-          scriptName
-        )}] in batched topological order\n`
-      )
+      chalk.bold(`\nRunning script [${chalk.green(scriptName)}] in batched topological order\n`)
     );
 
     await parallelizeBatches(batchedProjects, async pkg => {

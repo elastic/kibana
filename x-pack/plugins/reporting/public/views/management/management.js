@@ -5,6 +5,7 @@
  */
 
 import { management } from 'ui/management';
+import { i18n } from '@kbn/i18n';
 import routes from 'ui/routes';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
@@ -32,7 +33,9 @@ routes.defaults(/\/management/, {
 
         return kibanaManagementSection.register('reporting', {
           order: 15,
-          display: 'Reporting',
+          display: i18n.translate('xpack.reporting.management.reportingTitle', {
+            defaultMessage: 'Reporting'
+          }),
           url,
           tooltip
         });

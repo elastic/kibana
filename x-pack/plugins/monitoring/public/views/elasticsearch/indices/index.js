@@ -5,12 +5,14 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import { MonitoringViewBaseTableController } from '../../';
+import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchIndices } from '../../../components';
 import template from './index.html';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/elasticsearch/indices', {
   template,
@@ -21,7 +23,7 @@ uiRoutes.when('/elasticsearch/indices', {
     }
   },
   controllerAs: 'elasticsearchIndices',
-  controller: class ElasticsearchIndicesController extends MonitoringViewBaseTableController {
+  controller: class ElasticsearchIndicesController extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
@@ -33,7 +35,9 @@ uiRoutes.when('/elasticsearch/indices', {
       let showSystemIndices = features.isEnabled('showSystemIndices', false);
 
       super({
-        title: 'Elasticsearch - Indices',
+        title: i18n.translate('xpack.monitoring.elasticsearch.indices.routeTitle', {
+          defaultMessage: 'Elasticsearch - Indices'
+        }),
         storageKey: 'elasticsearch.indices',
         apiUrlFn: () => `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices?show_system_indices=${showSystemIndices}`,
         reactNodeId: 'elasticsearchIndicesReact',
@@ -43,6 +47,8 @@ uiRoutes.when('/elasticsearch/indices', {
         $scope,
         $injector
       });
+
+      this.isCcrEnabled = $scope.cluster.isCcrEnabled;
 
       // for binding
       const toggleShowSystemIndices = isChecked => {
@@ -60,12 +66,17 @@ uiRoutes.when('/elasticsearch/indices', {
 
       this.renderReact = ({ clusterStatus, indices }) => {
         super.renderReact(
-          <ElasticsearchIndices
-            clusterStatus={clusterStatus}
-            indices={indices}
-            showSystemIndices={showSystemIndices}
-            toggleShowSystemIndices={toggleShowSystemIndices}
-          />
+          <I18nContext>
+            <ElasticsearchIndices
+              clusterStatus={clusterStatus}
+              indices={indices}
+              showSystemIndices={showSystemIndices}
+              toggleShowSystemIndices={toggleShowSystemIndices}
+              sorting={this.sorting}
+              pagination={this.pagination}
+              onTableChange={this.onTableChange}
+            />
+          </I18nContext>
         );
       };
     }

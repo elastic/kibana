@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { inspectSettings } from '../../../server/lib/inspect_settings';
 
 describe('inspectSettings', function () {
@@ -27,7 +27,7 @@ describe('inspectSettings', function () {
 
   });
 
-  it('should break when unavailble info', function () {
+  it('should break when unavailable info', function () {
 
     const mockSettings = {
       isAvailable: () => false

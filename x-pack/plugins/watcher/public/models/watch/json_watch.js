@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import { BaseWatch } from './base_watch';
 import { WATCH_TYPES } from 'plugins/watcher/../common/constants';
 import defaultWatchJson from './default_watch.json';
+import { i18n } from '@kbn/i18n';
 
 /**
  * {@code JsonWatch} allows a user to create a Watch by writing the raw JSON.
@@ -34,9 +35,13 @@ export class JsonWatch extends BaseWatch {
   }
 
   static defaultWatchJson =  defaultWatchJson;
-  static typeName = 'Advanced Watch';
+  static typeName = i18n.translate('xpack.watcher.models.jsonWatch.typeName', {
+    defaultMessage: 'Advanced Watch'
+  });
   static iconClass = '';
-  static selectMessage = 'Set up a custom watch in raw JSON.';
+  static selectMessage = i18n.translate('xpack.watcher.models.jsonWatch.selectMessageText', {
+    defaultMessage: 'Set up a custom watch in raw JSON.'
+  });
   static isCreatable = true;
   static selectSortOrder = 100;
 }

@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import _ from 'lodash';
 
 /*
@@ -87,6 +88,7 @@ export function getReportCountsByParameter(callCluster, config, fields, withinDa
   }
 
   const params = {
+    rest_total_hits_as_int: true,
     index: `${reportingIndex}-*`,
     filterPath: ['hits.total'],
     body: {

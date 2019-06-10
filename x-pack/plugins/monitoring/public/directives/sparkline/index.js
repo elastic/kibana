@@ -10,10 +10,10 @@ import { uiModules } from 'ui/modules';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
 import moment from 'moment';
 import { formatMetric } from '../../lib/format_number';
+import { timefilter } from 'ui/timefilter';
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
 uiModule.directive('sparkline', ($injector) => {
-  const timefilter = $injector.get('timefilter');
   const config = $injector.get('config');
 
   const dateFormat = config.get('dateFormat');
@@ -27,10 +27,10 @@ uiModule.directive('sparkline', ($injector) => {
     link(scope, $elem) {
 
       function onBrush(xaxis) {
-        scope.$evalAsync(() => {
-          timefilter.time.from = moment(xaxis.from);
-          timefilter.time.to = moment(xaxis.to);
-          timefilter.time.mode = 'absolute';
+        timefilter.setTime({
+          from: moment(xaxis.from),
+          to: moment(xaxis.to),
+          mode: 'absolute'
         });
       }
 

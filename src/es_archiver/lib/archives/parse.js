@@ -22,15 +22,17 @@ import { PassThrough } from 'stream';
 
 import {
   createSplitStream,
-  createJsonParseStream,
-} from '../../../utils';
+  createReplaceStream,
+  createMapStream,
+} from '../../../legacy/utils';
 
 import { RECORD_SEPARATOR } from './constants';
 
 export function createParseArchiveStreams({ gzip = false } = {}) {
   return [
     gzip ? createGunzip() : new PassThrough(),
+    createReplaceStream('\r\n', '\n'),
     createSplitStream(RECORD_SEPARATOR),
-    createJsonParseStream(),
+    createMapStream(json => JSON.parse(json.trim())),
   ];
 }

@@ -13,18 +13,15 @@ export default async function ({ readConfigFile }) {
   return {
     ...functionalConfig,
     junit: {
-      reportName: 'X-Pack Chromium API Reporting Tests',
+      reportName: 'X-Pack Chromium Functional Reporting Tests',
     },
     testFiles: [require.resolve('../functional')],
     kbnTestServer: {
       ...functionalConfig.kbnTestServer,
       serverArgs: [
         ...functionalConfig.kbnTestServer.serverArgs,
+        '--xpack.reporting.csv.enablePanelActionDownload=true',
         `--xpack.reporting.capture.browser.type=chromium`,
-        // Jenkins agents take about 30 seconds to spin up chromium on a first run because of some fontconfig cache
-        // generation.
-        `--xpack.reporting.queue.timeout=60000`,
-        `--logging.verbose=true`,
       ],
     },
   };

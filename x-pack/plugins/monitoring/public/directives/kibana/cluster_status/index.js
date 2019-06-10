@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { ClusterStatus } from 'plugins/monitoring/components/kibana/cluster_status';
+import { I18nContext } from 'ui/i18n';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringClusterStatusKibana', () => {
@@ -17,8 +18,9 @@ uiModule.directive('monitoringClusterStatusKibana', () => {
       status: '=',
     },
     link(scope, $el) {
+      scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
       scope.$watch('status', status => {
-        render(<ClusterStatus stats={status} />, $el[0]);
+        render(<I18nContext><ClusterStatus stats={status} /></I18nContext>, $el[0]);
       });
     },
   };

@@ -9,6 +9,20 @@
     "totalShards": 10,
     "status": "green"
   },
+  "logs": {
+    "enabled": false,
+    "limit": 10,
+    "reason": {
+      "clusterExists": false,
+      "indexPatternExists": false,
+      "indexPatternInTimeRangeExists": false,
+      "typeExistsAtAnyTime": false,
+      "nodeExists": null,
+      "indexExists": false,
+      "typeExists": false
+    },
+    "logs": []
+  },
   "metrics": {
     "index_search_request_rate": [
       {
@@ -1096,8 +1110,7 @@
       "node": "xcP6ue7eRCieNNitFTT0EA",
       "relocating_node": null,
       "shard": 4,
-      "index": "avocado-tweets-2017.10.02",
-      "resolver": "xcP6ue7eRCieNNitFTT0EA"
+      "index": "avocado-tweets-2017.10.02"
     },
     {
       "state": "STARTED",
@@ -1105,8 +1118,7 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "relocating_node": null,
       "shard": 4,
-      "index": "avocado-tweets-2017.10.02",
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA"
+      "index": "avocado-tweets-2017.10.02"
     },
     {
       "state": "STARTED",
@@ -1114,8 +1126,7 @@
       "node": "xcP6ue7eRCieNNitFTT0EA",
       "relocating_node": null,
       "shard": 1,
-      "index": "avocado-tweets-2017.10.02",
-      "resolver": "xcP6ue7eRCieNNitFTT0EA"
+      "index": "avocado-tweets-2017.10.02"
     },
     {
       "state": "STARTED",
@@ -1123,8 +1134,7 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "relocating_node": null,
       "shard": 1,
-      "index": "avocado-tweets-2017.10.02",
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA"
+      "index": "avocado-tweets-2017.10.02"
     },
     {
       "state": "STARTED",
@@ -1132,8 +1142,7 @@
       "node": "xcP6ue7eRCieNNitFTT0EA",
       "relocating_node": null,
       "shard": 2,
-      "index": "avocado-tweets-2017.10.02",
-      "resolver": "xcP6ue7eRCieNNitFTT0EA"
+      "index": "avocado-tweets-2017.10.02"
     },
     {
       "state": "STARTED",
@@ -1141,8 +1150,7 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "relocating_node": null,
       "shard": 2,
-      "index": "avocado-tweets-2017.10.02",
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA"
+      "index": "avocado-tweets-2017.10.02"
     },
     {
       "state": "STARTED",
@@ -1150,8 +1158,7 @@
       "node": "xcP6ue7eRCieNNitFTT0EA",
       "relocating_node": null,
       "shard": 3,
-      "index": "avocado-tweets-2017.10.02",
-      "resolver": "xcP6ue7eRCieNNitFTT0EA"
+      "index": "avocado-tweets-2017.10.02"
     },
     {
       "state": "STARTED",
@@ -1159,8 +1166,7 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "relocating_node": null,
       "shard": 3,
-      "index": "avocado-tweets-2017.10.02",
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA"
+      "index": "avocado-tweets-2017.10.02"
     },
     {
       "state": "STARTED",
@@ -1168,8 +1174,7 @@
       "node": "xcP6ue7eRCieNNitFTT0EA",
       "relocating_node": null,
       "shard": 0,
-      "index": "avocado-tweets-2017.10.02",
-      "resolver": "xcP6ue7eRCieNNitFTT0EA"
+      "index": "avocado-tweets-2017.10.02"
     },
     {
       "state": "STARTED",
@@ -1177,8 +1182,7 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "relocating_node": null,
       "shard": 0,
-      "index": "avocado-tweets-2017.10.02",
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA"
+      "index": "avocado-tweets-2017.10.02"
     }
   ],
   "shardStats": {

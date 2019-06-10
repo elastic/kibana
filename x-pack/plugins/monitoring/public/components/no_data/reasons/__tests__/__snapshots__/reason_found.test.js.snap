@@ -11,7 +11,7 @@ Array [
     class="euiTextColor euiTextColor--subdued"
   >
     <div
-      class="euiText"
+      class="euiText euiText--medium"
     >
       <p>
         Monitoring provides insight to your hardware performance and load.
@@ -22,7 +22,7 @@ Array [
     class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
   />,
   <div
-    class="euiText"
+    class="euiText euiText--medium"
   >
     <p>
       We checked the cluster settings and found that 
@@ -35,7 +35,7 @@ Array [
           xpack.monitoring.collection.interval
         </code>
       </span>
-      is set to 
+       is set to 
       <span
         class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
       >
@@ -94,7 +94,7 @@ Array [
     class="euiTextColor euiTextColor--subdued"
   >
     <div
-      class="euiText"
+      class="euiText euiText--medium"
     >
       <p>
         To run monitoring please perform the following steps
@@ -105,7 +105,7 @@ Array [
     class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
   />,
   <div
-    class="euiText noData__alignLeft"
+    class="euiText euiText--medium eui-textLeft"
   >
     <p>
       We checked the 
@@ -211,7 +211,7 @@ Array [
     class="euiTextColor euiTextColor--subdued"
   >
     <div
-      class="euiText"
+      class="euiText euiText--medium"
     >
       <p>
         To run monitoring please perform the following steps
@@ -222,7 +222,7 @@ Array [
     class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
   />,
   <div
-    class="euiText"
+    class="euiText euiText--medium"
   >
     <p>
       We checked the node001foo settings and found that 

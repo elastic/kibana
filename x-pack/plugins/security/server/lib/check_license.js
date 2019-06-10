@@ -13,7 +13,6 @@
  * security in roles.
  * @property {boolean} allowRoleFieldLevelSecurity Indicates whether we allow users to define field level security
  * in roles
- * @property {string} [loginMessage] Message to show at the login page.
  * @property {string} [linksMessage] Message to show when security links are clicked throughout the kibana app.
  */
 
@@ -33,24 +32,22 @@ export function checkLicense(xPackInfo) {
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
-      loginMessage: 'Login is currently disabled. Administrators should consult the Kibana logs for more details.'
+      allowRbac: false,
+      layout: xPackInfo.isXpackUnavailable() ? 'error-xpack-unavailable' : 'error-es-unavailable'
     };
   }
 
-  const isLicenseBasic = xPackInfo.license.isOneOf(['basic']);
   const isEnabledInES = xPackInfo.feature('security').isEnabled();
-  if (!isEnabledInES || isLicenseBasic) {
+  if (!isEnabledInES) {
     return {
       showLogin: false,
       allowLogin: false,
       showLinks: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
-      linksMessage: isLicenseBasic
-        ? 'Your Basic license does not support Security. Please upgrade your license.'
-        : 'Access is denied because Security is disabled in Elasticsearch.'
+      allowRbac: false,
+      linksMessage: 'Access is denied because Security is disabled in Elasticsearch.'
     };
-
   }
 
   const isLicensePlatinumOrTrial = xPackInfo.license.isOneOf(['platinum', 'trial']);
@@ -60,6 +57,7 @@ export function checkLicense(xPackInfo) {
     showLinks: true,
     // Only platinum and trial licenses are compliant with field- and document-level security.
     allowRoleDocumentLevelSecurity: isLicensePlatinumOrTrial,
-    allowRoleFieldLevelSecurity: isLicensePlatinumOrTrial
+    allowRoleFieldLevelSecurity: isLicensePlatinumOrTrial,
+    allowRbac: true,
   };
 }

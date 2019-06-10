@@ -39,6 +39,7 @@ describe('setupXPackMain()', () => {
         elasticsearch: mockElasticsearchPlugin,
         xpack_main: mockXPackMainPlugin
       },
+      events: { on() {} },
       log() {},
       config() {},
       expose() {},

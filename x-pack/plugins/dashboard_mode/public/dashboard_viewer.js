@@ -14,29 +14,33 @@ import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 
 // import the uiExports that we want to "use"
+import 'uiExports/contextMenuActions';
 import 'uiExports/visTypes';
 import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
+import 'uiExports/inspectorViews';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/embeddableFactories';
-import 'uiExports/spyModes';
 import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
 import 'uiExports/fieldFormats';
-
+import 'uiExports/search';
+import 'uiExports/autocompleteProviders';
+import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
+import 'ui/kbn_top_nav';
 import 'plugins/kibana/dashboard';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
 import 'leaflet';
+import { npStart } from 'ui/new_platform';
 
-import { Notifier } from 'ui/notify';
+import { showAppRedirectNotification } from 'ui/notify';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
-import { KibanaRootController } from 'plugins/kibana/kibana_root_controller';
 
 uiModules.get('kibana')
   .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());
@@ -45,12 +49,11 @@ routes.enable();
 routes.otherwise({ redirectTo: defaultUrl() });
 
 chrome
-  .setRootController('kibana', function ($controller, $scope, courier, config) {
-    chrome.showOnlyById('kibana:dashboard');
-    $controller(KibanaRootController, { $scope, courier, config });
+  .setRootController('kibana', function () {
+    npStart.core.chrome.navLinks.showOnly('kibana:dashboard');
   });
 
-uiModules.get('kibana').run(Notifier.pullMessageFromUrl);
+uiModules.get('kibana').run(showAppRedirectNotification);
 
 // If there is a configured kbnDefaultAppId, and it is a dashboard ID, we'll
 // show that dashboard, otherwise, we'll show the default dasbhoard landing page.

@@ -1,75 +1,71 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Node Listing Metric Cell should format N/A as the metric for an offline node 1`] = `
-<td
-  class="kuiTableRowCell"
+<div
+  class="monTableCell__number monTableCell__offline"
 >
-  <div
-    class="kuiTableRowCell__liner"
-  >
-    <div
-      class="monitoringTableCell__number monitoringTableCell__offline"
-    >
-      N/A
-    </div>
-  </div>
-</td>
+  N/A
+</div>
 `;
 
 exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
-<td
-  class="kuiTableRowCell"
+<div
+  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  intl="[object Object]"
 >
   <div
-    class="kuiTableRowCell__liner"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    <div
-      class="monitoringTableCell__MetricCell__metric"
-    >
-      206.3 GB
-    </div>
     <span
-      class="monitoringTableCell__MetricCell__slopeArrow fa fa-long-arrow-down"
-    />
-    <div
-      class="monitoringTableCell__MetricCell__minMax"
+      class="euiTitle euiTitle--small"
+      style="overflow-x:hidden;white-space:nowrap"
     >
-      <div>
-        206.5 GB max
-      </div>
-      <div>
-        206.3 GB min
-      </div>
+      206.3 GB 
+      <span
+        class="fa fa-long-arrow-down"
+      />
+    </span>
+    <div
+      class="euiText euiText--extraSmall"
+    >
+      206.5 GB max
+    </div>
+    <div
+      class="euiText euiText--extraSmall"
+    >
+      206.3 GB min
     </div>
   </div>
-</td>
+</div>
 `;
 
 exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
-<td
-  class="kuiTableRowCell"
+<div
+  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  intl="[object Object]"
 >
   <div
-    class="kuiTableRowCell__liner"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    <div
-      class="monitoringTableCell__MetricCell__metric"
-    >
-      0%
-    </div>
     <span
-      class="monitoringTableCell__MetricCell__slopeArrow fa fa-long-arrow-down"
-    />
-    <div
-      class="monitoringTableCell__MetricCell__minMax"
+      class="euiTitle euiTitle--small"
+      style="overflow-x:hidden;white-space:nowrap"
     >
-      <div>
-        2% max
-      </div>
-      <div>
-        0% min
-      </div>
+      0% 
+      <span
+        class="fa fa-long-arrow-down"
+      />
+    </span>
+    <div
+      class="euiText euiText--extraSmall"
+    >
+      2% max
+    </div>
+    <div
+      class="euiText euiText--extraSmall"
+    >
+      0% min
     </div>
   </div>
-</td>
+</div>
 `;

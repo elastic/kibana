@@ -7,14 +7,17 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
-import dateMath from '@kbn/datemath';
+import 'ui/angular_ui_select';
+import dateMath from '@elastic/datemath';
 import { isJobIdValid, prefixDatafeedId } from 'plugins/ml/../common/util/job_utils';
-import { createSearchItems, createResultsUrl, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { getCreateRecognizerJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
+import { SearchItemsProvider, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 
-import 'plugins/kibana/visualize/styles/main.less';
 
 import uiRoutes from 'ui/routes';
+import { checkViewOrCreateJobs } from '../check_module';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from 'plugins/ml/util/index_utils';
@@ -23,37 +26,41 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { CreateRecognizerJobsServiceProvider } from './create_job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { initPromise } from 'plugins/ml/util/promise';
 import template from './create_job.html';
+import { toastNotifications } from 'ui/notify';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes
   .when('/jobs/new_job/simple/recognize', {
     template,
+    k7Breadcrumbs: getCreateRecognizerJobBreadcrumbs,
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
-      initPromise: initPromise(true)
     }
   });
+
+uiRoutes
+  .when('/modules/check_view_or_create', {
+    template,
+    resolve: {
+      checkViewOrCreateJobs
+    }
+  });
+
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlCreateRecognizerJobs', function (
-    $scope,
-    $window,
-    $route,
-    timefilter,
-    Private) {
+  .controller('MlCreateRecognizerJobs', function ($scope, $route, Private) {
 
     const mlCreateRecognizerJobsService = Private(CreateRecognizerJobsServiceProvider);
     timefilter.disableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
-    $scope.tt = timefilter;
     const msgs = mlMessageBarService;
 
     const SAVE_STATE = {
@@ -83,16 +90,33 @@ module
     const moduleId = $route.current.params.id;
     $scope.moduleId = moduleId;
 
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
-      query,
-      combinedQuery } = createSearchItems($route);
+      combinedQuery } = createSearchItems();
 
     const pageTitle = (savedSearch.id !== undefined) ?
-      `saved search ${savedSearch.title}` : `index pattern ${indexPattern.title}`;
+      i18n.translate('xpack.ml.newJob.simple.recognize.savedSearchPageTitle', {
+        defaultMessage: 'saved search {savedSearchTitle}',
+        values: { savedSearchTitle: savedSearch.title }
+      }) :
+      i18n.translate('xpack.ml.newJob.simple.recognize.indexPatternPageTitle', {
+        defaultMessage: 'index pattern {indexPatternTitle}',
+        values: { indexPatternTitle: indexPattern.title }
+      });
 
     $scope.displayQueryWarning = (savedSearch.id !== undefined);
+
+    $scope.hideAdvancedButtonAriaLabel = i18n.translate('xpack.ml.newJob.simple.recognize.hideAdvancedButtonAriaLabel', {
+      defaultMessage: 'Hide Advanced'
+    });
+    $scope.showAdvancedButtonAriaLabel = i18n.translate('xpack.ml.newJob.simple.recognize.showAdvancedButtonAriaLabel', {
+      defaultMessage: 'Show Advanced'
+    });
+    $scope.showAdvancedAriaLabel = i18n.translate('xpack.ml.newJob.simple.recognize.showAdvancedAriaLabel', {
+      defaultMessage: 'Show advanced'
+    });
 
     $scope.ui = {
       formValid: true,
@@ -101,9 +125,15 @@ module
       showJobInput: true,
       numberOfJobs: 0,
       kibanaLabels: {
-        dashboard: 'Dashboards',
-        search: 'Searches',
-        visualization: 'Visualizations',
+        dashboard: i18n.translate('xpack.ml.newJob.simple.recognize.dashboardsLabel', {
+          defaultMessage: 'Dashboards'
+        }),
+        search: i18n.translate('xpack.ml.newJob.simple.recognize.searchesLabel', {
+          defaultMessage: 'Searches'
+        }),
+        visualization: i18n.translate('xpack.ml.newJob.simple.recognize.visualizationsLabel', {
+          defaultMessage: 'Visualizations'
+        }),
       },
       validation: {
         checks: {
@@ -121,10 +151,9 @@ module
       kibanaObjects: {},
       start: 0,
       end: 0,
-      query,
-      filters: [],
       useFullIndexData: true,
-      startDatafeedAfterSave: true
+      startDatafeedAfterSave: true,
+      useDedicatedIndex: false,
     };
 
     $scope.resultsUrl = '';
@@ -132,7 +161,6 @@ module
     $scope.resetJob = function () {
       $scope.overallState = SAVE_STATE.NOT_SAVED;
       $scope.formConfig.jobs = [];
-      $scope.formConfig.filters = [];
       $scope.formConfig.kibanaObjects = {};
 
       loadJobConfigs();
@@ -188,7 +216,8 @@ module
                   title: o.title,
                   saveState: SAVE_STATE.NOT_SAVED,
                   config: o.config,
-                  exists: false
+                  exists: false,
+                  errors: [],
                 };
               });
             });
@@ -196,6 +225,7 @@ module
             // if they do, they are marked as such and greyed out.
             checkIfKibanaObjectsExist($scope.formConfig.kibanaObjects);
           }
+          $scope.$applyAsync();
         });
     }
 
@@ -252,10 +282,11 @@ module
         const prefix = $scope.formConfig.jobLabel;
         const indexPatternName = $scope.formConfig.indexPattern.title;
         const groups = $scope.formConfig.jobGroups;
+        const useDedicatedIndex = $scope.formConfig.useDedicatedIndex;
         const tempQuery = (savedSearch.id === undefined) ?
           undefined : combinedQuery;
 
-        ml.setupDataRecognizerConfig({ moduleId, prefix, groups, query: tempQuery, indexPatternName })
+        ml.setupDataRecognizerConfig({ moduleId, prefix, groups, query: tempQuery, indexPatternName, useDedicatedIndex })
           .then((resp) => {
             if (resp.jobs) {
               $scope.formConfig.jobs.forEach((job) => {
@@ -273,7 +304,12 @@ module
                   }
                 } else {
                   job.jobState = SAVE_STATE.FAILED;
-                  job.errors.push(`Could not save job ${jobId}`);
+                  job.errors.push(
+                    i18n.translate('xpack.ml.newJob.simple.recognize.job.couldNotSaveJobErrorMessage', {
+                      defaultMessage: 'Could not save job {jobId}',
+                      values: { jobId }
+                    })
+                  );
                 }
 
                 // check results from saving the datafeeds
@@ -290,8 +326,14 @@ module
                   }
                 } else {
                   job.datafeedState = SAVE_STATE.FAILED;
-                  job.errors.push(`Could not save datafeed ${datafeedId}`);
+                  job.errors.push(
+                    i18n.translate('xpack.ml.newJob.simple.recognize.datafeed.couldNotSaveDatafeedErrorMessage', {
+                      defaultMessage: 'Could not save datafeed {datafeedId}',
+                      values: { datafeedId }
+                    })
+                  );
                 }
+                $scope.$applyAsync();
               });
             }
 
@@ -305,15 +347,41 @@ module
                       obj.saveState = SAVE_STATE.SAVED;
                     } else {
                       obj.saveState = SAVE_STATE.FAILED;
+                      if (kibanaObjectResult.error && kibanaObjectResult.error.message) {
+                        obj.errors.push(kibanaObjectResult.error.message);
+                      }
                     }
                   } else {
                     obj.saveState = SAVE_STATE.FAILED;
-                    obj.errors.push(`Could not save ${objName} ${obj.id}`);
+                    obj.errors.push(
+                      i18n.translate('xpack.ml.newJob.simple.recognize.kibanaObject.couldNotSaveErrorMessage', {
+                        defaultMessage: 'Could not save {objName} {objId}',
+                        values: { objName, objId: obj.id }
+                      })
+                    );
                   }
+                  $scope.$applyAsync();
                 });
               });
             }
             resolve();
+          })
+          .catch((err) => {
+            console.log('Error setting up module', err);
+            toastNotifications.addWarning({
+              title: i18n.translate('xpack.ml.newJob.simple.recognize.moduleSetupFailedWarningTitle', {
+                defaultMessage: 'Error setting up module {moduleId}',
+                values: { moduleId }
+              }),
+              text: i18n.translate('xpack.ml.newJob.simple.recognize.moduleSetupFailedWarningDescription', {
+                defaultMessage: 'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
+                values: {
+                  count: $scope.formConfig.jobs.length
+                }
+              })
+            });
+            $scope.overallState = SAVE_STATE.FAILED;
+            $scope.$applyAsync();
           });
       });
     }
@@ -330,6 +398,7 @@ module
           obj.saveState = SAVE_STATE.SAVING;
         });
       });
+      $scope.$applyAsync();
     }
 
     function startDatafeeds() {
@@ -344,8 +413,8 @@ module
               $scope.formConfig.start = resp.start.epoch;
               $scope.formConfig.end = resp.end.epoch;
             } else {
-              $scope.formConfig.start = dateMath.parse(timefilter.time.from).valueOf();
-              $scope.formConfig.end = dateMath.parse(timefilter.time.to).valueOf();
+              $scope.formConfig.start = dateMath.parse(timefilter.getTime().from).valueOf();
+              $scope.formConfig.end = dateMath.parse(timefilter.getTime().to).valueOf();
             }
             let jobsCounter = 0;
             let datafeedCounter = 0;
@@ -408,6 +477,9 @@ module
                   job.errors.push(err.message);
                   job.runningState = DATAFEED_STATE.FAILED;
                   reject(err);
+                })
+                .then(() => {
+                  $scope.$applyAsync();
                 });
             }
           });
@@ -470,11 +542,14 @@ module
         $scope.overallState = SAVE_STATE.SAVED;
       }
 
-      $scope.resultsUrl = createResultsUrl(
+      $scope.resultsUrl = mlJobService.createResultsUrl(
         jobIds,
         $scope.formConfig.start,
         $scope.formConfig.end,
-        'explorer');
+        'explorer'
+      );
+
+      $scope.$applyAsync();
     };
 
 
@@ -490,19 +565,25 @@ module
       // also to allow an empty label
       const label = `${$scope.formConfig.jobLabel}extra`;
 
+
+
       if (isJobIdValid(label) === false) {
         valid = false;
         checks.jobLabel.valid = false;
-        let msg = 'Job label can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ';
-        msg += 'must start and end with an alphanumeric character';
+        const msg = i18n.translate('xpack.ml.newJob.simple.recognize.jobLabelAllowedCharactersDescription', {
+          defaultMessage: 'Job label can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
+          'must start and end with an alphanumeric character'
+        });
         checks.jobLabel.message = msg;
       }
       $scope.formConfig.jobGroups.forEach(group => {
         if (isJobIdValid(group) === false) {
           valid = false;
           checks.groupIds.valid = false;
-          let msg = 'Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ';
-          msg += 'must start and end with an alphanumeric character';
+          const msg = i18n.translate('xpack.ml.newJob.simple.recognize.jobGroupAllowedCharactersDescription', {
+            defaultMessage: 'Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
+            'must start and end with an alphanumeric character'
+          });
           checks.groupIds.message = msg;
         }
       });

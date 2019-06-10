@@ -1,0 +1,71 @@
+<table class="visEditorAgg__rangesTable form-group" ng-show="agg.params.ranges.length">
+  <tr>
+    <th scope="col">
+      <label
+        id="visEditorRangeFrom{{agg.id}}"
+        i18n-id="common.ui.aggTypes.ranges.fromColumnLabel"
+        i18n-default-message="From"
+      ></label>
+    </th>
+    <th scope="col" colspan="2">
+      <label
+        id="visEditorRangeTo{{agg.id}}"
+        i18n-id="common.ui.aggTypes.ranges.toColumnLabel"
+        i18n-default-message="To"
+      ></label>
+    </th>
+  </tr>
+
+  <tr
+    ng-repeat="range in agg.params.ranges track by $index">
+    <td>
+      <input
+        aria-labelledby="visEditorRangeFrom{{agg.id}}"
+        ng-model="range.from"
+        type="number"
+        class="form-control"
+        name="range.from"
+        step="any" />
+    </td>
+    <td>
+      <input
+        aria-labelledby="visEditorRangeTo{{agg.id}}"
+        ng-model="range.to"
+        type="number"
+        class="form-control"
+        name="range.to"
+        step="any" />
+    </td>
+    <td>
+      <button
+        type="button"
+        aria-label="{{ ::'common.ui.aggTypes.ranges.removeRangeButtonAriaLabel' | i18n: { defaultMessage: 'Remove this range' } }}"
+        ng-click="agg.params.ranges.splice($index, 1)"
+        class="kuiButton kuiButton--danger kuiButton--small">
+        <i class="fa fa-times"></i>
+      </button>
+    </td>
+  </tr>
+</table>
+
+<input ng-model="agg.params.ranges.length" name="rangeLength" required min="1" type="number" class="ng-hide" />
+<div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
+  <p>
+    <i class="fa fa-danger text-danger"></i>
+    <strong
+      i18n-id="common.ui.aggTypes.ranges.requiredRangeTitle"
+      i18n-default-message="Required:"
+    ></strong>
+    <span
+      i18n-id="common.ui.aggTypes.ranges.requiredRangeDescription"
+      i18n-default-message="You must specify at least one range."
+    ></span>
+  </p>
+</div>
+
+<button
+  ng-click="agg.params.ranges.push({})"
+  class="kuiButton kuiButton--primary kuiButton--fullWidth"
+  i18n-id="common.ui.aggTypes.ranges.addRangeButtonLabel"
+  i18n-default-message="Add Range"
+></button>

@@ -20,11 +20,11 @@ function isUnauthorizedResponseAllowed(response) {
 }
 
 const module = uiModules.get('security');
-module.factory('onUnauthorizedResponse', ($q, $window, $injector, Private, autoLogout) => {
-  const isLoginOrLogout = Private(PathProvider).isLoginOrLogout();
+module.factory('onUnauthorizedResponse', ($q, Private, autoLogout) => {
+  const isUnauthenticated = Private(PathProvider).isUnauthenticated();
   function interceptorFactory(responseHandler) {
     return function interceptor(response) {
-      if (response.status === 401 && !isUnauthorizedResponseAllowed(response) && !isLoginOrLogout) return autoLogout();
+      if (response.status === 401 && !isUnauthorizedResponseAllowed(response) && !isUnauthenticated) return autoLogout();
       return responseHandler(response);
     };
   }

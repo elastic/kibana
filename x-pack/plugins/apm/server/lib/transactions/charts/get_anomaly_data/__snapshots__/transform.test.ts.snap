@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`anomalySeriesTransform should match snapshot 1`] = `
+Object {
+  "anomalyBoundaries": Array [
+    Object {
+      "x": 10000,
+      "y": 200,
+      "y0": 20,
+    },
+    Object {
+      "x": 15000,
+      "y": 100,
+      "y0": 20,
+    },
+    Object {
+      "x": 25000,
+      "y": 50,
+      "y0": 10,
+    },
+  ],
+  "anomalyScore": Array [
+    Object {
+      "x": 25000,
+      "x0": 15000,
+    },
+    Object {
+      "x": 25000,
+      "x0": 25000,
+    },
+  ],
+}
+`;

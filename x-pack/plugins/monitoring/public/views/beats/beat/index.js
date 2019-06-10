@@ -5,6 +5,7 @@
  */
 
 import { find } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseController } from '../../';
@@ -30,7 +31,12 @@ uiRoutes.when('/beats/beat/:beatUuid', {
 
       const pageData = $route.current.locals.pageData;
       super({
-        title: `Beats - ${pageData.summary.name} - Overview`,
+        title: i18n.translate('xpack.monitoring.beats.instance.routeTitle', {
+          defaultMessage: 'Beats - {instanceName} - Overview',
+          values: {
+            instanceName: pageData.summary.name
+          }
+        }),
         getPageData,
         $scope,
         $injector

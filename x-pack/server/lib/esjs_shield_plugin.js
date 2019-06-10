@@ -27,7 +27,7 @@
     shield.authenticate = ca({
       params: {},
       url: {
-        fmt: '/_xpack/security/_authenticate'
+        fmt: '/_security/_authenticate'
       }
     });
 
@@ -46,7 +46,7 @@
       },
       urls: [
         {
-          fmt: '/_xpack/security/user/<%=username%>/_password',
+          fmt: '/_security/user/<%=username%>/_password',
           req: {
             username: {
               type: 'string',
@@ -55,7 +55,7 @@
           }
         },
         {
-          fmt: '/_xpack/security/user/_password'
+          fmt: '/_security/user/_password'
         }
       ],
       needBody: true,
@@ -77,7 +77,7 @@
         }
       },
       url: {
-        fmt: '/_xpack/security/realm/<%=realms%>/_clear_cache',
+        fmt: '/_security/realm/<%=realms%>/_clear_cache',
         req: {
           realms: {
             type: 'string',
@@ -97,7 +97,7 @@
     shield.clearCachedRoles = ca({
       params: {},
       url: {
-        fmt: '/_xpack/security/role/<%=name%>/_clear_cache',
+        fmt: '/_security/role/<%=name%>/_clear_cache',
         req: {
           name: {
             type: 'string',
@@ -122,7 +122,7 @@
         }
       },
       url: {
-        fmt: '/_xpack/security/role/<%=name%>',
+        fmt: '/_security/role/<%=name%>',
         req: {
           name: {
             type: 'string',
@@ -147,7 +147,7 @@
         }
       },
       url: {
-        fmt: '/_xpack/security/user/<%=username%>',
+        fmt: '/_security/user/<%=username%>',
         req: {
           username: {
             type: 'string',
@@ -168,7 +168,7 @@
       params: {},
       urls: [
         {
-          fmt: '/_xpack/security/role/<%=name%>',
+          fmt: '/_security/role/<%=name%>',
           req: {
             name: {
               type: 'string',
@@ -177,7 +177,7 @@
           }
         },
         {
-          fmt: '/_xpack/security/role'
+          fmt: '/_security/role'
         }
       ]
     });
@@ -192,7 +192,7 @@
       params: {},
       urls: [
         {
-          fmt: '/_xpack/security/user/<%=username%>',
+          fmt: '/_security/user/<%=username%>',
           req: {
             username: {
               type: 'list',
@@ -201,7 +201,7 @@
           }
         },
         {
-          fmt: '/_xpack/security/user'
+          fmt: '/_security/user'
         }
       ]
     });
@@ -220,7 +220,7 @@
         }
       },
       url: {
-        fmt: '/_xpack/security/role/<%=name%>',
+        fmt: '/_security/role/<%=name%>',
         req: {
           name: {
             type: 'string',
@@ -246,7 +246,7 @@
         }
       },
       url: {
-        fmt: '/_xpack/security/user/<%=username%>',
+        fmt: '/_security/user/<%=username%>',
         req: {
           username: {
             type: 'string',
@@ -256,6 +256,19 @@
       },
       needBody: true,
       method: 'PUT'
+    });
+
+    /**
+     * Perform a [shield.getUserPrivileges](Retrieve a user's list of privileges) request
+     *
+     */
+    shield.getUserPrivileges = ca({
+      params: {},
+      urls: [
+        {
+          fmt: '/_security/user/_privileges'
+        }
+      ]
     });
 
     /**
@@ -275,7 +288,7 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/saml/prepare'
+        fmt: '/_security/saml/prepare'
       }
     });
 
@@ -294,7 +307,7 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/saml/authenticate'
+        fmt: '/_security/saml/authenticate'
       }
     });
 
@@ -309,22 +322,7 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/saml/logout'
-      }
-    });
-
-    /**
-     * Invalidates SAML access token.
-     *
-     * @param {string} token SAML access token that needs to be invalidated.
-     *
-     * @returns {{redirect?: string}}
-     */
-    shield.samlLogout = ca({
-      method: 'POST',
-      needBody: true,
-      url: {
-        fmt: '/_xpack/security/saml/logout'
+        fmt: '/_security/saml/logout'
       }
     });
 
@@ -342,23 +340,149 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/saml/invalidate'
+        fmt: '/_security/saml/invalidate'
       }
     });
 
     /**
-     * Refreshes SAML access token.
+     * Asks Elasticsearch to prepare an OpenID Connect authentication request to be sent to
+     * the 3rd-party OpenID Connect provider.
+     *
+     * @param {string} realm The OpenID Connect realm name in Elasticsearch
+     *
+     * @returns {{state: string, nonce: string, redirect: string}} Object that includes two opaque parameters that need
+     * to be sent to Elasticsearch with the OpenID Connect response and redirect URL to the OpenID Connect provider that
+     * will be used to authenticate user.
+     */
+    shield.oidcPrepare = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/oidc/prepare'
+      }
+    });
+
+    /**
+     * Sends the URL to which the OpenID Connect Provider redirected the UA to Elasticsearch for validation.
+     *
+     * @param {string} state The state parameter that was returned by Elasticsearch in the
+     * preparation response.
+     * @param {string} nonce The nonce parameter that was returned by Elasticsearch in the
+     * preparation response.
+     * @param {string} redirect_uri The URL to where the UA was redirected by the OpenID Connect provider.
+     *
+     * @returns {{username: string, access_token: string, refresh_token; string, expires_in: number}} Object that
+     * includes name of the user, access token to use for any consequent requests that
+     * need to be authenticated and a number of seconds after which access token will expire.
+     */
+    shield.oidcAuthenticate = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/oidc/authenticate'
+      }
+    });
+
+    /**
+     * Invalidates an access token and refresh token pair that was generated after an OpenID Connect authentication.
+     *
+     * @param {string} token An access token that was created by authenticating to an OpenID Connect realm and
+     * that needs to be invalidated.
+     * @param {string} refres_token A refresh token that was created by authenticating to an OpenID Connect realm and
+     * that needs to be invalidated.
+     *
+     * @returns {{redirect?: string}} If the Elasticsearch OpenID Connect realm configuration and the
+     * OpenID Connect provider supports RP-initiated SLO, a URL to redirect the UA
+     */
+    shield.oidcLogout = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/oidc/logout'
+      }
+    });
+
+    /**
+     * Refreshes an access token.
      *
      * @param {string} grant_type Currently only "refresh_token" grant type is supported.
      * @param {string} refresh_token One-time refresh token that will be exchanged to the new access/refresh token pair.
      *
      * @returns {{access_token: string, type: string, expires_in: number, refresh_token: string}}
      */
-    shield.samlRefreshAccessToken = ca({
+    shield.getAccessToken = ca({
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_xpack/security/oauth2/token'
+        fmt: '/_security/oauth2/token'
+      }
+    });
+
+    /**
+     * Invalidates an access token.
+     *
+     * @param {string} token The access token to invalidate
+     *
+     * @returns {{created: boolean}}
+     */
+    shield.deleteAccessToken = ca({
+      method: 'DELETE',
+      needBody: true,
+      params: {
+        token: {
+          type: 'string'
+        }
+      },
+      url: {
+        fmt: '/_security/oauth2/token'
+      }
+    });
+
+    shield.getPrivilege = ca({
+      method: 'GET',
+      urls: [{
+        fmt: '/_security/privilege/<%=privilege%>',
+        req: {
+          privilege: {
+            type: 'string',
+            required: false
+          }
+        }
+      }, {
+        fmt: '/_security/privilege'
+      }]
+    });
+
+    shield.deletePrivilege = ca({
+      method: 'DELETE',
+      urls: [{
+        fmt: '/_security/privilege/<%=application%>/<%=privilege%>',
+        req: {
+          application: {
+            type: 'string',
+            required: true
+          },
+          privilege: {
+            type: 'string',
+            required: true
+          }
+        }
+      }]
+    });
+
+    shield.postPrivileges = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/privilege'
+      }
+    });
+
+    shield.hasPrivileges = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/user/_has_privileges'
       }
     });
   };

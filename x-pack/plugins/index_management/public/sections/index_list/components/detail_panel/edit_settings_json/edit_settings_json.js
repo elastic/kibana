@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { settingsDocumentationLink } from '../../../../../lib/documentation_links';
 
 import {
@@ -17,6 +18,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { TAB_SETTINGS } from '../../../../../constants';
 import {
   settingsToDisplay,
   readOnlySettings
@@ -56,7 +58,7 @@ export class EditSettingsJson extends React.PureComponent {
   }
   componentWillMount() {
     const { indexName } = this.props;
-    this.props.loadIndexData({ dataType: 'Settings', indexName });
+    this.props.loadIndexData({ dataType: TAB_SETTINGS, indexName });
   }
   componentDidUpdate() {
     const { data, indexStatus } = this.props;
@@ -118,7 +120,10 @@ export class EditSettingsJson extends React.PureComponent {
           <EuiFlexItem>
             <EuiTitle>
               <p>
-                Edit, then save your JSON
+                <FormattedMessage
+                  id="xpack.idxMgmt.editSettingsJSON.saveJSONDescription"
+                  defaultMessage="Edit, then save your JSON"
+                />
               </p>
             </EuiTitle>
           </EuiFlexItem>
@@ -130,7 +135,10 @@ export class EditSettingsJson extends React.PureComponent {
               onClick={this.commitSettings}
               disabled={!this.state.valid}
             >
-              Save
+              <FormattedMessage
+                id="xpack.idxMgmt.editSettingsJSON.saveJSONButtonLabel"
+                defaultMessage="Save"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -138,9 +146,12 @@ export class EditSettingsJson extends React.PureComponent {
         <EuiLink
           href={settingsDocumentationLink}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener"
         >
-          Settings reference
+          <FormattedMessage
+            id="xpack.idxMgmt.editSettingsJSON.settingsReferenceLinkText"
+            defaultMessage="Settings reference"
+          />
         </EuiLink>
         <EuiSpacer />
         <div

@@ -18,7 +18,7 @@ import { LISTING_METRICS_NAMES } from './nodes_listing_metrics';
  * @return {Array} node info combined with metrics for each node
  */
 export function handleResponse(response, clusterStats, shardStats, timeOptions = {}) {
-  if (!get(response, 'hits.total')) {
+  if (!get(response, 'hits.hits')) {
     return [];
   }
 

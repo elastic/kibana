@@ -1,1 +1,8 @@
+$checkboxBackgroundColor: $euiFormBackgroundColor;
+$checkboxBorderColor: $euiFormBorderColor;
+$checkboxIconColor: $euiColorGhost;
+$checkboxDisabledColor: $euiFormBackgroundDisabledColor;
+$checkboxCheckedBackgroundColor: $euiColorPrimary;
+$checkboxDisabledOpacity: 0.3;
+
 @import "check_box";

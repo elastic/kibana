@@ -11,9 +11,10 @@ import {
 } from './common';
 
 import {
-  getDashboardModeAuthScope,
   createDashboardModeRequestInterceptor,
 } from './server';
+
+import { i18n } from '@kbn/i18n';
 
 // Copied largely from plugins/kibana/index.js. The dashboard viewer includes just the dashboard section of
 // the standard kibana plugin.  We don't want to include code for the other links (visualize, dev tools, etc)
@@ -27,31 +28,43 @@ export function dashboardMode(kibana) {
     uiExports: {
       uiSettingDefaults: {
         [CONFIG_DASHBOARD_ONLY_MODE_ROLES]: {
-          name: 'Dashboards only roles',
-          description: `Roles that belong to View Dashboards Only mode`,
+          name: i18n.translate('xpack.dashboardMode.uiSettings.dashboardsOnlyRolesTitle', {
+            defaultMessage: 'Dashboards only roles'
+          }),
+          description: i18n.translate('xpack.dashboardMode.uiSettings.dashboardsOnlyRolesDescription', {
+            defaultMessage: 'Roles that belong to View Dashboards Only mode'
+          }),
           value: ['kibana_dashboard_only_user'],
           category: ['dashboard'],
         }
       },
       app: {
         id: 'dashboardViewer',
-        title: 'Dashboard Viewer',
+        title: i18n.translate('xpack.dashboardMode.dashboardViewerTitle', {
+          defaultMessage: 'Dashboard Viewer'
+        }),
         listed: false,
         hidden: true,
-        description: 'view dashboards',
+        description: i18n.translate('xpack.dashboardMode.dashboardViewerDescription', {
+          defaultMessage: 'view dashboards'
+        }),
         main: 'plugins/dashboard_mode/dashboard_viewer',
         links: [
           {
             id: 'kibana:dashboard',
-            title: 'Dashboard',
+            title: i18n.translate('xpack.dashboardMode.dashboardViewer.dashboardTitle', {
+              defaultMessage: 'Dashboard'
+            }),
             order: -1001,
             url: `${kbnBaseUrl}#/dashboards`,
             subUrlBase: `${kbnBaseUrl}#/dashboard`,
-            description: 'Dashboard Viewer',
+            description: i18n.translate('xpack.dashboardMode.dashboardViewer.dashboardDescription', {
+              defaultMessage: 'Dashboard Viewer'
+            }),
             icon: 'plugins/kibana/assets/dashboard.svg',
           }
         ],
-      }
+      },
     },
 
     config(Joi) {
@@ -66,9 +79,6 @@ export function dashboardMode(kibana) {
       ));
 
       if (server.plugins.security) {
-        // register auth getter with security plugin
-        server.plugins.security.registerAuthScopeGetter(getDashboardModeAuthScope);
-
         // extend the server to intercept requests
         const dashboardViewerApp = server.getHiddenUiAppById('dashboardViewer');
         server.ext(createDashboardModeRequestInterceptor(dashboardViewerApp));

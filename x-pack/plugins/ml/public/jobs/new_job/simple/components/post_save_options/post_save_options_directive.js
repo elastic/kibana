@@ -7,6 +7,7 @@
 
 
 import { postSaveService } from './post_save_service';
+import { i18n } from '@kbn/i18n';
 import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
 import { xpackFeatureProvider } from 'plugins/ml/license/check_license';
 import template from './post_save_options.html';
@@ -43,7 +44,11 @@ module.directive('mlPostSaveOptions', function (Private) {
       };
 
       $scope.apply = function () {
-        postSaveService.apply($scope.jobId, $scope.runInRealtime, $scope.createWatch);
+        postSaveService.apply($scope.jobId, $scope.runInRealtime, $scope.createWatch, i18n)
+          .catch(() => {})
+          .then(() => {
+            $scope.$applyAsync();
+          });
       };
     }
   };

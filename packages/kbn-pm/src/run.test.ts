@@ -25,21 +25,14 @@ import { Project } from './utils/project';
 const rootPath = resolve(`${__dirname}/utils/__fixtures__/kibana`);
 
 function getExpectedProjectsAndGraph(runMock: any) {
-  const [fullProjects, fullProjectGraph] = (runMock as jest.Mock<
-    any
-  >).mock.calls[0];
+  const [fullProjects, fullProjectGraph] = (runMock as jest.Mock<any>).mock.calls[0];
 
   const projects = [...fullProjects.keys()].sort();
 
-  const graph = [...fullProjectGraph.entries()].reduce(
-    (expected, [projectName, dependencies]) => {
-      expected[projectName] = dependencies.map(
-        (project: Project) => project.name
-      );
-      return expected;
-    },
-    {}
-  );
+  const graph = [...fullProjectGraph.entries()].reduce((expected, [projectName, dependencies]) => {
+    expected[projectName] = dependencies.map((project: Project) => project.name);
+    return expected;
+  }, {});
 
   return { projects, graph };
 }
@@ -123,9 +116,7 @@ test('respects both `include` and `exclude` filters if specified at the same tim
 });
 
 test('does not run command if all projects are filtered out', async () => {
-  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation(() => {
-    // noop
-  });
+  const mockProcessExit = jest.spyOn(process, 'exit').mockReturnValue(undefined as never);
 
   await runCommand(command, {
     ...config,

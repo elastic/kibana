@@ -6,12 +6,12 @@
 
 import _ from 'lodash';
 import { mapRequests } from '../map_requests';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('Map requests', () => {
   it('flatten ports', () => {
     const requests = { '5603': { total: 1, disconnects: 0, statusCodes: {} } };
-    const expected = { total: 1, disconnects: 0, status_codes: {} };
+    const expected = { total: 1, disconnects: 0 };
     expect(_.isEqual(mapRequests(requests), expected)).to.be(true);
   });
 
@@ -37,10 +37,6 @@ describe('Map requests', () => {
     const expected = {
       total: 3,
       disconnects: 44,
-      status_codes: {
-        '200': 22,
-        '201': 4
-      }
     };
     expect(_.isEqual(mapRequests(requests), expected)).to.be(true);
 

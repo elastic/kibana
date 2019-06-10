@@ -25,7 +25,7 @@ export async function runKibanaServer({ procs, config, options }) {
 
   await procs.run('kibana', {
     cmd: getKibanaCmd(installDir),
-    args: getCliArgs(config, options),
+    args: filterCliArgs(collectCliArgs(config, options)),
     env: {
       FORCE_COLOR: 1,
       ...process.env,
@@ -45,14 +45,81 @@ function getKibanaCmd(installDir) {
   return KIBANA_EXEC;
 }
 
-function getCliArgs(config, { devMode, installDir }) {
+/**
+ * When installDir is passed, we run from a built version of Kibana,
+ * which uses different command line arguments. If installDir is not
+ * passed, we run from source code. We also allow passing in extra
+ * Kibana server options, so we tack those on here.
+ */
+function collectCliArgs(config, { installDir, extraKbnOpts }) {
   const buildArgs = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs = config.get('kbnTestServer.serverArgs') || [];
 
-  if (devMode) serverArgs.push('--dev');
+  return pipe(
+    serverArgs,
+    args => (installDir ? args.filter(a => a !== '--oss') : args),
+    args => (installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args]),
+    args => args.concat(extraKbnOpts || [])
+  );
+}
 
-  return installDir
-    ? [...serverArgs, ...buildArgs]
-    : [KIBANA_EXEC_PATH, ...serverArgs, ...sourceArgs];
+/**
+ * Filter the cli args to remove duplications and
+ * overridden options
+ */
+function filterCliArgs(args) {
+  return args.reduce((acc, val, ind) => {
+    // If original argv has a later basepath setting, skip this val.
+    if (isBasePathSettingOverridden(args, val, ind)) {
+      return acc;
+    }
+
+    // Check if original argv has a later setting that overrides
+    // the current val. If so, skip this val.
+    if (
+      !allowsDuplicate(val) &&
+      findIndexFrom(args, ++ind, opt => opt.split('=')[0] === val.split('=')[0]) > -1
+    ) {
+      return acc;
+    }
+
+    return [...acc, val];
+  }, []);
+}
+
+/**
+ * Apply each function in fns to the result of the
+ * previous function. The first function's input
+ * is the arr array.
+ */
+function pipe(arr, ...fns) {
+  return fns.reduce((acc, fn) => {
+    return fn(acc);
+  }, arr);
+}
+
+/**
+ * Checks whether a specific parameter is allowed to appear multiple
+ * times in the Kibana parameters.
+ */
+function allowsDuplicate(val) {
+  return ['--plugin-path'].includes(val.split('=')[0]);
+}
+
+function isBasePathSettingOverridden(args, val, ind) {
+  const key = val.split('=')[0];
+  const basePathKeys = ['--no-base-path', '--server.basePath'];
+
+  if (basePathKeys.includes(key)) {
+    if (findIndexFrom(args, ++ind, opt => basePathKeys.includes(opt.split('=')[0])) > -1) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function findIndexFrom(array, index, ...args) {
+  return [...array].slice(index).findIndex(...args);
 }

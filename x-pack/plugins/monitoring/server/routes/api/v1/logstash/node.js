@@ -10,6 +10,7 @@ import { handleError } from '../../../../lib/errors';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSets } from './metric_set_node';
+import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 
@@ -18,7 +19,7 @@ const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
  */
 export function logstashNodeRoute(server) {
   /**
-   * Logtash Node request.
+   * Logstash Node request.
    *
    * This will fetch all data required to display a Logstash Node page.
    *
@@ -46,11 +47,11 @@ export function logstashNodeRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const lsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.logstash.index_pattern', ccs);
+      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
       const logstashUuid = req.params.logstashUuid;
 
       let metricSet;
@@ -74,12 +75,12 @@ export function logstashNodeRoute(server) {
           getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }),
         ]);
 
-        reply({
+        return {
           metrics,
           nodeSummary,
-        });
+        };
       } catch(err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

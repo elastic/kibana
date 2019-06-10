@@ -1,0 +1,42 @@
+{
+  "kibana": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "detected": {
+      "doesExist": true
+    },
+    "byUuid": null
+  },
+  "beats": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "detected": {
+      "mightExist": false
+    },
+    "byUuid": null
+  },
+  "logstash": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "detected": {
+      "mightExist": false
+    },
+    "byUuid": null
+  },
+  "apm": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "detected": {
+      "mightExist": true
+    },
+    "byUuid": null
+  },
+  "elasticsearch": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "detected": {
+      "doesExist": true
+    },
+    "byUuid": null
+  }
+}

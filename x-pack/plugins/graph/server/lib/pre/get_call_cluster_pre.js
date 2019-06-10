@@ -6,8 +6,8 @@
 
 export const getCallClusterPre = {
   assign: 'callCluster',
-  method(request, reply) {
+  method(request) {
     const cluster = request.server.plugins.elasticsearch.getCluster('data');
-    reply((...args) => cluster.callWithRequest(request, ...args));
+    return (...args) => cluster.callWithRequest(request, ...args);
   }
 };

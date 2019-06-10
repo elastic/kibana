@@ -3,13 +3,15 @@
 
 [partintro]
 --
-You can interactively explore your data from the Discover page. You have access to every document in every index that
-matches the selected index pattern. You can submit search queries, filter the search results, and view document data.
-You can also see the number of documents that match the search query and get field value statistics. If a time field is
-configured for the selected index pattern, the distribution of documents over time is displayed in a histogram at the
-top of the page.
+*Discover* enables you to explore your data with {kib}'s data discovery functions. 
+You have access to every document in every index that matches the selected index pattern. 
+You can submit search queries, filter the search results, and view document data.
+You can also see the number of documents that match the search query and get field value statistics. 
+If a time field is configured for the selected index pattern, the distribution of 
+documents over time is displayed in a histogram at the top of the page.
 
-image::images/Discover-Start-Annotated.png[Discover]
+[role="screenshot"]
+image::images/Discover-Start.png[Discover]
 --
 
 include::discover/set-time-filter.asciidoc[]

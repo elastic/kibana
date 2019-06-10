@@ -8,6 +8,7 @@ import Joi from 'joi';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getStats, getBeats } from '../../../../lib/beats';
 import { handleError } from '../../../../lib/errors';
+import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 
 export function beatsListingRoute(server) {
   server.route({
@@ -27,12 +28,12 @@ export function beatsListingRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
 
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const beatsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
+      const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
 
@@ -41,13 +42,13 @@ export function beatsListingRoute(server) {
           getBeats(req, beatsIndexPattern, clusterUuid),
         ]);
 
-        reply({
+        return {
           stats,
           listing
-        });
+        };
 
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
 
     }

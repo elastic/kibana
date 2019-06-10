@@ -109,7 +109,7 @@
       "nodeTypeClass": "fa-server",
       "nodeTypeLabel": "Node",
       "resolver": "1jxg5T33TWub-jJL4qP0Wg",
-      "shardCount": null,
+      "shardCount": 0,
       "transport_address": "127.0.0.1:9302",
       "type": "node"
     }

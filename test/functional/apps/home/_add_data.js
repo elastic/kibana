@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'header', 'home']);
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
   describe('add data tutorials', function describeIndexTests() {
 
@@ -33,6 +33,5 @@ export default function ({ getService, getPageObjects }) {
         expect(tutorialExists).to.be(true);
       });
     });
-
   });
 }

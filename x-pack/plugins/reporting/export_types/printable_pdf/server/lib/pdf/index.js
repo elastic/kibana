@@ -9,6 +9,7 @@ import _ from 'lodash';
 import concat from 'concat-stream';
 import Printer from 'pdfmake';
 import xRegExp from 'xregexp';
+import { i18n } from '@kbn/i18n';
 
 const assetPath = path.resolve(__dirname, 'assets');
 
@@ -131,7 +132,13 @@ class PdfMaker {
   }
 
   getBuffer() {
-    if (!this._pdfDoc) throw new Error('Document stream has not been generated');
+    if (!this._pdfDoc) {
+      throw new Error(
+        i18n.translate('xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage', {
+          defaultMessage: 'Document stream has not been generated'
+        })
+      );
+    }
     return new Promise((resolve, reject) => {
       const concatStream = concat(function (pdfBuffer) {
         resolve(pdfBuffer);
@@ -144,7 +151,13 @@ class PdfMaker {
   }
 
   getStream() {
-    if (!this._pdfDoc) throw new Error('Document stream has not been generated');
+    if (!this._pdfDoc) {
+      throw new Error(
+        i18n.translate('xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage', {
+          defaultMessage: 'Document stream has not been generated'
+        })
+      );
+    }
     this._pdfDoc.end();
     return this._pdfDoc;
   }
@@ -203,17 +216,22 @@ function getTemplate(layout, logo, title) {
               image: logo || logoPath,
             }, {
               alignment: 'center',
-              text: 'Page ' + currentPage.toString() + ' of ' + pageCount,
+              text: i18n.translate('xpack.reporting.exportTypes.printablePdf.pagingDescription', {
+                defaultMessage: 'Page {currentPage} of {pageCount}',
+                values: { currentPage: currentPage.toString(), pageCount }
+              }),
               style: {
                 color: '#aaa'
               },
             }, ''],
             [
               logo ? {
-                text: 'Powered by Elastic',
+                text: i18n.translate('xpack.reporting.exportTypes.printablePdf.logoDescription', {
+                  defaultMessage: 'Powered by Elastic'
+                }),
                 fontSize: 10,
                 style: {
-                  color: "#aaa"
+                  color: '#aaa'
                 },
                 margin: [0, 2, 0, 0]
               } : '',

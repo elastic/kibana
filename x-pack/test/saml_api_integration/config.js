@@ -18,12 +18,12 @@ export default async function ({ readConfigFile }) {
     servers: xPackAPITestsConfig.get('servers'),
     services: {
       chance: kibanaAPITestsConfig.get('services.chance'),
+      es: kibanaAPITestsConfig.get('services.es'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {
       reportName: 'X-Pack SAML API Integration Tests',
     },
-    env: xPackAPITestsConfig.get('env'),
 
     esTestCluster: {
       ...xPackAPITestsConfig.get('esTestCluster'),
@@ -31,14 +31,13 @@ export default async function ({ readConfigFile }) {
         ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.token.timeout=15s',
-        'xpack.security.authc.realms.saml1.type=saml',
-        'xpack.security.authc.realms.saml1.order=0',
-        `xpack.security.authc.realms.saml1.idp.metadata.path=${idpPath}`,
-        'xpack.security.authc.realms.saml1.idp.entity_id=http://www.elastic.co',
-        `xpack.security.authc.realms.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
-        `xpack.security.authc.realms.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
-        `xpack.security.authc.realms.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/v1/saml`,
-        'xpack.security.authc.realms.saml1.attributes.principal=urn:oid:0.0.7',
+        'xpack.security.authc.realms.saml.saml1.order=0',
+        `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${idpPath}`,
+        'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co',
+        `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
+        `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
+        `xpack.security.authc.realms.saml.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/v1/saml`,
+        'xpack.security.authc.realms.saml.saml1.attributes.principal=urn:oid:0.0.7',
       ],
     },
 
@@ -48,7 +47,7 @@ export default async function ({ readConfigFile }) {
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
         '--server.xsrf.whitelist=[\"/api/security/v1/saml\"]',
-        '--xpack.security.authProviders=[\"saml\"]',
+        `--xpack.security.authProviders=${JSON.stringify(['saml', 'basic'])}`,
       ],
     },
   };

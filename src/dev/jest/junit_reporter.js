@@ -23,13 +23,15 @@ import { writeFileSync } from 'fs';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
+import { escapeCdata } from '../xml';
+
 const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 
 /**
  * Jest reporter that produces JUnit report when running on CI
- * @class JestJunitReporter
+ * @class JestJUnitReporter
  */
-export default class JestJunitReporter {
+export default class JestJUnitReporter {
   constructor(globalConfig, options = {}) {
     const {
       reportName = 'Jest Tests',
@@ -37,7 +39,7 @@ export default class JestJunitReporter {
     } = options;
 
     this._reportName = reportName;
-    this._rootDirectory = rootDirectory;
+    this._rootDirectory = resolve(rootDirectory);
   }
 
   /**
@@ -47,7 +49,7 @@ export default class JestJunitReporter {
    * @return {undefined}
    */
   onRunComplete(contexts, results) {
-    if (!process.env.CI) {
+    if (!process.env.CI || !results.testResults.length) {
       return;
     }
 
@@ -68,7 +70,7 @@ export default class JestJunitReporter {
       timestamp: msToIso(results.startTime),
       time: msToSec(Date.now() - results.startTime),
       tests: results.numTotalTests,
-      failures: results.numFailedTests,
+      failures: results.numFailingTests,
       skipped: results.numPendingTests,
     });
 
@@ -79,7 +81,7 @@ export default class JestJunitReporter {
         timestamp: msToIso(suite.perfStats.start),
         time: msToSec(suite.perfStats.end - suite.perfStats.start),
         tests: suite.testResults.length,
-        failures: suite.numFailedTests,
+        failures: suite.numFailingTests,
         skipped: suite.numPendingTests,
         file: suite.testFilePath
       });
@@ -95,7 +97,7 @@ export default class JestJunitReporter {
         });
 
         test.failureMessages.forEach((message) => {
-          testEl.ele('failure').dat(message);
+          testEl.ele('failure').dat(escapeCdata(message));
         });
 
         if (test.status === 'pending') {
@@ -104,7 +106,7 @@ export default class JestJunitReporter {
       });
     });
 
-    const reportPath = resolve(rootDirectory, `target/junit/${reportName}.xml`);
+    const reportPath = resolve(rootDirectory, `target/junit/TEST-${reportName}.xml`);
     const reportXML = root.end({
       pretty: true,
       indent: '  ',

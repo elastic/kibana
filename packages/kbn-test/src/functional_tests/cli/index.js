@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { runTestsCli } from './run_tests_cli';
-export { startServersCli } from './start_servers_cli';
+export { runTestsCli } from './run_tests/cli';
+export { startServersCli } from './start_servers/cli';

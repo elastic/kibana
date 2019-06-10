@@ -5,9 +5,10 @@
  */
 
 import { find } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import { MonitoringViewBaseTableController } from '../../';
+import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
 
@@ -21,11 +22,13 @@ uiRoutes.when('/elasticsearch/ml_jobs', {
     pageData: getPageData
   },
   controllerAs: 'mlJobs',
-  controller: class MlJobsList extends MonitoringViewBaseTableController {
+  controller: class MlJobsList extends MonitoringViewBaseEuiTableController {
 
     constructor($injector, $scope) {
       super({
-        title: 'Elasticsearch - Machine Learning Jobs',
+        title: i18n.translate('xpack.monitoring.elasticsearch.mlJobs.routeTitle', {
+          defaultMessage: 'Elasticsearch - Machine Learning Jobs'
+        }),
         storageKey: 'elasticsearch.mlJobs',
         getPageData,
         $scope,
@@ -36,6 +39,7 @@ uiRoutes.when('/elasticsearch/ml_jobs', {
       this.data = $route.current.locals.pageData;
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
+      this.isCcrEnabled = Boolean($scope.cluster && $scope.cluster.isCcrEnabled);
     }
   }
 });

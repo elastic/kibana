@@ -6,7 +6,6 @@
 
 
 
-import './styles/main.less';
 import './create_job_controller';
 import './create_job_service';
 import 'plugins/ml/services/mapping_service';

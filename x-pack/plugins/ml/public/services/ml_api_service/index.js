@@ -9,21 +9,26 @@
 import { pick } from 'lodash';
 import chrome from 'ui/chrome';
 
-import { http } from 'plugins/ml/services/http_service';
+import { http } from '../../services/http_service';
 
+import { annotations } from './annotations';
+import { dataFrame } from './data_frame';
+import { filters } from './filters';
 import { results } from './results';
+import { jobs } from './jobs';
+import { fileDatavisualizer } from './datavisualizer';
 
 const basePath = chrome.addBasePath('/api/ml');
 
 export const ml = {
-  jobs(obj) {
+  getJobs(obj) {
     const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
     return http({
       url: `${basePath}/anomaly_detectors${jobId}`,
     });
   },
 
-  jobStats(obj) {
+  getJobStats(obj) {
     const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
     return http({
       url: `${basePath}/anomaly_detectors${jobId}/_stats`,
@@ -48,13 +53,6 @@ export const ml = {
   closeJob(obj) {
     return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/_close`,
-      method: 'POST'
-    });
-  },
-
-  forceCloseJob(obj) {
-    return http({
-      url: `${basePath}/anomaly_detectors/${obj.jobId}/_close?force=true`,
       method: 'POST'
     });
   },
@@ -97,14 +95,22 @@ export const ml = {
     });
   },
 
-  datafeeds(obj) {
+  validateCardinality(obj) {
+    return http({
+      url: `${basePath}/validate/cardinality`,
+      method: 'POST',
+      data: obj
+    });
+  },
+
+  getDatafeeds(obj) {
     const datafeedId = (obj && obj.datafeedId) ? `/${obj.datafeedId}` : '';
     return http({
       url: `${basePath}/datafeeds${datafeedId}`,
     });
   },
 
-  datafeedStats(obj) {
+  getDatafeedStats(obj) {
     const datafeedId = (obj && obj.datafeedId) ? `/${obj.datafeedId}` : '';
     return http({
       url: `${basePath}/datafeeds${datafeedId}/_stats`,
@@ -242,9 +248,23 @@ export const ml = {
     });
   },
 
+  listDataRecognizerModules() {
+    return http({
+      url: `${basePath}/modules/get_module`,
+      method: 'GET'
+    });
+  },
+
   getDataRecognizerModule(obj) {
     return http({
       url: `${basePath}/modules/get_module/${obj.moduleId}`,
+      method: 'GET'
+    });
+  },
+
+  dataRecognizerModuleJobsExist(obj) {
+    return http({
+      url: `${basePath}/modules/jobs_exist/${obj.moduleId}`,
       method: 'GET'
     });
   },
@@ -254,7 +274,8 @@ export const ml = {
       'prefix',
       'groups',
       'indexPatternName',
-      'query'
+      'query',
+      'useDedicatedIndex'
     ]);
 
     return http({
@@ -369,7 +390,6 @@ export const ml = {
   getCardinalityOfFields(obj) {
     const data = pick(obj, [
       'index',
-      'types',
       'fieldNames',
       'query',
       'timeFieldName',
@@ -406,5 +426,18 @@ export const ml = {
     });
   },
 
-  results
+  getIndices() {
+    const tempBasePath = chrome.addBasePath('/api');
+    return http({
+      url: `${tempBasePath}/index_management/indices`,
+      method: 'GET',
+    });
+  },
+
+  annotations,
+  dataFrame,
+  filters,
+  results,
+  jobs,
+  fileDatavisualizer,
 };

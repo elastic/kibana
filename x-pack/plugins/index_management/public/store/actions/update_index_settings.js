@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createAction } from "redux-actions";
-import { updateIndexSettings as request } from "../../services";
+import { createAction } from 'redux-actions';
+import { i18n }  from '@kbn/i18n';
+import { updateIndexSettings as request } from '../../services';
 import { reloadIndices } from './reload_indices';
 import { toastNotifications } from 'ui/notify';
 
 export const updateIndexSettingsSuccess = createAction(
-  "INDEX_MANAGEMENT_UPDATE_INDEX_SETTINGS_SUCCESS"
+  'INDEX_MANAGEMENT_UPDATE_INDEX_SETTINGS_SUCCESS'
 );
 export const updateIndexSettingsError = createAction(
-  "INDEX_MANAGEMENT_UPDATE_INDEX_SETTINGS_ERROR"
+  'INDEX_MANAGEMENT_UPDATE_INDEX_SETTINGS_ERROR'
 );
 
 export const updateIndexSettings = ({
@@ -33,5 +34,10 @@ export const updateIndexSettings = ({
   }
   dispatch(updateIndexSettingsSuccess());
   dispatch(reloadIndices([ indexName ]));
-  toastNotifications.addSuccess(`Successfully updated settings for index ${indexName}`);
+  toastNotifications.addSuccess(
+    i18n.translate('xpack.idxMgmt.updateIndexSettingsAction.settingsSuccessUpdateMessage', {
+      defaultMessage: 'Successfully updated settings for index {indexName}',
+      values: { indexName }
+    })
+  );
 };

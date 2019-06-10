@@ -55,6 +55,7 @@ describe('plugin generator sao integration', () => {
     expect(uiExports).not.toContain('app:');
     expect(uiExports).not.toContain('hacks:');
     expect(uiExports).not.toContain('init(server, options)');
+    expect(uiExports).not.toContain('registerFeature(');
   });
 
   it('includes app when answering yes', async () => {
@@ -73,8 +74,9 @@ describe('plugin generator sao integration', () => {
 
     const uiExports = getConfig(res.files['index.js']);
     expect(uiExports).toContain('app:');
+    expect(uiExports).toContain('init(server, options)');
+    expect(uiExports).toContain('registerFeature(');
     expect(uiExports).not.toContain('hacks:');
-    expect(uiExports).not.toContain('init(server, options)');
   });
 
   it('includes hack when answering yes', async () => {
@@ -94,7 +96,8 @@ describe('plugin generator sao integration', () => {
     const uiExports = getConfig(res.files['index.js']);
     expect(uiExports).toContain('app:');
     expect(uiExports).toContain('hacks:');
-    expect(uiExports).not.toContain('init(server, options)');
+    expect(uiExports).toContain('init(server, options)');
+    expect(uiExports).toContain('registerFeature(');
   });
 
   it('includes server api when answering yes', async () => {
@@ -115,6 +118,7 @@ describe('plugin generator sao integration', () => {
     expect(uiExports).toContain('app:');
     expect(uiExports).toContain('hacks:');
     expect(uiExports).toContain('init(server, options)');
+    expect(uiExports).toContain('registerFeature(');
   });
 
   it('plugin config has correct name and main path', async () => {
@@ -128,8 +132,8 @@ describe('plugin generator sao integration', () => {
     const nameLine = indexContents.match('name: (.*)')[1];
     const mainLine = indexContents.match('main: (.*)')[1];
 
-    expect(nameLine).toContain('some-fancy-plugin');
-    expect(mainLine).toContain('plugins/some-fancy-plugin/app');
+    expect(nameLine).toContain('some_fancy_plugin');
+    expect(mainLine).toContain('plugins/some_fancy_plugin/app');
   });
 
   it('plugin package has correct name', async () => {
@@ -142,7 +146,7 @@ describe('plugin generator sao integration', () => {
     const packageContents = getFileContents(res.files['package.json']);
     const pkg = JSON.parse(packageContents);
 
-    expect(pkg.name).toBe('some-fancy-plugin');
+    expect(pkg.name).toBe('some_fancy_plugin');
   });
 
   it('package has version "kibana" with master', async () => {

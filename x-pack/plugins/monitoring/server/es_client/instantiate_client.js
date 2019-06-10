@@ -10,41 +10,26 @@ import { LOGGING_TAG } from '../../common/constants';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
  * The connection options can be customized for the Monitoring application
- * This allows the app to connect to a decidated monitoring cluster even if
+ * This allows the app to connect to a dedicated monitoring cluster even if
  * Kibana itself is connected to a production cluster.
  */
 
 export function exposeClient(server) {
-  const Logger = server.plugins.elasticsearch.ElasticsearchClientLogging;
-  const logQueries = Boolean(server.config().get('xpack.monitoring.elasticsearch.logQueries'));
+  const config = hasMonitoringCluster(server) ? server.config().get('xpack.monitoring.elasticsearch') : {};
+  const cluster = server.plugins.elasticsearch.createCluster('monitoring', {
+    ...config,
+    plugins: [monitoringBulk],
+    logQueries: Boolean(config.logQueries),
+  });
 
-  class MonitoringClientLogging extends Logger {
-    constructor() {
-      super();
+  server.events.on('stop', bindKey(cluster, 'close'));
+  const configSource = hasMonitoringCluster(server) ? 'monitoring' : 'production';
+  server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster`);
+}
 
-      this.tags = [LOGGING_TAG];
-      this.logQueries = logQueries;
-    }
-  }
-
-  let config = {
-    ...server.config().get('xpack.monitoring.elasticsearch')
-  };
-  let configSource = 'monitoring';
-
-  if (!Boolean(config.url)) {
-    config = server.config().get('elasticsearch');
-    configSource = 'production';
-  }
-
-  config.log = MonitoringClientLogging;
-  config.plugins = [monitoringBulk];
-
-  const esPlugin = server.plugins.elasticsearch;
-  const cluster = esPlugin.createCluster('monitoring', config);
-  server.on('close', bindKey(cluster, 'close'));
-
-  server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster (${config.url})`);
+export function hasMonitoringCluster(server) {
+  const hosts = server.config().get('xpack.monitoring.elasticsearch.hosts');
+  return Boolean(hosts && hosts.length);
 }
 
 

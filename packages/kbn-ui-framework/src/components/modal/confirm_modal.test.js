@@ -68,7 +68,7 @@ test('onConfirm', () => {
 });
 
 describe('onCancel', () => {
-  test('triggerd by click', () => {
+  test('triggered by click', () => {
     const component = mount(
       <KuiConfirmModal
         onCancel={onCancel}

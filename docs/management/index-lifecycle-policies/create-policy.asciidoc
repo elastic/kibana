@@ -1,0 +1,93 @@
+[role="xpack"]
+[[creating-index-lifecycle-policies]]
+=== Creating an index lifecycle policy
+
+An index lifecycle policy enables you to define rules over when to perform 
+certain actions, such as a rollover or force merge, on an index. Index lifecycle 
+management automates execution of those actions at the right time.
+
+When you create an index lifecycle policy, consider the tradeoffs between 
+performance and availability. As you move your index through the lifecycle, 
+you’re likely moving your data to less performant hardware and reducing the 
+number of shards and replicas.  It’s important to ensure that the index 
+continues to have enough replicas to prevent data loss in the event of failures.
+
+*Index Lifecycle Policies* is automatically enabled in {kib}. Go to 
+*Management > {es} > Index Lifecycle Policies*. 
+
+NOTE: If you don’t want to use this feature, you can disable it by setting 
+`xpack.ilm.enabled` to false in your `kibana.yml` configuration file. If you 
+disable *Index Management*, then *Index Lifecycle Policies* is also disabled.
+
+[role="screenshot"]
+image::images/index-lifecycle-policies-create.png[][UI for creating an index lifecycle policy]
+
+==== Defining the phases of the index lifecycle
+
+You can define up to four phases in the index lifecycle. For each phase, you 
+can enable actions to optimize performance for that phase.
+
+The four phases in the index lifecycle are:
+
+* *Hot.* The index is actively being queried and written to. You can 
+roll over to a new index when the 
+original index reaches a specified size, document count, or age.  When a rollover occurs, a new 
+index is created, added to the index alias, and designated as the new “hot” 
+index. You can still query the previous indices, but you only ever write to 
+the “hot” index. See <<setting-a-rollover-action>>.
+
+* *Warm.* The index is typically searched at a lower rate than when the data is 
+hot. The index is not used for storing new data, but might occasionally add 
+late-arriving data, for example, from a Beat with a network problem that's now fixed.  
+You can optionally shrink the number replicas and move the shards to a 
+different set of nodes with smaller or less performant hardware. You can also 
+reduce the number of primary shards and force merge the index into 
+smaller {ref}/indices-segments.html[segments].
+ 
+* *Cold.* The index is no longer being updated and is seldom queried, but is 
+still searchable. If you have a big deployment, you can move it to even 
+less performant hardware. You might also reduce the number of replicas because 
+you expect the data to be queried less frequently. To keep the index searchable 
+for a longer period, and reduce the hardware requirements, you can use the 
+{ref}/frozen-indices.html[freeze action]. Queries are slower on a frozen index because the index is 
+reloaded from the disk to RAM on demand.
+
+* *Delete.* The index is no longer relevant. You can define when it is safe to 
+delete it.
+
+The index lifecycle always includes an active hot phase. The warm, cold, and 
+delete phases are optional. For example, you might define all four phases for 
+one policy and only a hot and delete phase for another.  See {ref}/_actions.html[Actions]
+for more information on the actions available in each phase. 
+
+[[setting-a-rollover-action]]
+==== Setting a rollover action
+
+The {ref}/indices-rollover-index.html[rollover] action enables you to automatically roll over to a new index based 
+on the index size, document count, or age. Rolling over to a new index based on 
+these criteria is preferable to time-based rollovers. Rolling over at an arbitrary 
+time often results in many small indices, which can have a negative impact on performance and resource usage.
+
+When you create an index lifecycle policy, the rollover action is enabled 
+by default.  The default size for triggering the rollover is 50 gigabytes, and 
+the default age is 30 days. The rollover occurs when any of the criteria are met.
+
+With the rollover action enabled, you can move to the warm phase on rollover or you can 
+time the move for a specified number of hours or days after the rollover. The 
+move to the cold and delete phases is based on the time from the rollover.
+
+If you are using daily indices (created by Logstash or another client) and you 
+want to use the index lifecycle policy to manage aging data, you can
+disable the rollover action in the hot phase. You can then
+transition to the warm, cold, and delete phases based on the time of index creation.
+
+==== Setting the index priority
+
+For the hot, warm, and cold phases, you can set a priority for recovering
+indices after a node restart. Indices with higher priorities are recovered 
+before indices with lower priorities. By default, the index priority is set to 
+100 in the hot phase, 50 in the warm phase, and 0 in the cold phase. 
+If the cold phase of one index has data that 
+is more important than the data in the hot phase of another, you might increase 
+the index priority in the cold phase.  See 
+{ref}/recovery-prioritization.html[Index recovery prioritization].

@@ -7,8 +7,9 @@
 import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
+import { injectI18n } from '@kbn/i18n/react';
 
-export function DetailStatus({ stats }) {
+function DetailStatusUi({ stats, intl }) {
   const {
     http_address: httpAddress,
     events,
@@ -21,46 +22,63 @@ export function DetailStatus({ stats }) {
 
   const firstMetrics = [
     {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.detailStatus.transportAddressLabel', defaultMessage: 'Transport Address'
+      }),
       value: httpAddress,
-      dataTestSubj: 'httpAddress'
+      'data-test-subj': 'httpAddress'
     },
     {
-      label: 'Events Received',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.detailStatus.eventsReceivedLabel', defaultMessage: 'Events Received'
+      }),
       value: formatMetric(events.in, '0.[0]a'),
-      dataTestSubj: 'eventsIn'
+      'data-test-subj': 'eventsIn'
     },
     {
-      label: 'Events Emitted',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.detailStatus.eventsEmittedLabel', defaultMessage: 'Events Emitted'
+      }),
       value: formatMetric(events.out, '0.[0]a'),
-      dataTestSubj: 'eventsOut'
+      'data-test-subj': 'eventsOut'
     },
     {
-      label: 'Config Reloads',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.detailStatus.configReloadsLabel', defaultMessage: 'Config Reloads'
+      }),
       value: reloads.successes,
-      dataTestSubj: 'numReloads'
+      'data-test-subj': 'numReloads'
     },
     {
-      label: 'Pipeline Workers',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.detailStatus.pipelineWorkersLabel', defaultMessage: 'Pipeline Workers'
+      }),
       value: pipeline.workers,
-      dataTestSubj: 'pipelineWorkers'
+      'data-test-subj': 'pipelineWorkers'
     },
     {
-      label: 'Batch Size',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.detailStatus.batchSizeLabel', defaultMessage: 'Batch Size'
+      }),
       value: pipeline.batch_size,
-      dataTestSubj: 'pipelineBatchSize'
+      'data-test-subj': 'pipelineBatchSize'
     }
   ];
 
   const lastMetrics = [
     {
-      label: 'Version',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.detailStatus.versionLabel', defaultMessage: 'Version'
+      }),
       value: version,
-      dataTestSubj: 'version'
+      'data-test-subj': 'version'
     },
     {
-      label: 'Uptime',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.detailStatus.uptimeLabel', defaultMessage: 'Uptime'
+      }),
       value: formatMetric(uptime, 'time_since'),
-      dataTestSubj: 'uptime'
+      'data-test-subj': 'uptime'
     }
   ];
 
@@ -68,9 +86,11 @@ export function DetailStatus({ stats }) {
   const metrics = [...firstMetrics];
   if (queueType) {
     metrics.push({
-      label: 'Queue Type',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.detailStatus.queueTypeLabel', defaultMessage: 'Queue Type'
+      }),
       value: queueType,
-      dataTestSubj: 'queueType'
+      'data-test-subj': 'queueType'
     });
   }
   metrics.push(...lastMetrics);
@@ -82,3 +102,5 @@ export function DetailStatus({ stats }) {
     />
   );
 }
+
+export const DetailStatus = injectI18n(DetailStatusUi);

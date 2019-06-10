@@ -7,6 +7,12 @@ import sinon from 'sinon';
 import { getReportingUsageCollector } from './get_reporting_usage_collector';
 
 function getServerMock(customization) {
+  class MockUsageCollector {
+    constructor(_server, { fetch }) {
+      this.fetch = fetch;
+    }
+  }
+
   const getLicenseCheckResults = sinon.stub().returns({});
   const defaultServerMock = {
     plugins: {
@@ -37,7 +43,14 @@ function getServerMock(customization) {
           return '.reporting-index';
         }
       }
-    })
+    }),
+    usage: {
+      collectorSet: {
+        makeUsageCollector: options => {
+          return new MockUsageCollector(this, options);
+        }
+      }
+    }
   };
   return Object.assign(defaultServerMock, customization);
 }

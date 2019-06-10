@@ -2,40 +2,27 @@
 
 exports[`DetailDrawer component If vertices shows basic info and no stats for if 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
-        <img
+        <EuiIcon
           className="lspvDetailDrawerIcon"
-          height={18}
-          width={18}
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
+      <EuiFlexItem>
+        <EuiTitle>
           <h2>
             if
           </h2>
@@ -44,24 +31,28 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText
-      grow={true}
-    >
+    <EuiText>
       <div>
         <p>
-          This is a conditional statement in your pipeline.
+          <FormattedMessage
+            defaultMessage="This is a conditional statement in your pipeline."
+            id="xpack.monitoring.logstash.pipeline.detailDrawer.conditionalStatementDescription"
+            values={Object {}}
+          />
         </p>
         <EuiCodeBlock>
           if ([type] == "apache_log") {
   ...
 }
         </EuiCodeBlock>
-        <EuiSpacer
-          size="l"
-        />
+        <EuiSpacer />
       </div>
       <p>
-        There are currently no metrics to show for this if condition.
+        <FormattedMessage
+          defaultMessage="There are currently no metrics to show for this if condition."
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.noMetricsForIfDescription"
+          values={Object {}}
+        />
       </p>
     </EuiText>
   </EuiFlyoutBody>
@@ -70,40 +61,27 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
 
 exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID shows basic info and stats for plugin, suggesting that user set explicit ID 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
-        <img
+        <EuiIcon
           className="lspvDetailDrawerIcon"
-          height={18}
-          width={18}
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
+      <EuiFlexItem>
+        <EuiTitle>
           <h2>
             grok filter
           </h2>
@@ -112,14 +90,18 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText
-      grow={true}
-    >
+    <EuiText>
       <div>
         <p>
-          This 
-          plugin
-           does not have an ID explicitly specified. Specifying an ID allows you to track differences across pipeline changes. You can explicitly specify an ID for this plugin like so:
+          <FormattedMessage
+            defaultMessage="This {vertexType} does not have an ID explicitly specified. Specifying an ID allows you to track differences across pipeline changes. You can explicitly specify an ID for this plugin like so:"
+            id="xpack.monitoring.logstash.pipeline.detailDrawer.specifyVertexIdDescription"
+            values={
+              Object {
+                "vertexType": "plugin",
+              }
+            }
+          />
         </p>
         <EuiCodeBlock>
            
@@ -127,9 +109,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
   id =&gt; "mySpecialId"
 }
         </EuiCodeBlock>
-        <EuiSpacer
-          size="l"
-        />
+        <EuiSpacer />
       </div>
       <EuiTable
         responsive={true}
@@ -140,12 +120,26 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
-              Events Latency
+              <FormattedMessage
+                defaultMessage="Events Latency"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsLatencyLabel"
+                values={Object {}}
+              />
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -184,6 +178,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               0.23 ms/e
@@ -194,12 +193,26 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
-              Events Emitted Rate
+              <FormattedMessage
+                defaultMessage="Events Emitted Rate"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedRateLabel"
+                values={Object {}}
+              />
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -238,6 +251,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               N/A
@@ -248,12 +266,26 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
-              Events Received
+              <FormattedMessage
+                defaultMessage="Events Received"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsReceivedLabel"
+                values={Object {}}
+              />
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -292,6 +324,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               203 events
@@ -302,12 +339,26 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
-              Events Emitted
+              <FormattedMessage
+                defaultMessage="Events Emitted"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedLabel"
+                values={Object {}}
+              />
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -346,6 +397,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               200 events
@@ -360,40 +416,27 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
 
 exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows basic info and stats for plugin, including explicit ID 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
-        <img
+        <EuiIcon
           className="lspvDetailDrawerIcon"
-          height={18}
-          width={18}
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
+      <EuiFlexItem>
+        <EuiTitle>
           <h2>
             grok filter
           </h2>
@@ -402,20 +445,23 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText
-      grow={true}
-    >
+    <EuiText>
       <p>
-        This 
-        plugin
-        's ID is 
-        <EuiBadge
-          color="default"
-          iconSide="left"
-        >
-          parse_apache_logline
-        </EuiBadge>
-        .
+        <FormattedMessage
+          defaultMessage="This {vertexType}'s ID is {vertexId}."
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.vertexIdDescription"
+          values={
+            Object {
+              "vertexId": <EuiBadge
+                color="default"
+                iconSide="left"
+              >
+                parse_apache_logline
+              </EuiBadge>,
+              "vertexType": "plugin",
+            }
+          }
+        />
       </p>
       <EuiTable
         responsive={true}
@@ -426,12 +472,26 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
-              Events Latency
+              <FormattedMessage
+                defaultMessage="Events Latency"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsLatencyLabel"
+                values={Object {}}
+              />
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -470,6 +530,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               0.23 ms/e
@@ -480,12 +545,26 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
-              Events Emitted Rate
+              <FormattedMessage
+                defaultMessage="Events Emitted Rate"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedRateLabel"
+                values={Object {}}
+              />
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -524,6 +603,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               N/A
@@ -534,12 +618,26 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
-              Events Received
+              <FormattedMessage
+                defaultMessage="Events Received"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsReceivedLabel"
+                values={Object {}}
+              />
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -578,6 +676,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               203 events
@@ -588,12 +691,26 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
-              Events Emitted
+              <FormattedMessage
+                defaultMessage="Events Emitted"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedLabel"
+                values={Object {}}
+              />
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -632,6 +749,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               200 events
@@ -646,40 +768,27 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
 
 exports[`DetailDrawer component Queue vertices shows basic info and no stats for queue 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
-        <img
+        <EuiIcon
           className="lspvDetailDrawerIcon"
-          height={18}
-          width={18}
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
+      <EuiFlexItem>
+        <EuiTitle>
           <h2>
             queue
           </h2>
@@ -688,14 +797,20 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText
-      grow={true}
-    >
+    <EuiText>
       <p>
-        This is an internal structure used by Logstash to buffer events between inputs and the rest of the pipeline.
+        <FormattedMessage
+          defaultMessage="This is an internal structure used by Logstash to buffer events between inputs and the rest of the pipeline."
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.structureDescription"
+          values={Object {}}
+        />
       </p>
       <p>
-        There are currently no metrics to show for the queue.
+        <FormattedMessage
+          defaultMessage="There are currently no metrics to show for the queue."
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.noMetricsForQueueDescription"
+          values={Object {}}
+        />
       </p>
     </EuiText>
   </EuiFlyoutBody>
@@ -704,49 +819,34 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
 
 exports[`DetailDrawer component shows vertex title 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
-        <img
+        <EuiIcon
           className="lspvDetailDrawerIcon"
-          height={18}
-          width={18}
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
+      <EuiFlexItem>
+        <EuiTitle>
           <h2 />
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText
-      grow={true}
-    />
+    <EuiText />
   </EuiFlyoutBody>
 </EuiFlyout>
 `;

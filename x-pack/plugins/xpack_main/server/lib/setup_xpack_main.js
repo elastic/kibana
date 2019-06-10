@@ -6,6 +6,8 @@
 
 import { injectXPackInfoSignature } from './inject_xpack_info_signature';
 import { XPackInfo } from './xpack_info';
+import { REPORT_INTERVAL_MS } from '../../common/constants';
+import { FeatureRegistry } from './feature_registry';
 
 /**
  * Setup the X-Pack Main plugin. This is fired every time that the Elasticsearch plugin becomes Green.
@@ -21,15 +23,29 @@ export function setupXPackMain(server) {
   });
 
   server.expose('info', info);
+  server.expose('telemetryCollectionInterval', REPORT_INTERVAL_MS);
   server.expose('createXPackInfo', (options) => new XPackInfo(server, options));
-  server.ext('onPreResponse', (request, reply) => injectXPackInfoSignature(info, request, reply));
-  server.plugins.elasticsearch.status.on('change', async () => {
-    await info.refreshNow();
+  server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
 
+  const featureRegistry = new FeatureRegistry();
+  server.expose('registerFeature', (feature) => featureRegistry.register(feature));
+  server.expose('getFeatures', () => featureRegistry.getAll());
+
+  const setPluginStatus = () => {
     if (info.isAvailable()) {
       server.plugins.xpack_main.status.green('Ready');
     } else {
       server.plugins.xpack_main.status.red(info.unavailableReason());
     }
+  };
+
+  // trigger an xpack info refresh whenever the elasticsearch plugin status changes
+  server.plugins.elasticsearch.status.on('change', async () => {
+    await info.refreshNow();
+    setPluginStatus();
   });
+
+  // whenever the license info is updated, regardless of the elasticsearch plugin status
+  // changes, reflect the change in our plugin status. See https://github.com/elastic/kibana/issues/20017
+  info.onLicenseInfoChange(setPluginStatus);
 }

@@ -17,20 +17,48 @@
  * under the License.
  */
 
-import { run } from './run';
-
+import { run, combineErrors } from './run';
 import * as Eslint from './eslint';
-import * as Tslint from './tslint';
+import * as Sasslint from './sasslint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
-run(async ({ log }) => {
+run(async ({ log, flags }) => {
   const files = await getFilesForCommit();
-  await checkFileCasing(log, files);
+  const errors = [];
 
-  for (const Linter of [Eslint, Tslint]) {
+  try {
+    await checkFileCasing(log, files);
+  } catch (error) {
+    errors.push(error);
+  }
+
+  for (const Linter of [Eslint, Sasslint]) {
     const filesToLint = Linter.pickFilesToLint(log, files);
     if (filesToLint.length > 0) {
-      await Linter.lintFiles(log, filesToLint);
+      try {
+        await Linter.lintFiles(log, filesToLint, {
+          fix: flags.fix
+        });
+      } catch (error) {
+        errors.push(error);
+      }
     }
   }
+
+  if (errors.length) {
+    throw combineErrors(errors);
+  }
+}, {
+  description: `
+    Run checks on files that are staged for commit
+  `,
+  flags: {
+    boolean: ['fix'],
+    default: {
+      fix: false
+    },
+    help: `
+      --fix              Execute eslint in --fix mode
+    `
+  },
 });

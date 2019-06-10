@@ -1,0 +1,605 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render empty suggestions component 1`] = `
+<SuggestionsComponent
+  groupIndex={0}
+  itemIndex={0}
+  loadMore={[Function]}
+  onClick={[Function]}
+  onMouseEnter={[Function]}
+  query="string"
+  show={true}
+  suggestionGroups={Array []}
+/>
+`;
+
+exports[`render full suggestions component 1`] = `
+<MemoryRouter
+  initialEntries={
+    Array [
+      Object {
+        "key": "testKey",
+        "pathname": "/",
+      },
+    ]
+  }
+>
+  <Router
+    history={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "testKey",
+            "pathname": "/",
+            "search": "",
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "testKey",
+          "pathname": "/",
+          "search": "",
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <SuggestionsComponent
+      groupIndex={0}
+      itemIndex={0}
+      loadMore={[Function]}
+      onClick={[Function]}
+      onMouseEnter={[Function]}
+      query="string"
+      show={true}
+      suggestionGroups={
+        Array [
+          Object {
+            "hasMore": false,
+            "suggestions": Array [
+              Object {
+                "description": "elastic/elasticsearch > src/foo/bar.java",
+                "end": 10,
+                "selectUrl": "http://github.com/elastic/elasticsearch/src/foo/bar.java",
+                "start": 1,
+                "text": "java.lang.String",
+                "tokenType": "tokenClass",
+              },
+            ],
+            "total": 1,
+            "type": "symbol",
+          },
+          Object {
+            "hasMore": false,
+            "suggestions": Array [
+              Object {
+                "description": "This is a file",
+                "end": 10,
+                "selectUrl": "http://github.com/elastic/elasticsearch/src/foo/bar.java",
+                "start": 1,
+                "text": "src/foo/bar.java",
+                "tokenType": "",
+              },
+            ],
+            "total": 1,
+            "type": "file",
+          },
+          Object {
+            "hasMore": true,
+            "suggestions": Array [
+              Object {
+                "description": "",
+                "end": 10,
+                "selectUrl": "http://github.com/elastic/kibana",
+                "start": 1,
+                "text": "elastic/kibana",
+                "tokenType": "",
+              },
+              Object {
+                "description": "",
+                "end": 10,
+                "selectUrl": "http://github.com/elastic/elasticsearch",
+                "start": 1,
+                "text": "elastic/elasticsearch",
+                "tokenType": "",
+              },
+            ],
+            "total": 2,
+            "type": "repository",
+          },
+        ]
+      }
+    >
+      <div
+        className="reactSuggestionTypeahead"
+      >
+        <div
+          className="kbnTypeahead"
+        >
+          <div
+            className="kbnTypeahead__popover"
+          >
+            <div
+              className="kbnTypeahead__items codeSearch-suggestion__group"
+              data-test-subj="codeTypeaheadList-symbol"
+              id="kbnTypeahead__items"
+              key="symbol-suggestions"
+              onScroll={[Function]}
+              role="listbox"
+            >
+              <EuiFlexGroup
+                className="codeSearch-suggestion__group-header"
+                justifyContent="spaceBetween"
+              >
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive codeSearch-suggestion__group-header"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    direction="row"
+                    gutterSize="none"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiToken
+                        displayOptions={Object {}}
+                        iconType="tokenSymbol"
+                        size="s"
+                      >
+                        <div
+                          className="euiToken euiToken--tokenTint07 euiToken--rectangle euiToken--small euiToken--fill"
+                        >
+                          <EuiIcon
+                            type="tokenSymbol"
+                          >
+                            <EuiIconEmpty
+                              className="euiIcon euiIcon--medium euiIcon-isLoading"
+                              focusable="false"
+                              style={null}
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </EuiIconEmpty>
+                          </EuiIcon>
+                        </div>
+                      </EuiToken>
+                      <EuiText
+                        className="codeSearch-suggestion__group-title"
+                      >
+                        <div
+                          className="euiText euiText--medium codeSearch-suggestion__group-title"
+                        >
+                          Symbols
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexGroup>
+                  <div
+                    className="codeSearch-suggestion__group-result"
+                  >
+                    1
+                     Result
+                  </div>
+                </div>
+              </EuiFlexGroup>
+              <SuggestionComponent
+                ariaId="suggestion-0-0"
+                innerRef={[Function]}
+                key="tokenClass - 0-0 - java.lang.String"
+                onClick={[Function]}
+                onMouseEnter={[Function]}
+                query="string"
+                selected={true}
+                suggestion={
+                  Object {
+                    "description": "elastic/elasticsearch > src/foo/bar.java",
+                    "end": 10,
+                    "selectUrl": "http://github.com/elastic/elasticsearch/src/foo/bar.java",
+                    "start": 1,
+                    "text": "java.lang.String",
+                    "tokenType": "tokenClass",
+                  }
+                }
+              >
+                <div
+                  aria-selected={true}
+                  className="codeSearch__suggestion-item codeSearch__suggestion-item--active"
+                  id="suggestion-0-0"
+                  onClick={[Function]}
+                  onMouseEnter={[Function]}
+                  role="option"
+                >
+                  <div
+                    className="codeSearch-suggestion--inner"
+                  >
+                    <div
+                      className="codeSearch-suggestion__token"
+                    >
+                      <EuiToken
+                        displayOptions={Object {}}
+                        iconType="tokenClass"
+                        size="s"
+                      >
+                        <div
+                          className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
+                        >
+                          <EuiIcon
+                            type="tokenClass"
+                          >
+                            <EuiIconEmpty
+                              className="euiIcon euiIcon--medium euiIcon-isLoading"
+                              focusable="false"
+                              style={null}
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </EuiIconEmpty>
+                          </EuiIcon>
+                        </div>
+                      </EuiToken>
+                    </div>
+                    <div>
+                      <div
+                        className="codeSearch__suggestion-text"
+                        data-test-subj="codeTypeaheadItem"
+                      >
+                        <span>
+                          java.lang.
+                          <strong>
+                            String
+                          </strong>
+                        </span>
+                      </div>
+                      <div
+                        className="codeSearch-suggestion__description"
+                      >
+                        elastic/elasticsearch &gt; src/foo/bar.java
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </SuggestionComponent>
+            </div>
+            <div
+              className="kbnTypeahead__items codeSearch-suggestion__group"
+              data-test-subj="codeTypeaheadList-file"
+              id="kbnTypeahead__items"
+              key="file-suggestions"
+              onScroll={[Function]}
+              role="listbox"
+            >
+              <EuiFlexGroup
+                className="codeSearch-suggestion__group-header"
+                justifyContent="spaceBetween"
+              >
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive codeSearch-suggestion__group-header"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    direction="row"
+                    gutterSize="none"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiToken
+                        displayOptions={Object {}}
+                        iconType="tokenFile"
+                        size="s"
+                      >
+                        <div
+                          className="euiToken euiToken--tokenTint12 euiToken--rectangle euiToken--small euiToken--fill"
+                        >
+                          <EuiIcon
+                            type="tokenFile"
+                          >
+                            <EuiIconEmpty
+                              className="euiIcon euiIcon--medium euiIcon-isLoading"
+                              focusable="false"
+                              style={null}
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </EuiIconEmpty>
+                          </EuiIcon>
+                        </div>
+                      </EuiToken>
+                      <EuiText
+                        className="codeSearch-suggestion__group-title"
+                      >
+                        <div
+                          className="euiText euiText--medium codeSearch-suggestion__group-title"
+                        >
+                          Files
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexGroup>
+                  <div
+                    className="codeSearch-suggestion__group-result"
+                  >
+                    1
+                     Result
+                  </div>
+                </div>
+              </EuiFlexGroup>
+              <SuggestionComponent
+                ariaId="suggestion-1-0"
+                innerRef={[Function]}
+                key=" - 1-0 - src/foo/bar.java"
+                onClick={[Function]}
+                onMouseEnter={[Function]}
+                query="string"
+                selected={false}
+                suggestion={
+                  Object {
+                    "description": "This is a file",
+                    "end": 10,
+                    "selectUrl": "http://github.com/elastic/elasticsearch/src/foo/bar.java",
+                    "start": 1,
+                    "text": "src/foo/bar.java",
+                    "tokenType": "",
+                  }
+                }
+              >
+                <div
+                  aria-selected={false}
+                  className="codeSearch__suggestion-item "
+                  id="suggestion-1-0"
+                  onClick={[Function]}
+                  onMouseEnter={[Function]}
+                  role="option"
+                >
+                  <div
+                    className="codeSearch-suggestion--inner"
+                  >
+                    <div>
+                      <div
+                        className="codeSearch__suggestion-text"
+                        data-test-subj="codeTypeaheadItem"
+                      >
+                        src/foo/bar.java
+                      </div>
+                      <div
+                        className="codeSearch-suggestion__description"
+                      >
+                        This is a file
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </SuggestionComponent>
+            </div>
+            <div
+              className="kbnTypeahead__items codeSearch-suggestion__group"
+              data-test-subj="codeTypeaheadList-repository"
+              id="kbnTypeahead__items"
+              key="repository-suggestions"
+              onScroll={[Function]}
+              role="listbox"
+            >
+              <EuiFlexGroup
+                className="codeSearch-suggestion__group-header"
+                justifyContent="spaceBetween"
+              >
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive codeSearch-suggestion__group-header"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    direction="row"
+                    gutterSize="none"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiToken
+                        displayOptions={Object {}}
+                        iconType="tokenRepo"
+                        size="s"
+                      >
+                        <div
+                          className="euiToken euiToken--tokenTint05 euiToken--rectangle euiToken--small euiToken--fill"
+                        >
+                          <EuiIcon
+                            type="tokenRepo"
+                          >
+                            <EuiIconEmpty
+                              className="euiIcon euiIcon--medium euiIcon-isLoading"
+                              focusable="false"
+                              style={null}
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </EuiIconEmpty>
+                          </EuiIcon>
+                        </div>
+                      </EuiToken>
+                      <EuiText
+                        className="codeSearch-suggestion__group-title"
+                      >
+                        <div
+                          className="euiText euiText--medium codeSearch-suggestion__group-title"
+                        >
+                          Repos
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexGroup>
+                  <div
+                    className="codeSearch-suggestion__group-result"
+                  >
+                    2
+                     Result
+                    s
+                  </div>
+                </div>
+              </EuiFlexGroup>
+              <SuggestionComponent
+                ariaId="suggestion-2-0"
+                innerRef={[Function]}
+                key=" - 2-0 - elastic/kibana"
+                onClick={[Function]}
+                onMouseEnter={[Function]}
+                query="string"
+                selected={false}
+                suggestion={
+                  Object {
+                    "description": "",
+                    "end": 10,
+                    "selectUrl": "http://github.com/elastic/kibana",
+                    "start": 1,
+                    "text": "elastic/kibana",
+                    "tokenType": "",
+                  }
+                }
+              >
+                <div
+                  aria-selected={false}
+                  className="codeSearch__suggestion-item "
+                  id="suggestion-2-0"
+                  onClick={[Function]}
+                  onMouseEnter={[Function]}
+                  role="option"
+                >
+                  <div
+                    className="codeSearch-suggestion--inner"
+                  >
+                    <div>
+                      <div
+                        className="codeSearch__suggestion-text"
+                        data-test-subj="codeTypeaheadItem"
+                      >
+                        elastic/kibana
+                      </div>
+                      <div
+                        className="codeSearch-suggestion__description"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </SuggestionComponent>
+              <SuggestionComponent
+                ariaId="suggestion-2-1"
+                innerRef={[Function]}
+                key=" - 2-1 - elastic/elasticsearch"
+                onClick={[Function]}
+                onMouseEnter={[Function]}
+                query="string"
+                selected={false}
+                suggestion={
+                  Object {
+                    "description": "",
+                    "end": 10,
+                    "selectUrl": "http://github.com/elastic/elasticsearch",
+                    "start": 1,
+                    "text": "elastic/elasticsearch",
+                    "tokenType": "",
+                  }
+                }
+              >
+                <div
+                  aria-selected={false}
+                  className="codeSearch__suggestion-item "
+                  id="suggestion-2-1"
+                  onClick={[Function]}
+                  onMouseEnter={[Function]}
+                  role="option"
+                >
+                  <div
+                    className="codeSearch-suggestion--inner"
+                  >
+                    <div>
+                      <div
+                        className="codeSearch__suggestion-text"
+                        data-test-subj="codeTypeaheadItem"
+                      >
+                        elastic/elasticsearch
+                      </div>
+                      <div
+                        className="codeSearch-suggestion__description"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </SuggestionComponent>
+              <div
+                className="codeSearch-suggestion__link"
+              >
+                <Link
+                  replace={false}
+                  to="/search?q=string"
+                >
+                  <a
+                    href="/search?q=string"
+                    onClick={[Function]}
+                  >
+                    View More
+                  </a>
+                </Link>
+              </div>
+            </div>
+            <Link
+              replace={false}
+              to="/search?q=string"
+            >
+              <a
+                href="/search?q=string"
+                onClick={[Function]}
+              >
+                <div
+                  className="codeSearch__full-text-button"
+                >
+                  Press ⮐ Return for Full Text Search
+                </div>
+              </a>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </SuggestionsComponent>
+  </Router>
+</MemoryRouter>
+`;

@@ -21,14 +21,14 @@ function scan(pattern) {
   });
 }
 
-const pattern = resolve(__dirname, '../../export_types/*/server/index.js');
+const pattern = resolve(__dirname, '../../export_types/*/server/index.[jt]s');
 async function exportTypesRegistryFn(server) {
   const exportTypesRegistry = new ExportTypesRegistry();
   const files = await scan(pattern);
   files.forEach(file => {
     server.log(['reporting', 'debug', 'exportTypes'], `Found exportType at ${file}`);
 
-    const { register } = require(file);
+    const { register } = require(file); // eslint-disable-line import/no-dynamic-require
     register(exportTypesRegistry);
   });
   return exportTypesRegistry;

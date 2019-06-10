@@ -31,35 +31,46 @@ export async function FailureDebuggingProvider({ getService }) {
   const config = getService('config');
   const lifecycle = getService('lifecycle');
   const log = getService('log');
-  const remote = getService('remote');
+  const browser = getService('browser');
 
   await del(config.get('failureDebugging.htmlDirectory'));
 
   async function logCurrentUrl() {
-    const currentUrl = await remote.getCurrentUrl();
+    const currentUrl = await browser.getCurrentUrl();
     log.info(`Current URL is: ${currentUrl}`);
   }
 
   async function savePageHtml(name) {
     await mkdirAsync(config.get('failureDebugging.htmlDirectory'));
     const htmlOutputFileName = resolve(config.get('failureDebugging.htmlDirectory'), `${name}.html`);
-    const pageSource = await remote.getPageSource();
+    const pageSource = await browser.getPageSource();
     log.info(`Saving page source to: ${htmlOutputFileName}`);
     await writeFileAsync(htmlOutputFileName, pageSource);
   }
 
+  async function logBrowserConsole() {
+    const browserLogs = await browser.getLogsFor('browser');
+    const browserOutput = browserLogs.reduce((acc, log) => acc += `${log.message.replace(/\\n/g, '\n')}\n`, '');
+    log.info(`Browser output is: ${browserOutput}`);
+  }
+
   async function onFailure(error, test) {
     // Replace characters in test names which can't be used in filenames, like *
-    const name = test.fullTitle().replace(/([^ a-zA-Z0-9/-]+)/g, '_');
+    const name = test.fullTitle().replace(/([^ a-zA-Z0-9-]+)/g, '_');
 
     await Promise.all([
       screenshots.takeForFailure(name),
       logCurrentUrl(),
-      savePageHtml(name)
+      savePageHtml(name),
+      logBrowserConsole(),
     ]);
   }
 
   lifecycle
     .on('testFailure', onFailure)
     .on('testHookFailure', onFailure);
+
+  return {
+    logBrowserConsole
+  };
 }

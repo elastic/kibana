@@ -7,3 +7,9 @@
 
 
 export const EVENT_RATE_COUNT_FIELD = '__ml_event_rate_count__';
+
+export const WIZARD_TYPE = {
+  SINGLE_METRIC: 'single-metric-wizard',
+  MULTI_METRIC: 'multi-metric-wizard',
+  POPULATION: 'population-wizard',
+};

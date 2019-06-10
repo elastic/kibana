@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'ui/filters/moment';
+import '../../../../directives/moment';
 import { uiModules } from 'ui/modules';
-import { Notifier } from 'ui/notify';
 import 'ui/pager_control';
 import 'ui/pager';
 import 'ui/table_info';
@@ -48,7 +47,6 @@ app.directive('watchHistory', function ($injector) {
         this.pageOfHistoryItems = [];
 
         this.historyRange = this.initialRange;
-        this.notifier = new Notifier({ location: 'Watcher' });
         this.pager = pagerFactory.create(this.historyItems.length, PAGINATION.PAGE_SIZE, 1);
 
         // react to data and UI changes

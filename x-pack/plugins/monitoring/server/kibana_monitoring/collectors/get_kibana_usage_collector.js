@@ -5,8 +5,7 @@
  */
 
 import { get, snakeCase } from 'lodash';
-import { KIBANA_USAGE_TYPE } from '../../../common/constants';
-import { UsageCollector } from '../classes/usage_collector';
+import { KIBANA_USAGE_TYPE, KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
 
 const TYPES = [
   'dashboard',
@@ -18,11 +17,13 @@ const TYPES = [
 ];
 
 /**
- * Fetches saved object client counts by querying the saved object index
+ * Fetches saved object counts by querying the .kibana index
  */
 export function getKibanaUsageCollector(server) {
-  return new UsageCollector(server, {
+  const { collectorSet } = server.usage;
+  return collectorSet.makeUsageCollector({
     type: KIBANA_USAGE_TYPE,
+    isReady: () => true,
     async fetch(callCluster) {
       const index = server.config().get('kibana.index');
       const savedObjectCountSearchParams = {
@@ -59,6 +60,20 @@ export function getKibanaUsageCollector(server) {
             total: bucketCounts[type] || 0
           }
         }), {})
+      };
+    },
+
+    /*
+     * Format the response data into a model for internal upload
+     * 1. Make this data part of the "kibana_stats" type
+     * 2. Organize the payload in the usage namespace of the data payload (usage.index, etc)
+     */
+    formatForBulkUpload: result => {
+      return {
+        type: KIBANA_STATS_TYPE_MONITORING,
+        payload: {
+          usage: result
+        }
       };
     }
   });

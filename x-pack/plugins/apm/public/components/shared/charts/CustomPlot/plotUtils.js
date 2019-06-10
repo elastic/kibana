@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { isEmpty, flatten } from 'lodash';
 import { scaleLinear } from 'd3-scale';
 import { XYPlot } from 'react-vis';
 import d3 from 'd3';
@@ -17,7 +17,7 @@ const XY_HEIGHT = unit * 16;
 const XY_MARGIN = {
   top: unit,
   left: unit * 5,
-  right: unit,
+  right: 0,
   bottom: unit * 2
 };
 
@@ -34,28 +34,36 @@ const getYScale = (yMin, yMax) => {
     .nice();
 };
 
-function getFlattenedCoordiantes(visibleSeries, enabledSeries) {
-  const enabledCoordinates = _.flatten(enabledSeries.map(serie => serie.data));
-  if (!_.isEmpty(enabledCoordinates)) {
+function getFlattenedCoordinates(visibleSeries, enabledSeries) {
+  const enabledCoordinates = flatten(enabledSeries.map(serie => serie.data));
+  if (!isEmpty(enabledCoordinates)) {
     return enabledCoordinates;
   }
 
-  return _.flatten(visibleSeries.map(serie => serie.data));
+  return flatten(visibleSeries.map(serie => serie.data));
 }
 
-export function getPlotValues(visibleSeries, enabledSeries, width) {
-  const flattenedCoordinates = getFlattenedCoordiantes(
+export function getPlotValues(
+  visibleSeries,
+  enabledSeries,
+  { width, yMin = 0, yMax = 'max' }
+) {
+  const flattenedCoordinates = getFlattenedCoordinates(
     visibleSeries,
     enabledSeries
   );
-  if (_.isEmpty(flattenedCoordinates)) {
+  if (isEmpty(flattenedCoordinates)) {
     return null;
   }
 
   const xMin = d3.min(flattenedCoordinates, d => d.x);
   const xMax = d3.max(flattenedCoordinates, d => d.x);
-  const yMin = 0;
-  const yMax = d3.max(flattenedCoordinates, d => d.y) || 1;
+  if (yMax === 'max') {
+    yMax = d3.max(flattenedCoordinates, d => d.y);
+  }
+  if (yMin === 'min') {
+    yMin = d3.min(flattenedCoordinates, d => d.y);
+  }
   const xScale = getXScale(xMin, xMax, width);
   const yScale = getYScale(yMin, yMax);
 

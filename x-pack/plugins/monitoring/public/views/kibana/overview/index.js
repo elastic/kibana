@@ -7,17 +7,22 @@
 /**
  * Kibana Overview
  */
-import { find } from 'lodash';
+import React from 'react';
 import uiRoutes from'ui/routes';
+import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ClusterStatus } from '../../../components/kibana/cluster_status';
+import { I18nContext } from 'ui/i18n';
+import { MonitoringViewBaseController } from '../../base_controller';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/kibana`;
-  const timefilter = $injector.get('timefilter');
   const timeBounds = timefilter.getBounds();
 
   return $http.post(url, {
@@ -44,27 +49,53 @@ uiRoutes.when('/kibana', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
+  controllerAs: 'monitoringKibanaOverviewApp',
+  controller: class extends MonitoringViewBaseController {
+    constructor($injector, $scope) {
+      super({
+        title: `Kibana`,
+        defaultData: {},
+        getPageData,
+        reactNodeId: 'monitoringKibanaOverviewApp',
+        $scope,
+        $injector
+      });
 
-    const $route = $injector.get('$route');
-    const globalState = $injector.get('globalState');
-    $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-    $scope.pageData = $route.current.locals.pageData;
+      $scope.$watch(() => this.data, data => {
+        if (!data || !data.clusterStatus) {
+          return;
+        }
 
-    const title = $injector.get('title');
-    title($scope.cluster, 'Kibana');
+        this.renderReact(
+          <I18nContext>
+            <EuiPage>
+              <EuiPageBody>
+                <EuiPanel>
+                  <ClusterStatus stats={data.clusterStatus} />
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_cluster_requests}
+                        onBrush={this.onBrush}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_cluster_response_times}
+                        onBrush={this.onBrush}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
 
-    const $executor = $injector.get('$executor');
-    $executor.register({
-      execute: () => getPageData($injector),
-      handleResponse: (response) => $scope.pageData = response
-    });
-
-    $executor.start();
-
-    $scope.$on('$destroy', $executor.destroy);
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
+          </I18nContext>
+        );
+      });
+    }
   }
 });

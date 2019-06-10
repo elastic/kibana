@@ -5,11 +5,23 @@
  */
 
 import {
+  EsProvider,
+  EsSupertestWithoutAuthProvider,
   SupertestWithoutAuthProvider,
   UsageAPIProvider,
+  InfraOpsGraphQLClientProvider,
+  InfraOpsGraphQLClientFactoryProvider,
+  SiemGraphQLClientProvider,
+  SiemGraphQLClientFactoryProvider,
+  InfraOpsSourceConfigurationProvider,
 } from './services';
 
-export default async function ({ readConfigFile }) {
+import {
+  SecurityServiceProvider,
+  SpacesServiceProvider,
+} from '../common/services';
+
+export async function getApiIntegrationConfig({ readConfigFile }) {
 
   const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
   const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
@@ -22,16 +34,24 @@ export default async function ({ readConfigFile }) {
       supertest: kibanaAPITestsConfig.get('services.supertest'),
       esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
       supertestWithoutAuth: SupertestWithoutAuthProvider,
-      es: kibanaCommonConfig.get('services.es'),
+      esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
+      infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
+      infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
+      siemGraphQLClientFactory: SiemGraphQLClientFactoryProvider,
+      siemGraphQLClient: SiemGraphQLClientProvider,
+      infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
+      es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,
       kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
+      chance: kibanaAPITestsConfig.get('services.chance'),
+      security: SecurityServiceProvider,
+      spaces: SpacesServiceProvider,
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack API Integration Tests',
     },
-    env: xPackFunctionalTestsConfig.get('env'),
     kbnTestServer: {
       ...xPackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
@@ -39,6 +59,14 @@ export default async function ({ readConfigFile }) {
         '--optimize.enabled=false',
       ],
     },
-    esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...xPackFunctionalTestsConfig.get('esTestCluster'),
+      serverArgs: [
+        ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
+        'node.attr.name=apiIntegrationTestNode'
+      ],
+    },
   };
 }
+
+export default getApiIntegrationConfig;

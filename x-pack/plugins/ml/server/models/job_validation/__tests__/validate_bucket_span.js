@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { validateBucketSpan } from '../validate_bucket_span';
 import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../../common/constants/validation';
 

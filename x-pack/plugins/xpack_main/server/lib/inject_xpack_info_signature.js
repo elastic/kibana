@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export async function injectXPackInfoSignature(info, request, reply) {
+export async function injectXPackInfoSignature(info, request, h) {
   // If we're returning an error response, refresh xpack info from
   // Elasticsearch in case the error is due to a change in license information
   // in Elasticsearch.
@@ -21,5 +21,5 @@ export async function injectXPackInfoSignature(info, request, reply) {
     response.headers['kbn-xpack-sig'] = info.getSignature();
   }
 
-  return reply.continue();
+  return h.continue;
 }

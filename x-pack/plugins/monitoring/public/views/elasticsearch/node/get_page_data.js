@@ -5,6 +5,7 @@
  */
 
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
+import { timefilter } from 'ui/timefilter';
 
 export function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -13,7 +14,6 @@ export function getPageData($injector) {
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/nodes/${$route.current.params.node}`;
   const features = $injector.get('features');
   const showSystemIndices = features.isEnabled('showSystemIndices', false);
-  const timefilter = $injector.get('timefilter');
   const timeBounds = timefilter.getBounds();
 
   return $http.post(url, {

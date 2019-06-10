@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Pager } from '@elastic/eui';
+import { Pager, EuiSearchBar } from '@elastic/eui';
 
 import { createSelector } from 'reselect';
 import { indexStatusLabels } from '../../lib/index_status_labels';
-import { filterItems, sortTable } from '../../services';
+import { sortTable } from '../../services';
+import { getToggleExtensions } from '../../index_management_extensions';
 
 export const getDetailPanelData = (state) => state.detailPanel.data;
 export const getDetailPanelError = (state) => state.detailPanel.error;
@@ -16,27 +16,60 @@ export const getDetailPanelType = (state) => state.detailPanel.panelType;
 export const isDetailPanelOpen = (state) => !!getDetailPanelType(state);
 export const getDetailPanelIndexName = (state) => state.detailPanel.indexName;
 export const getIndices = (state) => state.indices.byId;
+export const indicesLoading = (state) => state.indices.loading;
+export const getIndicesAsArray = (state) => Object.values(state.indices.byId);
+export const getIndicesByName = (state, indexNames) => {
+  const indices = getIndices(state);
+  return indexNames.map((indexName) => indices[indexName]);
+};
 export const getIndexByIndexName = (state, name) => getIndices(state)[name];
 export const getFilteredIds = (state) => state.indices.filteredIds;
 export const getRowStatuses = (state) => state.rowStatus;
 export const getTableState = (state) => state.tableState;
-
-
+export const getAllIds = (state) => state.indices.allIds;
 export const getIndexStatusByIndexName = (state, indexName) => {
   const indices = getIndices(state);
   const { status } = indices[indexName] || {};
   return status;
 };
+const defaultFilterFields = ['name'];
+
+const filterByToggles = (indices, toggleNameToVisibleMap) => {
+  const togglesByName = getToggleExtensions().reduce((byName, toggle) => ({
+    ...byName,
+    [toggle.name]: toggle,
+  }), {});
+
+  const toggleNames = Object.keys(togglesByName);
+  if (!toggleNames.length) {
+    return indices;
+  }
+  // An index is visible if ANY applicable toggle is visible.
+  return indices.filter((index) => {
+    return toggleNames.some(toggleName => {
+      if (!togglesByName[toggleName].matchIndex(index)) {
+        return true;
+      }
+
+      const isVisible = toggleNameToVisibleMap[toggleName] === true;
+
+      return isVisible;
+    });
+  });
+};
 const getFilteredIndices = createSelector(
   getIndices,
-  getRowStatuses,
+  getAllIds,
   getTableState,
-  (indices, rowStatuses, tableState) => {
-    const indexArray = Object.keys(indices).map(indexName => indices[indexName]);
+  (indices, allIds, tableState) => {
+    let indexArray = allIds.map(indexName => indices[indexName]);
+    indexArray = filterByToggles(indexArray, tableState.toggleNameToVisibleMap);
     const systemFilteredIndexes = tableState.showSystemIndices
       ? indexArray
       : indexArray.filter(index => !(index.name + '').startsWith('.'));
-    return filterItems(['name', 'uuid'], tableState.filter, systemFilteredIndexes);
+    const filter = tableState.filter || EuiSearchBar.Query.MATCH_ALL;
+    return EuiSearchBar.Query.execute(filter, systemFilteredIndexes,
+      { defaultFields: defaultFilterFields });
   }
 );
 export const getTotalItems = createSelector(

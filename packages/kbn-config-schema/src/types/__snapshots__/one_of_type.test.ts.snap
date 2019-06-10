@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fails if not matching literal 1`] = `
+"types that failed validation:
+- [0]: expected value to equal [foo] but got [bar]"
+`;
+
+exports[`fails if not matching multiple types 1`] = `
+"types that failed validation:
+- [0]: expected value of type [string] but got [boolean]
+- [1]: expected value of type [number] but got [boolean]"
+`;
+
+exports[`fails if not matching type 1`] = `
+"types that failed validation:
+- [0]: expected value of type [string] but got [boolean]"
+`;
+
+exports[`fails if not matching type 2`] = `
+"types that failed validation:
+- [0]: expected value of type [string] but got [number]"
+`;
+
+exports[`handles object with wrong type 1`] = `
+"types that failed validation:
+- [0.age]: expected value of type [number] but got [string]"
+`;
+
+exports[`includes namespace in failure 1`] = `
+"[foo-namespace]: types that failed validation:
+- [foo-namespace.0.age]: expected value of type [number] but got [string]"
+`;

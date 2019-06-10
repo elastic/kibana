@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function PageLoading() {
   return (
@@ -29,7 +30,12 @@ export function PageLoading() {
                 <EuiFlexItem grow={false}>
                   <EuiLoadingSpinner size="xl" />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>Loading...</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <FormattedMessage
+                    id="xpack.monitoring.pageLoadingTitle"
+                    defaultMessage="Loading…"
+                  />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

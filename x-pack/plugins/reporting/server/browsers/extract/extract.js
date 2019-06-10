@@ -6,7 +6,6 @@
 
 import path from 'path';
 import { unzip } from './unzip';
-import { bunzip2 } from './bunzip2';
 import { ExtractError } from './extract_error';
 
 export async function extract(archivePath, targetPath) {
@@ -14,9 +13,6 @@ export async function extract(archivePath, targetPath) {
   let unpacker;
 
   switch (fileType) {
-    case 'bz2':
-      unpacker = bunzip2;
-      break;
     case 'zip':
       unpacker = unzip;
       break;

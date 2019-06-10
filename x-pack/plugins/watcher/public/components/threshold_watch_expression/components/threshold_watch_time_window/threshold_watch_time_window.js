@@ -5,6 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 import template from './threshold_watch_time_window.html';
 import { TIME_UNITS } from 'plugins/watcher/../common/constants';
 import { getTimeUnitsLabel } from 'plugins/watcher/lib/get_time_units_label';
@@ -55,7 +56,9 @@ app.directive('thresholdWatchTimeWindow', function ($injector) {
       }
 
       get itemDescription() {
-        return 'For the last';
+        return i18n.translate('xpack.watcher.thresholdWatchExpression.timeWindow.itemDescription', {
+          defaultMessage: 'For the last',
+        });
       }
 
       get itemValue() {

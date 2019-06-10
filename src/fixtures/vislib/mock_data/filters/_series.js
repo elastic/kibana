@@ -24,6 +24,7 @@ export default {
     }
   ],
   'hits': 171454,
+  'xAxisOrderedValues': ['css', 'html', 'png'],
   'xAxisFormatter': function (val) {
     if (_.isObject(val)) {
       return JSON.stringify(val);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import Boom from 'boom';
 import { licensePreRoutingFactory } from '../license_pre_routing_factory';
 
@@ -34,31 +34,29 @@ describe('license_pre_routing_factory', () => {
         };
       });
 
-      it ('replies with 403', (done) => {
+      it('replies with 403', async () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
         const stubRequest = {};
-        licensePreRouting(stubRequest, (response) => {
+        expect(() => licensePreRouting(stubRequest)).to.throwException((response) => {
           expect(response).to.be.an(Error);
           expect(response.isBoom).to.be(true);
           expect(response.output.statusCode).to.be(403);
-          done();
         });
       });
     });
 
-    describe('isAvailable is true', () => {
+    describe('isAvailable is true', async () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
           isAvailable: true
         };
       });
 
-      it ('replies with nothing', (done) => {
+      it('replies with forbidden', async () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
         const stubRequest = {};
-        licensePreRouting(stubRequest, (response) => {
+        expect(() => licensePreRouting(stubRequest)).to.throwException((response) => {
           expect(response).to.eql(Boom.forbidden());
-          done();
         });
       });
     });

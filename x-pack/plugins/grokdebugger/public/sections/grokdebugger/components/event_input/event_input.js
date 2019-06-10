@@ -4,34 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
+import React from 'react';
+import {
+  EuiFormRow,
+  EuiPanel,
+  EuiCodeEditor
+} from '@elastic/eui';
 import { EDITOR } from '../../../../../common/constants';
-import { applyEditorOptions } from '../../../../lib/ace';
-import template from './event_input.html';
-import './event_input.less';
-import 'ace';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-const app = uiModules.get('xpack/grokdebugger');
-
-app.directive('eventInput', function () {
-  return {
-    restrict: 'E',
-    template: template,
-    scope: {
-      onChange: '='
-    },
-    bindToController: true,
-    controllerAs: 'eventInput',
-    controller: class EventInputController {
-      constructor($scope) {
-        $scope.$watch('eventInput.rawEvent', (newRawEvent) => {
-          this.onChange(newRawEvent);
-        });
-        $scope.aceLoaded = (editor) => {
-          this.editor = editor;
-          applyEditorOptions(editor, EDITOR.SAMPLE_DATA_MIN_LINES, EDITOR.SAMPLE_DATA_MAX_LINES);
-        };
-      }
-    }
-  };
-});
+export function EventInput({ value, onChange }) {
+  return (
+    <EuiFormRow
+      label={(
+        <FormattedMessage
+          id="xpack.grokDebugger.sampleDataLabel"
+          defaultMessage="Sample Data"
+        />
+      )}
+      fullWidth
+      data-test-subj="aceEventInput"
+    >
+      <EuiPanel paddingSize="s">
+        <EuiCodeEditor
+          width="100%"
+          value={value}
+          onChange={onChange}
+          setOptions={{
+            highlightActiveLine: false,
+            highlightGutterLine: false,
+            minLines: EDITOR.SAMPLE_DATA_MIN_LINES,
+            maxLines: EDITOR.SAMPLE_DATA_MAX_LINES
+          }}
+        />
+      </EuiPanel>
+    </EuiFormRow>
+  );
+}

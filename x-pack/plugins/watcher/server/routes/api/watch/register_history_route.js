@@ -49,7 +49,7 @@ export function registerHistoryRoute(server) {
   server.route({
     path: '/api/watcher/watch/{watchId}/history',
     method: 'GET',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { watchId } = request.params;
       const { startTime } = request.query;
@@ -68,18 +68,18 @@ export function registerHistoryRoute(server) {
             }, opts);
           });
 
-          reply({
+          return {
             watchHistoryItems: watchHistoryItems.map(watchHistoryItem => watchHistoryItem.downstreamJson)
-          });
+          };
         })
         .catch(err => {
-        // Case: Error from Elasticsearch JS client
+          // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return reply(wrapEsError(err));
+            throw wrapEsError(err);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          throw wrapUnknownError(err);
         });
     },
     config: {

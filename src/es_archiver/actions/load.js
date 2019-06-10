@@ -23,7 +23,7 @@ import { createReadStream } from 'fs';
 import {
   createPromiseFromStreams,
   concatStreamProviders,
-} from '../../utils';
+} from '../../legacy/utils';
 
 import {
   isGzip,
@@ -33,6 +33,8 @@ import {
   createParseArchiveStreams,
   createCreateIndexStream,
   createIndexDocRecordsStream,
+  migrateKibanaIndex,
+  Progress,
 } from '../lib';
 
 // pipe a series of streams into each other so that data and errors
@@ -45,7 +47,7 @@ const pipeline = (...streams) => streams
       .pipe(dest)
   ));
 
-export async function loadAction({ name, skipExisting, client, dataDir, log }) {
+export async function loadAction({ name, skipExisting, client, dataDir, log, kibanaUrl }) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
@@ -65,21 +67,33 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
     { objectMode: true }
   );
 
+  const progress = new Progress('load progress');
+  progress.activate(log);
+
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, log }),
-    createIndexDocRecordsStream(client, stats),
+    createCreateIndexStream({ client, stats, skipExisting, log, kibanaUrl }),
+    createIndexDocRecordsStream(client, stats, progress),
   ]);
 
-  const indicesToRefresh = [];
-  stats.forEachIndex((index, { docs }) => {
-    log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
-    indicesToRefresh.push(index);
-  });
+  progress.deactivate();
+  const result = stats.toJSON();
+
+  for (const [index, { docs }] of Object.entries(result)) {
+    if (!docs && docs.indexed > 0) {
+      log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
+    }
+  }
 
   await client.indices.refresh({
-    index: indicesToRefresh
+    index: '_all',
+    allowNoIndices: true,
   });
 
-  return stats.toJSON();
+  // If we affected the Kibana index, we need to ensure it's migrated...
+  if (Object.keys(result).some(k => k.startsWith('.kibana'))) {
+    await migrateKibanaIndex({ client, log, kibanaUrl });
+  }
+
+  return result;
 }

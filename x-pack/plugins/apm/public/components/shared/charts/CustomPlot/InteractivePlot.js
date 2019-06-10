@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 import { SharedPlot } from './plotUtils';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
@@ -13,76 +13,70 @@ import SelectionMarker from './SelectionMarker';
 import { MarkSeries, VerticalGridLines } from 'react-vis';
 import Tooltip from '../Tooltip';
 
+function getPointByX(serie, x) {
+  return serie.data.find(point => point.x === x);
+}
+
 class InteractivePlot extends PureComponent {
-  getMarkPoints = hoverIndex => {
-    if (!this.props.series[0].data[hoverIndex]) {
-      return [];
-    }
-
-    return this.props.series.map(serie => {
-      const { x, y } = serie.data[hoverIndex] || {};
-      return {
-        x,
-        y,
-        color: serie.color
-      };
-    });
+  getMarkPoints = hoverX => {
+    return this.props.series
+      .filter(serie =>
+        serie.data.some(point => point.x === hoverX && point.y != null)
+      )
+      .map(serie => {
+        const { x, y } = getPointByX(serie, hoverX) || {};
+        return {
+          x,
+          y,
+          color: serie.color
+        };
+      });
   };
 
-  getTooltipPoints = hoverIndex => {
-    if (!this.props.series[0].data[hoverIndex]) {
-      return [];
-    }
-
-    return this.props.series.map(serie => ({
-      color: serie.color,
-      value: this.props.formatTooltipValue(_.get(serie.data[hoverIndex], 'y')),
-      text: serie.titleShort || serie.title
-    }));
-  };
-
-  getHoveredX = hoverIndex => {
-    const defaultSerie = this.props.series[0].data;
-    return _.get(defaultSerie[hoverIndex], 'x');
+  getTooltipPoints = hoverX => {
+    return this.props.series
+      .filter(series => !series.hideTooltipValue)
+      .map(serie => {
+        const point = getPointByX(serie, hoverX) || {};
+        return {
+          color: serie.color,
+          value: this.props.formatTooltipValue(point),
+          text: serie.titleShort || serie.title
+        };
+      });
   };
 
   render() {
     const {
       plotValues,
-      hoverIndex,
+      hoverX,
       series,
       isDrawing,
       selectionStart,
       selectionEnd
     } = this.props;
 
-    if (_.isEmpty(series)) {
+    if (isEmpty(series)) {
       return null;
     }
 
-    const tooltipPoints = this.getTooltipPoints(hoverIndex);
-    const markPoints = this.getMarkPoints(hoverIndex);
-    const hoveredX = this.getHoveredX(hoverIndex);
+    const tooltipPoints = this.getTooltipPoints(hoverX);
+    const markPoints = this.getMarkPoints(hoverX);
     const { x, yTickValues } = plotValues;
     const yValueMiddle = yTickValues[1];
 
     return (
       <SharedPlot plotValues={plotValues}>
-        {hoveredX && (
-          <Tooltip
-            tooltipPoints={tooltipPoints}
-            x={hoveredX}
-            y={yValueMiddle}
-          />
+        {hoverX && (
+          <Tooltip tooltipPoints={tooltipPoints} x={hoverX} y={yValueMiddle} />
         )}
 
-        {hoveredX && <MarkSeries data={markPoints} colorType="literal" />}
-        {hoveredX && <VerticalGridLines tickValues={[hoveredX]} />}
+        {hoverX && <MarkSeries data={markPoints} colorType="literal" />}
+        {hoverX && <VerticalGridLines tickValues={[hoverX]} />}
 
-        {isDrawing &&
-          selectionEnd !== null && (
-            <SelectionMarker start={x(selectionStart)} end={x(selectionEnd)} />
-          )}
+        {isDrawing && selectionEnd !== null && (
+          <SelectionMarker start={x(selectionStart)} end={x(selectionEnd)} />
+        )}
       </SharedPlot>
     );
   }
@@ -90,7 +84,7 @@ class InteractivePlot extends PureComponent {
 
 InteractivePlot.propTypes = {
   formatTooltipValue: PropTypes.func.isRequired,
-  hoverIndex: PropTypes.number,
+  hoverX: PropTypes.number,
   isDrawing: PropTypes.bool.isRequired,
   plotValues: PropTypes.object.isRequired,
   selectionEnd: PropTypes.number,

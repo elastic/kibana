@@ -30,7 +30,7 @@
   }
 
   .kuiButton + .kuiButton {
-    margin-left: 2px;
+    margin-left: 0;
   }
 }
 
@@ -41,4 +41,11 @@
     flex: 1 1 auto;
     text-align: center;
   }
+}
+
+// KuiButtonGroup doesn't pass down className, so can't create custom classname
+// So this little gem was being applied in Home/components/tutorial
+.eui-textCenter > .kuiButtonGroup,
+.text-center > .kuiButtonGroup {
+  display: inline-block;
 }

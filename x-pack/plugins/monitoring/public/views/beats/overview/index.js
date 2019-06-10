@@ -5,6 +5,7 @@
  */
 
 import { find } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseController } from '../../';
@@ -29,7 +30,7 @@ uiRoutes.when('/beats', {
       $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
 
       super({
-        title: 'Beats - Overview',
+        title: i18n.translate('xpack.monitoring.beats.overview.routeTitle', { defaultMessage: 'Beats - Overview' }),
         getPageData,
         $scope,
         $injector

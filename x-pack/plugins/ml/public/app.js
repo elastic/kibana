@@ -10,18 +10,16 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/courier';
-import 'ui-bootstrap';
+import 'ui/angular-bootstrap';
 import 'ui/persisted_log';
 import 'ui/autoload/all';
+import 'ui/kbn_top_nav';
 
-import 'plugins/ml/styles/main.less';
 import 'plugins/ml/access_denied';
-import 'plugins/ml/factories/listener_factory';
-import 'plugins/ml/factories/state_factory';
-import 'plugins/ml/lib/angular_bootstrap_patch';
 import 'plugins/ml/jobs';
 import 'plugins/ml/services/calendar_service';
 import 'plugins/ml/components/messagebar';
+import 'plugins/ml/data_frame';
 import 'plugins/ml/datavisualizer';
 import 'plugins/ml/explorer';
 import 'plugins/ml/timeseriesexplorer';
@@ -32,16 +30,10 @@ import 'plugins/ml/components/confirm_modal';
 import 'plugins/ml/components/nav_menu';
 import 'plugins/ml/components/loading_indicator';
 import 'plugins/ml/settings';
+import 'plugins/ml/file_datavisualizer';
+import 'uiExports/autocompleteProviders';
 
 import uiRoutes from 'ui/routes';
-import moment from 'moment-timezone';
-import { uiModules } from 'ui/modules';
-
-const uiModule = uiModules.get('kibana');
-uiModule.run((config) => {
-  // Set the timezone for moment formatting to that configured in Kibana.
-  moment.tz.setDefault(config.get('dateFormat:tz'));
-});
 
 if (typeof uiRoutes.enable === 'function') {
   uiRoutes.enable();

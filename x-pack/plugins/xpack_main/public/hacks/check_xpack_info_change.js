@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { identity } from 'lodash';
+import { EuiCallOut } from '@elastic/eui';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
-import { Notifier } from 'ui/notify';
+import { banners } from 'ui/notify';
 import { DebounceProvider } from 'ui/debounce';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { XPackInfoSignatureProvider } from 'plugins/xpack_main/services/xpack_info_signature';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const module = uiModules.get('xpack_main', []);
 
@@ -19,9 +22,9 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
   const xpackInfo = Private(XPackInfoProvider);
   const xpackInfoSignature = Private(XPackInfoSignatureProvider);
   const debounce = Private(DebounceProvider);
-  const isLoginOrLogout = Private(PathProvider).isLoginOrLogout();
+  const isUnauthenticated = Private(PathProvider).isUnauthenticated();
+  let isLicenseExpirationBannerShown = false;
 
-  const notify = new Notifier();
   const notifyIfLicenseIsExpired = debounce(() => {
     const license = xpackInfo.get('license');
     if (license.isActive) {
@@ -29,21 +32,43 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
     }
 
     const uploadLicensePath = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management/upload_license`;
-    notify.directive({
-      template: `
-        <p>
-          Your ${license.type} license is currently expired. Please contact your administrator or
-          <a href="${uploadLicensePath}">update your license</a> directly.
-        </p>
-      `
-    }, {
-      type: 'error'
-    });
+
+    if (!isLicenseExpirationBannerShown) {
+      isLicenseExpirationBannerShown = true;
+      banners.add({
+        component: (
+          <EuiCallOut
+            iconType="help"
+            color="warning"
+            title={<FormattedMessage
+              id="xpack.main.welcomeBanner.licenseIsExpiredTitle"
+              defaultMessage="Your {licenseType} license is expired"
+              values={{ licenseType: license.type }}
+            />}
+          >
+            <FormattedMessage
+              id="xpack.main.welcomeBanner.licenseIsExpiredDescription"
+              defaultMessage="Contact your administrator or {updateYourLicenseLinkText} directly."
+              values={{
+                updateYourLicenseLinkText: (
+                  <a href={uploadLicensePath}>
+                    <FormattedMessage
+                      id="xpack.main.welcomeBanner.licenseIsExpiredDescription.updateYourLicenseLinkText"
+                      defaultMessage="update your license"
+                    />
+                  </a>
+                )
+              }}
+            />
+          </EuiCallOut>
+        ),
+      });
+    }
   });
 
   /**
    *  Intercept each network response to look for the kbn-xpack-sig header.
-   *  When that header is detected, compare it's value with the value cached
+   *  When that header is detected, compare its value with the value cached
    *  in the browser storage. When the value is new, call `xpackInfo.refresh()`
    *  so that it will pull down the latest x-pack info
    *
@@ -52,7 +77,7 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
    *  @return
    */
   function interceptor(response, handleResponse) {
-    if (isLoginOrLogout) {
+    if (isUnauthenticated) {
       return handleResponse(response);
     }
 

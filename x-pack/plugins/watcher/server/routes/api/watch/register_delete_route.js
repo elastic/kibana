@@ -23,25 +23,24 @@ export function registerDeleteRoute(server) {
   server.route({
     path: '/api/watcher/watch/{watchId}',
     method: 'DELETE',
-    handler: (request, reply) => {
+    handler: (request, h) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       const { watchId } = request.params;
 
       return deleteWatch(callWithRequest, watchId)
-        .then(() => reply().code(204))
+        .then(() => h.response().code(204))
         .catch(err => {
-
-        // Case: Error from Elasticsearch JS client
+          // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
             const statusCodeToMessageMap = {
               404: `Watch with id = ${watchId} not found`
             };
-            return reply(wrapEsError(err, statusCodeToMessageMap));
+            throw wrapEsError(err, statusCodeToMessageMap);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          throw wrapUnknownError(err);
         });
     },
     config: {

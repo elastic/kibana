@@ -26,6 +26,8 @@ export {
   createCreateIndexStream,
   createDeleteIndexStream,
   createGenerateIndexRecordsStream,
+  deleteKibanaIndices,
+  migrateKibanaIndex,
 } from './indices';
 
 export {
@@ -46,3 +48,7 @@ export {
 export {
   readDirectory
 } from './directory';
+
+export {
+  Progress
+} from './progress';

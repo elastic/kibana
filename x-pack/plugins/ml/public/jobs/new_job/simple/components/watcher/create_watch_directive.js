@@ -32,15 +32,6 @@ module.directive('mlCreateWatch', function () {
       $scope.STATUS = mlCreateWatchService.STATUS;
 
       $scope.ui = {
-        thresholdOptions: [
-          { display: 'critical', val: 75 },
-          { display: 'major', val: 50 },
-          { display: 'minor', val: 25 },
-          { display: 'warning', val: 0 }
-        ],
-        setThreshold: (t) => {
-          $scope.config.threshold = t;
-        },
         emailEnabled: false,
         embedded: $scope.embedded,
         watchAlreadyExists: false
@@ -57,11 +48,13 @@ module.directive('mlCreateWatch', function () {
       }
 
       // load elasticsearch settings to see if email has been configured
-      ml.getNotificationSettings().then((resp) => {
-        if (_.has(resp, 'defaults.xpack.notification.email')) {
-          $scope.ui.emailEnabled = true;
-        }
-      });
+      ml.getNotificationSettings()
+        .then((resp) => {
+          if (_.has(resp, 'defaults.xpack.notification.email')) {
+            $scope.ui.emailEnabled = true;
+            $scope.$applyAsync();
+          }
+        });
 
       // check to see whether a watch for this job has already been created.
       // display a warning if it has.
@@ -71,6 +64,9 @@ module.directive('mlCreateWatch', function () {
         })
         .catch(() => {
           $scope.ui.watchAlreadyExists = false;
+        })
+        .then(() => {
+          $scope.$applyAsync();
         });
     }
   };

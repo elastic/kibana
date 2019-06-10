@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 import { getClusterInfo } from '../get_cluster_info';
 
-export function mockGetClusterInfo(callCluster, clusterInfo) {
+export function mockGetClusterInfo(callCluster, clusterInfo, req) {
+  callCluster.withArgs(req, 'info').returns(clusterInfo);
   callCluster.withArgs('info').returns(clusterInfo);
 }
 

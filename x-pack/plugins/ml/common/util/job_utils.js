@@ -10,6 +10,7 @@ import _ from 'lodash';
 import semver from 'semver';
 import numeral from '@elastic/numeral';
 
+import { ALLOWED_DATA_UNITS } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 
 // work out the default frequency based on the bucket_span in seconds
@@ -30,14 +31,10 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {
 // Returns a flag to indicate whether the job is suitable for viewing
 // in the Time Series dashboard.
 export function isTimeSeriesViewJob(job) {
-  // TODO - do we need another function which returns whether to enable the
-  // link to the Single Metric dashboard in the Jobs list, only allowing single
-  // metric jobs with only one detector with no by/over/partition fields
-
   // only allow jobs with at least one detector whose function corresponds to
   // an ES aggregation which can be viewed in the single metric view and which
   // doesn't use a scripted field which can be very difficult or impossible to
-  // invert to a reverse search.
+  // invert to a reverse search, or when model plot has been enabled.
   let isViewable = false;
   const dtrs = job.analysis_config.detectors;
 
@@ -54,38 +51,86 @@ export function isTimeSeriesViewJob(job) {
 // Returns a flag to indicate whether the detector at the index in the specified job
 // is suitable for viewing in the Time Series dashboard.
 export function isTimeSeriesViewDetector(job, dtrIndex) {
-  // Check that the detector function is suitable for viewing in the Time Series dashboard,
-  // and that the partition, by and over fields are not using mlcategory or a scripted field which
-  // can be very difficult or impossible to invert to a reverse search of the underlying metric data.
-  let isDetectorViewable = false;
+  return isSourceDataChartableForDetector(job, dtrIndex) ||
+    isModelPlotChartableForDetector(job, dtrIndex);
+}
 
+// Returns a flag to indicate whether the source data can be plotted in a time
+// series chart for the specified detector.
+export function isSourceDataChartableForDetector(job, detectorIndex) {
+  let isSourceDataChartable = false;
   const dtrs = job.analysis_config.detectors;
-  if (dtrIndex >= 0 && dtrIndex < dtrs.length) {
-    const dtr = dtrs[dtrIndex];
-    isDetectorViewable = (isTimeSeriesViewFunction(dtr.function) === true) &&
+  if (detectorIndex >= 0 && detectorIndex < dtrs.length) {
+    const dtr = dtrs[detectorIndex];
+    const functionName = dtr.function;
+
+    // Check that the function maps to an ES aggregation,
+    // and that the partitioning field isn't mlcategory
+    // (since mlcategory is a derived field which won't exist in the source data).
+    // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
+    // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
+    isSourceDataChartable = (mlFunctionToESAggregation(functionName) !== null) &&
       (dtr.by_field_name !== 'mlcategory') &&
       (dtr.partition_field_name !== 'mlcategory') &&
       (dtr.over_field_name !== 'mlcategory');
 
+    // If the datafeed uses script fields, we can only plot the time series if
+    // model plot is enabled. Without model plot it will be very difficult or impossible
+    // to invert to a reverse search of the underlying metric data.
     const usesScriptFields = _.has(job, 'datafeed_config.script_fields');
-    if (isDetectorViewable === true && usesScriptFields === true) {
+    if (isSourceDataChartable === true && usesScriptFields === true) {
       // Perform extra check to see if the detector is using a scripted field.
       const scriptFields = usesScriptFields ? _.keys(job.datafeed_config.script_fields) : [];
-      isDetectorViewable = scriptFields.indexOf(dtr.field_name) === -1 &&
+      isSourceDataChartable = (
+        scriptFields.indexOf(dtr.field_name) === -1 &&
         scriptFields.indexOf(dtr.partition_field_name) === -1 &&
         scriptFields.indexOf(dtr.by_field_name) === -1 &&
-        scriptFields.indexOf(dtr.over_field_name) === -1;
+        scriptFields.indexOf(dtr.over_field_name) === -1);
     }
+
   }
 
-  return isDetectorViewable;
+  return isSourceDataChartable;
+}
+
+// Returns a flag to indicate whether model plot data can be plotted in a time
+// series chart for the specified detector.
+export function isModelPlotChartableForDetector(job, detectorIndex) {
+  let isModelPlotChartable = false;
+
+  const modelPlotEnabled = _.get(job, ['model_plot_config', 'enabled'], false);
+  const dtrs = job.analysis_config.detectors;
+  if (detectorIndex >= 0 && detectorIndex < dtrs.length && modelPlotEnabled === true) {
+    const dtr = dtrs[detectorIndex];
+    const functionName = dtr.function;
+
+    // Model plot can be charted for any of the functions which map to ES aggregations,
+    // plus varp and info_content functions.
+    isModelPlotChartable = (mlFunctionToESAggregation(functionName) !== null) ||
+      (['varp', 'high_varp', 'low_varp', 'info_content',
+        'high_info_content', 'low_info_content'].includes(functionName) === true);
+  }
+
+  return isModelPlotChartable;
 
 }
 
-// Returns a flag to indicate whether a detector with the specified function is
-// suitable for viewing in the Time Series dashboard.
-export function isTimeSeriesViewFunction(functionName) {
-  return mlFunctionToESAggregation(functionName) !== null;
+// Returns the names of the partition, by, and over fields for the detector with the
+// specified index from the supplied ML job configuration.
+export function getPartitioningFieldNames(job, detectorIndex) {
+  const fieldNames = [];
+  const detector = job.analysis_config.detectors[detectorIndex];
+  if (_.has(detector, 'partition_field_name')) {
+    fieldNames.push(detector.partition_field_name);
+  }
+  if (_.has(detector, 'by_field_name')) {
+    fieldNames.push(detector.by_field_name);
+  }
+  if (_.has(detector, 'over_field_name')) {
+    fieldNames.push(detector.over_field_name);
+  }
+
+  return fieldNames;
 }
 
 // Returns a flag to indicate whether model plot has been enabled for a job.
@@ -98,7 +143,7 @@ export function isModelPlotEnabled(job, detectorIndex, entityFields) {
   // Check if model_plot_config is enabled.
   let isEnabled = _.get(job, ['model_plot_config', 'enabled'], false);
 
-  if (isEnabled === true) {
+  if (isEnabled === true && entityFields !== undefined && entityFields.length > 0) {
     // If terms filter is configured in model_plot_config, check supplied entities.
     const termsStr = _.get(job, ['model_plot_config', 'terms'], '');
     if (termsStr !== '') {
@@ -164,8 +209,12 @@ export function mlFunctionToESAggregation(functionName) {
     return functionName;
   }
 
+  if (functionName === 'rare') {
+    return 'count';
+  }
+
   // Return null if ML function does not map to an ES aggregation.
-  // i.e. median, low_median, high_median, rare, freq_rare,
+  // i.e. median, low_median, high_median, freq_rare,
   // varp, low_varp, high_varp, time_of_day, time_of_week, lat_long,
   // info_content, low_info_content, high_info_content
   return null;
@@ -217,7 +266,7 @@ export function uniqWithIsEqual(arr) {
 // check job without manipulating UI and return a list of messages
 // job and fields get passed as arguments and are not accessed as $scope.* via the outer scope
 // because the plan is to move this function to the common code area so that it can be used on the server side too.
-export function basicJobValidation(job, fields, limits) {
+export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
   const messages = [];
   let valid = true;
 
@@ -233,20 +282,14 @@ export function basicJobValidation(job, fields, limits) {
       messages.push({ id: 'job_id_valid' });
     }
 
-    if (job.groups !== undefined) {
-      let groupIdValid = true;
-      job.groups.forEach(group => {
-        if (isJobIdValid(group) === false) {
-          groupIdValid = false;
-          valid = false;
-        }
-      });
-      if (job.groups.length > 0 && groupIdValid) {
-        messages.push({ id: 'job_group_id_valid' });
-      } else if (job.groups.length > 0 && !groupIdValid) {
-        messages.push({ id: 'job_group_id_invalid' });
-      }
-    }
+    // group names
+    const {
+      messages: groupsMessages,
+      valid: groupsValid,
+    } = validateGroupNames(job);
+
+    messages.push(...groupsMessages);
+    valid = (valid && groupsValid);
 
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
@@ -338,7 +381,10 @@ export function basicJobValidation(job, fields, limits) {
         messages.push({ id: 'bucket_span_invalid' });
         valid = false;
       } else {
-        messages.push({ id: 'bucket_span_valid' });
+        messages.push({
+          id: 'bucket_span_valid',
+          bucketSpan: job.analysis_config.bucket_span
+        });
       }
     }
 
@@ -353,21 +399,26 @@ export function basicJobValidation(job, fields, limits) {
       }
     }
 
-    // model memory limit
-    if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
-      if (typeof limits === 'object' && typeof limits.max_model_memory_limit !== 'undefined') {
-        const max = limits.max_model_memory_limit.toUpperCase();
-        const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+    if (skipMmlChecks === false) {
+      // model memory limit
+      const {
+        messages: mmlUnitMessages,
+        valid: mmlUnitValid,
+      } = validateModelMemoryLimitUnits(job);
 
-        const mmlBytes = numeral(mml).value();
-        const maxBytes = numeral(max).value();
+      messages.push(...mmlUnitMessages);
+      valid = (valid && mmlUnitValid);
 
-        if(mmlBytes > maxBytes) {
-          messages.push({ id: 'model_memory_limit_invalid' });
-          valid = false;
-        } else {
-          messages.push({ id: 'model_memory_limit_valid' });
-        }
+      if (mmlUnitValid) {
+        // if mml is a valid format,
+        // run the validation against max mml
+        const {
+          messages: mmlMessages,
+          valid: mmlValid,
+        } = validateModelMemoryLimit(job, limits);
+
+        messages.push(...mmlMessages);
+        valid = (valid && mmlValid);
       }
     }
 
@@ -378,7 +429,84 @@ export function basicJobValidation(job, fields, limits) {
   return {
     messages,
     valid,
-    contains(id) { return _.some(messages, { id }); },
-    find(id) { return _.find(messages, { id }); }
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
+export function validateModelMemoryLimit(job, limits) {
+  const messages = [];
+  let valid = true;
+  // model memory limit
+  if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
+    if (typeof limits === 'object' && typeof limits.max_model_memory_limit !== 'undefined') {
+      const max = limits.max_model_memory_limit.toUpperCase();
+      const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+
+      const mmlBytes = numeral(mml).value();
+      const maxBytes = numeral(max).value();
+
+      if(mmlBytes > maxBytes) {
+        messages.push({ id: 'model_memory_limit_invalid' });
+        valid = false;
+      } else {
+        messages.push({ id: 'model_memory_limit_valid' });
+      }
+    }
+  }
+  return {
+    valid,
+    messages,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
+export function validateModelMemoryLimitUnits(job) {
+  const messages = [];
+  let valid = true;
+
+  if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
+    const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+    const mmlSplit = mml.match(/\d+(\w+)/);
+    const unit = (mmlSplit && mmlSplit.length === 2) ? mmlSplit[1] : null;
+
+    if (ALLOWED_DATA_UNITS.indexOf(unit) === -1) {
+      messages.push({ id: 'model_memory_limit_units_invalid' });
+      valid = false;
+    } else {
+      messages.push({ id: 'model_memory_limit_units_valid' });
+    }
+  }
+  return {
+    valid,
+    messages,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
+export function validateGroupNames(job) {
+  const messages = [];
+  let valid = true;
+  if (job.groups !== undefined) {
+    let groupIdValid = true;
+    job.groups.forEach(group => {
+      if (isJobIdValid(group) === false) {
+        groupIdValid = false;
+        valid = false;
+      }
+    });
+    if (job.groups.length > 0 && groupIdValid) {
+      messages.push({ id: 'job_group_id_valid' });
+    } else if (job.groups.length > 0 && !groupIdValid) {
+      messages.push({ id: 'job_group_id_invalid' });
+    }
+  }
+  return {
+    valid,
+    messages,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
   };
 }

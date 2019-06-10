@@ -7,13 +7,10 @@
 
 
 import { once } from 'lodash';
-import { elasticsearchJsPlugin } from './elasticsearch-ml';
+import { elasticsearchJsPlugin } from './elasticsearch_ml';
 
 const callWithRequest = once((server) => {
-  const config = {
-    plugins: [ elasticsearchJsPlugin ],
-    ...server.config().get('elasticsearch')
-  };
+  const config = { plugins: [ elasticsearchJsPlugin ] };
   const cluster = server.plugins.elasticsearch.createCluster('ml', config);
 
   return cluster.callWithRequest;

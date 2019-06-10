@@ -20,8 +20,8 @@
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 
-export function generateNodeNoticeText(nodeDir) {
+export function generateNodeNoticeText(nodeDir, nodeVersion) {
   const licensePath = resolve(nodeDir, 'LICENSE');
   const license = readFileSync(licensePath, 'utf8');
-  return `This product bundles Node.js.\n\n${license}`;
+  return `This product bundles Node.js v${nodeVersion}.\n\n${license}`;
 }

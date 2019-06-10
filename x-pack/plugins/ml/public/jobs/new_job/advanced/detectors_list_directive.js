@@ -9,6 +9,7 @@
 // directive for displaying detectors form list.
 
 import angular from 'angular';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import 'plugins/ml/jobs/new_job/advanced/detector_modal';
 import 'plugins/ml/jobs/new_job/advanced/detector_filter_modal';
@@ -31,6 +32,7 @@ module.directive('mlJobDetectorsList', function ($modal) {
       fields: '=mlFields',
       catFieldNameSelected: '=mlCatFieldNameSelected',
       editMode: '=mlEditMode',
+      onUpdate: '=mlOnDetectorsUpdate'
     },
     template,
     controller: function ($scope) {
@@ -42,11 +44,14 @@ module.directive('mlJobDetectorsList', function ($modal) {
           } else {
             $scope.detectors.push(dtr);
           }
+
+          $scope.onUpdate();
         }
       };
 
       $scope.removeDetector = function (index) {
         $scope.detectors.splice(index, 1);
+        $scope.onUpdate();
       };
 
       $scope.editDetector = function (index) {
@@ -93,7 +98,16 @@ module.directive('mlJobDetectorsList', function ($modal) {
               then: function (callback) {
                 callback({
                   success: false,
-                  message: 'exclude_frequent value must be: "all", "none", "by" or "over"'
+                  message: i18n.translate('xpack.ml.newJob.advanced.detectorsList.invalidExcludeFrequentParameterErrorMessage', {
+                    defaultMessage: '{excludeFrequentParam} value must be: {allValue}, {noneValue}, {byValue} or {overValue}',
+                    values: {
+                      excludeFrequentParam: 'exclude_frequent',
+                      allValue: '"all"',
+                      noneValue: '"none"',
+                      byValue: '"by"',
+                      overValue: '"over"'
+                    }
+                  })
                 });
               }
             };
@@ -110,7 +124,11 @@ module.directive('mlJobDetectorsList', function ($modal) {
           .catch((resp) => {
             return {
               success: false,
-              message: (resp.message || 'Validation failed')
+              message: (
+                resp.message || i18n.translate('xpack.ml.newJob.advanced.detectorsList.validationFailedErrorMessage', {
+                  defaultMessage: 'Validation failed'
+                })
+              )
             };
           });
       }

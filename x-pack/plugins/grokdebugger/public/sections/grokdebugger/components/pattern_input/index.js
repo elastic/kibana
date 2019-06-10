@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './pattern_input';
+export { PatternInput } from './pattern_input';

@@ -24,10 +24,7 @@ import { Project } from './project';
 
 const projectKey = Symbol('__project');
 
-export function renderProjectsTree(
-  rootPath: string,
-  projects: Map<string, Project>
-) {
+export function renderProjectsTree(rootPath: string, projects: Map<string, Project>) {
   const projectsTree = buildProjectsTree(rootPath, projects);
   return treeToString(createTreeStructure(projectsTree));
 }
@@ -36,20 +33,19 @@ interface ITree {
   name?: string;
   children?: ITreeChildren;
 }
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ITreeChildren extends Array<ITree> {}
 
 type DirOrProjectName = string | typeof projectKey;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface IProjectsTree extends Map<DirOrProjectName, string | IProjectsTree> {}
 
 function treeToString(tree: ITree) {
   return [tree.name].concat(childrenToStrings(tree.children, '')).join('\n');
 }
 
-function childrenToStrings(
-  tree: ITreeChildren | undefined,
-  treePrefix: string
-) {
+function childrenToStrings(tree: ITreeChildren | undefined, treePrefix: string) {
   if (tree === undefined) {
     return [];
   }
@@ -149,11 +145,7 @@ function buildProjectsTree(rootPath: string, projects: Map<string, Project>) {
   return tree;
 }
 
-function addProjectToTree(
-  tree: IProjectsTree,
-  pathParts: string[],
-  project: Project
-) {
+function addProjectToTree(tree: IProjectsTree, pathParts: string[], project: Project) {
   if (pathParts.length === 0) {
     tree.set(projectKey, project.name);
   } else {

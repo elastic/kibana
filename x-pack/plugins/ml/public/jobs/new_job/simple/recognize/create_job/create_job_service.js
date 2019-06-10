@@ -5,8 +5,6 @@
  */
 
 
-
-import { getQueryFromSavedSearch } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -41,7 +39,7 @@ export function CreateRecognizerJobsServiceProvider(Private) {
     }
 
     indexTimeRange(indexPattern, formConfig) {
-      const query = getQueryFromSavedSearch(formConfig);
+      const query = formConfig.combinedQuery;
       return ml.getTimeFieldRange({
         index: indexPattern.title,
         timeFieldName: indexPattern.timeFieldName,

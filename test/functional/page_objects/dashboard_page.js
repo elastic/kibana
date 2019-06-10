@@ -18,8 +18,7 @@
  */
 
 import _ from 'lodash';
-
-import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
+import { DashboardConstants } from '../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
@@ -29,12 +28,13 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const retry = getService('retry');
   const config = getService('config');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize']);
+  const renderable = getService('renderable');
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'timePicker']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -51,24 +51,22 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       ]);
 
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
-        'defaultIndex': defaultIndex
+        'defaultIndex': defaultIndex,
       });
       await this.selectDefaultIndex(defaultIndex);
-      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
     }
 
     async preserveCrossAppState() {
-      const url = await remote.getCurrentUrl();
-      await remote.get(url, false);
+      const url = await browser.getCurrentUrl();
+      await browser.get(url, false);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectDefaultIndex(indexName) {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
-      await PageObjects.settings.clickLinkText(indexName);
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await find.clickByPartialLinkText(indexName);
       await PageObjects.settings.clickDefaultIndexButton();
     }
 
@@ -106,7 +104,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getDashboardIdFromCurrentUrl() {
-      const currentUrl = await remote.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       const urlSubstring = 'kibana#/dashboard/';
       const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
       const endIndex = currentUrl.indexOf('?');
@@ -123,24 +121,27 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
      */
     async onDashboardLandingPage() {
       log.debug(`onDashboardLandingPage`);
-      const exists = await testSubjects.exists('dashboardLandingPage');
-      return exists;
+      return await testSubjects.exists('dashboardLandingPage', {
+        timeout: 5000
+      });
+    }
+
+    async expectExistsDashboardLandingPage() {
+      log.debug(`expectExistsDashboardLandingPage`);
+      await testSubjects.existOrFail('dashboardLandingPage');
     }
 
     async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
       await find.clickByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
+      await this.expectExistsDashboardLandingPage();
     }
 
     async gotoDashboardLandingPage() {
       log.debug('gotoDashboardLandingPage');
       const onPage = await this.onDashboardLandingPage();
       if (!onPage) {
-        await retry.try(async () => {
-          await this.clickDashboardBreadcrumbLink();
-          const onDashboardLandingPage = await this.onDashboardLandingPage();
-          if (!onDashboardLandingPage) throw new Error('Not on the landing page.');
-        });
+        await this.clickDashboardBreadcrumbLink();
       }
     }
 
@@ -167,13 +168,42 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
-    async isDuplicateTitleWarningDisplayed() {
-      return await testSubjects.exists('titleDupicateWarnMsg');
+    /**
+     * Asserts that the duplicate title warning is either displayed or not displayed.
+     * @param { displayed: boolean }
+     */
+    async expectDuplicateTitleWarningDisplayed({ displayed }) {
+      if (displayed) {
+        await testSubjects.existOrFail('titleDupicateWarnMsg');
+      } else {
+        await testSubjects.missingOrFail('titleDupicateWarnMsg');
+      }
     }
 
-    async clickEdit() {
-      log.debug('Clicking edit');
-      return await testSubjects.click('dashboardEditMode');
+    /**
+     * Asserts that the toolbar pagination (count and arrows) is either displayed or not displayed.
+     * @param { displayed: boolean }
+     */
+    async expectToolbarPaginationDisplayed({ displayed }) {
+      const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
+      if (displayed) {
+        return await Promise.all(subjects.map(async subj => await testSubjects.existOrFail(subj)));
+      } else {
+        return await Promise.all(subjects.map(async subj => await testSubjects.missingOrFail(subj)));
+      }
+    }
+
+    async switchToEditMode() {
+      log.debug('Switching to edit mode');
+      await testSubjects.click('dashboardEditMode');
+      // wait until the count of dashboard panels equals the count of toggle menu icons
+      await retry.waitFor('in edit mode', async () => {
+        const [panels, menuIcons] = await Promise.all([
+          testSubjects.findAll('dashboardPanel'),
+          testSubjects.findAll('dashboardPanelToggleMenuIcon'),
+        ]);
+        return panels.length === menuIcons.length;
+      });
     }
 
     async getIsInViewMode() {
@@ -187,13 +217,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      // newDashboardLink button is only visible when dashboard listing table is displayed (at least one dashboard).
-      const exists = await testSubjects.exists('newDashboardLink');
+      // newItemButton button is only visible when dashboard listing table is displayed
+      // (at least one dashboard).
+      const exists = await testSubjects.exists('newItemButton');
       if (exists) {
-        return await testSubjects.click('newDashboardLink');
+        return await testSubjects.click('newItemButton');
       }
 
-      // no dashboards exist, click createDashboardPromptButton to create new dashboard
+      // If no dashboards exist, then newItemButton to create a new dashboard.
       return await this.clickCreateDashboardPrompt();
     }
 
@@ -203,6 +234,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getCreateDashboardPromptExists() {
       return await testSubjects.exists('createDashboardPromptButton');
+    }
+
+    async checkDashboardListingRow(id) {
+      await testSubjects.click(`checkboxSelectRow-${id}`);
     }
 
     async checkDashboardListingSelectAllCheckbox() {
@@ -215,16 +250,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickDeleteSelectedDashboards() {
-      await testSubjects.click('deleteSelectedDashboards');
-    }
-
-    async clickOptions() {
-      await testSubjects.click('dashboardOptionsButton');
+      await testSubjects.click('deleteSelectedItems');
     }
 
     async isOptionsOpen() {
       log.debug('isOptionsOpen');
-      return await testSubjects.exists('dashboardDarkThemeCheckbox');
+      return await testSubjects.exists('dashboardOptionsMenu');
     }
 
     async openOptions() {
@@ -241,21 +272,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.visualize.gotoLandingPage();
       await PageObjects.header.clickDashboard();
       await this.gotoDashboardLandingPage();
-    }
-
-    async isDarkThemeOn() {
-      log.debug('isDarkThemeOn');
-      await this.openOptions();
-      const darkThemeCheckbox = await testSubjects.find('dashboardDarkThemeCheckbox');
-      return await darkThemeCheckbox.getProperty('checked');
-    }
-
-    async useDarkTheme(on) {
-      await this.openOptions();
-      const isDarkThemeOn = await this.isDarkThemeOn();
-      if (isDarkThemeOn !== on) {
-        return await testSubjects.click('dashboardDarkThemeCheckbox');
-      }
     }
 
     async isMarginsOn() {
@@ -275,31 +291,50 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async gotoDashboardEditMode(dashboardName) {
       await this.loadSavedDashboard(dashboardName);
-      await this.clickEdit();
+      await this.switchToEditMode();
     }
 
     async renameDashboard(dashName) {
       log.debug(`Naming dashboard ` + dashName);
       await testSubjects.click('dashboardRenameButton');
-      await testSubjects.setValue('dashboardTitle', dashName);
+      await testSubjects.setValue('savedObjectTitle', dashName);
     }
 
     /**
+     * Save the current dashboard with the specified name and options and
+     * verify that the save was successful
      *
      * @param dashName {String}
-     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
+     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false,  waitDialogIsClosed: boolean }}
      */
-    async saveDashboard(dashName, saveOptions = {}) {
+    async saveDashboard(dashName, saveOptions = { waitDialogIsClosed: true }) {
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
       if (saveOptions.needsConfirm) {
         await this.clickSave();
       }
 
+      // Confirm that the Dashboard has actually been saved
+      await testSubjects.existOrFail('saveDashboardSuccess');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForSaveModalToClose();
+    }
 
-      // Confirm that the Dashboard has been saved.
-      return await testSubjects.exists('saveDashboardSuccess');
+    async waitForSaveModalToClose() {
+      log.debug('Waiting for dashboard save modal to close');
+      await retry.try(async () => {
+        if (await testSubjects.exists('savedObjectSaveModal')) {
+          throw new Error('dashboard save still open');
+        }
+      });
+    }
+
+    async deleteDashboard(dashboardName, dashboardId) {
+      await this.gotoDashboardLandingPage();
+      await this.searchForDashboardWithName(dashboardName);
+      await this.checkDashboardListingRow(dashboardId);
+      await this.clickDeleteSelectedDashboards();
+      await PageObjects.common.clickConfirmOnModal();
     }
 
     async cancelSave() {
@@ -308,24 +343,26 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickSave() {
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveDashboardButton');
-      });
+      log.debug('DashboardPage.clickSave');
+      await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    }
+
+    async pressEnterKey() {
+      log.debug('DashboardPage.pressEnterKey');
+      await PageObjects.common.pressEnterKey();
     }
 
     /**
      *
      * @param dashboardTitle {String}
-     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
+     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, waitDialogIsClosed: boolean}}
      */
-    async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = {}) {
+    async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = { waitDialogIsClosed: true }) {
       await testSubjects.click('dashboardSaveMenuItem');
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      const modalDialog = await testSubjects.find('savedObjectSaveModal');
 
       log.debug('entering new title');
-      await testSubjects.setValue('dashboardTitle', dashboardTitle);
+      await testSubjects.setValue('savedObjectTitle', dashboardTitle);
 
       if (saveOptions.storeTimeWithDashboard !== undefined) {
         await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
@@ -336,6 +373,23 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
 
       await this.clickSave();
+      if (saveOptions.waitDialogIsClosed) {
+        await testSubjects.waitForDeleted(modalDialog);
+      }
+    }
+
+    /**
+     * @param dashboardTitle {String}
+     */
+    async enterDashboardTitleAndPressEnter(dashboardTitle) {
+      await testSubjects.click('dashboardSaveMenuItem');
+      const modalDialog = await testSubjects.find('savedObjectSaveModal');
+
+      log.debug('entering new title');
+      await testSubjects.setValue('savedObjectTitle', dashboardTitle);
+
+      await this.pressEnterKey();
+      await testSubjects.waitForDeleted(modalDialog);
     }
 
     async selectDashboard(dashName) {
@@ -348,15 +402,20 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.gotoDashboardLandingPage();
 
       await retry.try(async () => {
-        const searchFilter = await testSubjects.find('searchFilter');
+        const searchFilter = await this.getSearchFilter();
         await searchFilter.clearValue();
         await PageObjects.common.pressEnterKey();
       });
     }
 
     async getSearchFilterValue() {
-      const searchFilter = await testSubjects.find('searchFilter');
+      const searchFilter = await this.getSearchFilter();
       return await searchFilter.getProperty('value');
+    }
+
+    async getSearchFilter() {
+      const searchFilter = await find.allByCssSelector('.euiFieldSearch');
+      return searchFilter[0];
     }
 
     async searchForDashboardWithName(dashName) {
@@ -365,7 +424,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.gotoDashboardLandingPage();
 
       await retry.try(async () => {
-        const searchFilter = await testSubjects.find('searchFilter');
+        const searchFilter = await this.getSearchFilter();
         await searchFilter.clearValue();
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
@@ -377,7 +436,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await find.allByCssSelector('.dashboardLink');
+      const dashboardTitles = await find.allByCssSelector('[data-test-subj^="dashboardListingTitleLink"]');
       return dashboardTitles.length;
     }
 
@@ -385,7 +444,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug(`getDashboardCountWithName: ${dashName}`);
 
       await this.searchForDashboardWithName(dashName);
-      const links = await find.allByLinkText(dashName);
+      const links = await testSubjects.findAll(`dashboardListingTitleLink-${dashName.replace(/ /g, '-')}`);
       return links.length;
     }
 
@@ -394,27 +453,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async loadSavedDashboard(dashName) {
       log.debug(`Load Saved Dashboard ${dashName}`);
 
-      await retry.try(async () => {
-        await this.searchForDashboardWithName(dashName);
-        await this.selectDashboard(dashName);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.gotoDashboardLandingPage();
 
-        const onDashboardLandingPage = await this.onDashboardLandingPage();
-        if (onDashboardLandingPage) {
-          throw new Error('Failed to open the dashboard up');
-        }
-      });
+      await this.searchForDashboardWithName(dashName);
+      await this.selectDashboard(dashName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
     }
 
     async getPanelTitles() {
       log.debug('in getPanelTitles');
       const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
-
-      function getTitles(chart) {
-        return chart.getVisibleText();
-      }
-      const getTitlePromises = _.map(titleObjects, getTitles);
-      return Promise.all(getTitlePromises);
+      return await Promise.all(titleObjects.map(async title => await title.getVisibleText()));
     }
 
     async getPanelDimensions() {
@@ -468,19 +518,19 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setTimepickerInHistoricalDataRange() {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInDataRange() {
       const fromTime = '2018-01-01 00:00:00.000';
       const toTime = '2018-04-13 00:00:00.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInLogstashDataRange() {
       const fromTime = '2018-04-09 00:00:00.000';
       const toTime = '2018-04-13 00:00:00.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setSaveAsNewCheckBox(checked) {
@@ -503,36 +553,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async getFilters(timeout = defaultFindTimeout) {
-      return await find.allByCssSelector('.filter-bar .filter', timeout);
-    }
-
     async getFilterDescriptions(timeout = defaultFindTimeout) {
       const filters = await find.allByCssSelector(
         '.filter-bar > .filter > .filter-description',
         timeout);
       return _.map(filters, async (filter) => await filter.getVisibleText());
-    }
-
-    async getPieSliceCount(timeout) {
-      log.debug('getPieSliceCount');
-      return await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice', timeout);
-        return slices.length;
-      });
-    }
-
-    async filterOnPieSlice(sliceValue) {
-      log.debug(`Filtering on a pie slice with optional value ${sliceValue}`);
-      if (sliceValue) {
-        await testSubjects.click(`pieSlice-${sliceValue}`);
-      } else {
-        await retry.try(async () => {
-          const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
-          log.debug('Slices found:' + slices.length);
-          return slices[0].click();
-        });
-      }
     }
 
     async getSharedItemsCount() {
@@ -547,22 +572,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async waitForRenderComplete() {
-      await retry.try(async () => {
-        const sharedItems = await find.allByCssSelector('[data-shared-item]');
-        const renderComplete = await Promise.all(sharedItems.map(async sharedItem => {
-          return await sharedItem.getAttribute('data-render-complete');
-        }));
-        if (renderComplete.length !== sharedItems.length) {
-          const expecting = `expecting: ${sharedItems.length}, received: ${renderComplete.length}`;
-          throw new Error(
-            `Some shared items dont have data-render-complete attribute, ${expecting}`);
-        }
-        const totalCount = renderComplete.filter(value => value === 'true' || value === 'disabled').length;
-        if (totalCount < sharedItems.length) {
-          const expecting = `${sharedItems.length}, received: ${totalCount}`;
-          throw new Error(`Still waiting on more visualizations to finish rendering, expecting: ${expecting}`);
-        }
-      });
+      log.debug('waitForRenderComplete');
+      const count = await this.getSharedItemsCount();
+      await renderable.waitForRender(parseInt(count));
     }
 
     async getSharedContainerData() {
@@ -570,7 +582,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const sharedContainer = await find.byCssSelector('[data-shared-items-container]');
       return {
         title: await sharedContainer.getAttribute('data-title'),
-        description: await sharedContainer.getAttribute('data-description')
+        description: await sharedContainer.getAttribute('data-description'),
+        count: await sharedContainer.getAttribute('data-shared-items-count'),
       };
     }
 
@@ -591,6 +604,22 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.click('dashboardPanelTitlesCheckbox');
     }
 
+    async expectMissingSaveOption() {
+      await testSubjects.missingOrFail('dashboardSaveMenuItem');
+    }
+
+    async getNotLoadedVisualizations(vizList) {
+      const checkList = [];
+      for (const name of vizList) {
+        const isPresent = await testSubjects.exists(
+          `dashboardPanelHeading-${name.replace(/\s+/g, '')}`,
+          { timeout: 10000 }
+        );
+        checkList.push({ name, isPresent });
+      }
+
+      return checkList.filter(viz => viz.isPresent === false).map(viz => viz.name);
+    }
   }
 
   return new DashboardPage();

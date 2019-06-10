@@ -4,7 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { handleActions } from "redux-actions";
+import { handleActions } from 'redux-actions';
+import {
+  UIM_DETAIL_PANEL_SUMMARY_TAB,
+  UIM_DETAIL_PANEL_SETTINGS_TAB,
+  UIM_DETAIL_PANEL_MAPPING_TAB,
+  UIM_DETAIL_PANEL_STATS_TAB,
+  UIM_DETAIL_PANEL_EDIT_SETTINGS_TAB,
+} from '../../../common/constants';
+import {
+  TAB_SUMMARY,
+  TAB_SETTINGS,
+  TAB_MAPPING,
+  TAB_STATS,
+  TAB_EDIT_SETTINGS,
+} from '../../constants';
+import { trackUiMetric } from '../../services';
 import { openDetailPanel, closeDetailPanel } from '../actions/detail_panel';
 import { loadIndexDataSuccess } from '../actions/load_index_data';
 import { updateIndexSettingsSuccess, updateIndexSettingsError } from '../actions/update_index_settings';
@@ -29,8 +44,21 @@ export const detailPanel = handleActions(
         indexName,
         title
       } = action.payload;
+
+      const panelTypeToUiMetricMap = {
+        [TAB_SUMMARY]: UIM_DETAIL_PANEL_SUMMARY_TAB,
+        [TAB_SETTINGS]: UIM_DETAIL_PANEL_SETTINGS_TAB,
+        [TAB_MAPPING]: UIM_DETAIL_PANEL_MAPPING_TAB,
+        [TAB_STATS]: UIM_DETAIL_PANEL_STATS_TAB,
+        [TAB_EDIT_SETTINGS]: UIM_DETAIL_PANEL_EDIT_SETTINGS_TAB,
+      };
+
+      if (panelTypeToUiMetricMap[panelType]) {
+        trackUiMetric(panelTypeToUiMetricMap[panelType]);
+      }
+
       return {
-        panelType: panelType || state.panelType || 'Summary',
+        panelType: panelType || state.panelType || TAB_SUMMARY,
         indexName,
         title
       };

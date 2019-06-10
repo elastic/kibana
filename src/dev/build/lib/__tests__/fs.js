@@ -21,15 +21,17 @@ import { resolve } from 'path';
 import { chmodSync, statSync } from 'fs';
 
 import del from 'del';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import { mkdirp, write, read, getChildPaths, copy, copyAll, getFileHash, untar } from '../fs';
+import { mkdirp, write, read, getChildPaths, copyAll, getFileHash, untar } from '../fs';
 
 const TMP = resolve(__dirname, '__tmp__');
 const FIXTURES = resolve(__dirname, 'fixtures');
 const FOO_TAR_PATH = resolve(FIXTURES, 'foo_dir.tar.gz');
 const BAR_TXT_PATH = resolve(FIXTURES, 'foo_dir/bar.txt');
 const WORLD_EXECUTABLE = resolve(FIXTURES, 'bin/world_executable');
+
+const isWindows = /^win/.test(process.platform);
 
 // get the mode of a file as a string, like 777, or 644,
 function getCommonMode(path) {
@@ -95,7 +97,7 @@ describe('dev/build/lib/fs', () => {
       expect(await read(destination)).to.be('bar');
     });
 
-    it('writes conent to a file with missing parents', async () => {
+    it('writes content to a file with missing parents', async () => {
       const destination = resolve(TMP, 'a/b/c/d/e');
 
       expect(await write(destination, 'bar')).to.be(undefined);
@@ -147,47 +149,6 @@ describe('dev/build/lib/fs', () => {
     });
   });
 
-  describe('copy()', () => {
-    it('rejects if source path is not absolute', async () => {
-      try {
-        await copy('foo/bar', __dirname);
-        throw new Error('Expected getChildPaths() to reject');
-      } catch (error) {
-        assertNonAbsoluteError(error);
-      }
-    });
-
-    it('rejects if destination path is not absolute', async () => {
-      try {
-        await copy(__dirname, 'foo/bar');
-        throw new Error('Expected getChildPaths() to reject');
-      } catch (error) {
-        assertNonAbsoluteError(error);
-      }
-    });
-
-    it('rejects if neither path is not absolute', async () => {
-      try {
-        await copy('foo/bar', 'foo/bar');
-        throw new Error('Expected getChildPaths() to reject');
-      } catch (error) {
-        assertNonAbsoluteError(error);
-      }
-    });
-
-    it('copies the contents of one file to another', async () => {
-      const destination = resolve(TMP, 'bar.txt');
-      await copy(BAR_TXT_PATH, destination);
-      expect(await read(destination)).to.be('bar\n');
-    });
-
-    it('copies the mode of the source file', async () => {
-      const destination = resolve(TMP, 'dest.txt');
-      await copy(WORLD_EXECUTABLE, destination);
-      expect(getCommonMode(destination)).to.be('777');
-    });
-  });
-
   describe('copyAll()', () => {
     it('rejects if source path is not absolute', async () => {
       try {
@@ -225,8 +186,8 @@ describe('dev/build/lib/fs', () => {
         resolve(destination, 'foo_dir/foo'),
       ]);
 
-      expect(getCommonMode(resolve(destination, 'bin/world_executable'))).to.be('777');
-      expect(getCommonMode(resolve(destination, 'foo_dir/bar.txt'))).to.be('644');
+      expect(getCommonMode(resolve(destination, 'bin/world_executable'))).to.be(isWindows ? '666' : '777');
+      expect(getCommonMode(resolve(destination, 'foo_dir/bar.txt'))).to.be(isWindows ? '666' : '644');
     });
 
     it('applies select globs if specified, ignores dot files', async () => {
@@ -269,6 +230,7 @@ describe('dev/build/lib/fs', () => {
       expect(await read(resolve(destination, 'foo_dir/bar.txt'))).to.be('bar\n');
       expect(await read(resolve(destination, 'foo_dir/.bar'))).to.be('dotfile\n');
     });
+
 
     it('supports atime and mtime', async () => {
       const destination = resolve(TMP, 'a/b/c/d/e');

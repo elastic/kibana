@@ -10,6 +10,7 @@ import {
   deleteIndicesSuccess,
   loadIndicesSuccess,
   reloadIndicesSuccess,
+  loadIndicesStart
 } from '../actions';
 
 const byId = handleActions({
@@ -27,7 +28,6 @@ const byId = handleActions({
   },
   [loadIndicesSuccess](state, action) {
     const { indices } = action.payload;
-
     const newState = {};
     indices.forEach(index => {
       newState[index.name] = index;
@@ -70,8 +70,16 @@ const allIds = handleActions({
     return state;
   }
 }, []);
-
+const loading = handleActions({
+  [loadIndicesStart]() {
+    return true;
+  },
+  [loadIndicesSuccess]() {
+    return false;
+  }
+}, true);
 export const indices = combineReducers({
+  loading,
   byId,
   allIds
 });

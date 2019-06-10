@@ -18,7 +18,7 @@ export {
 } from './beats';
 export {
   clusterRoute,
-  clustersRoute
+  clustersRoute,
 } from './cluster';
 export {
   esIndexRoute,
@@ -26,7 +26,9 @@ export {
   esNodeRoute,
   esNodesRoute,
   esOverviewRoute,
-  mlJobRoute
+  mlJobRoute,
+  ccrRoute,
+  ccrShardRoute
 } from './elasticsearch';
 export {
   clusterSettingsCheckRoute,
@@ -40,6 +42,11 @@ export {
   kibanaOverviewRoute
 } from './kibana';
 export {
+  apmInstanceRoute,
+  apmInstancesRoute,
+  apmOverviewRoute
+} from './apm';
+export {
   logstashClusterPipelinesRoute,
   logstashNodePipelinesRoute,
   logstashNodeRoute,
@@ -47,3 +54,4 @@ export {
   logstashOverviewRoute,
   logstashPipelineRoute
 } from './logstash';
+export * from './setup';

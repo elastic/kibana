@@ -16,7 +16,7 @@ import {
   timeUnit
 } from '../../../../../utils/formatters';
 import { toJson } from '../../../../../utils/testHelpers';
-import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/view';
+import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/index';
 
 describe('Histogram', () => {
   let wrapper;
@@ -38,9 +38,9 @@ describe('Histogram', () => {
         formatYShort={t => `${asDecimal(t)} occ.`}
         formatYLong={t => `${asDecimal(t)} occurrences`}
         tooltipHeader={bucket =>
-          `${timeFormatter(bucket.x0, false)} - ${timeFormatter(
+          `${timeFormatter(bucket.x0, { withUnit: false })} - ${timeFormatter(
             bucket.x,
-            false
+            { withUnit: false }
           )} ${unit}`
         }
         width={800}
@@ -87,7 +87,7 @@ describe('Histogram', () => {
       const tooltips = wrapper.find('Tooltip');
 
       expect(tooltips.length).toBe(1);
-      expect(tooltips.prop('header')).toBe('811 - 869 ms');
+      expect(tooltips.prop('header')).toBe('811 - 927 ms');
       expect(tooltips.prop('tooltipPoints')).toEqual([
         { value: '49.0 occurrences' }
       ]);
@@ -98,11 +98,13 @@ describe('Histogram', () => {
     it('should update state with "hoveredBucket"', () => {
       expect(wrapper.state()).toEqual({
         hoveredBucket: {
-          sampled: true,
+          sample: {
+            transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
+          },
           style: { cursor: 'pointer' },
-          transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192',
-          x: 869010,
+          xCenter: 869010,
           x0: 811076,
+          x: 926944,
           y: 49
         }
       });
@@ -124,11 +126,13 @@ describe('Histogram', () => {
 
     it('should call onClick with bucket', () => {
       expect(onClick).toHaveBeenCalledWith({
-        sampled: true,
+        sample: {
+          transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
+        },
         style: { cursor: 'pointer' },
-        transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192',
-        x: 869010,
+        xCenter: 869010,
         x0: 811076,
+        x: 926944,
         y: 49
       });
     });

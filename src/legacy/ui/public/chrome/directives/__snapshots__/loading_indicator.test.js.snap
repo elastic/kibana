@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kbnLoadingIndicator is hidden by default 1`] = `
+<div
+  className="kbnLoadingIndicator hidden"
+  data-test-subj="globalLoadingIndicator-hidden"
+>
+  <div
+    className="kbnLoadingIndicator__bar essentialAnimation"
+  />
+</div>
+`;
+
+exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
+<div
+  className="kbnLoadingIndicator"
+  data-test-subj="globalLoadingIndicator"
+>
+  <div
+    className="kbnLoadingIndicator__bar essentialAnimation"
+  />
+</div>
+`;

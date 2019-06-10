@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { createEscapeValue } from '../escape_value';
 
 describe('escapeValue', function () {
@@ -18,7 +18,7 @@ describe('escapeValue', function () {
       expect(escapeValue('baz qux')).to.be('"baz qux"');
     });
 
-    it('should escape values with hypens', function () {
+    it('should escape values with hyphens', function () {
       expect(escapeValue('baz-qux')).to.be('"baz-qux"');
     });
 

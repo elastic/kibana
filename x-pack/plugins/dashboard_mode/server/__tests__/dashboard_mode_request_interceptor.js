@@ -4,43 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import Hapi from 'hapi';
-import Chance from 'chance';
 
 import { createDashboardModeRequestInterceptor } from '../dashboard_mode_request_interceptor';
-import * as constantsNS from '../../common/constants';
 
-const chance = new Chance();
+const DASHBOARD_ONLY_MODE_ROLE = 'test_dashboard_only_mode_role';
 
 function setup() {
-  // randomize AUTH_SCOPE_DASHBORD_ONLY_MODE "constant" to ensure it's being used everywhere
-  const authScope = chance.word({ length: 12 });
-  Object.defineProperty(constantsNS, 'AUTH_SCOPE_DASHBORD_ONLY_MODE', {
-    value: authScope,
-    configurable: true,
-  });
-
   const dashboardViewerApp = {
     name: 'dashboardViewerApp'
   };
 
   const server = new Hapi.Server();
-  server.connection({ port: 0 });
+
+  server.decorate('request', 'getUiSettingsService', () => {
+    return {
+      get: () => Promise.resolve([DASHBOARD_ONLY_MODE_ROLE])
+    };
+  });
 
   // attach the extension
   server.ext(createDashboardModeRequestInterceptor(dashboardViewerApp));
 
   // allow the extension to fake "render an app"
-  server.decorate('reply', 'renderApp', function (app) {
-    this({ renderApp: true, app });
+  server.decorate('toolkit', 'renderApp', function (app) {
+    // `this` is the `h` response toolkit
+    return this.response({ renderApp: true, app });
   });
 
   server.route({
     path: '/app/{appId}',
     method: 'GET',
-    handler(req, reply) {
-      reply.renderApp({ name: req.params.appId });
+    handler(req, h) {
+      return h.renderApp({ name: req.params.appId });
     }
   });
 
@@ -48,12 +45,12 @@ function setup() {
   server.route({
     path: '/{path*}',
     method: 'GET',
-    handler(req, reply) {
-      reply({ catchAll: true, path: `/${req.params.path}` });
+    handler(req) {
+      return { catchAll: true, path: `/${req.params.path}` };
     }
   });
 
-  return { server, authScope };
+  return { server };
 }
 
 describe('DashboardOnlyModeRequestInterceptor', () => {
@@ -65,14 +62,14 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
     });
   });
 
-  describe('request does not have `xpack:dashboardMode` scope', () => {
+  describe('request is not for dashboad-only user', () => {
     describe('app route', () => {
       it('lets the route render as normal', async () => {
         const { server } = setup();
         const response = await server.inject({
           url: '/app/kibana',
           credentials: {
-            scope: ['foo', 'bar']
+            roles: ['foo', 'bar']
           }
         });
 
@@ -91,7 +88,7 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
         const response = await server.inject({
           url: '/foo/bar',
           credentials: {
-            scope: ['foo', 'bar']
+            roles: ['foo', 'bar']
           }
         });
 
@@ -105,14 +102,14 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
     });
   });
 
-  describe('request has correct auth scope scope', () => {
+  describe('request for dashboard-only user', () => {
     describe('non-kibana app route', () => {
       it('responds with 404', async () => {
-        const { server, authScope } = setup();
+        const { server } = setup();
         const response = await server.inject({
           url: '/app/foo',
           credentials: {
-            scope: [authScope]
+            roles: [DASHBOARD_ONLY_MODE_ROLE]
           }
         });
 
@@ -124,11 +121,11 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
     function testRendersDashboardViewerApp(url) {
       describe(`requests to url:"${url}"`, () => {
         it('renders the dashboardViewerApp instead', async () => {
-          const { server, authScope } = setup();
+          const { server } = setup();
           const response = await server.inject({
             url: '/app/kibana',
             credentials: {
-              scope: [authScope]
+              roles: [DASHBOARD_ONLY_MODE_ROLE]
             }
           });
 

@@ -9,13 +9,13 @@
 // Service for carrying out Elasticsearch queries to obtain data for the
 // Ml Results dashboards.
 import _ from 'lodash';
+// import d3 from 'd3';
 
-import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
-import { escapeForElasticsearchQuery } from 'plugins/ml/util/string_utils';
-import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
+import { ML_MEDIAN_PERCENTS } from '../../common/util/job_utils';
+import { escapeForElasticsearchQuery } from '../util/string_utils';
+import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
 
-import { ml } from 'plugins/ml/services/ml_api_service';
-
+import { ml } from '../services/ml_api_service';
 
 // Obtains the maximum bucket anomaly scores by job ID and time.
 // Pass an empty array or ['*'] to search over all job IDs.
@@ -268,7 +268,8 @@ function getTopInfluencers(
   earliestMs,
   latestMs,
   maxFieldValues = 10,
-  influencers = []) {
+  influencers = [],
+  influencersFilterQuery) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, influencers: {} };
 
@@ -308,6 +309,10 @@ function getTopInfluencers(
           query: jobIdFilterStr
         }
       });
+    }
+
+    if (influencersFilterQuery !== undefined) {
+      boolCriteria.push(influencersFilterQuery);
     }
 
     // Add a should query to filter for each of the specified influencers.
@@ -563,7 +568,8 @@ function getInfluencerValueMaxScoreByTime(
   earliestMs,
   latestMs,
   interval,
-  maxResults) {
+  maxResults,
+  influencersFilterQuery) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, results: {} };
 
@@ -604,13 +610,23 @@ function getInfluencerValueMaxScoreByTime(
       });
     }
 
+    if (influencersFilterQuery !== undefined) {
+      boolCriteria.push(influencersFilterQuery);
+    }
+
     if (influencerFieldValues && influencerFieldValues.length > 0) {
       let influencerFilterStr = '';
       _.each(influencerFieldValues, (value, i) => {
         if (i > 0) {
           influencerFilterStr += ' OR ';
         }
-        influencerFilterStr += `influencer_field_value:${escapeForElasticsearchQuery(value)}`;
+        if (value.trim().length > 0) {
+          influencerFilterStr += `influencer_field_value:${escapeForElasticsearchQuery(value)}`;
+        } else {
+          // Wrap whitespace influencer field values in quotes for the query_string query.
+          influencerFilterStr += `influencer_field_value:"${value}"`;
+        }
+
       });
       boolCriteria.push({
         query_string: {
@@ -764,6 +780,7 @@ function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResult
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
       size: maxResults !== undefined ? maxResults : 100,
+      rest_total_hits_as_int: true,
       body: {
         _source: ['job_id', 'detector_index', 'influencers', 'record_score'],
         query: {
@@ -809,7 +826,7 @@ function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResult
 // 'fieldValue' properties. The influencer array uses 'should' for the nested bool query,
 // so this returns record level results which have at least one of the influencers.
 // Pass an empty array or ['*'] to search over all job IDs.
-function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, latestMs, maxResults) {
+function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, latestMs, maxResults, influencersFilterQuery) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, records: [] };
 
@@ -851,6 +868,10 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
       });
     }
 
+    if (influencersFilterQuery !== undefined) {
+      boolCriteria.push(influencersFilterQuery);
+    }
+
     // Add a nested query to filter for each of the specified influencers.
     if (influencers.length > 0) {
       boolCriteria.push({
@@ -886,6 +907,7 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
       size: maxResults !== undefined ? maxResults : 100,
+      rest_total_hits_as_int: true,
       body: {
         query: {
           bool: {
@@ -1012,6 +1034,7 @@ function getRecordsForDetector(
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
       size: maxResults !== undefined ? maxResults : 100,
+      rest_total_hits_as_int: true,
       body: {
         query: {
           bool: {
@@ -1115,6 +1138,7 @@ function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, la
 
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       size: maxResults !== undefined ? maxResults : 100,
       body: {
         query: {
@@ -1156,7 +1180,6 @@ function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, la
 
 // Queries Elasticsearch to obtain metric aggregation results.
 // index can be a String, or String[], of index names to search.
-// types must be a String[] of types to search.
 // entityFields parameter must be an array, with each object in the array having 'fieldName'
 //  and 'fieldValue' properties.
 // Extra query object can be supplied, or pass null if no additional query
@@ -1164,10 +1187,9 @@ function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, la
 // Returned response contains a results property containing the requested aggregation.
 function getMetricData(
   index,
-  types,
   entityFields,
   query,
-  metricFunction,
+  metricFunction, // ES aggregation name
   metricFieldName,
   timeFieldName,
   earliestMs,
@@ -1177,14 +1199,10 @@ function getMetricData(
     const obj = { success: true, results: {} };
 
     // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the types, time range, entity fields,
+    // Add criteria for the time range, entity fields,
     // plus any additional supplied query.
     const mustCriteria = [];
     const shouldCriteria = [];
-
-    if (types && types.length) {
-      mustCriteria.push({ terms: { _type: types } });
-    }
 
     mustCriteria.push({
       range: {
@@ -1332,7 +1350,7 @@ function getEventRateData(
     const obj = { success: true, results: {} };
 
     // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the types, time range, entity fields,
+    // Add criteria for the time range, entity fields,
     // plus any additional supplied query.
     const mustCriteria = [{
       range: {
@@ -1350,6 +1368,7 @@ function getEventRateData(
 
     ml.esSearch({
       index,
+      rest_total_hits_as_int: true,
       size: 0,
       body: {
         query: {
@@ -1384,6 +1403,179 @@ function getEventRateData(
         obj.total = resp.hits.total;
 
         resolve(obj);
+      })
+      .catch((resp) => {
+        reject(resp);
+      });
+  });
+}
+
+// Queries Elasticsearch to obtain event distribution i.e. the count
+// of entities over time.
+// index can be a String, or String[], of index names to search.
+// Extra query object can be supplied, or pass null if no additional query.
+// Returned response contains a results property, which is an object
+// of document counts against time (epoch millis).
+const SAMPLER_TOP_TERMS_SHARD_SIZE = 20000;
+const ENTITY_AGGREGATION_SIZE = 10;
+const AGGREGATION_MIN_DOC_COUNT = 1;
+const CARDINALITY_PRECISION_THRESHOLD = 100;
+function getEventDistributionData(
+  index,
+  splitField,
+  filterField = null,
+  query,
+  metricFunction, // ES aggregation name
+  metricFieldName,
+  timeFieldName,
+  earliestMs,
+  latestMs,
+  interval) {
+  return new Promise((resolve, reject) => {
+    if (splitField === undefined) {
+      return resolve([]);
+    }
+
+    // Build the criteria to use in the bool filter part of the request.
+    // Add criteria for the time range, entity fields,
+    // plus any additional supplied query.
+    const mustCriteria = [];
+
+    mustCriteria.push({
+      range: {
+        [timeFieldName]: {
+          gte: earliestMs,
+          lte: latestMs,
+          format: 'epoch_millis'
+        }
+      }
+    });
+
+    if (query) {
+      mustCriteria.push(query);
+    }
+
+    if (filterField !== null) {
+      mustCriteria.push({
+        term: {
+          [filterField.fieldName]: filterField.fieldValue
+        }
+      });
+    }
+
+    const body = {
+      query: {
+        // using function_score and random_score to get a random sample of documents.
+        // otherwise all documents would have the same score and the sampler aggregation
+        // would pick the first N documents instead of a random set.
+        function_score: {
+          query: {
+            bool: {
+              must: mustCriteria
+            }
+          },
+          functions: [
+            {
+              random_score: {
+                // static seed to get same randomized results on every request
+                seed: 10,
+                field: '_seq_no'
+              }
+            }
+          ]
+        }
+      },
+      size: 0,
+      _source: {
+        excludes: []
+      },
+      aggs: {
+        sample: {
+          sampler: {
+            shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE
+          },
+          aggs: {
+            byTime: {
+              date_histogram: {
+                field: timeFieldName,
+                interval: interval,
+                min_doc_count: AGGREGATION_MIN_DOC_COUNT
+              },
+              aggs: {
+                entities: {
+                  terms: {
+                    field: splitField.fieldName,
+                    size: ENTITY_AGGREGATION_SIZE,
+                    min_doc_count: AGGREGATION_MIN_DOC_COUNT
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    if (metricFieldName !== undefined && metricFieldName !== '') {
+      body.aggs.sample.aggs.byTime.aggs.entities.aggs = {};
+
+      const metricAgg = {
+        [metricFunction]: {
+          field: metricFieldName
+        }
+      };
+
+      if (metricFunction === 'percentiles') {
+        metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];
+      }
+
+      if (metricFunction === 'cardinality') {
+        metricAgg[metricFunction].precision_threshold = CARDINALITY_PRECISION_THRESHOLD;
+      }
+      body.aggs.sample.aggs.byTime.aggs.entities.aggs.metric = metricAgg;
+    }
+
+    ml.esSearch({
+      index,
+      body,
+      rest_total_hits_as_int: true,
+    })
+      .then((resp) => {
+        // Because of the sampling, results of metricFunctions which use sum or count
+        // can be significantly skewed. Taking into account totalHits we calculate a
+        // a factor to normalize results for these metricFunctions.
+        const totalHits = _.get(resp, ['hits', 'total'], 0);
+        const successfulShards = _.get(resp, ['_shards', 'successful'], 0);
+
+        let normalizeFactor = 1;
+        if (totalHits > (successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE)) {
+          normalizeFactor = totalHits / (successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE);
+        }
+
+        const dataByTime = _.get(resp, ['aggregations', 'sample', 'byTime', 'buckets'], []);
+        const data = dataByTime.reduce((d, dataForTime) => {
+          const date = +dataForTime.key;
+          const entities = _.get(dataForTime, ['entities', 'buckets'], []);
+          entities.forEach((entity) => {
+            let value = (metricFunction === 'count') ? entity.doc_count : entity.metric.value;
+
+            if (
+              metricFunction === 'count'
+              || metricFunction === 'cardinality'
+              || metricFunction === 'sum'
+            ) {
+              value = value * normalizeFactor;
+            }
+
+            d.push({
+              date,
+              entity: entity.key,
+              value
+            });
+          });
+          return d;
+        }, []);
+        resolve(data);
       })
       .catch((resp) => {
         reject(resp);
@@ -1663,6 +1855,7 @@ export const mlResultsService = {
   getRecordsForCriteria,
   getMetricData,
   getEventRateData,
+  getEventDistributionData,
   getModelPlotOutput,
   getRecordMaxScoreByTime
 };

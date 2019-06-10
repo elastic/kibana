@@ -18,18 +18,15 @@
  */
 
 import _ from 'lodash';
-import { statSync, lstatSync, realpathSync } from 'fs';
-import { isWorker } from 'cluster';
+import { statSync } from 'fs';
 import { resolve } from 'path';
 
-import { fromRoot } from '../../utils';
-import { getConfig } from '../../server/path';
-import { readYamlConfig } from './read_yaml_config';
+import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { getConfig } from '../../legacy/server/path';
+import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
-
-const { startRepl } = canRequire('../repl') ? require('../repl') : { };
 
 function canRequire(path) {
   try {
@@ -44,26 +41,16 @@ function canRequire(path) {
   }
 }
 
-function isSymlinkTo(link, dest) {
-  try {
-    const stat = lstatSync(link);
-    return stat.isSymbolicLink() && realpathSync(link) === dest;
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
-      throw error;
-    }
-  }
-}
-
 const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
 const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
 
+const REPL_PATH = resolve(__dirname, '../repl');
+const CAN_REPL = canRequire(REPL_PATH);
+
 // xpack is installed in both dev and the distributable, it's optional if
 // install is a link to the source, not an actual install
-const XPACK_INSTALLED_DIR = resolve(__dirname, '../../../node_modules/x-pack');
-const XPACK_SOURCE_DIR = resolve(__dirname, '../../../x-pack');
-const XPACK_INSTALLED = canRequire(XPACK_INSTALLED_DIR);
-const XPACK_OPTIONAL = isSymlinkTo(XPACK_INSTALLED_DIR, XPACK_SOURCE_DIR);
+const XPACK_DIR = resolve(__dirname, '../../../x-pack');
+const XPACK_INSTALLED = canRequire(XPACK_DIR);
 
 const pathCollector = function () {
   const paths = [];
@@ -77,19 +64,22 @@ const configPathCollector = pathCollector();
 const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-function readServerSettings(opts, extraCliOptions) {
-  const settings = readYamlConfig(opts.config);
-  const set = _.partial(_.set, settings);
-  const get = _.partial(_.get, settings);
-  const has = _.partial(_.has, settings);
-  const merge = _.partial(_.merge, settings);
+function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
+  const set = _.partial(_.set, rawConfig);
+  const get = _.partial(_.get, rawConfig);
+  const has = _.partial(_.has, rawConfig);
+  const merge = _.partial(_.merge, rawConfig);
+
+  if (opts.oss) {
+    delete rawConfig.xpack;
+  }
 
   if (opts.dev) {
     set('env', 'development');
     set('optimize.watch', true);
 
     if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'elastic');
+      set('elasticsearch.username', 'kibana');
     }
 
     if (!has('elasticsearch.password')) {
@@ -106,13 +96,18 @@ function readServerSettings(opts, extraCliOptions) {
     }
   }
 
-  if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
+  if (opts.elasticsearch) set('elasticsearch.hosts', opts.elasticsearch.split(','));
   if (opts.port) set('server.port', opts.port);
   if (opts.host) set('server.host', opts.host);
   if (opts.quiet) set('logging.quiet', true);
   if (opts.silent) set('logging.silent', true);
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
+
+  if (opts.optimize) {
+    set('server.autoListen', false);
+    set('plugins.initialize', false);
+  }
 
   set('plugins.scanDirs', _.compact([].concat(
     get('plugins.scanDirs'),
@@ -123,15 +118,15 @@ function readServerSettings(opts, extraCliOptions) {
     get('plugins.paths'),
     opts.pluginPath,
 
-    XPACK_INSTALLED && (!XPACK_OPTIONAL || !opts.oss)
-      ? [XPACK_INSTALLED_DIR]
+    XPACK_INSTALLED && !opts.oss
+      ? [XPACK_DIR]
       : [],
   )));
 
   merge(extraCliOptions);
   merge(readKeystore(get('path.data')));
 
-  return settings;
+  return rawConfig;
 }
 
 export default function (program) {
@@ -140,11 +135,10 @@ export default function (program) {
   command
     .description('Run the kibana server')
     .collectUnknownOptions()
-    .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
+    .option('-e, --elasticsearch <uri1,uri2>', 'Elasticsearch instances')
     .option(
       '-c, --config <path>',
-      'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' +
-    'Use multiple --config args to include multiple config files.',
+      'Path to the config file, use multiple --config args to include multiple config files',
       configPathCollector,
       [ getConfig() ]
     )
@@ -161,7 +155,7 @@ export default function (program) {
       pluginDirCollector,
       [
         fromRoot('plugins'),
-        fromRoot('src/core_plugins')
+        fromRoot('src/legacy/core_plugins')
       ]
     )
     .option(
@@ -171,13 +165,15 @@ export default function (program) {
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
+    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
+    .option('--optimize', 'Optimize and then stop the server');
 
-  if (!!startRepl) {
+
+  if (CAN_REPL) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
   }
 
-  if (XPACK_OPTIONAL) {
+  if (!IS_KIBANA_DISTRIBUTABLE) {
     command
       .option('--oss', 'Start Kibana without X-Pack');
   }
@@ -185,92 +181,46 @@ export default function (program) {
   if (CAN_CLUSTER) {
     command
       .option('--dev', 'Run the server with development mode defaults')
+      .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
       .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
-      .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
+      .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
 
   command
     .action(async function (opts) {
-      if (opts.dev) {
+      if (opts.dev && opts.devConfig !== false) {
         try {
           const kbnDevConfig = fromRoot('config/kibana.dev.yml');
           if (statSync(kbnDevConfig).isFile()) {
             opts.config.push(kbnDevConfig);
           }
         } catch (err) {
-        // ignore, kibana.dev.yml does not exist
+          // ignore, kibana.dev.yml does not exist
         }
       }
 
-      const getCurrentSettings = () => readServerSettings(opts, this.getUnknownOptions());
-      const settings = getCurrentSettings();
-
-      if (CAN_CLUSTER && opts.dev && !isWorker) {
-        // stop processing the action and handoff to cluster manager
-        const ClusterManager = require(CLUSTER_MANAGER_PATH);
-        await ClusterManager.create(opts, settings);
-        return;
-      }
-
-      let kbnServer = {};
-      const KbnServer = require('../../server/kbn_server');
-      try {
-        kbnServer = new KbnServer(settings);
-        if (shouldStartRepl(opts)) {
-          startRepl(kbnServer);
-        }
-        await kbnServer.ready();
-      } catch (error) {
-        const { server } = kbnServer;
-
-        switch (error.code) {
-          case 'EADDRINUSE':
-            logFatal(`Port ${error.port} is already in use. Another instance of Kibana may be running!`, server);
-            break;
-
-          case 'InvalidConfig':
-            logFatal(error.message, server);
-            break;
-
-          default:
-            logFatal(error, server);
-            break;
-        }
-
-        kbnServer.close();
-        const exitCode = error.processExitCode == null ? 1 : error.processExitCode;
-        // eslint-disable-next-line no-process-exit
-        process.exit(exitCode);
-      }
-
-      process.on('SIGHUP', async function reloadConfig() {
-        const settings = getCurrentSettings();
-        kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
-        await kbnServer.applyLoggingConfiguration(settings);
-        kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
+      const unknownOptions = this.getUnknownOptions();
+      await bootstrap({
+        configs: [].concat(opts.config || []),
+        cliArgs: {
+          dev: !!opts.dev,
+          open: !!opts.open,
+          envName: unknownOptions.env ? unknownOptions.env.name : undefined,
+          quiet: !!opts.quiet,
+          silent: !!opts.silent,
+          watch: !!opts.watch,
+          repl: !!opts.repl,
+          basePath: !!opts.basePath,
+          optimize: !!opts.optimize,
+        },
+        features: {
+          isClusterModeSupported: CAN_CLUSTER,
+          isReplModeSupported: CAN_REPL,
+        },
+        applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
       });
-
-      return kbnServer;
     });
-}
 
-function shouldStartRepl(opts) {
-  if (opts.repl && !startRepl) {
-    throw new Error('Kibana REPL mode can only be run in development mode.');
-  }
-
-  // The kbnWorkerType check is necessary to prevent the repl
-  // from being started multiple times in different processes.
-  // We only want one REPL.
-  return opts.repl && process.env.kbnWorkerType === 'server';
-}
-
-function logFatal(message, server) {
-  if (server) {
-    server.log(['fatal'], message);
-  }
-
-  // It's possible for the Hapi logger to not be setup
-  console.error('FATAL', message);
 }

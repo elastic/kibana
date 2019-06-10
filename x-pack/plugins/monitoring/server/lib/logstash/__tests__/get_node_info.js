@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import { handleResponse } from '../get_node_info';
 
@@ -35,7 +35,7 @@ describe('get_logstash_info', () => {
                   failures: 2
                 },
                 queue: {
-                  type: "persisted",
+                  type: 'persisted',
                   events: 100
                 }
               }
@@ -56,7 +56,7 @@ describe('get_logstash_info', () => {
         successes: 5,
         failures: 2
       },
-      queue_type: "persisted"
+      queue_type: 'persisted'
     });
   });
 
@@ -81,7 +81,7 @@ describe('get_logstash_info', () => {
                   failures: 2
                 },
                 queue: {
-                  type: "persisted",
+                  type: 'persisted',
                   events: 100
                 }
               }
@@ -102,7 +102,7 @@ describe('get_logstash_info', () => {
         successes: 5,
         failures: 2
       },
-      queue_type: "persisted"
+      queue_type: 'persisted'
     });
   });
 

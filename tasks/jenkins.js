@@ -24,22 +24,20 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jenkins:unit', [
     'run:eslint',
-    'run:tslint',
+    'run:sasslint',
+    'run:checkTsProjects',
+    'run:checkCoreApiChanges',
+    'run:typeCheck',
+    'run:i18nCheck',
     'run:checkFileCasing',
-    'licenses',
-    'verifyDependencyVersions',
+    'run:licenses',
+    'run:verifyDependencyVersions',
     'run:verifyNotice',
-    'test:server',
-    'test:jest',
-    'test:jest_integration',
-    'test:projects',
-    'test:browser-ci',
-    'test:api',
-    'verifyTranslations',
-  ]);
-
-  grunt.config.set('functional_test_runner.functional.options.configOverrides.mochaOpts.bail', true);
-  grunt.registerTask('jenkins:selenium', [
-    'test:uiRelease'
+    'run:test_server',
+    'run:test_jest',
+    'run:test_jest_integration',
+    'run:test_projects',
+    'run:test_browser_ci',
+    'run:apiIntegrationTests',
   ]);
 };

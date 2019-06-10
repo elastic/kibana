@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexTimestamp } from '../../../plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
 
 function removeWhitespace(str) {
@@ -98,8 +98,8 @@ export function ReportingAPIProvider({ getService }) {
     },
 
     expectRecentPdfAppStats(stats, app, count) {
-      expect(stats.reporting.lastDay.printable_pdf.app[app]).to.be(count);
-      expect(stats.reporting.last7Days.printable_pdf.app[app]).to.be(count);
+      expect(stats.reporting.last_day.printable_pdf.app[app]).to.be(count);
+      expect(stats.reporting.last_7_days.printable_pdf.app[app]).to.be(count);
     },
 
     expectAllTimePdfAppStats(stats, app, count) {
@@ -107,8 +107,8 @@ export function ReportingAPIProvider({ getService }) {
     },
 
     expectRecentPdfLayoutStats(stats, layout, count) {
-      expect(stats.reporting.lastDay.printable_pdf.layout[layout]).to.be(count);
-      expect(stats.reporting.last7Days.printable_pdf.layout[layout]).to.be(count);
+      expect(stats.reporting.last_day.printable_pdf.layout[layout]).to.be(count);
+      expect(stats.reporting.last_7_days.printable_pdf.layout[layout]).to.be(count);
     },
 
     expectAllTimePdfLayoutStats(stats, layout, count) {
@@ -116,8 +116,8 @@ export function ReportingAPIProvider({ getService }) {
     },
 
     expectRecentJobTypeTotalStats(stats, jobType, count) {
-      expect(stats.reporting.lastDay[jobType].total).to.be(count);
-      expect(stats.reporting.last7Days[jobType].total).to.be(count);
+      expect(stats.reporting.last_day[jobType].total).to.be(count);
+      expect(stats.reporting.last_7_days[jobType].total).to.be(count);
     },
 
     expectAllTimeJobTypeTotalStats(stats, jobType, count) {

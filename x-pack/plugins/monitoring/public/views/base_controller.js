@@ -9,6 +9,9 @@ import moment from 'moment';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from 'plugins/monitoring/components';
+import { timefilter } from 'ui/timefilter';
+import { I18nContext } from 'ui/i18n';
+import { PromiseWithCancel } from '../../common/cancel_promise';
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -69,12 +72,11 @@ export class MonitoringViewBaseController {
     options = {}
   }) {
     const titleService = $injector.get('title');
-    const timefilter = $injector.get('timefilter');
     const $executor = $injector.get('$executor');
 
     titleService($scope.cluster, title);
 
-    this.data = { ...defaultData };
+    $scope.pageData = this.data = { ...defaultData };
     this._isDataInitialized = false;
     this.reactNodeId = reactNodeId;
 
@@ -96,19 +98,27 @@ export class MonitoringViewBaseController {
     }
 
     this.updateData = () => {
+      if (this.updateDataPromise) {
+        // Do not sent another request if one is inflight
+        // See https://github.com/elastic/kibana/issues/24082
+        this.updateDataPromise.cancel();
+        this.updateDataPromise = null;
+      }
       const _api = apiUrlFn ? apiUrlFn() : api;
-      return _getPageData($injector, _api)
-        .then(pageData => {
+      this.updateDataPromise = new PromiseWithCancel(_getPageData($injector, _api));
+      return this.updateDataPromise.promise().then((pageData) => {
+        $scope.$apply(() => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
-          this.data = pageData; // update the view's data with the fetch result
+          $scope.pageData = this.data = pageData; // update the view's data with the fetch result
         });
+      });
     };
     this.updateData();
 
     $executor.register({
       execute: () => this.updateData()
     });
-    $executor.start();
+    $executor.start($scope);
     $scope.$on('$destroy', () => {
       if (this.reactNodeId) { // WIP https://github.com/elastic/x-pack-kibana/issues/5198
         unmountComponentAtNode(document.getElementById(this.reactNodeId));
@@ -119,17 +129,19 @@ export class MonitoringViewBaseController {
     // needed for chart pages
     this.onBrush = ({ xaxis }) => {
       const { to, from } = xaxis;
-      $scope.$evalAsync(() => {
-        timefilter.time.from = moment(from);
-        timefilter.time.to = moment(to);
-        timefilter.time.mode = 'absolute';
+      timefilter.setTime({
+        from: moment(from),
+        to: moment(to),
+        mode: 'absolute'
       });
     };
+
+    this.setTitle = title => titleService($scope.cluster, title);
   }
 
   renderReact(component) {
     if (this._isDataInitialized === false) {
-      render(<PageLoading />, document.getElementById(this.reactNodeId));
+      render(<I18nContext><PageLoading /></I18nContext>, document.getElementById(this.reactNodeId));
     } else {
       render(component, document.getElementById(this.reactNodeId));
     }

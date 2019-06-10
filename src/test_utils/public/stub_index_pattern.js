@@ -17,20 +17,17 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import sinon from 'sinon';
-import Promise from 'bluebird';
 import { IndexPatternProvider, getRoutes } from 'ui/index_patterns/_index_pattern';
 import { formatHit } from 'ui/index_patterns/_format_hit';
 import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
 import { fieldFormats } from 'ui/registry/field_formats';
 import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
-import { IndexPatternsFieldListProvider } from 'ui/index_patterns/_field_list';
+import { FieldList } from 'ui/index_patterns/_field_list';
 
 export default function (Private) {
 
   const flattenHit = Private(IndexPatternsFlattenHitProvider);
-  const FieldList = Private(IndexPatternsFieldListProvider);
   const IndexPattern = Private(IndexPatternProvider);
 
   function StubIndexPattern(pattern, timeField, fields) {
@@ -38,6 +35,7 @@ export default function (Private) {
     this.title = pattern;
     this.popularizeField = sinon.stub();
     this.timeFieldName = timeField;
+    this.isTimeBased = () => Boolean(this.timeFieldName);
     this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
     this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
     this.getSourceFiltering = sinon.stub();
@@ -45,12 +43,6 @@ export default function (Private) {
     this.fieldFormatMap = {};
     this.routes = getRoutes();
 
-    this.toIndexList = _.constant(Promise.resolve(pattern.split(',')));
-    this.toDetailedIndexList = _.constant(Promise.resolve(pattern.split(',').map(index => ({
-      index,
-      min: 0,
-      max: 1
-    }))));
     this.getComputedFields = getComputedFields.bind(this);
     this.flattenHit = flattenHit(this);
     this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));

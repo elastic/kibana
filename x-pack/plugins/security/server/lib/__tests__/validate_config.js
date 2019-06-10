@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { validateConfig } from '../validate_config';
 
@@ -16,7 +16,8 @@ describe('Validate config', function () {
   beforeEach(() => {
     config = {
       get: sinon.stub(),
-      set: sinon.stub()
+      getDefault: sinon.stub(),
+      set: sinon.stub(),
     };
     log.resetHistory();
   });

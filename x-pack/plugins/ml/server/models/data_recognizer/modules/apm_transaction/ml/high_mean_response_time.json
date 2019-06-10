@@ -24,5 +24,7 @@
   "model_plot_config": {
     "enabled": true
   },
-  "model_snapshot_retention_days": 1
+  "custom_settings": {
+    "created_by": "ml-module-apm-transaction"
+  }
 }

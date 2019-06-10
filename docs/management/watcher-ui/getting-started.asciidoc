@@ -10,8 +10,9 @@ To access {watcher} UI within {kib}:
 locally, go to `http://localhost:5601/`.
 
 . Click **Management** in the side navigation, then select **Watcher** under `Elasticsearch`.
-
-image::management/watcher-ui/images/watches.png["Watch list",link="management/watcher-ui/images/watches.png"]
++
+[role="screenshot"]
+image::images/management-watcher-buttons.png["Watch list",link="management/watcher-ui/images/watches.png"]
 
 The watch list page within {watcher} UI enables you to view all existing watches including stateful information about each watch. This includes `State`, `Last Fired` and `Last Triggered`.
 

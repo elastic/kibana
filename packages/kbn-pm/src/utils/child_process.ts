@@ -23,14 +23,7 @@ import logSymbols from 'log-symbols';
 import logTransformer from 'strong-log-transformer';
 
 function generateColors() {
-  const colorWheel = [
-    chalk.cyan,
-    chalk.magenta,
-    chalk.blue,
-    chalk.yellow,
-    chalk.green,
-    chalk.red,
-  ];
+  const colorWheel = [chalk.cyan, chalk.magenta, chalk.blue, chalk.yellow, chalk.green];
 
   const count = colorWheel.length;
   let children = 0;
@@ -40,8 +33,8 @@ function generateColors() {
 
 export function spawn(command: string, args: string[], opts: execa.Options) {
   return execa(command, args, {
-    ...opts,
     stdio: 'inherit',
+    ...opts,
   });
 }
 
@@ -54,8 +47,8 @@ export function spawnStreaming(
   { prefix }: { prefix: string }
 ) {
   const spawned = execa(command, args, {
-    ...opts,
     stdio: ['ignore', 'pipe', 'pipe'],
+    ...opts,
   });
 
   const color = nextColor();

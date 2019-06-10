@@ -42,19 +42,13 @@ program
   .command('build [files...]')
   .description('Build a distributable archive')
   .on('--help', docs('build'))
-  .option(
-    '--skip-archive',
-    "Don't create the zip file, leave the build path alone"
-  )
+  .option('--skip-archive', "Don't create the zip file, leave the build path alone")
   .option(
     '-d, --build-destination <path>',
     'Target path for the build output, absolute or relative to the plugin root'
   )
   .option('-b, --build-version <version>', 'Version for the build output')
-  .option(
-    '-k, --kibana-version <version>',
-    'Kibana version for the build output'
-  )
+  .option('-k, --kibana-version <version>', 'Kibana version for the build output')
   .action(
     createCommanderAction('build', (command, files) => ({
       buildDestination: command.buildDestination,
@@ -75,10 +69,7 @@ program
   .command('test:browser')
   .description('Run the browser tests in a real web browser')
   .option('--dev', 'Enable dev mode, keeps the test server running')
-  .option(
-    '-p, --plugins <plugin-ids>',
-    "Manually specify which plugins' test bundles to run"
-  )
+  .option('-p, --plugins <plugin-ids>', "Manually specify which plugins' test bundles to run")
   .on('--help', docs('test/browser'))
   .action(
     createCommanderAction('testBrowser', command => ({

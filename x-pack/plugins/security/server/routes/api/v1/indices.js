@@ -14,24 +14,23 @@ export function initIndicesApi(server) {
   server.route({
     method: 'GET',
     path: '/api/security/v1/fields/{query}',
-    handler(request, reply) {
+    handler(request) {
       return callWithRequest(request, 'indices.getFieldMapping', {
         index: request.params.query,
         fields: '*',
         allowNoIndices: false,
         includeDefaults: true
       })
-        .then((mappings) => reply(
+        .then((mappings) =>
           _(mappings)
             .map('mappings')
-            .map(_.values)
             .flatten()
             .map(_.keys)
             .flatten()
             .uniq()
             .value()
-        ))
-        .catch(_.flow(wrapError, reply));
+        )
+        .catch(wrapError);
     }
   });
 }

@@ -8,6 +8,8 @@
 
 import template from './form_filter_input.html';
 
+import { i18n } from '@kbn/i18n';
+
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -25,7 +27,15 @@ module.directive('mlFormFilterInput', function () {
     replace: false,
     template,
     link(scope) {
-      scope.placeholder = angular.isDefined(scope.placeholder) ? scope.placeholder : 'Filter';
+      const placeholderIsDefined = angular.isDefined(scope.placeholder);
+
+      scope.placeholder = placeholderIsDefined
+        ? scope.placeholder
+        : i18n.translate('xpack.ml.formFilterInput.filterPlaceholder', { defaultMessage: 'Filter' });
+
+      scope.ariaLabel = placeholderIsDefined
+        ? scope.placeholder
+        : i18n.translate('xpack.ml.formFilterInput.filterAriaLabel', { defaultMessage: 'Filter' });
     }
   };
 });

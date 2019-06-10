@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { vertexFactory } from '../vertex_factory';
 import { PluginVertex } from '../plugin_vertex';
 import { IfVertex } from '../if_vertex';

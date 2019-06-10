@@ -20,10 +20,11 @@
 import Mocha from 'mocha';
 
 import { loadTestFiles } from './load_test_files';
+import { filterSuitesByTags } from './filter_suites_by_tags';
 import { MochaReporterProvider } from './reporter';
 
 /**
- *  Instansiate mocha and load testfiles into it
+ *  Instantiate mocha and load testfiles into it
  *
  *  @param  {Lifecycle} lifecycle
  *  @param  {ToolingLog} log
@@ -42,10 +43,26 @@ export async function setupMocha(lifecycle, log, config, providers) {
   });
 
   // global beforeEach hook in root suite triggers before all others
-  mocha.suite.beforeEach('global before each', async () => {
-    await lifecycle.trigger('beforeEachTest');
+  mocha.suite.beforeEach('global before each', async function () {
+    await lifecycle.trigger('beforeEachTest', this.currentTest);
   });
 
-  loadTestFiles(mocha, log, lifecycle, providers, config.get('testFiles'), config.get('updateBaselines'));
+  loadTestFiles({
+    mocha,
+    log,
+    lifecycle,
+    providers,
+    paths: config.get('testFiles'),
+    excludePaths: config.get('excludeTestFiles'),
+    updateBaselines: config.get('updateBaselines'),
+  });
+
+  filterSuitesByTags({
+    log,
+    mocha,
+    include: config.get('suiteTags.include'),
+    exclude: config.get('suiteTags.exclude'),
+  });
+
   return mocha;
 }

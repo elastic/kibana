@@ -5,7 +5,7 @@
  */
 
 import { checkForErrors, sendNotification } from './notify';
-import { wrap } from 'boom';
+import { boomify } from 'boom';
 
 describe('notifications/routes/send', () => {
 
@@ -96,9 +96,8 @@ describe('notifications/routes/send', () => {
         getActionForId: jest.fn().mockReturnValue(action),
       };
       const checkForErrors = jest.fn().mockReturnValue(error);
-      const reply = jest.fn();
 
-      await sendNotification(server, notificationService, id, notification, reply, { _checkForErrors: checkForErrors });
+      const sendResponse = await sendNotification(server, notificationService, id, notification, { _checkForErrors: checkForErrors });
 
       expect(notificationService.getActionForId).toHaveBeenCalledTimes(1);
       expect(notificationService.getActionForId).toHaveBeenCalledWith(id);
@@ -107,8 +106,7 @@ describe('notifications/routes/send', () => {
       expect(server.log).toHaveBeenCalledTimes(1);
       expect(server.log).toHaveBeenCalledWith(['actions', 'error'], error.message);
 
-      expect(reply).toHaveBeenCalledTimes(1);
-      expect(reply).toHaveBeenCalledWith({
+      expect(sendResponse).toEqual({
         status_code: 400,
         ok: false,
         message: `Error: ${error.message}`,
@@ -129,17 +127,15 @@ describe('notifications/routes/send', () => {
         getActionForId: jest.fn().mockReturnValue(action),
       };
       const checkForErrors = jest.fn().mockReturnValue(null);
-      const reply = jest.fn();
 
-      await sendNotification(server, notificationService, id, notification, reply, { _checkForErrors: checkForErrors });
+      const sendResponse = await sendNotification(server, notificationService, id, notification, { _checkForErrors: checkForErrors });
 
       expect(notificationService.getActionForId).toHaveBeenCalledTimes(1);
       expect(notificationService.getActionForId).toHaveBeenCalledWith(id);
       expect(checkForErrors).toHaveBeenCalledTimes(1);
       expect(checkForErrors).toHaveBeenCalledWith(action, id, notification);
 
-      expect(reply).toHaveBeenCalledTimes(1);
-      expect(reply).toHaveBeenCalledWith(response);
+      expect(sendResponse).toEqual(response);
     });
 
     it('replies with unexpected result error', async () => {
@@ -152,17 +148,15 @@ describe('notifications/routes/send', () => {
         getActionForId: jest.fn().mockReturnValue(action),
       };
       const checkForErrors = jest.fn().mockReturnValue(null);
-      const reply = jest.fn();
 
-      await sendNotification(server, notificationService, id, notification, reply, { _checkForErrors: checkForErrors });
+      const sendResponse = await sendNotification(server, notificationService, id, notification, { _checkForErrors: checkForErrors });
 
       expect(notificationService.getActionForId).toHaveBeenCalledTimes(1);
       expect(notificationService.getActionForId).toHaveBeenCalledWith(id);
       expect(checkForErrors).toHaveBeenCalledTimes(1);
       expect(checkForErrors).toHaveBeenCalledWith(action, id, notification);
 
-      expect(reply).toHaveBeenCalledTimes(1);
-      expect(reply).toHaveBeenCalledWith(wrap(error));
+      expect(sendResponse).toEqual(boomify(error));
     });
 
   });

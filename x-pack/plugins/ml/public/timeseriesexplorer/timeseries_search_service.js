@@ -64,7 +64,6 @@ function getMetricData(job, detectorIndex, entityFields, earliestMs, latestMs, i
 
       mlResultsService.getMetricData(
         chartConfig.datafeedConfig.indices,
-        chartConfig.datafeedConfig.types,
         entityFields,
         chartConfig.datafeedConfig.query,
         chartConfig.metricFunction,
@@ -121,7 +120,6 @@ function getChartDetails(job, detectorIndex, entityFields, earliestMs, latestMs)
       const entityFieldNames = _.map(blankEntityFields, 'fieldName');
       ml.getCardinalityOfFields({
         index: chartConfig.datafeedConfig.indices,
-        types: chartConfig.datafeedConfig.types,
         fieldNames: entityFieldNames,
         query: chartConfig.datafeedConfig.query,
         timeFieldName: chartConfig.timeField,
@@ -130,6 +128,8 @@ function getChartDetails(job, detectorIndex, entityFields, earliestMs, latestMs)
       })
         .then((results) => {
           _.each(blankEntityFields, (field) => {
+            // results will not contain keys for non-aggregatable fields,
+            // so store as 0 to indicate over all field values.
             obj.results.entityData.entities.push({
               fieldName: field.fieldName,
               cardinality: _.get(results, field.fieldName, 0)

@@ -3,10 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
+import { MonitoringViewBaseController } from '../../';
+import { Overview } from 'plugins/monitoring/components/cluster/overview';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/overview', {
   template,
@@ -20,29 +24,40 @@ uiRoutes.when('/overview', {
       return monitoringClusters(globalState.cluster_uuid, globalState.ccs);
     }
   },
-  controller($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
+  controller: class extends MonitoringViewBaseController {
+    constructor($injector, $scope) {
+      const kbnUrl = $injector.get('kbnUrl');
+      const monitoringClusters = $injector.get('monitoringClusters');
+      const globalState = $injector.get('globalState');
 
-    const $route = $injector.get('$route');
-    $scope.cluster = $route.current.locals.cluster;
+      super({
+        title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
+          defaultMessage: 'Overview'
+        }),
+        defaultData: {},
+        getPageData: () => monitoringClusters(globalState.cluster_uuid, globalState.ccs),
+        reactNodeId: 'monitoringClusterOverviewApp',
+        $scope,
+        $injector
+      });
 
-    const title = $injector.get('title');
-    title($scope.cluster, 'Overview');
+      const changeUrl = target => {
+        $scope.$evalAsync(() => {
+          kbnUrl.changePath(target);
+        });
+      };
 
-    const $executor = $injector.get('$executor');
-    const monitoringClusters = $injector.get('monitoringClusters');
-    const globalState = $injector.get('globalState');
-    $executor.register({
-      execute: () => monitoringClusters(globalState.cluster_uuid, globalState.ccs),
-      handleResponse(cluster) {
-        $scope.cluster = cluster;
-      }
-    });
-
-    $executor.start();
-
-    $scope.$on('$destroy', $executor.destroy);
+      $scope.$watch(() => this.data, data => {
+        this.renderReact(
+          <I18nContext>
+            <Overview
+              cluster={data}
+              changeUrl={changeUrl}
+              showLicenseExpiration={true}
+            />
+          </I18nContext>
+        );
+      });
+    }
   }
 });

@@ -7,6 +7,7 @@
 
 
 import { uiModules } from 'ui/modules';
+import { i18n } from '@kbn/i18n';
 const module = uiModules.get('apps/ml');
 
 module.controller('MlConfirmModal', function ($scope, $modalInstance, params) {
@@ -17,8 +18,13 @@ module.controller('MlConfirmModal', function ($scope, $modalInstance, params) {
   $scope.message = params.message || '';
   $scope.title = params.title || '';
 
-  $scope.okLabel = params.okLabel || 'OK';
-  $scope.cancelLabel = params.cancelLabel || 'Cancel';
+  $scope.okLabel = params.okLabel || i18n.translate('xpack.ml.confirmModal.okButtonLabel', {
+    defaultMessage: 'OK',
+  });
+
+  $scope.cancelLabel = params.cancelLabel || i18n.translate('xpack.ml.confirmModal.cancelButtonLabel', {
+    defaultMessage: 'Cancel',
+  });
 
   $scope.hideCancel = params.hideCancel || false;
 

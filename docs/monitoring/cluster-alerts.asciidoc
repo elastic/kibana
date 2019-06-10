@@ -1,6 +1,6 @@
 [role="xpack"]
 [[cluster-alerts]]
-=== Cluster Alerts
+== Cluster Alerts
 
 The *Monitoring > Clusters* page in {kib} summarizes the status of your Elastic
 stack. You can drill down into the metrics to view more information about your
@@ -17,6 +17,8 @@ different versions in the same cluster.
 versions running against the same {es} cluster.
 * Logstash Version Mismatch. You have Logstash nodes with different
 versions reporting stats to the same monitoring cluster.
+* {es} Nodes Changed. You have {es} nodes that were recently added or removed.
+* {es} License Expiration. The cluster's license is about to expire.
 +
 --
 If you do not preserve the data directory when upgrading a {kib} or
@@ -46,8 +48,6 @@ To receive email notifications for the Cluster Alerts:
 
 1. Configure an email account as described in
 {xpack-ref}/actions-email.html#configuring-email[Configuring Email Accounts].
-2. Navigate to the *Management* page in {kib}.
-3. Go to the *Advanced Settings* page, find the `xpack:defaultAdminEmail`
-setting, and enter your email address.
+2. Configure the `xpack.monitoring.cluster_alerts.email_notifications.email_address` setting in `kibana.yml` with your email address.
 
 Email notifications are sent only when Cluster Alerts are triggered and resolved.

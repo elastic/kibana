@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { IfVertex } from '../if_vertex';
 import { Vertex } from '../vertex';
-import ifIcon from '@elastic/eui/src/components/icon/assets/logstash_if.svg';
 
 describe('IfVertex', () => {
   let graph;
@@ -37,6 +36,6 @@ describe('IfVertex', () => {
 
   it('should use the correct icon', () => {
     const ifVertex = new IfVertex(graph, vertexJson);
-    expect(ifVertex.icon).to.be(ifIcon);
+    expect(ifVertex.iconType).to.be('logstashIf');
   });
 });

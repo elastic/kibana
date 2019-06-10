@@ -1,0 +1,58 @@
+# GitHub CODEOWNERS definition
+# Identify which groups will be pinged by changes to different parts of the codebase.
+# For more info, see https://help.github.com/articles/about-codeowners/
+
+# APM
+/x-pack/plugins/apm/  @elastic/apm-ui
+
+# Beats
+/x-pack/plugins/beats_management/  @elastic/beats
+
+# Canvas
+/x-pack/plugins/canvas/  @elastic/kibana-canvas
+
+# Code
+/x-pack/plugins/code/  @teams/code
+/x-pack/test/functional/apps/code/  @teams/code
+/x-pack/test/api_integration/apis/code/  @teams/code
+
+# Infrastructure and Logs UI
+/x-pack/plugins/infra/ @elastic/infra-logs-ui
+
+# Machine Learning
+/x-pack/plugins/ml/  @elastic/ml-ui
+
+# Operations
+/src/dev/ @elastic/kibana-operations
+/src/setup_node_env/ @elastic/kibana-operations
+/src/optimize/ @elastic/kibana-operations
+
+# Platform
+/src/core/  @elastic/kibana-platform
+/src/legacy/server/saved_objects/  @elastic/kibana-platform
+/src/legacy/ui/public/saved_objects  @elastic/kibana-platform
+
+# Security
+/x-pack/plugins/security/  @elastic/kibana-security
+/x-pack/plugins/spaces/  @elastic/kibana-security
+/x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
+/src/legacy/server/csp/ @elastic/kibana-security
+
+# Design
+**/*.scss  @elastic/kibana-design
+
+# Elasticsearch UI
+/src/legacy/core_plugins/console/  @elastic/es-ui
+/x-pack/plugins/console_extensions/  @elastic/es-ui
+/x-pack/plugins/cross_cluster_replication/  @elastic/es-ui
+/x-pack/plugins/index_lifecycle_management/  @elastic/es-ui
+/x-pack/plugins/index_management/  @elastic/es-ui
+/x-pack/plugins/license_management/  @elastic/es-ui
+/x-pack/plugins/remote_clusters/  @elastic/es-ui
+/x-pack/plugins/rollup/  @elastic/es-ui
+/x-pack/plugins/searchprofiler/  @elastic/es-ui
+/x-pack/plugins/snapshot_restore/  @elastic/es-ui
+/x-pack/plugins/watcher/  @elastic/es-ui
+
+# Kibana TSVB external contractors
+/src/legacy/core_plugins/metrics/  @elastic/kibana-tsvb-external

@@ -9,8 +9,9 @@ import { includes, isFunction } from 'lodash';
 import {
   EuiKeyboardAccessible,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class HorizontalLegend extends React.Component {
+class HorizontalLegendUI extends React.Component {
   constructor() {
     super();
     this.formatter = this.formatter.bind(this);
@@ -18,27 +19,52 @@ export class HorizontalLegend extends React.Component {
   }
 
   /**
-   * @param {Number} value The value to format and show in the horizontal
-   * legend. A null means no data for the time bucket and will be formatted as
-  * 'N/A'
+   * @param {Number} value Final value to display
    */
-  formatter(value) {
-    if (value === null) {
-      return 'N/A';
+  displayValue(value) {
+    return (
+      <span className="monRhythmChart__legendValue">
+        { value }
+      </span>
+    );
+  }
+
+  /**
+   * @param {Number} value True if value is falsy and/or not a number
+   */
+  validValue(value) {
+    return value !== null && value !== undefined && (typeof value === 'string' || !isNaN(value));
+  }
+
+  /**
+   * @param {Number} value The value to format and show in the horizontallegend.
+   * A null means no data for the time bucket and will be formatted as 'N/A'
+   * @param {Object} row Props passed form a parent by row index
+   */
+  formatter(value, row) {
+    if (!this.validValue(value)) {
+      return (<FormattedMessage
+        id="xpack.monitoring.chart.horizontalLegend.notAvailableLabel"
+        defaultMessage="N/A"
+      />);
     }
+
+    if (row && row.tickFormatter) {
+      return this.displayValue(row.tickFormatter(value));
+    }
+
     if (isFunction(this.props.tickFormatter)) {
-      return this.props.tickFormatter(value);
+      return this.displayValue(this.props.tickFormatter(value));
     }
-    return value;
+    return this.displayValue(value);
   }
 
   createSeries(row, rowIdx) {
-    const formatter = row.tickFormatter || this.formatter;
-    const value = formatter(this.props.seriesValues[row.id]);
-    const classes = ['col-md-4 col-xs-6 rhythm_chart__legend-item'];
+    const { intl } = this.props;
+    const classes = ['col-md-4 col-xs-6 monRhythmChart__legendItem'];
 
     if (!includes(this.props.seriesFilter, row.id)) {
-      classes.push('disabled');
+      classes.push('monRhythmChart__legendItem-isDisabled');
     }
     if (!row.label || row.legend === false) {
       return (
@@ -55,17 +81,18 @@ export class HorizontalLegend extends React.Component {
           className={classes.join(' ')}
           onClick={event => this.props.onToggle(event, row.id)}
         >
-          <span className="rhythm_chart__legend-label">
+          <span className="monRhythmChart__legendLabel">
             <span
-              className="fa fa-circle rhythm_chart__legend-indicator"
+              className="fa fa-circle monRhythmChart__legendIndicator"
               style={{ color: row.color }}
-              aria-label="toggle button"
+              aria-label={intl.formatMessage({
+                id: 'xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel',
+                defaultMessage: 'toggle button'
+              })}
             />
-            { ' ' + row.label }
+            { ' ' + row.label + ' ' }
           </span>
-          <span className="rhythm_chart__legend-value">
-            { ' ' + value }
-          </span>
+          { this.formatter(this.props.seriesValues[row.id], row) }
         </div>
       </EuiKeyboardAccessible>
     );
@@ -75,11 +102,13 @@ export class HorizontalLegend extends React.Component {
     const rows = this.props.series.map(this.createSeries);
 
     return (
-      <div className="rhythm_chart__legend-horizontal">
-        <div className="row rhythm_chart__legend-series">
+      <div className="monRhythmChart__legendHorizontal">
+        <div className="row monRhythmChart__legend-series">
           { rows }
         </div>
       </div>
     );
   }
 }
+
+export const HorizontalLegend = injectI18n(HorizontalLegendUI);

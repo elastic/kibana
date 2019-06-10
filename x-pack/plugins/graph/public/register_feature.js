@@ -8,11 +8,15 @@
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
+import { i18n } from '@kbn/i18n';
+
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'graph',
     title: 'Graph',
-    description: 'Surface and analyze relevant relationships in your Elasticsearch data.',
+    description: i18n.translate('xpack.graph.pluginDescription', {
+      defaultMessage: 'Surface and analyze relevant relationships in your Elasticsearch data.',
+    }),
     icon: 'graphApp',
     path: '/app/graph',
     showOnHomePage: true,

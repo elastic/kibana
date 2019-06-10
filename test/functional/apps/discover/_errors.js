@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
@@ -36,7 +36,9 @@ export default function ({ getService, getPageObjects }) {
 
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
-        const isFetchErrorVisible = await testSubjects.exists('discoverFetchError');
+        const isFetchErrorVisible = await testSubjects.exists(
+          'discoverFetchError'
+        );
         expect(isFetchErrorVisible).to.be(true);
       });
     });

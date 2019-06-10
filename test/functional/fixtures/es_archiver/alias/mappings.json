@@ -2,25 +2,23 @@
   "type": "index",
   "value": {
     "index": "test3",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
+    "mappings": {
+      "properties": {
+        "message": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        }
       }
     },
-    "mappings": {
-      "doc": {
-        "properties": {
-          "message": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          }
-        }
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
       }
     }
   }
@@ -30,19 +28,17 @@
   "type": "index",
   "value": {
     "index": "test9",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
+    "mappings": {
+      "properties": {
+        "date": {
+          "type": "date"
+        }
       }
     },
-    "mappings": {
-      "doc": {
-        "properties": {
-          "date": {
-            "type": "date"
-          }
-        }
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
       }
     }
   }
@@ -52,25 +48,23 @@
   "type": "index",
   "value": {
     "index": "test4",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
+    "mappings": {
+      "properties": {
+        "message": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        }
       }
     },
-    "mappings": {
-      "doc": {
-        "properties": {
-          "message": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          }
-        }
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
       }
     }
   }
@@ -80,25 +74,23 @@
   "type": "index",
   "value": {
     "index": "test2",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
+    "mappings": {
+      "properties": {
+        "message": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        }
       }
     },
-    "mappings": {
-      "doc": {
-        "properties": {
-          "message": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          }
-        }
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
       }
     }
   }
@@ -108,19 +100,17 @@
   "type": "index",
   "value": {
     "index": "test7",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
+    "mappings": {
+      "properties": {
+        "date": {
+          "type": "date"
+        }
       }
     },
-    "mappings": {
-      "doc": {
-        "properties": {
-          "date": {
-            "type": "date"
-          }
-        }
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
       }
     }
   }
@@ -130,19 +120,17 @@
   "type": "index",
   "value": {
     "index": "test6",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
+    "mappings": {
+      "properties": {
+        "date": {
+          "type": "date"
+        }
       }
     },
-    "mappings": {
-      "doc": {
-        "properties": {
-          "date": {
-            "type": "date"
-          }
-        }
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
       }
     }
   }
@@ -152,19 +140,17 @@
   "type": "index",
   "value": {
     "index": "test8",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
+    "mappings": {
+      "properties": {
+        "date": {
+          "type": "date"
+        }
       }
     },
-    "mappings": {
-      "doc": {
-        "properties": {
-          "date": {
-            "type": "date"
-          }
-        }
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
       }
     }
   }
@@ -174,19 +160,17 @@
   "type": "index",
   "value": {
     "index": "test5",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
+    "mappings": {
+      "properties": {
+        "date": {
+          "type": "date"
+        }
       }
     },
-    "mappings": {
-      "doc": {
-        "properties": {
-          "date": {
-            "type": "date"
-          }
-        }
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
       }
     }
   }
@@ -196,25 +180,23 @@
   "type": "index",
   "value": {
     "index": "test1",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
+    "mappings": {
+      "properties": {
+        "message": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        }
       }
     },
-    "mappings": {
-      "doc": {
-        "properties": {
-          "message": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          }
-        }
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
       }
     }
   }

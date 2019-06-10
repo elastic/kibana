@@ -1,11 +1,11 @@
 [[pdf-layout-modes]]
 == PDF Layout Modes
 
-When creating a PDF report, there are two layout modes *Optimize PDF for printing* and *Preserve existing layout in PDF*
+When creating a PDF report of a dashboard, there are two layout modes: *Optimize PDF for printing* and *Preserve existing layout in PDF*
 
 --
 [role="screenshot"]
-image:reporting/images/pdf-reporting.png["PDF Reporting",link="pdf-reporting.png"]
+image:reporting/images/preserve-layout-switch.png["PDF Reporting",link="preserve-layout-switch.png"]
 --
 
 [float]
@@ -27,3 +27,5 @@ This will create a PDF preserving the existing layout and size of the Visualizat
 [role="screenshot"]
 image:reporting/images/preserve-layout.png["Preserve existing layout in PDF",link="preserve-layout.png"]
 --
+
+When creating a PNG or a PDF report of a visualization, the "Optimize for printing" option will automatically be used.

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import nodeDetailFixture from './fixtures/node_detail_advanced';
 
 export default function ({ getService }) {
@@ -36,7 +36,6 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      console.log(JSON.stringify(body));
       expect(body).to.eql(nodeDetailFixture);
     });
   });

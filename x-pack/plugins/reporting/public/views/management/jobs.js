@@ -4,141 +4,58 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'angular-paging';
-import 'plugins/reporting/services/job_queue';
-import 'plugins/reporting/less/main.less';
-import { Notifier } from 'ui/notify';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import routes from 'ui/routes';
 import template from 'plugins/reporting/views/management/jobs.html';
-import { Poller } from '../../../../../common/poller';
 
-const pageSize = 10;
+import { ReportListing } from '../../components/report_listing';
+import { i18n } from '@kbn/i18n';
+import { I18nContext } from 'ui/i18n';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
-function mapJobs(jobs) {
-  return jobs.map((job) => {
-    return {
-      id: job._id,
-      type: job._source.jobtype,
-      object_type: job._source.payload.type,
-      object_title: job._source.payload.title,
-      created_by: job._source.created_by,
-      created_at: job._source.created_at,
-      started_at: job._source.started_at,
-      completed_at: job._source.completed_at,
-      status: job._source.status,
-      content_type: job._source.output ? job._source.output.content_type : false,
-      max_size_reached: job._source.output ? job._source.output.max_size_reached : false
-    };
-  });
-}
+const REACT_ANCHOR_DOM_ELEMENT_ID = 'reportListingAnchor';
 
 routes.when('/management/kibana/reporting', {
   template,
+  k7Breadcrumbs: () => [
+    MANAGEMENT_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.reporting.breadcrumb', {
+        defaultMessage: 'Reporting'
+      })
+    }
+  ],
   controllerAs: 'jobsCtrl',
-  controller($scope, $route, $window, $interval, reportingJobQueue, kbnUrl, Private, reportingPollConfig) {
-    const { jobsRefresh } = reportingPollConfig;
-    const notifier = new Notifier({ location: 'Reporting' });
+  controller($scope, kbnUrl, Private) {
     const xpackInfo = Private(XPackInfoProvider);
 
-    this.loading = false;
-    this.pageSize = pageSize;
-    this.currentPage = 1;
-    this.reportingJobs = [];
+    $scope.$$postDigest(() => {
+      const node = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
+      if (!node) {
+        return;
+      }
 
-    const licenseAllowsToShowThisPage = () => {
-      return xpackInfo.get('features.reporting.management.showLinks')
-        && xpackInfo.get('features.reporting.management.enableLinks');
-    };
-
-    const notifyAndRedirectToManagementOverviewPage = () => {
-      notifier.error(xpackInfo.get('features.reporting.management.message'));
-      kbnUrl.redirect('/management');
-      return Promise.reject();
-    };
-
-    const getJobs = (page = 0) => {
-      return reportingJobQueue.list(page)
-        .then((jobs) => {
-          return reportingJobQueue.total()
-            .then((total) => {
-              const mappedJobs = mapJobs(jobs);
-              return {
-                jobs: mappedJobs,
-                total: total,
-                pages: Math.ceil(total / pageSize),
-              };
-            });
-        })
-        .catch((err) => {
-          if (!licenseAllowsToShowThisPage()) {
-            return notifyAndRedirectToManagementOverviewPage();
-          }
-
-          if (err.status !== 401 && err.status !== 403) {
-            notifier.error(err.statusText || 'Request failed');
-          }
-
-          return {
-            jobs: [],
-            total: 0,
-            pages: 1,
-          };
-        });
-    };
-
-    const toggleLoading = () => {
-      this.loading = !this.loading;
-    };
-
-    const updateJobs = () => {
-      return getJobs(this.currentPage - 1)
-        .then((jobs) => {
-          this.reportingJobs = jobs;
-        });
-    };
-
-    const updateJobsLoading = () => {
-      toggleLoading();
-      updateJobs().then(toggleLoading);
-    };
-
-    // pagination logic
-    this.setPage = (page) => {
-      this.currentPage = page;
-    };
-
-    // job list updating
-    const poller = new Poller({
-      functionToPoll: () => {
-        return updateJobs();
-      },
-      pollFrequencyInMillis: jobsRefresh.interval,
-      trailing: true,
-      continuePollingOnError: true,
-      pollFrequencyErrorMultiplier: jobsRefresh.intervalErrorMultiplier
+      render(
+        <I18nContext>
+          <ReportListing
+            badLicenseMessage={xpackInfo.get('features.reporting.management.message')}
+            showLinks={xpackInfo.get('features.reporting.management.showLinks')}
+            enableLinks={xpackInfo.get('features.reporting.management.enableLinks')}
+            redirect={kbnUrl.redirect}
+          />
+        </I18nContext>,
+        node,
+      );
     });
-    poller.start();
 
-    // control handlers
-    this.download = (jobId) => {
-      $window.open(`../api/reporting/jobs/download/${jobId}`);
-    };
-
-    // fetch and show job error details
-    this.showError = (jobId) => {
-      reportingJobQueue.getContent(jobId)
-        .then((doc) => {
-          this.errorMessage = {
-            job_id: jobId,
-            message: doc.content,
-          };
-        });
-    };
-
-    $scope.$watch('jobsCtrl.currentPage', updateJobsLoading);
-
-    $scope.$on('$destroy', () => poller.stop());
+    $scope.$on('$destroy', () => {
+      const node = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
+      if (node) {
+        unmountComponentAtNode(node);
+      }
+    });
   }
 });

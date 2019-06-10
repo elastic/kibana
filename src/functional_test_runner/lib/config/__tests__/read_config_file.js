@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { readConfigFile } from '../read_config_file';
 import { Config } from '../config';
 
-const log = createToolingLog().resume();
+const log = new ToolingLog();
 
 describe('readConfigFile()', () => {
   it('reads config from a file, returns an instance of Config class', async () => {

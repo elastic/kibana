@@ -1,0 +1,95 @@
+.codeSidebar {
+  box-shadow: inset -1px 0 0 $euiColorLightShade;
+  padding: $euiSizeS;
+  flex-basis: 18rem;
+  flex-grow: 0;
+
+  .codeSidebar__heading {
+    margin: $euiSizeM $euiSizeM 0 $euiSizeM;
+  }
+
+  .code-sidebar__link {
+    background-color: transparent;
+    border-radius: $euiBorderRadius;
+    box-sizing: border-box;
+    padding-right: $euiSizeS;
+    width: 100%;
+    transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+    &:hover {
+      background-color: $euiColorLightestShade;
+    }
+    .euiFlexGroup--gutterLarge {
+      margin: 0;
+    }
+  }
+}
+
+.codeTab__projects {
+  .codeTab__projects--emptyHeader {
+    text-align: center;
+  }
+}
+
+.codeSymbol {
+  cursor: pointer;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  height: 1.5rem;
+  margin-left: 0.75rem;
+  background: transparent;
+  position: relative;
+
+  .euiToken {
+    margin-right: $euiSizeS;
+  }
+
+  > .euiIcon {
+    margin-right: $euiSizeXS;
+  }
+}
+
+.codeSymbol--nested {
+  margin-left: 2rem;
+}
+
+.code-structure-node {
+  padding: $euiSizeXS;
+}
+
+.code-full-width-node {
+  position: absolute;
+  // guess there's an element has a margin 1rem affect this, can't find it sby far
+  width: calc(100% + 1rem);
+  background: $euiColorLightShade;
+  left: 0;
+  height: 1.5rem;
+}
+
+.euiSideNavItem__items {
+  position: static;
+}
+
+.codeStructureTree--icon {
+  margin: auto 0.25rem;
+}
+
+.code-symbol-link {
+  &:focus {
+    animation: none !important;
+  }
+}
+
+// EUI Overrides
+// TODO: Add 'code' prefixed classnames
+.euiSideNavItem--root + .euiSideNavItem--root {
+  margin-top: 1rem;
+}
+
+.euiSideNavItem__items:after {
+  width: 0;
+}
+
+.euiSideNavItem--trunk > .euiSideNavItem__items {
+  margin-left: $euiSize;
+}

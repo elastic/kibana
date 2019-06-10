@@ -1,70 +1,51 @@
 [role="xpack"]
-[[xpack-upgrade-assistant]]
+[[upgrade-assistant]]
 == Upgrade Assistant
 
-The Upgrade Assistant helps you prepare to upgrade from Elasticsearch 5.x to
-Elasticsearch 6.0. It identifies deprecated settings, simplifies reindexing
-your pre-5.x indices, and upgrades the internal indices used by Kibana and
-X-Pack to the format required in 6.0.
+The Upgrade Assistant helps you prepare for your upgrade to {es} 9.0. 
+To access the assistant, go to *Management > 9.0 Upgrade Assistant*. 
 
-To access the Upgrade Assistant, go to **Management** and click the **Upgrade
-Assistant** link in the Elasticsearch section.
+The assistant identifies the deprecated settings in your cluster and indices 
+and guides you through the process of resolving issues, including reindexing. 
 
-[float]
-[[cluster-checkup]]
-=== Cluster Checkup
-
-The first step in preparing to upgrade is to identify any deprecated settings
-or features you are using. The Cluster Checkup runs a series of checks
-against your cluster and indices and generates a report identifying
-any issues that you need to resolve.
-
-To run the Cluster Checkup, go to the **Cluster Checkup** tab in the
-Upgrade Assistant. Issues that **must** be resolved before you can upgrade to
-Elasticsearch 6.0 appear in red as errors.
-
-If the checkup finds indices that need to be reindexed, you can
-manage that process with the Reindex Helper. You can also manually reindex or
-simply delete old indices if you are sure you no longer need them.
+Before upgrading to Elasticsearch 9.0, make sure that you are using the final 
+8.x minor release to see the most up-to-date deprecation issues. 
 
 [float]
-[[reindex-helper]]
-=== Reindex Helper
-If you have indices created in 2.x, you must reindex them before
-upgrading to Elasticsearch 6.0. In addition, the internal Kibana and X-Pack
-indices must be reindexed to upgrade them to the format required in 6.0.
+=== Reindexing
 
-To reindex indices with the Reindex Helper:
+The *Indices* page lists the indices that are incompatible with the next 
+major version of {es}. You can initiate a reindex to resolve the issues.
 
-. **Back up your indices using {ref}/modules-snapshots.html[Snapshot and Restore].**
-. Go to the **Reindex Helper** tab in the Upgrade Assistant.
-. Click the **Reindex** button to reindex an index.
-. Monitor the reindex task that is kicked off.
+[role="screenshot"]
+image::images/management-upgrade-assistant-9.0.png[]
 
-You can run any number of reindex tasks simultaneously. The processing status
-is displayed for each index. You can stop a task by clicking **Cancel**. If
-any step in the reindex process fails, you can reset the index by clicking
-**Reset**.
+For a preview of how the data will change during the reindex, select the 
+index name. A warning appears if the index requires destructive changes.  
+Back up your index, then proceed with the reindex by accepting each breaking change.  
 
-You can also click **Refresh Indices** to remove any indices that have been
-successfully reindexed from the list.
+You can follow the progress as the Upgrade Assistant makes the index read-only, 
+creates a new index, reindexes the documents, and creates an alias that points 
+from the old index to the new one. 
 
-Reindexing tasks continue to run when you leave the Reindex Helper. When you
-come back, click **Refresh Indices** to get the latest status of your indices.
+If the reindexing fails or is cancelled, the changes are rolled back, the 
+new index is deleted, and the original index becomes writable. An error 
+message explains the reason for the failure.
 
-NOTE: When you come back to the Reindex Helper, it shows any tasks that are
-still running. You can cancel those tasks if you need to, but you won't have
-access to the task progress and are blocked from resetting indices that fail
-reindexing. This is because the index might have been modified outside of
-your Kibana instance.
+You can reindex multiple indices at a time, but keep an eye on the 
+{es} metrics, including CPU usage, memory pressure, and disk usage. If a 
+metric is so high it affects query performance, cancel the reindex and 
+continue by reindexing fewer indices at a time.
 
-[float]
-[[toggle-deprecation-logger]]
-=== Toggle Deprecation Logger
+Additional considerations:
 
-To see the current deprecation logging status, go to the **Toggle Deprecation
-Logging** tab in the Upgrade Assistant. Deprecation Logging is enabled by
-default from Elasticsearch 5.x onward. If you have disabled deprecation logging, you
-can click **Toggle Deprecation Logging** to re-enable it. This logs any
-deprecated actions to your log directory so you can see what changes you need
-to make to your code before upgrading.
+* If you use {alert-features}, when you reindex the internal indices
+(`.watches`), the {watcher} process pauses and no alerts are triggered.  
+
+* If you use {ml-features}, when you reindex the internal indices (`.ml-state`),
+the {ml} jobs pause and models are not trained or updated. 
+
+* If you use {security-features}, before you reindex the internal indices
+(`.security*`), it is a good idea to create a temporary superuser account in the
+`file` realm. For more information, see
+{ref}/configuring-file-realm.html[Configuring a file realm].

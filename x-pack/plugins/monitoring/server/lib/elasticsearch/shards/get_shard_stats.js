@@ -17,8 +17,9 @@ export function handleResponse(resp, includeNodes, includeIndices, cluster) {
   let indicesTotals;
   let nodes;
 
-  if (resp && resp.hits && resp.hits.total !== 0) {
-    indices = resp.aggregations.indices.buckets.reduce(normalizeIndexShards, {});
+  const buckets = get(resp, 'aggregations.indices.buckets');
+  if (buckets && buckets.length !== 0) {
+    indices = buckets.reduce(normalizeIndexShards, {});
     indicesTotals = calculateIndicesTotals(indices);
 
     if (includeNodes) {
@@ -38,7 +39,6 @@ export function getShardStats(req, esIndexPattern, cluster, { includeNodes = fal
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
 
   const config = req.server.config();
-  const nodeResolver = config.get('xpack.monitoring.node_resolver');
   const metric = ElasticsearchMetric.getMetricFields();
   const params = {
     index: esIndexPattern,
@@ -53,7 +53,7 @@ export function getShardStats(req, esIndexPattern, cluster, { includeNodes = fal
         filters: [ { term: { state_uuid: get(cluster, 'cluster_state.state_uuid') } } ]
       }),
       aggs: {
-        ...getShardAggs(config, includeNodes, nodeResolver)
+        ...getShardAggs(config, includeNodes)
       }
     }
   };

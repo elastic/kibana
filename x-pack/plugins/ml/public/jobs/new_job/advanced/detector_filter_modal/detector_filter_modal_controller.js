@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
@@ -17,13 +18,22 @@ const module = uiModules.get('apps/ml');
 module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, params) {
   const msgs = mlMessageBarService;
   msgs.clear();
-  $scope.title = 'Add new filter';
+  $scope.title = i18n.translate('xpack.ml.newJob.advanced.detectorFilterModal.addNewFilterTitle', {
+    defaultMessage: 'Add new filter'
+  });
   $scope.detector = params.detector;
   $scope.saveLock = false;
   $scope.editMode = false;
   let index = -1;
   const add = params.add;
   const validate = params.validate;
+
+  $scope.updateButtonLabel = i18n.translate('xpack.ml.newJob.advanced.detectorFilterModal.updateButtonLabel', {
+    defaultMessage: 'Update'
+  });
+  $scope.addButtonLabel = i18n.translate('xpack.ml.newJob.advanced.detectorFilterModal.addButtonLabel', {
+    defaultMessage: 'Add'
+  });
 
   /*
   $scope.functions = [
@@ -87,10 +97,12 @@ module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, par
       value_list: []
     };
   } else {
-    // edting an existing filter
+    // editing an existing filter
     $scope.editMode = true;
     $scope.filter = params.filter;
-    $scope.title = 'Edit filter';
+    $scope.title = i18n.translate('xpack.ml.newJob.advanced.detectorFilterModal.editFilterTitle', {
+      defaultMessage: 'Edit filter'
+    });
     index = params.index;
   }
 
@@ -202,7 +214,7 @@ module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, par
       delete filter.value_list;
     }
 
-    // make a local copy of the detector, add the new fitler
+    // make a local copy of the detector, add the new filter
     // and send it off for validation.
     // if it passes, add the filter to the real detector.
     const dtr = angular.copy($scope.detector);

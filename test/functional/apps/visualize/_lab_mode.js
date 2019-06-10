@@ -17,21 +17,22 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'settings']);
 
   // Flaky: https://github.com/elastic/kibana/issues/19743
-  describe.skip('visualize lab mode', () => {
+  describe('visualize lab mode', () => {
 
     it('disabling does not break loading saved searches', async () => {
       await PageObjects.common.navigateToUrl('discover', '');
       await PageObjects.discover.saveSearch('visualize_lab_mode_test');
-      await PageObjects.discover.openSavedSearch();
+      await PageObjects.discover.openLoadSavedSearchPanel();
       const hasSaved = await PageObjects.discover.hasSavedSearch('visualize_lab_mode_test');
       expect(hasSaved).to.be(true);
+      await PageObjects.discover.closeLoadSaveSearchPanel();
 
       log.info('found saved search before toggling enableLabs mode');
 
@@ -42,13 +43,14 @@ export default function ({ getService, getPageObjects }) {
 
       // Expect the discover still to list that saved visualization in the open list
       await PageObjects.header.clickDiscover();
-      await PageObjects.discover.openSavedSearch();
+      await PageObjects.discover.openLoadSavedSearchPanel();
       const stillHasSaved = await PageObjects.discover.hasSavedSearch('visualize_lab_mode_test');
       expect(stillHasSaved).to.be(true);
       log.info('found saved search after toggling enableLabs mode');
     });
 
     after(async () => {
+      await PageObjects.discover.closeLoadSaveSearchPanel();
       await PageObjects.header.clickManagement();
       await PageObjects.settings.clickKibanaSettings();
       await PageObjects.settings.clearAdvancedSettings('visualize:enableLabs');

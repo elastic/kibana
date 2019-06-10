@@ -6,6 +6,7 @@
 
 import { get } from 'lodash';
 import { createQuery } from './create_query';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../monitoring/common/constants';
 
 /**
  * Get a list of Cluster UUIDs that exist within the specified timespan.
@@ -33,7 +34,7 @@ export function getClusterUuids(server, callCluster, start, end) {
 export function fetchClusterUuids(server, callCluster, start, end) {
   const config = server.config();
   const params = {
-    index: config.get('xpack.monitoring.elasticsearch.index_pattern'),
+    index: INDEX_PATTERN_ELASTICSEARCH,
     size: 0,
     ignoreUnavailable: true,
     filterPath: 'aggregations.cluster_uuids.buckets.key',

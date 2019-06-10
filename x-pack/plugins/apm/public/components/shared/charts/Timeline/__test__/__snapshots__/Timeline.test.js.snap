@@ -1,6 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Timline should render with data 1`] = `
+exports[`Timeline should render with data 1`] = `
+.c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  font-size: 12px;
+  color: #69707d;
+  cursor: pointer;
+  opacity: 1;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c1 {
+  width: 11px;
+  height: 11px;
+  margin-right: 5.5px;
+  background: #98a2b3;
+  border-radius: 100%;
+}
+
 <div
   onScroll={[Function]}
   onTouchEnd={[Function]}
@@ -22,7 +49,7 @@ exports[`Timline should render with data 1`] = `
           style={
             Object {
               "backgroundColor": "#ffffff",
-              "borderBottom": "1px solid #999999",
+              "borderBottom": "1px solid #98a2b3",
               "height": "100px",
               "position": "absolute",
               "width": "100%",
@@ -30,21 +57,18 @@ exports[`Timline should render with data 1`] = `
             }
           }
         >
-          <div>
-            Hello - i am a header
-          </div>
           <div
             className="rv-xy-plot "
             style={
               Object {
-                "height": "40px",
-                "width": "100px",
+                "height": "100px",
+                "width": "1000px",
               }
             }
           >
             <svg
               className="rv-xy-plot__inner"
-              height={40}
+              height={100}
               onClick={[Function]}
               onDoubleClick={[Function]}
               onMouseDown={[Function]}
@@ -52,14 +76,14 @@ exports[`Timline should render with data 1`] = `
               onMouseLeave={[Function]}
               onMouseMove={[Function]}
               onWheel={[Function]}
-              width={100}
+              width={1000}
             >
               <g
                 className="rv-xy-plot__axis rv-xy-plot__axis--horizontal "
                 style={
                   Object {
                     "text": Object {
-                      "fill": "#999999",
+                      "fill": "#98a2b3",
                     },
                   }
                 }
@@ -67,14 +91,14 @@ exports[`Timline should render with data 1`] = `
               >
                 <g
                   className="rv-xy-plot__axis__ticks"
-                  transform="translate(0, 40)"
+                  transform="translate(0, 100)"
                 >
                   <g
                     className="rv-xy-plot__axis__tick"
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                         },
                       }
                     }
@@ -85,7 +109,7 @@ exports[`Timline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
@@ -99,16 +123,16 @@ exports[`Timline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
-                      0
+                      0 ms
                     </text>
                   </g>
                   <g
@@ -116,18 +140,18 @@ exports[`Timline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                         },
                       }
                     }
-                    transform="translate(0, 0)"
+                    transform="translate(90, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
@@ -141,14 +165,14 @@ exports[`Timline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       20 ms
                     </text>
@@ -158,18 +182,18 @@ exports[`Timline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                         },
                       }
                     }
-                    transform="translate(0, 0)"
+                    transform="translate(180, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
@@ -183,14 +207,14 @@ exports[`Timline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       40 ms
                     </text>
@@ -200,18 +224,18 @@ exports[`Timline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                         },
                       }
                     }
-                    transform="translate(0, 0)"
+                    transform="translate(270, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
@@ -225,14 +249,14 @@ exports[`Timline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       60 ms
                     </text>
@@ -242,18 +266,18 @@ exports[`Timline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                         },
                       }
                     }
-                    transform="translate(0, 0)"
+                    transform="translate(360, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
@@ -267,14 +291,14 @@ exports[`Timline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       80 ms
                     </text>
@@ -284,18 +308,18 @@ exports[`Timline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                         },
                       }
                     }
-                    transform="translate(0, 0)"
+                    transform="translate(450, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
@@ -309,14 +333,14 @@ exports[`Timline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       100 ms
                     </text>
@@ -326,18 +350,18 @@ exports[`Timline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                         },
                       }
                     }
-                    transform="translate(0, 0)"
+                    transform="translate(540, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
@@ -351,14 +375,14 @@ exports[`Timline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       120 ms
                     </text>
@@ -368,18 +392,18 @@ exports[`Timline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                         },
                       }
                     }
-                    transform="translate(0, 0)"
+                    transform="translate(630, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
@@ -393,14 +417,14 @@ exports[`Timline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       140 ms
                     </text>
@@ -410,18 +434,18 @@ exports[`Timline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                         },
                       }
                     }
-                    transform="translate(0, 0)"
+                    transform="translate(720, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
@@ -435,14 +459,14 @@ exports[`Timline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       160 ms
                     </text>
@@ -452,18 +476,18 @@ exports[`Timline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                         },
                       }
                     }
-                    transform="translate(0, 0)"
+                    transform="translate(810, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
@@ -477,14 +501,14 @@ exports[`Timline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#999999",
+                          "fill": "#98a2b3",
                           "text": Object {
-                            "fill": "#999999",
+                            "fill": "#98a2b3",
                           },
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       180 ms
                     </text>
@@ -492,17 +516,107 @@ exports[`Timline should render with data 1`] = `
                 </g>
               </g>
               <g
-                transform="translate(50, 40)"
+                transform="translate(950, 28)"
               >
                 <text
                   dy="0"
                   textAnchor="middle"
                   transform="translate(0, -8)"
                 >
-                  205 ms
+                  200 ms
                 </text>
               </g>
             </svg>
+            <div
+              style={
+                Object {
+                  "bottom": 0,
+                  "left": "494.5px",
+                  "position": "absolute",
+                }
+              }
+            >
+              <span
+                className="euiToolTipAnchor"
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <div
+                  aria-describedby="timeToFirstByte"
+                  className="c0"
+                  disabled={false}
+                  fontSize="12px"
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                >
+                  <span
+                    className="c1"
+                    color="#98a2b3"
+                    radius={11}
+                  />
+                </div>
+              </span>
+            </div>
+            <div
+              style={
+                Object {
+                  "bottom": 0,
+                  "left": "539.5px",
+                  "position": "absolute",
+                }
+              }
+            >
+              <span
+                className="euiToolTipAnchor"
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <div
+                  aria-describedby="domInteractive"
+                  className="c0"
+                  disabled={false}
+                  fontSize="12px"
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                >
+                  <span
+                    className="c1"
+                    color="#98a2b3"
+                    radius={11}
+                  />
+                </div>
+              </span>
+            </div>
+            <div
+              style={
+                Object {
+                  "bottom": 0,
+                  "left": "899.5px",
+                  "position": "absolute",
+                }
+              }
+            >
+              <span
+                className="euiToolTipAnchor"
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <div
+                  aria-describedby="domComplete"
+                  className="c0"
+                  disabled={false}
+                  fontSize="12px"
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                >
+                  <span
+                    className="c1"
+                    color="#98a2b3"
+                    radius={11}
+                  />
+                </div>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -520,7 +634,7 @@ exports[`Timline should render with data 1`] = `
           style={
             Object {
               "height": "216px",
-              "width": "100px",
+              "width": "1000px",
             }
           }
         >
@@ -534,7 +648,7 @@ exports[`Timline should render with data 1`] = `
             onMouseLeave={[Function]}
             onMouseMove={[Function]}
             onWheel={[Function]}
-            width={100}
+            width={1000}
           >
             <g
               className="rv-xy-plot__grid-lines"
@@ -544,7 +658,7 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#f5f5f5",
+                    "stroke": "#f5f7fa",
                   }
                 }
                 x1={0}
@@ -556,11 +670,11 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#f5f5f5",
+                    "stroke": "#f5f7fa",
                   }
                 }
-                x1={0}
-                x2={0}
+                x1={90}
+                x2={90}
                 y1={0}
                 y2={116}
               />
@@ -568,11 +682,11 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#f5f5f5",
+                    "stroke": "#f5f7fa",
                   }
                 }
-                x1={0}
-                x2={0}
+                x1={180}
+                x2={180}
                 y1={0}
                 y2={116}
               />
@@ -580,11 +694,11 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#f5f5f5",
+                    "stroke": "#f5f7fa",
                   }
                 }
-                x1={0}
-                x2={0}
+                x1={270}
+                x2={270}
                 y1={0}
                 y2={116}
               />
@@ -592,11 +706,11 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#f5f5f5",
+                    "stroke": "#f5f7fa",
                   }
                 }
-                x1={0}
-                x2={0}
+                x1={360}
+                x2={360}
                 y1={0}
                 y2={116}
               />
@@ -604,11 +718,11 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#f5f5f5",
+                    "stroke": "#f5f7fa",
                   }
                 }
-                x1={0}
-                x2={0}
+                x1={450}
+                x2={450}
                 y1={0}
                 y2={116}
               />
@@ -616,11 +730,11 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#f5f5f5",
+                    "stroke": "#f5f7fa",
                   }
                 }
-                x1={0}
-                x2={0}
+                x1={540}
+                x2={540}
                 y1={0}
                 y2={116}
               />
@@ -628,11 +742,11 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#f5f5f5",
+                    "stroke": "#f5f7fa",
                   }
                 }
-                x1={0}
-                x2={0}
+                x1={630}
+                x2={630}
                 y1={0}
                 y2={116}
               />
@@ -640,11 +754,11 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#f5f5f5",
+                    "stroke": "#f5f7fa",
                   }
                 }
-                x1={0}
-                x2={0}
+                x1={720}
+                x2={720}
                 y1={0}
                 y2={116}
               />
@@ -652,11 +766,11 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#f5f5f5",
+                    "stroke": "#f5f7fa",
                   }
                 }
-                x1={0}
-                x2={0}
+                x1={810}
+                x2={810}
                 y1={0}
                 y2={116}
               />
@@ -664,11 +778,11 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#f5f5f5",
+                    "stroke": "#f5f7fa",
                   }
                 }
-                x1={0}
-                x2={0}
+                x1={900}
+                x2={900}
                 y1={0}
                 y2={116}
               />
@@ -681,11 +795,52 @@ exports[`Timline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#999999",
+                    "stroke": "#98a2b3",
                   }
                 }
-                x1={0}
-                x2={0}
+                x1={450}
+                x2={450}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#98a2b3",
+                  }
+                }
+                x1={495.00000000000006}
+                x2={495.00000000000006}
+                y1={0}
+                y2={116}
+              />
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": "#98a2b3",
+                  }
+                }
+                x1={855}
+                x2={855}
+                y1={0}
+                y2={116}
+              />
+            </g>
+            <g
+              className="rv-xy-plot__grid-lines"
+              transform="translate(50,100)"
+            >
+              <line
+                className="rv-xy-plot__grid-lines__line"
+                style={
+                  Object {
+                    "stroke": undefined,
+                  }
+                }
+                x1={900}
+                x2={900}
                 y1={0}
                 y2={116}
               />

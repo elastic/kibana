@@ -10,8 +10,6 @@ import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';
 import template from './index_select.html';
 
-import './index_select.less';
-
 function mapIndex(indexName, isFromIndexPattern = false, isUserEntered = false) {
   return { indexName, isFromIndexPattern, isUserEntered };
 }
@@ -111,7 +109,7 @@ app.directive('indexSelect', ($injector) => {
 
       /**
        * This method powers the `group-by` within ui-select to group
-       * our indices array based on the souce
+       * our indices array based on the source
        *
        * @param {object} index
        */

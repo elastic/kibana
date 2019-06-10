@@ -27,7 +27,7 @@
  *  If the last stream is readable, it's final value
  *  will be provided as the promise value.
  *
- *  Errors emmitted from any stream will cause
+ *  Errors emitted from any stream will cause
  *  the promise to be rejected with that error.
  *
  *  @param  {Array<Stream>} streams
@@ -76,10 +76,7 @@ export async function createPromiseFromStreams(streams) {
 
   // wait (and rethrow) the first error, or for the last stream
   // to both finish writing and providing values to read
-  await Promise.race([
-    anyStreamFailure,
-    Promise.all([lastFinishedWriting, lastFinishedReading]),
-  ]);
+  await Promise.race([anyStreamFailure, Promise.all([lastFinishedWriting, lastFinishedReading])]);
 
   // return the final chunk read from the last stream
   return await lastFinishedReading;

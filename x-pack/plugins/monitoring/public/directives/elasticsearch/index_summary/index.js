@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { IndexDetailStatus } from 'plugins/monitoring/components/elasticsearch/index_detail_status';
+import { I18nContext } from 'ui/i18n';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringIndexSummary', () => {
@@ -15,8 +16,9 @@ uiModule.directive('monitoringIndexSummary', () => {
     restrict: 'E',
     scope: { summary: '=' },
     link(scope, $el) {
+      scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
       scope.$watch('summary', summary => {
-        render(<IndexDetailStatus stats={summary} />, $el[0]);
+        render(<I18nContext><IndexDetailStatus stats={summary} /></I18nContext>, $el[0]);
       });
     }
   };

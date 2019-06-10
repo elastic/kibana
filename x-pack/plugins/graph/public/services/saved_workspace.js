@@ -5,26 +5,37 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { i18n } from '@kbn/i18n';
+import {
+  extractReferences,
+  injectReferences,
+} from './saved_workspace_references';
 
 const module = uiModules.get('app/dashboard');
 
-export function SavedWorkspaceProvider(courier) {
+export function SavedWorkspaceProvider(Private) {
   // SavedWorkspace constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
-  class SavedWorkspace extends courier.SavedObject {
+  const SavedObject = Private(SavedObjectProvider);
+  class SavedWorkspace extends SavedObject {
     constructor(id) {
       // Gives our SavedWorkspace the properties of a SavedObject
       super ({
         type: SavedWorkspace.type,
         mapping: SavedWorkspace.mapping,
         searchSource: SavedWorkspace.searchsource,
+        extractReferences: extractReferences,
+        injectReferences: injectReferences,
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id: id,
 
         // default values that will get assigned if the doc is new
         defaults: {
-          title: 'New Graph Workspace',
+          title: i18n.translate('xpack.graph.savedWorkspace.workspaceNameTitle', {
+            defaultMessage: 'New Graph Workspace'
+          }),
           numLinks: 0,
           numVertices: 0,
           wsState: '{}',
