@@ -5,7 +5,7 @@
  */
 
 import { Actions } from '..';
-import { checkSavedObjectsPrivilegesFactory } from '.';
+import { ensureSavedObjectsPrivilegesFactory } from '.';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 
 const createMockErrors = () => {
@@ -46,7 +46,7 @@ const createCheckSavedObjectsPrivileges = (
   const mockActions = createMockActions();
 
   const checkSavedObjectsPrivileges = jest.fn(
-    checkSavedObjectsPrivilegesFactory({
+    ensureSavedObjectsPrivilegesFactory({
       actionsService: mockActions,
       auditLogger: mockAuditLogger,
       checkPrivilegesWithRequest: () => ({

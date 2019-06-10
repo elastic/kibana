@@ -18,29 +18,26 @@ import {
   SavedObject,
   UpdateOptions,
 } from 'src/legacy/server/saved_objects';
-import {
-  CheckSavedObjectsPrivileges,
-  SavedObjectsOperation,
-} from './check_saved_objects_privileges';
+import { EnsureSavedObjectsPrivileges } from './ensure_saved_objects_privileges';
 
 export interface SecureSavedObjectsClientWrapperDeps {
   baseClient: SavedObjectsClientContract;
-  checkSavedObjectsPrivileges: CheckSavedObjectsPrivileges;
+  ensureSavedObjectsPrivileges: EnsureSavedObjectsPrivileges;
   errors: SavedObjectsClientContract['errors'];
 }
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private baseClient: SavedObjectsClientContract;
 
-  private checkSavedObjectsPrivileges: CheckSavedObjectsPrivileges;
+  private ensureSavedObjectsPrivileges: EnsureSavedObjectsPrivileges;
 
   public errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SecureSavedObjectsClientWrapperDeps) {
-    const { baseClient, checkSavedObjectsPrivileges, errors } = options;
+    const { baseClient, ensureSavedObjectsPrivileges, errors } = options;
 
     this.errors = errors;
     this.baseClient = baseClient;
-    this.checkSavedObjectsPrivileges = checkSavedObjectsPrivileges;
+    this.ensureSavedObjectsPrivileges = ensureSavedObjectsPrivileges;
   }
 
   public async create<T extends SavedObjectAttributes = any>(
@@ -48,7 +45,11 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: T,
     options: CreateOptions = {}
   ) {
-    await this.ensureAuthorized(type, 'create', options.namespace, { type, attributes, options });
+    await this.ensureSavedObjectsPrivileges(type, 'create', options.namespace, {
+      type,
+      attributes,
+      options,
+    });
 
     return await this.baseClient.create(type, attributes, options);
   }
@@ -58,13 +59,20 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: CreateOptions = {}
   ) {
     const types = uniq(objects.map(o => o.type));
-    await this.ensureAuthorized(types, 'bulk_create', options.namespace, { objects, options });
+    await this.ensureSavedObjectsPrivileges(types, 'bulk_create', options.namespace, {
+      objects,
+      options,
+    });
 
     return await this.baseClient.bulkCreate(objects, options);
   }
 
   public async delete(type: string, id: string, options: BaseOptions = {}) {
-    await this.ensureAuthorized(type, 'delete', options.namespace, { type, id, options });
+    await this.ensureSavedObjectsPrivileges(type, 'delete', options.namespace, {
+      type,
+      id,
+      options,
+    });
 
     return await this.baseClient.delete(type, id, options);
   }
@@ -72,7 +80,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   public async find<T extends SavedObjectAttributes = any>(
     options: FindOptions = {}
   ): Promise<FindResponse<T>> {
-    await this.ensureAuthorized(options.type, 'find', options.namespace, { options });
+    await this.ensureSavedObjectsPrivileges(options.type, 'find', options.namespace, { options });
 
     return this.baseClient.find(options);
   }
@@ -82,7 +90,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: BaseOptions = {}
   ): Promise<BulkResponse<T>> {
     const types = uniq(objects.map(o => o.type));
-    await this.ensureAuthorized(types, 'bulk_get', options.namespace, { objects, options });
+    await this.ensureSavedObjectsPrivileges(types, 'bulk_get', options.namespace, {
+      objects,
+      options,
+    });
 
     return await this.baseClient.bulkGet(objects, options);
   }
@@ -92,7 +103,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     id: string,
     options: BaseOptions = {}
   ): Promise<SavedObject<T>> {
-    await this.ensureAuthorized(type, 'get', options.namespace, { type, id, options });
+    await this.ensureSavedObjectsPrivileges(type, 'get', options.namespace, { type, id, options });
 
     return await this.baseClient.get(type, id, options);
   }
@@ -103,7 +114,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: Partial<T>,
     options: UpdateOptions = {}
   ) {
-    await this.ensureAuthorized(type, 'update', options.namespace, {
+    await this.ensureSavedObjectsPrivileges(type, 'update', options.namespace, {
       type,
       id,
       attributes,
@@ -111,14 +122,5 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     });
 
     return await this.baseClient.update(type, id, attributes, options);
-  }
-
-  private async ensureAuthorized(
-    typeOrTypes: string | string[] | undefined,
-    action: SavedObjectsOperation,
-    namespace: string | undefined,
-    args: any
-  ) {
-    await this.checkSavedObjectsPrivileges(typeOrTypes, action, namespace, args);
   }
 }

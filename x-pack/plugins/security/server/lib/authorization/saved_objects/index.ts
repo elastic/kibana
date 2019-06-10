@@ -5,8 +5,8 @@
  */
 
 export {
-  checkSavedObjectsPrivilegesFactory,
-  CheckSavedObjectsPrivileges,
-} from './check_saved_objects_privileges';
+  ensureSavedObjectsPrivilegesFactory,
+  EnsureSavedObjectsPrivileges,
+} from './ensure_saved_objects_privileges';
 
 export { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';

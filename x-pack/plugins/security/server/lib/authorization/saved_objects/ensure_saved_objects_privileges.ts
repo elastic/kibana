@@ -31,19 +31,19 @@ interface Deps {
   auditLogger: any;
 }
 
-export type CheckSavedObjectsPrivileges = (
+export type EnsureSavedObjectsPrivileges = (
   typeOrTypes: string | string[] | undefined,
   operation: SavedObjectsOperation,
   namespace: string | undefined,
   args: any
 ) => Promise<void>;
 
-export function checkSavedObjectsPrivilegesFactory(deps: Deps) {
+export function ensureSavedObjectsPrivilegesFactory(deps: Deps) {
   const checkPrivileges = deps.checkPrivilegesWithRequest(deps.request);
 
   const { errors, spacesEnabled, actionsService, auditLogger } = deps;
 
-  const checkSavedObjectsPrivileges: CheckSavedObjectsPrivileges = async (
+  const ensureSavedObjectsPrivileges: EnsureSavedObjectsPrivileges = async (
     typeOrTypes: string | string[] | undefined,
     operation: SavedObjectsOperation,
     namespace: string | undefined,
@@ -90,7 +90,7 @@ export function checkSavedObjectsPrivilegesFactory(deps: Deps) {
     }
   };
 
-  return checkSavedObjectsPrivileges;
+  return ensureSavedObjectsPrivileges;
 }
 
 function normalizeTypes(typeOrTypes: string | string[] | undefined): string[] {

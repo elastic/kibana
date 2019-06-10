@@ -9,7 +9,7 @@ import {
   SecureSavedObjectsClientWrapperDeps,
 } from './secure_saved_objects_client_wrapper';
 import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
-import { checkSavedObjectsPrivilegesFactory } from './check_saved_objects_privileges';
+import { ensureSavedObjectsPrivilegesFactory } from './ensure_saved_objects_privileges';
 import { Actions } from '../actions';
 
 const createMockErrors = () => {
@@ -46,8 +46,8 @@ const createCheckSavedObjectsPrivileges = (checkPrivilegesImpl: () => Promise<an
   const mockErrors = createMockErrors();
   const mockActions = createMockActions();
 
-  const checkSavedObjectsPrivileges = jest.fn(
-    checkSavedObjectsPrivilegesFactory({
+  const ensureSavedObjectsPrivileges = jest.fn(
+    ensureSavedObjectsPrivilegesFactory({
       actionsService: mockActions,
       auditLogger: mockAuditLogger,
       checkPrivilegesWithRequest: () => ({
@@ -65,7 +65,7 @@ const createCheckSavedObjectsPrivileges = (checkPrivilegesImpl: () => Promise<an
     mockActions,
     mockAuditLogger,
     mockErrors,
-    checkSavedObjectsPrivileges,
+    ensureSavedObjectsPrivileges,
   };
 };
 
@@ -73,12 +73,12 @@ describe('#errors', () => {
   test(`assigns errors from constructor to .errors`, () => {
     const errors = Symbol();
 
-    const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(() => {
+    const { ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(() => {
       throw new Error('An actual error would happen here');
     });
 
     const client = new SecureSavedObjectsClientWrapper(({
-      checkSavedObjectsPrivileges,
+      ensureSavedObjectsPrivileges,
       errors,
     } as unknown) as SecureSavedObjectsClientWrapperDeps);
 
@@ -93,19 +93,19 @@ describe(`spaces disabled`, () => {
       const {
         mockErrors,
         mockAuditLogger,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(() => {
         throw new Error('An actual error would happen here');
       });
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
 
       await expect(client.create(type, {})).rejects.toThrowError(mockErrors.generalError);
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', undefined, {
         attributes: {},
         options: {},
         type,
@@ -122,7 +122,7 @@ describe(`spaces disabled`, () => {
       const {
         mockErrors,
         mockAuditLogger,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(async () => ({
         hasAllRequested: false,
         username,
@@ -133,7 +133,7 @@ describe(`spaces disabled`, () => {
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
       const attributes = Symbol();
@@ -143,7 +143,7 @@ describe(`spaces disabled`, () => {
         mockErrors.forbiddenError
       );
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', undefined, {
         attributes,
         options,
         type,
@@ -163,7 +163,7 @@ describe(`spaces disabled`, () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+    test(`passes options.namespace to ensureSavedObjectsPrivileges`, async () => {
       const type = 'foo';
       const username = Symbol();
       const returnValue = Symbol();
@@ -172,7 +172,7 @@ describe(`spaces disabled`, () => {
         create: jest.fn().mockReturnValue(returnValue),
       } as unknown) as SavedObjectsClientContract;
 
-      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(async () => ({
+      const { ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(async () => ({
         hasAllRequested: true,
         username,
         privileges: {
@@ -182,7 +182,7 @@ describe(`spaces disabled`, () => {
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const attributes = Symbol();
@@ -193,7 +193,7 @@ describe(`spaces disabled`, () => {
       const result = await client.create(type, attributes as any, options);
 
       expect(result).toBe(returnValue);
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', options.namespace, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', options.namespace, {
         attributes,
         options,
         type,
@@ -208,7 +208,7 @@ describe(`spaces disabled`, () => {
       const mockBaseClient = ({
         create: jest.fn().mockReturnValue(returnValue),
       } as unknown) as SavedObjectsClientContract;
-      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { mockAuditLogger, ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         async () => ({
           hasAllRequested: true,
           username,
@@ -220,7 +220,7 @@ describe(`spaces disabled`, () => {
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const attributes = Symbol();
@@ -229,7 +229,7 @@ describe(`spaces disabled`, () => {
       const result = await client.create(type, attributes as any, options as any);
 
       expect(result).toBe(returnValue);
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'create', undefined, {
         attributes,
         options,
         type,
@@ -255,14 +255,14 @@ describe(`spaces disabled`, () => {
       const {
         mockAuditLogger,
         mockErrors,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(async () => {
         throw new Error('An actual error would happen here');
       });
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
 
@@ -274,7 +274,7 @@ describe(`spaces disabled`, () => {
         mockErrors.generalError
       );
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith([type], 'bulk_create', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith([type], 'bulk_create', undefined, {
         objects,
         options,
       });
@@ -291,7 +291,7 @@ describe(`spaces disabled`, () => {
       const {
         mockAuditLogger,
         mockErrors,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(async () => ({
         hasAllRequested: false,
         username,
@@ -302,7 +302,7 @@ describe(`spaces disabled`, () => {
       }));
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
       const objects = [
@@ -316,7 +316,7 @@ describe(`spaces disabled`, () => {
         mockErrors.forbiddenError
       );
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(
         [type1, type2],
         'bulk_create',
         undefined,
@@ -338,7 +338,7 @@ describe(`spaces disabled`, () => {
       );
     });
 
-    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+    test(`passes options.namespace to ensureSavedObjectsPrivileges`, async () => {
       const username = Symbol();
       const type1 = 'foo';
       const type2 = 'bar';
@@ -357,13 +357,13 @@ describe(`spaces disabled`, () => {
         },
       }));
 
-      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const objects = [
@@ -375,7 +375,7 @@ describe(`spaces disabled`, () => {
       const result = await client.bulkCreate(objects, options);
 
       expect(result).toBe(returnValue);
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(
         [type1, type2],
         'bulk_create',
         options.namespace,
@@ -405,13 +405,13 @@ describe(`spaces disabled`, () => {
         },
       }));
 
-      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { mockAuditLogger, ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const objects = [
@@ -423,7 +423,7 @@ describe(`spaces disabled`, () => {
       const result = await client.bulkCreate(objects, options as any);
 
       expect(result).toBe(returnValue);
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(
         [type1, type2],
         'bulk_create',
         undefined,
@@ -456,7 +456,7 @@ describe(`spaces disabled`, () => {
       const {
         mockAuditLogger,
         mockErrors,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
 
       const id = Symbol() as any;
@@ -464,13 +464,13 @@ describe(`spaces disabled`, () => {
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
 
       await expect(client.delete(type, id, options)).rejects.toThrowError(mockErrors.generalError);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', undefined, {
         type,
         id,
         options,
@@ -494,11 +494,11 @@ describe(`spaces disabled`, () => {
       const {
         mockAuditLogger,
         mockErrors,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
       const id = Symbol();
@@ -508,7 +508,7 @@ describe(`spaces disabled`, () => {
         mockErrors.forbiddenError
       );
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', undefined, {
         type,
         id,
         options,
@@ -528,7 +528,7 @@ describe(`spaces disabled`, () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+    test(`passes options.namespace to ensureSavedObjectsPrivileges`, async () => {
       const type = 'foo';
       const username = Symbol();
       const returnValue = Symbol();
@@ -543,13 +543,13 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'delete')]: true,
         },
       }));
-      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const id = Symbol();
@@ -558,7 +558,7 @@ describe(`spaces disabled`, () => {
       const result = await client.delete(type, id as any, options);
 
       expect(result).toBe(returnValue);
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', options.namespace, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', options.namespace, {
         type,
         options,
         id,
@@ -580,13 +580,13 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'delete')]: true,
         },
       }));
-      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { mockAuditLogger, ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const id = Symbol();
@@ -595,7 +595,7 @@ describe(`spaces disabled`, () => {
       const result = await client.delete(type, id as any, options as any);
 
       expect(result).toBe(returnValue);
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'delete', undefined, {
         type,
         options,
         id,
@@ -625,18 +625,18 @@ describe(`spaces disabled`, () => {
       const {
         mockAuditLogger,
         mockErrors,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
 
       await expect(client.find({ type })).rejects.toThrowError(mockErrors.generalError);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', undefined, {
         options: { type },
       });
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
@@ -658,19 +658,19 @@ describe(`spaces disabled`, () => {
       const {
         mockAuditLogger,
         mockErrors,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
       const options = { type };
 
       await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', undefined, {
         options,
       });
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
@@ -702,18 +702,18 @@ describe(`spaces disabled`, () => {
       const {
         mockAuditLogger,
         mockErrors,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
       const options = { type: [type1, type2] };
 
       await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith([type1, type2], 'find', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith([type1, type2], 'find', undefined, {
         options,
       });
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
@@ -729,7 +729,7 @@ describe(`spaces disabled`, () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+    test(`passes options.namespace to ensureSavedObjectsPrivileges`, async () => {
       const type = 'foo';
       const username = Symbol();
       const returnValue = Symbol();
@@ -744,12 +744,12 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'find')]: true,
         },
       }));
-      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const options = { type, namespace: 'my-namespace' };
@@ -758,7 +758,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', options.namespace, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', options.namespace, {
         options,
       });
     });
@@ -778,12 +778,12 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'find')]: true,
         },
       }));
-      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { mockAuditLogger, ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const options = { type };
@@ -792,7 +792,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'find', undefined, {
         options,
       });
       expect(mockBaseClient.find).toHaveBeenCalledWith({ type });
@@ -817,12 +817,12 @@ describe(`spaces disabled`, () => {
       const {
         mockErrors,
         mockAuditLogger,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
 
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
 
@@ -830,7 +830,7 @@ describe(`spaces disabled`, () => {
       const options = Symbol() as any;
       await expect(client.bulkGet(objects, options)).rejects.toThrowError(mockErrors.generalError);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith([type], 'bulk_get', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith([type], 'bulk_get', undefined, {
         objects,
         options,
       });
@@ -855,11 +855,11 @@ describe(`spaces disabled`, () => {
       const {
         mockErrors,
         mockAuditLogger,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
       const objects = [
@@ -873,7 +873,7 @@ describe(`spaces disabled`, () => {
         mockErrors.forbiddenError
       );
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(
         [type1, type2],
         'bulk_get',
         undefined,
@@ -896,7 +896,7 @@ describe(`spaces disabled`, () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+    test(`passes options.namespace to ensureSavedObjectsPrivileges`, async () => {
       const type1 = 'foo';
       const type2 = 'bar';
       const username = Symbol();
@@ -913,12 +913,12 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type2, 'bulk_get')]: true,
         },
       }));
-      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const objects = [{ type: type1, id: 'foo-id' }, { type: type2, id: 'bar-id' }];
@@ -928,7 +928,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(
         [type1, type2],
         'bulk_get',
         options.namespace,
@@ -956,12 +956,12 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type2, 'bulk_get')]: true,
         },
       }));
-      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { mockAuditLogger, ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const objects = [{ type: type1, id: 'foo-id' }, { type: type2, id: 'bar-id' }];
@@ -971,7 +971,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(
         [type1, type2],
         'bulk_get',
         undefined,
@@ -1003,11 +1003,11 @@ describe(`spaces disabled`, () => {
       const {
         mockAuditLogger,
         mockErrors,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
 
@@ -1016,7 +1016,7 @@ describe(`spaces disabled`, () => {
 
       await expect(client.get(type, id, options)).rejects.toThrowError(mockErrors.generalError);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', undefined, {
         type,
         id,
         options,
@@ -1040,11 +1040,11 @@ describe(`spaces disabled`, () => {
       const {
         mockAuditLogger,
         mockErrors,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
       const id = Symbol();
@@ -1054,7 +1054,7 @@ describe(`spaces disabled`, () => {
         mockErrors.forbiddenError
       );
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', undefined, {
         type,
         id,
         options,
@@ -1074,7 +1074,7 @@ describe(`spaces disabled`, () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+    test(`passes options.namespace to ensureSavedObjectsPrivileges`, async () => {
       const type = 'foo';
       const username = Symbol();
       const returnValue = Symbol();
@@ -1089,12 +1089,12 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'get')]: true,
         },
       }));
-      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const id = Symbol();
@@ -1104,7 +1104,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', options.namespace, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', options.namespace, {
         type,
         id,
         options,
@@ -1126,12 +1126,12 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'get')]: true,
         },
       }));
-      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { mockAuditLogger, ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const id = Symbol();
@@ -1141,7 +1141,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'get', undefined, {
         type,
         id,
         options,
@@ -1170,11 +1170,11 @@ describe(`spaces disabled`, () => {
       const {
         mockAuditLogger,
         mockErrors,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
 
@@ -1186,7 +1186,7 @@ describe(`spaces disabled`, () => {
         mockErrors.generalError
       );
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', undefined, {
         type,
         id,
         attributes,
@@ -1211,11 +1211,11 @@ describe(`spaces disabled`, () => {
       const {
         mockAuditLogger,
         mockErrors,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
       } = createCheckSavedObjectsPrivileges(mockCheckPrivileges);
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: (null as unknown) as SavedObjectsClientContract,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: mockErrors as any,
       });
       const id = Symbol();
@@ -1226,7 +1226,7 @@ describe(`spaces disabled`, () => {
         client.update(type, id as any, attributes as any, options as any)
       ).rejects.toThrowError(mockErrors.forbiddenError);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', undefined, {
         type,
         id,
         attributes,
@@ -1248,7 +1248,7 @@ describe(`spaces disabled`, () => {
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`passes options.namespace to checkSavedObjectsPrivileges`, async () => {
+    test(`passes options.namespace to ensureSavedObjectsPrivileges`, async () => {
       const type = 'foo';
       const username = Symbol();
       const returnValue = Symbol();
@@ -1263,12 +1263,12 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'update')]: true,
         },
       }));
-      const { checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const id = Symbol();
@@ -1278,7 +1278,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', options.namespace, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', options.namespace, {
         type,
         id,
         options,
@@ -1301,12 +1301,12 @@ describe(`spaces disabled`, () => {
           [mockActions.savedObject.get(type, 'update')]: true,
         },
       }));
-      const { mockAuditLogger, checkSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
+      const { mockAuditLogger, ensureSavedObjectsPrivileges } = createCheckSavedObjectsPrivileges(
         mockCheckPrivileges
       );
       const client = new SecureSavedObjectsClientWrapper({
         baseClient: mockBaseClient,
-        checkSavedObjectsPrivileges,
+        ensureSavedObjectsPrivileges,
         errors: null as any,
       });
       const id = Symbol();
@@ -1317,7 +1317,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
 
-      expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', undefined, {
+      expect(ensureSavedObjectsPrivileges).toHaveBeenCalledWith(type, 'update', undefined, {
         type,
         id,
         options,
