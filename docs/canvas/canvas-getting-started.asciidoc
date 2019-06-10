@@ -144,9 +144,3 @@ Here are some things to try:
 //** Elements
 
 * Deep dive into the {kibana-ref}/canvas-function-reference.html[expression language and functions] that drive Canvas.
-
-
-
-
-
-
