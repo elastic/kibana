@@ -16,6 +16,13 @@ export const isAuthorizedKibanaUser = async (
   request: Legacy.Request,
   user?: AuthenticatedUser
 ) => {
+  const hasCredentials = request.auth && request.auth.credentials;
+  const useRbac = authorizationService.mode.useRbacForRequest(request);
+
+  if (!hasCredentials || !useRbac) {
+    return true;
+  }
+
   const roles = getUserRoles(request, user);
   if (roles.includes('superuser')) {
     return true;
@@ -25,7 +32,7 @@ export const isAuthorizedKibanaUser = async (
 
   const serializedPrivileges = serializePrivileges(application, privileges.get());
 
-  // Reserved privileges on their own do not grant access to kibana.; rather, they augment existing kibana access.
+  // Reserved privileges on their own do not grant access to kibana; rather, they augment existing kibana access.
   // Therefore, a user is said to be an authorized Kibana user iff they have at least one known privilege that isn't reserved.
   const knownUnreservedPrivileges = Object.keys(serializedPrivileges[application]).filter(
     knownPriv => !PrivilegeSerializer.isSerializedReservedPrivilege(knownPriv)
