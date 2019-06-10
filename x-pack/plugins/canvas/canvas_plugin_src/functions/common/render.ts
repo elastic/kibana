@@ -7,17 +7,18 @@
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Render, ContainerStyle } from '../types';
 import { getFunctionHelp } from '../../strings';
+// @ts-ignore unconverted local file
+import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 
 interface ContainerStyleArgument extends ContainerStyle {
   type: 'containerStyle';
 }
 
 interface Arguments {
-  as: string | null;
-  css: string | null;
-  containerStyle: ContainerStyleArgument | null;
+  as: string;
+  css: string;
+  containerStyle: ContainerStyleArgument;
 }
-
 export function render(): ExpressionFunction<'render', Render<any>, Arguments, Render<Arguments>> {
   const { help, args: argHelp } = getFunctionHelp().render;
 
@@ -31,25 +32,43 @@ export function render(): ExpressionFunction<'render', Render<any>, Arguments, R
     },
     args: {
       as: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.as,
-        options: ['debug', 'error', 'image', 'pie', 'plot', 'shape', 'table', 'text'],
+        options: [
+          'advanced_filter',
+          'debug',
+          'dropdown_filter',
+          'error',
+          'image',
+          'markdown',
+          'metric',
+          'pie',
+          'plot',
+          'progress',
+          'repeatImage',
+          'revealImage',
+          'shape',
+          'table',
+          'time_filter',
+          'text',
+        ],
       },
       css: {
-        types: ['string', 'null'],
-        default: '"* > * {}"',
+        types: ['string'],
         help: argHelp.css,
+        default: `"${DEFAULT_ELEMENT_CSS}"`,
       },
       containerStyle: {
-        types: ['containerStyle', 'null'],
+        types: ['containerStyle'],
         help: argHelp.containerStyle,
+        default: '{containerStyle}',
       },
     },
     fn: (context, args) => {
       return {
         ...context,
         as: args.as || context.as,
-        css: args.css,
+        css: args.css || DEFAULT_ELEMENT_CSS,
         containerStyle: args.containerStyle,
       };
     },

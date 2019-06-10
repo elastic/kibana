@@ -11,7 +11,8 @@ import { dragAndDropReducer, DragAndDropState, initialDragAndDropState } from '.
 import { hostsReducer, HostsState, initialHostsState } from './hosts';
 import { initialInputsState, inputsReducer, InputsState } from './inputs';
 import { initialNetworkState, networkReducer, NetworkState } from './network';
-import { TimelineState, initialTimelineState, timelineReducer } from './timeline/reducer';
+import { initialTimelineState, timelineReducer } from './timeline/reducer';
+import { TimelineState } from './timeline/types';
 
 export interface State {
   app: AppState;

@@ -27,6 +27,7 @@ export function formatnumber(): ExpressionFunction<'formatnumber', number, Argum
         aliases: ['_'],
         types: ['string'],
         help: argHelp.format,
+        required: true,
       },
     },
     fn: (context, args) => {

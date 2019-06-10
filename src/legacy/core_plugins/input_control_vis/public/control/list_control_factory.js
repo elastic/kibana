@@ -85,11 +85,13 @@ class ListControl extends Control {
       }
 
       const ancestorValues = this.getAncestorValues();
-      if (_.isEqual(ancestorValues, this.lastAncestorValues)) {
+      if (_.isEqual(ancestorValues, this.lastAncestorValues)
+        && _.isEqual(query, this.lastQuery)) {
         // short circuit to avoid fetching options list for same ancestor values
         return;
       }
       this.lastAncestorValues = ancestorValues;
+      this.lastQuery = query;
 
       ancestorFilters = this.getAncestorFilters();
     }

@@ -17,10 +17,96 @@
  * under the License.
  */
 
+import { Query } from 'ui/embeddable';
+import { AppState } from 'ui/state_management/app_state';
+import { Filter } from '@kbn/es-query';
+import { DashboardViewMode } from './dashboard_view_mode';
+
 export interface GridData {
   w: number;
   h: number;
   x: number;
   y: number;
   i: string;
+}
+
+export interface SavedDashboardPanel {
+  // TODO: Make id optional when embeddable API V2 is merged. At that point, it's okay to store panels
+  // that aren't backed by saved object ids.
+  readonly id: string;
+
+  readonly version: string;
+  readonly type: string;
+  panelIndex: string;
+  embeddableConfig: any;
+  readonly gridData: GridData;
+  readonly title?: string;
+}
+
+export interface Pre61SavedDashboardPanel {
+  readonly size_x: number;
+  readonly size_y: number;
+  readonly row: number;
+  readonly col: number;
+  readonly panelIndex: number | string; // earlier versions allowed this to be number or string
+  readonly id: string;
+  readonly type: string;
+  embeddableConfig: any;
+}
+
+export interface Pre64SavedDashboardPanel {
+  columns?: string;
+  sort?: string;
+  readonly id?: string;
+  readonly version: string;
+  readonly type: string;
+  readonly panelIndex: string;
+  readonly gridData: GridData;
+  readonly title?: string;
+  embeddableConfig: any;
+}
+
+export interface DashboardAppStateDefaults {
+  panels: SavedDashboardPanel[];
+  fullScreenMode: boolean;
+  title: string;
+  description?: string;
+  timeRestore: boolean;
+  options: {
+    useMargins: boolean;
+    hidePanelTitles: boolean;
+  };
+  query: Query;
+  filters: Filter[];
+  viewMode: DashboardViewMode;
+}
+
+export interface DashboardAppStateParameters {
+  panels: SavedDashboardPanel[];
+  fullScreenMode: boolean;
+  title: string;
+  description: string;
+  timeRestore: boolean;
+  options: {
+    hidePanelTitles: boolean;
+    useMargins: boolean;
+  };
+  query: Query | string;
+  filters: Filter[];
+  viewMode: DashboardViewMode;
+}
+
+// This could probably be improved if we flesh out AppState more... though AppState will be going away
+// so maybe not worth too much time atm.
+export type DashboardAppState = DashboardAppStateParameters & AppState;
+
+export interface SavedDashboardPanelMap {
+  [key: string]: SavedDashboardPanel;
+}
+
+export interface StagedFilter {
+  field: string;
+  value: string;
+  operator: string;
+  index: string;
 }

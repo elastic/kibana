@@ -40,12 +40,12 @@ describe('getCapabilities', () => {
     };
     const capabilities = await wmsClient.getCapabilities();
     expect(capabilities.layers).toEqual([
-      { label: 'layer1', value: '1' },
-      { label: 'layer2', value: '2' }
+      { label: 'layer1 (1)', value: '1' },
+      { label: 'layer2 (2)', value: '2' }
     ]);
     expect(capabilities.styles).toEqual([
-      { label: 'defaultStyle', value: 'default' },
-      { label: 'fancyStyle', value: 'fancy' }
+      { label: 'defaultStyle (default)', value: 'default' },
+      { label: 'fancyStyle (fancy)', value: 'fancy' }
     ]);
   });
 
@@ -97,13 +97,13 @@ describe('getCapabilities', () => {
     };
     const capabilities = await wmsClient.getCapabilities();
     expect(capabilities.layers).toEqual([
-      { label: 'hierarchyLevel1PathA - hierarchyLevel2 - layer1', value: '1' },
-      { label: 'hierarchyLevel1PathA - hierarchyLevel2 - layer2', value: '2' },
-      { label: 'hierarchyLevel1PathB - layer3', value: '3' }
+      { label: 'hierarchyLevel1PathA - hierarchyLevel2 - layer1 (1)', value: '1' },
+      { label: 'hierarchyLevel1PathA - hierarchyLevel2 - layer2 (2)', value: '2' },
+      { label: 'hierarchyLevel1PathB - layer3 (3)', value: '3' }
     ]);
     expect(capabilities.styles).toEqual([
-      { label: 'hierarchyLevel1PathA - hierarchyLevel2 - defaultStyle', value: 'default' },
-      { label: 'hierarchyLevel1PathB - fancyStyle', value: 'fancy' }
+      { label: 'hierarchyLevel1PathA - hierarchyLevel2 - defaultStyle (default)', value: 'default' },
+      { label: 'hierarchyLevel1PathB - fancyStyle (fancy)', value: 'fancy' }
     ]);
   });
 
@@ -155,8 +155,8 @@ describe('getCapabilities', () => {
       {
         label: 'hierarchyLevel1PathA - hierarchyLevel2',
         options: [
-          { label: 'layer1', value: '1' },
-          { label: 'layer2', value: '2' },
+          { label: 'layer1 (1)', value: '1' },
+          { label: 'layer2 (2)', value: '2' },
         ]
       }
     ]);
@@ -164,14 +164,61 @@ describe('getCapabilities', () => {
       {
         label: 'hierarchyLevel1PathA - hierarchyLevel2',
         options: [
-          { label: 'defaultStyle', value: 'default' },
-          { label: 'fancyStyle', value: 'fancy' },
+          { label: 'defaultStyle (default)', value: 'default' },
+          { label: 'fancyStyle (fancy)', value: 'fancy' },
         ]
       }
     ]);
   });
 
-  it('Should create not group common hierarchy when there is only a single layer', async () => {
+  it('Should ensure no option labels have name collisions', async () => {
+    const wmsClient = new WmsClient({ serviceUrl: 'myWMSUrl' });
+    wmsClient._fetch = () => {
+      return {
+        status: 200,
+        text: () => {
+          return `
+            <WMT_MS_Capabilities version="1.1.1">
+              <Capability>
+                <Layer>
+                  <Title>mylayer</Title>
+                  <Name>my_layer</Name>
+                  <Style>
+                    <Name>default</Name>
+                    <Title>defaultStyle</Title>
+                  </Style>
+                </Layer>
+                <Layer>
+                  <Title>mylayer</Title>
+                  <Name>my_layer</Name>
+                  <Style>
+                    <Name>default</Name>
+                    <Title>defaultStyle</Title>
+                  </Style>
+                </Layer>
+                <Layer>
+                  <Title>mylayer</Title>
+                  <Name>my_layer</Name>
+                  <Style>
+                    <Name>default</Name>
+                    <Title>defaultStyle</Title>
+                  </Style>
+                </Layer>
+              </Capability>
+            </WMT_MS_Capabilities>
+          `;
+        }
+      };
+    };
+    const capabilities = await wmsClient.getCapabilities();
+    expect(capabilities.layers).toEqual([
+      { label: 'mylayer (my_layer)', value: 'my_layer' },
+      { label: 'mylayer (my_layer):1', value: 'my_layer' },
+      { label: 'mylayer (my_layer):2', value: 'my_layer' },
+    ]);
+  });
+
+  it('Should not create group common hierarchy when there is only a single layer', async () => {
     const wmsClient = new WmsClient({ serviceUrl: 'myWMSUrl' });
     wmsClient._fetch = () => {
       return {
@@ -192,10 +239,12 @@ describe('getCapabilities', () => {
     };
     const capabilities = await wmsClient.getCapabilities();
     expect(capabilities.layers).toEqual([
-      { label: 'layer1', value: '1' },
+      { label: 'layer1 (1)', value: '1' },
     ]);
   });
+});
 
+describe('getUrlTemplate', () => {
   it('Should not overwrite specific query parameters when defined in the url', async () => {
     const urlWithQuery = 'http://example.com/wms?map=MyMap&format=image/jpeg&service=NotWMS&version=0&request=GetNull&srs=Invalid&transparent=false&width=1024&height=640';
     const wmsClient = new WmsClient({ serviceUrl: urlWithQuery });
