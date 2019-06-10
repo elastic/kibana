@@ -19,9 +19,10 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { ClusterItemContainer } from './helpers';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function BeatsPanelUi(props) {
+export function BeatsPanel(props) {
   if (!get(props, 'beats.total', 0) > 0) {
     return null;
   }
@@ -50,7 +51,9 @@ function BeatsPanelUi(props) {
     <ClusterItemContainer
       {...props}
       url="beats"
-      title={props.intl.formatMessage({ id: 'xpack.monitoring.cluster.overview.beatsPanel.beatsTitle', defaultMessage: 'Beats' })}
+      title={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.beatsTitle', {
+        defaultMessage: 'Beats'
+      })}
     >
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
@@ -59,8 +62,9 @@ function BeatsPanelUi(props) {
               <h3>
                 <EuiLink
                   onClick={goToBeats}
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.beatsPanel.overviewLinkAriaLabel', defaultMessage: 'Beats Overview' })}
+                  aria-label={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.overviewLinkAriaLabel', {
+                    defaultMessage: 'Beats Overview'
+                  })}
                   data-test-subj="beatsOverview"
                 >
                   <FormattedMessage
@@ -99,10 +103,13 @@ function BeatsPanelUi(props) {
               <h3>
                 <EuiLink
                   onClick={goToInstances}
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.beatsPanel.instancesTotalLinkAriaLabel',
-                    defaultMessage: 'Beats Instances: {beatsTotal}' },
-                  { beatsTotal: props.beats.total })}
+                  aria-label={i18n.translate(
+                    'xpack.monitoring.cluster.overview.beatsPanel.instancesTotalLinkAriaLabel',
+                    {
+                      defaultMessage: 'Beats Instances: {beatsTotal}',
+                      values: { beatsTotal: props.beats.total }
+                    }
+                  )}
                   data-test-subj="beatsListing"
                 >
                   <FormattedMessage
@@ -123,5 +130,3 @@ function BeatsPanelUi(props) {
     </ClusterItemContainer>
   );
 }
-
-export const BeatsPanel = injectI18n(BeatsPanelUi);
