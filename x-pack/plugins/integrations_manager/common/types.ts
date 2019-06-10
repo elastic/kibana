@@ -14,8 +14,12 @@ export interface ClientPluginInitializerContext {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerPluginInitializerContext {}
 
+export interface HttpServiceSetup {
+  route(route: ServerRoute | ServerRoute[]): void;
+}
+
 export interface CoreSetup {
-  http: { route(route: ServerRoute | ServerRoute[]): void };
+  http: HttpServiceSetup;
 }
 
 // the contract with the registry
