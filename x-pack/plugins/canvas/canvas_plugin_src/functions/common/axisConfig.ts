@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable, Position } from '../types';
+import { Position } from '../types';
 import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
@@ -21,7 +21,7 @@ interface AxisConfig extends Arguments {
   type: 'axisConfig';
 }
 
-export function axisConfig(): ExpressionFunction<'axisConfig', Datatable, Arguments, AxisConfig> {
+export function axisConfig(): ExpressionFunction<'axisConfig', null, Arguments, AxisConfig> {
   const { help, args: argHelp } = getFunctionHelp().axisConfig;
   const errors = getFunctionErrors().axisConfig;
 
@@ -30,7 +30,7 @@ export function axisConfig(): ExpressionFunction<'axisConfig', Datatable, Argume
     aliases: [],
     type: 'axisConfig',
     context: {
-      types: ['datatable'],
+      types: ['null'],
     },
     help,
     args: {
@@ -46,11 +46,11 @@ export function axisConfig(): ExpressionFunction<'axisConfig', Datatable, Argume
         default: 'left',
       },
       min: {
-        types: ['number', 'date', 'string', 'null'],
+        types: ['number', 'string', 'null'],
         help: argHelp.min,
       },
       max: {
-        types: ['number', 'date', 'string', 'null'],
+        types: ['number', 'string', 'null'],
         help: argHelp.max,
       },
       tickSize: {

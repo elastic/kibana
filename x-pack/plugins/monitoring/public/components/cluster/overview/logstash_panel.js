@@ -22,9 +22,10 @@ import {
   EuiHorizontalRule,
   EuiIconTip,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function LogstashPanelUi(props) {
+export function LogstashPanel(props) {
   if (!props.node_count) {
     return null;
   }
@@ -37,8 +38,9 @@ function LogstashPanelUi(props) {
     <ClusterItemContainer
       {...props}
       url="logstash"
-      title={props.intl.formatMessage({
-        id: 'xpack.monitoring.cluster.overview.logstashPanel.logstashTitle', defaultMessage: 'Logstash' })}
+      title={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.logstashTitle', {
+        defaultMessage: 'Logstash'
+      })}
     >
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
@@ -47,8 +49,9 @@ function LogstashPanelUi(props) {
               <h3>
                 <EuiLink
                   onClick={goToLogstash}
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel', defaultMessage: 'Logstash Overview' })}
+                  aria-label={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel', {
+                    defaultMessage: 'Logstash Overview'
+                  })}
                 >
                   <FormattedMessage
                     id="xpack.monitoring.cluster.overview.logstashPanel.overviewLinkLabel"
@@ -88,10 +91,12 @@ function LogstashPanelUi(props) {
                 <EuiLink
                   onClick={goToNodes}
                   data-test-subj="lsNodes"
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkAriaLabel',
-                    defaultMessage: 'Logstash Nodes: {nodesCount}' },
-                  { nodesCount: props.node_count }
+                  aria-label={i18n.translate(
+                    'xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkAriaLabel',
+                    {
+                      defaultMessage: 'Logstash Nodes: {nodesCount}',
+                      values: { nodesCount: props.node_count }
+                    }
                   )}
                 >
                   <FormattedMessage
@@ -136,10 +141,12 @@ function LogstashPanelUi(props) {
                     <EuiLink
                       onClick={goToPipelines}
                       data-test-subj="lsPipelines"
-                      aria-label={props.intl.formatMessage({
-                        id: 'xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel',
-                        defaultMessage: 'Logstash Pipelines (beta feature): {pipelineCount}' },
-                      { pipelineCount: props.pipeline_count }
+                      aria-label={i18n.translate(
+                        'xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel',
+                        {
+                          defaultMessage: 'Logstash Pipelines (beta feature): {pipelineCount}',
+                          values: { pipelineCount: props.pipeline_count }
+                        }
                       )}
                     >
                       <FormattedMessage
@@ -153,9 +160,9 @@ function LogstashPanelUi(props) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiIconTip
-                  content={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip',
-                    defaultMessage: 'Beta feature' })}
+                  content={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip', {
+                    defaultMessage: 'Beta feature'
+                  })}
                   position="bottom"
                   type="beaker"
                   aria-label="Beta feature"
@@ -185,5 +192,3 @@ function LogstashPanelUi(props) {
     </ClusterItemContainer>
   );
 }
-
-export const LogstashPanel = injectI18n(LogstashPanelUi);

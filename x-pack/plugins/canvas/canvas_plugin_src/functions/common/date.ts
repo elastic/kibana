@@ -9,7 +9,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
-  value: string | null;
+  value: string;
   format: string;
 }
 
@@ -27,7 +27,7 @@ export function date(): ExpressionFunction<'date', null, Arguments, number> {
     args: {
       value: {
         aliases: ['_'],
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.value,
       },
       format: {

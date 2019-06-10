@@ -25,6 +25,8 @@ import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { filterHeaders, Headers } from './headers';
 import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
 
+const requestSymbol = Symbol('request');
+
 /**
  * Request specific route information exposed to a handler.
  * @public
@@ -43,6 +45,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
+   * @internal
    */
   public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     req: Request,
@@ -87,14 +90,19 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   public readonly url: Url;
   public readonly route: RecursiveReadonly<KibanaRequestRoute>;
 
+  /** @internal */
+  protected readonly [requestSymbol]: Request;
+
   constructor(
-    private readonly request: Request,
+    request: Request,
     readonly params: Params,
     readonly query: Query,
     readonly body: Body
   ) {
     this.headers = request.headers;
     this.url = request.url;
+
+    this[requestSymbol] = request;
     this.route = deepFreeze(this.getRouteInfo());
   }
 
@@ -102,19 +110,21 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     return filterHeaders(this.headers, headersToKeep);
   }
 
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  public unstable_getIncomingMessage() {
-    return this.request.raw.req;
-  }
-
   private getRouteInfo() {
+    const request = this[requestSymbol];
     return {
-      path: this.request.path,
-      method: this.request.method,
+      path: request.path,
+      method: request.method,
       options: {
-        authRequired: this.request.route.settings.auth !== false,
-        tags: this.request.route.settings.tags || [],
+        authRequired: request.route.settings.auth !== false,
+        tags: request.route.settings.tags || [],
       },
     };
   }
 }
+
+/**
+ * Returns underlying Hapi Request object for KibanaRequest
+ * @internal
+ */
+export const toRawRequest = (request: KibanaRequest) => request[requestSymbol];
