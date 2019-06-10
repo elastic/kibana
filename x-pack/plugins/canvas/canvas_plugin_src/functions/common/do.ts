@@ -18,7 +18,7 @@ export function doFn(): ExpressionFunction<'do', any, Arguments, any> {
     help,
     args: {
       fn: {
-        aliases: ['_'],
+        aliases: ['_', 'exp', 'expression', 'function'],
         multi: true,
         help: argHelp.fn,
       },

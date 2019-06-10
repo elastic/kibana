@@ -32,7 +32,7 @@ uiRoutes
     k7Breadcrumbs: () => [{ text: i18n.translate('common.ui.errorUrlOverflow.breadcrumbs.errorText', { defaultMessage: 'Error' }) }],
     controllerAs: 'controller',
     controller: class OverflowController {
-      constructor(Private, config, $scope) {
+      constructor(Private, $scope) {
         const kbnUrl = Private(KbnUrlProvider);
         const urlOverflow = new UrlOverflowService();
 

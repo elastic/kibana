@@ -7,7 +7,7 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { Tag } from '../tag';
 
-storiesOf('components/Tag', module)
+storiesOf('components/Tags/Tag', module)
   .add('as health', () => <Tag name="tag" />)
   .add('as health with color', () => <Tag name="tag" color="#9b3067" />)
   .add('as badge', () => <Tag name="tag" type="badge" />)
