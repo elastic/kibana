@@ -20,72 +20,62 @@ include::{asciidoc-dir}/../../shared/versions72.asciidoc[]
 
 include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
 
-//Introduction
 include::introduction.asciidoc[]
 
-//Set up Kibana
 include::setup.asciidoc[]
 
 include::monitoring/configuring-monitoring.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
 
-//Getting started
 include::getting-started.asciidoc[]
 
-//Discover
 include::discover.asciidoc[]
 
-//Visualize
 include::visualize.asciidoc[]
 
-//Dashboard
 include::dashboard.asciidoc[]
 
-//Timelion
 include::timelion.asciidoc[]
 
-//Canvas
 include::canvas.asciidoc[]
 
-//Machine Learning
 include::ml/index.asciidoc[]
 
-//Maps
 include::maps/index.asciidoc[]
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 include::code/index.asciidoc[]
 
 =======
 //Infrastructure
 >>>>>>> 8333132b74... [DOCS] Add brew install instructions. Closes #38220
+=======
+>>>>>>> 60ece06107... Removed inline notes from index
 include::infrastructure/index.asciidoc[]
 
-//Logs
 include::logs/index.asciidoc[]
 
-//APM
 include::apm/index.asciidoc[]
 
-//Uptime
 include::uptime/index.asciidoc[]
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 include::siem/index.asciidoc[]
 
 =======
 //Graphing connections in your data
 >>>>>>> 8333132b74... [DOCS] Add brew install instructions. Closes #38220
+=======
+>>>>>>> 60ece06107... Removed inline notes from index
 include::graph/index.asciidoc[]
 
-//Dev tools
 include::dev-tools.asciidoc[]
 
-//Monitoring
 include::monitoring/index.asciidoc[]
 
-//Management
 include::management.asciidoc[]
 
 include::spaces/index.asciidoc[]
@@ -98,22 +88,16 @@ include::management/upgrade-assistant/index.asciidoc[]
 
 include::management/dashboard_only_mode/index.asciidoc[]
 
-//Reporting from Kibana
 include::reporting/index.asciidoc[]
 
-//REST API
 include::api.asciidoc[]
 
-//Kibana plugins
 include::plugins.asciidoc[]
 
-//Contributing to Kibana
 include::development.asciidoc[]
 
-//Limitations
 include::limitations.asciidoc[]
 
-//Release highlights
 include::release-notes/highlights.asciidoc[]
 
 include::migration.asciidoc[]
