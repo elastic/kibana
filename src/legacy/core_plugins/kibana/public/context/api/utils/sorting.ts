@@ -34,7 +34,7 @@ const META_FIELD_NAMES: string[] = ['_seq_no', '_doc', '_uid'];
  * Returns a field from the intersection of the set of sortable fields in the
  * given index pattern and a given set of candidate field names.
  */
-function getFirstSortableField(indexPattern: IndexPattern, fieldNames: string[]) {
+export function getFirstSortableField(indexPattern: IndexPattern, fieldNames: string[]) {
   const sortableFields = fieldNames.filter(
     fieldName =>
       META_FIELD_NAMES.includes(fieldName) ||
@@ -47,8 +47,6 @@ function getFirstSortableField(indexPattern: IndexPattern, fieldNames: string[])
 /**
  * Return the reversed sort direction.
  */
-function reverseSortDirection(sortDirection: SortDirection) {
-  return sortDirection === SortDirection.asc ? 'desc' : 'asc';
+export function reverseSortDir(sortDirection: SortDirection) {
+  return sortDirection === SortDirection.asc ? SortDirection.desc : SortDirection.asc;
 }
-
-export { getFirstSortableField, reverseSortDirection };

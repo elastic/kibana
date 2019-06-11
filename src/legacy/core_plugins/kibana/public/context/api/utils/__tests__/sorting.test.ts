@@ -16,19 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { reverseSortDir, SortDirection } from '../sorting';
 
-import expect from '@kbn/expect';
-
-import {
-  reverseSortDirection,
-} from '../sorting';
-
-
-describe('context app', function () {
-  describe('function reverseSortDirection', function () {
-    it('should reverse a direction given as a string', function () {
-      expect(reverseSortDirection('asc')).to.eql('desc');
-      expect(reverseSortDirection('desc')).to.eql('asc');
-    });
+describe('function reverseSortDir', function() {
+  test('reverse a given sort direction', function() {
+    expect(reverseSortDir(SortDirection.asc)).toBe(SortDirection.desc);
+    expect(reverseSortDir(SortDirection.desc)).toBe(SortDirection.asc);
   });
 });
