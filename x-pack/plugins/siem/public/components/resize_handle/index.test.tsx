@@ -17,6 +17,7 @@ import {
   isResizing,
   removeGlobalResizeCursorStyleFromBody,
   Resizeable,
+  calculateDeltaX,
 } from '.';
 import { CellResizeHandle } from './styled_handles';
 
@@ -151,6 +152,20 @@ describe('Resizeable', () => {
         );
 
         expect(isResizing()).toEqual(false);
+      });
+    });
+
+    describe('#calculateDeltaX', () => {
+      test('it returns 0 when prevX isEqual 0', () => {
+        expect(calculateDeltaX({ prevX: 0, screenX: 189 })).toEqual(0);
+      });
+
+      test('it returns positive difference when screenX > prevX', () => {
+        expect(calculateDeltaX({ prevX: 10, screenX: 189 })).toEqual(179);
+      });
+
+      test('it returns negative difference when prevX > screenX ', () => {
+        expect(calculateDeltaX({ prevX: 199, screenX: 189 })).toEqual(-10);
       });
     });
   });
