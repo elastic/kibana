@@ -23,6 +23,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import { FilterBarQueryFilterProvider } from '../query_filter';
+import { getFiltersArray } from './_get_filters_array';
 
 describe('add filters', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -58,20 +59,7 @@ describe('add filters', function () {
   }));
 
   beforeEach(function () {
-    filters = [
-      {
-        query: { match: { extension: { query: 'jpg', type: 'phrase' } } },
-        meta: { index: 'logstash-*', negate: false, disabled: false }
-      },
-      {
-        query: { match: { '@tags': { query: 'info', type: 'phrase' } } },
-        meta: { index: 'logstash-*', negate: false, disabled: false }
-      },
-      {
-        query: { match: { '_type': { query: 'nginx', type: 'phrase' } } },
-        meta: { index: 'logstash-*', negate: false, disabled: false }
-      }
-    ];
+    filters = getFiltersArray();
   });
 
   describe('adding filters', function () {

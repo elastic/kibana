@@ -22,9 +22,7 @@ import ngMock from 'ng_mock';
 import './_get_filters';
 import './_add_filters';
 import './_remove_filters';
-import './_toggle_filters';
 import './_invert_filters';
-import './_pin_filters';
 import { FilterBarQueryFilterProvider } from '../query_filter';
 let queryFilter;
 
@@ -54,7 +52,6 @@ describe('Query Filter', function () {
         expect(queryFilter.removeFilter).to.be.a('function');
         expect(queryFilter.removeAll).to.be.a('function');
         expect(queryFilter.invertFilter).to.be.a('function');
-        expect(queryFilter.pinFilter).to.be.a('function');
       });
 
     });

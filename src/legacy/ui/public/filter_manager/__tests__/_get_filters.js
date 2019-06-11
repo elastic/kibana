@@ -22,6 +22,7 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import MockState from 'fixtures/mock_state';
 import { FilterBarQueryFilterProvider } from '../query_filter';
+import { getFiltersArray } from './_get_filters_array';
 
 describe('get filters', function () {
   const storeNames = {
@@ -56,11 +57,7 @@ describe('get filters', function () {
     let filters;
 
     beforeEach(function () {
-      filters = [
-        { query: { match: { extension: { query: 'jpg', type: 'phrase' } } } },
-        { query: { match: { '@tags': { query: 'info', type: 'phrase' } } } },
-        null
-      ];
+      filters = getFiltersArray();
     });
 
     it('should return app and global filters', function () {

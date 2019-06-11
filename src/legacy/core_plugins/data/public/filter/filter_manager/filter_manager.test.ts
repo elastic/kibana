@@ -345,11 +345,10 @@ describe('new_filter_manager', () => {
   describe('invert', () => {
     test('invert to disabled', async () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-      const f1Inverted = filterManager.invertFilter(f1);
-      expect(f1Inverted.meta.negate).toBe(!f1.meta.negate);
-
-      const f1InvertedAgain = filterManager.invertFilter(f1Inverted);
-      expect(f1InvertedAgain.meta.negate).toBe(f1.meta.negate);
+      filterManager.invertFilter(f1);
+      expect(f1.meta.negate).toBe(true);
+      filterManager.invertFilter(f1);
+      expect(f1.meta.negate).toBe(false);
     });
   });
 

@@ -23,6 +23,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import { FilterBarQueryFilterProvider } from '../query_filter';
+import { getFiltersArray } from './_get_filters_array';
 
 describe('invert filters', function () {
   let filters;
@@ -54,20 +55,7 @@ describe('invert filters', function () {
     $rootScope = _$rootScope_;
     queryFilter = Private(FilterBarQueryFilterProvider);
 
-    filters = [
-      {
-        query: { match: { extension: { query: 'jpg', type: 'phrase' } } },
-        meta: { negate: false, disabled: false }
-      },
-      {
-        query: { match: { '@tags': { query: 'info', type: 'phrase' } } },
-        meta: { negate: false, disabled: false }
-      },
-      {
-        query: { match: { '_type': { query: 'nginx', type: 'phrase' } } },
-        meta: { negate: false, disabled: false }
-      }
-    ];
+    filters = getFiltersArray();
   }));
 
   describe('inverting a filter', function () {
@@ -112,36 +100,6 @@ describe('invert filters', function () {
 
       expect(fetchStub.called);
       expect(updateStub.called);
-    });
-  });
-
-  describe('bulk inverting', function () {
-    beforeEach(function () {
-      appState.filters = filters;
-      globalState.filters = _.map(_.cloneDeep(filters), function (filter) {
-        filter.meta.negate = true;
-        return filter;
-      });
-    });
-
-    it('should swap the negate state for all filters', function () {
-      queryFilter.invertAll();
-      _.each(appState.filters, function (filter) {
-        expect(filter.meta.negate).to.be(true);
-      });
-      _.each(globalState.filters, function (filter) {
-        expect(filter.meta.negate).to.be(false);
-      });
-    });
-
-    it('should work without global state filters', function () {
-      // remove global filters
-      delete globalState.filters;
-
-      queryFilter.invertAll();
-      _.each(appState.filters, function (filter) {
-        expect(filter.meta.negate).to.be(true);
-      });
     });
   });
 });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter, isFilterPinned, toggleFilterNegated, FilterStateStore } from '@kbn/es-query';
+import { Filter, isFilterPinned, FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
 import { Subject } from 'rxjs';
@@ -187,7 +187,7 @@ export class FilterManager {
   }
 
   public invertFilter(filter: Filter) {
-    return toggleFilterNegated(filter);
+    filter.meta.negate = !filter.meta.negate;
   }
 
   public removeAll() {

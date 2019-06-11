@@ -23,6 +23,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import { FilterBarQueryFilterProvider } from '../query_filter';
+import { getFiltersArray } from './_get_filters_array';
 
 describe('remove filters', function () {
   let filters;
@@ -53,20 +54,7 @@ describe('remove filters', function () {
   beforeEach(ngMock.inject(function (_$rootScope_, Private) {
     $rootScope = _$rootScope_;
     queryFilter = Private(FilterBarQueryFilterProvider);
-    filters = [
-      {
-        query: { match: { extension: { query: 'jpg', type: 'phrase' } } },
-        meta: { negate: false, disabled: false }
-      },
-      {
-        query: { match: { '@tags': { query: 'info', type: 'phrase' } } },
-        meta: { negate: false, disabled: false }
-      },
-      {
-        query: { match: { '_type': { query: 'nginx', type: 'phrase' } } },
-        meta: { negate: false, disabled: false }
-      }
-    ];
+    filters = getFiltersArray();
   }));
 
   describe('removing a filter', function () {
