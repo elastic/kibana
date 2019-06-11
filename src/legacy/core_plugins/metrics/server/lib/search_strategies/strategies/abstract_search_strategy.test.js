@@ -40,12 +40,16 @@ describe('AbstractSearchStrategy', () => {
     req = {
       pre: {
         indexPatternsService: {
-          getFieldsForWildcard: jest.fn().mockReturnValue(mockedFields)
-        }
-      }
+          getFieldsForWildcard: jest.fn().mockReturnValue(mockedFields),
+        },
+      },
     };
 
-    abstractSearchStrategy = new AbstractSearchStrategy(server, callWithRequestFactory, SearchRequest);
+    abstractSearchStrategy = new AbstractSearchStrategy(
+      server,
+      callWithRequestFactory,
+      SearchRequest
+    );
   });
 
   test('should init an AbstractSearchStrategy instance', () => {
