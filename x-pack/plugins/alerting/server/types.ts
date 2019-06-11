@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from 'src/legacy/server/saved_objects';
+import { SavedObjectAttributes, SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
 import { AlertInstance } from './lib';
 import { AlertTypeRegistry } from './alert_type_registry';
 
@@ -19,8 +19,9 @@ export type Log = (
 ) => void;
 
 export interface Services {
-  callCluster: any;
   log: Log;
+  callCluster: any;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export interface AlertServices extends Services {

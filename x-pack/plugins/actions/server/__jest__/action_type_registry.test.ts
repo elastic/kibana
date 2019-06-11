@@ -11,12 +11,14 @@ jest.mock('../get_create_task_runner_function', () => ({
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { ActionTypeRegistry } from '../action_type_registry';
+import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 
 const mockTaskManager = taskManagerMock.create();
 
 const services = {
   log: jest.fn(),
   callCluster: jest.fn(),
+  savedObjectsClient: SavedObjectsClientMock.create(),
 };
 const actionTypeRegistryParams = {
   services,

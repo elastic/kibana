@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
 import { ActionTypeRegistry } from './action_type_registry';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -16,6 +17,7 @@ export interface SavedObjectReference {
 
 export interface Services {
   callCluster: any;
+  savedObjectsClient: SavedObjectsClientContract;
   log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
 }
 

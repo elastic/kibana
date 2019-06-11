@@ -26,6 +26,7 @@ export function init(server: Legacy.Server) {
   const services: Services = {
     log: server.log,
     callCluster: callWithInternalUser,
+    savedObjectsClient: savedObjectsClientWithInternalUser,
   };
 
   const { taskManager } = server;

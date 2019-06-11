@@ -18,6 +18,7 @@ const alertTypeRegistryParams = {
   services: {
     log: jest.fn(),
     callCluster: jest.fn(),
+    savedObjectsClient: SavedObjectsClientMock.create(),
   },
   taskManager,
   fireAction: jest.fn(),
