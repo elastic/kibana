@@ -17,14 +17,29 @@
  * under the License.
  */
 
-export const image = () => ({
-  name: 'image',
+import { ExpressionType } from '../../types';
+import { Render } from './render';
+
+const name = 'error';
+
+// TODO: Improve typings on this interface [#38553]
+export interface InterpreterErrorType {
+  type: typeof name;
+  error: unknown;
+  info: unknown;
+}
+
+export const error = (): ExpressionType<typeof name, InterpreterErrorType> => ({
+  name,
   to: {
-    render: input => {
+    render: (input): Render<Pick<InterpreterErrorType, 'error' | 'info'>> => {
       return {
         type: 'render',
-        as: 'image',
-        value: input,
+        as: name,
+        value: {
+          error: input.error,
+          info: input.info,
+        },
       };
     },
   },

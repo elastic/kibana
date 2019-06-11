@@ -17,26 +17,26 @@
  * under the License.
  */
 
-export const number = () => ({
-  name: 'number',
+import { ExpressionType } from '../../types';
+
+const name = 'render';
+
+/**
+ * Represents an object that is intended to be rendered.
+ */
+export interface Render<T> {
+  type: typeof name;
+  as: string;
+  value: T;
+}
+
+export const render = (): ExpressionType<typeof name, Render<unknown>> => ({
+  name,
   from: {
-    null: () => 0,
-    boolean: b => Number(b),
-    string: n => Number(n),
-  },
-  to: {
-    render: value => {
-      const text = `${value}`;
-      return {
-        type: 'render',
-        as: 'text',
-        value: { text },
-      };
-    },
-    datatable: value => ({
-      type: 'datatable',
-      columns: [{ name: 'value', type: 'number' }],
-      rows: [{ value }],
+    '*': <T>(v: T): Render<T> => ({
+      type: name,
+      as: 'debug',
+      value: v,
     }),
   },
 });
