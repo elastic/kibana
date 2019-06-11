@@ -14,8 +14,6 @@ export default function(kibana: any) {
     require: ['actions', 'alerting', 'elasticsearch'],
     name: 'alerts',
     init(server: any) {
-      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-
       // Action types
       server.plugins.actions.registerType({
         id: 'test.index-record',
@@ -36,8 +34,8 @@ export default function(kibana: any) {
             })
             .required(),
         },
-        async executor({ actionTypeConfig, params }: ActionTypeExecutorOptions) {
-          return await callWithInternalUser('index', {
+        async executor({ actionTypeConfig, params, services }: ActionTypeExecutorOptions) {
+          return await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -60,8 +58,8 @@ export default function(kibana: any) {
             })
             .required(),
         },
-        async executor({ actionTypeConfig, params }: ActionTypeExecutorOptions) {
-          await callWithInternalUser('index', {
+        async executor({ actionTypeConfig, params, services }: ActionTypeExecutorOptions) {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -87,7 +85,7 @@ export default function(kibana: any) {
             .fire(actionGroupToFire, {
               instanceContextValue: true,
             });
-          await callWithInternalUser('index', {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -106,7 +104,7 @@ export default function(kibana: any) {
         id: 'test.never-firing',
         description: 'Test: Never firing',
         async execute({ services, params, state }: AlertExecuteOptions) {
-          await callWithInternalUser('index', {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -125,7 +123,7 @@ export default function(kibana: any) {
         id: 'test.failing',
         description: 'Test: Failing',
         async execute({ services, params, state }: AlertExecuteOptions) {
-          await callWithInternalUser('index', {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {

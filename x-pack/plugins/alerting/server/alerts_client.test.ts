@@ -17,6 +17,7 @@ const savedObjectsClient = SavedObjectsClientMock.create();
 const alertsClientParams = {
   services: {
     log: jest.fn(),
+    callCluster: jest.fn(),
   },
   taskManager,
   alertTypeRegistry,

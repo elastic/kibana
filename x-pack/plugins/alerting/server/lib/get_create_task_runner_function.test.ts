@@ -21,6 +21,7 @@ const savedObjectsClient = SavedObjectsClientMock.create();
 const getCreateTaskRunnerFunctionParams = {
   services: {
     log: jest.fn(),
+    callCluster: jest.fn(),
   },
   alertType: {
     id: 'test',
@@ -108,6 +109,7 @@ Array [
     },
     "services": Object {
       "alertInstanceFactory": [Function],
+      "callCluster": [MockFunction],
       "log": [MockFunction],
     },
     "state": Object {},

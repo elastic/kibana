@@ -16,6 +16,7 @@ const mockTaskManager = taskManagerMock.create();
 
 const services = {
   log: jest.fn(),
+  callCluster: jest.fn(),
 };
 const actionTypeRegistryParams = {
   services,
@@ -65,6 +66,7 @@ Array [
       "registerType": [MockFunction],
     },
     "services": Object {
+      "callCluster": [MockFunction],
       "log": [MockFunction],
     },
   },

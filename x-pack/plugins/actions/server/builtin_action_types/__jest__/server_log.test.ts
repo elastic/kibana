@@ -17,6 +17,7 @@ const NO_OP_FN = () => {};
 
 const services = {
   log: NO_OP_FN,
+  callCluster: NO_OP_FN,
 };
 
 let actionTypeRegistry: ActionTypeRegistry;
@@ -104,6 +105,7 @@ describe('execute()', () => {
     await actionType.executor({
       services: {
         log: mockLog,
+        callCluster: NO_OP_FN,
       },
       actionTypeConfig: {},
       params: { message: 'message text here', tags: ['tag1', 'tag2'] },

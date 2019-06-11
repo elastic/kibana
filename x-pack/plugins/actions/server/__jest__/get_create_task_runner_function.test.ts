@@ -12,6 +12,7 @@ const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 const getCreateTaskRunnerFunctionParams = {
   services: {
     log: jest.fn(),
+    callCluster: jest.fn(),
   },
   actionType: {
     id: '1',
@@ -72,6 +73,7 @@ Array [
       "baz": true,
     },
     "services": Object {
+      "callCluster": [MockFunction],
       "log": [MockFunction],
     },
   },

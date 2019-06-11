@@ -21,6 +21,7 @@ const mockEncryptedSavedObjectsPlugin = {
 
 const services = {
   log: jest.fn(),
+  callCluster: jest.fn(),
 };
 
 const actionTypeRegistryParams = {

@@ -13,6 +13,7 @@ export type Context = Record<string, any>;
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 
 export interface Services {
+  callCluster: any;
   log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
 }
 

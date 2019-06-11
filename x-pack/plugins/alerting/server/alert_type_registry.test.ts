@@ -17,6 +17,7 @@ const taskManager = taskManagerMock.create();
 const alertTypeRegistryParams = {
   services: {
     log: jest.fn(),
+    callCluster: jest.fn(),
   },
   taskManager,
   fireAction: jest.fn(),
