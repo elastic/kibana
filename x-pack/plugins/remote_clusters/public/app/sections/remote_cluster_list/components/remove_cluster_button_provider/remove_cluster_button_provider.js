@@ -6,13 +6,13 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiConfirmModal,
   EuiOverlayMask,
 } from '@elastic/eui';
-
-import { i18n, FormattedMessage } from '../../../../services/i18n';
 
 export class RemoveClusterButtonProvider extends Component {
   static propTypes = {

@@ -6,6 +6,8 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -29,7 +31,6 @@ import {
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouterLinkProps, extractQueryParams } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
-import { i18n, FormattedMessage } from '../../services/i18n';
 
 import {
   RemoteClusterTable,

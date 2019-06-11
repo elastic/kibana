@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   isSeedNodeValid,
   isSeedNodePortValid,
 } from '../../../../services';
-import { i18n } from '../../../../services/i18n';
 
 export function validateSeed(seed) {
   const errors = [];

@@ -6,10 +6,6 @@
 
 import { validateName } from './validate_name';
 
-jest.mock('../../../../services/i18n', () => ({
-  FormattedMessage: () => {},
-}));
-
 describe('validateName', () => {
   describe('rejects empty input', () => {
     ['   ', undefined, null].forEach(input => {

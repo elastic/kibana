@@ -6,6 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -28,7 +29,6 @@ import {
 
 import { CRUD_APP_BASE_PATH } from '../../../constants';
 import { getRouterLinkProps } from '../../../services';
-import { FormattedMessage } from '../../../services/i18n';
 import { ConfiguredByNodeWarning } from '../../components';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 

@@ -7,6 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { merge } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -33,10 +35,7 @@ import {
   skippingDisconnectedClustersUrl,
   transportPortUrl,
 } from '../../../services/documentation';
-import {
-  i18n,
-  FormattedMessage,
-} from '../../../services/i18n';
+
 import { validateName, validateSeeds, validateSeed } from './validators';
 
 const defaultFields = {

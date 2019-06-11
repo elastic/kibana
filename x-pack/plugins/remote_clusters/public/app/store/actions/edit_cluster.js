@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '../../services/i18n';
+import { i18n } from '@kbn/i18n';
+
 import { fatalError, toastNotifications } from '../../services/notification';
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { loadClusters } from './load_clusters';

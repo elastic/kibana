@@ -12,13 +12,6 @@ import { RemoteClusterForm } from './remote_cluster_form';
 // Make sure we have deterministic aria IDs.
 jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'mockId');
 
-jest.mock('../../../services/i18n', () => ({
-  FormattedMessage: ({ defaultMessage }) => defaultMessage,
-  i18n: {
-    translate: () => {},
-  },
-}));
-
 describe('RemoteClusterForm', () => {
   test(`renders untouched state`, () => {
     const component = renderWithIntl(

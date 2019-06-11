@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import { createRouter, createIsEsError, Router } from '../../server/lib/create_router';
 import { registerLicenseChecker } from '../../server/lib/register_license_checker';
@@ -35,7 +34,6 @@ export function createShim(
         createRouter: (basePath: string) => createRouter(server, pluginId, basePath),
         isEsError: createIsEsError(server),
       },
-      i18n,
     },
     pluginsSetup: {
       license: {

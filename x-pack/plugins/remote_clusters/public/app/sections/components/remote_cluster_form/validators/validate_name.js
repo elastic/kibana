@@ -5,8 +5,7 @@
  */
 
 import React from 'react';
-
-import { FormattedMessage } from '../../../../services/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function validateName(name) {
   if (!name || !name.trim()) {

@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   loadClusters as sendLoadClustersRequest,
   showApiWarning,
 } from '../../services';
-import { i18n } from '../../services/i18n';
+
 import {
   REFRESH_CLUSTERS_SUCCESS,
 } from '../action_types';

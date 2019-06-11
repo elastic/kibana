@@ -5,6 +5,7 @@
  */
 
 import { unmountComponentAtNode } from 'react-dom';
+import { i18n } from '@kbn/i18n';
 
 import template from './index.html';
 import { renderReact } from './app';
@@ -14,7 +15,6 @@ import { init as initBreadcrumbs } from './app/services/breadcrumb';
 import { init as initDocumentation } from './app/services/documentation';
 import { init as initHttp } from './app/services/http';
 import { init as initUiMetric } from './app/services/ui_metric';
-import { init as initI18n } from './app/services/i18n';
 import { init as initNotification } from './app/services/notification';
 
 const REACT_ROOT_ID = 'remoteClustersReactRoot';
@@ -23,9 +23,7 @@ export class Plugin {
   start(core, plugins) {
     if (core.chrome.getInjected('remoteClustersUiEnabled')) {
       const {
-        translation: {
-          i18n,
-          FormattedMessage,
+        i18n: {
           Context,
         },
         routing: {
@@ -65,7 +63,6 @@ export class Plugin {
       initBreadcrumbs(chrome, BREADCRUMB, i18n);
       initDocumentation(esDocBasePath, esPluginDocBasePath);
       initUiMetric(track);
-      initI18n(i18n, FormattedMessage);
       initNotification(toastNotifications, fatalError);
 
       const unmountReactApp = () => {

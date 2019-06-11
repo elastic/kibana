@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
@@ -18,11 +16,7 @@ import { trackUiMetric as track } from '../../../../src/legacy/core_plugins/ui_m
 export function createShim() {
   return {
     core: {
-      translation: {
-        i18n,
-        Context: I18nContext,
-        FormattedMessage,
-      },
+      i18n: { Context: I18nContext },
       routing: {
         registerAngularRoute: (path, config) => {
           routes.when(path, config);

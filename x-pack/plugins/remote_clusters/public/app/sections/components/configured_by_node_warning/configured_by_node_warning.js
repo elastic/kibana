@@ -10,7 +10,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '../../../services/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function ConfiguredByNodeWarning() {
   return (

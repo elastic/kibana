@@ -6,6 +6,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -17,7 +18,6 @@ import {
 } from '@elastic/eui';
 
 import { remoteClustersUrl } from '../../../services/documentation';
-import { FormattedMessage } from '../../../services/i18n';
 
 export const RemoteClusterPageTitle = ({ title }) => (
   <Fragment>

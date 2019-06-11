@@ -51,7 +51,6 @@ export function remoteClusters(kibana: any) {
         },
       } = createShim(server, PLUGIN.ID);
 
-      const { i18n } = coreSetup;
       const remoteClustersPlugin = new RemoteClustersPlugin();
 
       // Set up plugin.
@@ -60,7 +59,7 @@ export function remoteClusters(kibana: any) {
       registerLicenseChecker(
         server,
         PLUGIN.ID,
-        PLUGIN.getI18nName(i18n),
+        PLUGIN.getI18nName(),
         PLUGIN.MINIMUM_LICENSE_REQUIRED
       );
     },

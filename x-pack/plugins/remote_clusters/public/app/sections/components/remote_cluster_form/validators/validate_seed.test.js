@@ -6,12 +6,6 @@
 
 import { validateSeed } from './validate_seed';
 
-jest.mock('../../../../services/i18n', () => ({
-  i18n: {
-    translate: () => {},
-  },
-}));
-
 describe('validateSeeds', () => {
   test(`rejects invalid seeds and invalid ports`, () => {
     const errorsCount = validateSeed('&').length;
