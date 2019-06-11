@@ -131,6 +131,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             'canvas',
             'code',
             'infrastructure',
+            'integrations_manager',
             'logs',
             'maps',
             'uptime',
