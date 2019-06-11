@@ -41,7 +41,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getChartTimespan() {
-      const el = await find.byCssSelector('.small > span:nth-child(1)');
+      const el = await find.byCssSelector('.small > label:nth-child(1)');
       return await el.getVisibleText();
     }
 
