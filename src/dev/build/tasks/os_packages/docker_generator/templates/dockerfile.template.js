@@ -19,13 +19,21 @@
 
 import dedent from 'dedent';
 
-function generator({ artifactTarball, versionTag, license, usePublicArtifact  }) {
+function generator({ artifactTarball, versionTag, license, usePublicArtifact, imageFlavor  }) {
   const copyArtifactTarballInsideDockerOptFolder = () => {
     if (usePublicArtifact) {
       return `RUN cd /opt && curl --retry 8 -s -L -O https://artifacts.elastic.co/downloads/kibana/${ artifactTarball } && cd -`;
     }
 
     return `COPY ${ artifactTarball } /opt`;
+  };
+
+  const copyCertsInsideDockerCertsFolder = () => {
+    if (!imageFlavor) {
+      return '#Add certs for Code to clone from common sites\nCOPY --chown=1000:0 certs/* /etc/pki/tls/certs/';
+    }
+
+    return '';
   };
 
   return dedent(`
@@ -73,6 +81,8 @@ function generator({ artifactTarball, versionTag, license, usePublicArtifact  })
   # Add the launcher/wrapper script. It knows how to interpret environment
   # variables and translate them to Kibana CLI options.
   COPY --chown=1000:0 bin/kibana-docker /usr/local/bin/
+  
+  ${copyCertsInsideDockerCertsFolder()}
   
   # Ensure gid 0 write permissions for OpenShift.
   RUN chmod g+ws /usr/share/kibana && \\
