@@ -47,17 +47,12 @@ export function getCreateTaskRunnerFunction({
           alertInstanceFactory,
         };
 
-        const range = {
-          // Add 1ms to the from, since the range is inclusive
-          from: new Date(new Date(taskInstance.state.previousRange.to).getTime() + 1),
-          to: new Date(taskInstance.state.scheduledRunAt),
-        };
-
         const alertTypeState = await alertType.execute({
-          range,
           services: alertTypeServices,
           params: alertSavedObject.attributes.alertTypeParams,
           state: taskInstance.state.alertTypeState || {},
+          scheduledRunAt: taskInstance.state.scheduledRunAt,
+          previousScheduledRunAt: taskInstance.state.previousScheduledRunAt,
         });
 
         for (const alertInstanceId of Object.keys(alertInstances)) {
@@ -86,7 +81,7 @@ export function getCreateTaskRunnerFunction({
             alertInstances,
             // We store nextRunAt ourselves since task manager changes runAt when executing a task
             scheduledRunAt: nextRunAt,
-            previousRange: range,
+            previousScheduledRunAt: taskInstance.state.scheduledRunAt,
           },
           runAt: nextRunAt,
         };

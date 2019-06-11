@@ -36,10 +36,6 @@ const getCreateTaskRunnerFunctionParams = {
 const mockedTaskInstance = {
   runAt: mockedLastRunAt,
   state: {
-    previousRange: {
-      from: new Date(mockedLastRunAt.getTime() - 10000),
-      to: new Date(mockedLastRunAt.getTime() - 10000),
-    },
     scheduledRunAt: mockedLastRunAt,
   },
   taskType: 'alerting:test',
@@ -89,10 +85,7 @@ Object {
   "state": Object {
     "alertInstances": Object {},
     "alertTypeState": undefined,
-    "previousRange": Object {
-      "from": 2019-06-03T18:55:10.983Z,
-      "to": 2019-06-03T18:55:20.982Z,
-    },
+    "previousScheduledRunAt": 2019-06-03T18:55:20.982Z,
     "scheduledRunAt": 2019-06-03T18:55:30.982Z,
   },
 }
@@ -104,12 +97,7 @@ Object {
   "bar": true,
 }
 `);
-  expect(call.range).toMatchInlineSnapshot(`
-Object {
-  "from": 2019-06-03T18:55:10.983Z,
-  "to": 2019-06-03T18:55:20.982Z,
-}
-`);
+  expect(call.scheduledRunAt).toMatchInlineSnapshot(`2019-06-03T18:55:20.982Z`);
   expect(call.state).toMatchInlineSnapshot(`Object {}`);
   expect(call.services.alertInstanceFactory).toBeTruthy();
   expect(call.services.callCluster).toBeTruthy();

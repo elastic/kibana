@@ -178,10 +178,7 @@ Array [
       "alerting",
     ],
     "state": Object {
-      "previousRange": Object {
-        "from": 2019-02-12T21:01:22.479Z,
-        "to": 2019-02-12T21:01:22.479Z,
-      },
+      "previousScheduledRunAt": null,
       "scheduledRunAt": 2019-02-12T21:01:22.479Z,
     },
     "taskType": "alerting:123",
