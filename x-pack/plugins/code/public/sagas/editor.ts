@@ -173,7 +173,6 @@ function* handleMainRouteChange(action: Action<Match>) {
   yield put(fetchRepoBranches({ uri: repoUri }));
   if (file) {
     if ([PathTypes.blob, PathTypes.blame].includes(pathType as PathTypes)) {
-      yield call(handleFile, repoUri, file, revision);
       yield put(revealPosition(position));
       const { tab, refUrl } = queryParams;
       if (tab === 'references' && refUrl) {
@@ -182,6 +181,7 @@ function* handleMainRouteChange(action: Action<Match>) {
         yield put(closeReferences(false));
       }
     }
+    yield call(handleFile, repoUri, file, revision);
     const commits = yield select((state: RootState) => state.file.treeCommits[file]);
     if (commits === undefined) {
       yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
