@@ -242,7 +242,7 @@
     "trunc-text": "1.0.2",
     "tslib": "^1.9.3",
     "type-detect": "^4.0.8",
-    "ui-select": "0.19.6",
+    "ui-select": "0.19.8",
     "url-loader": "2.0.0",
     "uuid": "3.0.1",
     "val-loader": "^1.1.1",
