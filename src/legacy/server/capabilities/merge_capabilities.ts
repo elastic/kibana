@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import typeDetect from 'type-detect';
 import { merge } from 'lodash';
 import { Capabilities } from '../../../core/public';
 
@@ -27,5 +28,17 @@ export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Cap
       management: {},
       catalogue: {},
     },
-    ...sources
+    ...sources,
+    (a: any, b: any) => {
+      if (
+        (typeDetect(a) === 'boolean' && typeDetect(b) === 'Object') ||
+        (typeDetect(b) === 'boolean' && typeDetect(a) === 'Object')
+      ) {
+        throw new Error(`a boolean and an object can't be merged`);
+      }
+
+      if (typeDetect(a) === 'boolean' && typeDetect(b) === 'boolean' && a !== b) {
+        throw new Error(`"true" and "false" can't be merged`);
+      }
+    }
   );
