@@ -26,8 +26,10 @@ x-pack/plugins/integrations_manager/
 ```
 
 ## Development
+We're using a long-running feature branch [`feature-integrations-manager`](https://github.com/elastic/kibana/tree/feature-integrations-manager). [jfsiii](http://github.com/jfsiii) will keep the branch up-to-date with `master` by doing a `git merge master` periodically (a few times a week?).
+
 ### Feature development
-We're using a long-running feature branch [`feature-integrations-manager`](https://github.com/elastic/kibana/tree/feature-integrations-manager). Develop new features under branches in your own fork of `elastic/kibana`, then make PR's against [`elastic:feature-integrations-manager`](https://github.com/elastic/kibana/tree/feature-integrations-manager). e.g. work in `yourname:123456-feature-description` and create a PR to merge that into `elastic:feature-integrations-manager`. See https://github.com/elastic/kibana/pull/37950 for an example
+Develop new features under branches in your own fork of `elastic/kibana`, then make PR's against [`elastic:feature-integrations-manager`](https://github.com/elastic/kibana/tree/feature-integrations-manager). e.g. work in `yourname:123456-feature-description` and create a PR to merge that into `elastic:feature-integrations-manager`. See https://github.com/elastic/kibana/pull/37950 for an example.
 
 ### Getting started
  1. In one shell: start the [registry service](https://github.com/elastic/integrations-registry). See [thier docs](https://github.com/elastic/integrations-registry#running) for more information.
