@@ -1,7 +1,7 @@
 [role="xpack"]
 [[metrics-explorer]]
 
-The metrics explorer allows you to create system load charts for each host you're monitoring with Metricbeat.
+The metrics explorer gives the user the ability to easily visualize Metricbeat data and group by arbitary attributes. It empowers the user to visualize multiple metrics and can be a jumping off point for further investigations.
 
 [role="screenshot"]
 image::infrastructure/images/metrics-explorer-screen.png[Metrics Explorer in Kibana]
