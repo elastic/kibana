@@ -7,9 +7,10 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { IndexPatternPrivateState } from './indexpattern';
+import { IndexPatternPrivateState, OperationType } from './indexpattern';
 import { getColumnOrder, getPotentialColumns } from './operations';
 import { IndexPatternDimensionPanel } from './dimension_panel';
+import { DataType } from '../types';
 
 jest.mock('./operations');
 
@@ -368,7 +369,7 @@ describe('multiple IndexPatternDimensionPanels', () => {
     });
 
     it('should show all functions enabled on the selected dimension', () => {
-      const wrapper1 = shallow(
+      const wrapper = shallow(
         <IndexPatternDimensionPanel
           state={state}
           setState={() => {}}
@@ -378,16 +379,33 @@ describe('multiple IndexPatternDimensionPanels', () => {
       );
 
       expect(
-        wrapper1
+        wrapper
           .find('[data-test-subj^="lns-indexPatternDimension-"]')
           .map(n => n.prop('isDisabled'))
       ).not.toContain([true]);
     });
 
-    it('should limit the second dimension to only values', () => {
-      const wrapper2 = shallow(
+    it('should limit the second dimension to only values after selecting a field', () => {
+      const stateWithColumns: IndexPatternPrivateState = {
+        ...state,
+        columns: {
+          ...state.columns,
+          col2: {
+            operationId: 'op2',
+            dataType: 'number',
+            isBucketed: false,
+            label: 'value of bytes',
+
+            sourceField: 'bytes',
+            operationType: 'value',
+          },
+        },
+        columnOrder: ['col1', 'col2'],
+      };
+
+      const wrapper = shallow(
         <IndexPatternDimensionPanel
-          state={state}
+          state={stateWithColumns}
           setState={() => {}}
           columnId={'col2'}
           filterOperations={() => true}
@@ -395,14 +413,58 @@ describe('multiple IndexPatternDimensionPanels', () => {
       );
 
       expect(
-        wrapper2.find('[data-test-subj="lns-indexPatternDimension-value"]').prop('isDisabled')
+        wrapper.find('[data-test-subj="lns-indexPatternDimension-value"]').prop('isDisabled')
       ).toEqual(false);
       expect(
-        wrapper2.find('[data-test-subj="lns-indexPatternDimension-count"]').prop('isDisabled')
+        wrapper.find('[data-test-subj="lns-indexPatternDimension-avg"]').prop('isDisabled')
       ).toEqual(false);
       expect(
-        wrapper2.find('[data-test-subj="lns-indexPatternDimension-count"]').prop('color')
+        wrapper.find('[data-test-subj="lns-indexPatternDimension-avg"]').prop('color')
       ).toEqual('danger');
+    });
+  });
+
+  it('should clear the prior dimension when a conflicting change is made', () => {
+    const stateWithColumns: IndexPatternPrivateState = {
+      ...state,
+      columns: {
+        ...state.columns,
+        col2: {
+          operationId: 'op2',
+          dataType: 'number',
+          isBucketed: false,
+          label: 'value of bytes',
+
+          sourceField: 'bytes',
+          operationType: 'value',
+        },
+      },
+      columnOrder: ['col1', 'col2'],
+    };
+
+    const setState = jest.fn();
+    const wrapper = shallow(
+      <IndexPatternDimensionPanel
+        state={stateWithColumns}
+        setState={setState}
+        columnId={'col2'}
+        filterOperations={() => true}
+      />
+    );
+
+    wrapper.find('[data-test-subj="lns-indexPatternDimension-avg"]')!.simulate('click');
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      columns: {
+        // col1 is removed
+        col2: expect.objectContaining({
+          operationType: 'avg',
+          sourceField: 'bytes',
+          // Other parts of this don't matter for this test
+        }),
+      },
+      columnOrder: ['col2'],
     });
   });
 });
