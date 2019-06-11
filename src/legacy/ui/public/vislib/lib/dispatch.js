@@ -21,6 +21,9 @@ import d3 from 'd3';
 import { get } from 'lodash';
 import $ from 'jquery';
 import { SimpleEmitter } from '../../utils/simple_emitter';
+import chrome from 'ui/chrome';
+
+const config = chrome.getUiSettingsClient();
 
 /**
  * Handles event responses
@@ -29,14 +32,12 @@ import { SimpleEmitter } from '../../utils/simple_emitter';
  * @constructor
  * @param handler {Object} Reference to Handler Class Object
  */
-
 export class Dispatch extends SimpleEmitter {
   constructor(handler) {
     super();
     this.handler = handler;
     this._listeners = {};
   }
-
 
   _pieClickResponse(data) {
     const points = [];
@@ -76,8 +77,9 @@ export class Dispatch extends SimpleEmitter {
   clickEventResponse(d, props = {}) {
     let isSlices = props.isSlices;
     if (isSlices === undefined) {
-      const _data = d3.event.target.nearestViewportElement ?
-        d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
+      const _data = d3.event.target.nearestViewportElement
+        ? d3.event.target.nearestViewportElement.__data__
+        : d3.event.target.__data__;
       isSlices = !!(_data && _data.slices);
     }
 
@@ -87,6 +89,38 @@ export class Dispatch extends SimpleEmitter {
       e: d3.event,
       data: isSlices ? this._pieClickResponse(data) : this._seriesClickResponse(data),
     };
+  }
+
+  /**
+   * Determine whether rendering a series is configured in percentage mode
+   * Used to display a value percentage formatted in it's popover
+   *
+   * @param rawId {string} The rawId of series to check
+   * @param series {Array} Array of all series data
+   * @param visConfig {VisConfig}
+   * @returns {Boolean}
+   */
+  _isSeriesInPercentageMode(rawId, series, visConfig) {
+
+    if (!rawId || !Array.isArray(series) || !visConfig) {
+      return false;
+    }
+    //find the primary id by the rawId, that id is used in the config's seriesParams
+    const { id } = series.find(series => series.rawId === rawId);
+    if (!id) {
+      return false;
+    }
+
+    //find the matching seriesParams of the series, to get the id of the valueAxis
+    const seriesParams = visConfig.get('seriesParams', []);
+    const { valueAxis: valueAxisId } = seriesParams.find(param => param.data.id === id) || {};
+    if (!valueAxisId) {
+      return false;
+    }
+    const usedValueAxis = visConfig
+      .get('valueAxes', [])
+      .find(valueAxis => valueAxis.id === valueAxisId);
+    return get(usedValueAxis, 'scale.mode') === 'percentage';
   }
 
   /**
@@ -100,29 +134,33 @@ export class Dispatch extends SimpleEmitter {
    */
   eventResponse(d, i) {
     const datum = d._input || d;
-    const data = d3.event.target.nearestViewportElement ?
-      d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
-    const label = d.label ? d.label : (d.series || 'Count');
+    const data = d3.event.target.nearestViewportElement
+      ? d3.event.target.nearestViewportElement.__data__
+      : d3.event.target.__data__;
+    const label = d.label ? d.label : d.series || 'Count';
     const isSeries = !!(data && data.series);
     const isSlices = !!(data && data.slices);
     const series = isSeries ? data.series : undefined;
     const slices = isSlices ? data.slices : undefined;
     const handler = this.handler;
     const color = get(handler, 'data.color');
+    const config = handler && handler.visConfig;
+    const isPercentageMode = this._isSeriesInPercentageMode(d.seriesId, series, config);
 
     const eventData = {
       value: d.y,
       point: datum,
-      datum: datum,
-      label: label,
+      datum,
+      label,
       color: color ? color(label) : undefined,
       pointIndex: i,
-      series: series,
-      slices: slices,
-      config: handler && handler.visConfig,
-      data: data,
+      series,
+      slices,
+      config,
+      data,
       e: d3.event,
-      handler: handler
+      handler,
+      isPercentageMode,
     };
 
     return eventData;
@@ -168,8 +206,7 @@ export class Dispatch extends SimpleEmitter {
         self.addMousePointer.call(this, arguments);
       }
 
-      const dimmingOpacity = self.handler.visConfig.get('dimmingOpacity');
-      self.handler.highlight.call(this, $el, dimmingOpacity);
+      self.handler.highlight.call(this, $el);
       self.emit('hover', self.eventResponse(d, i));
     }
 
@@ -202,14 +239,9 @@ export class Dispatch extends SimpleEmitter {
    * @returns {Function}
    */
   addClickEvent() {
-    const self = this;
-    const addEvent = this.addEvent;
+    const onClick = (d) => this.emit('click', this.clickEventResponse(d));
 
-    function click(d) {
-      self.emit('click', self.clickEventResponse(d));
-    }
-
-    return addEvent('click', click);
+    return this.addEvent('click', onClick);
   }
 
   /**
@@ -263,14 +295,16 @@ export class Dispatch extends SimpleEmitter {
    * @param element {d3.Selection}
    * @method highlight
    */
-  highlight(element, dimmingOpacity) {
+  highlight(element) {
     const label = this.getAttribute('data-label');
     if (!label) return;
-
-    $(element).parent().find('[data-label]')
-      .css('opacity', 1)//Opacity 1 is needed to avoid the css application
+    const dimming = config.get('visualization:dimmingOpacity');
+    $(element)
+      .parent()
+      .find('[data-label]')
+      .css('opacity', 1) //Opacity 1 is needed to avoid the css application
       .not((els, el) => String($(el).data('label')) === label)
-      .css('opacity', justifyOpacity(dimmingOpacity));
+      .css('opacity', justifyOpacity(dimming));
   }
 
   /**
@@ -305,32 +339,32 @@ export class Dispatch extends SimpleEmitter {
     }
 
     brush.on('brushend', function brushEnd() {
-
       // Assumes data is selected at the chart level
       // In this case, the number of data objects should always be 1
       const data = d3.select(this).data()[0];
-      const isTimeSeries = (data.ordered && data.ordered.date);
+      const isTimeSeries = data.ordered && data.ordered.date;
 
       // Allows for brushing on d3.scale.ordinal()
-      const selected = xScale.domain().filter(function (d) {
-        return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
-      });
+      const selected = xScale.domain().filter((d) =>
+        brush.extent()[0] <= xScale(d) && xScale(d) <= brush.extent()[1]
+      );
       const range = isTimeSeries ? brush.extent() : selected;
 
       return self.emit('brush', {
-        range: range,
+        range,
         config: visConfig,
         e: d3.event,
-        data: data
+        data,
       });
     });
 
     // if `addBrushing` is true, add brush canvas
     if (self.listenerCount('brush')) {
-      const rect = svg.insert('g', 'g')
+      const rect = svg
+        .insert('g', 'g')
         .attr('class', 'brush')
         .call(brush)
-        .call(function (brushG) {
+        .call(brushG => {
           // hijack the brush start event to filter out right/middle clicks
           const brushHandler = brushG.on('mousedown.brush');
           if (!brushHandler) return; // touch events in use
@@ -355,9 +389,8 @@ function validBrushClick(event) {
   return event.button === 0;
 }
 
-
 function justifyOpacity(opacity) {
   const decimalNumber = parseFloat(opacity, 10);
   const fallbackOpacity = 0.5;
-  return (0 <= decimalNumber  && decimalNumber <= 1) ? decimalNumber : fallbackOpacity;
+  return 0 <= decimalNumber && decimalNumber <= 1 ? decimalNumber : fallbackOpacity;
 }
