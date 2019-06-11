@@ -21,14 +21,13 @@ import _ from 'lodash';
 import d3 from 'd3';
 import { KbnError } from '../errors';
 import { EventsProvider } from '../events';
-import { VislibVisConfigProvider } from './lib/vis_config';
+import { VisConfig } from './lib/vis_config';
 import { Handler } from './lib/handler';
 import { setHierarchicalTooltipFormatter } from '../vis/components/tooltip/_hierarchical_tooltip_formatter';
 import { setPointSeriesTooltipFormatter } from '../vis/components/tooltip/_pointseries_tooltip_formatter';
 
 export function VislibVisProvider(Private, config) {
   const Events = Private(EventsProvider);
-  const VisConfig = Private(VislibVisConfigProvider);
 
   setHierarchicalTooltipFormatter(Private);
   setPointSeriesTooltipFormatter(Private);
