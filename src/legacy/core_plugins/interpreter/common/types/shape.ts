@@ -17,27 +17,19 @@
  * under the License.
  */
 
-export const pointseries = () => ({
-  name: 'pointseries',
-  from: {
-    null: () => {
-      return {
-        type: 'pointseries',
-        rows: [],
-        columns: {},
-      };
-    },
-  },
+import { ExpressionType } from '../../types';
+import { Render } from './render';
+
+const name = 'shape';
+
+export const shape = (): ExpressionType<typeof name, undefined> => ({
+  name,
   to: {
-    render: (pointseries, types) => {
-      const datatable = types.datatable.from(pointseries, types);
+    render: <T>(input: T): Render<T> => {
       return {
         type: 'render',
-        as: 'table',
-        value: {
-          datatable,
-          showHeader: true,
-        },
+        as: name,
+        value: input,
       };
     },
   },

@@ -17,26 +17,25 @@
  * under the License.
  */
 
-export const boolean = () => ({
-  name: 'boolean',
+import { ExpressionType } from '../../types';
+
+const name = 'style';
+
+export interface Style {
+  type: typeof name;
+  spec: any;
+  css: string;
+}
+
+export const style = (): ExpressionType<typeof name, Style> => ({
+  name,
   from: {
-    null: () => false,
-    number: n => Boolean(n),
-    string: s => Boolean(s),
-  },
-  to: {
-    render: value => {
-      const text = `${value}`;
+    null: () => {
       return {
-        type: 'render',
-        as: 'text',
-        value: { text },
+        type: 'style',
+        spec: {},
+        css: '',
       };
     },
-    datatable: value => ({
-      type: 'datatable',
-      columns: [{ name: 'value', type: 'boolean' }],
-      rows: [{ value }],
-    }),
   },
 });
