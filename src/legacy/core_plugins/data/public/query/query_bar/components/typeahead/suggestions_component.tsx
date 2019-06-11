@@ -68,6 +68,7 @@ export class SuggestionsComponent extends Component<Props> {
             >
               {suggestions}
             </div>
+            {this.props.append}
           </div>
         </div>
       </div>
