@@ -13,9 +13,6 @@ export interface CoreSetup {
     createRouter(basePath: string): Router;
     isEsError(error: any): boolean;
   };
-  i18n: {
-    [i18nPackage: string]: any;
-  };
 }
 
 export interface Plugins {
