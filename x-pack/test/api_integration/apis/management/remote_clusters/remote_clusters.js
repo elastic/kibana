@@ -10,7 +10,9 @@ import { API_BASE_PATH, NODE_SEED } from './constants';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('Remote Clusters', () => {
+  describe('Remote Clusters', function () {
+    this.tags(['skipCloud']);
+
     describe('Empty List', () => {
       it('should return an empty array when there are no remote clusters', async () => {
         const uri = `${API_BASE_PATH}`;

@@ -50,7 +50,9 @@ export default function ({ getService }) {
   );
 
   // Flaky tests; possible race condition with ES.
-  describe.skip('follower indices', () => {
+  describe.skip('follower indices', function () {
+    this.tags(['skipCloud']);
+
     afterEach(() => cleanUp());
 
     describe('list()', () => {

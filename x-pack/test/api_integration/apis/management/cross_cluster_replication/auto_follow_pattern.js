@@ -46,7 +46,9 @@ export default function ({ getService }) {
       })
   );
 
-  describe('auto follow patterns', () => {
+  describe('auto follow patterns', function () {
+    this.tags(['skipCloud']);
+
     afterEach(() => {
       return cleanUp();
     });
