@@ -35,7 +35,9 @@ export const createStore = <State extends {}>(defaultState: State): AppStore<Sta
   const redux = createReduxStore<State, any, any, any>(reducer, defaultState as any);
 
   const $state = new Subject();
-  redux.subscribe((state: State) => $state.next(state));
+  redux.subscribe(() => {
+    $state.next(redux.getState());
+  });
 
   const set = (state: State) =>
     redux.dispatch({
