@@ -22,6 +22,9 @@ export type OnResize = (
 export const resizeCursorStyle = 'col-resize';
 export const globalResizeCursorClassName = 'global-resize-cursor';
 
+export const calculateDeltaX = ({ prevX, screenX }: { prevX: number; screenX: number }) =>
+  prevX !== 0 ? screenX - prevX : 0;
+
 // eslint-disable-next-line no-unused-expressions
 injectGlobal`
 .${globalResizeCursorClassName} {
@@ -96,7 +99,8 @@ export class Resizeable extends React.PureComponent<Props, State> {
 
     this.drag$ = down$.pipe(concatMap(() => move$.pipe(takeUntil(up$))));
     this.dragSubscription = this.drag$.subscribe(e => {
-      const delta = this.mousemove(e);
+      const delta = this.calculateDelta(e);
+
       if (!this.state.isResizing) {
         this.setState({ isResizing: true });
       }
@@ -142,9 +146,11 @@ export class Resizeable extends React.PureComponent<Props, State> {
     );
   }
 
-  private mousemove = (e: MouseEvent) => {
-    const movementX = this.prevX ? e.screenX - this.prevX : 0;
+  private calculateDelta = (e: MouseEvent) => {
+    const deltaX = calculateDeltaX({ prevX: this.prevX, screenX: e.screenX });
+
     this.prevX = e.screenX;
-    return movementX;
+
+    return deltaX;
   };
 }
