@@ -24,7 +24,7 @@ test('can create store', () => {
   expect(store).toMatchObject({
     get: expect.any(Function),
     set: expect.any(Function),
-    $state: expect.any(Object),
+    state$: expect.any(Object),
     redux: {
       getState: expect.any(Function),
       dispatch: expect.any(Function),
@@ -75,7 +75,7 @@ test('does not shallow merge states', () => {
 test('can subscribe and unsubscribe to state changes', () => {
   const store = createStore<any>({});
   const spy = jest.fn();
-  const subscription = store.$state.subscribe(spy);
+  const subscription = store.state$.subscribe(spy);
   store.set({ a: 1 });
   store.set({ a: 2 });
   subscription.unsubscribe();
@@ -90,8 +90,8 @@ test('multiple subscribers can subscribe', () => {
   const store = createStore<any>({});
   const spy1 = jest.fn();
   const spy2 = jest.fn();
-  const subscription1 = store.$state.subscribe(spy1);
-  const subscription2 = store.$state.subscribe(spy2);
+  const subscription1 = store.state$.subscribe(spy1);
+  const subscription2 = store.state$.subscribe(spy2);
   store.set({ a: 1 });
   subscription1.unsubscribe();
   store.set({ a: 2 });

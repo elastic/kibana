@@ -24,5 +24,5 @@ export interface AppStore<State extends {}> {
   redux: ReduxStore;
   get: () => State;
   set: (state: State) => void;
-  $state: Observable<State>;
+  state$: Observable<State>;
 }
