@@ -22,13 +22,13 @@ import {
   columnToOperation,
   FieldBasedIndexPatternColumn,
 } from './indexpattern';
-import { getParamEditors } from './params';
 
 import {
   getOperationDisplay,
   getOperations,
   getPotentialColumns,
   getColumnOrder,
+  operationDefinitionMap,
 } from './operations';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
@@ -66,7 +66,8 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
       })
     : filteredColumns;
 
-  const ParamEditor = selectedColumn && getParamEditors()[selectedColumn.operationType];
+  const ParamEditor =
+    selectedColumn && operationDefinitionMap[selectedColumn.operationType].paramEditor;
 
   return (
     <EuiFlexGroup>

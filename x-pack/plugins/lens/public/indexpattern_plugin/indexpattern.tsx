@@ -21,15 +21,7 @@ import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 
-export type OperationType =
-  | 'value'
-  | 'terms'
-  | 'date_histogram'
-  | 'sum'
-  | 'avg'
-  | 'min'
-  | 'max'
-  | 'count';
+export type OperationType = IndexPatternColumn['operationType'];
 
 export type IndexPatternColumn =
   | DateHistogramIndexPatternColumn

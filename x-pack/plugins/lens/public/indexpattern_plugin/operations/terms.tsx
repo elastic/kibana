@@ -4,22 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
-import {
-  IndexPatternPrivateState,
-  OperationType,
-  DateHistogramIndexPatternColumn,
-  TermsIndexPatternColumn,
-} from './indexpattern';
-import { isMetricOperation } from './operations';
-
-export interface ParamEditorProps {
-  state: IndexPatternPrivateState;
-  setState: (newState: IndexPatternPrivateState) => void;
-  columnId: string;
-}
+import { IndexPatternField, TermsIndexPatternColumn } from '../indexpattern';
+import { DimensionPriority } from '../../types';
+import { OperationDefinition } from '.';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -33,50 +23,44 @@ const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
   }
 >;
 
-const paramEditors: Partial<Record<OperationType, React.ComponentType<ParamEditorProps>>> = {
-  date_histogram: ({ state, setState, columnId }) => {
-    const column = state.columns[columnId] as DateHistogramIndexPatternColumn;
-    const intervals = ['M', 'w', 'd', 'h'];
+function ofName(name: string) {
+  return i18n.translate('xpack.lens.indexPattern.termsOf', {
+    defaultMessage: 'Top Values of {name}',
+    values: { name },
+  });
+}
 
-    function intervalToNumeric(interval: string) {
-      return intervals.indexOf(interval);
-    }
-
-    function numericToInterval(i: number) {
-      return intervals[i];
-    }
-    return (
-      <EuiForm>
-        <EuiFormRow label="Level of detail">
-          <FixedEuiRange
-            min={0}
-            max={intervals.length - 1}
-            step={1}
-            value={intervalToNumeric(column.params.interval)}
-            showTicks
-            ticks={intervals.map((interval, index) => ({ label: interval, value: index }))}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setState({
-                ...state,
-                columns: {
-                  ...state.columns,
-                  [columnId]: {
-                    ...column,
-                    params: {
-                      ...column.params,
-                      interval: numericToInterval(Number(e.target.value)),
-                    },
-                  },
-                },
-              })
-            }
-            aria-label="Level of Detail"
-          />
-        </EuiFormRow>
-      </EuiForm>
+export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
+  type: 'terms',
+  displayName: i18n.translate('xpack.lens.indexPattern.terms', {
+    defaultMessage: 'Top Values',
+  }),
+  isApplicableWithoutField: false,
+  isApplicableForField: ({ aggregationRestrictions, type }) => {
+    return Boolean(
+      type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)
     );
   },
-  terms: ({ state, setState, columnId: currentColumnId }) => {
+  buildColumn(
+    operationId: string,
+    suggestedOrder?: DimensionPriority,
+    field?: IndexPatternField
+  ): TermsIndexPatternColumn {
+    return {
+      operationId,
+      label: ofName(field ? field.name : ''),
+      dataType: 'string',
+      operationType: 'terms',
+      suggestedOrder,
+      sourceField: field ? field.name : '',
+      isBucketed: true,
+      params: {
+        size: 5,
+        orderBy: { type: 'alphabetical' },
+      },
+    };
+  },
+  paramEditor: ({ state, setState, columnId: currentColumnId }) => {
     const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
@@ -97,7 +81,7 @@ const paramEditors: Partial<Record<OperationType, React.ComponentType<ParamEdito
     }
 
     const orderOptions = Object.entries(state.columns)
-      .filter(([_columnId, column]) => isMetricOperation(column.operationType))
+      .filter(([_columnId, column]) => !column.isBucketed)
       .map(([columnId, column]) => {
         return {
           value: toValue({ type: 'column', columnId }),
@@ -161,9 +145,3 @@ const paramEditors: Partial<Record<OperationType, React.ComponentType<ParamEdito
     );
   },
 };
-
-export function getParamEditors(): Partial<
-  Record<OperationType, React.ComponentType<ParamEditorProps>>
-> {
-  return paramEditors;
-}
