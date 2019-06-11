@@ -42,6 +42,7 @@ export interface ILanguageServerHandler {
 }
 
 export class LanguageServerProxy implements ILanguageServerHandler {
+  private error: any | null = null;
   public get isClosed() {
     return this.closed;
   }
@@ -78,6 +79,9 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   }
 
   public receiveRequest(method: string, params: any, isNotification: boolean = false) {
+    if (this.error) {
+      return Promise.reject(this.error);
+    }
     const message: RequestMessage = {
       jsonrpc: '2.0',
       id: this.sequenceNumber++,
@@ -105,6 +109,9 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     workspaceFolders: [WorkspaceFolder],
     initOptions?: object
   ): Promise<InitializeResult> {
+    if (this.error) {
+      throw this.error;
+    }
     const clientConn = await this.tryConnect();
     const rootUri = workspaceFolders[0].uri;
     const params = {
@@ -200,9 +207,9 @@ export class LanguageServerProxy implements ILanguageServerHandler {
           server.removeListener('error', rej);
           this.logger.info('Wait langserver connection on port ' + this.targetPort);
         });
-        onCancel!(() => {
+        onCancel!(error => {
           server.close();
-          rej('canceled');
+          rej(error);
         });
       });
     }
@@ -235,7 +242,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     }
     this.closed = false;
     if (!this.connectingPromise) {
-      this.connectingPromise = new Cancelable((resolve, reject, onCancel) => {
+      this.connectingPromise = new Cancelable(resolve => {
         this.socket = new net.Socket();
 
         this.socket.on('connect', () => {
@@ -257,9 +264,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
           this.targetPort,
           this.targetHost
         );
-        onCancel!(() => {
-          reject('canceled');
-        });
       });
     }
     return this.connectingPromise.promise;
@@ -321,5 +325,13 @@ export class LanguageServerProxy implements ILanguageServerHandler {
         this.connectingPromise = null;
       }
     }
+  }
+
+  public setError(error: any) {
+    if (this.connectingPromise) {
+      this.connectingPromise.cancel(error);
+      this.connectingPromise = null;
+    }
+    this.error = error;
   }
 }

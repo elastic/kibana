@@ -11,7 +11,7 @@ import fs from 'fs';
 
 import { ServerOptions } from '../server_options';
 import { createTestServerOption } from '../test_utils';
-import { AbstractLauncher } from './abstract_launcher';
+import { AbstractLauncher, ServerStartFailed } from './abstract_launcher';
 import { RequestExpander } from './request_expander';
 import { LanguageServerProxy } from './proxy';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
@@ -33,6 +33,8 @@ class MockLauncher extends AbstractLauncher {
   constructor(name: string, targetHost: string, opt: ServerOptions) {
     super(name, targetHost, opt, new ConsoleLoggerFactory());
   }
+
+  protected maxRespawn = 3;
 
   createExpander(
     proxy: LanguageServerProxy,
@@ -76,13 +78,13 @@ class PassiveMockLauncher extends MockLauncher {
     name: string,
     targetHost: string,
     opt: ServerOptions,
-    private dieFirstTime: boolean = false
+    private dieBeforeStart: number = 0
   ) {
     super(name, targetHost, opt);
   }
 
   startConnect(proxy: LanguageServerProxy) {
-    proxy.awaitServerConnection();
+    proxy.awaitServerConnection().catch(this.log.debug);
   }
 
   async getPort() {
@@ -98,9 +100,9 @@ class PassiveMockLauncher extends MockLauncher {
     });
     this.childProcess.send(`port ${port}`);
     this.childProcess.send(`host ${this.targetHost}`);
-    if (this.dieFirstTime) {
+    if (this.dieBeforeStart > 0) {
       this.childProcess!.send('quit');
-      this.dieFirstTime = false;
+      this.dieBeforeStart -= 1;
     } else {
       this.childProcess!.send('connect');
     }
@@ -184,7 +186,7 @@ test('launcher can reconnect if process died', async () => {
     expect(mockMonitor.mock.calls[2][0]).toBe('socket connected');
   });
   await proxy.exit();
-  await delay(2000);
+  await delay(1000);
 });
 
 test('passive launcher can start and end a process', async () => {
@@ -204,7 +206,7 @@ test('passive launcher can start and end a process', async () => {
 });
 
 test('passive launcher should restart a process if a process died before connected', async () => {
-  const launcher = new PassiveMockLauncher('mock', 'localhost', options, true);
+  const launcher = new PassiveMockLauncher('mock', 'localhost', options, 1);
   const proxy = await launcher.launch(false, 1, '');
   await delay(100);
   await retryUtil(30000, () => {
@@ -215,4 +217,20 @@ test('passive launcher should restart a process if a process died before connect
   });
   await proxy.exit();
   await delay(1000);
+});
+
+test('launcher should mark proxy unusable after restart 2 times', async () => {
+  const launcher = new PassiveMockLauncher('mock', 'localhost', options, 3);
+  try {
+    await launcher.launch(false, 1, '');
+  } catch (e) {
+    await retryUtil(30000, () => {
+      expect(mockMonitor.mock.calls[0][0]).toBe('process started');
+      // restart 2 times
+      expect(mockMonitor.mock.calls[1][0]).toBe('process started');
+      expect(mockMonitor.mock.calls[2][0]).toBe('process started');
+    });
+    expect(e).toEqual(ServerStartFailed);
+    await delay(1000);
+  }
 });
