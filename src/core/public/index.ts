@@ -62,6 +62,7 @@ import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_setting
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 
 export { CoreContext, CoreSystem } from './core_system';
+export { RecursiveReadonly } from '../utils';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle

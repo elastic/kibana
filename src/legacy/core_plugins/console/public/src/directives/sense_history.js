@@ -18,6 +18,7 @@
  */
 
 import { keyCodes } from '@elastic/eui';
+import template from './history.html';
 
 const { memoize } = require('lodash');
 const moment = require('moment');
@@ -30,7 +31,7 @@ require('ui/modules')
   .directive('senseHistory', function () {
     return {
       restrict: 'E',
-      template: require('./history.html'),
+      template,
       controllerAs: 'history',
       controller: function ($scope, $element) {
         this.reqs = history.getHistory();
