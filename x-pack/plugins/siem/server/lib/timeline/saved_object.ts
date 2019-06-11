@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { failure } from 'io-ts/lib/PathReporter';
-import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 
@@ -19,13 +17,15 @@ import {
   ResponseFavoriteTimeline,
 } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
-import { Note } from '../note';
 import { NoteSavedObject } from '../note/types';
-import { PinnedEvent } from '../pinned_event';
 import { PinnedEventSavedObject } from '../pinned_event/types';
 
-import { SavedTimeline, TimelineSavedObjectRuntimeType, TimelineSavedObject } from './types';
-import { timelineSavedObjectType } from '.';
+import { SavedTimeline, TimelineSavedObject } from './types';
+import { Note } from '../note/saved_object';
+import { PinnedEvent } from '../pinned_event/saved_object';
+import { timelineSavedObjectType } from './saved_object_mappings';
+import { pickSavedTimeline } from './pick_saved_timeline';
+import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];
@@ -260,42 +260,12 @@ export class Timeline {
   }
 }
 
-export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
-  return TimelineSavedObjectRuntimeType.decode(savedObject)
-    .map(savedTimeline => ({
-      savedObjectId: savedTimeline.id,
-      version: savedTimeline.version,
-      ...savedTimeline.attributes,
-    }))
-    .getOrElseL(errors => {
-      throw new Error(failure(errors).join('\n'));
-    });
-};
-
 // we have to use any here because the SavedObjectAttributes interface is like below
 // export interface SavedObjectAttributes {
 //   [key: string]: SavedObjectAttributes | string | number | boolean | null;
 // }
 // then this interface does not allow types without index signature
 // this is limiting us with our type for now so the easy way was to use any
-
-export const pickSavedTimeline = (
-  timelineId: string | null,
-  savedTimeline: SavedTimeline,
-  userInfo: RequestAuth
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any => {
-  if (timelineId == null) {
-    savedTimeline.created = new Date().valueOf();
-    savedTimeline.createdBy = getOr(null, 'credentials.username', userInfo);
-    savedTimeline.updated = new Date().valueOf();
-    savedTimeline.updatedBy = getOr(null, 'credentials.username', userInfo);
-  } else if (timelineId != null) {
-    savedTimeline.updated = new Date().valueOf();
-    savedTimeline.updatedBy = getOr(null, 'credentials.username', userInfo);
-  }
-  return savedTimeline;
-};
 
 const timelineWithReduxProperties = (
   notes: NoteSavedObject[],

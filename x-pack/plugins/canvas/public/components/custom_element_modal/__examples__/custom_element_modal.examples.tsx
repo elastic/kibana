@@ -10,7 +10,7 @@ import { action } from '@storybook/addon-actions';
 import { CustomElementModal } from '../custom_element_modal';
 import { elasticLogo } from '../../../lib/elastic_logo';
 
-storiesOf('components/CustomElementModal', module)
+storiesOf('components/Elements/CustomElementModal', module)
   .add('with title', () => (
     <CustomElementModal
       title="Create new element"

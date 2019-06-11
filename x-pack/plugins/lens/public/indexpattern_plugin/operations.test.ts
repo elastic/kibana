@@ -82,7 +82,7 @@ describe('getOperationTypesForField', () => {
     });
   });
 
-  describe('with rollups', () => {
+  describe('with restrictions', () => {
     it('should return operations on strings', () => {
       expect(
         getOperationTypesForField({
@@ -90,7 +90,7 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          rollupRestrictions: {
+          aggregationRestrictions: {
             terms: {
               agg: 'terms',
             },
@@ -106,7 +106,7 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          rollupRestrictions: {
+          aggregationRestrictions: {
             min: {
               agg: 'min',
             },
@@ -125,7 +125,7 @@ describe('getOperationTypesForField', () => {
           name: 'a',
           aggregatable: true,
           searchable: true,
-          rollupRestrictions: {
+          aggregationRestrictions: {
             date_histogram: {
               agg: 'date_histogram',
               fixed_interval: '60m',
@@ -170,7 +170,7 @@ describe('getOperationTypesForField', () => {
     it('should list operations by field for a regular index pattern', () => {
       const columns = getPotentialColumns(state);
 
-      expect(columns.map(col => [col.sourceField, col.operationType])).toMatchInlineSnapshot(`
+      expect(columns.map(col => [('sourceField' in col) ? col.sourceField : '_documents_', col.operationType])).toMatchInlineSnapshot(`
 Array [
   Array [
     "bytes",
@@ -193,7 +193,7 @@ Array [
     "max",
   ],
   Array [
-    "documents",
+    "_documents_",
     "count",
   ],
   Array [
@@ -272,6 +272,9 @@ describe('getColumnOrder', () => {
           // Private
           operationType: 'date_histogram',
           sourceField: 'timestamp',
+          params: {
+            interval: '1d'
+          }
         },
       })
     ).toEqual(['col1', 'col3', 'col2']);
@@ -312,6 +315,9 @@ describe('getColumnOrder', () => {
           operationType: 'date_histogram',
           sourceField: 'timestamp',
           suggestedOrder: 1,
+          params: {
+            interval: '1d'
+          }
         },
       })
     ).toEqual(['col3', 'col1', 'col2']);

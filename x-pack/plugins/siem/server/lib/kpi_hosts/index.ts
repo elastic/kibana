@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KpiHostsData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 
-import { KpiHostsAdapter } from './types';
+import { KpiHostsAdapter, KpiHostsMappedData } from './types';
 
 export class KpiHosts {
   constructor(private readonly adapter: KpiHostsAdapter) {}
@@ -15,7 +14,7 @@ export class KpiHosts {
   public async getKpiHosts(
     req: FrameworkRequest,
     options: RequestBasicOptions
-  ): Promise<KpiHostsData> {
+  ): Promise<KpiHostsMappedData> {
     return await this.adapter.getKpiHosts(req, options);
   }
 }

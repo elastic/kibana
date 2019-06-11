@@ -17,7 +17,7 @@ exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
             "value": "1",
           },
           Object {
-            "label": "my-fake-rollup-pattern",
+            "label": "my-fake-restricted-pattern",
             "value": "2",
           },
         ]

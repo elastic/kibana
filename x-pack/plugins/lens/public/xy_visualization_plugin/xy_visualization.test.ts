@@ -8,6 +8,7 @@ import { xyVisualization } from './xy_visualization';
 import { Position } from '@elastic/charts';
 import { DatasourcePublicAPI } from '../types';
 import { State } from './types';
+import { createMockDatasource } from '../editor_frame_plugin/mocks';
 
 function exampleState(): State {
   return {
@@ -31,19 +32,18 @@ function exampleState(): State {
   };
 }
 
-describe('XY visualization', () => {
+describe('xy_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
-      const initialState = xyVisualization.initialize();
+      const mockDatasource = createMockDatasource();
+      mockDatasource.publicAPIMock.generateColumnId
+        .mockReturnValue('test-id1')
+        .mockReturnValueOnce('test-id2');
+      const initialState = xyVisualization.initialize(mockDatasource.publicAPIMock);
 
       expect(initialState.x.accessor).toBeDefined();
       expect(initialState.y.accessors[0]).toBeDefined();
       expect(initialState.x.accessor).not.toEqual(initialState.y.accessors[0]);
-
-      // These change with each generation, so we'll ignore them
-      // in our match snapshot test.
-      delete initialState.x.accessor;
-      delete initialState.y.accessors;
 
       expect(initialState).toMatchInlineSnapshot(`
 Object {
@@ -56,11 +56,15 @@ Object {
   "stackAccessors": Array [],
   "title": "Empty XY Chart",
   "x": Object {
+    "accessor": "test-id2",
     "position": "bottom",
     "showGridlines": false,
     "title": "X",
   },
   "y": Object {
+    "accessors": Array [
+      "test-id1",
+    ],
     "position": "left",
     "showGridlines": false,
     "title": "Y",
@@ -70,7 +74,9 @@ Object {
     });
 
     it('loads from persisted state', () => {
-      expect(xyVisualization.initialize(exampleState())).toEqual(exampleState());
+      expect(
+        xyVisualization.initialize(createMockDatasource().publicAPIMock, exampleState())
+      ).toEqual(exampleState());
     });
   });
 

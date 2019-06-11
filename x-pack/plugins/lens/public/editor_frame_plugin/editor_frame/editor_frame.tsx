@@ -27,6 +27,29 @@ export interface EditorFrameProps {
 export function EditorFrame(props: EditorFrameProps) {
   const [state, dispatch] = useReducer(reducer, props, getInitialState);
 
+  // create public datasource api for current state
+  // as soon as datasource is available and memoize it
+  const datasourcePublicAPI = useMemo(
+    () =>
+      state.datasource.activeId && !state.datasource.isLoading
+        ? props.datasourceMap[state.datasource.activeId].getPublicAPI(
+            state.datasource.state,
+            (newState: unknown) => {
+              dispatch({
+                type: 'UPDATE_DATASOURCE_STATE',
+                newState,
+              });
+            }
+          )
+        : undefined,
+    [
+      props.datasourceMap,
+      state.datasource.isLoading,
+      state.datasource.activeId,
+      state.datasource.state,
+    ]
+  );
+
   // Initialize current datasource
   useEffect(
     () => {
@@ -49,27 +72,24 @@ export function EditorFrame(props: EditorFrameProps) {
     [state.datasource.activeId, state.datasource.isLoading]
   );
 
-  // create public datasource api for current state
-  // as soon as datasource is available and memoize it
-  const datasourcePublicAPI = useMemo(
-    () =>
-      state.datasource.activeId && !state.datasource.isLoading
-        ? props.datasourceMap[state.datasource.activeId].getPublicAPI(
-            state.datasource.state,
-            (newState: unknown) => {
-              dispatch({
-                type: 'UPDATE_DATASOURCE_STATE',
-                newState,
-              });
-            }
-          )
-        : undefined,
-    [
-      props.datasourceMap,
-      state.datasource.isLoading,
-      state.datasource.activeId,
-      state.datasource.state,
-    ]
+  // Initialize visualization as soon as datasource is ready
+  useEffect(
+    () => {
+      if (
+        datasourcePublicAPI &&
+        state.visualization.state === null &&
+        state.visualization.activeId !== null
+      ) {
+        const initialVisualizationState = props.visualizationMap[
+          state.visualization.activeId
+        ].initialize(datasourcePublicAPI);
+        dispatch({
+          type: 'UPDATE_VISUALIZATION_STATE',
+          newState: initialVisualizationState,
+        });
+      }
+    },
+    [datasourcePublicAPI, state.visualization.activeId, state.visualization.state]
   );
 
   if (state.datasource.activeId && !state.datasource.isLoading) {

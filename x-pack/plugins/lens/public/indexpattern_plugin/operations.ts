@@ -125,12 +125,12 @@ export function getOperationDisplay(): Record<
 
 export function getOperationTypesForField({
   type,
-  rollupRestrictions,
+  aggregationRestrictions,
 }: IndexPatternField): OperationType[] {
-  if (rollupRestrictions) {
+  if (aggregationRestrictions) {
     const validOperations = getOperations();
-    return Object.keys(rollupRestrictions).filter(key =>
-      // Filter out operations that rollups support, but that aren't yet supported by the client
+    return Object.keys(aggregationRestrictions).filter(key =>
+      // Filter out operations that are available, but that aren't yet supported by the client
       validOperations.includes(key as OperationType)
     ) as OperationType[];
   }

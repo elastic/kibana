@@ -45,7 +45,7 @@ const expectedIndexPatterns = {
   },
   2: {
     id: '2',
-    title: 'my-fake-rollup-pattern',
+    title: 'my-fake-restricted-pattern',
     timeFieldName: 'timestamp',
     fields: [
       {
@@ -53,7 +53,7 @@ const expectedIndexPatterns = {
         type: 'date',
         aggregatable: true,
         searchable: true,
-        rollupRestrictions: {
+        aggregationRestrictions: {
           date_histogram: {
             agg: 'date_histogram',
             fixed_interval: '1d',
@@ -67,7 +67,7 @@ const expectedIndexPatterns = {
         type: 'number',
         aggregatable: true,
         searchable: true,
-        rollupRestrictions: {
+        aggregationRestrictions: {
           // Ignored in the UI
           histogram: {
             agg: 'histogram',
@@ -92,7 +92,7 @@ const expectedIndexPatterns = {
         type: 'string',
         aggregatable: true,
         searchable: true,
-        rollupRestrictions: {
+        aggregationRestrictions: {
           terms: {
             agg: 'terms',
           },
@@ -242,7 +242,6 @@ describe('IndexPattern Data Source', () => {
 
             // Private
             operationType: 'count',
-            sourceField: 'document',
           },
           col2: {
             operationId: 'op2',
@@ -253,6 +252,9 @@ describe('IndexPattern Data Source', () => {
             // Private
             operationType: 'date_histogram',
             sourceField: 'timestamp',
+            params: {
+              interval: '1d'
+            }
           },
         },
       };
