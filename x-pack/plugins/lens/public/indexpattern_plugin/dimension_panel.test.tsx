@@ -94,7 +94,7 @@ describe('IndexPatternDimensionPanel', () => {
       />
     );
 
-    expect(getPotentialColumns as jest.Mock).toHaveBeenCalledWith(state, 1);
+    expect(getPotentialColumns as jest.Mock).toHaveBeenCalledWith(state, 'col1', 1);
   });
 
   it('should call the filterOperations function', () => {
@@ -288,6 +288,121 @@ describe('IndexPatternDimensionPanel', () => {
       ...state,
       columns: {},
       columnOrder: [],
+    });
+  });
+});
+
+describe('multiple IndexPatternDimensionPanels', () => {
+  let state: IndexPatternPrivateState;
+
+  describe('with an empty state', () => {
+    beforeEach(() => {
+      state = {
+        indexPatterns: expectedIndexPatterns,
+        currentIndexPatternId: '1',
+        columnOrder: [],
+        columns: {},
+      };
+
+      jest.clearAllMocks();
+    });
+
+    it('should enable all options on both dimensions', () => {
+      const wrapper1 = shallow(
+        <IndexPatternDimensionPanel
+          state={state}
+          setState={() => {}}
+          columnId={'col1'}
+          filterOperations={() => true}
+        />
+      );
+
+      const wrapper2 = shallow(
+        <IndexPatternDimensionPanel
+          state={state}
+          setState={() => {}}
+          columnId={'col2'}
+          filterOperations={() => true}
+        />
+      );
+
+      expect(
+        wrapper1
+          .find('[data-test-subj^="lns-indexPatternDimension-"]')
+          .some(n => n.prop('isDisabled'))
+      ).toEqual(false);
+
+      expect(
+        wrapper1
+          .find('[data-test-subj^="lns-indexPatternDimension-"]')
+          .map(n => n.prop('isDisabled'))
+      ).toEqual(
+        wrapper2
+          .find('[data-test-subj^="lns-indexPatternDimension-"]')
+          .map(n => n.prop('isDisabled'))
+      );
+    });
+  });
+
+  describe('with a prior selection on one dimension', () => {
+    beforeEach(() => {
+      state = {
+        indexPatterns: expectedIndexPatterns,
+        currentIndexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            operationId: 'op1',
+            label: 'Value of timestamp',
+            dataType: 'date',
+            isBucketed: false,
+
+            // Private
+            operationType: 'value',
+            sourceField: 'timestamp',
+          },
+        },
+      };
+
+      jest.clearAllMocks();
+    });
+
+    it('should show all functions enabled on the selected dimension', () => {
+      const wrapper1 = shallow(
+        <IndexPatternDimensionPanel
+          state={state}
+          setState={() => {}}
+          columnId={'col1'}
+          filterOperations={() => true}
+        />
+      );
+
+      expect(
+        wrapper1
+          .find('[data-test-subj^="lns-indexPatternDimension-"]')
+          .map(n => n.prop('isDisabled'))
+      ).not.toContain([true]);
+    });
+
+    it('should limit the second dimension to only values', () => {
+      const wrapper2 = shallow(
+        <IndexPatternDimensionPanel
+          state={state}
+          setState={() => {}}
+          columnId={'col2'}
+          filterOperations={() => true}
+        />
+      );
+
+      expect(
+        wrapper2.find('[data-test-subj="lns-indexPatternDimension-value"]').prop('isDisabled')
+      ).toEqual(false);
+      expect(
+        wrapper2.find('[data-test-subj="lns-indexPatternDimension-count"]').prop('isDisabled')
+      ).toEqual(false);
+      expect(
+        wrapper2.find('[data-test-subj="lns-indexPatternDimension-count"]').prop('color')
+      ).toEqual('danger');
     });
   });
 });

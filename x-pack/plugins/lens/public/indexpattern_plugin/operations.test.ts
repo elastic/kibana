@@ -5,7 +5,6 @@
  */
 
 import { getOperationTypesForField, getPotentialColumns, getColumnOrder } from './operations';
-import { IndexPatternPrivateState } from './indexpattern';
 
 const expectedIndexPatterns = {
   1: {
@@ -82,7 +81,31 @@ describe('getOperationTypesForField', () => {
     });
   });
 
-  describe('with restrictions', () => {
+  describe('with non-standard fields', () => {
+    it('should return an empty array for non-aggregatable', () => {
+      expect(
+        getOperationTypesForField({
+          type: 'string',
+          name: '_source',
+          aggregatable: false,
+          searchable: true,
+        })
+      ).toEqual([]);
+    });
+
+    it('should return an empty array for non-searchable', () => {
+      expect(
+        getOperationTypesForField({
+          type: 'number',
+          name: '_version',
+          aggregatable: true,
+          searchable: false,
+        })
+      ).toEqual([]);
+    });
+  });
+
+  describe('with aggregation restrictions', () => {
     it('should return operations on strings', () => {
       expect(
         getOperationTypesForField({
@@ -139,38 +162,35 @@ describe('getOperationTypesForField', () => {
   });
 
   describe('getPotentialColumns', () => {
-    let state: IndexPatternPrivateState;
-
-    beforeEach(() => {
-      state = {
-        indexPatterns: expectedIndexPatterns,
-        currentIndexPatternId: '1',
-        columnOrder: ['col1'],
-        columns: {
-          col1: {
-            operationId: 'op1',
-            label: 'Value of timestamp',
-            dataType: 'date',
-            isBucketed: false,
-
-            // Private
-            operationType: 'value',
-            sourceField: 'timestamp',
-          },
-        },
-      };
-    });
-
     it('should include priority', () => {
-      const columns = getPotentialColumns(state, 1);
+      const columns = getPotentialColumns(
+        {
+          indexPatterns: expectedIndexPatterns,
+          currentIndexPatternId: '1',
+          columnOrder: [],
+          columns: {},
+        },
+        'col1',
+        1
+      );
 
-      expect(columns.every(col => col.suggestedOrder === 1)).toEqual(true);
+      expect(columns.queriable.every(col => col.suggestedOrder === 1)).toEqual(true);
     });
 
-    it('should list operations by field for a regular index pattern', () => {
-      const columns = getPotentialColumns(state);
+    it('should list all operations by field when nothing is selected', () => {
+      const columns = getPotentialColumns(
+        {
+          indexPatterns: expectedIndexPatterns,
+          currentIndexPatternId: '1',
+          columnOrder: [],
+          columns: {},
+        },
+        'col1',
+        1
+      );
 
-      expect(columns.map(col => [col.sourceField, col.operationType])).toMatchInlineSnapshot(`
+      expect(columns.queriable.map(col => [col.sourceField, col.operationType]))
+        .toMatchInlineSnapshot(`
 Array [
   Array [
     "bytes",
@@ -215,6 +235,56 @@ Array [
 ]
 `);
     });
+  });
+
+  it('should list value queries for a second dimension based on values in first', () => {
+    const columns = getPotentialColumns(
+      {
+        indexPatterns: expectedIndexPatterns,
+        currentIndexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            operationId: 'op1',
+            label: 'Value of timestamp',
+            dataType: 'date',
+            isBucketed: false,
+
+            // Private
+            operationType: 'value',
+            sourceField: 'timestamp',
+          },
+        },
+      },
+      'col2'
+    );
+
+    expect(columns.queriable.every(col => col.operationType === 'value')).toEqual(true);
+  });
+
+  it('should list aggregations for a second dimension once an aggregation is selected on the first', () => {
+    const columns = getPotentialColumns(
+      {
+        indexPatterns: expectedIndexPatterns,
+        currentIndexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            operationId: 'op1',
+            label: 'Date histogram of timestamp',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            sourceField: 'timestamp',
+          },
+        },
+      },
+      'col2'
+    );
+
+    expect(columns.queriable.some(col => col.operationType === 'value')).toEqual(false);
   });
 });
 

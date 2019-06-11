@@ -120,6 +120,8 @@ export function getOperationDisplay(): Record<
 
 export function getOperationTypesForField({
   type,
+  aggregatable,
+  searchable,
   aggregationRestrictions,
 }: IndexPatternField): OperationType[] {
   if (aggregationRestrictions) {
@@ -128,6 +130,10 @@ export function getOperationTypesForField({
       // Filter out operations that are available, but that aren't yet supported by the client
       validOperations.includes(key as OperationType)
     ) as OperationType[];
+  }
+
+  if (!aggregatable || !searchable) {
+    return [];
   }
 
   switch (type) {
@@ -160,8 +166,12 @@ export function getOperationResultType({ type }: IndexPatternField, op: Operatio
 
 export function getPotentialColumns(
   state: IndexPatternPrivateState,
+  currentColumnId: string,
   suggestedOrder?: DimensionPriority
-): IndexPatternColumn[] {
+): {
+  queriable: IndexPatternColumn[];
+  withTransition: IndexPatternColumn[];
+} {
   const fields = state.indexPatterns[state.currentIndexPatternId].fields;
 
   const operationPanels = getOperationDisplay();
@@ -200,7 +210,27 @@ export function getPotentialColumns(
     sourceField.localeCompare(sourceField2)
   );
 
-  return columns;
+  const hasOtherColumns = Object.keys(state.columns).find(id => id !== currentColumnId);
+
+  if (hasOtherColumns) {
+    const hasValue = Object.entries(state.columns).find(
+      ([id, col]) => id !== currentColumnId && col.operationType === 'value'
+    );
+
+    const [queriable, withTransition] = _.partition(columns, col =>
+      hasValue ? col.operationType === 'value' : col.operationType !== 'value'
+    );
+
+    return {
+      queriable,
+      withTransition,
+    };
+  }
+
+  return {
+    queriable: columns,
+    withTransition: [],
+  };
 }
 
 export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {

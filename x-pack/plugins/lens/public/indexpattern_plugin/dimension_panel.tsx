@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiToolTip,
 } from '@elastic/eui';
 import { DatasourceDimensionPanelProps } from '../types';
 import { IndexPatternColumn, IndexPatternPrivateState, columnToOperation } from './indexpattern';
@@ -36,9 +37,13 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
   const operations = getOperations();
   const operationPanels = getOperationDisplay();
 
-  const columns = getPotentialColumns(props.state, props.suggestedPriority);
+  const columns = getPotentialColumns(props.state, props.columnId, props.suggestedPriority);
 
-  const filteredColumns = columns.filter(col => {
+  const filteredColumns = columns.queriable.filter(col => {
+    return props.filterOperations(columnToOperation(col));
+  });
+
+  const transitionColumns = columns.withTransition.filter(col => {
     return props.filterOperations(columnToOperation(col));
   });
 
@@ -51,6 +56,12 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
         return col.sourceField === selectedColumn.sourceField;
       })
     : filteredColumns;
+
+  const transitionFunctionsFromField = selectedColumn
+    ? transitionColumns.filter(col => {
+        return col.sourceField === selectedColumn.sourceField;
+      })
+    : transitionColumns;
 
   return (
     <EuiFlexGroup>
@@ -105,7 +116,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
                 singleSelection={{ asPlainText: true }}
                 isClearable={false}
                 onChange={choices => {
-                  const column: IndexPatternColumn = columns.find(
+                  const column: IndexPatternColumn = filteredColumns.find(
                     ({ operationId }) => operationId === choices[0].value
                   )!;
                   const newColumns: IndexPatternPrivateState['columns'] = {
@@ -123,39 +134,77 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <div>
-                {operations.map(o => (
-                  <EuiButtonEmpty
-                    data-test-subj={`lns-indexPatternDimension-${o}`}
-                    key={o}
-                    color={
-                      selectedColumn && selectedColumn.operationType === o ? 'primary' : 'text'
-                    }
-                    isDisabled={!functionsFromField.some(col => col.operationType === o)}
-                    onClick={() => {
-                      if (!selectedColumn) {
-                        return;
+                {operations.map(o => {
+                  const isSelected =
+                    selectedColumn &&
+                    filteredColumns.find(
+                      col =>
+                        col.operationType === o && col.sourceField === selectedColumn.sourceField
+                    );
+                  const requiresTransition =
+                    selectedColumn &&
+                    transitionColumns.find(
+                      col =>
+                        col.operationType === o && col.sourceField === selectedColumn.sourceField
+                    );
+                  return (
+                    <EuiButtonEmpty
+                      data-test-subj={`lns-indexPatternDimension-${o}`}
+                      key={o}
+                      color={requiresTransition ? 'danger' : isSelected ? 'primary' : 'text'}
+                      isDisabled={
+                        !selectedColumn ||
+                        (!functionsFromField.some(col => col.operationType === o) &&
+                          !transitionFunctionsFromField.some(col => col.operationType === o))
                       }
+                      onClick={() => {
+                        if (!selectedColumn) {
+                          return;
+                        }
 
-                      const newColumn: IndexPatternColumn = filteredColumns.find(
-                        col =>
-                          col.operationType === o && col.sourceField === selectedColumn.sourceField
-                      )!;
+                        if (requiresTransition) {
+                          const newColumn = requiresTransition;
 
-                      const newColumns = {
-                        ...props.state.columns,
-                        [props.columnId]: newColumn,
-                      };
+                          // For now, clear out all other columns
+                          const newColumns = {
+                            [props.columnId]: newColumn,
+                          };
 
-                      props.setState({
-                        ...props.state,
-                        columnOrder: getColumnOrder(newColumns),
-                        columns: newColumns,
-                      });
-                    }}
-                  >
-                    <span>{operationPanels[o].displayName}</span>
-                  </EuiButtonEmpty>
-                ))}
+                          props.setState({
+                            ...props.state,
+                            columnOrder: getColumnOrder(newColumns),
+                            columns: newColumns,
+                          });
+                        } else {
+                          const newColumn: IndexPatternColumn = filteredColumns.find(
+                            col =>
+                              col.operationType === o &&
+                              col.sourceField === selectedColumn.sourceField
+                          )!;
+
+                          const newColumns = {
+                            ...props.state.columns,
+                            [props.columnId]: newColumn,
+                          };
+
+                          props.setState({
+                            ...props.state,
+                            columnOrder: getColumnOrder(newColumns),
+                            columns: newColumns,
+                          });
+                        }
+                      }}
+                    >
+                      {requiresTransition ? (
+                        <EuiToolTip position="left" content="This option will change other fields">
+                          <span>{operationPanels[o].displayName}</span>
+                        </EuiToolTip>
+                      ) : (
+                        <span>{operationPanels[o].displayName}</span>
+                      )}
+                    </EuiButtonEmpty>
+                  );
+                })}
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>

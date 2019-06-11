@@ -294,6 +294,10 @@ describe('IndexPattern Data Source', () => {
           isBucketed: false,
         } as Operation);
       });
+
+      it('should get an operation for an invalid column', () => {
+        expect(publicAPI.getOperationForColumnId('col2')).toEqual(null);
+      });
     });
   });
 });
