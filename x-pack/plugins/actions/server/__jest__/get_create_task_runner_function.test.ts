@@ -63,22 +63,17 @@ Array [
 ]
 `);
   expect(getCreateTaskRunnerFunctionParams.actionType.executor).toHaveBeenCalledTimes(1);
-  expect(getCreateTaskRunnerFunctionParams.actionType.executor.mock.calls[0])
-    .toMatchInlineSnapshot(`
-Array [
-  Object {
-    "actionTypeConfig": Object {
-      "bar": true,
-      "foo": true,
-    },
-    "params": Object {
-      "baz": true,
-    },
-    "services": Object {
-      "callCluster": [MockFunction],
-      "log": [MockFunction],
-    },
-  },
-]
+  const call = getCreateTaskRunnerFunctionParams.actionType.executor.mock.calls[0][0];
+  expect(call.actionTypeConfig).toMatchInlineSnapshot(`
+Object {
+  "bar": true,
+  "foo": true,
+}
 `);
+  expect(call.params).toMatchInlineSnapshot(`
+Object {
+  "baz": true,
+}
+`);
+  expect(call.services).toBeTruthy();
 });

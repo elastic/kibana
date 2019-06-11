@@ -98,25 +98,22 @@ Object {
 }
 `);
   expect(getCreateTaskRunnerFunctionParams.alertType.execute).toHaveBeenCalledTimes(1);
-  expect(getCreateTaskRunnerFunctionParams.alertType.execute.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "params": Object {
-      "bar": true,
-    },
-    "range": Object {
-      "from": 2019-06-03T18:55:10.983Z,
-      "to": 2019-06-03T18:55:20.982Z,
-    },
-    "services": Object {
-      "alertInstanceFactory": [Function],
-      "callCluster": [MockFunction],
-      "log": [MockFunction],
-    },
-    "state": Object {},
-  },
-]
+  const call = getCreateTaskRunnerFunctionParams.alertType.execute.mock.calls[0][0];
+  expect(call.params).toMatchInlineSnapshot(`
+Object {
+  "bar": true,
+}
 `);
+  expect(call.range).toMatchInlineSnapshot(`
+Object {
+  "from": 2019-06-03T18:55:10.983Z,
+  "to": 2019-06-03T18:55:20.982Z,
+}
+`);
+  expect(call.state).toMatchInlineSnapshot(`Object {}`);
+  expect(call.services.alertInstanceFactory).toBeTruthy();
+  expect(call.services.callCluster).toBeTruthy();
+  expect(call.services).toBeTruthy();
 });
 
 test('fireAction is called per alert instance that fired', async () => {

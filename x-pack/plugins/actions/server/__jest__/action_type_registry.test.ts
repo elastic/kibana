@@ -54,26 +54,16 @@ Array [
 ]
 `);
     expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
-    expect(getCreateTaskRunnerFunction.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "actionType": Object {
-      "executor": [MockFunction],
-      "id": "my-action-type",
-      "name": "My action type",
-    },
-    "encryptedSavedObjectsPlugin": Object {
-      "getDecryptedAsInternalUser": [MockFunction],
-      "isEncryptionError": [MockFunction],
-      "registerType": [MockFunction],
-    },
-    "services": Object {
-      "callCluster": [MockFunction],
-      "log": [MockFunction],
-    },
-  },
-]
+    const call = getCreateTaskRunnerFunction.mock.calls[0][0];
+    expect(call.actionType).toMatchInlineSnapshot(`
+Object {
+  "executor": [MockFunction],
+  "id": "my-action-type",
+  "name": "My action type",
+}
 `);
+    expect(call.encryptedSavedObjectsPlugin).toBeTruthy();
+    expect(call.services).toBeTruthy();
   });
 
   test('throws error if action type already registered', () => {
