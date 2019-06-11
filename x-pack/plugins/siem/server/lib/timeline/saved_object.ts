@@ -64,7 +64,7 @@ export class Timeline {
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
       searchFields: onlyUserFavorite
-        ? ['title', 'description', 'favorite.userName']
+        ? ['title', 'description', 'favorite.keySearch']
         : ['title', 'description'],
       sortField: sort != null ? sort.sortField : undefined,
       sortOrder: sort != null ? sort.sortOrder : undefined,
@@ -95,9 +95,10 @@ export class Timeline {
     const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
     const fullName = getOr(null, 'credentials.fullname', request[internalFrameworkRequest].auth);
     const userFavoriteTimeline = {
+      keySearch: userName != null ? convertStringToBase64(userName) : null,
+      favoriteDate: new Date().valueOf(),
       fullName,
       userName,
-      favoriteDate: new Date().valueOf(),
     };
     if (timeline.favorite != null) {
       const alreadyExistsTimelineFavoriteByUser = timeline.favorite.findIndex(
@@ -231,12 +232,10 @@ export class Timeline {
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
       request[internalFrameworkRequest]
     );
-    if (options.searchFields != null && options.searchFields.includes('favorite.userName')) {
-      options.search = `${options.search != null ? options.search : ''} ${getOr(
-        null,
-        'credentials.username',
-        request[internalFrameworkRequest].auth
-      )}`;
+    if (options.searchFields != null && options.searchFields.includes('favorite.keySearch')) {
+      options.search = `${options.search != null ? options.search : ''} ${
+        userName != null ? convertStringToBase64(userName) : null
+      }`;
     }
 
     const savedObjects = await savedObjectsClient.find({
@@ -266,6 +265,8 @@ export class Timeline {
     };
   }
 }
+
+const convertStringToBase64 = (text: string): string => new Buffer(text).toString('base64');
 
 // we have to use any here because the SavedObjectAttributes interface is like below
 // export interface SavedObjectAttributes {
