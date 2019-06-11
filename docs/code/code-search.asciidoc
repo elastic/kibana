@@ -1,0 +1,24 @@
+[[code-search]]
+== Search
+
+[float]
+==== Typeahead search
+The search bar is built to minimize the time for you to locate the result. It shows `Symbols`, `Files`, and `Repos` results as you type, and clicking on any result takes you to the definition. You can use the search type dropdown to show all types of results or limit it to a specific search type.
+
+[role="screenshot"]
+image::images/code-quick-search.png[]
+
+[float]
+==== Full-text search
+If the quick search results don’t contain what you are looking for, you can press ‘Enter’ to bring out the full text search.
+[role="screenshot"]
+image::images/code-full-text-search.png[]
+You can further slice and dice the results using the repo and language facet filters on the left.
+
+[float]
+==== Search filter
+You can also use the Search Filters to limit the search scope to certain repos before issuing a query. To search across all repos, remove all repo filters. By default, the search repo is limited to the current repo.
+[role="screenshot"]
+image::images/code-search-filter.png[]
+
+include::code-multiple-kibana-instances-config.asciidoc[]

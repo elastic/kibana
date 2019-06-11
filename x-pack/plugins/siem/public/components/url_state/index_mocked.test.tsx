@@ -8,10 +8,10 @@ import { shallow } from 'enzyme';
 import { throttle } from 'lodash/fp';
 import * as React from 'react';
 import { UrlStateContainerLifecycle } from './';
-import { UrlStateContainerPropTypes } from './types';
-import { CONSTANTS } from './constants';
 import { getMockPropsObj, mockHistory, filterQuery, testCases } from './test_dependencies';
 import { networkModel } from '../../store';
+import { UrlStateContainerPropTypes } from './types';
+import { CONSTANTS } from './constants';
 
 jest.mock('lodash/fp');
 

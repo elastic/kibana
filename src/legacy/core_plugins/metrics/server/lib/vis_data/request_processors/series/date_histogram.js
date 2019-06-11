@@ -26,8 +26,8 @@ export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObj
   return next => doc => {
     const { timeField, interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
-    const { from, to }  = offsetTime(req, series.offset_time);
-    const  timezone = capabilities.searchTimezone;
+    const { from, to } = offsetTime(req, series.offset_time);
+    const timezone = capabilities.searchTimezone;
 
     set(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
       field: timeField,
@@ -36,8 +36,8 @@ export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObj
       time_zone: timezone,
       extended_bounds: {
         min: from.valueOf(),
-        max: to.valueOf()
-      }
+        max: to.valueOf(),
+      },
     });
     set(doc, `aggs.${series.id}.meta`, {
       timeField,

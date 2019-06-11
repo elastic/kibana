@@ -40,7 +40,7 @@ export class JavaLauncher extends AbstractLauncher {
   }
 
   startConnect(proxy: LanguageServerProxy) {
-    proxy.awaitServerConnection();
+    proxy.awaitServerConnection().catch(this.log.debug);
   }
 
   async getPort(): Promise<number> {

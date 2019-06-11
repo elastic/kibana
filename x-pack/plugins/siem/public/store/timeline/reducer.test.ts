@@ -41,7 +41,7 @@ import {
   upsertTimelineColumn,
 } from './helpers';
 import { timelineDefaults } from './model';
-import { TimelineById } from './reducer';
+import { TimelineById } from './types';
 
 const timelineByIdMock: TimelineById = {
   foo: {

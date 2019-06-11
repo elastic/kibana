@@ -8,8 +8,25 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { ActionCreator } from 'typescript-fsa';
 import { RouteComponentProps } from 'react-router';
 import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
+import { UrlInputsModel } from '../../store/inputs/model';
+import { InputsModelId } from '../../store/inputs/constants';
 import { CONSTANTS } from './constants';
-import { InputsModelId, UrlInputsModel } from '../../store/inputs/model';
+
+export const LOCATION_KEYS: LocationKeysType[] = [
+  CONSTANTS.hostsDetails,
+  CONSTANTS.hostsPage,
+  CONSTANTS.networkDetails,
+  CONSTANTS.networkPage,
+];
+
+export const URL_STATE_KEYS: KeyUrlState[] = [CONSTANTS.kqlQuery, CONSTANTS.timerange];
+
+export const LOCATION_MAPPED_TO_MODEL: LocationMappedToModel = {
+  [CONSTANTS.networkPage]: networkModel.NetworkType.page,
+  [CONSTANTS.networkDetails]: networkModel.NetworkType.details,
+  [CONSTANTS.hostsPage]: hostsModel.HostsType.page,
+  [CONSTANTS.hostsDetails]: hostsModel.HostsType.details,
+};
 
 export type LocationTypes =
   | CONSTANTS.networkDetails

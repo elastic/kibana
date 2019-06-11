@@ -24,7 +24,7 @@ import expect from '@kbn/expect';
 import Promise from 'bluebird';
 import { DuplicateField } from '../../errors';
 import { IndexedArray } from '../../indexed_array';
-import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
+import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { FixturesStubbedSavedObjectIndexPatternProvider } from 'fixtures/stubbed_saved_object_index_pattern';
 import { IndexPatternProvider } from '../_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
@@ -49,7 +49,7 @@ describe('index pattern', function () {
   beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule));
 
   beforeEach(ngMock.inject(function (Private) {
-    mockLogstashFields = Private(FixturesLogstashFieldsProvider);
+    mockLogstashFields = stubbedLogstashFields();
     savedObjectsResponse = Private(FixturesStubbedSavedObjectIndexPatternProvider);
 
     savedObjectsClient = Private(SavedObjectsClientProvider);
