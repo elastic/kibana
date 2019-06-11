@@ -6,7 +6,6 @@
 
 import _ from 'lodash';
 import { ES_GEO_FIELD_TYPE } from '../../common/constants/file_import';
-import { i18n } from '@kbn/i18n';
 
 const DEFAULT_SETTINGS = {
   number_of_shards: 1
@@ -27,11 +26,13 @@ const DEFAULT_GEO_POINT_MAPPINGS = {
 const DEFAULT_INGEST_PIPELINE = {};
 
 export function getGeoIndexTypesForFeatures(featureTypes) {
+  const isPoint = featureTypes.includes('Point')
+    || featureTypes.includes('MultiPoint');
   if (!featureTypes || !featureTypes.length) {
     return [];
-  } else if (!featureTypes.includes('Point')) {
+  } else if (!isPoint) {
     return [ES_GEO_FIELD_TYPE.GEO_SHAPE];
-  } else if (featureTypes.includes('Point') && featureTypes.length === 1) {
+  } else if (isPoint && featureTypes.length === 1) {
     return [ ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE ];
   } else {
     return [ ES_GEO_FIELD_TYPE.GEO_SHAPE ];
@@ -62,16 +63,6 @@ export function geoJsonToEs(parsedGeojson, datatype) {
   } else if (datatype === ES_GEO_FIELD_TYPE.GEO_POINT) {
     return features.reduce((accu, { geometry, properties }) => {
       const { coordinates } = geometry;
-      if (Array.isArray(coordinates[0])) {
-        throw(
-          i18n.translate(
-            'xpack.fileUpload.geoProcessing.notPointError', {
-              defaultMessage: 'Coordinates {coordinates} does not contain point datatype',
-              values: { coordinates: coordinates.toString() }
-            })
-        );
-        return accu;
-      }
       accu.push({
         coordinates,
         ...(!_.isEmpty(properties) ? { ...properties } : {})
