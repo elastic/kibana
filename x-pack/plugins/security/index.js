@@ -85,14 +85,14 @@ export const security = (kibana) => new kibana.Plugin({
       unused('authorization.legacyFallback.enabled'),
       rename('authProviders', 'authc.providers'),
       (settings, log) => {
-        const hasSAMLProvider = get(settings, 'authc.providers').includes('saml');
+        const hasSAMLProvider = get(settings, 'authc.providers', []).includes('saml');
         if (hasSAMLProvider && !get(settings, 'authc.saml.realm')) {
-          log('Config key "authc.saml.realm" will become mandatory in the next major version.');
+          log('Config key "authc.saml.realm" will become mandatory when using the SAML authentication provider in the next major version.');
         }
 
         if (has(settings, 'public')) {
           log('Config key "public" is deprecated and will be removed in the next major version. ' +
-            'Consider specifying "authc.saml.realm" instead.');
+            'Specify "authc.saml.realm" instead.');
         }
       }
     ];

@@ -83,7 +83,6 @@ SAML support in {kib} is designed to be the primary (or sole) authentication met
 --------------------------------------------------------------------------------
 xpack.security.authc.providers: [saml, basic]
 --------------------------------------------------------------------------------
---
 
 The order of `saml` and `basic` is important. Users who open {kib} will go through the SAML Single Sign-On process unless the direct Basic authentication `/login` link is used. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database. Or, when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy).
 
