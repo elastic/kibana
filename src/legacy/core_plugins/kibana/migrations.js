@@ -334,9 +334,9 @@ function replaceMovAvgToMovFn(doc) {
           part.metrics.forEach(metric => {
             if (metric.type === 'moving_average') {
               metric.model_type = metric.model;
-              metric.alpha = 0;
-              metric.beta = 0;
-              metric.gamma = 0;
+              metric.alpha = 0.3;
+              metric.beta = 0.1;
+              metric.gamma = 0.3;
               metric.period = 1;
               metric.multiplicative = true;
 
