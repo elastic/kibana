@@ -488,7 +488,7 @@ class DashboardAppController {
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    function save(saveOptions: SaveOptions) {
+    function save(saveOptions: SaveOptions): Promise<{ id?: string } | { error: Error }> {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function(id) {
           if (id) {
@@ -569,7 +569,7 @@ class DashboardAppController {
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return save(saveOptions).then((response: { id: string } | { error: Error }) => {
+        return save(saveOptions).then((response: { id?: string } | { error: Error }) => {
           // If the save wasn't successful, put the original values back.
           if (!(response as { id: string }).id) {
             dashboardStateManager.setTitle(currentTitle);
@@ -606,7 +606,7 @@ class DashboardAppController {
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return save(saveOptions).then((response: { id: string } | { error: Error }) => {
+        return save(saveOptions).then((response: { id?: string } | { error: Error }) => {
           // If the save wasn't successful, put the original title back.
           if ((response as { error: Error }).error) {
             dashboardStateManager.setTitle(currentTitle);
