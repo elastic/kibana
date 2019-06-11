@@ -18,6 +18,7 @@
  */
 
 import './agg_params';
+import './new_agg_params';
 import './agg_add';
 import { Direction } from './keyboard_move';
 import _ from 'lodash';
@@ -117,6 +118,12 @@ uiModules
 
           return $scope.$index > firstDifferentSchema;
         }
+
+        $scope.onAggTypeChange = (agg, value) => {
+          if (agg.type !== value) {
+            agg.type = value;
+          }
+        };
       }
     };
   });

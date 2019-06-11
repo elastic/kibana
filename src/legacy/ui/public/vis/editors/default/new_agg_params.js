@@ -17,57 +17,60 @@
  * under the License.
  */
 
-import 'ngreact';
-import { uiModules } from '../../../modules';
-import { DefaultEditorAggSelect } from './components/default_editor_agg_select';
 import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from '../../../modules';
+import { DefaultEditorAggParams } from './components/default_editor_agg_params';
 
 uiModules
-  .get('app/visualize', ['react'])
-  .directive('visAggSelectReactWrapper', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggSelect), [
+  .get('app/visualize')
+  .directive('visAggParamsReactWrapper', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggParams), [
     ['agg', { watchDepth: 'collection' }],
-    ['aggTypeOptions', { watchDepth: 'collection' }],
+    ['indexPattern', { watchDepth: 'reference' }],
+    ['onAggTypeChange', { watchDepth: 'reference' }],
+    ['aggType', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
-    ['setValue', { watchDepth: 'reference' }],
-    'aggHelpLink',
-    'showValidation',
-    'isSubAggregation',
-    'value',
+    'id',
+    'aggIndex',
+    'groupName',
+    'aggIsTooLow',
+    'showValidation'
   ]))
-  .directive('visAggSelect', function () {
+  .directive('newVisEditorAggParams', function () {
     return {
       restrict: 'E',
       scope: true,
       require: '^ngModel',
       template: function () {
-        return `<vis-agg-select-react-wrapper
+        return `<vis-agg-params-react-wrapper
             ng-if="setValidity"
             agg="agg"
-            agg-help-link="aggHelpLink"
-            agg-type-options="aggTypeOptions"
-            show-validation="showValidation"
-            is-sub-aggregation="isSubAggregation"
-            value="paramValue"
+            agg-index="aggIndex"
+            agg-is-too-low="aggIsTooLow"
+            agg-type="agg.type"
+            group-name="groupName"
+            index-pattern="indexPattern"
+            on-agg-type-change="onAggTypeChange"
             set-validity="setValidity"
-            set-value="onChange"
             set-touched="setTouched"
-          ></vis-agg-select-react-wrapper>`;
+            show-validation="showValidation"
+          ></vis-agg-params-react-wrapper>`;
       },
       link: {
         pre: function ($scope, $el, attr) {
           $scope.$bind('agg', attr.agg);
-          $scope.$bind('aggTypeOptions', attr.aggTypeOptions);
-          $scope.$bind('isSubAggregation', attr.isSubAggregation);
+          $scope.$bind('aggIndex', attr.aggIndex);
+          $scope.$bind('aggIsTooLow', attr.aggIsTooLow);
+          $scope.$bind('indexPattern', attr.indexPattern);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
           $scope.showValidation = false;
 
-          $scope.$watch('agg.type', (value) => {
-            // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
-            // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
-            $scope.paramValue = value;
-          });
+          // $scope.$watch('agg.type', (value) => {
+          //   // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
+          //   // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
+          //   $scope.paramValue = value;
+          // });
 
           $scope.$watch(() => {
             // The model can become touched either onBlur event or when the form is submitted.
@@ -78,14 +81,14 @@ uiModules
             }
           }, true);
 
-          $scope.onChange = (value) => {
-            $scope.paramValue = value;
-            // This is obviously not a good code quality, but without using scope binding (which we can't see above)
-            // to bind function values, this is right now the best temporary fix, until all of this will be gone.
-            $scope.$parent.onAggTypeChange($scope.agg, value);
-            $scope.showValidation = true;
-            ngModelCtrl.$setDirty();
-          };
+          // $scope.onChange = (value) => {
+          //   $scope.paramValue = value;
+          //   // This is obviously not a good code quality, but without using scope binding (which we can't see above)
+          //   // to bind function values, this is right now the best temporary fix, until all of this will be gone.
+          //   $scope.$parent.onAggTypeChange($scope.agg, value);
+          //   $scope.showValidation = true;
+          //   ngModelCtrl.$setDirty();
+          // };
 
           $scope.setTouched = () => {
             ngModelCtrl.$setTouched();

@@ -29,7 +29,7 @@ const parentPipelineAggController = function ($scope) {
   $scope.$watch('agg.params.metricAgg', updateOrderAgg);
 
   $scope.$on('$destroy', function () {
-    const lastBucket = _.findLast($scope.state.aggs, agg => agg.type.type === 'buckets');
+    const lastBucket = _.findLast($scope.state.aggs, agg => agg.type && agg.type.type === 'buckets');
     if ($scope.aggForm && $scope.aggForm.agg) {
       $scope.aggForm.agg.$setValidity('bucket', true);
     }
@@ -44,7 +44,7 @@ const parentPipelineAggController = function ($scope) {
   };
 
   function checkBuckets() {
-    const lastBucket = _.findLast($scope.state.aggs, agg => agg.type.type === 'buckets');
+    const lastBucket = _.findLast($scope.state.aggs, agg => agg.type && agg.type.type === 'buckets');
     const bucketHasType = lastBucket && lastBucket.type;
     const bucketIsHistogram = bucketHasType && ['date_histogram', 'histogram'].includes(lastBucket.type.name);
     const canUseAggregation = lastBucket && bucketIsHistogram;
