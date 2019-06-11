@@ -30,6 +30,7 @@ import { gte } from './gte';
 import { head } from './head';
 import { ifFn } from './if';
 import { image } from './image';
+import { joinRows } from './joinRows';
 import { lt } from './lt';
 import { lte } from './lte';
 import { mapColumn } from './mapColumn';
@@ -88,6 +89,7 @@ export const functions = [
   image,
   lt,
   lte,
+  joinRows,
   mapColumn,
   math,
   metric,
