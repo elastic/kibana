@@ -231,6 +231,14 @@
         ],
       },
       {
+        groupSlug: 'yauzl',
+        groupName: 'yauzl related packages',
+        packageNames: [
+          'yauzl',
+          '@types/yauzl',
+        ],
+      },
+      {
         groupSlug: 'bluebird',
         groupName: 'bluebird related packages',
         packageNames: [
