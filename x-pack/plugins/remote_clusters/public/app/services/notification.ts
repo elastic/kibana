@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export let toastNotifications: any;
+export let toasts: any;
 export let fatalError: any;
 
-export function init(_toastNotifications: any, _fatalError: any): void {
-  toastNotifications = _toastNotifications;
+export function init(_toasts: any, _fatalError: any): void {
+  toasts = _toasts;
   fatalError = _fatalError;
 }

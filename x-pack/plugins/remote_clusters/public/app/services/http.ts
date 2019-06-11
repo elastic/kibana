@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-let client: any;
-let addBasePath: any;
+let _httpClient: any;
+let _prependBasePath: any;
 
-export function init(httpClient: any, chrome: any): void {
-  client = httpClient;
-  addBasePath = chrome.addBasePath.bind(chrome);
+export function init(httpClient: any, prependBasePath: any): void {
+  _httpClient = httpClient;
+  _prependBasePath = prependBasePath;
 }
 
 export function getFullPath(path: string): string {
-  const apiPrefix = addBasePath('/api/remote_clusters');
+  const apiPrefix = _prependBasePath('/api/remote_clusters');
 
   if (path) {
     return `${apiPrefix}/${path}`;
@@ -23,17 +23,17 @@ export function getFullPath(path: string): string {
 }
 
 export function sendPost(path: string, payload: any): any {
-  return client.post(getFullPath(path), payload);
+  return _httpClient.post(getFullPath(path), payload);
 }
 
 export function sendGet(path: string): any {
-  return client.get(getFullPath(path));
+  return _httpClient.get(getFullPath(path));
 }
 
 export function sendPut(path: string, payload: any): any {
-  return client.put(getFullPath(path), payload);
+  return _httpClient.put(getFullPath(path), payload);
 }
 
 export function sendDelete(path: string): any {
-  return client.delete(getFullPath(path));
+  return _httpClient.delete(getFullPath(path));
 }

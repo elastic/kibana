@@ -4,34 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nContext } from 'ui/i18n';
-import chrome from 'ui/chrome';
-import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
+import { npSetup, npStart } from 'ui/new_platform';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { fatalError, toastNotifications } from 'ui/notify';
+import { fatalError } from 'ui/notify';
 import routes from 'ui/routes';
+import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 
 import { trackUiMetric as track } from '../../../../src/legacy/core_plugins/ui_metric/public';
 
 export function createShim() {
+  const {
+    core: { chrome },
+  } = npSetup;
+
+  const {
+    core: { i18n, notifications, http, injectedMetadata },
+  } = npStart;
+
   return {
-    core: {
-      i18n: { Context: I18nContext },
-      routing: {
-        registerAngularRoute: (path, config) => {
-          routes.when(path, config);
-        },
-      },
+    coreStart: {
       chrome,
-      notification: {
+      i18n,
+      notifications: {
+        ...notifications,
         fatalError,
-        toastNotifications,
       },
+      injectedMetadata,
+      http,
       documentation: {
-        esDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`,
+        elasticWebsiteUrl: ELASTIC_WEBSITE_URL,
+        docLinkVersion: DOC_LINK_VERSION,
+      },
+      routes: {
+        register: routes.when.bind(routes),
       },
     },
-    plugins: {
+    pluginsStart: {
       management: {
         sections: management,
         constants: {

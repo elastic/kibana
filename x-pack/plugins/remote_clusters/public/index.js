@@ -7,6 +7,6 @@
 import { Plugin as RemoteClustersPlugin } from './plugin';
 import { createShim } from './shim';
 
-const { core, plugins } = createShim();
+const { coreStart, pluginsStart } = createShim();
 const remoteClustersPlugin = new RemoteClustersPlugin();
-remoteClustersPlugin.start(core, plugins);
+remoteClustersPlugin.start(coreStart, pluginsStart);

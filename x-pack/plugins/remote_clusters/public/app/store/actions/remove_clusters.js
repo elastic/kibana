@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { toastNotifications } from '../../services/notification';
+import { toasts } from '../../services/notification';
 import { UIM_CLUSTER_REMOVE, UIM_CLUSTER_REMOVE_MANY } from '../../constants';
 
 import {
@@ -56,7 +56,7 @@ export const removeClusters = (names) => async (dispatch, getState) => {
     new Promise(resolve => setTimeout(resolve, 500)),
   ]).catch(error => {
     const errorTitle = getErrorTitle(names.length, names[0]);
-    toastNotifications.addDanger({
+    toasts.addDanger({
       title: errorTitle,
       text: error.data.message,
     });
@@ -75,7 +75,7 @@ export const removeClusters = (names) => async (dispatch, getState) => {
     } = errors[0];
 
     const title = getErrorTitle(errors.length, name);
-    toastNotifications.addDanger({
+    toasts.addDanger({
       title,
       text: message,
     });
@@ -86,12 +86,12 @@ export const removeClusters = (names) => async (dispatch, getState) => {
     trackUiMetric(names.length > 1 ? UIM_CLUSTER_REMOVE_MANY : UIM_CLUSTER_REMOVE);
 
     if (itemsDeleted.length === 1) {
-      toastNotifications.addSuccess(i18n.translate('xpack.remoteClusters.removeAction.successSingleNotificationTitle', {
+      toasts.addSuccess(i18n.translate('xpack.remoteClusters.removeAction.successSingleNotificationTitle', {
         defaultMessage: `Remote cluster '{name}' was removed`,
         values: { name: itemsDeleted[0] },
       }));
     } else {
-      toastNotifications.addSuccess(i18n.translate('xpack.remoteClusters.removeAction.successMultipleNotificationTitle', {
+      toasts.addSuccess(i18n.translate('xpack.remoteClusters.removeAction.successMultipleNotificationTitle', {
         defaultMessage: '{count} remote clusters were removed',
         values: { count: itemsDeleted.length },
       }));

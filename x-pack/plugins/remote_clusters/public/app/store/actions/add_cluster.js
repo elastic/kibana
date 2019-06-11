@@ -13,7 +13,7 @@ import {
   extractQueryParams,
   redirect,
 } from '../../services';
-import { fatalError, toastNotifications } from '../../services/notification';
+import { fatalError, toasts } from '../../services/notification';
 
 import {
   ADD_CLUSTER_START,
@@ -85,7 +85,7 @@ export const addCluster = (cluster) => async (dispatch) => {
 
   if (redirectUrl) {
     // A toast is only needed if we're leaving the app.
-    toastNotifications.addSuccess(i18n.translate('xpack.remoteClusters.addAction.successTitle', {
+    toasts.addSuccess(i18n.translate('xpack.remoteClusters.addAction.successTitle', {
       defaultMessage: `Added remote cluster '{name}'`,
       values: { name: cluster.name },
     }));

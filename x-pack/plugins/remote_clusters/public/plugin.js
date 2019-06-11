@@ -20,38 +20,28 @@ import { init as initNotification } from './app/services/notification';
 const REACT_ROOT_ID = 'remoteClustersReactRoot';
 
 export class Plugin {
-  start(core, plugins) {
-    if (core.chrome.getInjected('remoteClustersUiEnabled')) {
-      const {
-        i18n: {
-          Context,
-        },
-        routing: {
-          registerAngularRoute,
-        },
-        chrome,
-        notification: {
-          toastNotifications,
-          fatalError,
-        },
-        documentation: {
-          esPluginDocBasePath,
-          esDocBasePath,
-        },
-      } = core;
+  start(coreStart, pluginsStart) {
+    const {
+      i18n: { Context },
+      chrome: { setBreadcrumbs },
+      notifications: { toasts, fatalError },
+      http: { prependBasePath },
+      injectedMetadata: { getInjectedVar },
+      documentation: { elasticWebsiteUrl, docLinkVersion },
+      routes: { register: registerRoute },
+    } = coreStart;
 
+    if (getInjectedVar('remoteClustersUiEnabled')) {
       const {
         management: {
           constants: {
             BREADCRUMB,
           },
         },
-        uiMetric: {
-          track,
-        },
-      } = plugins;
+        uiMetric: { track },
+      } = pluginsStart;
 
-      const esSection = plugins.management.sections.getSection('elasticsearch');
+      const esSection = pluginsStart.management.sections.getSection('elasticsearch');
       esSection.register('remote_clusters', {
         visible: true,
         display: i18n.translate('xpack.remoteClusters.appTitle', { defaultMessage: 'Remote Clusters' }),
@@ -60,10 +50,10 @@ export class Plugin {
       });
 
       // Initialize services
-      initBreadcrumbs(chrome, BREADCRUMB, i18n);
-      initDocumentation(esDocBasePath, esPluginDocBasePath);
+      initBreadcrumbs(setBreadcrumbs, BREADCRUMB, i18n);
+      initDocumentation(`${elasticWebsiteUrl}guide/en/elasticsearch/reference/${docLinkVersion}/`);
       initUiMetric(track);
-      initNotification(toastNotifications, fatalError);
+      initNotification(toasts, fatalError);
 
       const unmountReactApp = () => {
         const appElement = document.getElementById(REACT_ROOT_ID);
@@ -72,14 +62,14 @@ export class Plugin {
         }
       };
 
-      registerAngularRoute(`${CRUD_APP_BASE_PATH}/:view?/:id?`, {
+      registerRoute(`${CRUD_APP_BASE_PATH}/:view?/:id?`, {
         template,
         controllerAs: 'remoteClusters',
         controller: class RemoteClustersController {
           constructor($scope, $route, $http, kbnUrl) {
             // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
             // e.g. to check license status per request.
-            initHttp($http, chrome);
+            initHttp($http, prependBasePath);
 
             setRedirect((path) => {
               $scope.$evalAsync(() => {

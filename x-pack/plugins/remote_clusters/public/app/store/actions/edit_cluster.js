@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { fatalError, toastNotifications } from '../../services/notification';
+import { fatalError, toasts } from '../../services/notification';
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { loadClusters } from './load_clusters';
 
@@ -73,7 +73,7 @@ export const editCluster = (cluster) => async (dispatch) => {
 
   if (redirectUrl) {
     // A toast is only needed if we're leaving the app.
-    toastNotifications.addSuccess(i18n.translate('xpack.remoteClusters.editAction.successTitle', {
+    toasts.addSuccess(i18n.translate('xpack.remoteClusters.editAction.successTitle', {
       defaultMessage: `Edited remote cluster '{name}'`,
       values: { name: cluster.name },
     }));

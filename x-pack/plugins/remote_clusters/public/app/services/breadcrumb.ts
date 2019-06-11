@@ -6,12 +6,12 @@
 
 import { CRUD_APP_BASE_PATH } from '../constants';
 
-let setFullBreadcrumbs: any;
-let breadcrumbs: any;
+let _setBreadcrumbs: any;
+let _breadcrumbs: any;
 
-export function init(chrome: any, managementBreadcrumb: any, i18n: any): void {
-  setFullBreadcrumbs = chrome.breadcrumbs.set;
-  breadcrumbs = {
+export function init(setGlobalBreadcrumbs: any, managementBreadcrumb: any, i18n: any): void {
+  _setBreadcrumbs = setGlobalBreadcrumbs;
+  _breadcrumbs = {
     management: managementBreadcrumb,
     home: {
       text: i18n.translate('xpack.remoteClusters.listBreadcrumbTitle', {
@@ -33,19 +33,19 @@ export function init(chrome: any, managementBreadcrumb: any, i18n: any): void {
 }
 
 export function setBreadcrumbs(type: string, queryParams?: string): void {
-  if (!breadcrumbs[type]) {
+  if (!_breadcrumbs[type]) {
     return;
   }
 
   if (type === 'home') {
-    setFullBreadcrumbs([breadcrumbs.management, breadcrumbs.home]);
+    _setBreadcrumbs([_breadcrumbs.management, _breadcrumbs.home]);
   } else {
     // Support deep-linking back to a remote cluster in the detail panel.
     const homeBreadcrumb = {
-      text: breadcrumbs.home.text,
-      href: `${breadcrumbs.home.href}${queryParams}`,
+      text: _breadcrumbs.home.text,
+      href: `${_breadcrumbs.home.href}${queryParams}`,
     };
 
-    setFullBreadcrumbs([breadcrumbs.management, homeBreadcrumb, breadcrumbs[type]]);
+    _setBreadcrumbs([_breadcrumbs.management, homeBreadcrumb, _breadcrumbs[type]]);
   }
 }
