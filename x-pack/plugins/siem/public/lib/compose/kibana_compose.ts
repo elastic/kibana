@@ -18,7 +18,7 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore: path dynamic for kibana
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
-import { errorLink } from '../../containers/errors';
+import { errorLink, refetchOnErrorLink } from '../../containers/errors';
 import introspectionQueryResultData from '../../graphql/introspection.json';
 import { AppKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { AppKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
@@ -42,6 +42,7 @@ export function compose(): AppFrontendLibs {
     cache,
     link: ApolloLink.from([
       errorLink,
+      refetchOnErrorLink,
       withClientState({
         cache,
         resolvers: {},

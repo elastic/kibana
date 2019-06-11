@@ -32,3 +32,9 @@ export const errorLink = onError(({ graphQLErrors, networkError }) => {
     );
   }
 });
+
+export const refetchOnErrorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+  if (graphQLErrors != null || networkError != null) {
+    return forward(operation);
+  }
+});
