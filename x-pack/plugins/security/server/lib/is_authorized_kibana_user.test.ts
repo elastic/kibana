@@ -15,6 +15,9 @@ function buildAuthorizationService(privileges: EsApplication[] = []) {
   return ({
     application: 'kibana-.kibana',
     getPrivilegesWithRequest: jest.fn().mockResolvedValue([...privileges]),
+    mode: {
+      useRbacForRequest: jest.fn().mockReturnValue(true),
+    },
     privileges: {
       get: () => ({
         global: {
