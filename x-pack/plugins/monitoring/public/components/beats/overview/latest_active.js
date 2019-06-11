@@ -9,18 +9,28 @@ import PropTypes from 'prop-types';
 import {
   EuiBasicTable
 } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function LatestActiveUi({ latestActive, intl }) {
+export function LatestActive({ latestActive }) {
   const rangeMap = {
     'last1m':
-      intl.formatMessage({ id: 'xpack.monitoring.beats.overview.latestActive.last1MinuteLabel', defaultMessage: 'Last 1 minute' }),
+      i18n.translate('xpack.monitoring.beats.overview.latestActive.last1MinuteLabel', {
+        defaultMessage: 'Last 1 minute'
+      }),
     'last5m':
-      intl.formatMessage({ id: 'xpack.monitoring.beats.overview.latestActive.last5MinutesLabel', defaultMessage: 'Last 5 minutes' }),
+      i18n.translate('xpack.monitoring.beats.overview.latestActive.last5MinutesLabel', {
+        defaultMessage: 'Last 5 minutes'
+      }),
     'last20m':
-      intl.formatMessage({ id: 'xpack.monitoring.beats.overview.latestActive.last20MinutesLabel', defaultMessage: 'Last 20 minutes' }),
-    'last1h': intl.formatMessage({ id: 'xpack.monitoring.beats.overview.latestActive.last1HourLabel', defaultMessage: 'Last 1 hour' }),
-    'last1d': intl.formatMessage({ id: 'xpack.monitoring.beats.overview.latestActive.last1DayLabel', defaultMessage: 'Last 1 day' }),
+      i18n.translate('xpack.monitoring.beats.overview.latestActive.last20MinutesLabel', {
+        defaultMessage: 'Last 20 minutes'
+      }),
+    'last1h': i18n.translate('xpack.monitoring.beats.overview.latestActive.last1HourLabel', {
+      defaultMessage: 'Last 1 hour'
+    }),
+    'last1d': i18n.translate('xpack.monitoring.beats.overview.latestActive.last1DayLabel', {
+      defaultMessage: 'Last 1 day'
+    }),
   };
 
   const activity = latestActive.map(({ range, count }) => ({
@@ -46,11 +56,9 @@ function LatestActiveUi({ latestActive, intl }) {
   );
 }
 
-LatestActiveUi.propTypes = {
+LatestActive.propTypes = {
   latestActive: PropTypes.arrayOf(PropTypes.shape({
     range: PropTypes.string.isRequired,
     count: PropTypes.number.isRequired,
   })).isRequired
 };
-
-export const LatestActive = injectI18n(LatestActiveUi);

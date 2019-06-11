@@ -13,74 +13,41 @@ import path from 'path';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
-import { ILanguageServerLauncher } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
+import { AbstractLauncher } from './abstract_launcher';
 
-export class JavaLauncher implements ILanguageServerLauncher {
-  private isRunning: boolean = false;
+const JAVA_LANG_DETACH_PORT = 2090;
+
+export class JavaLauncher extends AbstractLauncher {
   private needModuleArguments: boolean = true;
-  constructor(
+  public constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
-  ) {}
-  public get running(): boolean {
-    return this.isRunning;
+  ) {
+    super('java', targetHost, options, loggerFactory);
   }
 
-  public async launch(builtinWorkspace: boolean, maxWorkspace: number, installationPath: string) {
-    let port = 2090;
-
-    if (!this.options.lsp.detach) {
-      port = await getPort();
-    }
-    const log = this.loggerFactory.getLogger(['code', `java@${this.targetHost}:${port}`]);
-    const proxy = new LanguageServerProxy(port, this.targetHost, log, this.options.lsp);
-    proxy.awaitServerConnection();
-    if (this.options.lsp.detach) {
-      // detach mode
-      proxy.onConnected(() => {
-        this.isRunning = true;
-      });
-      proxy.onDisconnected(() => {
-        this.isRunning = false;
-        if (!proxy.isClosed) {
-          proxy.awaitServerConnection();
-        }
-      });
-    } else {
-      let child = await this.spawnJava(installationPath, port, log);
-      proxy.onDisconnected(async () => {
-        if (!proxy.isClosed) {
-          child.kill();
-          proxy.awaitServerConnection();
-          log.warn('language server disconnected, restarting it');
-          child = await this.spawnJava(installationPath, port, log);
-        } else {
-          child.kill();
-        }
-      });
-      proxy.onExit(() => {
-        if (child) {
-          child.kill();
-        }
-      });
-    }
-    proxy.listen();
-    return new Promise<RequestExpander>(resolve => {
-      proxy.onConnected(() => {
-        resolve(
-          new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
-            settings: {
-              'java.import.gradle.enabled': this.options.security.enableGradleImport,
-              'java.import.maven.enabled': this.options.security.enableMavenImport,
-              'java.autobuild.enabled': false,
-            },
-          })
-        );
-      });
+  createExpander(proxy: LanguageServerProxy, builtinWorkspace: boolean, maxWorkspace: number) {
+    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
+      settings: {
+        'java.import.gradle.enabled': this.options.security.enableGradleImport,
+        'java.import.maven.enabled': this.options.security.enableMavenImport,
+        'java.autobuild.enabled': false,
+      },
     });
+  }
+
+  startConnect(proxy: LanguageServerProxy) {
+    proxy.awaitServerConnection().catch(this.log.debug);
+  }
+
+  async getPort(): Promise<number> {
+    if (!this.options.lsp.detach) {
+      return await getPort();
+    }
+    return JAVA_LANG_DETACH_PORT;
   }
 
   private async getJavaHome(installationPath: string, log: Logger) {
@@ -132,7 +99,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     return bundledJavaHome;
   }
 
-  private async spawnJava(installationPath: string, port: number, log: Logger) {
+  async spawnProcess(installationPath: string, port: number, log: Logger) {
     const launchersFound = glob.sync('**/plugins/org.eclipse.equinox.launcher_*.jar', {
       cwd: installationPath,
     });
@@ -156,6 +123,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
       '-Dosgi.bundles.defaultStartLevel=4',
       '-Declipse.product=org.elastic.jdt.ls.core.product',
       '-Dlog.level=ALL',
+      '-Dfile.encoding=utf8',
       '-noverify',
       '-Xmx4G',
       '-jar',
@@ -192,8 +160,6 @@ export class JavaLauncher implements ILanguageServerLauncher {
     p.stderr.on('data', data => {
       log.stderr(data.toString());
     });
-    this.isRunning = true;
-    p.on('exit', () => (this.isRunning = false));
     log.info(
       `Launch Java Language Server at port ${port.toString()}, pid:${
         p.pid

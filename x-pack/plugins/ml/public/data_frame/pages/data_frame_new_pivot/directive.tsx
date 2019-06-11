@@ -14,6 +14,7 @@ const module = uiModules.get('apps/ml', ['react']);
 import { IndexPattern } from 'ui/index_patterns';
 import { I18nContext } from 'ui/i18n';
 import { IPrivate } from 'ui/private';
+import { timefilter } from 'ui/timefilter';
 import { InjectorService } from '../../../../common/types/angular';
 
 // @ts-ignore
@@ -37,6 +38,9 @@ module.directive('mlNewDataFrame', ($injector: InjectorService) => {
       const kbnBaseUrl = $injector.get<string>('kbnBaseUrl');
       const kibanaConfig = $injector.get('config');
       const Private: IPrivate = $injector.get('Private');
+
+      timefilter.disableTimeRangeSelector();
+      timefilter.disableAutoRefreshSelector();
 
       const createSearchItems: CreateSearchItems = Private(SearchItemsProvider);
       const { indexPattern, savedSearch, combinedQuery } = createSearchItems();

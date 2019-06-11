@@ -6,12 +6,13 @@
 
 import { Legacy } from 'kibana';
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { AuthScopeService, ScopesGetter } from '../auth_scope_service';
 import { getErrorStatusCode } from '../errors';
 import {
   AuthenticationProviderOptions,
   BaseAuthenticationProvider,
   BasicAuthenticationProvider,
+  KerberosAuthenticationProvider,
+  RequestWithLoginAttempt,
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
@@ -33,10 +34,11 @@ const providerMap = new Map<
   string,
   new (
     options: AuthenticationProviderOptions,
-    providerSpecificOptions: AuthenticationProviderSpecificOptions
+    providerSpecificOptions?: AuthenticationProviderSpecificOptions
   ) => BaseAuthenticationProvider
 >([
   ['basic', BasicAuthenticationProvider],
+  ['kerberos', KerberosAuthenticationProvider],
   ['saml', SAMLAuthenticationProvider],
   ['token', TokenAuthenticationProvider],
   ['oidc', OIDCAuthenticationProvider],
@@ -76,29 +78,25 @@ function getProviderOptions(server: Legacy.Server) {
 function getProviderSpecificOptions(
   server: Legacy.Server,
   providerType: string
-): AuthenticationProviderSpecificOptions {
+): AuthenticationProviderSpecificOptions | undefined {
   const config = server.config();
-  // we can't use `config.has` here as it doesn't currently work with Joi's "alternatives" syntax which we
-  // are using to make the provider specific configuration required when the auth provider is specified
-  const authc = config.get<Record<string, AuthenticationProviderSpecificOptions | undefined>>(
-    `xpack.security.authc`
-  );
-  if (authc && authc[providerType] !== undefined) {
-    return authc[providerType] as AuthenticationProviderSpecificOptions;
-  }
 
-  return {};
+  const providerOptionsConfigKey = `xpack.security.authc.${providerType}`;
+  if (config.has(providerOptionsConfigKey)) {
+    return config.get<AuthenticationProviderSpecificOptions>(providerOptionsConfigKey);
+  }
 }
 
 /**
  * Instantiates authentication provider based on the provider key from config.
  * @param providerType Provider type key.
  * @param options Options to pass to provider's constructor.
+ * @param providerSpecificOptions Options that are specific to {@param providerType}.
  */
 function instantiateProvider(
   providerType: string,
   options: AuthenticationProviderOptions,
-  providerSpecificOptions: AuthenticationProviderSpecificOptions
+  providerSpecificOptions?: AuthenticationProviderSpecificOptions
 ) {
   const ProviderClassName = providerMap.get(providerType);
   if (!ProviderClassName) {
@@ -130,19 +128,14 @@ class Authenticator {
   /**
    * Instantiates Authenticator and bootstrap configured providers.
    * @param server Server instance.
-   * @param authScope AuthScopeService instance.
    * @param session Session instance.
    */
-  constructor(
-    private readonly server: Legacy.Server,
-    private readonly authScope: AuthScopeService,
-    private readonly session: Session
-  ) {
+  constructor(private readonly server: Legacy.Server, private readonly session: Session) {
     const config = this.server.config();
-    const authProviders = config.get<string[]>('xpack.security.authProviders');
+    const authProviders = config.get<string[]>('xpack.security.authc.providers');
     if (authProviders.length === 0) {
       throw new Error(
-        'No authentication provider is configured. Verify `xpack.security.authProviders` config value.'
+        'No authentication provider is configured. Verify `xpack.security.authc.providers` config value.'
       );
     }
 
@@ -163,7 +156,7 @@ class Authenticator {
    * Performs request authentication using configured chain of authentication providers.
    * @param request Request instance.
    */
-  async authenticate(request: Legacy.Request) {
+  async authenticate(request: RequestWithLoginAttempt) {
     assertRequest(request);
 
     const isSystemApiRequest = this.server.plugins.kibana.systemApi.isSystemApiRequest(request);
@@ -210,11 +203,7 @@ class Authenticator {
       }
 
       if (authenticationResult.succeeded()) {
-        return AuthenticationResult.succeeded({
-          ...authenticationResult.user,
-          // Complement user returned from the provider with scopes.
-          scope: await this.authScope.getForRequestAndUser(request, authenticationResult.user!),
-        } as any);
+        return AuthenticationResult.succeeded(authenticationResult.user!);
       } else if (authenticationResult.redirected()) {
         return authenticationResult;
       }
@@ -227,7 +216,7 @@ class Authenticator {
    * Deauthenticates current request.
    * @param request Request instance.
    */
-  async deauthenticate(request: Legacy.Request) {
+  async deauthenticate(request: RequestWithLoginAttempt) {
     assertRequest(request);
 
     const sessionValue = await this.getSessionValue(request);
@@ -295,8 +284,7 @@ class Authenticator {
 
 export async function initAuthenticator(server: Legacy.Server) {
   const session = await Session.create(server);
-  const authScope = new AuthScopeService();
-  const authenticator = new Authenticator(server, authScope, session);
+  const authenticator = new Authenticator(server, session);
 
   const loginAttempts = new WeakMap();
   server.decorate('request', 'loginAttempt', function(this: Legacy.Request) {
@@ -307,12 +295,11 @@ export async function initAuthenticator(server: Legacy.Server) {
     return loginAttempts.get(request);
   });
 
-  server.expose('authenticate', (request: Legacy.Request) => authenticator.authenticate(request));
-  server.expose('deauthenticate', (request: Legacy.Request) =>
-    authenticator.deauthenticate(request)
+  server.expose('authenticate', (request: RequestWithLoginAttempt) =>
+    authenticator.authenticate(request)
   );
-  server.expose('registerAuthScopeGetter', (scopeExtender: ScopesGetter) =>
-    authScope.registerGetter(scopeExtender)
+  server.expose('deauthenticate', (request: RequestWithLoginAttempt) =>
+    authenticator.deauthenticate(request)
   );
 
   server.expose('isAuthenticated', async (request: Legacy.Request) => {

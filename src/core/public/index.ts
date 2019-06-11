@@ -45,15 +45,16 @@ import {
   ChromeStart,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
-import { HttpServiceBase, HttpSetup, HttpStart } from './http';
+import { HttpServiceBase, HttpSetup, HttpStart, HttpInterceptor } from './http';
 import { I18nSetup, I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
+  ErrorToastOptions,
   NotificationsSetup,
+  NotificationsStart,
   Toast,
   ToastInput,
   ToastsApi,
-  NotificationsStart,
 } from './notifications';
 import { OverlayRef, OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
@@ -61,6 +62,7 @@ import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_setting
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 
 export { CoreContext, CoreSystem } from './core_system';
+export { RecursiveReadonly } from '../utils';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -128,6 +130,8 @@ export {
   HttpServiceBase,
   HttpSetup,
   HttpStart,
+  HttpInterceptor,
+  ErrorToastOptions,
   FatalErrorsSetup,
   FatalErrorInfo,
   Capabilities,

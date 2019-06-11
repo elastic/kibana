@@ -60,7 +60,7 @@ uiModules
     return service;
   });
 
-function profileVizController($scope, $route, $interval, $http, HighlightService, Private) {
+function profileVizController($scope, $http, HighlightService, Private) {
   $scope.title = 'Search Profile';
   $scope.description = 'Search profiling and visualization';
   $scope.profileResponse = [];

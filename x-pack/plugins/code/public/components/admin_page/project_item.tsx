@@ -14,6 +14,9 @@ import {
   EuiText,
   EuiTextColor,
   EuiToolTip,
+  EuiConfirmModal,
+  EuiOverlayMask,
+  EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
@@ -29,21 +32,57 @@ const stateColor = {
   [RepoState.INDEXING]: 'primary',
 };
 
-class CodeProjectItem extends React.PureComponent<{
-  project: Repository;
-  enableManagement: boolean;
-  showStatus: boolean;
-  status?: RepoStatus;
-  deleteRepo?: (uri: string) => void;
-  indexRepo?: (uri: string) => void;
-  initRepoCommand?: (uri: string) => void;
-  openSettings?: (uri: string, url: string) => void;
-}> {
+class CodeProjectItem extends React.PureComponent<
+  {
+    project: Repository;
+    enableManagement: boolean;
+    showStatus: boolean;
+    status?: RepoStatus;
+    deleteRepo?: (uri: string) => void;
+    indexRepo?: (uri: string) => void;
+    initRepoCommand?: (uri: string) => void;
+    openSettings?: (uri: string, url: string) => void;
+  },
+  { showReindexConfirmModal: boolean; showDeleteConfirmModal: boolean }
+> {
+  state = {
+    showDeleteConfirmModal: false,
+    showReindexConfirmModal: false,
+  };
+
+  openReindexModal = () => {
+    this.setState({ showReindexConfirmModal: true });
+  };
+
+  closeReindexModal = () => {
+    this.setState({ showReindexConfirmModal: false });
+  };
+
+  openDeleteModal = () => {
+    this.setState({ showDeleteConfirmModal: true });
+  };
+
+  closeDeleteModal = () => {
+    this.setState({ showDeleteConfirmModal: false });
+  };
+
+  confirmDelete = () => {
+    if (this.props.deleteRepo) {
+      this.props.deleteRepo(this.props.project.uri);
+      this.closeDeleteModal();
+    }
+  };
+
+  confirmReindex = () => {
+    if (this.props.indexRepo) {
+      this.props.indexRepo(this.props.project.uri);
+      this.closeReindexModal();
+    }
+  };
+
   public render() {
     const { project, showStatus, status, enableManagement } = this.props;
     const { name, org, uri, url } = project;
-    const onClickDelete = () => this.props.deleteRepo && this.props.deleteRepo(uri);
-    const onClickIndex = () => this.props.indexRepo && this.props.indexRepo(uri);
     const onClickSettings = () => this.props.openSettings && this.props.openSettings(uri, url);
     let footer = null;
     let disableRepoLink = false;
@@ -115,7 +154,7 @@ class CodeProjectItem extends React.PureComponent<{
               className="codeButton__project"
               data-test-subj="settingsRepositoryButton"
               tabIndex={0}
-              onKeyDown={onClickSettings}
+              onKeyPress={onClickSettings}
               onClick={onClickSettings}
               role="button"
               style={{ visibility: settingsVisibility }}
@@ -131,14 +170,14 @@ class CodeProjectItem extends React.PureComponent<{
               className="codeButton__project"
               data-test-subj="indexRepositoryButton"
               tabIndex={0}
-              onKeyDown={onClickIndex}
-              onClick={onClickIndex}
+              onKeyPress={this.openReindexModal}
+              onClick={this.openReindexModal}
               role="button"
               style={{ visibility: indexVisibility }}
             >
               <EuiIcon type="indexSettings" />
               <EuiText size="xs" color="subdued">
-                Index
+                Reindex
               </EuiText>
             </div>
           </EuiFlexItem>
@@ -147,8 +186,8 @@ class CodeProjectItem extends React.PureComponent<{
               className="codeButton__project"
               data-test-subj="deleteRepositoryButton"
               tabIndex={0}
-              onKeyDown={onClickDelete}
-              onClick={onClickDelete}
+              onKeyPress={this.openDeleteModal}
+              onClick={this.openDeleteModal}
               role="button"
               style={{ visibility: deleteVisibility }}
             >
@@ -195,9 +234,42 @@ class CodeProjectItem extends React.PureComponent<{
           </EuiFlexItem>
           {enableManagement && projectManagement}
         </EuiFlexGroup>
+        {this.state.showDeleteConfirmModal && this.renderDeleteConfirmModal()}
+        {this.state.showReindexConfirmModal && this.renderReindexConfirmModal()}
       </EuiPanel>
     );
   }
+
+  renderReindexConfirmModal = () => {
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title="Reindex this repository?"
+          onCancel={this.closeReindexModal}
+          onConfirm={this.confirmReindex}
+          cancelButtonText="No, don't do it"
+          confirmButtonText="Yes, do it"
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        />
+      </EuiOverlayMask>
+    );
+  };
+
+  renderDeleteConfirmModal = () => {
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title="Delete this repository?"
+          onCancel={this.closeDeleteModal}
+          onConfirm={this.confirmDelete}
+          cancelButtonText="No, don't do it"
+          confirmButtonText="Yes, do it"
+          buttonColor="danger"
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        />
+      </EuiOverlayMask>
+    );
+  };
 
   private renderProgress() {
     const { status } = this.props;

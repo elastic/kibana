@@ -5,11 +5,13 @@
  */
 
 import { Request } from 'hapi';
+import Joi from 'joi';
 import { KbnServer } from '../../../types';
 // @ts-ignore
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 // @ts-ignore
 import { reportingFeaturePreRoutingFactory } from './reporting_feature_pre_routing';
+import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 
 const API_TAG = 'api';
 
@@ -38,6 +40,27 @@ export function getRouteConfigFactoryReportingPre(server: KbnServer) {
       tags: [API_TAG],
       pre: preRouting,
     };
+  };
+}
+
+export function getRouteOptions(server: KbnServer) {
+  const getRouteConfig = getRouteConfigFactoryReportingPre(server);
+  return {
+    ...getRouteConfig(() => CSV_FROM_SAVEDOBJECT_JOB_TYPE),
+    validate: {
+      params: Joi.object({
+        savedObjectType: Joi.string().required(),
+        savedObjectId: Joi.string().required(),
+      }).required(),
+      payload: Joi.object({
+        state: Joi.object().default({}),
+        timerange: Joi.object({
+          timezone: Joi.string().default('UTC'),
+          min: Joi.date().required(),
+          max: Joi.date().required(),
+        }).optional(),
+      }),
+    },
   };
 }
 

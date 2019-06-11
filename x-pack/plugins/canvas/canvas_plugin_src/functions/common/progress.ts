@@ -5,9 +5,10 @@
  */
 
 import { get } from 'lodash';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { ContextFunction, Render, Style } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Render, Style } from '../types';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 export enum Shape {
   GAUGE = 'gauge',
@@ -31,8 +32,9 @@ interface Arguments {
   valueWeight: number;
 }
 
-export function progress(): ContextFunction<'progress', number, Arguments, Render<Arguments>> {
+export function progress(): ExpressionFunction<'progress', number, Arguments, Render<Arguments>> {
   const { help, args: argHelp } = getFunctionHelp().progress;
+  const errors = getFunctionErrors().progress;
 
   return {
     name: 'progress',
@@ -88,10 +90,10 @@ export function progress(): ContextFunction<'progress', number, Arguments, Rende
     },
     fn: (value, args) => {
       if (args.max <= 0) {
-        throw new Error(`Invalid max value: '${args.max}'. 'max' must be greater than 0`);
+        throw errors.invalidMaxValue(args.max);
       }
       if (value > args.max || value < 0) {
-        throw new Error(`Invalid value: '${value}'. Value must be between 0 and ${args.max}`);
+        throw errors.invalidValue(value, args.max);
       }
 
       let label = '';

@@ -40,9 +40,9 @@ import { timefilter } from 'ui/timefilter';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
-import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import { DocTitleProvider } from 'ui/doc_title';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
@@ -185,7 +185,6 @@ function discoverController(
   $timeout,
   $window,
   AppState,
-  Notifier,
   Private,
   Promise,
   config,
@@ -199,11 +198,8 @@ function discoverController(
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
+  const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const filterManager = Private(FilterManagerProvider);
-  const notify = new Notifier({
-    location: 'Discover'
-  });
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const inspectorAdapters = {
@@ -718,7 +714,13 @@ function discoverController(
         logInspectorRequest();
         return courier.fetch();
       })
-      .catch(notify.error);
+      .catch((error) => {
+        toastNotifications.addError(error, {
+          title: i18n.translate('kbn.discover.discoverError', {
+            defaultMessage: 'Discover error',
+          }),
+        });
+      });
   };
 
   $scope.updateQueryAndFetch = function ({ query, dateRange }) {
@@ -799,7 +801,11 @@ function discoverController(
         if (fetchError) {
           $scope.fetchError = fetchError;
         } else {
-          notify.error(error);
+          toastNotifications.addError(error, {
+            title: i18n.translate('kbn.discover.errorLoadingData', {
+              defaultMessage: 'Error loading data',
+            }),
+          });
         }
 
         // Restart. This enables auto-refresh functionality.

@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
 import chrome from 'ui/chrome';
-import { DEFAULT_INDEX_KEY } from '../../../..';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { FlowTarget, GetDomainFirstLastSeenQuery } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
 import { QueryTemplateProps } from '../../query_template';

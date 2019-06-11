@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -15,7 +15,8 @@ import { dictionaryToArray } from '../../../../common/types/common';
 import {
   AggName,
   dateHistogramIntervalFormatRegex,
-  groupByConfigHasInterval,
+  isGroupByDateHistogram,
+  isGroupByHistogram,
   histogramIntervalFormatRegex,
   isAggName,
   PivotGroupByConfig,
@@ -64,6 +65,16 @@ interface SelectOption {
 
 type optionalInterval = string | undefined;
 
+function getDefaultInterval(defaultData: PivotGroupByConfig): string | undefined {
+  if (isGroupByDateHistogram(defaultData)) {
+    return defaultData.calendar_interval;
+  } else if (isGroupByHistogram(defaultData)) {
+    return defaultData.interval;
+  }
+
+  return undefined;
+}
+
 interface Props {
   defaultData: PivotGroupByConfig;
   otherAggNames: AggName[];
@@ -80,15 +91,17 @@ export const PopoverForm: React.SFC<Props> = ({
   const [agg, setAgg] = useState(defaultData.agg);
   const [aggName, setAggName] = useState(defaultData.aggName);
   const [field, setField] = useState(defaultData.field);
-  const [interval, setInterval] = useState(
-    groupByConfigHasInterval(defaultData) ? defaultData.interval : undefined
-  );
+  const [interval, setInterval] = useState(getDefaultInterval(defaultData));
 
   function getUpdatedItem(): PivotGroupByConfig {
     const updatedItem = { ...defaultData, agg, aggName, field };
-    if (groupByConfigHasInterval(updatedItem) && interval !== undefined) {
+
+    if (isGroupByHistogram(updatedItem) && interval !== undefined) {
       updatedItem.interval = interval;
+    } else if (isGroupByDateHistogram(updatedItem) && interval !== undefined) {
+      updatedItem.calendar_interval = interval;
     }
+
     // Casting to PivotGroupByConfig because TS would otherwise complain about the
     // PIVOT_SUPPORTED_GROUP_BY_AGGS type for `agg`.
     return updatedItem as PivotGroupByConfig;
@@ -130,10 +143,11 @@ export const PopoverForm: React.SFC<Props> = ({
   }
 
   const validInterval =
-    groupByConfigHasInterval(defaultData) && isIntervalValid(interval, defaultData.agg);
+    (isGroupByDateHistogram(defaultData) || isGroupByHistogram(defaultData)) &&
+    isIntervalValid(interval, defaultData.agg);
 
   let formValid = validAggName;
-  if (formValid && groupByConfigHasInterval(defaultData)) {
+  if (formValid && (isGroupByDateHistogram(defaultData) || isGroupByHistogram(defaultData))) {
     formValid = isIntervalValid(interval, defaultData.agg);
   }
 
@@ -178,7 +192,7 @@ export const PopoverForm: React.SFC<Props> = ({
           />
         </EuiFormRow>
       )}
-      {groupByConfigHasInterval(defaultData) && (
+      {(isGroupByDateHistogram(defaultData) || isGroupByHistogram(defaultData)) && (
         <EuiFormRow
           error={
             !validInterval && [
@@ -192,11 +206,30 @@ export const PopoverForm: React.SFC<Props> = ({
             defaultMessage: 'Interval',
           })}
         >
-          <EuiFieldText
-            defaultValue={interval}
-            isInvalid={!validInterval}
-            onChange={e => setInterval(e.target.value)}
-          />
+          <Fragment>
+            {isGroupByHistogram(defaultData) && (
+              <EuiFieldText
+                defaultValue={interval}
+                isInvalid={!validInterval}
+                onChange={e => setInterval(e.target.value)}
+              />
+            )}
+            {isGroupByDateHistogram(defaultData) && (
+              <EuiSelect
+                options={[
+                  { value: '1m', text: '1m' },
+                  { value: '1h', text: '1h' },
+                  { value: '1d', text: '1d' },
+                  { value: '1w', text: '1w' },
+                  { value: '1M', text: '1M' },
+                  { value: '1q', text: '1q' },
+                  { value: '1y', text: '1y' },
+                ]}
+                value={interval}
+                onChange={e => setInterval(e.target.value)}
+              />
+            )}
+          </Fragment>
         </EuiFormRow>
       )}
       <EuiFormRow hasEmptyLabelSpace>

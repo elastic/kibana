@@ -20,7 +20,7 @@
 import { Component } from 'react';
 import React from 'react';
 
-import { EuiFieldText, EuiOutsideClickDetector } from '@elastic/eui';
+import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import {
@@ -28,32 +28,32 @@ import {
   AutocompleteSuggestionType,
   getAutocompleteProvider,
 } from 'ui/autocomplete_providers';
-import { debounce, compact } from 'lodash';
-import { IndexPattern } from 'ui/index_patterns';
+import { debounce, compact, isEqual, omit } from 'lodash';
+import { IndexPattern, StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedLog } from 'ui/persisted_log';
 import chrome from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { Storage } from 'ui/storage';
+import { localStorage } from 'ui/storage/storage_service';
+import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
-
-interface Query {
-  query: string;
-  language: string;
-}
+import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
 interface Props {
-  indexPatterns: IndexPattern[];
+  indexPatterns: Array<IndexPattern | string>;
   intl: InjectedIntl;
   query: Query;
   appName: string;
   disableAutoFocus?: boolean;
-  screenTitle: string;
+  screenTitle?: string;
   prepend?: any;
-  store: Storage;
+  store?: Storage;
   persistedLog?: PersistedLog;
+  bubbleSubmitEvent?: boolean;
+  languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
 }
@@ -65,6 +65,7 @@ interface State {
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
+  indexPatterns: StaticIndexPattern[];
 }
 
 const KEY_CODES = {
@@ -90,6 +91,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     suggestionLimit: 50,
     selectionStart: null,
     selectionEnd: null,
+    indexPatterns: [],
   };
 
   public inputRef: HTMLInputElement | null = null;
@@ -101,26 +103,41 @@ export class QueryBarInputUI extends Component<Props, State> {
     return toUser(this.props.query.query);
   };
 
+  private fetchIndexPatterns = async () => {
+    const stringPatterns = this.props.indexPatterns.filter(
+      indexPattern => typeof indexPattern === 'string'
+    ) as string[];
+    const objectPatterns = this.props.indexPatterns.filter(
+      indexPattern => typeof indexPattern !== 'string'
+    ) as IndexPattern[];
+
+    const objectPatternsFromStrings = await fetchIndexPatterns(stringPatterns);
+
+    this.setState({
+      indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
+    });
+  };
+
   private getSuggestions = async () => {
     if (!this.inputRef) {
       return;
     }
 
-    const {
-      query: { query, language },
-    } = this.props;
-    const recentSearchSuggestions = this.getRecentSearchSuggestions(query);
+    const language = this.props.query.language;
+    const queryString = this.getQueryString();
+
+    const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
 
     const autocompleteProvider = getAutocompleteProvider(language);
     if (
       !autocompleteProvider ||
-      !Array.isArray(this.props.indexPatterns) ||
-      compact(this.props.indexPatterns).length === 0
+      !Array.isArray(this.state.indexPatterns) ||
+      compact(this.state.indexPatterns).length === 0
     ) {
       return recentSearchSuggestions;
     }
 
-    const indexPatterns = this.props.indexPatterns;
+    const indexPatterns = this.state.indexPatterns;
     const getAutocompleteSuggestions = autocompleteProvider({ config, indexPatterns });
 
     const { selectionStart, selectionEnd } = this.inputRef;
@@ -129,7 +146,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     }
 
     const suggestions: AutocompleteSuggestion[] = await getAutocompleteSuggestions({
-      query,
+      query: queryString,
       selectionStart,
       selectionEnd,
     });
@@ -239,8 +256,11 @@ export class QueryBarInputUI extends Component<Props, State> {
           }
           break;
         case KEY_CODES.ENTER:
-          event.preventDefault();
+          if (!this.props.bubbleSubmitEvent) {
+            event.preventDefault();
+          }
           if (isSuggestionsVisible && index !== null && this.state.suggestions[index]) {
+            event.preventDefault();
             this.selectSuggestion(this.state.suggestions[index]);
           } else {
             this.onSubmit(this.props.query);
@@ -339,7 +359,11 @@ export class QueryBarInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.props.store.set('kibana.userQueryLanguage', language);
+    if (this.props.store) {
+      this.props.store.set('kibana.userQueryLanguage', language);
+    } else {
+      localStorage.set('kibana.userQueryLanguage', language);
+    }
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
@@ -368,14 +392,20 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(this.props.appName, this.props.query.language);
-    this.updateSuggestions();
+
+    this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 
   public componentDidUpdate(prevProps: Props) {
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(this.props.appName, this.props.query.language);
-    this.updateSuggestions();
+
+    if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
+      this.fetchIndexPatterns().then(this.updateSuggestions);
+    } else if (!isEqual(prevProps.query, this.props.query)) {
+      this.updateSuggestions();
+    }
 
     if (this.state.selectionStart !== null && this.state.selectionEnd !== null) {
       if (this.inputRef) {
@@ -396,6 +426,22 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 
   public render() {
+    const rest = omit(this.props, [
+      'indexPatterns',
+      'intl',
+      'query',
+      'appName',
+      'disableAutoFocus',
+      'screenTitle',
+      'prepend',
+      'store',
+      'persistedLog',
+      'bubbleSubmitEvent',
+      'languageSwitcherPopoverAnchorPosition',
+      'onChange',
+      'onSubmit',
+    ]);
+
     return (
       <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
         <div
@@ -406,58 +452,62 @@ export class QueryBarInputUI extends Component<Props, State> {
           aria-owns="kbnTypeahead__items"
           aria-controls="kbnTypeahead__items"
         >
-          <form name="queryBarForm">
-            <div role="search">
-              <div className="kuiLocalSearchAssistedInput">
-                <EuiFieldText
-                  placeholder={this.props.intl.formatMessage({
-                    id: 'data.query.queryBar.searchInputPlaceholder',
-                    defaultMessage: 'Search',
-                  })}
-                  value={this.getQueryString()}
-                  onKeyDown={this.onKeyDown}
-                  onKeyUp={this.onKeyUp}
-                  onChange={this.onInputChange}
-                  onClick={this.onClickInput}
-                  fullWidth
-                  autoFocus={!this.props.disableAutoFocus}
-                  inputRef={node => {
-                    if (node) {
-                      this.inputRef = node;
-                    }
-                  }}
-                  autoComplete="off"
-                  spellCheck={false}
-                  aria-label={this.props.intl.formatMessage(
-                    {
-                      id: 'data.query.queryBar.searchInputAriaLabel',
-                      defaultMessage:
-                        'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
-                    },
-                    {
-                      previouslyTranslatedPageTitle: this.props.screenTitle,
-                      pageType: this.props.appName,
-                    }
-                  )}
-                  type="text"
-                  data-test-subj="queryInput"
-                  aria-autocomplete="list"
-                  aria-controls="kbnTypeahead__items"
-                  aria-activedescendant={
-                    this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
+          <div role="search">
+            <div className="kuiLocalSearchAssistedInput">
+              <EuiFieldText
+                placeholder={this.props.intl.formatMessage({
+                  id: 'data.query.queryBar.searchInputPlaceholder',
+                  defaultMessage: 'Search',
+                })}
+                value={this.getQueryString()}
+                onKeyDown={this.onKeyDown}
+                onKeyUp={this.onKeyUp}
+                onChange={this.onInputChange}
+                onClick={this.onClickInput}
+                fullWidth
+                autoFocus={!this.props.disableAutoFocus}
+                inputRef={node => {
+                  if (node) {
+                    this.inputRef = node;
                   }
-                  role="textbox"
-                  prepend={this.props.prepend}
-                  append={
-                    <QueryLanguageSwitcher
-                      language={this.props.query.language}
-                      onSelectLanguage={this.onSelectLanguage}
-                    />
-                  }
-                />
-              </div>
+                }}
+                autoComplete="off"
+                spellCheck={false}
+                aria-label={
+                  this.props.screenTitle
+                    ? this.props.intl.formatMessage(
+                        {
+                          id: 'data.query.queryBar.searchInputAriaLabel',
+                          defaultMessage:
+                            'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
+                        },
+                        {
+                          previouslyTranslatedPageTitle: this.props.screenTitle,
+                          pageType: this.props.appName,
+                        }
+                      )
+                    : undefined
+                }
+                type="text"
+                data-test-subj="queryInput"
+                aria-autocomplete="list"
+                aria-controls="kbnTypeahead__items"
+                aria-activedescendant={
+                  this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
+                }
+                role="textbox"
+                prepend={this.props.prepend}
+                append={
+                  <QueryLanguageSwitcher
+                    language={this.props.query.language}
+                    anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+                    onSelectLanguage={this.onSelectLanguage}
+                  />
+                }
+                {...rest}
+              />
             </div>
-          </form>
+          </div>
 
           <SuggestionsComponent
             show={this.state.isSuggestionsVisible}

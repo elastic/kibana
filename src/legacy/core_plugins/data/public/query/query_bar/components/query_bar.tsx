@@ -40,13 +40,9 @@ import { PersistedLog } from 'ui/persisted_log';
 import { QueryBarInput } from './query_bar_input';
 
 import { getQueryLog } from '../lib/get_query_log';
+import { Query } from '../index';
 
 const config = chrome.getUiSettingsClient();
-
-interface Query {
-  query: string;
-  language: string;
-}
 
 interface DateRange {
   from: string;
@@ -59,7 +55,7 @@ interface Props {
   disableAutoFocus?: boolean;
   appName: string;
   screenTitle: string;
-  indexPatterns: IndexPattern[];
+  indexPatterns: Array<IndexPattern | string>;
   store: Storage;
   intl: InjectedIntl;
   prepend?: any;
@@ -338,6 +334,7 @@ export class QueryBarUI extends Component<Props, State> {
     const { query, language } = this.state.query;
     if (
       language === 'kuery' &&
+      typeof query === 'string' &&
       !store.get('kibana.luceneSyntaxWarningOptOut') &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {

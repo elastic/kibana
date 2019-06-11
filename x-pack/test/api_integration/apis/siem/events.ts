@@ -95,6 +95,34 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
             expect(events.edges[0]!.node.host!.name).to.eql([HOST_NAME]);
           });
       });
+      it('Make sure that timestamp is returned in the Events query', () => {
+        return client
+          .query<GetEventsQuery.Query>({
+            query: eventsQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              pagination: {
+                limit: 2,
+                cursor: CURSOR_ID,
+                tiebreaker: '193',
+              },
+              sortField: {
+                sortFieldId: 'timestamp',
+                direction: Direction.desc,
+              },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            },
+          })
+          .then(resp => {
+            const events = resp.data.source.Events;
+            expect(events.edges[0]!.node.timestamp).to.eql('2019-02-19T20:42:29.965Z');
+          });
+      });
     });
     describe('last event time', () => {
       describe('packetbeat', () => {

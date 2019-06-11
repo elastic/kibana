@@ -21,7 +21,6 @@ import { IndexerFactory } from '../indexer';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
-import { ServerOptions } from '../server_options';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { AbstractWorker } from './abstract_worker';
 import { CancellationSerivce } from './cancellation_service';
@@ -36,7 +35,7 @@ export class IndexWorker extends AbstractWorker {
     protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly indexerFactories: IndexerFactory[],
-    protected readonly options: ServerOptions,
+    protected readonly gitOps: GitOperations,
     private readonly cancellationService: CancellationSerivce
   ) {
     super(queue, log);
@@ -46,7 +45,7 @@ export class IndexWorker extends AbstractWorker {
 
   public async executeJob(job: Job) {
     const { payload, cancellationToken } = job;
-    const { uri, revision } = payload;
+    const { uri, revision, enforceReindex } = payload;
     const indexerNumber = this.indexerFactories.length;
 
     const workerProgress = (await this.objectClient.getRepositoryLspIndexStatus(
@@ -84,10 +83,11 @@ export class IndexWorker extends AbstractWorker {
     }
 
     // Binding the index cancellation logic
+    let cancelled = false;
     this.cancellationService.cancelIndexJob(uri);
     const indexPromises: Array<Promise<IndexStats>> = this.indexerFactories.map(
       async (indexerFactory: IndexerFactory, index: number) => {
-        const indexer = await indexerFactory.create(uri, revision);
+        const indexer = await indexerFactory.create(uri, revision, enforceReindex);
         if (!indexer) {
           this.log.info(`Failed to create indexer for ${uri}`);
           return new Map(); // return an empty map as stats.
@@ -96,6 +96,7 @@ export class IndexWorker extends AbstractWorker {
         if (cancellationToken) {
           cancellationToken.on(() => {
             indexer.cancel();
+            cancelled = true;
           });
           this.cancellationService.registerIndexJobToken(uri, cancellationToken);
         }
@@ -108,8 +109,8 @@ export class IndexWorker extends AbstractWorker {
       uri,
       revision,
       stats: aggregateIndexStats(stats),
+      cancelled,
     };
-    this.log.info(`Index worker finished with stats: ${JSON.stringify([...res.stats])}`);
     return res;
   }
 
@@ -125,6 +126,11 @@ export class IndexWorker extends AbstractWorker {
   }
 
   public async onJobCompleted(job: Job, res: IndexWorkerResult) {
+    if (res.cancelled) {
+      // Skip updating job progress if the job is done because of cancellation.
+      return;
+    }
+    this.log.info(`Index worker finished with stats: ${JSON.stringify([...res.stats])}`);
     await super.onJobCompleted(job, res);
     const { uri, revision } = job.payload;
     try {
@@ -165,8 +171,7 @@ export class IndexWorker extends AbstractWorker {
 
   protected async getTimeoutMs(payload: any) {
     try {
-      const gitOperator = new GitOperations(this.options.repoPath);
-      const totalCount = await gitOperator.countRepoFiles(payload.uri, 'head');
+      const totalCount = await this.gitOps.countRepoFiles(payload.uri, 'head');
       let timeout = moment.duration(1, 'hour').asMilliseconds();
       if (totalCount > 0) {
         // timeout = ln(file_count) in hour

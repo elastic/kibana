@@ -8,6 +8,7 @@ import Boom from 'boom';
 import sinon from 'sinon';
 
 import { requestFixture } from '../../__tests__/__fixtures__/request';
+import { LoginAttempt } from '../login_attempt';
 import { mockAuthenticationProviderOptions } from './base.mock';
 
 import { SAMLAuthenticationProvider } from './saml';
@@ -33,6 +34,35 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
+    it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
+      const request = requestFixture({ headers: { authorization: 'Basic some:credentials' } });
+
+      const authenticationResult = await provider.authenticate(request, {
+        accessToken: 'some-valid-token',
+        refreshToken: 'some-valid-refresh-token',
+      });
+
+      sinon.assert.notCalled(callWithRequest);
+      expect(request.headers.authorization).toBe('Basic some:credentials');
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
+
+    it('does not handle requests with non-empty `loginAttempt`.', async () => {
+      const request = requestFixture();
+
+      const loginAttempt = new LoginAttempt();
+      loginAttempt.setCredentials('user', 'password');
+      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
+
+      const authenticationResult = await provider.authenticate(request, {
+        accessToken: 'some-valid-token',
+        refreshToken: 'some-valid-refresh-token',
+      });
+
+      sinon.assert.notCalled(callWithRequest);
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
+
     it('redirects non-AJAX request that can not be authenticated to the IdP.', async () => {
       const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
@@ -45,6 +75,36 @@ describe('SAMLAuthenticationProvider', () => {
 
       sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
         body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` },
+      });
+
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.redirectURL).toBe(
+        'https://idp-host/path/login?SAMLRequest=some%20request%20'
+      );
+      expect(authenticationResult.state).toEqual({
+        requestId: 'some-request-id',
+        nextURL: `/s/foo/some-path`,
+      });
+    });
+
+    it('uses `realm` name instead of `acs` if it is specified for SAML prepare request.', async () => {
+      const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
+
+      // Create new provider instance with additional `realm` option.
+      const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
+      callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
+      callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
+      provider = new SAMLAuthenticationProvider(providerOptions, { realm: 'test-realm' });
+
+      callWithInternalUser.withArgs('shield.samlPrepare').resolves({
+        id: 'some-request-id',
+        redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+      });
+
+      const authenticationResult = await provider.authenticate(request, null);
+
+      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlPrepare', {
+        body: { realm: 'test-realm' },
       });
 
       expect(authenticationResult.redirected()).toBe(true);
@@ -187,19 +247,6 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.state).toBeUndefined();
-    });
-
-    it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
-      const request = requestFixture({ headers: { authorization: 'Basic some:credentials' } });
-
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'some-valid-token',
-        refreshToken: 'some-valid-refresh-token',
-      });
-
-      sinon.assert.notCalled(callWithRequest);
-      expect(request.headers.authorization).toBe('Basic some:credentials');
-      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
@@ -783,7 +830,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.redirectURL).toBe('/logged_out');
     });
 
-    it('relies SAML invalidate call even if access token is presented.', async () => {
+    it('relies on SAML invalidate call even if access token is presented.', async () => {
       const request = requestFixture({ search: '?SAMLRequest=xxx%20yyy' });
 
       callWithInternalUser.withArgs('shield.samlInvalidate').resolves({ redirect: null });
@@ -818,6 +865,28 @@ describe('SAMLAuthenticationProvider', () => {
           queryString: 'SAMLRequest=xxx%20yyy',
           acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml',
         },
+      });
+
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.redirectURL).toBe('/logged_out');
+    });
+
+    it('uses `realm` name instead of `acs` if it is specified for SAML invalidate request.', async () => {
+      const request = requestFixture({ search: '?SAMLRequest=xxx%20yyy' });
+
+      // Create new provider instance with additional `realm` option.
+      const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
+      callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
+      callWithInternalUser = providerOptions.client.callWithInternalUser as sinon.SinonStub;
+      provider = new SAMLAuthenticationProvider(providerOptions, { realm: 'test-realm' });
+
+      callWithInternalUser.withArgs('shield.samlInvalidate').resolves({ redirect: undefined });
+
+      const authenticationResult = await provider.deauthenticate(request);
+
+      sinon.assert.calledOnce(callWithInternalUser);
+      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.samlInvalidate', {
+        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
       });
 
       expect(authenticationResult.redirected()).toBe(true);

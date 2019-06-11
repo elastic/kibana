@@ -19,11 +19,11 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggSelect from './agg_select';
-import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import { AggSelect } from './agg_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -61,10 +61,7 @@ export const Static = props => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage
-              id="tsvb.static.aggregationLabel"
-              defaultMessage="Aggregation"
-            />
+            <FormattedMessage id="tsvb.static.aggregationLabel" defaultMessage="Aggregation" />
           </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
@@ -77,10 +74,9 @@ export const Static = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('staticValue')}
-            label={(<FormattedMessage
-              id="tsvb.static.staticValuesLabel"
-              defaultMessage="Static Value"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.static.staticValuesLabel" defaultMessage="Static Value" />
+            }
           >
             <EuiFieldNumber
               onChange={handleTextChange('value')}

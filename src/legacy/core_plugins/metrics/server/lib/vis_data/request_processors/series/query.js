@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import offsetTime from '../../offset_time';
-import getIntervalAndTimefield from '../../get_interval_and_timefield';
+import { offsetTime } from '../../offset_time';
+import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { buildEsQuery } from '@kbn/es-query';
 
-export default function query(req, panel, series, esQueryConfig, indexPatternObject) {
+export function query(req, panel, series, esQueryConfig, indexPatternObject) {
   return next => doc => {
     const { timeField } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { from, to } = offsetTime(req, series.offset_time);
@@ -43,21 +43,13 @@ export default function query(req, panel, series, esQueryConfig, indexPatternObj
     doc.query.bool.must.push(timerange);
 
     if (panel.filter) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: panel.filter,
-          analyze_wildcard: true,
-        },
-      });
+      doc.query.bool.must.push(buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig));
     }
 
     if (series.filter) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: series.filter,
-          analyze_wildcard: true,
-        },
-      });
+      doc.query.bool.must.push(
+        buildEsQuery(indexPatternObject, [series.filter], [], esQueryConfig)
+      );
     }
 
     return next(doc);

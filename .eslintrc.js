@@ -56,6 +56,7 @@ module.exports = {
         'x-pack/plugins/apm/**/*',
         'x-pack/plugins/canvas/**/*',
         '**/*.{ts,tsx}',
+        'src/legacy/core_plugins/metrics/**/*.js',
       ],
       plugins: ['prettier'],
       rules: Object.assign(
@@ -184,7 +185,13 @@ module.exports = {
         // instructs import/no-extraneous-dependencies to treat modules
         // in plugins/ or ui/ namespace as "core modules" so they don't
         // trigger failures for not being listed in package.json
-        'import/core-modules': ['plugins', 'legacy/ui', 'uiExports'],
+        'import/core-modules': [
+          'plugins',
+          'legacy/ui',
+          'uiExports',
+          // TODO: Remove once https://github.com/benmosher/eslint-plugin-import/issues/1374 is fixed
+          'querystring',
+        ],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {
@@ -400,10 +407,181 @@ module.exports = {
      * SIEM overrides
      */
     {
-      files: ['x-pack/plugins/siem/**/*.ts'],
+      // front end typescript and javascript files only
+      files: ['x-pack/plugins/siem/public/**/*.{js,ts,tsx}'],
       rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/server/*'],
+          },
+        ],
+      },
+    },
+    {
+      // typescript only for front and back end
+      files: ['x-pack/plugins/siem/**/*.{ts,tsx}'],
+      rules: {
+        // This will be turned on after bug fixes are complete
+        // '@typescript-eslint/explicit-member-accessibility': 'warn',
+        '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
-        'import/order': 'error',
+        '@typescript-eslint/no-useless-constructor': 'error',
+        // This will be turned on after bug fixes are complete
+        // '@typescript-eslint/no-object-literal-type-assertion': 'warn',
+        '@typescript-eslint/unified-signatures': 'error',
+
+        // eventually we want this to be a warn and then an error since this is a recommended linter rule
+        // for now, keeping it commented out to avoid too much IDE noise until the other linter issues
+        // are fixed in the next release or two
+        // '@typescript-eslint/explicit-function-return-type': 'warn',
+
+        // these rules cannot be turned on and tested at the moment until this issue is resolved:
+        // https://github.com/prettier/prettier-eslint/issues/201
+        // '@typescript-eslint/await-thenable': 'error',
+        // '@typescript-eslint/no-non-null-assertion': 'error'
+        // '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+        // '@typescript-eslint/no-unused-vars': 'error',
+        // '@typescript-eslint/prefer-includes': 'error',
+        // '@typescript-eslint/prefer-string-starts-ends-with': 'error',
+        // '@typescript-eslint/promise-function-async': 'error',
+        // '@typescript-eslint/prefer-regexp-exec': 'error',
+        // '@typescript-eslint/promise-function-async': 'error',
+        // '@typescript-eslint/require-array-sort-compare': 'error',
+        // '@typescript-eslint/restrict-plus-operands': 'error',
+        // '@typescript-eslint/unbound-method': 'error',
+      },
+    },
+    {
+      // typescript and javascript for front and back end
+      files: ['x-pack/plugins/siem/**/*.{js,ts,tsx}'],
+      plugins: ['eslint-plugin-node', 'react'],
+      rules: {
+        'accessor-pairs': 'error',
+        'array-callback-return': 'error',
+        'no-array-constructor': 'error',
+        // This will be turned on after bug fixes are mostly completed
+        // 'arrow-body-style': ['warn', 'as-needed'],
+        complexity: 'warn',
+        // This will be turned on after bug fixes are mostly completed
+        // 'consistent-return': 'warn',
+        // This will be turned on after bug fixes are mostly completed
+        // 'func-style': ['warn', 'expression'],
+        // These will be turned on after bug fixes are mostly completed and we can
+        // run a fix-lint
+        /*
+        'import/order': [
+          'warn',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+            'newlines-between': 'always',
+          },
+        ],
+        */
+        'node/no-deprecated-api': 'error',
+        'no-bitwise': 'error',
+        'no-continue': 'error',
+        'no-dupe-keys': 'error',
+        'no-duplicate-case': 'error',
+        // This will be turned on after bug fixes are mostly completed
+        // 'no-duplicate-imports': 'warn',
+        'no-empty-character-class': 'error',
+        'no-empty-pattern': 'error',
+        'no-ex-assign': 'error',
+        'no-extend-native': 'error',
+        'no-extra-bind': 'error',
+        'no-extra-boolean-cast': 'error',
+        'no-extra-label': 'error',
+        'no-floating-decimal': 'error',
+        'no-func-assign': 'error',
+        'no-implicit-globals': 'error',
+        'no-implied-eval': 'error',
+        'no-invalid-regexp': 'error',
+        'no-inner-declarations': 'error',
+        'no-lone-blocks': 'error',
+        'no-multi-assign': 'error',
+        'no-misleading-character-class': 'error',
+        'no-new-symbol': 'error',
+        'no-obj-calls': 'error',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-param-reassign': 'warn',
+        'no-process-exit': 'error',
+        'no-prototype-builtins': 'error',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-return-await': 'warn',
+        'no-self-compare': 'error',
+        'no-shadow-restricted-names': 'error',
+        'no-sparse-arrays': 'error',
+        'no-this-before-super': 'error',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-undef': 'warn',
+        'no-unreachable': 'error',
+        'no-unsafe-finally': 'error',
+        'no-useless-call': 'error',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-useless-catch': 'warn',
+        'no-useless-concat': 'error',
+        'no-useless-computed-key': 'error',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-useless-escape': 'warn',
+        'no-useless-rename': 'error',
+        // This will be turned on after bug fixes are mostly complete
+        // 'no-useless-return': 'warn',
+        // This will be turned on after bug fixers are mostly complete
+        // 'no-void': 'warn',
+        'one-var-declaration-per-line': 'error',
+        'prefer-object-spread': 'error',
+        'prefer-promise-reject-errors': 'error',
+        'prefer-rest-params': 'error',
+        'prefer-spread': 'error',
+        // This style will be turned on after most bugs are fixed
+        // 'prefer-template': 'warn',
+        // This style will be turned on after most bugs are fixed
+        // quotes: ['warn', 'single', { avoidEscape: true }],
+        'react/boolean-prop-naming': 'error',
+        'react/button-has-type': 'error',
+        'react/forbid-dom-props': 'error',
+        'react/no-access-state-in-setstate': 'error',
+        // This style will be turned on after most bugs are fixed
+        // 'react/no-children-prop': 'warn',
+        'react/no-danger-with-children': 'error',
+        'react/no-deprecated': 'error',
+        'react/no-did-mount-set-state': 'error',
+        // Re-enable once we have better options per this issue:
+        // https://github.com/airbnb/javascript/issues/1875
+        // 'react/no-did-update-set-state': 'error',
+        'react/no-direct-mutation-state': 'error',
+        'react/no-find-dom-node': 'error',
+        'react/no-redundant-should-component-update': 'error',
+        'react/no-render-return-value': 'error',
+        'react/no-typos': 'error',
+        'react/no-string-refs': 'error',
+        'react/no-this-in-sfc': 'error',
+        'react/no-unescaped-entities': 'error',
+        'react/no-unsafe': 'error',
+        'react/no-unused-prop-types': 'error',
+        'react/no-unused-state': 'error',
+        // will introduced after the other warns are fixed
+        // 'react/sort-comp': 'error',
+        'react/void-dom-elements-no-children': 'error',
+        'react/jsx-boolean-value': ['error', 'warn'],
+        // will introduced after the other warns are fixed
+        // 'react/jsx-no-bind': 'error',
+        'react/jsx-no-comment-textnodes': 'error',
+        'react/jsx-no-literals': 'error',
+        'react/jsx-no-target-blank': 'error',
+        'react/jsx-fragments': 'error',
+        'react/jsx-sort-default-props': 'error',
+        // might be introduced after the other warns are fixed
+        // 'react/jsx-sort-props': 'error',
+        'react/jsx-tag-spacing': 'error',
+        'require-atomic-updates': 'error',
+        'rest-spread-spacing': ['error', 'never'],
+        'symbol-description': 'error',
+        'template-curly-spacing': 'error',
+        'vars-on-top': 'error',
       },
     },
 
@@ -527,6 +705,17 @@ module.exports = {
       files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
       env: {
         jquery: true,
+      },
+    },
+
+    /**
+     * TSVB overrides
+     */
+    {
+      files: ['src/legacy/core_plugins/metrics/**/*.js'],
+      excludedFiles: 'src/legacy/core_plugins/metrics/index.js',
+      rules: {
+        'import/no-default-export': 'error',
       },
     },
   ],

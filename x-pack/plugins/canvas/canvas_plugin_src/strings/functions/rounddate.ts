@@ -23,7 +23,6 @@ export const help: FunctionHelp<FunctionFactory<typeof rounddate>> = {
       defaultMessage:
         '{moment} format with which to bucket (See {url}). For example "{example}" would round to the month',
       values: {
-        ms: 'ms',
         moment: 'MomentJS',
         url: 'https://momentjs.com/docs/#/displaying/',
         example: 'YYYY-MM',

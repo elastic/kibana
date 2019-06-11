@@ -6,7 +6,7 @@
 import { kfetch } from 'ui/kfetch';
 
 import { Action } from 'redux-actions';
-import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { call, put, takeEvery, takeLatest, take } from 'redux-saga/effects';
 import {
   deleteRepo,
   deleteRepoFailed,
@@ -27,6 +27,10 @@ import {
   initRepoCommand,
   updateDeleteProgress,
   updateIndexProgress,
+  gotoRepoFailed,
+  loadRepo,
+  loadRepoSuccess,
+  loadRepoFailed,
 } from '../actions';
 import { loadLanguageServers } from '../actions/language_server';
 import { history } from '../utils/url';
@@ -50,7 +54,11 @@ function requestDeleteRepo(uri: string) {
 }
 
 function requestIndexRepo(uri: string) {
-  return kfetch({ pathname: `/api/code/repo/index/${uri}`, method: 'post' });
+  return kfetch({
+    pathname: `/api/code/repo/index/${uri}`,
+    method: 'post',
+    body: JSON.stringify({ reindex: true }),
+  });
 }
 
 function* handleDeleteRepo(action: Action<string>) {
@@ -125,13 +133,20 @@ function requestRepoInitCmd(repoUri: string) {
   });
 }
 function* handleGotoRepo(action: Action<string>) {
-  const repoUri = action.payload as string;
-  const repo = yield call(requestRepo, repoUri);
-  history.replace(`${repoUri}/tree/${repo.defaultBranch || 'master'}`);
-}
-
-function requestRepo(uri: string) {
-  return kfetch({ pathname: `/api/code/repo${uri}`, method: 'get' });
+  try {
+    const repoUri = action.payload as string;
+    yield put(loadRepo(repoUri));
+    const loadRepoDoneAction = yield take([String(loadRepoSuccess), String(loadRepoFailed)]);
+    if (loadRepoDoneAction.type === String(loadRepoSuccess)) {
+      history.replace(`/${repoUri}/tree/${loadRepoDoneAction.payload.defaultBranch || 'master'}`);
+    } else {
+      // redirect to root project path if repo not found to show 404 page
+      history.replace(`/${action.payload}/tree/master`);
+    }
+  } catch (e) {
+    history.replace(`/${action.payload}/tree/master`);
+    yield put(gotoRepoFailed(e));
+  }
 }
 
 export function* watchImportRepo() {

@@ -15,6 +15,7 @@ import {
   AuthenticationProviderOptions,
   BaseAuthenticationProvider,
   AuthenticationProviderSpecificOptions,
+  RequestWithLoginAttempt,
 } from './base';
 
 /**
@@ -54,7 +55,7 @@ interface ProviderState {
 /**
  * Defines the shape of an incoming OpenID Connect Request
  */
-type OIDCIncomingRequest = Legacy.Request & {
+type OIDCIncomingRequest = RequestWithLoginAttempt & {
   payload: {
     iss?: string;
     login_hint?: string;
@@ -80,7 +81,7 @@ type OIDCIncomingRequest = Legacy.Request & {
  *   an OpenID Connect Provider
  * @param request Request instance.
  */
-function isOIDCIncomingRequest(request: Legacy.Request): request is OIDCIncomingRequest {
+function isOIDCIncomingRequest(request: RequestWithLoginAttempt): request is OIDCIncomingRequest {
   return (
     (request.payload != null && !!(request.payload as Record<string, unknown>).iss) ||
     (request.query != null &&
@@ -115,10 +116,10 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
 
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
-    oidcOptions: Readonly<AuthenticationProviderSpecificOptions>
+    oidcOptions?: Readonly<AuthenticationProviderSpecificOptions>
   ) {
     super(options);
-    if (!oidcOptions.realm) {
+    if (!oidcOptions || !oidcOptions.realm) {
       throw new Error('Realm name must be specified');
     }
 
@@ -134,7 +135,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  public async authenticate(request: Legacy.Request, state?: ProviderState | null) {
+  public async authenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
     this.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
     let {
@@ -143,6 +144,11 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     } = await this.authenticateViaHeader(request);
     if (headerNotRecognized) {
       return authenticationResult;
+    }
+
+    if (request.loginAttempt().getCredentials() != null) {
+      this.debug('Login attempt is detected, but it is not supported by the provider');
+      return AuthenticationResult.notHandled();
     }
 
     if (state && authenticationResult.notHandled()) {
@@ -250,10 +256,11 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * Initiates an authentication attempt by either providing the realm name or the issuer to Elasticsearch
    *
    * @param request Request instance.
-   * @param params
+   * @param params OIDC authentication parameters.
+   * @param [sessionState] Optional state object associated with the provider.
    */
   private async initiateOIDCAuthentication(
-    request: Legacy.Request,
+    request: RequestWithLoginAttempt,
     params: { realm: string } | { iss: string; login_hint?: string },
     sessionState?: ProviderState | null
   ) {
@@ -305,7 +312,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * forward to Elasticsearch backend.
    * @param request Request instance.
    */
-  private async authenticateViaHeader(request: Legacy.Request) {
+  private async authenticateViaHeader(request: RequestWithLoginAttempt) {
     this.debug('Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
@@ -347,7 +354,10 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(request: Legacy.Request, { accessToken }: ProviderState) {
+  private async authenticateViaState(
+    request: RequestWithLoginAttempt,
+    { accessToken }: ProviderState
+  ) {
     this.debug('Trying to authenticate via state.');
 
     if (!accessToken) {
@@ -385,7 +395,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * @param state State value previously stored by the provider.
    */
   private async authenticateViaRefreshToken(
-    request: Legacy.Request,
+    request: RequestWithLoginAttempt,
     { refreshToken }: ProviderState
   ) {
     this.debug('Trying to refresh elasticsearch access token.');

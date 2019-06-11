@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import bucketTransform from '../../helpers/bucket_transform';
+import { bucketTransform } from '../../helpers/bucket_transform';
 
 describe('bucketTransform', () => {
   describe('count', () => {
@@ -29,8 +29,8 @@ describe('bucketTransform', () => {
         bucket_script: {
           buckets_path: { count: '_count' },
           script: { source: 'count * 1', lang: 'expression' },
-          gap_policy: 'skip'
-        }
+          gap_policy: 'skip',
+        },
       });
     });
   });
@@ -72,22 +72,20 @@ describe('bucketTransform', () => {
         id: 'test',
         type: 'std_deviation',
         field: 'cpu.pct',
-        sigma: 2
+        sigma: 2,
       };
       expect(fn(metric)).to.eql({
-        extended_stats: { field: 'cpu.pct', sigma: 2 }
+        extended_stats: { field: 'cpu.pct', sigma: 2 },
       });
     });
 
     it('throws error if type is missing', () => {
-      const run = () =>
-        bucketTransform.std_deviation({ id: 'test', field: 'cpu.pct' });
+      const run = () => bucketTransform.std_deviation({ id: 'test', field: 'cpu.pct' });
       expect(run).to.throw(Error, 'Metric missing type');
     });
 
     it('throws error if field is missing', () => {
-      const run = () =>
-        bucketTransform.std_deviation({ id: 'test', type: 'avg' });
+      const run = () => bucketTransform.std_deviation({ id: 'test', type: 'avg' });
       expect(run).to.throw(Error, 'Metric missing field');
     });
   });
@@ -98,17 +96,14 @@ describe('bucketTransform', () => {
         id: 'test',
         type: 'percentile',
         field: 'cpu.pct',
-        percentiles: [
-          { value: 50, mode: 'line' },
-          { value: 10, mode: 'band', percentile: 90 }
-        ]
+        percentiles: [{ value: 50, mode: 'line' }, { value: 10, mode: 'band', percentile: 90 }],
       };
       const fn = bucketTransform.percentile;
       expect(fn(metric)).to.eql({
         percentiles: {
           field: 'cpu.pct',
-          percents: [50, 10, 90]
-        }
+          percents: [50, 10, 90],
+        },
       });
     });
 
@@ -123,14 +118,14 @@ describe('bucketTransform', () => {
           { value: undefined, mode: 'line' },
           { value: '', mode: 'line' },
           { value: null, mode: 'line' },
-          { value: 0, mode: 'line' }
-        ]
+          { value: 0, mode: 'line' },
+        ],
       };
       expect(bucketTransform.percentile(metric)).to.eql({
         percentiles: {
           field: 'cpu.pct',
-          percents: [50, 0, 0, 0, 0, 0]
-        }
+          percents: [50, 0, 0, 0, 0, 0],
+        },
       });
     });
 
@@ -139,7 +134,7 @@ describe('bucketTransform', () => {
         bucketTransform.percentile({
           id: 'test',
           field: 'cpu.pct',
-          percentiles: [{ value: 50, mode: 'line' }]
+          percentiles: [{ value: 50, mode: 'line' }],
         });
       expect(run).to.throw(Error, 'Metric missing type');
     });
@@ -149,7 +144,7 @@ describe('bucketTransform', () => {
         bucketTransform.percentile({
           id: 'test',
           type: 'avg',
-          percentiles: [{ value: 50, mode: 'line' }]
+          percentiles: [{ value: 50, mode: 'line' }],
         });
       expect(run).to.throw(Error, 'Metric missing field');
     });
@@ -159,7 +154,7 @@ describe('bucketTransform', () => {
         bucketTransform.percentile({
           id: 'test',
           type: 'avg',
-          field: 'cpu.pct'
+          field: 'cpu.pct',
         });
       expect(run).to.throw(Error, 'Metric missing percentiles');
     });
@@ -170,7 +165,7 @@ describe('bucketTransform', () => {
       const metric = {
         id: '2',
         type: 'derivative',
-        field: '1'
+        field: '1',
       };
       const metrics = [{ id: '1', type: 'max', field: 'cpu.pct' }, metric];
       const fn = bucketTransform.derivative;
@@ -178,8 +173,8 @@ describe('bucketTransform', () => {
         derivative: {
           buckets_path: '1',
           gap_policy: 'skip',
-          unit: '10s'
-        }
+          unit: '10s',
+        },
       });
     });
 
@@ -188,7 +183,7 @@ describe('bucketTransform', () => {
         id: '2',
         type: 'derivative',
         field: '1',
-        unit: '1s'
+        unit: '1s',
       };
       const metrics = [{ id: '1', type: 'max', field: 'cpu.pct' }, metric];
       const fn = bucketTransform.derivative;
@@ -196,8 +191,8 @@ describe('bucketTransform', () => {
         derivative: {
           buckets_path: '1',
           gap_policy: 'skip',
-          unit: '1s'
-        }
+          unit: '1s',
+        },
       });
     });
 
@@ -206,7 +201,7 @@ describe('bucketTransform', () => {
         id: '2',
         type: 'derivative',
         field: '1',
-        gap_policy: 'zero_fill'
+        gap_policy: 'zero_fill',
       };
       const metrics = [{ id: '1', type: 'max', field: 'cpu.pct' }, metric];
       const fn = bucketTransform.derivative;
@@ -214,20 +209,18 @@ describe('bucketTransform', () => {
         derivative: {
           buckets_path: '1',
           gap_policy: 'zero_fill',
-          unit: '10s'
-        }
+          unit: '10s',
+        },
       });
     });
 
     it('throws error if type is missing', () => {
-      const run = () =>
-        bucketTransform.derivative({ id: 'test', field: 'cpu.pct' });
+      const run = () => bucketTransform.derivative({ id: 'test', field: 'cpu.pct' });
       expect(run).to.throw(Error, 'Metric missing type');
     });
 
     it('throws error if field is missing', () => {
-      const run = () =>
-        bucketTransform.derivative({ id: 'test', type: 'derivative' });
+      const run = () => bucketTransform.derivative({ id: 'test', type: 'derivative' });
       expect(run).to.throw(Error, 'Metric missing field');
     });
   });
@@ -237,7 +230,7 @@ describe('bucketTransform', () => {
       const metric = {
         id: '2',
         type: 'serial_diff',
-        field: '1'
+        field: '1',
       };
       const metrics = [{ id: '1', type: 'max', field: 'cpu.pct' }, metric];
       const fn = bucketTransform.serial_diff;
@@ -245,8 +238,8 @@ describe('bucketTransform', () => {
         serial_diff: {
           buckets_path: '1',
           gap_policy: 'skip',
-          lag: 1
-        }
+          lag: 1,
+        },
       });
     });
 
@@ -255,7 +248,7 @@ describe('bucketTransform', () => {
         id: '2',
         type: 'serial_diff',
         field: '1',
-        lag: 10
+        lag: 10,
       };
       const metrics = [{ id: '1', type: 'max', field: 'cpu.pct' }, metric];
       const fn = bucketTransform.serial_diff;
@@ -263,8 +256,8 @@ describe('bucketTransform', () => {
         serial_diff: {
           buckets_path: '1',
           gap_policy: 'skip',
-          lag: 10
-        }
+          lag: 10,
+        },
       });
     });
 
@@ -273,7 +266,7 @@ describe('bucketTransform', () => {
         id: '2',
         type: 'serial_diff',
         field: '1',
-        gap_policy: 'zero_fill'
+        gap_policy: 'zero_fill',
       };
       const metrics = [{ id: '1', type: 'max', field: 'cpu.pct' }, metric];
       const fn = bucketTransform.serial_diff;
@@ -281,20 +274,18 @@ describe('bucketTransform', () => {
         serial_diff: {
           buckets_path: '1',
           gap_policy: 'zero_fill',
-          lag: 1
-        }
+          lag: 1,
+        },
       });
     });
 
     it('throws error if type is missing', () => {
-      const run = () =>
-        bucketTransform.serial_diff({ id: 'test', field: 'cpu.pct' });
+      const run = () => bucketTransform.serial_diff({ id: 'test', field: 'cpu.pct' });
       expect(run).to.throw(Error, 'Metric missing type');
     });
 
     it('throws error if field is missing', () => {
-      const run = () =>
-        bucketTransform.serial_diff({ id: 'test', type: 'serial_diff' });
+      const run = () => bucketTransform.serial_diff({ id: 'test', type: 'serial_diff' });
       expect(run).to.throw(Error, 'Metric missing field');
     });
   });
@@ -305,19 +296,17 @@ describe('bucketTransform', () => {
       const metrics = [{ id: '1', type: 'sum', field: 'cpu.pct' }, metric];
       const fn = bucketTransform.cumulative_sum;
       expect(fn(metric, metrics, '10s')).is.eql({
-        cumulative_sum: { buckets_path: '1' }
+        cumulative_sum: { buckets_path: '1' },
       });
     });
 
     it('throws error if type is missing', () => {
-      const run = () =>
-        bucketTransform.cumulative_sum({ id: 'test', field: 'cpu.pct' });
+      const run = () => bucketTransform.cumulative_sum({ id: 'test', field: 'cpu.pct' });
       expect(run).to.throw(Error, 'Metric missing type');
     });
 
     it('throws error if field is missing', () => {
-      const run = () =>
-        bucketTransform.cumulative_sum({ id: 'test', type: 'cumulative_sum' });
+      const run = () => bucketTransform.cumulative_sum({ id: 'test', type: 'cumulative_sum' });
       expect(run).to.throw(Error, 'Metric missing field');
     });
   });
@@ -331,8 +320,8 @@ describe('bucketTransform', () => {
         moving_avg: {
           buckets_path: '1',
           model: 'simple',
-          gap_policy: 'skip'
-        }
+          gap_policy: 'skip',
+        },
       });
     });
 
@@ -341,7 +330,7 @@ describe('bucketTransform', () => {
         id: '2',
         type: 'moving_average',
         field: '1',
-        predict: 10
+        predict: 10,
       };
       const metrics = [{ id: '1', type: 'avg', field: 'cpu.pct' }, metric];
       const fn = bucketTransform.moving_average;
@@ -350,8 +339,8 @@ describe('bucketTransform', () => {
           buckets_path: '1',
           model: 'simple',
           gap_policy: 'skip',
-          predict: 10
-        }
+          predict: 10,
+        },
       });
     });
 
@@ -363,7 +352,7 @@ describe('bucketTransform', () => {
         model: 'holt_winters',
         window: 10,
         minimize: 1,
-        settings: 'alpha=0.9 beta=0.5'
+        settings: 'alpha=0.9 beta=0.5',
       };
       const metrics = [{ id: '1', type: 'avg', field: 'cpu.pct' }, metric];
       const fn = bucketTransform.moving_average;
@@ -376,21 +365,19 @@ describe('bucketTransform', () => {
           minimize: true,
           settings: {
             alpha: 0.9,
-            beta: 0.5
-          }
-        }
+            beta: 0.5,
+          },
+        },
       });
     });
 
     it('throws error if type is missing', () => {
-      const run = () =>
-        bucketTransform.moving_average({ id: 'test', field: 'cpu.pct' });
+      const run = () => bucketTransform.moving_average({ id: 'test', field: 'cpu.pct' });
       expect(run).to.throw(Error, 'Metric missing type');
     });
 
     it('throws error if field is missing', () => {
-      const run = () =>
-        bucketTransform.moving_average({ id: 'test', type: 'moving_average' });
+      const run = () => bucketTransform.moving_average({ id: 'test', type: 'moving_average' });
       expect(run).to.throw(Error, 'Metric missing field');
     });
   });
@@ -401,24 +388,24 @@ describe('bucketTransform', () => {
         id: '2',
         type: 'calculation',
         script: 'params.idle != null ? 1 - params.idle : 0',
-        variables: [{ name: 'idle', field: '1' }]
+        variables: [{ name: 'idle', field: '1' }],
       };
       const metrics = [{ id: '1', type: 'avg', field: 'cpu.idle.pct' }, metric];
       const fn = bucketTransform.calculation;
       expect(fn(metric, metrics, '10s')).is.eql({
         bucket_script: {
           buckets_path: {
-            idle: '1'
+            idle: '1',
           },
           gap_policy: 'skip',
           script: {
             source: 'params.idle != null ? 1 - params.idle : 0',
             lang: 'painless',
             params: {
-              _interval: 10000
-            }
-          }
-        }
+              _interval: 10000,
+            },
+          },
+        },
       });
     });
 
@@ -427,7 +414,7 @@ describe('bucketTransform', () => {
         bucketTransform.calculation({
           id: 'test',
           type: 'calculation',
-          script: 'params.idle != null ? 1 - params.idle : null'
+          script: 'params.idle != null ? 1 - params.idle : null',
         });
       expect(run).to.throw(Error, 'Metric missing variables');
     });
@@ -437,7 +424,7 @@ describe('bucketTransform', () => {
         bucketTransform.calculation({
           id: 'test',
           type: 'calculation',
-          variables: [{ field: '1', name: 'idle' }]
+          variables: [{ field: '1', name: 'idle' }],
         });
       expect(run).to.throw(Error, 'Metric missing script');
     });
@@ -448,21 +435,21 @@ describe('bucketTransform', () => {
       const metric = {
         id: '2',
         type: 'positive_only',
-        field: '1'
+        field: '1',
       };
       const metrics = [{ id: '1', type: 'avg', field: 'cpu.idle.pct' }, metric];
       const fn = bucketTransform.positive_only;
       expect(fn(metric, metrics, '10s')).is.eql({
         bucket_script: {
           buckets_path: {
-            value: '1'
+            value: '1',
           },
           gap_policy: 'skip',
           script: {
             source: 'params.value > 0.0 ? params.value : 0.0',
-            lang: 'painless'
-          }
-        }
+            lang: 'painless',
+          },
+        },
       });
     });
   });
