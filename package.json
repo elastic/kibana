@@ -244,7 +244,7 @@
     "type-detect": "^4.0.8",
     "ui-select": "0.19.6",
     "url-loader": "2.0.0",
-    "uuid": "3.0.1",
+    "uuid": "3.3.2",
     "val-loader": "^1.1.1",
     "validate-npm-package-name": "2.2.2",
     "vega-lib": "4.3.0",
