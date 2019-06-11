@@ -63,22 +63,36 @@ test('<Provider> passes state to <Consumer>', () => {
   expect(container!.innerHTML).toBe('world');
 });
 
+interface State1 {
+  hello: string;
+}
+
+interface Props1 {
+  message: string;
+  stop: '.' | '!' | '?';
+}
+
 test('<Provider> passes state to connect()()', () => {
-  const store = createStore({ hello: 'Bob' });
+  const store = createStore<State1>({ hello: 'Bob' });
   const { Provider, connect } = createContext(store);
 
-  const Demo: React.FC<{ message: string }> = ({ message }) => <>{message}</>;
-  const mergeProps = ({ hello }: any) => ({ message: hello });
-  const DemoConnected: React.FC<{}> = connect(mergeProps)(Demo) as any;
+  const Demo: React.FC<Props1> = ({ message, stop }) => (
+    <>
+      {message}
+      {stop}
+    </>
+  );
+  const mergeProps = ({ hello }: State1) => ({ message: hello });
+  const DemoConnected = connect<Props1, 'message'>(mergeProps)(Demo);
 
   ReactDOM.render(
     <Provider>
-      <DemoConnected />
+      <DemoConnected stop="?" />
     </Provider>,
     container
   );
 
-  expect(container!.innerHTML).toBe('Bob');
+  expect(container!.innerHTML).toBe('Bob?');
 });
 
 test('context receives Redux store', () => {

@@ -25,11 +25,15 @@ import { AppStore } from './types';
 // NOTE: Types in `react-redux` seem to be quite off compared to reality
 // NOTE: that's why a lot of `any`s below.
 
-export type MapStateToProps<State extends {}, Props extends {}> = (state: State) => Partial<Props>;
-
 export interface ConsumerProps<State> {
   children: (state: State) => React.ReactChild;
 }
+
+export type MapStateToProps<State extends {}, StateProps extends {}> = (state: State) => StateProps;
+
+export type Connect<State extends {}> = <Props extends {}, StatePropKeys extends keyof Props>(
+  mapStateToProp: MapStateToProps<State, Pick<Props, StatePropKeys>>
+) => (component: React.ComponentType<Props>) => React.FC<Omit<Props, StatePropKeys>>;
 
 const mapDispatchToProps = () => ({});
 const mergeProps: any = (stateProps: any, dispatchProps: any, ownProps: any) => ({
@@ -54,8 +58,8 @@ export const createContext = <State>({ redux }: AppStore<State>) => {
     });
 
   const options: any = { context };
-  const connect = (mapStateToProps: MapStateToProps<State, any>) =>
-    reactReduxConnect(mapStateToProps, mapDispatchToProps, mergeProps, options);
+  const connect: Connect<State> = mapStateToProps =>
+    reactReduxConnect(mapStateToProps, mapDispatchToProps, mergeProps, options) as any;
 
   return {
     Provider,
