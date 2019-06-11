@@ -30,6 +30,7 @@ export function setupDirective() {
       wrapInI18nContext(SearchBar),
       [
         ['query', { watchDepth: 'reference' }],
+        ['savedQuery', { watchDepth: 'reference' }],
         ['store', { watchDepth: 'reference' }],
         ['intl', { watchDepth: 'reference' }],
 

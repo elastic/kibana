@@ -153,6 +153,7 @@ class SearchBarUI extends Component<Props, State> {
         {this.props.showQueryBar ? (
           <QueryBar
             query={this.props.query}
+            savedQuery={this.props.savedQuery}
             screenTitle={this.props.screenTitle}
             onSubmit={this.props.onQuerySubmit}
             appName={this.props.appName}

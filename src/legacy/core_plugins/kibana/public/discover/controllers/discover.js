@@ -252,6 +252,7 @@ function discoverController(
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.refreshInterval = timefilter.getRefreshInterval();
+  $scope.savedQuery = $route.current.locals.savedQuery;
 
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';

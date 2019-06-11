@@ -19,7 +19,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { SFC } from 'react';
+import React, { FunctionComponent } from 'react';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 
 function getEuiIconType(type: string) {
@@ -48,7 +48,7 @@ interface Props {
   ariaId: string;
 }
 
-export const SuggestionComponent: SFC<Props> = props => {
+export const SuggestionComponent: FunctionComponent<Props> = props => {
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div

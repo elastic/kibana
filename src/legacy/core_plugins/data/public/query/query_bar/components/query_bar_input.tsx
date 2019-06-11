@@ -41,11 +41,14 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
+import { SavedQueryRow } from './saved_query_row';
+import { SavedQuery } from '../../../search/search_bar';
 
 interface Props {
   indexPatterns: Array<IndexPattern | string>;
   intl: InjectedIntl;
   query: Query;
+  savedQuery: SavedQuery;
   appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -516,7 +519,7 @@ export class QueryBarInputUI extends Component<Props, State> {
             onClick={this.onClickSuggestion}
             onMouseEnter={this.onMouseEnterSuggestion}
             loadMore={this.increaseLimit}
-            append={<div style={{ padding: '20px', fontWeight: 'bold' }}>Saved Query Title</div>}
+            append={<SavedQueryRow savedQuery={this.props.savedQuery} />}
           />
         </div>
       </EuiOutsideClickDetector>

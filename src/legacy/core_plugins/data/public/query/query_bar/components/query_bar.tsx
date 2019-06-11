@@ -41,6 +41,7 @@ import { QueryBarInput } from './query_bar_input';
 
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
+import { SavedQuery } from '../../../search/search_bar';
 
 const config = chrome.getUiSettingsClient();
 
@@ -51,6 +52,7 @@ interface DateRange {
 
 interface Props {
   query: Query;
+  savedQuery: SavedQuery;
   onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
@@ -255,6 +257,7 @@ export class QueryBarUI extends Component<Props, State> {
             onChange={this.onChange}
             onSubmit={this.onInputSubmit}
             persistedLog={this.persistedLog}
+            savedQuery={this.props.savedQuery}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>

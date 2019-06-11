@@ -17,27 +17,17 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { Query } from '../../query/query_bar';
+import React, { FunctionComponent } from 'react';
+import { SavedQuery } from '../../../search/search_bar';
 
-export { SearchBar } from './components';
-
-// @ts-ignore
-export { setupDirective } from './directive';
-
-interface RefreshInterval {
-  pause: boolean;
-  value: number;
+interface Props {
+  savedQuery: SavedQuery;
 }
 
-export interface SavedQuery {
-  title: string;
-  description: string;
-  query: Query;
-  filters: Filter[];
-  timefilter: {
-    timeFrom: string;
-    timeTo: string;
-    refreshInterval: RefreshInterval;
-  };
-}
+export const SavedQueryRow: FunctionComponent<Props> = props => {
+  return (
+    <div style={{ padding: '20px', fontWeight: 'bold' }}>
+      {props.savedQuery ? props.savedQuery.title : 'Manage Saved Queries'}
+    </div>
+  );
+};
