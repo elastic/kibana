@@ -11,6 +11,7 @@ import { Location, History } from 'history';
 import { MemoryRouter, Router } from 'react-router-dom';
 import { IUrlParams } from '../types';
 import { tick } from '../../../utils/testHelpers';
+import { getParsedDate } from '../helpers';
 
 function mountParams(location: Location) {
   return mount(
@@ -82,6 +83,21 @@ describe('UrlParamsContext', () => {
     expect(params.end).toEqual('2009-04-10T12:00:00.000Z');
   });
 
+  it('should parse relative time ranges on mount', () => {
+    const location = {
+      pathname: '/test/updated',
+      search: '?rangeFrom=now-1d%2Fd&rangeTo=now-1d%2Fd&transactionId=UPDATED'
+    } as Location;
+
+    const wrapper = mountParams(location);
+
+    // force an update
+    wrapper.setProps({ abc: 123 });
+    const params = getDataFromOutput(wrapper);
+    expect(params.start).toEqual(getParsedDate('now-1d/d'));
+    expect(params.end).toEqual(getParsedDate('now-1d/d', { roundUp: true }));
+  });
+
   it('should refresh the time range with new values', async () => {
     const calls = [];
     const history = ({
@@ -129,5 +145,48 @@ describe('UrlParamsContext', () => {
     const params = getDataFromOutput(wrapper);
     expect(params.start).toEqual('2005-09-20T12:00:00.000Z');
     expect(params.end).toEqual('2005-10-21T12:00:00.000Z');
+  });
+
+  it('should refresh the time range with new values if time range is relative', async () => {
+    const history = ({
+      location: {
+        pathname: '/test'
+      },
+      listen: jest.fn()
+    } as unknown) as History;
+
+    const wrapper = mount(
+      <Router history={history}>
+        <UrlParamsProvider>
+          <UrlParamsContext.Consumer>
+            {({ urlParams, refreshTimeRange }) => {
+              return (
+                <React.Fragment>
+                  <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
+                  <button
+                    onClick={() =>
+                      refreshTimeRange({
+                        rangeFrom: 'now-1d/d',
+                        rangeTo: 'now-1d/d'
+                      })
+                    }
+                  />
+                </React.Fragment>
+              );
+            }}
+          </UrlParamsContext.Consumer>
+        </UrlParamsProvider>
+      </Router>
+    );
+
+    await tick();
+
+    wrapper.find('button').simulate('click');
+
+    await tick();
+
+    const params = getDataFromOutput(wrapper);
+    expect(params.start).toEqual('2000-06-13T22:00:00.000Z');
+    expect(params.end).toEqual('2000-06-14T21:59:59.999Z');
   });
 });
