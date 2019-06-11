@@ -9,6 +9,7 @@ import { UrlParamsContext, UrlParamsProvider } from '..';
 import { mount } from 'enzyme';
 import { Location, History } from 'history';
 import { MemoryRouter, Router } from 'react-router-dom';
+import moment from 'moment-timezone';
 import { IUrlParams } from '../types';
 import { tick } from '../../../utils/testHelpers';
 import { getParsedDate } from '../helpers';
@@ -32,6 +33,14 @@ function getDataFromOutput(wrapper: ReturnType<typeof mount>) {
 }
 
 describe('UrlParamsContext', () => {
+  beforeEach(() => {
+    moment.tz.setDefault('Etc/GMT');
+  });
+
+  afterEach(() => {
+    moment.tz.setDefault('');
+  });
+
   it('should have default params', () => {
     const location = { pathname: '/test/pathname' } as Location;
 
@@ -155,6 +164,10 @@ describe('UrlParamsContext', () => {
       listen: jest.fn()
     } as unknown) as History;
 
+    jest
+      .spyOn(Date, 'now')
+      .mockImplementation(() => new Date('2000-06-15T12:00:00Z').getTime());
+
     const wrapper = mount(
       <Router history={history}>
         <UrlParamsProvider>
@@ -186,7 +199,7 @@ describe('UrlParamsContext', () => {
     await tick();
 
     const params = getDataFromOutput(wrapper);
-    expect(params.start).toEqual('2000-06-13T22:00:00.000Z');
-    expect(params.end).toEqual('2000-06-14T21:59:59.999Z');
+    expect(params.start).toEqual('2000-06-14T00:00:00.000Z');
+    expect(params.end).toEqual('2000-06-14T23:59:59.999Z');
   });
 });
