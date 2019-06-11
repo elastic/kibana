@@ -6,7 +6,6 @@
 
 
 import { i18n } from '@kbn/i18n';
-import { ML_CONFIG_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
@@ -328,24 +327,11 @@ export function jobsProvider(callWithRequest) {
   // e.g. *_low_request_rate_ecs
   async function jobsExist(jobIds = []) {
     // Get the list of job IDs.
-    // Use size of 10000, matching anomaly_detectors endpoint.
-    const maxJobsSize = 10000;
-    const resp = await callWithRequest('search', {
-      index: ML_CONFIG_INDEX_PATTERN,
-      size: maxJobsSize,
-      body: {
-        _source: 'job_id',
-        query: {
-          term: { job_type: 'anomaly_detector' }
-        }
-      }
-    });
+    const jobsInfo = await callWithRequest('ml.jobs', { jobId: jobIds });
 
     const results = {};
-    let allJobIds = [];
-    if (resp.hits.total.value > 0) {
-      const hits = resp.hits.hits;
-      allJobIds = hits.map(hit => hit._source.job_id);
+    if (jobsInfo.count > 0) {
+      const allJobIds = jobsInfo.jobs.map(job => job.job_id);
 
       // Check if each of the supplied IDs match existing jobs.
       jobIds.forEach((jobId) => {
