@@ -10,7 +10,7 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
 
-  describe('elasticsearch document layer', () => {
+  describe('search hits', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('document example');
     });
