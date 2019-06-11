@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 
 import { UncommonProcessesData, UncommonProcessesEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
@@ -75,7 +75,7 @@ export const getHits = (
 export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>) =>
   buckets.map(bucket => ({
     id: [bucket.key],
-    name: bucket.host.hits.hits[0]._source.host.name,
+    name: get('host.name', bucket.host.hits.hits[0]._source),
   }));
 
 export const formatUncommonProcessesData = (
