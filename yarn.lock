@@ -27821,10 +27821,10 @@ vega-scenegraph@^3.2.3:
     vega-loader "^3.0.1"
     vega-util "^1.7.0"
 
-vega-schema-url-parser@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/vega-schema-url-parser/-/vega-schema-url-parser-1.0.0.tgz#fc17631e354280d663ed39e3fa8eddb62145402e"
-  integrity sha512-pIG9Ox6fwaveiAntC9FxjpIT2GlSP/CruJtJxrUk4OdV624p9OC5KHfA3AUWOcVv3GddRO6FaQaZ6N6k9cD1rA==
+vega-schema-url-parser@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/vega-schema-url-parser/-/vega-schema-url-parser-1.1.0.tgz#39168ec04e5468ce278a06c16ec0d126035a85b5"
+  integrity sha512-Tc85J2ofMZZOsxiqDM9sbvfsa+Vdo3GwNLjEEsPOsCDeYqsUHKAlc1IpbbhPLZ6jusyM9Lk0e1izF64GGklFDg==
 
 vega-spec-injector@^0.0.2:
   version "0.0.2"
