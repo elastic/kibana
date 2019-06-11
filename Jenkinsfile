@@ -4,20 +4,21 @@ pipeline {
     BASE_DIR = "."
   }
   stages {
-    stage('Checkout') {
+    stage('Build OSS Distro') {
       steps {
-        echo 'Building..'
-        // git 'git@github.com:elastic/kibana.git'
+        echo 'Building OSS Distro'
+        echo 'Store OSS Distro'
       }
     }
-    stage('Test') {
+    stage('Build Default Distro') {
       steps {
-        echo 'Testing..'
+        echo 'Building Default Distro' 
+        echo 'Store Default Distro'
       }
     }
-    stage('Deploy') {
+    stage('Launch Workers') {
       steps {
-        echo 'Deploying....'
+        echo 'Launching N workers'
       }
     }
   }
