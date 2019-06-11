@@ -30,4 +30,11 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       isBucketed: false,
     };
   },
+  toEsAggsConfig: (column, columnId) => ({
+    id: columnId,
+    enabled: true,
+    type: 'count',
+    schema: 'metric',
+    params: {},
+  }),
 };

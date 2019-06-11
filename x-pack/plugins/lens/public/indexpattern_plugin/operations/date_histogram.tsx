@@ -59,6 +59,25 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       },
     };
   },
+  toEsAggsConfig: (column, columnId) => ({
+    id: columnId,
+    enabled: true,
+    type: 'date_histogram',
+    schema: 'segment',
+    params: {
+      field: column.sourceField,
+      // TODO: This range should be passed in from somewhere else
+      timeRange: {
+        from: 'now-1d',
+        to: 'now',
+      },
+      useNormalizedEsInterval: true,
+      interval: column.params.interval,
+      drop_partials: false,
+      min_doc_count: 1,
+      extended_bounds: {},
+    },
+  }),
   paramEditor: ({ state, setState, columnId }) => {
     const column = state.columns[columnId] as DateHistogramIndexPatternColumn;
     const intervals = ['M', 'w', 'd', 'h'];

@@ -60,6 +60,23 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       },
     };
   },
+  toEsAggsConfig: (column, columnId) => ({
+    id: columnId,
+    enabled: true,
+    type: 'terms',
+    schema: 'segment',
+    params: {
+      field: column.sourceField,
+      orderBy:
+        column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
+      order: 'desc',
+      size: column.params.size,
+      otherBucket: false,
+      otherBucketLabel: 'Other',
+      missingBucket: false,
+      missingBucketLabel: 'Missing',
+    },
+  }),
   paramEditor: ({ state, setState, columnId: currentColumnId }) => {
     const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {

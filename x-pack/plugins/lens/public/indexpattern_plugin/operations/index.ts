@@ -65,6 +65,7 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn = BaseInde
     field?: IndexPatternField
   ) => C;
   paramEditor?: React.ComponentType<ParamEditorProps>;
+  toEsAggsConfig: (column: C, columnId: string) => unknown;
 }
 
 export function getOperationDisplay() {

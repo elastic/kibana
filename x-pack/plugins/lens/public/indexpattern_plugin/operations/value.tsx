@@ -43,4 +43,7 @@ export const valueOperation: OperationDefinition<ValueIndexPatternColumn> = {
       isBucketed: false,
     };
   },
+  toEsAggsConfig() {
+    throw new Error('Invariant: The value operation does not have an esaggs config');
+  },
 };

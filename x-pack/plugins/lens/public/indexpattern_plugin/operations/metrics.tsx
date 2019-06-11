@@ -48,6 +48,15 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         isBucketed: false,
       } as T;
     },
+    toEsAggsConfig: (column, columnId) => ({
+      id: columnId,
+      enabled: true,
+      type: column.operationType,
+      schema: 'metric',
+      params: {
+        field: column.sourceField,
+      },
+    }),
   };
   return operationDefinition;
 }
