@@ -13,7 +13,7 @@ import {
   listAlertTypesRoute,
   updateAlertRoute,
 } from './routes';
-import { AlertingPlugin } from './types';
+import { AlertingPlugin, Services } from './types';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertsClient } from './alerts_client';
 
@@ -23,8 +23,13 @@ export function init(server: Legacy.Server) {
     callWithInternalUser
   );
 
+  const services: Services = {
+    log: server.log,
+  };
+
   const { taskManager } = server;
   const alertTypeRegistry = new AlertTypeRegistry({
+    services,
     taskManager: taskManager!,
     fireAction: server.plugins.actions!.fire,
     savedObjectsClient: savedObjectsClientWithInternalUser,
@@ -43,6 +48,7 @@ export function init(server: Legacy.Server) {
     const request = this;
     const savedObjectsClient = request.getSavedObjectsClient();
     const alertsClient = new AlertsClient({
+      services,
       savedObjectsClient,
       alertTypeRegistry,
       taskManager: taskManager!,

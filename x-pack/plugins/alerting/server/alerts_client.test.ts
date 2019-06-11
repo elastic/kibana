@@ -15,6 +15,9 @@ const alertTypeRegistry = alertTypeRegistryMock.create();
 const savedObjectsClient = SavedObjectsClientMock.create();
 
 const alertsClientParams = {
+  services: {
+    log: jest.fn(),
+  },
   taskManager,
   alertTypeRegistry,
   savedObjectsClient,
@@ -289,6 +292,58 @@ Object {
 Array [
   "alert",
   "1",
+]
+`);
+  });
+
+  test('returns task manager error if cleanup fails, logs to console', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const data = getMockData();
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      description: 'Test',
+      async execute() {},
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        interval: 10000,
+        alertTypeParams: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockRejectedValueOnce(new Error('Task manager error'));
+    savedObjectsClient.delete.mockRejectedValueOnce(new Error('Saved object delete error'));
+    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Task manager error"`
+    );
+    expect(alertsClientParams.services.log).toHaveBeenCalledTimes(1);
+    expect(alertsClientParams.services.log.mock.calls[0]).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "alerting",
+    "error",
+  ],
+  "Failed to cleanup alert \\"1\\" after scheduling task failed",
 ]
 `);
   });

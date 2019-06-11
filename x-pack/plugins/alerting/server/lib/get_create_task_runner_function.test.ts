@@ -19,6 +19,9 @@ const mockedLastRunAt = new Date('2019-06-03T18:55:20.982Z');
 const savedObjectsClient = SavedObjectsClientMock.create();
 
 const getCreateTaskRunnerFunctionParams = {
+  services: {
+    log: jest.fn(),
+  },
   alertType: {
     id: 'test',
     description: 'My test alert',
@@ -105,6 +108,7 @@ Array [
     },
     "services": Object {
       "alertInstanceFactory": [Function],
+      "log": [MockFunction],
     },
     "state": Object {},
   },

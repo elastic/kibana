@@ -8,7 +8,7 @@ import { Legacy } from 'kibana';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createFireFunction } from './create_fire_function';
-import { ActionsPlugin } from './types';
+import { ActionsPlugin, Services } from './types';
 import {
   createRoute,
   deleteRoute,
@@ -33,11 +33,13 @@ export function init(server: Legacy.Server) {
     attributesToExcludeFromAAD: new Set(['description']),
   });
 
+  const services: Services = {
+    log: server.log,
+  };
+
   const { taskManager } = server;
   const actionTypeRegistry = new ActionTypeRegistry({
-    services: {
-      log: server.log,
-    },
+    services,
     taskManager: taskManager!,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
   });

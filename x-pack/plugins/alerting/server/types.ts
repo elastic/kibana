@@ -12,7 +12,11 @@ export type State = Record<string, any>;
 export type Context = Record<string, any>;
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 
-export interface AlertServices {
+export interface Services {
+  log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
+}
+
+export interface AlertServices extends Services {
   alertInstanceFactory: (id: string) => AlertInstance;
 }
 

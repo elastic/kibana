@@ -6,12 +6,13 @@
 
 import { omit } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/legacy/server/saved_objects';
-import { Alert, RawAlert, AlertTypeRegistry, AlertAction } from './types';
+import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Services } from './types';
 import { TaskManager } from '../../task_manager';
 import { TASK_MANAGER_SCOPE } from '../common/constants';
 import { throwIfAlertTypeParamsInvalid } from './lib';
 
 interface ConstructorOptions {
+  services: Services;
   taskManager: TaskManager;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
@@ -51,11 +52,18 @@ interface UpdateOptions {
 }
 
 export class AlertsClient {
+  private services: Services;
   private taskManager: TaskManager;
   private savedObjectsClient: SavedObjectsClientContract;
   private alertTypeRegistry: AlertTypeRegistry;
 
-  constructor({ alertTypeRegistry, savedObjectsClient, taskManager }: ConstructorOptions) {
+  constructor({
+    alertTypeRegistry,
+    savedObjectsClient,
+    taskManager,
+    services,
+  }: ConstructorOptions) {
+    this.services = services;
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
@@ -77,7 +85,15 @@ export class AlertsClient {
       scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert);
     } catch (e) {
       // Cleanup data, something went wrong scheduling the task
-      await this.savedObjectsClient.delete('alert', createdAlert.id);
+      try {
+        await this.savedObjectsClient.delete('alert', createdAlert.id);
+      } catch (err) {
+        // Skip the cleanup error and throw the task manager error to avoid confusion
+        this.services.log(
+          ['alerting', 'error'],
+          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed`
+        );
+      }
       throw e;
     }
     await this.savedObjectsClient.update(

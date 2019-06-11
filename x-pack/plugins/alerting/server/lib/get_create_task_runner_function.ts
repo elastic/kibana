@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
 import { ActionsPlugin } from '../../../actions';
-import { AlertType } from '../types';
+import { AlertType, Services, AlertServices } from '../types';
 import { TaskInstance } from '../../../task_manager';
 import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
@@ -14,6 +14,7 @@ import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 
 interface CreateTaskRunnerFunctionOptions {
+  services: Services;
   alertType: AlertType;
   fireAction: ActionsPlugin['fire'];
   savedObjectsClient: SavedObjectsClientContract;
@@ -24,6 +25,7 @@ interface TaskRunnerOptions {
 }
 
 export function getCreateTaskRunnerFunction({
+  services,
   alertType,
   fireAction,
   savedObjectsClient,
@@ -40,7 +42,8 @@ export function getCreateTaskRunnerFunction({
         }
         const alertInstanceFactory = createAlertInstanceFactory(alertInstances);
 
-        const services = {
+        const alertTypeServices: AlertServices = {
+          ...services,
           alertInstanceFactory,
         };
 
@@ -52,7 +55,7 @@ export function getCreateTaskRunnerFunction({
 
         const alertTypeState = await alertType.execute({
           range,
-          services,
+          services: alertTypeServices,
           params: alertSavedObject.attributes.alertTypeParams,
           state: taskInstance.state.alertTypeState || {},
         });

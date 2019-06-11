@@ -15,6 +15,9 @@ import { taskManagerMock } from '../../task_manager/task_manager.mock';
 const taskManager = taskManagerMock.create();
 
 const alertTypeRegistryParams = {
+  services: {
+    log: jest.fn(),
+  },
   taskManager,
   fireAction: jest.fn(),
   savedObjectsClient: SavedObjectsClientMock.create(),
