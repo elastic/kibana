@@ -17,7 +17,7 @@ kibana-ciGroup*)
   export CI_GROUP="${JOB##kibana-ciGroup}"
   ./test/scripts/jenkins_ci_group.sh
   ;;
-x-pack-intake*)
+x-pack-intake)
   ./test/scripts/jenkins_xpack.sh
   ;;
 x-pack-ciGroup*)
