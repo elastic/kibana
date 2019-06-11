@@ -27,7 +27,9 @@ describe('brushHandler', () => {
   beforeEach(() => {
     mockTimefilter = {
       time: {},
-      setTime: function (time) { this.time = time; }
+      setTime: function(time) {
+        this.time = time;
+      },
     };
     onBrush = createBrushHandler(mockTimefilter);
   });
@@ -40,5 +42,4 @@ describe('brushHandler', () => {
     expect(mockTimefilter.time.to).toEqual(moment(to).toISOString());
     expect(mockTimefilter.time.mode).toEqual('absolute');
   });
-
 });

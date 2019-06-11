@@ -21,7 +21,6 @@ import { expect } from 'chai';
 import { createTickFormatter } from '../tick_formatter';
 
 describe('createTickFormatter(format, template)', () => {
-
   it('returns a number with two decimal place by default', () => {
     const fn = createTickFormatter();
     expect(fn(1.5556)).to.equal('1.56');
@@ -29,17 +28,17 @@ describe('createTickFormatter(format, template)', () => {
 
   it('returns a percent with percent formatter', () => {
     const config = {
-      'format:percent:defaultPattern': '0.[00]%'
+      'format:percent:defaultPattern': '0.[00]%',
     };
-    const fn = createTickFormatter('percent', null, (key) => config[key]);
+    const fn = createTickFormatter('percent', null, key => config[key]);
     expect(fn(0.5556)).to.equal('55.56%');
   });
 
   it('returns a byte formatted string with byte formatter', () => {
     const config = {
-      'format:bytes:defaultPattern': '0.0b'
+      'format:bytes:defaultPattern': '0.0b',
     };
-    const fn = createTickFormatter('bytes', null, (key) => config[key]);
+    const fn = createTickFormatter('bytes', null, key => config[key]);
     expect(fn(1500 ^ 10)).to.equal('1.5KB');
   });
 
@@ -50,9 +49,9 @@ describe('createTickFormatter(format, template)', () => {
 
   it('returns a located string with custom locale setting', () => {
     const config = {
-      'format:number:defaultLocale': 'fr'
+      'format:number:defaultLocale': 'fr',
     };
-    const fn = createTickFormatter('0,0.0', null, (key) => config[key]);
+    const fn = createTickFormatter('0,0.0', null, key => config[key]);
     expect(fn(1500)).to.equal('1 500,0');
   });
 
@@ -73,9 +72,9 @@ describe('createTickFormatter(format, template)', () => {
 
   it('returns formatted value if passed a bad template', () => {
     const config = {
-      'format:number:defaultPattern': '0,0.[00]'
+      'format:number:defaultPattern': '0,0.[00]',
     };
-    const fn = createTickFormatter('number', '{{value', (key) => config[key]);
+    const fn = createTickFormatter('number', '{{value', key => config[key]);
     expect(fn(1.5556)).to.equal('1.56');
   });
 });

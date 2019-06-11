@@ -69,7 +69,7 @@ export class VisEditor extends Component {
     this.props.vis.updateState();
   }, VIS_STATE_DEBOUNCE_DELAY);
 
-  isValidKueryQuery = (filterQuery) => {
+  isValidKueryQuery = filterQuery => {
     if (filterQuery && filterQuery.language === 'kuery') {
       try {
         fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
@@ -99,11 +99,12 @@ export class VisEditor extends Component {
     if (this.props.isEditorMode) {
       const extractedIndexPatterns = extractIndexPatterns(nextModel);
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        fetchFields(extractedIndexPatterns)
-          .then(visFields => this.setState({
+        fetchFields(extractedIndexPatterns).then(visFields =>
+          this.setState({
             visFields,
             extractedIndexPatterns,
-          }));
+          })
+        );
       }
     }
 
@@ -118,7 +119,7 @@ export class VisEditor extends Component {
     this.setState({ dirty: false });
   };
 
-  handleAutoApplyToggle = (event) => {
+  handleAutoApplyToggle = event => {
     this.setState({ autoApply: event.target.checked });
   };
 
@@ -150,7 +151,7 @@ export class VisEditor extends Component {
       return (
         <div className="tvbEditor" data-test-subj="tvbVisEditor">
           <div className="tvbEditor--hideForReporting">
-            <VisPicker model={model} onChange={this.handleChange}/>
+            <VisPicker model={model} onChange={this.handleChange} />
           </div>
           <VisEditorVisualization
             dirty={this.state.dirty}

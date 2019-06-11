@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export const getStackAccessors = stack => stack ? [0] : null;  // todo: props.stack ???
+export const getStackAccessors = stack => (stack ? [0] : null); // todo: props.stack ???

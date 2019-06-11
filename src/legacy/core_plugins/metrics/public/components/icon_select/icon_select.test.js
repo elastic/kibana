@@ -29,7 +29,7 @@ describe('src/legacy/core_plugins/metrics/public/components/icon_select/icon_sel
       expect(wrapper).toMatchSnapshot();
     });
 
-    test('should put the default value if the passed one does\'t match with icons collection', () => {
+    test("should put the default value if the passed one does't match with icons collection", () => {
       const wrapper = shallow(<IconSelect onChange={jest.fn()} value="unknown" />);
 
       expect(wrapper.prop('selectedOptions')).toEqual([ICONS[0]]);

@@ -56,9 +56,7 @@ export function BarSeriesDecorator({
     ...barSeriesStyle,
   };
 
-  return (
-    <BarSeries {...seriesSettings} />
-  );
+  return <BarSeries {...seriesSettings} />;
 }
 
 BarSeriesDecorator.propTypes = PanelEntities.BarChart;

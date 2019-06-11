@@ -59,7 +59,10 @@ export class TimeseriesVisualization extends Component {
   };
 
   componentDidUpdate() {
-    if (this.showToastNotification && this.notificationReason !== this.showToastNotification.reason) {
+    if (
+      this.showToastNotification &&
+      this.notificationReason !== this.showToastNotification.reason
+    ) {
       if (this.notification) {
         toastNotifications.remove(this.notification);
       }
@@ -95,14 +98,18 @@ export class TimeseriesVisualization extends Component {
         icon,
         data: annotationData.map(({ docs, ...rest }) => ({
           ...rest,
-          docs: docs.map(applyDocToTemplate)
-        }))
+          docs: docs.map(applyDocToTemplate),
+        })),
       };
     });
 
     const seriesModel = model.series.map(s => cloneDeep(s)).filter(s => !s.hidden);
     const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
-    const tickFormatter = createTickFormatter(get(firstSeries, 'formatter'), get(firstSeries, 'value_template'), this.props.getConfig);
+    const tickFormatter = createTickFormatter(
+      get(firstSeries, 'formatter'),
+      get(firstSeries, 'value_template'),
+      this.props.getConfig
+    );
 
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
     const mainAxisId = yAxisIdGenerator('main');
@@ -123,7 +130,11 @@ export class TimeseriesVisualization extends Component {
     seriesModel.forEach(seriesGroup => {
       const seriesGroupId = seriesGroup.id;
       const seriesData = series.filter(r => startsWith(r.id, seriesGroup.id));
-      const seriesGroupTickFormatter = createTickFormatter(seriesGroup.formatter, seriesGroup.value_template, this.props.getConfig);
+      const seriesGroupTickFormatter = createTickFormatter(
+        seriesGroup.formatter,
+        seriesGroup.value_template,
+        this.props.getConfig
+      );
 
       seriesData.forEach(seriesDataRow => {
         seriesDataRow.tickFormatter = seriesGroupTickFormatter;
@@ -189,7 +200,7 @@ export class TimeseriesVisualization extends Component {
 
     return (
       <div className="tvbVis" style={style}>
-        <TimeSeries {...params}/>
+        <TimeSeries {...params} />
       </div>
     );
   }
@@ -200,5 +211,5 @@ TimeseriesVisualization.propTypes = {
   onBrush: PropTypes.func,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
-  getConfig: PropTypes.func
+  getConfig: PropTypes.func,
 };

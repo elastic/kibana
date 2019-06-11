@@ -31,7 +31,7 @@ import {
   LIGHT_THEME,
   getAnnotationId,
   AnnotationDomainTypes,
-  LineAnnotation
+  LineAnnotation,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
@@ -42,7 +42,7 @@ function generateAnnotationData(values) {
   return values.map(({ key, docs }) => ({
     dataValue: key,
     details: docs[0],
-    header: moment(key).format('MMM DD, YYYY hh:mm A')
+    header: moment(key).format('MMM DD, YYYY hh:mm A'),
   }));
 }
 
@@ -56,10 +56,10 @@ export const TimeSeries = ({
   yaxes,
   onBrush,
   xAxisFormatter,
-  annotations
+  annotations,
 }) => {
   return (
-    <Chart renderer="canvas" className="tvbVisTimeSeries" >
+    <Chart renderer="canvas" className="tvbVisTimeSeries">
       <Settings
         showLegend={legend}
         legendPosition={legendPosition}
@@ -68,9 +68,9 @@ export const TimeSeries = ({
         theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
       />
 
-      { annotations.map(({ id, data, icon, color }) => {
+      {annotations.map(({ id, data, icon, color }) => {
         const dataValues = generateAnnotationData(data);
-        const style = { line: { stroke: color, } };
+        const style = { line: { stroke: color } };
 
         return (
           <LineAnnotation
@@ -81,11 +81,11 @@ export const TimeSeries = ({
             marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
             style={style}
           />
-        );})
-      }
+        );
+      })}
 
-      {
-        series.map(({
+      {series.map(
+        ({
           id,
           label,
           bars,
@@ -97,7 +97,7 @@ export const TimeSeries = ({
           groupId,
           color,
           stack,
-          points
+          points,
         }) => {
           if (bars.show) {
             return (
@@ -137,10 +137,10 @@ export const TimeSeries = ({
           }
 
           return null;
-        })
-      }
+        }
+      )}
 
-      { yaxes.map(({ id, groupId, position, tickFormatter, min, max }) => (
+      {yaxes.map(({ id, groupId, position, tickFormatter, min, max }) => (
         <Axis
           key={id}
           groupId={getGroupId(groupId)}
@@ -150,8 +150,8 @@ export const TimeSeries = ({
           showGridLines={showGrid}
           gridLineStyle={GRID_LINE_CONFIG}
           tickFormat={tickFormatter}
-        />))
-      }
+        />
+      ))}
 
       <Axis
         id={getAxisId('bottom')}
@@ -168,7 +168,7 @@ export const TimeSeries = ({
 TimeSeries.defaultProps = {
   showGrid: true,
   legend: true,
-  legendPosition: 'right'
+  legendPosition: 'right',
 };
 
 TimeSeries.propTypes = {

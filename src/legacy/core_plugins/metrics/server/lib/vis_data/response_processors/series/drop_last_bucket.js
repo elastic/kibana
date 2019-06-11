@@ -32,4 +32,3 @@ export function dropLastBucket(resp, panel, series) {
     return next(results);
   };
 }
-

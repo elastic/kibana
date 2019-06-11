@@ -27,7 +27,7 @@ export const CurveType = {
   CURVE_STEP: 6,
   CURVE_STEP_AFTER: 7,
   CURVE_STEP_BEFORE: 8,
-  LINEAR: 9
+  LINEAR: 9,
 };
 
 export const ScaleType = {
@@ -35,7 +35,7 @@ export const ScaleType = {
   Ordinal: 'ordinal',
   Log: 'log',
   Sqrt: 'sqrt',
-  Time: 'time'
+  Time: 'time',
 };
 
 export const getSpecId = x => `id:${x}`;

@@ -38,18 +38,26 @@ export function replaceVars(str, args = {}, vars = {}) {
       const badVar = e.message.split(/"/)[1];
       e.error = {
         caused_by: {
-          reason: i18n.translate('tsvb.replaceVars.errors.unknownVarDescription',
-            { defaultMessage: '{badVar} is an unknown variable', values: { badVar: '{{' + badVar + '}}' } }),
-          title: i18n.translate('tsvb.replaceVars.errors.unknownVarTitle', { defaultMessage: 'Error processing your markdown' })
-        }
+          reason: i18n.translate('tsvb.replaceVars.errors.unknownVarDescription', {
+            defaultMessage: '{badVar} is an unknown variable',
+            values: { badVar: '{{' + badVar + '}}' },
+          }),
+          title: i18n.translate('tsvb.replaceVars.errors.unknownVarTitle', {
+            defaultMessage: 'Error processing your markdown',
+          }),
+        },
       };
     } else {
       e.error = {
         caused_by: {
           reason: i18n.translate('tsvb.replaceVars.errors.markdownErrorDescription', {
-            defaultMessage: 'Please verify you are only using markdown, known variables, and built-in Handlebars expressions' }),
-          title: i18n.translate('tsvb.replaceVars.errors.markdownErrorTitle', { defaultMessage: 'Error processing your markdown' })
-        }
+            defaultMessage:
+              'Please verify you are only using markdown, known variables, and built-in Handlebars expressions',
+          }),
+          title: i18n.translate('tsvb.replaceVars.errors.markdownErrorTitle', {
+            defaultMessage: 'Error processing your markdown',
+          }),
+        },
       };
     }
     return e;

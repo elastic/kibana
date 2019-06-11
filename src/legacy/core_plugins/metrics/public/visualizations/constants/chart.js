@@ -17,12 +17,12 @@
  * under the License.
  */
 
-export const COLORS =  {
+export const COLORS = {
   LINE_COLOR: 'rgba(105,112,125,0.2)',
   TEXT_COLOR: 'rgba(0,0,0,0.4)',
   TEXT_COLOR_REVERSED: 'rgba(255,255,255,0.5)',
   VALUE_COLOR: 'rgba(0,0,0,0.7)',
-  VALUE_COLOR_REVERSED: 'rgba(255,255,255,0.8)'
+  VALUE_COLOR_REVERSED: 'rgba(255,255,255,0.8)',
 };
 
 export const GRID_LINE_CONFIG = {

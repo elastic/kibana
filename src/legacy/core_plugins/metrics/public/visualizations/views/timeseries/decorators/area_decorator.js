@@ -57,9 +57,7 @@ export function AreaSeriesDecorator({
     ...areaSeriesStyle,
   };
 
-  return (
-    <AreaSeries {...seriesSettings} />
-  );
+  return <AreaSeries {...seriesSettings} />;
 }
 
 AreaSeriesDecorator.propTypes = PanelEntities.AreaChart;
