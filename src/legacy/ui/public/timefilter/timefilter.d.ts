@@ -24,9 +24,7 @@ import moment = require('moment');
 // NOTE: These types are somewhat guessed, they may be incorrect.
 
 export interface RefreshInterval {
-  display?: string;
   pause: boolean;
-  section?: string;
   value: number;
 }
 

@@ -18,6 +18,7 @@
  */
 
 import { Filter } from '@kbn/es-query';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
 
 // Should go away soon once everyone imports from kbn/es-query
 export { Filter } from '@kbn/es-query';
@@ -25,11 +26,6 @@ export { Filter } from '@kbn/es-query';
 export interface TimeRange {
   to: string;
   from: string;
-}
-
-export interface RefreshConfig {
-  isPaused: boolean;
-  interval: number;
 }
 
 export interface FilterMeta {
@@ -62,7 +58,7 @@ export interface ContainerState {
 
   filters: Filter[];
 
-  refreshConfig: RefreshConfig;
+  refreshConfig: RefreshInterval;
 
   query: Query;
 
