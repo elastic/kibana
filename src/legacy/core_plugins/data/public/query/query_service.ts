@@ -23,6 +23,7 @@ import {
   QueryBarInput,
   fromUser,
   toUser,
+  getQueryLog,
   setupDirective as setupQueryBarDirective,
 } from './query_bar';
 
@@ -38,6 +39,7 @@ export class QueryService {
       helpers: {
         fromUser,
         toUser,
+        getQueryLog,
       },
       ui: {
         QueryBar,
@@ -53,3 +55,5 @@ export class QueryService {
 
 /** @public */
 export type QuerySetup = ReturnType<QueryService['setup']>;
+
+export { Query } from './query_bar';

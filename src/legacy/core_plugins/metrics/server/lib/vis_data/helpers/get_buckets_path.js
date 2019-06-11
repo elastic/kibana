@@ -54,7 +54,5 @@ export const getBucketsPath = (id, metrics) => {
       break;
   }
 
-
   return bucketsPath;
 };
-

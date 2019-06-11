@@ -37,7 +37,6 @@ const SPLIT_MODES = {
 };
 
 export class Split extends Component {
-
   componentWillReceiveProps(nextProps) {
     const { model } = nextProps;
     if (model.split_mode === 'filters' && !model.split_filters) {
@@ -48,8 +47,8 @@ export class Split extends Component {
             id: uuid.v1(),
             filter: {
               query: '',
-              language: getDefaultQueryLanguage()
-            }
+              language: getDefaultQueryLanguage(),
+            },
           },
         ],
       });
@@ -75,7 +74,8 @@ export class Split extends Component {
 
   render() {
     const { model, panel, uiRestrictions } = this.props;
-    const indexPattern = (model.override_index_pattern && model.series_index_pattern) ||
+    const indexPattern =
+      (model.override_index_pattern && model.series_index_pattern) ||
       (panel.index_pattern || panel.default_index_pattern);
 
     const splitMode = get(this.props, 'model.split_mode', SPLIT_MODES.EVERYTHING);

@@ -43,7 +43,7 @@ class Interactive extends React.Component<{}, { hasButtons: boolean; value: stri
   }
 }
 
-storiesOf('components/ColorManager', module)
+storiesOf('components/Color/ColorManager', module)
   .addParameters({
     info: {
       inline: true,

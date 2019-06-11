@@ -11,9 +11,8 @@ import { Stats } from 'plugins/monitoring/components/beats';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { i18n } from '@kbn/i18n';
-import { injectI18n } from '@kbn/i18n/react';
 
-class ListingUI extends PureComponent {
+export class Listing extends PureComponent {
   getColumns() {
     const { kbnUrl, scope } = this.props.angular;
 
@@ -136,5 +135,3 @@ class ListingUI extends PureComponent {
     );
   }
 }
-
-export const Listing = injectI18n(ListingUI);
