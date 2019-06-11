@@ -20,8 +20,8 @@
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 
 export enum SortDirection {
-  asc,
-  desc,
+  asc = 'asc',
+  desc = 'desc',
 }
 
 /**

@@ -18,14 +18,14 @@
  */
 import { SortDirection } from './sorting';
 
-type InterableValue = number | null;
+export type IntervalValue = number | null;
 
 /**
  * Generate a sequence of pairs from the iterable that looks like
  * `[[x_0, x_1], [x_1, x_2], [x_2, x_3], ..., [x_(n-1), x_n]]`.
  */
-export function* asPairs(iterable: Iterable<InterableValue>): IterableIterator<InterableValue[]> {
-  let currentPair: InterableValue[] = [];
+export function* asPairs(iterable: Iterable<IntervalValue>): IterableIterator<IntervalValue[]> {
+  let currentPair: IntervalValue[] = [];
   for (const value of iterable) {
     currentPair = [...currentPair, value].slice(-2);
     if (currentPair.length === 2) {
@@ -43,7 +43,7 @@ export function generateIntervals(
   startTime: number,
   type: string,
   sort: SortDirection
-): IterableIterator<InterableValue[]> {
+): IterableIterator<IntervalValue[]> {
   const offsetSign =
     (sort === SortDirection.asc && type === 'successors') ||
     (sort === SortDirection.desc && type === 'predecessors')

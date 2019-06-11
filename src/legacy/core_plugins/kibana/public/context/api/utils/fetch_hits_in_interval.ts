@@ -19,6 +19,10 @@
 import { SearchSource } from 'ui/courier';
 import { convertTimeValueToIso } from './date_conversion';
 import { SortDirection } from './sorting';
+import { EsHitRecordList } from '../context';
+import { IntervalValue } from './generate_intervals';
+import { EsQuerySort } from './get_es_query_sort';
+import { EsQuerySearchAfter } from './get_es_query_search_after';
 
 interface RangeQuery {
   format: string;
@@ -27,41 +31,33 @@ interface RangeQuery {
 }
 
 /**
- * Fetch the hits between `(afterTimeValue, tieBreakerValue)` and
- * `endRangeMillis` from the `searchSource` using the given `timeField` and
- * `tieBreakerField` up to a maximum of `maxCount` documents. The
- * documents are sorted by `(timeField, tieBreakerField)` using the
- * `timeSortDirection` for both fields
+ * Fetch the hits between a given `interval` up to a maximum of `maxCount` documents.
+ * The documents are sorted by `sort`
  *
  * The `searchSource` is assumed to have the appropriate index pattern
  * and filters set.
  */
 export async function fetchHitsInInterval(
   searchSource: SearchSource,
-  timeFieldName: string,
-  sort: any,
+  timeField: string,
+  sort: EsQuerySort,
   sortDir: SortDirection,
-  startRangeMillis: number | null,
-  endRangeMillis: number | null,
-  searchAfter: [number | string, number | string],
+  interval: IntervalValue[],
+  searchAfter: EsQuerySearchAfter,
   maxCount: number,
   nanosValue: string
-): Promise<Array<Record<string, any>>> {
+): Promise<EsHitRecordList> {
   const range: RangeQuery = {
     format: 'strict_date_optional_time',
   };
-  if (startRangeMillis) {
-    range[sortDir === SortDirection.asc ? 'gte' : 'lte'] = convertTimeValueToIso(
-      startRangeMillis,
-      nanosValue
-    );
+  const [start, stop] = interval;
+
+  if (start) {
+    range[sortDir === SortDirection.asc ? 'gte' : 'lte'] = convertTimeValueToIso(start, nanosValue);
   }
 
-  if (endRangeMillis) {
-    range[sortDir === SortDirection.asc ? 'lte' : 'gte'] = convertTimeValueToIso(
-      endRangeMillis,
-      nanosValue
-    );
+  if (stop) {
+    range[sortDir === SortDirection.asc ? 'lte' : 'gte'] = convertTimeValueToIso(stop, nanosValue);
   }
   const response = await searchSource
     .setField('size', maxCount)
@@ -70,7 +66,7 @@ export async function fetchHitsInInterval(
         constant_score: {
           filter: {
             range: {
-              [timeFieldName]: range,
+              [timeField]: range,
             },
           },
         },
