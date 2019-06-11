@@ -677,6 +677,25 @@ Collects element filters on the workpad, usually to provide them to a data sourc
 
 *Accepts:* `null`
 
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ *†* 
+
+Alias: `group`
+|`string`
+|The name of the filter group to use
+
+|`ungrouped`
+
+Alias: `nogroup`, `nogroups`
+|`boolean`
+|Don't include filters that belong to groups
+
+Default: `false`
+|===
+
 *Returns:* `filter`
 
 
