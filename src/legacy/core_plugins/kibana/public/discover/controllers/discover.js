@@ -175,21 +175,27 @@ uiRoutes
         if (savedQueryId) {
           return savedObjectsClient.get('query', savedQueryId).then(savedQuery => {
             if (savedQuery.error) return;
+            let filters = savedQuery.attributes.filters;
+            if (filters) {
+              filters = JSON.parse(filters);
+            }
+            let time = savedQuery.attributes.timefilter;
+            if (time) {
+              time = JSON.parse(savedQuery.attributes.timefilter);
 
-            const time = JSON.parse(savedQuery.attributes.timefilter);
+              timefilter.setTime({
+                from: time.timeFrom,
+                to: time.timeTo,
+              });
 
-            timefilter.setTime({
-              from: time.timeFrom,
-              to: time.timeTo,
-            });
-
-            if (time.refreshInterval) {
-              timefilter.setRefreshInterval(time.refreshInterval);
+              if (time.refreshInterval) {
+                timefilter.setRefreshInterval(time.refreshInterval);
+              }
             }
 
             return {
               ...savedQuery.attributes,
-              filters: JSON.parse(savedQuery.attributes.filters),
+              filters: filters,
               timefilter: time,
             };
           });
