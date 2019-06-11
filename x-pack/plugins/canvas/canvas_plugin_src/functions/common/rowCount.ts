@@ -15,10 +15,10 @@ export function rowCount(): ExpressionFunction<'rowCount', Datatable, {}, number
     name: 'rowCount',
     aliases: [],
     type: 'number',
+    help,
     context: {
       types: ['datatable'],
     },
-    help,
     args: {},
     fn: context => context.rows.length,
   };

@@ -39,15 +39,22 @@ export class SearchBar extends React.PureComponent<Props> {
     }
 
     // Update the url and push to history as well.
-    const queries = querystring.parse(history.location.search.replace('?', ''));
+    const previousQueries = querystring.parse(history.location.search.replace('?', ''));
+    const queries: any =
+      repoScopes.length === 0
+        ? {
+            ...previousQueries,
+            q: query,
+          }
+        : {
+            ...previousQueries,
+            q: query,
+            repoScope: repoScopes,
+          };
     history.push(
       url.format({
         pathname: '/search',
-        query: {
-          ...queries,
-          q: query,
-          repoScope: repoScopes,
-        },
+        query: queries,
       })
     );
   };

@@ -11,18 +11,17 @@ import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { banners } from 'ui/notify';
 import { DebounceProvider } from 'ui/debounce';
-import { PathProvider } from 'plugins/xpack_main/services/path';
+import { Path } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { XPackInfoSignatureProvider } from 'plugins/xpack_main/services/xpack_info_signature';
+import { xpackInfoSignature } from 'plugins/xpack_main/services/xpack_info_signature';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const module = uiModules.get('xpack_main', []);
 
 module.factory('checkXPackInfoChange', ($q, Private) => {
   const xpackInfo = Private(XPackInfoProvider);
-  const xpackInfoSignature = Private(XPackInfoSignatureProvider);
   const debounce = Private(DebounceProvider);
-  const isUnauthenticated = Private(PathProvider).isUnauthenticated();
+  const isUnauthenticated = Path.isUnauthenticated();
   let isLicenseExpirationBannerShown = false;
 
   const notifyIfLicenseIsExpired = debounce(() => {

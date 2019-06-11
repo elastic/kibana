@@ -18,13 +18,14 @@ import {
 } from '@elastic/eui';
 
 import './ccr.css';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 function toSeconds(ms) {
   return Math.floor(ms / 1000) + 's';
 }
 
-class CcrUI extends Component {
+export class Ccr extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -33,7 +34,6 @@ class CcrUI extends Component {
   }
 
   toggleShards(index, shards) {
-    const { intl } = this.props;
     const itemIdToExpandedRowMap = {
       ...this.state.itemIdToExpandedRowMap
     };
@@ -56,8 +56,7 @@ class CcrUI extends Component {
           columns={[
             {
               field: 'shardId',
-              name: intl.formatMessage({
-                id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.shardColumnTitle',
+              name: i18n.translate('xpack.monitoring.elasticsearch.ccr.shardsTable.shardColumnTitle', {
                 defaultMessage: 'Shard'
               }),
               render: shardId => {
@@ -73,8 +72,7 @@ class CcrUI extends Component {
             },
             {
               field: 'syncLagOps',
-              name: intl.formatMessage({
-                id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.syncLagOpsColumnTitle',
+              name: i18n.translate('xpack.monitoring.elasticsearch.ccr.shardsTable.syncLagOpsColumnTitle', {
                 defaultMessage: 'Sync Lag (ops)'
               }),
               render: (syncLagOps, data) => (
@@ -114,23 +112,23 @@ class CcrUI extends Component {
             },
             {
               field: 'syncLagTime',
-              name: intl.formatMessage({
-                id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.lastFetchTimeColumnTitle',
-                defaultMessage: 'Last fetch time'
-              }),
+              name: i18n.translate(
+                'xpack.monitoring.elasticsearch.ccr.shardsTable.lastFetchTimeColumnTitle',
+                {
+                  defaultMessage: 'Last fetch time'
+                }
+              ),
               render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
             },
             {
               field: 'opsSynced',
-              name: intl.formatMessage({
-                id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.opsSyncedColumnTitle',
+              name: i18n.translate('xpack.monitoring.elasticsearch.ccr.shardsTable.opsSyncedColumnTitle', {
                 defaultMessage: 'Ops synced'
               }),
             },
             {
               field: 'error',
-              name: intl.formatMessage({
-                id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.errorColumnTitle',
+              name: i18n.translate('xpack.monitoring.elasticsearch.ccr.shardsTable.errorColumnTitle', {
                 defaultMessage: 'Error'
               }),
               render: error => (
@@ -152,7 +150,7 @@ class CcrUI extends Component {
   }
 
   renderTable() {
-    const { data, intl } = this.props;
+    const { data } = this.props;
     const items = data;
 
     let pagination = {
@@ -177,8 +175,7 @@ class CcrUI extends Component {
         columns={[
           {
             field: 'index',
-            name: intl.formatMessage({
-              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.indexColumnTitle',
+            name: i18n.translate('xpack.monitoring.elasticsearch.ccr.ccrListingTable.indexColumnTitle', {
               defaultMessage: 'Index'
             }),
             sortable: true,
@@ -196,41 +193,45 @@ class CcrUI extends Component {
           {
             field: 'follows',
             sortable: true,
-            name: intl.formatMessage({
-              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.followsColumnTitle',
+            name: i18n.translate('xpack.monitoring.elasticsearch.ccr.ccrListingTable.followsColumnTitle', {
               defaultMessage: 'Follows'
             }),
           },
           {
             field: 'syncLagOps',
             sortable: true,
-            name: intl.formatMessage({
-              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.syncLagOpsColumnTitle',
-              defaultMessage: 'Sync Lag (ops)'
-            }),
+            name: i18n.translate(
+              'xpack.monitoring.elasticsearch.ccr.ccrListingTable.syncLagOpsColumnTitle',
+              {
+                defaultMessage: 'Sync Lag (ops)'
+              }
+            ),
           },
           {
             field: 'syncLagTime',
             sortable: true,
-            name: intl.formatMessage({
-              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.lastFetchTimeColumnTitle',
-              defaultMessage: 'Last fetch time'
-            }),
+            name: i18n.translate(
+              'xpack.monitoring.elasticsearch.ccr.ccrListingTable.lastFetchTimeColumnTitle',
+              {
+                defaultMessage: 'Last fetch time'
+              }
+            ),
             render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
           },
           {
             field: 'opsSynced',
             sortable: true,
-            name: intl.formatMessage({
-              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.opsSyncedColumnTitle',
-              defaultMessage: 'Ops synced'
-            }),
+            name: i18n.translate(
+              'xpack.monitoring.elasticsearch.ccr.ccrListingTable.opsSyncedColumnTitle',
+              {
+                defaultMessage: 'Ops synced'
+              }
+            ),
           },
           {
             field: 'error',
             sortable: true,
-            name: intl.formatMessage({
-              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.errorColumnTitle',
+            name: i18n.translate('xpack.monitoring.elasticsearch.ccr.ccrListingTable.errorColumnTitle', {
               defaultMessage: 'Error'
             }),
             render: error => (
@@ -266,5 +267,3 @@ class CcrUI extends Component {
     );
   }
 }
-
-export const Ccr = injectI18n(CcrUI);

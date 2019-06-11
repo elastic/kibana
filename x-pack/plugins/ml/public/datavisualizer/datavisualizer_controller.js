@@ -25,7 +25,7 @@ import { notify, toastNotifications } from 'ui/notify';
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { getDataVisualizerBreadcrumbs } from './breadcrumbs';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';
-import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { checkBasicLicense, isFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { SearchItemsProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
@@ -122,8 +122,6 @@ module
 
     $scope.samplerShardSize = $scope.appState.samplerShardSize ?
       $scope.appState.samplerShardSize : 5000;     // -1 indicates no sampling.
-
-    const MlTimeBuckets = Private(IntervalHelperProvider);
 
     let metricFieldRegexp;
     let metricFieldFilterTimeout;
