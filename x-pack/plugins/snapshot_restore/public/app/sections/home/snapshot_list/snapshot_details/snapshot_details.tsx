@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -208,6 +209,15 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
                     );
                   }}
                 </SnapshotDeleteProvider>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton fill color="primary">
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.snapshotDetails.restoreButtonLabel"
+                    defaultMessage="Restore"
+                  />
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

@@ -106,7 +106,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
             );
 
             return (
-              <EuiToolTip content={label} delay="long">
+              <EuiToolTip content={label}>
                 <EuiButtonIcon
                   aria-label={i18n.translate(
                     'xpack.snapshotRestore.repositoryList.table.actionEditAriaLabel',
@@ -141,7 +141,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
                           }
                         );
                   return (
-                    <EuiToolTip content={label} delay="long">
+                    <EuiToolTip content={label}>
                       <EuiButtonIcon
                         aria-label={i18n.translate(
                           'xpack.snapshotRestore.repositoryList.table.actionRemoveAriaLabel',

@@ -146,6 +146,31 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       actions: [
         {
           render: ({ snapshot, repository }: SnapshotDetails) => {
+            const label = i18n.translate(
+              'xpack.snapshotRestore.snapshotList.table.actionRestoreTooltip',
+              { defaultMessage: 'Restore' }
+            );
+            return (
+              <EuiToolTip content={label}>
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.snapshotRestore.snapshotList.table.actionRestoreAriaLabel',
+                    {
+                      defaultMessage: 'Store snapshot `{name}`',
+                      values: { name: snapshot },
+                    }
+                  )}
+                  iconType="exportAction"
+                  color="primary"
+                  data-test-subj="srsnapshotListRestoreActionButton"
+                  onClick={() => {}}
+                />
+              </EuiToolTip>
+            );
+          },
+        },
+        {
+          render: ({ snapshot, repository }: SnapshotDetails) => {
             return (
               <SnapshotDeleteProvider>
                 {deleteSnapshotPrompt => {
@@ -154,7 +179,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                     { defaultMessage: 'Delete' }
                   );
                   return (
-                    <EuiToolTip content={label} delay="long">
+                    <EuiToolTip content={label}>
                       <EuiButtonIcon
                         aria-label={i18n.translate(
                           'xpack.snapshotRestore.snapshotList.table.actionDeleteAriaLabel',
