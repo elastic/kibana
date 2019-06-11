@@ -18,44 +18,8 @@
  */
 
 import { cloneDeep, get, omit, has, flow } from 'lodash';
-
-function migrateIndexPattern(doc) {
-  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
-  if (typeof searchSourceJSON !== 'string') {
-    return;
-  }
-  let searchSource;
-  try {
-    searchSource = JSON.parse(searchSourceJSON);
-  } catch (e) {
-    // Let it go, the data is invalid and we'll leave it as is
-    return;
-  }
-  if (searchSource.index) {
-    searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-    doc.references.push({
-      name: searchSource.indexRefName,
-      type: 'index-pattern',
-      id: searchSource.index,
-    });
-    delete searchSource.index;
-  }
-  if (searchSource.filter) {
-    searchSource.filter.forEach((filterRow, i) => {
-      if (!filterRow.meta || !filterRow.meta.index) {
-        return;
-      }
-      filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
-      doc.references.push({
-        name: filterRow.meta.indexRefName,
-        type: 'index-pattern',
-        id: filterRow.meta.index,
-      });
-      delete filterRow.meta.index;
-    });
-  }
-  doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
-}
+import { dashboardMigrations700 } from './dashboard_migrations';
+import { migrateIndexPattern700 } from './migrate_index_pattern';
 
 // [TSVB] Migrate percentile-rank aggregation (value -> values)
 const migratePercentileRankAggregation = doc => {
@@ -338,7 +302,7 @@ export const migrations = {
       doc.references = doc.references || [];
 
       // Migrate index pattern
-      migrateIndexPattern(doc);
+      migrateIndexPattern700(doc);
 
       // Migrate saved search
       const savedSearchId = get(doc, 'attributes.savedSearchId');
@@ -418,49 +382,14 @@ export const migrations = {
     '7.3.0': executeMigrations730,
   },
   dashboard: {
-    '7.0.0': (doc) => {
-      // Set new "references" attribute
-      doc.references = doc.references || [];
-      // Migrate index pattern
-      migrateIndexPattern(doc);
-      // Migrate panels
-      const panelsJSON = get(doc, 'attributes.panelsJSON');
-      if (typeof panelsJSON !== 'string') {
-        return doc;
-      }
-      let panels;
-      try {
-        panels = JSON.parse(panelsJSON);
-      } catch (e) {
-        // Let it go, the data is invalid and we'll leave it as is
-        return doc;
-      }
-      if (!Array.isArray(panels)) {
-        return doc;
-      }
-      panels.forEach((panel, i) => {
-        if (!panel.type || !panel.id) {
-          return;
-        }
-        panel.panelRefName = `panel_${i}`;
-        doc.references.push({
-          name: `panel_${i}`,
-          type: panel.type,
-          id: panel.id,
-        });
-        delete panel.type;
-        delete panel.id;
-      });
-      doc.attributes.panelsJSON = JSON.stringify(panels);
-      return doc;
-    },
+    '7.0.0': dashboardMigrations700,
   },
   search: {
     '7.0.0': (doc) => {
       // Set new "references" attribute
       doc.references = doc.references || [];
       // Migrate index pattern
-      migrateIndexPattern(doc);
+      migrateIndexPattern700(doc);
       return doc;
     },
   },
