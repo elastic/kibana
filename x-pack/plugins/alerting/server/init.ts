@@ -49,7 +49,7 @@ export function init(server: Legacy.Server) {
     const request = this;
     const savedObjectsClient = request.getSavedObjectsClient();
     const alertsClient = new AlertsClient({
-      services,
+      log: server.log,
       savedObjectsClient,
       alertTypeRegistry,
       taskManager: taskManager!,

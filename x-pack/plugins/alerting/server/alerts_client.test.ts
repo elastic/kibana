@@ -15,10 +15,7 @@ const alertTypeRegistry = alertTypeRegistryMock.create();
 const savedObjectsClient = SavedObjectsClientMock.create();
 
 const alertsClientParams = {
-  services: {
-    log: jest.fn(),
-    callCluster: jest.fn(),
-  },
+  log: jest.fn(),
   taskManager,
   alertTypeRegistry,
   savedObjectsClient,
@@ -337,8 +334,8 @@ Array [
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Task manager error"`
     );
-    expect(alertsClientParams.services.log).toHaveBeenCalledTimes(1);
-    expect(alertsClientParams.services.log.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(alertsClientParams.log).toHaveBeenCalledTimes(1);
+    expect(alertsClientParams.log.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
   Array [
     "alerting",

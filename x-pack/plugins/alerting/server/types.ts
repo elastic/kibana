@@ -12,9 +12,15 @@ export type State = Record<string, any>;
 export type Context = Record<string, any>;
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 
+export type Log = (
+  tags: string | string[],
+  data?: string | object | (() => any),
+  timestamp?: number
+) => void;
+
 export interface Services {
   callCluster: any;
-  log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
+  log: Log;
 }
 
 export interface AlertServices extends Services {
