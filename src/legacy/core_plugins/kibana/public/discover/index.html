@@ -5,18 +5,21 @@
     <div data-transclude-slots>
       <!-- Breadcrumbs. -->
       <div data-transclude-slot="topLeftCorner" class="kuiLocalBreadcrumbs">
-        <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb" ng-if="opts.savedSearch.id">
+        <h1 id="kui_local_breadcrumb" class="kuiLocalBreadcrumb" ng-if="opts.savedSearch.id">
           <span class="kuiLocalBreadcrumb__emphasis">
-            <span
+            <button
+              class="kuiLink"
+              type="button"
               id="reload_saved_search"
               aria-label="{{::'kbn.discover.reloadSavedSearchAriaLabel' | i18n: {defaultMessage: 'Reload saved search'} }}"
               tooltip="{{::'kbn.discover.reloadSavedSearchTooltip' | i18n: {defaultMessage: 'Reload saved search'} }}"
               tooltip-placement="right"
               tooltip-append-to-body="1"
               ng-click="resetQuery()"
-              kbn-accessible-click
-              class="kuiIcon fa-undo small"
-            ></span>&nbsp;
+            >
+              <span class="kuiIcon fa-undo small"></span>
+              {{::'kbn.discover.reloadSavedSearchButton' | i18n: {defaultMessage: 'Reload'} }}
+            </button>
           </span>
         </h1>
         <div class="kuiLocalBreadcrumb">

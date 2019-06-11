@@ -12,7 +12,7 @@ import { get } from 'lodash';
 import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
 import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
 import { JobStatuses } from '../constants/job_statuses';
-import { PathProvider } from 'plugins/xpack_main/services/path';
+import { Path } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { Poller } from '../../../../common/poller';
 import {
@@ -27,7 +27,7 @@ import { npStart } from 'ui/new_platform';
 uiModules.get('kibana')
   .run((Private, reportingPollConfig) => {
     // Don't show users any reporting toasts until they're logged in.
-    if (Private(PathProvider).isUnauthenticated()) {
+    if (Path.isUnauthenticated()) {
       return;
     }
 
