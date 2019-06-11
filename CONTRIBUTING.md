@@ -309,7 +309,7 @@ ReactDOM.render(
 );
 ```
 
-There is a number of tools was created to support internationalization in Kibana that would allow one to validate internationalized labels,
+There are a number of tools was created to support internationalization in Kibana that would allow one to validate internationalized labels,
 extract them to a `JSON` file or integrate translations back to Kibana. To know more, please read corresponding [readme](src/dev/i18n/README.md) file.
 
 ### Testing and Building
