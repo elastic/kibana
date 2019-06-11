@@ -24,7 +24,7 @@ import {
   EuiFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiFormLabel,
+  EuiIcon,
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
@@ -91,18 +91,12 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
     <>
       {ranges.map(({ from, to, id }) => (
         <Fragment key={id}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem>
               <EuiFieldNumber
-                prepend={
-                  <EuiFormLabel id={`visEditorRangeFrom${agg.id}_${id}`}>
-                    <FormattedMessage
-                      id="common.ui.aggTypes.ranges.fromLabel"
-                      defaultMessage="From"
-                    />
-                  </EuiFormLabel>
-                }
-                aria-labelledby={`visEditorRangeFrom${agg.id}_${id}`}
+                aria-label={i18n.translate('common.ui.aggTypes.ranges.fromLabel', {
+                  defaultMessage: 'From',
+                })}
                 value={isEmpty(from) ? '' : from}
                 placeholder="&minus;∞"
                 onChange={ev => onChangeRange(id, 'from', ev.target.value)}
@@ -110,14 +104,14 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
                 compressed={true}
               />
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="sortRight" color="subdued" />
+            </EuiFlexItem>
             <EuiFlexItem>
               <EuiFieldNumber
-                prepend={
-                  <EuiFormLabel id={`visEditorRangeTo${agg.id}_${id}`}>
-                    <FormattedMessage id="common.ui.aggTypes.ranges.toLabel" defaultMessage="To" />
-                  </EuiFormLabel>
-                }
-                aria-labelledby={`visEditorRangeTo${agg.id}_${id}`}
+                aria-label={i18n.translate('common.ui.aggTypes.ranges.toLabel', {
+                  defaultMessage: 'To',
+                })}
                 value={isEmpty(to) ? '' : to}
                 placeholder="+∞"
                 onChange={ev => onChangeRange(id, 'to', ev.target.value)}
