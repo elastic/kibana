@@ -1,17 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-
-function report {
-  if [[ -z "$PR_SOURCE_BRANCH" ]]; then
-    cd "$KIBANA_DIR"
-    node src/dev/failed_tests/cli
-  else
-    echo "Failure issues not created on pull requests"
-  fi
-}
-
-trap report EXIT
+trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
 export TEST_BROWSER_HEADLESS=1
 
@@ -42,6 +32,6 @@ cd "$XPACK_DIR"
 checks-reporter-with-killswitch "X-Pack Chrome Functional tests / Group ${CI_GROUP}" node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag "ciGroup$CI_GROUP"
 echo ""
 echo ""
-checks-reporter-with-killswitch "X-Pack Firefox Functional tests / Group ${CI_GROUP}" node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag "ciGroup$CI_GROUP" --config "test/functional/config.firefox.js"
-echo ""
-echo ""
+# checks-reporter-with-killswitch "X-Pack Firefox Functional tests / Group ${CI_GROUP}" node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag "ciGroup$CI_GROUP" --config "test/functional/config.firefox.js"
+# echo ""
+# echo ""

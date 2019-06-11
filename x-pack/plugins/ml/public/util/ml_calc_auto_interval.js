@@ -19,7 +19,7 @@
 import moment from 'moment';
 const { duration: d } = moment;
 
-export function TimeBucketsCalcAutoIntervalProvider() {
+export function timeBucketsCalcAutoIntervalProvider() {
 
   // Note there is a current issue with Kibana (Kibana issue #9184)
   // which means we can't round to, for example, 2 week or 3 week buckets,
@@ -119,7 +119,7 @@ export function TimeBucketsCalcAutoIntervalProvider() {
 
     }),
 
-    atLeast: find(revRoundingRules, function atLeast(upperBound, lowerBound, target) { // eslint-disable-line no-unused-vars
+    atLeast: find(revRoundingRules, function atLeast(upperBound, lowerBound, target) {
       // Unmodified from Kibana ui/time_buckets/calc_auto_interval.js.
       if (lowerBound <= target) {
         return lowerBound;

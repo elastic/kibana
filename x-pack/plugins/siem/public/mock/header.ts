@@ -20,6 +20,7 @@ export const defaultHeaders: ColumnHeader[] = [
     example: '2016-05-23T08:05:34.853Z',
     id: '@timestamp',
     type: 'date',
+    aggregatable: true,
     width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
   {
@@ -30,6 +31,7 @@ export const defaultHeaders: ColumnHeader[] = [
     example: '7',
     id: 'event.severity',
     type: 'long',
+    aggregatable: true,
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
@@ -40,6 +42,7 @@ export const defaultHeaders: ColumnHeader[] = [
     example: 'user-management',
     id: 'event.category',
     type: 'keyword',
+    aggregatable: true,
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
@@ -50,6 +53,7 @@ export const defaultHeaders: ColumnHeader[] = [
     example: 'user-password-change',
     id: 'event.action',
     type: 'keyword',
+    aggregatable: true,
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
@@ -60,6 +64,7 @@ export const defaultHeaders: ColumnHeader[] = [
     example: '',
     id: 'host.name',
     type: 'keyword',
+    aggregatable: true,
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
@@ -69,6 +74,7 @@ export const defaultHeaders: ColumnHeader[] = [
     example: '',
     id: 'source.ip',
     type: 'ip',
+    aggregatable: true,
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
@@ -78,6 +84,7 @@ export const defaultHeaders: ColumnHeader[] = [
     example: '',
     id: 'destination.ip',
     type: 'ip',
+    aggregatable: true,
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
@@ -87,6 +94,7 @@ export const defaultHeaders: ColumnHeader[] = [
     example: 'albert',
     id: 'user.name',
     type: 'keyword',
+    aggregatable: true,
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
@@ -96,6 +104,18 @@ export const defaultHeaders: ColumnHeader[] = [
     example: 'Y-6TfmcB0WOhS6qyMv3s',
     id: '_id',
     type: 'keyword',
+    aggregatable: true,
+    width: DEFAULT_COLUMN_MIN_WIDTH,
+  },
+  {
+    category: 'base',
+    columnHeaderType: defaultColumnHeaderType,
+    description:
+      'For log events the message field contains the log message.\nIn other use cases the message field can be used to concatenate different values which are then freely searchable. If multiple messages exist, they can be combined into one message.',
+    example: 'Hello World',
+    id: 'message',
+    type: 'text',
+    aggregatable: false,
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
 ];

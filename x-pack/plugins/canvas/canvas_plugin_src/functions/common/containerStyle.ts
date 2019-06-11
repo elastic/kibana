@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { NullContextFunction, ContainerStyle } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ContainerStyle } from '../types';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 // @ts-ignore untyped local
 import { isValidUrl } from '../../../common/lib/url';
 
@@ -13,8 +13,14 @@ interface Return extends ContainerStyle {
   type: 'containerStyle';
 }
 
-export function containerStyle(): NullContextFunction<'containerStyle', ContainerStyle, Return> {
+export function containerStyle(): ExpressionFunction<
+  'containerStyle',
+  null,
+  ContainerStyle,
+  Return
+> {
   const { help, args: argHelp } = getFunctionHelp().containerStyle;
+  const errors = getFunctionErrors().containerStyle;
 
   return {
     name: 'containerStyle',
@@ -26,23 +32,23 @@ export function containerStyle(): NullContextFunction<'containerStyle', Containe
     help,
     args: {
       border: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.border,
       },
       borderRadius: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.borderRadius,
       },
       padding: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.padding,
       },
       backgroundColor: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.backgroundColor,
       },
       backgroundImage: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.backgroundImage,
       },
       backgroundSize: {
@@ -58,13 +64,14 @@ export function containerStyle(): NullContextFunction<'containerStyle', Containe
         options: ['repeat-x', 'repeat', 'space', 'round', 'no-repeat', 'space'],
       },
       opacity: {
-        types: ['number', 'null'],
+        types: ['number'],
         help: argHelp.opacity,
       },
       overflow: {
         types: ['string'],
         help: argHelp.overflow,
         options: ['visible', 'hidden', 'scroll', 'auto'],
+        default: 'hidden',
       },
     },
     fn: (_context, args) => {
@@ -76,7 +83,7 @@ export function containerStyle(): NullContextFunction<'containerStyle', Containe
 
       if (backgroundImage) {
         if (!isValidUrl(backgroundImage)) {
-          throw new Error('Invalid backgroundImage. Please provide an asset or a URL.');
+          throw errors.invalidBackgroundImage();
         }
 
         style.backgroundImage = `url(${backgroundImage})`;

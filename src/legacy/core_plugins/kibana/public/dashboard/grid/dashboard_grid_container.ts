@@ -21,17 +21,18 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { updatePanels } from '../actions';
 import { getPanels, getUseMargins, getViewMode } from '../selectors';
-import { DashboardViewMode, PanelStateMap } from '../selectors/types';
+import { DashboardViewMode } from '../selectors/types';
 import { DashboardGrid } from './dashboard_grid';
+import { SavedDashboardPanelMap } from '../types';
 
 interface DashboardGridContainerStateProps {
-  panels: PanelStateMap;
+  panels: SavedDashboardPanelMap;
   dashboardViewMode: DashboardViewMode;
   useMargins: boolean;
 }
 
 interface DashboardGridContainerDispatchProps {
-  onPanelsUpdated(updatedPanels: PanelStateMap): void;
+  onPanelsUpdated(updatedPanels: SavedDashboardPanelMap): void;
 }
 
 const mapStateToProps = ({ dashboard }: any): any => ({
@@ -41,7 +42,7 @@ const mapStateToProps = ({ dashboard }: any): any => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  onPanelsUpdated: (updatedPanels: PanelStateMap) => dispatch(updatePanels(updatedPanels)),
+  onPanelsUpdated: (updatedPanels: SavedDashboardPanelMap) => dispatch(updatePanels(updatedPanels)),
 });
 
 export const DashboardGridContainer = connect<

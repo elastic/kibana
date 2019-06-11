@@ -5,14 +5,15 @@
  */
 
 import { takeRight } from 'lodash';
-import { ContextFunction, Datatable } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   count: number;
 }
 
-export function tail(): ContextFunction<'tail', Datatable, Arguments, Datatable> {
+export function tail(): ExpressionFunction<'tail', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().tail;
 
   return {
