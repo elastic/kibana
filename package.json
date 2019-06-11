@@ -255,7 +255,7 @@
     "webpack": "4.23.1",
     "webpack-merge": "4.1.4",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "2.7.0"
+    "yauzl": "2.10.0"
   },
   "devDependencies": {
     "@babel/parser": "7.4.5",
