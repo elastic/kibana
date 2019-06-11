@@ -56,6 +56,7 @@ module.exports = {
         'x-pack/plugins/apm/**/*',
         'x-pack/plugins/canvas/**/*',
         '**/*.{ts,tsx}',
+        'src/legacy/core_plugins/metrics/**/*.js',
       ],
       plugins: ['prettier'],
       rules: Object.assign(
@@ -464,7 +465,7 @@ module.exports = {
     {
       // typescript and javascript for front and back end
       files: ['x-pack/plugins/siem/**/*.{js,ts,tsx}'],
-      plugins: ['react'],
+      plugins: ['eslint-plugin-node', 'react'],
       rules: {
         'accessor-pairs': 'error',
         'array-callback-return': 'error',
@@ -487,6 +488,7 @@ module.exports = {
           },
         ],
         */
+        'node/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
