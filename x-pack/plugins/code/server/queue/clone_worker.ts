@@ -14,6 +14,7 @@ import {
   CloneWorkerResult,
   WorkerReservedProgress,
 } from '../../model';
+import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
@@ -31,11 +32,12 @@ export class CloneWorker extends AbstractGitWorker {
     protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions,
+    protected readonly gitOps: GitOperations,
     private readonly indexWorker: IndexWorker,
     private readonly repoServiceFactory: RepositoryServiceFactory,
     private readonly cancellationService: CancellationSerivce
   ) {
-    super(queue, log, client, serverOptions);
+    super(queue, log, client, serverOptions, gitOps);
   }
 
   public async executeJob(job: Job) {
