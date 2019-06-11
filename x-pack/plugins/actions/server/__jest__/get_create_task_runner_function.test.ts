@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { getCreateTaskRunnerFunction } from '../get_create_task_runner_function';
 import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
@@ -76,4 +77,62 @@ Object {
 }
 `);
   expect(call.services).toBeTruthy();
+});
+
+test('validates params before executing the task', async () => {
+  const createTaskRunner = getCreateTaskRunnerFunction({
+    ...getCreateTaskRunnerFunctionParams,
+    actionType: {
+      ...getCreateTaskRunnerFunctionParams.actionType,
+      validate: {
+        params: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+    },
+  });
+  const runner = createTaskRunner({ taskInstance: taskInstanceMock });
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '1',
+    type: 'action',
+    references: [],
+    attributes: {
+      actionTypeConfig: { foo: true },
+      actionTypeConfigSecrets: { bar: true },
+    },
+  });
+  await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"params invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+  );
+});
+
+test('validates config before executing the task', async () => {
+  const createTaskRunner = getCreateTaskRunnerFunction({
+    ...getCreateTaskRunnerFunctionParams,
+    actionType: {
+      ...getCreateTaskRunnerFunctionParams.actionType,
+      validate: {
+        actionTypeConfig: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+    },
+  });
+  const runner = createTaskRunner({ taskInstance: taskInstanceMock });
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '1',
+    type: 'action',
+    references: [],
+    attributes: {
+      actionTypeConfig: { foo: true },
+      actionTypeConfigSecrets: { bar: true },
+    },
+  });
+  await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"actionTypeConfig invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+  );
 });

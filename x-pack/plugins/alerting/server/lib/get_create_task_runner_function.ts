@@ -12,6 +12,7 @@ import { createFireHandler } from './create_fire_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
+import { throwIfAlertTypeParamsInvalid } from './throw_if_alert_type_params_invalid';
 
 interface CreateTaskRunnerFunctionOptions {
   services: Services;
@@ -34,6 +35,10 @@ export function getCreateTaskRunnerFunction({
     return {
       run: async () => {
         const alertSavedObject = await savedObjectsClient.get('alert', taskInstance.params.alertId);
+
+        // Validate
+        throwIfAlertTypeParamsInvalid(alertType, alertSavedObject.attributes.alertTypeParams);
+
         const fireHandler = createFireHandler({ alertSavedObject, fireAction });
         const alertInstances: Record<string, AlertInstance> = {};
         const alertInstancesData = taskInstance.state.alertInstances || {};

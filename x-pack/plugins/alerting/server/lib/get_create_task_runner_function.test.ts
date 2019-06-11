@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import { AlertExecuteOptions } from '../types';
 import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
@@ -160,4 +161,25 @@ Object {
   },
 }
 `);
+});
+
+test('validates params before executing the alert type', async () => {
+  const createTaskRunner = getCreateTaskRunnerFunction({
+    ...getCreateTaskRunnerFunctionParams,
+    alertType: {
+      ...getCreateTaskRunnerFunctionParams.alertType,
+      validate: {
+        params: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+    },
+  });
+  savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+  const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
+  await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"alertTypeParams invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+  );
 });
