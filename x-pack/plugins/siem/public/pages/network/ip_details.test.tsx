@@ -105,7 +105,6 @@ describe('Ip Details', () => {
     const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
-
   test('it renders ipv6 headline', async () => {
     localSource[0].result.data.source.status.indicesExist = true;
     const ip = 'fe80--24ce-f7ff-fede-a571';
