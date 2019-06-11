@@ -334,7 +334,7 @@
     "turf": "3.0.14",
     "typescript-fsa": "^2.5.0",
     "typescript-fsa-reducers": "^0.4.5",
-    "ui-select": "0.19.6",
+    "ui-select": "0.19.8",
     "unstated": "^2.1.1",
     "uuid": "3.0.1",
     "venn.js": "0.2.9",
