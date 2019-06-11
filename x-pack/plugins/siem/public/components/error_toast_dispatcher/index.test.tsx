@@ -24,7 +24,7 @@ describe('Error Toast Dispatcher', () => {
   });
 
   describe('rendering', () => {
-    test('it renders the default Authentication table', () => {
+    test('it renders', () => {
       const wrapper = shallow(
         <Provider store={store}>
           <ErrorToastDispatcher toastLifeTimeMs={9999999999} />
