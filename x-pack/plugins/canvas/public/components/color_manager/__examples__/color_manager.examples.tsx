@@ -72,7 +72,7 @@ storiesOf('components/Color/ColorManager', module)
     <ColorManager key="2" onChange={action('onChange')} value="#xyz" />,
     <ColorManager key="3" onChange={action('onChange')} value="#ghij" />,
     <ColorManager key="4" onChange={action('onChange')} value="#canvas" />,
-    <ColorManager key="4" onChange={action('onChange')} value="#12345xyz" />,
+    <ColorManager key="5" onChange={action('onChange')} value="#12345xyz" />,
     <ColorManager key="6" onChange={action('onChange')} value="rgb(a,b,c)" />,
     <ColorManager key="7" onChange={action('onChange')} value="rgba(w,x,y,z)" />,
   ])
