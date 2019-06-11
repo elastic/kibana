@@ -18,7 +18,6 @@ import {
   EuiFormRow,
   EuiOverlayMask,
   EuiSpacer,
-  // @ts-ignore
   EuiSuperSelect,
   EuiText,
   EuiTitle,
@@ -145,6 +144,92 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     const hasSelectedSpaces = this.state.selectedSpaceIds.length > 0;
 
+    const options = [
+      {
+        value: 'basePrivilege_custom',
+        disabled: !this.canCustomizeFeaturePrivileges(baseExplanation, allowedPrivileges),
+        inputDisplay: (
+          <EuiText>
+            <FormattedMessage
+              id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDisplay"
+              defaultMessage="Custom"
+            />
+          </EuiText>
+        ),
+        dropdownDisplay: (
+          <EuiText>
+            <strong>
+              <FormattedMessage
+                id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDropdownDisplay"
+                defaultMessage="Custom"
+              />
+            </strong>
+            <p>
+              <FormattedMessage
+                id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDetails"
+                defaultMessage="Customize access by feature in selected spaces."
+              />
+            </p>
+          </EuiText>
+        ),
+      },
+      {
+        value: 'basePrivilege_read',
+        disabled: !allowedPrivileges.base.privileges.includes('read'),
+        inputDisplay: (
+          <EuiText>
+            <FormattedMessage
+              id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDisplay"
+              defaultMessage="Read"
+            />
+          </EuiText>
+        ),
+        dropdownDisplay: (
+          <EuiText>
+            <strong>
+              <FormattedMessage
+                id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDropdownDisplay"
+                defaultMessage="Read"
+              />
+            </strong>
+            <p>
+              <FormattedMessage
+                id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDetails"
+                defaultMessage="Grant read-only access to all features in selected spaces."
+              />
+            </p>
+          </EuiText>
+        ),
+      },
+      {
+        value: 'basePrivilege_all',
+        inputDisplay: (
+          <EuiText>
+            <FormattedMessage
+              id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDisplay"
+              defaultMessage="All"
+            />
+          </EuiText>
+        ),
+        dropdownDisplay: (
+          <EuiText>
+            <strong>
+              <FormattedMessage
+                id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDropdownDisplay"
+                defaultMessage="All"
+              />
+            </strong>
+            <p>
+              <FormattedMessage
+                id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDetails"
+                defaultMessage="Grant full access to all features in selected spaces."
+              />
+            </p>
+          </EuiText>
+        ),
+      },
+    ];
+
     return (
       <EuiForm>
         <EuiFormRow
@@ -175,91 +260,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             data-test-subj={'basePrivilegeComboBox'}
             fullWidth
             onChange={this.onSpaceBasePrivilegeChange}
-            options={[
-              {
-                value: 'basePrivilege_custom',
-                disabled: !this.canCustomizeFeaturePrivileges(baseExplanation, allowedPrivileges),
-                inputDisplay: (
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDisplay"
-                      defaultMessage="Custom"
-                    />
-                  </EuiText>
-                ),
-                dropdownDisplay: (
-                  <EuiText>
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDropdownDisplay"
-                        defaultMessage="Custom"
-                      />
-                    </strong>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDetails"
-                        defaultMessage="Customize access by feature in selected spaces."
-                      />
-                    </p>
-                  </EuiText>
-                ),
-              },
-              {
-                value: 'basePrivilege_read',
-                disabled: !allowedPrivileges.base.privileges.includes('read'),
-                inputDisplay: (
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDisplay"
-                      defaultMessage="Read"
-                    />
-                  </EuiText>
-                ),
-                dropdownDisplay: (
-                  <EuiText>
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDropdownDisplay"
-                        defaultMessage="Read"
-                      />
-                    </strong>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDetails"
-                        defaultMessage="Grant read-only access to all features in selected spaces."
-                      />
-                    </p>
-                  </EuiText>
-                ),
-              },
-              {
-                value: 'basePrivilege_all',
-                inputDisplay: (
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDisplay"
-                      defaultMessage="All"
-                    />
-                  </EuiText>
-                ),
-                dropdownDisplay: (
-                  <EuiText>
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDropdownDisplay"
-                        defaultMessage="All"
-                      />
-                    </strong>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDetails"
-                        defaultMessage="Grant full access to all features in selected spaces."
-                      />
-                    </p>
-                  </EuiText>
-                ),
-              },
-            ]}
+            options={options}
             hasDividers
             valueOfSelected={`basePrivilege_${this.getDisplayedBasePrivilege(
               allowedPrivileges,

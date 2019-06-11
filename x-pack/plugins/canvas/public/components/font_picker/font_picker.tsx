@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore (elastic/eui#1262) EuiSuperSelect is not exported yet
 import { EuiSuperSelect } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
@@ -32,7 +31,7 @@ export const FontPicker: FunctionComponent<Props> = props => {
     <EuiSuperSelect
       compressed
       options={displayedFonts.map(font => ({
-        value: font.value,
+        value: font.value as FontValue,
         inputDisplay: <div style={{ fontFamily: font.value }}>{font.label}</div>,
       }))}
       valueOfSelected={value}
