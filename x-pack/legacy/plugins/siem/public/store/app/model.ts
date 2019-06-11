@@ -15,7 +15,7 @@ export interface NotesById {
 export interface Error {
   id: string;
   title: string;
-  message: string;
+  message: string[];
 }
 
 export type ErrorModel = Error[];

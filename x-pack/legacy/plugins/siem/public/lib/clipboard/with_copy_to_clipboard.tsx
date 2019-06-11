@@ -27,7 +27,7 @@ export const WithCopyToClipboard = pure<{ text: string; titleSummary?: string }>
   ({ text, titleSummary, children }) => (
     <WithCopyToClipboardContainer>
       <>{children}</>
-      <Clipboard content={text} titleSummary={titleSummary}>
+      <Clipboard content={text} titleSummary={titleSummary} toastLifeTimeMs={800}>
         <EuiIcon
           color="text"
           type="copyClipboard"
