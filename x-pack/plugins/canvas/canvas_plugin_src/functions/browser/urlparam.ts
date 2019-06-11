@@ -30,6 +30,7 @@ export function urlparam(): ExpressionFunction<'urlparam', null, Arguments, stri
         aliases: ['_', 'var', 'variable'],
         help: argHelp.param,
         multi: false,
+        required: true,
       },
       default: {
         types: ['string'],

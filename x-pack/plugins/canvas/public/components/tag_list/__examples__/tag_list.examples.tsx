@@ -53,7 +53,7 @@ const mockTagRegistry: { [tag: string]: TagSpec } = {
 
 const getTag = (name: string): TagSpec => mockTagRegistry[name] || { name, color: '#666666' };
 
-storiesOf('components/TagList', module)
+storiesOf('components/Tags/TagList', module)
   .add('empty list', () => <TagList getTag={getTag} />)
   .add('with health tags', () => <TagList tags={['tag1', 'tag4', 'tag6']} getTag={getTag} />)
   .add('with badge tags', () => (

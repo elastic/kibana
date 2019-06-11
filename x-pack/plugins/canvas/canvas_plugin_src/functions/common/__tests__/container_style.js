@@ -22,8 +22,9 @@ describe('containerStyle', () => {
       expect(result).to.have.property('type', 'containerStyle');
     });
 
-    it('all style properties are omitted if args not provided', () => {
-      expect(result).to.only.have.key('type');
+    it('all style properties except `overflow` are omitted if args not provided', () => {
+      expect(result).to.have.keys('type', 'overflow');
+      expect(result).to.have.property('overflow', 'hidden');
     });
   });
 
@@ -129,6 +130,10 @@ describe('containerStyle', () => {
         let result = fn(null, { overflow: 'visible' });
         expect(result).to.have.property('overflow', 'visible');
         result = fn(null, { overflow: 'hidden' });
+        expect(result).to.have.property('overflow', 'hidden');
+      });
+      it(`defaults to 'hidden'`, () => {
+        const result = fn(null);
         expect(result).to.have.property('overflow', 'hidden');
       });
     });

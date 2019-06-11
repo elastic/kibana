@@ -7,6 +7,7 @@
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
 import { LanguageServerStatus } from '../../common/language_server';
+import { GitOperations } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { RepositoryConfigController } from '../repository_config_controller';
 import { ServerOptions } from '../server_options';
@@ -21,13 +22,14 @@ export class LspService {
   constructor(
     targetHost: string,
     serverOptions: ServerOptions,
+    gitOps: GitOperations,
     client: EsClient,
     installManager: InstallManager,
     loggerFactory: LoggerFactory,
     repoConfigController: RepositoryConfigController
   ) {
     this.workspaceHandler = new WorkspaceHandler(
-      serverOptions.repoPath,
+      gitOps,
       serverOptions.workspacePath,
       client,
       loggerFactory
