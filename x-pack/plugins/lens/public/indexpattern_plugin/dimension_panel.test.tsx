@@ -7,10 +7,9 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { IndexPatternPrivateState, OperationType } from './indexpattern';
+import { IndexPatternPrivateState } from './indexpattern';
 import { getColumnOrder, getPotentialColumns } from './operations';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { DataType } from '../types';
 
 jest.mock('./operations');
 
@@ -284,6 +283,27 @@ describe('IndexPatternDimensionPanel', () => {
     const clearButton = wrapper.find('[data-test-subj="indexPattern-dimensionPopover-remove"]');
 
     clearButton.simulate('click');
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      columns: {},
+      columnOrder: [],
+    });
+  });
+
+  it('should clear the dimension when the combobox is cleared', () => {
+    const setState = jest.fn();
+
+    const wrapper = shallow(
+      <IndexPatternDimensionPanel
+        state={state}
+        setState={setState}
+        columnId={'col1'}
+        filterOperations={() => true}
+      />
+    );
+
+    wrapper.find(EuiComboBox)!.prop('onChange')!([]);
 
     expect(setState).toHaveBeenCalledWith({
       ...state,

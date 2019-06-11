@@ -213,7 +213,7 @@ export function getPotentialColumns(
   const hasOtherColumns = Object.keys(state.columns).find(id => id !== currentColumnId);
 
   if (hasOtherColumns) {
-    const hasValue = Object.entries(state.columns).find(
+    const hasValue = Object.entries(state.columns).some(
       ([id, col]) => id !== currentColumnId && col.operationType === 'value'
     );
 

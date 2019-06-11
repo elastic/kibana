@@ -63,6 +63,19 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
       })
     : transitionColumns;
 
+  function removeCurrentColumn() {
+    const newColumns: IndexPatternPrivateState['columns'] = {
+      ...props.state.columns,
+    };
+    delete newColumns[props.columnId];
+
+    props.setState({
+      ...props.state,
+      columns: newColumns,
+      columnOrder: getColumnOrder(newColumns),
+    });
+  }
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={true}>
@@ -114,8 +127,13 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
                     : []
                 }
                 singleSelection={{ asPlainText: true }}
-                isClearable={false}
+                isClearable={true}
                 onChange={choices => {
+                  if (choices.length === 0) {
+                    removeCurrentColumn();
+                    return;
+                  }
+
                   const column: IndexPatternColumn = filteredColumns.find(
                     ({ operationId }) => operationId === choices[0].value
                   )!;
@@ -133,25 +151,18 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
               />
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
-              <div>
-                {operations.map(o => {
-                  const isSelected =
-                    selectedColumn &&
-                    filteredColumns.find(
-                      col =>
-                        col.operationType === o && col.sourceField === selectedColumn.sourceField
-                    );
-                  const requiresTransition =
-                    selectedColumn &&
-                    transitionColumns.find(
-                      col =>
-                        col.operationType === o && col.sourceField === selectedColumn.sourceField
-                    );
-                  return (
+              {operations.map(o => {
+                const isSelected = selectedColumn && selectedColumn.operationType === o;
+                const transitionColumn =
+                  selectedColumn &&
+                  transitionColumns.find(
+                    col => col.operationType === o && col.sourceField === selectedColumn.sourceField
+                  );
+                return (
+                  <div key={o}>
                     <EuiButtonEmpty
                       data-test-subj={`lns-indexPatternDimension-${o}`}
-                      key={o}
-                      color={requiresTransition ? 'danger' : isSelected ? 'primary' : 'text'}
+                      color={transitionColumn ? 'danger' : isSelected ? 'primary' : 'text'}
                       isDisabled={
                         !selectedColumn ||
                         (!functionsFromField.some(col => col.operationType === o) &&
@@ -162,8 +173,8 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
                           return;
                         }
 
-                        if (requiresTransition) {
-                          const newColumn = requiresTransition;
+                        if (transitionColumn) {
+                          const newColumn = transitionColumn;
 
                           // For now, clear out all other columns
                           const newColumns = {
@@ -195,17 +206,24 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
                         }
                       }}
                     >
-                      {requiresTransition ? (
-                        <EuiToolTip position="left" content="This option will change other fields">
+                      {transitionColumn ? (
+                        <EuiToolTip
+                          position="left"
+                          content={i18n.translate('xpack.lens.dimensionPanel.clearOnSelectLabel', {
+                            defaultMessage:
+                              'When you select {name}, all other dimensions will be cleared',
+                            values: { name: operationPanels[o].displayName },
+                          })}
+                        >
                           <span>{operationPanels[o].displayName}</span>
                         </EuiToolTip>
                       ) : (
                         <span>{operationPanels[o].displayName}</span>
                       )}
                     </EuiButtonEmpty>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopover>
@@ -218,18 +236,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
             iconSize="s"
             color="danger"
             aria-label="Remove"
-            onClick={() => {
-              const newColumns: IndexPatternPrivateState['columns'] = {
-                ...props.state.columns,
-              };
-              delete newColumns[props.columnId];
-
-              props.setState({
-                ...props.state,
-                columns: newColumns,
-                columnOrder: getColumnOrder(newColumns),
-              });
-            }}
+            onClick={removeCurrentColumn}
           />
         </EuiFlexItem>
       )}
