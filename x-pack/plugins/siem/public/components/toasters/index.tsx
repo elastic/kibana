@@ -7,8 +7,9 @@
 import { EuiGlobalToastList, Toast, EuiButton } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { createContext, Dispatch, useReducer, useContext, useState } from 'react';
-import { ModalAllErrors } from './modal_all_errors';
+import styled from 'styled-components';
 
+import { ModalAllErrors } from './modal_all_errors';
 import * as i18n from './translations';
 
 export interface AppToast extends Toast {
@@ -79,7 +80,7 @@ export const GlobalToaster = ({ toastLifeTimeMs = 5000 }: GlobalToasterProps) =>
 
   return (
     <>
-      {toasts != null && toasts.length > 0 && !isShowing && (
+      {toasts.length > 0 && !isShowing && (
         <EuiGlobalToastList
           toasts={[formatToErrorToastIfNeeded(toasts[0], toggle)]}
           dismissToast={({ id }) => {
@@ -101,7 +102,7 @@ const formatToErrorToastIfNeeded = (
 ): AppToast => {
   if (toast != null && toast.errors != null && toast.errors.length > 0) {
     toast.text = (
-      <div style={{ textAlign: 'right' }}>
+      <ErrorToastContainer>
         <EuiButton
           data-test-subj="toaster-show-all-error-modal"
           size="s"
@@ -110,8 +111,12 @@ const formatToErrorToastIfNeeded = (
         >
           {i18n.SEE_ALL_ERRORS}
         </EuiButton>
-      </div>
+      </ErrorToastContainer>
     );
   }
   return toast;
 };
+
+const ErrorToastContainer = styled.div`
+  text-align: right;
+`;

@@ -12,10 +12,10 @@ import { Provider } from 'react-redux';
 import { apolloClientObservable, mockGlobalState } from '../../mock';
 import { createStore } from '../../store/store';
 
-import { ErrorToast } from '.';
+import { ErrorToastDispatcher } from '.';
 import { State } from '../../store/reducer';
 
-describe('Error Toast', () => {
+describe('Error Toast Dispatcher', () => {
   const state: State = mockGlobalState;
   let store = createStore(state, apolloClientObservable);
 
@@ -27,7 +27,7 @@ describe('Error Toast', () => {
     test('it renders the default Authentication table', () => {
       const wrapper = shallow(
         <Provider store={store}>
-          <ErrorToast toastLifeTimeMs={9999999999} />
+          <ErrorToastDispatcher toastLifeTimeMs={9999999999} />
         </Provider>
       );
       expect(toJson(wrapper)).toMatchSnapshot();

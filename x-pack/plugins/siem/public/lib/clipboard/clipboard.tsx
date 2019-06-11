@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Toast } from '@elastic/eui';
+import { Toast, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import * as React from 'react';
 import uuid from 'uuid';
@@ -37,7 +37,7 @@ interface Props {
 
 export const Clipboard = ({ children, content, onCopy, titleSummary, toastLifeTimeMs }: Props) => {
   const dispatchToaster = useStateToaster()[1];
-  const onClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -55,16 +55,16 @@ export const Clipboard = ({ children, content, onCopy, titleSummary, toastLifeTi
     }
   };
 
-  // TODO: 1 error is: Visible, non-interactive elements with click handlers must have at least one keyboard listener
-  // TODO: 2 error is: Elements with the 'button' interactive role must be focusable
-  // TODO: Investigate this error
-  /* eslint-disable */
   return (
-    <>
-      <div role="button" data-test-subj="clipboard" onClick={onClick}>
-        {children}
-      </div>
-    </>
+    <EuiButtonIcon
+      aria-label={i18n.COPY_TO_THE_CLIPBOARD}
+      color="subdued"
+      data-test-subj="clipboard"
+      iconSize="s"
+      iconType="copyClipboard"
+      onClick={onClick}
+    >
+      {children}
+    </EuiButtonIcon>
   );
-  /* eslint-enable */
 };

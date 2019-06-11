@@ -17,7 +17,7 @@ import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
 
-import { ErrorToast } from '../components/error_toast';
+import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
 import { KibanaConfigContext } from '../lib/adapters/framework/kibana_framework_adapter';
 import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
@@ -47,7 +47,7 @@ export const startApp = async (libs: AppFrontendLibs) => {
                   <PageRouter history={history} />
                 </KibanaConfigContext.Provider>
               </ThemeProvider>
-              <ErrorToast />
+              <ErrorToastDispatcher />
               <GlobalToaster />
             </ApolloProvider>
           </ReduxStoreProvider>

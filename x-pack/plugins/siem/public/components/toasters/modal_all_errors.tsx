@@ -18,6 +18,7 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
 
 import { AppToast } from '.';
 import * as i18n from './translations';
@@ -48,7 +49,7 @@ export const ModalAllErrors = ({ isShowing, toast, toggle }: FullErrorProps) =>
                 buttonContent={error.length > 100 ? `${error.substring(0, 100)} ...` : error}
                 data-test-subj="modal-all-errors-accordion"
               >
-                <EuiCodeBlock>{error}</EuiCodeBlock>
+                <MyEuiCodeBlock>{error}</MyEuiCodeBlock>
               </EuiAccordion>
             ))}
         </EuiModalBody>
@@ -61,3 +62,7 @@ export const ModalAllErrors = ({ isShowing, toast, toggle }: FullErrorProps) =>
       </EuiModal>
     </EuiOverlayMask>
   ) : null;
+
+const MyEuiCodeBlock = styled(EuiCodeBlock)`
+  margin-top: 4px;
+`;

@@ -26,11 +26,15 @@ interface DispatchProps {
 
 type Props = OwnProps & ReduxProps & DispatchProps;
 
-const ErrorToastComponent = ({ toastLifeTimeMs = 5000, errors = [], removeError }: Props) => {
+const ErrorToastDispatcherComponent = ({
+  toastLifeTimeMs = 5000,
+  errors = [],
+  removeError,
+}: Props) => {
   const [{ toasts }, dispatchToaster] = useStateToaster();
   useEffect(() => {
     errors.forEach(({ id, title, message }) => {
-      if (toasts.filter(toast => toast.id === id).length === 0) {
+      if (!toasts.some(toast => toast.id === id)) {
         dispatchToaster({
           type: 'addToaster',
           toast: {
@@ -54,9 +58,9 @@ const makeMapStateToProps = () => {
   return (state: State) => getErrorSelector(state);
 };
 
-export const ErrorToast = connect(
+export const ErrorToastDispatcher = connect(
   makeMapStateToProps,
   {
     removeError: appActions.removeError,
   }
-)(ErrorToastComponent);
+)(ErrorToastDispatcherComponent);

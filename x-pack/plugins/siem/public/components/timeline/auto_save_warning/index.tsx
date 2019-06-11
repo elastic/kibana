@@ -57,7 +57,7 @@ const AutoSaveWarningMsgComponent = pure<OwnProps>(
         title: i18n.TITLE,
         color: 'warning',
         iconType: 'alert',
-        toastLifeTimeMs: 15000,
+        toastLifeTimeMs: 10000,
         text: (
           <>
             <p>{i18n.DESCRIPTION}</p>
