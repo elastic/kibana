@@ -193,42 +193,5 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         source: 'action:test.index-record',
       });
     });
-
-    it.skip('should retry failures', async () => {
-      await supertest
-        .post('/api/action/08cca6da-60ed-49ca-85f6-641240300a3f/fire')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            index: esTestIndexName,
-            reference: 'retry-action-1',
-          },
-        })
-        .expect(200);
-      await retry.tryForTime(5000, async () => {
-        const searchResult = await es.search({
-          index: esTestIndexName,
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      source: 'action:test.failing',
-                    },
-                  },
-                  {
-                    term: {
-                      reference: 'retry-action-1',
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        });
-        expect(searchResult.hits.total.value).to.greaterThan(1);
-      });
-    });
   });
 }

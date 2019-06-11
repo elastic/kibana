@@ -140,50 +140,5 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
         source: 'action:test.index-record',
       });
     });
-
-    it.skip('should retry failures', async () => {
-      await supertest
-        .post('/api/alert')
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestAlertData({
-            interval: 60000, // 1m, we don't want to catch the next interval for retries
-            alertTypeId: 'test.failing',
-            alertTypeParams: {
-              index: esTestIndexName,
-              reference: 'failing-test-1',
-            },
-            actions: [],
-          })
-        )
-        .expect(200)
-        .then((resp: any) => {
-          createdAlertIds.push(resp.body.id);
-        });
-      await retry.tryForTime(5000, async () => {
-        const searchResult = await es.search({
-          index: esTestIndexName,
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      source: 'alert:test.failing',
-                    },
-                  },
-                  {
-                    term: {
-                      reference: 'failing-test-1',
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        });
-        expect(searchResult.hits.total.value).to.greaterThan(1);
-      });
-    });
   });
 }
