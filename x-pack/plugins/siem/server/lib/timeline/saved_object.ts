@@ -266,7 +266,7 @@ export class Timeline {
   }
 }
 
-const convertStringToBase64 = (text: string): string => new Buffer(text).toString('base64');
+export const convertStringToBase64 = (text: string): string => Buffer.from(text).toString('base64');
 
 // we have to use any here because the SavedObjectAttributes interface is like below
 // export interface SavedObjectAttributes {
