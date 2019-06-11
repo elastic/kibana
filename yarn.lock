@@ -5784,15 +5784,15 @@ assign-symbols@^1.0.0:
   resolved "https://registry.yarnpkg.com/assign-symbols/-/assign-symbols-1.0.0.tgz#59667f41fadd4f20ccbc2bb96b8d4f7f78ec0367"
   integrity sha1-WWZ/QfrdTyDMvCu5a41Pf3jsA2c=
 
+assignment@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/assignment/-/assignment-2.0.0.tgz#ffd17b21bf5d6b22e777b989681a815456a3dd3e"
+  integrity sha1-/9F7Ib9dayLnd7mJaBqBVFaj3T4=
+
 assignment@2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/assignment/-/assignment-2.2.0.tgz#f5b5bc2d160d69986e8700cd38f567c0aabe101e"
   integrity sha1-9bW8LRYNaZhuhwDNOPVnwKq+EB4=
-
-assignment@^2.0.0:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/assignment/-/assignment-2.2.1.tgz#359a7726b57e55c6b98052fa3a82f58f29052523"
-  integrity sha1-NZp3JrV+Vca5gFL6OoL1jykFJSM=
 
 ast-module-types@^2.3.1, ast-module-types@^2.3.2, ast-module-types@^2.4.0:
   version "2.5.0"
@@ -14272,6 +14272,11 @@ hawk@~6.0.2:
     hoek "4.x.x"
     sntp "2.x.x"
 
+he@0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/he/-/he-0.5.0.tgz#2c05ffaef90b68e860f3fd2b54ef580989277ee2"
+  integrity sha1-LAX/rvkLaOhg8/0rVO9YCYknfuI=
+
 he@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/he/-/he-1.1.1.tgz#93410fd21b009735151f8868c2f271f3427e23fd"
@@ -14281,11 +14286,6 @@ he@1.2.x, he@^1.1.1:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
-
-he@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/he/-/he-0.5.0.tgz#2c05ffaef90b68e860f3fd2b54ef580989277ee2"
-  integrity sha1-LAX/rvkLaOhg8/0rVO9YCYknfuI=
 
 header-case@^1.0.0:
   version "1.0.1"
@@ -15067,13 +15067,13 @@ inquirer@^6.2.2:
     strip-ansi "^5.0.0"
     through "^2.3.6"
 
-insane@2.5.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/insane/-/insane-2.5.0.tgz#3252baec85c53b108cdf731e7962b7ce9c5cff1f"
-  integrity sha1-MlK67IXFOxCM33MeeWK3zpxc/x8=
+insane@2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/insane/-/insane-2.6.1.tgz#c7dcae7b51c20346883b71078fad6ce0483c198f"
+  integrity sha1-x9yue1HCA0aIO3EHj61s4Eg8GY8=
   dependencies:
-    assignment "^2.0.0"
-    he "^0.5.0"
+    assignment "2.0.0"
+    he "0.5.0"
 
 insight@^0.10.1:
   version "0.10.1"
@@ -26405,13 +26405,13 @@ trough@^1.0.0:
   dependencies:
     glob "^6.0.4"
 
-trunc-html@1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/trunc-html/-/trunc-html-1.0.2.tgz#6e631ce8ec43e415a5e9f6a7e770572ec026f22b"
-  integrity sha1-bmMc6OxD5BWl6fan53BXLsAm8is=
+trunc-html@1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/trunc-html/-/trunc-html-1.1.2.tgz#1e97d51f67d470b67662b1a670e6d0ea7a8edafe"
+  integrity sha1-HpfVH2fUcLZ2YrGmcObQ6nqO2v4=
   dependencies:
     assignment "2.2.0"
-    insane "2.5.0"
+    insane "2.6.1"
     trunc-text "1.0.1"
 
 trunc-text@1.0.1:
