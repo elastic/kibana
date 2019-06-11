@@ -58,6 +58,6 @@ test('should validate and throw error when actionTypeConfig is invalid', () => {
       {}
     )
   ).toThrowErrorMatchingInlineSnapshot(
-    `"child \\"param1\\" fails because [\\"param1\\" is required]"`
+    `"actionTypeConfig invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
   );
 });

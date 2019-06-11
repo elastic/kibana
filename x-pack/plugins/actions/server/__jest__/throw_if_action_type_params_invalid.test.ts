@@ -58,6 +58,6 @@ test('should validate and throw error when params is invalid', () => {
       {}
     )
   ).toThrowErrorMatchingInlineSnapshot(
-    `"child \\"param1\\" fails because [\\"param1\\" is required]"`
+    `"params invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
   );
 });

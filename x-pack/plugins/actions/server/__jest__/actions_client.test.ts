@@ -107,7 +107,7 @@ Array [
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
+      `"actionTypeConfig invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
   });
 
@@ -358,7 +358,7 @@ Array [
         options: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
+      `"actionTypeConfig invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
   });
 
