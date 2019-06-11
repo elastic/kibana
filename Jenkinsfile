@@ -10,18 +10,18 @@ pipeline {
         git 'git@github.com:elastic/kibana.git'
       }
     }
-    /* stage('Test') { */
-    /*   steps { */
-    /*     echo 'Testing..' */
-    /*     dir("${BASE_DIR}"){ */
-    /*           sh './.ci/run.sh' */
-    /*         } */
-    /*   } */
-    /* } */
-    /* stage('Deploy') { */
-    /*   steps { */
-    /*     echo 'Deploying....' */
-    /*   } */
-    /* } */
+    stage('Test') {
+      steps {
+        echo 'Testing..'
+        dir("${BASE_DIR}"){
+              sh './.ci/run.sh'
+            }
+      }
+    }
+    stage('Deploy') {
+      steps {
+        echo 'Deploying....'
+      }
+    }
   }
 }
