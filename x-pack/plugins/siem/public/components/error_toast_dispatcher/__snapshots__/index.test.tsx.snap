@@ -1,5 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Error Toast Dispatcher rendering it renders the default Authentication table 1`] = `
+<Connect(ErrorToastDispatcherComponent)
+  toastLifeTimeMs={9999999999}
+/>
+`;
+
 exports[`Error Toast rendering it renders the default Authentication table 1`] = `
 <Connect(ErrorToastComponent)
   toastLifeTimeMs={9999999999}
