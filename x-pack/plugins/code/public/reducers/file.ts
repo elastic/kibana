@@ -46,7 +46,6 @@ export interface FileState {
   opendir?: FileTree;
   isNotFound: boolean;
   treeCommits: { [path: string]: CommitInfo[] };
-  currentPath: string;
   loadingCommits: boolean;
   commitsFullyLoaded: { [path: string]: boolean };
   fileTreeLoadingPaths: string[];
@@ -67,7 +66,6 @@ const initialState: FileState = {
   commits: [],
   treeCommits: {},
   isNotFound: false,
-  currentPath: '',
   loadingCommits: false,
   commitsFullyLoaded: {},
 };
@@ -112,7 +110,6 @@ export const file = handleActions(
   {
     [String(fetchRepoTree)]: (state: FileState, action: any) =>
       produce(state, draft => {
-        draft.currentPath = action.payload.path;
         // @ts-ignore
         draft.fileTreeLoadingPaths.push(action.payload!.path);
       }),
