@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
 import {
   EuiButton,
@@ -51,11 +51,10 @@ interface Props extends RouteComponentProps {
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
-const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
+export const RepositoryDetails: React.FunctionComponent<Props> = ({
   repositoryName,
   onClose,
   onRepositoryDeleted,
-  history,
 }) => {
   const {
     core: { i18n },
@@ -370,9 +369,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  href={history.createHref({
-                    pathname: `${BASE_PATH}/edit_repository/${repositoryName}`,
-                  })}
+                  href={`#${BASE_PATH}/edit_repository/${repositoryName}`}
                   fill
                   color="primary"
                 >
@@ -411,5 +408,3 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     </EuiFlyout>
   );
 };
-
-export const RepositoryDetails = withRouter(RepositoryDetailsUi);

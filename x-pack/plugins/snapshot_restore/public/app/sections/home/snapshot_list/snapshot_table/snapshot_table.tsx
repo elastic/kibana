@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
-import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
+import { BASE_PATH, SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
@@ -163,7 +163,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                   iconType="exportAction"
                   color="primary"
                   data-test-subj="srsnapshotListRestoreActionButton"
-                  onClick={() => {}}
+                  href={`#${BASE_PATH}/restore_snapshot/${repository}/${snapshot}`}
                 />
               </EuiToolTip>
             );

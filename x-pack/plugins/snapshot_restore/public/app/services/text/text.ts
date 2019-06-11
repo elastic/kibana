@@ -57,6 +57,9 @@ class TextService {
       repositoryEdit: i18n.translate('xpack.snapshotRestore.editRepository.breadcrumbTitle', {
         defaultMessage: 'Edit repository',
       }),
+      restoreSnapshot: i18n.translate('xpack.snapshotRestore.restoreSnapshot.breadcrumbTitle', {
+        defaultMessage: 'Restore snapshot',
+      }),
     };
   }
 

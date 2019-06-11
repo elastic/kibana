@@ -10,7 +10,7 @@ import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 
 import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION, Section } from './constants';
-import { RepositoryAdd, RepositoryEdit, SnapshotRestoreHome } from './sections';
+import { RepositoryAdd, RepositoryEdit, RestoreSnapshot, SnapshotRestoreHome } from './sections';
 import { loadPermissions } from './services/http';
 import { useAppDependencies } from './index';
 
@@ -99,6 +99,16 @@ export const App: React.FunctionComponent = () => {
           exact
           path={`${BASE_PATH}/:section(${sectionsRegex})/:repositoryName?/:snapshotId*`}
           component={SnapshotRestoreHome}
+        />
+        <Redirect
+          exact
+          from={`${BASE_PATH}/restore_snapshot/:repositoryName`}
+          to={`${BASE_PATH}/snapshots`}
+        />
+        <Route
+          exact
+          path={`${BASE_PATH}/restore_snapshot/:repositoryName/:snapshotId*`}
+          component={RestoreSnapshot}
         />
         <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
       </Switch>

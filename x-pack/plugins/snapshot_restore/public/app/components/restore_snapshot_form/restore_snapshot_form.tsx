@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
 
-export { SnapshotRestoreHome } from './home';
-export { RepositoryAdd } from './repository_add';
-export { RepositoryEdit } from './repository_edit';
-export { RestoreSnapshot } from './restore_snapshot';
+export const RestoreSnapshotForm: React.FunctionComponent = () => {
+  return <div>Snapshot restore form</div>;
+};

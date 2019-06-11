@@ -5,7 +5,7 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
 import {
   EuiBadge,
@@ -34,13 +34,12 @@ interface Props extends RouteComponentProps {
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
-const RepositoryTableUi: React.FunctionComponent<Props> = ({
+export const RepositoryTable: React.FunctionComponent<Props> = ({
   repositories,
   managedRepository,
   reload,
   openRepositoryDetailsUrl,
   onRepositoryDeleted,
-  history,
 }) => {
   const {
     core: { i18n },
@@ -245,9 +244,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton
-            href={history.createHref({
-              pathname: `${BASE_PATH}/add_repository`,
-            })}
+            href={`#${BASE_PATH}/add_repository`}
             fill
             iconType="plusInCircle"
             data-test-subj="srRepositoriesAddButton"
@@ -304,5 +301,3 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
     />
   );
 };
-
-export const RepositoryTable = withRouter(RepositoryTableUi);

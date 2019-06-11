@@ -21,11 +21,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { SectionError, SectionLoading, SnapshotDeleteProvider } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 import {
+  BASE_PATH,
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
   UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
 } from '../../../../constants';
@@ -49,11 +50,12 @@ const panelTypeToUiMetricMap: { [key: string]: string } = {
   [TAB_FAILURES]: UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
 };
 
-const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
+export const SnapshotDetails: React.FunctionComponent<Props> = ({
   repositoryName,
   snapshotId,
   onClose,
   onSnapshotDeleted,
+  history,
 }) => {
   const {
     core: { i18n },
@@ -212,7 +214,11 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButton fill color="primary">
+                <EuiButton
+                  href={`#${BASE_PATH}/restore_snapshot/${repositoryName}/${snapshotId}`}
+                  fill
+                  color="primary"
+                >
                   <FormattedMessage
                     id="xpack.snapshotRestore.snapshotDetails.restoreButtonLabel"
                     defaultMessage="Restore"
@@ -267,5 +273,3 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     </EuiFlyout>
   );
 };
-
-export const SnapshotDetails = withRouter(SnapshotDetailsUi);
