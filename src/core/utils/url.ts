@@ -20,6 +20,11 @@
 import { ParsedUrlQuery } from 'querystring';
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
 
+/**
+ * We define our own typings because the current version of @types/node
+ * declares properties to be optional "hostname?: string".
+ * Although, parse call returns "hostname: null | string".
+ */
 export interface URLMeaningfulParts {
   auth?: string | null;
   hash?: string | null;
