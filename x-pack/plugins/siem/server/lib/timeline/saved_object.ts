@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { failure } from 'io-ts/lib/PathReporter';
-import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 
@@ -19,13 +17,15 @@ import {
   ResponseFavoriteTimeline,
 } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
-import { Note } from '../note';
 import { NoteSavedObject } from '../note/types';
-import { PinnedEvent } from '../pinned_event';
 import { PinnedEventSavedObject } from '../pinned_event/types';
 
-import { SavedTimeline, TimelineSavedObjectRuntimeType, TimelineSavedObject } from './types';
-import { timelineSavedObjectType } from '.';
+import { SavedTimeline, TimelineSavedObject } from './types';
+import { Note } from '../note/saved_object';
+import { PinnedEvent } from '../pinned_event/saved_object';
+import { timelineSavedObjectType } from './saved_object_mappings';
+import { pickSavedTimeline } from './pick_saved_timeline';
+import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];
@@ -64,7 +64,7 @@ export class Timeline {
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
       searchFields: onlyUserFavorite
-        ? ['title', 'description', 'favorite.userName']
+        ? ['title', 'description', 'favorite.keySearch']
         : ['title', 'description'],
       sortField: sort != null ? sort.sortField : undefined,
       sortOrder: sort != null ? sort.sortOrder : undefined,
@@ -95,9 +95,10 @@ export class Timeline {
     const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
     const fullName = getOr(null, 'credentials.fullname', request[internalFrameworkRequest].auth);
     const userFavoriteTimeline = {
+      keySearch: userName != null ? convertStringToBase64(userName) : null,
+      favoriteDate: new Date().valueOf(),
       fullName,
       userName,
-      favoriteDate: new Date().valueOf(),
     };
     if (timeline.favorite != null) {
       const alreadyExistsTimelineFavoriteByUser = timeline.favorite.findIndex(
@@ -119,7 +120,10 @@ export class Timeline {
     return {
       savedObjectId: persistResponse.timeline.savedObjectId,
       version: persistResponse.timeline.version,
-      favorite: persistResponse.timeline.favorite != null ? persistResponse.timeline.favorite : [],
+      favorite:
+        persistResponse.timeline.favorite != null
+          ? persistResponse.timeline.favorite.filter(fav => fav.userName === userName)
+          : [],
     };
   }
 
@@ -203,6 +207,8 @@ export class Timeline {
   }
 
   private async getSavedTimeline(request: FrameworkRequest, timelineId: string) {
+    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
+
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
       request[internalFrameworkRequest]
     );
@@ -217,19 +223,19 @@ export class Timeline {
 
     const [notes, pinnedEvents, timeline] = timelineWithNotesAndPinnedEvents;
 
-    return timelineWithReduxProperties(notes, pinnedEvents, timeline);
+    return timelineWithReduxProperties(notes, pinnedEvents, timeline, userName);
   }
 
   private async getAllSavedTimeline(request: FrameworkRequest, options: FindOptions) {
+    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
+
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
       request[internalFrameworkRequest]
     );
-    if (options.searchFields != null && options.searchFields.includes('favorite.userName')) {
-      options.search = `${options.search != null ? options.search : ''} ${getOr(
-        null,
-        'credentials.username',
-        request[internalFrameworkRequest].auth
-      )}`;
+    if (options.searchFields != null && options.searchFields.includes('favorite.keySearch')) {
+      options.search = `${options.search != null ? options.search : ''} ${
+        userName != null ? convertStringToBase64(userName) : null
+      }`;
     }
 
     const savedObjects = await savedObjectsClient.find({
@@ -254,23 +260,13 @@ export class Timeline {
     return {
       totalCount: savedObjects.total,
       timeline: timelinesWithNotesAndPinnedEvents.map(([notes, pinnedEvents, timeline]) =>
-        timelineWithReduxProperties(notes, pinnedEvents, timeline)
+        timelineWithReduxProperties(notes, pinnedEvents, timeline, userName)
       ),
     };
   }
 }
 
-export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
-  return TimelineSavedObjectRuntimeType.decode(savedObject)
-    .map(savedTimeline => ({
-      savedObjectId: savedTimeline.id,
-      version: savedTimeline.version,
-      ...savedTimeline.attributes,
-    }))
-    .getOrElseL(errors => {
-      throw new Error(failure(errors).join('\n'));
-    });
-};
+export const convertStringToBase64 = (text: string): string => Buffer.from(text).toString('base64');
 
 // we have to use any here because the SavedObjectAttributes interface is like below
 // export interface SavedObjectAttributes {
@@ -279,30 +275,15 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
 // then this interface does not allow types without index signature
 // this is limiting us with our type for now so the easy way was to use any
 
-export const pickSavedTimeline = (
-  timelineId: string | null,
-  savedTimeline: SavedTimeline,
-  userInfo: RequestAuth
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any => {
-  if (timelineId == null) {
-    savedTimeline.created = new Date().valueOf();
-    savedTimeline.createdBy = getOr(null, 'credentials.username', userInfo);
-    savedTimeline.updated = new Date().valueOf();
-    savedTimeline.updatedBy = getOr(null, 'credentials.username', userInfo);
-  } else if (timelineId != null) {
-    savedTimeline.updated = new Date().valueOf();
-    savedTimeline.updatedBy = getOr(null, 'credentials.username', userInfo);
-  }
-  return savedTimeline;
-};
-
 const timelineWithReduxProperties = (
   notes: NoteSavedObject[],
   pinnedEvents: PinnedEventSavedObject[],
-  timeline: TimelineSavedObject
+  timeline: TimelineSavedObject,
+  userName: string
 ): TimelineSavedObject => ({
   ...timeline,
+  favorite:
+    timeline.favorite != null ? timeline.favorite.filter(fav => fav.userName === userName) : [],
   eventIdToNoteIds: notes.filter(note => note.eventId != null),
   noteIds: notes
     .filter(note => note.eventId == null && note.noteId != null)

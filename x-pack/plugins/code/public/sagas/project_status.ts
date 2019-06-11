@@ -21,14 +21,12 @@ import {
   takeLatest,
 } from 'redux-saga/effects';
 
-import { RepositoryUtils } from '../../common/repository_utils';
 import { Repository, RepositoryUri, WorkerReservedProgress } from '../../model';
 import * as ROUTES from '../components/routes';
 import { allStatusSelector, repoUriSelector, routeSelector } from '../selectors';
 import {
   deleteRepo,
   fetchReposSuccess,
-  importRepo,
   indexRepo,
   loadRepoSuccess,
   loadStatusFailed,
@@ -43,6 +41,7 @@ import {
   pollRepoCloneStatusStop,
   pollRepoDeleteStatusStop,
   pollRepoIndexStatusStop,
+  importRepoSuccess,
 } from '../actions';
 import { RepoState } from '../reducers';
 import {
@@ -172,9 +171,8 @@ export function* watchResetPollingStatus() {
 }
 
 const parseCloneStatusPollingRequest = (action: Action<any>) => {
-  if (action.type === String(importRepo)) {
-    const repoUrl: string = action.payload;
-    return RepositoryUtils.buildRepository(repoUrl).uri;
+  if (action.type === String(importRepoSuccess)) {
+    return action.payload.uri;
   } else if (action.type === String(pollRepoCloneStatusStart)) {
     return action.payload;
   }
@@ -215,7 +213,7 @@ export function* watchRepoCloneStatusPolling() {
   // * user click import repository
   // * repository status has been loaded and it's in cloning
   yield takeEvery(
-    [String(importRepo), String(pollRepoCloneStatusStart)],
+    [String(importRepoSuccess), String(pollRepoCloneStatusStart)],
     pollRepoCloneStatusRunner
   );
 }
@@ -348,7 +346,7 @@ function createRepoStatusPollingRunner(
     // Wait for the cancellation task
     yield take(pollingStopActionFunctionPattern(repoUri));
 
-    // Cancell the task
+    // Cancel the task
     yield cancel(task);
   };
 }

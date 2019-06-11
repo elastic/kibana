@@ -19,8 +19,10 @@ import {
   TreeEntry,
 } from '@elastic/nodegit';
 import Boom from 'boom';
+import LruCache from 'lru-cache';
 import * as Path from 'path';
 import * as fs from 'fs';
+
 import { GitBlame } from '../common/git_blame';
 import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
 import { FileTree, FileTreeItemType, RepositoryUri, sortFileTree } from '../model';
@@ -83,15 +85,37 @@ function entry2Tree(entry: TreeEntry): FileTree {
 }
 
 export class GitOperations {
+  private REPO_LRU_CACHE_SIZE = 16;
+  private REPO_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour;
   private repoRoot: string;
+  private repoCache: LruCache<RepositoryUri, Repository>;
 
   constructor(repoRoot: string) {
     this.repoRoot = repoRoot;
+
+    const options = {
+      max: this.REPO_LRU_CACHE_SIZE,
+      maxAge: this.REPO_MAX_AGE_MS,
+      dispose: (repoUri: RepositoryUri, repo: Repository) => {
+        // Clean up the repository before disposing this repo out of the cache.
+        repo.cleanup();
+      },
+    };
+    this.repoCache = new LruCache(options);
+  }
+
+  public cleanRepo(uri: RepositoryUri) {
+    if (this.repoCache.has(uri)) {
+      this.repoCache.del(uri);
+    }
+  }
+
+  public async cleanAllRepo() {
+    this.repoCache.reset();
   }
 
   public async fileContent(uri: RepositoryUri, path: string, revision: string = 'master') {
-    const repo = await this.openRepo(uri);
-    const commit = await this.getCommit(repo, revision);
+    const commit = await this.getCommit(uri, revision);
     const entry: TreeEntry = await checkExists(
       () => commit.getEntry(path),
       `file ${uri}/${path} not found `
@@ -103,7 +127,8 @@ export class GitOperations {
     }
   }
 
-  public async getCommit(repo: Repository, revision: string): Promise<Commit> {
+  public async getCommit(uri: RepositoryUri, revision: string): Promise<Commit> {
+    const repo = await this.openRepo(uri);
     if (revision.toUpperCase() === 'HEAD') {
       return await repo.getHeadCommit();
     }
@@ -119,9 +144,25 @@ export class GitOperations {
     return commit;
   }
 
+  public async getDefaultBranch(uri: RepositoryUri): Promise<string> {
+    const repo = await this.openRepo(uri);
+    const ref = await repo.getReference(HEAD);
+    const name = ref.name();
+    if (name.startsWith(REFS_HEADS)) {
+      return name.substr(REFS_HEADS.length);
+    }
+    return name;
+  }
+
+  public async getHeadRevision(uri: RepositoryUri): Promise<string> {
+    const repo = await this.openRepo(uri);
+    const commit = await repo.getHeadCommit();
+    return commit.sha();
+  }
+
   public async blame(uri: RepositoryUri, revision: string, path: string): Promise<GitBlame[]> {
     const repo = await this.openRepo(uri);
-    const newestCommit = (await this.getCommit(repo, revision)).id();
+    const newestCommit = (await this.getCommit(uri, revision)).id();
     const blame = await Blame.file(repo, path, { newestCommit });
     const results: GitBlame[] = [];
     for (let i = 0; i < blame.getHunkCount(); i++) {
@@ -150,9 +191,19 @@ export class GitOperations {
   }
 
   public async openRepo(uri: RepositoryUri): Promise<Repository> {
+    if (this.repoCache.has(uri)) {
+      const repo = this.repoCache.get(uri) as Repository;
+      return Promise.resolve(repo);
+    }
+
     const repoDir = Path.join(this.repoRoot, uri);
     this.checkPath(repoDir);
-    return checkExists<Repository>(() => Repository.open(repoDir), `repo ${uri} not found`);
+    const repo = await checkExists<Repository>(
+      () => Repository.open(repoDir),
+      `repo ${uri} not found`
+    );
+    this.repoCache.set(uri, repo);
+    return Promise.resolve(repo);
   }
 
   private checkPath(path: string) {
@@ -161,8 +212,7 @@ export class GitOperations {
     }
   }
   public async countRepoFiles(uri: RepositoryUri, revision: string): Promise<number> {
-    const repo = await this.openRepo(uri);
-    const commit = await this.getCommit(repo, revision);
+    const commit = await this.getCommit(uri, revision);
     const tree = await commit.getTree();
     let count = 0;
 
@@ -187,14 +237,17 @@ export class GitOperations {
     uri: RepositoryUri,
     revision: string
   ): Promise<AsyncIterableIterator<FileTree>> {
-    const repo = await this.openRepo(uri);
-    const commit = await this.getCommit(repo, revision);
+    const commit = await this.getCommit(uri, revision);
     const tree = await commit.getTree();
 
     async function* walk(t: Tree): AsyncIterableIterator<FileTree> {
       for (const e of t.entries()) {
         if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
-          yield entry2Tree(e);
+          const blob = await e.getBlob();
+          // Ignore binary files
+          if (!blob.isBinary()) {
+            yield entry2Tree(e);
+          }
         } else if (e.isDirectory()) {
           const subFolder = await e.getTree();
           await (yield* walk(subFolder));
@@ -227,8 +280,7 @@ export class GitOperations {
     childrenDepth: number = 1,
     flatten: boolean = false
   ): Promise<FileTree> {
-    const repo = await this.openRepo(uri);
-    const commit = await this.getCommit(repo, revision);
+    const commit = await this.getCommit(uri, revision);
     const tree = await commit.getTree();
     if (path === '/') {
       path = '';
@@ -278,7 +330,7 @@ export class GitOperations {
 
   public async getCommitDiff(uri: string, revision: string): Promise<CommitDiff> {
     const repo = await this.openRepo(uri);
-    const commit = await this.getCommit(repo, revision);
+    const commit = await this.getCommit(uri, revision);
     const diffs = await commit.getDiff();
 
     const commitDiff: CommitDiff = {
@@ -350,8 +402,8 @@ export class GitOperations {
 
   public async getDiff(uri: string, oldRevision: string, newRevision: string): Promise<Diff> {
     const repo = await this.openRepo(uri);
-    const oldCommit = await this.getCommit(repo, oldRevision);
-    const newCommit = await this.getCommit(repo, newRevision);
+    const oldCommit = await this.getCommit(uri, oldRevision);
+    const newCommit = await this.getCommit(uri, newRevision);
     const oldTree = await oldCommit.getTree();
     const newTree = await newCommit.getTree();
 
@@ -556,20 +608,4 @@ export async function referenceInfo(ref: Reference): Promise<ReferenceInfo | nul
     commit,
     type,
   };
-}
-
-export async function getDefaultBranch(path: string): Promise<string> {
-  const repo = await Repository.open(path);
-  const ref = await repo.getReference(HEAD);
-  const name = ref.name();
-  if (name.startsWith(REFS_HEADS)) {
-    return name.substr(REFS_HEADS.length);
-  }
-  return name;
-}
-
-export async function getHeadRevision(path: string): Promise<string> {
-  const repo = await Repository.open(path);
-  const commit = await repo.getHeadCommit();
-  return commit.sha();
 }

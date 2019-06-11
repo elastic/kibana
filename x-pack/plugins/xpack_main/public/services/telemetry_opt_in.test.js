@@ -19,20 +19,11 @@ describe('TelemetryOptInProvider', () => {
       addBasePath: (url) => url
     };
 
-    class MockNotifier {
-      constructor() {
-        this.error = jest.fn();
-      }
-    }
-
     const mockInjector = {
       get: (key) => {
         switch (key) {
           case 'telemetryOptedIn': {
             return optedIn;
-          }
-          case 'Notifier': {
-            return MockNotifier;
           }
           case '$http': {
             return mockHttp;

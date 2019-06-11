@@ -27,7 +27,7 @@ import { DetailSymbolInformation, Full } from '@elastic/lsp-extension';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
 import { LspRequest, WorkerReservedProgress } from '../../model';
-import { getDefaultBranch, GitOperations } from '../git_operations';
+import { GitOperations } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
@@ -36,18 +36,17 @@ import { LoggerFactory } from '../utils/log_factory';
 export const MAX_RESULT_COUNT = 20;
 
 export class WorkspaceHandler {
-  private git: GitOperations;
   private revisionMap: { [uri: string]: string } = {};
   private log: Logger;
   private readonly objectClient: RepositoryObjectClient | undefined = undefined;
 
   constructor(
-    readonly repoPath: string,
+    readonly gitOps: GitOperations,
     private readonly workspacePath: string,
     private readonly client: EsClient,
     loggerFactory: LoggerFactory
   ) {
-    this.git = new GitOperations(repoPath);
+    // this.git = new GitOperations(repoPath);
     this.log = loggerFactory.getLogger(['LSP', 'workspace']);
     if (this.client) {
       this.objectClient = new RepositoryObjectClient(this.client);
@@ -85,9 +84,9 @@ export class WorkspaceHandler {
       await tryGetGitStatus(0);
     }
 
-    const bareRepo = await this.git.openRepo(repositoryUri);
-    const targetCommit = await this.git.getCommit(bareRepo, revision);
-    const defaultBranch = await getDefaultBranch(bareRepo.path());
+    const bareRepo = await this.gitOps.openRepo(repositoryUri);
+    const targetCommit = await this.gitOps.getCommit(repositoryUri, revision);
+    const defaultBranch = await this.gitOps.getDefaultBranch(repositoryUri);
     if (revision !== defaultBranch) {
       await this.checkCommit(bareRepo, targetCommit);
       revision = defaultBranch;
@@ -267,7 +266,8 @@ export class WorkspaceHandler {
     if (uri && uri.startsWith(prefix)) {
       const locationPath = fs.realpathSync(decodeURIComponent(uri.substring(prefix.length)));
       const workspacePath = fs.realpathSync(decodeURIComponent(this.workspacePath));
-      if (locationPath.startsWith(workspacePath)) {
+      // On windows, it's possible one path has c:\ and another has C:\, so we need compare case-insensitive
+      if (locationPath.toLocaleLowerCase().startsWith(workspacePath.toLocaleLowerCase())) {
         let relativePath = path.relative(workspacePath, locationPath);
         if (path.sep === '\\') {
           relativePath = relativePath.replace(/\\/gi, '/');

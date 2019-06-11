@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunction, Render, ContainerStyle } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Render, ContainerStyle } from '../types';
 import { getFunctionHelp } from '../../strings';
+// @ts-ignore unconverted local file
+import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 
-interface Arguments {
-  as: string | null;
-  css: string | null;
-  containerStyle: ContainerStyle | null;
+interface ContainerStyleArgument extends ContainerStyle {
+  type: 'containerStyle';
 }
 
-export function render(): ContextFunction<'render', Render<any>, Arguments, Render<Arguments>> {
+interface Arguments {
+  as: string;
+  css: string;
+  containerStyle: ContainerStyleArgument;
+}
+export function render(): ExpressionFunction<'render', Render<any>, Arguments, Render<Arguments>> {
   const { help, args: argHelp } = getFunctionHelp().render;
 
   return {
@@ -26,25 +32,43 @@ export function render(): ContextFunction<'render', Render<any>, Arguments, Rend
     },
     args: {
       as: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.as,
-        options: ['debug', 'error', 'image', 'pie', 'plot', 'shape', 'table', 'text'],
+        options: [
+          'advanced_filter',
+          'debug',
+          'dropdown_filter',
+          'error',
+          'image',
+          'markdown',
+          'metric',
+          'pie',
+          'plot',
+          'progress',
+          'repeatImage',
+          'revealImage',
+          'shape',
+          'table',
+          'time_filter',
+          'text',
+        ],
       },
       css: {
-        types: ['string', 'null'],
-        default: '"* > * {}"',
+        types: ['string'],
         help: argHelp.css,
+        default: `"${DEFAULT_ELEMENT_CSS}"`,
       },
       containerStyle: {
-        types: ['containerStyle', 'null'],
+        types: ['containerStyle'],
         help: argHelp.containerStyle,
+        default: '{containerStyle}',
       },
     },
     fn: (context, args) => {
       return {
         ...context,
         as: args.as || context.as,
-        css: args.css,
+        css: args.css || DEFAULT_ELEMENT_CSS,
         containerStyle: args.containerStyle,
       };
     },

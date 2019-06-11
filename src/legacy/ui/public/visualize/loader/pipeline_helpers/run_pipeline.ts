@@ -21,10 +21,9 @@
 import { fromExpression } from '@kbn/interpreter/common';
 // @ts-ignore
 import { getInterpreter } from 'plugins/interpreter/interpreter';
-// @ts-ignore
-import { KibanaContext } from 'plugins/interpreter/types';
 
 import { Adapters } from 'ui/inspector';
+import { KibanaContext } from '../../../../../core_plugins/interpreter/public';
 
 type getInitialContextFunction = () => KibanaContext;
 
