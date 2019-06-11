@@ -21,9 +21,10 @@ export const asset = () => ({
       types: ['string'],
       help: 'The ID of the asset value to return',
       multi: false,
+      required: true,
     },
   },
-  fn: (context, args) => {
+  fn: (_context, args) => {
     const assetId = args.id;
     const asset = getAssetById(getState(), assetId);
     if (asset !== undefined) {

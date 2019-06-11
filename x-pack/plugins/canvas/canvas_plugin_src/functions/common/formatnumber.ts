@@ -5,14 +5,14 @@
  */
 
 import numeral from '@elastic/numeral';
-import { ContextFunction } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   format: string;
 }
 
-export function formatnumber(): ContextFunction<'formatnumber', number, Arguments, string> {
+export function formatnumber(): ExpressionFunction<'formatnumber', number, Arguments, string> {
   const { help, args: argHelp } = getFunctionHelp().formatnumber;
 
   return {
@@ -27,6 +27,7 @@ export function formatnumber(): ContextFunction<'formatnumber', number, Argument
         aliases: ['_'],
         types: ['string'],
         help: argHelp.format,
+        required: true,
       },
     },
     fn: (context, args) => {
