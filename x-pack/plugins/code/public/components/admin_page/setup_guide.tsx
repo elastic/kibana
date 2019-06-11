@@ -28,9 +28,9 @@ const steps = [
       <EuiText>
         <p>If you are using single Kibana instance, you can skip this step.</p>
         <p>
-          If you are using multiple Kibana instances, you need to assign one Kibana instance as
-          `Code node`. To do this, add the following line of code into your kibana.yml file of every
-          Kibana instance and restart the instances:
+          If you are using multiple Kibana nodes, you will need to configure at least one node as a
+          Code instance. Please add the following line of code into your kibana.yml file for every
+          instance you wish to run Code on:
         </p>
         <pre>
           <code>xpack.code.codeNodeUrl: 'http://$YourCodeNodeAddress'</code>
@@ -74,7 +74,7 @@ const steps = [
           <EuiLink href={documentationLinks.codeRepoManagement} target="_blank">
             your own repo
           </EuiLink>
-          . It is as easy as copy and paste git clone URLs to Code.
+          . Simply paste your git clone URLs into Code.
         </p>
       </EuiText>
     ),
@@ -150,8 +150,8 @@ class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideTo
             {this.props.setupOk === false && (
               <EuiCallOut title="Code instance not found." color="danger" iconType="cross">
                 <p>
-                  Please follow the guide below to configure your Kibana instance and then refresh
-                  this page.
+                  Please follow the guide below to configure your Kibana instance. Once configured,
+                  refresh this page.
                 </p>
               </EuiCallOut>
             )}
@@ -159,7 +159,7 @@ class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideTo
               <React.Fragment>
                 <EuiSpacer size="s" />
                 <EuiButton iconType="sortLeft">
-                  <Link to="/admin">Back To Project Dashboard</Link>
+                  <Link to="/admin">Back To project dashboard</Link>
                 </EuiButton>
                 <EuiSpacer size="s" />
               </React.Fragment>
