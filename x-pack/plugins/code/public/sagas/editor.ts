@@ -43,6 +43,7 @@ import {
   refUrlSelector,
   repoScopeSelector,
   urlQueryStringSelector,
+  createTreeSelector,
 } from '../selectors';
 import { history } from '../utils/url';
 import { mainRoutePattern } from './patterns';
@@ -172,7 +173,6 @@ function* handleMainRouteChange(action: Action<Match>) {
   yield put(fetchRepoBranches({ uri: repoUri }));
   if (file) {
     if ([PathTypes.blob, PathTypes.blame].includes(pathType as PathTypes)) {
-      yield call(handleFile, repoUri, file, revision);
       yield put(revealPosition(position));
       const { tab, refUrl } = queryParams;
       if (tab === 'references' && refUrl) {
@@ -181,6 +181,7 @@ function* handleMainRouteChange(action: Action<Match>) {
         yield put(closeReferences(false));
       }
     }
+    yield call(handleFile, repoUri, file, revision);
     const commits = yield select((state: RootState) => state.file.treeCommits[file]);
     if (commits === undefined) {
       yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
@@ -203,15 +204,27 @@ function* handleMainRouteChange(action: Action<Match>) {
         .slice(0, -1)
         .join('/');
   yield put(openTreePath(openPath || ''));
-  yield put(
-    fetchRepoTree({
-      uri: repoUri,
-      revision,
-      path: file || '',
-      parents: getPathOfTree(tree, (file || '').split('/')) === null,
-      isDir,
-    })
-  );
+  function isTreeLoaded(isDirectory: boolean, targetTree: FileTree | null) {
+    if (!isDirectory) {
+      return !!targetTree;
+    } else if (!targetTree) {
+      return false;
+    } else {
+      return targetTree.children && targetTree.children.length > 0;
+    }
+  }
+  const targetTree: FileTree | null = yield select(createTreeSelector(file || ''));
+  if (!isTreeLoaded(isDir, targetTree)) {
+    yield put(
+      fetchRepoTree({
+        uri: repoUri,
+        revision,
+        path: file || '',
+        parents: getPathOfTree(tree, (file || '').split('/')) === null,
+        isDir,
+      })
+    );
+  }
   const uri = toCanonicalUrl({
     repoUri,
     file,

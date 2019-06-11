@@ -111,6 +111,31 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
 
                 <EuiSpacer />
 
+                <AuthenticationsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                  type={hostsModel.HostsType.page}
+                >
+                  {({ authentications, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                    <AuthenticationTableManage
+                      id={id}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      loading={loading}
+                      data={authentications}
+                      totalCount={totalCount}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      loadMore={loadMore}
+                      type={hostsModel.HostsType.page}
+                    />
+                  )}
+                </AuthenticationsQuery>
+
+                <EuiSpacer />
+
                 <UncommonProcessesQuery
                   endDate={to}
                   filterQuery={filterQuery}
@@ -141,31 +166,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                     />
                   )}
                 </UncommonProcessesQuery>
-
-                <EuiSpacer />
-
-                <AuthenticationsQuery
-                  endDate={to}
-                  filterQuery={filterQuery}
-                  sourceId="default"
-                  startDate={from}
-                  type={hostsModel.HostsType.page}
-                >
-                  {({ authentications, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
-                    <AuthenticationTableManage
-                      id={id}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      loading={loading}
-                      data={authentications}
-                      totalCount={totalCount}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      loadMore={loadMore}
-                      type={hostsModel.HostsType.page}
-                    />
-                  )}
-                </AuthenticationsQuery>
 
                 <EuiSpacer />
 

@@ -4,22 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function MockWindowProvider() {
-  const items = {};
-  return {
-    sessionStorage: {
-      setItem(key, value) {
-        items[key] = value;
-      },
-      getItem(key) {
-        return items[key];
-      },
-      removeItem(key) {
-        delete items[key];
-      }
+const items = {};
+export const mockWindow = {
+  sessionStorage: {
+    setItem(key, value) {
+      items[key] = value;
     },
-    location: {
-      pathname: ''
+    getItem(key) {
+      return items[key];
+    },
+    removeItem(key) {
+      delete items[key];
     }
-  };
-}
+  },
+  location: {
+    pathname: ''
+  }
+};
