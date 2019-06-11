@@ -76,14 +76,14 @@ test('can subscribe and unsubscribe to state changes', () => {
   const store = createStore<any>({});
   const spy = jest.fn();
   const subscription = store.$state.subscribe(spy);
-  store.set({a: 1});
-  store.set({a: 2});
+  store.set({ a: 1 });
+  store.set({ a: 2 });
   subscription.unsubscribe();
-  store.set({a: 3});
+  store.set({ a: 3 });
 
   expect(spy).toHaveBeenCalledTimes(2);
-  expect(spy.mock.calls[0][0]).toEqual({a: 1});
-  expect(spy.mock.calls[1][0]).toEqual({a: 2});
+  expect(spy.mock.calls[0][0]).toEqual({ a: 1 });
+  expect(spy.mock.calls[1][0]).toEqual({ a: 2 });
 });
 
 test('multiple subscribers can subscribe', () => {
@@ -92,15 +92,15 @@ test('multiple subscribers can subscribe', () => {
   const spy2 = jest.fn();
   const subscription1 = store.$state.subscribe(spy1);
   const subscription2 = store.$state.subscribe(spy2);
-  store.set({a: 1});
+  store.set({ a: 1 });
   subscription1.unsubscribe();
-  store.set({a: 2});
+  store.set({ a: 2 });
   subscription2.unsubscribe();
-  store.set({a: 3});
+  store.set({ a: 3 });
 
   expect(spy1).toHaveBeenCalledTimes(1);
   expect(spy2).toHaveBeenCalledTimes(2);
-  expect(spy1.mock.calls[0][0]).toEqual({a: 1});
-  expect(spy2.mock.calls[0][0]).toEqual({a: 1});
-  expect(spy2.mock.calls[1][0]).toEqual({a: 2});
+  expect(spy1.mock.calls[0][0]).toEqual({ a: 1 });
+  expect(spy2.mock.calls[0][0]).toEqual({ a: 1 });
+  expect(spy2.mock.calls[1][0]).toEqual({ a: 2 });
 });
