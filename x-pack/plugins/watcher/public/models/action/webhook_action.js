@@ -20,6 +20,8 @@ export class WebhookAction extends BaseAction {
     this.host = get(props, 'host');
     this.port = get(props, 'port');
     this.path = get(props, 'path');
+    this.username = get(props, 'username');
+    this.password = get(props, 'password');
     this.contentType = get(props, 'contentType');
 
     this.fullPath = `${this.host}:${this.port}${this.path}`;
@@ -30,6 +32,8 @@ export class WebhookAction extends BaseAction {
       host: [],
       port: [],
       body: [],
+      username: [],
+      password: [],
     };
 
     if (!this.host) {
@@ -39,6 +43,7 @@ export class WebhookAction extends BaseAction {
         })
       );
     }
+
     if (!this.port) {
       errors.port.push(
         i18n.translate('xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage', {
@@ -46,6 +51,7 @@ export class WebhookAction extends BaseAction {
         })
       );
     }
+
     if (this.contentType === 'application/json' && typeof this.body === 'string' && this.body !== '') {
       try {
         const parsedJson = JSON.parse(this.body);
@@ -60,6 +66,25 @@ export class WebhookAction extends BaseAction {
         }));
       }
     }
+
+    // Password is required if username specified
+    if (this.username && !this.password) {
+      errors.password.push(
+        i18n.translate('xpack.watcher.watchActions.webhook.passwordIsRequiredIfUsernameValidationMessage', {
+          defaultMessage: 'Password is required.',
+        })
+      );
+    }
+
+    // Username is required if password is specified
+    if (this.password && !this.username) {
+      errors.username.push(
+        i18n.translate('xpack.watcher.watchActions.webhook.usernameIsRequiredIfPasswordValidationMessage', {
+          defaultMessage: 'Username is required.',
+        })
+      );
+    }
+
     return errors;
   }
 
@@ -72,6 +97,8 @@ export class WebhookAction extends BaseAction {
       port: this.port,
       path: this.path,
       body: this.body,
+      username: this.username,
+      password: this.password,
       webhook: {
         host: this.host,
         port: this.port,

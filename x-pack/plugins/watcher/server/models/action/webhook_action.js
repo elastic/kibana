@@ -19,6 +19,8 @@ export class WebhookAction extends BaseAction {
     this.path = props.path;
     this.body = props.body;
     this.contentType = props.contentType;
+    this.username = props.username;
+    this.password = props.password;
   }
 
   // To Kibana
@@ -31,6 +33,7 @@ export class WebhookAction extends BaseAction {
       path: this.path,
       body: this.body,
       contentType: this.contentType,
+      username: this.username,
     });
     return result;
   }
@@ -47,6 +50,8 @@ export class WebhookAction extends BaseAction {
       path: json.path,
       body: json.body,
       contentType: json.contentType,
+      username: json.username,
+      password: json.password,
     });
 
     const action = new WebhookAction(props, errors);
@@ -58,18 +63,31 @@ export class WebhookAction extends BaseAction {
     const result = super.upstreamJson;
 
     const optionalFields = {};
+
     if (this.path) {
       optionalFields.path = this.path;
     }
+
     if (this.method) {
       optionalFields.method = this.method;
     }
+
     if (this.body) {
       optionalFields.body = this.body;
     }
+
     if (this.contentType) {
       optionalFields.headers = {
         'Content-Type': this.contentType,
+      };
+    }
+
+    if (this.username && this.password) {
+      optionalFields.auth = {
+        basic: {
+          username: this.username,
+          password: this.password,
+        },
       };
     }
 
@@ -87,21 +105,31 @@ export class WebhookAction extends BaseAction {
   // From Elasticsearch
   static fromUpstreamJson(json) {
     const props = super.getPropsFromUpstreamJson(json);
+    const webhookJson = json && json.actionJson && json.actionJson.webhook;
     const { errors } = this.validateJson(json.actionJson);
+
+    const { path, method, body, auth, headers } = webhookJson;
 
     const optionalFields = {};
 
-    if (json.actionJson.webhook.path) {
-      optionalFields.path = json.actionJson.webhook.path;
+    if (path) {
+      optionalFields.path = path;
     }
-    if (json.actionJson.webhook.method) {
-      optionalFields.method = json.actionJson.webhook.method;
+
+    if (method) {
+      optionalFields.method = method;
     }
-    if (json.actionJson.webhook.body) {
-      optionalFields.body = json.actionJson.webhook.body;
+
+    if (body) {
+      optionalFields.body = body;
     }
-    if (json.actionJson.webhook.headers['Content-Type']) {
-      optionalFields.contentType = json.actionJson.webhook.headers['Content-Type'];
+
+    if (headers['Content-Type']) {
+      optionalFields.contentType = headers['Content-Type'];
+    }
+
+    if (auth && auth.basic) {
+      optionalFields.username = auth.basic.username;
     }
 
     Object.assign(props, {

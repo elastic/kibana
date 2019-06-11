@@ -9,8 +9,8 @@ import { LICENSE_TYPE_GOLD, LicenseType } from '../../../../common/constants';
 export const PLUGIN = {
   ID: 'watcher',
   MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_GOLD as LicenseType,
-  getI18nName: (translate: (key: string, config: object) => string): string => {
-    return translate('xpack.watcher.appName', {
+  getI18nName: (i18n: any): string => {
+    return i18n.translate('xpack.watcher.appName', {
       defaultMessage: 'Watcher',
     });
   },

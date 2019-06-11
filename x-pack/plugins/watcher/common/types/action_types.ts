@@ -58,6 +58,8 @@ export interface WebhookAction extends BaseAction {
   port: number;
   path?: string;
   body?: string;
+  username?: string;
+  password?: string;
 }
 
 export interface SlackAction extends BaseAction {
