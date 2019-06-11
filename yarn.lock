@@ -4119,6 +4119,11 @@
   resolved "https://registry.yarnpkg.com/@types/tempy/-/tempy-0.2.0.tgz#8b7a93f6912aef25cc0b8d8a80ff974151478685"
   integrity sha512-YaX74QljqR45Xu7dd22wMvzTS+ItUiSyDl9XJl6WTgYNE09r2TF+mV2FDjWRM5Sdzf9C9dXRTUdz9J5SoEYxXg==
 
+"@types/tinycolor2@^1.4.0":
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@types/tinycolor2/-/tinycolor2-1.4.2.tgz#721ca5c5d1a2988b4a886e35c2ffc5735b6afbdf"
+  integrity sha512-PeHg/AtdW6aaIO2a+98Xj7rWY4KC1E6yOy7AFknJQ7VXUGNrMlyxDFxJo7HqLtjQms/ZhhQX52mLVW/EX3JGOw==
+
 "@types/tinycolor2@^1.4.1":
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/@types/tinycolor2/-/tinycolor2-1.4.1.tgz#2f5670c9d1d6e558897a810ed284b44918fc1253"
@@ -26099,22 +26104,18 @@ tinycolor2@1.3.0:
   resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.3.0.tgz#3f38e6424de4566122d550eb1acc80cad37a7184"
   integrity sha1-PzjmQk3kVmEi1VDrGsyAytN6cYQ=
 
-tinycolor2@^1.4.1:
+tinycolor2@^1.0.0, tinycolor2@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.4.1.tgz#f4fad333447bc0b07d4dc8e9209d8f39a8ac77e8"
   integrity sha1-9PrTM0R7wLB9TcjpIJ2POaisd+g=
 
-tinycolor2@~1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.0.0.tgz#d32c2f2c8abc5bb3d21bf7fba16825357d4bbac3"
-  integrity sha1-0ywvLIq8W7PSG/f7oWglNX1LusM=
-
-tinygradient@0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/tinygradient/-/tinygradient-0.3.0.tgz#f26926f12f2810f5f8aae56e4d3a7d1e36743b39"
-  integrity sha1-8mkm8S8oEPX4quVuTTp9HjZ0Ozk=
+tinygradient@0.4.3:
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/tinygradient/-/tinygradient-0.4.3.tgz#0a8dfde56f8865deec4c435a51bd5b0c0dec59fa"
+  integrity sha512-tBPYQSs6eWukzzAITBSmqcOwZCKACvRa/XjPPh1mj4mnx4G3Drm51HxyCTU/TKnY8kG4hmTe5QlOh9O82aNtJQ==
   dependencies:
-    tinycolor2 "~1.0.0"
+    "@types/tinycolor2" "^1.4.0"
+    tinycolor2 "^1.0.0"
 
 tinymath@1.2.1:
   version "1.2.1"
