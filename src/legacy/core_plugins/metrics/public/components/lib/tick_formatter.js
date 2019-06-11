@@ -45,7 +45,7 @@ export const tickFormatter = (format = '0,0.[00]', template, getConfig = null) =
       formatter = new FieldFormat({ pattern: format }, getConfig);
     }
   }
-  return (val) => {
+  return val => {
     let value;
     if (!isNumber(val)) {
       value = val;
