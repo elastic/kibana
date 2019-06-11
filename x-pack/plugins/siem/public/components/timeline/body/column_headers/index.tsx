@@ -96,6 +96,7 @@ export const ColumnHeaders = pure<Props>(
     minWidth,
   }) => {
     const { isResizing, setIsResizing } = isContainerResizing();
+
     return (
       <ColumnHeadersContainer data-test-subj="column-headers" minWidth={minWidth}>
         <ColumnHeadersFlexGroup
@@ -141,6 +142,7 @@ export const ColumnHeaders = pure<Props>(
                 {columnHeaders.map((header, i) => (
                   <EuiFlexItem grow={false} key={header.id}>
                     <Draggable
+                      data-test-subj="draggable"
                       draggableId={getDraggableFieldId({
                         contextId: `timeline-column-headers-${timelineId}`,
                         fieldId: header.id,
