@@ -11,7 +11,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 
 import { wait } from '../../lib/helpers';
 
-import { WithSource } from '.';
+import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
 
 describe('Index Fields & Browser Fields', () => {
@@ -51,5 +51,21 @@ describe('Index Fields & Browser Fields', () => {
 
     // Why => https://github.com/apollographql/react-apollo/issues/1711
     await wait();
+  });
+
+  describe('indicesExistOrDataTemporarilyUnavailable', () => {
+    test('it returns false when undefined', () => {
+      let undefVar;
+      const result = indicesExistOrDataTemporarilyUnavailable(undefVar);
+      expect(result).toBeFalsy();
+    });
+    test('it returns true when true', () => {
+      const result = indicesExistOrDataTemporarilyUnavailable(true);
+      expect(result).toBeTruthy();
+    });
+    test('it returns false when false', () => {
+      const result = indicesExistOrDataTemporarilyUnavailable(false);
+      expect(result).toBeFalsy();
+    });
   });
 });
