@@ -21,7 +21,6 @@ import { IndexerFactory } from '../indexer';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
-import { ServerOptions } from '../server_options';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { AbstractWorker } from './abstract_worker';
 import { CancellationSerivce } from './cancellation_service';
@@ -36,7 +35,7 @@ export class IndexWorker extends AbstractWorker {
     protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly indexerFactories: IndexerFactory[],
-    protected readonly options: ServerOptions,
+    protected readonly gitOps: GitOperations,
     private readonly cancellationService: CancellationSerivce
   ) {
     super(queue, log);
@@ -172,8 +171,7 @@ export class IndexWorker extends AbstractWorker {
 
   protected async getTimeoutMs(payload: any) {
     try {
-      const gitOperator = new GitOperations(this.options.repoPath);
-      const totalCount = await gitOperator.countRepoFiles(payload.uri, 'head');
+      const totalCount = await this.gitOps.countRepoFiles(payload.uri, 'head');
       let timeout = moment.duration(1, 'hour').asMilliseconds();
       if (totalCount > 0) {
         // timeout = ln(file_count) in hour
