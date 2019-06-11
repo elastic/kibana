@@ -36,5 +36,10 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
   queryFilter.addFiltersAndChangeTimeFilter = filterManager.addFiltersAndChangeTimeFilter.bind(filterManager);
   queryFilter.removeAll = filterManager.removeAll.bind(filterManager);
 
+  queryFilter.destroy = () => {
+    filterManager.destroy();
+    filterStateManager.destroy();
+  };
+
   return queryFilter;
 }

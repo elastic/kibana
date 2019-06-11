@@ -30,6 +30,7 @@ export class FilterStateManager {
   prevGlobalFilters: Filter[] | undefined;
   prevAppFilters: Filter[] | undefined;
   stateUpdated$: Subject<PartitionedFilters> = new Subject();
+  interval: NodeJS.Timeout | undefined;
 
   constructor(globalState: State, getAppState: () => State) {
     this.getAppState = getAppState;
@@ -38,10 +39,16 @@ export class FilterStateManager {
     this.watchFilterState();
   }
 
+  destroy() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+  }
+
   private watchFilterState() {
     // This is a temporary solution to remove rootscope.
     // Moving forward, state should provide observable subscriptions.
-    setInterval(() => {
+    this.interval = setInterval(() => {
       const appState = this.getAppState();
       if (
         !appState ||

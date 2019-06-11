@@ -28,7 +28,6 @@ import { getFiltersArray } from './_get_filters_array';
 describe('remove filters', function () {
   let filters;
   let queryFilter;
-  let $rootScope;
   let appState;
   let globalState;
 
@@ -51,28 +50,27 @@ describe('remove filters', function () {
     }
   ));
 
-  beforeEach(ngMock.inject(function (_$rootScope_, Private) {
-    $rootScope = _$rootScope_;
+  beforeEach(ngMock.inject(function (Private) {
     queryFilter = Private(FilterBarQueryFilterProvider);
     filters = getFiltersArray();
   }));
 
   describe('removing a filter', function () {
-    it('should remove the filter from appState', function () {
-      appState.filters = filters;
+    it('should remove the filter from appState', async function () {
+      await queryFilter.addFilters(filters, false);
       expect(appState.filters).to.have.length(3);
       queryFilter.removeFilter(filters[0]);
       expect(appState.filters).to.have.length(2);
     });
 
-    it('should remove the filter from globalState', function () {
-      globalState.filters = filters;
+    it('should remove the filter from globalState', async function () {
+      await queryFilter.addFilters(filters, true);
       expect(globalState.filters).to.have.length(3);
       queryFilter.removeFilter(filters[0]);
       expect(globalState.filters).to.have.length(2);
     });
 
-    it('should fire the update and fetch events', function () {
+    it('should fire the update and fetch events', async function () {
       const updateStub = sinon.stub();
       const fetchStub = sinon.stub();
 
@@ -84,51 +82,41 @@ describe('remove filters', function () {
         next: fetchStub,
       });
 
-      appState.filters = filters;
-      $rootScope.$digest();
-
+      await queryFilter.addFilters(filters, false);
       queryFilter.removeFilter(filters[0]);
-      $rootScope.$digest();
 
       // this time, events should be emitted
       expect(fetchStub.called);
       expect(updateStub.called);
     });
 
-    it('should remove matching filters', function () {
-      globalState.filters.push(filters[0]);
-      globalState.filters.push(filters[1]);
-      appState.filters.push(filters[2]);
-      $rootScope.$digest();
+    it('should remove matching filters', async function () {
+      await queryFilter.addFilters([filters[0], filters[1]], true);
+      await queryFilter.addFilters([filters[2]], false);
 
       queryFilter.removeFilter(filters[0]);
-      $rootScope.$digest();
+
       expect(globalState.filters).to.have.length(1);
       expect(appState.filters).to.have.length(1);
     });
 
-    it('should remove matching filters by comparison', function () {
-      globalState.filters.push(filters[0]);
-      globalState.filters.push(filters[1]);
-      appState.filters.push(filters[2]);
-      $rootScope.$digest();
+    it('should remove matching filters by comparison', async function () {
+      await queryFilter.addFilters([filters[0], filters[1]], true);
+      await queryFilter.addFilters([filters[2]], false);
 
       queryFilter.removeFilter(_.cloneDeep(filters[0]));
-      $rootScope.$digest();
+
       expect(globalState.filters).to.have.length(1);
       expect(appState.filters).to.have.length(1);
 
       queryFilter.removeFilter(_.cloneDeep(filters[2]));
-      $rootScope.$digest();
       expect(globalState.filters).to.have.length(1);
       expect(appState.filters).to.have.length(0);
     });
 
-    it('should do nothing with a non-matching filter', function () {
-      globalState.filters.push(filters[0]);
-      globalState.filters.push(filters[1]);
-      appState.filters.push(filters[2]);
-      $rootScope.$digest();
+    it('should do nothing with a non-matching filter', async function () {
+      await queryFilter.addFilters([filters[0], filters[1]], true);
+      await queryFilter.addFilters([filters[2]], false);
 
       const missedFilter = _.cloneDeep(filters[0]);
       missedFilter.meta = {
@@ -136,21 +124,19 @@ describe('remove filters', function () {
       };
 
       queryFilter.removeFilter(missedFilter);
-      $rootScope.$digest();
       expect(globalState.filters).to.have.length(2);
       expect(appState.filters).to.have.length(1);
     });
   });
 
   describe('bulk removal', function () {
-    it('should remove all the filters from both states', function () {
-      globalState.filters.push(filters[0]);
-      globalState.filters.push(filters[1]);
-      appState.filters.push(filters[2]);
+    it('should remove all the filters from both states', async function () {
+      await queryFilter.addFilters([filters[0], filters[1]], true);
+      await queryFilter.addFilters([filters[2]], false);
       expect(globalState.filters).to.have.length(2);
       expect(appState.filters).to.have.length(1);
 
-      queryFilter.removeAll();
+      await queryFilter.removeAll();
       expect(globalState.filters).to.have.length(0);
       expect(appState.filters).to.have.length(0);
     });

@@ -20,7 +20,7 @@
 import { Filter, isFilterPinned, FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 
 import { npSetup } from 'ui/new_platform';
 
@@ -50,6 +50,7 @@ export class FilterManager {
   filters: Filter[] = [];
   updated$: Subject<any> = new Subject();
   fetch$: Subject<any> = new Subject();
+  updateSubscription$: Subscription | undefined;
 
   constructor(indexPatterns: any, filterState: FilterStateManager) {
     this.indexPatterns = indexPatterns;
@@ -58,21 +59,29 @@ export class FilterManager {
     this.watchFilterState();
   }
 
+  destroy() {
+    if (this.updateSubscription$) {
+      this.updateSubscription$.unsubscribe();
+    }
+  }
+
   private watchFilterState() {
-    this.filterState.getStateUpdated$().subscribe((partitionedFilters: PartitionedFilters) => {
-      if (!this.haveFiltersChanged(partitionedFilters)) return;
+    this.updateSubscription$ = this.filterState
+      .getStateUpdated$()
+      .subscribe((partitionedFilters: PartitionedFilters) => {
+        if (!this.haveFiltersChanged(partitionedFilters)) return;
 
-      const newPartitionedFilters = _.cloneDeep(partitionedFilters);
+        const newPartitionedFilters = _.cloneDeep(partitionedFilters);
 
-      FilterManager.setFiltersStore(newPartitionedFilters.appFilters, FilterStateStore.APP_STATE);
-      FilterManager.setFiltersStore(
-        newPartitionedFilters.globalFilters,
-        FilterStateStore.GLOBAL_STATE
-      );
+        FilterManager.setFiltersStore(newPartitionedFilters.appFilters, FilterStateStore.APP_STATE);
+        FilterManager.setFiltersStore(
+          newPartitionedFilters.globalFilters,
+          FilterStateStore.GLOBAL_STATE
+        );
 
-      const newFilters = this.mergeIncomingFilters(newPartitionedFilters);
-      this.handleStateUpdate(newFilters);
-    });
+        const newFilters = this.mergeIncomingFilters(newPartitionedFilters);
+        this.handleStateUpdate(newFilters);
+      });
   }
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
@@ -94,7 +103,7 @@ export class FilterManager {
       appFilters.splice(i, 1);
     });
 
-    return this.mergeFilters(appFilters, globalFilters);
+    return uniqFilters(appFilters.concat(globalFilters), COMPARATOR_OPTIONS);
   }
 
   private haveFiltersChanged(partitionedFilters: PartitionedFilters) {
@@ -112,13 +121,6 @@ export class FilterManager {
     // This is legacy optimization logic.
     // TODO: What it does is - ----------
     return !onlyDisabled(newFilters, this.filters) && !onlyStateChanged(newFilters, this.filters);
-  }
-
-  private mergeFilters(newFilters: Filter[], oldFilters: Filter[]): Filter[] {
-    // Order matters!
-    // uniqFilters will throw out duplicates from the back of the array,
-    // but we want newer filters to overwrite previously created filters.
-    return uniqFilters(newFilters.concat(oldFilters), COMPARATOR_OPTIONS);
   }
 
   private static partitionFilters(filters: Filter[]): PartitionedFilters {
@@ -211,7 +213,11 @@ export class FilterManager {
     FilterManager.setFiltersStore(filters, store);
 
     const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, filters);
-    const newFilters = this.mergeFilters(mappedFilters, this.filters);
+
+    // Order matters!
+    // uniqFilters will throw out duplicates from the back of the array,
+    // but we want newer filters to overwrite previously created filters.
+    const newFilters = uniqFilters(mappedFilters.concat(this.filters));
     this.handleStateUpdate(newFilters);
   }
 
