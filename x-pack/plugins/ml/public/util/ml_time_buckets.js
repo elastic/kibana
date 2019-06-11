@@ -14,125 +14,123 @@
 import _ from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
+import chrome from 'ui/chrome';
 
-import { TimeBucketsCalcAutoIntervalProvider } from 'plugins/ml/util/ml_calc_auto_interval';
+import { timeBucketsCalcAutoIntervalProvider } from 'plugins/ml/util/ml_calc_auto_interval';
 import { inherits } from 'plugins/ml/util/inherits';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('w');    // Multiple units of week or longer converted to days for ES intervals.
 
 import { TimeBuckets } from 'ui/time_buckets';
-export function IntervalHelperProvider(Private, config) {
 
-  const calcAuto = Private(TimeBucketsCalcAutoIntervalProvider);
-  inherits(MlTimeBuckets, TimeBuckets);
+const config = chrome.getUiSettingsClient();
 
-  function MlTimeBuckets() {
-    this.barTarget = config.get('histogram:barTarget');
-    this.maxBars = config.get('histogram:maxBars');
+const calcAuto = timeBucketsCalcAutoIntervalProvider();
+inherits(MlTimeBuckets, TimeBuckets);
 
-    // return MlTimeBuckets.Super.call(this);
+export function MlTimeBuckets() {
+  this.barTarget = config.get('histogram:barTarget');
+  this.maxBars = config.get('histogram:maxBars');
+
+  // return MlTimeBuckets.Super.call(this);
+}
+
+MlTimeBuckets.prototype.setBarTarget = function (bt) {
+  this.barTarget = bt;
+};
+
+MlTimeBuckets.prototype.setMaxBars = function (mb) {
+  this.maxBars = mb;
+};
+
+MlTimeBuckets.prototype.getInterval = function () {
+  const self = this;
+  const duration = self.getDuration();
+  return decorateInterval(maybeScaleInterval(readInterval()), duration);
+
+  // either pull the interval from state or calculate the auto-interval
+  function readInterval() {
+    const interval = self._i;
+    if (moment.isDuration(interval)) return interval;
+    return calcAuto.near(self.barTarget, duration);
   }
 
-  MlTimeBuckets.prototype.setBarTarget = function (bt) {
-    this.barTarget = bt;
-  };
+  // check to see if the interval should be scaled, and scale it if so
+  function maybeScaleInterval(interval) {
+    if (!self.hasBounds()) return interval;
 
-  MlTimeBuckets.prototype.setMaxBars = function (mb) {
-    this.maxBars = mb;
-  };
+    const maxLength = self.maxBars;
+    const approxLen = duration / interval;
+    let scaled;
 
-  MlTimeBuckets.prototype.getInterval = function () {
-    const self = this;
-    const duration = self.getDuration();
-    return decorateInterval(maybeScaleInterval(readInterval()), duration);
-
-    // either pull the interval from state or calculate the auto-interval
-    function readInterval() {
-      const interval = self._i;
-      if (moment.isDuration(interval)) return interval;
-      return calcAuto.near(self.barTarget, duration);
-    }
-
-    // check to see if the interval should be scaled, and scale it if so
-    function maybeScaleInterval(interval) {
-      if (!self.hasBounds()) return interval;
-
-      const maxLength = self.maxBars;
-      const approxLen = duration / interval;
-      let scaled;
-
-      // If the number of buckets we got back from using the barTarget is less than
-      // maxBars, than use the lessThan rule to try and get closer to maxBars.
-      if (approxLen > maxLength) {
-        scaled = calcAuto.lessThan(maxLength, duration);
-      } else {
-        return interval;
-      }
-
-      if (+scaled === +interval) return interval;
-
-      decorateInterval(interval, duration);
-      return _.assign(scaled, {
-        preScaled: interval,
-        scale: interval / scaled,
-        scaled: true
-      });
-    }
-
-  };
-
-  // Returns an interval which in the last step of calculation is rounded to
-  // the closest multiple of the supplied divisor (in seconds).
-  MlTimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
-    const interval = this.getInterval();
-    const intervalSecs = interval.asSeconds();
-
-    const remainder = intervalSecs % divisorSecs;
-    if (remainder === 0) {
+    // If the number of buckets we got back from using the barTarget is less than
+    // maxBars, than use the lessThan rule to try and get closer to maxBars.
+    if (approxLen > maxLength) {
+      scaled = calcAuto.lessThan(maxLength, duration);
+    } else {
       return interval;
     }
 
-    // Create a new interval which is a multiple of the supplied divisor (not zero).
-    let nearestMultiple = remainder > (divisorSecs / 2) ?
-      intervalSecs + divisorSecs - remainder : intervalSecs - remainder;
-    nearestMultiple = nearestMultiple === 0 ? divisorSecs : nearestMultiple;
-    const nearestMultipleInt = moment.duration(nearestMultiple, 'seconds');
-    decorateInterval(nearestMultipleInt, this.getDuration());
+    if (+scaled === +interval) return interval;
 
-    // Check to see if the new interval is scaled compared to the original.
-    const preScaled = _.get(interval, 'preScaled');
-    if (preScaled !== undefined && preScaled < nearestMultipleInt) {
-      nearestMultipleInt.preScaled = preScaled;
-      nearestMultipleInt.scale = preScaled / nearestMultipleInt;
-      nearestMultipleInt.scaled = true;
-    }
+    decorateInterval(interval, duration);
+    return _.assign(scaled, {
+      preScaled: interval,
+      scale: interval / scaled,
+      scaled: true
+    });
+  }
 
-    return nearestMultipleInt;
-  };
+};
 
-  // Appends some MlTimeBuckets specific properties to the momentjs duration interval.
-  // Uses the originalDuration from which the time bucket was created to calculate the overflow
-  // property (i.e. difference between the supplied duration and the calculated bucket interval).
-  function decorateInterval(interval, originalDuration) {
-    const esInterval = calcEsInterval(interval);
-    interval.esValue = esInterval.value;
-    interval.esUnit = esInterval.unit;
-    interval.expression = esInterval.expression;
-    interval.overflow = originalDuration > interval ? moment.duration(interval - originalDuration) : false;
+// Returns an interval which in the last step of calculation is rounded to
+// the closest multiple of the supplied divisor (in seconds).
+MlTimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
+  const interval = this.getInterval();
+  const intervalSecs = interval.asSeconds();
 
-    const prettyUnits = moment.normalizeUnits(esInterval.unit);
-    if (esInterval.value === 1) {
-      interval.description = prettyUnits;
-    } else {
-      interval.description = `${esInterval.value} ${prettyUnits}s`;
-    }
-
+  const remainder = intervalSecs % divisorSecs;
+  if (remainder === 0) {
     return interval;
   }
 
+  // Create a new interval which is a multiple of the supplied divisor (not zero).
+  let nearestMultiple = remainder > (divisorSecs / 2) ?
+    intervalSecs + divisorSecs - remainder : intervalSecs - remainder;
+  nearestMultiple = nearestMultiple === 0 ? divisorSecs : nearestMultiple;
+  const nearestMultipleInt = moment.duration(nearestMultiple, 'seconds');
+  decorateInterval(nearestMultipleInt, this.getDuration());
 
-  return MlTimeBuckets;
+  // Check to see if the new interval is scaled compared to the original.
+  const preScaled = _.get(interval, 'preScaled');
+  if (preScaled !== undefined && preScaled < nearestMultipleInt) {
+    nearestMultipleInt.preScaled = preScaled;
+    nearestMultipleInt.scale = preScaled / nearestMultipleInt;
+    nearestMultipleInt.scaled = true;
+  }
+
+  return nearestMultipleInt;
+};
+
+// Appends some MlTimeBuckets specific properties to the momentjs duration interval.
+// Uses the originalDuration from which the time bucket was created to calculate the overflow
+// property (i.e. difference between the supplied duration and the calculated bucket interval).
+function decorateInterval(interval, originalDuration) {
+  const esInterval = calcEsInterval(interval);
+  interval.esValue = esInterval.value;
+  interval.esUnit = esInterval.unit;
+  interval.expression = esInterval.expression;
+  interval.overflow = originalDuration > interval ? moment.duration(interval - originalDuration) : false;
+
+  const prettyUnits = moment.normalizeUnits(esInterval.unit);
+  if (esInterval.value === 1) {
+    interval.description = prettyUnits;
+  } else {
+    interval.description = `${esInterval.value} ${prettyUnits}s`;
+  }
+
+  return interval;
 }
 
 export function getBoundsRoundedToInterval(bounds, interval, inclusiveEnd = false) {

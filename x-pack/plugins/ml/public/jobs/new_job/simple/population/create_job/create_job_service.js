@@ -10,16 +10,15 @@ import _ from 'lodash';
 
 import { EVENT_RATE_COUNT_FIELD, WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
-import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { timefilter } from 'ui/timefilter';
 
-export function PopulationJobServiceProvider(Private) {
+export function PopulationJobServiceProvider() {
 
-  const TimeBuckets = Private(IntervalHelperProvider);
   const OVER_FIELD_EXAMPLES_COUNT = 40;
 
   class PopulationJobService {
@@ -77,7 +76,7 @@ export function PopulationJobServiceProvider(Private) {
           };
         });
 
-        const searchJson = getSearchJsonFromConfig(formConfig, timefilter, TimeBuckets);
+        const searchJson = getSearchJsonFromConfig(formConfig, timefilter, MlTimeBuckets);
 
         ml.esSearch(searchJson)
           .then((resp) => {
@@ -314,7 +313,7 @@ export function PopulationJobServiceProvider(Private) {
 
   function getSearchJsonFromConfig(formConfig) {
     const bounds = timefilter.getActiveBounds();
-    const buckets = new TimeBuckets();
+    const buckets = new MlTimeBuckets();
     buckets.setInterval('auto');
     buckets.setBounds(bounds);
 
