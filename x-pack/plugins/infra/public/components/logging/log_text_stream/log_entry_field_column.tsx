@@ -24,10 +24,18 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   isWrapped,
 }) => {
   const value = useMemo(() => JSON.parse(encodedValue), [encodedValue]);
-
+  const formattedValue = Array.isArray(value) ? (
+    <ul>
+      {value.map((entry, i) => (
+        <li key={`LogEntryFieldColumn-${entry}-${i}`}>{entry}</li>
+      ))}
+    </ul>
+  ) : (
+    value
+  );
   return (
     <FieldColumnContent isHighlighted={isHighlighted} isHovered={isHovered} isWrapped={isWrapped}>
-      {value}
+      {formattedValue}
     </FieldColumnContent>
   );
 };
