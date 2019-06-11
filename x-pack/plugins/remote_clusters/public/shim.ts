@@ -41,10 +41,8 @@ export function createShim() {
     },
     pluginsStart: {
       management: {
-        sections: management,
-        constants: {
-          BREADCRUMB: MANAGEMENT_BREADCRUMB,
-        },
+        getSection: management.getSection.bind(management),
+        breadcrumb: MANAGEMENT_BREADCRUMB,
       },
       uiMetric: {
         track,

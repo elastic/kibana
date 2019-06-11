@@ -33,15 +33,11 @@ export class Plugin {
 
     if (getInjectedVar('remoteClustersUiEnabled')) {
       const {
-        management: {
-          constants: {
-            BREADCRUMB,
-          },
-        },
+        management: { getSection, breadcrumb: managementBreadcrumb },
         uiMetric: { track },
       } = pluginsStart;
 
-      const esSection = pluginsStart.management.sections.getSection('elasticsearch');
+      const esSection = getSection('elasticsearch');
       esSection.register('remote_clusters', {
         visible: true,
         display: i18n.translate('xpack.remoteClusters.appTitle', { defaultMessage: 'Remote Clusters' }),
@@ -50,7 +46,7 @@ export class Plugin {
       });
 
       // Initialize services
-      initBreadcrumbs(setBreadcrumbs, BREADCRUMB, i18n);
+      initBreadcrumbs(setBreadcrumbs, managementBreadcrumb, i18n);
       initDocumentation(`${elasticWebsiteUrl}guide/en/elasticsearch/reference/${docLinkVersion}/`);
       initUiMetric(track);
       initNotification(toasts, fatalError);
