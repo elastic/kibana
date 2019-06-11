@@ -17,16 +17,8 @@
  * under the License.
  */
 
-import { getDocLink } from '../../documentation_links';
-import { uiModules } from '../../modules';
+import React from 'react';
+import { mount } from 'enzyme';
+import { DateRangesParamEditor } from './date_ranges';
 
-const module = uiModules.get('kibana');
-
-module.directive('documentationHref', function () {
-  return {
-    restrict: 'A',
-    link: function (scope, element, attributes) {
-      element.attr('href', getDocLink(attributes.documentationHref));
-    }
-  };
-});
+describe('DateRangesParamEditor component', () => {});
