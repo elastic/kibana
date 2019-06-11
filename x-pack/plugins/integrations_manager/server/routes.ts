@@ -12,7 +12,7 @@ import {
   API_SAVED_OBJECTS_ROOT,
   SAVED_OBJECT_TYPE,
 } from '../common/constants';
-import { Request } from '../common/types';
+import { Request, ServerRoute } from '../common/types';
 import { fetchInfo, fetchList, getZipInfo } from './registry';
 import { getClient } from './saved_objects';
 
@@ -23,7 +23,7 @@ interface PostRequest extends Request {
 }
 
 // Manager public API paths (currently essentially a proxy to registry service)
-export const routes = [
+export const routes: ServerRoute[] = [
   {
     method: 'GET',
     path: API_INTEGRATIONS_LIST,
