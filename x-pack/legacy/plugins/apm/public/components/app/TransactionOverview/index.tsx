@@ -19,6 +19,7 @@ import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { TransactionBreakdown } from './TransactionBreakdown';
 import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
 import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
@@ -56,7 +57,7 @@ export function TransactionOverview({
   serviceTransactionTypes
 }: Props) {
   const location = useLocation();
-  const { serviceName, transactionType } = urlParams;
+  const { serviceName, transactionType, start, end } = urlParams;
 
   // redirect to first transaction type
   useRedirect(
@@ -86,6 +87,16 @@ export function TransactionOverview({
 
   return (
     <React.Fragment>
+      <EuiPanel>
+        <TransactionBreakdown
+          serviceName={serviceName}
+          start={start}
+          end={end}
+        />
+      </EuiPanel>
+
+      <EuiSpacer size="s" />
+
       {serviceTransactionTypes.length > 1 ? (
         <EuiFormRow
           id="transaction-type-select-row"
