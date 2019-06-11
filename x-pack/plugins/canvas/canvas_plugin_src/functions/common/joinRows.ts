@@ -42,7 +42,7 @@ export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments,
         aliases: ['sep'],
         types: ['string'],
         default: ',',
-        help: 'Separator to use for row values',
+        help: 'Separator to use between row values',
       },
       quote: {
         types: ['string'],
