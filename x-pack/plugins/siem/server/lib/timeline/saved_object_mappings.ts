@@ -132,6 +132,9 @@ export const timelineSavedObjectMappings: {
       },
       favorite: {
         properties: {
+          keySearch: {
+            type: 'text',
+          },
           fullName: {
             type: 'text',
           },

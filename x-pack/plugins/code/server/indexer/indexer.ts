@@ -14,5 +14,9 @@ export interface Indexer {
 }
 
 export interface IndexerFactory {
-  create(repoUri: RepositoryUri, revision: string): Promise<Indexer | undefined>;
+  create(
+    repoUri: RepositoryUri,
+    revision: string,
+    enforcedReindex: boolean
+  ): Promise<Indexer | undefined>;
 }

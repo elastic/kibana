@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/ColorPicker interactive 1`] = `
+exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
 <div>
   <div>
     <div
@@ -274,7 +274,7 @@ exports[`Storyshots components/ColorPicker interactive 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ColorPicker six colors 1`] = `
+exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
 <div>
   <div
     className="canvasColorPalette"
@@ -544,7 +544,7 @@ exports[`Storyshots components/ColorPicker six colors 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ColorPicker six colors, value missing 1`] = `
+exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] = `
 <div>
   <div
     className="canvasColorPalette"
@@ -800,7 +800,7 @@ exports[`Storyshots components/ColorPicker six colors, value missing 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ColorPicker three colors 1`] = `
+exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
 <div>
   <div
     className="canvasColorPalette"

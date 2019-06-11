@@ -88,9 +88,10 @@ const SavedDateRangePickerRuntimeType = runtimeTypes.partial({
  *  Favorite Types
  */
 const SavedFavoriteRuntimeType = runtimeTypes.partial({
+  keySearch: unionWithNullType(runtimeTypes.string),
+  favoriteDate: unionWithNullType(runtimeTypes.number),
   fullName: unionWithNullType(runtimeTypes.string),
   userName: unionWithNullType(runtimeTypes.string),
-  favoriteDate: unionWithNullType(runtimeTypes.number),
 });
 
 /*

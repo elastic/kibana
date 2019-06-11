@@ -265,6 +265,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('editLayerButton');
     }
 
+    async closeLayerPanel() {
+      await testSubjects.click('layerPanelCancelButton');
+      await this.waitForLayersToLoad();
+    }
+
     async getLayerTOCDetails(layerName) {
       return await testSubjects.getVisibleText(`mapLayerTOCDetails${escapeLayerName(layerName)}`);
     }

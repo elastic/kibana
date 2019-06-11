@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/Asset airplane 1`] = `
+exports[`Storyshots components/Assets/Asset airplane 1`] = `
 <div
   style={
     Object {
@@ -196,7 +196,7 @@ exports[`Storyshots components/Asset airplane 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/Asset marker 1`] = `
+exports[`Storyshots components/Assets/Asset marker 1`] = `
 <div
   style={
     Object {
