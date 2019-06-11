@@ -25,6 +25,8 @@ import { Subject } from 'rxjs';
 import { npSetup } from 'ui/new_platform';
 
 // @ts-ignore
+import { compareFilters } from './lib/compare_filters';
+// @ts-ignore
 import { onlyDisabled } from './lib/only_disabled';
 // @ts-ignore
 import { onlyStateChanged } from './lib/only_state_changed';
@@ -39,6 +41,8 @@ import { changeTimeFilter } from './lib/change_time_filter';
 
 import { PartitionedFilters } from './partitioned_filters';
 import { FilterStateManager } from './filter_state_manager';
+
+const COMPARATOR_OPTIONS = { negate: true, disabled: true };
 
 export class FilterManager {
   filterState: FilterStateManager;
@@ -58,13 +62,39 @@ export class FilterManager {
     this.filterState.getStateUpdated$().subscribe((partitionedFilters: PartitionedFilters) => {
       if (!this.haveFiltersChanged(partitionedFilters)) return;
 
-      const newFilters = this.mergeFilters(
-        partitionedFilters.appFilters,
-        partitionedFilters.globalFilters
+      const newPartitionedFilters = _.cloneDeep(partitionedFilters);
+
+      FilterManager.setFiltersStore(newPartitionedFilters.appFilters, FilterStateStore.APP_STATE);
+      FilterManager.setFiltersStore(
+        newPartitionedFilters.globalFilters,
+        FilterStateStore.GLOBAL_STATE
       );
 
-      this.setFilters(newFilters);
+      const newFilters = this.mergeIncomingFilters(newPartitionedFilters);
+      this.handleStateUpdate(newFilters);
     });
+  }
+
+  private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
+    // ensure we don't mutate the filters passed in
+    const globalFilters = partitionedFilters.globalFilters;
+    const appFilters = partitionedFilters.appFilters;
+
+    // existing globalFilters should be mutated by appFilters
+    _.each(appFilters, function(filter, i) {
+      const match = _.find(globalFilters, function(globalFilter) {
+        return compareFilters(globalFilter, filter, COMPARATOR_OPTIONS);
+      });
+
+      // no match, do nothing
+      if (!match) return;
+
+      // matching filter in globalState, update global and remove from appState
+      _.assign(match.meta, filter.meta);
+      appFilters.splice(i, 1);
+    });
+
+    return this.mergeFilters(appFilters, globalFilters);
   }
 
   private haveFiltersChanged(partitionedFilters: PartitionedFilters) {
@@ -88,21 +118,43 @@ export class FilterManager {
     // Order matters!
     // uniqFilters will throw out duplicates from the back of the array,
     // but we want newer filters to overwrite previously created filters.
-    return uniqFilters(newFilters.concat(oldFilters));
+    return uniqFilters(newFilters.concat(oldFilters), COMPARATOR_OPTIONS);
   }
 
   private static partitionFilters(filters: Filter[]): PartitionedFilters {
     const [globalFilters, appFilters] = _.partition(filters, isFilterPinned);
-
     return {
       globalFilters,
       appFilters,
     };
   }
 
+  private static setFiltersStore(filters: Filter[], store: FilterStateStore) {
+    _.map(filters, (filter: Filter) => {
+      // Override status only for filters that didn't have state in the first place.
+      if (filter.$state.store === undefined) {
+        filter.$state.store = store;
+      }
+    });
+  }
+
   private handleStateUpdate(newFilters: Filter[]) {
     // This is where the angular update magic \ syncing diget happens
     const filtersUpdated = this.filtersUpdated(newFilters);
+
+    // global filters should always be first
+    newFilters.sort(
+      (a: Filter, b: Filter): number => {
+        if (a.$state.store === FilterStateStore.GLOBAL_STATE) {
+          return -1;
+        } else if (b.$state.store === FilterStateStore.GLOBAL_STATE) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+    );
+
     this.filters = newFilters;
     if (filtersUpdated) {
       this.filterState.updateAppState(FilterManager.partitionFilters(newFilters));
@@ -155,14 +207,8 @@ export class FilterManager {
 
     // set the store of all filters
     // TODO: is this necessary?
-    _.map(filters, filter => {
-      // Override status only for filters that didn't have state in the first place.
-      if (filter.$state.store === undefined) {
-        filter.$state.store = pinFilterStatus
-          ? FilterStateStore.GLOBAL_STATE
-          : FilterStateStore.APP_STATE;
-      }
-    });
+    const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
+    FilterManager.setFiltersStore(filters, store);
 
     const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, filters);
     const newFilters = this.mergeFilters(mappedFilters, this.filters);

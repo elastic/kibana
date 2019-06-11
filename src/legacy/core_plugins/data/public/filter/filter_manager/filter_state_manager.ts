@@ -47,9 +47,9 @@ export class FilterStateManager {
         !appState ||
         !this.globalState ||
         (this.prevGlobalFilters &&
-          this.prevGlobalFilters === this.globalState.filters &&
+          _.isEqual(this.prevGlobalFilters, this.globalState.filters) &&
           this.prevAppFilters &&
-          this.prevAppFilters === appState.filters)
+          _.isEqual(this.prevAppFilters, appState.filters))
       )
         return;
 
@@ -59,9 +59,9 @@ export class FilterStateManager {
       });
 
       // store new filter changes
-      this.prevGlobalFilters = this.globalState.filters;
-      this.prevAppFilters = appState.filters;
-    }, 50);
+      this.prevGlobalFilters = _.cloneDeep(this.globalState.filters);
+      this.prevAppFilters = _.cloneDeep(appState.filters);
+    }, 10);
   }
 
   private saveState() {
