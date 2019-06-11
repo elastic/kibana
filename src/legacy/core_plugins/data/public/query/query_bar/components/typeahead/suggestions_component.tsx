@@ -29,6 +29,7 @@ interface Props {
   show: boolean;
   suggestions: AutocompleteSuggestion[];
   loadMore: () => void;
+  append: React.ReactNode;
 }
 
 export class SuggestionsComponent extends Component<Props> {

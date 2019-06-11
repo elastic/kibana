@@ -516,6 +516,7 @@ export class QueryBarInputUI extends Component<Props, State> {
             onClick={this.onClickSuggestion}
             onMouseEnter={this.onMouseEnterSuggestion}
             loadMore={this.increaseLimit}
+            append={<div />}
           />
         </div>
       </EuiOutsideClickDetector>
