@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { PathProvider } from 'plugins/xpack_main/services/path';
+import { Path } from 'plugins/xpack_main/services/path';
 import { fetchTelemetry } from '../fetch_telemetry';
 import { renderBanner } from './render_banner';
 import { shouldShowBanner } from './should_show_banner';
@@ -31,7 +31,7 @@ async function asyncInjectBanner($injector) {
   }
 
   // and no banner for non-logged in users
-  if (Private(PathProvider).isUnauthenticated()) {
+  if (Path.isUnauthenticated()) {
     return;
   }
 

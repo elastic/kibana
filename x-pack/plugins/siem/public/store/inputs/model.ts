@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InputsModelId } from './constants';
 import { CONSTANTS } from '../../components/url_state/constants';
 
 export interface AbsoluteTimeRange {
@@ -21,10 +22,6 @@ export interface RelativeTimeRange {
   from: number;
   to: number;
 }
-
-export type InputsModelId = 'global' | 'timeline';
-
-export type TimeRangeKinds = 'absolute' | 'relative';
 
 export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
 

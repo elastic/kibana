@@ -219,6 +219,7 @@ export function repositoryRoute(
     async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Logger(req.server);
+      const reindex: boolean = (req.payload as any).reindex;
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         const cloneStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
@@ -226,6 +227,7 @@ export function repositoryRoute(
         const payload = {
           uri: repoUri,
           revision: cloneStatus.revision,
+          enforceReindex: reindex,
         };
         await indexWorker.enqueueJob(payload, {});
         return {};
