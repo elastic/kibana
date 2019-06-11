@@ -238,7 +238,7 @@
     "tinygradient": "0.3.0",
     "tinymath": "1.2.1",
     "topojson-client": "3.0.0",
-    "trunc-html": "1.0.2",
+    "trunc-html": "1.1.2",
     "trunc-text": "1.0.2",
     "tslib": "^1.9.3",
     "type-detect": "^4.0.8",
