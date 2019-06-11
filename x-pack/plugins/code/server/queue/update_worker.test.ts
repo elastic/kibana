@@ -8,6 +8,7 @@ import sinon from 'sinon';
 
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Repository } from '../../model';
+import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
@@ -59,6 +60,7 @@ test('Execute update job', async () => {
         enableGitCertCheck: false,
       },
     } as ServerOptions,
+    {} as GitOperations,
     (repoServiceFactory as any) as RepositoryServiceFactory,
     cancellationService as CancellationSerivce
   );
@@ -98,6 +100,7 @@ test('On update job completed because of cancellation ', async () => {
         enableGitCertCheck: false,
       },
     } as ServerOptions,
+    {} as GitOperations,
     {} as RepositoryServiceFactory,
     cancellationService as CancellationSerivce
   );
