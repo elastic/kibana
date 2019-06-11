@@ -8,7 +8,12 @@ import { v4 } from 'uuid';
 import { Observable, Subscription, pairs } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { PluginInitializerContext, Logger, ClusterClient, CoreSetup } from 'src/core/server';
+import {
+  PluginInitializerContext,
+  Logger,
+  ClusterClient,
+  ElasticsearchServiceSetup,
+} from 'src/core/server';
 
 import { ProxyPluginType } from './proxy';
 
@@ -60,8 +65,8 @@ export class ClusterDocClient {
     this.log = initializerContext.logger.get('proxy');
   }
 
-  public async setup(core: CoreSetup) {
-    this.elasticsearch = core.elasticsearch.dataClient$;
+  public async setup(esClient: Partial<ElasticsearchServiceSetup>) {
+    this.elasticsearch = esClient.dataClient$;
     this.configSubscription = this.config$.subscribe(config => {
       this.setConfig(config);
     });
@@ -70,7 +75,7 @@ export class ClusterDocClient {
   }
 
   public async start() {
-    this.mainLoop();
+    await this.mainLoop();
   }
 
   public async stop() {
@@ -119,10 +124,9 @@ export class ClusterDocClient {
   }
 
   private setTimer() {
-    console.log('in set timer, timer is', this.timer);
     if (this.timer) return;
     this.log.debug('Set timer to updateNodeMap');
-    this.timer = setInterval(async () => {
+    this.timer = setTimeout(async () => {
       this.log.debug('Updating node map');
       await this.mainLoop();
     }, this.updateInterval);
@@ -182,7 +186,6 @@ export class ClusterDocClient {
   }
 
   private async mainLoop(): Promise<void> {
-    console.log('in main loop');
     const nodes = await this.getNodeList();
     const finishTime = new Date().getTime();
 

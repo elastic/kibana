@@ -81,7 +81,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   }
 
   public async setup(core: CoreSetup, plugins: {}) {
-    await this.clusterDocClient.setup(core);
+    await this.clusterDocClient.setup(core.elasticsearch);
 
     this.configSubscription = this.config$.subscribe(config => {
       this.setConfig(config);

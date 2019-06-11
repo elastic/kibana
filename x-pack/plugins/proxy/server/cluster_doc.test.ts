@@ -16,17 +16,26 @@ import { loggingServiceMock } from '../../../../src/core/server/logging/logging_
 import { elasticsearchServiceMock } from '../../../../src/core/server/elasticsearch/elasticsearch_service.mock';
 import { getEnvOptions } from '../../../../src/core/server/config/__mocks__/env';
 import { ProxyConfig, ProxyPluginType } from './proxy';
-import { ElasticsearchService } from '../../../../src/core/server/elasticsearch/elasticsearch_service';
 
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
 
 const createConfigService = (value: Partial<ProxyPluginType> = {}) => {
+  const conf = Object.assign(
+    {
+      updateInterval: 0,
+      timeoutThreshold: 0,
+      port: 0,
+      maxRetry: 0,
+      requestBackoff: 0,
+    },
+    value
+  );
   const configService = new ConfigService(
     new BehaviorSubject<Config>(
       new ObjectToConfigAdapter({
         xpack: {
-          proxy: value,
+          proxy: conf,
         },
       })
     ),
@@ -46,6 +55,11 @@ function configService(value: Partial<ProxyPluginType>) {
   };
 }
 
+const esClients = {
+  adminClient: {},
+  dataClient: {},
+};
+
 beforeEach(() => {
   jest.useFakeTimers();
 });
@@ -55,13 +69,24 @@ afterEach(() => {
 });
 
 it('correctly instantiates', async () => {
-  const elasticClient = elasticsearchServiceMock.create();
+  esClients.dataClient = {
+    callAsInternalUser: jest.fn(() => ({
+      routing_table: {},
+      nodes: {},
+    })),
+  };
+  const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
   const config = configService({
     updateInterval: 100,
     timeoutThreshold: 100,
   });
   const clusterDoc = new ClusterDocClient({ config, env, logger });
-  await clusterDoc.setup({ elasticsearch: elasticClient });
-  await clusterDoc.start();
+  try {
+    await clusterDoc.setup(elasticClient);
+    await clusterDoc.start();
+  } catch (err) {
+    console.log(err);
+    expect(err).toBeFalsy();
+  }
   expect(setTimeout).toHaveBeenCalledTimes(1);
 });
