@@ -8,11 +8,12 @@ import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 export enum Operation {
   EQ = 'eq',
-  NE = 'ne',
-  LT = 'lt',
   GT = 'gt',
-  LTE = 'lte',
   GTE = 'gte',
+  LT = 'lt',
+  LTE = 'lte',
+  NE = 'ne',
+  NEQ = 'neq',
 }
 
 interface Arguments {
@@ -32,7 +33,7 @@ export function compare(): ExpressionFunction<'compare', Context, Arguments, boo
     aliases: ['condition'],
     type: 'boolean',
     context: {
-      types: ['null', 'string', 'number', 'boolean'],
+      types: ['string', 'number', 'boolean', 'null'],
     },
     args: {
       op: {
@@ -56,6 +57,7 @@ export function compare(): ExpressionFunction<'compare', Context, Arguments, boo
         case Operation.EQ:
           return a === b;
         case Operation.NE:
+        case Operation.NEQ:
           return a !== b;
         case Operation.LT:
           if (typesMatch) {

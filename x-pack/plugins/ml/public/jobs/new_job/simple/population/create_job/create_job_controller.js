@@ -20,7 +20,7 @@ import angular from 'angular';
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { getCreatePopulationJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
@@ -67,7 +67,6 @@ module
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
     const msgs = mlMessageBarService;
-    const MlTimeBuckets = Private(IntervalHelperProvider);
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
     const chartDataUtils = Private(ChartDataUtilsProvider);
     const mlPopulationJobService = Private(PopulationJobServiceProvider);

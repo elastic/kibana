@@ -206,14 +206,14 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
             all: [...savedObjectTypes],
             read: [],
           },
-          ui: [],
+          ui: ['read', 'edit', 'delete'],
         },
         read: {
           savedObject: {
             all: [],
             read: [...savedObjectTypes],
           },
-          ui: [],
+          ui: ['read'],
         },
       },
     },

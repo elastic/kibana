@@ -16,9 +16,7 @@ import * as i18n from '../timeline/body/renderers/translations';
 import { GeoFields } from './geo_fields';
 import { IpWithPort } from './ip_with_port';
 import { Label } from './label';
-import { SourceDestinationIpProps } from './types';
-
-export type SourceDestinationType = 'source' | 'destination';
+import { SourceDestinationIpProps, SourceDestinationType } from './types';
 
 export interface IpPortPair {
   ip: string;
