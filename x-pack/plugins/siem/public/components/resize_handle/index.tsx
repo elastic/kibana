@@ -67,8 +67,6 @@ export const removeGlobalResizeCursorStyleFromBody = () => {
   document.body.classList.remove(globalResizeCursorClassName);
 };
 
-export const isResizing = () => document.body.className.includes(globalResizeCursorClassName);
-
 export class Resizeable extends React.PureComponent<Props, State> {
   private drag$: Observable<MouseEvent> | null;
   private dragSubscription: Subscription | null;

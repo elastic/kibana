@@ -14,7 +14,6 @@ import { TestProviders } from '../../mock/test_providers';
 import {
   addGlobalResizeCursorStyleToBody,
   globalResizeCursorClassName,
-  isResizing,
   removeGlobalResizeCursorStyleFromBody,
   Resizeable,
   calculateDeltaX,
@@ -116,42 +115,6 @@ describe('Resizeable', () => {
         removeGlobalResizeCursorStyleFromBody();
 
         expect(document.body.className).not.toContain(globalResizeCursorClassName);
-      });
-    });
-
-    describe('#isResizing', () => {
-      test('it returns true when the global-resize-cursor is present on the body', () => {
-        mount(
-          <TestProviders>
-            <Resizeable
-              handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
-              height="100%"
-              id="test"
-              onResize={jest.fn()}
-              render={() => <></>}
-            />
-          </TestProviders>
-        );
-
-        addGlobalResizeCursorStyleToBody();
-
-        expect(isResizing()).toEqual(true);
-      });
-
-      test('it returns false when the global-resize-cursor is NOT present on the body', () => {
-        mount(
-          <TestProviders>
-            <Resizeable
-              handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
-              height="100%"
-              id="test"
-              onResize={jest.fn()}
-              render={() => <></>}
-            />
-          </TestProviders>
-        );
-
-        expect(isResizing()).toEqual(false);
       });
     });
 

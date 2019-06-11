@@ -97,10 +97,10 @@ export class Header extends React.PureComponent<Props> {
     const {
       header,
       isLoading,
-      sort,
       onColumnRemoved,
       onFilterChange = noop,
       setIsResizing,
+      sort,
     } = this.props;
 
     setIsResizing(isResizing);
