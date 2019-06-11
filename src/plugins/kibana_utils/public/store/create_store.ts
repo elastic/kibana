@@ -1,0 +1,52 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { createStore as createReduxStore, Reducer } from 'redux';
+import { Subject, Observable } from 'rxjs';
+import { AppStore } from './types';
+
+export const createStore = <State extends {}>(defaultState: State): AppStore<State> => {
+  const reducer: Reducer = (state, action) => {
+    switch (action.type) {
+      case 'SET':
+        return action.state;
+      case 'MUTATION':
+        return action.fn(state, ...action.args);
+      default:
+        return state;
+    }
+  };
+  const redux = createReduxStore<State, any, any, any>(reducer, defaultState as any);
+
+  const $state = new Subject();
+  redux.subscribe((state: State) => $state.next(state));
+
+  const set = (state: State) =>
+    redux.dispatch({
+      type: 'SET',
+      state,
+    });
+
+  return {
+    redux,
+    $state: $state as Observable<State>,
+    get: redux.getState,
+    set,
+  };
+};
