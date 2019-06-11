@@ -30,6 +30,8 @@ import { Storage } from 'ui/storage';
 import { Query, QueryBar } from '../../../query/query_bar';
 import { FilterBar } from '../../../filter/filter_bar';
 import { SavedQuery } from '../index';
+import { SavedQueryDetails } from '../../../query/query_bar/components/saved_query_row';
+import { saveQuery } from '../../../query/query_bar/lib/saved_query_service';
 
 interface DateRange {
   from: string;
@@ -101,6 +103,37 @@ class SearchBarUI extends Component<Props, State> {
     });
   };
 
+  public onSave = (savedQueryDetails: SavedQueryDetails) => {
+    const savedQuery: SavedQuery = {
+      title: savedQueryDetails.title,
+      description: savedQueryDetails.description,
+      query: savedQueryDetails.query,
+    };
+
+    if (savedQueryDetails.includeFilters) {
+      savedQuery.filters = this.props.filters;
+    }
+
+    if (
+      savedQueryDetails.includeTimeFilter &&
+      this.props.dateRangeTo &&
+      this.props.dateRangeFrom &&
+      this.props.refreshInterval &&
+      this.props.isRefreshPaused
+    ) {
+      savedQuery.timefilter = {
+        timeFrom: this.props.dateRangeFrom,
+        timeTo: this.props.dateRangeTo,
+        refreshInterval: {
+          value: this.props.refreshInterval,
+          pause: this.props.isRefreshPaused,
+        },
+      };
+    }
+
+    saveQuery(savedQuery);
+  };
+
   public componentDidMount() {
     if (this.filterBarRef) {
       this.setFilterBarHeight();
@@ -167,6 +200,7 @@ class SearchBarUI extends Component<Props, State> {
             refreshInterval={this.props.refreshInterval}
             showAutoRefreshOnly={this.props.showAutoRefreshOnly}
             onRefreshChange={this.props.onRefreshChange}
+            onSave={this.onSave}
           />
         ) : (
           ''

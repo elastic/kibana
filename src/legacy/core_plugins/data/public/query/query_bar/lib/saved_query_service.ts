@@ -17,27 +17,35 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { Query } from '../../query/query_bar';
+import chrome from 'ui/chrome';
+import { SavedQuery } from '../../../search';
 
-export { SearchBar } from './components';
+export const saveQuery = (savedQuery: SavedQuery) => {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
 
-// @ts-ignore
-export { setupDirective } from './directive';
-
-interface RefreshInterval {
-  pause: boolean;
-  value: number;
-}
-
-export interface SavedQuery {
-  title: string;
-  description: string;
-  query: Query;
-  filters?: Filter[];
-  timefilter?: {
-    timeFrom: string;
-    timeTo: string;
-    refreshInterval: RefreshInterval;
+  const query = {
+    query:
+      typeof savedQuery.query.query === 'string'
+        ? savedQuery.query.query
+        : JSON.stringify(savedQuery.query.query),
+    language: savedQuery.query.language,
   };
-}
+
+  const queryObject = {
+    title: savedQuery.title,
+    description: savedQuery.description,
+    query,
+    filters: '',
+    timefilter: '',
+  };
+
+  if (savedQuery.filters) {
+    queryObject.filters = JSON.stringify(savedQuery.filters);
+  }
+
+  if (savedQuery.timefilter) {
+    queryObject.timefilter = JSON.stringify(savedQuery.timefilter);
+  }
+
+  savedObjectsClient.create('query', queryObject);
+};

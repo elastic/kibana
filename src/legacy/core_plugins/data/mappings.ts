@@ -17,27 +17,31 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { Query } from '../../query/query_bar';
-
-export { SearchBar } from './components';
-
-// @ts-ignore
-export { setupDirective } from './directive';
-
-interface RefreshInterval {
-  pause: boolean;
-  value: number;
-}
-
-export interface SavedQuery {
-  title: string;
-  description: string;
-  query: Query;
-  filters?: Filter[];
-  timefilter?: {
-    timeFrom: string;
-    timeTo: string;
-    refreshInterval: RefreshInterval;
-  };
-}
+export const mappings = {
+  query: {
+    properties: {
+      title: {
+        type: 'text',
+      },
+      description: {
+        type: 'text',
+      },
+      query: {
+        properties: {
+          language: {
+            type: 'text',
+          },
+          query: {
+            type: 'text',
+          },
+        },
+      },
+      filters: {
+        type: 'text',
+      },
+      timefilter: {
+        type: 'text',
+      },
+    },
+  },
+};

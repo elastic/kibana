@@ -43,12 +43,13 @@ import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { SavedQueryRow } from './saved_query_row';
 import { SavedQuery } from '../../../search/search_bar';
+import { SavedQueryDetails } from './saved_query_row';
 
 interface Props {
   indexPatterns: Array<IndexPattern | string>;
   intl: InjectedIntl;
   query: Query;
-  savedQuery: SavedQuery;
+  savedQuery?: SavedQuery;
   appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -59,6 +60,7 @@ interface Props {
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
+  onSave?: (savedQueryDetails: SavedQueryDetails) => void;
 }
 
 interface State {
@@ -433,6 +435,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'indexPatterns',
       'intl',
       'query',
+      'savedQuery',
       'appName',
       'disableAutoFocus',
       'screenTitle',
@@ -443,6 +446,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'languageSwitcherPopoverAnchorPosition',
       'onChange',
       'onSubmit',
+      'onSave',
     ]);
 
     return (
@@ -519,7 +523,15 @@ export class QueryBarInputUI extends Component<Props, State> {
             onClick={this.onClickSuggestion}
             onMouseEnter={this.onMouseEnterSuggestion}
             loadMore={this.increaseLimit}
-            append={<SavedQueryRow savedQuery={this.props.savedQuery} />}
+            append={
+              this.props.savedQuery && this.props.onSave ? (
+                <SavedQueryRow
+                  query={this.props.query}
+                  savedQuery={this.props.savedQuery}
+                  onSave={this.props.onSave}
+                />
+              ) : null
+            }
           />
         </div>
       </EuiOutsideClickDetector>

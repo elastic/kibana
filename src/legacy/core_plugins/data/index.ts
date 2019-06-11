@@ -19,7 +19,7 @@
 
 import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
-import mappings from './mappings.json';
+import { mappings } from './mappings';
 
 // eslint-disable-next-line import/no-default-export
 export default function DataPlugin(kibana: any) {
