@@ -37,6 +37,7 @@ describe('Header', () => {
         onColumnRemoved={jest.fn()}
         onColumnResized={jest.fn()}
         onColumnSorted={jest.fn()}
+        setIsResizing={jest.fn()}
         sort={sort}
         timelineId={timelineId}
       />
@@ -54,6 +55,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -77,6 +79,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -105,6 +108,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -129,6 +133,7 @@ describe('Header', () => {
               onColumnRemoved={jest.fn()}
               onColumnResized={jest.fn()}
               onColumnSorted={jest.fn()}
+              setIsResizing={jest.fn()}
               sort={sort}
               timelineId={timelineId}
             />
@@ -156,6 +161,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -184,6 +190,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -209,6 +216,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -234,6 +242,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -347,6 +356,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -370,6 +380,7 @@ describe('Header', () => {
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
+            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />

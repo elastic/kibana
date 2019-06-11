@@ -34,6 +34,7 @@ import { ColumnHeader } from './column_header';
 import { EventsSelect } from './events_select';
 import { Header } from './header';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
+import { isContainerResizing } from '../../../resize_handle/is_resizing';
 
 const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
   overflow: hidden;
@@ -93,90 +94,95 @@ export const ColumnHeaders = pure<Props>(
     sort,
     timelineId,
     minWidth,
-  }) => (
-    <ColumnHeadersContainer data-test-subj="column-headers" minWidth={minWidth}>
-      <ColumnHeadersFlexGroup
-        alignItems="center"
-        data-test-subj="column-headers-group"
-        gutterSize="none"
-      >
-        <EuiFlexItem data-test-subj="actions-item" grow={false}>
-          <ActionsContainer
-            actionsColumnWidth={actionsColumnWidth}
-            data-test-subj="actions-container"
-          >
-            <EuiFlexGroup gutterSize="none">
-              {showEventsSelect && (
-                <EventsSelectContainer grow={false}>
-                  <EventsSelect checkState="unchecked" timelineId={timelineId} />
-                </EventsSelectContainer>
-              )}
-              <EuiFlexItem grow={true}>
-                <StatefulFieldsBrowser
-                  browserFields={browserFields}
-                  columnHeaders={columnHeaders}
-                  data-test-subj="field-browser"
-                  height={FIELD_BROWSER_HEIGHT}
-                  isLoading={isLoading}
-                  onUpdateColumns={onUpdateColumns}
-                  timelineId={timelineId}
-                  width={FIELD_BROWSER_WIDTH}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </ActionsContainer>
-        </EuiFlexItem>
-
-        <EuiFlexItem data-test-subj="headers-item" grow={false}>
-          <DroppableWrapper
-            droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
-            height={COLUMN_HEADERS_HEIGHT}
-            isDropDisabled={false}
-            type={DRAG_TYPE_FIELD}
-          >
-            <EuiFlexGroup data-test-subj="headers-group" gutterSize="none">
-              {columnHeaders.map((header, i) => (
-                <EuiFlexItem grow={false} key={header.id}>
-                  <Draggable
-                    draggableId={getDraggableFieldId({
-                      contextId: `timeline-column-headers-${timelineId}`,
-                      fieldId: header.id,
-                    })}
-                    index={i}
-                    type={DRAG_TYPE_FIELD}
-                  >
-                    {(provided, snapshot) => (
-                      <div
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        ref={provided.innerRef}
-                        data-test-subj="draggable-header"
-                      >
-                        {!snapshot.isDragging ? (
-                          <Header
-                            timelineId={timelineId}
-                            header={header}
-                            isLoading={isLoading}
-                            onColumnRemoved={onColumnRemoved}
-                            onColumnResized={onColumnResized}
-                            onColumnSorted={onColumnSorted}
-                            onFilterChange={onFilterChange}
-                            sort={sort}
-                          />
-                        ) : (
-                          <DragEffects>
-                            <DraggableFieldBadge fieldId={header.id} />
-                          </DragEffects>
-                        )}
-                      </div>
-                    )}
-                  </Draggable>
+  }) => {
+    const { isResizing, setIsResizing } = isContainerResizing();
+    return (
+      <ColumnHeadersContainer data-test-subj="column-headers" minWidth={minWidth}>
+        <ColumnHeadersFlexGroup
+          alignItems="center"
+          data-test-subj="column-headers-group"
+          gutterSize="none"
+        >
+          <EuiFlexItem data-test-subj="actions-item" grow={false}>
+            <ActionsContainer
+              actionsColumnWidth={actionsColumnWidth}
+              data-test-subj="actions-container"
+            >
+              <EuiFlexGroup gutterSize="none">
+                {showEventsSelect && (
+                  <EventsSelectContainer grow={false}>
+                    <EventsSelect checkState="unchecked" timelineId={timelineId} />
+                  </EventsSelectContainer>
+                )}
+                <EuiFlexItem grow={true}>
+                  <StatefulFieldsBrowser
+                    browserFields={browserFields}
+                    columnHeaders={columnHeaders}
+                    data-test-subj="field-browser"
+                    height={FIELD_BROWSER_HEIGHT}
+                    isLoading={isLoading}
+                    onUpdateColumns={onUpdateColumns}
+                    timelineId={timelineId}
+                    width={FIELD_BROWSER_WIDTH}
+                  />
                 </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </DroppableWrapper>
-        </EuiFlexItem>
-      </ColumnHeadersFlexGroup>
-    </ColumnHeadersContainer>
-  )
+              </EuiFlexGroup>
+            </ActionsContainer>
+          </EuiFlexItem>
+
+          <EuiFlexItem data-test-subj="headers-item" grow={false}>
+            <DroppableWrapper
+              droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
+              height={COLUMN_HEADERS_HEIGHT}
+              isDropDisabled={false}
+              type={DRAG_TYPE_FIELD}
+            >
+              <EuiFlexGroup data-test-subj="headers-group" gutterSize="none">
+                {columnHeaders.map((header, i) => (
+                  <EuiFlexItem grow={false} key={header.id}>
+                    <Draggable
+                      draggableId={getDraggableFieldId({
+                        contextId: `timeline-column-headers-${timelineId}`,
+                        fieldId: header.id,
+                      })}
+                      index={i}
+                      type={DRAG_TYPE_FIELD}
+                      isDragDisabled={isResizing}
+                    >
+                      {(provided, snapshot) => (
+                        <div
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          ref={provided.innerRef}
+                          data-test-subj="draggable-header"
+                        >
+                          {!snapshot.isDragging ? (
+                            <Header
+                              timelineId={timelineId}
+                              header={header}
+                              isLoading={isLoading}
+                              onColumnRemoved={onColumnRemoved}
+                              onColumnResized={onColumnResized}
+                              onColumnSorted={onColumnSorted}
+                              onFilterChange={onFilterChange}
+                              setIsResizing={setIsResizing}
+                              sort={sort}
+                            />
+                          ) : (
+                            <DragEffects>
+                              <DraggableFieldBadge fieldId={header.id} />
+                            </DragEffects>
+                          )}
+                        </div>
+                      )}
+                    </Draggable>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </DroppableWrapper>
+          </EuiFlexItem>
+        </ColumnHeadersFlexGroup>
+      </ColumnHeadersContainer>
+    );
+  }
 );
