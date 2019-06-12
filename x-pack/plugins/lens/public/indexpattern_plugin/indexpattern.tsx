@@ -31,7 +31,6 @@ export type IndexPatternColumn =
   | AvgIndexPatternColumn
   | MinIndexPatternColumn
   | MaxIndexPatternColumn
-  | SumIndexPatternColumn
   | CountIndexPatternColumn;
 
 export interface BaseIndexPatternColumn {

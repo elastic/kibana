@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiRange, EuiSelect, EuiContextMenuItem } from '@elastic/eui';
 import { IndexPatternField, TermsIndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '.';
@@ -77,20 +77,21 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       missingBucketLabel: 'Missing',
     },
   }),
-  paramEditor: ({ state, setState, columnId: currentColumnId }) => {
+  contextMenu: ({ state, setState, columnId: currentColumnId }) => {
     const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
+    const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
         return orderBy.type;
       }
-      return `${orderBy.type}-${orderBy.columnId}`;
+      return `${orderBy.type}${SEPARATOR}${orderBy.columnId}`;
     }
 
     function fromValue(value: string): TermsIndexPatternColumn['params']['orderBy'] {
       if (value === 'alphabetical') {
         return { type: 'alphabetical' };
       }
-      const parts = value.split('-');
+      const parts = value.split(SEPARATOR);
       return {
         type: 'column',
         columnId: parts[1],
@@ -109,7 +110,34 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       value: toValue({ type: 'alphabetical' }),
       text: 'Alphabetical',
     });
-
+    return [
+      <EuiContextMenuItem key={`orderby-${toValue(currentColumn.params.orderBy)}`}>
+        <EuiFormRow label="Order by">
+          <EuiSelect
+            options={orderOptions}
+            value={toValue(currentColumn.params.orderBy)}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setState({
+                ...state,
+                columns: {
+                  ...state.columns,
+                  [currentColumnId]: {
+                    ...currentColumn,
+                    params: {
+                      ...currentColumn.params,
+                      orderBy: fromValue(e.target.value),
+                    },
+                  },
+                },
+              })
+            }
+          />
+        </EuiFormRow>
+      </EuiContextMenuItem>,
+    ];
+  },
+  inlineOptions: ({ state, setState, columnId: currentColumnId }) => {
+    const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
     return (
       <EuiForm>
         <EuiFormRow label="Number of values">
@@ -135,27 +163,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
               })
             }
             aria-label="Number of values"
-          />
-        </EuiFormRow>
-        <EuiFormRow label="Order by">
-          <EuiSelect
-            options={orderOptions}
-            value={toValue(currentColumn.params.orderBy)}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setState({
-                ...state,
-                columns: {
-                  ...state.columns,
-                  [currentColumnId]: {
-                    ...currentColumn,
-                    params: {
-                      ...currentColumn.params,
-                      orderBy: fromValue(e.target.value),
-                    },
-                  },
-                },
-              })
-            }
           />
         </EuiFormRow>
       </EuiForm>

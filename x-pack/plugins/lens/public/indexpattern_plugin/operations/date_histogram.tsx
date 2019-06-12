@@ -78,7 +78,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       extended_bounds: {},
     },
   }),
-  paramEditor: ({ state, setState, columnId }) => {
+  inlineOptions: ({ state, setState, columnId }) => {
     const column = state.columns[columnId] as DateHistogramIndexPatternColumn;
     const intervals = ['M', 'w', 'd', 'h'];
 

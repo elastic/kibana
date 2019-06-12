@@ -26,7 +26,7 @@ type PossibleOperationDefinitions<
   U extends IndexPatternColumn = IndexPatternColumn
 > = U extends IndexPatternColumn ? OperationDefinition<U> : never;
 
-type PartialOperationDefinitionMap<
+type PossibleOperationDefinitionMapEntyries<
   U extends PossibleOperationDefinitions = PossibleOperationDefinitions
 > = U extends PossibleOperationDefinitions ? { [K in U['type']]: U } : never;
 
@@ -34,7 +34,7 @@ type UnionToIntersection<U> = (U extends U ? (k: U) => void : never) extends ((k
   ? I
   : never;
 
-export type AllOperationDefinitions = UnionToIntersection<PartialOperationDefinitionMap>;
+export type AllOperationDefinitions = UnionToIntersection<PossibleOperationDefinitionMapEntyries>;
 
 export const operationDefinitionMap: AllOperationDefinitions = {
   terms: termsOperation,
@@ -64,7 +64,8 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn = BaseInde
     suggestedOrder?: DimensionPriority,
     field?: IndexPatternField
   ) => C;
-  paramEditor?: React.ComponentType<ParamEditorProps>;
+  inlineOptions?: React.ComponentType<ParamEditorProps>;
+  contextMenu?: (props: ParamEditorProps) => JSX.Element[];
   toEsAggsConfig: (column: C, columnId: string) => unknown;
 }
 
