@@ -1,5 +1,3 @@
 - [ ] Add readme.
-- [ ] Use Redux actions for mutations.
 - [ ] Create React hooks.
 - [ ] Figure out how to store mutations in store.
-- [ ] Rename `.mutations` to `.createMutations`.

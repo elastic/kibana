@@ -19,12 +19,18 @@
 
 import { createStore as createReduxStore, Reducer } from 'redux';
 import { Subject, Observable } from 'rxjs';
-import { AppStore, Mutations } from './types';
+import { AppStore, Mutations, PureMutations } from './types';
 
 const SET = '__SET__';
 
 export const createStore = <State extends {}>(defaultState: State): AppStore<State> => {
+  const mutations: PureMutations<State> = {};
   const reducer: Reducer = (state, action) => {
+    const mutation = mutations[action.type];
+    if (mutation) {
+      return mutation(state)(...action.args);
+    }
+
     switch (action.type) {
       case SET:
         return action.state;
@@ -48,16 +54,14 @@ export const createStore = <State extends {}>(defaultState: State): AppStore<Sta
   });
 
   const createMutations: AppStore<State>['createMutations'] = pureMutations => {
+    Object.assign(mutations, pureMutations);
     const result: Mutations<any> = {};
-    for (const [name, fn] of Object.entries(pureMutations)) {
-      result[name] = (...args) => {
-        set(fn(get())(...args));
-        /*
+    for (const type of Object.keys(pureMutations)) {
+      result[type] = (...args) => {
         redux.dispatch({
-          type: name,
+          type,
           args,
         });
-        */
       };
     }
     return result;
