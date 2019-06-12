@@ -115,4 +115,4 @@ export class WithSource extends React.PureComponent<WithSourceProps> {
 }
 
 export const indicesExistOrDataTemporarilyUnavailable = (indicesExist: boolean | undefined) =>
-  indicesExist || isUndefined(indicesExist);
+  isUndefined(indicesExist) ? false : indicesExist;

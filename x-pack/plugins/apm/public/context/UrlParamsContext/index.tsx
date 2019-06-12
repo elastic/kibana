@@ -59,7 +59,7 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
         refUrlParams.current = {
           ...refUrlParams.current,
           start: getParsedDate(timeRange.rangeFrom),
-          end: getParsedDate(timeRange.rangeTo)
+          end: getParsedDate(timeRange.rangeTo, { roundUp: true })
         };
 
         forceUpdate(uniqueId());

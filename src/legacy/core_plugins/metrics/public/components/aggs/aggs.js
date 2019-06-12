@@ -30,7 +30,6 @@ import { handleAdd, handleDelete } from '../lib/collection_actions';
 const DROPPABLE_ID = 'aggs_dnd';
 
 export class Aggs extends PureComponent {
-
   render() {
     const { panel, model, fields, uiRestrictions } = this.props;
     const list = model.metrics;
@@ -38,11 +37,7 @@ export class Aggs extends PureComponent {
     const onChange = seriesChangeHandler(this.props, list);
 
     return (
-      <EuiDroppable
-        droppableId={`${DROPPABLE_ID}:${model.id}`}
-        type="MICRO"
-        spacing="s"
-      >
+      <EuiDroppable droppableId={`${DROPPABLE_ID}:${model.id}`} type="MICRO" spacing="s">
         {list.map((row, idx) => (
           <EuiDraggable
             spacing="s"

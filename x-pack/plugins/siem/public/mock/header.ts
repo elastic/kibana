@@ -107,4 +107,15 @@ export const defaultHeaders: ColumnHeader[] = [
     aggregatable: true,
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
+  {
+    category: 'base',
+    columnHeaderType: defaultColumnHeaderType,
+    description:
+      'For log events the message field contains the log message.\nIn other use cases the message field can be used to concatenate different values which are then freely searchable. If multiple messages exist, they can be combined into one message.',
+    example: 'Hello World',
+    id: 'message',
+    type: 'text',
+    aggregatable: false,
+    width: DEFAULT_COLUMN_MIN_WIDTH,
+  },
 ];
