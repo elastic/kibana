@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Error Toast Dispatcher rendering it renders 1`] = `
+<Connect(ErrorToastDispatcherComponent)
+  toastLifeTimeMs={9999999999}
+/>
+`;

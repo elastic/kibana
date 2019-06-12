@@ -8,7 +8,36 @@ import { FontLabel } from '../../../common/lib/fonts';
 export { FontLabel as FontFamily, FontValue } from '../../../common/lib/fonts';
 
 /**
- * Type containing font weights.
+ * Enum of supported CSS `background-repeat` properties.
+ */
+export enum BackgroundRepeat {
+  REPEAT = 'repeat',
+  REPEAT_NO = 'no-repeat',
+  REPEAT_X = 'repeat-x',
+  REPEAT_Y = 'repeat-y',
+  ROUND = 'round',
+  SPACE = 'space',
+}
+
+/**
+ * Enum of supported CSS `background-size` properties.
+ */
+export enum BackgroundSize {
+  AUTO = 'auto',
+  CONTAIN = 'contain',
+  COVER = 'cover',
+}
+
+/**
+ * Enum of supported CSS `font-style` properties.
+ */
+export enum FontStyle {
+  ITALIC = 'italic',
+  NORMAL = 'normal',
+}
+
+/**
+ * Enum of supported CSS `font-weight` properties.
  */
 export enum FontWeight {
   NORMAL = 'normal',
@@ -27,14 +56,32 @@ export enum FontWeight {
 }
 
 /**
- * Type containing valid text alignments.
+ * Enum of supported CSS `overflow` properties.
  */
-export type TextAlignment = 'center' | 'left' | 'right' | 'justify';
+export enum Overflow {
+  AUTO = 'auto',
+  HIDDEN = 'hidden',
+  SCROLL = 'scroll',
+  VISIBLE = 'visible',
+}
 
 /**
- * Collection of text alignments.
+ * Enum of supported CSS `text-align` properties.
  */
-export const TEXT_ALIGNMENTS: TextAlignment[] = ['center', 'left', 'right', 'justify'];
+export enum TextAlignment {
+  CENTER = 'center',
+  JUSTIFY = 'justify',
+  LEFT = 'left',
+  RIGHT = 'right',
+}
+
+/**
+ * Enum of supported CSS `text-decoration` properties.
+ */
+export enum TextDecoration {
+  NONE = 'none',
+  UNDERLINE = 'underline',
+}
 
 /**
  * Represents the various style properties that can be applied to an element.
@@ -44,11 +91,11 @@ export interface CSSStyle {
   fill?: string;
   fontFamily?: FontLabel;
   fontSize?: string;
-  fontStyle?: 'italic' | 'normal';
+  fontStyle?: FontStyle;
   fontWeight?: FontWeight;
   lineHeight?: number | string;
   textAlign?: TextAlignment;
-  textDecoration?: 'underline' | 'none';
+  textDecoration?: TextDecoration;
 }
 
 /**
@@ -60,10 +107,10 @@ export interface ContainerStyle {
   padding: string | null;
   backgroundColor: string | null;
   backgroundImage: string | null;
-  backgroundSize: 'contain' | 'cover' | 'auto';
-  backgroundRepeat: 'repeat-x' | 'repeat' | 'space' | 'round' | 'no-repeat' | 'space';
+  backgroundSize: BackgroundSize;
+  backgroundRepeat: BackgroundRepeat;
   opacity: number | null;
-  overflow: 'visible' | 'hidden' | 'scroll' | 'auto';
+  overflow: Overflow;
 }
 
 /**
