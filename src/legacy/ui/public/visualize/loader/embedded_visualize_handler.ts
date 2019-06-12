@@ -203,7 +203,7 @@ export class EmbeddedVisualizeHandler {
     this.events$.subscribe(event => {
       if (this.actions[event.name]) {
         event.data.aggConfigs = getTableAggs(this.vis);
-        const newFilters = this.actions[event.name](event.data);
+        const newFilters = this.actions[event.name](event.data) || [];
         visFilters.pushFilters(newFilters);
       }
     });

@@ -103,7 +103,7 @@ const createFiltersFromEvent = (event) => {
   return filters;
 };
 
-const VisFiltersProvider = (getAppState) => {
+const VisFiltersProvider = (getAppState, $timeout) => {
 
   const pushFilters = (filters, simulate) => {
     const appState = getAppState();
@@ -113,6 +113,8 @@ const VisFiltersProvider = (getAppState) => {
         return i === flatFilters.findIndex(f => _.isEqual(v, f));
       });
       pushFilterBarFilters(appState, deduplicatedFilters);
+      // to trigger angular digest cycle, we can get rid of this once we have either new filterManager or actions API
+      $timeout(_.noop, 0);
     }
   };
 
