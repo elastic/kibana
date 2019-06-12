@@ -29,10 +29,10 @@ import {
   initAppAuthorization,
   registerPrivilegesWithCluster,
   validateFeaturePrivileges,
-  ensureSavedObjectsPrivilegesFactory,
+  createSecureSavedObjectsWrapperFactory,
+  SECURE_SOC_WRAPPER_PRIORITY,
 } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
-import { SecureSavedObjectsClientWrapper } from './server/lib/authorization/saved_objects/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
 import { createOptionalPlugin } from './server/lib/optional_plugin';
 
@@ -205,26 +205,12 @@ export const security = (kibana) => new kibana.Plugin({
       return new savedObjects.SavedObjectsClient(callWithRequestRepository);
     });
 
-    savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MAX_SAFE_INTEGER - 1, ({ client, request }) => {
-      if (authorization.mode.useRbacForRequest(request)) {
-        const ensureSavedObjectsPrivileges = ensureSavedObjectsPrivilegesFactory({
-          spacesEnabled: spaces.isEnabled,
-          checkPrivilegesWithRequest: authorization.checkPrivilegesWithRequest,
-          request,
-          actionsService: authorization.actions,
-          errors: savedObjects.SavedObjectsClient.errors,
-          auditLogger,
-        });
-
-        return new SecureSavedObjectsClientWrapper({
-          baseClient: client,
-          ensureSavedObjectsPrivileges,
-          errors: savedObjects.SavedObjectsClient.errors,
-        });
-      }
-
-      return client;
-    });
+    savedObjects.addScopedSavedObjectsClientWrapperFactory(SECURE_SOC_WRAPPER_PRIORITY, createSecureSavedObjectsWrapperFactory({
+      authorization,
+      spaces,
+      savedObjects,
+      auditLogger
+    }));
 
     getUserProvider(server);
 

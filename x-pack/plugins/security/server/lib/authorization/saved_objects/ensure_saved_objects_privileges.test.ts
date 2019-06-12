@@ -5,7 +5,7 @@
  */
 
 import { Actions } from '..';
-import { ensureSavedObjectsPrivilegesFactory } from '.';
+import { ensureSavedObjectsPrivilegesFactory } from './ensure_saved_objects_privileges';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 
 const createMockErrors = () => {
@@ -49,7 +49,7 @@ const createCheckSavedObjectsPrivileges = (
     ensureSavedObjectsPrivilegesFactory({
       actionsService: mockActions,
       auditLogger: mockAuditLogger,
-      checkPrivilegesWithRequest: () => ({
+      checkPrivileges: {
         atSpace: spacesEnabled
           ? jest.fn().mockImplementationOnce(checkPrivilegesImpl)
           : jest.fn().mockRejectedValue('atSpace should not be called'),
@@ -57,9 +57,8 @@ const createCheckSavedObjectsPrivileges = (
         globally: !spacesEnabled
           ? jest.fn().mockImplementationOnce(checkPrivilegesImpl)
           : jest.fn().mockRejectedValue('globally should not be called'),
-      }),
+      },
       errors: mockErrors,
-      request: null as any,
       spacesEnabled,
     })
   );

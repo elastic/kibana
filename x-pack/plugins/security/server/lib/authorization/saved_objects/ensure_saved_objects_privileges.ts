@@ -5,9 +5,8 @@
  */
 
 import { get } from 'lodash';
-import { Legacy } from 'kibana';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
-import { CheckPrivilegesWithRequest, CheckPrivilegesAtResourceResponse } from '../check_privileges';
+import { CheckPrivileges, CheckPrivilegesAtResourceResponse } from '../check_privileges';
 import { Actions } from '../actions';
 
 export type SavedObjectsOperation =
@@ -25,8 +24,7 @@ interface Deps {
     decorateForbiddenError: (error: Error) => Error;
   };
   spacesEnabled: boolean;
-  checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
-  request: Legacy.Request;
+  checkPrivileges: CheckPrivileges;
   actionsService: Actions;
   auditLogger: any;
 }
@@ -39,9 +37,7 @@ export type EnsureSavedObjectsPrivileges = (
 ) => Promise<void>;
 
 export function ensureSavedObjectsPrivilegesFactory(deps: Deps) {
-  const checkPrivileges = deps.checkPrivilegesWithRequest(deps.request);
-
-  const { errors, spacesEnabled, actionsService, auditLogger } = deps;
+  const { errors, spacesEnabled, actionsService, auditLogger, checkPrivileges } = deps;
 
   const ensureSavedObjectsPrivileges: EnsureSavedObjectsPrivileges = async (
     typeOrTypes: string | string[] | undefined,

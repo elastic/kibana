@@ -5,8 +5,6 @@
  */
 
 export {
-  ensureSavedObjectsPrivilegesFactory,
-  EnsureSavedObjectsPrivileges,
-} from './ensure_saved_objects_privileges';
-
-export { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
+  createSecureSavedObjectsWrapperFactory,
+  SECURE_SOC_WRAPPER_PRIORITY,
+} from './secure_saved_objects_client_wrapper_factory';

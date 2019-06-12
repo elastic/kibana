@@ -14,4 +14,7 @@ export { PrivilegeSerializer } from './privilege_serializer';
 export { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 export { ResourceSerializer } from './resource_serializer';
 export { validateFeaturePrivileges } from './validate_feature_privileges';
-export { ensureSavedObjectsPrivilegesFactory } from './saved_objects';
+export {
+  createSecureSavedObjectsWrapperFactory,
+  SECURE_SOC_WRAPPER_PRIORITY,
+} from './saved_objects';
