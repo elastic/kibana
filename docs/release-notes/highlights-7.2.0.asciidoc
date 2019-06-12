@@ -166,10 +166,11 @@ image::release-notes/images/7.2-localization.png[Kibana in Japanese]
 [float]
 === Data frames
 
-beta[] Machine Learning now enables you to transform your data with data frames. A 
-new wizard guides you through the process of creating a data frame: selecting 
-the source data, the fields you want to group by, and the aggregations for 
-pivoting the data. There is also a preview of the transform for reviewing the configuration. 
+beta[] Machine Learning now enables you to transform your data with
+{stack-ov}/ml-dataframes.html[data frames]. A new wizard guides you through the
+process of creating a data frame: selecting the source data, the fields you want
+to group by, and the aggregations for pivoting the data. There is also a preview
+of the transform for reviewing the configuration. 
 
 [role="screenshot"]
 image::release-notes/images/7.2-data-frames.png[Data frames]
