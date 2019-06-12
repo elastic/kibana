@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
@@ -127,9 +128,11 @@ export const security = (kibana) => new kibana.Plugin({
     replaceInjectedVars: async function (injectedVars, request, server) {
       const { security } = server.plugins;
 
+      const userRoles = _.get(request, 'auth.credentials.roles', []);
+
       return {
         ...injectedVars,
-        canAccessKibana: await isAuthorizedKibanaUser(security.authorization, request),
+        canAccessKibana: await isAuthorizedKibanaUser(security.authorization, request, userRoles),
       };
     }
   },

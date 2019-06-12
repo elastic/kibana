@@ -41,42 +41,33 @@ function buildAuthorizationService(privileges: EsApplication[] = []) {
   } as unknown) as AuthorizationService;
 }
 
-function buildRequest(roles: string[] = []): Legacy.Request {
+function buildRequest(): Legacy.Request {
   const request: Legacy.Request = ({
-    auth: {
-      credentials: {
-        roles,
-      },
-    },
+    auth: { credentials: { username: 'foo' } },
   } as unknown) as Legacy.Request;
 
   return request;
 }
 
-function buildUser(roles: string[] = []): AuthenticatedUser {
-  return {
-    username: 'test user',
-    roles,
-  } as AuthenticatedUser;
-}
-
 describe('isAuthorizedKibanaUser', () => {
   it('returns true for superusers', async () => {
-    const request = buildRequest(['some role', 'superuser']);
+    const request = buildRequest();
     const authService = buildAuthorizationService();
 
-    await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(true);
+    await expect(isAuthorizedKibanaUser(authService, request, ['superuser'])).resolves.toEqual(
+      true
+    );
   });
 
   it('returns false for users with no privileges', async () => {
-    const request = buildRequest(['some role']);
+    const request = buildRequest();
     const authService = buildAuthorizationService();
 
     await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(false);
   });
 
   it('returns false for users with only reserved privileges', async () => {
-    const request = buildRequest(['some role']);
+    const request = buildRequest();
     const authService = buildAuthorizationService([
       {
         application: 'kibana-.kibana',
@@ -89,7 +80,7 @@ describe('isAuthorizedKibanaUser', () => {
   });
 
   it('returns true for users with a base privilege', async () => {
-    const request = buildRequest(['some role']);
+    const request = buildRequest();
     const authService = buildAuthorizationService([
       {
         application: 'kibana-.kibana',
@@ -102,7 +93,7 @@ describe('isAuthorizedKibanaUser', () => {
   });
 
   it('returns true for users with a feature privilege', async () => {
-    const request = buildRequest(['some role']);
+    const request = buildRequest();
     const authService = buildAuthorizationService([
       {
         application: 'kibana-.kibana',
@@ -115,7 +106,7 @@ describe('isAuthorizedKibanaUser', () => {
   });
 
   it('returns true for users with both reserved and non-reserved privileges', async () => {
-    const request = buildRequest(['some role']);
+    const request = buildRequest();
     const authService = buildAuthorizationService([
       {
         application: 'kibana-.kibana',
@@ -131,7 +122,7 @@ describe('isAuthorizedKibanaUser', () => {
   });
 
   it('returns false for users with unknown privileges', async () => {
-    const request = buildRequest(['some role']);
+    const request = buildRequest();
     const authService = buildAuthorizationService([
       {
         application: 'kibana-.kibana',
@@ -144,23 +135,5 @@ describe('isAuthorizedKibanaUser', () => {
     ]);
 
     await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(false);
-  });
-
-  describe('with the optional user argument', () => {
-    it('returns true for superusers', async () => {
-      const request = buildRequest();
-      const user = buildUser(['some role', 'superuser']);
-      const authService = buildAuthorizationService();
-
-      await expect(isAuthorizedKibanaUser(authService, request, user)).resolves.toEqual(true);
-    });
-
-    it('returns false for users with no privileges', async () => {
-      const request = buildRequest();
-      const user = buildUser(['some role']);
-      const authService = buildAuthorizationService();
-
-      await expect(isAuthorizedKibanaUser(authService, request, user)).resolves.toEqual(false);
-    });
   });
 });

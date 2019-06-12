@@ -6,7 +6,6 @@
 
 import { Legacy } from 'kibana';
 import { AuthorizationService } from './authorization/service';
-import { AuthenticatedUser } from '../../common/model';
 import { RESERVED_PRIVILEGES_APPLICATION_WILDCARD } from '../../common/constants';
 import { serializePrivileges } from './authorization/privileges_serializer';
 import { PrivilegeSerializer } from './authorization';
@@ -14,7 +13,7 @@ import { PrivilegeSerializer } from './authorization';
 export const isAuthorizedKibanaUser = async (
   authorizationService: AuthorizationService,
   request: Legacy.Request,
-  user?: AuthenticatedUser
+  userRoles: string[] = []
 ) => {
   const hasCredentials = request.auth && request.auth.credentials;
   const useRbac = authorizationService.mode.useRbacForRequest(request);
@@ -23,8 +22,7 @@ export const isAuthorizedKibanaUser = async (
     return true;
   }
 
-  const roles = getUserRoles(request, user);
-  if (roles.includes('superuser')) {
+  if (userRoles.includes('superuser')) {
     return true;
   }
 
@@ -46,19 +44,3 @@ export const isAuthorizedKibanaUser = async (
       privilege.privileges.some(priv => knownUnreservedPrivileges.includes(priv))
   );
 };
-
-function getUserRoles(request: Legacy.Request, user?: AuthenticatedUser) {
-  if (user && user.roles) {
-    return user.roles;
-  }
-
-  const authUser: AuthenticatedUser | null =
-    request.auth && request.auth.credentials
-      ? (request.auth.credentials as AuthenticatedUser)
-      : null;
-
-  if (authUser && authUser.roles) {
-    return authUser.roles;
-  }
-  return [];
-}
