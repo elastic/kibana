@@ -38,3 +38,25 @@ export type MetricsAggs<T extends MetricSeriesKeys> = {
     >;
   };
 } & T;
+
+export type JavaGcMetricsAggs<T extends MetricSeriesKeys> = {
+  perAgent: {
+    doc_count_error_upper_bound: number;
+    sum_other_doc_count: number;
+    buckets: Array<
+      {
+        key: string; // agent.ephemeral_id
+        doc_count: number;
+        timeseriesData: {
+          buckets: Array<
+            {
+              key_as_string: string; // timestamp as string
+              key: number; // timestamp as epoch milliseconds
+              doc_count: number;
+            } & T
+          >;
+        };
+      } & T
+    >;
+  };
+} & T;

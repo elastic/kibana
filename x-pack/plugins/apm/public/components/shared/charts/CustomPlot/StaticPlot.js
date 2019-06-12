@@ -11,7 +11,8 @@ import {
   LineSeries,
   LineMarkSeries,
   AreaSeries,
-  VerticalRectSeries
+  VerticalRectSeries,
+  VerticalBarSeries
 } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
@@ -88,6 +89,16 @@ class StaticPlot extends PureComponent {
             data={serie.data}
             color={serie.color}
             size={0.5}
+          />
+        );
+      case 'bar':
+        return (
+          <VerticalBarSeries
+            getNull={d => d.y !== null}
+            key={serie.title}
+            xType="time"
+            data={serie.data}
+            color={serie.color}
           />
         );
       default:
