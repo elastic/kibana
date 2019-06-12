@@ -7,7 +7,7 @@
 import { darken, transparentize } from 'polished';
 import React, { useMemo } from 'react';
 
-import { css } from '../../../../../../common/eui_styled_components';
+import styled, { css } from '../../../../../../common/eui_styled_components';
 import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryFieldColumnProps {
@@ -18,6 +18,13 @@ interface LogEntryFieldColumnProps {
   isEnzyme?: boolean;
 }
 
+const CommaSeparatedLI = styled.li`
+  display: inline;
+  &:not(:last-child) {
+    margin-right: 1ex;
+  }
+`;
+
 export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnProps> = ({
   encodedValue,
   isHighlighted,
@@ -26,7 +33,18 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   isEnzyme,
 }) => {
   const value = useMemo(() => JSON.parse(encodedValue), [encodedValue]);
-  const formattedValue = Array.isArray(value) ? value.join(', ') : value;
+  const formattedValue = Array.isArray(value) ? (
+    <ul>
+      {value.map((entry, i) => (
+        <CommaSeparatedLI key={`LogEntryFieldColumn-${i}`}>
+          {entry}
+          {i < value.length - 1 && ','}
+        </CommaSeparatedLI>
+      ))}
+    </ul>
+  ) : (
+    value
+  );
   return (
     <FieldColumnContent
       isHighlighted={isHighlighted}
