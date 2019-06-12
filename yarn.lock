@@ -8342,10 +8342,10 @@ combined-stream@^1.0.5, combined-stream@^1.0.6, combined-stream@~1.0.5, combined
   dependencies:
     delayed-stream "~1.0.0"
 
-combokeys@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/combokeys/-/combokeys-3.0.0.tgz#955c59a3959af40d26846ab6fc3c682448e7572e"
-  integrity sha1-lVxZo5Wa9A0mhGq2/DxoJEjnVy4=
+combokeys@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/combokeys/-/combokeys-3.0.1.tgz#fc8ca5c3f5f2d2b03a458544cb88b14ab5f53f86"
+  integrity sha512-5nAfaLZ3oO3kA+/xdoL7t197UJTz2WWidyH3BBeU6hqHtvyFERICd0y3DQFrQkJFTKBrtUDck/xCLLoFpnjaCw==
 
 comma-separated-tokens@^1.0.0:
   version "1.0.5"
@@ -11517,10 +11517,15 @@ eventemitter3@^3.0.0, eventemitter3@^3.1.0:
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-3.1.0.tgz#090b4d6cdbd645ed10bf750d4b5407942d7ba163"
   integrity sha512-ivIvhpq/Y0uSjcHDcOIccjmYjGLcP09MFGE7ysAwkAvkXfpZlC985pH2/ui64DKazbTW/4kN3yqozUxlXzI6cA==
 
-events@^1.0.0, events@^1.0.2:
+events@^1.0.2:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/events/-/events-1.1.1.tgz#9ebdb7635ad099c70dcc4c2a1f5004288e8bd924"
   integrity sha1-nr23Y1rQmccNzEwqH1AEKI6L2SQ=
+
+events@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/events/-/events-3.0.0.tgz#9a0a0dfaf62893d92b875b8f2698ca4114973e88"
+  integrity sha512-Dc381HFWJzEOhQ+d8pkNon++bk9h6cdAoAj4iE6Q4y6xgTzySWXlKn05/TVNpjnfRqi/X0EpJEJohPjNI3zpVA==
 
 eventsource@^1.0.7:
   version "1.0.7"
@@ -15137,7 +15142,7 @@ insane@2.6.1:
     assignment "2.0.0"
     he "0.5.0"
 
-insight@^0.10.1:
+insight@0.10.1:
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/insight/-/insight-0.10.1.tgz#a0ecf668484a95d66e9be59644964e719cc83380"
   integrity sha512-kLGeYQkh18f8KuC68QKdi0iwUcIaayJVB/STpX7x452/7pAUm1yfG4giJwcxbrTh0zNYtc8kBR+6maLMOzglOQ==
@@ -19436,9 +19441,9 @@ node-jose@1.1.0:
     uuid "^3.3.2"
 
 "node-libs-browser@^1.0.0 || ^2.0.0", node-libs-browser@^2.0.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/node-libs-browser/-/node-libs-browser-2.1.0.tgz#5f94263d404f6e44767d726901fff05478d600df"
-  integrity sha512-5AzFzdoIMb89hBGMZglEegffzgRg+ZFoUmisQ8HI4j1KDdpx13J0taNp2y9xPbur6W61gepGDDotGBVQ7mfUCg==
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/node-libs-browser/-/node-libs-browser-2.2.0.tgz#c72f60d9d46de08a940dedbb25f3ffa2f9bbaa77"
+  integrity sha512-5MQunG/oyOaBdttrL40dA7bUfPORLRWMUJLQtMg7nluxUvk5XwnLdL9twQHFAjRx/y7mIMkLKT9++qPbbk6BZA==
   dependencies:
     assert "^1.1.1"
     browserify-zlib "^0.2.0"
@@ -19447,7 +19452,7 @@ node-jose@1.1.0:
     constants-browserify "^1.0.0"
     crypto-browserify "^3.11.0"
     domain-browser "^1.1.1"
-    events "^1.0.0"
+    events "^3.0.0"
     https-browserify "^1.0.0"
     os-browserify "^0.3.0"
     path-browserify "0.0.0"
@@ -19461,7 +19466,7 @@ node-jose@1.1.0:
     timers-browserify "^2.0.4"
     tty-browserify "0.0.0"
     url "^0.11.0"
-    util "^0.10.3"
+    util "^0.11.0"
     vm-browserify "0.0.4"
 
 node-modules-regexp@^1.0.0:
@@ -22582,11 +22587,11 @@ react-select@^2.3.0:
     react-transition-group "^2.2.1"
 
 react-shortcuts@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/react-shortcuts/-/react-shortcuts-2.0.0.tgz#871b033a071a8537422b1529d691c38432823bae"
-  integrity sha512-MlYxLHQ6zwgo9OiQgIvHoeZtPTQGI4NLXtVAAU77gK/H1euLCreqSk0sYKQ9TFDbuj769UqKw2VF7W1Xq7WWbA==
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/react-shortcuts/-/react-shortcuts-2.0.1.tgz#6de302244ce33ac9f9273dbeec540a8f81808f91"
+  integrity sha512-Io51aosqU29ERe7uPDqvmZYVV1r8IrOCM3Vc46wkPqbLo84uqPphHfqijM0BkOnJMmwOfj8o5OIUZbTtoRBbDA==
   dependencies:
-    combokeys "^3.0.0"
+    combokeys "^3.0.1"
     events "^1.0.2"
     invariant "^2.1.0"
     just-reduce-object "^1.0.3"
@@ -27638,6 +27643,13 @@ util@0.10.3, util@^0.10.3:
   dependencies:
     inherits "2.0.1"
 
+util@^0.11.0:
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/util/-/util-0.11.1.tgz#3236733720ec64bb27f6e26f421aaa2e1b588d61"
+  integrity sha512-HShAsny+zS2TZfaXxD9tYj4HQGlBezXZMZuM/S5PKLLoZkShZiGk9o5CzukI1LVHZvjdvZ2Sj1aW/Ndn2NB/HQ==
+  dependencies:
+    inherits "2.0.3"
+
 utila@^0.4.0, utila@~0.4:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/utila/-/utila-0.4.0.tgz#8a16a05d445657a3aea5eecc5b12a4fa5379772c"
@@ -27728,7 +27740,7 @@ vega-canvas@^1.0.1, vega-canvas@^1.1.0:
   resolved "https://registry.yarnpkg.com/vega-canvas/-/vega-canvas-1.1.0.tgz#99ce74d4510a46fc9ed1a8721014da725898ec9f"
   integrity sha512-0RBwjnrFf4VRhNm5ICY+o1/q6mynli+VheOXKGML9mElRsplZgzd/pv9NnNRNigU+M66Kr7zUpskoakh8EhW9Q==
 
-vega-crossfilter@^3.0.1:
+vega-crossfilter@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/vega-crossfilter/-/vega-crossfilter-3.0.1.tgz#8b4394fb5e354e5c6f79ca9f491531a292c04209"
   integrity sha512-GNCP0k1otJKtE9SnYm1cDBqUfBvWTaxJ3/bdMpWvGNUtAdDBAlrtspDBTpwMu4MLNWbAy1zp9jN0ztCXBZF29Q==
@@ -27745,7 +27757,7 @@ vega-dataflow@^4.0.0, vega-dataflow@^4.0.4, vega-dataflow@^4.1.0:
     vega-loader "^3.1.0"
     vega-util "^1.7.0"
 
-vega-encode@^3.2.2:
+vega-encode@^3.2.0:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/vega-encode/-/vega-encode-3.2.2.tgz#b7bdee200629b1d54de8267b1b8aafef9f1be8b7"
   integrity sha512-Hmk+ReH6R1wTnz56gWyk8CnzgAzq11QYkrEzw794MMY2l61EG3sX9veyZ9AdtDufOq9oDa58/kfgk65UD9A+sA==
@@ -27778,7 +27790,7 @@ vega-force@^3.0.0:
     vega-dataflow "^4.0.0"
     vega-util "^1.7.0"
 
-vega-geo@^3.1.1:
+vega-geo@^3.1.0:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/vega-geo/-/vega-geo-3.1.1.tgz#5ff84061dea93d89a453e1b56b3444a6031810f6"
   integrity sha512-EltBQmid6DZ7d4iArgTnsGRsx4ZaHrwvaegq6iIwWp7GHtJ8i+8bzPFfHo1pBuRVmHG4ZA2NH+cNaW2IIgWcPg==
@@ -27800,30 +27812,30 @@ vega-hierarchy@^3.1.0:
     vega-dataflow "^4.0.4"
     vega-util "^1.7.0"
 
-vega-lib@4.4.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/vega-lib/-/vega-lib-4.4.0.tgz#37d99514c5496a0ce001033bdacb504361ef6880"
-  integrity sha512-bfOsO5wks+ctnJ94fIPWH/B0qocdFs4WZ8teIgjF7m5XE+EVln+1nq9Z+sV7wdw7vftzGg0GAx9UH/kJxyopKg==
+vega-lib@4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/vega-lib/-/vega-lib-4.3.0.tgz#b17bea4393a281db3e647e665b9e97aa793ccfd6"
+  integrity sha512-NNTpxpUAQfFUqkf6XnsL5nko9sCIQPMRe5AZI9Bsb8mHaA0oukAV1dPIb57MIYZg/wYwtrvc6EwhKxsjCQZHnA==
   dependencies:
-    vega-crossfilter "^3.0.1"
-    vega-dataflow "^4.1.0"
-    vega-encode "^3.2.2"
+    vega-crossfilter "^3.0.0"
+    vega-dataflow "^4.0.4"
+    vega-encode "^3.2.0"
     vega-event-selector "^2.0.0"
     vega-expression "^2.4.0"
     vega-force "^3.0.0"
-    vega-geo "^3.1.1"
+    vega-geo "^3.1.0"
     vega-hierarchy "^3.1.0"
-    vega-loader "^3.1.0"
-    vega-parser "^3.9.0"
+    vega-loader "^3.0.1"
+    vega-parser "^3.8.0"
     vega-projection "^1.2.0"
-    vega-runtime "^3.2.0"
-    vega-scale "^2.5.1"
+    vega-runtime "^3.1.1"
+    vega-scale "^2.5.0"
     vega-scenegraph "^3.2.3"
-    vega-statistics "^1.2.3"
-    vega-transforms "^2.3.1"
+    vega-statistics "^1.2.2"
+    vega-transforms "^2.3.0"
     vega-typings "*"
     vega-util "^1.7.0"
-    vega-view "^3.4.1"
+    vega-view "^3.4.0"
     vega-view-transforms "^2.0.3"
     vega-voronoi "^3.0.0"
     vega-wordcloud "^3.0.0"
@@ -27852,7 +27864,7 @@ vega-loader@^3.0.1, vega-loader@^3.1.0:
     topojson-client "^3.0.0"
     vega-util "^1.7.0"
 
-vega-parser@^3.9.0:
+vega-parser@^3.8.0, vega-parser@^3.9.0:
   version "3.9.0"
   resolved "https://registry.yarnpkg.com/vega-parser/-/vega-parser-3.9.0.tgz#a7bbe380c5ae70ddd501163302a948f25aadd686"
   integrity sha512-/fdPt5wcZgbPi0zwzJsBgi/k2GO3s53j7kJUYFGff75+wLJ2n/XtLCU295Wo7+cGCfkCZs0FfYKWa8AJrQZiag==
@@ -27877,7 +27889,7 @@ vega-projection@^1.2.0:
   dependencies:
     d3-geo "^1.10.0"
 
-vega-runtime@^3.2.0:
+vega-runtime@^3.1.1, vega-runtime@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/vega-runtime/-/vega-runtime-3.2.0.tgz#ad4152079989058db90ce1993f16b3876f628d8b"
   integrity sha512-aoWqH+U5tiByj3cIGZsTDPMTb10tUN2nm4zWa3Z7lOUilbw/+gEaOuy1qvr4VrVhUShsnytudED4OpQNUkKy3Q==
@@ -27908,17 +27920,17 @@ vega-scenegraph@^3.2.3:
     vega-loader "^3.0.1"
     vega-util "^1.7.0"
 
-vega-schema-url-parser@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/vega-schema-url-parser/-/vega-schema-url-parser-1.1.0.tgz#39168ec04e5468ce278a06c16ec0d126035a85b5"
-  integrity sha512-Tc85J2ofMZZOsxiqDM9sbvfsa+Vdo3GwNLjEEsPOsCDeYqsUHKAlc1IpbbhPLZ6jusyM9Lk0e1izF64GGklFDg==
+vega-schema-url-parser@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/vega-schema-url-parser/-/vega-schema-url-parser-1.0.0.tgz#fc17631e354280d663ed39e3fa8eddb62145402e"
+  integrity sha512-pIG9Ox6fwaveiAntC9FxjpIT2GlSP/CruJtJxrUk4OdV624p9OC5KHfA3AUWOcVv3GddRO6FaQaZ6N6k9cD1rA==
 
 vega-spec-injector@^0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/vega-spec-injector/-/vega-spec-injector-0.0.2.tgz#f1d990109dd9d845c524738f818baa4b72a60ca6"
   integrity sha512-wOMMqmpssn0/ZFPW7wl1v26vbseRX7zHPWzEyS9TwNXTRCu1TcjIBIR+X23lCWocxhoBqFxmqyn8UowMhlGtAg==
 
-vega-statistics@^1.2.1, vega-statistics@^1.2.3:
+vega-statistics@^1.2.1, vega-statistics@^1.2.2, vega-statistics@^1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/vega-statistics/-/vega-statistics-1.2.3.tgz#4a7ca4c5fd9cc00c3700cb9cde336995439a55fa"
   integrity sha512-Acs6kswwO7lJYiG7KXxSI+Hr+PDKF+EMX/KmCOmyn8JB1W9fWIhTMBCNKf27r8XuAboBd0fQixuIx9L1Scdo+g==
@@ -27933,7 +27945,7 @@ vega-tooltip@^0.9.14:
     json-stringify-safe "^5.0.1"
     vega-util "^1.7.0"
 
-vega-transforms@^2.3.1:
+vega-transforms@^2.3.0:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/vega-transforms/-/vega-transforms-2.3.1.tgz#a31a1ff8086c6909384ddfcc973bd58d53d801ae"
   integrity sha512-jvDz33ohZiP6cN74quEvesHr0sbSMMQ69ZZqgL6cRDHBqfiuHPhZofBKWDXE1nEWDmJqTEyvg0gsnA8vpHzpjQ==
@@ -27964,7 +27976,7 @@ vega-view-transforms@^2.0.3:
     vega-scenegraph "^3.2.3"
     vega-util "^1.7.0"
 
-vega-view@^3.4.1:
+vega-view@^3.4.0:
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/vega-view/-/vega-view-3.4.1.tgz#8f36fea88792b3b1ee3a535c5322dc7ecd975532"
   integrity sha512-hT9Bj9qRCGz+4umid8tFuADyUF7xOHTQmeu18XtRgEkNOtTALlDYLmCSpcGkP1N6eeZm3aRWBtkUz/XE7/6d+Q==
@@ -29251,28 +29263,20 @@ yarn@^1.12.3:
   resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.16.0.tgz#5701b58ac555ff91f7b889b7d791b3dc86f8f999"
   integrity sha512-cfemyGlnWKA1zopUUgebTPf8C4WkPIZ+TJmklwcEAJ4u6oWPtJeAzrsamaGGh/+b1XWe8W51yzAImC4AWbWR1g==
 
-yauzl@2.4.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/yauzl/-/yauzl-2.4.1.tgz#9528f442dab1b2284e58b4379bb194e22e0c4005"
-  integrity sha1-lSj0QtqxsihOWLQ3m7GU4i4MQAU=
-  dependencies:
-    fd-slicer "~1.0.1"
-
-yauzl@2.7.0:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/yauzl/-/yauzl-2.7.0.tgz#e21d847868b496fc29eaec23ee87fdd33e9b2bce"
-  integrity sha1-4h2EeGi0lvwp6uwj7of90z6bK84=
-  dependencies:
-    buffer-crc32 "~0.2.3"
-    fd-slicer "~1.0.1"
-
-yauzl@^2.10.0:
+yauzl@2.10.0, yauzl@^2.10.0:
   version "2.10.0"
   resolved "https://registry.yarnpkg.com/yauzl/-/yauzl-2.10.0.tgz#c7eb17c93e112cb1086fa6d8e51fb0667b79a5f9"
   integrity sha1-x+sXyT4RLLEIb6bY5R+wZnt5pfk=
   dependencies:
     buffer-crc32 "~0.2.3"
     fd-slicer "~1.1.0"
+
+yauzl@2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/yauzl/-/yauzl-2.4.1.tgz#9528f442dab1b2284e58b4379bb194e22e0c4005"
+  integrity sha1-lSj0QtqxsihOWLQ3m7GU4i4MQAU=
+  dependencies:
+    fd-slicer "~1.0.1"
 
 yauzl@^2.4.2:
   version "2.9.1"
@@ -29392,10 +29396,10 @@ yeoman-generator@1.1.1:
     user-home "^2.0.0"
     yeoman-environment "^1.1.0"
 
-yo@2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/yo/-/yo-2.0.5.tgz#2f747f5d279ab777e0167b0aa63d7b607507d73d"
-  integrity sha512-PLyTNZSJjHkks/FIln+QE5PxV224MsekCzbROVhZEW0MvLyj/6ghWIVkdBmrwdAbapH8H9q21F1/pQ9Q0Lk9UA==
+yo@2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/yo/-/yo-2.0.6.tgz#7b562f68a0434237c24a1fd3982f235035839516"
+  integrity sha512-1OleNumZXtE/Lo/ZDPsMXqOX8oXr8tpBXYgUGEDAONYqLX3/n3PV3BWkXI7Iwq6vhuAAYPRLinncUe30izlcSg==
   dependencies:
     async "^2.6.1"
     chalk "^2.4.1"
@@ -29408,7 +29412,7 @@ yo@2.0.5:
     got "^8.3.2"
     humanize-string "^1.0.2"
     inquirer "^6.0.0"
-    insight "^0.10.1"
+    insight "0.10.1"
     lodash "^4.17.10"
     meow "^3.0.0"
     npm-keyword "^5.0.0"

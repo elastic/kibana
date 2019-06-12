@@ -27,7 +27,7 @@ jest.mock('ui/chrome',
             case 'timepicker:timeDefaults':
               return { from: 'now-15m', to: 'now' };
             case 'timepicker:refreshIntervalDefaults':
-              return { display: 'Off', pause: false, value: 0 };
+              return { pause: false, value: 0 };
             default:
               throw new Error(`Unexpected config key: ${key}`);
           }
@@ -39,7 +39,7 @@ jest.mock('ui/chrome',
 import _ from 'lodash';
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { onBrushEvent } from '../brush_event';
+import { onBrushEvent } from './brush_event';
 import { timefilter } from 'ui/timefilter';
 
 describe('brushEvent', () => {
