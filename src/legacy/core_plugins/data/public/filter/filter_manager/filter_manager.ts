@@ -134,8 +134,8 @@ export class FilterManager {
   private static setFiltersStore(filters: Filter[], store: FilterStateStore) {
     _.map(filters, (filter: Filter) => {
       // Override status only for filters that didn't have state in the first place.
-      if (filter.$state.store === undefined) {
-        filter.$state.store = store;
+      if (filter.$state === undefined) {
+        filter.$state = { store };
       }
     });
   }
@@ -147,9 +147,9 @@ export class FilterManager {
     // global filters should always be first
     newFilters.sort(
       (a: Filter, b: Filter): number => {
-        if (a.$state.store === FilterStateStore.GLOBAL_STATE) {
+        if (a.$state && a.$state.store === FilterStateStore.GLOBAL_STATE) {
           return -1;
-        } else if (b.$state.store === FilterStateStore.GLOBAL_STATE) {
+        } else if (b.$state && b.$state.store === FilterStateStore.GLOBAL_STATE) {
           return 1;
         } else {
           return 0;

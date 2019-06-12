@@ -20,17 +20,14 @@
 export function getFiltersArray() {
   return [
     {
-      $state: {},
       query: { match: { extension: { query: 'jpg', type: 'phrase' } } },
       meta: { index: 'logstash-*', negate: false, disabled: false }
     },
     {
-      $state: {},
       query: { match: { '@tags': { query: 'info', type: 'phrase' } } },
       meta: { index: 'logstash-*', negate: false, disabled: false }
     },
     {
-      $state: {},
       query: { match: { '_type': { query: 'nginx', type: 'phrase' } } },
       meta: { index: 'logstash-*', negate: false, disabled: false }
     }
