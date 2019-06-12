@@ -23,7 +23,7 @@
  * funcationality contained here.
  */
 
-import { IndexMapping } from '../../../mappings';
+import { IndexMapping } from '../../mappings';
 
 /* eslint-disable  @typescript-eslint/unified-signatures */
 export interface CallCluster {

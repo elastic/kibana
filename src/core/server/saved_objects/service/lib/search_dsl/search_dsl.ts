@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 
-import { IndexMapping } from '../../../../mappings';
+import { IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';

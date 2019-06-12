@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getRootPropertiesObjects, IndexMapping } from '../../../../mappings';
+import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 
 /**

@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { getProperty, IndexMapping } from '../../../../mappings';
+import { getProperty, IndexMapping } from '../../../mappings';
 
 const TOP_LEVEL_FIELDS = ['_id'];
 

@@ -17,24 +17,4 @@
  * under the License.
  */
 
-import { MappingProperties } from '../../mappings';
-import { SavedObjectsSchemaDefinition } from '../../schema';
-
-/*
- * This file contains logic to convert savedObjectSchemas into a dictonary of indexes and documents
- */
-export function createIndexMap(
-  defaultIndex: string,
-  savedObjectSchemas: SavedObjectsSchemaDefinition,
-  indexMap: MappingProperties
-) {
-  const map: { [index: string]: MappingProperties } = {};
-  Object.keys(indexMap).forEach(type => {
-    const indexPattern = (savedObjectSchemas[type] || {}).indexPattern || defaultIndex;
-    if (!map.hasOwnProperty(indexPattern as string)) {
-      map[indexPattern] = {};
-    }
-    map[indexPattern][type] = indexMap[type];
-  });
-  return map;
-}
+export * from '../../../core/server/saved_objects';

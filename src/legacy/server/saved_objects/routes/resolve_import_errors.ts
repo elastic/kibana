@@ -22,8 +22,10 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { extname } from 'path';
 import { Readable } from 'stream';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { resolveImportErrors } from '../../../../core/server/saved_objects/import';
 import { SavedObjectsClient } from '../';
-import { resolveImportErrors } from '../import';
 import { Prerequisites } from './types';
 
 interface HapiReadableStream extends Readable {

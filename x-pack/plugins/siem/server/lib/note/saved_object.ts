@@ -9,7 +9,7 @@ import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 
-import { FindOptions } from 'src/legacy/server/saved_objects/service';
+import { SavedObjectsFindOptions } from 'src/legacy/server/saved_objects';
 
 import { Pick3 } from '../../../common/utility_types';
 import { PageInfoNote, ResponseNote, ResponseNotes, SortNote } from '../../graphql/types';
@@ -39,7 +39,7 @@ export class Note {
   }
 
   public async deleteNoteByTimelineId(request: FrameworkRequest, timelineId: string) {
-    const options: FindOptions = {
+    const options: SavedObjectsFindOptions = {
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -61,7 +61,7 @@ export class Note {
     request: FrameworkRequest,
     eventId: string
   ): Promise<NoteSavedObject[]> {
-    const options: FindOptions = {
+    const options: SavedObjectsFindOptions = {
       search: eventId,
       searchFields: ['eventId'],
     };
@@ -73,7 +73,7 @@ export class Note {
     request: FrameworkRequest,
     timelineId: string
   ): Promise<NoteSavedObject[]> {
-    const options: FindOptions = {
+    const options: SavedObjectsFindOptions = {
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -87,7 +87,7 @@ export class Note {
     search: string | null,
     sort: SortNote | null
   ): Promise<ResponseNotes> {
-    const options: FindOptions = {
+    const options: SavedObjectsFindOptions = {
       perPage: pageInfo != null ? pageInfo.pageSize : undefined,
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
@@ -166,7 +166,7 @@ export class Note {
     return convertSavedObjectToSavedNote(savedObject);
   }
 
-  private async getAllSavedNote(request: FrameworkRequest, options: FindOptions) {
+  private async getAllSavedNote(request: FrameworkRequest, options: SavedObjectsFindOptions) {
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
       request[internalFrameworkRequest]
     );

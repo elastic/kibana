@@ -7,10 +7,7 @@
 import moment from 'moment';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import {
-  FindResponse,
-  SavedObjectsClient,
-} from 'src/legacy/server/saved_objects/service/saved_objects_client';
+import { FindResponse, SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import {
   IndexGroup,
   REINDEX_OP_TYPE,

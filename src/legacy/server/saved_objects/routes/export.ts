@@ -20,8 +20,10 @@
 import Hapi from 'hapi';
 import Joi from 'joi';
 import stringify from 'json-stable-stringify';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getSortedObjectsForExport } from '../../../../core/server/saved_objects/export';
 import { SavedObjectsClient } from '../';
-import { getSortedObjectsForExport } from '../export';
 import { Prerequisites } from './types';
 
 interface ExportRequest extends Hapi.Request {

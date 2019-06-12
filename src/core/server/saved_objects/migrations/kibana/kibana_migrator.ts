@@ -23,7 +23,7 @@
  */
 
 import { once } from 'lodash';
-import { MappingProperties } from '../../../mappings';
+import { MappingProperties } from '../../mappings';
 import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
 import { SavedObjectsManagementDefinition } from '../../management';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';

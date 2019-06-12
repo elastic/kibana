@@ -19,7 +19,7 @@
 
 import { omit } from 'lodash';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
+import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
@@ -32,13 +32,13 @@ import {
   BulkCreateObject,
   CreateOptions,
   SavedObject,
-  FindOptions,
+  SavedObjectsFindOptions,
   SavedObjectAttributes,
   FindResponse,
   BulkGetObject,
   BulkResponse,
   UpdateOptions,
-  BaseOptions,
+  SavedObjectsBaseOptions,
   MigrationVersion,
   UpdateResponse,
 } from '../saved_objects_client';
@@ -73,7 +73,7 @@ export interface SavedObjectsRepositoryOptions {
   onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
 }
 
-export interface IncrementCounterOptions extends BaseOptions {
+export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
   migrationVersion?: MigrationVersion;
 }
 
@@ -307,7 +307,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type: string, id: string, options: BaseOptions = {}): Promise<{}> {
+  async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}): Promise<{}> {
     if (!this._allowedTypes.includes(type)) {
       throw errors.createGenericNotFoundError();
     }
@@ -397,7 +397,7 @@ export class SavedObjectsRepository {
     fields,
     namespace,
     type,
-  }: FindOptions): Promise<FindResponse<T>> {
+  }: SavedObjectsFindOptions): Promise<FindResponse<T>> {
     if (!type) {
       throw new TypeError(`options.type must be a string or an array of strings`);
     }
@@ -480,7 +480,7 @@ export class SavedObjectsRepository {
    */
   async bulkGet<T extends SavedObjectAttributes = any>(
     objects: BulkGetObject[] = [],
-    options: BaseOptions = {}
+    options: SavedObjectsBaseOptions = {}
   ): Promise<BulkResponse<T>> {
     const { namespace } = options;
 
@@ -552,7 +552,7 @@ export class SavedObjectsRepository {
   async get<T extends SavedObjectAttributes = any>(
     type: string,
     id: string,
-    options: BaseOptions = {}
+    options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {
     if (!this._allowedTypes.includes(type)) {
       throw errors.createGenericNotFoundError(type, id);

@@ -5,11 +5,11 @@
  */
 
 import {
-  BaseOptions,
+  SavedObjectsBaseOptions,
   BulkCreateObject,
   BulkGetObject,
   CreateOptions,
-  FindOptions,
+  SavedObjectsFindOptions,
   SavedObjectAttributes,
   SavedObjectsClientContract,
   UpdateOptions,
@@ -107,7 +107,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
-  public async bulkCreate(objects: BulkCreateObject[], options: BaseOptions = {}) {
+  public async bulkCreate(objects: BulkCreateObject[], options: SavedObjectsBaseOptions = {}) {
     throwErrorIfTypesContainsSpace(objects.map(object => object.type));
     throwErrorIfNamespaceSpecified(options);
 
@@ -126,7 +126,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  public async delete(type: string, id: string, options: BaseOptions = {}) {
+  public async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);
 
@@ -152,7 +152,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  public async find(options: FindOptions = {}) {
+  public async find(options: SavedObjectsFindOptions = {}) {
     if (options.type) {
       throwErrorIfTypesContainsSpace(coerceToArray(options.type));
     }
@@ -182,7 +182,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  public async bulkGet(objects: BulkGetObject[] = [], options: BaseOptions = {}) {
+  public async bulkGet(objects: BulkGetObject[] = [], options: SavedObjectsBaseOptions = {}) {
     throwErrorIfTypesContainsSpace(objects.map(object => object.type));
     throwErrorIfNamespaceSpecified(options);
 
@@ -201,7 +201,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  public async get(type: string, id: string, options: BaseOptions = {}) {
+  public async get(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);
 

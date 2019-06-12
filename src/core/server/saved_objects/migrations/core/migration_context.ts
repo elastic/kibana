@@ -25,7 +25,7 @@
  */
 
 import { SavedObjectsSerializer } from '../../serialization';
-import { MappingProperties } from './../../../mappings';
+import { MappingProperties } from '../../mappings';
 import { buildActiveMappings } from './build_active_mappings';
 import { CallCluster } from './call_cluster';
 import { VersionedTransformer } from './document_migrator';

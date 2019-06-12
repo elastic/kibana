@@ -21,12 +21,12 @@ import { errors, SavedObjectsRepository } from './lib';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
-export interface BaseOptions {
+export interface SavedObjectsBaseOptions {
   /** Specify the namespace for this operation */
   namespace?: string;
 }
 
-export interface CreateOptions extends BaseOptions {
+export interface CreateOptions extends SavedObjectsBaseOptions {
   /** (not recommended) Specify an id for the document */
   id?: string;
   /** Overwrite existing documents (defaults to false) */
@@ -47,7 +47,7 @@ export interface BulkResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
-export interface FindOptions extends BaseOptions {
+export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   type?: string | string[];
   page?: number;
   perPage?: number;
@@ -68,7 +68,7 @@ export interface FindResponse<T extends SavedObjectAttributes = any> {
   page: number;
 }
 
-export interface UpdateOptions extends BaseOptions {
+export interface UpdateOptions extends SavedObjectsBaseOptions {
   /** Ensures version matches that of persisted object */
   version?: string;
   references?: SavedObjectReference[];
@@ -100,10 +100,6 @@ export interface MigrationVersion {
 
 export interface SavedObjectAttributes {
   [key: string]: SavedObjectAttributes | string | number | boolean | null;
-}
-
-export interface VisualizationAttributes extends SavedObjectAttributes {
-  visState: string;
 }
 
 export interface SavedObject<T extends SavedObjectAttributes = any> {
@@ -241,7 +237,7 @@ export class SavedObjectsClient {
    * @param id
    * @param options
    */
-  async delete(type: string, id: string, options: BaseOptions = {}) {
+  async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     return await this._repository.delete(type, id, options);
   }
 
@@ -251,7 +247,7 @@ export class SavedObjectsClient {
    * @param options
    */
   async find<T extends SavedObjectAttributes = any>(
-    options: FindOptions
+    options: SavedObjectsFindOptions
   ): Promise<FindResponse<T>> {
     return await this._repository.find(options);
   }
@@ -269,7 +265,7 @@ export class SavedObjectsClient {
    */
   async bulkGet<T extends SavedObjectAttributes = any>(
     objects: BulkGetObject[] = [],
-    options: BaseOptions = {}
+    options: SavedObjectsBaseOptions = {}
   ): Promise<BulkResponse<T>> {
     return await this._repository.bulkGet(objects, options);
   }
@@ -284,7 +280,7 @@ export class SavedObjectsClient {
   async get<T extends SavedObjectAttributes = any>(
     type: string,
     id: string,
-    options: BaseOptions = {}
+    options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {
     return await this._repository.get(type, id, options);
   }

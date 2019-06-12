@@ -75,6 +75,14 @@ export {
   PluginName,
 } from './plugins';
 
+export {
+  SavedObjectAttributes,
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+} from './saved_objects';
+
 export { RecursiveReadonly } from '../utils';
 
 /**

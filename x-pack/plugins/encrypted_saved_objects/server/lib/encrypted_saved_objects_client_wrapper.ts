@@ -6,12 +6,12 @@
 
 import uuid from 'uuid';
 import {
-  BaseOptions,
+  SavedObjectsBaseOptions,
   BulkCreateObject,
   BulkGetObject,
   BulkResponse,
   CreateOptions,
-  FindOptions,
+  SavedObjectsFindOptions,
   FindResponse,
   SavedObjectAttributes,
   SavedObjectsClientContract,
@@ -71,7 +71,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
-  public async bulkCreate(objects: BulkCreateObject[], options?: BaseOptions) {
+  public async bulkCreate(objects: BulkCreateObject[], options?: SavedObjectsBaseOptions) {
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
     // sequential processing.
@@ -107,23 +107,23 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
-  public async delete(type: string, id: string, options?: BaseOptions) {
+  public async delete(type: string, id: string, options?: SavedObjectsBaseOptions) {
     return await this.options.baseClient.delete(type, id, options);
   }
 
-  public async find(options: FindOptions = {}) {
+  public async find(options: SavedObjectsFindOptions = {}) {
     return this.stripEncryptedAttributesFromBulkResponse(
       await this.options.baseClient.find(options)
     );
   }
 
-  public async bulkGet(objects: BulkGetObject[] = [], options?: BaseOptions) {
+  public async bulkGet(objects: BulkGetObject[] = [], options?: SavedObjectsBaseOptions) {
     return this.stripEncryptedAttributesFromBulkResponse(
       await this.options.baseClient.bulkGet(objects, options)
     );
   }
 
-  public async get(type: string, id: string, options?: BaseOptions) {
+  public async get(type: string, id: string, options?: SavedObjectsBaseOptions) {
     return this.stripEncryptedAttributesFromResponse(
       await this.options.baseClient.get(type, id, options)
     );

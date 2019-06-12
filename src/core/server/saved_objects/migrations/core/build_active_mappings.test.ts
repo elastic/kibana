@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexMapping } from './../../../mappings';
+import { IndexMapping } from './../../mappings';
 import { buildActiveMappings, diffMappings } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {

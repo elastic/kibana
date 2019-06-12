@@ -26,8 +26,8 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsClient as SavedObjectsApi,
+  SavedObjectsFindOptions,
 } from '../../../server/saved_objects';
-import { FindOptions } from '../../../server/saved_objects/service';
 import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
 import { kfetch, KFetchQuery } from '../kfetch';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../utils/case_conversion';
@@ -239,7 +239,7 @@ export class SavedObjectsClient {
    * @returns A find result with objects matching the specified search.
    */
   public find = <T extends SavedObjectAttributes>(
-    options: FindOptions = {}
+    options: SavedObjectsFindOptions = {}
   ): Promise<FindResults<T>> => {
     const path = this.getPath(['_find']);
     const query = keysToSnakeCaseShallow(options);
