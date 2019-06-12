@@ -16,3 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+/* eslint-env jest */
+
+// TODO: Docs!
+
+jest.mock('ui/metadata');
+jest.mock('ui/chrome');

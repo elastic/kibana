@@ -17,13 +17,20 @@
  * under the License.
  */
 
-import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
+import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
-jest.doMock('ui/new_platform', () => ({
-  npSetup: {
-    core: {
-      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-      notifications: notificationServiceMock.createSetupContract(),
-    }
-  },
-}));
+// TODO remove
+// console.log('hit chrome mock!!!');
+
+const chrome = {
+  getBasePath: jest.fn().mockReturnValue(''),
+  getUiSettingsClient: () => ({
+    ...uiSettingsServiceMock.createSetupContract(),
+    getUpdate$: () => ({
+      subscribe: jest.fn(),
+    }),
+  }),
+};
+
+// eslint-disable-next-line import/no-default-export
+export default chrome;
