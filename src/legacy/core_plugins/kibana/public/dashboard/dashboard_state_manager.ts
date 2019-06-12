@@ -27,6 +27,7 @@ import { TimeRange, Query } from 'ui/embeddable';
 import { Timefilter } from 'ui/timefilter';
 import { Filter } from '@kbn/es-query';
 import moment from 'moment';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
@@ -212,13 +213,8 @@ export class DashboardStateManager {
     );
   }
 
-  public handleRefreshConfigChange({ pause, value }: { pause: boolean; value: number }) {
-    store.dispatch(
-      updateRefreshConfig({
-        isPaused: pause,
-        interval: value,
-      })
-    );
+  public handleRefreshConfigChange(refreshInterval: RefreshInterval) {
+    store.dispatch(updateRefreshConfig(refreshInterval));
   }
 
   /**
