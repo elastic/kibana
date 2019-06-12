@@ -71,7 +71,7 @@ export const createStore = <State extends {}>(defaultState: State): AppStore<Sta
     get,
     set,
     redux,
-    state$: state$ as Observable<State>,
+    state$: (state$ as unknown) as Observable<State>,
     createMutations,
   };
 };

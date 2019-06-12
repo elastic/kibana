@@ -31,9 +31,15 @@ export interface ConsumerProps<State> {
 
 export type MapStateToProps<State extends {}, StateProps extends {}> = (state: State) => StateProps;
 
+// TODO: `Omit` is generally part of TypeScript, but it currently does not exist in our build.
+type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
 export type Connect<State extends {}> = <Props extends {}, StatePropKeys extends keyof Props>(
   mapStateToProp: MapStateToProps<State, Pick<Props, StatePropKeys>>
 ) => (component: React.ComponentType<Props>) => React.FC<Omit<Props, StatePropKeys>>;
+
+interface ReduxContextValue {
+  store: Store;
+}
 
 const mapDispatchToProps = () => ({});
 const mergeProps: any = (stateProps: any, dispatchProps: any, ownProps: any) => ({
@@ -43,7 +49,7 @@ const mergeProps: any = (stateProps: any, dispatchProps: any, ownProps: any) => 
 });
 
 export const createContext = <State>({ redux }: AppStore<State>) => {
-  const context = React.createContext<{ store: Store }>({ store: redux });
+  const context = React.createContext<ReduxContextValue>({ store: redux });
 
   const Provider: React.FC<{}> = ({ children }) =>
     React.createElement(ReactReduxProvider, {
@@ -54,7 +60,7 @@ export const createContext = <State>({ redux }: AppStore<State>) => {
 
   const Consumer: React.FC<ConsumerProps<State>> = ({ children }) =>
     React.createElement(context.Consumer, {
-      children: ({ store }) => children(store.getState()),
+      children: ({ store }: ReduxContextValue) => children(store.getState()),
     });
 
   const options: any = { context };
