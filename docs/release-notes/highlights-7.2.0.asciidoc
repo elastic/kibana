@@ -9,14 +9,14 @@ coming[7.2.0]
 Each release of {kib} brings new features and product improvements. 
 Here are the highlights of the feature and user experience changes in 7.2.0.
 
-Refer to the {kib} <<breaking-changes-7.2, breaking changes>> and <<release-notes, 
-release notes>> for a list of bug fixes and other changes.
+Refer to the {kib} {kibana-ref}/breaking-changes-7.2.html[breaking changes] and 
+{kibana-ref}/release-notes.html[release notes]
+for a list of bug fixes and other changes.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
-// end::notable-highlights[]
 
 
 [float]
@@ -24,7 +24,7 @@ release notes>> for a list of bug fixes and other changes.
 
 Want to hide Dev Tools from the left navigation? Show Stack Monitoring only to 
 admins? Or, give certain users access to only Dashboard and Canvas? 
-<<kibana-role-management, Feature controls>> allow you to hide and 
+{kibana-ref}/kibana-role-management.html[Feature controls] allow you to hide and 
 restrict applications and features in the {kib} UI.
 
 [role="screenshot"]
@@ -43,8 +43,8 @@ image::release-notes/images/7.2-space-privileges.png[Space privileges]
 [float]
 === Saved Object Import and Export API
 
-{kib} has new APIs for <<saved-objects-api-import, importing>> and 
-<<saved-objects-api-export, exporting>> saved objects, including dashboards, 
+{kib} has new APIs for {kibana-ref}/saved-objects-api-import.html[importing] and 
+{kibana-ref}/saved-objects-api-export.html[exporting] saved objects, including dashboards, 
 visualizations, index patterns, maps, Canvas workpads, and advanced settings. 
 A benefit of this new API is that it automatically exports the dependencies 
 of the saved object. Just export the dashboard you need and its visualizations 
@@ -117,7 +117,7 @@ a copy of your data in case something goes wrong. If you need to roll back to an
 older version of your data, you can restore a snapshot from the repository.  
 
 Use the Snapshot UI to register new repositories, edit existing ones, and drill down into 
-details about your repositories and snapshots. See <<snapshot-repositories, Snapshot repositories>>
+details about your repositories and snapshots. See {kibana-ref}/snapshot-repositories.html[Snapshot repositories]
 for step-by-step instructions.  Additional snapshot and recovery features are 
 planned for upcoming versions.
 
@@ -132,7 +132,7 @@ dashboard. You can view and interact with your geospatial data alongside
 bar charts, pie charts, and other visualizations. Click the map to 
 quickly hone in on the data you desire, and that data is shown across the dashboard, 
 similar to how you interact with other visualization types. See 
-<<maps-embedding, Adding a map to a dashboard>> for step-by-step instructions.
+{kibana-ref}/maps-embedding.html[Adding a map to a dashboard] for step-by-step instructions.
 
 [role="screenshot"]
 image::release-notes/images/7.2-maps.png[Embedded map in dark mode]
@@ -147,7 +147,7 @@ Maps app now fully respects dark mode.
 view of a map in a dashboard.  
 
 * *Class styling.* Use this style to symbolize map features by class. 
-See <<maps-vector-style-class>> for an example.
+See {kibana-ref}/vector-style.html#maps-vector-style-class[Class styling] for an example.
 
 
 [float]
@@ -166,10 +166,11 @@ image::release-notes/images/7.2-localization.png[Kibana in Japanese]
 [float]
 === Data frames
 
-beta[] Machine Learning now enables you to transform your data with data frames. A 
-new wizard guides you through the process of creating a data frame: selecting 
-the source data, the fields you want to group by, and the aggregations for 
-pivoting the data. There is also a preview of the transform for reviewing the configuration. 
+beta[] Machine Learning now enables you to transform your data with
+{stack-ov}/ml-dataframes.html[data frames]. A new wizard guides you through the
+process of creating a data frame: selecting the source data, the fields you want
+to group by, and the aggregations for pivoting the data. There is also a preview
+of the transform for reviewing the configuration. 
 
 [role="screenshot"]
 image::release-notes/images/7.2-data-frames.png[Data frames]
@@ -187,6 +188,9 @@ A query bar is now available in the Machine Learning Anomaly Explorer, which
 enables you to filter anomaly results for one or more selected influencers. 
 The query bar suggests influencer field names and values for the selected jobs 
 as you type.
+
+// end::notable-highlights[]
+
 
 [float]
 === Give us your feedback
