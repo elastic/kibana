@@ -158,7 +158,7 @@ export class AxisScale {
   getDomain(length) {
     const domain = this.getExtents();
     const pad = this.axisConfig.get('padForLabels');
-    if (pad > 0) {
+    if (pad > 0 && this.canApplyNice()) {
       const domainLength = domain[1] - domain[0];
       const valuePerPixel = domainLength / length;
       const padValue = valuePerPixel * pad;

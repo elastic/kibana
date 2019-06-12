@@ -278,9 +278,9 @@ export class ColumnChart extends PointSeries {
 
     function labelY(d) {
       if (isHorizontal) {
-        return y(d) - 4;
+        return d.y >= 0 ? y(d) - 4 : y(d) + heightFunc(d) + this.getBBox().height;
       }
-      return y(d) + heightFunc(d) + 4;
+      return d.y >= 0 ? y(d) + 4 : y(d) - this.getBBox().width - 4;
     }
 
     function labelDisplay(d, i) {
