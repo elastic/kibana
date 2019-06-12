@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { KibanaDatatable } from '../types';
 
@@ -19,12 +20,16 @@ export const renameColumns: ExpressionFunction<
 > = {
   name: 'lens_rename_columns',
   type: 'kibana_datatable',
-  help: 'A helper to rename the columns of a datatable',
+  help: i18n.translate('lens.functions.renameColumns.help', {
+    defaultMessage: 'A helper to rename the columns of a datatable',
+  }),
   args: {
     idMap: {
       types: ['string'],
-      help:
-        'A JSON encoded object in which keys are the old column ids and values are the corresponding new ones. All other columns ids are kept.',
+      help: i18n.translate('lens.functions.renameColumns.idMap.help', {
+        defaultMessage:
+          'A JSON encoded object in which keys are the old column ids and values are the corresponding new ones. All other columns ids are kept.',
+      }),
     },
   },
   context: {
@@ -40,11 +45,13 @@ export const renameColumns: ExpressionFunction<
           mappedRow[toId] = row[fromId];
         });
 
-        Object.keys(row)
-          .filter(id => !(id in idMap))
-          .forEach(unchangedId => {
-            mappedRow[unchangedId] = row[unchangedId];
-          });
+        Object.entries(row).forEach(([id, value]) => {
+          if (id in idMap) {
+            mappedRow[idMap[id]] = value;
+          } else {
+            mappedRow[id] = value;
+          }
+        });
 
         return mappedRow;
       }),
