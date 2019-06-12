@@ -125,6 +125,12 @@ module.directive('vislibValueAxes', function () {
         }
       };
 
+      $scope.updateBottomMargin = function (axis) {
+        if (!axis.scale.defaultYExtents) {
+          delete axis.scale.bottomMargin;
+        }
+      };
+
       $scope.updateAxisName = function (axis) {
         const axisName = _.capitalize(axis.position) + 'Axis-';
         axis.name = axisName + $scope.editorState.params.valueAxes.reduce((value, axis) => {
