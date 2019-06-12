@@ -19,6 +19,7 @@ tar xzvf "$auditbeatArchive" -C "$auditbeatDir" --strip=1
 cp -f "$dir/src/dev/ci_setup/auditbeat.yml" "$auditbeatDir"
 sudo chown root "$auditbeatDir/auditbeat.yml"
 (cd "$auditbeatDir" && sudo ./auditbeat) &
+echo "Auditbeat has been started in the background"
 
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY
