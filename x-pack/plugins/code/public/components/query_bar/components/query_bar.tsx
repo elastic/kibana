@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 import { connect } from 'react-redux';
-import { saveSearchOptions, searchReposForScope } from '../../../actions';
+import { saveSearchOptions, searchReposForScope, suggestionSearch } from '../../../actions';
 import { matchPairs } from '../lib/match_pairs';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
@@ -39,7 +39,8 @@ const KEY_CODES = {
 interface Props {
   query: string;
   onSubmit: (query: string) => void;
-  onSelect: (item: AutocompleteSuggestion) => void;
+  onSelect: (item: AutocompleteSuggestion, query: string) => void;
+  onSuggestionQuerySubmitted?: (query: string) => void;
   disableAutoFocus?: boolean;
   appName: string;
   suggestionProviders: SuggestionsProvider[];
@@ -188,6 +189,10 @@ export class CodeQueryBar extends Component<Props, State> {
       return;
     }
 
+    if (this.props.onSuggestionQuerySubmitted) {
+      this.props.onSuggestionQuerySubmitted(query);
+    }
+
     const res = await Promise.all(
       this.props.suggestionProviders.map((provider: SuggestionsProvider) => {
         // Merge the default repository scope if necessary.
@@ -214,17 +219,16 @@ export class CodeQueryBar extends Component<Props, State> {
     if (selectionStart === null || selectionEnd === null) {
       return;
     }
-
     this.setState(
       {
-        query: '',
+        query: this.state.query,
         groupIndex: null,
         itemIndex: null,
         isSuggestionsVisible: false,
       },
       () => {
         if (item) {
-          this.props.onSelect(item);
+          this.props.onSelect(item, this.state.query);
         }
       }
     );
@@ -505,6 +509,7 @@ const mapStateToProps = (state: RootState) => ({
 const mapDispatchToProps = {
   repositorySearch: searchReposForScope,
   saveSearchOptions,
+  onSuggestionQuerySubmitted: suggestionSearch,
 };
 
 export const QueryBar = connect(
