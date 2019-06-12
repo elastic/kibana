@@ -9,15 +9,17 @@ import assert from 'assert';
 import { execSync } from 'child_process';
 import fs from 'fs';
 import * as mkdirp from 'mkdirp';
-import os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';
-import { getDefaultBranch, GitOperations } from '../git_operations';
+import { GitOperations } from '../git_operations';
 import { createTestServerOption } from '../test_utils';
 
 describe('git_operations', () => {
   it('get default branch from a non master repo', async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test_git'));
+    const repoUri = 'github.com/foo/bar';
+    const repoDir = path.join(serverOptions.repoPath, repoUri);
+    mkdirp.sync(repoDir);
+
     // create a non-master using git commands
     const shell = `
     git init
@@ -25,18 +27,18 @@ describe('git_operations', () => {
     git commit -m 'init commit'
     git branch -m trunk
   `;
-    fs.writeFileSync(path.join(tmpDir, 'run.sh'), shell, 'utf-8');
+    fs.writeFileSync(path.join(repoDir, 'run.sh'), shell, 'utf-8');
     execSync('sh ./run.sh', {
-      cwd: tmpDir,
+      cwd: repoDir,
     });
 
     try {
-      const defaultBranch = await getDefaultBranch(tmpDir);
+      const g = new GitOperations(serverOptions.repoPath);
+      const defaultBranch = await g.getDefaultBranch(repoUri);
       assert.strictEqual(defaultBranch, 'trunk');
     } finally {
-      rimraf.sync(tmpDir);
+      rimraf.sync(repoDir);
     }
-    return '';
   });
 
   async function prepareProject(repoPath: string) {

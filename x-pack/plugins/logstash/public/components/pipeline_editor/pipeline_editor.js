@@ -7,6 +7,7 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import 'brace/mode/plain_text';
 import 'brace/theme/github';
@@ -189,9 +190,15 @@ class PipelineEditorUi extends React.Component {
   };
 
   notifyOnError = err => {
-    const { notifier, licenseService } = this.props;
+    const { licenseService, toastNotifications } = this.props;
 
-    return licenseService.checkValidity().then(() => notifier.error(err));
+    return licenseService.checkValidity().then(() => {
+      toastNotifications.addError(err, {
+        title: i18n.translate('xpack.logstash.pipelineEditor.errorHandlerToastTitle', {
+          defaultMessage: 'Pipeline error'
+        }),
+      });
+    });
   };
 
   deletePipeline = () => {
@@ -479,9 +486,6 @@ PipelineEditorUi.propTypes = {
     isReadOnly: PropTypes.bool.isRequired,
     message: PropTypes.string,
   }).isRequired,
-  notifier: PropTypes.shape({
-    error: PropTypes.func.isRequired,
-  }).isRequired,
   open: PropTypes.func.isRequired,
   pipeline: PropTypes.shape({
     id: PropTypes.string,
@@ -511,6 +515,7 @@ PipelineEditorUi.propTypes = {
   toastNotifications: PropTypes.shape({
     addWarning: PropTypes.func.isRequired,
     addSuccess: PropTypes.func.isRequired,
+    addError: PropTypes.func.isRequired,
   }).isRequired,
   username: PropTypes.string,
 };

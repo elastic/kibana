@@ -146,5 +146,64 @@ describe('plain_column_renderer', () => {
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
+
+    test('should render a message text', () => {
+      const mockMessageDatum = cloneDeep(mockTimelineData[30].data);
+      const column = plainColumnRenderer.renderColumn({
+        columnName: 'message',
+        eventId: _id,
+        values: getValues('message', mockMessageDatum),
+        field: defaultHeaders.find(h => h.id === 'message')!,
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('I am a log file message');
+    });
+
+    test('should NOT render a message as a draggable', () => {
+      const mockMessageDatum = cloneDeep(mockTimelineData[30].data);
+      const column = plainColumnRenderer.renderColumn({
+        columnName: 'message',
+        eventId: _id,
+        values: getValues('message', mockMessageDatum),
+        field: defaultHeaders.find(h => h.id === 'message')!,
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="draggableWrapperDiv"]')
+          .first()
+          .exists()
+      ).toBe(false);
+    });
+
+    test('should render a _id as a draggable', () => {
+      const column = plainColumnRenderer.renderColumn({
+        columnName: '_id',
+        eventId: _id,
+        values: [mockTimelineData[0]._id],
+        field: defaultHeaders.find(h => h.id === '_id')!,
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="draggableWrapperDiv"]')
+          .first()
+          .exists()
+      ).toBe(true);
+    });
   });
 });

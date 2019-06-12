@@ -13,7 +13,7 @@ import { Filter, Datatable, DatatableColumn, DatatableRow } from '../../types';
 import { getFunctionHelp } from '../../../strings';
 
 interface Arguments {
-  type: string | null;
+  type: string;
 }
 
 export function demodata(): ExpressionFunction<'demodata', Filter, Arguments, Datatable> {
@@ -29,7 +29,7 @@ export function demodata(): ExpressionFunction<'demodata', Filter, Arguments, Da
     },
     args: {
       type: {
-        types: ['string', 'null'],
+        types: ['string'],
         aliases: ['_'],
         help: argHelp.type,
         default: 'ci',

@@ -11,6 +11,7 @@ import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
 
+import { GitOperations } from '../git_operations';
 import { WorkerReservedProgress } from '../../model';
 import { LspIndexer } from '../indexer/lsp_indexer';
 import { RepositoryGitStatusReservedField } from '../indexer/schema';
@@ -60,6 +61,7 @@ function prepareProject(url: string, p: string) {
 const repoUri = 'github.com/elastic/TypeScript-Node-Starter';
 
 const serverOptions = createTestServerOption();
+const gitOps = new GitOperations(serverOptions.repoPath);
 
 function cleanWorkspace() {
   return new Promise(resolve => {
@@ -165,6 +167,7 @@ describe('lsp_indexer unit tests', function(this: any) {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
@@ -186,6 +189,7 @@ describe('lsp_indexer unit tests', function(this: any) {
       'master',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
@@ -205,9 +209,13 @@ describe('lsp_indexer unit tests', function(this: any) {
     // The rest 158 files will only be indexed for document.
     // There are also 10 binary files to be excluded.
     // So the total number of index requests will be 66 + 158 - 10 = 214.
-    assert.ok(bulkSpy.calledOnce);
+    assert.strictEqual(bulkSpy.callCount, 5);
     assert.strictEqual(lspSendRequestSpy.callCount, 22);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 214 * 2);
+    let total = 0;
+    for (let i = 0; i < bulkSpy.callCount; i++) {
+      total += bulkSpy.getCall(i).args[0].body.length;
+    }
+    assert.strictEqual(total, 214 * 2);
     // @ts-ignore
   }).timeout(20000);
 
@@ -224,6 +232,7 @@ describe('lsp_indexer unit tests', function(this: any) {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
@@ -237,6 +246,7 @@ describe('lsp_indexer unit tests', function(this: any) {
       'master',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
@@ -271,6 +281,7 @@ describe('lsp_indexer unit tests', function(this: any) {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
@@ -292,6 +303,7 @@ describe('lsp_indexer unit tests', function(this: any) {
       '261557d',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
@@ -319,9 +331,13 @@ describe('lsp_indexer unit tests', function(this: any) {
     // 3 * 11 = 33. Also there are 15 files without supported language. Only one
     // document will be index for these files. So total index requests would be
     // 33 + 15 = 48.
-    assert.ok(bulkSpy.calledOnce);
+    assert.strictEqual(bulkSpy.callCount, 2);
     assert.strictEqual(lspSendRequestSpy.callCount, 11);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 48 * 2);
+    let total = 0;
+    for (let i = 0; i < bulkSpy.callCount; i++) {
+      total += bulkSpy.getCall(i).args[0].body.length;
+    }
+    assert.strictEqual(total, 48 * 2);
     // @ts-ignore
   }).timeout(20000);
 });

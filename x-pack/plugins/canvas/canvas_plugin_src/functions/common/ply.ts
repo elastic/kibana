@@ -37,7 +37,7 @@ export function ply(): ExpressionFunction<'ply', Datatable, Arguments, Return> {
         types: ['datatable'],
         resolve: false,
         multi: true,
-        aliases: ['fn', 'function'],
+        aliases: ['exp', 'fn', 'function'],
         help: argHelp.expression,
       },
       // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now

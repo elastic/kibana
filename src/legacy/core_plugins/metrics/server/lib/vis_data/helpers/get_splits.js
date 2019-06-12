@@ -25,8 +25,7 @@ import { getSplitColors } from './get_split_colors';
 import { formatKey } from './format_key';
 
 const getTimeSeries = (resp, series) =>
-  _.get(resp, `aggregations.timeseries`) ||
-  _.get(resp, `aggregations.${series.id}.timeseries`);
+  _.get(resp, `aggregations.timeseries`) || _.get(resp, `aggregations.${series.id}.timeseries`);
 
 export function getSplits(resp, panel, series, meta) {
   if (!meta) {
@@ -82,5 +81,3 @@ export function getSplits(resp, panel, series, meta) {
     },
   ];
 }
-
-

@@ -92,3 +92,4 @@ export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from '.
 
 /** @public types */
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
+export { Query } from './query';
