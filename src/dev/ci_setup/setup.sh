@@ -9,16 +9,17 @@ RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
 ###
-### Configure Auditbeat
+### Configure auditbeat
 ###
+echo "Configuring auditbeat"
 auditbeatArchive="$HOME/auditbeat.tar.gz"
 auditbeatDir="$HOME/auditbeat"
 curl -L -o "$auditbeatArchive" https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-7.1.1-linux-x86_64.tar.gz
 mkdir -p "$auditbeatDir"
 tar xzvf "$auditbeatArchive" -C "$auditbeatDir" --strip=1
 cp -f "$dir/src/dev/ci_setup/auditbeat.yml" "$auditbeatDir"
-sudo chown root "$auditbeatDir/auditbeat.yml"
-(cd "$auditbeatDir" && sudo ./auditbeat) &
+# sudo chown root "$auditbeatDir/auditbeat.yml"
+(cd "$auditbeatDir" && ./auditbeat) &
 echo "Auditbeat has been started in the background"
 
 ###
