@@ -71,14 +71,14 @@ async function callAPI(
   const apiContext = clientPath.length === 1 ? client : get(client, clientPath.slice(0, -1));
   try {
     return await new Promise((resolve, reject) => {
-      // We have to use a callback here instead of using promises directly because it's the only way
-      // to get access to the abort method on the request
-      const request = api.call(apiContext, clientParams, (err: any, res: any) =>
-        err ? reject(err) : resolve(res)
-      );
+      const request = api.call(apiContext, clientParams);
       if (options.signal) {
-        options.signal.onabort = () => request.abort();
+        options.signal.addEventListener('abort', () => {
+          request.abort();
+          reject(new Error('Request was aborted'));
+        });
       }
+      return request.then(resolve, reject);
     });
   } catch (err) {
     if (!options.wrap401Errors || err.statusCode !== 401) {

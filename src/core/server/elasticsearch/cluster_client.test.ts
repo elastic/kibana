@@ -165,15 +165,23 @@ describe('#callAsInternalUser', () => {
     ).rejects.toStrictEqual(mockAuthenticationError);
   });
 
-  test('sets the onabort property of a signal if provided', () => {
+  test('aborts the request and rejects if a signal is provided and aborted', async () => {
     const controller = new AbortController();
 
-    clusterClient.callAsInternalUser('ping', undefined, {
+    // The ES client returns a promise with an additional `abort` method to abort the request
+    const mockValue: any = Promise.resolve();
+    mockValue.abort = jest.fn();
+    mockEsClientInstance.ping.mockReturnValue(mockValue);
+
+    const promise = clusterClient.callAsInternalUser('ping', undefined, {
       wrap401Errors: false,
       signal: controller.signal,
     });
 
-    expect(typeof controller.signal.onabort).toBe('function');
+    controller.abort();
+
+    expect(mockValue.abort).toHaveBeenCalled();
+    await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`"Request was aborted"`);
   });
 
   test('does not override WWW-Authenticate if returned by Elasticsearch', async () => {
