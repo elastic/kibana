@@ -36,20 +36,35 @@ export function toExpression(state: IndexPatternPrivateState) {
       column => column.sourceField
     );
 
+    const idMap = fieldNames.reduce(
+      (currentIdMap, fieldName, index) => ({
+        ...currentIdMap,
+        [fieldName]: state.columnOrder[index],
+      }),
+      {} as Record<string, string>
+    );
     return `esdocs index="${indexName}" fields="${fieldNames.join(', ')}" sort="${
       fieldNames[0]
-    }, DESC"`;
+    }, DESC" | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
   } else if (sortedColumns.length) {
     const aggs = sortedColumns.map((col, index) => {
       return getEsAggsConfig(col, state.columnOrder[index]);
     });
 
+    const idMap = state.columnOrder.reduce(
+      (currentIdMap, columnId, index) => ({
+        ...currentIdMap,
+        [`col-${index}-${columnId}`]: columnId,
+      }),
+      {} as Record<string, string>
+    );
+
     return `esaggs
       index="${state.currentIndexPatternId}"
       metricsAtAllLevels="false"
       partialRows="false"
-      aggConfigs='${JSON.stringify(aggs)}'`;
+      aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
   }
 
-  return '';
+  return null;
 }
