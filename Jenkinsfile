@@ -7,7 +7,8 @@ pipeline {
     stage('Build OSS Distro') {
       steps {
         echo 'Building OSS Distro'
-        sh './ci/run.sh'
+        // sh './ci/run.sh'
+        sh 'pwd'
         echo 'Store OSS Distro'
       }
     }
