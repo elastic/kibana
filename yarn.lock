@@ -1644,34 +1644,6 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@11.0.1":
-  version "11.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-11.0.1.tgz#fbf8650bd766f955b611d6aa9f652bab680a8874"
-  integrity sha512-/RJOFPTiFu1UIqhLEzsY0n3tv5XwXxH1W3dica8YtfaTl+6GvvQhYP9MAjqzOwDd0y8E7+130ZTFszwP+cyBcQ==
-  dependencies:
-    "@types/lodash" "^4.14.116"
-    "@types/numeral" "^0.0.25"
-    "@types/react-beautiful-dnd" "^10.1.0"
-    classnames "^2.2.5"
-    core-js "^2.5.1"
-    highlight.js "^9.12.0"
-    html "^1.0.0"
-    keymirror "^0.1.1"
-    lodash "^4.17.11"
-    numeral "^2.0.6"
-    prop-types "^15.6.0"
-    react-ace "^5.5.0"
-    react-beautiful-dnd "^10.1.0"
-    react-color "^2.13.8"
-    react-focus-lock "^1.17.7"
-    react-input-autosize "^2.2.1"
-    react-is "~16.3.0"
-    react-virtualized "^9.18.5"
-    react-vis "1.10.2"
-    resize-observer-polyfill "^1.5.0"
-    tabbable "^1.1.0"
-    uuid "^3.1.0"
-
 "@elastic/eui@11.3.1":
   version "11.3.1"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-11.3.1.tgz#7c011ff916d8e8bf4d9f735a3ca7bcb43eb45a59"
