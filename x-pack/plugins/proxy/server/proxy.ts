@@ -9,6 +9,18 @@ import { Agent as HTTPAgent } from 'http';
 import { URL } from 'url';
 import { promisify } from 'util';
 import { readFile } from 'fs';
+import crypto from 'crypto';
+
+// `crypto` type definitions doesn't currently include `crypto.constants`, see
+// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412
+const cryptoConstants = (crypto as any).constants;
+
+const protocolMap = new Map<string, number>([
+  ['TLSv1', cryptoConstants.SSL_OP_NO_TLSv1],
+  ['TLSv1.1', cryptoConstants.SSL_OP_NO_TLSv1_1],
+  ['TLSv1.2', cryptoConstants.SSL_OP_NO_TLSv1_2],
+]);
+
 const readFileAsync = promisify(readFile);
 
 import { Observable, Subscription } from 'rxjs';
@@ -54,6 +66,13 @@ export const ProxyConfig = {
     cert: schema.string(),
     key: schema.string(),
     ca: schema.string(),
+    cipherSuites: schema.arrayOf(schema.string(), {
+      defaultValue: cryptoConstants.defulatCoreCipherList.split(':'),
+    }),
+    supportedProtocols: schema.arrayOf(
+      schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
+      { defaultValue: ['TLSv1.1', 'TLSv1.2'], minSize: 1 }
+    ),
   }),
 };
 
@@ -88,32 +107,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     const config = await this.config$.pipe(first()).toPromise();
     this.setConfig(config);
 
-    let sslConf: Partial<SslConfig> = {};
-    try {
-      const [tlsCert, tlsKey, tlsCa] = await Promise.all([
-        readFileAsync(config.cert),
-        readFileAsync(config.key),
-        readFileAsync(config.ca),
-      ]);
-
-      this.httpsAgent = new HTTPSAgent({
-        keepAlive: true,
-        cert: tlsCert,
-        key: tlsKey,
-        ca: tlsCa,
-      });
-
-      sslConf = {
-        enabled: true,
-        redirectHttpFromPort: this.port,
-        certificate: tlsCert.toString(),
-        key: tlsKey.toString(),
-        certificateAuthorities: [tlsCa.toString()],
-      };
-    } catch (err) {
-      this.log.warn(`Unable to read TLS certificate ${err.message}`);
-    }
-
+    const ssl = await this.configureSSL(config);
     this.wreck = Wreck.defaults({
       agent: {
         https: this.httpsAgent,
@@ -124,12 +118,41 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
 
     const httpSetup = await core.http.createNewServer({
       port: config.port,
-      ssl: sslConf,
+      ssl,
     });
+
     const setup: ProxyServiceSetup = {
       httpSetup,
     };
+
     return setup;
+  }
+
+  private async configureSSL(config: ProxyPluginType) {
+    const [tlsCert, tlsKey, tlsCa] = await Promise.all([
+      readFileAsync(config.cert),
+      readFileAsync(config.key),
+      readFileAsync(config.ca),
+    ]);
+
+    this.httpsAgent = new HTTPSAgent({
+      keepAlive: true,
+      cert: tlsCert,
+      key: tlsKey,
+      ca: tlsCa,
+    });
+
+    const ssl = new SslConfig({
+      enabled: true,
+      redirectHttpFromPort: this.port,
+      certificate: tlsCert.toString(),
+      key: tlsKey.toString(),
+      certificateAuthorities: [tlsCa.toString()],
+      cipherSuites: config.cipherSuites,
+      keyPassphrase: undefined,
+      supportedProtocols: config.supportedProtocols,
+    });
+    return ssl;
   }
 
   private setConfig(config: ProxyPluginType) {
