@@ -12,6 +12,8 @@ export const FORMAT_OPTIONS = [
   // 'xml',
 ];
 
+export const CUSTOM_DROPDOWN_OPTION = 'custom';
+
 export const TIMESTAMP_OPTIONS = [
   'custom',
   'dd/MMM/yyyy:HH:mm:ss XX',
@@ -108,7 +110,7 @@ export const DELIMITER_OPTIONS = [
   'semicolon',
   'pipe',
   'space',
-  'other',
+  CUSTOM_DROPDOWN_OPTION,
 ];
 
 export const QUOTE_OPTIONS = [

@@ -32,7 +32,7 @@ import {
 } from './options';
 import { isTimestampFormatValid } from './overrides_validation';
 
-import { TIMESTAMP_OPTIONS } from './options/option_lists';
+import { TIMESTAMP_OPTIONS, CUSTOM_DROPDOWN_OPTION } from './options/option_lists';
 
 const formatOptions = getFormatOptions();
 const timestampFormatOptions = getTimestampFormatOptions();
@@ -42,7 +42,6 @@ const quoteOptions = getQuoteOptions();
 
 const LINES_TO_SAMPLE_VALUE_MIN = 3;
 const LINES_TO_SAMPLE_VALUE_MAX = 1000000;
-const CUSTOM_DROPDOWN_OPTION = 'custom';
 
 export class Overrides extends Component {
   constructor(props) {
@@ -318,7 +317,7 @@ export class Overrides extends Component {
               />
             </EuiFormRow>
             {
-              (delimiter === 'other') &&
+              (delimiter === CUSTOM_DROPDOWN_OPTION) &&
               <EuiFormRow
                 label={
                   <FormattedMessage
@@ -537,7 +536,7 @@ function convertDelimiter(d) {
 
     default:
       return {
-        delimiter: 'other',
+        delimiter: CUSTOM_DROPDOWN_OPTION,
         customDelimiter: d,
       };
   }
@@ -556,7 +555,7 @@ function convertDelimiterBack(delimiter, customDelimiter) {
       return '|';
     case 'space':
       return ' ';
-    case 'other':
+    case CUSTOM_DROPDOWN_OPTION:
       return customDelimiter;
 
     default:
