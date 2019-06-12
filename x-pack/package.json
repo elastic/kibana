@@ -335,7 +335,7 @@
     "ui-select": "0.19.8",
     "unstated": "^2.1.1",
     "uuid": "3.3.2",
-    "venn.js": "0.2.9",
+    "venn.js": "0.2.20",
     "vscode-jsonrpc": "^3.6.2",
     "vscode-languageserver": "^4.2.1",
     "vscode-languageserver-types": "^3.10.0",
