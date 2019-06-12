@@ -71,7 +71,7 @@ export const SavedQueryRow: FunctionComponent<Props> = ({ query, savedQuery, onS
 
   let rowContent;
   if (savedQuery) {
-    rowContent = savedQuery.title;
+    rowContent = <EuiFlexItem grow={false}>{savedQuery.title}</EuiFlexItem>;
   } else if (query.query.length !== 0) {
     rowContent = (
       <EuiFlexItem grow={false}>
