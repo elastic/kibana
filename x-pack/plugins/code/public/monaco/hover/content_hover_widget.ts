@@ -160,7 +160,7 @@ export class ContentHoverWidget extends ContentWidget {
         lineNumber: this.lastRange.startLineNumber,
         column: this.lastRange.startColumn,
       });
-      const action = this.editor.getAction('editor.action.goToDeclaration');
+      const action = this.editor.getAction('editor.action.revealDefinition');
       action.run().then(() => this.hide());
     }
   }

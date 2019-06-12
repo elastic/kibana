@@ -10,13 +10,16 @@ import mkdirp from 'mkdirp';
 import * as os from 'os';
 import rimraf from 'rimraf';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+
 import { LspRequest } from '../../model';
+import { GitOperations } from '../git_operations';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { WorkspaceHandler } from './workspace_handler';
 
 const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
 const workspaceDir = path.join(baseDir, 'workspace');
 const repoDir = path.join(baseDir, 'repo');
+const gitOps = new GitOperations(repoDir);
 
 function handleResponseUri(wh: WorkspaceHandler, uri: string) {
   const dummyRequest: LspRequest = {
@@ -57,7 +60,7 @@ function makeAFile(
 
 test('file system url should be converted', async () => {
   const workspaceHandler = new WorkspaceHandler(
-    repoDir,
+    gitOps,
     workspaceDir,
     // @ts-ignore
     null,
@@ -73,7 +76,7 @@ test('should support symbol link', async () => {
   fs.symlinkSync(workspaceDir, symlinkToWorkspace, 'dir');
   // @ts-ignore
   const workspaceHandler = new WorkspaceHandler(
-    repoDir,
+    gitOps,
     symlinkToWorkspace,
     // @ts-ignore
     null,
@@ -88,7 +91,7 @@ test('should support symbol link', async () => {
 test('should support spaces in workspace dir', async () => {
   const workspaceHasSpaces = path.join(baseDir, 'work  space');
   const workspaceHandler = new WorkspaceHandler(
-    repoDir,
+    gitOps,
     workspaceHasSpaces,
     // @ts-ignore
     null,
@@ -101,7 +104,7 @@ test('should support spaces in workspace dir', async () => {
 
 test('should throw a error if url is invalid', async () => {
   const workspaceHandler = new WorkspaceHandler(
-    repoDir,
+    gitOps,
     workspaceDir,
     // @ts-ignore
     null,

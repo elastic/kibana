@@ -11,6 +11,7 @@ import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
 
+import { GitOperations } from '../git_operations';
 import { WorkerReservedProgress } from '../../model';
 import { LspIndexer } from '../indexer/lsp_indexer';
 import { RepositoryGitStatusReservedField } from '../indexer/schema';
@@ -60,6 +61,7 @@ function prepareProject(url: string, p: string) {
 const repoUri = 'github.com/elastic/TypeScript-Node-Starter';
 
 const serverOptions = createTestServerOption();
+const gitOps = new GitOperations(serverOptions.repoPath);
 
 function cleanWorkspace() {
   return new Promise(resolve => {
@@ -165,6 +167,7 @@ describe('lsp_indexer unit tests', function(this: any) {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
@@ -186,6 +189,7 @@ describe('lsp_indexer unit tests', function(this: any) {
       'master',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
@@ -228,6 +232,7 @@ describe('lsp_indexer unit tests', function(this: any) {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
@@ -241,6 +246,7 @@ describe('lsp_indexer unit tests', function(this: any) {
       'master',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
@@ -275,6 +281,7 @@ describe('lsp_indexer unit tests', function(this: any) {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
@@ -296,6 +303,7 @@ describe('lsp_indexer unit tests', function(this: any) {
       '261557d',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
