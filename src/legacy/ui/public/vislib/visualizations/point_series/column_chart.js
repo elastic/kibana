@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import d3 from 'd3';
+import { isColorDark } from '@elastic/eui/lib/services';
 import { PointSeries } from './_point_series';
 
 const defaults = {
@@ -43,15 +44,6 @@ function datumWidth(defaultWidth, datum, nextDatum, scale, gutterWidth, groupCou
     }
   }
   return datumWidth;
-}
-
-function invertColor(hex) {
-  const d3rgb = d3.rgb(hex);
-  const r = d3rgb.r;
-  const g = d3rgb.g;
-  const b = d3rgb.b;
-  const a = 1.0 - (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return a < 0.5 ? d3rgb.darker(1) : d3rgb.brighter(3);
 }
 
 /**
@@ -210,14 +202,16 @@ export class ColumnChart extends PointSeries {
       .attr('y', isHorizontal ? y : x)
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
-    const data = this.chartData;
-    const color = this.handler.data.getColorFunc();
     const layer = d3.select(bars[0].parentNode);
-    const barLabels = layer.selectAll('text').data(data.values.filter(function (d) {
+    const barLabels = layer.selectAll('text').data(chartData.values.filter(function (d) {
       return !_.isNull(d.y);
     }));
 
     if (isLabels) {
+      const colorFunc = this.handler.data.getColorFunc();
+      const d3Color = d3.rgb(colorFunc(chartData.label));
+      const labelColor = isColorDark(d3Color.r, d3Color.g, d3Color.b) ? 'white' : 'black';
+
       barLabels
         .enter()
         .append('text')
@@ -227,7 +221,7 @@ export class ColumnChart extends PointSeries {
         .attr('dominant-baseline', 'central')
         .attr('text-anchor', 'middle')
         .attr('font-size', '8pt')
-        .attr('fill', () => invertColor(color(data.label)))
+        .attr('fill', labelColor)
         .attr('display', labelDisplay);
     }
 
@@ -321,10 +315,8 @@ export class ColumnChart extends PointSeries {
       .attr('y', isHorizontal ? y : x)
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
-    const data = this.chartData;
-    const color = this.handler.data.getColorFunc();
     const layer = d3.select(bars[0].parentNode);
-    const barLabels = layer.selectAll('text').data(data.values.filter(function (d) {
+    const barLabels = layer.selectAll('text').data(chartData.values.filter(function (d) {
       return !_.isNull(d.y);
     }));
 
@@ -333,6 +325,8 @@ export class ColumnChart extends PointSeries {
       .remove();
 
     if (isLabels) {
+      const labelColor = this.handler.data.getColorFunc()(chartData.label);
+
       barLabels
         .enter()
         .append('text')
@@ -342,7 +336,7 @@ export class ColumnChart extends PointSeries {
         .attr('y', isHorizontal ? labelY : labelX)
         .attr('dominant-baseline', isHorizontal ? 'auto' : 'central')
         .attr('text-anchor', isHorizontal ? 'middle' : 'start')
-        .attr('fill', () => color(data.label))
+        .attr('fill', labelColor)
         .attr('display', labelDisplay);
     }
     return bars;
