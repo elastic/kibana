@@ -38,7 +38,7 @@ export const code = (kibana: any) =>
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
         }).default(),
-        enabled: Joi.boolean().default(true),
+        enabled: Joi.boolean().default(false),
         queueIndex: Joi.string().default('.code_internal-worker-queue'),
         // 1 hour by default.
         queueTimeoutMs: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),

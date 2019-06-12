@@ -5,28 +5,30 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { deletePolicy } from '../../../../services/api';
 import { showApiError } from '../../../../services/api_errors';
-export class ConfirmDeleteUi extends Component {
+
+export class ConfirmDelete extends Component {
   deletePolicy = async () => {
-    const { intl, policyToDelete, callback } = this.props;
+    const { policyToDelete, callback } = this.props;
     const policyName = policyToDelete.name;
 
     try {
       await deletePolicy(policyName);
-      const message = intl.formatMessage({
-        id: 'xpack.indexLifecycleMgmt.confirmDelete.successMessage',
+      const message = i18n.translate('xpack.indexLifecycleMgmt.confirmDelete.successMessage', {
         defaultMessage: 'Deleted policy {policyName}',
-      }, { policyName });
+        values: { policyName }
+      });
       toastNotifications.addSuccess(message);
     } catch (e) {
-      const title = intl.formatMessage({
-        id: 'xpack.indexLifecycleMgmt.confirmDelete.errorMessage',
+      const title = i18n.translate('xpack.indexLifecycleMgmt.confirmDelete.errorMessage', {
         defaultMessage: 'Error deleting policy {policyName}',
-      }, { policyName });
+        values: { policyName }
+      });
       showApiError(e, title);
     }
     if (callback) {
@@ -34,11 +36,11 @@ export class ConfirmDeleteUi extends Component {
     }
   };
   render() {
-    const { intl, policyToDelete, onCancel } = this.props;
-    const title = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.confirmDelete.title',
+    const { policyToDelete, onCancel } = this.props;
+    const title = i18n.translate('xpack.indexLifecycleMgmt.confirmDelete.title', {
       defaultMessage: 'Delete policy "{name}"',
-    }, { name: policyToDelete.name });
+      values: { name: policyToDelete.name }
+    });
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
@@ -71,4 +73,3 @@ export class ConfirmDeleteUi extends Component {
     );
   }
 }
-export const ConfirmDelete = injectI18n(ConfirmDeleteUi);
