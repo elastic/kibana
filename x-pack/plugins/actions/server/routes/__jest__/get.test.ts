@@ -19,12 +19,18 @@ it('calls get with proper parameters', async () => {
     method: 'GET',
     url: '/api/action/1',
   };
+  const expectedResult = {
+    id: '1',
+    type: 'action',
+    attributes: {},
+    references: [],
+  };
 
-  actionsClient.get.mockResolvedValueOnce({ success: true });
+  actionsClient.get.mockResolvedValueOnce(expectedResult);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toEqual({ success: true });
+  expect(response).toEqual(expectedResult);
   expect(actionsClient.get).toHaveBeenCalledTimes(1);
   expect(actionsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
 Array [

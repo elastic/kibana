@@ -6,19 +6,10 @@
 
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { createFireFunction } from '../create_fire_function';
+import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 
 const mockTaskManager = taskManagerMock.create();
-
-const savedObjectsClient = {
-  errors: {} as any,
-  bulkCreate: jest.fn(),
-  bulkGet: jest.fn(),
-  create: jest.fn(),
-  delete: jest.fn(),
-  find: jest.fn(),
-  get: jest.fn(),
-  update: jest.fn(),
-};
+const savedObjectsClient = SavedObjectsClientMock.create();
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -29,9 +20,12 @@ describe('fire()', () => {
       savedObjectsClient,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
       attributes: {
         actionTypeId: 'mock-action',
       },
+      references: [],
     });
     await fireFn({
       id: '123',

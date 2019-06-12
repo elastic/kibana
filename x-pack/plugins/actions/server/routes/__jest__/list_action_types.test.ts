@@ -19,12 +19,18 @@ it('calls the list function', async () => {
     method: 'GET',
     url: '/api/action/types',
   };
+  const expectedResult = [
+    {
+      id: '1',
+      name: 'One',
+    },
+  ];
 
-  actionTypeRegistry.list.mockResolvedValueOnce({ success: true });
+  actionTypeRegistry.list.mockReturnValueOnce(expectedResult);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toEqual({ success: true });
+  expect(response).toEqual(expectedResult);
   expect(actionTypeRegistry.list).toHaveBeenCalledTimes(1);
   expect(actionTypeRegistry.list.mock.calls[0]).toMatchInlineSnapshot(`Array []`);
 });

@@ -36,12 +36,32 @@ it('creates an action with proper parameters', async () => {
       ],
     },
   };
+  const expectedResult = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      description: 'My description',
+      actionTypeId: 'abc',
+      actionTypeConfig: { foo: true },
+      actionTypeConfigSecrets: {},
+    },
+    migrationVersion: {
+      abc: '1.2.3',
+    },
+    references: [
+      {
+        name: 'ref_0',
+        type: 'bcd',
+        id: '234',
+      },
+    ],
+  };
 
-  actionsClient.create.mockResolvedValueOnce({ success: true });
+  actionsClient.create.mockResolvedValueOnce(expectedResult);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toEqual({ success: true });
+  expect(response).toEqual(expectedResult);
   expect(actionsClient.create).toHaveBeenCalledTimes(1);
   expect(actionsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
 Array [

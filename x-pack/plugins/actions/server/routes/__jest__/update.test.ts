@@ -33,12 +33,28 @@ it('calls the update function with proper parameters', async () => {
       ],
     },
   };
+  const expectedResult = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      description: 'My description',
+      actionTypeConfig: { foo: true },
+    },
+    version: '2',
+    references: [
+      {
+        name: 'ref_0',
+        type: 'bcd',
+        id: '234',
+      },
+    ],
+  };
 
-  actionsClient.update.mockResolvedValueOnce({ success: true });
+  actionsClient.update.mockResolvedValueOnce(expectedResult);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toEqual({ success: true });
+  expect(response).toEqual(expectedResult);
   expect(actionsClient.update).toHaveBeenCalledTimes(1);
   expect(actionsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
 Array [

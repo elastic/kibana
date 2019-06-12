@@ -27,12 +27,18 @@ it('sends proper arguments to action find function', async () => {
       'sort_field=description&' +
       'fields=description',
   };
+  const expectedResult = {
+    total: 0,
+    per_page: 10,
+    page: 1,
+    saved_objects: [],
+  };
 
-  actionsClient.find.mockResolvedValueOnce({ success: true });
+  actionsClient.find.mockResolvedValueOnce(expectedResult);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toEqual({ success: true });
+  expect(response).toEqual(expectedResult);
   expect(actionsClient.find).toHaveBeenCalledTimes(1);
   expect(actionsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
 Array [

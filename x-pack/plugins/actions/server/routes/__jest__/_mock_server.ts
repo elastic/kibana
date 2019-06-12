@@ -5,6 +5,9 @@
  */
 
 import Hapi from 'hapi';
+import { SavedObjectsClientMock } from '../../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
+import { actionsClientMock } from '../../actions_client.mock';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
 const defaultConfig = {
   'kibana.index': '.kibana',
@@ -15,30 +18,9 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
     port: 0,
   });
 
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
-
-  const actionsClient = {
-    create: jest.fn(),
-    get: jest.fn(),
-    find: jest.fn(),
-    delete: jest.fn(),
-    update: jest.fn(),
-    fire: jest.fn(),
-  };
-
-  const actionTypeRegistry = {
-    register: jest.fn(),
-    list: jest.fn(),
-  };
+  const actionsClient = actionsClientMock.create();
+  const actionTypeRegistry = actionTypeRegistryMock.create();
+  const savedObjectsClient = SavedObjectsClientMock.create();
 
   server.config = () => {
     return {
