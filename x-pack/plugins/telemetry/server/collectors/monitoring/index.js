@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('xpack_main', () => {
-    loadTestFile(require.resolve('./features'));
-    loadTestFile(require.resolve('./settings'));
-  });
-}
+export { getAllStats } from './get_all_stats';
