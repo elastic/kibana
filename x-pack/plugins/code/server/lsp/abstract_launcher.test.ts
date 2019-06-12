@@ -140,7 +140,8 @@ async function retryUtil(millis: number, testFn: () => void, interval = 1000) {
   }
 }
 
-test('launcher can start and end a process', async () => {
+// FLAKY: https://github.com/elastic/kibana/issues/38791
+test.skip('launcher can start and end a process', async () => {
   const launcher = new MockLauncher('mock', 'localhost', options);
   const proxy = await launcher.launch(false, 1, '');
   await retryUtil(1000, () => {
