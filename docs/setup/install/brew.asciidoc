@@ -46,6 +46,7 @@ and data directory are stored in the following locations.
 | conf
   | Configuration files including `kibana.yml`
   | /usr/local/etc/kibana
+ d|  
 
 | data
   | The location of the data files of each index / shard allocated
@@ -61,6 +62,6 @@ and data directory are stored in the following locations.
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
   | /usr/local/var/homebrew/linked/kibana/plugins
-  |
+ d|
 
 |=======================================================================
