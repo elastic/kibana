@@ -8,7 +8,7 @@ type Mutator = (state: State) => (...args) => State;
 ```
 
 Mutator must not mutate `state` object in-place, instead it should return a
-shollow copy of it, e.g. `{ ...state }`.
+shallow copy of it, e.g. `{ ...state }`.
 
 ```ts
 const setUiMode: Mutator = state => uiMode => ({ ...state, uiMode });
@@ -30,8 +30,8 @@ provided to your mutator automatically).
 mutators.setUiMode('dark');
 ```
 
-Your mutators are bound to the `store` so you can treat each of them as a standalone
-function and export from a module.
+Your mutators are bound to the `store` so you can treat each of them as a
+standalone function for export.
 
 ```ts
 const { setUiMode, resetUiMode } = store.createMutators({
