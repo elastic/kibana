@@ -7,7 +7,6 @@
 import { npStart } from 'ui/new_platform';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { fatalError } from 'ui/notify';
-import routes from 'ui/routes';
 import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 
 import { trackUiMetric as track } from '../../../../src/legacy/core_plugins/ui_metric/public';
@@ -21,18 +20,13 @@ export function createShim() {
     coreStart: {
       chrome,
       i18n,
-      notifications: {
-        ...notifications,
-        fatalError,
-      },
+      notifications,
+      fatalError,
       injectedMetadata,
       http,
       documentation: {
         elasticWebsiteUrl: ELASTIC_WEBSITE_URL,
         docLinkVersion: DOC_LINK_VERSION,
-      },
-      routes: {
-        register: routes.when.bind(routes),
       },
     },
     pluginsStart: {

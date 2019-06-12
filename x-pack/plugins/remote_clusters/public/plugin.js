@@ -6,6 +6,7 @@
 
 import { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import routes from 'ui/routes';
 
 import template from './index.html';
 import { renderReact } from './app';
@@ -24,11 +25,11 @@ export class Plugin {
     const {
       i18n: { Context },
       chrome: { setBreadcrumbs },
-      notifications: { toasts, fatalError },
+      notifications: { toasts },
+      fatalError,
       http: { prependBasePath },
       injectedMetadata: { getInjectedVar },
       documentation: { elasticWebsiteUrl, docLinkVersion },
-      routes: { register: registerRoute },
     } = coreStart;
 
     if (getInjectedVar('remoteClustersUiEnabled')) {
@@ -58,7 +59,9 @@ export class Plugin {
         }
       };
 
-      registerRoute(`${CRUD_APP_BASE_PATH}/:view?/:id?`, {
+      // NOTE: The New Platform will implicitly handle much of this logic by mounting the app at
+      // the base route.
+      routes.when(`${CRUD_APP_BASE_PATH}/:view?/:id?`, {
         template,
         controllerAs: 'remoteClusters',
         controller: class RemoteClustersController {
