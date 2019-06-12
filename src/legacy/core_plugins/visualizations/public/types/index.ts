@@ -23,6 +23,7 @@ export {
   DefaultEditorSize,
   // types
   TypesSetup,
+  visFactory,
   Vis,
   VisParams,
   VisProvider,
