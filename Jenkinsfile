@@ -7,10 +7,11 @@ pipeline {
     stage('Build OSS Distro') {
       steps {
         echo 'Building OSS Distro'
-        // sh './ci/run.sh'
         sh 'pwd'
-        sh 'ls -laR'
-        echo 'Store OSS Distro'
+        // sh './ci/run.sh'
+        sh label: 'Run the ci script?', script: 'sh ./.ci/run.sh'
+        // sh 'ls -laR'
+        o 'Store OSS Distro'
       }
     }
     stage('Build Default Distro') {
