@@ -118,10 +118,10 @@ class SearchBarUI extends Component<Props, State> {
 
     if (
       savedQueryMeta.shouldIncludeTimefilter &&
-      this.props.dateRangeTo &&
-      this.props.dateRangeFrom &&
-      this.props.refreshInterval &&
-      this.props.isRefreshPaused
+      this.props.dateRangeTo !== undefined &&
+      this.props.dateRangeFrom !== undefined &&
+      this.props.refreshInterval !== undefined &&
+      this.props.isRefreshPaused !== undefined
     ) {
       savedQuery.timefilter = {
         timeFrom: this.props.dateRangeFrom,
