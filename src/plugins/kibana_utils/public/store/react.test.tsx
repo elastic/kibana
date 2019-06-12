@@ -225,4 +225,163 @@ describe('hooks', () => {
       expect(container!.querySelector('strong')!.innerHTML).toBe('20');
     });
   });
+
+  describe('useSelector', () => {
+    test('can select deeply nested value', () => {
+      const store = createStore({
+        foo: {
+          bar: {
+            baz: 'qux',
+          },
+        },
+      });
+      const selector = (state: { foo: { bar: { baz: string } } }) => state.foo.bar.baz;
+      const { Provider, useSelector } = createContext(store);
+      const Demo: React.FC<{}> = () => {
+        const value = useSelector(selector);
+        return <>{value}</>;
+      };
+
+      ReactDOM.render(
+        <Provider>
+          <Demo />
+        </Provider>,
+        container
+      );
+
+      expect(container!.innerHTML).toBe('qux');
+    });
+
+    test('re-renders when state changes', () => {
+      const store = createStore({
+        foo: {
+          bar: {
+            baz: 'qux',
+          },
+        },
+      });
+      const selector = (state: { foo: { bar: { baz: string } } }) => state.foo.bar.baz;
+      const { Provider, useSelector } = createContext(store);
+      const Demo: React.FC<{}> = () => {
+        const value = useSelector(selector);
+        return <>{value}</>;
+      };
+
+      ReactDOM.render(
+        <Provider>
+          <Demo />
+        </Provider>,
+        container
+      );
+
+      expect(container!.innerHTML).toBe('qux');
+      act(() => {
+        store.set({
+          foo: {
+            bar: {
+              baz: 'quux',
+            },
+          },
+        });
+      });
+      expect(container!.innerHTML).toBe('quux');
+    });
+
+    test("re-renders only when selector's result changes", async () => {
+      const store = createStore({ a: 'b', foo: 'bar' });
+      const selector = (state: { foo: string }) => state.foo;
+      const { Provider, useSelector } = createContext(store);
+
+      let cnt = 0;
+      const Demo: React.FC<{}> = () => {
+        cnt++;
+        const value = useSelector(selector);
+        return <>{value}</>;
+      };
+      ReactDOM.render(
+        <Provider>
+          <Demo />
+        </Provider>,
+        container
+      );
+
+      await new Promise(r => setTimeout(r, 1));
+      expect(cnt).toBe(1);
+
+      act(() => {
+        store.set({ a: 'c', foo: 'bar' });
+      });
+
+      await new Promise(r => setTimeout(r, 1));
+      expect(cnt).toBe(1);
+
+      act(() => {
+        store.set({ a: 'd', foo: 'bar 2' });
+      });
+
+      await new Promise(r => setTimeout(r, 1));
+      expect(cnt).toBe(2);
+    });
+
+    test('re-renders on same shape object', async () => {
+      const store = createStore({ foo: { bar: 'baz' } });
+      const selector = (state: { foo: any }) => state.foo;
+      const { Provider, useSelector } = createContext(store);
+
+      let cnt = 0;
+      const Demo: React.FC<{}> = () => {
+        cnt++;
+        const value = useSelector(selector);
+        return <>{JSON.stringify(value)}</>;
+      };
+      ReactDOM.render(
+        <Provider>
+          <Demo />
+        </Provider>,
+        container
+      );
+
+      await new Promise(r => setTimeout(r, 1));
+      expect(cnt).toBe(1);
+
+      act(() => {
+        store.set({ foo: { bar: 'baz' } });
+      });
+
+      await new Promise(r => setTimeout(r, 1));
+      expect(cnt).toBe(2);
+    });
+
+    test('can set custom comparator function to prevent re-renders on deep equality', async () => {
+      const store = createStore({ foo: { bar: 'baz' } });
+      const selector = (state: { foo: any }) => state.foo;
+      const comparator = (prev: any, curr: any) => JSON.stringify(prev) === JSON.stringify(curr);
+      const { Provider, useSelector } = createContext(store);
+
+      let cnt = 0;
+      const Demo: React.FC<{}> = () => {
+        cnt++;
+        const value = useSelector(selector, comparator);
+        return <>{JSON.stringify(value)}</>;
+      };
+      ReactDOM.render(
+        <Provider>
+          <Demo />
+        </Provider>,
+        container
+      );
+
+      await new Promise(r => setTimeout(r, 1));
+      expect(cnt).toBe(1);
+
+      act(() => {
+        store.set({ foo: { bar: 'baz' } });
+      });
+
+      await new Promise(r => setTimeout(r, 1));
+      expect(cnt).toBe(1);
+    });
+
+    xtest('unsubscribes when React un-mounts', () => {});
+  });
 });

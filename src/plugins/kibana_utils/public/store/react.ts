@@ -21,9 +21,12 @@ import * as React from 'react';
 import { Provider as ReactReduxProvider, connect as reactReduxConnect } from 'react-redux';
 import { Store } from 'redux';
 import { AppStore, Mutators, PureMutators } from './types';
+import { observableSelector, Selector, Comparator } from './observable_selector';
 // TODO: Below import is temporary, use `react-use` lib instead.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useObservable } from '../../../kibana_react/public/util/use_observable';
+
+const { useMemo, useLayoutEffect, useContext, createElement, Fragment } = React;
 
 /**
  * @note
@@ -64,32 +67,36 @@ export const createContext = <
   (redux as any).__appStore = store;
   const context = React.createContext<ReduxContextValue>({ store: redux });
 
-  /**
-   * @todo
-   *
-   * - [x] `useStore`
-   * - [x] `useState`
-   * - [ ] `useSelector`
-   * - [x] `useMutators`
-   */
-
   const useStore = (): AppStore<State, StateMutators> => {
     // eslint-disable-next-line no-shadow
-    const { store } = React.useContext(context);
+    const { store } = useContext(context);
     return (store as any).__appStore;
   };
 
   const useState = (): State => {
-    // eslint-disable-next-line no-shadow
-    const store = useStore();
-    const state = useObservable(store.state$, store.get());
+    const { state$, get } = useStore();
+    const state = useObservable(state$, get());
     return state;
   };
 
   const useMutators = (): StateMutators => useStore().mutators;
 
+  const useSelector = <Result>(
+    selector: Selector<State, Result>,
+    comparator?: Comparator<Result>
+  ): Result => {
+    const { state$, get } = useStore();
+    const [observable$, unsubscribe] = useMemo(
+      () => observableSelector(get(), state$, selector, comparator),
+      [state$]
+    );
+    useLayoutEffect(() => unsubscribe, [observable$, unsubscribe]);
+    const value = useObservable(observable$, selector(get()));
+    return value;
+  };
+
   const Provider: React.FC<{}> = ({ children }) =>
-    React.createElement(ReactReduxProvider, {
+    createElement(ReactReduxProvider, {
       store: redux,
       context,
       children,
@@ -97,7 +104,7 @@ export const createContext = <
 
   const Consumer: React.FC<ConsumerProps<State>> = ({ children }) => {
     const state = useState();
-    return React.createElement(React.Fragment, { children: children(state) });
+    return createElement(Fragment, { children: children(state) });
   };
 
   const options: any = { context };
@@ -112,5 +119,6 @@ export const createContext = <
     useStore,
     useState,
     useMutators,
+    useSelector,
   };
 };
