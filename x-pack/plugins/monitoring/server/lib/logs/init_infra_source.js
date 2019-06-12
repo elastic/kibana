@@ -15,19 +15,7 @@ export const initInfraSource = server => {
     const filebeatIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_FILEBEAT, '*');
     infraPlugin.defineInternalSourceConfiguration(INFRA_SOURCE_ID, {
       name: 'Elastic Stack Logs',
-      logAlias: filebeatIndexPattern,
-      logColumns: [
-        {
-          timestampColumn: {
-            id: '5e7f964a-be8a-40d8-88d2-fbcfbdca0e2f',
-          },
-        },
-        {
-          messageColumn: {
-            id: 'b645d6da-824b-4723-9a2a-e8cece1645c0',
-          },
-        },
-      ]
+      logAlias: filebeatIndexPattern
     });
   }
 };
