@@ -7,8 +7,8 @@
 const localMousePosition = (canvasOrigin, clientX, clientY, zoomScale = 1) => {
   const { left, top } = canvasOrigin();
   return {
-    x: clientX * (1 / zoomScale) - left,
-    y: clientY * (1 / zoomScale) - top,
+    x: (clientX - left) * (1 / zoomScale),
+    y: (clientY - top) * (1 / zoomScale),
   };
 };
 
