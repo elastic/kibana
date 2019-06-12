@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+set -x
 
 # move to Kibana root
 cd "$(dirname "$0")/.."
@@ -35,3 +36,4 @@ x-pack-ciGroup*)
   exit 1
   ;;
 esac
+set +x
