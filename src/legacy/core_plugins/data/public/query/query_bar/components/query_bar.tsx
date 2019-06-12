@@ -42,7 +42,6 @@ import { QueryBarInput } from './query_bar_input';
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
 import { SavedQuery } from '../../../search/search_bar';
-import { SavedQueryDetails } from './saved_query_row';
 
 const config = chrome.getUiSettingsClient();
 
@@ -89,7 +88,7 @@ export class QueryBarUI extends Component<Props, State> {
     }
 
     let nextQuery = null;
-    if (nextProps.query.query !== prevState.query.query) {
+    if (nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
