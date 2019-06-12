@@ -185,6 +185,26 @@ describe('Vislib Line Chart', function () {
           });
         });
       });
+      [0, 2, 4, 8].forEach(function (bottomMarginValue) {
+        describe('defaultYExtents is true and bottomMargin is defined', function () {
+          beforeEach(function () {
+            vis.visConfigArgs.defaultYExtents = true;
+            vis.visConfigArgs.bottomMargin = bottomMarginValue;
+            vis.render(data, persistedState);
+          });
+
+          it('should return yAxis extents equal to data extents - bottomMargin', function () {
+            vis.handler.charts.forEach(function (chart) {
+              const yAxis = chart.handler.valueAxes[0];
+              const min = vis.handler.valueAxes[0].axisScale.getYMin();
+              const max = vis.handler.valueAxes[0].axisScale.getYMax();
+              const domain = yAxis.getScale().domain();
+              expect(domain[0] + bottomMarginValue).to.equal(min);
+              expect(domain[1]).to.equal(max);
+            });
+          });
+        });
+      });
     });
   });
 });
