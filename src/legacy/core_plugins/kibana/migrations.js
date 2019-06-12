@@ -168,7 +168,7 @@ function migrateGaugeVerticalSplitToAlignment(doc, logger)  {
 
   if (visStateJSON) {
     try {
-      const visState = JSON.pars(visStateJSON);
+      const visState = JSON.parse(visStateJSON);
       if (visState && visState.type === 'gauge' && !visState.params.gauge.alignment) {
 
         visState.params.gauge.alignment = visState.params.gauge.verticalSplit ? 'vertical' : 'horizontal';
