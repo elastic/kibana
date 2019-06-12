@@ -432,7 +432,7 @@
     "typings-tester": "^0.3.2",
     "vinyl-fs": "^3.0.2",
     "xml2js": "^0.4.19",
-    "xmlbuilder": "9.0.4",
+    "xmlbuilder": "9.0.7",
     "zlib": "^1.0.5"
   },
   "engines": {
