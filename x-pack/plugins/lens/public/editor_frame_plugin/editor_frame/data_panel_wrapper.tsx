@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, memo } from 'react';
+import React, { useMemo, memo, useContext } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { DatasourceDataPanelProps, Datasource } from '../..';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
+import { DragContext } from '../../drag_drop';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
@@ -30,6 +31,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   );
 
   const datasourceProps: DatasourceDataPanelProps = {
+    dragDropContext: useContext(DragContext),
     state: props.datasourceState,
     setState: setDatasourceState,
   };

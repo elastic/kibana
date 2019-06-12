@@ -195,6 +195,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               render={datasource.renderDimensionPanel}
               nativeProps={{
                 columnId: state.x.accessor,
+                dragDropContext: props.dragDropContext,
                 // TODO: Filter out invalid x-dimension operations
                 filterOperations: () => true,
               }}
@@ -253,6 +254,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     render={datasource.renderDimensionPanel}
                     nativeProps={{
                       columnId: accessor,
+                      dragDropContext: props.dragDropContext,
                       filterOperations: (op: Operation) =>
                         !op.isBucketed && op.dataType === 'number',
                     }}

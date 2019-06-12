@@ -326,7 +326,7 @@ Object {
         setDatasourceState(updatedState);
       });
 
-      expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(2);
+      expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(3);
       expect(mockDatasource.renderDataPanel).toHaveBeenLastCalledWith(
         expect.any(Element),
         expect.objectContaining({
