@@ -22,21 +22,21 @@ import { Store as ReduxStore } from 'redux';
 
 export interface AppStore<
   State extends {},
-  StateMutations extends Mutations<PureMutations<State>> = {}
+  StateMutators extends Mutators<PureMutators<State>> = {}
 > {
   redux: ReduxStore;
   get: () => State;
   set: (state: State) => void;
   state$: Observable<State>;
-  createMutations: <M extends PureMutations<State>>(pureMutations: M) => Mutations<M>;
-  mutations: StateMutations;
+  createMutators: <M extends PureMutators<State>>(pureMutators: M) => Mutators<M>;
+  mutators: StateMutators;
 }
 
-export type PureMutation<State extends {}> = (state: State) => (...args: any[]) => State;
-export type Mutation<M extends PureMutation<any>> = (...args: Parameters<ReturnType<M>>) => void;
+export type PureMutator<State extends {}> = (state: State) => (...args: any[]) => State;
+export type Mutator<M extends PureMutator<any>> = (...args: Parameters<ReturnType<M>>) => void;
 
-export interface PureMutations<State extends {}> {
-  [name: string]: PureMutation<State>;
+export interface PureMutators<State extends {}> {
+  [name: string]: PureMutator<State>;
 }
 
-export type Mutations<M extends PureMutations<any>> = { [K in keyof M]: Mutation<M[K]> };
+export type Mutators<M extends PureMutators<any>> = { [K in keyof M]: Mutator<M[K]> };
