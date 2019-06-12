@@ -10,13 +10,10 @@ import { EuiComboBox } from '@elastic/eui';
 import { IndexPatternPrivateState } from './indexpattern';
 import { getColumnOrder, getPotentialColumns } from './operations';
 import { IndexPatternDimensionPanel } from './dimension_panel';
+import { DragContextState, DropHandler } from '../drag_drop';
+import { createMockedDragDropContext } from './mocks';
 
 jest.mock('./operations');
-
-const dragDropContext = {
-  dragging: undefined,
-  setDragging: jest.fn(),
-};
 
 const expectedIndexPatterns = {
   1: {
@@ -48,6 +45,7 @@ const expectedIndexPatterns = {
 
 describe('IndexPatternDimensionPanel', () => {
   let state: IndexPatternPrivateState;
+  let dragDropContext: DragContextState;
 
   beforeEach(() => {
     state = {
@@ -67,6 +65,8 @@ describe('IndexPatternDimensionPanel', () => {
         },
       },
     };
+
+    dragDropContext = createMockedDragDropContext();
 
     jest.clearAllMocks();
   });
@@ -303,6 +303,209 @@ describe('IndexPatternDimensionPanel', () => {
       ...state,
       columns: {},
       columnOrder: [],
+    });
+  });
+
+  describe('drag and drop', () => {
+    function dragDropState() {
+      return {
+        ...state,
+        currentIndexPatternId: 'foo',
+        indexPatterns: {
+          foo: {
+            id: 'foo',
+            title: 'Foo pattern',
+            fields: [{ aggregatable: true, name: 'bar', searchable: true, type: 'number' }],
+          },
+        },
+      };
+    }
+
+    it('is not droppable if no drag is happening', () => {
+      const component = mount(
+        <IndexPatternDimensionPanel
+          dragDropContext={dragDropContext}
+          state={dragDropState()}
+          setState={() => {}}
+          columnId={'col2'}
+          filterOperations={() => true}
+        />
+      );
+
+      expect(
+        component
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('droppable')
+      ).toBeFalsy();
+    });
+
+    it('is not droppable if the dragged item has no type', () => {
+      const component = shallow(
+        <IndexPatternDimensionPanel
+          dragDropContext={{
+            ...dragDropContext,
+            dragging: { name: 'bar' },
+          }}
+          state={dragDropState()}
+          setState={() => {}}
+          columnId={'col2'}
+          filterOperations={() => true}
+        />
+      );
+
+      expect(
+        component
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('droppable')
+      ).toBeFalsy();
+    });
+
+    it('is not droppable if field is not supported by filterOperations', () => {
+      const component = shallow(
+        <IndexPatternDimensionPanel
+          dragDropContext={{
+            ...dragDropContext,
+            dragging: { type: 'number', name: 'bar' },
+          }}
+          state={dragDropState()}
+          setState={() => {}}
+          columnId={'col2'}
+          filterOperations={() => false}
+        />
+      );
+
+      expect(
+        component
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('droppable')
+      ).toBeFalsy();
+    });
+
+    it('is droppable if the field is supported by filterOperations', () => {
+      const component = shallow(
+        <IndexPatternDimensionPanel
+          dragDropContext={{
+            ...dragDropContext,
+            dragging: { type: 'number', name: 'bar' },
+          }}
+          state={dragDropState()}
+          setState={() => {}}
+          columnId={'col2'}
+          filterOperations={op => op.dataType === 'number'}
+        />
+      );
+
+      expect(
+        component
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('droppable')
+      ).toBeTruthy();
+    });
+
+    it('appends the dropped column when a field is dropped', () => {
+      const dragging = { type: 'number', name: 'bar' };
+      const testState = dragDropState();
+      const setState = jest.fn();
+      const component = shallow(
+        <IndexPatternDimensionPanel
+          dragDropContext={{
+            ...dragDropContext,
+            dragging,
+          }}
+          state={testState}
+          setState={setState}
+          columnId={'col2'}
+          filterOperations={op => op.dataType === 'number'}
+        />
+      );
+
+      const onDrop = component
+        .find('[data-test-subj="indexPattern-dropTarget"]')
+        .first()
+        .prop('onDrop') as DropHandler;
+
+      onDrop(dragging);
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: expect.objectContaining({
+            ...testState.columns,
+            col2: expect.objectContaining({
+              dataType: 'number',
+              sourceField: 'bar',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('updates a column when a field is dropped', () => {
+      const dragging = { type: 'number', name: 'bar' };
+      const testState = dragDropState();
+      const setState = jest.fn();
+      const component = shallow(
+        <IndexPatternDimensionPanel
+          dragDropContext={{
+            ...dragDropContext,
+            dragging,
+          }}
+          state={testState}
+          setState={setState}
+          columnId={'col1'}
+          filterOperations={op => op.dataType === 'number'}
+        />
+      );
+
+      const onDrop = component
+        .find('[data-test-subj="indexPattern-dropTarget"]')
+        .first()
+        .prop('onDrop') as DropHandler;
+
+      onDrop(dragging);
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: expect.objectContaining({
+            col1: expect.objectContaining({
+              dataType: 'number',
+              sourceField: 'bar',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('ignores drops of unsupported fields', () => {
+      const dragging = { type: 'number', name: 'baz' };
+      const testState = dragDropState();
+      const setState = jest.fn();
+      const component = shallow(
+        <IndexPatternDimensionPanel
+          dragDropContext={{
+            ...dragDropContext,
+            dragging,
+          }}
+          state={testState}
+          setState={setState}
+          columnId={'col2'}
+          filterOperations={op => op.dataType === 'number'}
+        />
+      );
+
+      const onDrop = component
+        .find('[data-test-subj="indexPattern-dropTarget"]')
+        .first()
+        .prop('onDrop') as DropHandler;
+
+      onDrop(dragging);
+
+      expect(setState).not.toBeCalled();
     });
   });
 });

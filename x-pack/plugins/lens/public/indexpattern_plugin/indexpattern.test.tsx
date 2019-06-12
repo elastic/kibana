@@ -14,6 +14,7 @@ import {
   IndexPatternDataPanel,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
+import { createMockedDragDropContext } from './mocks';
 
 jest.mock('./loader');
 
@@ -102,11 +103,6 @@ const expectedIndexPatterns = {
   },
 };
 
-const dragDropContext = {
-  dragging: undefined,
-  setDragging: jest.fn(),
-};
-
 describe('IndexPattern Data Source', () => {
   let persistedState: IndexPatternPersistedState;
   let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
@@ -164,7 +160,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         shallow(
           <IndexPatternDataPanel
-            dragDropContext={dragDropContext}
+            dragDropContext={createMockedDragDropContext()}
             state={state}
             setState={() => {}}
           />
@@ -176,7 +172,10 @@ describe('IndexPattern Data Source', () => {
       const setState = jest.fn();
 
       const wrapper = shallow(
-        <IndexPatternDataPanel dragDropContext={dragDropContext} {...{ state, setState }} />
+        <IndexPatternDataPanel
+          dragDropContext={createMockedDragDropContext()}
+          {...{ state, setState }}
+        />
       );
 
       const comboBox = wrapper.find(EuiComboBox);
