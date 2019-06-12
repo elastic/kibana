@@ -92,7 +92,6 @@ export type TestSubjects =
   | 'watchesTable'
   | 'cell'
   | 'row'
-  | 'watchLink'
   | 'deleteWatchButton'
   | 'createWatchButton'
   | 'emptyPrompt'

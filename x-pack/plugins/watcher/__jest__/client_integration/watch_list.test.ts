@@ -138,9 +138,9 @@ describe('<WatchList />', () => {
           const { rows } = table.getMetaData('watchesTable');
           const idColumn = rows[0].columns[1].reactWrapper;
 
-          expect(findTestSubject(idColumn, 'watchLink').length).toBe(1);
+          expect(findTestSubject(idColumn, `watchIdColumn-${watch1.id}`).length).toBe(1);
           expect(
-            findTestSubject(idColumn, 'watchLink')
+            findTestSubject(idColumn, `watchIdColumn-${watch1.id}`)
               .getDOMNode()
               .getAttribute('href')
           ).toEqual(`#/management/elasticsearch/watcher/watches/watch/${watch1.id}/status`);

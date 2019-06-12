@@ -224,10 +224,9 @@ const WatchListUi = () => {
         sortable: true,
         truncateText: true,
         render: (id: string) => {
-          // TODO: Update data-test-subj for functional test
           return (
             <EuiLink
-              data-test-subj="watchLink"
+              data-test-subj={`watchIdColumn-${id}`}
               href={`#/management/elasticsearch/watcher/watches/watch/${id}/status`}
             >
               {id}
