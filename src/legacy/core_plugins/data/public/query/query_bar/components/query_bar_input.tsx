@@ -43,7 +43,6 @@ import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { SavedQueryRow } from './saved_query_row';
 import { SavedQuery } from '../../../search/search_bar';
-import { SavedQueryDetails } from './saved_query_row';
 
 interface Props {
   indexPatterns: Array<IndexPattern | string>;
@@ -60,7 +59,7 @@ interface Props {
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
-  onSave?: (savedQueryDetails: SavedQueryDetails) => void;
+  onSave?: () => void;
 }
 
 interface State {

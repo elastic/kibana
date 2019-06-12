@@ -69,7 +69,7 @@ interface Props {
   showAutoRefreshOnly?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
-  onSave: (savedQueryDetails: SavedQueryDetails) => void;
+  onSave: () => void;
 }
 
 interface State {
