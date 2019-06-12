@@ -178,6 +178,8 @@ Array [
       "alerting",
     ],
     "state": Object {
+      "alertInstances": Object {},
+      "alertTypeState": Object {},
       "previousScheduledRunAt": null,
       "scheduledRunAt": 2019-02-12T21:01:22.479Z,
     },
@@ -338,7 +340,7 @@ Array [
     "alerting",
     "error",
   ],
-  "Failed to cleanup alert \\"1\\" after scheduling task failed",
+  "Failed to cleanup alert \\"1\\" after scheduling task failed. Error: Saved object delete error",
 ]
 `);
   });

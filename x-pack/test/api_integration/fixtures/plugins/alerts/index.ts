@@ -76,7 +76,7 @@ export default function(kibana: any) {
       // Alert types
       server.plugins.alerting.registerType({
         id: 'test.always-firing',
-        description: 'Test: Always Firing',
+        name: 'Test: Always Firing',
         async execute({ services, params, state }: AlertExecuteOptions) {
           const actionGroupToFire = params.actionGroupToFire || 'default';
           services
@@ -102,7 +102,7 @@ export default function(kibana: any) {
       });
       server.plugins.alerting.registerType({
         id: 'test.never-firing',
-        description: 'Test: Never firing',
+        name: 'Test: Never firing',
         async execute({ services, params, state }: AlertExecuteOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -121,7 +121,7 @@ export default function(kibana: any) {
       });
       server.plugins.alerting.registerType({
         id: 'test.failing',
-        description: 'Test: Failing',
+        name: 'Test: Failing',
         async execute({ services, params, state }: AlertExecuteOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -138,7 +138,7 @@ export default function(kibana: any) {
       });
       server.plugins.alerting.registerType({
         id: 'test.validation',
-        description: 'Test: Validation',
+        name: 'Test: Validation',
         validate: {
           params: Joi.object()
             .keys({
@@ -150,7 +150,7 @@ export default function(kibana: any) {
       });
       server.plugins.alerting.registerType({
         id: 'test.noop',
-        description: 'Test: Noop',
+        name: 'Test: Noop',
         async execute({ services, params, state }: AlertExecuteOptions) {},
       });
     },

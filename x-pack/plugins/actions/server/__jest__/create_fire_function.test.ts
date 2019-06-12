@@ -50,7 +50,7 @@ Array [
       "namespace": "abc",
     },
     "scope": Array [
-      "alerting",
+      "actions",
     ],
     "state": Object {},
     "taskType": "actions:mock-action",

@@ -71,9 +71,9 @@ Array [
     const firstCall = getCreateTaskRunnerFunction.mock.calls[0][0];
     expect(firstCall.alertType).toMatchInlineSnapshot(`
 Object {
-  "description": "Test",
   "execute": [MockFunction],
   "id": "test",
+  "name": "Test",
 }
 `);
     expect(firstCall.savedObjectsClient).toBeTruthy();
@@ -108,9 +108,9 @@ describe('get()', () => {
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
 Object {
-  "name": "Test",
   "execute": [MockFunction],
   "id": "test",
+  "name": "Test",
 }
 `);
   });
@@ -141,8 +141,8 @@ describe('list()', () => {
     expect(result).toMatchInlineSnapshot(`
 Array [
   Object {
-    "description": "Test",
     "id": "test",
+    "name": "Test",
   },
 ]
 `);

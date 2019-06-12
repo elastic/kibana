@@ -66,6 +66,7 @@ describe('validateActionTypeParams()', () => {
   test('should validate and pass when params is valid', () => {
     expect(validateActionTypeParams(actionType, { message: 'a message' })).toEqual({
       message: 'a message',
+      tags: ['info', 'alerting'],
     });
     expect(
       validateActionTypeParams(actionType, {

@@ -20,7 +20,7 @@ export default function listAlertTypes({ getService }: KibanaFunctionalTestDefau
           const fixtureAlertType = resp.body.find((alertType: any) => alertType.id === 'test.noop');
           expect(fixtureAlertType).to.eql({
             id: 'test.noop',
-            description: 'Test: Noop',
+            name: 'Test: Noop',
           });
         });
     });
