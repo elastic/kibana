@@ -27,11 +27,14 @@ export interface IndexPattern {
   id: string;
   fields: Field[];
   title: string;
+}
+// IndexPattern returned by IndexPatternProvider
+export interface IndexPatternEnhanced extends IndexPattern {
   isTimeNanosBased: () => boolean;
 }
 
-export interface IndexPatterns {
-  get: (id: string) => IndexPattern;
+export interface IndexPatternsEnhanced {
+  get: (id: string) => IndexPatternEnhanced;
 }
 
 export interface StaticIndexPatternField {
