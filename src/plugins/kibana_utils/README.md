@@ -2,4 +2,4 @@
 
 Utilities for building Kibana plugins.
 
-- [Application/plugin *state containers*](./docs/store/README.md).
+- [*State containers* aka `store`s](./docs/store/README.md).

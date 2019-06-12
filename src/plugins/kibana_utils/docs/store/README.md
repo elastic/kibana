@@ -1,8 +1,8 @@
 # State containers
 
-- [State containers for holding serializable state](./creation.md).
-- Each plugin/app that needs runtime state will create a *store* using `store = createStore()`.
-- *Store* can be updated using mutators `mutators = store.createMutators({ ... })`.
+- State containers for holding serializable state.
+- [Each plugin/app that needs runtime state will create a *store* using `store = createStore()`](./creation.md).
+- [*Store* can be updated using mutators `mutators = store.createMutators({ ... })`](./mutators.md).
 - *Store* can be connected to React `{Provider, connect} = createContext(store)`.
 - In Angular *store* is consumed using `store.get()` and `store.state$`.
 - Under-the-hood uses Redux `store.redux` (but you should never need it explicitly).
