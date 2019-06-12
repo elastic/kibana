@@ -64,23 +64,6 @@ export const createContext = <
   (redux as any).__appStore = store;
   const context = React.createContext<ReduxContextValue>({ store: redux });
 
-  const Provider: React.FC<{}> = ({ children }) =>
-    React.createElement(ReactReduxProvider, {
-      store: redux,
-      context,
-      children,
-    } as any);
-
-  const Consumer: React.FC<ConsumerProps<State>> = ({ children }) =>
-    React.createElement(context.Consumer, {
-      // eslint-disable-next-line no-shadow
-      children: ({ store }: ReduxContextValue) => children(store.getState()),
-    });
-
-  const options: any = { context };
-  const connect: Connect<State> = mapStateToProps =>
-    reactReduxConnect(mapStateToProps, mapDispatchToProps, mergeProps, options) as any;
-
   /**
    * @todo
    *
@@ -104,6 +87,22 @@ export const createContext = <
   };
 
   const useMutators = (): StateMutators => useStore().mutators;
+
+  const Provider: React.FC<{}> = ({ children }) =>
+    React.createElement(ReactReduxProvider, {
+      store: redux,
+      context,
+      children,
+    } as any);
+
+  const Consumer: React.FC<ConsumerProps<State>> = ({ children }) => {
+    const state = useState();
+    return React.createElement(React.Fragment, { children: children(state) });
+  };
+
+  const options: any = { context };
+  const connect: Connect<State> = mapStateToProps =>
+    reactReduxConnect(mapStateToProps, mapDispatchToProps, mergeProps, options) as any;
 
   return {
     Provider,
