@@ -43,7 +43,6 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
           <div
             style={{
               position: 'absolute',
-              backgroundColor: theme.euiColorEmptyShade,
               borderBottom: `1px solid ${theme.euiColorMediumShade}`,
               height: px(margins.top),
               zIndex: 2,
