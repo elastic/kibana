@@ -21,8 +21,6 @@ import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
 
 import classNames from 'classnames';
-import _ from 'lodash';
-import { get, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import { Storage } from 'ui/storage';
 import { timeHistory } from 'ui/timefilter/time_history';
@@ -54,6 +52,7 @@ interface Props {
   query: Query;
   savedQuery: SavedQuery;
   onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
+  onChange: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
   screenTitle: string;
@@ -70,81 +69,15 @@ interface Props {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
   onSave: () => void;
+  isDirty: boolean;
 }
 
 interface State {
-  query: Query;
-  inputIsPristine: boolean;
-  currentProps?: Props;
-  dateRangeFrom: string;
-  dateRangeTo: string;
   isDateRangeInvalid: boolean;
 }
 
 export class QueryBarUI extends Component<Props, State> {
-  public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-    if (isEqual(prevState.currentProps, nextProps)) {
-      return null;
-    }
-
-    let nextQuery = null;
-    if (nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
-      nextQuery = {
-        query: nextProps.query.query,
-        language: nextProps.query.language,
-      };
-    } else if (nextProps.query.language !== prevState.query.language) {
-      nextQuery = {
-        query: '',
-        language: nextProps.query.language,
-      };
-    }
-
-    let nextDateRange = null;
-    if (
-      nextProps.dateRangeFrom !== get(prevState, 'currentProps.dateRangeFrom') ||
-      nextProps.dateRangeTo !== get(prevState, 'currentProps.dateRangeTo')
-    ) {
-      nextDateRange = {
-        dateRangeFrom: nextProps.dateRangeFrom,
-        dateRangeTo: nextProps.dateRangeTo,
-      };
-    }
-
-    const nextState: any = {
-      currentProps: nextProps,
-    };
-    if (nextQuery) {
-      nextState.query = nextQuery;
-    }
-    if (nextDateRange) {
-      nextState.dateRangeFrom = nextDateRange.dateRangeFrom;
-      nextState.dateRangeTo = nextDateRange.dateRangeTo;
-    }
-    return nextState;
-  }
-
-  /*
-   Keep the "draft" value in local state until the user actually submits the query. There are a couple advantages:
-
-    1. Each app doesn't have to maintain its own "draft" value if it wants to put off updating the query in app state
-    until the user manually submits their changes. Most apps have watches on the query value in app state so we don't
-    want to trigger those on every keypress. Also, some apps (e.g. dashboard) already juggle multiple query values,
-    each with slightly different semantics and I'd rather not add yet another variable to the mix.
-
-    2. Changes to the local component state won't trigger an Angular digest cycle. Triggering digest cycles on every
-    keypress has been a major source of performance issues for us in previous implementations of the query bar.
-    See https://github.com/elastic/kibana/issues/14086
-  */
   public state = {
-    query: {
-      query: this.props.query.query,
-      language: this.props.query.language,
-    },
-    inputIsPristine: true,
-    currentProps: this.props,
-    dateRangeFrom: _.get(this.props, 'dateRangeFrom', 'now-15m'),
-    dateRangeTo: _.get(this.props, 'dateRangeTo', 'now'),
     isDateRangeInvalid: false,
   };
 
@@ -152,29 +85,25 @@ export class QueryBarUI extends Component<Props, State> {
 
   private persistedLog: PersistedLog | undefined;
 
-  public isDirty = () => {
-    if (!this.props.showDatePicker) {
-      return this.state.query.query !== this.props.query.query;
-    }
-
-    return (
-      this.state.query.query !== this.props.query.query ||
-      this.state.dateRangeFrom !== this.props.dateRangeFrom ||
-      this.state.dateRangeTo !== this.props.dateRangeTo
-    );
-  };
-
   public onClickSubmitButton = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (this.persistedLog) {
-      this.persistedLog.add(this.state.query.query);
+      this.persistedLog.add(this.props.query.query);
     }
-    this.onSubmit(() => event.preventDefault());
+    event.preventDefault();
+    this.onSubmit({ query: this.props.query, dateRange: this.getDateRange() });
   };
 
-  public onChange = (query: Query) => {
-    this.setState({
+  public getDateRange() {
+    return {
+      from: this.props.dateRangeFrom || 'now-15m',
+      to: this.props.dateRangeTo || 'now',
+    };
+  }
+
+  public onQueryChange = (query: Query) => {
+    this.props.onChange({
       query,
-      inputIsPristine: false,
+      dateRange: this.getDateRange(),
     });
   };
 
@@ -191,41 +120,37 @@ export class QueryBarUI extends Component<Props, State> {
   }) => {
     this.setState(
       {
-        dateRangeFrom: start,
-        dateRangeTo: end,
         isDateRangeInvalid: isInvalid,
       },
-      () => isQuickSelection && this.onSubmit()
+      () => {
+        const retVal = {
+          query: this.props.query,
+          dateRange: {
+            from: start,
+            to: end,
+          },
+        };
+
+        if (isQuickSelection) {
+          this.props.onSubmit(retVal);
+        } else {
+          this.props.onChange(retVal);
+        }
+      }
     );
   };
 
-  public onSubmit = (preventDefault?: () => void) => {
-    if (preventDefault) {
-      preventDefault();
-    }
-
+  public onSubmit = ({ query, dateRange }: { query: Query; dateRange: DateRange }) => {
     this.handleLuceneSyntaxWarning();
+    timeHistory.add(this.getDateRange());
 
-    timeHistory.add({
-      from: this.state.dateRangeFrom,
-      to: this.state.dateRangeTo,
-    });
-
-    this.props.onSubmit({
-      query: {
-        query: this.state.query.query,
-        language: this.state.query.language,
-      },
-      dateRange: {
-        from: this.state.dateRangeFrom,
-        to: this.state.dateRangeTo,
-      },
-    });
+    this.props.onSubmit({ query, dateRange });
   };
 
   private onInputSubmit = (query: Query) => {
-    this.setState({ query }, () => {
-      this.onSubmit();
+    this.onSubmit({
+      query,
+      dateRange: this.getDateRange(),
     });
   };
 
@@ -252,10 +177,10 @@ export class QueryBarUI extends Component<Props, State> {
             disableAutoFocus={this.props.disableAutoFocus}
             indexPatterns={this.props.indexPatterns}
             prepend={this.props.prepend}
-            query={this.state.query}
+            query={this.props.query}
             screenTitle={this.props.screenTitle}
             store={this.props.store}
-            onChange={this.onChange}
+            onChange={this.onQueryChange}
             onSubmit={this.onInputSubmit}
             persistedLog={this.persistedLog}
             savedQuery={this.props.savedQuery}
@@ -272,7 +197,7 @@ export class QueryBarUI extends Component<Props, State> {
       React.cloneElement(this.props.customSubmitButton, { onClick: this.onClickSubmitButton })
     ) : (
       <EuiSuperUpdateButton
-        needsUpdate={this.isDirty()}
+        needsUpdate={this.props.isDirty}
         isDisabled={this.state.isDateRangeInvalid}
         onClick={this.onClickSubmitButton}
         data-test-subj="querySubmitButton"
@@ -318,8 +243,8 @@ export class QueryBarUI extends Component<Props, State> {
     return (
       <EuiFlexItem className="kbnQueryBar__datePickerWrapper">
         <EuiSuperDatePicker
-          start={this.state.dateRangeFrom}
-          end={this.state.dateRangeTo}
+          start={this.props.dateRangeFrom}
+          end={this.props.dateRangeTo}
           isPaused={this.props.isRefreshPaused}
           refreshInterval={this.props.refreshInterval}
           onTimeChange={this.onTimeChange}
@@ -336,7 +261,7 @@ export class QueryBarUI extends Component<Props, State> {
 
   private handleLuceneSyntaxWarning() {
     const { intl, store } = this.props;
-    const { query, language } = this.state.query;
+    const { query, language } = this.props.query;
     if (
       language === 'kuery' &&
       typeof query === 'string' &&

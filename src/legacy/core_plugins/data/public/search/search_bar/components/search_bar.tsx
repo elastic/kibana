@@ -26,6 +26,7 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { IndexPattern } from 'ui/index_patterns';
 import { Storage } from 'ui/storage';
+import { get, isEqual } from 'lodash';
 
 import { Query, QueryBar } from '../../../query/query_bar';
 import { FilterBar } from '../../../filter/filter_bar';
@@ -68,6 +69,10 @@ interface Props {
 interface State {
   isFiltersVisible: boolean;
   showSaveQueryModal: boolean;
+  currentProps?: Props;
+  query: Query;
+  dateRangeFrom: string;
+  dateRangeTo: string;
 }
 
 class SearchBarUI extends Component<Props, State> {
@@ -79,9 +84,82 @@ class SearchBarUI extends Component<Props, State> {
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
 
+  public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
+    if (isEqual(prevState.currentProps, nextProps)) {
+      return null;
+    }
+
+    let nextQuery = null;
+    if (nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
+      nextQuery = {
+        query: nextProps.query.query,
+        language: nextProps.query.language,
+      };
+    } else if (nextProps.query.language !== prevState.query.language) {
+      nextQuery = {
+        query: '',
+        language: nextProps.query.language,
+      };
+    }
+
+    let nextDateRange = null;
+    if (
+      nextProps.dateRangeFrom !== get(prevState, 'currentProps.dateRangeFrom') ||
+      nextProps.dateRangeTo !== get(prevState, 'currentProps.dateRangeTo')
+    ) {
+      nextDateRange = {
+        dateRangeFrom: nextProps.dateRangeFrom,
+        dateRangeTo: nextProps.dateRangeTo,
+      };
+    }
+
+    const nextState: any = {
+      currentProps: nextProps,
+    };
+    if (nextQuery) {
+      nextState.query = nextQuery;
+    }
+    if (nextDateRange) {
+      nextState.dateRangeFrom = nextDateRange.dateRangeFrom;
+      nextState.dateRangeTo = nextDateRange.dateRangeTo;
+    }
+    return nextState;
+  }
+
+  /*
+   Keep the "draft" value in local state until the user actually submits the query. There are a couple advantages:
+
+    1. Each app doesn't have to maintain its own "draft" value if it wants to put off updating the query in app state
+    until the user manually submits their changes. Most apps have watches on the query value in app state so we don't
+    want to trigger those on every keypress. Also, some apps (e.g. dashboard) already juggle multiple query values,
+    each with slightly different semantics and I'd rather not add yet another variable to the mix.
+
+    2. Changes to the local component state won't trigger an Angular digest cycle. Triggering digest cycles on every
+    keypress has been a major source of performance issues for us in previous implementations of the query bar.
+    See https://github.com/elastic/kibana/issues/14086
+  */
   public state = {
     isFiltersVisible: true,
     showSaveQueryModal: false,
+    currentProps: this.props,
+    query: {
+      query: this.props.query.query,
+      language: this.props.query.language,
+    },
+    dateRangeFrom: _.get(this.props, 'dateRangeFrom', 'now-15m'),
+    dateRangeTo: _.get(this.props, 'dateRangeTo', 'now'),
+  };
+
+  public isDirty = () => {
+    if (!this.props.showDatePicker) {
+      return this.state.query.query !== this.props.query.query;
+    }
+
+    return (
+      this.state.query.query !== this.props.query.query ||
+      this.state.dateRangeFrom !== this.props.dateRangeFrom ||
+      this.state.dateRangeTo !== this.props.dateRangeTo
+    );
   };
 
   public setFilterBarHeight = () => {
@@ -109,7 +187,7 @@ class SearchBarUI extends Component<Props, State> {
     const savedQuery: SavedQuery = {
       title: savedQueryMeta.title,
       description: savedQueryMeta.description,
-      query: this.props.query,
+      query: this.state.query,
     };
 
     if (savedQueryMeta.shouldIncludeFilters) {
@@ -118,14 +196,14 @@ class SearchBarUI extends Component<Props, State> {
 
     if (
       savedQueryMeta.shouldIncludeTimefilter &&
-      this.props.dateRangeTo !== undefined &&
-      this.props.dateRangeFrom !== undefined &&
+      this.state.dateRangeTo !== undefined &&
+      this.state.dateRangeFrom !== undefined &&
       this.props.refreshInterval !== undefined &&
       this.props.isRefreshPaused !== undefined
     ) {
       savedQuery.timefilter = {
-        timeFrom: this.props.dateRangeFrom,
-        timeTo: this.props.dateRangeTo,
+        timeFrom: this.state.dateRangeFrom,
+        timeTo: this.state.dateRangeTo,
         refreshInterval: {
           value: this.props.refreshInterval,
           pause: this.props.isRefreshPaused,
@@ -140,6 +218,33 @@ class SearchBarUI extends Component<Props, State> {
     this.setState({
       showSaveQueryModal: true,
     });
+  };
+
+  public onQueryBarChange = (queryAndDateRange: { dateRange: DateRange; query: Query }) => {
+    this.setState({
+      query: queryAndDateRange.query,
+      dateRangeFrom: queryAndDateRange.dateRange.from,
+      dateRangeTo: queryAndDateRange.dateRange.to,
+    });
+  };
+
+  public onQueryBarSubmit = (queryAndDateRange: { dateRange: DateRange; query: Query }) => {
+    this.setState(
+      {
+        query: queryAndDateRange.query,
+        dateRangeFrom: queryAndDateRange.dateRange.from,
+        dateRangeTo: queryAndDateRange.dateRange.to,
+      },
+      () => {
+        this.props.onQuerySubmit({
+          query: this.state.query,
+          dateRange: {
+            from: this.state.dateRangeFrom,
+            to: this.state.dateRangeTo,
+          },
+        });
+      }
+    );
   };
 
   public componentDidMount() {
@@ -193,22 +298,24 @@ class SearchBarUI extends Component<Props, State> {
       <div className="globalQueryBar">
         {this.props.showQueryBar ? (
           <QueryBar
-            query={this.props.query}
+            query={this.state.query}
             savedQuery={this.props.savedQuery}
             screenTitle={this.props.screenTitle}
-            onSubmit={this.props.onQuerySubmit}
+            onSubmit={this.onQueryBarSubmit}
             appName={this.props.appName}
             indexPatterns={this.props.indexPatterns}
             store={this.props.store}
             prepend={this.props.showFilterBar ? filterTriggerButton : ''}
             showDatePicker={this.props.showDatePicker}
-            dateRangeFrom={this.props.dateRangeFrom}
-            dateRangeTo={this.props.dateRangeTo}
+            dateRangeFrom={this.state.dateRangeFrom}
+            dateRangeTo={this.state.dateRangeTo}
             isRefreshPaused={this.props.isRefreshPaused}
             refreshInterval={this.props.refreshInterval}
             showAutoRefreshOnly={this.props.showAutoRefreshOnly}
             onRefreshChange={this.props.onRefreshChange}
             onSave={this.onInitiateSave}
+            onChange={this.onQueryBarChange}
+            isDirty={this.isDirty()}
           />
         ) : (
           ''
