@@ -4,4 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Router } from './router';
+import { connect } from 'react-redux';
+import { setFullscreen } from '../../state/actions/transient';
+import { Router as Component } from './router';
+
+const mapDispatchToState = {
+  setFullscreen,
+};
+
+export const Router = connect(
+  null,
+  mapDispatchToState
+)(Component);
