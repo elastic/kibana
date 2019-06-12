@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npSetup, npStart } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { fatalError } from 'ui/notify';
 import routes from 'ui/routes';
@@ -14,11 +14,7 @@ import { trackUiMetric as track } from '../../../../src/legacy/core_plugins/ui_m
 
 export function createShim() {
   const {
-    core: { chrome },
-  } = npSetup;
-
-  const {
-    core: { i18n, notifications, http, injectedMetadata },
+    core: { chrome, i18n, notifications, http, injectedMetadata },
   } = npStart;
 
   return {
