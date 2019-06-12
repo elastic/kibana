@@ -24,7 +24,7 @@ import * as errors from './errors';
 import elasticsearch from 'elasticsearch';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
-import { getRootPropertiesObjects } from '../../../mappings/lib/get_root_properties_objects';
+import { getRootPropertiesObjects } from '../../mappings/lib/get_root_properties_objects';
 import { encodeHitVersion } from '../../version';
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
@@ -1154,26 +1154,27 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
-    it('passes mappings, schema, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl', async () => {
-      callAdminCluster.mockReturnValue(namespacedSearchResults);
-      const relevantOpts = {
-        namespace: 'foo-namespace',
-        search: 'foo*',
-        searchFields: ['foo'],
-        type: ['bar'],
-        sortField: 'name',
-        sortOrder: 'desc',
-        defaultSearchOperator: 'AND',
-        hasReference: {
-          type: 'foo',
-          id: '1',
-        },
-      };
+    it('passes mappings, schema, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl',
+      async () => {
+        callAdminCluster.mockReturnValue(namespacedSearchResults);
+        const relevantOpts = {
+          namespace: 'foo-namespace',
+          search: 'foo*',
+          searchFields: ['foo'],
+          type: ['bar'],
+          sortField: 'name',
+          sortOrder: 'desc',
+          defaultSearchOperator: 'AND',
+          hasReference: {
+            type: 'foo',
+            id: '1',
+          },
+        };
 
-      await savedObjectsRepository.find(relevantOpts);
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, relevantOpts);
-    });
+        await savedObjectsRepository.find(relevantOpts);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, relevantOpts);
+      });
 
     it('merges output of getSearchDsl into es request body', async () => {
       callAdminCluster.mockReturnValue(noNamespaceSearchResults);
@@ -1627,7 +1628,7 @@ describe('SavedObjectsRepository', () => {
         {
           error: {
             error: 'Bad Request',
-            message: "Unsupported saved object type: 'invalidtype': Bad Request",
+            message: 'Unsupported saved object type: \'invalidtype\': Bad Request',
             statusCode: 400,
           },
           id: 'two',
@@ -1636,7 +1637,7 @@ describe('SavedObjectsRepository', () => {
         {
           error: {
             error: 'Bad Request',
-            message: "Unsupported saved object type: 'invalidtype': Bad Request",
+            message: 'Unsupported saved object type: \'invalidtype\': Bad Request',
             statusCode: 400,
           },
           id: 'four',
@@ -2088,7 +2089,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('types on custom index', () => {
-    it("should error when attempting to 'update' an unsupported type", async () => {
+    it('should error when attempting to \'update\' an unsupported type', async () => {
       await expect(
         savedObjectsRepository.update('hiddenType', 'bogus', { title: 'some title' })
       ).rejects.toEqual(new Error('Saved object [hiddenType/bogus] not found'));
@@ -2096,25 +2097,25 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('unsupported types', () => {
-    it("should error when attempting to 'update' an unsupported type", async () => {
+    it('should error when attempting to \'update\' an unsupported type', async () => {
       await expect(
         savedObjectsRepository.update('hiddenType', 'bogus', { title: 'some title' })
       ).rejects.toEqual(new Error('Saved object [hiddenType/bogus] not found'));
     });
 
-    it("should error when attempting to 'get' an unsupported type", async () => {
+    it('should error when attempting to \'get\' an unsupported type', async () => {
       await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(
         new Error('Not Found')
       );
     });
 
-    it("should return an error object when attempting to 'create' an unsupported type", async () => {
+    it('should return an error object when attempting to \'create\' an unsupported type', async () => {
       await expect(
         savedObjectsRepository.create('hiddenType', { title: 'some title' })
-      ).rejects.toEqual(new Error("Unsupported saved object type: 'hiddenType': Bad Request"));
+      ).rejects.toEqual(new Error('Unsupported saved object type: \'hiddenType\': Bad Request'));
     });
 
-    it("should not return hidden saved ojects when attempting to 'find' support and unsupported types", async () => {
+    it('should not return hidden saved ojects when attempting to \'find\' support and unsupported types', async () => {
       callAdminCluster.mockReturnValue({
         hits: {
           total: 1,
@@ -2146,7 +2147,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it("should return empty results when attempting to 'find' an unsupported type", async () => {
+    it('should return empty results when attempting to \'find\' an unsupported type', async () => {
       callAdminCluster.mockReturnValue({
         hits: {
           total: 0,
@@ -2162,7 +2163,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it("should return empty results when attempting to 'find' more than one unsupported types", async () => {
+    it('should return empty results when attempting to \'find\' more than one unsupported types', async () => {
       const findParams = { type: ['hiddenType', 'hiddenType2'] };
       callAdminCluster.mockReturnValue({
         status: 200,
@@ -2180,13 +2181,13 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it("should error when attempting to 'delete' hidden types", async () => {
+    it('should error when attempting to \'delete\' hidden types', async () => {
       await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(
         new Error('Not Found')
       );
     });
 
-    it("should error when attempting to 'bulkCreate' an unsupported type", async () => {
+    it('should error when attempting to \'bulkCreate\' an unsupported type', async () => {
       callAdminCluster.mockReturnValue({
         items: [
           {
@@ -2219,7 +2220,7 @@ describe('SavedObjectsRepository', () => {
           {
             error: {
               error: 'Bad Request',
-              message: "Unsupported saved object type: 'hiddenType': Bad Request",
+              message: 'Unsupported saved object type: \'hiddenType\': Bad Request',
               statusCode: 400,
             },
             id: 'two',
@@ -2229,10 +2230,10 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it("should error when attempting to 'incrementCounter' for an unsupported type", async () => {
+    it('should error when attempting to \'incrementCounter\' for an unsupported type', async () => {
       await expect(
         savedObjectsRepository.incrementCounter('hiddenType', 'doesntmatter', 'fieldArg')
-      ).rejects.toEqual(new Error("Unsupported saved object type: 'hiddenType': Bad Request"));
+      ).rejects.toEqual(new Error('Unsupported saved object type: \'hiddenType\': Bad Request'));
     });
   });
 });
