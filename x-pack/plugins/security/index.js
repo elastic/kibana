@@ -28,10 +28,10 @@ import {
   initAppAuthorization,
   registerPrivilegesWithCluster,
   validateFeaturePrivileges,
-  checkSavedObjectsPrivilegesFactory,
+  ensureSavedObjectsPrivilegesFactory,
 } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
-import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
+import { SecureSavedObjectsClientWrapper } from './server/lib/authorization/saved_objects/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
 import { createOptionalPlugin } from './server/lib/optional_plugin';
 
@@ -192,7 +192,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MAX_SAFE_INTEGER - 1, ({ client, request }) => {
       if (authorization.mode.useRbacForRequest(request)) {
-        const checkSavedObjectsPrivileges = checkSavedObjectsPrivilegesFactory({
+        const ensureSavedObjectsPrivileges = ensureSavedObjectsPrivilegesFactory({
           spacesEnabled: spaces.isEnabled,
           checkPrivilegesWithRequest: authorization.checkPrivilegesWithRequest,
           request,
@@ -203,7 +203,7 @@ export const security = (kibana) => new kibana.Plugin({
 
         return new SecureSavedObjectsClientWrapper({
           baseClient: client,
-          checkSavedObjectsPrivileges,
+          ensureSavedObjectsPrivileges,
           errors: savedObjects.SavedObjectsClient.errors,
         });
       }
