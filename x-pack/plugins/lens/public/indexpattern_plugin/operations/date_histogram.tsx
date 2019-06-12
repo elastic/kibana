@@ -10,6 +10,7 @@ import { EuiForm, EuiFormRow, EuiRange } from '@elastic/eui';
 import { IndexPatternField, DateHistogramIndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '.';
+import { updateColumnParam } from './utils';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -100,19 +101,14 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
             showTicks
             ticks={intervals.map((interval, index) => ({ label: interval, value: index }))}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setState({
-                ...state,
-                columns: {
-                  ...state.columns,
-                  [columnId]: {
-                    ...column,
-                    params: {
-                      ...column.params,
-                      interval: numericToInterval(Number(e.target.value)),
-                    },
-                  },
-                },
-              })
+              setState(
+                updateColumnParam(
+                  state,
+                  column,
+                  'interval',
+                  numericToInterval(Number(e.target.value))
+                )
+              )
             }
             aria-label="Level of Detail"
           />

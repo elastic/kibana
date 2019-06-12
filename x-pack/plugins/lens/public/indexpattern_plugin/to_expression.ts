@@ -6,7 +6,11 @@
 
 import _ from 'lodash';
 
-import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
+import {
+  IndexPatternPrivateState,
+  IndexPatternColumn,
+  ValueIndexPatternColumn,
+} from './indexpattern';
 import { operationDefinitionMap, OperationDefinition } from './operations';
 
 export function toExpression(state: IndexPatternPrivateState) {
@@ -28,8 +32,8 @@ export function toExpression(state: IndexPatternPrivateState) {
   }
 
   if (sortedColumns.every(({ operationType }) => operationType === 'value')) {
-    const fieldNames = sortedColumns.map(column =>
-      'sourceField' in column ? column.sourceField : undefined
+    const fieldNames = (sortedColumns as ValueIndexPatternColumn[]).map(
+      column => column.sourceField
     );
 
     return `esdocs index="${indexName}" fields="${fieldNames.join(', ')}" sort="${

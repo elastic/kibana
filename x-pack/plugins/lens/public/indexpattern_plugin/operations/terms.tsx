@@ -10,6 +10,7 @@ import { EuiForm, EuiFormRow, EuiRange, EuiSelect, EuiContextMenuItem } from '@e
 import { IndexPatternField, TermsIndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '.';
+import { updateColumnParam } from './utils';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -117,19 +118,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             options={orderOptions}
             value={toValue(currentColumn.params.orderBy)}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setState({
-                ...state,
-                columns: {
-                  ...state.columns,
-                  [currentColumnId]: {
-                    ...currentColumn,
-                    params: {
-                      ...currentColumn.params,
-                      orderBy: fromValue(e.target.value),
-                    },
-                  },
-                },
-              })
+              setState(
+                updateColumnParam(state, currentColumn, 'orderBy', fromValue(e.target.value))
+              )
             }
           />
         </EuiFormRow>
@@ -148,19 +139,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             value={currentColumn.params.size}
             showInput
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setState({
-                ...state,
-                columns: {
-                  ...state.columns,
-                  [currentColumnId]: {
-                    ...currentColumn,
-                    params: {
-                      ...currentColumn.params,
-                      size: Number(e.target.value),
-                    },
-                  },
-                },
-              })
+              setState(updateColumnParam(state, currentColumn, 'size', Number(e.target.value)))
             }
             aria-label="Number of values"
           />
