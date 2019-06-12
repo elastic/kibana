@@ -60,10 +60,8 @@ export class MachineLearningFlyout extends Component<Props, State> {
     this.setState({ isCreatingJob: true });
     try {
       const { serviceName } = this.props.urlParams;
-      if (!serviceName || !transactionType) {
-        throw new Error(
-          'Service name and transaction type are required to create this ML job'
-        );
+      if (!serviceName) {
+        throw new Error('Service name is required to create this ML job');
       }
       const res = await startMLJob({ serviceName, transactionType });
       const didSucceed = res.datafeeds[0].success && res.jobs[0].success;
