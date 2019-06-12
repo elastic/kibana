@@ -22,8 +22,11 @@ export type OnResize = (
 export const resizeCursorStyle = 'col-resize';
 export const globalResizeCursorClassName = 'global-resize-cursor';
 
+/** This polyfill is for Safari only. `movementX` is more accurate and "feels" better, so only use this function on Safari */
 export const calculateDeltaX = ({ prevX, screenX }: { prevX: number; screenX: number }) =>
   prevX !== 0 ? screenX - prevX : 0;
+
+const isSafari = /^((?!chrome|android|crios|fxios|Firefox).)*safari/i.test(navigator.userAgent);
 
 // eslint-disable-next-line no-unused-expressions
 injectGlobal`
@@ -97,7 +100,7 @@ export class Resizeable extends React.PureComponent<Props, State> {
 
     this.drag$ = down$.pipe(concatMap(() => move$.pipe(takeUntil(up$))));
     this.dragSubscription = this.drag$.subscribe(e => {
-      const delta = this.calculateDelta(e);
+      const delta = isSafari ? this.calculateDelta(e) : e.movementX;
 
       if (!this.state.isResizing) {
         this.setState({ isResizing: true });
