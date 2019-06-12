@@ -9,7 +9,7 @@ export default function ({ getService, getPageObjects }) {
   const visualTesting = getService('visualTesting');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'security']);
 
   describe('Security', () => {
     describe('Login Page', () => {
