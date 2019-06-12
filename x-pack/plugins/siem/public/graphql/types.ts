@@ -312,7 +312,7 @@ export interface OsEcsFields {
 }
 
 export interface CursorType {
-  value: string;
+  value?: string | null;
 
   tiebreaker?: string | null;
 }
@@ -904,6 +904,8 @@ export interface IpOverviewData {
 
   destination?: Overview | null;
 
+  host: HostEcsFields;
+
   server?: Overview | null;
 
   source?: Overview | null;
@@ -915,8 +917,6 @@ export interface Overview {
   lastSeen?: Date | null;
 
   autonomousSystem: AutonomousSystem;
-
-  host: HostEcsFields;
 
   geo: GeoEcsFields;
 }
@@ -1054,15 +1054,23 @@ export interface KpiNetworkData {
 
   uniqueFlowId?: number | null;
 
-  activeAgents?: number | null;
-
   uniqueSourcePrivateIps?: number | null;
 
+  uniqueSourcePrivateIpsHistogram?: KpiNetworkHistogramData[] | null;
+
   uniqueDestinationPrivateIps?: number | null;
+
+  uniqueDestinationPrivateIpsHistogram?: KpiNetworkHistogramData[] | null;
 
   dnsQueries?: number | null;
 
   tlsHandshakes?: number | null;
+}
+
+export interface KpiNetworkHistogramData {
+  x?: string | null;
+
+  y?: number | null;
 }
 
 export interface KpiHostsData {
@@ -1088,17 +1096,9 @@ export interface KpiHostsData {
 }
 
 export interface KpiHostHistogramData {
-  key?: number | null;
+  x?: string | null;
 
-  key_as_string?: string | null;
-
-  count?: Count | null;
-}
-
-export interface Count {
-  value?: number | null;
-
-  doc_count?: number | null;
+  y?: number | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -1180,15 +1180,23 @@ export interface NetworkDnsItem {
 }
 
 export interface OverviewNetworkData {
-  packetbeatFlow: number;
+  auditbeatSocket?: number | null;
 
-  packetbeatDNS: number;
+  filebeatCisco?: number | null;
 
-  filebeatSuricata: number;
+  filebeatNetflow?: number | null;
+
+  filebeatPanw?: number | null;
+
+  filebeatSuricata?: number | null;
 
   filebeatZeek?: number | null;
 
-  auditbeatSocket?: number | null;
+  packetbeatDNS?: number | null;
+
+  packetbeatFlow?: number | null;
+
+  packetbeatTLS?: number | null;
 }
 
 export interface OverviewHostData {
@@ -1203,6 +1211,10 @@ export interface OverviewHostData {
   auditbeatProcess?: number | null;
 
   auditbeatUser?: number | null;
+
+  filebeatSystemModule?: number | null;
+
+  winlogbeat?: number | null;
 }
 
 export interface UncommonProcessesData {
@@ -2181,7 +2193,7 @@ export namespace GetAuthenticationsQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -2195,7 +2207,7 @@ export namespace GetAuthenticationsQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -2323,7 +2335,7 @@ export namespace GetDomainsQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -2337,7 +2349,7 @@ export namespace GetDomainsQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -2386,7 +2398,7 @@ export namespace GetEventsQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
 
     tiebreaker?: string | null;
   };
@@ -2634,7 +2646,7 @@ export namespace GetHostsTableQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -2648,7 +2660,7 @@ export namespace GetHostsTableQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -2767,6 +2779,8 @@ export namespace GetIpOverviewQuery {
     source?: _Source | null;
 
     destination?: Destination | null;
+
+    host: Host;
   };
 
   export type _Source = {
@@ -2779,8 +2793,6 @@ export namespace GetIpOverviewQuery {
     autonomousSystem: AutonomousSystem;
 
     geo: Geo;
-
-    host: Host;
   };
 
   export type AutonomousSystem = {
@@ -2819,36 +2831,6 @@ export namespace GetIpOverviewQuery {
     lon?: ToNumberArray | null;
   };
 
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    architecture?: ToStringArray | null;
-
-    id?: ToStringArray | null;
-
-    ip?: ToStringArray | null;
-
-    mac?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    os?: Os | null;
-
-    type?: ToStringArray | null;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    family?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    platform?: ToStringArray | null;
-
-    version?: ToStringArray | null;
-  };
-
   export type Destination = {
     __typename?: 'Overview';
 
@@ -2859,8 +2841,6 @@ export namespace GetIpOverviewQuery {
     autonomousSystem: _AutonomousSystem;
 
     geo: _Geo;
-
-    host: _Host;
   };
 
   export type _AutonomousSystem = {
@@ -2899,7 +2879,7 @@ export namespace GetIpOverviewQuery {
     lon?: ToNumberArray | null;
   };
 
-  export type _Host = {
+  export type Host = {
     __typename?: 'HostEcsFields';
 
     architecture?: ToStringArray | null;
@@ -2912,12 +2892,12 @@ export namespace GetIpOverviewQuery {
 
     name?: ToStringArray | null;
 
-    os?: _Os | null;
+    os?: Os | null;
 
     type?: ToStringArray | null;
   };
 
-  export type _Os = {
+  export type Os = {
     __typename?: 'OsEcsFields';
 
     family?: ToStringArray | null;
@@ -2976,15 +2956,15 @@ export namespace GetKpiHostsQuery {
     uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
   };
 
-  export type HostsHistogram = ChartFields.Fragment;
+  export type HostsHistogram = KpiHostChartFields.Fragment;
 
-  export type AuthSuccessHistogram = ChartFields.Fragment;
+  export type AuthSuccessHistogram = KpiHostChartFields.Fragment;
 
-  export type AuthFailureHistogram = ChartFields.Fragment;
+  export type AuthFailureHistogram = KpiHostChartFields.Fragment;
 
-  export type UniqueSourceIpsHistogram = ChartFields.Fragment;
+  export type UniqueSourceIpsHistogram = KpiHostChartFields.Fragment;
 
-  export type UniqueDestinationIpsHistogram = ChartFields.Fragment;
+  export type UniqueDestinationIpsHistogram = KpiHostChartFields.Fragment;
 }
 
 export namespace GetKpiNetworkQuery {
@@ -3016,16 +2996,22 @@ export namespace GetKpiNetworkQuery {
 
     uniqueFlowId?: number | null;
 
-    activeAgents?: number | null;
-
     uniqueSourcePrivateIps?: number | null;
 
+    uniqueSourcePrivateIpsHistogram?: UniqueSourcePrivateIpsHistogram[] | null;
+
     uniqueDestinationPrivateIps?: number | null;
+
+    uniqueDestinationPrivateIpsHistogram?: UniqueDestinationPrivateIpsHistogram[] | null;
 
     dnsQueries?: number | null;
 
     tlsHandshakes?: number | null;
   };
+
+  export type UniqueSourcePrivateIpsHistogram = KpiNetworkChartFields.Fragment;
+
+  export type UniqueDestinationPrivateIpsHistogram = KpiNetworkChartFields.Fragment;
 }
 
 export namespace GetNetworkDnsQuery {
@@ -3090,7 +3076,7 @@ export namespace GetNetworkDnsQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -3104,7 +3090,7 @@ export namespace GetNetworkDnsQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -3219,7 +3205,7 @@ export namespace GetNetworkTopNFlowQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -3233,7 +3219,7 @@ export namespace GetNetworkTopNFlowQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -3273,6 +3259,10 @@ export namespace GetOverviewHostQuery {
     auditbeatProcess?: number | null;
 
     auditbeatUser?: number | null;
+
+    filebeatSystemModule?: number | null;
+
+    winlogbeat?: number | null;
   };
 }
 
@@ -3301,15 +3291,23 @@ export namespace GetOverviewNetworkQuery {
   export type OverviewNetwork = {
     __typename?: 'OverviewNetworkData';
 
-    packetbeatFlow: number;
+    auditbeatSocket?: number | null;
 
-    packetbeatDNS: number;
+    filebeatCisco?: number | null;
 
-    filebeatSuricata: number;
+    filebeatNetflow?: number | null;
+
+    filebeatPanw?: number | null;
+
+    filebeatSuricata?: number | null;
 
     filebeatZeek?: number | null;
 
-    auditbeatSocket?: number | null;
+    packetbeatDNS?: number | null;
+
+    packetbeatFlow?: number | null;
+
+    packetbeatTLS?: number | null;
   };
 }
 
@@ -3609,7 +3607,7 @@ export namespace GetTimelineQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
 
     tiebreaker?: string | null;
   };
@@ -4838,7 +4836,7 @@ export namespace GetTlsQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -4852,7 +4850,7 @@ export namespace GetTlsQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -4936,7 +4934,7 @@ export namespace GetUncommonProcessesQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -4950,7 +4948,7 @@ export namespace GetUncommonProcessesQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
@@ -5021,7 +5019,7 @@ export namespace GetUsersQuery {
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 
   export type PageInfo = {
@@ -5035,24 +5033,26 @@ export namespace GetUsersQuery {
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value: string;
+    value?: string | null;
   };
 }
 
-export namespace ChartFields {
+export namespace KpiHostChartFields {
   export type Fragment = {
     __typename?: 'KpiHostHistogramData';
 
     x?: string | null;
 
-    y?: Y | null;
+    y?: number | null;
   };
+}
 
-  export type Y = {
-    __typename?: 'Count';
+export namespace KpiNetworkChartFields {
+  export type Fragment = {
+    __typename?: 'KpiNetworkHistogramData';
 
-    value?: number | null;
+    x?: string | null;
 
-    doc_count?: number | null;
+    y?: number | null;
   };
 }

@@ -21,4 +21,4 @@ export { EmbeddableFactory, OnEmbeddableStateChanged } from './embeddable_factor
 export * from './embeddable';
 export * from './context_menu_actions';
 export { EmbeddableFactoriesRegistryProvider } from './embeddable_factories_registry';
-export { ContainerState, EmbeddableState, Query, Filters, TimeRange, RefreshConfig } from './types';
+export { ContainerState, EmbeddableState, Query, Filters, Filter, TimeRange } from './types';

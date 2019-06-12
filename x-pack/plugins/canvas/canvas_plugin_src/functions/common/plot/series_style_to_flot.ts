@@ -46,7 +46,7 @@ export const seriesStyleToFlot = (seriesStyle: SeriesStyle) => {
     },
   };
 
-  if (stack) {
+  if (stack != null) {
     (flotStyle as any).stack = stack;
   }
   if (color) {

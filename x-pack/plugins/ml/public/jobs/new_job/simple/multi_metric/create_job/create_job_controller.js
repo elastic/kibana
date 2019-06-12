@@ -20,7 +20,7 @@ import angular from 'angular';
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { getCreateMultiMetricJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
@@ -68,7 +68,6 @@ module
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
     const msgs = mlMessageBarService;
-    const MlTimeBuckets = Private(IntervalHelperProvider);
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
     const chartDataUtils = Private(ChartDataUtilsProvider);
     const mlMultiMetricJobService = Private(MultiMetricJobServiceProvider);
@@ -351,7 +350,7 @@ module
           })
           .catch((resp) => {
             msgs.error(resp.message);
-            _.each($scope.formConfig.fields, (field, id) => { // eslint-disable-line no-unused-vars
+            _.each($scope.formConfig.fields, (field, id) => {
               $scope.chartStates.fields[id] = CHART_STATE.NO_RESULTS;
             });
             $scope.$applyAsync();
@@ -365,7 +364,7 @@ module
         chartDataUtils.loadDocCountData($scope.formConfig, $scope.chartData)
           .then((resp) => {
             if (thisLoadTimestamp === $scope.chartData.lastLoadTimestamp) {
-              _.each(dtrs, (dtr, id) => { // eslint-disable-line no-unused-vars
+              _.each(dtrs, (dtr, id) => {
                 const state = (resp.totalResults) ? CHART_STATE.LOADED : CHART_STATE.NO_RESULTS;
                 $scope.chartStates.fields[id] = state;
               });
@@ -387,7 +386,7 @@ module
     };
 
     function setFieldsChartStates(state) {
-      _.each($scope.chartStates.fields, (chart, key) => { // eslint-disable-line no-unused-vars
+      _.each($scope.chartStates.fields, (chart, key) => {
         $scope.chartStates.fields[key] = state;
       });
       $scope.$applyAsync();

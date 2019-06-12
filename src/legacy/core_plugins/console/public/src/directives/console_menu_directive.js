@@ -26,9 +26,5 @@ const module = uiModules.get('apps/sense', ['react']);
 import { ConsoleMenu } from '../console_menu';
 
 module.directive('consoleMenu', function (reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(ConsoleMenu),
-    undefined,
-    { restrict: 'E' }
-  );
+  return reactDirective(wrapInI18nContext(ConsoleMenu));
 });

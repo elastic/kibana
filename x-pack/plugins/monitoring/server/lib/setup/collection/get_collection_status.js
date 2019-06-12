@@ -6,7 +6,7 @@
 
 import { get, uniq } from 'lodash';
 import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN } from '../../../../common/constants';
-import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../xpack_main/common/constants';
+import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 
 const APM_CUSTOM_ID = 'apm';
 const ELASTICSEARCH_CUSTOM_ID = 'elasticsearch';

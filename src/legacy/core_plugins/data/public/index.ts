@@ -104,3 +104,5 @@ export {
   parseEsInterval,
   ParsedInterval,
 } from '../common/parse_es_interval';
+
+export { Query } from './query';
