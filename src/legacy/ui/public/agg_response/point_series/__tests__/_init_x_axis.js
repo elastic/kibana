@@ -108,6 +108,7 @@ describe('initXAxis', function () {
 
   it('reads the interval param from the x agg', function () {
     chart.aspects.x[0].params.interval = 'P1D';
+    chart.aspects.x[0].params.date = true;
     initXAxis(chart, table);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
