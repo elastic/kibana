@@ -6,6 +6,7 @@
 
 import { Indexer, IndexerFactory, LspIncrementalIndexer, LspIndexer } from '.';
 import { RepositoryUri } from '../../model';
+import { GitOperations } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
@@ -18,17 +19,23 @@ export class LspIndexerFactory implements IndexerFactory {
   constructor(
     protected readonly lspService: LspService,
     protected readonly options: ServerOptions,
+    protected readonly gitOps: GitOperations,
     protected readonly client: EsClient,
     protected readonly log: Logger
   ) {
     this.objectClient = new RepositoryObjectClient(this.client);
   }
 
-  public async create(repoUri: RepositoryUri, revision: string): Promise<Indexer | undefined> {
+  public async create(
+    repoUri: RepositoryUri,
+    revision: string,
+    enforcedReindex: boolean = false
+  ): Promise<Indexer | undefined> {
     try {
       const repo = await this.objectClient.getRepository(repoUri);
       const indexedRevision = repo.indexedRevision;
-      if (indexedRevision) {
+      // Skip incremental indexer if enforced reindex.
+      if (!enforcedReindex && indexedRevision) {
         this.log.info(`Create indexer to index ${repoUri} from ${indexedRevision} to ${revision}`);
         // Create the indexer to index only the diff between these 2 revisions.
         return new LspIncrementalIndexer(
@@ -37,6 +44,7 @@ export class LspIndexerFactory implements IndexerFactory {
           indexedRevision,
           this.lspService,
           this.options,
+          this.gitOps,
           this.client,
           this.log
         );
@@ -48,6 +56,7 @@ export class LspIndexerFactory implements IndexerFactory {
           revision,
           this.lspService,
           this.options,
+          this.gitOps,
           this.client,
           this.log
         );
