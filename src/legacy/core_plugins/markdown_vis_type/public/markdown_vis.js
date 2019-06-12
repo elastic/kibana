@@ -29,7 +29,7 @@ export const markdownVis = visFactory.createReactVisualization({
   title: 'Markdown',
   isAccessible: true,
   icon: 'visText',
-  description: i18n.translate('markdownVis.markdownDescription', {
+  description: i18n.translate('markdownVisType.markdownDescription', {
     defaultMessage: 'Create a document using markdown syntax'
   }),
   visConfig: {

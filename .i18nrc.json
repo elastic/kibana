@@ -12,7 +12,7 @@
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
     "embeddableApi": "src/legacy/core_plugins/embeddable_api",
     "kbnVislibVisTypes": "src/legacy/core_plugins/kbn_vislib_vis_types",
-    "markdownVis": "src/legacy/core_plugins/markdown_vis",
+    "markdownVisType": "src/legacy/core_plugins/markdown_vis_type",
     "metricVis": "src/legacy/core_plugins/metric_vis",
     "vega": "src/legacy/core_plugins/vega",
     "tableVis": "src/legacy/core_plugins/table_vis",

@@ -17,43 +17,20 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
+import { LegacyPluginApi } from '../../plugin_discovery/types';
 
-export const kibanaMarkdown = () => ({
-  name: 'markdownVis',
-  type: 'render',
-  context: {
-    types: [],
-  },
-  help: i18n.translate('markdownVis.function.help', {
-    defaultMessage: 'Markdown visualization'
-  }),
-  args: {
-    markdown: {
-      type: ['string'],
-      aliases: ['_'],
-      required: true,
+// eslint-disable-next-line import/no-default-export
+export default function MarkdownVisTypePlugin(kibana: LegacyPluginApi) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'markdown_vis_type',
+    require: ['data', 'visualizations'],
+    uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      visTypes: ['plugins/markdown_vis_type/index'],
     },
-    fontSize: {
-      types: ['number'],
-      default: 12,
-    },
-    openLinksInNewTab: {
-      types: ['boolean'],
-      default: false,
-    }
-  },
-  fn(context, args) {
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visType: 'markdown',
-        visConfig: {
-          ...args,
-        },
-      }
-    };
-  }
-});
+  };
 
+  return new kibana.Plugin(config);
+}
