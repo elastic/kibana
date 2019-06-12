@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const TASK_MANAGER_SCOPE = 'alerting';
+export const TASK_MANAGER_SCOPE = 'actions';

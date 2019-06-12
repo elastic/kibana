@@ -37,7 +37,7 @@ describe('has()', () => {
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register({
       id: 'foo',
-      description: 'Foo',
+      name: 'Foo',
       execute: jest.fn(),
     });
     expect(registry.has('foo')).toEqual(true);
@@ -52,7 +52,7 @@ describe('registry()', () => {
     getCreateTaskRunnerFunction.mockReturnValue(jest.fn());
     registry.register({
       id: 'test',
-      description: 'Test',
+      name: 'Test',
       execute: jest.fn(),
     });
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
@@ -84,13 +84,13 @@ Object {
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register({
       id: 'test',
-      description: 'Test',
+      name: 'Test',
       execute: jest.fn(),
     });
     expect(() =>
       registry.register({
         id: 'test',
-        description: 'Test',
+        name: 'Test',
         execute: jest.fn(),
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
@@ -102,13 +102,13 @@ describe('get()', () => {
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register({
       id: 'test',
-      description: 'Test',
+      name: 'Test',
       execute: jest.fn(),
     });
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
 Object {
-  "description": "Test",
+  "name": "Test",
   "execute": [MockFunction],
   "id": "test",
 }
@@ -134,7 +134,7 @@ describe('list()', () => {
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register({
       id: 'test',
-      description: 'Test',
+      name: 'Test',
       execute: jest.fn(),
     });
     const result = registry.list();

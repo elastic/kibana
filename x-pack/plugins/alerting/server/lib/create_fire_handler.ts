@@ -17,20 +17,27 @@ interface CreateFireHandlerOptions {
 export function createFireHandler({ fireAction, alertSavedObject }: CreateFireHandlerOptions) {
   return async (actionGroup: string, context: Context, state: State) => {
     const alertActions: RawAlertAction[] = alertSavedObject.attributes.actions;
-    const actions = alertActions.filter(({ group }: { group: string }) => group === actionGroup);
-    for (const action of actions) {
-      const params = transformActionParams(action.params, state, context);
-      const actionReference = alertSavedObject.references.find(
-        obj => obj.name === action.actionRef
-      );
-      if (!actionReference) {
-        throw new Error(
-          `Action reference "${action.actionRef}" not found in alert id: ${alertSavedObject.id}`
+    const actions = alertActions
+      .filter(({ group }: { group: string }) => group === actionGroup)
+      .map(action => {
+        const actionReference = alertSavedObject.references.find(
+          obj => obj.name === action.actionRef
         );
-      }
+        if (!actionReference) {
+          throw new Error(
+            `Action reference "${action.actionRef}" not found in alert id: ${alertSavedObject.id}`
+          );
+        }
+        return {
+          ...action,
+          id: actionReference.id,
+          params: transformActionParams(action.params, state, context),
+        };
+      });
+    for (const action of actions) {
       await fireAction({
-        id: actionReference.id,
-        params,
+        id: action.id,
+        params: action.params,
       });
     }
   };

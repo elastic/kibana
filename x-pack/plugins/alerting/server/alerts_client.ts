@@ -86,7 +86,9 @@ export class AlertsClient {
         // Skip the cleanup error and throw the task manager error to avoid confusion
         this.log(
           ['alerting', 'error'],
-          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed`
+          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${
+            err.message
+          }`
         );
       }
       throw e;
@@ -160,6 +162,8 @@ export class AlertsClient {
         // It changes it for timeout, etc when a task is running.
         scheduledRunAt: new Date(Date.now() + alert.interval),
         previousScheduledRunAt: null,
+        alertTypeState: {},
+        alertInstances: {},
       },
       scope: [TASK_MANAGER_SCOPE],
     });

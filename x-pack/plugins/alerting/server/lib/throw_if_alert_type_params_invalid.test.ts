@@ -12,7 +12,7 @@ test('should pass when validation not defined', () => {
     throwIfAlertTypeParamsInvalid(
       {
         id: 'my-alert-type',
-        description: 'My description',
+        name: 'My description',
         async execute() {},
       },
       {}
@@ -25,7 +25,7 @@ test('should validate and pass when params is valid', () => {
     throwIfAlertTypeParamsInvalid(
       {
         id: 'my-alert-type',
-        description: 'My description',
+        name: 'My description',
         validate: {
           params: Joi.object()
             .keys({
@@ -45,7 +45,7 @@ test('should validate and throw error when params is invalid', () => {
     throwIfAlertTypeParamsInvalid(
       {
         id: 'my-alert-type',
-        description: 'My description',
+        name: 'My description',
         validate: {
           params: Joi.object()
             .keys({

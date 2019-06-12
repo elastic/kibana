@@ -51,7 +51,7 @@ export class AlertTypeRegistry {
     this.alertTypes[alertType.id] = alertType;
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
-        title: alertType.description,
+        title: alertType.name,
         type: `alerting:${alertType.id}`,
         createTaskRunner: getCreateTaskRunnerFunction({
           services: this.services,
@@ -80,7 +80,7 @@ export class AlertTypeRegistry {
   public list() {
     return Object.entries(this.alertTypes).map(([alertTypeId, alertType]) => ({
       id: alertTypeId,
-      description: alertType.description,
+      name: alertType.name,
     }));
   }
 }

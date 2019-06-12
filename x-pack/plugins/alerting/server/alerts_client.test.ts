@@ -58,7 +58,7 @@ describe('create()', () => {
     const data = getMockData();
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
-      description: 'Test',
+      name: 'Test',
       async execute() {},
     });
     savedObjectsClient.create.mockResolvedValueOnce({
@@ -212,7 +212,7 @@ Object {
     const data = getMockData();
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
-      description: 'Test',
+      name: 'Test',
       validate: {
         params: Joi.object()
           .keys({
@@ -232,7 +232,7 @@ Object {
     const data = getMockData();
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
-      description: 'Test',
+      name: 'Test',
       async execute() {},
     });
     savedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
@@ -247,7 +247,7 @@ Object {
     const data = getMockData();
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
-      description: 'Test',
+      name: 'Test',
       async execute() {},
     });
     savedObjectsClient.create.mockResolvedValueOnce({
@@ -296,7 +296,7 @@ Array [
     const data = getMockData();
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
-      description: 'Test',
+      name: 'Test',
       async execute() {},
     });
     savedObjectsClient.create.mockResolvedValueOnce({
@@ -581,7 +581,7 @@ describe('update()', () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
-      description: 'Test',
+      name: 'Test',
       async execute() {},
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -696,7 +696,7 @@ Object {
     const alertsClient = new AlertsClient(alertsClientParams);
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
-      description: 'Test',
+      name: 'Test',
       validate: {
         params: Joi.object()
           .keys({

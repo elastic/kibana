@@ -38,7 +38,7 @@ export interface AlertExecuteOptions {
 
 export interface AlertType {
   id: string;
-  description: string;
+  name: string;
   validate?: {
     params?: any;
   };

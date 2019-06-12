@@ -33,8 +33,8 @@ export function getCreateTaskRunnerFunction({
           namespace,
         });
         const mergedActionTypeConfig = {
-          ...action.attributes.actionTypeConfig,
-          ...action.attributes.actionTypeConfigSecrets,
+          ...(action.attributes.actionTypeConfig || {}),
+          ...(action.attributes.actionTypeConfigSecrets || {}),
         };
         throwIfActionTypeConfigInvalid(actionType, mergedActionTypeConfig);
         throwIfActionTypeParamsInvalid(actionType, actionTypeParams);

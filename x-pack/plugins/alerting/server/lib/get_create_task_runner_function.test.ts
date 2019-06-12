@@ -27,7 +27,7 @@ const getCreateTaskRunnerFunctionParams = {
   },
   alertType: {
     id: 'test',
-    description: 'My test alert',
+    name: 'My test alert',
     execute: jest.fn(),
   },
   fireAction: jest.fn(),
