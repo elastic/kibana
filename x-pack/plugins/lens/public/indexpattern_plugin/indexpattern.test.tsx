@@ -119,10 +119,10 @@ describe('IndexPattern Data Source', () => {
           operationId: 'op1',
           label: 'My Op',
           dataType: 'string',
-          isBucketed: false,
+          isBucketed: true,
 
           // Private
-          operationType: 'value',
+          operationType: 'terms',
           sourceField: 'op',
         },
       },
@@ -303,7 +303,7 @@ describe('IndexPattern Data Source', () => {
           id: 'op1',
           label: 'My Op',
           dataType: 'string',
-          isBucketed: false,
+          isBucketed: true,
         } as Operation);
       });
     });

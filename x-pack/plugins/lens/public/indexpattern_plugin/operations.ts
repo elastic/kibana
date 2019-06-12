@@ -15,7 +15,8 @@ import {
 } from './indexpattern';
 
 export function getOperations(): OperationType[] {
-  return ['value', 'terms', 'date_histogram', 'sum', 'avg', 'min', 'max', 'count'];
+  // Raw value is not listed in the MVP
+  return ['terms', 'date_histogram', 'sum', 'avg', 'min', 'max', 'count'];
 }
 
 export function getOperationDisplay(): Record<
@@ -132,11 +133,11 @@ export function getOperationTypesForField({
 
   switch (type) {
     case 'date':
-      return ['value', 'date_histogram'];
+      return ['date_histogram'];
     case 'number':
-      return ['value', 'sum', 'avg', 'min', 'max'];
+      return ['sum', 'avg', 'min', 'max'];
     case 'string':
-      return ['value', 'terms'];
+      return ['terms'];
   }
   return [];
 }

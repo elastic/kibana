@@ -55,12 +55,12 @@ describe('IndexPatternDimensionPanel', () => {
       columns: {
         col1: {
           operationId: 'op1',
-          label: 'Value of timestamp',
+          label: 'Date Histogram of timestamp',
           dataType: 'date',
-          isBucketed: false,
+          isBucketed: true,
 
           // Private
-          operationType: 'value',
+          operationType: 'date_histogram',
           sourceField: 'timestamp',
         },
       },
@@ -169,17 +169,14 @@ describe('IndexPatternDimensionPanel', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-value"]').prop('color')
+      wrapper.find('[data-test-subj="lns-indexPatternDimension-date_histogram"]').prop('color')
     ).toEqual('primary');
     expect(
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-value"]').prop('isDisabled')
+      wrapper.find('[data-test-subj="lns-indexPatternDimension-date_histogram"]').prop('isDisabled')
     ).toEqual(false);
     expect(
       wrapper.find('[data-test-subj="lns-indexPatternDimension-terms"]').prop('isDisabled')
     ).toEqual(true);
-    expect(
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-date_histogram"]').prop('isDisabled')
-    ).toEqual(false);
     expect(
       wrapper.find('[data-test-subj="lns-indexPatternDimension-sum"]').prop('isDisabled')
     ).toEqual(true);
@@ -271,11 +268,6 @@ describe('IndexPatternDimensionPanel', () => {
         ...state.columns,
         col2: expect.objectContaining({
           operationId: firstField.value,
-          label: 'Value of bytes',
-          dataType: 'number',
-          isBucketed: false,
-          operationType: 'value',
-          sourceField: 'bytes',
         }),
       },
       columnOrder: ['col1', 'col2'],

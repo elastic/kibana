@@ -45,7 +45,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['value', 'terms']));
+      ).toEqual(expect.arrayContaining(['terms']));
     });
 
     it('should return operations on numbers', () => {
@@ -56,7 +56,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['value', 'avg', 'sum', 'min', 'max']));
+      ).toEqual(expect.arrayContaining(['avg', 'sum', 'min', 'max']));
     });
 
     it('should return operations on dates', () => {
@@ -67,7 +67,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['value', 'date_histogram']));
+      ).toEqual(expect.arrayContaining(['date_histogram']));
     });
 
     it('should return no operations on unknown types', () => {
@@ -149,12 +149,12 @@ describe('getOperationTypesForField', () => {
         columns: {
           col1: {
             operationId: 'op1',
-            label: 'Value of timestamp',
+            label: 'Date Histogram of timestamp',
             dataType: 'date',
-            isBucketed: false,
+            isBucketed: true,
 
             // Private
-            operationType: 'value',
+            operationType: 'date_histogram',
             sourceField: 'timestamp',
           },
         },
@@ -172,10 +172,6 @@ describe('getOperationTypesForField', () => {
 
       expect(columns.map(col => [col.sourceField, col.operationType])).toMatchInlineSnapshot(`
 Array [
-  Array [
-    "bytes",
-    "value",
-  ],
   Array [
     "bytes",
     "sum",
@@ -198,15 +194,7 @@ Array [
   ],
   Array [
     "source",
-    "value",
-  ],
-  Array [
-    "source",
     "terms",
-  ],
-  Array [
-    "timestamp",
-    "value",
   ],
   Array [
     "timestamp",
@@ -228,12 +216,12 @@ describe('getColumnOrder', () => {
       getColumnOrder({
         col1: {
           operationId: 'op1',
-          label: 'Value of timestamp',
-          dataType: 'string',
-          isBucketed: false,
+          label: 'Date Histogram of timestamp',
+          dataType: 'date',
+          isBucketed: true,
 
           // Private
-          operationType: 'value',
+          operationType: 'date_histogram',
           sourceField: 'timestamp',
         },
       })
