@@ -441,8 +441,8 @@ class FilterEditorUI extends Component<Props, State> {
       queryDsl,
     } = this.state;
 
-    const { store } = this.props.filter.$state;
-    if (!store) {
+    const { $state } = this.props.filter;
+    if (!$state || !$state.store) {
       return; // typescript validation
     }
     const alias = useCustomLabel ? customLabel : null;
@@ -451,10 +451,10 @@ class FilterEditorUI extends Component<Props, State> {
       const { index, disabled, negate } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id;
       const body = JSON.parse(queryDsl);
-      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, store);
+      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
       this.props.onSubmit(filter);
     } else if (indexPattern && field && operator) {
-      const filter = buildFilter(indexPattern, field, operator, params, alias, store);
+      const filter = buildFilter(indexPattern, field, operator, params, alias, $state.store);
       this.props.onSubmit(filter);
     }
   };

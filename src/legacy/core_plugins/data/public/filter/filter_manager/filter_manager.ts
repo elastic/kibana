@@ -42,7 +42,7 @@ import { changeTimeFilter } from './lib/change_time_filter';
 import { PartitionedFilters } from './partitioned_filters';
 import { FilterStateManager } from './filter_state_manager';
 
-const COMPARATOR_OPTIONS = { negate: true, disabled: true };
+// const COMPARATOR_OPTIONS = { negate: true, disabled: true };
 
 export class FilterManager {
   filterState: FilterStateManager;

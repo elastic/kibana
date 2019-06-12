@@ -269,13 +269,13 @@ describe('new_filter_manager', () => {
 
     test('add filter with no state, and force pin', async () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 38);
-      f1.$state.store = undefined;
+      f1.$state = undefined;
 
       await filterManager.addFilters([f1], true);
 
       // FILTER SHOULD BE GLOBAL
       const f1Output = filterManager.getFilters()[0];
-      expect(f1Output.$state.store).toBeDefined();
+      expect(f1Output.$state).toBeDefined();
       if (f1Output.$state) {
         expect(f1Output.$state.store).toBe(FilterStateStore.GLOBAL_STATE);
       }
@@ -283,13 +283,13 @@ describe('new_filter_manager', () => {
 
     test('add filter with no state, and dont force pin', async () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 38);
-      f1.$state.store = undefined;
+      f1.$state = undefined;
 
       await filterManager.addFilters([f1], false);
 
       // FILTER SHOULD BE APP
       const f1Output = filterManager.getFilters()[0];
-      expect(f1Output.$state.store).toBeDefined();
+      expect(f1Output.$state).toBeDefined();
       if (f1Output.$state) {
         expect(f1Output.$state.store).toBe(FilterStateStore.APP_STATE);
       }
