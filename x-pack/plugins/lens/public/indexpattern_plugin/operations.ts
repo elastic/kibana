@@ -159,28 +159,38 @@ export function getOperationResultType({ type }: IndexPatternField, op: Operatio
   }
 }
 
+export function makeOperation(
+  index: number,
+  op: OperationType,
+  field: IndexPatternField,
+  suggestedOrder?: DimensionPriority
+): IndexPatternColumn {
+  const operationPanels = getOperationDisplay();
+  return {
+    operationId: `${index}${op}`,
+    label: operationPanels[op].ofName(field.name),
+    dataType: getOperationResultType(field, op),
+    isBucketed: op === 'terms' || op === 'date_histogram',
+
+    operationType: op,
+    sourceField: field.name,
+    suggestedOrder,
+  };
+}
+
 export function getPotentialColumns(
   state: IndexPatternPrivateState,
   suggestedOrder?: DimensionPriority
 ): IndexPatternColumn[] {
   const fields = state.indexPatterns[state.currentIndexPatternId].fields;
 
-  const operationPanels = getOperationDisplay();
-
   const columns: IndexPatternColumn[] = fields
     .map((field, index) => {
       const validOperations = getOperationTypesForField(field);
 
-      return validOperations.map(op => ({
-        operationId: `${index}${op}`,
-        label: operationPanels[op].ofName(field.name),
-        dataType: getOperationResultType(field, op),
-        isBucketed: op === 'terms' || op === 'date_histogram',
-
-        operationType: op,
-        sourceField: field.name,
-        suggestedOrder,
-      }));
+      return validOperations.map(op => {
+        return makeOperation(index, op, field, suggestedOrder);
+      });
     })
     .reduce((prev, current) => prev.concat(current));
 
