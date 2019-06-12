@@ -12,7 +12,7 @@ import { getFunctionHelp } from '../../strings';
 interface Arguments {
   filterColumn: string;
   valueColumn: string;
-  filterGroup: string | null;
+  filterGroup: string;
 }
 
 interface Return {
@@ -39,14 +39,16 @@ export function dropdownControl(): ExpressionFunction<
     args: {
       filterColumn: {
         types: ['string'],
+        required: true,
         help: argHelp.filterColumn,
       },
       valueColumn: {
         types: ['string'],
+        required: true,
         help: argHelp.valueColumn,
       },
       filterGroup: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.filterGroup,
       },
     },

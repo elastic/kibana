@@ -32,23 +32,23 @@ export function containerStyle(): ExpressionFunction<
     help,
     args: {
       border: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.border,
       },
       borderRadius: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.borderRadius,
       },
       padding: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.padding,
       },
       backgroundColor: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.backgroundColor,
       },
       backgroundImage: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.backgroundImage,
       },
       backgroundSize: {
@@ -64,13 +64,14 @@ export function containerStyle(): ExpressionFunction<
         options: ['repeat-x', 'repeat', 'space', 'round', 'no-repeat', 'space'],
       },
       opacity: {
-        types: ['number', 'null'],
+        types: ['number'],
         help: argHelp.opacity,
       },
       overflow: {
         types: ['string'],
         help: argHelp.overflow,
         options: ['visible', 'hidden', 'scroll', 'auto'],
+        default: 'hidden',
       },
     },
     fn: (_context, args) => {
