@@ -34,11 +34,6 @@ export const createStore = <State extends {}>(defaultState: State): AppStore<Sta
   };
   const redux = createReduxStore<State, any, any, any>(reducer, defaultState as any);
 
-  const state$ = new Subject();
-  redux.subscribe(() => {
-    state$.next(redux.getState());
-  });
-
   const get = redux.getState;
 
   const set = (state: State) =>
@@ -47,21 +42,32 @@ export const createStore = <State extends {}>(defaultState: State): AppStore<Sta
       state,
     });
 
+  const state$ = new Subject();
+  redux.subscribe(() => {
+    state$.next(get());
+  });
+
   const mutations: AppStore<State>['mutations'] = pureMutations => {
     const result: Mutations<any> = {};
     for (const [name, fn] of Object.entries(pureMutations)) {
       result[name] = (...args) => {
         set(fn(get())(...args));
+        /*
+        redux.dispatch({
+          type: name,
+          args,
+        });
+        */
       };
     }
     return result;
   };
 
   return {
-    redux,
-    state$: state$ as Observable<State>,
     get,
     set,
+    redux,
+    state$: state$ as Observable<State>,
     mutations,
   };
 };
