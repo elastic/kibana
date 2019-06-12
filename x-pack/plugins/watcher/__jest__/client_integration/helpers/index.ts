@@ -8,6 +8,7 @@ import { setup as watchListSetup } from './watch_list.helpers';
 import { setup as watchStatusSetup } from './watch_status.helpers';
 import { setup as watchCreateJsonSetup } from './watch_create_json.helpers';
 import { setup as watchCreateThresholdSetup } from './watch_create_threshold.helpers';
+import { setup as watchEditSetup } from './watch_edit.helpers';
 
 export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../test_utils';
 
@@ -18,4 +19,5 @@ export const pageHelpers = {
   watchStatus: { setup: watchStatusSetup },
   watchCreateJson: { setup: watchCreateJsonSetup },
   watchCreateThreshold: { setup: watchCreateThresholdSetup },
+  watchEdit: { setup: watchEditSetup },
 };

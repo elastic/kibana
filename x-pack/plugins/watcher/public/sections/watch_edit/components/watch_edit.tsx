@@ -16,7 +16,7 @@ import { Watch } from 'plugins/watcher/models/watch';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
-import { getPageErrorCode, PageError, SectionLoading } from '../../../components';
+import { getPageErrorCode, PageError, SectionLoading, SectionError } from '../../../components';
 import { loadWatch } from '../../../lib/api';
 import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../../lib/breadcrumbs';
 import { JsonWatchEdit } from './json_watch_edit';
@@ -143,6 +143,22 @@ export const WatchEdit = ({
     return (
       <EuiPageContent>
         <PageError errorCode={errorCode} id={id} />
+      </EuiPageContent>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <EuiPageContent>
+        <SectionError
+          title={
+            <FormattedMessage
+              id="xpack.watcher.sections.watchEdit.errorTitle"
+              defaultMessage="Error loading watch"
+            />
+          }
+          error={loadError}
+        />
       </EuiPageContent>
     );
   }

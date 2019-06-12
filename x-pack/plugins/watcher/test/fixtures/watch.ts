@@ -11,6 +11,15 @@ interface Watch {
   id: string;
   name: string;
   type: 'json' | 'threshold' | 'monitoring';
+  timeField?: string;
+  triggerIntervalSize?: number;
+  triggerIntervalUnit?: string;
+  aggType?: string;
+  termSize?: number;
+  thresholdComparator?: string;
+  timeWindowSize?: number;
+  timeWindowUnit?: string;
+  threshold?: number[];
   isSystemWatch: boolean;
   watchStatus: {
     state: 'OK' | 'Firing' | 'Error' | 'Config error' | 'Disabled';
@@ -25,6 +34,15 @@ export const getWatch = ({
   id = getRandomString(),
   name = getRandomString(),
   type = 'json',
+  timeField,
+  triggerIntervalSize,
+  triggerIntervalUnit,
+  aggType,
+  termSize,
+  thresholdComparator,
+  timeWindowSize,
+  timeWindowUnit,
+  threshold,
   isSystemWatch = false,
   watchStatus = {
     state: 'OK',
@@ -34,6 +52,15 @@ export const getWatch = ({
   id,
   name,
   type,
+  timeField,
+  triggerIntervalSize,
+  triggerIntervalUnit,
+  aggType,
+  termSize,
+  thresholdComparator,
+  timeWindowSize,
+  timeWindowUnit,
+  threshold,
   isSystemWatch,
   watchStatus,
 });

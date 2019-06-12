@@ -212,7 +212,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiForm>
+      <EuiForm data-test-subj="thresholdWatchForm">
         {serverError && (
           <Fragment>
             <SectionError
