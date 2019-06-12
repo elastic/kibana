@@ -159,9 +159,12 @@ test('mutation methods are not bound', () => {
 });
 
 test('created mutations are saved in store object', () => {
-  const store = createStore<any, {
-    add: (increment: number) => void
-  }>({ value: -3 });
+  const store = createStore<
+    any,
+    {
+      add: (increment: number) => void;
+    }
+  >({ value: -3 });
 
   store.createMutations({
     add: state => increment => ({ ...state, value: state.value + increment }),
