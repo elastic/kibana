@@ -101,6 +101,7 @@ export class Workpad extends React.PureComponent {
           style={{
             height,
             width,
+            transformOrigin: '0 0',
             transform: isFullscreen ? undefined : `scale3d(${zoomScale}, ${zoomScale}, 1)`, // don't scale in fullscreen mode
           }}
         >
