@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { DeletePhase as PresentationComponent } from './delete_phase';
 import { getPhase } from '../../../../store/selectors';
 import { setPhaseData } from '../../../../store/actions';
-import { PHASE_DELETE, PHASE_HOT, PHASE_ROLLOVER_ENABLED } from '../../../../store/constants';
+import { PHASE_DELETE, PHASE_HOT, PHASE_ROLLOVER_ENABLED } from '../../../../constants';
 
 export const DeletePhase = connect(
   state => ({

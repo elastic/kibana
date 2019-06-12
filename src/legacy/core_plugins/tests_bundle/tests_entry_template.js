@@ -30,34 +30,69 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
  */
 
 // import global polyfills before everything else
-import 'babel-polyfill';
+import '@babel/polyfill';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
 import 'childnode-remove-polyfill';
+import fetchMock from 'fetch-mock/es5/client';
+import Symbol_observable from 'symbol-observable';
 
-import { CoreSystem } from '__kibanaCore__'
+import { CoreSystem } from '__kibanaCore__';
+
+// Fake uiCapabilities returned to Core in browser tests
+const uiCapabilities = {
+  navLinks: {
+    myLink: true,
+    notMyLink: true,
+  },
+  discover: {
+    showWriteControls: true
+  },
+  visualize: {
+    save: true
+  },
+  dashboard: {
+    showWriteControls: true
+  },
+  timelion: {
+    save: true
+  },
+};
+
+// Mock fetch for CoreSystem calls.
+fetchMock.config.fallbackToNetwork = true;
+fetchMock.post(/\\/api\\/capabilities/, {
+  status: 200,
+  body: JSON.stringify({ capabilities: uiCapabilities }),
+  headers: { 'Content-Type': 'application/json' },
+});
 
 // render the core system in a child of the body as the default children of the body
 // in the browser tests are needed for mocha and other test components to work
 const rootDomElement = document.createElement('div');
 document.body.appendChild(rootDomElement)
 
-new CoreSystem({
+const coreSystem = new CoreSystem({
   injectedMetadata: {
     version: '1.2.3',
     buildNumber: 1234,
     legacyMetadata: {
+      nav: [],
       version: '1.2.3',
       buildNum: 1234,
+      devMode: true,
       uiSettings: {
         defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
         user: {}
-      }
+      },
+      nav: []
     },
     csp: {
       warnLegacyBrowsers: false,
     },
+    capabilities: uiCapabilities,
+    uiPlugins: [],
     vars: {
       kbnIndex: '.kibana',
       esShardTimeout: 1500,
@@ -83,6 +118,9 @@ new CoreSystem({
         enabled: true,
         enableExternalUrls: true
       },
+      interpreterConfig: {
+        enableInVisualize: true
+      }
     },
   },
   rootDomElement,
@@ -90,5 +128,11 @@ new CoreSystem({
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
   }
-}).start()
+})
+
+coreSystem
+  .setup()
+  .then(() => {
+    return coreSystem.start();
+  });
 `;

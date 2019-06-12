@@ -10,6 +10,7 @@ import header from './header.png';
 export const table: ElementFactory = () => ({
   name: 'table',
   displayName: 'Data table',
+  tags: ['text'],
   help: 'A scrollable grid for displaying data in a tabular format',
   image: header,
   expression: `filters

@@ -13,10 +13,8 @@ import { InnerCustomPlot } from '../index';
 import responseWithData from './responseWithData.json';
 import VoronoiPlot from '../VoronoiPlot';
 import InteractivePlot from '../InteractivePlot';
-import {
-  getResponseTimeSeries,
-  getEmptySerie
-} from '../../../../../store/selectors/chartSelectors';
+import { getResponseTimeSeries } from '../../../../../selectors/chartSelectors';
+import { getEmptySeries } from '../getEmptySeries';
 
 function getXValueByIndex(index) {
   return responseWithData.responseTimes.avg[index].x;
@@ -29,7 +27,7 @@ describe('when response has data', () => {
   let onSelectionEnd;
 
   beforeEach(() => {
-    const series = getResponseTimeSeries(responseWithData);
+    const series = getResponseTimeSeries({ apmTimeseries: responseWithData });
     onHover = jest.fn();
     onMouseLeave = jest.fn();
     onSelectionEnd = jest.fn();
@@ -289,7 +287,7 @@ describe('when response has no data', () => {
   const onSelectionEnd = jest.fn();
   let wrapper;
   beforeEach(() => {
-    const series = getEmptySerie(1451606400000, 1451610000000);
+    const series = getEmptySeries(1451606400000, 1451610000000);
 
     wrapper = mount(
       <InnerCustomPlot

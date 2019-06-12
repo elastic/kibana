@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 
 export class DateFromStringType extends t.Type<Date, string, t.mixed> {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   public readonly _tag: 'DateFromISOStringType' = 'DateFromISOStringType';
   constructor() {
     super(
@@ -27,7 +27,7 @@ export class DateFromStringType extends t.Type<Date, string, t.mixed> {
     );
   }
 }
-// tslint:disable-next-line
+// eslint-disable-next-line
 export interface DateFromString extends DateFromStringType {}
 
 export const DateFromString: DateFromString = new DateFromStringType();

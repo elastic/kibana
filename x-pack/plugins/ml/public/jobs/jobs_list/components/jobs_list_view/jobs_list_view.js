@@ -95,6 +95,7 @@ export class JobsListView extends Component {
 
   componentWillUnmount() {
     timefilter.off('refreshIntervalUpdate');
+    deletingJobsRefreshTimeout = null;
     this.clearRefreshInterval();
   }
 
@@ -126,7 +127,7 @@ export class JobsListView extends Component {
     } else {
       this.setRefreshInterval(value);
     }
-    this.refreshJobSummaryList(true);
+    this.refreshJobSummaryList();
   }
 
   setRefreshInterval(interval) {
@@ -317,7 +318,7 @@ export class JobsListView extends Component {
           // if there are some jobs in a deleting state, start polling for
           // deleting jobs so we can update the jobs list once the
           // deleting tasks are over
-          this.checkDeletingJobTasks();
+          this.checkDeletingJobTasks(forceRefresh);
         }
       } catch (error) {
         console.error(error);
@@ -326,17 +327,22 @@ export class JobsListView extends Component {
     }
   }
 
-  async checkDeletingJobTasks() {
-    const { jobIds } = await ml.jobs.deletingJobTasks();
+  async checkDeletingJobTasks(forceRefresh = false) {
+    const { jobIds: taskJobIds } = await ml.jobs.deletingJobTasks();
 
-    if (jobIds.length === 0 || isEqual(jobIds.sort(), this.state.deletingJobIds.sort())) {
-      this.setState({
-        deletingJobIds: jobIds,
-      });
-      this.refreshJobSummaryList(true);
+    const taskListHasChanged = (isEqual(taskJobIds.sort(), this.state.deletingJobIds.sort()) === false);
+
+    this.setState({
+      deletingJobIds: taskJobIds,
+    });
+
+    // only reload the jobs list if the contents of the task list has changed
+    // or the check refresh has been forced i.e. from a user action
+    if (taskListHasChanged || forceRefresh) {
+      this.refreshJobSummaryList();
     }
 
-    if (jobIds.length > 0 && deletingJobsRefreshTimeout === null) {
+    if (taskJobIds.length > 0 && deletingJobsRefreshTimeout === null) {
       deletingJobsRefreshTimeout = setTimeout(() => {
         deletingJobsRefreshTimeout = null;
         this.checkDeletingJobTasks();
@@ -406,7 +412,7 @@ export class JobsListView extends Component {
         <JobStatsBar
           jobsSummaryList={jobsSummaryList}
         />
-        <div className="job-management">
+        <div className="job-management" data-test-subj="ml-jobs-list">
           <NodeAvailableWarning />
           <UpgradeWarning />
           <header>
@@ -435,4 +441,3 @@ export class JobsListView extends Component {
     );
   }
 }
-

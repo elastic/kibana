@@ -19,12 +19,14 @@ function createInspectorAdapters() {
   return inspectorAdapters;
 }
 
-const INITIAL_STATE = {
-  inspectorAdapters: createInspectorAdapters(),
-};
-
 // Reducer
-export function nonSerializableInstances(state = INITIAL_STATE) {
+export function nonSerializableInstances(state) {
+  if (!state) {
+    return {
+      inspectorAdapters: createInspectorAdapters(),
+    };
+  }
+
   // state is read only and provides access to non-serializeable object instances
   return state;
 }

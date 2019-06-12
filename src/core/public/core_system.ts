@@ -19,15 +19,19 @@
 
 import './core.css';
 
-import { BasePathService } from './base_path';
+import { InternalCoreSetup, InternalCoreStart } from '.';
 import { ChromeService } from './chrome';
-import { FatalErrorsService } from './fatal_errors';
+import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
+import { OverlayService } from './overlays';
+import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
+import { ApplicationService } from './application';
+import { mapToObject } from '../utils/';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -37,11 +41,17 @@ interface Params {
   useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
 }
 
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CoreContext {}
+
 /**
- * The CoreSystem is the root of the new platform, and starts all parts
+ * The CoreSystem is the root of the new platform, and setups all parts
  * of Kibana in the UI, including the LegacyPlatform which is managed
  * by the LegacyPlatformService. As we migrate more things to the new
  * platform the CoreSystem will get many more Services.
+ *
+ * @internal
  */
 export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
@@ -50,13 +60,14 @@ export class CoreSystem {
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly uiSettings: UiSettingsService;
-  private readonly basePath: BasePathService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
+  private readonly overlay: OverlayService;
+  private readonly plugins: PluginsService;
+  private readonly application: ApplicationService;
 
   private readonly rootDomElement: HTMLElement;
-  private readonly notificationsTargetDomElement: HTMLDivElement;
-  private readonly legacyPlatformTargetDomElement: HTMLDivElement;
+  private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
     const {
@@ -75,75 +86,127 @@ export class CoreSystem {
       injectedMetadata,
     });
 
-    this.fatalErrors = new FatalErrorsService({
-      rootDomElement,
-      injectedMetadata: this.injectedMetadata,
-      stopCoreSystem: () => {
-        this.stop();
-      },
+    this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
+      // Stop Core before rendering any fatal errors into the DOM
+      this.stop();
     });
 
-    this.notificationsTargetDomElement = document.createElement('div');
-    this.notifications = new NotificationsService({
-      targetDomElement: this.notificationsTargetDomElement,
-    });
+    this.notifications = new NotificationsService();
     this.http = new HttpService();
-    this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
+    this.overlay = new OverlayService();
+    this.application = new ApplicationService();
     this.chrome = new ChromeService({ browserSupportsCsp });
 
-    this.legacyPlatformTargetDomElement = document.createElement('div');
+    const core: CoreContext = {};
+    this.plugins = new PluginsService(core);
+
     this.legacyPlatform = new LegacyPlatformService({
-      targetDomElement: this.legacyPlatformTargetDomElement,
       requireLegacyFiles,
       useLegacyTestHarness,
     });
   }
 
-  public start() {
+  public async setup() {
     try {
+      // Setup FatalErrorsService and it's dependencies first so that we're
+      // able to render any errors.
+      const injectedMetadata = this.injectedMetadata.setup();
+      this.fatalErrorsSetup = this.fatalErrors.setup({
+        injectedMetadata,
+        i18n: this.i18n.getContext(),
+      });
+      const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
+      const notifications = this.notifications.setup({ uiSettings });
+      const application = this.application.setup();
+
+      const core: InternalCoreSetup = {
+        application,
+        fatalErrors: this.fatalErrorsSetup,
+        http,
+        injectedMetadata,
+        notifications,
+        uiSettings,
+      };
+
+      // Services that do not expose contracts at setup
+      const plugins = await this.plugins.setup(core);
+      await this.legacyPlatform.setup({ core, plugins: mapToObject(plugins.contracts) });
+
+      return { fatalErrors: this.fatalErrorsSetup };
+    } catch (error) {
+      if (this.fatalErrorsSetup) {
+        this.fatalErrorsSetup.add(error);
+      } else {
+        // If the FatalErrorsService has not yet been setup, log error to console
+        // eslint-disable-next-line no-console
+        console.log(error);
+      }
+    }
+  }
+
+  public async start() {
+    try {
+      const injectedMetadata = await this.injectedMetadata.start();
+      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const i18n = await this.i18n.start();
+      const application = await this.application.start({ injectedMetadata });
+
+      const notificationsTargetDomElement = document.createElement('div');
+      const overlayTargetDomElement = document.createElement('div');
+      const legacyPlatformTargetDomElement = document.createElement('div');
+
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
-      this.rootDomElement.appendChild(this.notificationsTargetDomElement);
-      this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
+      this.rootDomElement.appendChild(notificationsTargetDomElement);
+      this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
+      this.rootDomElement.appendChild(overlayTargetDomElement);
 
-      const i18n = this.i18n.start();
-      const notifications = this.notifications.start({ i18n });
-      const injectedMetadata = this.injectedMetadata.start();
-      const fatalErrors = this.fatalErrors.start({ i18n });
-      const http = this.http.start({ fatalErrors });
-      const basePath = this.basePath.start({ injectedMetadata });
-      const uiSettings = this.uiSettings.start({
-        notifications,
+      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
+      const notifications = await this.notifications.start({
+        i18n,
+        overlays,
+        targetDomElement: notificationsTargetDomElement,
+      });
+      const chrome = await this.chrome.start({
+        application,
         http,
         injectedMetadata,
-        basePath,
-      });
-      const chrome = this.chrome.start({
-        injectedMetadata,
         notifications,
       });
 
-      this.legacyPlatform.start({
+      const core: InternalCoreStart = {
+        application,
+        chrome,
+        http,
         i18n,
         injectedMetadata,
-        fatalErrors,
         notifications,
-        http,
-        basePath,
-        uiSettings,
-        chrome,
-      });
+        overlays,
+      };
 
-      return { fatalErrors };
+      const plugins = await this.plugins.start(core);
+      await this.legacyPlatform.start({
+        core,
+        plugins: mapToObject(plugins.contracts),
+        targetDomElement: legacyPlatformTargetDomElement,
+      });
     } catch (error) {
-      this.fatalErrors.add(error);
+      if (this.fatalErrorsSetup) {
+        this.fatalErrorsSetup.add(error);
+      } else {
+        // If the FatalErrorsService has not yet been setup, log error to console
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
     }
   }
 
   public stop() {
     this.legacyPlatform.stop();
+    this.plugins.stop();
     this.notifications.stop();
     this.http.stop();
     this.uiSettings.stop();

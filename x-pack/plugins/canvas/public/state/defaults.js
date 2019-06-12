@@ -42,7 +42,7 @@ export const getDefaultPage = () => {
 export const getDefaultWorkpad = () => {
   const page = getDefaultPage();
   return {
-    name: 'Untitled Workpad',
+    name: 'My Canvas Workpad',
     id: getId('workpad'),
     width: 1080,
     height: 720,

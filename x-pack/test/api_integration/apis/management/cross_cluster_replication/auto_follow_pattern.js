@@ -4,111 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import { API_BASE_PATH } from './constants';
-
-import { initClusterHelpers, getRandomString } from './lib';
-
-const AUTO_FOLLOW_PATTERNS_API_BASE_PATH = API_BASE_PATH + '/auto_follow_patterns';
+import { getRandomString } from './lib';
+import { getAutoFollowIndexPayload } from './fixtures';
+import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
+import { registerHelpers as registerAutoFollowPatternHelpers } from './auto_follow_pattern.helpers';
 
 export default function ({ getService }) {
-  let autoFollowPatternsCreated = [];
   const supertest = getService('supertest');
 
-  const { CLUSTER_NAME, addCluster, deleteAllClusters } = initClusterHelpers(supertest);
+  const { addCluster, deleteAllClusters } = registerRemoteClustersHelpers(supertest);
+  const {
+    loadAutoFollowPatterns,
+    getAutoFollowPattern,
+    createAutoFollowPattern,
+    deleteAllAutoFollowPatterns
+  } = registerAutoFollowPatternHelpers(supertest);
 
-  const deleteAutoFollowPatternRequest = (name) => (
-    supertest
-      .delete(`${AUTO_FOLLOW_PATTERNS_API_BASE_PATH}/${name}`)
-      .set('kbn-xsrf', 'xxx')
-  );
+  describe('auto follow patterns', function () {
+    this.tags(['skipCloud']);
 
-  const getAutoFollowIndexPayload = () => ({
-    remoteCluster: CLUSTER_NAME,
-    leaderIndexPatterns: [ 'leader-*'],
-    followIndexPattern: '{{leader_index}}_follower'
-  });
-
-  const createAutoFollowIndexRequest = (name = getRandomString(), payload = getAutoFollowIndexPayload()) => {
-    autoFollowPatternsCreated.push(name);
-
-    return supertest
-      .post(AUTO_FOLLOW_PATTERNS_API_BASE_PATH)
-      .set('kbn-xsrf', 'xxx')
-      .send({ ...payload, id: name });
-  };
-
-  const cleanUp = () => (
-    Promise.all([deleteAllClusters(), ...autoFollowPatternsCreated.map(deleteAutoFollowPatternRequest)])
-      .then(() => {
-        autoFollowPatternsCreated = [];
-      })
-  );
-
-  describe('auto follow patterns', () => {
-    afterEach(() => {
-      return cleanUp();
-    });
+    after(() => deleteAllAutoFollowPatterns().then(deleteAllClusters));
 
     describe('list()', () => {
       it('should return an empty object when there are no auto follow patterns', async () => {
-        const uri = `${AUTO_FOLLOW_PATTERNS_API_BASE_PATH}`;
-
-        const { body } = await supertest
-          .get(uri)
-          .expect(200);
+        const { body } = await loadAutoFollowPatterns().expect(200);
 
         expect(body).to.eql({ patterns: [] });
       });
     });
 
-    describe('create()', () => {
-      let payload;
-
-      beforeEach(() => {
-        payload = getAutoFollowIndexPayload();
-      });
-
+    describe('when remote cluster does not exist', () => {
       it('should throw a 404 error when cluster is unknown', async () => {
+        const payload = getAutoFollowIndexPayload();
         payload.remoteCluster = 'unknown-cluster';
 
-        const { body } = await createAutoFollowIndexRequest(undefined, payload).expect(404);
+        const { body } = await createAutoFollowPattern(undefined, payload).expect(404);
         expect(body.cause[0]).to.contain('no such remote cluster');
-      });
-
-      it('should create an auto-follow pattern when cluster is known', async () => {
-        await addCluster();
-
-        const name = getRandomString();
-        const { body } = await createAutoFollowIndexRequest(name).expect(200);
-
-        expect(body.acknowledged).to.eql(true);
       });
     });
 
-    describe('get()', () => {
-      it('should return a 404 when the auto-follow pattern is not found', async () => {
-        const name = getRandomString();
-        const { body } = await supertest
-          .get(`${AUTO_FOLLOW_PATTERNS_API_BASE_PATH}/${name}`)
-          .expect(404);
+    describe('when remote cluster exists', () => {
+      before(() => addCluster());
 
-        expect(body.cause).not.to.be(undefined);
+      describe('create()', () => {
+        it('should create an auto-follow pattern when cluster is known', async () => {
+          const name = getRandomString();
+          const { body } = await createAutoFollowPattern(name).expect(200);
+
+          expect(body.acknowledged).to.eql(true);
+        });
       });
 
-      it('should return an auto-follow pattern that was created', async () => {
-        const name = getRandomString();
-        const autoFollowPattern = getAutoFollowIndexPayload();
+      describe('get()', () => {
+        it('should return a 404 when the auto-follow pattern is not found', async () => {
+          const name = getRandomString();
+          const { body } = await getAutoFollowPattern(name).expect(404);
 
-        await addCluster();
-        await createAutoFollowIndexRequest(name, autoFollowPattern);
+          expect(body.cause).not.to.be(undefined);
+        });
 
-        const { body } = await supertest
-          .get(`${AUTO_FOLLOW_PATTERNS_API_BASE_PATH}/${name}`)
-          .expect(200);
+        it('should return an auto-follow pattern that was created', async () => {
+          const name = getRandomString();
+          const autoFollowPattern = getAutoFollowIndexPayload();
 
-        expect(body).to.eql({ ...autoFollowPattern, name });
+          await createAutoFollowPattern(name, autoFollowPattern);
+
+          const { body } = await getAutoFollowPattern(name).expect(200);
+
+          expect(body).to.eql({ ...autoFollowPattern, name });
+        });
       });
     });
   });

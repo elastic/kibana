@@ -58,32 +58,45 @@ export function initAuthenticateApi(server) {
     },
     async handler(request, h) {
       try {
-        // When authenticating using SAML we _expect_ to redirect to the SAML provider.
-        // However, it may happen that Identity Provider sends a new SAML Response
-        // while user has an active session already (e.g. user opens Kibana from
-        // Identity Provider portal in two different tabs or logged in as a different
-        // user and tries to open Kibana once again). If we receive a success instead
-        // of a redirect when trying to authenticate the user, we know this has occured,
-        // and we return an appropriate error to the user.
+        // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
+        const authenticationResult = await server.plugins.security.authenticate(request);
+        if (authenticationResult.redirected()) {
+          return h.redirect(authenticationResult.redirectURL);
+        }
 
-        // NOTE: there are several ways to handle the case when Kibana has an active
-        // session, but its ACS endpoint receives another SAMLResponse. We can't just
-        // silently ignore that new SAMLResponse since it might be for a different
-        // user, and we would not know, and users might not notice.
-        //
-        // Options:
-        //
-        // 1. Give users an error saying they’re already logged in;
-        // 2. Send the new SAML Response to ES and check if it’s for the same user. If so,
-        //    we’re probably OK, if not show error (probably);
-        // 3. Terminate the old session and start a new one;
-        // 4. Ask the user.
-        //
-        // We currently implement option 1, as it seems to be the easiest and safest,
-        // although it might not be the ideal UX in the long term.
+        return Boom.unauthorized(authenticationResult.error);
+      } catch (err) {
+        return wrapError(err);
+      }
+    }
+  });
+
+  server.route({
+    // POST is only allowed for Third Party initiated authentication
+    method: ['GET', 'POST'],
+    path: '/api/security/v1/oidc',
+    config: {
+      auth: false,
+      validate: {
+        query: Joi.object().keys({
+          iss: Joi.string().uri({ scheme: 'https' }),
+          login_hint: Joi.string(),
+          target_link_uri: Joi.string().uri(),
+          code: Joi.string(),
+          error: Joi.string(),
+          error_description: Joi.string(),
+          error_uri: Joi.string().uri(),
+          state: Joi.string()
+        }).unknown()
+      }
+    },
+    async handler(request, h) {
+      try {
+        // We handle the fact that the user might get redirected to Kibana while already having an session
+        // Return an error notifying the user they are already logged in.
         const authenticationResult = await server.plugins.security.authenticate(request);
         if (authenticationResult.succeeded()) {
-          throw Boom.forbidden(
+          return Boom.forbidden(
             'Sorry, you already have an active Kibana session. ' +
             'If you want to start a new one, please logout from the existing session first.'
           );

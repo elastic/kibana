@@ -6,8 +6,6 @@
 
 import { AbstractLayer } from './layer';
 import _ from 'lodash';
-import React from 'react';
-import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 
@@ -49,10 +47,18 @@ export class TileLayer extends AbstractLayer {
     }
   }
 
+  _getMbLayerId() {
+    return this.getId() + '_raster';
+  }
+
+  getMbLayerIds() {
+    return [this._getMbLayerId()];
+  }
+
   syncLayerWithMB(mbMap) {
 
     const source = mbMap.getSource(this.getId());
-    const mbLayerId = this.getId() + '_raster';
+    const mbLayerId = this._getMbLayerId();
 
     if (!source) {
       const sourceDataRequest = this.getSourceDataRequest();
@@ -97,15 +103,7 @@ export class TileLayer extends AbstractLayer {
     return 'grid';
   }
 
-  getIcon() {
-    return (
-      <EuiIcon
-        type={this.getLayerTypeIconName()}
-      />
-    );
-  }
   isLayerLoading() {
     return false;
   }
-
 }

@@ -11,7 +11,7 @@ Usage:
 Options:
   --help                         Display this menu and exit. 
   --config <file>                Pass in a config. Can pass in multiple configs. 
-  --esFrom <snapshot|source>     Build Elasticsearch from source or run from snapshot. Default: snapshot
+  --esFrom <snapshot|source>     Build Elasticsearch from source or run from snapshot. Default: $TEST_ES_FROM or snapshot
   --kibana-install-dir <dir>     Run Kibana from existing install directory instead of from source. 
   --bail                         Stop the test run at the first failure. 
   --grep <pattern>               Pattern to select which tests to run. 

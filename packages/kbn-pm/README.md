@@ -88,15 +88,16 @@ are running inside of.
 ```
 
 This works because we moved to a strict location of Kibana plugins,
-`../kibana-extra/{pluginName}` relative to Kibana. This is one of the reasons we
-wanted to move towards a setup that looks like this:
+`./plugins/{pluginName}` inside of Kibana, or `../kibana-extra/{pluginName}`
+relative to Kibana. This is one of the reasons we wanted to move towards a setup
+that looks like this:
 
 ```
 elastic
-├── kibana
-└── kibana-extra
-    ├── kibana-canvas
-    └── x-pack-kibana
+└── kibana
+    └── plugins
+        ├── kibana-canvas
+        └── x-pack-kibana
 ```
 
 Relying on `link:` style dependencies means we no longer need to `npm publish`
@@ -119,11 +120,12 @@ yarn kbn bootstrap
 ```
 
 By default, `@kbn/pm` will bootstrap all packages within Kibana, plus all
-Kibana plugins located in `../kibana-extra`. There are several options for
-skipping parts of this, e.g. to skip bootstrapping of Kibana plugins:
+Kibana plugins located in `./plugins` or `../kibana-extra`. There are several
+options for skipping parts of this, e.g. to skip bootstrapping of Kibana
+plugins:
 
 ```
-yarn kbn bootstrap --skip-kibana-extra
+yarn kbn bootstrap --skip-kibana-plugins
 ```
 
 Or just skip few selected packages:
@@ -152,7 +154,7 @@ yarn kbn run build
 ```
 
 And if needed, you can skip packages in the same way as for bootstrapping, e.g.
-with `--exclude` and `--skip-kibana-extra`:
+with `--exclude` and `--skip-kibana-plugins`:
 
 ```
 yarn kbn run build --exclude kibana

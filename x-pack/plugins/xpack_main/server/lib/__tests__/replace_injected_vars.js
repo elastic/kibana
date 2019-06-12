@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { replaceInjectedVars } from '../replace_injected_vars';
 
@@ -47,7 +47,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
 
     sinon.assert.calledOnce(server.plugins.security.isAuthenticated);
@@ -67,7 +66,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
   });
 
@@ -84,7 +82,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
   });
 
@@ -101,7 +98,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
   });
 
@@ -118,7 +114,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
   });
 
@@ -135,7 +130,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
   });
 
@@ -146,7 +140,7 @@ describe('replaceInjectedVars uiExport', () => {
     server.plugins.security.isAuthenticated.returns(false);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
-    expect(newVars).to.be(originalInjectedVars);
+    expect(newVars).to.eql(originalInjectedVars);
   });
 
   it('sends the originalInjectedVars if xpack info is unavailable', async () => {
@@ -156,11 +150,11 @@ describe('replaceInjectedVars uiExport', () => {
     server.plugins.xpack_main.info.isAvailable.returns(false);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
-    expect(newVars).to.be(originalInjectedVars);
+    expect(newVars).to.eql(originalInjectedVars);
   });
 
   it('sends the originalInjectedVars (with xpackInitialInfo = undefined) if security is disabled, xpack info is unavailable', async () => {
-    const originalInjectedVars = { a: 1 };
+    const originalInjectedVars = { a: 1, uiCapabilities: { navLinks: { foo: true }, bar: { baz: true }, catalogue: { cfoo: true } } };
     const request = buildRequest();
     const server = mockServer();
     delete server.plugins.security;
@@ -171,7 +165,13 @@ describe('replaceInjectedVars uiExport', () => {
       a: 1,
       telemetryOptedIn: null,
       xpackInitialInfo: undefined,
-      userProfile: {},
+      uiCapabilities: {
+        navLinks: { foo: true },
+        bar: { baz: true },
+        catalogue: {
+          cfoo: true,
+        }
+      },
     });
   });
 
@@ -182,7 +182,7 @@ describe('replaceInjectedVars uiExport', () => {
     server.plugins.xpack_main.info.feature().getLicenseCheckResults.returns(undefined);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
-    expect(newVars).to.be(originalInjectedVars);
+    expect(newVars).to.eql(originalInjectedVars);
   });
 });
 
@@ -196,6 +196,20 @@ function mockServer() {
         isAuthenticated: sinon.stub().returns(true)
       },
       xpack_main: {
+        getFeatures: () => [{
+          id: 'mockFeature',
+          name: 'Mock Feature',
+          privileges: {
+            all: {
+              app: [],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['mockFeatureCapability']
+            }
+          }
+        }],
         info: {
           isAvailable: sinon.stub().returns(true),
           feature: () => ({

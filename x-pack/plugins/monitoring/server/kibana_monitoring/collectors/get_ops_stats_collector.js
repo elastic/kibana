@@ -13,6 +13,7 @@ import { opsBuffer } from './ops_buffer';
 import Oppsy from 'oppsy';
 import { cloneDeep } from 'lodash';
 
+let bufferHadEvents = false;
 
 class OpsMonitor {
   constructor(server, buffer, interval) {
@@ -80,6 +81,12 @@ export function getOpsStatsCollector(server, kbnServer) {
   return collectorSet.makeStatsCollector({
     type: KIBANA_STATS_TYPE_MONITORING,
     init: opsMonitor.start,
+    isReady: () => {
+      if (!bufferHadEvents) {
+        bufferHadEvents = buffer.hasEvents();
+      }
+      return bufferHadEvents;
+    },
     fetch: async () => {
       return await buffer.flush();
     }

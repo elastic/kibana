@@ -20,6 +20,11 @@
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
+import { applicationServiceMock } from '../application/application_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { notificationServiceMock } from '../notifications/notifications_service.mock';
+
 const store = new Map();
 (window as any).localStorage = {
   setItem: (key: string, value: string) => store.set(String(key), String(value)),
@@ -31,22 +36,10 @@ import { ChromeService } from './chrome_service';
 
 function defaultStartDeps(): any {
   return {
-    notifications: {
-      toasts: {
-        addWarning: jest.fn(),
-      },
-    },
-    injectedMetadata: {
-      injectedMetadataStart: true,
-      getCspConfig: jest.fn().mockReturnValue({ warnLegacyBrowsers: true }),
-      getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
-      getLegacyMetadata: jest.fn().mockReturnValue({
-        uiSettings: {
-          defaults: { legacyInjectedUiSettingDefaults: true },
-          user: { legacyInjectedUiSettingUserValues: true },
-        },
-      }),
-    },
+    application: applicationServiceMock.createStartContract(),
+    http: httpServiceMock.createStartContract(),
+    notifications: notificationServiceMock.createStartContract(),
+    injectedMetadata: injectedMetadataServiceMock.createStartContract(),
   };
 }
 
@@ -60,20 +53,12 @@ describe('start', () => {
     const startDeps = defaultStartDeps();
     startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
     service.start(startDeps);
-    expect(startDeps.notifications.toasts.addWarning).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "Your browser does not meet the security requirements for Kibana.",
-    ],
+    expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Your browser does not meet the security requirements for Kibana.",
   ],
-  "results": Array [
-    Object {
-      "isThrow": false,
-      "value": undefined,
-    },
-  ],
-}
+]
 `);
   });
 
@@ -151,7 +136,7 @@ Array [
 `);
     });
 
-    it('always emits false if embed query string is in hash when started', async () => {
+    it('always emits false if embed query string is in hash when set up', async () => {
       window.history.pushState(undefined, '', '#/home?a=b&embed=true');
 
       const service = new ChromeService({ browserSupportsCsp: true });
@@ -260,6 +245,37 @@ Array [
   Array [
     "baz",
   ],
+]
+`);
+    });
+  });
+
+  describe('badge', () => {
+    it('updates/emits the current badge', async () => {
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = service.start(defaultStartDeps());
+      const promise = start
+        .getBadge$()
+        .pipe(toArray())
+        .toPromise();
+
+      start.setBadge({ text: 'foo', tooltip: `foo's tooltip` });
+      start.setBadge({ text: 'bar', tooltip: `bar's tooltip` });
+      start.setBadge(undefined);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+Array [
+  undefined,
+  Object {
+    "text": "foo",
+    "tooltip": "foo's tooltip",
+  },
+  Object {
+    "text": "bar",
+    "tooltip": "bar's tooltip",
+  },
+  undefined,
 ]
 `);
     });

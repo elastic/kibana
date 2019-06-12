@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -236,11 +236,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickBucket('Split Series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        await PageObjects.common.sleep(1003);
+        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['200', '404', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
@@ -251,7 +248,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.toggleOpenEditor(1, 'false');
         await PageObjects.visualize.selectCustomSortMetric(3, 'Min', 'bytes');
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['404', '200', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
@@ -278,18 +274,15 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickBucket('Split Series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
 
         await PageObjects.visualize.toggleOpenEditor(3, 'false');
         await PageObjects.visualize.clickAddBucket();
         await PageObjects.visualize.clickBucket('Split Series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('machine.os');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        await PageObjects.common.sleep(1003);
+        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = [
           '200 - win 8', '200 - win xp', '200 - ios', '200 - osx', '200 - win 7',
@@ -303,7 +296,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct series when disabling first agg', async function () {
         await PageObjects.visualize.toggleDisabledAgg(3);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = [ 'win 8', 'win xp', 'ios', 'osx', 'win 7' ];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
@@ -318,12 +310,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
         await PageObjects.visualize.toggleOpenEditor(1);
         await PageObjects.visualize.selectAggregation('Derivative', 'metrics');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-
-        await PageObjects.common.sleep(1003);
+        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = [
           'Derivative of Count'

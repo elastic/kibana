@@ -30,14 +30,14 @@ import 'uiExports/autocompleteProviders';
 import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
+import 'ui/kbn_top_nav';
 import 'plugins/kibana/dashboard';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
-import 'ui/pager';
-import 'ui/pager_control';
 import 'leaflet';
+import { npStart } from 'ui/new_platform';
 
 import { showAppRedirectNotification } from 'ui/notify';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
@@ -50,7 +50,7 @@ routes.otherwise({ redirectTo: defaultUrl() });
 
 chrome
   .setRootController('kibana', function () {
-    chrome.showOnlyById('kibana:dashboard');
+    npStart.core.chrome.navLinks.showOnly('kibana:dashboard');
   });
 
 uiModules.get('kibana').run(showAppRedirectNotification);

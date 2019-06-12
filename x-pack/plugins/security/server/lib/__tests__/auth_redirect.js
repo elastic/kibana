@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 import { hFixture } from './__fixtures__/h';
@@ -34,8 +34,6 @@ describe('lib/auth_redirect', function () {
       .isAvailable.returns(true);
     server.plugins.xpack_main.info
       .feature.returns({ isEnabled: sinon.stub().returns(true) });
-    server.plugins.xpack_main.info
-      .license.isOneOf.returns(false);
 
     authenticate = authenticateFactory(server);
   });
@@ -105,6 +103,31 @@ describe('lib/auth_redirect', function () {
     sinon.assert.notCalled(h.authenticated);
   });
 
+  it('includes `WWW-Authenticate` header if `authenticate` fails to authenticate user and provides challenges', async () => {
+    const originalEsError = Boom.unauthorized('some message');
+    originalEsError.output.headers['WWW-Authenticate'] = [
+      'Basic realm="Access to prod", charset="UTF-8"',
+      'Basic',
+      'Negotiate'
+    ];
+
+    server.plugins.security.authenticate.withArgs(request).resolves(
+      AuthenticationResult.failed(originalEsError, ['Negotiate'])
+    );
+
+    const response = await authenticate(request, h);
+
+    sinon.assert.calledWithExactly(
+      server.log,
+      ['info', 'authentication'],
+      'Authentication attempt failed: some message'
+    );
+    expect(response.message).to.eql(originalEsError.message);
+    expect(response.output.headers).to.eql({ 'WWW-Authenticate': ['Negotiate'] });
+    sinon.assert.notCalled(h.redirect);
+    sinon.assert.notCalled(h.authenticated);
+  });
+
   it('returns `unauthorized` when authentication can not be handled', async () => {
     server.plugins.security.authenticate.withArgs(request).returns(
       Promise.resolve(AuthenticationResult.notHandled())
@@ -128,12 +151,4 @@ describe('lib/auth_redirect', function () {
     sinon.assert.notCalled(h.redirect);
   });
 
-  it('replies with no credentials when license is basic', async () => {
-    server.plugins.xpack_main.info.license.isOneOf.returns(true);
-
-    await authenticate(request, h);
-
-    sinon.assert.calledWith(h.authenticated, { credentials: {} });
-    sinon.assert.notCalled(h.redirect);
-  });
 });

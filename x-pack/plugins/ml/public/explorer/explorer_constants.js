@@ -25,10 +25,17 @@ export const EXPLORER_ACTION = {
   RELOAD: 'reload',
 };
 
+export const FILTER_ACTION = {
+  ADD: '+',
+  REMOVE: '-',
+};
+
 export const APP_STATE_ACTION = {
+  CLEAR_INFLUENCER_FILTER_SETTINGS: 'clearInfluencerFilterSettings',
   CLEAR_SELECTION: 'clearSelection',
   SAVE_SELECTION: 'saveSelection',
   SAVE_SWIMLANE_VIEW_BY_FIELD_NAME: 'saveSwimlaneViewByFieldName',
+  SAVE_INFLUENCER_FILTER_SETTINGS: 'saveInfluencerFilterSettings'
 };
 
 export const SWIMLANE_TYPE = {
@@ -44,5 +51,6 @@ export const CHART_TYPE = {
 
 export const MAX_CATEGORY_EXAMPLES = 10;
 export const MAX_INFLUENCER_FIELD_VALUES = 10;
+export const MAX_INFLUENCER_FIELD_NAMES = 50;
 
 export const VIEW_BY_JOB_LABEL = i18n.translate('xpack.ml.explorer.jobIdLabel', { defaultMessage: 'job ID' });

@@ -2,40 +2,29 @@
 
 exports[`Home component should render 1`] = `
 <div>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
+  <ApmHeader>
+    <EuiFlexGroup
+      alignItems="center"
     >
-      <EuiTitle
-        size="l"
-        textTransform="none"
+      <EuiFlexItem
+        grow={false}
       >
-        <h1>
-          APM
-        </h1>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <SetupInstructionsLink />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="l"
-  />
-  <Connect(KueryBarView) />
-  <withRouter(HistoryTabsWithoutRouter)
+        <EuiTitle
+          size="l"
+        >
+          <h1>
+            APM
+          </h1>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <SetupInstructionsLink />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </ApmHeader>
+  <HistoryTabs
     tabs={
       Array [
         Object {

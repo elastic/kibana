@@ -5,7 +5,8 @@
  */
 
 import * as React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../../common/eui_styled_components';
 
 interface HighlightedIntervalProps {
   className?: string;
@@ -35,7 +36,7 @@ export const HighlightedInterval: React.SFC<HighlightedIntervalProps> = ({
 
 HighlightedInterval.displayName = 'HighlightedInterval';
 
-const HighlightPolygon = styled.polygon`
+const HighlightPolygon = euiStyled.polygon`
   fill: ${props => props.theme.eui.euiColorPrimary};
   fill-opacity: 0.3;
   stroke: ${props => props.theme.eui.euiColorPrimary};

@@ -98,8 +98,6 @@ export class LegacyPlatformProxy extends EventEmitter {
    * Neither new nor legacy platform should use this method directly.
    */
   public getConnections(callback: (error: Error | null, count?: number) => void) {
-    this.log.debug('"getConnections" has been called.');
-
     // This method is used by `even-better` (before we start platform).
     // It seems that the latest version of parent `good` doesn't use this anymore.
     this.server.getConnections(callback);

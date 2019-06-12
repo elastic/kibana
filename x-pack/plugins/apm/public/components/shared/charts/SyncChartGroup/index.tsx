@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import React from 'react';
-import { timefilter } from 'ui/timefilter';
+import { fromQuery, toQuery } from '../../Links/url_helpers';
+import { history } from '../../../../utils/history';
 
 export interface RangeSelection {
   start: number;
@@ -44,12 +44,22 @@ export class SyncChartGroup extends React.Component<
     this.setState({ hoverX: null });
   public onSelectionEnd: OnSelectionEndHandler = range => {
     this.setState({ hoverX: null });
-    timefilter.setTime({
-      from: moment(range.start).toISOString(),
-      to: moment(range.end).toISOString(),
-      mode: 'absolute'
+
+    const currentSearch = toQuery(history.location.search);
+    const nextSearch = {
+      rangeFrom: new Date(range.start).toISOString(),
+      rangeTo: new Date(range.end).toISOString()
+    };
+
+    history.push({
+      ...history.location,
+      search: fromQuery({
+        ...currentSearch,
+        ...nextSearch
+      })
     });
   };
+
   public render() {
     return this.props.render({
       onHover: this.onHover,

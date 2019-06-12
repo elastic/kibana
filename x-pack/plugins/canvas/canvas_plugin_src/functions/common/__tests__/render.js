@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { render } from '../render';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { DEFAULT_ELEMENT_CSS } from '../../../../common/lib/constants';
 import { testTable } from './fixtures/test_tables';
 import { fontStyle, containerStyle } from './fixtures/test_styles';
 
@@ -56,9 +57,9 @@ describe('render', () => {
         expect(result).to.have.property('css', '".canvasRenderEl { background-color: red; }"');
       });
 
-      it("defaults to '* > * {}'", () => {
+      it(`defaults to '${DEFAULT_ELEMENT_CSS}'`, () => {
         const result = fn(renderTable);
-        expect(result).to.have.property('css', '"* > * {}"');
+        expect(result).to.have.property('css', `"${DEFAULT_ELEMENT_CSS}"`);
       });
     });
 

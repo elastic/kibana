@@ -23,7 +23,7 @@
 
 import crypto from 'crypto';
 import _ from 'lodash';
-import { IndexMapping, MappingProperties } from './call_cluster';
+import { IndexMapping, MappingProperties } from './../../../mappings';
 
 /**
  * Creates an index mapping with the core properties required by saved object

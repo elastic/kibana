@@ -22,7 +22,6 @@ describe('SingleSearchRequest', () => {
   let searchRequest;
   let req;
   let callWithRequest;
-  let indexPattern;
   let getServiceMock;
   let includeFrozen;
 
@@ -30,31 +29,29 @@ describe('SingleSearchRequest', () => {
     includeFrozen = false;
     getServiceMock = jest.fn().mockResolvedValue(includeFrozen);
     req = {
-      getUiSettingsService: jest.fn().mockReturnValue({ get: getServiceMock })
+      getUiSettingsService: jest.fn().mockReturnValue({ get: getServiceMock }),
     };
     callWithRequest = jest.fn().mockReturnValue({});
-    indexPattern = 'indexPattern';
-    searchRequest = new SingleSearchRequest(req, callWithRequest, indexPattern);
+    searchRequest = new SingleSearchRequest(req, callWithRequest);
   });
 
   test('should init an SingleSearchRequest instance', () => {
     expect(searchRequest.req).toBe(req);
     expect(searchRequest.callWithRequest).toBe(callWithRequest);
-    expect(searchRequest.indexPattern).toBe(indexPattern);
     expect(searchRequest.search).toBeDefined();
   });
 
   test('should get the response from elastic search', async () => {
-    const options = {};
+    const searches = [{ body: 'body', index: 'index' }];
 
-    const responses = await searchRequest.search(options);
+    const responses = await searchRequest.search(searches);
 
     expect(responses).toEqual([{}]);
     expect(req.getUiSettingsService).toHaveBeenCalled();
     expect(getServiceMock).toHaveBeenCalledWith('search:includeFrozen');
     expect(callWithRequest).toHaveBeenCalledWith(req, 'search', {
-      ...options,
-      index: indexPattern,
+      body: 'body',
+      index: 'index',
       ignore_throttled: !includeFrozen,
     });
   });

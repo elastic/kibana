@@ -5,9 +5,11 @@
  */
 
 import { registerFetchRoute } from './register_fetch_route';
+import { registerCreateRoute } from './register_create_route';
 import { registerDeleteRoute } from './register_delete_route';
 
 export function registerPoliciesRoutes(server) {
   registerFetchRoute(server);
+  registerCreateRoute(server);
   registerDeleteRoute(server);
 }

@@ -26,10 +26,12 @@ An _advanced job_ can contain multiple detectors and enables you to configure al
 job settings.
 
 {kib} can also recognize certain types of data and provide specialized wizards
-for that context.  For example, if you use {filebeat-ref}/index.html[{filebeat}]
+for that context. For example, if you use {filebeat-ref}/index.html[{filebeat}]
 to ship access logs from your
 http://nginx.org/[Nginx] and https://httpd.apache.org/[Apache] HTTP servers to
-{es}, the following wizards appear:
+{es} and store it using fields and datatypes from the
+{ecs-ref}/ecs-reference.html[Elastic Common Schema (ECS)], the following wizards
+appear:
 
 [role="screenshot"]
 image::ml/images/ml-data-recognizer-filebeat.jpg[A screenshot of the {filebeat} job creation wizards]
@@ -38,19 +40,18 @@ Likewise, if you use {auditbeat-ref}/index.html[{auditbeat}] to audit process
 activity on your systems, the following wizards appear:
 
 [role="screenshot"]
-image::ml/images/ml-data-recognizer-auditbeat.jpg[A screenshot of the {auditbeat} job creation wizards]
+image::ml/images/ml-data-recognizer-auditbeat.jpg[A screenshot of the {auditbeat} job creation wizards] 
 
 These wizards create {ml} jobs, dashboards, searches, and visualizations that
 are customized to help you analyze your {auditbeat} and {filebeat} data.
 
 If you are not certain which type of job to create, you can use the
-*Data Visualizer* to learn more about your data and to identify possible fields
-for {ml} analysis. 
+*Data Visualizer* to learn more about your data. If your index pattern contains
+a time field, it can identify possible fields for {ml} analysis. 
 
 [NOTE] 
 ===============================
-* If your index pattern does not contain a time field, you cannot use the *Data Visualizer*. 
-* If your data is located outside of {es}, you cannot use {kib} to create
+If your data is located outside of {es}, you cannot use {kib} to create
 your jobs and you cannot use {dfeeds} to retrieve your data in real time.
 Machine learning analysis is still possible, however, by using APIs to
 create and manage jobs and post data to them. For more information, see

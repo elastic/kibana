@@ -59,6 +59,124 @@ Object {
 });
 
 describe('visualization', () => {
+  describe('date histogram time zone removal', () => {
+    const migrate = doc => migrations.visualization['6.7.2'](doc);
+    let doc;
+    beforeEach(() => {
+      doc = {
+        attributes: {
+          visState: JSON.stringify({
+            aggs: [
+              {
+                'enabled': true,
+                'id': '1',
+                'params': {
+                  // Doesn't make much sense but we want to test it's not removing it from anything else
+                  time_zone: 'Europe/Berlin',
+                },
+                'schema': 'metric',
+                'type': 'count'
+              },
+              {
+                'enabled': true,
+                'id': '2',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'time_zone': 'Europe/Berlin',
+                  'interval': 'auto',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '4',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'interval': 'auto',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '3',
+                'params': {
+                  'customBucket': {
+                    'enabled': true,
+                    'id': '1-bucket',
+                    'params': {
+                      'customInterval': '2h',
+                      'drop_partials': false,
+                      'extended_bounds': {},
+                      'field': 'timestamp',
+                      'interval': 'auto',
+                      'min_doc_count': 1,
+                      'time_zone': 'Europe/Berlin',
+                      'useNormalizedEsInterval': true
+                    },
+                    'type': 'date_histogram'
+                  },
+                  'customMetric': {
+                    'enabled': true,
+                    'id': '1-metric',
+                    'params': {},
+                    'type': 'count'
+                  }
+                },
+                'schema': 'metric',
+                'type': 'max_bucket'
+              },
+            ]
+          }),
+        }
+      };
+    });
+
+    it('should remove time_zone from date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1]).not.toHaveProperty('params.time_zone');
+    });
+
+    it('should not remove time_zone from non date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[0]).toHaveProperty('params.time_zone');
+    });
+
+    it('should remove time_zone from nested aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
+    });
+
+    it('should not fail on date histograms without a time_zone', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[2]).not.toHaveProperty('params.time_zone');
+    });
+
+    it('should be able to apply the migration twice, since we need it for 6.7.2 and 7.0.1', () => {
+      const migratedDoc = migrate(migrate(doc));
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1]).not.toHaveProperty('params.time_zone');
+      expect(aggs[0]).toHaveProperty('params.time_zone');
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
+      expect(aggs[2]).not.toHaveProperty('params.time_zone');
+    });
+  });
+
   describe('7.0.0', () => {
     const migrate = doc => migrations.visualization['7.0.0'](doc);
     const generateDoc = ({ type, aggs }) => ({
@@ -596,6 +714,338 @@ Object {
         },
       };
       expect(() => migrate(doc)).toThrowError(/My Vis/);
+    });
+  });
+
+  describe('date histogram custom interval removal', () => {
+    const migrate = doc => migrations.visualization['7.2.0'](doc);
+    let doc;
+    beforeEach(() => {
+      doc = {
+        attributes: {
+          visState: JSON.stringify({
+            aggs: [
+              {
+                'enabled': true,
+                'id': '1',
+                'params': {
+                  'customInterval': '1h'
+                },
+                'schema': 'metric',
+                'type': 'count'
+              },
+              {
+                'enabled': true,
+                'id': '2',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'interval': 'auto',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '4',
+                'params': {
+                  'customInterval': '2h',
+                  'drop_partials': false,
+                  'extended_bounds': {},
+                  'field': 'timestamp',
+                  'interval': 'custom',
+                  'min_doc_count': 1,
+                  'useNormalizedEsInterval': true
+                },
+                'schema': 'segment',
+                'type': 'date_histogram'
+              },
+              {
+                'enabled': true,
+                'id': '3',
+                'params': {
+                  'customBucket': {
+                    'enabled': true,
+                    'id': '1-bucket',
+                    'params': {
+                      'customInterval': '2h',
+                      'drop_partials': false,
+                      'extended_bounds': {},
+                      'field': 'timestamp',
+                      'interval': 'custom',
+                      'min_doc_count': 1,
+                      'useNormalizedEsInterval': true
+                    },
+                    'type': 'date_histogram'
+                  },
+                  'customMetric': {
+                    'enabled': true,
+                    'id': '1-metric',
+                    'params': {},
+                    'type': 'count'
+                  }
+                },
+                'schema': 'metric',
+                'type': 'max_bucket'
+              },
+            ]
+          }),
+        }
+      };
+    });
+
+    it('should remove customInterval from date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1]).not.toHaveProperty('params.customInterval');
+    });
+
+    it('should not change interval from date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[1].params.interval).toBe(JSON.parse(doc.attributes.visState).aggs[1].params.interval);
+    });
+
+    it('should not remove customInterval from non date_histogram aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[0]).toHaveProperty('params.customInterval');
+    });
+
+    it('should set interval with customInterval value and remove customInterval when interval equals "custom"', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[2].params.interval).toBe(JSON.parse(doc.attributes.visState).aggs[2].params.customInterval);
+      expect(aggs[2]).not.toHaveProperty('params.customInterval');
+    });
+
+    it('should remove customInterval from nested aggregations', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.customInterval');
+    });
+
+    it('should remove customInterval from nested aggregations and set interval with customInterval value', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3].params.customBucket.params.interval)
+        .toBe(JSON.parse(doc.attributes.visState).aggs[3].params.customBucket.params.customInterval);
+      expect(aggs[3]).not.toHaveProperty('params.customBucket.params.customInterval');
+    });
+
+    it('should not fail on date histograms without a customInterval', () => {
+      const migratedDoc = migrate(doc);
+      const aggs = JSON.parse(migratedDoc.attributes.visState).aggs;
+      expect(aggs[3]).not.toHaveProperty('params.customInterval');
+    });
+  });
+  describe('7.3.0', () => {
+    const migrate = doc => migrations.visualization['7.3.0'](doc);
+
+    it('migrates type = gauge verticalSplit: false to alignment: vertical', () => {
+      const migratedDoc = migrate({
+        attributes: {
+          visState: JSON.stringify({ type: 'gauge', params: { gauge: { verticalSplit: false } } }),
+        },
+      });
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"horizontal\\"}}}",
+  },
+}
+`);
+    });
+
+    it('migrates type = gauge verticalSplit: false to alignment: horizontal', () => {
+      const migratedDoc = migrate({
+        attributes: {
+          visState: JSON.stringify({ type: 'gauge', params: { gauge: { verticalSplit: true } } }),
+        },
+      });
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"vertical\\"}}}",
+  },
+}
+`);
+    });
+
+    it('doesnt migrate type = gauge containing invalid visState object', () => {
+      const migratedDoc = migrate({
+        attributes: {
+          visState: JSON.stringify({ type: 'gauge' }),
+        },
+      });
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "visState": "{\\"type\\":\\"gauge\\"}",
+  },
+}
+`);
+    });
+
+    describe('filters agg query migration', () => {
+      const doc = {
+        attributes: {
+          visState: JSON.stringify({
+            aggs: [
+              {
+                type: 'filters',
+                params: {
+                  filters: [
+                    {
+                      input: {
+                        query: 'response:200',
+                      },
+                      label: '',
+                    },
+                    {
+                      input: {
+                        query: 'response:404',
+                      },
+                      label: 'bad response',
+                    },
+                    {
+                      input: {
+                        query: {
+                          exists: {
+                            field: 'phpmemory',
+                          },
+                        },
+                      },
+                      label: '',
+                    },
+                  ],
+                },
+              },
+            ],
+          }),
+        },
+      };
+
+      it('should add language property to filters without one, assuming lucene', () => {
+        const migrationResult = migrate(doc);
+        expect(migrationResult).toEqual({
+          attributes: {
+            visState: JSON.stringify({
+              aggs: [
+                {
+                  type: 'filters',
+                  params: {
+                    filters: [
+                      {
+                        input: {
+                          query: 'response:200',
+                          language: 'lucene',
+                        },
+                        label: '',
+                      },
+                      {
+                        input: {
+                          query: 'response:404',
+                          language: 'lucene',
+                        },
+                        label: 'bad response',
+                      },
+                      {
+                        input: {
+                          query: {
+                            exists: {
+                              field: 'phpmemory',
+                            },
+                          },
+                          language: 'lucene',
+                        },
+                        label: '',
+                      },
+                    ],
+                  },
+                },
+              ],
+            }),
+          },
+        });
+      });
+    });
+  });
+  describe('7.3.0 tsvb', () => {
+    const migrate = doc => migrations.visualization['7.3.0'](doc);
+    const generateDoc = ({ params }) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({ params }),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+      },
+    });
+    it('should change series item filters from a string into an object', () => {
+      const params = { type: 'metric', series: [{ filter: 'Filter Bytes Test:>1000' }] };
+      const testDoc1 = generateDoc({ params });
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+      expect(series[0].filter).toHaveProperty('query');
+      expect(series[0].filter).toHaveProperty('language');
+    });
+    it('should not change a series item filter string in the object after migration', () => {
+      const markdownParams = {
+        type: 'markdown',
+        series: [
+          {
+            filter: 'Filter Bytes Test:>1000',
+            split_filters: [{ filter: 'bytes:>1000' }],
+          }
+        ]
+      };
+      const markdownDoc = generateDoc({ params: markdownParams });
+      const migratedMarkdownDoc = migrate(markdownDoc);
+      const markdownSeries = JSON.parse(migratedMarkdownDoc.attributes.visState).params.series;
+      expect(markdownSeries[0].filter.query).toBe(JSON.parse(markdownDoc.attributes.visState).params.series[0].filter);
+      expect(markdownSeries[0].split_filters[0].filter.query)
+        .toBe(JSON.parse(markdownDoc.attributes.visState).params.series[0].split_filters[0].filter);
+    });
+    it('should change series item filters from a string into an object for all filters', () => {
+      const params = {
+        type: 'timeseries',
+        filter: 'bytes:>1000',
+        series: [
+          {
+            filter: 'Filter Bytes Test:>1000',
+            split_filters: [{ filter: 'bytes:>1000' }],
+          }
+        ],
+        annotations: [{ query_string: 'bytes:>1000' }],
+      };
+      const timeSeriesDoc = generateDoc({ params: params });
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+      expect(Object.keys(timeSeriesParams.series[0].filter)).toEqual(expect.arrayContaining(['query', 'language']));
+      expect(Object.keys(timeSeriesParams.series[0].split_filters[0].filter)).toEqual(expect.arrayContaining(['query', 'language']));
+      expect(Object.keys(timeSeriesParams.annotations[0].query_string)).toEqual(expect.arrayContaining(['query', 'language']));
+    });
+    it('should not fail on a metric visualization without a filter in a series item', () => {
+      const params = { type: 'metric', series: [{}, {}, {}] };
+      const testDoc1 = generateDoc({ params });
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+      expect(series[2]).not.toHaveProperty('filter.query');
+    });
+    it('should not migrate a visualization of unknown type', () => {
+      const params = { type: 'unknown', series: [{ filter: 'foo:bar' }] };
+      const doc = generateDoc({ params });
+      const migratedDoc = migrate(doc);
+      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+      expect(series[0].filter).toEqual(params.series[0].filter);
     });
   });
 });

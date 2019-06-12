@@ -11,7 +11,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
@@ -20,29 +19,32 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { capabilities } from 'ui/capabilities';
+import { kfetch } from 'ui/kfetch';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
-
-import { SpacesNavState } from 'plugins/spaces/views/nav_control';
-import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
+import { Feature } from '../../../../../xpack_main/types';
 import { isReservedSpace } from '../../../../common';
+import { DEFAULT_SPACE_ID } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
 import { getSpacesFeatureDescription } from '../../../lib/constants';
 import { SpacesManager } from '../../../lib/spaces_manager';
+import { SpacesNavState } from '../../nav_control';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
+import { getEnabledFeatures } from '../lib/feature_utils';
 
 interface Props {
   spacesManager: SpacesManager;
   spacesNavState: SpacesNavState;
-  userProfile: UserProfile;
   intl: InjectedIntl;
 }
 
 interface State {
   spaces: Space[];
+  features: Feature[];
   loading: boolean;
   showConfirmDeleteModal: boolean;
   selectedSpace: Space | null;
@@ -54,6 +56,7 @@ class SpacesGridPageUI extends Component<Props, State> {
     super(props);
     this.state = {
       spaces: [],
+      features: [],
       loading: true,
       showConfirmDeleteModal: false,
       selectedSpace: null,
@@ -62,14 +65,16 @@ class SpacesGridPageUI extends Component<Props, State> {
   }
 
   public componentDidMount() {
-    this.loadGrid();
+    if (capabilities.get().spaces.manage) {
+      this.loadGrid();
+    }
   }
 
   public render() {
     return (
       <div className="spcGridPage">
         <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
-        <SecureSpaceMessage userProfile={this.props.userProfile} />
+        <SecureSpaceMessage />
         {this.getConfirmDeleteModal()}
       </div>
     );
@@ -77,7 +82,8 @@ class SpacesGridPageUI extends Component<Props, State> {
 
   public getPageContent() {
     const { intl } = this.props;
-    if (!this.props.userProfile.hasCapability('manageSpaces')) {
+
+    if (!capabilities.get().spaces.manage) {
       return <UnauthorizedPrompt />;
     }
 
@@ -218,32 +224,31 @@ class SpacesGridPageUI extends Component<Props, State> {
     spacesNavState.refreshSpacesList();
   };
 
-  public loadGrid = () => {
+  public loadGrid = async () => {
     const { spacesManager } = this.props;
 
     this.setState({
       loading: true,
       spaces: [],
+      features: [],
     });
 
-    const setSpaces = (spaces: Space[]) => {
+    const getSpaces = spacesManager.getSpaces();
+    const getFeatures = kfetch({ method: 'get', pathname: '/api/features/v1' });
+
+    try {
+      const [spaces, features] = await Promise.all([getSpaces, getFeatures]);
       this.setState({
         loading: false,
         spaces,
+        features,
       });
-    };
-
-    spacesManager
-      .getSpaces()
-      .then(spaces => {
-        setSpaces(spaces);
-      })
-      .catch(error => {
-        this.setState({
-          loading: false,
-          error,
-        });
+    } catch (error) {
+      this.setState({
+        loading: false,
+        error,
       });
+    }
   };
 
   public getColumnConfig() {
@@ -254,17 +259,15 @@ class SpacesGridPageUI extends Component<Props, State> {
         name: '',
         width: '50px',
         sortable: true,
-        render: (value: string, record: Space) => {
-          return (
-            <EuiLink
-              onClick={() => {
-                this.onEditSpaceClick(record);
-              }}
-            >
-              <SpaceAvatar space={record} size="s" />
-            </EuiLink>
-          );
-        },
+        render: (value: string, record: Space) => (
+          <EuiLink
+            onClick={() => {
+              this.onEditSpaceClick(record);
+            }}
+          >
+            <SpaceAvatar space={record} size="s" />
+          </EuiLink>
+        ),
       },
       {
         field: 'name',
@@ -273,25 +276,15 @@ class SpacesGridPageUI extends Component<Props, State> {
           defaultMessage: 'Space',
         }),
         sortable: true,
-        render: (value: string, record: Space) => {
-          return (
-            <EuiLink
-              onClick={() => {
-                this.onEditSpaceClick(record);
-              }}
-            >
-              {value}
-            </EuiLink>
-          );
-        },
-      },
-      {
-        field: 'id',
-        name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGridPage.identifierColumnName',
-          defaultMessage: 'Identifier',
-        }),
-        sortable: true,
+        render: (value: string, record: Space) => (
+          <EuiLink
+            onClick={() => {
+              this.onEditSpaceClick(record);
+            }}
+          >
+            {value}
+          </EuiLink>
+        ),
       },
       {
         field: 'description',
@@ -302,51 +295,100 @@ class SpacesGridPageUI extends Component<Props, State> {
         sortable: true,
       },
       {
+        field: 'disabledFeatures',
+        name: intl.formatMessage({
+          id: 'xpack.spaces.management.spacesGridPage.featuresColumnName',
+          defaultMessage: 'Features',
+        }),
+        sortable: true,
+        render: (disabledFeatures: string[], record: Space) => {
+          const enabledFeatureCount = getEnabledFeatures(this.state.features, record).length;
+          if (enabledFeatureCount === this.state.features.length) {
+            return (
+              <FormattedMessage
+                id="xpack.spaces.management.spacesGridPage.allFeaturesEnabled"
+                defaultMessage="All features visible"
+              />
+            );
+          }
+          if (enabledFeatureCount === 0) {
+            return (
+              <EuiText color={'danger'}>
+                <FormattedMessage
+                  id="xpack.spaces.management.spacesGridPage.noFeaturesEnabled"
+                  defaultMessage="No features visible"
+                />
+              </EuiText>
+            );
+          }
+          return (
+            <FormattedMessage
+              id="xpack.spaces.management.spacesGridPage.someFeaturesEnabled"
+              defaultMessage="{enabledFeatureCount} / {totalFeatureCount} features visible"
+              values={{
+                enabledFeatureCount,
+                totalFeatureCount: this.state.features.length,
+              }}
+            />
+          );
+        },
+      },
+      {
+        field: 'id',
+        name: intl.formatMessage({
+          id: 'xpack.spaces.management.spacesGridPage.identifierColumnName',
+          defaultMessage: 'Identifier',
+        }),
+        sortable: true,
+        render(id: string) {
+          if (id === DEFAULT_SPACE_ID) {
+            return '';
+          }
+          return id;
+        },
+      },
+      {
         name: intl.formatMessage({
           id: 'xpack.spaces.management.spacesGridPage.actionsColumnName',
           defaultMessage: 'Actions',
         }),
         actions: [
           {
-            render: (record: Space) => {
-              return (
-                <EuiButtonIcon
-                  aria-label={intl.formatMessage(
-                    {
-                      id: 'xpack.spaces.management.spacesGridPage.editSpaceActionName',
-                      defaultMessage: `Edit {spaceName}.`,
-                    },
-                    {
-                      spaceName: record.name,
-                    }
-                  )}
-                  color={'primary'}
-                  iconType={'pencil'}
-                  onClick={() => this.onEditSpaceClick(record)}
-                />
-              );
-            },
+            render: (record: Space) => (
+              <EuiButtonIcon
+                aria-label={intl.formatMessage(
+                  {
+                    id: 'xpack.spaces.management.spacesGridPage.editSpaceActionName',
+                    defaultMessage: `Edit {spaceName}.`,
+                  },
+                  {
+                    spaceName: record.name,
+                  }
+                )}
+                color={'primary'}
+                iconType={'pencil'}
+                onClick={() => this.onEditSpaceClick(record)}
+              />
+            ),
           },
           {
             available: (record: Space) => !isReservedSpace(record),
-            render: (record: Space) => {
-              return (
-                <EuiButtonIcon
-                  aria-label={intl.formatMessage(
-                    {
-                      id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
-                      defaultMessage: `Delete {spaceName}.`,
-                    },
-                    {
-                      spaceName: record.name,
-                    }
-                  )}
-                  color={'danger'}
-                  iconType={'trash'}
-                  onClick={() => this.onDeleteSpaceClick(record)}
-                />
-              );
-            },
+            render: (record: Space) => (
+              <EuiButtonIcon
+                aria-label={intl.formatMessage(
+                  {
+                    id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
+                    defaultMessage: `Delete {spaceName}.`,
+                  },
+                  {
+                    spaceName: record.name,
+                  }
+                )}
+                color={'danger'}
+                iconType={'trash'}
+                onClick={() => this.onDeleteSpaceClick(record)}
+              />
+            ),
           },
         ],
       },

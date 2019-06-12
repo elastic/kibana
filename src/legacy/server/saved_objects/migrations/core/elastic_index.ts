@@ -23,18 +23,9 @@
  */
 
 import _ from 'lodash';
-import { MigrationVersion } from '../../serialization';
-import {
-  AliasAction,
-  CallCluster,
-  IndexMapping,
-  NotFound,
-  RawDoc,
-  ShardsInfo,
-} from './call_cluster';
-
-// @ts-ignore untyped dependency
-import { getTypes } from '../../../mappings';
+import { IndexMapping } from '../../../mappings';
+import { MigrationVersion } from '../../';
+import { AliasAction, CallCluster, NotFound, RawDoc, ShardsInfo } from './call_cluster';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { checkLicense } from '../check_license';
 
@@ -58,21 +58,21 @@ describe('check_license', function () {
   });
 
 
-  it('should not show login page or other security elements if license is basic.', () => {
+  it('should show login page and other security elements if license is basic and security is enabled.', () => {
     mockXPackInfo.license.isOneOf.withArgs(['basic']).returns(true);
+    mockXPackInfo.license.isOneOf.withArgs(['platinum', 'trial']).returns(false);
     mockXPackInfo.feature.withArgs('security').returns({
       isEnabled: () => { return true; }
     });
 
     const licenseCheckResults = checkLicense(mockXPackInfo);
     expect(licenseCheckResults).to.be.eql({
-      showLogin: false,
-      allowLogin: false,
-      showLinks: false,
+      showLogin: true,
+      allowLogin: true,
+      showLinks: true,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
-      allowRbac: false,
-      linksMessage: 'Your Basic license does not support Security. Please upgrade your license.'
+      allowRbac: true
     });
   });
 

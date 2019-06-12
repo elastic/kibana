@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import 'ui/doc_title';
-import { useResizeChecker } from '../sense_editor_resize';
+import { DocTitleProvider } from 'ui/doc_title';
+
+import { applyResizeCheckerToEditors } from '../sense_editor_resize';
 import $ from 'jquery';
 import { initializeInput } from '../input';
 import { initializeOutput } from '../output';
@@ -28,16 +29,22 @@ import { DOC_LINK_VERSION } from 'ui/documentation_links';
 
 const module = require('ui/modules').get('app/sense');
 
-module.run(function (Private, $rootScope) {
+module.run(function ($rootScope) {
   module.setupResizeCheckerForRootEditors = ($el, ...editors) => {
-    return useResizeChecker($rootScope, $el, ...editors);
+    return applyResizeCheckerToEditors($rootScope, $el, ...editors);
   };
 });
 
-module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, docTitle, kbnUiAceKeyboardModeService) {
+module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, kbnUiAceKeyboardModeService) {
+  const docTitle = Private(DocTitleProvider);
   docTitle.change('Console');
 
   $scope.topNavController = Private(SenseTopNavController);
+
+  // Since we pass this callback via reactDirective into a react component, which has the function defined as required
+  // in it's prop types, we should set this initially (before it's set in the $timeout below). Without this line
+  // the component we pass this in will throw an propType validation error.
+  $scope.getRequestsAsCURL = () => '';
 
   // We need to wait for these elements to be rendered before we can select them with jQuery
   // and then initialize this app
@@ -53,6 +60,9 @@ module.controller('SenseController', function SenseController(Private, $scope, $
       $scope.getDocumentation();
     });
     $scope.getDocumentation();
+
+    // expose method for React Consumption
+    $scope.getRequestsAsCURL = input.getRequestsAsCURL;
   });
   $scope.getDocumentation = () => {
     input.getRequestsInRange(function (requests) {

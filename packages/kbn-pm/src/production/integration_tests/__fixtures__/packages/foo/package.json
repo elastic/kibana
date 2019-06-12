@@ -3,15 +3,21 @@
   "version": "1.0.0",
   "private": true,
   "main": "./target/index.js",
+  "kibana": {
+    "build": {
+      "oss": false
+    }
+  },
   "dependencies": {
     "@elastic/bar": "link:../bar"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
+    "@babel/core": "^7.3.4",
+    "@babel/cli": "^7.2.3",
+    "@babel/preset-env": "^7.3.4",
     "moment": "2.20.1"
   },
   "scripts": {
-    "build": "babel --presets env --out-dir target src"
+    "build": "babel --presets=@babel/preset-env --out-dir target src"
   }
 }

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
@@ -53,7 +53,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
   const createExpectNotSpaceAwareRbacForbidden = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Forbidden',
-      message: `Unable to get globaltype, missing action:saved_objects/globaltype/get`,
+      message: `Unable to get globaltype`,
       statusCode: 403,
     });
   };
@@ -76,7 +76,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
   const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Forbidden',
-      message: `Unable to get ${type}, missing action:saved_objects/${type}/get`,
+      message: `Unable to get ${type}`,
       statusCode: 403,
     });
   };
@@ -95,9 +95,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     expect(resp.body).to.eql({
       id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
       type: 'visualization',
-      migrationVersion: {
-        visualization: '7.0.0',
-      },
+      migrationVersion: resp.body.migrationVersion,
       updated_at: '2017-09-21T18:51:23.794Z',
       version: resp.body.version,
       attributes: {

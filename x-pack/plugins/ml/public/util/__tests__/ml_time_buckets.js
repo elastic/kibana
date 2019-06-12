@@ -7,29 +7,26 @@
 
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import {
-  IntervalHelperProvider,
+  MlTimeBuckets,
   getBoundsRoundedToInterval,
   calcEsInterval } from '../ml_time_buckets';
 
 describe('ML - time buckets', () => {
 
-  let TimeBuckets;
   let autoBuckets;
   let customBuckets;
 
   beforeEach(() => {
     ngMock.module('kibana');
-    ngMock.inject((Private) => {
-      // Create the TimeBuckets interval providers for use in the tests.
-      TimeBuckets = Private(IntervalHelperProvider);
+    ngMock.inject(() => {
 
-      autoBuckets = new TimeBuckets();
+      autoBuckets = new MlTimeBuckets();
       autoBuckets.setInterval('auto');
 
-      customBuckets = new TimeBuckets();
+      customBuckets = new MlTimeBuckets();
       customBuckets.setInterval('auto');
       customBuckets.setBarTarget(500);
       customBuckets.setMaxBars(550);

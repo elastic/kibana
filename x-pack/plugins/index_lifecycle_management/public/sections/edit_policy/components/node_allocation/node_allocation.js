@@ -5,11 +5,14 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiButtonEmpty, EuiCallOut, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { PHASE_NODE_ATTRS } from '../../../../store/constants';
-import { ErrableFormRow } from '../../form_errors';
+
+import { PHASE_NODE_ATTRS } from '../../../../constants';
 import { LearnMoreLink } from '../../../components/learn_more_link';
+import { ErrableFormRow } from '../../form_errors';
+
 const learnMoreLinks = (
   <Fragment>
     <EuiSpacer size="s" />
@@ -25,15 +28,16 @@ const learnMoreLinks = (
     />
   </Fragment>
 );
-class NodeAllocationUi extends Component {
+
+export class NodeAllocation extends Component {
   componentDidMount() {
     this.props.fetchNodes();
   }
+
   render() {
     const {
       phase,
       setPhaseData,
-      intl,
       isShowingErrors,
       phaseData,
       showNodeDetailsFlyout,
@@ -72,13 +76,13 @@ class NodeAllocationUi extends Component {
         </Fragment>
       );
     }
+
     return (
       <Fragment>
         <ErrableFormRow
           id={`${phase}-${PHASE_NODE_ATTRS}`}
-          label={intl.formatMessage({
-            id: 'xpack.indexLifecycleMgmt.editPolicy.nodeAllocationLabel',
-            defaultMessage: 'Select a node attribute to control shard allocation',
+          label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeAllocationLabel', {
+            defaultMessage: 'Select a node attribute to control shard allocation'
           })}
           errorKey={PHASE_NODE_ATTRS}
           isShowingErrors={isShowingErrors}
@@ -113,4 +117,3 @@ class NodeAllocationUi extends Component {
     );
   }
 }
-export const NodeAllocation = injectI18n(NodeAllocationUi);

@@ -58,7 +58,7 @@ export function Field(indexPattern, spec) {
 
   let format = spec.format;
   if (!format || !(format instanceof FieldFormat)) {
-    format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.getDefaultInstance(spec.type);
+    format = indexPattern.fieldFormatMap[spec.name] || fieldFormats.getDefaultInstance(spec.type, spec.esTypes);
   }
 
   const indexed = !!spec.indexed;
@@ -72,6 +72,7 @@ export function Field(indexPattern, spec) {
 
   obj.fact('name');
   obj.fact('type');
+  obj.fact('esTypes');
   obj.writ('count', spec.count || 0);
 
   // scripted objs
@@ -97,6 +98,10 @@ export function Field(indexPattern, spec) {
 
   // conflict info
   obj.writ('conflictDescriptions');
+
+  // multi info
+  obj.fact('parent');
+  obj.fact('subType');
 
   return obj.create();
 }

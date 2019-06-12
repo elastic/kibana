@@ -13,7 +13,7 @@ export const Tray = ({ children, done }) => {
     <Fragment>
       <EuiFlexGroup className="canvasTray__toggle" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon size="s" onClick={done} aria-label="Dismiss tray" iconType="arrowDown" />
+          <EuiButtonIcon size="s" onClick={done} aria-label="Close tray" iconType="arrowDown" />
         </EuiFlexItem>
       </EuiFlexGroup>
 

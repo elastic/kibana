@@ -1,6 +1,7 @@
 {
   "paths": {
     "common.ui": "src/legacy/ui",
+    "data": "src/legacy/core_plugins/data",
     "server": "src/legacy/server",
     "console": "src/legacy/core_plugins/console",
     "core": "src/core",
@@ -20,8 +21,10 @@
     "timelion": "src/legacy/core_plugins/timelion",
     "tagCloud": "src/legacy/core_plugins/tagcloud",
     "tsvb": "src/legacy/core_plugins/metrics",
+    "kbnESQuery": "packages/kbn-es-query",
     "xpack.apm": "x-pack/plugins/apm",
     "xpack.beatsManagement": "x-pack/plugins/beats_management",
+    "xpack.canvas": "x-pack/plugins/canvas",
     "xpack.crossClusterReplication": "x-pack/plugins/cross_cluster_replication",
     "xpack.dashboardMode": "x-pack/plugins/dashboard_mode",
     "xpack.graph": "x-pack/plugins/graph",
@@ -31,27 +34,28 @@
     "xpack.infra": "x-pack/plugins/infra",
     "xpack.kueryAutocomplete": "x-pack/plugins/kuery_autocomplete",
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
+    "xpack.maps": "x-pack/plugins/maps",
     "xpack.ml": "x-pack/plugins/ml",
     "xpack.logstash": "x-pack/plugins/logstash",
     "xpack.main": "x-pack/plugins/xpack_main",
+    "xpack.telemetry": "x-pack/plugins/telemetry",
     "xpack.monitoring": "x-pack/plugins/monitoring",
     "xpack.remoteClusters": "x-pack/plugins/remote_clusters",
     "xpack.reporting": "x-pack/plugins/reporting",
     "xpack.rollupJobs": "x-pack/plugins/rollup",
     "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
+    "xpack.siem": "x-pack/plugins/siem",
     "xpack.security": "x-pack/plugins/security",
     "xpack.server": "x-pack/server",
+    "xpack.snapshotRestore": "x-pack/plugins/snapshot_restore",
     "xpack.spaces": "x-pack/plugins/spaces",
     "xpack.upgradeAssistant": "x-pack/plugins/upgrade_assistant",
     "xpack.uptime": "x-pack/plugins/uptime",
     "xpack.watcher": "x-pack/plugins/watcher"
   },
-  "exclude": [
-    "src/legacy/ui/ui_render/bootstrap/app_bootstrap.js",
-    "src/legacy/ui/ui_render/ui_render_mixin.js",
-    "x-pack/plugins/infra/server/lib/domains/log_entries_domain/log_entries_domain.ts"
-  ],
+  "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
   "translations": [
-    "x-pack/plugins/translations/translations/zh-CN.json"
+    "x-pack/plugins/translations/translations/zh-CN.json",
+    "x-pack/plugins/translations/translations/ja-JP.json"
   ]
 }

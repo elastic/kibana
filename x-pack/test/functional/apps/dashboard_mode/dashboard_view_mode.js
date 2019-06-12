@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -25,11 +25,13 @@ export default function ({ getService, getPageObjects }) {
     'header',
     'settings',
     'timePicker',
+    'share',
   ]);
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
 
-  describe('Dashboard View Mode', () => {
+  describe('Dashboard View Mode', function () {
+    this.tags(['skipFirefox']);
 
     before('initialize tests', async () => {
       log.debug('Dashboard View Mode:initTests');
@@ -38,7 +40,6 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         'defaultIndex': 'logstash-*'
       });
-      await kibanaServer.uiSettings.disableToastAutohide();
       browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');
@@ -145,6 +146,11 @@ export default function ({ getService, getPageObjects }) {
         expect(filterCount).to.equal(1);
       });
 
+      it('shows the full screen menu item', async () => {
+        const fullScreenMenuItemExists = await testSubjects.exists('dashboardFullScreenMode');
+        expect(fullScreenMenuItemExists).to.be(true);
+      });
+
       it('does not show the edit menu item', async () => {
         const editMenuItemExists = await testSubjects.exists('dashboardEditMode');
         expect(editMenuItemExists).to.be(false);
@@ -160,9 +166,14 @@ export default function ({ getService, getPageObjects }) {
         expect(reportingMenuItemExists).to.be(false);
       });
 
-      it('does not show the sharing menu item', async () => {
+      it('shows the sharing menu item', async () => {
         const shareMenuItemExists = await testSubjects.exists('shareTopNavButton');
-        expect(shareMenuItemExists).to.be(false);
+        expect(shareMenuItemExists).to.be(true);
+      });
+
+      it(`Permalinks doesn't show create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlMissingOrFail();
       });
 
       it('does not show the visualization edit icon', async () => {

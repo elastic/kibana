@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import 'ui/angular_ui_select';
 
 import { aggTypes } from 'ui/agg_types';
@@ -20,7 +21,7 @@ import uiRoutes from 'ui/routes';
 import { getSafeAggregationName } from 'plugins/ml/../common/util/job_utils';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { getCreateSingleMetricJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
@@ -39,7 +40,6 @@ import {
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { SingleMetricJobServiceProvider } from './create_job_service';
-import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
 import template from './create_job.html';
@@ -64,22 +64,13 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlCreateSingleMetricJob', function (
-    $scope,
-    $route,
-    $filter,
-    $timeout,
-    Private,
-    AppState,
-    i18n) {
+  .controller('MlCreateSingleMetricJob', function ($scope, $route, $timeout, Private, AppState) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
     const msgs = mlMessageBarService;
-    const MlTimeBuckets = Private(IntervalHelperProvider);
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
     const mlSingleMetricJobService = Private(SingleMetricJobServiceProvider);
-    const mlFullTimeRangeSelectorService = Private(FullTimeRangeSelectorServiceProvider);
 
     const stateDefaults = {
       mlJobSettings: {}
@@ -124,25 +115,25 @@ module
 
     timeBasedIndexCheck(indexPattern, true);
 
-    $scope.indexPatternLinkText = i18n('xpack.ml.newJob.simple.singleMetric.noResultsFound.indexPatternLinkText', {
+    $scope.indexPatternLinkText = i18n.translate('xpack.ml.newJob.simple.singleMetric.noResultsFound.indexPatternLinkText', {
       defaultMessage: 'full {indexPatternTitle} data',
       values: { indexPatternTitle: indexPattern.title }
     });
-    $scope.nameNotValidMessage = i18n('xpack.ml.newJob.simple.singleMetric.nameNotValidMessage', {
+    $scope.nameNotValidMessage = i18n.translate('xpack.ml.newJob.simple.singleMetric.nameNotValidMessage', {
       defaultMessage: 'Enter a name for the job'
     });
-    $scope.showAdvancedButtonAriaLabel = i18n('xpack.ml.newJob.simple.singleMetric.showAdvancedButtonAriaLabel', {
+    $scope.showAdvancedButtonAriaLabel = i18n.translate('xpack.ml.newJob.simple.singleMetric.showAdvancedButtonAriaLabel', {
       defaultMessage: 'Show Advanced'
     });
-    $scope.hideAdvancedButtonAriaLabel = i18n('xpack.ml.newJob.simple.singleMetric.hideAdvancedButtonAriaLabel', {
+    $scope.hideAdvancedButtonAriaLabel = i18n.translate('xpack.ml.newJob.simple.singleMetric.hideAdvancedButtonAriaLabel', {
       defaultMessage: 'Hide Advanced'
     });
     const pageTitle = (savedSearch.id !== undefined) ?
-      i18n('xpack.ml.newJob.simple.singleMetric.savedSearchPageTitle', {
+      i18n.translate('xpack.ml.newJob.simple.singleMetric.savedSearchPageTitle', {
         defaultMessage: 'saved search {savedSearchTitle}',
         values: { savedSearchTitle: savedSearch.title }
       })
-      : i18n('xpack.ml.newJob.simple.singleMetric.indexPatternPageTitle', {
+      : i18n.translate('xpack.ml.newJob.simple.singleMetric.indexPatternPageTitle', {
         defaultMessage: 'index pattern {indexPatternTitle}',
         values: { indexPatternTitle: indexPattern.title }
       });
@@ -160,7 +151,7 @@ module
       fields: [],
       timeFields: [],
       intervals: [{
-        title: i18n('xpack.ml.newJob.simple.singleMetric.autoIntervalUnitTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.singleMetric.autoIntervalUnitTitle', {
           defaultMessage: 'Auto'
         }),
         value: 'auto',
@@ -170,47 +161,47 @@ module
         return agg.fieldIsTimeField();
       }*/
       }, {
-        title: i18n('xpack.ml.newJob.simple.singleMetric.millisecondIntervalUnitTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.singleMetric.millisecondIntervalUnitTitle', {
           defaultMessage: 'Millisecond'
         }),
         value: 'ms'
       }, {
-        title: i18n('xpack.ml.newJob.simple.singleMetric.secondIntervalUnitTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.singleMetric.secondIntervalUnitTitle', {
           defaultMessage: 'Second'
         }),
         value: 's'
       }, {
-        title: i18n('xpack.ml.newJob.simple.singleMetric.minuteIntervalUnitTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.singleMetric.minuteIntervalUnitTitle', {
           defaultMessage: 'Minute'
         }),
         value: 'm'
       }, {
-        title: i18n('xpack.ml.newJob.simple.singleMetric.hourlyIntervalUnitTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.singleMetric.hourlyIntervalUnitTitle', {
           defaultMessage: 'Hourly'
         }),
         value: 'h'
       }, {
-        title: i18n('xpack.ml.newJob.simple.singleMetric.dailyIntervalUnitTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.singleMetric.dailyIntervalUnitTitle', {
           defaultMessage: 'Daily'
         }),
         value: 'd'
       }, {
-        title: i18n('xpack.ml.newJob.simple.singleMetric.weeklyIntervalUnitTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.singleMetric.weeklyIntervalUnitTitle', {
           defaultMessage: 'Weekly'
         }),
         value: 'w'
       }, {
-        title: i18n('xpack.ml.newJob.simple.singleMetric.monthlyIntervalUnitTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.singleMetric.monthlyIntervalUnitTitle', {
           defaultMessage: 'Monthly'
         }),
         value: 'M'
       }, {
-        title: i18n('xpack.ml.newJob.simple.singleMetric.yearlyIntervalUnitTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.singleMetric.yearlyIntervalUnitTitle', {
           defaultMessage: 'Yearly'
         }),
         value: 'y'
       }, {
-        title: i18n('xpack.ml.newJob.simple.singleMetric.customIntervalUnitTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.singleMetric.customIntervalUnitTitle', {
           defaultMessage: 'Custom'
         }),
         value: 'custom'
@@ -397,10 +388,10 @@ module
                 saveNewDatafeed(job, true);
               })
               .catch((resp) => {
-                msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.openJobErrorMessage', {
+                msgs.error(i18n.translate('xpack.ml.newJob.simple.singleMetric.openJobErrorMessage', {
                   defaultMessage: 'Could not open job: '
                 }), resp);
-                msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.creatingDatafeedErrorMessage', {
+                msgs.error(i18n.translate('xpack.ml.newJob.simple.singleMetric.creatingDatafeedErrorMessage', {
                   defaultMessage: 'Job created, creating datafeed anyway'
                 }));
                 // if open failed, still attempt to create the datafeed
@@ -411,7 +402,7 @@ module
           })
           .catch((resp) => {
             // save failed
-            msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.saveFailedErrorMessage', {
+            msgs.error(i18n.translate('xpack.ml.newJob.simple.singleMetric.saveFailedErrorMessage', {
               defaultMessage: 'Save failed: '
             }), resp.resp);
             $scope.$applyAsync();
@@ -457,7 +448,7 @@ module
                 })
                 .catch((resp) => {
                   // datafeed failed
-                  msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.datafeedNotStartedErrorMessage', {
+                  msgs.error(i18n.translate('xpack.ml.newJob.simple.singleMetric.datafeedNotStartedErrorMessage', {
                     defaultMessage: 'Could not start datafeed: '
                   }), resp);
                 })
@@ -469,7 +460,7 @@ module
             }
           })
           .catch((resp) => {
-            msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.saveDatafeedFailedErrorMessage', {
+            msgs.error(i18n.translate('xpack.ml.newJob.simple.singleMetric.saveDatafeedFailedErrorMessage', {
               defaultMessage: 'Save datafeed failed: '
             }), resp);
             $scope.$applyAsync();
@@ -628,10 +619,6 @@ module
     $scope.moveToAdvancedJobCreation = function () {
       const job = mlSingleMetricJobService.getJobFromConfig($scope.formConfig);
       moveToAdvancedJobCreation(job);
-    };
-
-    $scope.setFullTimeRange = function () {
-      return mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
 
     $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.loadVis);

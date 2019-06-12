@@ -1,5 +1,206 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`getFilteredQueryAndStatusFilter handles \`match_phrase\` queries 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "match_phrase": Object {
+            "monitor.name": "icmp test",
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "startRange",
+              "lte": "endRange",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "statusFilter": undefined,
+}
+`;
+
+exports[`getFilteredQueryAndStatusFilter handles nested query strings 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "bool": Object {
+            "must": Array [],
+          },
+        },
+        Object {
+          "bool": Object {
+            "should": Array [
+              Array [
+                Object {
+                  "bool": Object {
+                    "must": Array [
+                      Object {
+                        "match": Object {
+                          "monitor.name": Object {
+                            "operator": "and",
+                            "query": "test-page",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "must": Array [
+                      Object {
+                        "match": Object {
+                          "monitor.name": Object {
+                            "operator": "and",
+                            "query": "prod-site",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            ],
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "startRange",
+              "lte": "endRange",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "statusFilter": "up",
+}
+`;
+
+exports[`getFilteredQueryAndStatusFilter handles nested status queries with sibling clauses 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "bool": Object {
+            "must": Array [
+              Object {
+                "match": Object {
+                  "monitor.type": Object {
+                    "operator": "and",
+                    "query": "http",
+                  },
+                },
+              },
+              Object {
+                "match": Object {
+                  "observer.geo.name": Object {
+                    "operator": "and",
+                    "query": "Philadelphia",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        Object {
+          "bool": Object {
+            "should": Array [
+              Array [
+                Object {
+                  "bool": Object {
+                    "must": Array [
+                      Object {
+                        "match": Object {
+                          "monitor.name": Object {
+                            "operator": "and",
+                            "query": "test-page",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "must": Array [
+                      Object {
+                        "match": Object {
+                          "monitor.name": Object {
+                            "operator": "and",
+                            "query": "prod-site",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            ],
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "startRange",
+              "lte": "endRange",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "statusFilter": "down",
+}
+`;
+
+exports[`getFilteredQueryAndStatusFilter handles simple_query_string 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "simple_query_string": Object {
+            "fields": Array [
+              "monitor.id",
+              "monitor.url",
+              "monitor.type",
+              "monitor.status",
+              "monitor.name",
+              "url.full",
+              "url.path",
+              "url.scheme",
+              "url.domain",
+              "error.type",
+            ],
+            "query": "http",
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "startRange",
+              "lte": "endRange",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "statusFilter": undefined,
+}
+`;
+
 exports[`getFilteredQueryAndStatusFilter returns a range + id filter when status filter is absent 1`] = `
 Object {
   "query": Object {

@@ -5,17 +5,20 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TOCEntry } from './view';
 
+const LAYER_ID = '1';
+
 const mockLayer = {
-  getId: () => { return '1'; },
-  getTOCDetails: () => { return (<div>TOC details mock</div>); },
+  getId: () => { return LAYER_ID; },
+  getLegendDetails: () => { return (<div>TOC details mock</div>); },
   getDisplayName: () => { return 'layer 1'; },
   isVisible: () => { return true; },
   showAtZoomLevel: () => { return true; },
   hasErrors: () => { return false; },
+  hasLegendDetails: () => { return true; },
 };
 
 const defaultProps = {
@@ -26,11 +29,12 @@ const defaultProps = {
   getSelectedLayerSelector: () => {},
   hasDirtyStateSelector: () => {},
   zoom: 0,
+  isLegendDetailsOpen: false,
 };
 
 describe('TOCEntry', () => {
   test('is rendered', async () => {
-    const component = shallow(
+    const component = shallowWithIntl(
       <TOCEntry
         {...defaultProps}
       />
@@ -47,10 +51,27 @@ describe('TOCEntry', () => {
 
   describe('props', () => {
     test('isReadOnly', async () => {
-      const component = shallow(
+      const component = shallowWithIntl(
         <TOCEntry
           {...defaultProps}
           isReadOnly={true}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component)
+        .toMatchSnapshot();
+    });
+
+    test('should display layer details when isLegendDetailsOpen is true', async () => {
+      const component = shallowWithIntl(
+        <TOCEntry
+          {...defaultProps}
+          isLegendDetailsOpen={true}
         />
       );
 

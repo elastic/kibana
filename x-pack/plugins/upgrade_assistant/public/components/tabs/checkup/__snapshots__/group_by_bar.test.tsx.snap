@@ -2,13 +2,12 @@
 
 exports[`GroupByBar renders 1`] = `
 <EuiFlexItem
-  component="div"
   grow={false}
 >
   <EuiFilterGroup>
     <EuiFilterButton
       color="text"
-      grow={false}
+      grow={true}
       hasActiveFilters={true}
       iconSide="right"
       key="message"
@@ -19,7 +18,7 @@ exports[`GroupByBar renders 1`] = `
     </EuiFilterButton>
     <EuiFilterButton
       color="text"
-      grow={false}
+      grow={true}
       hasActiveFilters={false}
       iconSide="right"
       key="index"

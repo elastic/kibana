@@ -34,7 +34,7 @@ interface TagEditProps {
   tag: BeatTag;
   configuration_blocks: {
     error?: string | undefined;
-    blocks: ConfigurationBlock[];
+    list: ConfigurationBlock[];
     page: number;
     total: number;
   };
@@ -147,7 +147,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             <div>
               <ConfigList
                 onTableChange={this.props.onConfigListChange}
-                configs={configuration_blocks}
+                configs={configuration_blocks} // eslint-disable-line @typescript-eslint/camelcase
                 onConfigClick={(action: string, block: ConfigurationBlock) => {
                   if (action === 'delete') {
                     this.props.onConfigRemoved(block);

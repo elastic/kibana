@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { readPipelineListRows } from './browser_exec_scripts/read_pipeline_list_rows';
-
 export function PipelineListProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const browser = getService('browser');
   const random = getService('random');
 
   // test subject selectors
@@ -113,17 +110,17 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<Array<Object>>}
      */
     async readRows() {
-      return await browser.execute(
-        readPipelineListRows,
-        await testSubjects.find(SUBJ_CONTAINER),
-        {
-          ROW: testSubjects.getCssSelector(INNER_SUBJ_ROW),
-          CELL_ID: testSubjects.getCssSelector(INNER_SUBJ_CELL_ID),
-          CELL_DESCRIPTION: testSubjects.getCssSelector(INNER_SUBJ_CELL_DESCRIPTION),
-          CELL_LAST_MODIFIED: testSubjects.getCssSelector(INNER_SUBJ_CELL_LAST_MODIFIED),
-          CELL_USERNAME: testSubjects.getCssSelector(INNER_SUBJ_CELL_USERNAME),
-        },
-      );
+      const pipelineTable = await testSubjects.find('pipelineTable');
+      const $ = await pipelineTable.parseDomContent();
+      return $.findTestSubjects(INNER_SUBJ_ROW).toArray().map(row => {
+        return {
+          selected: $(row).hasClass('euiTableRow-isSelected'),
+          id: $(row).findTestSubjects(INNER_SUBJ_CELL_ID).text(),
+          description: $(row).findTestSubjects(INNER_SUBJ_CELL_DESCRIPTION).text(),
+          lastModified: $(row).findTestSubjects(INNER_SUBJ_CELL_LAST_MODIFIED).text(),
+          username: $(row).findTestSubjects(INNER_SUBJ_CELL_USERNAME).text()
+        };
+      });
     }
 
     /**
@@ -163,9 +160,12 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<undefined>}
      */
     async assertExists() {
-      await retry.waitFor('pipline list visible on screen', async () => (
-        await testSubjects.exists(SUBJ_CONTAINER)
-      ));
+      await retry.waitFor('pipline list visible on screen', async () => {
+        const container = await testSubjects.find(SUBJ_CONTAINER);
+        const found = await container.findAllByCssSelector('table tbody');
+        const isLoading = await testSubjects.exists('loadingPipelines');
+        return (found.length > 0) && (isLoading === false);
+      });
     }
 
     /**

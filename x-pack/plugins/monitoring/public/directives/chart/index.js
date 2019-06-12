@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import moment from 'moment';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -21,6 +21,8 @@ uiModule.directive('monitoringChart', () => {
       series: '='
     },
     link(scope, $elem) {
+      scope.$on('$destroy', () => $elem && $elem[0] && unmountComponentAtNode($elem[0]));
+
       function onBrush({ xaxis }) {
         timefilter.setTime({
           from: moment(xaxis.from),

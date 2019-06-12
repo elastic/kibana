@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { isSystemApiRequest } from 'ui/system_api';
-import { PathProvider } from 'plugins/xpack_main/services/path';
+import { Path } from 'plugins/xpack_main/services/path';
+import { toastNotifications } from 'ui/notify';
 import 'plugins/security/services/auto_logout';
+import { SessionExpirationWarning } from '../components/session_expiration_warning';
 
 /**
  * Client session timeout is decreased by this number so that Kibana server
@@ -20,32 +24,45 @@ const SESSION_TIMEOUT_GRACE_PERIOD_MS = 5000;
 
 const module = uiModules.get('security', []);
 module.config(($httpProvider) => {
-  $httpProvider.interceptors.push(($timeout, $window, $q, $injector, sessionTimeout, Notifier, Private, autoLogout, i18n) => {
-    const isUnauthenticated = Private(PathProvider).isUnauthenticated();
-    const notifier = new Notifier();
+  $httpProvider.interceptors.push((
+    $timeout,
+    $q,
+    $injector,
+    sessionTimeout,
+    Private,
+    autoLogout
+  ) => {
+
+    function refreshSession() {
+      // Make a simple request to keep the session alive
+      $injector.get('es').ping();
+      clearNotifications();
+    }
+
+    const isUnauthenticated = Path.isUnauthenticated();
     const notificationLifetime = 60 * 1000;
     const notificationOptions = {
-      type: 'warning',
-      content: i18n('xpack.security.hacks.logoutNotification', {
-        defaultMessage: 'You will soon be logged out due to inactivity. Click OK to resume.'
-      }),
-      icon: 'warning',
-      title: i18n('xpack.security.hacks.warningTitle', {
+      color: 'warning',
+      text: (
+        <SessionExpirationWarning onRefreshSession={refreshSession} />
+      ),
+      title: i18n.translate('xpack.security.hacks.warningTitle', {
         defaultMessage: 'Warning'
       }),
-      lifetime: Math.min(
+      toastLifeTimeMs: Math.min(
         (sessionTimeout - SESSION_TIMEOUT_GRACE_PERIOD_MS),
         notificationLifetime
       ),
-      actions: ['accept']
     };
 
     let pendingNotification;
     let activeNotification;
+    let pendingSessionExpiration;
 
     function clearNotifications() {
       if (pendingNotification) $timeout.cancel(pendingNotification);
-      if (activeNotification) activeNotification.clear();
+      if (pendingSessionExpiration) clearTimeout(pendingSessionExpiration);
+      if (activeNotification) toastNotifications.remove(activeNotification);
     }
 
     function scheduleNotification() {
@@ -53,14 +70,8 @@ module.config(($httpProvider) => {
     }
 
     function showNotification() {
-      activeNotification = notifier.add(notificationOptions, (action) => {
-        if (action === 'accept') {
-          // Make a simple request to keep the session alive
-          $injector.get('es').ping();
-        } else {
-          autoLogout();
-        }
-      });
+      activeNotification = toastNotifications.add(notificationOptions);
+      pendingSessionExpiration = setTimeout(() => autoLogout(), notificationOptions.toastLifeTimeMs);
     }
 
     function interceptorFactory(responseHandler) {

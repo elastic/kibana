@@ -77,7 +77,7 @@ const props = {
 describe('CalendarsList', () => {
 
   test('loads calendars on mount', () => {
-    ml.calendars = jest.fn();
+    ml.calendars = jest.fn(() => []);
     shallowWithIntl(
       <CalendarsList.WrappedComponent {...props}/>
     );

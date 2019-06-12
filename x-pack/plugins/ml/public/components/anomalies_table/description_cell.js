@@ -40,7 +40,7 @@ export function DescriptionCell({ actual, typical }) {
       }
       <EuiFlexItem grow={false}>
         <EuiText size="xs">
-          <p>{message}</p>
+          {message}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

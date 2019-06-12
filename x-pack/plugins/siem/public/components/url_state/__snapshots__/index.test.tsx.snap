@@ -1,0 +1,603 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UrlStateContainer mounts and renders 1`] = `
+<MockedProvider
+  addTypename={true}
+>
+  <ApolloProvider
+    client={
+      ApolloClient {
+        "__operations_cache__": Map {},
+        "cache": InMemoryCache {
+          "addTypename": true,
+          "cacheKeyRoot": KeyTrie {
+            "weakness": true,
+          },
+          "config": Object {
+            "addTypename": true,
+            "dataIdFromObject": [Function],
+            "fragmentMatcher": HeuristicFragmentMatcher {},
+            "freezeResults": false,
+            "resultCaching": true,
+          },
+          "data": DepTrackingCache {
+            "data": Object {},
+            "depend": [Function],
+          },
+          "maybeBroadcastWatch": [Function],
+          "optimisticData": DepTrackingCache {
+            "data": Object {},
+            "depend": [Function],
+          },
+          "silenceBroadcast": false,
+          "storeReader": StoreReader {
+            "executeSelectionSet": [Function],
+            "executeStoreQuery": [Function],
+            "executeSubSelectedArray": [Function],
+            "freezeResults": false,
+          },
+          "storeWriter": StoreWriter {},
+          "typenameDocumentCache": Map {},
+          "watches": Set {},
+        },
+        "defaultOptions": Object {},
+        "disableNetworkFetches": false,
+        "link": ApolloLink {
+          "request": [Function],
+        },
+        "mutate": [Function],
+        "query": [Function],
+        "queryDeduplication": true,
+        "reFetchObservableQueries": [Function],
+        "resetStore": [Function],
+        "resetStoreCallbacks": Array [],
+        "ssrMode": false,
+        "store": DataStore {
+          "cache": InMemoryCache {
+            "addTypename": true,
+            "cacheKeyRoot": KeyTrie {
+              "weakness": true,
+            },
+            "config": Object {
+              "addTypename": true,
+              "dataIdFromObject": [Function],
+              "fragmentMatcher": HeuristicFragmentMatcher {},
+              "freezeResults": false,
+              "resultCaching": true,
+            },
+            "data": DepTrackingCache {
+              "data": Object {},
+              "depend": [Function],
+            },
+            "maybeBroadcastWatch": [Function],
+            "optimisticData": DepTrackingCache {
+              "data": Object {},
+              "depend": [Function],
+            },
+            "silenceBroadcast": false,
+            "storeReader": StoreReader {
+              "executeSelectionSet": [Function],
+              "executeStoreQuery": [Function],
+              "executeSubSelectedArray": [Function],
+              "freezeResults": false,
+            },
+            "storeWriter": StoreWriter {},
+            "typenameDocumentCache": Map {},
+            "watches": Set {},
+          },
+        },
+        "version": "2.3.8",
+        "watchQuery": [Function],
+      }
+    }
+  >
+    <pure(Component)
+      store={
+        Object {
+          "dispatch": [Function],
+          "getState": [Function],
+          "replaceReducer": [Function],
+          "subscribe": [Function],
+          Symbol(observable): [Function],
+        }
+      }
+    >
+      <Component
+        store={
+          Object {
+            "dispatch": [Function],
+            "getState": [Function],
+            "replaceReducer": [Function],
+            "subscribe": [Function],
+            Symbol(observable): [Function],
+          }
+        }
+      >
+        <I18nProvider>
+          <IntlProvider
+            defaultLocale="en"
+            formats={
+              Object {
+                "date": Object {
+                  "full": Object {
+                    "day": "numeric",
+                    "month": "long",
+                    "weekday": "long",
+                    "year": "numeric",
+                  },
+                  "long": Object {
+                    "day": "numeric",
+                    "month": "long",
+                    "year": "numeric",
+                  },
+                  "medium": Object {
+                    "day": "numeric",
+                    "month": "short",
+                    "year": "numeric",
+                  },
+                  "short": Object {
+                    "day": "numeric",
+                    "month": "numeric",
+                    "year": "2-digit",
+                  },
+                },
+                "number": Object {
+                  "currency": Object {
+                    "style": "currency",
+                  },
+                  "percent": Object {
+                    "style": "percent",
+                  },
+                },
+                "relative": Object {
+                  "days": Object {
+                    "units": "day",
+                  },
+                  "hours": Object {
+                    "units": "hour",
+                  },
+                  "minutes": Object {
+                    "units": "minute",
+                  },
+                  "months": Object {
+                    "units": "month",
+                  },
+                  "seconds": Object {
+                    "units": "second",
+                  },
+                  "years": Object {
+                    "units": "year",
+                  },
+                },
+                "time": Object {
+                  "full": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                    "second": "numeric",
+                    "timeZoneName": "short",
+                  },
+                  "long": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                    "second": "numeric",
+                    "timeZoneName": "short",
+                  },
+                  "medium": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                    "second": "numeric",
+                  },
+                  "short": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                  },
+                },
+              }
+            }
+            locale="en"
+            messages={Object {}}
+            textComponent={Symbol(react.fragment)}
+          >
+            <ApolloProvider
+              client={
+                ApolloClient {
+                  "__operations_cache__": Map {},
+                  "cache": InMemoryCache {
+                    "addTypename": true,
+                    "cacheKeyRoot": KeyTrie {
+                      "weakness": true,
+                    },
+                    "config": Object {
+                      "addTypename": true,
+                      "dataIdFromObject": [Function],
+                      "fragmentMatcher": HeuristicFragmentMatcher {},
+                      "freezeResults": false,
+                      "resultCaching": true,
+                    },
+                    "data": DepTrackingCache {
+                      "data": Object {},
+                      "depend": [Function],
+                    },
+                    "maybeBroadcastWatch": [Function],
+                    "optimisticData": DepTrackingCache {
+                      "data": Object {},
+                      "depend": [Function],
+                    },
+                    "silenceBroadcast": false,
+                    "storeReader": StoreReader {
+                      "executeSelectionSet": [Function],
+                      "executeStoreQuery": [Function],
+                      "executeSubSelectedArray": [Function],
+                      "freezeResults": false,
+                    },
+                    "storeWriter": StoreWriter {},
+                    "typenameDocumentCache": Map {},
+                    "watches": Set {},
+                  },
+                  "defaultOptions": Object {},
+                  "disableNetworkFetches": false,
+                  "link": ApolloLink {
+                    "request": [Function],
+                  },
+                  "mutate": [Function],
+                  "query": [Function],
+                  "queryDeduplication": true,
+                  "reFetchObservableQueries": [Function],
+                  "resetStore": [Function],
+                  "resetStoreCallbacks": Array [],
+                  "ssrMode": false,
+                  "store": DataStore {
+                    "cache": InMemoryCache {
+                      "addTypename": true,
+                      "cacheKeyRoot": KeyTrie {
+                        "weakness": true,
+                      },
+                      "config": Object {
+                        "addTypename": true,
+                        "dataIdFromObject": [Function],
+                        "fragmentMatcher": HeuristicFragmentMatcher {},
+                        "freezeResults": false,
+                        "resultCaching": true,
+                      },
+                      "data": DepTrackingCache {
+                        "data": Object {},
+                        "depend": [Function],
+                      },
+                      "maybeBroadcastWatch": [Function],
+                      "optimisticData": DepTrackingCache {
+                        "data": Object {},
+                        "depend": [Function],
+                      },
+                      "silenceBroadcast": false,
+                      "storeReader": StoreReader {
+                        "executeSelectionSet": [Function],
+                        "executeStoreQuery": [Function],
+                        "executeSubSelectedArray": [Function],
+                        "freezeResults": false,
+                      },
+                      "storeWriter": StoreWriter {},
+                      "typenameDocumentCache": Map {},
+                      "watches": Set {},
+                    },
+                  },
+                  "version": "2.3.8",
+                  "watchQuery": [Function],
+                }
+              }
+            >
+              <Provider
+                store={
+                  Object {
+                    "dispatch": [Function],
+                    "getState": [Function],
+                    "replaceReducer": [Function],
+                    "subscribe": [Function],
+                    Symbol(observable): [Function],
+                  }
+                }
+              >
+                <ThemeProvider
+                  theme={[Function]}
+                >
+                  <DragDropContext
+                    onDragEnd={[MockFunction]}
+                  >
+                    <Router
+                      history={
+                        Object {
+                          "action": "POP",
+                          "block": [MockFunction],
+                          "createHref": [MockFunction],
+                          "go": [MockFunction],
+                          "goBack": [MockFunction],
+                          "goForward": [MockFunction],
+                          "length": 2,
+                          "listen": [MockFunction] {
+                            "calls": Array [
+                              Array [
+                                [Function],
+                              ],
+                            ],
+                            "results": Array [
+                              Object {
+                                "type": "return",
+                                "value": undefined,
+                              },
+                            ],
+                          },
+                          "location": Object {
+                            "hash": "",
+                            "pathname": "/network",
+                            "search": "",
+                            "state": "",
+                          },
+                          "push": [MockFunction],
+                          "replace": [MockFunction] {
+                            "calls": Array [
+                              Array [
+                                Object {
+                                  "hash": "",
+                                  "pathname": "/network",
+                                  "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
+                                  "state": "",
+                                },
+                              ],
+                            ],
+                            "results": Array [
+                              Object {
+                                "type": "return",
+                                "value": undefined,
+                              },
+                            ],
+                          },
+                        }
+                      }
+                    >
+                      <withRouter(Connect(UrlStateContainerLifecycle))
+                        indexPattern={
+                          Object {
+                            "fields": Array [
+                              Object {
+                                "aggregatable": true,
+                                "name": "response",
+                                "searchable": true,
+                                "type": "number",
+                              },
+                            ],
+                            "title": "logstash-*",
+                          }
+                        }
+                      >
+                        <Route>
+                          <Connect(UrlStateContainerLifecycle)
+                            history={
+                              Object {
+                                "action": "POP",
+                                "block": [MockFunction],
+                                "createHref": [MockFunction],
+                                "go": [MockFunction],
+                                "goBack": [MockFunction],
+                                "goForward": [MockFunction],
+                                "length": 2,
+                                "listen": [MockFunction] {
+                                  "calls": Array [
+                                    Array [
+                                      [Function],
+                                    ],
+                                  ],
+                                  "results": Array [
+                                    Object {
+                                      "type": "return",
+                                      "value": undefined,
+                                    },
+                                  ],
+                                },
+                                "location": Object {
+                                  "hash": "",
+                                  "pathname": "/network",
+                                  "search": "",
+                                  "state": "",
+                                },
+                                "push": [MockFunction],
+                                "replace": [MockFunction] {
+                                  "calls": Array [
+                                    Array [
+                                      Object {
+                                        "hash": "",
+                                        "pathname": "/network",
+                                        "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
+                                        "state": "",
+                                      },
+                                    ],
+                                  ],
+                                  "results": Array [
+                                    Object {
+                                      "type": "return",
+                                      "value": undefined,
+                                    },
+                                  ],
+                                },
+                              }
+                            }
+                            indexPattern={
+                              Object {
+                                "fields": Array [
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "response",
+                                    "searchable": true,
+                                    "type": "number",
+                                  },
+                                ],
+                                "title": "logstash-*",
+                              }
+                            }
+                            location={
+                              Object {
+                                "hash": "",
+                                "pathname": "/network",
+                                "search": "",
+                                "state": "",
+                              }
+                            }
+                            match={
+                              Object {
+                                "isExact": false,
+                                "params": Object {},
+                                "path": "/",
+                                "url": "/",
+                              }
+                            }
+                          >
+                            <UrlStateContainerLifecycle
+                              history={
+                                Object {
+                                  "action": "POP",
+                                  "block": [MockFunction],
+                                  "createHref": [MockFunction],
+                                  "go": [MockFunction],
+                                  "goBack": [MockFunction],
+                                  "goForward": [MockFunction],
+                                  "length": 2,
+                                  "listen": [MockFunction] {
+                                    "calls": Array [
+                                      Array [
+                                        [Function],
+                                      ],
+                                    ],
+                                    "results": Array [
+                                      Object {
+                                        "type": "return",
+                                        "value": undefined,
+                                      },
+                                    ],
+                                  },
+                                  "location": Object {
+                                    "hash": "",
+                                    "pathname": "/network",
+                                    "search": "",
+                                    "state": "",
+                                  },
+                                  "push": [MockFunction],
+                                  "replace": [MockFunction] {
+                                    "calls": Array [
+                                      Array [
+                                        Object {
+                                          "hash": "",
+                                          "pathname": "/network",
+                                          "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
+                                          "state": "",
+                                        },
+                                      ],
+                                    ],
+                                    "results": Array [
+                                      Object {
+                                        "type": "return",
+                                        "value": undefined,
+                                      },
+                                    ],
+                                  },
+                                }
+                              }
+                              indexPattern={
+                                Object {
+                                  "fields": Array [
+                                    Object {
+                                      "aggregatable": true,
+                                      "name": "response",
+                                      "searchable": true,
+                                      "type": "number",
+                                    },
+                                  ],
+                                  "title": "logstash-*",
+                                }
+                              }
+                              location={
+                                Object {
+                                  "hash": "",
+                                  "pathname": "/network",
+                                  "search": "",
+                                  "state": "",
+                                }
+                              }
+                              match={
+                                Object {
+                                  "isExact": false,
+                                  "params": Object {},
+                                  "path": "/",
+                                  "url": "/",
+                                }
+                              }
+                              setAbsoluteTimerange={[Function]}
+                              setHostsKql={[Function]}
+                              setNetworkKql={[Function]}
+                              setRelativeTimerange={[Function]}
+                              toggleTimelineLinkTo={[Function]}
+                              urlState={
+                                Object {
+                                  "kqlQuery": Object {
+                                    "hosts.details": Object {
+                                      "filterQuery": null,
+                                      "queryLocation": "hosts.details",
+                                      "type": "details",
+                                    },
+                                    "hosts.page": Object {
+                                      "filterQuery": null,
+                                      "queryLocation": "hosts.page",
+                                      "type": "page",
+                                    },
+                                    "network.details": Object {
+                                      "filterQuery": null,
+                                      "queryLocation": "network.details",
+                                      "type": "details",
+                                    },
+                                    "network.page": Object {
+                                      "filterQuery": null,
+                                      "queryLocation": "network.page",
+                                      "type": "page",
+                                    },
+                                  },
+                                  "timerange": Object {
+                                    "global": Object {
+                                      "linkTo": Array [
+                                        "timeline",
+                                      ],
+                                      "timerange": Object {
+                                        "from": 0,
+                                        "fromStr": "now-24h",
+                                        "kind": "relative",
+                                        "to": 1,
+                                        "toStr": "now",
+                                      },
+                                    },
+                                    "timeline": Object {
+                                      "linkTo": Array [
+                                        "global",
+                                      ],
+                                      "timerange": Object {
+                                        "from": 0,
+                                        "fromStr": "now-24h",
+                                        "kind": "relative",
+                                        "to": 1,
+                                        "toStr": "now",
+                                      },
+                                    },
+                                  },
+                                }
+                              }
+                            />
+                          </Connect(UrlStateContainerLifecycle)>
+                        </Route>
+                      </withRouter(Connect(UrlStateContainerLifecycle))>
+                    </Router>
+                  </DragDropContext>
+                </ThemeProvider>
+              </Provider>
+            </ApolloProvider>
+          </IntlProvider>
+        </I18nProvider>
+      </Component>
+    </pure(Component)>
+  </ApolloProvider>
+</MockedProvider>
+`;

@@ -33,24 +33,12 @@ export const logEntriesQuery = gql`
         hasMoreBefore
         hasMoreAfter
         entries {
-          gid
-          key {
-            time
-            tiebreaker
-          }
-          message {
-            ... on InfraLogMessageFieldSegment {
-              field
-              value
-            }
-            ... on InfraLogMessageConstantSegment {
-              constant
-            }
-          }
+          ...InfraLogEntryFields
         }
       }
     }
   }
 
   ${sharedFragments.InfraTimeKey}
+  ${sharedFragments.InfraLogEntryFields}
 `;

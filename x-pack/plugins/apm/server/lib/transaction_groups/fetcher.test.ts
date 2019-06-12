@@ -15,17 +15,21 @@ describe('transactionGroupsFetcher', () => {
     const setup = {
       start: 1528113600000,
       end: 1528977600000,
-      client: clientSpy,
+      client: {
+        search: clientSpy
+      } as any,
       config: {
-        get: jest.fn((key: string) => {
+        get: jest.fn<any, string[]>((key: string) => {
           switch (key) {
             case 'apm_oss.transactionIndices':
               return 'myIndex';
             case 'xpack.apm.ui.transactionGroupBucketSize':
               return 100;
           }
-        })
-      }
+        }),
+        has: () => true
+      },
+      uiFiltersES: [{ term: { 'service.environment': 'test' } }]
     };
     const bodyQuery = { my: 'bodyQuery' };
     res = await transactionGroupsFetcher(setup, bodyQuery);

@@ -611,131 +611,131 @@
     i18n-default-message="Help"
   ></h2>
 
-  <tabset>
-    <tab heading="{{ ::'timelion.help.mainPage.functionReferenceTitle' | i18n: { defaultMessage: 'Function reference' } }}">
-      <div class="list-group-item list-group-item--noBorder">
-        <div class="kuiLocalDropdownHelpText">
-          <span
-            i18n-id="timelion.help.mainPage.functionReference.gettingStartedText"
-            i18n-default-message="Click any function for more information. Just getting started?"
-          ></span>
-          <a
-            i18n-id="timelion.help.mainPage.functionReference.welcomePageLinkText"
-            i18n-default-message="Check out the tutorial"
-            class="kuiLink"
-            ng-click="setPage(1)"
-            kbn-accessible-click
-          ></a>.
-        </div>
+  <timelion-help-tabs
+    activateTab="activateTab"
+    activeTab="activeTab"
+  >
+  </timelion-help-tabs>
 
-        <div class="timHelp__functions">
-          <table class="table table-condensed table-bordered">
-            <tr
-              class="timHelp__functionsTableRow"
-              ng-repeat-start="function in functions.list"
-              ng-class="{active: functions.details === function.name}"
-              ng-click="functions.details =
-                        (functions.details === function.name ?
-                          null : function.name)"
-              kbn-accessible-click
-            >
-              <td><strong>.{{function.name}}()</strong></td>
-              <td>{{function.help}}</td>
-            </tr>
-            <tr ng-if="functions.details === function.name" ng-repeat-end>
-              <td colspan=2>
-                <div class="suggestion-details" >
-                  <table
-                    class="table table-condensed table-bordered
-                           timHelp__functionDetailsTable"
-                    ng-show="function.args.length > (function.chainable ? 1: 0)"
-                  >
-                    <thead>
-                      <th
-                        scope="col"
-                        i18n-id="timelion.help.mainPage.functionReference.detailsTable.argumentNameColumnLabel"
-                        i18n-default-message="Argument Name"
-                      ></th>
-                      <th
-                        scope="col"
-                        i18n-id="timelion.help.mainPage.functionReference.detailsTable.acceptedTypesColumnLabel"
-                        i18n-default-message="Accepted Types"
-                      ></th>
-                      <th
-                        scope="col"
-                        i18n-id="timelion.help.mainPage.functionReference.detailsTable.informationColumnLabel"
-                        i18n-default-message="Information"
-                      ></th>
-                    </thead>
-                    <tr
-                      ng-repeat="arg in function.args"
-                      ng-hide="$index < 1 && function.chainable"
-                    >
-                      <td>{{arg.name}}</td>
-                      <td><em>{{arg.types.join(', ')}}</em></td>
-                      <td>{{arg.help}}</td>
-                    </tr>
-                  </table>
-                  <div ng-hide="function.args.length > (function.chainable ? 1: 0)">
-                    <em
-                      i18n-id="timelion.help.mainPage.functionReference.noArgumentsFunctionErrorMessage"
-                      i18n-default-message="This function does not accept any arguments. Well that's simple, isn't it?"
-                    ></em>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-    </tab>
+  <div ng-show="activeTab == 'funcref'" class="list-group-item list-group-item--noBorder">
+    <div class="kuiLocalDropdownHelpText">
+      <span
+        i18n-id="timelion.help.mainPage.functionReference.gettingStartedText"
+        i18n-default-message="Click any function for more information. Just getting started?"
+      ></span>
+      <a
+        i18n-id="timelion.help.mainPage.functionReference.welcomePageLinkText"
+        i18n-default-message="Check out the tutorial"
+        class="kuiLink"
+        ng-click="setPage(1)"
+        kbn-accessible-click
+      ></a>.
+    </div>
 
-    <tab heading="{{ ::'timelion.help.mainPage.keyboardTipsTitle' | i18n: { defaultMessage: 'Keyboard tips' } }}">
-      <div class="list-group-item list-group-item--noBorder">
-        <!-- General editing tips -->
-        <dl class="dl-horizontal">
-          <dd>
-            <strong
-              i18n-id="timelion.help.mainPage.keyboardTips.generalEditingTitle"
-              i18n-default-message="General editing"
-            ></strong></dd>
-          <dt></dt>
-          <dt>Ctrl/Cmd + Enter</dt>
-          <dd
-            i18n-id="timelion.help.mainPage.keyboardTips.generalEditing.submitRequestText"
-            i18n-default-message="Submit request"
-          ></dd>
-        </dl>
+    <div class="timHelp__functions">
+      <table class="table table-condensed table-bordered">
+        <tr
+          class="timHelp__functionsTableRow"
+          ng-repeat-start="function in functions.list"
+          ng-class="{active: functions.details === function.name}"
+          ng-click="functions.details =
+                    (functions.details === function.name ?
+                      null : function.name)"
+          kbn-accessible-click
+        >
+          <td><strong>.{{function.name}}()</strong></td>
+          <td>{{function.help}}</td>
+        </tr>
+        <tr ng-if="functions.details === function.name" ng-repeat-end>
+          <td colspan=2>
+            <div class="suggestion-details" >
+              <table
+                class="table table-condensed table-bordered
+                        timHelp__functionDetailsTable"
+                ng-show="function.args.length > (function.chainable ? 1: 0)"
+              >
+                <thead>
+                  <th
+                    scope="col"
+                    i18n-id="timelion.help.mainPage.functionReference.detailsTable.argumentNameColumnLabel"
+                    i18n-default-message="Argument Name"
+                  ></th>
+                  <th
+                    scope="col"
+                    i18n-id="timelion.help.mainPage.functionReference.detailsTable.acceptedTypesColumnLabel"
+                    i18n-default-message="Accepted Types"
+                  ></th>
+                  <th
+                    scope="col"
+                    i18n-id="timelion.help.mainPage.functionReference.detailsTable.informationColumnLabel"
+                    i18n-default-message="Information"
+                  ></th>
+                </thead>
+                <tr
+                  ng-repeat="arg in function.args"
+                  ng-hide="$index < 1 && function.chainable"
+                >
+                  <td>{{arg.name}}</td>
+                  <td><em>{{arg.types.join(', ')}}</em></td>
+                  <td>{{arg.help}}</td>
+                </tr>
+              </table>
+              <div ng-hide="function.args.length > (function.chainable ? 1: 0)">
+                <em
+                  i18n-id="timelion.help.mainPage.functionReference.noArgumentsFunctionErrorMessage"
+                  i18n-default-message="This function does not accept any arguments. Well that's simple, isn't it?"
+                ></em>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
 
-        <!-- Auto complete tips -->
-        <dl class="dl-horizontal">
-          <dt></dt>
-          <dd>
-            <strong
-              i18n-id="timelion.help.mainPage.keyboardTips.autoCompleteTitle"
-              i18n-default-message="When auto-complete is visible"
-            ></strong>
-          </dd>
-          <dt
-            i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.downArrowLabel"
-            i18n-default-message="Down arrow"
-          ></dt>
-          <dd
-            i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.downArrowDescription"
-            i18n-default-message="Switch focus to auto-complete menu. Use arrows to further select a term"
-          ></dd>
-          <dt>Enter/Tab</dt>
-          <dd
-            i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.enterTabDescription"
-            i18n-default-message="Select the currently selected or the top most term in auto-complete menu"
-          ></dd>
-          <dt>Esc</dt>
-          <dd
-            i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.escDescription"
-            i18n-default-message="Close auto-complete menu"
-          ></dd>
-        </dl>
-      </div>
-    </tab>
-  </tabset>
+  <div ng-show="activeTab == 'keyboardtips'" class="list-group-item list-group-item--noBorder">
+    <!-- General editing tips -->
+    <dl class="dl-horizontal">
+      <dd>
+        <strong
+          i18n-id="timelion.help.mainPage.keyboardTips.generalEditingTitle"
+          i18n-default-message="General editing"
+        ></strong></dd>
+      <dt></dt>
+      <dt>Ctrl/Cmd + Enter</dt>
+      <dd
+        i18n-id="timelion.help.mainPage.keyboardTips.generalEditing.submitRequestText"
+        i18n-default-message="Submit request"
+      ></dd>
+    </dl>
+
+    <!-- Auto complete tips -->
+    <dl class="dl-horizontal">
+      <dt></dt>
+      <dd>
+        <strong
+          i18n-id="timelion.help.mainPage.keyboardTips.autoCompleteTitle"
+          i18n-default-message="When auto-complete is visible"
+        ></strong>
+      </dd>
+      <dt
+        i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.downArrowLabel"
+        i18n-default-message="Down arrow"
+      ></dt>
+      <dd
+        i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.downArrowDescription"
+        i18n-default-message="Switch focus to auto-complete menu. Use arrows to further select a term"
+      ></dd>
+      <dt>Enter/Tab</dt>
+      <dd
+        i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.enterTabDescription"
+        i18n-default-message="Select the currently selected or the top most term in auto-complete menu"
+      ></dd>
+      <dt>Esc</dt>
+      <dd
+        i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.escDescription"
+        i18n-default-message="Close auto-complete menu"
+      ></dd>
+    </dl>
+  </div>
 </div>

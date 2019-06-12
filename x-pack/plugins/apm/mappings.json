@@ -22,6 +22,14 @@
             "type": "long",
             "null_value": 0
           },
+          "rum-js": {
+            "type": "long",
+            "null_value": 0
+          },
+          "dotnet": {
+            "type": "long",
+            "null_value": 0
+          },
           "ruby": {
             "type": "long",
             "null_value": 0

@@ -4,35 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { setupRequest } from './setup_request';
 
-describe('setupRequest', () => {
-  let callWithRequestSpy: jest.Mock;
-  let mockReq: any;
-
-  beforeEach(() => {
-    callWithRequestSpy = jest.fn();
-    mockReq = {
-      params: {},
-      query: {},
-      server: {
-        config: () => 'myConfig',
-        plugins: {
-          elasticsearch: {
-            getCluster: () => ({ callWithRequest: callWithRequestSpy })
-          }
+function getMockRequest() {
+  const callWithRequestSpy = jest.fn();
+  const mockRequest = ({
+    params: {},
+    query: {},
+    server: {
+      config: () => ({ get: () => 'apm-*' }),
+      plugins: {
+        elasticsearch: {
+          getCluster: () => ({ callWithRequest: callWithRequestSpy })
         }
-      },
-      getUiSettingsService: jest.fn(() => ({
-        get: jest.fn(() => Promise.resolve(false))
-      }))
-    };
-  });
+      }
+    },
+    getUiSettingsService: () => ({ get: async () => false })
+  } as any) as Legacy.Request;
 
-  it('should call callWithRequest with correct args', async () => {
-    const setup = setupRequest(mockReq);
-    await setup.client('myType', { body: { foo: 'bar' } });
-    expect(callWithRequestSpy).toHaveBeenCalledWith(mockReq, 'myType', {
+  return { callWithRequestSpy, mockRequest };
+}
+
+describe('setupRequest', () => {
+  it('should call callWithRequest with default args', async () => {
+    const { mockRequest, callWithRequestSpy } = getMockRequest();
+    const { client } = setupRequest(mockRequest);
+    await client.search({ index: 'apm-*', body: { foo: 'bar' } });
+    expect(callWithRequestSpy).toHaveBeenCalledWith(mockRequest, 'search', {
+      index: 'apm-*',
       body: {
         foo: 'bar',
         query: {
@@ -46,45 +46,102 @@ describe('setupRequest', () => {
     });
   });
 
-  it('should set ignore_throttled to false if includeFrozen is true', async () => {
-    // mock includeFrozen to return true
-    mockReq.getUiSettingsService.mockImplementation(() => ({
-      get: jest.fn(() => Promise.resolve(true))
-    }));
-    const setup = setupRequest(mockReq);
-    await setup.client('myType', {});
-    const params = callWithRequestSpy.mock.calls[0][2];
-    expect(params.ignore_throttled).toBe(false);
-  });
+  describe('observer.version_major filter', () => {
+    describe('if index is apm-*', () => {
+      it('should merge `observer.version_major` filter with existing boolean filters', async () => {
+        const { mockRequest, callWithRequestSpy } = getMockRequest();
+        const { client } = setupRequest(mockRequest);
+        await client.search({
+          index: 'apm-*',
+          body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
+        });
+        const params = callWithRequestSpy.mock.calls[0][2];
+        expect(params.body).toEqual({
+          query: {
+            bool: {
+              filter: [
+                { term: 'someTerm' },
+                { range: { 'observer.version_major': { gte: 7 } } }
+              ]
+            }
+          }
+        });
+      });
 
-  it('should set filter if none exists', async () => {
-    const setup = setupRequest(mockReq);
-    await setup.client('myType', {});
-    const params = callWithRequestSpy.mock.calls[0][2];
-    expect(params.body).toEqual({
-      query: {
-        bool: { filter: [{ range: { 'observer.version_major': { gte: 7 } } }] }
-      }
-    });
-  });
+      it('should add `observer.version_major` filter if none exists', async () => {
+        const { mockRequest, callWithRequestSpy } = getMockRequest();
+        const { client } = setupRequest(mockRequest);
+        await client.search({ index: 'apm-*' });
+        const params = callWithRequestSpy.mock.calls[0][2];
+        expect(params.body).toEqual({
+          query: {
+            bool: {
+              filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
+            }
+          }
+        });
+      });
 
-  it('should merge filters if one exists', async () => {
-    const setup = setupRequest(mockReq);
-    await setup.client('myType', {
-      body: {
-        query: { bool: { filter: [{ term: 'someTerm' }] } }
-      }
+      it('should not add `observer.version_major` filter if `includeLegacyData=true`', async () => {
+        const { mockRequest, callWithRequestSpy } = getMockRequest();
+        const { client } = setupRequest(mockRequest);
+        await client.search(
+          {
+            index: 'apm-*',
+            body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
+          },
+          {
+            includeLegacyData: true
+          }
+        );
+        const params = callWithRequestSpy.mock.calls[0][2];
+        expect(params.body).toEqual({
+          query: { bool: { filter: [{ term: 'someTerm' }] } }
+        });
+      });
     });
-    const params = callWithRequestSpy.mock.calls[0][2];
-    expect(params.body).toEqual({
-      query: {
-        bool: {
-          filter: [
-            { term: 'someTerm' },
-            { range: { 'observer.version_major': { gte: 7 } } }
-          ]
+
+    it('if index is not an APM index, it should not add `observer.version_major` filter', async () => {
+      const { mockRequest, callWithRequestSpy } = getMockRequest();
+      const { client } = setupRequest(mockRequest);
+      await client.search({
+        index: '.ml-*',
+        body: {
+          query: { bool: { filter: [{ term: 'someTerm' }] } }
         }
-      }
+      });
+      const params = callWithRequestSpy.mock.calls[0][2];
+      expect(params.body).toEqual({
+        query: {
+          bool: {
+            filter: [{ term: 'someTerm' }]
+          }
+        }
+      });
+    });
+  });
+
+  describe('ignore_throttled', () => {
+    it('should set `ignore_throttled=true` if `includeFrozen=false`', async () => {
+      const { mockRequest, callWithRequestSpy } = getMockRequest();
+
+      // mock includeFrozen to return false
+      mockRequest.getUiSettingsService = () => ({ get: async () => false });
+      const { client } = setupRequest(mockRequest);
+      await client.search({});
+      const params = callWithRequestSpy.mock.calls[0][2];
+      expect(params.ignore_throttled).toBe(true);
+    });
+
+    it('should set `ignore_throttled=false` if `includeFrozen=true`', async () => {
+      const { mockRequest, callWithRequestSpy } = getMockRequest();
+
+      // mock includeFrozen to return true
+      mockRequest.getUiSettingsService = () => ({ get: async () => true });
+      const { client } = setupRequest(mockRequest);
+      await client.search({});
+      const params = callWithRequestSpy.mock.calls[0][2];
+      expect(params.ignore_throttled).toBe(false);
     });
   });
 });

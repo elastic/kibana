@@ -11,8 +11,6 @@ exports[`Queue component renders default elements 1`] = `
   />
   <EuiText
     className="monPipelineViewer__queueMessage"
-    grow={true}
-    size="m"
   >
     <FormattedMessage
       defaultMessage="Queue metrics not available"

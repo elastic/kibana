@@ -48,7 +48,7 @@ const termsAgg = ({ field, size, direction, query }) => {
       source: field.script,
       lang: field.lang
     };
-    terms.valueType = field.type === 'number' ? 'float' : field.type;
+    terms.value_type = field.type === 'number' ? 'float' : field.type;
   } else {
     terms.field = field.name;
   }
@@ -58,8 +58,8 @@ const termsAgg = ({ field, size, direction, query }) => {
   }
 
   return {
-    'termsAgg': {
-      'terms': terms
+    termsAgg: {
+      terms: terms
     }
   };
 };
@@ -85,11 +85,13 @@ class ListControl extends Control {
       }
 
       const ancestorValues = this.getAncestorValues();
-      if (_.isEqual(ancestorValues, this.lastAncestorValues)) {
+      if (_.isEqual(ancestorValues, this.lastAncestorValues)
+        && _.isEqual(query, this.lastQuery)) {
         // short circuit to avoid fetching options list for same ancestor values
         return;
       }
       this.lastAncestorValues = ancestorValues;
+      this.lastQuery = query;
 
       ancestorFilters = this.getAncestorFilters();
     }

@@ -13,6 +13,7 @@ test('it renders without crashing', () => {
     id: 'space-id',
     name: 'space name',
     description: 'space description',
+    disabledFeatures: [],
   };
 
   shallow(<SpaceCards spaces={[space]} onSpaceSelect={jest.fn()} />);

@@ -17,28 +17,17 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-
-import { LoggerFactory } from '../logging';
-import { HttpConfig } from './http_config';
-import { HttpService, HttpServiceStart } from './http_service';
-import { Router } from './router';
-
-export { Router, KibanaRequest } from './router';
-export { HttpService, HttpServiceStart };
-export { HttpServerInfo } from './http_server';
+export { config, HttpConfig, HttpConfigType } from './http_config';
+export { HttpService, HttpServiceSetup, HttpServiceStart } from './http_service';
+export {
+  KibanaRequest,
+  KibanaRequestRoute,
+  Router,
+  RouteMethod,
+  RouteConfigOptions,
+} from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
-
-export { HttpConfig };
-
-export class HttpModule {
-  public readonly service: HttpService;
-
-  constructor(readonly config$: Observable<HttpConfig>, logger: LoggerFactory) {
-    this.service = new HttpService(this.config$, logger);
-
-    const router = new Router('/core');
-    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
-    this.service.registerRouter(router);
-  }
-}
+export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
+export { AuthenticationHandler, AuthToolkit } from './lifecycle/auth';
+export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
+export { SessionStorageFactory, SessionStorage } from './session_storage';

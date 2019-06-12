@@ -7,6 +7,7 @@
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import React from 'react';
+import { UMBadge } from '../badge';
 import { UMBreadcrumb } from '../breadcrumbs';
 import { UptimeAppProps } from '../uptime_app';
 import { CreateGraphQLClient } from './adapters/framework/framework_adapter_types';
@@ -16,6 +17,8 @@ export interface UMFrontendLibs {
 }
 
 export type UMUpdateBreadcrumbs = (breadcrumbs: UMBreadcrumb[]) => void;
+
+export type UMUpdateBadge = (badge: UMBadge) => void;
 
 export type UMGraphQLClient = ApolloClient<NormalizedCacheObject>; // | OtherClientType
 

@@ -34,7 +34,8 @@ import { SavedObjectsClient } from './saved_objects_client';
  */
 export class SimpleSavedObject<T extends SavedObjectAttributes> {
   public attributes: T;
-  // tslint:disable-next-line variable-name We want to use the same interface this class had in JS
+  // We want to use the same interface this class had in JS
+  // eslint-disable-next-line variable-name
   public _version?: SavedObjectType<T>['version'];
   public id: SavedObjectType<T>['id'];
   public type: SavedObjectType<T>['type'];
@@ -69,7 +70,7 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
     return has(this.attributes, key);
   }
 
-  public save() {
+  public save(): Promise<SimpleSavedObject<T>> {
     if (this.id) {
       return this.client.update(this.type, this.id, this.attributes, {
         migrationVersion: this.migrationVersion,

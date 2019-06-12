@@ -16,37 +16,52 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import handleAnnotationResponse from './handle_annotation_response';
+import { handleAnnotationResponse } from './response_processors/annotations/';
 import { getAnnotationRequestParams } from './annorations/get_request_params';
+import { getLastSeriesTimestamp } from './helpers/timestamp';
 
 function validAnnotation(annotation) {
-  return annotation.index_pattern &&
+  return (
+    annotation.index_pattern &&
     annotation.time_field &&
     annotation.fields &&
     annotation.icon &&
-    annotation.template;
+    annotation.template &&
+    !annotation.hidden
+  );
 }
 
-export async function getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities) {
-  const panelIndexPattern = panel.index_pattern;
-  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
+export async function getAnnotations({
+  req,
+  esQueryConfig,
+  searchStrategy,
+  panel,
+  capabilities,
+  series,
+}) {
+  const searchRequest = searchStrategy.getSearchRequest(req);
   const annotations = panel.annotations.filter(validAnnotation);
+  const lastSeriesTimestamp = getLastSeriesTimestamp(series);
+  const handleAnnotationResponseBy = handleAnnotationResponse(lastSeriesTimestamp);
 
-  const bodiesPromises = annotations.map(annotation => getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities));
-  const body = (await Promise.all(bodiesPromises))
-    .reduce((acc, items) => acc.concat(items), []);
+  const bodiesPromises = annotations.map(annotation =>
+    getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities)
+  );
+  const searches = (await Promise.all(bodiesPromises)).reduce(
+    (acc, items) => acc.concat(items),
+    []
+  );
 
-  if (!body.length) return { responses: [] };
+  if (!searches.length) return { responses: [] };
 
   try {
-    const responses = await searchRequest.search({ body });
+    const data = await searchRequest.search(searches);
 
-    return annotations
-      .reduce((acc, annotation, index) => {
-        acc[annotation.id] = handleAnnotationResponse(responses[index], annotation);
+    return annotations.reduce((acc, annotation, index) => {
+      acc[annotation.id] = handleAnnotationResponseBy(data[index], annotation);
 
-        return acc;
-      }, {});
+      return acc;
+    }, {});
   } catch (error) {
     if (error.message === 'missing-indices') return { responses: [] };
     throw error;

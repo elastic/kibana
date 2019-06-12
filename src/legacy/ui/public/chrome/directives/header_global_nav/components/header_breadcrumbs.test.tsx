@@ -20,12 +20,12 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { Breadcrumb } from '../../../../../../../core/public/chrome';
+import { ChromeBreadcrumb } from '../../../../../../../core/public';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 
 describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {
-    const breadcrumbs$ = new Rx.Subject<Breadcrumb[]>();
+    const breadcrumbs$ = new Rx.Subject<ChromeBreadcrumb[]>();
     const wrapper = mount(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
 
     breadcrumbs$.next([{ text: 'First' }]);

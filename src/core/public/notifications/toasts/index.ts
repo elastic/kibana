@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { ToastsService } from './toasts_service';
-export { ToastsStart, ToastInput } from './toasts_start';
+export { ToastsService, ToastsSetup, ToastsStart } from './toasts_service';
+export { ErrorToastOptions, ToastsApi, ToastInput } from './toasts_api';
 export { Toast } from '@elastic/eui';

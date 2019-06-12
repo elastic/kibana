@@ -275,9 +275,11 @@
      * Asks Elasticsearch to prepare SAML authentication request to be sent to
      * the 3rd-party SAML identity provider.
      *
-     * @param {string} acs Assertion consumer service URL to use for SAML request or URL in the
-     * Kibana to which identity provider will post SAML response. Based on the ACS Elasticsearch
+     * @param {string} [acs] Optional assertion consumer service URL to use for SAML request or URL
+     * in the Kibana to which identity provider will post SAML response. Based on the ACS Elasticsearch
      * will choose the right SAML realm.
+     *
+     * @param {string} [realm] Optional name of the Elasticsearch SAML realm to use to handle request.
      *
      * @returns {{realm: string, id: string, redirect: string}} Object that includes identifier
      * of the SAML realm used to prepare authentication request, encrypted request token to be
@@ -327,27 +329,13 @@
     });
 
     /**
-     * Invalidates SAML access token.
-     *
-     * @param {string} token SAML access token that needs to be invalidated.
-     *
-     * @returns {{redirect?: string}}
-     */
-    shield.samlLogout = ca({
-      method: 'POST',
-      needBody: true,
-      url: {
-        fmt: '/_security/saml/logout'
-      }
-    });
-
-    /**
      * Invalidates SAML session based on Logout Request received from the Identity Provider.
      *
      * @param {string} queryString URL encoded query string provided by Identity Provider.
-     * @param {string} acs Assertion consumer service URL to use for SAML request or URL in the
+     * @param {string} [acs] Optional assertion consumer service URL to use for SAML request or URL in the
      * Kibana to which identity provider will post SAML response. Based on the ACS Elasticsearch
      * will choose the right SAML realm to invalidate session.
+     * @param {string} [realm] Optional name of the Elasticsearch SAML realm to use to handle request.
      *
      * @returns {{redirect?: string}}
      */
@@ -356,6 +344,64 @@
       needBody: true,
       url: {
         fmt: '/_security/saml/invalidate'
+      }
+    });
+
+    /**
+     * Asks Elasticsearch to prepare an OpenID Connect authentication request to be sent to
+     * the 3rd-party OpenID Connect provider.
+     *
+     * @param {string} realm The OpenID Connect realm name in Elasticsearch
+     *
+     * @returns {{state: string, nonce: string, redirect: string}} Object that includes two opaque parameters that need
+     * to be sent to Elasticsearch with the OpenID Connect response and redirect URL to the OpenID Connect provider that
+     * will be used to authenticate user.
+     */
+    shield.oidcPrepare = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/oidc/prepare'
+      }
+    });
+
+    /**
+     * Sends the URL to which the OpenID Connect Provider redirected the UA to Elasticsearch for validation.
+     *
+     * @param {string} state The state parameter that was returned by Elasticsearch in the
+     * preparation response.
+     * @param {string} nonce The nonce parameter that was returned by Elasticsearch in the
+     * preparation response.
+     * @param {string} redirect_uri The URL to where the UA was redirected by the OpenID Connect provider.
+     *
+     * @returns {{username: string, access_token: string, refresh_token; string, expires_in: number}} Object that
+     * includes name of the user, access token to use for any consequent requests that
+     * need to be authenticated and a number of seconds after which access token will expire.
+     */
+    shield.oidcAuthenticate = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/oidc/authenticate'
+      }
+    });
+
+    /**
+     * Invalidates an access token and refresh token pair that was generated after an OpenID Connect authentication.
+     *
+     * @param {string} token An access token that was created by authenticating to an OpenID Connect realm and
+     * that needs to be invalidated.
+     * @param {string} refres_token A refresh token that was created by authenticating to an OpenID Connect realm and
+     * that needs to be invalidated.
+     *
+     * @returns {{redirect?: string}} If the Elasticsearch OpenID Connect realm configuration and the
+     * OpenID Connect provider supports RP-initiated SLO, a URL to redirect the UA
+     */
+    shield.oidcLogout = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/oidc/logout'
       }
     });
 

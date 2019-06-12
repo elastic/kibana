@@ -14,5 +14,5 @@ export const Debug = ({ payload }) => (
 );
 
 Debug.propTypes = {
-  payload: PropTypes.object.isRequired,
+  payload: PropTypes.object,
 };

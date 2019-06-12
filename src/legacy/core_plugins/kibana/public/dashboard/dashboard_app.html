@@ -10,6 +10,7 @@
       <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
         <search-bar
           query="model.query"
+          screen-title="screenTitle"
           on-query-submit="updateQueryAndFetch"
           app-name="'dashboard'"
           index-patterns="indexPatterns"
@@ -22,11 +23,22 @@
           is-refresh-paused="model.refreshInterval.pause"
           refresh-interval="model.refreshInterval.value"
           on-refresh-change="onRefreshChange"
-          watch-depth="reference"
         ></search-bar>
       </div>
     </div>
   </kbn-top-nav>
+
+  <!--
+  The top nav is hidden in embed mode but the filter bar must still be present so
+  we show the filter bar on its own here if the chrome is not visible.
+-->
+  <filter-bar
+    ng-if="showFilterBar() && !chrome.getVisible()"
+    class-name="'globalFilterGroup__filterBar'"
+    filters="model.filters"
+    on-filters-updated="onFiltersUpdated"
+    index-patterns="indexPatterns"
+  ></filter-bar>
 
   <apply-filters-popover
     filters="appState.$newFilters"

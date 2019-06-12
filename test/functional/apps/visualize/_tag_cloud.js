@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function tryingForTime() {
         await PageObjects.visualize.selectField(termsField);
       });
-      await PageObjects.visualize.selectOrderBy('_key');
+      await PageObjects.visualize.selectOrderByMetric(2, '_key');
       await PageObjects.visualize.clickGo();
     });
 

@@ -10,6 +10,7 @@ import { get } from 'lodash';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
 import { flushContext, flushContextAfterIndex } from '../actions/elements';
+import { setWorkpad } from '../actions/workpad';
 
 /*
   Resolved args are a way to handle async values. They track the status, value, and error
@@ -47,6 +48,7 @@ function _getValue(hasError, value, oldVal) {
 }
 
 function getContext(value, loading = false, oldVal = null) {
+  // TODO: this is no longer correct.
   const hasError = value instanceof Error;
   return {
     state: _getState(hasError, loading),
@@ -88,9 +90,15 @@ export const resolvedArgsReducer = handleActions(
       }, transientState);
     },
 
-    [actions.clear]: (transientState, { payload }) => {
+    [actions.clearValue]: (transientState, { payload }) => {
       const { path } = payload;
       return del(transientState, getFullPath(path));
+    },
+
+    [actions.clearValues]: (transientState, { payload }) => {
+      return payload.reduce((transientState, path) => {
+        return del(transientState, getFullPath(path));
+      }, transientState);
     },
 
     [actions.inFlightActive]: transientState => {
@@ -128,6 +136,9 @@ export const resolvedArgsReducer = handleActions(
 
         return state;
       }, transientState);
+    },
+    [setWorkpad]: (transientState, {}) => {
+      return set(transientState, 'resolvedArgs', {});
     },
   },
   {}

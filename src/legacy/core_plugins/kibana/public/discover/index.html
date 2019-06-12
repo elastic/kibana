@@ -5,18 +5,21 @@
     <div data-transclude-slots>
       <!-- Breadcrumbs. -->
       <div data-transclude-slot="topLeftCorner" class="kuiLocalBreadcrumbs">
-        <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb" ng-if="opts.savedSearch.id">
+        <h1 id="kui_local_breadcrumb" class="kuiLocalBreadcrumb" ng-if="opts.savedSearch.id">
           <span class="kuiLocalBreadcrumb__emphasis">
-            <span
+            <button
+              class="kuiLink"
+              type="button"
               id="reload_saved_search"
               aria-label="{{::'kbn.discover.reloadSavedSearchAriaLabel' | i18n: {defaultMessage: 'Reload saved search'} }}"
               tooltip="{{::'kbn.discover.reloadSavedSearchTooltip' | i18n: {defaultMessage: 'Reload saved search'} }}"
               tooltip-placement="right"
               tooltip-append-to-body="1"
               ng-click="resetQuery()"
-              kbn-accessible-click
-              class="kuiIcon fa-undo small"
-            ></span>&nbsp;
+            >
+              <span class="kuiIcon fa-undo small"></span>
+              {{::'kbn.discover.reloadSavedSearchButton' | i18n: {defaultMessage: 'Reload'} }}
+            </button>
           </span>
         </h1>
         <div class="kuiLocalBreadcrumb">
@@ -33,6 +36,7 @@
       <div data-transclude-slot="bottomRow" class="fullWidth">
         <search-bar
           query="state.query"
+          screen-title="screenTitle"
           on-query-submit="updateQueryAndFetch"
           app-name="'discover'"
           index-patterns="[indexPattern]"
@@ -44,7 +48,6 @@
           is-refresh-paused="refreshInterval.pause"
           refresh-interval="refreshInterval.value"
           on-refresh-change="onRefreshChange"
-          watch-depth="reference"
         ></search-bar>
       </div>
     </div>
@@ -100,9 +103,7 @@
                 class="euiTitle euiTitle--small"
               ></h2>
               <div class="euiSpacer euiSpacer--m"></div>
-              <div class="euiLoadingSpinner euiLoadingSpinner--large"></div>
-              <div class="euiSpacer euiSpacer--m"></div>
-              <div ng-show="fetchStatus">{{fetchStatus.complete}} / {{fetchStatus.total}}</div>
+              <div class="euiLoadingSpinner euiLoadingSpinner--large" data-test-subj="loadingSpinner"></div>
             </div>
           </div>
 
@@ -128,16 +129,18 @@
             >
               <header class="dscTimechart__header">
                 <div class="small">
-                  <span
+                  <label
+                    for="dscResultsIntervalSelector"
                     tooltip="{{::'kbn.discover.howToChangeTheTimeTooltip' | i18n: {defaultMessage: 'To change the time, click the clock icon in the navigation bar'} }}"
                   >
-                    {{timeRange.from | moment}} - {{timeRange.to | moment}}
-                  </span>
+                    {{toMoment(timeRange.from)}} - {{toMoment(timeRange.to)}}
+                  </label>
 
                   &mdash;
 
                   <span class="form-inline">
                     <select
+                      id="dscResultsIntervalSelector"
                       class="dscResults__interval form-control"
                       ng-model="state.interval"
                       ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"

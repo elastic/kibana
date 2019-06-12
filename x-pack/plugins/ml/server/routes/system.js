@@ -14,7 +14,6 @@ import { wrapError } from '../client/errors';
 import Boom from 'boom';
 
 import { isSecurityDisabled } from '../lib/security_utils';
-import { isBasicLicense } from '../lib/check_license';
 
 export function systemRoutes(server, commonRouteConfig) {
   const callWithInternalUser = callWithInternalUserFactory(server);
@@ -61,11 +60,7 @@ export function systemRoutes(server, commonRouteConfig) {
           }
         }
 
-        // isSecurityDisabled will return true if it is a basic license
-        // this will cause the subsequent ml.privilegeCheck to fail.
-        // therefore, check for a basic license first and report that security
-        // is disabled because its not available on basic
-        if (isBasicLicense(server) || isSecurityDisabled(server)) {
+        if (isSecurityDisabled(server)) {
           // if xpack.security.enabled has been explicitly set to false
           // return that security is disabled and don't call the privilegeCheck endpoint
           return {
@@ -95,7 +90,7 @@ export function systemRoutes(server, commonRouteConfig) {
       return new Promise((resolve, reject) => {
         // check for basic license first for consistency with other
         // security disabled checks
-        if (isBasicLicense(server) || isSecurityDisabled(server)) {
+        if (isSecurityDisabled(server)) {
           getNodeCount()
             .then(resolve)
             .catch(reject);

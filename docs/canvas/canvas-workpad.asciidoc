@@ -1,7 +1,8 @@
+[role="xpack"]
 [[canvas-workpad]]
 === Using the workpad
 
-beta[]Now that you have a workpad with sample data that you can mess with, let’s mess with it. 
+Now that you have a workpad with sample data that you can mess with, let’s mess with it. 
 We’ll start out by making a few stylistic changes. 
 
 . Click the gauge chart in the top left of the workpad (fun fact, these are actually pie charts). 

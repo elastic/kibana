@@ -24,6 +24,7 @@ import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
+import { coreMixin } from './core';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
 import { usageMixin } from './usage';
@@ -35,8 +36,9 @@ import configCompleteMixin from './config/complete';
 import optimizeMixin from '../../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
-import { savedObjectsMixin } from './saved_objects';
+import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
 import { sampleDataMixin } from './sample_data';
+import { capabilitiesMixin } from './capabilities';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
@@ -53,7 +55,19 @@ export default class KbnServer {
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    this.core = core;
+    const { setupDeps, startDeps, serverOptions, handledConfigPaths, logger } = core;
+    this.newPlatform = {
+      coreContext: {
+        logger,
+      },
+      setup: setupDeps,
+      start: startDeps,
+      stop: null,
+      params: {
+        serverOptions,
+        handledConfigPaths,
+      },
+    };
 
     this.ready = constant(this.mixin(
       Plugins.waitForInitSetupMixin,
@@ -63,6 +77,8 @@ export default class KbnServer {
 
       // sets this.server
       httpMixin,
+
+      coreMixin,
 
       // adds methods for extending this.server
       serverExtensionsMixin,
@@ -90,6 +106,9 @@ export default class KbnServer {
 
       // setup saved object routes
       savedObjectsMixin,
+
+      // setup capabilities routes
+      capabilitiesMixin,
 
       // setup routes for installing/uninstalling sample data sets
       sampleDataMixin,

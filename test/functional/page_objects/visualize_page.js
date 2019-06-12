@@ -19,9 +19,9 @@
 
 import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 import Bluebird from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-export function VisualizePageProvider({ getService, getPageObjects }) {
+export function VisualizePageProvider({ getService, getPageObjects, updateBaselines }) {
   const browser = getService('browser');
   const config = getService('config');
   const testSubjects = getService('testSubjects');
@@ -29,10 +29,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const log = getService('log');
   const inspector = getService('inspector');
+  const screenshot = getService('screenshots');
   const table = getService('table');
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
+  const comboBox = getService('comboBox');
 
   class VisualizePage {
 
@@ -378,17 +380,32 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getMetric() {
-      const metricElement = await find.byCssSelector('div[ng-controller="KbnMetricVisController"]');
-      return await metricElement.getVisibleText();
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .mtrVis__container');
+      const values = await Promise.all(elements.map(async element => {
+        const text = await element.getVisibleText();
+        return text;
+      }));
+      return values.filter(item => item.length > 0).reduce((arr, item) => arr.concat(item.split('\n')), []);
     }
 
     async getGaugeValue() {
-      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
-      return await Promise.all(elements.map(async element => await element.getVisibleText()));
+      const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg text');
+      const values = await Promise.all(elements.map(async element => {
+        const text = await element.getVisibleText();
+        return text;
+      }));
+      return values.filter(item => item.length > 0);
     }
 
     async clickMetricEditor() {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
+    }
+
+    async clickMetricByIndex(index) {
+      log.debug(`clickMetricByIndex(${index})`);
+      const metrics = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .mtrVis .mtrVis__container');
+      expect(metrics.length).greaterThan(index);
+      await metrics[index].click();
     }
 
     async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
@@ -397,7 +414,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickSavedSearch(savedSearchName) {
-      await testSubjects.click('savedSearchesTab');
       await testSubjects.click(`savedObjectTitle${savedSearchName.split(' ').join('-')}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -408,8 +424,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setValue(newValue) {
-      await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
-      const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
+      const input = await find.byCssSelector('[data-test-subj="visEditorPercentileRanks"] input');
       await input.clearValue();
       await input.type(newValue);
     }
@@ -431,19 +446,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
-      const selector = `
+      const comboBoxElement = await find.byCssSelector(`
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
-        .agg-select
-      `;
+        [data-test-subj="defaultEditorAggSelect"]
+      `);
 
-      await retry.try(async () => {
-        await find.clickByCssSelector(selector);
-        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-        await input.type(myString);
-        await input.pressKeys(browser.keys.RETURN);
-      });
+      await comboBox.setElement(comboBoxElement, myString);
       await PageObjects.common.sleep(500);
     }
 
@@ -481,25 +491,21 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // So to modify a metric or aggregation tests need to keep track of the
       // order they are added.
       await this.toggleOpenEditor(index);
-      const aggSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} div [data-test-subj="visEditorAggSelect"] div span[aria-label="Select box activate"]`);
-      // open agg selection list
-      await aggSelect.click();
+
       // select our agg
-      const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
-      await aggItem.click();
-      const fieldSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`);
-      // open field selection list
-      await fieldSelect.click();
+      const aggSelect = await find
+        .byCssSelector(`#visAggEditorParams${index} [data-test-subj="defaultEditorAggSelect"]`);
+      await comboBox.setElement(aggSelect, agg);
+
+      const fieldSelect = await find.byCssSelector(`#visAggEditorParams${index} [data-test-subj="visDefaultEditorField"]`);
       // select our field
-      await testSubjects.click(field);
+      await comboBox.setElement(fieldSelect, field);
       // enter custom label
       await this.setCustomLabel(label, index);
     }
 
     async setCustomLabel(label, index = 1) {
-      const customLabel = await find.byCssSelector(`#visEditorStringInput${index}customLabel`);
+      const customLabel = await testSubjects.find(`visEditorStringInput${index}customLabel`);
       customLabel.type(label);
     }
 
@@ -535,9 +541,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getField() {
-      const field = await retry.try(
-        async () => await find.byCssSelector('.ng-valid-required[name="field"] .ui-select-match-text'));
-      return await field.getVisibleText();
+      return await comboBox.getComboBoxSelectedOptions('visDefaultEditorField');
     }
 
     async selectField(fieldValue, groupName = 'buckets', childAggregationType = null) {
@@ -546,70 +550,46 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
-        .field-select
+        [data-test-subj="visDefaultEditorField"]
       `;
-      await find.clickByCssSelector(selector);
-      await find.setValue(`${selector} input.ui-select-search`, fieldValue);
-      const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-      await input.pressKeys(browser.keys.RETURN);
+      const fieldEl = await find.byCssSelector(selector);
+      await comboBox.setElement(fieldEl, fieldValue);
     }
 
     async selectFieldById(fieldValue, id) {
       await find.clickByCssSelector(`#${id} > option[label="${fieldValue}"]`);
     }
 
-    async orderBy(fieldValue) {
-      await find.clickByCssSelector(
-        'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"]'
-        + `option:contains("${fieldValue}")`);
-    }
-
-    async selectOrderBy(fieldValue) {
-      await find.clickByCssSelector(`select[name="orderBy"] > option[value="${fieldValue}"]`);
-    }
-
-    async getInputTypeParam(paramName) {
-      const input = await find.byCssSelector(`input[ng-model="agg.params.${paramName}"]`);
-      return await input.getProperty('value');
-    }
-
     async getInterval() {
-      const intervalElement = await find.byCssSelector(
-        `select[ng-model="agg.params.interval"] option[selected]`);
-      return await intervalElement.getProperty('label');
+      return await comboBox.getComboBoxSelectedOptions('visEditorInterval');
     }
 
     async setInterval(newValue) {
       log.debug(`Visualize.setInterval(${newValue})`);
-      const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      await input.type(newValue);
-      // The interval element will only interpret space as "select this" if there
-      // was a long enough gap from the typing above to the space click.  Hence the
-      // need for the sleep.
-      await PageObjects.common.sleep(500);
-      await input.pressKeys(browser.keys.SPACE);
+      return await comboBox.set('visEditorInterval', newValue);
     }
 
     async setCustomInterval(newValue) {
-      await this.setInterval('Custom');
-      const input = await find.byCssSelector('input[name="customInterval"]');
-      await input.clearValue();
-      await input.type(newValue);
+      log.debug(`Visualize.setCustomInterval(${newValue})`);
+      return await comboBox.setCustom('visEditorInterval', newValue);
     }
 
-    async setNumericInterval(newValue, { append } = {}) {
-      const input = await find.byCssSelector('input[name="interval"]');
-      if (!append) {
-        await input.clearValue();
+    async getNumericInterval(agg = 2) {
+      const intervalElement = await testSubjects.find(`visEditorInterval${agg}`);
+      return await intervalElement.getProperty('value');
+    }
+
+    async setNumericInterval(newValue, { append } = {}, agg = 2) {
+      if (append) {
+        await testSubjects.append(`visEditorInterval${agg}`, String(newValue));
+      } else {
+        await testSubjects.setValue(`visEditorInterval${agg}`, String(newValue));
       }
-      await input.type(newValue + '');
-      await PageObjects.common.sleep(1000);
     }
 
-    async setSize(newValue) {
-      const input = await find.byCssSelector(`vis-editor-agg-params[aria-hidden="false"] input[name="size"]`);
-      await input.clearValue();
-      await input.type(String(newValue));
+    async setSize(newValue, aggId) {
+      const dataTestSubj = aggId ? `aggregationEditor${aggId} sizeParamEditor` : 'sizeParamEditor';
+      await testSubjects.setValue(dataTestSubj, String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
@@ -622,12 +602,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async toggleOtherBucket() {
-      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showOther"]');
+    async toggleOtherBucket(agg = 2) {
+      return await testSubjects.click(`aggregationEditor${agg} otherBucketSwitch`);
     }
 
-    async toggleMissingBucket() {
-      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showMissing"]');
+    async toggleMissingBucket(agg = 2) {
+      return await testSubjects.click(`aggregationEditor${agg} missingBucketSwitch`);
     }
 
     async isApplyEnabled() {
@@ -692,10 +672,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const lastRow = await table.findByCssSelector('tr:last-child');
       const fromCell = await lastRow.findByCssSelector('td:first-child input');
       await fromCell.clearValue();
-      await fromCell.type(`${from}`);
+      await fromCell.type(`${from}`, { charByChar: true });
       const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
       await toCell.clearValue();
-      await toCell.type(`${to}`);
+      await toCell.type(`${to}`, { charByChar: true });
     }
 
     async clickYAxisOptions(axisId) {
@@ -738,13 +718,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async ensureSavePanelOpen() {
       log.debug('ensureSavePanelOpen');
-      let isOpen = await testSubjects.exists('savedObjectSaveModal');
-      await retry.try(async () => {
-        while (!isOpen) {
-          await testSubjects.click('visualizeSaveButton');
-          isOpen = await testSubjects.exists('savedObjectSaveModal');
-        }
-      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const isOpen = await testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
+      if (!isOpen) {
+        await testSubjects.click('visualizeSaveButton');
+      }
     }
 
     async saveVisualization(vizName, { saveAsNew = false } = {}) {
@@ -773,12 +751,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       ));
     }
 
-    async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
-      await this.saveVisualization(vizName, { saveAsNew });
-      const errorToast = await testSubjects.exists('saveVisualizationError', {
-        timeout: defaultFindTimeout
-      });
-      expect(errorToast).to.be(true);
+    async expectNoSaveOption() {
+      const saveButtonExists = await testSubjects.exists('visualizeSaveButton');
+      expect(saveButtonExists).to.be(false);
     }
 
     async clickLoadSavedVisButton() {
@@ -826,6 +801,39 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return $('.y > g > text').toArray().map(tick => $(tick).text().trim());
     }
 
+    /**
+     * Removes chrome and takes a small screenshot of a vis to compare against a baseline.
+     * @param {string} name The name of the baseline image.
+     * @param {object} opts Options object.
+     * @param {number} opts.threshold Threshold for allowed variance when comparing images.
+     */
+    async expectVisToMatchScreenshot(name, opts = { threshold: 0.05 }) {
+      log.debug(`expectVisToMatchScreenshot(${name})`);
+
+      // Collapse sidebar and inject some CSS to hide the nav so we have a focused screenshot
+      await this.clickEditorSidebarCollapse();
+      await this.waitForVisualizationRenderingStabilized();
+      await browser.execute(`
+        var el = document.createElement('style');
+        el.id = '__data-test-style';
+        el.innerHTML = '[data-test-subj="headerGlobalNav"] { display: none; } ';
+        el.innerHTML += '[data-test-subj="top-nav"] { display: none; } ';
+        el.innerHTML += '[data-test-subj="experimentalVisInfo"] { display: none; } ';
+        document.body.appendChild(el);
+      `);
+
+      const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines);
+
+      // Reset the chart to its original state
+      await browser.execute(`
+        var el = document.getElementById('__data-test-style');
+        document.body.removeChild(el);
+      `);
+      await this.clickEditorSidebarCollapse();
+      await this.waitForVisualizationRenderingStabilized();
+      expect(percentDifference).to.be.lessThan(opts.threshold);
+    }
+
     /*
      ** This method gets the chart data and scales it based on chart height and label.
      ** Returns an array of height values
@@ -856,6 +864,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return chartData;
     }
 
+    /*
+    ** This method returns the paths that compose an area chart.
+    */
+    async getAreaChartPaths(dataLabel) {
+      const path = await retry.try(
+        async () => await find.byCssSelector(`path[data-label="${dataLabel}"]`, defaultFindTimeout * 2)
+      );
+      const data = await path.getAttribute('d');
+      log.debug(data);
+      // This area chart data starts with a 'M'ove to a x,y location, followed
+      // by a bunch of 'L'ines from that point to the next.  Those points are
+      // the values we're going to use to calculate the data values we're testing.
+      // So git rid of the one 'M' and split the rest on the 'L's.
+      return data.split('L');
+    }
+
     // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
     async getLineChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
       // 1). get the range/pixel ratio
@@ -867,18 +891,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const chartTypes = await retry.try(
         async () => await find
           .allByCssSelector(`.visWrapper__chart circle[data-label="${dataLabel}"][fill-opacity="1"]`, defaultFindTimeout * 2));
-
-      // 5). for each chart element, find the green circle, then the cy position
-      async function getChartType(chart) {
+      // 4). for each chart element, find the green circle, then the cy position
+      const chartData = await Promise.all(chartTypes.map(async chart => {
         const cy = await chart.getAttribute('cy');
         // the point_series_options test has data in the billions range and
         // getting 11 digits of precision with these calculations is very hard
         return Math.round(((yAxisHeight - cy) * yAxisRatio).toPrecision(6));
-      }
+      }));
 
-      // 4). pass the chartTypes to the getChartType function
-      const getChartTypesPromises = chartTypes.map(getChartType);
-      return await Promise.all(getChartTypesPromises);
+      return chartData;
     }
 
     // this is ALMOST identical to DiscoverPage.getBarChartData
@@ -1211,13 +1232,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return errorMessage;
     }
 
-    async selectSortMetric(agg, metric) {
-      const sortMetric = await find.byCssSelector(`[data-test-subj="visEditorOrder${agg}-${metric}"]`);
-      return await sortMetric.click();
+    async selectOrderByMetric(agg, metric) {
+      const sortSelect = await testSubjects.find(`visEditorOrderBy${agg}`);
+      const sortMetric = await sortSelect.findByCssSelector(`option[value="${metric}"]`);
+      await sortMetric.click();
     }
 
     async selectCustomSortMetric(agg, metric, field) {
-      await this.selectSortMetric(agg, 'custom');
+      await this.selectOrderByMetric(agg, 'custom');
       await this.selectAggregation(metric, 'groupName');
       await this.selectField(field, 'groupName');
     }

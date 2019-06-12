@@ -4,28 +4,18 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
 <EuiFlexGroup
   alignItems="center"
   className="monPipelineViewer__statement"
-  component="div"
-  direction="row"
   gutterSize="none"
   justifyContent="spaceBetween"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="xs"
-      justifyContent="flexStart"
       responsive={false}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -45,7 +35,6 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiBadge
@@ -60,17 +49,10 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
     </EuiFlexGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <Metric
         className="monPipelineViewer__metric--cpuTime"
@@ -98,28 +80,18 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
 <EuiFlexGroup
   alignItems="center"
   className="monPipelineViewer__statement"
-  component="div"
-  direction="row"
   gutterSize="none"
   justifyContent="spaceBetween"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="xs"
-      justifyContent="flexStart"
       responsive={false}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -139,7 +111,6 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiBadge
@@ -154,17 +125,10 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
     </EuiFlexGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <Metric
         className="monPipelineViewer__metric--cpuTime"
@@ -192,28 +156,18 @@ exports[`PluginStatement component does not render explicit id field if no id is
 <EuiFlexGroup
   alignItems="center"
   className="monPipelineViewer__statement"
-  component="div"
-  direction="row"
   gutterSize="none"
   justifyContent="spaceBetween"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="xs"
-      justifyContent="flexStart"
       responsive={false}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -235,17 +189,10 @@ exports[`PluginStatement component does not render explicit id field if no id is
     </EuiFlexGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <Metric
         className="monPipelineViewer__metric--eventsEmitted"
@@ -261,28 +208,18 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
 <EuiFlexGroup
   alignItems="center"
   className="monPipelineViewer__statement"
-  component="div"
-  direction="row"
   gutterSize="none"
   justifyContent="spaceBetween"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="xs"
-      justifyContent="flexStart"
       responsive={false}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -302,7 +239,6 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiBadge
@@ -317,17 +253,10 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
     </EuiFlexGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <Metric
         className="monPipelineViewer__metric--eventsEmitted"
@@ -343,28 +272,18 @@ exports[`PluginStatement component renders processor statement metrics 1`] = `
 <EuiFlexGroup
   alignItems="center"
   className="monPipelineViewer__statement"
-  component="div"
-  direction="row"
   gutterSize="none"
   justifyContent="spaceBetween"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="xs"
-      justifyContent="flexStart"
       responsive={false}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -384,7 +303,6 @@ exports[`PluginStatement component renders processor statement metrics 1`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiBadge
@@ -399,17 +317,10 @@ exports[`PluginStatement component renders processor statement metrics 1`] = `
     </EuiFlexGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <Metric
         className="monPipelineViewer__metric--cpuTime"

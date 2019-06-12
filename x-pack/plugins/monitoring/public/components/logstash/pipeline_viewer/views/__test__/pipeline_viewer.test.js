@@ -6,8 +6,7 @@
 
 import React from 'react';
 import { PipelineViewer } from '../pipeline_viewer';
-import { shallowWithIntl } from '../../../../../../../../test_utils/enzyme_helpers';
-import { get } from 'lodash';
+import { shallow } from 'enzyme';
 
 describe('PipelineViewer component', () => {
   let pipeline;
@@ -44,42 +43,21 @@ describe('PipelineViewer component', () => {
       },
     };
 
-    component = <PipelineViewer.WrappedComponent pipeline={pipeline} />;
+    component = <PipelineViewer pipeline={pipeline} setDetailVertexId={jest.fn()} />;
   });
 
   it('passes expected props', () => {
-    const renderedComponent = shallowWithIntl(component);
+    const renderedComponent = shallow(component);
 
     expect(renderedComponent).toMatchSnapshot();
   });
 
-  it('changes selected vertex', () => {
-    const vertex = { id: 'stdin' };
-
-    const instance = shallowWithIntl(component).instance();
-    instance.onShowVertexDetails(vertex);
-
-    expect(get(instance, 'state.detailDrawer.vertex')).toBe(vertex);
-  });
-
-  it('toggles selected vertex on second pass', () => {
-    const vertex = { id: 'stdin' };
-
-    const instance = shallowWithIntl(component).instance();
-    instance.onShowVertexDetails(vertex);
-    instance.onShowVertexDetails(vertex);
-
-    expect(get(instance, 'state.detailDrawer.vertex')).toBeNull();
-  });
-
   it('renders DetailDrawer when selected vertex is not null', () => {
     const vertex = { id: 'stdin' };
+    component = <PipelineViewer pipeline={pipeline} setDetailVertexId={jest.fn()} detailVertex={vertex} />;
 
-    const wrapper = shallowWithIntl(component);
-    const instance = wrapper.instance();
-    instance.onShowVertexDetails(vertex);
-    wrapper.update();
+    const renderedComponent = shallow(component);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(renderedComponent).toMatchSnapshot();
   });
 });

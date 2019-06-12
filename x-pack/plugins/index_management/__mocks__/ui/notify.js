@@ -7,4 +7,6 @@
 export const toastNotifications = {
   addSuccess: () => {},
   addDanger: () => {},
+  addWarning: () => {},
+  addError: () => {},
 };

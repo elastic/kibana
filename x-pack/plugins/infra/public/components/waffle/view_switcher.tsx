@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 interface Props {
   view: string;
-  onChange: (view: string) => void;
+  onChange: EuiButtonGroupProps['onChange'];
   intl: InjectedIntl;
 }
 

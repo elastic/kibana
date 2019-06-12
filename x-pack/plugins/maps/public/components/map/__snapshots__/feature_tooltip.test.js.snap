@@ -1,0 +1,172 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FeatureTooltip should not show close button and not show filter button 1`] = `
+<Fragment>
+  <table
+    className="mapFeatureTooltip_table"
+  >
+    <tbody />
+  </table>
+</Fragment>
+`;
+
+exports[`FeatureTooltip should show both filter buttons and close button 1`] = `
+<Fragment>
+  <EuiTextAlign
+    textAlign="center"
+  >
+    <EuiButtonIcon
+      aria-label="Close tooltip"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      type="button"
+    />
+  </EuiTextAlign>
+  <table
+    className="mapFeatureTooltip_table"
+  >
+    <tbody>
+      <tr
+        key="foo"
+      >
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        >
+          foo
+        </td>
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "bar",
+            }
+          }
+        />
+        <td>
+          <EuiButtonIcon
+            aria-label="Filter on property"
+            className="mapFeatureTooltip__filterButton"
+            color="primary"
+            iconSize="m"
+            iconType="plusInCircle"
+            onClick={[Function]}
+            title="Filter on property"
+            type="button"
+          />
+        </td>
+      </tr>
+      <tr
+        key="foo"
+      >
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        >
+          foo
+        </td>
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "bar",
+            }
+          }
+        />
+      </tr>
+    </tbody>
+  </table>
+</Fragment>
+`;
+
+exports[`FeatureTooltip should show close button, but not filter button 1`] = `
+<Fragment>
+  <EuiTextAlign
+    textAlign="center"
+  >
+    <EuiButtonIcon
+      aria-label="Close tooltip"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      type="button"
+    />
+  </EuiTextAlign>
+  <table
+    className="mapFeatureTooltip_table"
+  >
+    <tbody />
+  </table>
+</Fragment>
+`;
+
+exports[`FeatureTooltip should show error message if unable to load tooltip content 1`] = `
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  size="s"
+  title="Unable to load tooltip content"
+>
+  <p>
+    Simulated load properties error
+  </p>
+</EuiCallOut>
+`;
+
+exports[`FeatureTooltip should show only filter button for filterable properties 1`] = `
+<Fragment>
+  <table
+    className="mapFeatureTooltip_table"
+  >
+    <tbody>
+      <tr
+        key="foo"
+      >
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        >
+          foo
+        </td>
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "bar",
+            }
+          }
+        />
+        <td>
+          <EuiButtonIcon
+            aria-label="Filter on property"
+            className="mapFeatureTooltip__filterButton"
+            color="primary"
+            iconSize="m"
+            iconType="plusInCircle"
+            onClick={[Function]}
+            title="Filter on property"
+            type="button"
+          />
+        </td>
+      </tr>
+      <tr
+        key="foo"
+      >
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        >
+          foo
+        </td>
+        <td
+          className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "bar",
+            }
+          }
+        />
+      </tr>
+    </tbody>
+  </table>
+</Fragment>
+`;

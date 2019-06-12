@@ -7,7 +7,7 @@
         <h1>{{indexPattern.title}}</h1>
       </div>
       <div class="euiFlexItem euiFlexItem--flexGrowZero">
-          <ml-full-time-range-selector ng-if="showSidebar" index-pattern='indexPattern' query='searchQuery' />
+        <ml-full-time-range-selector ng-if="indexPattern.timeFieldName !== undefined" index-pattern='indexPattern' query='searchQuery' />
       </div>
     </div>
 

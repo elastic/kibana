@@ -18,25 +18,11 @@
  */
 
 import Promise from 'bluebird';
-import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 
-const NoConnections = elasticsearch.errors.NoConnections;
-
-export default function (plugin, server) {
-  const config = server.config();
-  const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-  const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
-
+export default function (plugin, server, requestDelay) {
   plugin.status.yellow('Waiting for Elasticsearch');
-  function waitForPong(callWithInternalUser) {
-    return callWithInternalUser('ping').catch(function (err) {
-      if (!(err instanceof NoConnections)) throw err;
-      plugin.status.red(`Unable to connect to Elasticsearch.`);
-      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser));
-    });
-  }
 
   function waitUntilReady() {
     return new Promise((resolve) => {
@@ -44,24 +30,9 @@ export default function (plugin, server) {
     });
   }
 
-  function waitForEsVersion() {
-    return ensureEsVersion(server, kibanaVersion.get()).catch(err => {
-      plugin.status.red(err);
-      return Promise.delay(REQUEST_DELAY).then(waitForEsVersion);
-    });
-  }
-
-  function setGreenStatus() {
-    return plugin.status.green('Ready');
-  }
-
   function check() {
-    const healthCheck =
-      waitForPong(callAdminAsKibanaUser)
-        .then(waitForEsVersion);
-
-    return healthCheck
-      .then(setGreenStatus)
+    return ensureEsVersion(server, kibanaVersion.get())
+      .then(() => plugin.status.green('Ready'))
       .catch(err => plugin.status.red(err));
   }
 
@@ -81,7 +52,7 @@ export default function (plugin, server) {
   }
 
   function startorRestartChecking() {
-    scheduleCheck(stopChecking() ? REQUEST_DELAY : 1);
+    scheduleCheck(stopChecking() ? requestDelay : 1);
   }
 
   function stopChecking() {

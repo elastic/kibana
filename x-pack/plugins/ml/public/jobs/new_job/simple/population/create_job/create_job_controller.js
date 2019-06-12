@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import 'ui/angular_ui_select';
 
 import { aggTypes } from 'ui/agg_types/index';
@@ -19,7 +20,7 @@ import angular from 'angular';
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { getCreatePopulationJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
@@ -39,7 +40,6 @@ import {
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { PopulationJobServiceProvider } from './create_job_service';
-import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
@@ -62,21 +62,14 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlCreatePopulationJob', function (
-    $scope,
-    $timeout,
-    Private,
-    AppState,
-    i18n) {
+  .controller('MlCreatePopulationJob', function ($scope, $timeout, Private, AppState) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
     const msgs = mlMessageBarService;
-    const MlTimeBuckets = Private(IntervalHelperProvider);
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
     const chartDataUtils = Private(ChartDataUtilsProvider);
     const mlPopulationJobService = Private(PopulationJobServiceProvider);
-    const mlFullTimeRangeSelectorService = Private(FullTimeRangeSelectorServiceProvider);
     $scope.addNewJobToRecentlyAccessed = addNewJobToRecentlyAccessed;
 
     const stateDefaults = {
@@ -119,19 +112,19 @@ module
     timeBasedIndexCheck(indexPattern, true);
 
     const pageTitle = (savedSearch.id !== undefined) ?
-      i18n('xpack.ml.newJob.simple.population.savedSearchPageTitle', {
+      i18n.translate('xpack.ml.newJob.simple.population.savedSearchPageTitle', {
         defaultMessage: 'saved search {savedSearchTitle}',
         values: { savedSearchTitle: savedSearch.title }
       }) :
-      i18n('xpack.ml.newJob.simple.population.indexPatternPageTitle', {
+      i18n.translate('xpack.ml.newJob.simple.population.indexPatternPageTitle', {
         defaultMessage: 'index pattern {indexPatternTitle}',
         values: { indexPatternTitle: indexPattern.title }
       });
 
-    $scope.analysisStoppingLabel = i18n('xpack.ml.newJob.simple.population.analysisStoppingLabel', {
+    $scope.analysisStoppingLabel = i18n.translate('xpack.ml.newJob.simple.population.analysisStoppingLabel', {
       defaultMessage: 'Analysis stopping'
     });
-    $scope.stopAnalysisLabel = i18n('xpack.ml.newJob.simple.population.stopAnalysisLabel', {
+    $scope.stopAnalysisLabel = i18n.translate('xpack.ml.newJob.simple.population.stopAnalysisLabel', {
       defaultMessage: 'Stop analysis'
     });
 
@@ -152,52 +145,52 @@ module
       timeFields: [],
       splitText: '',
       intervals: [{
-        title: i18n('xpack.ml.newJob.simple.population.intervals.autoTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.autoTitle', {
           defaultMessage: 'Auto'
         }),
         value: 'auto',
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.millisecondTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.millisecondTitle', {
           defaultMessage: 'Millisecond'
         }),
         value: 'ms'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.secondTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.secondTitle', {
           defaultMessage: 'Second'
         }),
         value: 's'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.minuteTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.minuteTitle', {
           defaultMessage: 'Minute'
         }),
         value: 'm'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.hourlyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.hourlyTitle', {
           defaultMessage: 'Hourly'
         }),
         value: 'h'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.dailyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.dailyTitle', {
           defaultMessage: 'Daily'
         }),
         value: 'd'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.weeklyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.weeklyTitle', {
           defaultMessage: 'Weekly'
         }),
         value: 'w'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.monthlyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.monthlyTitle', {
           defaultMessage: 'Monthly'
         }),
         value: 'M'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.yearlyTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.yearlyTitle', {
           defaultMessage: 'Yearly'
         }),
         value: 'y'
       }, {
-        title: i18n('xpack.ml.newJob.simple.population.intervals.customTitle', {
+        title: i18n.translate('xpack.ml.newJob.simple.population.intervals.customTitle', {
           defaultMessage: 'Custom'
         }),
         value: 'custom'
@@ -517,13 +510,13 @@ module
               })
               .catch((resp) => {
                 msgs.error(
-                  i18n('xpack.ml.newJob.simple.population.couldNotOpenJobErrorMessage', {
+                  i18n.translate('xpack.ml.newJob.simple.population.couldNotOpenJobErrorMessage', {
                     defaultMessage: 'Could not open job:',
                   }),
                   resp
                 );
                 msgs.error(
-                  i18n('xpack.ml.newJob.simple.population.jobCreatedAndDatafeedCreatingAnywayErrorMessage', {
+                  i18n.translate('xpack.ml.newJob.simple.population.jobCreatedAndDatafeedCreatingAnywayErrorMessage', {
                     defaultMessage: 'Job created, creating datafeed anyway'
                   })
                 );
@@ -535,7 +528,7 @@ module
           .catch((resp) => {
             // save failed
             msgs.error(
-              i18n('xpack.ml.newJob.simple.population.saveFailedErrorMessage', {
+              i18n.translate('xpack.ml.newJob.simple.population.saveFailedErrorMessage', {
                 defaultMessage: 'Save failed:',
               }),
               resp.resp
@@ -583,7 +576,7 @@ module
                 .catch((resp) => {
                   // datafeed failed
                   msgs.error(
-                    i18n('xpack.ml.newJob.simple.population.couldNotStartDatafeedErrorMessage', {
+                    i18n.translate('xpack.ml.newJob.simple.population.couldNotStartDatafeedErrorMessage', {
                       defaultMessage: 'Could not start datafeed:'
                     }),
                     resp
@@ -598,7 +591,7 @@ module
           })
           .catch((resp) => {
             msgs.error(
-              i18n('xpack.ml.newJob.simple.population.saveDatafeedFailedErrorMessage', {
+              i18n.translate('xpack.ml.newJob.simple.population.saveDatafeedFailedErrorMessage', {
                 defaultMessage: 'Save datafeed failed:',
               }),
               resp
@@ -733,10 +726,6 @@ module
     $scope.moveToAdvancedJobCreation = function () {
       const job = mlPopulationJobService.getJobFromConfig($scope.formConfig);
       moveToAdvancedJobCreation(job);
-    };
-
-    $scope.setFullTimeRange = function () {
-      return mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
 
     initAgg();

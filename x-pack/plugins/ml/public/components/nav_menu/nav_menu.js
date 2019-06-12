@@ -11,6 +11,8 @@ import { isFullLicense } from '../../license/check_license';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
+import 'ui/directives/kbn_href';
+
 module.directive('mlNavMenu', function () {
   return {
     restrict: 'E',
@@ -24,9 +26,11 @@ module.directive('mlNavMenu', function () {
       scope.showTabs = false;
       if (scope.name === 'jobs' ||
         scope.name === 'settings' ||
+        scope.name === 'data_frame' ||
         scope.name === 'datavisualizer' ||
         scope.name === 'filedatavisualizer' ||
         scope.name === 'timeseriesexplorer' ||
+        scope.name === 'access-denied' ||
         scope.name === 'explorer') {
         scope.showTabs = true;
       }

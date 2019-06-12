@@ -5,9 +5,8 @@
  */
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
-import { Role } from '../../../../../../../common/model/role';
-import { isReservedRole, isRoleEnabled } from '../../../../../../lib/role';
+import { Role, RoleIndexPrivilege } from '../../../../../../../common/model';
+import { isReadOnlyRole, isRoleEnabled } from '../../../../../../lib/role_utils';
 import { getFields } from '../../../../../../objects';
 import { RoleValidator } from '../../../lib/validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
@@ -52,16 +51,15 @@ export class IndexPrivileges extends Component<Props, State> {
       // doesn't permit FLS/DLS).
       allowDocumentLevelSecurity: allowDocumentLevelSecurity || !isRoleEnabled(this.props.role),
       allowFieldLevelSecurity: allowFieldLevelSecurity || !isRoleEnabled(this.props.role),
-      isReservedRole: isReservedRole(this.props.role),
+      isReadOnlyRole: isReadOnlyRole(this.props.role),
     };
 
-    const forms = indices.map((indexPrivilege: IndexPrivilege, idx) => (
+    const forms = indices.map((indexPrivilege: RoleIndexPrivilege, idx) => (
       <IndexPrivilegeForm
         key={idx}
         {...props}
         formIndex={idx}
         validator={this.props.validator}
-        allowDelete={!props.isReservedRole}
         indexPrivilege={indexPrivilege}
         availableFields={this.state.availableFields[indexPrivilege.names.join(',')]}
         onChange={this.onIndexPrivilegeChange(idx)}
@@ -96,7 +94,7 @@ export class IndexPrivileges extends Component<Props, State> {
   };
 
   public onIndexPrivilegeChange = (privilegeIndex: number) => {
-    return (updatedPrivilege: IndexPrivilege) => {
+    return (updatedPrivilege: RoleIndexPrivilege) => {
       const { role } = this.props;
       const { indices } = role.elasticsearch;
 
@@ -132,13 +130,13 @@ export class IndexPrivileges extends Component<Props, State> {
     };
   };
 
-  public isPlaceholderPrivilege = (indexPrivilege: IndexPrivilege) => {
+  public isPlaceholderPrivilege = (indexPrivilege: RoleIndexPrivilege) => {
     return indexPrivilege.names.length === 0;
   };
 
-  public loadAvailableFields(privileges: IndexPrivilege[]) {
-    // Reserved roles cannot be edited, and therefore do not need to fetch available fields.
-    if (isReservedRole(this.props.role)) {
+  public loadAvailableFields(privileges: RoleIndexPrivilege[]) {
+    // readonly roles cannot be edited, and therefore do not need to fetch available fields.
+    if (isReadOnlyRole(this.props.role)) {
       return;
     }
 

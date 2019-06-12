@@ -7,8 +7,9 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
-import { goToPolicyList } from '../../services/navigation';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import {
   EuiPage,
   EuiPageBody,
@@ -26,23 +27,27 @@ import {
   EuiFlexItem,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
-import { HotPhase } from './components/hot_phase';
-import { WarmPhase } from './components/warm_phase';
-import { DeletePhase } from './components/delete_phase';
-import { ColdPhase } from './components/cold_phase';
+
 import {
   PHASE_HOT,
   PHASE_COLD,
   PHASE_DELETE,
   PHASE_WARM,
   STRUCTURE_POLICY_NAME,
-} from '../../store/constants';
+} from '../../constants';
+
+import { goToPolicyList } from '../../services/navigation';
 import { findFirstError } from '../../services/find_errors';
+import { LearnMoreLink } from '../components';
 import { NodeAttrsDetails } from './components/node_attrs_details';
 import { PolicyJsonFlyout } from './components/policy_json_flyout';
 import { ErrableFormRow } from './form_errors';
-import { LearnMoreLink } from '../components';
-class EditPolicyUi extends Component {
+import { HotPhase } from './components/hot_phase';
+import { WarmPhase } from './components/warm_phase';
+import { DeletePhase } from './components/delete_phase';
+import { ColdPhase } from './components/cold_phase';
+
+export class EditPolicy extends Component {
   static propTypes = {
     selectedPolicy: PropTypes.object.isRequired,
     errors: PropTypes.object.isRequired,
@@ -57,17 +62,22 @@ class EditPolicyUi extends Component {
       isShowingPolicyJsonFlyout: false,
     };
   }
+
   selectPolicy = policyName => {
     const { setSelectedPolicy, policies } = this.props;
+
     const selectedPolicy = policies.find(policy => {
       return policy.name === policyName;
     });
+
     if (selectedPolicy) {
       setSelectedPolicy(selectedPolicy);
     }
   };
+
   componentDidMount() {
     window.scrollTo(0, 0);
+
     const {
       isPolicyListLoaded,
       fetchPolicies,
@@ -75,6 +85,7 @@ class EditPolicyUi extends Component {
         params: { policyName },
       } = { params: {} },
     } = this.props;
+
     if (policyName) {
       const decodedPolicyName = decodeURIComponent(policyName);
       if (isPolicyListLoaded) {
@@ -88,19 +99,19 @@ class EditPolicyUi extends Component {
       this.props.setSelectedPolicy(null);
     }
   }
+
   backToPolicyList = () => {
     this.props.setSelectedPolicy(null);
     goToPolicyList();
   };
+
   submit = async () => {
-    const { intl } = this.props;
     this.setState({ isShowingErrors: true });
     const { saveLifecyclePolicy, lifecycle, saveAsNewPolicy, firstError } = this.props;
     if (firstError) {
       toastNotifications.addDanger(
-        intl.formatMessage({
-          id: 'xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage',
-          defaultMessage: 'Please fix the  errors on this page.',
+        i18n.translate('xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage', {
+          defaultMessage: 'Please fix the  errors on this page.'
         })
       );
       const errorRowId = `${firstError.replace('.', '-')}-row`;
@@ -124,7 +135,6 @@ class EditPolicyUi extends Component {
   };
   render() {
     const {
-      intl,
       selectedPolicy,
       errors,
       setSaveAsNewPolicy,
@@ -148,17 +158,13 @@ class EditPolicyUi extends Component {
             <EuiTitle>
               <h4>
                 {isNewPolicy
-                  ? intl.formatMessage({
-                    id: 'xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage',
-                    defaultMessage: 'Create an index lifecycle policy',
+                  ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
+                    defaultMessage: 'Create an index lifecycle policy'
                   })
-                  : intl.formatMessage(
-                    {
-                      id: 'xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage',
-                      defaultMessage: 'Edit index lifecycle policy {originalPolicyName}',
-                    },
-                    { originalPolicyName }
-                  )}
+                  : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
+                    defaultMessage: 'Edit index lifecycle policy {originalPolicyName}',
+                    values: { originalPolicyName }
+                  })}
               </h4>
             </EuiTitle>
             <div className="euiAnimateContentLoad">
@@ -243,9 +249,8 @@ class EditPolicyUi extends Component {
                   >
                     <ErrableFormRow
                       id={STRUCTURE_POLICY_NAME}
-                      label={intl.formatMessage({
-                        id: 'xpack.indexLifecycleMgmt.editPolicy.policyNameLabel',
-                        defaultMessage: 'Policy name',
+                      label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
+                        defaultMessage: 'Policy name'
                       })}
                       errorKey={STRUCTURE_POLICY_NAME}
                       isShowingErrors={isShowingErrors}
@@ -356,4 +361,3 @@ class EditPolicyUi extends Component {
     );
   }
 }
-export const EditPolicy = injectI18n(EditPolicyUi);

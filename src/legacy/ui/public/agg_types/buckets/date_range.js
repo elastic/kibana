@@ -16,15 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { get } from 'lodash';
+import chrome from '../../chrome';
+import moment from 'moment-timezone';
 import { dateRange } from '../../utils/date_range';
-import '../../directives/validate_date_math';
-import '../../directives/documentation_href';
+import '../directives/validate_date_math';
+import '../directives/documentation_href';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { fieldFormats } from '../../registry/field_formats';
 import dateRangesTemplate from '../controls/date_ranges.html';
 import { i18n } from '@kbn/i18n';
+
+const config = chrome.getUiSettingsClient();
+const detectedTimezone = moment.tz.guess();
+const tzOffset = moment().format('Z');
 
 export const dateRangeBucketAgg = new BucketAggType({
   name: 'date_range',
@@ -56,5 +62,21 @@ export const dateRangeBucketAgg = new BucketAggType({
       to: 'now'
     }],
     editor: dateRangesTemplate
+  }, {
+    name: 'time_zone',
+    default: undefined,
+    // Implimentation method is the same as that of date_histogram
+    serialize: () => undefined,
+    write: (agg, output) => {
+      let tz = agg.params.time_zone;
+      if (!tz && agg.params.field) {
+        tz = get(agg.getIndexPattern(), ['typeMeta', 'aggs', 'date_range', agg.params.field.name, 'time_zone']);
+      }
+      if (!tz) {
+        const isDefaultTimezone = config.isDefault('dateFormat:tz');
+        tz = isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
+      }
+      output.params.time_zone = tz;
+    }
   }]
 });

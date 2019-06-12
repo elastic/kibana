@@ -20,7 +20,7 @@
 
 import angular from 'angular';
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '../agg_params';
 import { VisProvider } from '../../..';
@@ -104,7 +104,7 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
       aggFilter: aggFilter
     });
 
-    const customLabelElement = $elem.find('label:contains("Custom Label")');
+    const customLabelElement = $elem.find('label:contains("Custom label")');
     expect(customLabelElement.length).to.be(1);
   });
 
@@ -117,7 +117,7 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
       aggFilter: aggFilter
     });
 
-    const customLabelElement = $elem.find('label:contains("Custom Label")');
+    const customLabelElement = $elem.find('label:contains("Custom label")');
     expect(customLabelElement.length).to.be(0);
   });
 });

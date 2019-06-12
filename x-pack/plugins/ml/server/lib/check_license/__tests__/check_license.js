@@ -6,10 +6,10 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { set } from 'lodash';
-import { checkLicense, isBasicLicense } from '../check_license';
+import { checkLicense } from '../check_license';
 
 describe('check_license', () => {
 
@@ -148,34 +148,6 @@ describe('check_license', () => {
           });
         });
       });
-    });
-  });
-});
-
-function mockServerFactory(licenseType = 'basic') {
-  return {
-    plugins: {
-      xpack_main: {
-        info: {
-          license: {
-            getType: () => licenseType
-          }
-        }
-      }
-    }
-  };
-}
-
-describe('isBasicLicense', () => {
-  describe('license information is basic', () => {
-    it('should be true', () => {
-      expect(isBasicLicense(mockServerFactory())).to.be(true);
-    });
-  });
-
-  describe('license information is gold', () => {
-    it('should be true', () => {
-      expect(isBasicLicense(mockServerFactory('gold'))).to.be(false);
     });
   });
 });

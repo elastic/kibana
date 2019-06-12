@@ -92,6 +92,23 @@ export function jobServiceRoutes(server, commonRouteConfig) {
 
   server.route({
     method: 'POST',
+    path: '/api/ml/jobs/jobs_with_timerange',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { jobsWithTimerange } = jobServiceProvider(callWithRequest);
+      const { dateFormatTz } = request.payload;
+      return jobsWithTimerange(dateFormatTz)
+        .catch(resp => {
+          wrapError(resp);
+        });
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'POST',
     path: '/api/ml/jobs/jobs',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
@@ -141,6 +158,21 @@ export function jobServiceRoutes(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { deletingJobTasks } = jobServiceProvider(callWithRequest);
       return deletingJobTasks()
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/ml/jobs/jobs_exist',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { jobsExist } = jobServiceProvider(callWithRequest);
+      const { jobIds } = request.payload;
+      return jobsExist(jobIds)
         .catch(resp => wrapError(resp));
     },
     config: {

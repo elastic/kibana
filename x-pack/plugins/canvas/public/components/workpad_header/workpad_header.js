@@ -19,126 +19,142 @@ import {
 } from '@elastic/eui';
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
-import { WorkpadExport } from '../workpad_export';
-import { FullscreenControl } from '../fullscreen_control';
-import { RefreshControl } from '../refresh_control';
+import { ToolTipShortcut } from '../tool_tip_shortcut/';
+import { ControlSettings } from './control_settings';
+import { RefreshControl } from './refresh_control';
+import { FullscreenControl } from './fullscreen_control';
+import { WorkpadExport } from './workpad_export';
 
-export const WorkpadHeader = ({
-  isWriteable,
-  canUserWrite,
-  toggleWriteable,
-  addElement,
-  setShowElementModal,
-  showElementModal,
-}) => {
-  const keyHandler = action => {
+export class WorkpadHeader extends React.PureComponent {
+  static propTypes = {
+    isWriteable: PropTypes.bool,
+    toggleWriteable: PropTypes.func,
+  };
+
+  state = { isModalVisible: false };
+
+  _fullscreenButton = ({ toggleFullscreen }) => (
+    <EuiToolTip
+      position="bottom"
+      content={
+        <span>
+          Enter fullscreen mode <ToolTipShortcut namespace="PRESENTATION" action="FULLSCREEN" />
+        </span>
+      }
+    >
+      <EuiButtonIcon
+        iconType="fullScreen"
+        aria-label="View fullscreen"
+        onClick={toggleFullscreen}
+      />
+    </EuiToolTip>
+  );
+
+  _keyHandler = action => {
     if (action === 'EDITING') {
-      toggleWriteable();
+      this.props.toggleWriteable();
     }
   };
 
-  const elementAdd = (
+  _hideElementModal = () => this.setState({ isModalVisible: false });
+  _showElementModal = () => this.setState({ isModalVisible: true });
+
+  _elementAdd = () => (
     <EuiOverlayMask>
       <EuiModal
-        onClose={() => setShowElementModal(false)}
+        onClose={this._hideElementModal}
         className="canvasModal--fixedSize"
         maxWidth="1000px"
-        initialFocus=".canvasElements__filter"
+        initialFocus=".canvasElements__filter input"
       >
-        <ElementTypes
-          onClick={element => {
-            addElement(element);
-            setShowElementModal(false);
-          }}
-        />
+        <ElementTypes onClose={this._hideElementModal} />
         <EuiModalFooter>
-          <EuiButton size="s" onClick={() => setShowElementModal(false)}>
-            Dismiss
+          <EuiButton size="s" onClick={this._hideElementModal}>
+            Close
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
     </EuiOverlayMask>
   );
 
-  let readOnlyToolTip = '';
+  _getTooltipText = () => {
+    if (!this.props.canUserWrite) {
+      return "You don't have permission to edit this workpad";
+    } else {
+      const content = this.props.isWriteable ? `Hide editing controls` : `Show editing controls`;
+      return (
+        <span>
+          {content} <ToolTipShortcut namespace="EDITOR" action="EDITING" />
+        </span>
+      );
+    }
+  };
 
-  if (!canUserWrite) {
-    readOnlyToolTip = "You don't have permission to edit this workpad";
-  } else {
-    readOnlyToolTip = isWriteable ? 'Hide editing controls' : 'Show editing controls';
-  }
+  render() {
+    const { isWriteable, canUserWrite, toggleWriteable } = this.props;
+    const { isModalVisible } = this.state;
 
-  return (
-    <div>
-      {showElementModal ? elementAdd : null}
-      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <RefreshControl />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FullscreenControl>
-                {({ toggleFullscreen }) => (
-                  <EuiToolTip position="bottom" content="Enter fullscreen mode">
-                    <EuiButtonIcon
-                      iconType="fullScreen"
-                      aria-label="View fullscreen"
-                      onClick={toggleFullscreen}
-                    />
-                  </EuiToolTip>
-                )}
-              </FullscreenControl>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <WorkpadExport />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {canUserWrite && (
-                <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
-              )}
-              <EuiToolTip position="bottom" content={readOnlyToolTip}>
-                <EuiButtonIcon
-                  iconType={isWriteable ? 'lockOpen' : 'lock'}
-                  onClick={() => {
-                    toggleWriteable();
-                  }}
-                  size="s"
-                  aria-label={readOnlyToolTip}
-                  isDisabled={!canUserWrite}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {isWriteable ? (
+    return (
+      <div>
+        {isModalVisible ? this._elementAdd() : null}
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <AssetManager />
+                <ControlSettings />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  size="s"
-                  iconType="vector"
-                  onClick={() => setShowElementModal(true)}
-                >
-                  Add element
-                </EuiButton>
+                <RefreshControl />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <FullscreenControl>{this._fullscreenButton}</FullscreenControl>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <WorkpadExport />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {canUserWrite && (
+                  <Shortcuts
+                    name="EDITOR"
+                    handler={this._keyHandler}
+                    targetNodeSelector="body"
+                    global
+                  />
+                )}
+                <EuiToolTip position="bottom" content={this._getTooltipText()}>
+                  <EuiButtonIcon
+                    iconType={isWriteable ? 'lockOpen' : 'lock'}
+                    onClick={toggleWriteable}
+                    size="s"
+                    aria-label={this._getTooltipText()}
+                    isDisabled={!canUserWrite}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    </div>
-  );
-};
-
-WorkpadHeader.propTypes = {
-  isWriteable: PropTypes.bool,
-  toggleWriteable: PropTypes.func,
-  addElement: PropTypes.func.isRequired,
-  showElementModal: PropTypes.bool,
-  setShowElementModal: PropTypes.func,
-};
+          {isWriteable ? (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <AssetManager />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    size="s"
+                    iconType="vector"
+                    data-test-subj="add-element-button"
+                    onClick={this._showElementModal}
+                  >
+                    Add element
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </div>
+    );
+  }
+}

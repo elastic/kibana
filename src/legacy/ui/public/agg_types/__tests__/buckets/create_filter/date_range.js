@@ -18,8 +18,9 @@
  */
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
+import moment from 'moment';
 import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { createFilterDateRange } from '../../../buckets/create_filter/date_range';
@@ -57,8 +58,8 @@ describe('AggConfig Filters', function () {
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);
       expect(filter.range).to.have.property('@timestamp');
-      expect(filter.range['@timestamp']).to.have.property('gte', +new Date('1 Feb 2015'));
-      expect(filter.range['@timestamp']).to.have.property('lt', +new Date('7 Feb 2015'));
+      expect(filter.range['@timestamp']).to.have.property('gte', moment(new Date('1 Feb 2015')).toISOString());
+      expect(filter.range['@timestamp']).to.have.property('lt', moment(new Date('7 Feb 2015')).toISOString());
     });
   });
 });

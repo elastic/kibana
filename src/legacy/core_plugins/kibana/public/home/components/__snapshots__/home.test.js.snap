@@ -16,19 +16,8 @@ exports[`home directories should not render directory entry when showOnHomePage 
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -36,7 +25,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -52,14 +40,10 @@ exports[`home directories should not render directory entry when showOnHomePage 
           <EuiFlexGrid
             columns={2}
             gutterSize="s"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -67,7 +51,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -82,8 +65,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -92,22 +73,14 @@ exports[`home directories should not render directory entry when showOnHomePage 
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
         className="eui-textCenter"
-        component="div"
         grow={false}
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -126,6 +99,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -156,19 +130,8 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -176,7 +139,6 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -192,14 +154,10 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           <EuiFlexGrid
             columns={2}
             gutterSize="s"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -207,7 +165,6 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -222,13 +179,9 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           >
             <EuiFlexItem
               className="homHome__synopsisItem"
-              component="div"
-              grow={true}
               key="index_patterns"
             >
               <Synopsis
@@ -247,22 +200,14 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
         className="eui-textCenter"
-        component="div"
         grow={false}
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -281,6 +226,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -311,19 +257,8 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -331,7 +266,6 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -347,12 +281,9 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           <EuiFlexGrid
             columns={2}
             gutterSize="s"
-            responsive={true}
           >
             <EuiFlexItem
               className="homHome__synopsisItem"
-              component="div"
-              grow={true}
               key="dashboard"
             >
               <Synopsis
@@ -366,10 +297,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           </EuiFlexGrid>
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -377,7 +305,6 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -392,8 +319,6 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -402,22 +327,14 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
         className="eui-textCenter"
-        component="div"
         grow={false}
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -436,6 +353,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -466,19 +384,8 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -486,7 +393,6 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -502,14 +408,10 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="s"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -517,7 +419,6 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -532,8 +433,6 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -542,22 +441,14 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
         className="eui-textCenter"
-        component="div"
         grow={false}
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -576,6 +467,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -606,19 +498,8 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -626,7 +507,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -642,14 +522,10 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           <EuiFlexGrid
             columns={2}
             gutterSize="s"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -657,7 +533,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -672,8 +547,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -682,22 +555,14 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
         className="eui-textCenter"
-        component="div"
         grow={false}
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -716,6 +581,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -746,19 +612,8 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -766,7 +621,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -782,14 +636,10 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           <EuiFlexGrid
             columns={2}
             gutterSize="s"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -797,7 +647,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -812,8 +661,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -822,22 +669,14 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
         className="eui-textCenter"
-        component="div"
         grow={false}
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -856,6 +695,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -886,19 +726,8 @@ exports[`home should render home component 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -906,7 +735,6 @@ exports[`home should render home component 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -922,14 +750,10 @@ exports[`home should render home component 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="s"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -937,7 +761,6 @@ exports[`home should render home component 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -952,8 +775,6 @@ exports[`home should render home component 1`] = `
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -962,22 +783,14 @@ exports[`home should render home component 1`] = `
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
         className="eui-textCenter"
-        component="div"
         grow={false}
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -996,6 +809,7 @@ exports[`home should render home component 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1026,19 +840,8 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -1046,7 +849,6 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -1062,14 +864,10 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="s"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -1077,7 +875,6 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -1092,8 +889,6 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1102,22 +897,14 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
         className="eui-textCenter"
-        component="div"
         grow={false}
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -1136,6 +923,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1166,19 +954,8 @@ exports[`home welcome should show the normal home page if welcome screen is disa
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -1186,7 +963,6 @@ exports[`home welcome should show the normal home page if welcome screen is disa
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -1202,14 +978,10 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           <EuiFlexGrid
             columns={2}
             gutterSize="s"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -1217,7 +989,6 @@ exports[`home welcome should show the normal home page if welcome screen is disa
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -1232,8 +1003,6 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1242,22 +1011,14 @@ exports[`home welcome should show the normal home page if welcome screen is disa
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
         className="eui-textCenter"
-        component="div"
         grow={false}
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -1276,6 +1037,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1313,19 +1075,8 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     <EuiSpacer
       size="l"
     />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -1333,7 +1084,6 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -1349,14 +1099,10 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           <EuiFlexGrid
             columns={2}
             gutterSize="s"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiPanel
           grow={true}
           hasShadow={false}
@@ -1364,7 +1110,6 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -1379,8 +1124,6 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           />
           <EuiFlexGrid
             columns={2}
-            gutterSize="l"
-            responsive={true}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -1389,22 +1132,14 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
       size="l"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="center"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
         className="eui-textCenter"
-        component="div"
         grow={false}
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -1423,6 +1158,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage

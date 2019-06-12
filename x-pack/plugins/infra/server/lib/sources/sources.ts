@@ -12,15 +12,20 @@ import { Pick3 } from '../../../common/utility_types';
 import { InfraConfigurationAdapter } from '../adapters/configuration';
 import { InfraFrameworkRequest, internalInfraFrameworkRequest } from '../adapters/framework';
 import { defaultSourceConfiguration } from './defaults';
+import { NotFoundError } from './errors';
 import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';
 import {
-  InfraSavedSourceConfigurationRuntimeType,
+  InfraSavedSourceConfiguration,
   InfraSourceConfiguration,
-  PartialInfraSourceConfiguration,
-  PartialInfraSourceConfigurationRuntimeType,
+  InfraStaticSourceConfiguration,
+  pickSavedSourceConfiguration,
+  SourceConfigurationSavedObjectRuntimeType,
+  StaticSourceConfigurationRuntimeType,
 } from './types';
 
 export class InfraSources {
+  private internalSourceConfigurations: Map<string, InfraStaticSourceConfiguration> = new Map();
+
   constructor(
     private readonly libs: {
       configuration: InfraConfigurationAdapter;
@@ -32,24 +37,39 @@ export class InfraSources {
   public async getSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
-    const savedSourceConfiguration = await this.getSavedSourceConfiguration(request, sourceId).then(
-      result => ({
-        ...result,
+    const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
+      .then(internalSourceConfiguration => ({
+        id: sourceId,
+        version: undefined,
+        updatedAt: undefined,
+        origin: 'internal' as 'internal',
         configuration: mergeSourceConfiguration(
           staticDefaultSourceConfiguration,
-          result.configuration
+          internalSourceConfiguration
         ),
-      }),
-      err =>
+      }))
+      .catch(err =>
+        err instanceof NotFoundError
+          ? this.getSavedSourceConfiguration(request, sourceId).then(result => ({
+              ...result,
+              configuration: mergeSourceConfiguration(
+                staticDefaultSourceConfiguration,
+                result.configuration
+              ),
+            }))
+          : Promise.reject(err)
+      )
+      .catch(err =>
         this.libs.savedObjects.SavedObjectsClient.errors.isNotFoundError(err)
           ? Promise.resolve({
               id: sourceId,
               version: undefined,
               updatedAt: undefined,
+              origin: 'fallback' as 'fallback',
               configuration: staticDefaultSourceConfiguration,
             })
           : Promise.reject(err)
-    );
+      );
 
     return savedSourceConfiguration;
   }
@@ -71,7 +91,7 @@ export class InfraSources {
   public async createSourceConfiguration(
     request: InfraFrameworkRequest,
     sourceId: string,
-    source: PartialInfraSourceConfiguration
+    source: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
@@ -85,7 +105,7 @@ export class InfraSources {
         .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
         .create(
           infraSourceConfigurationSavedObjectType,
-          { ...newSourceConfiguration },
+          pickSavedSourceConfiguration(newSourceConfiguration) as any,
           { id: sourceId }
         )
     );
@@ -108,15 +128,15 @@ export class InfraSources {
   public async updateSourceConfiguration(
     request: InfraFrameworkRequest,
     sourceId: string,
-    updaters: Array<(configuration: InfraSourceConfiguration) => InfraSourceConfiguration>
+    sourceProperties: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
     const { configuration, version } = await this.getSourceConfiguration(request, sourceId);
 
-    const updatedConfigurationAttributes = updaters.reduce(
-      (accumulatedConfiguration, updater) => updater(accumulatedConfiguration),
-      configuration
+    const updatedSourceConfigurationAttributes = mergeSourceConfiguration(
+      configuration,
+      sourceProperties
     );
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
@@ -125,7 +145,7 @@ export class InfraSources {
         .update(
           infraSourceConfigurationSavedObjectType,
           sourceId,
-          { ...updatedConfigurationAttributes },
+          pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
           {
             version,
           }
@@ -141,12 +161,31 @@ export class InfraSources {
     };
   }
 
+  public async defineInternalSourceConfiguration(
+    sourceId: string,
+    sourceProperties: InfraStaticSourceConfiguration
+  ) {
+    this.internalSourceConfigurations.set(sourceId, sourceProperties);
+  }
+
+  public async getInternalSourceConfiguration(sourceId: string) {
+    const internalSourceConfiguration = this.internalSourceConfigurations.get(sourceId);
+
+    if (!internalSourceConfiguration) {
+      throw new NotFoundError(
+        `Failed to load internal source configuration: no configuration "${sourceId}" found.`
+      );
+    }
+
+    return internalSourceConfiguration;
+  }
+
   private async getStaticDefaultSourceConfiguration() {
     const staticConfiguration = await this.libs.configuration.get();
     const staticSourceConfiguration = runtimeTypes
       .type({
         sources: runtimeTypes.type({
-          default: PartialInfraSourceConfigurationRuntimeType,
+          default: StaticSourceConfigurationRuntimeType,
         }),
       })
       .decode(staticConfiguration)
@@ -184,7 +223,7 @@ export class InfraSources {
 
 const mergeSourceConfiguration = (
   first: InfraSourceConfiguration,
-  ...others: PartialInfraSourceConfiguration[]
+  ...others: InfraStaticSourceConfiguration[]
 ) =>
   others.reduce<InfraSourceConfiguration>(
     (previousSourceConfiguration, currentSourceConfiguration) => ({
@@ -199,11 +238,12 @@ const mergeSourceConfiguration = (
   );
 
 const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
-  InfraSavedSourceConfigurationRuntimeType.decode(savedObject)
+  SourceConfigurationSavedObjectRuntimeType.decode(savedObject)
     .map(savedSourceConfiguration => ({
       id: savedSourceConfiguration.id,
       version: savedSourceConfiguration.version,
       updatedAt: savedSourceConfiguration.updated_at,
+      origin: 'stored' as 'stored',
       configuration: savedSourceConfiguration.attributes,
     }))
     .getOrElseL(errors => {

@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { containerStyle } from '../containerStyle';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { elasticLogo } from '../../../lib/elastic_logo';
+import { getFunctionErrors } from '../../../strings';
+
+const errors = getFunctionErrors().containerStyle;
 
 describe('containerStyle', () => {
   const fn = functionWrapper(containerStyle);
@@ -19,8 +22,9 @@ describe('containerStyle', () => {
       expect(result).to.have.property('type', 'containerStyle');
     });
 
-    it('all style properties are omitted if args not provided', () => {
-      expect(result).to.only.have.key('type');
+    it('all style properties except `overflow` are omitted if args not provided', () => {
+      expect(result).to.have.keys('type', 'overflow');
+      expect(result).to.have.property('overflow', 'hidden');
     });
   });
 
@@ -76,9 +80,7 @@ describe('containerStyle', () => {
       it('throws when provided an invalid dataurl/url', () => {
         expect(fn)
           .withArgs(null, { backgroundImage: 'foo' })
-          .to.throwException(e => {
-            expect(e.message).to.be('Invalid backgroundImage. Please provide an asset or a URL.');
-          });
+          .to.throwException(new RegExp(errors.invalidBackgroundImage('foo').message));
       });
     });
 
@@ -128,6 +130,10 @@ describe('containerStyle', () => {
         let result = fn(null, { overflow: 'visible' });
         expect(result).to.have.property('overflow', 'visible');
         result = fn(null, { overflow: 'hidden' });
+        expect(result).to.have.property('overflow', 'hidden');
+      });
+      it(`defaults to 'hidden'`, () => {
+        const result = fn(null);
         expect(result).to.have.property('overflow', 'hidden');
       });
     });

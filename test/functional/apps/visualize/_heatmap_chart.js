@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -129,6 +129,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.addCustomRange(600, 700);
       await PageObjects.visualize.clickAddRange();
       await PageObjects.visualize.addCustomRange(700, 800);
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await PageObjects.visualize.clickGo();
       const legends = await PageObjects.visualize.getLegendEntries();
       const expectedLegends = [

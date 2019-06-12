@@ -12,13 +12,14 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import moment from 'moment';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { numTicksForDateFormat } from '../../util/chart_utils';
 import { calculateTextWidth } from '../../util/string_utils';
-import { IntervalHelperProvider } from '../../util/ml_time_buckets';
+import { MlTimeBuckets } from '../../util/ml_time_buckets';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 import { formatHumanReadableDateTime } from '../../util/date_utils';
 
@@ -26,7 +27,7 @@ import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlDocumentCountChart', function (Private, i18n) {
+module.directive('mlDocumentCountChart', function () {
   function link(scope, element, attrs) {
     const svgWidth = attrs.width ? +attrs.width : 400;
     const svgHeight = scope.height = attrs.height ? +attrs.height : 400;
@@ -42,8 +43,6 @@ module.directive('mlDocumentCountChart', function (Private, i18n) {
 
     let barChartGroup;
     let barWidth = 5;            // Adjusted according to data aggregation interval.
-
-    const MlTimeBuckets = Private(IntervalHelperProvider);
 
     scope.chartData = [];
 
@@ -157,7 +156,7 @@ module.directive('mlDocumentCountChart', function (Private, i18n) {
 
       function showChartTooltip(data, rect) {
         const formattedDate = formatHumanReadableDateTime(data.time);
-        const contents = i18n('xpack.ml.fieldDataCard.documentCountChart.chartTooltip', {
+        const contents = i18n.translate('xpack.ml.fieldDataCard.documentCountChart.chartTooltip', {
           defaultMessage: '{formattedDate}{br}{hr}count: {dataValue}',
           values: {
             formattedDate,

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { formatSparklineCounts, PingCount } from '../format_sparkline_counts';
+import { MonitorSeriesPoint } from '../../../../common/graphql/types';
+import { formatSparklineCounts } from '../format_sparkline_counts';
 
 describe('formatSparklineCounts', () => {
-  let counts: PingCount[];
+  let counts: MonitorSeriesPoint[];
 
   beforeEach(() => {
     counts = [

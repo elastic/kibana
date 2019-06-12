@@ -6,16 +6,15 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
+import { i18n } from '@kbn/i18n';
 import {
   EuiPopover,
   EuiPopoverTitle,
   EuiExpression,
   EuiFormErrorText,
 } from '@elastic/eui';
-
 import { MetricsEditor } from '../../../../shared/components/metrics_editor';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 export class MetricsExpression extends Component {
 
   state = {
@@ -37,7 +36,12 @@ export class MetricsExpression extends Component {
   _renderMetricsEditor = () => {
     if (!this.props.rightFields) {
       return (
-        <EuiFormErrorText>JOIN must be set</EuiFormErrorText>
+        <EuiFormErrorText>
+          <FormattedMessage
+            id="xpack.maps.layerPanel.metricsExpression.joinMustBeSetErrorMessage"
+            defaultMessage="JOIN must be set"
+          />
+        </EuiFormErrorText>
       );
     }
 
@@ -69,7 +73,12 @@ export class MetricsExpression extends Component {
 
         return `${type} ${field}`;
       });
-
+    const useMetricDescription = i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetricsDescription', {
+      defaultMessage: '{metricsLength, plural, one {and use metric} other {and use metrics}}',
+      values: {
+        metricsLength: metricExpressions.length
+      }
+    });
     return (
       <EuiPopover
         id="metricsPopover"
@@ -82,14 +91,19 @@ export class MetricsExpression extends Component {
         button={
           <EuiExpression
             onClick={this._togglePopover}
-            description={metricExpressions.length > 1 ? 'and use metrics' : 'and use metric'}
+            description={useMetricDescription}
             uppercase={false}
             value={metricExpressions.length > 0 ? metricExpressions.join(', ') : 'count'}
           />
         }
       >
         <div style={{ width: 400 }}>
-          <EuiPopoverTitle>Metrics</EuiPopoverTitle>
+          <EuiPopoverTitle>
+            <FormattedMessage
+              id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
+              defaultMessage="Metrics"
+            />
+          </EuiPopoverTitle>
           {this._renderMetricsEditor()}
         </div>
       </EuiPopover>

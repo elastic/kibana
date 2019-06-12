@@ -81,7 +81,7 @@ export class TaskStore {
   public readonly index: string;
   private callCluster: ElasticJs;
   private supportedTypes: string[];
-  private _isInitialized = false; // tslint:disable-line:variable-name
+  private _isInitialized = false; // eslint-disable-line @typescript-eslint/camelcase
   private logger: Logger;
 
   /**

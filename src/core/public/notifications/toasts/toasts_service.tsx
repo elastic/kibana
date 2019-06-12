@@ -22,39 +22,57 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { Toast } from '@elastic/eui';
 import { I18nStart } from '../../i18n';
+import { UiSettingsSetup } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
-import { ToastsStart } from './toasts_start';
+import { ToastsApi } from './toasts_api';
+import { OverlayStart } from '../../overlays';
 
-interface Params {
+interface SetupDeps {
+  uiSettings: UiSettingsSetup;
+}
+
+interface StartDeps {
+  i18n: I18nStart;
+  overlays: OverlayStart;
   targetDomElement: HTMLElement;
 }
 
-interface Deps {
-  i18n: I18nStart;
-}
+/** @public */
+export type ToastsSetup = Pick<ToastsApi, Exclude<keyof ToastsApi, 'registerOverlays'>>;
+
+/** @public */
+export type ToastsStart = ToastsSetup;
 
 export class ToastsService {
-  constructor(private readonly params: Params) {}
+  private api?: ToastsApi;
+  private targetDomElement?: HTMLElement;
 
-  public start({ i18n }: Deps) {
-    const toasts = new ToastsStart();
+  public setup({ uiSettings }: SetupDeps) {
+    this.api = new ToastsApi({ uiSettings });
+    return this.api!;
+  }
+
+  public start({ i18n, overlays, targetDomElement }: StartDeps) {
+    this.api!.registerOverlays(overlays);
+    this.targetDomElement = targetDomElement;
 
     render(
       <i18n.Context>
         <GlobalToastList
-          dismissToast={(toast: Toast) => toasts.remove(toast)}
-          toasts$={toasts.get$()}
+          dismissToast={(toast: Toast) => this.api!.remove(toast)}
+          toasts$={this.api!.get$()}
         />
       </i18n.Context>,
-      this.params.targetDomElement
+      targetDomElement
     );
 
-    return toasts;
+    return this.api!;
   }
 
   public stop() {
-    unmountComponentAtNode(this.params.targetDomElement);
-
-    this.params.targetDomElement.textContent = '';
+    if (this.targetDomElement) {
+      unmountComponentAtNode(this.targetDomElement);
+      this.targetDomElement.textContent = '';
+    }
   }
 }

@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { axisConfig } from '../axisConfig';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { testTable } from '../__tests__/fixtures/test_tables';
+import { getFunctionErrors } from '../../../strings';
+import { testTable } from './fixtures/test_tables';
+
+const errors = getFunctionErrors().axisConfig;
 
 describe('axisConfig', () => {
   const fn = functionWrapper(axisConfig);
@@ -50,17 +53,15 @@ describe('axisConfig', () => {
         expect(result).to.have.property('position', 'bottom');
       });
 
-      it('defaults to an empty string if not provided', () => {
+      it('defaults to "left" if not provided', () => {
         const result = fn(testTable);
-        expect(result).to.have.property('position', '');
+        expect(result).to.have.property('position', 'left');
       });
 
       it('throws when given an invalid position', () => {
         expect(fn)
           .withArgs(testTable, { position: 'foo' })
-          .to.throwException(e => {
-            expect(e.message).to.be(`Invalid position: 'foo'`);
-          });
+          .to.throwException(new RegExp(errors.invalidPosition('foo').message));
       });
     });
 
@@ -81,11 +82,7 @@ describe('axisConfig', () => {
       it('throws when given an invalid date string', () => {
         expect(fn)
           .withArgs(testTable, { min: 'foo' })
-          .to.throwException(e => {
-            expect(e.message).to.be(
-              `Invalid date string: 'foo'. 'min' must be a number, date in ms, or ISO8601 date string`
-            );
-          });
+          .to.throwException(new RegExp(errors.invalidMinDateString('foo').message));
       });
     });
 
@@ -106,11 +103,7 @@ describe('axisConfig', () => {
       it('throws when given an invalid date string', () => {
         expect(fn)
           .withArgs(testTable, { max: '20/02/17' })
-          .to.throwException(e => {
-            expect(e.message).to.be(
-              `Invalid date string: '20/02/17'. 'max' must be a number, date in ms, or ISO8601 date string`
-            );
-          });
+          .to.throwException(new RegExp(errors.invalidMaxDateString('20/02/17').message));
       });
     });
 

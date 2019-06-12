@@ -20,13 +20,14 @@
 import React from 'react';
 import { getDisplayName } from './lib/get_display_name';
 import { last, findIndex, first } from 'lodash';
-import calculateLabel  from '../../common/calculate_label';
+import { calculateLabel } from '../../common/calculate_label';
+
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
     const { model, visData } = props;
-    if (!model || !visData || !visData[model.id]) return (<WrappedComponent {...props} />);
+    if (!model || !visData || !visData[model.id]) return <WrappedComponent {...props} />;
     if (visData[model.id].series.every(s => s.id.split(':').length === 1)) {
-      return (<WrappedComponent {...props} />);
+      return <WrappedComponent {...props} />;
     }
 
     const splitsVisData = visData[model.id].series.reduce((acc, series) => {
@@ -35,35 +36,47 @@ export function visWithSplits(WrappedComponent) {
       if (!seriesModel || !splitId) return acc;
       const metric = last(seriesModel.metrics);
       const label = calculateLabel(metric, seriesModel.metrics);
-      if (!acc[splitId]) acc[splitId] = { series: [], label: series.label };
+
+      if (!acc[splitId]) {
+        acc[splitId] = {
+          series: [],
+          label: series.label.toString(),
+        };
+      }
 
       acc[splitId].series.push({
         ...series,
         id: seriesId,
         color: series.color || seriesModel.color,
-        label: seriesModel.label || label
+        label: seriesModel.label || label,
       });
       return acc;
     }, {});
 
-    const nonSplitSeries = first(visData[model.id].series.filter((series) => {
-      const seriesModel = model.series.find(s => s.id === series.id);
-      if (!seriesModel) return false;
-      return ['everything', 'filter'].includes(seriesModel.split_mode);
-    }));
+    const nonSplitSeries = first(
+      visData[model.id].series.filter(series => {
+        const seriesModel = model.series.find(s => s.id === series.id);
+        if (!seriesModel) return false;
+        return ['everything', 'filter'].includes(seriesModel.split_mode);
+      })
+    );
 
-    const indexOfNonSplit = nonSplitSeries ? findIndex(model.series, s => s.id === nonSplitSeries.id) : null;
-
+    const indexOfNonSplit = nonSplitSeries
+      ? findIndex(model.series, s => s.id === nonSplitSeries.id)
+      : null;
 
     const rows = Object.keys(splitsVisData).map(key => {
       const splitData = splitsVisData[key];
       const { series, label } = splitData;
-      const newSeries = (indexOfNonSplit != null && indexOfNonSplit > 0) ?  [...series, nonSplitSeries] : [nonSplitSeries, ...series];
+      const newSeries =
+        indexOfNonSplit != null && indexOfNonSplit > 0
+          ? [...series, nonSplitSeries]
+          : [nonSplitSeries, ...series];
       const newVisData = {
         [model.id]: {
           id: model.id,
-          series: newSeries || series
-        }
+          series: newSeries || series,
+        },
       };
       return (
         <div key={key} className="tvbSplitVis__split">
@@ -79,9 +92,7 @@ export function visWithSplits(WrappedComponent) {
       );
     });
 
-    return (
-      <div className="tvbSplitVis">{rows}</div>
-    );
+    return <div className="tvbSplitVis">{rows}</div>;
   }
   SplitVisComponent.displayName = `SplitVisComponent(${getDisplayName(WrappedComponent)})`;
   return SplitVisComponent;

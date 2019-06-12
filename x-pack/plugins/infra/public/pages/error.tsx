@@ -14,11 +14,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../common/eui_styled_components';
 import { Header } from '../components/header';
 import { ColumnarPage, PageContent } from '../components/page';
 
-const DetailPageContent = styled(PageContent)`
+const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
   background-color: ${props => props.theme.eui.euiColorLightestShade};
 `;

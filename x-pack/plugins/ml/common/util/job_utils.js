@@ -31,14 +31,10 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {
 // Returns a flag to indicate whether the job is suitable for viewing
 // in the Time Series dashboard.
 export function isTimeSeriesViewJob(job) {
-  // TODO - do we need another function which returns whether to enable the
-  // link to the Single Metric dashboard in the Jobs list, only allowing single
-  // metric jobs with only one detector with no by/over/partition fields
-
   // only allow jobs with at least one detector whose function corresponds to
   // an ES aggregation which can be viewed in the single metric view and which
   // doesn't use a scripted field which can be very difficult or impossible to
-  // invert to a reverse search.
+  // invert to a reverse search, or when model plot has been enabled.
   let isViewable = false;
   const dtrs = job.analysis_config.detectors;
 
@@ -55,38 +51,68 @@ export function isTimeSeriesViewJob(job) {
 // Returns a flag to indicate whether the detector at the index in the specified job
 // is suitable for viewing in the Time Series dashboard.
 export function isTimeSeriesViewDetector(job, dtrIndex) {
-  // Check that the detector function is suitable for viewing in the Time Series dashboard,
-  // and that the partition, by and over fields are not using mlcategory or a scripted field which
-  // can be very difficult or impossible to invert to a reverse search of the underlying metric data.
-  let isDetectorViewable = false;
+  return isSourceDataChartableForDetector(job, dtrIndex) ||
+    isModelPlotChartableForDetector(job, dtrIndex);
+}
 
+// Returns a flag to indicate whether the source data can be plotted in a time
+// series chart for the specified detector.
+export function isSourceDataChartableForDetector(job, detectorIndex) {
+  let isSourceDataChartable = false;
   const dtrs = job.analysis_config.detectors;
-  if (dtrIndex >= 0 && dtrIndex < dtrs.length) {
-    const dtr = dtrs[dtrIndex];
-    isDetectorViewable = (isTimeSeriesViewFunction(dtr.function) === true) &&
+  if (detectorIndex >= 0 && detectorIndex < dtrs.length) {
+    const dtr = dtrs[detectorIndex];
+    const functionName = dtr.function;
+
+    // Check that the function maps to an ES aggregation,
+    // and that the partitioning field isn't mlcategory
+    // (since mlcategory is a derived field which won't exist in the source data).
+    // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
+    // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
+    isSourceDataChartable = (mlFunctionToESAggregation(functionName) !== null) &&
       (dtr.by_field_name !== 'mlcategory') &&
       (dtr.partition_field_name !== 'mlcategory') &&
       (dtr.over_field_name !== 'mlcategory');
 
+    // If the datafeed uses script fields, we can only plot the time series if
+    // model plot is enabled. Without model plot it will be very difficult or impossible
+    // to invert to a reverse search of the underlying metric data.
     const usesScriptFields = _.has(job, 'datafeed_config.script_fields');
-    if (isDetectorViewable === true && usesScriptFields === true) {
+    if (isSourceDataChartable === true && usesScriptFields === true) {
       // Perform extra check to see if the detector is using a scripted field.
       const scriptFields = usesScriptFields ? _.keys(job.datafeed_config.script_fields) : [];
-      isDetectorViewable = scriptFields.indexOf(dtr.field_name) === -1 &&
+      isSourceDataChartable = (
+        scriptFields.indexOf(dtr.field_name) === -1 &&
         scriptFields.indexOf(dtr.partition_field_name) === -1 &&
         scriptFields.indexOf(dtr.by_field_name) === -1 &&
-        scriptFields.indexOf(dtr.over_field_name) === -1;
+        scriptFields.indexOf(dtr.over_field_name) === -1);
     }
+
   }
 
-  return isDetectorViewable;
-
+  return isSourceDataChartable;
 }
 
-// Returns a flag to indicate whether a detector with the specified function is
-// suitable for viewing in the Time Series dashboard.
-export function isTimeSeriesViewFunction(functionName) {
-  return mlFunctionToESAggregation(functionName) !== null;
+// Returns a flag to indicate whether model plot data can be plotted in a time
+// series chart for the specified detector.
+export function isModelPlotChartableForDetector(job, detectorIndex) {
+  let isModelPlotChartable = false;
+
+  const modelPlotEnabled = _.get(job, ['model_plot_config', 'enabled'], false);
+  const dtrs = job.analysis_config.detectors;
+  if (detectorIndex >= 0 && detectorIndex < dtrs.length && modelPlotEnabled === true) {
+    const dtr = dtrs[detectorIndex];
+    const functionName = dtr.function;
+
+    // Model plot can be charted for any of the functions which map to ES aggregations,
+    // plus varp and info_content functions.
+    isModelPlotChartable = (mlFunctionToESAggregation(functionName) !== null) ||
+      (['varp', 'high_varp', 'low_varp', 'info_content',
+        'high_info_content', 'low_info_content'].includes(functionName) === true);
+  }
+
+  return isModelPlotChartable;
+
 }
 
 // Returns the names of the partition, by, and over fields for the detector with the
@@ -117,7 +143,7 @@ export function isModelPlotEnabled(job, detectorIndex, entityFields) {
   // Check if model_plot_config is enabled.
   let isEnabled = _.get(job, ['model_plot_config', 'enabled'], false);
 
-  if (isEnabled === true) {
+  if (isEnabled === true && entityFields !== undefined && entityFields.length > 0) {
     // If terms filter is configured in model_plot_config, check supplied entities.
     const termsStr = _.get(job, ['model_plot_config', 'terms'], '');
     if (termsStr !== '') {

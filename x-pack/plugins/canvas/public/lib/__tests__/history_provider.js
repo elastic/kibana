@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import lzString from 'lz-string';
 import { historyProvider } from '../history_provider';
 
@@ -12,7 +12,7 @@ function createState() {
   return {
     transient: {
       selectedPage: 'page-f3ce-4bb7-86c8-0417606d6592',
-      selectedElement: 'element-d88c-4bbd-9453-db22e949b92e',
+      selectedToplevelNodes: ['element-d88c-4bbd-9453-db22e949b92e'],
       resolvedArgs: {},
     },
     persistent: {

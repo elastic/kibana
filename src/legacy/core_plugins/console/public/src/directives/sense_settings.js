@@ -19,19 +19,33 @@
 
 require('ui/directives/input_focus');
 
+import template from './settings.html';
+const mappings = require('../mappings');
+
 require('ui/modules')
   .get('app/sense')
   .directive('senseSettings', function () {
     return {
       restrict: 'E',
-      template: require('./settings.html'),
+      template,
       controllerAs: 'settings',
       controller: function ($scope, $element) {
         const settings = require('../settings');
 
         this.vals = settings.getCurrentSettings();
         this.apply = () => {
+          const prevSettings = settings.getAutocomplete();
           this.vals = settings.updateSettings(this.vals);
+          // Find which, if any, autocomplete settings have changed
+          const settingsDiff = Object.keys(prevSettings).filter(key => prevSettings[key] !== this.vals.autocomplete[key]);
+          if (settingsDiff.length > 0) {
+            const changedSettings = settingsDiff.reduce((changedSettingsAccum, setting) => {
+              changedSettingsAccum[setting] = this.vals.autocomplete[setting];
+              return changedSettingsAccum;
+            }, {});
+            // Update autocomplete info based on changes so new settings takes effect immediately.
+            mappings.retrieveAutoCompleteInfo(changedSettings);
+          }
           $scope.kbnTopNav.close();
         };
 

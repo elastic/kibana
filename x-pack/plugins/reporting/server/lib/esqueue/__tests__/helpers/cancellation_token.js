@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { CancellationToken } from '../../helpers/cancellation_token';
+import { CancellationToken } from '../../../../../common/cancellation_token';
 
 describe('CancellationToken', function () {
   let cancellationToken;
@@ -22,7 +22,7 @@ describe('CancellationToken', function () {
     });
 
     it('accepts a function', function () {
-      expect(cancellationToken.on).withArgs(function () {}).to.not.throwError();
+      expect(cancellationToken.on).withArgs(function () {}).not.to.throwError();
     });
 
     it(`calls function if cancel has previously been called`, function () {

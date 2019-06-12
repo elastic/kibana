@@ -19,15 +19,13 @@
 
 import d3 from 'd3';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import $ from 'jquery';
-import VislibLibLayoutSplitsGaugeChartChartSplitProvider from '../../../../../lib/layout/splits/gauge_chart/chart_split';
-import VislibLibLayoutSplitsGaugeChartChartTitleSplitProvider from '../../../../../lib/layout/splits/gauge_chart/chart_title_split';
+import { chartSplit } from '../../../../../lib/layout/splits/gauge_chart/chart_split';
+import { chartTitleSplit } from '../../../../../lib/layout/splits/gauge_chart/chart_title_split';
 
 describe('Vislib Gauge Split Function Test Suite', function () {
   describe('Column Chart', function () {
-    let chartSplit;
-    let chartTitleSplit;
     let el;
     const data = {
       rows: [
@@ -151,10 +149,7 @@ describe('Vislib Gauge Split Function Test Suite', function () {
     };
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      chartSplit = Private(VislibLibLayoutSplitsGaugeChartChartSplitProvider);
-      chartTitleSplit = Private(VislibLibLayoutSplitsGaugeChartChartTitleSplitProvider);
-
+    beforeEach(ngMock.inject(function () {
       el = d3.select('body').append('div')
         .attr('class', 'visualization')
         .datum(data);

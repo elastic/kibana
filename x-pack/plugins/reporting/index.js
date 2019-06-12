@@ -5,16 +5,14 @@
  */
 
 import { resolve } from 'path';
-import { UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
+import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { registerRoutes } from './server/routes';
 
 import { createQueueFactory } from './server/lib/create_queue';
 import { config as appConfig } from './server/config/config';
 import { checkLicenseFactory } from './server/lib/check_license';
-import { validateConfig } from './server/lib/validate_config';
-import { validateMaxContentLength } from './server/lib/validate_max_content_length';
-import { validateBrowser } from './server/lib/validate_browser';
+import { runValidations } from './server/lib/validate';
 import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
 import { CHROMIUM, createBrowserDriverFactory, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
@@ -28,7 +26,7 @@ const kbToBase64Length = (kb) => {
 
 export const reporting = (kibana) => {
   return new kibana.Plugin({
-    id: 'reporting',
+    id: PLUGIN_ID,
     configPrefix: 'xpack.reporting',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
@@ -38,12 +36,17 @@ export const reporting = (kibana) => {
         'plugins/reporting/share_context_menu/register_csv_reporting',
         'plugins/reporting/share_context_menu/register_reporting',
       ],
+      contextMenuActions: [
+        'plugins/reporting/panel_actions/get_csv_panel_action',
+      ],
       hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],
       injectDefaultVars(server, options) {
+        const config = server.config();
         return {
-          reportingPollConfig: options.poll
+          reportingPollConfig: options.poll,
+          enablePanelActionDownload: config.get('xpack.reporting.csv.enablePanelActionDownload'),
         };
       },
       uiSettingDefaults: {
@@ -62,7 +65,7 @@ export const reporting = (kibana) => {
               description: '200 kB',
             }
           },
-          category: ['reporting'],
+          category: [PLUGIN_ID],
         }
       }
     },
@@ -94,12 +97,17 @@ export const reporting = (kibana) => {
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
             type: Joi.any().valid(CHROMIUM).default(CHROMIUM),
-            autoDownload: Joi.boolean().when('$dev', {
+            autoDownload: Joi.boolean().when('$dist', {
               is: true,
-              then: Joi.default(true),
-              otherwise: Joi.default(false),
+              then: Joi.default(false),
+              otherwise: Joi.default(true),
             }),
             chromium: Joi.object({
+              inspect: Joi.boolean().when('$dev', {
+                is: false,
+                then: Joi.valid(false),
+                else: Joi.default(false),
+              }),
               disableSandbox: Joi.boolean().default(await getDefaultChromiumSandboxDisabled()),
               proxy: Joi.object({
                 enabled: Joi.boolean().default(false),
@@ -119,13 +127,18 @@ export const reporting = (kibana) => {
           }).default()
         }).default(),
         csv: Joi.object({
+          enablePanelActionDownload: Joi.boolean().default(false),
           maxSizeBytes: Joi.number().integer().default(1024 * 1024 * 10), // bytes in a kB * kB in a mB * 10
           scroll: Joi.object({
             duration: Joi.string().regex(/^[0-9]+(d|h|m|s|ms|micros|nanos)$/, { name: 'DurationString' }).default('30s'),
             size: Joi.number().integer().default(500)
           }).default(),
         }).default(),
-        encryptionKey: Joi.string(),
+        encryptionKey: Joi.when(Joi.ref('$dist'), {
+          is: true,
+          then: Joi.string(),
+          otherwise: Joi.string().default('a'.repeat(32)),
+        }),
         roles: Joi.object({
           allow: Joi.array().items(Joi.string()).default(['reporting_user']),
         }).default(),
@@ -144,20 +157,24 @@ export const reporting = (kibana) => {
     },
 
     init: async function (server) {
+      let isCollectorReady = false;
+      const isReady = () => isCollectorReady;
+      // Register a function with server to manage the collection of usage stats
+      server.usage.collectorSet.register(getReportingUsageCollector(server, isReady));
+
       const exportTypesRegistry = await exportTypesRegistryFactory(server);
       const browserFactory = await createBrowserDriverFactory(server);
       server.expose('exportTypesRegistry', exportTypesRegistry);
 
       const config = server.config();
-      const logWarning = message => server.log(['reporting', 'warning'], message);
-
-      validateConfig(config, logWarning);
-      validateMaxContentLength(server, logWarning);
-      validateBrowser(browserFactory, logWarning);
-      logConfiguration(config, message => server.log(['reporting', 'debug'], message));
+      const logger = {
+        debug: message => server.log(['reporting', 'debug'], message),
+        warning: message => server.log(['reporting', 'warning'], message),
+      };
+      logConfiguration(config, logger);
+      runValidations(server, config, logger, browserFactory);
 
       const { xpack_main: xpackMainPlugin } = server.plugins;
-
       mirrorPluginStatus(xpackMainPlugin, this);
       const checkLicense = checkLicenseFactory(exportTypesRegistry);
       xpackMainPlugin.status.once('green', () => {
@@ -166,8 +183,8 @@ export const reporting = (kibana) => {
         xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
-      // Register a function with server to manage the collection of usage stats
-      server.usage.collectorSet.register(getReportingUsageCollector(server));
+      // Post initialization of the above code, the collector is now ready to fetch its data
+      isCollectorReady = true;
 
       server.expose('browserDriverFactory', browserFactory);
       server.expose('queue', createQueueFactory(server));

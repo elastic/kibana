@@ -23,7 +23,7 @@ export const FollowerIndexPageTitle = ({ title }) => (
   <Fragment>
     <EuiSpacer size="xs" />
 
-    <EuiPageContentHeader>
+    <EuiPageContentHeader data-test-subj="pageTitle">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="l">
@@ -38,6 +38,7 @@ export const FollowerIndexPageTitle = ({ title }) => (
             href={followerIndexUrl}
             target="_blank"
             iconType="help"
+            data-test-subj="docsButton"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.readDocsFollowerIndexButtonLabel"

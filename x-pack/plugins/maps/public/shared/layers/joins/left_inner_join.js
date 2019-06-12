@@ -7,7 +7,6 @@
 
 import { ESJoinSource } from '../sources/es_join_source';
 import { VectorStyle } from '../styles/vector_style';
-import { filterPropertiesForTooltip } from '../util';
 
 export class LeftInnerJoin {
 
@@ -57,18 +56,13 @@ export class LeftInnerJoin {
       });
 
       const joinKey = feature.properties[this._descriptor.leftField];
-      if (propertiesMap.has(joinKey)) {
+      if (propertiesMap && propertiesMap.has(joinKey)) {
         Object.assign(feature.properties,  propertiesMap.get(joinKey));
       }
     });
-
-    //Create a new instance.
-    //We use a reference check to determine whether the feature collection has changed and needs to be updated on the mapbox-gl source.
-    //We need to update because mapbox creates copies of the property object, that it then dispatches on tooltip-events.
-    return { ...featureCollection };
   }
 
-  getJoinSource() {
+  getRightJoinSource() {
     return this._rightSource;
   }
 
@@ -80,10 +74,8 @@ export class LeftInnerJoin {
     return this._descriptor;
   }
 
-  filterAndFormatPropertiesForTooltip(properties) {
-    const metricFields = this._rightSource.getMetricFields();
-    return filterPropertiesForTooltip(metricFields, properties);
-
+  async filterAndFormatPropertiesForTooltip(properties) {
+    return await this._rightSource.filterAndFormatPropertiesToHtml(properties);
   }
 
   getIndexPatternIds() {

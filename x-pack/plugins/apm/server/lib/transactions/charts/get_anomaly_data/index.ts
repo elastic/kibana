@@ -33,6 +33,11 @@ export async function getAnomalySeries({
     return;
   }
 
+  // don't fetch anomalies if uiFilters are applied
+  if (setup.uiFiltersES.length > 0) {
+    return;
+  }
+
   const mlBucketSize = await getMlBucketSize({
     serviceName,
     transactionType,

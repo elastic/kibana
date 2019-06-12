@@ -26,11 +26,6 @@ yarn prettier  "./x-pack/plugins/apm/**/*.{tsx,ts,js}" --write
 yarn eslint ./x-pack/plugins/apm --fix
 ```
 
-### TSLint
-```
-yarn tslint ./x-pack/plugins/apm/**/*.{ts,tsx} --fix
-```
-
 ### Ensure everything from master has been backported to 6.x
 ```
 git fetch origin && git checkout 6.x && git diff origin/6.x..origin/master ./plugins/apm | git apply

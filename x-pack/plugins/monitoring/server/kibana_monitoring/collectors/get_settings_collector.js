@@ -36,7 +36,6 @@ export async function getDefaultAdminEmail(config, callCluster, log) {
   const version = config.get('pkg.version');
   const uiSettingsDoc = await callCluster('get', {
     index,
-    type: 'doc',
     id: `config:${version}`,
     ignore: [400, 404] // 400 if the index is closed, 404 if it does not exist
   });
@@ -87,6 +86,7 @@ export function getSettingsCollector(server) {
 
   return collectorSet.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
+    isReady: () => true,
     async fetch(callCluster) {
       let kibanaSettingsData;
       const defaultAdminEmail = await checkForEmailValue(config, callCluster, this.log);

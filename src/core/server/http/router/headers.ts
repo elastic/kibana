@@ -19,9 +19,8 @@
 
 import { pick } from '../../../utils';
 
-export interface Headers {
-  [key: string]: string | string[] | undefined;
-}
+/** @public */
+export type Headers = Record<string, string | string[] | undefined>;
 
 const normalizeHeaderField = (field: string) => field.trim().toLowerCase();
 

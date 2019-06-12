@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { MonitoringMainController } from '../';
 
 const getMockLicenseService = (options) => ({ mlIsSupported: () => options.mlIsSupported });

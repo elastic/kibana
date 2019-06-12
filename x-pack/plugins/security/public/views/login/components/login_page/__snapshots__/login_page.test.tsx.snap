@@ -24,7 +24,6 @@ exports[`LoginPage disabled form states renders as expected when a connection to
       <EuiTitle
         className="loginWelcome__title"
         size="l"
-        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -37,7 +36,6 @@ exports[`LoginPage disabled form states renders as expected when a connection to
       <EuiText
         className="loginWelcome__subtitle"
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
@@ -57,18 +55,9 @@ exports[`LoginPage disabled form states renders as expected when a connection to
     className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <DisabledLoginForm
           message={
             <FormattedMessage
@@ -115,7 +104,6 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
       <EuiTitle
         className="loginWelcome__title"
         size="l"
-        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -128,7 +116,6 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
       <EuiText
         className="loginWelcome__subtitle"
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
@@ -148,18 +135,9 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
     className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <DisabledLoginForm
           message={
             <FormattedMessage
@@ -206,7 +184,6 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
       <EuiTitle
         className="loginWelcome__title"
         size="l"
-        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -219,7 +196,6 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
       <EuiText
         className="loginWelcome__subtitle"
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
@@ -239,18 +215,9 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
     className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <DisabledLoginForm
           message={
             <FormattedMessage
@@ -297,7 +264,6 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
       <EuiTitle
         className="loginWelcome__title"
         size="l"
-        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -310,7 +276,6 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
       <EuiText
         className="loginWelcome__subtitle"
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
@@ -330,18 +295,9 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
     className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <DisabledLoginForm
           message={
             <FormattedMessage
@@ -388,7 +344,6 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
       <EuiTitle
         className="loginWelcome__title"
         size="l"
-        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -401,7 +356,6 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
       <EuiText
         className="loginWelcome__subtitle"
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
@@ -421,18 +375,9 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
     className="loginWelcome__content loginWelcome-body"
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <InjectIntl(BasicLoginFormUI)
           http={
             Object {

@@ -1,21 +1,121 @@
+/**
+ * 1. Truncate the layer name
+ * 2. For showing the layer details toggle above the following entry
+ */
+
 .mapTocEntry {
-  padding: $euiSizeS $euiSize;
   position: relative;
+  padding: $euiSizeS;
+  border-bottom: 1px solid $euiColorLightestShade;
+
+  &:hover,
+  &:focus,
+  &:focus-within {
+    z-index: 2; /* 2 */
+
+    .mapTocEntry__layerIcons,
+    .mapTocEntry__detailsToggle {
+      display: block;
+      animation: mapTocEntryBecomeVisible $euiAnimSpeedFast $euiAnimSlightResistance;
+    }
+  }
+
+  .mapTocEntry__layerIcons,
+  .mapTocEntry__detailsToggle {
+    &:hover,
+    &:focus {
+      display: block;
+      animation: mapTocEntryBecomeVisible $euiAnimSpeedFast $euiAnimSlightResistance;
+    }
+  }
 }
 
-.mapTocEntry-visible {
-  opacity: 1;
+.mapTocEntry-isDragging {
+  @include euiBottomShadowMedium;
 }
 
+.mapTocEntry-isDraggingOver {
+  background-color: $euiColorEmptyShade;
+  // Don't allow interaction events while layer is being re-ordered
+  pointer-events: none !important;
+}
+
+.mapTocEntry-visible,
 .mapTocEntry-notVisible {
-  opacity: 0.5;
+  display: flex;
 }
 
-.mapTocEntry__grab {
-  margin-left: $euiSizeXS;
+.mapLayTocActions {
+  overflow: hidden; /* 1 */
+  flex-grow: 1;
+}
+
+.mapLayTocActions__popoverAnchor {
+  max-width: 100%;
+}
+
+.mapTocEntry-notVisible .mapTocEntry__layerName {
+  opacity: 0.5;
 }
 
 .mapTocEntry__grab:hover {
   cursor: grab;
 }
 
+.mapTocEntry__layerName {
+  font-weight: $euiFontWeightMedium;
+}
+
+.mapTocEntry__layerNameText {
+  display: flex;
+  align-items: center;
+}
+
+.mapTocEntry__layerNameIcon {
+  flex-shrink: 0;
+  margin-right: $euiSizeS;
+
+  > * {
+    vertical-align: sub;
+  }
+}
+
+.mapTocEntry__layerIcons {
+  flex-shrink: 0;
+  display: none;
+}
+
+.mapTocEntry__detailsToggle {
+  position: absolute;
+  display: none;
+  left: 50%;
+  top: $euiSizeXL;
+  transform: translateX(-50%);
+}
+
+.mapTocEntry__detailsToggleButton {
+  background-color: $euiColorEmptyShade;
+  border: $euiBorderThin;
+  color: $euiTextColor;
+  border-radius: $euiBorderRadius / 2;
+  height: $euiSize;
+  width: $euiSizeXL;
+  line-height: $euiSize;
+  text-align: center;
+
+  &:focus {
+    @include euiFocusRing;
+  }
+}
+
+.mapTocEntry__layerDetails {
+  @include euiOverflowShadow(transparentize($euiShadowColor, .7));
+  background-color: $euiPageBackgroundColor;
+  padding: $euiSize $euiSizeS $euiSizeS;
+  margin: $euiSizeS (-$euiSizeS) (-$euiSizeS);
+}
+
+@keyframes mapTocEntryBecomeVisible {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}

@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { compose, withState, withProps, getContext, withHandlers } from 'recompose';
+import { pure, compose, withState, withProps, getContext, withHandlers } from 'recompose';
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
@@ -19,13 +19,19 @@ import {
 } from '../../state/selectors/workpad';
 import { Workpad as Component } from './workpad';
 
-const mapStateToProps = state => ({
-  pages: getPages(state),
-  selectedPageNumber: getSelectedPageIndex(state) + 1,
-  totalElementCount: getAllElements(state).length,
-  workpad: getWorkpad(state),
-  isFullscreen: getFullscreen(state),
-});
+const mapStateToProps = state => {
+  const { width, height, id: workpadId, css: workpadCss } = getWorkpad(state);
+  return {
+    pages: getPages(state),
+    selectedPageNumber: getSelectedPageIndex(state) + 1,
+    totalElementCount: getAllElements(state).length,
+    width,
+    height,
+    workpadCss,
+    workpadId,
+    isFullscreen: getFullscreen(state),
+  };
+};
 
 const mapDispatchToProps = {
   undoHistory,
@@ -34,6 +40,7 @@ const mapDispatchToProps = {
 };
 
 export const Workpad = compose(
+  pure,
   getContext({
     router: PropTypes.object,
   }),
@@ -68,17 +75,17 @@ export const Workpad = compose(
       }
       props.setPrevSelectedPageNumber(props.selectedPageNumber);
       const transitionPage = Math.max(props.selectedPageNumber, pageNumber) - 1;
-      const { transition } = props.workpad.pages[transitionPage];
+      const { transition } = props.pages[transitionPage];
       if (transition) {
         props.setTransition(transition);
       }
-      props.router.navigateTo('loadWorkpad', { id: props.workpad.id, page: pageNumber });
+      props.router.navigateTo('loadWorkpad', { id: props.workpadId, page: pageNumber });
     },
   }),
   withHandlers({
     onTransitionEnd: ({ setTransition }) => () => setTransition(null),
     nextPage: props => () => {
-      const pageNumber = Math.min(props.selectedPageNumber + 1, props.workpad.pages.length);
+      const pageNumber = Math.min(props.selectedPageNumber + 1, props.pages.length);
       props.onPageChange(pageNumber);
     },
     previousPage: props => () => {

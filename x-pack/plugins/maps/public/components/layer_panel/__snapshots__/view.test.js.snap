@@ -2,13 +2,8 @@
 
 exports[`LayerPanel is rendered 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
   direction="column"
   gutterSize="none"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlyoutHeader
     className="mapLayerPanel__header"
@@ -16,15 +11,10 @@ exports[`LayerPanel is rendered 1`] = `
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
       responsive={false}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonIcon
@@ -35,16 +25,16 @@ exports[`LayerPanel is rendered 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Fit
+          <FormattedMessage
+            defaultMessage="Fit"
+            id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonIcon>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="s"
-          textTransform="none"
         >
           <h2>
             layer 1
@@ -66,7 +56,6 @@ exports[`LayerPanel is rendered 1`] = `
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <EuiSpacer
@@ -88,35 +77,28 @@ exports[`LayerPanel is rendered 1`] = `
       </EuiAccordion>
     </div>
   </EuiFlyoutHeader>
-  <EuiFlyoutBody
+  <div
     className="mapLayerPanel__body"
   >
-    <SettingsPanel />
-    <EuiSpacer
-      size="s"
-    />
-    <EuiPanel
-      grow={true}
-      hasShadow={false}
-      paddingSize="m"
+    <div
+      className="mapLayerPanel__bodyOverflow"
     >
-      <JoinEditor />
-    </EuiPanel>
-    <EuiSpacer
-      size="s"
-    />
-    <StyleTabs
-      layer={
-        Object {
-          "getDisplayName": [Function],
-          "getId": [Function],
-          "getImmutableSourceProperties": [Function],
-          "getLayerTypeIconName": [Function],
-          "isJoinable": [Function],
-        }
-      }
-    />
-  </EuiFlyoutBody>
+      <LayerErrors />
+      <LayerSettings />
+      <SourceSettings />
+      <EuiPanel
+        grow={true}
+        hasShadow={false}
+        paddingSize="m"
+      >
+        <JoinEditor />
+      </EuiPanel>
+      <EuiSpacer
+        size="s"
+      />
+      <StyleSettings />
+    </div>
+  </div>
   <EuiFlyoutFooter
     className="mapLayerPanel__footer"
   >

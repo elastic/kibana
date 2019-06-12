@@ -66,21 +66,6 @@ uiModules.get('kibana/region_map')
               setTimeout(function () {
                 $scope.dirty = false;
               }, 0);
-              $scope.collections.vectorLayers = newVectorLayers;
-
-              if ($scope.collections.vectorLayers[0] && !$scope.editorState.params.selectedLayer) {
-                $scope.editorState.params.selectedLayer = $scope.collections.vectorLayers[0];
-                onLayerChange();
-              }
-
-
-              //the dirty flag is set to true because the change in vector layers config causes an update of the scope.params
-              //temp work-around. addressing this issue with the visualize refactor for 6.0
-              setTimeout(function () {
-                $scope.dirty = false;
-              }, 0);
-
-
             })
             .catch(function (error) {
               toastNotifications.addWarning(error.message);

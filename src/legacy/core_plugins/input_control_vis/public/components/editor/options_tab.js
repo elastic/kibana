@@ -86,7 +86,7 @@ export class OptionsTab extends Component {
           <EuiSwitch
             label={<FormattedMessage
               id="inputControl.editor.optionsTab.pinFiltersLabel"
-              defaultMessage="Pin filters to global state"
+              defaultMessage="Pin filters for all applications"
             />}
             checked={this.props.editorState.params.pinFilters}
             onChange={this.handlePinFilters}

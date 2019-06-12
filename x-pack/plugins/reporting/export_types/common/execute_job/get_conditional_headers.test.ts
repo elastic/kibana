@@ -26,7 +26,15 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {},
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+      },
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -43,7 +51,15 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {},
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+      },
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -64,7 +80,15 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {},
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+      },
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -81,7 +105,15 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {},
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+      },
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -96,7 +128,15 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {},
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+      },
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -119,7 +159,15 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {},
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+      },
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -136,7 +184,15 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {},
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+      },
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -152,7 +208,15 @@ test('uses basePath from job when creating saved object service', async () => {
   };
 
   const { conditionalHeaders } = await getConditionalHeaders({
-    job: {},
+    job: {
+      title: 'cool-job-bro',
+      type: 'csv',
+      jobParams: {
+        savedObjectId: 'abc-123',
+        isImmediate: false,
+        savedObjectType: 'search',
+      },
+    },
     filteredHeaders: permittedHeaders,
     server: mockServer,
   });
@@ -162,7 +226,16 @@ test('uses basePath from job when creating saved object service', async () => {
 
   const jobBasePath = '/sbp/s/marketing';
   await getCustomLogo({
-    job: { basePath: jobBasePath },
+    job: {
+      title: 'cool-job-bro',
+      type: 'csv',
+      jobParams: {
+        savedObjectId: 'abc-123',
+        isImmediate: false,
+        savedObjectType: 'search',
+      },
+      basePath: jobBasePath,
+    },
     conditionalHeaders,
     server: mockServer,
   });
@@ -179,7 +252,15 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
   };
 
   const { conditionalHeaders } = await getConditionalHeaders({
-    job: {},
+    job: {
+      title: 'cool-job-bro',
+      type: 'csv',
+      jobParams: {
+        savedObjectId: 'abc-123',
+        isImmediate: false,
+        savedObjectType: 'search',
+      },
+    },
     filteredHeaders: permittedHeaders,
     server: mockServer,
   });
@@ -188,7 +269,15 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
   mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
 
   await getCustomLogo({
-    job: {},
+    job: {
+      title: 'cool-job-bro',
+      type: 'csv',
+      jobParams: {
+        savedObjectId: 'abc-123',
+        isImmediate: false,
+        savedObjectType: 'search',
+      },
+    },
     conditionalHeaders,
     server: mockServer,
   });
@@ -196,4 +285,44 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
   expect(mockServer.savedObjects.getScopedSavedObjectsClient.mock.calls[0][0].getBasePath()).toBe(
     '/sbp'
   );
+});
+
+describe('config formatting', () => {
+  test(`lowercases server.host`, async () => {
+    mockServer = createMockServer({ settings: { 'server.host': 'COOL-HOSTNAME' } });
+    const { conditionalHeaders } = await getConditionalHeaders({
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+      },
+      filteredHeaders: {},
+      server: mockServer,
+    });
+    expect(conditionalHeaders.conditions.hostname).toEqual('cool-hostname');
+  });
+
+  test(`lowercases xpack.reporting.kibanaServer.hostname`, async () => {
+    mockServer = createMockServer({
+      settings: { 'xpack.reporting.kibanaServer.hostname': 'GREAT-HOSTNAME' },
+    });
+    const { conditionalHeaders } = await getConditionalHeaders({
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+      },
+      filteredHeaders: {},
+      server: mockServer,
+    });
+    expect(conditionalHeaders.conditions.hostname).toEqual('great-hostname');
+  });
 });

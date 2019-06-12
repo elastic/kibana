@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -236,6 +236,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('zoom warning behavior', function describeIndexTests() {
+      // Zoom warning is only applicable to OSS
+      this.tags(['skipCloud', 'skipFirefox']);
 
       const waitForLoading = false;
       let zoomWarningEnabled;

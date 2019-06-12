@@ -23,7 +23,8 @@ function getAnomaliesTableData(callWithRequest, payload) {
     latestMs,
     dateFormatTz,
     maxRecords,
-    maxExamples } = payload;
+    maxExamples,
+    influencersFilterQuery } = payload;
   return rs.getAnomaliesTableData(
     jobIds,
     criteriaFields,
@@ -34,7 +35,8 @@ function getAnomaliesTableData(callWithRequest, payload) {
     latestMs,
     dateFormatTz,
     maxRecords,
-    maxExamples);
+    maxExamples,
+    influencersFilterQuery);
 }
 
 function getCategoryDefinition(callWithRequest, payload) {

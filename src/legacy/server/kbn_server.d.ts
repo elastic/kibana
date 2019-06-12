@@ -17,16 +17,35 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { ResponseObject, Server } from 'hapi';
 
+import {
+  ElasticsearchServiceSetup,
+  ConfigService,
+  LoggerFactory,
+  InternalCoreSetup,
+  InternalCoreStart,
+} from '../../core/server';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
+import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
-import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
+import {
+  SavedObjectsClient,
+  SavedObjectsService,
+  SavedObjectsSchema,
+  SavedObjectsManagement,
+} from './saved_objects';
+import { Capabilities } from '../../core/public';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
+  has(key: string): boolean;
+}
+
+export interface UiApp {
+  getId(): string;
 }
 
 // Extend the defaults with the plugins and server methods we need.
@@ -43,20 +62,55 @@ declare module 'hapi' {
     config: () => KibanaConfig;
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsService;
+    usage: { collectorSet: any };
+    injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
+    getHiddenUiAppById(appId: string): UiApp;
+    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
+    addScopedTutorialContextFactory: (
+      scopedTutorialContextFactory: (...args: any[]) => any
+    ) => void;
+    savedObjectsManagement(): SavedObjectsManagement;
+    getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
+    getUiNavLinks(): Array<{ _id: string }>;
   }
 
   interface Request {
     getSavedObjectsClient(): SavedObjectsClient;
     getBasePath(): string;
     getUiSettingsService(): any;
+    getCapabilities(): Promise<Capabilities>;
+  }
+
+  interface ResponseToolkit {
+    renderAppWithDefaultConfig(app: UiApp): ResponseObject;
   }
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
-
+type Unpromise<T> = T extends Promise<infer U> ? U : T;
+// eslint-disable-next-line import/no-default-export
 export default class KbnServer {
+  public readonly newPlatform: {
+    coreContext: {
+      logger: LoggerFactory;
+    };
+    setup: {
+      core: InternalCoreSetup;
+      plugins: Record<string, unknown>;
+    };
+    start: {
+      core: InternalCoreStart;
+      plugins: Record<string, unknown>;
+    };
+    stop: null;
+    params: {
+      serverOptions: ElasticsearchServiceSetup;
+      handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
+    };
+  };
   public server: Server;
   public inject: Server['inject'];
+  public pluginSpecs: any[];
 
   constructor(settings: any, core: any);
 
@@ -64,6 +118,7 @@ export default class KbnServer {
   public mixin(...fns: KbnMixinFunc[]): Promise<void>;
   public listen(): Promise<Server>;
   public close(): Promise<void>;
+  public afterPluginsInit(callback: () => void): void;
   public applyLoggingConfiguration(settings: any): void;
 }
 

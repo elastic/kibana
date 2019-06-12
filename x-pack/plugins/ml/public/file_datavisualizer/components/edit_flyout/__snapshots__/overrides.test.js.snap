@@ -15,6 +15,7 @@ exports[`Overrides render overrides 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldNumber
       compressed={false}
@@ -35,6 +36,7 @@ exports[`Overrides render overrides 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiComboBox
       compressed={false}
@@ -79,6 +81,7 @@ exports[`Overrides render overrides 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiComboBox
       compressed={false}
@@ -393,6 +396,7 @@ exports[`Overrides render overrides 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiComboBox
       compressed={false}

@@ -28,7 +28,7 @@ export const createListRoute = () => ({
   path: '/api/sample_data',
   method: 'GET',
   config: {
-    handler: async (request) => {
+    handler: async request => {
       const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
 
       const sampleDatasets = request.server.getSampleDatasets().map(sampleDataset => {
@@ -39,10 +39,9 @@ export const createListRoute = () => ({
           previewImagePath: sampleDataset.previewImagePath,
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
           overviewDashboard: sampleDataset.overviewDashboard,
+          appLinks: sampleDataset.appLinks,
           defaultIndex: sampleDataset.defaultIndex,
-          dataIndices: sampleDataset.dataIndices.map(dataIndexConfig => {
-            return { id: dataIndexConfig.id };
-          }),
+          dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
         };
       });
 
@@ -88,6 +87,6 @@ export const createListRoute = () => ({
 
       await Promise.all(isInstalledPromises);
       return sampleDatasets;
-    }
-  }
+    },
+  },
 });

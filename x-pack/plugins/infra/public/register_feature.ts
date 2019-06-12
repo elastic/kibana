@@ -22,7 +22,7 @@ FeatureCatalogueRegistryProvider.register((i18n: I18nServiceType) => ({
       'Explore infrastructure metrics and logs for common servers, containers, and services.',
   }),
   icon: 'infraApp',
-  path: `/app/${APP_ID}#home`,
+  path: `/app/${APP_ID}#infrastructure`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 }));

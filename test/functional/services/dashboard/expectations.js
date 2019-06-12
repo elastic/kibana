@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function DashboardExpectProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -35,6 +35,14 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(expectedCount);
       });
+    }
+
+    async visualizationsArePresent(vizList) {
+      log.debug('Checking all visualisations are present on dashsboard');
+      let notLoaded = await PageObjects.dashboard.getNotLoadedVisualizations(vizList);
+      // TODO: Determine issue occasionally preventing 'geo map' from loading
+      notLoaded = notLoaded.filter(x => x !== 'Rendering Test: geo map');
+      expect(notLoaded).to.be.empty();
     }
 
     async selectedLegendColorCount(color, expectedCount) {

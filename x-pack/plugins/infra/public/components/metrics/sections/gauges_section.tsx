@@ -15,7 +15,8 @@ import {
 } from '@elastic/eui';
 import { get, last, max } from 'lodash';
 import React, { ReactText } from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { InfraMetricData } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import { InfraMetricLayoutSection } from '../../../pages/metrics/layouts/types';
@@ -96,7 +97,7 @@ export class GaugesSection extends React.PureComponent<Props> {
   }
 }
 
-const GroupBox = styled.div`
+const GroupBox = euiStyled.div`
   display: flex;
   flex-flow: row wrap;
   justify-content: space-evenly;

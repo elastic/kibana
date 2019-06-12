@@ -17,17 +17,20 @@
  * under the License.
  */
 
-import { get, includes, max, min, sum } from 'lodash';
-import { EXTENDED_STATS_TYPES, METRIC_TYPES } from './metric_types';
+import { get, includes, max, min, sum, noop } from 'lodash';
+import { toPercentileNumber } from '../../../../common/to_percentile_number';
+import { EXTENDED_STATS_TYPES, METRIC_TYPES } from '../../../../common/metric_types';
 
 const aggFns = {
   max,
   min,
   sum,
+  noop,
+  concat: values => values.join(', '),
   avg: values => sum(values) / values.length,
 };
 
-export default (row, metric) => {
+export const getAggValue = (row, metric) => {
   // Extended Stats
   if (includes(EXTENDED_STATS_TYPES, metric.type)) {
     const isStdDeviation = /^std_deviation/.test(metric.type);
@@ -40,25 +43,22 @@ export default (row, metric) => {
 
   switch (metric.type) {
     case METRIC_TYPES.PERCENTILE:
-      let percentileKey = `${metric.percent}`;
-      if (!/\./.test(`${metric.percent}`)) {
-        percentileKey = `${metric.percent}.0`;
-      }
+      const percentileKey = toPercentileNumber(`${metric.percent}`);
+
       return row[metric.id].values[percentileKey];
     case METRIC_TYPES.PERCENTILE_RANK:
-      const percentileRankKey = `${metric.value}`;
-      return (
-        row[metric.id] &&
-        row[metric.id].values &&
-        row[metric.id].values[percentileRankKey]
-      );
+      const percentileRankKey = toPercentileNumber(`${metric.value}`);
+
+      return row[metric.id] && row[metric.id].values && row[metric.id].values[percentileRankKey];
     case METRIC_TYPES.TOP_HIT:
-      if (row[metric.id].doc_count === 0) return null;
+      if (row[metric.id].doc_count === 0) {
+        return null;
+      }
+
       const hits = get(row, [metric.id, 'docs', 'hits', 'hits'], []);
-      const values = hits.map(doc => {
-        return get(doc, `_source.${metric.field}`, 0);
-      });
-      const aggWith = (metric.agg_with && aggFns[metric.agg_with]) || aggFns.avg;
+      const values = hits.map(doc => get(doc, `_source.${metric.field}`));
+      const aggWith = (metric.agg_with && aggFns[metric.agg_with]) || aggFns.noop;
+
       return aggWith(values);
     case METRIC_TYPES.COUNT:
       return get(row, 'doc_count', null);

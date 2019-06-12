@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { DetailDrawer } from './detail_drawer';
 import { Queue } from './queue';
 import { StatementSection } from './statement_section';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiSpacer,
   EuiPage,
@@ -17,7 +17,7 @@ import {
   EuiPageBody,
 } from '@elastic/eui';
 
-class PipelineViewerUi extends React.Component {
+export class PipelineViewer extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -27,36 +27,15 @@ class PipelineViewerUi extends React.Component {
     };
   }
 
-  onShowVertexDetails = (vertex) => {
-    if (vertex === this.state.detailDrawer.vertex) {
-      this.onHideVertexDetails();
-    }
-    else {
-      this.setState({
-        detailDrawer: {
-          vertex
-        }
-      });
-    }
-  }
-
-  onHideVertexDetails = () => {
-    this.setState({
-      detailDrawer: {
-        vertex: null
-      }
-    });
-  }
-
   renderDetailDrawer = () => {
-    if (!this.state.detailDrawer.vertex) {
+    if (!this.props.detailVertex) {
       return null;
     }
 
     return (
       <DetailDrawer
-        vertex={this.state.detailDrawer.vertex}
-        onHide={this.onHideVertexDetails}
+        vertex={this.props.detailVertex}
+        onHide={() => this.props.setDetailVertexId(undefined)}
         timeseriesTooltipXValueFormatter={this.props.timeseriesTooltipXValueFormatter}
       />
     );
@@ -69,7 +48,6 @@ class PipelineViewerUi extends React.Component {
       outputs,
       queue
     } = this.props.pipeline;
-    const { intl } = this.props;
 
     return (
       <EuiPage>
@@ -77,28 +55,31 @@ class PipelineViewerUi extends React.Component {
           <EuiPageContent verticalPosition="center" horizontalPosition="center" className="monPipelineViewer">
             <StatementSection
               iconType="logstashInput"
-              headingText={intl.formatMessage({ id: 'xpack.monitoring.logstash.pipelineViewer.inputsTitle', defaultMessage: 'Inputs' })}
+              headingText={i18n.translate('xpack.monitoring.logstash.pipelineViewer.inputsTitle', {
+                defaultMessage: 'Inputs'
+              })}
               elements={inputs}
-              onShowVertexDetails={this.onShowVertexDetails}
-              detailVertex={this.state.detailDrawer.vertex}
+              onShowVertexDetails={this.props.setDetailVertexId}
             />
             <EuiSpacer />
             <Queue queue={queue} />
             <EuiSpacer />
             <StatementSection
               iconType="logstashFilter"
-              headingText={intl.formatMessage({ id: 'xpack.monitoring.logstash.pipelineViewer.filtersTitle', defaultMessage: 'Filters' })}
+              headingText={i18n.translate('xpack.monitoring.logstash.pipelineViewer.filtersTitle', {
+                defaultMessage: 'Filters'
+              })}
               elements={filters}
-              onShowVertexDetails={this.onShowVertexDetails}
-              detailVertex={this.state.detailDrawer.vertex}
+              onShowVertexDetails={this.props.setDetailVertexId}
             />
             <EuiSpacer />
             <StatementSection
               iconType="logstashOutput"
-              headingText={intl.formatMessage({ id: 'xpack.monitoring.logstash.pipelineViewer.outputsTitle', defaultMessage: 'Outputs' })}
+              headingText={i18n.translate('xpack.monitoring.logstash.pipelineViewer.outputsTitle', {
+                defaultMessage: 'Outputs'
+              })}
               elements={outputs}
-              onShowVertexDetails={this.onShowVertexDetails}
-              detailVertex={this.state.detailDrawer.vertex}
+              onShowVertexDetails={this.props.setDetailVertexId}
             />
             { this.renderDetailDrawer() }
           </EuiPageContent>
@@ -108,7 +89,7 @@ class PipelineViewerUi extends React.Component {
   }
 }
 
-PipelineViewerUi.propTypes = {
+PipelineViewer.propTypes = {
   pipeline: PropTypes.shape({
     inputs: PropTypes.array.isRequired,
     filters: PropTypes.array.isRequired,
@@ -116,5 +97,3 @@ PipelineViewerUi.propTypes = {
     queue: PropTypes.object.isRequired,
   }).isRequired
 };
-
-export const PipelineViewer = injectI18n(PipelineViewerUi);

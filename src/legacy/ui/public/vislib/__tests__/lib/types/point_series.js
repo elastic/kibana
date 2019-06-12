@@ -18,12 +18,13 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
-import { VislibTypesPointSeries } from '../../../lib/types/point_series';
+import { vislibPointSeriesTypes as pointSeriesConfig } from '../../../lib/types/point_series';
+import percentileTestdata from './testdata_linechart_percentile.json';
+import percentileTestdataResult from './testdata_linechart_percentile_result.json';
 
 describe('Point Series Config Type Class Test Suite', function () {
-  let pointSeriesConfig;
   let parsedConfig;
   const histogramConfig = {
     type: 'histogram',
@@ -105,9 +106,6 @@ describe('Point Series Config Type Class Test Suite', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    pointSeriesConfig = Private(VislibTypesPointSeries);
-  }));
 
   describe('histogram chart', function () {
     beforeEach(function () {
@@ -120,6 +118,20 @@ describe('Point Series Config Type Class Test Suite', function () {
     it('should set axis title and formatter from data', () => {
       expect(parsedConfig.categoryAxes[0].title.text).to.equal(data.data.xAxisLabel);
       expect(parsedConfig.valueAxes[0].labels.axisFormatter).to.not.be.undefined;
+    });
+  });
+
+  describe('line chart', function () {
+    beforeEach(function () {
+      const percentileDataObj = {
+        get: (prop) => { return data[prop] || data.data[prop] ||  null; },
+        getLabels: () => [],
+        data: percentileTestdata.data
+      };
+      parsedConfig = pointSeriesConfig.line(percentileTestdata.cfg, percentileDataObj);
+    });
+    it('should render a percentile line chart', function () {
+      expect(JSON.stringify(parsedConfig)).to.eql(JSON.stringify(percentileTestdataResult));
     });
   });
 

@@ -22,8 +22,12 @@ import * as Url from 'url';
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { IconType } from '@elastic/eui';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
+import { NavLinksService } from './nav_links/nav_links_service';
+import { ApplicationStart } from '../application';
+import { HttpStart } from '../http';
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -32,45 +36,60 @@ function isEmbedParamInHash() {
   return Boolean(query.embed);
 }
 
-export interface Brand {
+/** @public */
+export interface ChromeBadge {
+  text: string;
+  tooltip: string;
+  iconType?: IconType;
+}
+
+/** @public */
+export interface ChromeBrand {
   logo?: string;
   smallLogo?: string;
 }
 
-export interface Breadcrumb {
+/** @public */
+export interface ChromeBreadcrumb {
   text: string;
   href?: string;
   'data-test-subj'?: string;
 }
 
-export type HelpExtension = (element: HTMLDivElement) => (() => void);
+/** @public */
+export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 
 interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
 interface StartDeps {
+  application: ApplicationStart;
+  http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
 }
 
+/** @internal */
 export class ChromeService {
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly browserSupportsCsp: boolean;
+  private readonly navLinks = new NavLinksService();
 
   public constructor({ browserSupportsCsp }: ConstructorParams) {
     this.browserSupportsCsp = browserSupportsCsp;
   }
 
-  public start({ injectedMetadata, notifications }: StartDeps) {
+  public start({ application, http, injectedMetadata, notifications }: StartDeps) {
     const FORCE_HIDDEN = isEmbedParamInHash();
 
-    const brand$ = new Rx.BehaviorSubject<Brand>({});
+    const brand$ = new Rx.BehaviorSubject<ChromeBrand>({});
     const isVisible$ = new Rx.BehaviorSubject(true);
     const isCollapsed$ = new Rx.BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
     const applicationClasses$ = new Rx.BehaviorSubject<Set<string>>(new Set());
-    const helpExtension$ = new Rx.BehaviorSubject<HelpExtension | undefined>(undefined);
-    const breadcrumbs$ = new Rx.BehaviorSubject<Breadcrumb[]>([]);
+    const helpExtension$ = new Rx.BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
+    const breadcrumbs$ = new Rx.BehaviorSubject<ChromeBreadcrumb[]>([]);
+    const badge$ = new Rx.BehaviorSubject<ChromeBadge | undefined>(undefined);
 
     if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -81,6 +100,8 @@ export class ChromeService {
     }
 
     return {
+      navLinks: this.navLinks.start({ application, http }),
+
       /**
        * Set the brand configuration. Normally the `logo` property will be rendered as the
        * CSS background for the home link in the chrome navigation, but when the page is
@@ -95,7 +116,7 @@ export class ChromeService {
        *    })
        *
        */
-      setBrand: (brand: Brand) => {
+      setBrand: (brand: ChromeBrand) => {
         brand$.next(
           Object.freeze({
             logo: brand.logo,
@@ -170,6 +191,17 @@ export class ChromeService {
           map(set => [...set]),
           takeUntil(this.stop$)
         ),
+      /**
+       * Get an observable of the current badge
+       */
+      getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
+
+      /**
+       * Override the current badge
+       */
+      setBadge: (badge: ChromeBadge | undefined) => {
+        badge$.next(badge);
+      },
 
       /**
        * Get an observable of the current list of breadcrumbs
@@ -179,7 +211,7 @@ export class ChromeService {
       /**
        * Override the current set of breadcrumbs
        */
-      setBreadcrumbs: (newBreadcrumbs: Breadcrumb[]) => {
+      setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
         breadcrumbs$.next(newBreadcrumbs);
       },
 
@@ -191,15 +223,17 @@ export class ChromeService {
       /**
        * Override the current set of breadcrumbs
        */
-      setHelpExtension: (helpExtension?: HelpExtension) => {
+      setHelpExtension: (helpExtension?: ChromeHelpExtension) => {
         helpExtension$.next(helpExtension);
       },
     };
   }
 
   public stop() {
+    this.navLinks.stop();
     this.stop$.next();
   }
 }
 
+/** @public */
 export type ChromeStart = ReturnType<ChromeService['start']>;

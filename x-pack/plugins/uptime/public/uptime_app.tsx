@@ -5,264 +5,190 @@
  */
 
 import {
-  EuiHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
   // @ts-ignore missing typings for EuiHeaderLink
   EuiHeaderLink,
   // @ts-ignore missing typings for EuiHeaderLinks
-  EuiHeaderLinks,
-  // @ts-ignore missing typings for EuiHeaderLogo
   EuiHeaderLogo,
-  EuiHeaderSection,
-  // @ts-ignore missing typings for EuiHeaderSectionItem
+  // @ts-ignore missing typings for EuiHeaderLogo
   EuiHeaderSectionItem,
+  // @ts-ignore missing typings for EuiHeaderSectionItem
   EuiPage,
-  EuiPageContent,
+  EuiSpacer,
   // @ts-ignore missing typings for EuiSuperDatePicker
   EuiSuperDatePicker,
+  EuiTitle,
 } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { capabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
-import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
-import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
+import { UMBreadcrumb } from './breadcrumbs';
+import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
+import { UptimeRefreshContext, UptimeSettingsContext } from './contexts';
+import { UptimeDatePicker } from './components/functional/uptime_date_picker';
+import { useUrlParams } from './hooks';
 
-interface UptimeAppColors {
+export interface UptimeAppColors {
   danger: string;
-  primary: string;
-  secondary: string;
-}
-
-// TODO: these props are global to this app, we should put them in a context
-export interface UptimeCommonProps {
-  autorefreshIsPaused: boolean;
-  autorefreshInterval: number;
-  dateRangeStart: string;
-  dateRangeEnd: string;
-  colors: UptimeAppColors;
-}
-
-export interface UptimePersistedState {
-  autorefreshIsPaused: boolean;
-  autorefreshInterval: number;
-  dateRangeStart: string;
-  dateRangeEnd: string;
+  success: string;
+  range: string;
+  mean: string;
 }
 
 export interface UptimeAppProps {
+  basePath: string;
+  client: UMGraphQLClient;
   darkMode: boolean;
-  graphQLClient: UMGraphQLClient;
-  initialDateRangeStart: string;
-  initialDateRangeEnd: string;
-  initialAutorefreshInterval: number;
-  initialAutorefreshIsPaused: boolean;
+  isApmAvailable: boolean;
+  isInfraAvailable: boolean;
+  isLogsAvailable: boolean;
   kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
-  updateBreadcrumbs: UMUpdateBreadcrumbs;
-  persistState(state: UptimePersistedState): void;
+  setBreadcrumbs: UMUpdateBreadcrumbs;
+  setBadge: UMUpdateBadge;
+  renderGlobalHelpControls(): void;
 }
 
-interface UptimeAppState {
-  autorefreshIsPaused: boolean;
-  autorefreshInterval: number;
-  breadcrumbs: UMBreadcrumb[];
-  colors: UptimeAppColors;
-  dateRangeStart: string;
-  dateRangeEnd: string;
-}
+const Application = (props: UptimeAppProps) => {
+  const {
+    basePath,
+    client,
+    darkMode,
+    isApmAvailable,
+    isInfraAvailable,
+    isLogsAvailable,
+    renderGlobalHelpControls,
+    routerBasename,
+    setBreadcrumbs,
+    setBadge,
+  } = props;
 
-// TODO: when EUI exports types for this, this should be replaced
-interface SuperDateRangePickerRangeChangedEvent {
-  start: string;
-  end: string;
-}
-
-interface SuperDateRangePickerRefreshChangedEvent {
-  isPaused: boolean;
-  refreshInterval?: number;
-}
-
-class Application extends React.Component<UptimeAppProps, UptimeAppState> {
-  private setBreadcrumbs: UMUpdateBreadcrumbs;
-  constructor(props: UptimeAppProps) {
-    super(props);
-
-    const {
-      darkMode,
-      initialAutorefreshIsPaused: autorefreshIsPaused,
-      initialAutorefreshInterval: autorefreshInterval,
-      initialDateRangeStart: dateRangeStart,
-      initialDateRangeEnd: dateRangeEnd,
-      kibanaBreadcrumbs,
-      updateBreadcrumbs,
-    } = props;
-
-    this.setBreadcrumbs = updateBreadcrumbs;
-
-    let colors: UptimeAppColors;
-    if (darkMode) {
-      colors = {
-        primary: euiDarkVars.euiColorVis1,
-        secondary: euiDarkVars.euiColorVis0,
-        danger: euiDarkVars.euiColorVis9,
-      };
-    } else {
-      colors = {
-        primary: euiLightVars.euiColorVis1,
-        secondary: euiLightVars.euiColorVis0,
-        danger: euiLightVars.euiColorVis9,
-      };
-    }
-
-    this.state = {
-      autorefreshIsPaused,
-      autorefreshInterval,
-      breadcrumbs: kibanaBreadcrumbs,
-      colors,
-      dateRangeStart,
-      dateRangeEnd,
+  let colors: UptimeAppColors;
+  if (darkMode) {
+    colors = {
+      success: euiDarkVars.euiColorSuccess,
+      range: euiDarkVars.euiFocusBackgroundColor,
+      mean: euiDarkVars.euiColorPrimary,
+      danger: euiDarkVars.euiColorDanger,
+    };
+  } else {
+    colors = {
+      success: euiLightVars.euiColorSuccess,
+      range: euiLightVars.euiFocusBackgroundColor,
+      mean: euiLightVars.euiColorPrimary,
+      danger: euiLightVars.euiColorDanger,
     };
   }
 
-  public componentWillMount() {
-    this.setBreadcrumbs([overviewBreadcrumb]);
-  }
+  const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
+  const [headingText, setHeadingText] = useState<string | undefined>(undefined);
 
-  public render() {
-    const { routerBasename, graphQLClient } = this.props;
-    return (
-      <I18nContext>
-        <Router basename={routerBasename}>
-          <ApolloProvider client={graphQLClient}>
-            <EuiPage className="app-wrapper-panel">
-              <EuiHeader>
-                {/*
-              // @ts-ignore TODO no typings for grow prop */}
-                <EuiHeaderSection grow={true}>
-                  <EuiHeaderSectionItem border="right">
-                    <EuiHeaderLogo
-                      aria-label={i18n.translate('xpack.uptime.appHeader.uptimeLogoAriaLabel', {
-                        defaultMessage: 'Go to Uptime home page',
-                      })}
-                      href="#/"
-                      iconType="uptimeApp"
-                      iconTitle={i18n.translate('xpack.uptime.appHeader.uptimeLogoTitle', {
-                        defaultMessage: 'Uptime',
-                      })}
-                    >
-                      <FormattedMessage
-                        id="xpack.uptime.appHeader.uptimeLogoText"
-                        defaultMessage="Uptime"
-                      />
-                    </EuiHeaderLogo>
-                  </EuiHeaderSectionItem>
-                </EuiHeaderSection>
-                <EuiHeaderSection side="right">
-                  <EuiHeaderSectionItem border="none">
-                    <div
-                      style={{
-                        marginTop: '4px',
-                        marginLeft: '16px',
-                        marginRight: '16px',
-                        minWidth: '600px',
-                      }}
-                    >
-                      <EuiSuperDatePicker
-                        start={this.state.dateRangeStart}
-                        end={this.state.dateRangeEnd}
-                        isPaused={this.state.autorefreshIsPaused}
-                        refreshInterval={this.state.autorefreshInterval}
-                        onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {
-                          this.setState(
-                            { dateRangeStart: start, dateRangeEnd: end },
-                            this.persistState
-                          );
-                        }}
-                        onRefreshChange={({
-                          isPaused,
-                          refreshInterval,
-                        }: SuperDateRangePickerRefreshChangedEvent) => {
-                          const autorefreshInterval =
-                            refreshInterval === undefined
-                              ? this.state.autorefreshInterval
-                              : refreshInterval;
-                          this.setState(
-                            { autorefreshIsPaused: isPaused, autorefreshInterval },
-                            this.persistState
-                          );
-                        }}
-                        showUpdateButton={false}
-                      />
-                    </div>
-                  </EuiHeaderSectionItem>
-                </EuiHeaderSection>
-                <EuiHeaderSection side="right">
-                  <EuiHeaderSection>
-                    <EuiHeaderLinks>
-                      <EuiHeaderLink
-                        aria-label={i18n.translate('xpack.uptime.header.helpLinkAriaLabel', {
-                          defaultMessage: 'Go to our discuss page',
-                        })}
-                        iconType="help"
-                        href="https://discuss.elastic.co/c/uptime"
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.uptime.header.helpLinkText"
-                          defaultMessage="Discuss"
-                          description="The link is to a support form called 'Discuss', where users can submit feedback."
-                        />
-                      </EuiHeaderLink>
-                    </EuiHeaderLinks>
-                  </EuiHeaderSection>
-                </EuiHeaderSection>
-              </EuiHeader>
-              <EuiPageContent>
-                <Switch>
-                  <Route
-                    exact
-                    path="/"
-                    render={props => (
-                      <OverviewPage
-                        {...props}
-                        {...this.state}
-                        setBreadcrumbs={this.setBreadcrumbs}
-                      />
-                    )}
-                  />
-                  <Route
-                    path="/monitor/:id"
-                    render={props => (
-                      <MonitorPage
-                        {...props}
-                        {...this.state}
-                        updateBreadcrumbs={this.setBreadcrumbs}
-                      />
-                    )}
-                  />
-                </Switch>
-              </EuiPageContent>
-            </EuiPage>
-          </ApolloProvider>
-        </Router>
-      </I18nContext>
+  useEffect(() => {
+    renderGlobalHelpControls();
+    setBadge(
+      !capabilities.get().uptime.save
+        ? {
+            text: i18n.translate('xpack.uptime.badge.readOnly.text', {
+              defaultMessage: 'Read only',
+            }),
+            tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
+              defaultMessage: 'Unable to save',
+            }),
+            iconType: 'glasses',
+          }
+        : undefined
     );
-  }
+  }, []);
 
-  private persistState = (): void => {
-    const { autorefreshIsPaused, autorefreshInterval, dateRangeStart, dateRangeEnd } = this.state;
-    this.props.persistState({
-      autorefreshIsPaused,
-      autorefreshInterval,
-      dateRangeStart,
-      dateRangeEnd,
-    });
+  const refreshApp = () => {
+    setLastRefresh(Date.now());
   };
-}
+
+  return (
+    <I18nContext>
+      <Router basename={routerBasename}>
+        <Route
+          path="/"
+          render={(rootRouteProps: RouteComponentProps) => {
+            const [
+              { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd },
+            ] = useUrlParams(rootRouteProps.history, rootRouteProps.location);
+            return (
+              <ApolloProvider client={client}>
+                <UptimeSettingsContext.Provider
+                  value={{
+                    autorefreshInterval,
+                    autorefreshIsPaused,
+                    basePath,
+                    colors,
+                    dateRangeStart,
+                    dateRangeEnd,
+                    isApmAvailable,
+                    isInfraAvailable,
+                    isLogsAvailable,
+                    refreshApp,
+                    setHeadingText,
+                  }}
+                >
+                  <UptimeRefreshContext.Provider value={{ lastRefresh }}>
+                    <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                      <div>
+                        <EuiFlexGroup
+                          alignItems="center"
+                          justifyContent="spaceBetween"
+                          gutterSize="s"
+                        >
+                          <EuiFlexItem grow={false}>
+                            <EuiTitle>
+                              <h2>{headingText}</h2>
+                            </EuiTitle>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <UptimeDatePicker refreshApp={refreshApp} {...rootRouteProps} />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                        <EuiSpacer size="s" />
+                        <Switch>
+                          <Route
+                            exact
+                            path="/"
+                            render={routerProps => (
+                              <OverviewPage
+                                basePath={basePath}
+                                setBreadcrumbs={setBreadcrumbs}
+                                {...routerProps}
+                              />
+                            )}
+                          />
+                          <Route
+                            path="/monitor/:id/:location?"
+                            render={routerProps => (
+                              <MonitorPage
+                                query={client.query}
+                                setBreadcrumbs={setBreadcrumbs}
+                                {...routerProps}
+                              />
+                            )}
+                          />
+                        </Switch>
+                      </div>
+                    </EuiPage>
+                  </UptimeRefreshContext.Provider>
+                </UptimeSettingsContext.Provider>
+              </ApolloProvider>
+            );
+          }}
+        />
+      </Router>
+    </I18nContext>
+  );
+};
 
 export const UptimeApp = (props: UptimeAppProps) => <Application {...props} />;

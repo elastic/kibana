@@ -19,7 +19,7 @@
 
 import chrome from '../chrome';
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function AggConfigResult(aggConfig, parent, value, key, filters) {
   this.key = key;
   this.value = value;

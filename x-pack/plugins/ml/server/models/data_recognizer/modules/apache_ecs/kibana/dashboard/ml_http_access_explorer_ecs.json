@@ -8,6 +8,6 @@
   "optionsJSON": "{\"darkTheme\":false}",
   "version": 1,
   "kibanaSavedObjectMeta": {
-    "searchSourceJSON": "{\n  \"filter\": [],\n  \"highlightAll\": true,\n  \"version\": true,\n  \"query\": {\n    \"query\": \"\",\n    \"language\": \"lucene\"\n  }\n}"
+    "searchSourceJSON": "{\n  \"filter\": [],\n  \"highlightAll\": true,\n  \"version\": true,\n  \"query\": {\n    \"query\": \"\",\n    \"language\": \"kuery\"\n  }\n}"
   }
 }

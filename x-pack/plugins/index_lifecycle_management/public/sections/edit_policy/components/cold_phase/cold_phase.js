@@ -6,7 +6,8 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
@@ -17,19 +18,20 @@ import {
   EuiSwitch,
   EuiTextColor,
 } from '@elastic/eui';
+
 import {
   PHASE_COLD,
   PHASE_ENABLED,
   PHASE_REPLICA_COUNT,
   PHASE_FREEZE_ENABLED
-} from '../../../../store/constants';
+} from '../../../../constants';
+import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
 import { ErrableFormRow } from '../../form_errors';
 import { MinAgeInput } from '../min_age_input';
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
 import { NodeAllocation } from '../node_allocation';
 import { SetPriorityInput } from '../set_priority_input';
 
-class ColdPhaseUi extends PureComponent {
+export class ColdPhase extends PureComponent {
   static propTypes = {
     setPhaseData: PropTypes.func.isRequired,
     showNodeDetailsFlyout: PropTypes.func.isRequired,
@@ -44,13 +46,13 @@ class ColdPhaseUi extends PureComponent {
       phaseData,
       errors,
       isShowingErrors,
-      intl,
       hotPhaseRolloverEnabled
     } = this.props;
-    const freezeLabel = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel',
-      defaultMessage: 'Freeze index',
+
+    const freezeLabel = i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
+      defaultMessage: 'Freeze index'
     });
+
     return (
       <div id="coldPhaseContent" aria-live="polite" role="region">
         <EuiDescribedFormGroup
@@ -135,8 +137,7 @@ class ColdPhaseUi extends PureComponent {
                       isShowingErrors={isShowingErrors}
                       errors={errors}
                       helpText={
-                        intl.formatMessage({
-                          id: 'xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText',
+                        i18n.translate('xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText', {
                           defaultMessage: 'By default, the number of replicas remains the same.'
                         })
                       }
@@ -204,4 +205,3 @@ class ColdPhaseUi extends PureComponent {
     );
   }
 }
-export const ColdPhase = injectI18n(ColdPhaseUi);

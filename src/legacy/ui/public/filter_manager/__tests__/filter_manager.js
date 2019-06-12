@@ -20,10 +20,10 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import MockState from 'fixtures/mock_state';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { FilterManagerProvider } from '..';
-import { FilterBarQueryFilterProvider } from '../../filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
 import { getPhraseScript } from '@kbn/es-query';
 let queryFilter;
 let filterManager;

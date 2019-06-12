@@ -5,11 +5,12 @@
  */
 
 import { i18n }  from '@kbn/i18n';
+import { LICENSE_TYPE_BASIC } from '../../../../common/constants';
 
 export const PLUGIN = {
   ID: 'index_management',
   NAME: i18n.translate('xpack.idxMgmt.appTitle', {
     defaultMessage: 'Index Management'
   }),
-  MINIMUM_LICENSE_REQUIRED: 'basic',
+  MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC,
 };

@@ -13,6 +13,8 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
   hasStateChanged }) => {
   const removeBtn = (
@@ -23,10 +25,23 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
         flush="right"
         data-test-subj="mapRemoveLayerButton"
       >
-        Remove layer
+        <FormattedMessage
+          id="xpack.maps.layerPanel.footer.removeLayerButtonLabel"
+          defaultMessage="Remove layer"
+        />
       </EuiButtonEmpty>
     </EuiFlexItem>
   );
+
+
+  const cancelButtonLabel =   hasStateChanged ? (<FormattedMessage
+    id="xpack.maps.layerPanel.footer.cancelButtonLabel"
+    defaultMessage="Cancel"
+  />) : (<FormattedMessage
+    id="xpack.maps.layerPanel.footer.closeButtonLabel"
+    defaultMessage="Close"
+  />);
+
 
   return (
     <EuiFlexGroup responsive={false}>
@@ -34,8 +49,9 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
         <EuiButtonEmpty
           onClick={cancelLayerPanel}
           flush="left"
+          data-test-subj="layerPanelCancelButton"
         >
-          {hasStateChanged ? 'Cancel' : 'Close'}
+          {cancelButtonLabel}
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -49,7 +65,10 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
           onClick={saveLayerEdits}
           fill
         >
-          Save &amp; close
+          <FormattedMessage
+            id="xpack.maps.layerPanel.footer.saveAndCloseButtonLabel"
+            defaultMessage="Save & close"
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

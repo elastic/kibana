@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AggregationSearchResponse,
-  ESFilter,
-  SearchParams
-} from 'elasticsearch';
+import { ESFilter, SearchParams } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -17,6 +13,7 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE
 } from '../../../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../../../typings/common';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { rangeFilter } from '../../../helpers/range_filter';
 import { Setup } from '../../../helpers/setup_request';
@@ -68,8 +65,7 @@ interface Aggs {
   };
 }
 
-export type ESResponse = AggregationSearchResponse<void, Aggs>;
-
+export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
 export function timeseriesFetcher({
   serviceName,
   transactionType,
@@ -80,26 +76,24 @@ export function timeseriesFetcher({
   transactionType?: string;
   transactionName?: string;
   setup: Setup;
-}): Promise<ESResponse> {
-  const { start, end, esFilterQuery, client, config } = setup;
+}) {
+  const { start, end, uiFiltersES, client, config } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) }
+    { range: rangeFilter(start, end) },
+    ...uiFiltersES
   ];
 
   if (transactionName) {
     filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
   }
 
+  // TODO reimplement these as uiFilters
   if (transactionType) {
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-  }
-
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
   }
 
   const params: SearchParams = {
@@ -140,5 +134,5 @@ export function timeseriesFetcher({
     }
   };
 
-  return client<void, Aggs>('search', params);
+  return client.search<void, Aggs>(params);
 }

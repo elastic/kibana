@@ -19,13 +19,21 @@
 
 import { join } from 'path';
 import typeDetect from 'type-detect';
+
+import { Type } from '@kbn/config-schema';
+
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
-import { PluginInitializerContext, PluginStartContext } from './plugin_context';
+import { PluginInitializerContext } from './plugin_context';
+import { CoreSetup, CoreStart } from '..';
+
+export type PluginConfigSchema = Type<unknown> | null;
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
  * that use it as a key or value more obvious.
+ *
+ * @public
  */
 export type PluginName = string;
 
@@ -80,60 +88,142 @@ export interface PluginManifest {
   readonly server: boolean;
 }
 
-type PluginInitializer<TExposed, TDependencies extends Record<PluginName, unknown>> = (
-  coreContext: PluginInitializerContext
-) => {
-  start: (pluginStartContext: PluginStartContext, dependencies: TDependencies) => TExposed;
+/**
+ * Small container object used to expose information about discovered plugins that may
+ * or may not have been started.
+ * @public
+ */
+export interface DiscoveredPlugin {
+  /**
+   * Identifier of the plugin.
+   */
+  readonly id: PluginName;
+
+  /**
+   * Root configuration path used by the plugin, defaults to "id".
+   */
+  readonly configPath: ConfigPath;
+
+  /**
+   * An optional list of the other plugins that **must be** installed and enabled
+   * for this plugin to function properly.
+   */
+  readonly requiredPlugins: ReadonlyArray<PluginName>;
+
+  /**
+   * An optional list of the other plugins that if installed and enabled **may be**
+   * leveraged by this plugin for some additional functionality but otherwise are
+   * not required for this plugin to work properly.
+   */
+  readonly optionalPlugins: ReadonlyArray<PluginName>;
+}
+
+/**
+ * An extended `DiscoveredPlugin` that exposes more sensitive information. Should never
+ * be exposed to client-side code.
+ * @internal
+ */
+export interface DiscoveredPluginInternal extends DiscoveredPlugin {
+  /**
+   * Path on the filesystem where plugin was loaded from.
+   */
+  readonly path: string;
+}
+
+/**
+ * The interface that should be returned by a `PluginInitializer`.
+ *
+ * @public
+ */
+export interface Plugin<
+  TSetup,
+  TStart,
+  TPluginsSetup extends Record<PluginName, unknown> = {},
+  TPluginsStart extends Record<PluginName, unknown> = {}
+> {
+  setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+  start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
   stop?: () => void;
-};
+}
+
+/**
+ * The `plugin` export at the root of a plugin's `server` directory should conform
+ * to this interface.
+ *
+ * @public
+ */
+export type PluginInitializer<
+  TSetup,
+  TStart,
+  TPluginsSetup extends Record<PluginName, unknown> = {},
+  TPluginsStart extends Record<PluginName, unknown> = {}
+> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
  * plugin and dispatching proper context and dependencies into plugin's lifecycle hooks.
+ *
  * @internal
  */
-export class Plugin<
+export class PluginWrapper<
+  TSetup = unknown,
   TStart = unknown,
-  TDependencies extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, unknown> = Record<PluginName, unknown>
 > {
   public readonly name: PluginManifest['id'];
   public readonly configPath: PluginManifest['configPath'];
-  public readonly requiredDependencies: PluginManifest['requiredPlugins'];
-  public readonly optionalDependencies: PluginManifest['optionalPlugins'];
+  public readonly requiredPlugins: PluginManifest['requiredPlugins'];
+  public readonly optionalPlugins: PluginManifest['optionalPlugins'];
   public readonly includesServerPlugin: PluginManifest['server'];
   public readonly includesUiPlugin: PluginManifest['ui'];
 
   private readonly log: Logger;
 
-  private instance?: ReturnType<PluginInitializer<TStart, TDependencies>>;
+  private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   constructor(
     public readonly path: string,
-    private readonly manifest: PluginManifest,
+    public readonly manifest: PluginManifest,
     private readonly initializerContext: PluginInitializerContext
   ) {
     this.log = initializerContext.logger.get();
     this.name = manifest.id;
     this.configPath = manifest.configPath;
-    this.requiredDependencies = manifest.requiredPlugins;
-    this.optionalDependencies = manifest.optionalPlugins;
+    this.requiredPlugins = manifest.requiredPlugins;
+    this.optionalPlugins = manifest.optionalPlugins;
     this.includesServerPlugin = manifest.server;
     this.includesUiPlugin = manifest.ui;
   }
 
   /**
-   * Instantiates plugin and calls `start` function exposed by the plugin initializer.
-   * @param startContext Context that consists of various core services tailored specifically
-   * for the `start` lifecycle event.
-   * @param dependencies The dictionary where the key is the dependency name and the value
-   * is the contract returned by the dependency's `start` function.
+   * Instantiates plugin and calls `setup` function exposed by the plugin initializer.
+   * @param setupContext Context that consists of various core services tailored specifically
+   * for the `setup` lifecycle event.
+   * @param plugins The dictionary where the key is the dependency name and the value
+   * is the contract returned by the dependency's `setup` function.
    */
-  public async start(startContext: PluginStartContext, dependencies: TDependencies) {
+  public async setup(setupContext: CoreSetup, plugins: TPluginsSetup) {
     this.instance = this.createPluginInstance();
 
-    this.log.info('Starting plugin');
+    this.log.info('Setting up plugin');
 
-    return await this.instance.start(startContext, dependencies);
+    return await this.instance.setup(setupContext, plugins);
+  }
+
+  /**
+   * Calls `start` function exposed by the initialized plugin.
+   * @param startContext Context that consists of various core services tailored specifically
+   * for the `start` lifecycle event.
+   * @param plugins The dictionary where the key is the dependency name and the value
+   * is the contract returned by the dependency's `start` function.
+   */
+  public async start(startContext: CoreStart, plugins: TPluginsStart) {
+    if (this.instance === undefined) {
+      throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
+    }
+
+    return await this.instance.start(startContext, plugins);
   }
 
   /**
@@ -141,7 +231,7 @@ export class Plugin<
    */
   public async stop() {
     if (this.instance === undefined) {
-      throw new Error(`Plugin "${this.name}" can't be stopped since it isn't started.`);
+      throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
     this.log.info('Stopping plugin');
@@ -153,16 +243,36 @@ export class Plugin<
     this.instance = undefined;
   }
 
+  public getConfigSchema(): PluginConfigSchema {
+    if (!this.manifest.server) {
+      return null;
+    }
+    const pluginPathServer = join(this.path, 'server');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const pluginDefinition = require(pluginPathServer);
+
+    if (!('config' in pluginDefinition)) {
+      this.log.debug(`"${pluginPathServer}" does not export "config".`);
+      return null;
+    }
+
+    if (!(pluginDefinition.config.schema instanceof Type)) {
+      throw new Error('Configuration schema expected to be an instance of Type');
+    }
+    return pluginDefinition.config.schema;
+  }
+
   private createPluginInstance() {
     this.log.debug('Initializing plugin');
 
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const pluginDefinition = require(join(this.path, 'server'));
     if (!('plugin' in pluginDefinition)) {
       throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);
     }
 
     const { plugin: initializer } = pluginDefinition as {
-      plugin: PluginInitializer<TStart, TDependencies>;
+      plugin: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
     };
     if (!initializer || typeof initializer !== 'function') {
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
@@ -177,8 +287,8 @@ export class Plugin<
       );
     }
 
-    if (typeof instance.start !== 'function') {
-      throw new Error(`Instance of plugin "${this.name}" does not define "start" function.`);
+    if (typeof instance.setup !== 'function') {
+      throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);
     }
 
     return instance;

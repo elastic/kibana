@@ -18,11 +18,12 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { uiModules } from '../modules';
-import paginateControlsTemplate from '../partials/paginate_controls.html';
+import paginateControlsTemplate from './partials/paginate_controls.html';
 
 uiModules.get('kibana')
-  .directive('paginate', function ($parse, $compile, i18n) {
+  .directive('paginate', function ($parse, $compile) {
     return {
       restrict: 'E',
       scope: true,
@@ -61,7 +62,7 @@ uiModules.get('kibana')
       controller: function ($scope, $document) {
         const self = this;
         const ALL = 0;
-        const allSizeTitle = i18n('common.ui.directives.paginate.size.allDropDownOptionLabel', {
+        const allSizeTitle = i18n.translate('common.ui.directives.paginate.size.allDropDownOptionLabel', {
           defaultMessage: 'All',
         });
 

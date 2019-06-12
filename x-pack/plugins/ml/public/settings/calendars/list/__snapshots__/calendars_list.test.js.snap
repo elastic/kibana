@@ -11,6 +11,10 @@ exports[`CalendarsList Renders calendar list with calendars 1`] = `
     panelPaddingSize="l"
     verticalPosition="center"
   >
+    <CalendarsListHeader
+      refreshCalendars={[Function]}
+      totalCount={2}
+    />
     <InjectIntl(CalendarsListTable)
       calendarsList={
         Array [

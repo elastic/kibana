@@ -1,11 +1,11 @@
 [[settings]]
 == Configuring Kibana
 
-The Kibana server reads properties from the `kibana.yml` file on startup. The 
-location of this file differs depending on how you installed {kib}. For example, 
-if you installed {kib} from an archive distribution (`.tar.gz` or `.zip`), by 
-default it is in `$KIBANA_HOME/config`. By default, with package distributions 
-(Debian or RPM), it is in `/etc/kibana`. 
+The Kibana server reads properties from the `kibana.yml` file on startup. The
+location of this file differs depending on how you installed {kib}. For example,
+if you installed {kib} from an archive distribution (`.tar.gz` or `.zip`), by
+default it is in `$KIBANA_HOME/config`. By default, with package distributions
+(Debian or RPM), it is in `/etc/kibana`.
 
 The default settings configure Kibana to run on `localhost:5601`. To change the
 host or port number, or connect to Elasticsearch running on a different machine,
@@ -80,7 +80,7 @@ requests to check Elasticsearch for an updated list of nodes.
 `elasticsearch.sniffOnStart:`:: *Default: false* Attempt to find other
 Elasticsearch nodes on startup.
 
-`elasticsearch.sniffOnConectionFault:`:: *Default: false* Update the list of
+`elasticsearch.sniffOnConnectionFault:`:: *Default: false* Update the list of
 Elasticsearch nodes immediately following a connection fault.
 
 `elasticsearch.ssl.alwaysPresentCertificate:`:: *Default: false* Controls
@@ -118,14 +118,24 @@ password that the Kibana server uses to perform maintenance on the Kibana index
 at startup. Your Kibana users still need to authenticate with Elasticsearch,
 which is proxied through the Kibana server.
 
+`interpreter.enableInVisualize`:: *Default: true* Enables use of interpreter in
+Visualize.
+
 `kibana.defaultAppId:`:: *Default: "discover"* The default application to load.
 
 `kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to
 store saved searches, visualizations and dashboards. Kibana creates a new index
-if the index doesn’t already exist.
+if the index doesn’t already exist. If you configure a custom index, the name must
+be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
 
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana
 stores log output.
+
+`logging.json:`:: *Default: false* Logs output as JSON. When set to `true`, the
+logs will be formatted as JSON strings that include timestamp, log level, context, message
+text and any other metadata that may be associated with the log message itself.
+If `logging.dest.stdout` is set and there is no interactive terminal ("TTY"), this setting
+will default to `true`.
 
 `logging.quiet:`:: *Default: false* Set the value of this setting to `true` to
 suppress all logging output other than error messages.
@@ -134,17 +144,22 @@ suppress all logging output other than error messages.
 suppress all logging output.
 
 `logging.timezone`:: *Default: UTC* Set to the canonical timezone id
-(e.g. `US/Pacific`) to log events using that timezone. A list of timezones can
+(for example, `America/Los_Angeles`) to log events using that timezone. A list of timezones can
 be referenced at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
 
 [[logging-verbose]]`logging.verbose:`:: *Default: false* Set the value of this
 setting to `true` to log all events, including system usage information and all
 requests. Supported on Elastic Cloud Enterprise.
 
-`map.includeElasticMapsService:`:: *Default: true* Turns on or off whether
-layers from the Elastic Maps Service should be included in the vector and tile
-layer option list. By turning this off, only the layers that are configured here
-will be included.
+`map.includeElasticMapsService:`:: *Default: true*
+Set to false to disable connections to Elastic Maps Service.
+When `includeElasticMapsService` is turned off, only the vector layers configured by `map.regionmap`
+and the tile layer configured by `map.tilemap.url` will be available in the <<maps, Maps application>>,
+<<tilemap, Coordinate map visualizations>>, and <<regionmap, Region map visualizations>>.
+
+`map.proxyElasticMapsServiceInMaps:`:: *Default: false*
+Set to true to proxy all <<maps, Maps application>> Elastic Maps Service requests through the Kibana server.
+This setting does not impact <<tilemap, Coordinate map visualizations>> and <<regionmap, Region map visualizations>>.
 
 [[regionmap-settings]] `map.regionmap:`:: Specifies additional vector layers for
 use in <<regionmap, Region Map>> visualizations. Supported on {ece}. Each layer
@@ -289,10 +304,15 @@ disable the License Management user interface.
 `xpack.rollup.enabled:`:: *Default: true* Set this value to false to disable the
 Rollup user interface.
 
+`i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`, `ja-JP`.
+
+
 include::{docdir}/settings/apm-settings.asciidoc[]
+include::{docdir}/settings/code-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]
 include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]
+include::{docdir}/settings/i18n-settings.asciidoc[]
 include::{docdir}/settings/logs-ui-settings.asciidoc[]
 include::{docdir}/settings/ml-settings.asciidoc[]
 include::{docdir}/settings/monitoring-settings.asciidoc[]

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { AttributionControl } from './view';
 
@@ -25,7 +25,7 @@ describe('AttributionControl', () => {
         ];
       }
     };
-    const component = shallow(
+    const component = shallowWithIntl(
       <AttributionControl
         layerList={[mockLayer1, mockLayer2]}
       />

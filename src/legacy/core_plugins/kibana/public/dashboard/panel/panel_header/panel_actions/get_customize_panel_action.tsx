@@ -37,9 +37,6 @@ export function getCustomizePanelAction({
 }): ContextMenuAction {
   return new ContextMenuAction(
     {
-      displayName: i18n.translate('kbn.dashboard.panel.customizePanel.displayName', {
-        defaultMessage: 'Customize panel',
-      }),
       id: 'customizePanel',
       parentPanelId: 'mainMenu',
     },
@@ -64,6 +61,11 @@ export function getCustomizePanelAction({
       ),
       icon: <EuiIcon type="pencil" />,
       isVisible: ({ containerState }) => containerState.viewMode === DashboardViewMode.EDIT,
+      getDisplayName: () => {
+        return i18n.translate('kbn.dashboard.panel.customizePanel.displayName', {
+          defaultMessage: 'Customize panel',
+        });
+      },
     }
   );
 }

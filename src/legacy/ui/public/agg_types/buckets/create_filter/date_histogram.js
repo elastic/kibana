@@ -25,8 +25,8 @@ export function createFilterDateHistogram(agg, key) {
   const interval = agg.buckets.getInterval();
 
   return buildRangeFilter(agg.params.field, {
-    gte: start.valueOf(),
-    lt: start.add(interval).valueOf(),
-    format: 'epoch_millis'
+    gte: start.toISOString(),
+    lt: start.add(interval).toISOString(),
+    format: 'strict_date_optional_time'
   }, agg.getIndexPattern());
 }

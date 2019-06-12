@@ -19,12 +19,7 @@
 
 import { format as formatUrl } from 'url';
 import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig } from '@kbn/test';
-import {
-  KibanaServerProvider,
-  EsProvider,
-  EsArchiverProvider,
-  RetryProvider,
-} from './services';
+import { services } from './services';
 
 export default function () {
   const servers = {
@@ -60,15 +55,10 @@ export default function () {
         `--elasticsearch.username=${servers.elasticsearch.username}`,
         `--elasticsearch.password=${servers.elasticsearch.password}`,
         `--kibana.disableWelcomeScreen=true`,
-        `--server.maxPayloadBytes=1648576`,
+        `--server.maxPayloadBytes=1679958`,
       ],
     },
 
-    services: {
-      kibanaServer: KibanaServerProvider,
-      retry: RetryProvider,
-      es: EsProvider,
-      esArchiver: EsArchiverProvider,
-    }
+    services
   };
 }

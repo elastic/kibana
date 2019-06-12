@@ -9,12 +9,10 @@ exports[`CcrShard that is renders an exception properly 1`] = `
   <EuiTitle
     color="danger"
     size="s"
-    textTransform="none"
   >
     <h3>
       <EuiTextColor
         color="danger"
-        component="span"
       >
         <FormattedMessage
           defaultMessage="Errors"
@@ -67,7 +65,7 @@ exports[`CcrShard that it renders normally 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(StatusUI)
+    <Status
       formattedLeader="leader on remote"
       oldestStat={
         Object {
@@ -107,17 +105,9 @@ exports[`CcrShard that it renders normally 1`] = `
       size="s"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
       wrap={true}
     >
       <EuiFlexItem
-        component="div"
-        grow={true}
         key="0"
         style={
           Object {
@@ -130,12 +120,10 @@ exports[`CcrShard that it renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <InjectIntl(MonitoringTimeseriesContainerUI) />
+          <MonitoringTimeseriesContainer />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
-        grow={true}
         key="1"
         style={
           Object {
@@ -148,20 +136,14 @@ exports[`CcrShard that it renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <InjectIntl(MonitoringTimeseriesContainerUI) />
+          <MonitoringTimeseriesContainer />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiHorizontalRule
-      margin="l"
-      size="full"
-    />
+    <EuiHorizontalRule />
     <EuiAccordion
       buttonContent={
-        <EuiTitle
-          size="m"
-          textTransform="none"
-        >
+        <EuiTitle>
           <h2>
             <FormattedMessage
               defaultMessage="Advanced"
@@ -177,16 +159,12 @@ exports[`CcrShard that it renders normally 1`] = `
     >
       <EuiTitle
         size="s"
-        textTransform="none"
       >
         <h4>
           September 27, 2018 9:32:09 AM
         </h4>
       </EuiTitle>
-      <EuiHorizontalRule
-        margin="l"
-        size="full"
-      />
+      <EuiHorizontalRule />
       <EuiCodeBlock
         language="json"
       >

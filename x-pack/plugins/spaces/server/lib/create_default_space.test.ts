@@ -8,14 +8,13 @@ jest.mock('../../../../server/lib/get_client_shield', () => ({
 }));
 
 import Boom from 'boom';
-// @ts-ignore
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { createDefaultSpace } from './create_default_space';
 
 let mockCallWithRequest;
 beforeEach(() => {
   mockCallWithRequest = jest.fn();
-  getClient.mockReturnValue({
+  (getClient as jest.Mock).mockReturnValue({
     callWithRequest: mockCallWithRequest,
   });
 });
@@ -99,6 +98,7 @@ test(`it creates the default space when one does not exist`, async () => {
     {
       _reserved: true,
       description: 'This is your default space!',
+      disabledFeatures: [],
       name: 'Default',
       color: '#00bfb3',
     },

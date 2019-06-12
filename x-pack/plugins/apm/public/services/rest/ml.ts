@@ -7,14 +7,11 @@
 import { ESFilter } from 'elasticsearch';
 import chrome from 'ui/chrome';
 import {
-  getMlJobId,
-  getMlPrefix
-} from 'x-pack/plugins/apm/common/ml_job_constants';
-import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE
 } from '../../../common/elasticsearch_fieldnames';
+import { getMlJobId, getMlPrefix } from '../../../common/ml_job_constants';
 import { callApi } from './callApi';
 
 interface MlResponseItem {
@@ -74,19 +71,23 @@ export interface MLJobApiResponse {
   }>;
 }
 
-export async function getMLJob({
+export async function getHasMLJob({
   serviceName,
   transactionType
 }: {
   serviceName: string;
-  transactionType?: string;
-  anomalyName?: string;
+  transactionType: string;
 }) {
-  return callApi<MLJobApiResponse>({
-    method: 'GET',
-    pathname: `/api/ml/anomaly_detectors/${getMlJobId(
-      serviceName,
-      transactionType
-    )}`
-  });
+  try {
+    await callApi<MLJobApiResponse>({
+      method: 'GET',
+      pathname: `/api/ml/anomaly_detectors/${getMlJobId(
+        serviceName,
+        transactionType
+      )}`
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
 }

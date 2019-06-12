@@ -29,6 +29,7 @@ import {
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
 import { JOB_STATE } from '../../../../common/constants/states';
+import { FORECAST_DURATION_MAX_DAYS } from './forecasting_modal';
 import { ForecastProgress } from './forecast_progress';
 import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { checkPermission, createPermissionFailureMessage } from 'plugins/ml/privilege/check_privilege';
@@ -138,8 +139,9 @@ export function RunControls({
               error={newForecastDurationErrors}
               helpText={<FormattedMessage
                 id="xpack.ml.timeSeriesExplorer.runControls.forecastMaximumLengthHelpText"
-                defaultMessage="Length of forecast, up to a maximum of 8 weeks.
+                defaultMessage="Length of forecast, up to a maximum of {maximumForecastDurationDays} days.
                   Use s for seconds, m for minutes, h for hours, d for days, w for weeks."
+                values={{ maximumForecastDurationDays: FORECAST_DURATION_MAX_DAYS }}
               />}
             >
               {disabledState.isDisabledToolTipText === undefined ? durationInput

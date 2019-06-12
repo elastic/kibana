@@ -17,7 +17,6 @@ import moment from 'moment-timezone';
 import '../components/annotations/annotations_table';
 import '../components/anomalies_table';
 import '../components/controls';
-import '../components/job_select_list';
 
 import template from './explorer.html';
 
@@ -29,8 +28,7 @@ import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getIndexPatterns, loadIndexPatterns } from '../util/index_utils';
-import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
-import { JobSelectServiceProvider } from '../components/job_select_list/job_select_service';
+import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { explorer$ } from './explorer_dashboard_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
@@ -47,6 +45,7 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
+      jobs: mlJobService.loadJobsWrapper
     },
   });
 
@@ -62,6 +61,7 @@ module.controller('MlExplorerController', function (
   Private,
   config,
 ) {
+
   // Even if they are not used directly anymore in this controller but via imports
   // in React components, because of the use of AppState and its dependency on angularjs
   // these services still need to be required here to properly initialize.
@@ -69,6 +69,8 @@ module.controller('MlExplorerController', function (
   $injector.get('mlSelectIntervalService');
   $injector.get('mlSelectLimitService');
   $injector.get('mlSelectSeverityService');
+
+  const mlJobSelectService = $injector.get('mlJobSelectService');
 
   // $scope should only contain what's actually still necessary for the angular part.
   // For the moment that's the job selector and the (hidden) filter bar.
@@ -80,12 +82,17 @@ module.controller('MlExplorerController', function (
   const tzConfig = config.get('dateFormat:tz');
   $scope.dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
-  $scope.mlJobSelectService = Private(JobSelectServiceProvider);
-  $scope.MlTimeBuckets = Private(IntervalHelperProvider);
+  $scope.MlTimeBuckets = MlTimeBuckets;
 
   let resizeTimeout = null;
 
-  function jobSelectionUpdate(action, { fullJobs, selectedCells, selectedJobIds, swimlaneViewByFieldName }) {
+  function jobSelectionUpdate(action, {
+    fullJobs,
+    filterData,
+    selectedCells,
+    selectedJobIds,
+    swimlaneViewByFieldName
+  }) {
     const jobs = createJobs(fullJobs).map((job) => {
       job.selected = selectedJobIds.some((id) => job.id === id);
       return job;
@@ -106,9 +113,12 @@ module.controller('MlExplorerController', function (
           noJobsFound,
           selectedCells,
           selectedJobs,
-          swimlaneViewByFieldName
+          swimlaneViewByFieldName,
+          filterData
         }
       });
+      $scope.jobSelectionUpdateInProgress = false;
+      $scope.$applyAsync();
     }
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs.
@@ -125,6 +135,7 @@ module.controller('MlExplorerController', function (
   // AppState is used to store state in the URL.
   $scope.appState = new AppState({
     mlExplorerSwimlane: {},
+    mlExplorerFilter: {}
   });
 
   // Load the job info needed by the dashboard, then do the first load.
@@ -133,62 +144,78 @@ module.controller('MlExplorerController', function (
   // <ml-explorer-react-wrapper /> and <Explorer /> have been initialized.
   function loadJobsListener({ action }) {
     if (action === EXPLORER_ACTION.LOAD_JOBS) {
-      mlJobService.loadJobs()
-        .then((resp) => {
-          if (resp.jobs.length > 0) {
-            // Select any jobs set in the global state (i.e. passed in the URL).
-            const selectedJobIds = $scope.mlJobSelectService.getSelectedJobIds(true);
-            let selectedCells;
+      // Jobs load via route resolver
+      if (mlJobService.jobs.length > 0) {
+        // Select any jobs set in the global state (i.e. passed in the URL).
+        const selectedJobIds = mlJobSelectService.getValue().selection;
+        let selectedCells;
+        let filterData = {};
 
-            // keep swimlane selection, restore selectedCells from AppState
-            if ($scope.appState.mlExplorerSwimlane.selectedType !== undefined) {
-              selectedCells = {
-                type: $scope.appState.mlExplorerSwimlane.selectedType,
-                lanes: $scope.appState.mlExplorerSwimlane.selectedLanes,
-                times: $scope.appState.mlExplorerSwimlane.selectedTimes,
-                showTopFieldValues: $scope.appState.mlExplorerSwimlane.showTopFieldValues,
-                viewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
-              };
-            }
+        // keep swimlane selection, restore selectedCells from AppState
+        if ($scope.appState.mlExplorerSwimlane.selectedType !== undefined) {
+          selectedCells = {
+            type: $scope.appState.mlExplorerSwimlane.selectedType,
+            lanes: $scope.appState.mlExplorerSwimlane.selectedLanes,
+            times: $scope.appState.mlExplorerSwimlane.selectedTimes,
+            showTopFieldValues: $scope.appState.mlExplorerSwimlane.showTopFieldValues,
+            viewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
+          };
+        }
 
-            jobSelectionUpdate(EXPLORER_ACTION.INITIALIZE, {
-              fullJobs: resp.jobs,
-              selectedCells,
-              selectedJobIds,
-              swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
-            });
-          } else {
-            explorer$.next({
-              action: EXPLORER_ACTION.RELOAD,
-              payload: {
-                loading: false,
-                noJobsFound: true,
-              }
-            });
-          }
-        })
-        .catch((resp) => {
-          console.log('Explorer - error getting job info from elasticsearch:', resp);
+        // keep influencers filter selection, restore from AppState
+        if ($scope.appState.mlExplorerFilter.influencersFilterQuery !== undefined) {
+          filterData = {
+            influencersFilterQuery: $scope.appState.mlExplorerFilter.influencersFilterQuery,
+            filterActive: $scope.appState.mlExplorerFilter.filterActive,
+            filteredFields: $scope.appState.mlExplorerFilter.filteredFields,
+            queryString: $scope.appState.mlExplorerFilter.queryString,
+          };
+        }
+
+        jobSelectionUpdate(EXPLORER_ACTION.INITIALIZE, {
+          filterData,
+          fullJobs: mlJobService.jobs,
+          selectedCells,
+          selectedJobIds,
+          swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
         });
+      } else {
+        explorer$.next({
+          action: EXPLORER_ACTION.RELOAD,
+          payload: {
+            loading: false,
+            noJobsFound: true,
+          }
+        });
+      }
     }
   }
 
   const explorerSubscriber = explorer$.subscribe(loadJobsListener);
 
   // Listen for changes to job selection.
-  $scope.mlJobSelectService.listenJobSelectionChange($scope, (event, selectedJobIds) => {
-    jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds });
+  $scope.jobSelectionUpdateInProgress = false;
+
+  const jobSelectServiceSub = mlJobSelectService.subscribe(({ selection }) => {
+    if (selection !== undefined) {
+      $scope.jobSelectionUpdateInProgress = true;
+      jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds: selection });
+    }
   });
 
   // Refresh all the data when the time range is altered.
   $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-    explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    }
   });
 
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);
   refreshWatcher.init(async () => {
-    explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    }
   });
 
   // Redraw the swimlane when the window resizes or the global nav is toggled.
@@ -210,7 +237,9 @@ module.controller('MlExplorerController', function (
   });
 
   function redrawOnResize() {
-    explorer$.next({ action: EXPLORER_ACTION.REDRAW });
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.REDRAW });
+    }
   }
 
   $scope.appStateHandler = ((action, payload) => {
@@ -237,12 +266,27 @@ module.controller('MlExplorerController', function (
       $scope.appState.mlExplorerSwimlane.viewByFieldName = payload.swimlaneViewByFieldName;
     }
 
+    if (action === APP_STATE_ACTION.SAVE_INFLUENCER_FILTER_SETTINGS) {
+      $scope.appState.mlExplorerFilter.influencersFilterQuery = payload.influencersFilterQuery;
+      $scope.appState.mlExplorerFilter.filterActive = payload.filterActive;
+      $scope.appState.mlExplorerFilter.filteredFields = payload.filteredFields;
+      $scope.appState.mlExplorerFilter.queryString = payload.queryString;
+    }
+
+    if (action === APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS) {
+      delete $scope.appState.mlExplorerFilter.influencersFilterQuery;
+      delete $scope.appState.mlExplorerFilter.filterActive;
+      delete $scope.appState.mlExplorerFilter.filteredFields;
+      delete $scope.appState.mlExplorerFilter.queryString;
+    }
+
     $scope.appState.save();
     $scope.$applyAsync();
   });
 
   $scope.$on('$destroy', () => {
     explorerSubscriber.unsubscribe();
+    jobSelectServiceSub.unsubscribe();
     refreshWatcher.cancel();
     $(window).off('resize', jqueryRedrawOnResize);
     // Cancel listening for updates to the global nav state.

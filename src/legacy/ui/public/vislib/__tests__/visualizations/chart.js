@@ -18,14 +18,13 @@
  */
 
 import d3 from 'd3';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { VislibVisProvider } from '../../vis';
 import '../../../persisted_state';
-import { VislibVisualizationsChartProvider } from '../../visualizations/_chart';
+import { Chart } from '../../visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {
-  let Chart;
   let persistedState;
   let Vis;
   let vis;
@@ -113,7 +112,6 @@ describe('Vislib _chart Test Suite', function () {
   beforeEach(ngMock.inject(function (Private, $injector) {
     Vis = Private(VislibVisProvider);
     persistedState = new ($injector.get('PersistedState'))();
-    Chart = Private(VislibVisualizationsChartProvider);
 
     el = d3.select('body').append('div').attr('class', 'column-chart');
 

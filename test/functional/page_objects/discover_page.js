@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function DiscoverPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -28,6 +28,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'common']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
 
   class DiscoverPage {
     async getQueryField() {
@@ -39,7 +41,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getChartTimespan() {
-      const el = await find.byCssSelector('.small > span:nth-child(1)');
+      const el = await find.byCssSelector('.small > label[for="dscResultsIntervalSelector"]');
       return await el.getVisibleText();
     }
 
@@ -58,6 +60,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         const name = await this.getCurrentQueryName();
         expect(name).to.be(searchName);
       });
+    }
+
+    async waitUntilSearchingHasFinished() {
+      const spinner = await testSubjects.find('loadingSpinner');
+      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
     }
 
     async getColumnHeaders() {
@@ -86,13 +93,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async hasSavedSearch(searchName) {
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       return searchLink.isDisplayed();
     }
 
     async loadSavedSearch(searchName) {
       await this.openLoadSavedSearchPanel();
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       await searchLink.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -117,8 +124,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async brushHistogram(from, to) {
       const bars = await find.allByCssSelector('.series.histogram rect');
       await browser.dragAndDrop(
-        { element: bars[from], xOffset: 0, yOffset: -5 },
-        { element: bars[to], xOffset: 0, yOffset: -5 }
+        { location: bars[from], offset: { x: 0, y: -5 } },
+        { location: bars[to], offset: { x: 0, y: -5 } }
       );
     }
 
@@ -234,6 +241,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         await testSubjects.click(`fieldVisualize-${field}`);
       });
+    }
+
+    async expectFieldListItemVisualize(field) {
+      await testSubjects.existOrFail(`fieldVisualize-${field}`);
+    }
+
+    async expectMissingFieldListItemVisualize(field) {
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`);
     }
 
     async clickFieldListPlusFilter(field, value) {

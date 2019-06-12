@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { dynamicSizeShape } from '../style_option_shapes';
 import { FieldSelect, fieldShape } from '../field_select';
 import { SizeRangeSelector } from './size_range_selector';
 import { EuiSpacer } from '@elastic/eui';
@@ -39,10 +40,6 @@ export function DynamicSizeSelection({ ordinalFields, styleOptions, onChange }) 
 
 DynamicSizeSelection.propTypes = {
   ordinalFields: PropTypes.arrayOf(fieldShape).isRequired,
-  styleOptions: PropTypes.shape({
-    minSize: PropTypes.number.isRequired,
-    maxSize: PropTypes.number.isRequired,
-    field: fieldShape,
-  }).isRequired,
+  styleOptions: dynamicSizeShape.isRequired,
   onChange: PropTypes.func.isRequired
 };

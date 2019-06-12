@@ -46,7 +46,7 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
 
   initScope($scope) {
     $scope.$watch(() => this.data, data => {
-      this.renderReact(data);
+      this.renderReact(data, $scope.cluster);
     });
 
     // HACK to force table to re-render even if data hasn't changed. This
@@ -56,8 +56,8 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
       const { data } = this;
       const dataWithShardActivityLoading = { ...data, shardActivity: null };
       // force shard activity to rerender by manipulating and then re-setting its data prop
-      this.renderReact(dataWithShardActivityLoading);
-      this.renderReact(data);
+      this.renderReact(dataWithShardActivityLoading, $scope.cluster);
+      this.renderReact(data, $scope.cluster);
     });
   }
 
@@ -67,15 +67,17 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
     });
   }
 
-  renderReact(data) {
+  renderReact(data, cluster) {
     // All data needs to originate in this view, and get passed as a prop to the components, for statelessness
-    const { clusterStatus, metrics, shardActivity } = data;
+    const { clusterStatus, metrics, shardActivity, logs } = data;
     const shardActivityData = shardActivity && this.filterShardActivityData(shardActivity); // no filter on data = null
     const component = (
       <I18nContext>
         <ElasticsearchOverview
           clusterStatus={clusterStatus}
           metrics={metrics}
+          logs={logs}
+          cluster={cluster}
           shardActivity={shardActivityData}
           onBrush={this.onBrush}
           showShardActivityHistory={this.showShardActivityHistory}

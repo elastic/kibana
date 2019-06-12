@@ -18,7 +18,7 @@
  */
 
 import { Deprecations } from '../../../deprecation';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import index from '../index';
 import { noop } from 'lodash';
 import sinon from 'sinon';

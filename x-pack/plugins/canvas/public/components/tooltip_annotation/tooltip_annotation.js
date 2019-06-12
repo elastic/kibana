@@ -6,11 +6,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { toCSS } from '../../lib/aeroelastic';
+import { matrixToCSS } from '../../lib/dom';
 
 export const HoverAnnotation = ({ transformMatrix, text }) => {
   const newStyle = {
-    transform: `${toCSS(transformMatrix)} translate(1em, -1em)`,
+    transform: `${matrixToCSS(transformMatrix)} translate(1em, -1em)`,
   };
   return (
     <div className="tooltipAnnotation canvasLayoutAnnotation" style={newStyle}>

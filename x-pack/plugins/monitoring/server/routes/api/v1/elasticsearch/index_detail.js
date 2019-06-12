@@ -13,7 +13,8 @@ import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSet } from './metric_set_index_detail';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH, INDEX_PATTERN_FILEBEAT } from '../../../../../common/constants';
+import { getLogs } from '../../../../lib/logs/get_logs';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSet;
 
@@ -47,6 +48,7 @@ export function esIndexRoute(server) {
         const start = req.payload.timeRange.min;
         const end = req.payload.timeRange.max;
         const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+        const filebeatIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_FILEBEAT, ccs);
         const isAdvanced = req.payload.is_advanced;
         const metricSet = isAdvanced ? metricSetAdvanced : metricSetOverview;
 
@@ -57,6 +59,7 @@ export function esIndexRoute(server) {
         const indexSummary = await getIndexSummary(req, esIndexPattern, shardStats, { clusterUuid, indexUuid, start, end });
         const metrics = await getMetrics(req, esIndexPattern, metricSet, [{ term: { 'index_stats.index': indexUuid } }]);
 
+        let logs;
         let shardAllocation;
         if (!isAdvanced) {
           // TODO: Why so many fields needed for a single component (shard legend)?
@@ -69,6 +72,8 @@ export function esIndexRoute(server) {
           };
           const shards = await getShardAllocation(req, esIndexPattern, allocationOptions);
 
+          logs = await getLogs(config, req, filebeatIndexPattern, { clusterUuid, indexUuid, start, end });
+
           shardAllocation = {
             shards,
             shardStats: { nodes: shardStats.nodes },
@@ -80,6 +85,7 @@ export function esIndexRoute(server) {
         return {
           indexSummary,
           metrics,
+          logs,
           ...shardAllocation,
         };
 

@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   replaceTokensInUrlValue,
   getUrlForRecord,
@@ -49,16 +49,36 @@ describe('ML - custom URL utils', () => {
     latest: '2017-02-09T17:15:00.000Z'
   };
 
+  const TEST_RECORD_SPECIAL_CHARS = {
+    ...TEST_DOC,
+    earliest: '2017-02-09T15:10:00.000Z',
+    latest: '2017-02-09T17:15:00.000Z',
+    partition_field_value: '<>:;[}")',
+    influencers: [
+      {
+        influencer_field_name: 'airline',
+        influencer_field_values: ['<>:;[}")']
+      }
+    ],
+    airline: ['<>:;[}")'],
+  };
+
   const TEST_DASHBOARD_URL = {
     url_name: 'Show dashboard',
     time_range: '1h',
-    url_value: 'kibana#/dashboard/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:\'$earliest$\',mode:absolute,to:\'$latest$\'))&_a=(filters:!(),query:(language:lucene,query:\'airline:\"$airline$\"\'))' // eslint-disable-line max-len
+    url_value: 'kibana#/dashboard/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:\'$earliest$\',mode:absolute,to:\'$latest$\'))&_a=(filters:!(),query:(language:kuery,query:\'airline:\"$airline$\"\'))' // eslint-disable-line max-len
   };
 
   const TEST_DISCOVER_URL = {
     url_name: 'Raw data',
     time_range: 'auto',
-    url_value: 'kibana#/discover?_g=(time:(from:\'$earliest$\',mode:absolute,to:\'$latest$\'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:lucene,query:\'airline:\"$airline$\"\'))' // eslint-disable-line max-len
+    url_value: 'kibana#/discover?_g=(time:(from:\'$earliest$\',mode:absolute,to:\'$latest$\'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:\'airline:\"$airline$\"\'))' // eslint-disable-line max-len
+  };
+
+  const TEST_DASHBOARD_LUCENE_URL = {
+    url_name: 'Show dashboard',
+    time_range: '1h',
+    url_value: 'kibana#/dashboard/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:\'$earliest$\',mode:absolute,to:\'$latest$\'))&_a=(filters:!(),query:(language:lucene,query:\'airline:\"$airline$\"\'))' // eslint-disable-line max-len
   };
 
   const TEST_OTHER_URL = {
@@ -74,11 +94,19 @@ describe('ML - custom URL utils', () => {
 
   describe('replaceTokensInUrlValue', () => {
     it('replaces tokens as expected for a Kibana Dashboard type URL', () => {
-      expect(replaceTokensInUrlValue(TEST_DASHBOARD_URL, 300, TEST_DOC, 'timestamp')).to.be('kibana#/dashboard/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:\'2017-02-09T15:10:00.000Z\',mode:absolute,to:\'2017-02-09T17:15:00.000Z\'))&_a=(filters:!(),query:(language:lucene,query:\'airline:"AAL"\'))');  // eslint-disable-line max-len
+      expect(replaceTokensInUrlValue(TEST_DASHBOARD_URL, 300, TEST_DOC, 'timestamp')).to.be('kibana#/dashboard/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:\'2017-02-09T15:10:00.000Z\',mode:absolute,to:\'2017-02-09T17:15:00.000Z\'))&_a=(filters:!(),query:(language:kuery,query:\'airline:"AAL"\'))');  // eslint-disable-line max-len
+    });
+
+    it('replaces tokens containing special characters as expected for a Kibana Dashboard type URL', () => {
+      expect(replaceTokensInUrlValue(TEST_DASHBOARD_URL, 300, TEST_RECORD_SPECIAL_CHARS, 'timestamp')).to.be('kibana#/dashboard/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:\'2017-02-09T15:10:00.000Z\',mode:absolute,to:\'2017-02-09T17:15:00.000Z\'))&_a=(filters:!(),query:(language:kuery,query:\'airline:"%3C%3E%3A%3B%5B%7D%5C%22)"\'))');  // eslint-disable-line max-len
+    });
+
+    it('replaces tokens containing special characters as expected for a Kibana Dashboard type URL where query language is lucene', () => {
+      expect(replaceTokensInUrlValue(TEST_DASHBOARD_LUCENE_URL, 300, TEST_RECORD_SPECIAL_CHARS, 'timestamp')).to.be('kibana#/dashboard/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:\'2017-02-09T15:10:00.000Z\',mode:absolute,to:\'2017-02-09T17:15:00.000Z\'))&_a=(filters:!(),query:(language:lucene,query:\'airline:"%5C%3C%5C%3E%5C%3A%3B%5C%5B%5C%7D%5C%22%5C)"\'))');  // eslint-disable-line max-len
     });
 
     it('replaces tokens as expected for a Kibana Discover type URL', () => {
-      expect(replaceTokensInUrlValue(TEST_DISCOVER_URL, 300, TEST_DOC, 'timestamp')).to.be('kibana#/discover?_g=(time:(from:\'2017-02-09T16:05:00.000Z\',mode:absolute,to:\'2017-02-09T16:20:00.000Z\'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:lucene,query:\'airline:"AAL"\'))');  // eslint-disable-line max-len
+      expect(replaceTokensInUrlValue(TEST_DISCOVER_URL, 300, TEST_DOC, 'timestamp')).to.be('kibana#/discover?_g=(time:(from:\'2017-02-09T16:05:00.000Z\',mode:absolute,to:\'2017-02-09T16:20:00.000Z\'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:\'airline:"AAL"\'))');  // eslint-disable-line max-len
     });
 
     it('replaces tokens as expected for other type URL with tokens', () => {
@@ -93,11 +121,15 @@ describe('ML - custom URL utils', () => {
 
   describe('getUrlForRecord', () => {
     it('returns expected URL for a Kibana Dashboard type URL', () => {
-      expect(getUrlForRecord(TEST_DASHBOARD_URL, TEST_RECORD)).to.be('kibana#/dashboard/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:\'2017-02-09T15:10:00.000Z\',mode:absolute,to:\'2017-02-09T17:15:00.000Z\'))&_a=(filters:!(),query:(language:lucene,query:\'airline:"AAL"\'))');  // eslint-disable-line max-len
+      expect(getUrlForRecord(TEST_DASHBOARD_URL, TEST_RECORD)).to.be('kibana#/dashboard/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:\'2017-02-09T15:10:00.000Z\',mode:absolute,to:\'2017-02-09T17:15:00.000Z\'))&_a=(filters:!(),query:(language:kuery,query:\'airline:"AAL"\'))');  // eslint-disable-line max-len
     });
 
     it('returns expected URL for a Kibana Discover type URL', () => {
-      expect(getUrlForRecord(TEST_DISCOVER_URL, TEST_RECORD)).to.be('kibana#/discover?_g=(time:(from:\'2017-02-09T15:10:00.000Z\',mode:absolute,to:\'2017-02-09T17:15:00.000Z\'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:lucene,query:\'airline:"AAL"\'))');  // eslint-disable-line max-len
+      expect(getUrlForRecord(TEST_DISCOVER_URL, TEST_RECORD)).to.be('kibana#/discover?_g=(time:(from:\'2017-02-09T15:10:00.000Z\',mode:absolute,to:\'2017-02-09T17:15:00.000Z\'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:\'airline:"AAL"\'))');  // eslint-disable-line max-len
+    });
+
+    it('returns expected URL for a Kibana Discover type URL when record field contains special characters', () => {
+      expect(getUrlForRecord(TEST_DISCOVER_URL, TEST_RECORD_SPECIAL_CHARS)).to.be('kibana#/discover?_g=(time:(from:\'2017-02-09T15:10:00.000Z\',mode:absolute,to:\'2017-02-09T17:15:00.000Z\'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:\'airline:"%3C%3E%3A%3B%5B%7D%5C%22)"\'))');  // eslint-disable-line max-len
     });
 
     it('returns expected URL for other type URL', () => {

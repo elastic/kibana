@@ -9,6 +9,7 @@ export interface ElementSpec {
   image: string;
   expression: string;
   displayName?: string;
+  tags?: string[];
   help?: string;
   filter?: string;
   width?: number;

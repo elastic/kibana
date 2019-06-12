@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { handleResponse } from '../get_node_summary';
 
 describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {

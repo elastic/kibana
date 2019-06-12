@@ -56,7 +56,7 @@ export const Toolbar = props => {
         <WorkpadManager onClose={closeWorkpadManager} />
         <EuiModalFooter>
           <EuiButton size="s" onClick={closeWorkpadManager}>
-            Dismiss
+            Close
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>

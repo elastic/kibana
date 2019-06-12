@@ -32,7 +32,7 @@ describe('ElasticIndex', () => {
           return { status: 404 };
         });
 
-      const info = await Index.fetchInfo(callCluster, '.kibana-test');
+      const info = await Index.fetchInfo(callCluster as any, '.kibana-test');
       expect(info).toEqual({
         aliases: {},
         exists: false,
@@ -51,7 +51,7 @@ describe('ElasticIndex', () => {
         };
       });
 
-      await expect(Index.fetchInfo(callCluster, '.baz')).rejects.toThrow(
+      await expect(Index.fetchInfo(callCluster as any, '.baz')).rejects.toThrow(
         /cannot be automatically migrated/
       );
     });
@@ -105,7 +105,7 @@ describe('ElasticIndex', () => {
         expect(index).toEqual('.abcd');
       });
 
-      await Index.createIndex(callCluster, '.abcd', { foo: 'bar' } as any);
+      await Index.createIndex(callCluster as any, '.abcd', { foo: 'bar' } as any);
       expect(callCluster).toHaveBeenCalled();
     });
   });
@@ -117,7 +117,7 @@ describe('ElasticIndex', () => {
         expect(index).toEqual('.lotr');
       });
 
-      await Index.deleteIndex(callCluster, '.lotr');
+      await Index.deleteIndex(callCluster as any, '.lotr');
       expect(callCluster).toHaveBeenCalled();
     });
   });
@@ -151,7 +151,7 @@ describe('ElasticIndex', () => {
         }
       });
 
-      await Index.claimAlias(callCluster, '.hola-42', '.hola');
+      await Index.claimAlias(callCluster as any, '.hola-42', '.hola');
 
       assertCalled(callCluster);
     });
@@ -177,7 +177,7 @@ describe('ElasticIndex', () => {
         }
       });
 
-      await Index.claimAlias(callCluster, '.ze-index', '.muchacha');
+      await Index.claimAlias(callCluster as any, '.ze-index', '.muchacha');
 
       assertCalled(callCluster);
     });
@@ -204,7 +204,7 @@ describe('ElasticIndex', () => {
         }
       });
 
-      await Index.claimAlias(callCluster, '.ze-index', '.muchacha', [
+      await Index.claimAlias(callCluster as any, '.ze-index', '.muchacha', [
         { remove_index: { index: 'awww-snap!' } },
       ]);
 
@@ -220,7 +220,7 @@ describe('ElasticIndex', () => {
             expect(arg.body).toEqual({
               mappings: {
                 dynamic: 'strict',
-                properties: { foo: 'bar' },
+                properties: { foo: { type: 'keyword' } },
               },
               settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
             });
@@ -264,10 +264,10 @@ describe('ElasticIndex', () => {
         indexName: '.ze-index',
         mappings: {
           dynamic: 'strict',
-          properties: { foo: 'bar' },
+          properties: { foo: { type: 'keyword' } },
         },
       };
-      await Index.convertToAlias(callCluster, info, '.muchacha', 10);
+      await Index.convertToAlias(callCluster as any, info, '.muchacha', 10);
 
       expect(callCluster.mock.calls.map(([path]) => path)).toEqual([
         'indices.create',
@@ -286,7 +286,7 @@ describe('ElasticIndex', () => {
             expect(arg.body).toEqual({
               mappings: {
                 dynamic: 'strict',
-                properties: { foo: 'bar' },
+                properties: { foo: { type: 'keyword' } },
               },
               settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
             });
@@ -323,10 +323,10 @@ describe('ElasticIndex', () => {
         indexName: '.ze-index',
         mappings: {
           dynamic: 'strict',
-          properties: { foo: 'bar' },
+          properties: { foo: { type: 'keyword' } },
         },
       };
-      await expect(Index.convertToAlias(callCluster, info, '.muchacha', 10)).rejects.toThrow(
+      await expect(Index.convertToAlias(callCluster as any, info, '.muchacha', 10)).rejects.toThrow(
         /Re-index failed \[search_phase_execution_exception\] all shards failed/
       );
 
@@ -390,7 +390,7 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      await expect(Index.write(callCluster, index, docs)).rejects.toThrow(/dern/);
+      await expect(Index.write(callCluster as any, index, docs)).rejects.toThrow(/dern/);
       expect(callCluster).toHaveBeenCalled();
     });
   });
@@ -551,7 +551,7 @@ describe('ElasticIndex', () => {
         }
         throw new Error(`Unknown command ${path}.`);
       });
-      const hasMigrations = await Index.migrationsUpToDate(callCluster, index, migrations);
+      const hasMigrations = await Index.migrationsUpToDate(callCluster as any, index, migrations);
       return { hasMigrations, callCluster };
     }
 

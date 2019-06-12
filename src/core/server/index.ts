@@ -17,58 +17,112 @@
  * under the License.
  */
 
-import { PluginsModule } from './plugins';
+/**
+ * The Kibana Core APIs for server-side plugins.
+ *
+ * A plugin's `server/index` file must contain a named import, `plugin`, that
+ * implements {@link PluginInitializer} which returns an object that implements
+ * {@link Plugin}.
+ *
+ * The plugin integrates with the core system via lifecycle events: `setup`,
+ * `start`, and `stop`. In each lifecycle method, the plugin will receive the
+ * corresponding core services available (either {@link CoreSetup} or
+ * {@link CoreStart}) and any interfaces returned by dependency plugins'
+ * lifecycle method. Anything returned by the plugin's lifecycle method will be
+ * exposed to downstream dependencies when their corresponding lifecycle methods
+ * are invoked.
+ *
+ * @packageDocumentation
+ */
+
+import { Observable } from 'rxjs';
+import { ClusterClient, ElasticsearchServiceSetup } from './elasticsearch';
+import { HttpServiceSetup, HttpServiceStart } from './http';
+import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
 export { bootstrap } from './bootstrap';
+export { ConfigService } from './config';
+export {
+  CallAPIOptions,
+  ClusterClient,
+  Headers,
+  ScopedClusterClient,
+  ElasticsearchClientConfig,
+  APICaller,
+} from './elasticsearch';
+export {
+  AuthenticationHandler,
+  AuthToolkit,
+  KibanaRequest,
+  KibanaRequestRoute,
+  OnPreAuthHandler,
+  OnPreAuthToolkit,
+  OnPostAuthHandler,
+  OnPostAuthToolkit,
+  Router,
+  RouteMethod,
+  RouteConfigOptions,
+  SessionStorageFactory,
+  SessionStorage,
+} from './http';
+export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
-import { first } from 'rxjs/operators';
-import { ConfigService, Env } from './config';
-import { HttpConfig, HttpModule, HttpServerInfo } from './http';
-import { LegacyCompatModule } from './legacy';
-import { Logger, LoggerFactory } from './logging';
+export {
+  DiscoveredPlugin,
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginName,
+} from './plugins';
 
-export class Server {
-  private readonly http: HttpModule;
-  private readonly plugins: PluginsModule;
-  private readonly legacy: LegacyCompatModule;
-  private readonly log: Logger;
+export { RecursiveReadonly } from '../utils';
 
-  constructor(configService: ConfigService, logger: LoggerFactory, private readonly env: Env) {
-    this.log = logger.get('server');
-
-    this.http = new HttpModule(configService.atPath('server', HttpConfig), logger);
-
-    const core = { env, configService, logger };
-    this.plugins = new PluginsModule(core);
-    this.legacy = new LegacyCompatModule(core);
-  }
-
-  public async start() {
-    this.log.debug('starting server');
-
-    // We shouldn't start http service in two cases:
-    // 1. If `server.autoListen` is explicitly set to `false`.
-    // 2. When the process is run as dev cluster master in which case cluster manager
-    // will fork a dedicated process where http service will be started instead.
-    let httpStart: HttpServerInfo | undefined;
-    const httpConfig = await this.http.config$.pipe(first()).toPromise();
-    if (!this.env.isDevClusterMaster && httpConfig.autoListen) {
-      httpStart = await this.http.service.start();
-    }
-
-    const pluginsStart = await this.plugins.service.start();
-
-    await this.legacy.service.start({
-      http: httpStart,
-      plugins: pluginsStart,
-    });
-  }
-
-  public async stop() {
-    this.log.debug('stopping server');
-
-    await this.legacy.service.stop();
-    await this.plugins.service.stop();
-    await this.http.service.stop();
-  }
+/**
+ * Context passed to the plugins `setup` method.
+ *
+ * @public
+ */
+export interface CoreSetup {
+  elasticsearch: {
+    adminClient$: Observable<ClusterClient>;
+    dataClient$: Observable<ClusterClient>;
+  };
+  http: {
+    registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
+    registerAuth: HttpServiceSetup['registerAuth'];
+    registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
+    getBasePathFor: HttpServiceSetup['getBasePathFor'];
+    setBasePathFor: HttpServiceSetup['setBasePathFor'];
+    createNewServer: HttpServiceSetup['createNewServer'];
+  };
 }
+
+/**
+ * Context passed to the plugins `start` method.
+ *
+ * @public
+ */
+export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+/** @internal */
+export interface InternalCoreSetup {
+  http: HttpServiceSetup;
+  elasticsearch: ElasticsearchServiceSetup;
+  plugins: PluginsServiceSetup;
+}
+
+/**
+ * @public
+ */
+export interface InternalCoreStart {
+  http: HttpServiceStart;
+  plugins: PluginsServiceStart;
+}
+
+export {
+  HttpServiceSetup,
+  HttpServiceStart,
+  ElasticsearchServiceSetup,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+};

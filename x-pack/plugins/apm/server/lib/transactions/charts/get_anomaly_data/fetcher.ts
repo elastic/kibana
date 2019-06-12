@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AggregationSearchResponse } from 'elasticsearch';
-import { getMlIndex } from 'x-pack/plugins/apm/common/ml_job_constants';
+import { getMlIndex } from '../../../../../common/ml_job_constants';
+import { PromiseReturnType } from '../../../../../typings/common';
 import { Setup } from '../../../helpers/setup_request';
 
 export interface ESBucket {
@@ -29,8 +29,7 @@ interface Aggs {
   };
 }
 
-export type ESResponse = AggregationSearchResponse<void, Aggs>;
-
+export type ESResponse = PromiseReturnType<typeof anomalySeriesFetcher>;
 export async function anomalySeriesFetcher({
   serviceName,
   transactionType,
@@ -43,7 +42,7 @@ export async function anomalySeriesFetcher({
   intervalString: string;
   mlBucketSize: number;
   setup: Setup;
-}): Promise<ESResponse | undefined> {
+}) {
   const { client, start, end } = setup;
 
   // move the start back with one bucket size, to ensure to get anomaly data in the beginning
@@ -92,7 +91,7 @@ export async function anomalySeriesFetcher({
   };
 
   try {
-    return await client<void, Aggs>('search', params);
+    return await client.search<void, Aggs>(params);
   } catch (err) {
     const isHttpError = 'statusCode' in err;
     if (isHttpError) {

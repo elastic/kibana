@@ -24,6 +24,37 @@ import {
 
 import { AddItemPopover } from '../components/add_item_popover';
 
+function renderToolsRight(
+  canCreateFilter,
+  canDeleteFilter,
+  addItems,
+  deleteSelectedItems,
+  selectedItemCount
+) {
+  return [
+    (
+      <AddItemPopover
+        addItems={addItems}
+        canCreateFilter={canCreateFilter}
+        key="add_item_btn"
+      />
+    ),
+    (
+      <EuiButton
+        color="danger"
+        size="s"
+        disabled={(selectedItemCount === 0 || canDeleteFilter === false)}
+        onClick={deleteSelectedItems}
+        key="delete_item_btn"
+      >
+        <FormattedMessage
+          id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
+          defaultMessage="Delete item"
+        />
+      </EuiButton>
+    )];
+}
+
 export function EditFilterListToolbar({
   canCreateFilter,
   canDeleteFilter,
@@ -32,35 +63,24 @@ export function EditFilterListToolbar({
   deleteSelectedItems,
   selectedItemCount }) {
 
+  const toolsRight = renderToolsRight(
+    canCreateFilter,
+    canDeleteFilter,
+    addItems,
+    deleteSelectedItems,
+    selectedItemCount
+  );
+
   return (
     <React.Fragment>
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <AddItemPopover
-            addItems={addItems}
-            canCreateFilter={canCreateFilter}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiFlexGroup alignItems="center" gutterSize="xl">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="danger"
-            disabled={(selectedItemCount === 0 || canDeleteFilter === false)}
-            onClick={deleteSelectedItems}
-          >
-            <FormattedMessage
-              id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
-              defaultMessage="Delete item"
-            />
-          </EuiButton>
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiSearchBar
+            toolsRight={toolsRight}
             onChange={onSearchChange}
+            filters={[]}
           />
         </EuiFlexItem>
-
       </EuiFlexGroup>
     </React.Fragment>
   );

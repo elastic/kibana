@@ -8,13 +8,15 @@ import { combineReducers } from 'redux';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  InfraMetricInput,
-  InfraMetricType,
+  InfraSnapshotMetricInput,
+  InfraSnapshotMetricType,
   InfraNodeType,
-  InfraPathInput,
+  InfraSnapshotGroupbyInput,
 } from '../../../graphql/types';
-import { InfraGroupByOptions } from '../../../lib/lib';
+import { InfraGroupByOptions, InfraWaffleMapBounds } from '../../../lib/lib';
 import {
+  changeAutoBounds,
+  changeBoundsOverride,
   changeCustomOptions,
   changeGroupBy,
   changeMetric,
@@ -23,19 +25,23 @@ import {
 } from './actions';
 
 export interface WaffleOptionsState {
-  metric: InfraMetricInput;
-  groupBy: InfraPathInput[];
+  metric: InfraSnapshotMetricInput;
+  groupBy: InfraSnapshotGroupbyInput[];
   nodeType: InfraNodeType;
   view: string;
   customOptions: InfraGroupByOptions[];
+  boundsOverride: InfraWaffleMapBounds;
+  autoBounds: boolean;
 }
 
 export const initialWaffleOptionsState: WaffleOptionsState = {
-  metric: { type: InfraMetricType.cpu },
+  metric: { type: InfraSnapshotMetricType.cpu },
   groupBy: [],
   nodeType: InfraNodeType.host,
   view: 'map',
   customOptions: [],
+  boundsOverride: { max: 1, min: 0 },
+  autoBounds: true,
 };
 
 const currentMetricReducer = reducerWithInitialState(initialWaffleOptionsState.metric).case(
@@ -62,10 +68,21 @@ const currentViewReducer = reducerWithInitialState(initialWaffleOptionsState.vie
   (current, target) => target
 );
 
+const currentBoundsOverrideReducer = reducerWithInitialState(
+  initialWaffleOptionsState.boundsOverride
+).case(changeBoundsOverride, (current, target) => target);
+
+const currentAutoBoundsReducer = reducerWithInitialState(initialWaffleOptionsState.autoBounds).case(
+  changeAutoBounds,
+  (current, target) => target
+);
+
 export const waffleOptionsReducer = combineReducers<WaffleOptionsState>({
   metric: currentMetricReducer,
   groupBy: currentGroupByReducer,
   nodeType: currentNodeTypeReducer,
   view: currentViewReducer,
   customOptions: currentCustomOptionsReducer,
+  boundsOverride: currentBoundsOverrideReducer,
+  autoBounds: currentAutoBoundsReducer,
 });

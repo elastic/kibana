@@ -26,12 +26,8 @@ export const PageControls = ({ pageId, onDelete, onDuplicate }) => {
       justifyContent="spaceBetween"
     >
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="Duplicate">
-          <EuiButtonIcon
-            iconType="document"
-            aria-label="Duplicate Page"
-            onClick={handleDuplicate}
-          />
+        <EuiToolTip content="Clone">
+          <EuiButtonIcon iconType="copy" aria-label="Clone page" onClick={handleDuplicate} />
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

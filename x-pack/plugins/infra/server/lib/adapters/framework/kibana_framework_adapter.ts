@@ -56,6 +56,9 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
           schema,
         }),
         path: routePath,
+        route: {
+          tags: ['access:infra'],
+        },
       },
       plugin: graphqlHapi,
     });
@@ -67,6 +70,9 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
           passHeader: `'kbn-version': '${this.version}'`,
         }),
         path: `${routePath}/graphiql`,
+        route: {
+          tags: ['access:infra'],
+        },
       },
       plugin: graphiqlHapi,
     });
@@ -81,6 +87,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
 
     this.server.route({
       handler: wrappedHandler,
+      options: route.options,
       method: route.method,
       path: route.path,
     });
@@ -142,8 +149,17 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   ) {
     const internalRequest = req[internalInfraFrameworkRequest];
     const server = internalRequest.server;
+
+    let url = '/api/metrics/vis/data';
+    if (server.plugins.spaces) {
+      const spaceId = server.plugins.spaces.getSpaceId(internalRequest);
+      if (spaceId !== 'default') {
+        url = `/s/${spaceId}${url}`;
+      }
+    }
+
     const request = {
-      url: '/api/metrics/vis/data',
+      url,
       method: 'POST',
       headers: internalRequest.headers,
       payload: {

@@ -2,19 +2,7 @@
 
 exports[`#start() load order useLegacyTestHarness = false loads ui/modules before ui/chrome, and both before legacy files 1`] = `
 Array [
-  "ui/metadata",
-  "ui/i18n",
-  "ui/notify/fatal_error",
-  "ui/notify/toasts",
-  "ui/chrome/api/loading_count",
-  "ui/chrome/api/base_path",
-  "ui/chrome/api/ui_settings",
-  "ui/chrome/api/injected_vars",
-  "ui/chrome/api/controls",
-  "ui/chrome/api/help_extension",
-  "ui/chrome/api/theme",
-  "ui/chrome/api/breadcrumbs",
-  "ui/chrome/services/global_nav_state",
+  "ui/new_platform",
   "ui/chrome",
   "legacy files",
 ]
@@ -22,25 +10,13 @@ Array [
 
 exports[`#start() load order useLegacyTestHarness = true loads ui/modules before ui/test_harness, and both before legacy files 1`] = `
 Array [
-  "ui/metadata",
-  "ui/i18n",
-  "ui/notify/fatal_error",
-  "ui/notify/toasts",
-  "ui/chrome/api/loading_count",
-  "ui/chrome/api/base_path",
-  "ui/chrome/api/ui_settings",
-  "ui/chrome/api/injected_vars",
-  "ui/chrome/api/controls",
-  "ui/chrome/api/help_extension",
-  "ui/chrome/api/theme",
-  "ui/chrome/api/breadcrumbs",
-  "ui/chrome/services/global_nav_state",
+  "ui/new_platform",
   "ui/test_harness",
   "legacy files",
 ]
 `;
 
-exports[`#stop() destroys the angular scope and empties the targetDomElement if angular is bootstraped to targetDomElement 1`] = `
+exports[`#stop() destroys the angular scope and empties the targetDomElement if angular is bootstrapped to targetDomElement 1`] = `
 <div
   class="ng-scope"
 />

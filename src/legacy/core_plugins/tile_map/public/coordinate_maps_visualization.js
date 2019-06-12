@@ -143,7 +143,7 @@ export function CoordinateMapsVisualizationProvider(Private) {
 
       await super._updateParams();
 
-      this._kibanaMap.setDesaturateBaseLayer(this.vis.params.isDesaturated);
+      this._kibanaMap.setDesaturateBaseLayer(this._params.isDesaturated);
 
       //avoid recreating the leaflet layer when there are option-changes that do not effect the representation
       //e.g. tooltip-visibility, legend position, basemap-desaturation, ...

@@ -17,10 +17,7 @@ exports[`Settings Renders settings page 1`] = `
       <EuiPageContentHeader
         responsive={true}
       >
-        <EuiTitle
-          size="m"
-          textTransform="none"
-        >
+        <EuiTitle>
           <h2>
             <FormattedMessage
               defaultMessage="Job Management"
@@ -31,16 +28,9 @@ exports[`Settings Renders settings page 1`] = `
         </EuiTitle>
       </EuiPageContentHeader>
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
         gutterSize="xl"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiButtonEmpty
@@ -60,7 +50,6 @@ exports[`Settings Renders settings page 1`] = `
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiButtonEmpty

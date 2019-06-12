@@ -23,7 +23,7 @@ import { Status } from '../update_status';
 
 export class VisualizationController {
   constructor(element: HTMLElement, vis: Vis);
-  public render(visData: any, update: { [key in Status]: boolean }): Promise<void>;
+  public render(visData: any, visParams: any, update: { [key in Status]: boolean }): Promise<void>;
   public destroy(): void;
   public isLoaded?(): Promise<void> | void;
 }

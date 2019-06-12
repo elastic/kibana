@@ -14,8 +14,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../common/eui_styled_components';
 import { FlexPage } from './page';
 
 interface Props {
@@ -64,6 +64,6 @@ export const ErrorPage: React.SFC<Props> = ({ detailedMessage, retry, shortMessa
   </FlexPage>
 );
 
-const MinimumPageContent = styled(EuiPageContent)`
+const MinimumPageContent = euiStyled(EuiPageContent)`
   min-width: 50vh;
 `;

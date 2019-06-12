@@ -7,8 +7,9 @@
 import { SearchParams } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
-  TRACE_ID
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+  TRACE_ID,
+  TRANSACTION_ID
+} from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
@@ -49,14 +50,14 @@ export async function getTraceErrorsPerTransaction(
       aggs: {
         transactions: {
           terms: {
-            field: 'transaction.id'
+            field: TRANSACTION_ID
           }
         }
       }
     }
   };
 
-  const resp = await client<never, TraceErrorsAggResponse>('search', params);
+  const resp = await client.search<never, TraceErrorsAggResponse>(params);
 
   return resp.aggregations.transactions.buckets.reduce(
     (acc, bucket) => ({

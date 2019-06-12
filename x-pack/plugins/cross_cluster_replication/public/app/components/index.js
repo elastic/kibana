@@ -18,3 +18,4 @@ export { FollowerIndexUnfollowProvider } from './follower_index_unfollow_provide
 export { FollowerIndexForm } from './follower_index_form';
 export { FollowerIndexPageTitle } from './follower_index_page_title';
 export { FormEntryRow } from './form_entry_row';
+export { RemoteClustersFormField } from './remote_clusters_form_field';

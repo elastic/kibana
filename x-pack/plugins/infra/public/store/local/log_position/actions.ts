@@ -30,18 +30,6 @@ export const reportVisiblePositions = actionCreator<ReportVisiblePositionsPayloa
   'REPORT_VISIBLE_POSITIONS'
 );
 
-export interface ReportVisibleSummaryPayload {
-  start: number;
-  end: number;
-  bucketsOnPage: number;
-  pagesBeforeStart: number;
-  pagesAfterEnd: number;
-}
-
-export const reportVisibleSummary = actionCreator<ReportVisibleSummaryPayload>(
-  'REPORT_VISIBLE_SUMMARY'
-);
-
 export const startAutoReload = actionCreator<number>('START_AUTO_RELOAD');
 
 export const stopAutoReload = actionCreator('STOP_AUTO_RELOAD');

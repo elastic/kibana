@@ -7,6 +7,7 @@
 import React from 'react';
 import { VectorStyle } from '../vector_style';
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
@@ -93,12 +94,18 @@ export class StaticDynamicStyleRow extends React.Component {
   render() {
     const isDynamic = this._isDynamic();
     const dynamicTooltipContent =
-      isDynamic ? 'Use static styling properties to symbolize features.' : 'Use property values to symbolize features.';
+      isDynamic ?
+        i18n.translate('xpack.maps.styles.staticDynamic.staticDescription', {
+          defaultMessage: 'Use static styling properties to symbolize features.'
+        })  :
+        i18n.translate('xpack.maps.styles.staticDynamic.dynamicDescription', {
+          defaultMessage: 'Use property values to symbolize features.'
+        });
 
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem className={isDynamic ? 'mapStaticDynamicSylingOption__dynamicSizeHack' : undefined}>
-          <EuiFormRow label={this.props.name && this.props.name}>
+          <EuiFormRow label={this.props.label && this.props.label}>
             {this._renderStyleSelector()}
           </EuiFormRow>
         </EuiFlexItem>

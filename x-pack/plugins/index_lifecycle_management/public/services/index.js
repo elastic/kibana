@@ -6,3 +6,4 @@
 
 export { filterItems } from './filter_items';
 export { sortTable } from './sort_table';
+export { trackUiMetric, getUiMetricsForPhases } from './ui_metric';

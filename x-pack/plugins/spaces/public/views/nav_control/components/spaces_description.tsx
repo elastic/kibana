@@ -6,12 +6,10 @@
 
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
 import React, { SFC } from 'react';
-import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
 import { ManageSpacesButton } from '../../../components';
 import { getSpacesFeatureDescription } from '../../../lib/constants';
 
 interface Props {
-  userProfile: UserProfile;
   onManageSpacesClick: () => void;
 }
 
@@ -30,7 +28,6 @@ export const SpacesDescription: SFC<Props> = (props: Props) => {
         <ManageSpacesButton
           size="s"
           style={{ width: `100%` }}
-          userProfile={props.userProfile}
           onClick={props.onManageSpacesClick}
         />
       </div>

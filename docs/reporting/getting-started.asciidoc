@@ -49,5 +49,4 @@ image:reporting/images/share-button.png["Reporting Button",link="share-button.pn
 === Generating a Report Automatically
 
 If you want to automatically generate reports from a script or with
-{watcher}, use the displayed Generation URL. For more information, see
-<<automating-report-generation, Automating Report Generation>>
+{watcher}, see <<automating-report-generation, Automating Report Generation>>

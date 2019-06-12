@@ -95,7 +95,7 @@ export class App extends Component {
       // This error isn't an HTTP error, so let the fatal error screen tell the user something
       // unexpected happened.
       fatalError(error, i18n.translate('xpack.crossClusterReplication.app.checkPermissionsFatalErrorTitle', {
-        defaultMessage: 'Cross Cluster Replication app',
+        defaultMessage: 'Cross-Cluster Replication app',
       }));
     }
   }
@@ -126,7 +126,7 @@ export class App extends Component {
           {getReason()}
           {' '}
           <a
-            data-test-subj="ccrManageLicenseLink"
+            data-test-subj="manageLicenseLink"
             href={chrome.addBasePath('/app/kibana#/management/elasticsearch/license_management/home')}
           >
             <FormattedMessage
@@ -196,7 +196,7 @@ export class App extends Component {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.app.deniedPermissionDescription"
-                  defaultMessage="To use Cross Cluster Replication, you must have {clusterPrivilegesCount,
+                  defaultMessage="To use Cross-Cluster Replication, you must have {clusterPrivilegesCount,
                     plural, one {this cluster privilege} other {these cluster privileges}}: {clusterPrivileges}."
                   values={{
                     clusterPrivileges: missingClusterPrivileges.join(', '),

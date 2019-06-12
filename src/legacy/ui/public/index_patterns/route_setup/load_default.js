@@ -59,13 +59,13 @@ function displayBanner() {
   }, 15000);
 }
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function (opts) {
   opts = opts || {};
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
 
   uiRoutes
-    .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config) {
+    .addSetupWork(function loadDefaultIndexPattern(Private, $route, config) {
       const getIds = Private(IndexPatternsGetProvider)('id');
       const route = _.get($route, 'current.$$route');
 
@@ -85,8 +85,8 @@ export default function (opts) {
           }
 
           if (!defined) {
-            // If there is only one index pattern, set it as default
-            if (patterns.length === 1) {
+            // If there is any index pattern created, set the first as default
+            if (patterns.length >= 1) {
               defaultId = patterns[0];
               config.set('defaultIndex', defaultId);
             } else {

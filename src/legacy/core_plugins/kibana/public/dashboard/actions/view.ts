@@ -17,8 +17,11 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import { createAction } from 'redux-actions';
-import { Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
+import { Filters, Query, TimeRange } from 'ui/embeddable';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { KibanaAction } from '../../selectors/types';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelId } from '../selectors';
@@ -26,7 +29,7 @@ import { PanelId } from '../selectors';
 export enum ViewActionTypeKeys {
   UPDATE_VIEW_MODE = 'UPDATE_VIEW_MODE',
   SET_VISIBLE_CONTEXT_MENU_PANEL_ID = 'SET_VISIBLE_CONTEXT_MENU_PANEL_ID',
-  MAXIMIZE_PANEl = 'MAXIMIZE_PANEl',
+  MAXIMIZE_PANEL = 'MAXIMIZE_PANEL',
   MINIMIZE_PANEL = 'MINIMIZE_PANEL',
   UPDATE_IS_FULL_SCREEN_MODE = 'UPDATE_IS_FULL_SCREEN_MODE',
   UPDATE_USE_MARGINS = 'UPDATE_USE_MARGINS',
@@ -48,7 +51,7 @@ export interface CloseContextMenuAction
   extends KibanaAction<ViewActionTypeKeys.CLOSE_CONTEXT_MENU, undefined> {}
 
 export interface MaximizePanelAction
-  extends KibanaAction<ViewActionTypeKeys.MAXIMIZE_PANEl, PanelId> {}
+  extends KibanaAction<ViewActionTypeKeys.MAXIMIZE_PANEL, PanelId> {}
 
 export interface MinimizePanelAction
   extends KibanaAction<ViewActionTypeKeys.MINIMIZE_PANEL, undefined> {}
@@ -66,7 +69,7 @@ export interface UpdateTimeRangeAction
   extends KibanaAction<ViewActionTypeKeys.UPDATE_TIME_RANGE, TimeRange> {}
 
 export interface UpdateRefreshConfigAction
-  extends KibanaAction<ViewActionTypeKeys.UPDATE_REFRESH_CONFIG, RefreshConfig> {}
+  extends KibanaAction<ViewActionTypeKeys.UPDATE_REFRESH_CONFIG, RefreshInterval> {}
 
 export interface UpdateFiltersAction
   extends KibanaAction<ViewActionTypeKeys.UPDATE_FILTERS, Filters> {}
@@ -92,7 +95,7 @@ export const closeContextMenu = createAction(ViewActionTypeKeys.CLOSE_CONTEXT_ME
 export const setVisibleContextMenuPanelId = createAction<PanelId>(
   ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID
 );
-export const maximizePanel = createAction<PanelId>(ViewActionTypeKeys.MAXIMIZE_PANEl);
+export const maximizePanel = createAction<PanelId>(ViewActionTypeKeys.MAXIMIZE_PANEL);
 export const minimizePanel = createAction(ViewActionTypeKeys.MINIMIZE_PANEL);
 export const updateIsFullScreenMode = createAction<boolean>(
   ViewActionTypeKeys.UPDATE_IS_FULL_SCREEN_MODE
@@ -102,8 +105,8 @@ export const updateHidePanelTitles = createAction<boolean>(
   ViewActionTypeKeys.UPDATE_HIDE_PANEL_TITLES
 );
 export const updateTimeRange = createAction<TimeRange>(ViewActionTypeKeys.UPDATE_TIME_RANGE);
-export const updateRefreshConfig = createAction<RefreshConfig>(
+export const updateRefreshConfig = createAction<RefreshInterval>(
   ViewActionTypeKeys.UPDATE_REFRESH_CONFIG
 );
 export const updateFilters = createAction<Filters>(ViewActionTypeKeys.UPDATE_FILTERS);
-export const updateQuery = createAction<Query>(ViewActionTypeKeys.UPDATE_QUERY);
+export const updateQuery = createAction<Query | string>(ViewActionTypeKeys.UPDATE_QUERY);

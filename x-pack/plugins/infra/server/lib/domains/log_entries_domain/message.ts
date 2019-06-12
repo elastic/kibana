@@ -7,8 +7,15 @@
 import stringify from 'json-stable-stringify';
 
 import { InfraLogMessageSegment } from '../../../graphql/types';
+import {
+  LogMessageFormattingCondition,
+  LogMessageFormattingInstruction,
+  LogMessageFormattingRule,
+} from './rule_types';
 
-export function compileFormattingRules(rules: LogMessageFormattingRule[]) {
+export function compileFormattingRules(
+  rules: LogMessageFormattingRule[]
+): CompiledLogMessageFormattingRule {
   const compiledRules = rules.map(compileRule);
 
   return {
@@ -23,7 +30,7 @@ export function compileFormattingRules(rules: LogMessageFormattingRule[]) {
         )
       )
     ),
-    format: (fields: Fields): InfraLogMessageSegment[] => {
+    format(fields): InfraLogMessageSegment[] {
       for (const compiledRule of compiledRules) {
         if (compiledRule.fulfillsCondition(fields)) {
           return compiledRule.format(fields);
@@ -31,6 +38,9 @@ export function compileFormattingRules(rules: LogMessageFormattingRule[]) {
       }
 
       return [];
+    },
+    fulfillsCondition() {
+      return true;
     },
   };
 }
@@ -158,49 +168,18 @@ interface Fields {
   [fieldName: string]: string | number | object | boolean | null;
 }
 
-interface LogMessageFormattingRule {
-  when: LogMessageFormattingCondition;
-  format: LogMessageFormattingInstruction[];
-}
-
-type LogMessageFormattingCondition =
-  | LogMessageFormattingExistsCondition
-  | LogMessageFormattingFieldValueCondition;
-
-interface LogMessageFormattingExistsCondition {
-  exists: string[];
-}
-
-interface LogMessageFormattingFieldValueCondition {
-  values: {
-    [fieldName: string]: string | number | boolean | null;
-  };
-}
-
-type LogMessageFormattingInstruction =
-  | LogMessageFormattingFieldReference
-  | LogMessageFormattingConstant;
-
-interface LogMessageFormattingFieldReference {
-  field: string;
-}
-
-interface LogMessageFormattingConstant {
-  constant: string;
-}
-
-interface CompiledLogMessageFormattingRule {
+export interface CompiledLogMessageFormattingRule {
   requiredFields: string[];
   fulfillsCondition(fields: Fields): boolean;
   format(fields: Fields): InfraLogMessageSegment[];
 }
 
-interface CompiledLogMessageFormattingCondition {
+export interface CompiledLogMessageFormattingCondition {
   conditionFields: string[];
   fulfillsCondition(fields: Fields): boolean;
 }
 
-interface CompiledLogMessageFormattingInstruction {
+export interface CompiledLogMessageFormattingInstruction {
   formattingFields: string[];
   format(fields: Fields): InfraLogMessageSegment[];
 }

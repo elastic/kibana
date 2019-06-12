@@ -13,28 +13,36 @@ import { SingleFieldSelect } from '../../../components/single_field_select';
 import { RENDER_AS } from './render_as';
 import { indexPatternService } from '../../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiFormRow,
   EuiComboBox,
   EuiSpacer,
 } from '@elastic/eui';
+import { ES_GEO_FIELD_TYPE } from '../../../../../common/constants';
 
 function filterGeoField({ type }) {
-  return ['geo_point'].includes(type);
+  return [ES_GEO_FIELD_TYPE.GEO_POINT].includes(type);
 }
 
 const requestTypeOptions = [
   {
-    label: 'points',
+    label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
+      defaultMessage: 'points'
+    }),
     value: RENDER_AS.POINT
   },
   {
-    label: 'grid rectangles',
+    label: i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
+      defaultMessage: 'grid rectangles'
+    }),
     value: RENDER_AS.GRID
   },
   {
-    label: 'heat map',
+    label: i18n.translate('xpack.maps.source.esGeoGrid.heatmapDropdownOption', {
+      defaultMessage: 'heat map'
+    }),
     value: RENDER_AS.HEATMAP
   }
 ];
@@ -146,9 +154,14 @@ export class CreateSourceEditor extends Component {
     }
 
     return (
-      <EuiFormRow label="Geospatial field">
+      <EuiFormRow label={i18n.translate('xpack.maps.source.esGeoGrid.geofieldLabel', {
+        defaultMessage: 'Geospatial field'
+      })}
+      >
         <SingleFieldSelect
-          placeholder="Select geo field"
+          placeholder={i18n.translate('xpack.maps.source.esGeoGrid.geofieldPlaceholder', {
+            defaultMessage: 'Select geo field'
+          })}
           value={this.state.geoField}
           onChange={this._onGeoFieldSelect}
           filterField={filterGeoField}
@@ -164,9 +177,14 @@ export class CreateSourceEditor extends Component {
     }
 
     return (
-      <EuiFormRow label="Show as">
+      <EuiFormRow label={i18n.translate('xpack.maps.source.esGeoGrid.showAsLabel', {
+        defaultMessage: 'Show as'
+      })}
+      >
         <EuiComboBox
-          placeholder="Select a single option"
+          placeholder={i18n.translate('xpack.maps.source.esGeoGrid.showAsPlaceholder', {
+            defaultMessage: 'Select a single option'
+          })}
           singleSelection={{ asPlainText: true }}
           options={requestTypeOptions}
           selectedOptions={[this.state.requestType]}
@@ -178,13 +196,18 @@ export class CreateSourceEditor extends Component {
 
   _renderIndexPatternSelect() {
     return (
-      <EuiFormRow label="Index pattern">
+      <EuiFormRow label={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternLabel', {
+        defaultMessage: 'Index pattern'
+      })}
+      >
         <IndexPatternSelect
           isDisabled={this.state.noGeoIndexPatternsExist}
           indexPatternId={this.state.indexPatternId}
           onChange={this.onIndexPatternSelect}
-          placeholder="Select index pattern"
-          fieldTypes={['geo_point']}
+          placeholder={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternPlaceholder', {
+            defaultMessage: 'Select index pattern'
+          })}
+          fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT]}
           onNoIndexPatterns={this._onNoIndexPatterns}
         />
       </EuiFormRow>

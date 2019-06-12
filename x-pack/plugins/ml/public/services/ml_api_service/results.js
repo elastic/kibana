@@ -23,7 +23,8 @@ export const results = {
     latestMs,
     dateFormatTz,
     maxRecords,
-    maxExamples) {
+    maxExamples,
+    influencersFilterQuery) {
 
     return http({
       url: `${basePath}/results/anomalies_table_data`,
@@ -38,7 +39,8 @@ export const results = {
         latestMs,
         dateFormatTz,
         maxRecords,
-        maxExamples
+        maxExamples,
+        influencersFilterQuery
       }
     });
   },

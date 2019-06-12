@@ -82,7 +82,7 @@ Use the `--help` flag for more options.
 [float]
 ===== Environment
 
-The tests are written in https://mochajs.org[mocha] using https://github.com/Automattic/expect.js[expect] for assertions.
+The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/master/packages/kbn-expect[@kbn/expect] for assertions.
 
 We use https://sites.google.com/a/chromium.org/chromedriver/[chromedriver], https://theintern.github.io/leadfoot[leadfoot], and https://github.com/theintern/digdug[digdug] for automating Chrome. When the `FunctionalTestRunner` launches, digdug opens a `Tunnel` which starts chromedriver and a stripped-down instance of Chrome. It also creates an instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command`] class, which is available via the `remote` service. The `remote` communicates to Chrome through the digdug `Tunnel`. See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] docs for all the commands you can use with `remote`.
 
@@ -122,11 +122,11 @@ A test suite is a collection of tests defined by calling `describe()`, and then 
 [float]
 ===== Anatomy of a test file
 
-The annotated example file below shows the basic structure every test suite uses. It starts by importing https://github.com/Automattic/expect.js[`expect.js`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
+The annotated example file below shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/master/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
 
 ["source","js"]
 ----
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 // test files must `export default` a function that defines a test suite
 export default function ({ getService, getPageObject }) {
 

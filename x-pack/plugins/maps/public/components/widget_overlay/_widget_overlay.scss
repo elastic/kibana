@@ -10,16 +10,23 @@
   top: $euiSizeM;
   right: $euiSizeM;
   bottom: $euiSizeM;
+  left: 0; // Necessary to have a left value for IE
   pointer-events: none; /* 1 */
 }
 
-.mapWidgetOverlay__rightSide {
-  min-width: 17rem;
-  max-width: 24rem;
+.mapWidgetOverlay__layerWrapper {
+  align-items: flex-end;
+  width: $euiSize * 20;
+  min-height: 0; // Fixes scroll in Firefox
+}
+
+.mapWidgetControl__headerFlexItem {
+  flex-shrink: 0;
 }
 
 .mapWidgetControl {
   max-height: 100%;
+  width: 100%;
   overflow: hidden;
   padding-bottom: $euiSizeS; // ensures the scrollbar doesn't appear unnecessarily because of flex group negative margins
   border-color: transparent !important;
@@ -30,11 +37,10 @@
   &.mapWidgetControl-hasShadow {
     @include euiBottomShadowLarge;
   }
-
-  .mapWidgetControl__header {
-    padding: $euiSizeS $euiSize;
-    flex-shrink: 0;
-  }
 }
 
-
+.mapWidgetControl__header {
+  padding: 0 $euiSize;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}

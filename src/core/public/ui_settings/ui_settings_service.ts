@@ -17,29 +17,24 @@
  * under the License.
  */
 
-import { BasePathStart } from '../base_path';
-import { HttpStart } from '../http';
-import { InjectedMetadataStart } from '../injected_metadata';
-import { NotificationsStart } from '../notifications';
+import { HttpSetup } from '../http';
+import { InjectedMetadataSetup } from '../injected_metadata';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 
-import { i18n } from '@kbn/i18n';
-
-interface Deps {
-  notifications: NotificationsStart;
-  http: HttpStart;
-  injectedMetadata: InjectedMetadataStart;
-  basePath: BasePathStart;
+interface UiSettingsServiceDeps {
+  http: HttpSetup;
+  injectedMetadata: InjectedMetadataSetup;
 }
 
+/** @internal */
 export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
 
-  public start({ notifications, http, injectedMetadata, basePath }: Deps): UiSettingsStart {
-    this.uiSettingsApi = new UiSettingsApi(basePath, injectedMetadata.getKibanaVersion());
+  public setup({ http, injectedMetadata }: UiSettingsServiceDeps): UiSettingsSetup {
+    this.uiSettingsApi = new UiSettingsApi(http);
     http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
 
     // TODO: Migrate away from legacyMetadata https://github.com/elastic/kibana/issues/22779
@@ -47,14 +42,6 @@ export class UiSettingsService {
 
     this.uiSettingsClient = new UiSettingsClient({
       api: this.uiSettingsApi,
-      onUpdateError: error => {
-        notifications.toasts.addDanger({
-          title: i18n.translate('core.uiSettings.unableUpdateUISettingNotificationMessageTitle', {
-            defaultMessage: 'Unable to update UI setting',
-          }),
-          text: error.message,
-        });
-      },
       defaults: legacyMetadata.uiSettings.defaults,
       initialSettings: legacyMetadata.uiSettings.user,
     });
@@ -73,4 +60,5 @@ export class UiSettingsService {
   }
 }
 
-export type UiSettingsStart = UiSettingsClient;
+/** @public */
+export type UiSettingsSetup = UiSettingsClient;

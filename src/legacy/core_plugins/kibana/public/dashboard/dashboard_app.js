@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
@@ -25,16 +26,13 @@ import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
-import 'ui/search_bar';
-import 'ui/apply_filters';
-
 import { panelActionsStore } from './store/panel_actions_store';
 
 import { getDashboardTitle } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { DocTitleProvider } from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
@@ -48,7 +46,7 @@ import { showOptionsPopover } from './top_nav/show_options_popover';
 import { showNewVisModal } from '../visualize/wizard';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-import * as filterActions from 'ui/doc_table/actions/filter';
+import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { ContextMenuActionsRegistryProvider } from 'ui/embeddable';
@@ -57,6 +55,7 @@ import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
+
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -89,8 +88,7 @@ app.directive('dashboardApp', function ($injector) {
       $routeParams,
       getAppState,
       dashboardConfig,
-      localStorage,
-      i18n,
+      localStorage
     ) {
       const filterManager = Private(FilterManagerProvider);
       const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -112,7 +110,7 @@ app.directive('dashboardApp', function ($injector) {
 
       const dashboardStateManager = new DashboardStateManager({
         savedDashboard: dash,
-        AppState,
+        AppStateClass: AppState,
         hideWriteControls: dashboardConfig.getHideWriteControls(),
         addFilter: ({ field, value, operator, index }) => {
           filterActions.addFilter(field, value, operator, index, dashboardStateManager.getAppState(), filterManager);
@@ -141,6 +139,7 @@ app.directive('dashboardApp', function ($injector) {
           refreshInterval: timefilter.getRefreshInterval(),
         };
         $scope.panels = dashboardStateManager.getPanels();
+        $scope.screenTitle = dashboardStateManager.getTitle();
 
         const panelIndexPatterns = dashboardStateManager.getPanelIndexPatterns();
         if (panelIndexPatterns && panelIndexPatterns.length > 0) {
@@ -199,7 +198,7 @@ app.directive('dashboardApp', function ($injector) {
       const updateBreadcrumbs = () => {
         chrome.breadcrumbs.set([
           {
-            text: i18n('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
+            text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
               defaultMessage: 'Dashboard',
             }),
             href: $scope.landingPageUrl()
@@ -242,7 +241,7 @@ app.directive('dashboardApp', function ($injector) {
           // a reload, since no state changes will cause it.
           dashboardStateManager.requestReload();
         } else {
-          $scope.model.query = migrateLegacyQuery(query);
+          $scope.model.query = query;
           dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
         }
         $scope.refresh();
@@ -282,7 +281,8 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
-      $scope.$watch('model.query', (query) => {
+      $scope.$watch('model.query', (newQuery) => {
+        const query = migrateLegacyQuery(newQuery);
         $scope.updateQueryAndFetch({ query });
       });
 
@@ -329,20 +329,20 @@ app.directive('dashboardApp', function ($injector) {
         }
 
         confirmModal(
-          i18n('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription',
+          i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription',
             { defaultMessage: `Once you discard your changes, there's no getting them back.` }
           ),
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
-            confirmButtonText: i18n('kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
+            confirmButtonText: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
               { defaultMessage: 'Discard changes' }
             ),
-            cancelButtonText: i18n('kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
+            cancelButtonText: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
               { defaultMessage: 'Continue editing' }
             ),
             defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
-            title: i18n('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle',
+            title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle',
               { defaultMessage: 'Discard changes to dashboard?' }
             )
           }
@@ -366,7 +366,7 @@ app.directive('dashboardApp', function ($injector) {
           .then(function (id) {
             if (id) {
               toastNotifications.addSuccess({
-                title: i18n('kbn.dashboard.dashboardWasSavedSuccessMessage',
+                title: i18n.translate('kbn.dashboard.dashboardWasSavedSuccessMessage',
                   {
                     defaultMessage: `Dashboard '{dashTitle}' was saved`,
                     values: { dashTitle: dash.title },
@@ -385,7 +385,7 @@ app.directive('dashboardApp', function ($injector) {
             return { id };
           }).catch((error) => {
             toastNotifications.addDanger({
-              title: i18n('kbn.dashboard.dashboardWasNotSavedDangerMessage',
+              title: i18n.translate('kbn.dashboard.dashboardWasNotSavedDangerMessage',
                 {
                   defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
                   values: {
@@ -478,7 +478,7 @@ app.directive('dashboardApp', function ($injector) {
           showNewVisModal(visTypes, { editorParams: [DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM] });
         };
 
-        showAddPanel(dashboardStateManager.addNewPanel, addNewVis, visTypes);
+        showAddPanel(dashboardStateManager.addNewPanel, addNewVis, embeddableFactories);
       };
       navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
         showOptionsPopover({
@@ -497,6 +497,7 @@ app.directive('dashboardApp', function ($injector) {
         showShareContextMenu({
           anchorElement,
           allowEmbed: true,
+          allowShortUrl: !dashboardConfig.getHideWriteControls(),
           getUnhashableStates,
           objectId: dash.id,
           objectType: 'dashboard',
@@ -511,15 +512,20 @@ app.directive('dashboardApp', function ($injector) {
       updateViewMode(dashboardStateManager.getViewMode());
 
       // update root source when filters update
-      $scope.$listen(queryFilter, 'update', function () {
-        $scope.model.filters = queryFilter.getFilters();
-        dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
+      this.updateSubscription = queryFilter.getUpdates$().subscribe({
+        next: () => {
+          $scope.model.filters = queryFilter.getFilters();
+          dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
+        }
       });
 
       // update data when filters fire fetch event
-      $scope.$listen(queryFilter, 'fetch', $scope.refresh);
+
+      this.fetchSubscription = queryFilter.getFetches$().subscribe($scope.refresh);
 
       $scope.$on('$destroy', () => {
+        this.updateSubscription.unsubscribe();
+        this.fetchSubscription.unsubscribe();
         dashboardStateManager.destroy();
       });
 

@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
+import {
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiPopover,
+  EuiPopoverProps,
+} from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilities } from 'ui/capabilities/react';
 import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
+import { createUptimeLink } from './lib/create_uptime_link';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -21,89 +28,113 @@ interface Props {
   isPopoverOpen: boolean;
   closePopover: () => void;
   intl: InjectedIntl;
+  uiCapabilities: UICapabilities;
+  popoverPosition: EuiPopoverProps['anchorPosition'];
 }
 
-export const NodeContextMenu = injectI18n(
-  ({ options, timeRange, children, node, isPopoverOpen, closePopover, nodeType, intl }: Props) => {
-    // Due to the changing nature of the fields between APM and this UI,
-    // We need to have some exceptions until 7.0 & ECS is finalized. Reference
-    // #26620 for the details for these fields.
-    // TODO: This is tech debt, remove it after 7.0 & ECS migration.
-    const APM_FIELDS = {
-      [InfraNodeType.host]: 'host.hostname',
-      [InfraNodeType.container]: 'container.id',
-      [InfraNodeType.pod]: 'kubernetes.pod.uid',
-    };
+export const NodeContextMenu = injectUICapabilities(
+  injectI18n(
+    ({
+      options,
+      timeRange,
+      children,
+      node,
+      isPopoverOpen,
+      closePopover,
+      nodeType,
+      intl,
+      uiCapabilities,
+      popoverPosition,
+    }: Props) => {
+      // Due to the changing nature of the fields between APM and this UI,
+      // We need to have some exceptions until 7.0 & ECS is finalized. Reference
+      // #26620 for the details for these fields.
+      // TODO: This is tech debt, remove it after 7.0 & ECS migration.
+      const APM_FIELDS = {
+        [InfraNodeType.host]: 'host.hostname',
+        [InfraNodeType.container]: 'container.id',
+        [InfraNodeType.pod]: 'kubernetes.pod.uid',
+      };
 
-    const nodeLogsUrl = node.id
-      ? getNodeLogsUrl({
+      const nodeLogsMenuItem = {
+        name: intl.formatMessage({
+          id: 'xpack.infra.nodeContextMenu.viewLogsName',
+          defaultMessage: 'View logs',
+        }),
+        href: getNodeLogsUrl({
           nodeType,
           nodeId: node.id,
           time: timeRange.to,
-        })
-      : undefined;
-    const nodeDetailUrl = node.id
-      ? getNodeDetailUrl({
+        }),
+        'data-test-subj': 'viewLogsContextMenuItem',
+      };
+
+      const nodeDetailMenuItem = {
+        name: intl.formatMessage({
+          id: 'xpack.infra.nodeContextMenu.viewMetricsName',
+          defaultMessage: 'View metrics',
+        }),
+        href: getNodeDetailUrl({
           nodeType,
           nodeId: node.id,
           from: timeRange.from,
           to: timeRange.to,
-        })
-      : undefined;
+        }),
+      };
 
-    const apmTracesUrl = {
-      name: intl.formatMessage(
+      const apmTracesMenuItem = {
+        name: intl.formatMessage(
+          {
+            id: 'xpack.infra.nodeContextMenu.viewAPMTraces',
+            defaultMessage: 'View {nodeType} APM traces',
+          },
+          { nodeType }
+        ),
+        href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
+        'data-test-subj': 'viewApmTracesContextMenuItem',
+      };
+
+      const uptimeMenuItem = {
+        name: intl.formatMessage(
+          {
+            id: 'xpack.infra.nodeContextMenu.viewUptimeLink',
+            defaultMessage: 'View {nodeType} in Uptime',
+          },
+          { nodeType }
+        ),
+        href: createUptimeLink(options, nodeType, node),
+      };
+
+      const showLogsLink = node.id && uiCapabilities.logs.show;
+      const showAPMTraceLink = uiCapabilities.apm && uiCapabilities.apm.show;
+      const showUptimeLink =
+        [InfraNodeType.pod, InfraNodeType.container].includes(nodeType) || node.ip;
+
+      const panels: EuiContextMenuPanelDescriptor[] = [
         {
-          id: 'xpack.infra.nodeContextMenu.viewAPMTraces',
-          defaultMessage: 'View {nodeType} APM traces',
+          id: 0,
+          title: '',
+          items: [
+            ...(showLogsLink ? [nodeLogsMenuItem] : []),
+            nodeDetailMenuItem,
+            ...(showAPMTraceLink ? [apmTracesMenuItem] : []),
+            ...(showUptimeLink ? [uptimeMenuItem] : []),
+          ],
         },
-        { nodeType }
-      ),
-      href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
-    };
+      ];
 
-    const panels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: '',
-        items: [
-          ...(nodeLogsUrl
-            ? [
-                {
-                  name: intl.formatMessage({
-                    id: 'xpack.infra.nodeContextMenu.viewLogsName',
-                    defaultMessage: 'View logs',
-                  }),
-                  href: nodeLogsUrl,
-                },
-              ]
-            : []),
-          ...(nodeDetailUrl
-            ? [
-                {
-                  name: intl.formatMessage({
-                    id: 'xpack.infra.nodeContextMenu.viewMetricsName',
-                    defaultMessage: 'View metrics',
-                  }),
-                  href: nodeDetailUrl,
-                },
-              ]
-            : []),
-          ...[apmTracesUrl],
-        ],
-      },
-    ];
-
-    return (
-      <EuiPopover
-        closePopover={closePopover}
-        id={`${node.pathId}-popover`}
-        isOpen={isPopoverOpen}
-        button={children}
-        panelPaddingSize="none"
-      >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
-      </EuiPopover>
-    );
-  }
+      return (
+        <EuiPopover
+          closePopover={closePopover}
+          id={`${node.pathId}-popover`}
+          isOpen={isPopoverOpen}
+          button={children}
+          panelPaddingSize="none"
+          anchorPosition={popoverPosition}
+        >
+          <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="nodeContextMenu" />
+        </EuiPopover>
+      );
+    }
+  )
 );

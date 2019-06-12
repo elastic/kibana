@@ -11,10 +11,10 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 
+import euiStyled from '../../../../../common/eui_styled_components';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
 
@@ -27,6 +27,7 @@ interface AutocompleteFieldProps {
   placeholder?: string;
   suggestions: AutocompleteSuggestion[];
   value: string;
+  autoFocus?: boolean;
 }
 
 interface AutocompleteFieldState {
@@ -86,7 +87,7 @@ export class AutocompleteField extends React.Component<
   }
 
   public componentDidMount() {
-    if (this.inputElement) {
+    if (this.inputElement && this.props.autoFocus) {
       this.inputElement.focus();
     }
   }
@@ -224,7 +225,7 @@ export class AutocompleteField extends React.Component<
 
   private updateSuggestions = () => {
     const inputCursorPosition = this.inputElement ? this.inputElement.selectionStart || 0 : 0;
-    this.props.loadSuggestions(this.props.value, inputCursorPosition, 10);
+    this.props.loadSuggestions(this.props.value, inputCursorPosition, 200);
   };
 }
 
@@ -296,16 +297,19 @@ const FixedEuiFieldSearch: React.SFC<
     }
 > = EuiFieldSearch as any;
 
-const AutocompleteContainer = styled.div`
+const AutocompleteContainer = euiStyled.div`
   position: relative;
 `;
 
-const SuggestionsPanel = styled(EuiPanel).attrs({
+const SuggestionsPanel = euiStyled(EuiPanel).attrs({
   paddingSize: 'none',
   hasShadow: true,
 })`
   position: absolute;
   width: 100%;
   margin-top: 2px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  z-index: ${props => props.theme.eui.euiZLevel1};
+  max-height: 322px;
 `;

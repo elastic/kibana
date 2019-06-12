@@ -5,12 +5,12 @@
  */
 
 import { ElasticsearchMappingOf } from '../../utils/typed_elasticsearch_mappings';
-import { InfraSourceConfiguration } from './types';
+import { InfraSavedSourceConfiguration } from './types';
 
 export const infraSourceConfigurationSavedObjectType = 'infrastructure-ui-source';
 
 export const infraSourceConfigurationSavedObjectMappings: {
-  [infraSourceConfigurationSavedObjectType]: ElasticsearchMappingOf<InfraSourceConfiguration>;
+  [infraSourceConfigurationSavedObjectType]: ElasticsearchMappingOf<InfraSavedSourceConfiguration>;
 } = {
   [infraSourceConfigurationSavedObjectType]: {
     properties: {
@@ -42,6 +42,35 @@ export const infraSourceConfigurationSavedObjectMappings: {
           },
           timestamp: {
             type: 'keyword',
+          },
+        },
+      },
+      logColumns: {
+        type: 'nested',
+        properties: {
+          timestampColumn: {
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+            },
+          },
+          messageColumn: {
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+            },
+          },
+          fieldColumn: {
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+              field: {
+                type: 'keyword',
+              },
+            },
           },
         },
       },

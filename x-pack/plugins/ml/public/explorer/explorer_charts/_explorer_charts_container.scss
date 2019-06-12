@@ -27,44 +27,6 @@
       padding-top: 10px;
     }
 
-    .kuiButton.dropdown-toggle,
-    .open > .dropdown-toggle.kuiButton--primary:hover,
-    .open > .dropdown-toggle.kuiButton--primary:focus {
-      background: transparent;
-      border: none;
-      color: #444444;
-      padding: 0px 50px 0px 0px;
-    }
-
-    .dropdown-menu {
-      min-width: 120px;
-      font-size: 13px;
-    }
-
-    .dropdown-menu > li > a {
-      color: $euiTextColor;
-      text-decoration: none;
-    }
-
-    .dropdown-menu > li > a:hover, .dropdown-menu > li > a:active {
-      color: $euiColorEmptyShade;
-    }
-
-    button.dropdown-toggle {
-      width: 110px;
-      text-align: left;
-      margin-bottom: 3px;
-
-      span {
-        font-size: $euiFontSizeS;
-      }
-    }
-
-    button.dropdown-toggle:hover,
-    button.dropdown-toggle:focus {
-      color: $euiTextColor;
-    }
-
     .ml-anomaly-interim-result {
       font-style: italic;
       padding-bottom: 3px;

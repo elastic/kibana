@@ -271,7 +271,7 @@ export const getTooltips = () => {
     },
     forecasting_modal_run_duration: {
       text: i18n.translate('xpack.ml.tooltips.forecastingModalRunDurationTooltip', {
-        defaultMessage: 'Length of forecast, up to a maximum of 8 weeks. ' +
+        defaultMessage: 'Length of forecast, up to a maximum of 3650 days. ' +
           'Use s for seconds, m for minutes, h for hours, d for days, w for weeks.'
       })
     },

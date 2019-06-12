@@ -22,9 +22,12 @@
  * the raw document format as stored in ElasticSearch.
  */
 
+/* eslint-disable @typescript-eslint/camelcase */
+
 import uuid from 'uuid';
 import { SavedObjectsSchema } from '../schema';
 import { decodeVersion, encodeVersion } from '../version';
+import { MigrationVersion, SavedObjectReference } from '../service/saved_objects_client';
 
 /**
  * A raw document as represented directly in the saved object index.
@@ -38,23 +41,6 @@ export interface RawDoc {
 }
 
 /**
- * A dictionary of saved object type -> version used to determine
- * what migrations need to be applied to a saved object.
- */
-export interface MigrationVersion {
-  [type: string]: string;
-}
-
-/**
- * A reference object to anohter saved object.
- */
-export interface SavedObjectReference {
-  name: string;
-  type: string;
-  id: string;
-}
-
-/**
  * A saved object type definition that allows for miscellaneous, unknown
  * properties, as current discussions around security, ACLs, etc indicate
  * that future props are likely to be added. Migrations support this
@@ -62,12 +48,12 @@ export interface SavedObjectReference {
  */
 interface SavedObjectDoc {
   attributes: object;
-  id: string;
+  id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
   namespace?: string;
   migrationVersion?: MigrationVersion;
   version?: string;
-  updated_at?: Date;
+  updated_at?: string;
 
   [rootProp: string]: any;
 }

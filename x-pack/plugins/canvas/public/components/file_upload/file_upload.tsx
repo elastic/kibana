@@ -7,7 +7,7 @@
 // @ts-ignore (elastic/eui#1262) EuiFilePicker is not exported yet
 import { EuiFilePicker } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { SFC } from 'react';
+import React, { FunctionComponent } from 'react';
 
 interface Props {
   /** Optional ID of the component */
@@ -18,7 +18,7 @@ interface Props {
   onUpload: () => void;
 }
 
-export const FileUpload: SFC<Props> = props => (
+export const FileUpload: FunctionComponent<Props> = props => (
   <EuiFilePicker compressed id={props.id} className={props.className} onChange={props.onUpload} />
 );
 

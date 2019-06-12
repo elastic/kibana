@@ -19,7 +19,7 @@
 
 import d3 from 'd3';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 // Data
 import series from 'fixtures/vislib/mock_data/date_histogram/_series';
@@ -27,10 +27,10 @@ import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
 import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
-import { VislibLibLayoutLayoutProvider } from '../../../lib/layout/layout';
+import { Layout } from '../../../lib/layout/layout';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import '../../../../persisted_state';
-import { VislibVisConfigProvider } from '../../../lib/vis_config';
+import { VisConfig } from '../../../lib/vis_config';
 
 const dateHistogramArray = [
   series,
@@ -47,21 +47,17 @@ const names = [
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Layout Class Test Suite for ' + names[i] + ' Data', function () {
-    let Layout;
     let vis;
     let persistedState;
     let numberOfCharts;
     let testLayout;
-    let VisConfig;
 
     beforeEach(ngMock.module('kibana'));
 
     beforeEach(function () {
       ngMock.inject(function (Private, $injector) {
-        Layout = Private(VislibLibLayoutLayoutProvider);
         vis = Private(FixturesVislibVisFixtureProvider)();
         persistedState = new ($injector.get('PersistedState'))();
-        VisConfig = Private(VislibVisConfigProvider);
         vis.render(data, persistedState);
         numberOfCharts = vis.handler.charts.length;
       });

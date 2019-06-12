@@ -6,13 +6,12 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-
 import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonIcon,
 } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
 import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
 
@@ -45,7 +44,7 @@ export class Join extends Component {
   }
 
   componentDidUpdate() {
-    if (!this.state.rigthFields && getIndexPatternId(this.props)) {
+    if (!this.state.rightFields && getIndexPatternId(this.props) && !this.state.loadError) {
       this._loadRightFields(getIndexPatternId(this.props));
     }
   }
@@ -74,7 +73,10 @@ export class Join extends Component {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: `Unable to find Index pattern ${indexPatternId}`
+          loadError: i18n.translate('xpack.maps.layerPanel.join.noIndexPatternErrorMessage', {
+            defaultMessage: `Unable to find Index pattern {indexPatternId}`,
+            values: { indexPatternId }
+          })
         });
       }
       return;
@@ -89,7 +91,9 @@ export class Join extends Component {
       return;
     }
 
-    this.setState({ rightFields: indexPattern.fields });
+    this.setState({
+      rightFields: indexPattern.fields
+    });
   }
 
   async _loadLeftSourceName() {
@@ -101,16 +105,16 @@ export class Join extends Component {
   }
 
   async _loadLeftFields() {
-    let stringFields;
+    let leftFields;
     try {
-      stringFields = await this.props.layer.getStringFields();
+      leftFields = await this.props.layer.getLeftJoinFields();
     } catch (error) {
-      stringFields = [];
+      leftFields = [];
     }
     if (!this._isMounted) {
       return;
     }
-    this.setState({ leftFields: stringFields });
+    this.setState({ leftFields });
   }
 
   _onLeftFieldChange = (leftField) => {
@@ -204,8 +208,12 @@ export class Join extends Component {
             className="mapJoinItem__delete"
             iconType="trash"
             color="danger"
-            aria-label="Delete join"
-            title="Delete join"
+            aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
+              defaultMessage: 'Delete join'
+            })}
+            title={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
+              defaultMessage: 'Delete join'
+            })}
             onClick={onRemove}
           />
         </EuiFlexGroup>

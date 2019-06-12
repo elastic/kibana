@@ -6,12 +6,16 @@
 
 import 'hapi';
 
-import { CloudPlugin } from 'x-pack/plugins/cloud';
-import { XPackMainPlugin } from 'x-pack/plugins/xpack_main/xpack_main';
+import { CloudPlugin } from '../plugins/cloud';
+import { EncryptedSavedObjectsPlugin } from '../plugins/encrypted_saved_objects';
+import { XPackMainPlugin } from '../plugins/xpack_main/xpack_main';
+import { SecurityPlugin } from '../plugins/security';
 
 declare module 'hapi' {
   interface PluginProperties {
     cloud?: CloudPlugin;
     xpack_main: XPackMainPlugin;
+    security?: SecurityPlugin;
+    encrypted_saved_objects?: EncryptedSavedObjectsPlugin;
   }
 }

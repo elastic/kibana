@@ -10,7 +10,6 @@ import * as workpadService from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
 import { getId } from '../../lib/get_id';
 import { templatesRegistry } from '../../lib/templates_registry';
-import { tagsRegistry } from '../../lib/tags_registry';
 import { WorkpadTemplates as Component } from './workpad_templates';
 
 export const WorkpadTemplates = compose(
@@ -19,13 +18,12 @@ export const WorkpadTemplates = compose(
   }),
   withProps(() => ({
     templates: templatesRegistry.toJS(),
-    uniqueTags: tagsRegistry.toJS(),
   })),
   withHandlers({
     // Clone workpad given an id
     cloneWorkpad: props => workpad => {
       workpad.id = getId('workpad');
-      workpad.name = `Untitled Workpad - ${workpad.name}`;
+      workpad.name = `My Canvas Workpad - ${workpad.name}`;
       workpad.tags = undefined;
       return workpadService
         .create(workpad)

@@ -9,6 +9,7 @@ import React from 'react';
 
 import { EuiComboBox } from '@elastic/eui';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 export function FieldSelect({ fields, selectedField, onChange }) {
 
@@ -64,7 +65,11 @@ export function FieldSelect({ fields, selectedField, onChange }) {
       singleSelection={{ asPlainText: true }}
       isClearable={false}
       fullWidth
-      placeholder="Select a field"
+      placeholder={
+        i18n.translate('xpack.maps.styles.vector.selectFieldPlaceholder', {
+          defaultMessage: 'Select a field'
+        })
+      }
     />
   );
 }

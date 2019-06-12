@@ -1,109 +1,114 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ErrorList component renders the error list without errors 1`] = `
-<Fragment>
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="s"
+>
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
     <h5>
       <FormattedMessage
-        defaultMessage="Error list"
+        defaultMessage="Errors"
         id="xpack.uptime.errorList.title"
         values={Object {}}
       />
     </h5>
   </EuiTitle>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="m"
-  >
-    <EuiInMemoryTable
-      columns={
-        Array [
-          Object {
-            "field": "type",
-            "name": "Error type",
-          },
-          Object {
-            "field": "monitorId",
-            "name": "Monitor ID",
-            "render": [Function],
-            "width": "25%",
-          },
-          Object {
-            "field": "count",
-            "name": "Count",
-          },
-          Object {
-            "field": "timestamp",
-            "name": "Latest error",
-            "render": [Function],
-          },
-          Object {
-            "field": "statusCode",
-            "name": "Status code",
-          },
-          Object {
-            "field": "latestMessage",
-            "name": "Latest message",
-            "width": "40%",
-          },
-        ]
-      }
-      executeQueryOptions={Object {}}
-      items={
-        Array [
-          Object {
-            "count": 843,
-            "latestMessage": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
-            "monitorId": "auto-http-0X3675F89EF0612091",
-            "statusCode": null,
-            "timestamp": "2019-01-28T18:43:15.077Z",
-            "type": "io",
-          },
-          Object {
-            "count": 748,
-            "latestMessage": "dial tcp 127.0.0.1:9200: connect: connection refused",
-            "monitorId": "auto-tcp-0X81440A68E839814C",
-            "statusCode": null,
-            "timestamp": "2019-01-28T17:59:34.075Z",
-            "type": "io",
-          },
-          Object {
-            "count": 1,
-            "latestMessage": "lookup www.reddit.com: no such host",
-            "monitorId": "auto-http-0XD9AE729FC1C1E04A",
-            "statusCode": null,
-            "timestamp": "2019-01-28T18:03:10.077Z",
-            "type": "io",
-          },
-          Object {
-            "count": 645,
-            "latestMessage": "received status code 301 expecting 200",
-            "monitorId": "auto-http-0XA8096548ECEB85B7",
-            "statusCode": "301",
-            "timestamp": "2019-01-28T18:43:07.078Z",
-            "type": "validate",
-          },
-        ]
-      }
-      loading={false}
-      pagination={
+  <EuiInMemoryTable
+    columns={
+      Array [
         Object {
-          "initialPageSize": 10,
-          "pageSizeOptions": Array [
-            5,
-            10,
-            20,
-            50,
-          ],
-        }
+          "field": "count",
+          "name": "Frequency",
+          "render": [Function],
+          "width": "200px",
+        },
+        Object {
+          "field": "type",
+          "name": "Error type",
+        },
+        Object {
+          "field": "monitorId",
+          "name": "Monitor ID",
+          "render": [Function],
+          "width": "12.5%",
+        },
+        Object {
+          "field": "location",
+          "name": "Location",
+          "width": "12.5%",
+        },
+        Object {
+          "field": "statusCode",
+          "name": "Status code",
+          "render": [Function],
+        },
+        Object {
+          "field": "latestMessage",
+          "name": "Latest message",
+          "render": [Function],
+          "width": "40%",
+        },
+      ]
+    }
+    executeQueryOptions={Object {}}
+    items={
+      Array [
+        Object {
+          "count": 843,
+          "latestMessage": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
+          "monitorId": "auto-http-0X3675F89EF0612091",
+          "name": null,
+          "statusCode": null,
+          "timestamp": "2019-01-28T18:43:15.077Z",
+          "type": "io",
+        },
+        Object {
+          "count": 748,
+          "latestMessage": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "monitorId": "auto-tcp-0X81440A68E839814C",
+          "name": null,
+          "statusCode": null,
+          "timestamp": "2019-01-28T17:59:34.075Z",
+          "type": "io",
+        },
+        Object {
+          "count": 1,
+          "latestMessage": "lookup www.reddit.com: no such host",
+          "monitorId": "auto-http-0XD9AE729FC1C1E04A",
+          "name": null,
+          "statusCode": null,
+          "timestamp": "2019-01-28T18:03:10.077Z",
+          "type": "io",
+        },
+        Object {
+          "count": 645,
+          "latestMessage": "received status code 301 expecting 200",
+          "monitorId": "auto-http-0XA8096548ECEB85B7",
+          "name": null,
+          "statusCode": "301",
+          "timestamp": "2019-01-28T18:43:07.078Z",
+          "type": "validate",
+        },
+      ]
+    }
+    loading={false}
+    pagination={
+      Object {
+        "initialPageSize": 10,
+        "pageSizeOptions": Array [
+          5,
+          10,
+          20,
+          50,
+        ],
       }
-      responsive={true}
-      sorting={false}
-    />
-  </EuiPanel>
-</Fragment>
+    }
+    responsive={true}
+    sorting={false}
+  />
+</EuiPanel>
 `;

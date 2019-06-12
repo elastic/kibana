@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import request from 'request';
 
 export default function ({ getService }) {
@@ -98,7 +98,6 @@ export default function ({ getService }) {
         'full_name',
         'email',
         'roles',
-        'scope',
         'metadata',
         'enabled',
         'authentication_realm',
@@ -137,7 +136,6 @@ export default function ({ getService }) {
           'full_name',
           'email',
           'roles',
-          'scope',
           'metadata',
           'enabled',
           'authentication_realm',

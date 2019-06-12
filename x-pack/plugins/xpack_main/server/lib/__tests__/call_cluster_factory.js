@@ -4,20 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { callClusterFactory } from '../call_cluster_factory';
 
 describe('callClusterFactory', () => {
 
-  const configGetStub = sinon.stub();
   let mockServer;
   let mockCluster;
 
   beforeEach(() => {
-    configGetStub.withArgs('elasticsearch.username').returns(null);
-    configGetStub.withArgs('elasticsearch.password').returns(null);
-
     mockCluster = {
       callWithRequest: sinon.stub().returns(Promise.resolve({ hits: { total: 0 } })),
       callWithInternalUser: sinon.stub().returns(Promise.resolve({ hits: { total: 0 } })),
@@ -27,7 +23,6 @@ describe('callClusterFactory', () => {
         elasticsearch: { getCluster: sinon.stub().withArgs('admin').returns(mockCluster) }
       },
       log() {},
-      config: () => ({ get: configGetStub })
     };
   });
 
@@ -67,9 +62,6 @@ describe('callClusterFactory', () => {
 
   describe('getCallClusterInternal', () => {
     it('returns a method that wraps callWithInternalUser', async () => {
-      configGetStub.withArgs('elasticsearch.username').returns('fakeReqUser');
-      configGetStub.withArgs('elasticsearch.password').returns('fakeReqPassword');
-
       const callCluster = callClusterFactory(mockServer).getCallClusterInternal();
 
       const result = await callCluster('search', { body: { match: { match_all: {} } } });

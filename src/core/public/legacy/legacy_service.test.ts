@@ -18,15 +18,16 @@
  */
 
 import angular from 'angular';
-import * as Rx from 'rxjs';
 
 const mockLoadOrder: string[] = [];
 
-const mockUiMetadataInit = jest.fn();
-jest.mock('ui/metadata', () => {
-  mockLoadOrder.push('ui/metadata');
+const mockUiNewPlatformSetup = jest.fn();
+const mockUiNewPlatformStart = jest.fn();
+jest.mock('ui/new_platform', () => {
+  mockLoadOrder.push('ui/new_platform');
   return {
-    __newPlatformInit__: mockUiMetadataInit,
+    __setup__: mockUiNewPlatformSetup,
+    __start__: mockUiNewPlatformStart,
   };
 });
 
@@ -46,331 +47,126 @@ jest.mock('ui/test_harness', () => {
   };
 });
 
-const mockI18nContextInit = jest.fn();
-jest.mock('ui/i18n', () => {
-  mockLoadOrder.push('ui/i18n');
-  return {
-    __newPlatformInit__: mockI18nContextInit,
-  };
-});
-
-const mockFatalErrorInit = jest.fn();
-jest.mock('ui/notify/fatal_error', () => {
-  mockLoadOrder.push('ui/notify/fatal_error');
-  return {
-    __newPlatformInit__: mockFatalErrorInit,
-  };
-});
-
-const mockNotifyToastsInit = jest.fn();
-jest.mock('ui/notify/toasts', () => {
-  mockLoadOrder.push('ui/notify/toasts');
-  return {
-    __newPlatformInit__: mockNotifyToastsInit,
-  };
-});
-
-const mockHttpInit = jest.fn();
-jest.mock('ui/chrome/api/loading_count', () => {
-  mockLoadOrder.push('ui/chrome/api/loading_count');
-  return {
-    __newPlatformInit__: mockHttpInit,
-  };
-});
-
-const mockBasePathInit = jest.fn();
-jest.mock('ui/chrome/api/base_path', () => {
-  mockLoadOrder.push('ui/chrome/api/base_path');
-  return {
-    __newPlatformInit__: mockBasePathInit,
-  };
-});
-
-const mockUiSettingsInit = jest.fn();
-jest.mock('ui/chrome/api/ui_settings', () => {
-  mockLoadOrder.push('ui/chrome/api/ui_settings');
-  return {
-    __newPlatformInit__: mockUiSettingsInit,
-  };
-});
-
-const mockInjectedVarsInit = jest.fn();
-jest.mock('ui/chrome/api/injected_vars', () => {
-  mockLoadOrder.push('ui/chrome/api/injected_vars');
-  return {
-    __newPlatformInit__: mockInjectedVarsInit,
-  };
-});
-
-const mockChromeControlsInit = jest.fn();
-jest.mock('ui/chrome/api/controls', () => {
-  mockLoadOrder.push('ui/chrome/api/controls');
-  return {
-    __newPlatformInit__: mockChromeControlsInit,
-  };
-});
-
-const mockChromeHelpExtensionInit = jest.fn();
-jest.mock('ui/chrome/api/help_extension', () => {
-  mockLoadOrder.push('ui/chrome/api/help_extension');
-  return {
-    __newPlatformInit__: mockChromeHelpExtensionInit,
-  };
-});
-
-const mockChromeThemeInit = jest.fn();
-jest.mock('ui/chrome/api/theme', () => {
-  mockLoadOrder.push('ui/chrome/api/theme');
-  return {
-    __newPlatformInit__: mockChromeThemeInit,
-  };
-});
-
-const mockChromeBreadcrumbsInit = jest.fn();
-jest.mock('ui/chrome/api/breadcrumbs', () => {
-  mockLoadOrder.push('ui/chrome/api/breadcrumbs');
-  return {
-    __newPlatformInit__: mockChromeBreadcrumbsInit,
-  };
-});
-
-const mockGlobalNavStateInit = jest.fn();
-jest.mock('ui/chrome/services/global_nav_state', () => {
-  mockLoadOrder.push('ui/chrome/services/global_nav_state');
-  return {
-    __newPlatformInit__: mockGlobalNavStateInit,
-  };
-});
-
+import { chromeServiceMock } from '../chrome/chrome_service.mock';
+import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
+import { i18nServiceMock } from '../i18n/i18n_service.mock';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { notificationServiceMock } from '../notifications/notifications_service.mock';
+import { overlayServiceMock } from '../overlays/overlay_service.mock';
+import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { LegacyPlatformService } from './legacy_service';
+import { applicationServiceMock } from '../application/application_service.mock';
 
-const fatalErrorsStart = {} as any;
-const notificationsStart = {
-  toasts: {},
-} as any;
-
-const injectedMetadataStart: any = {
-  getBasePath: jest.fn(),
-  getLegacyMetadata: jest.fn(),
-};
-
-const httpStart = {
-  addLoadingCount: jest.fn(),
-  getLoadingCount$: jest
-    .fn()
-    .mockImplementation(() => new Rx.Observable(observer => observer.next(0))),
-};
-
-const basePathStart = {
-  get: jest.fn(),
-  addToPath: jest.fn(),
-  removeFromPath: jest.fn(),
-};
-
-const uiSettingsStart: any = {};
-const chromeStart: any = {};
-const i18nStart: any = { Context: () => '' };
+const applicationSetup = applicationServiceMock.createSetupContract();
+const fatalErrorsSetup = fatalErrorsServiceMock.createSetupContract();
+const httpSetup = httpServiceMock.createSetupContract();
+const injectedMetadataSetup = injectedMetadataServiceMock.createSetupContract();
+const notificationsSetup = notificationServiceMock.createSetupContract();
+const uiSettingsSetup = uiSettingsServiceMock.createSetupContract();
 
 const defaultParams = {
-  targetDomElement: document.createElement('div'),
   requireLegacyFiles: jest.fn(() => {
     mockLoadOrder.push('legacy files');
   }),
 };
 
+const defaultSetupDeps = {
+  core: {
+    application: applicationSetup,
+    fatalErrors: fatalErrorsSetup,
+    injectedMetadata: injectedMetadataSetup,
+    notifications: notificationsSetup,
+    http: httpSetup,
+    uiSettings: uiSettingsSetup,
+  },
+  plugins: {},
+};
+
+const applicationStart = applicationServiceMock.createStartContract();
+const httpStart = httpServiceMock.createStartContract();
+const chromeStart = chromeServiceMock.createStartContract();
+const i18nStart = i18nServiceMock.createStartContract();
+const injectedMetadataStart = injectedMetadataServiceMock.createStartContract();
+const notificationsStart = notificationServiceMock.createStartContract();
+const overlayStart = overlayServiceMock.createStartContract();
+
 const defaultStartDeps = {
-  i18n: i18nStart,
-  fatalErrors: fatalErrorsStart,
-  injectedMetadata: injectedMetadataStart,
-  notifications: notificationsStart,
-  http: httpStart,
-  basePath: basePathStart,
-  uiSettings: uiSettingsStart,
-  chrome: chromeStart,
+  core: {
+    application: applicationStart,
+    http: httpStart,
+    chrome: chromeStart,
+    i18n: i18nStart,
+    injectedMetadata: injectedMetadataStart,
+    notifications: notificationsStart,
+    overlays: overlayStart,
+  },
+  targetDomElement: document.createElement('div'),
+  plugins: {},
 };
 
 afterEach(() => {
   jest.clearAllMocks();
-  injectedMetadataStart.getLegacyMetadata.mockReset();
   jest.resetModules();
   mockLoadOrder.length = 0;
 });
 
-describe('#start()', () => {
+describe('#setup()', () => {
   describe('default', () => {
-    it('passes legacy metadata from injectedVars to ui/metadata', () => {
-      const legacyMetadata = { isLegacyMetadata: true };
-      injectedMetadataStart.getLegacyMetadata.mockReturnValue(legacyMetadata);
-
+    it('initializes ui/new_platform with core APIs', () => {
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
-      expect(mockUiMetadataInit).toHaveBeenCalledTimes(1);
-      expect(mockUiMetadataInit).toHaveBeenCalledWith(legacyMetadata);
+      expect(mockUiNewPlatformSetup).toHaveBeenCalledTimes(1);
+      expect(mockUiNewPlatformSetup).toHaveBeenCalledWith(defaultSetupDeps.core, {});
+    });
+  });
+});
+
+describe('#start()', () => {
+  it('initializes ui/new_platform with core APIs', () => {
+    const legacyPlatform = new LegacyPlatformService({
+      ...defaultParams,
     });
 
-    it('passes i18n.Context to ui/i18n', () => {
+    legacyPlatform.setup(defaultSetupDeps);
+    legacyPlatform.start(defaultStartDeps);
+
+    expect(mockUiNewPlatformStart).toHaveBeenCalledTimes(1);
+    expect(mockUiNewPlatformStart).toHaveBeenCalledWith(defaultStartDeps.core, {});
+  });
+
+  describe('useLegacyTestHarness = false', () => {
+    it('passes the targetDomElement to ui/chrome', () => {
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
       });
 
+      legacyPlatform.setup(defaultSetupDeps);
       legacyPlatform.start(defaultStartDeps);
 
-      expect(mockI18nContextInit).toHaveBeenCalledTimes(1);
-      expect(mockI18nContextInit).toHaveBeenCalledWith(i18nStart.Context);
+      expect(mockUiTestHarnessBootstrap).not.toHaveBeenCalled();
+      expect(mockUiChromeBootstrap).toHaveBeenCalledTimes(1);
+      expect(mockUiChromeBootstrap).toHaveBeenCalledWith(defaultStartDeps.targetDomElement);
     });
+  });
 
-    it('passes fatalErrors service to ui/notify/fatal_errors', () => {
+  describe('useLegacyTestHarness = true', () => {
+    it('passes the targetDomElement to ui/test_harness', () => {
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
+        useLegacyTestHarness: true,
       });
 
+      legacyPlatform.setup(defaultSetupDeps);
       legacyPlatform.start(defaultStartDeps);
 
-      expect(mockFatalErrorInit).toHaveBeenCalledTimes(1);
-      expect(mockFatalErrorInit).toHaveBeenCalledWith(fatalErrorsStart);
-    });
-
-    it('passes toasts service to ui/notify/toasts', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockNotifyToastsInit).toHaveBeenCalledTimes(1);
-      expect(mockNotifyToastsInit).toHaveBeenCalledWith(notificationsStart.toasts);
-    });
-
-    it('passes http service to ui/chrome/api/loading_count', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockHttpInit).toHaveBeenCalledTimes(1);
-      expect(mockHttpInit).toHaveBeenCalledWith(httpStart);
-    });
-
-    it('passes basePath service to ui/chrome/api/base_path', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockBasePathInit).toHaveBeenCalledTimes(1);
-      expect(mockBasePathInit).toHaveBeenCalledWith(basePathStart);
-    });
-
-    it('passes basePath service to ui/chrome/api/ui_settings', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockUiSettingsInit).toHaveBeenCalledTimes(1);
-      expect(mockUiSettingsInit).toHaveBeenCalledWith(uiSettingsStart);
-    });
-
-    it('passes injectedMetadata service to ui/chrome/api/injected_vars', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockInjectedVarsInit).toHaveBeenCalledTimes(1);
-      expect(mockInjectedVarsInit).toHaveBeenCalledWith(injectedMetadataStart);
-    });
-
-    it('passes chrome service to ui/chrome/api/controls', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockChromeControlsInit).toHaveBeenCalledTimes(1);
-      expect(mockChromeControlsInit).toHaveBeenCalledWith(chromeStart);
-    });
-
-    it('passes chrome service to ui/chrome/api/help_extension', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockChromeHelpExtensionInit).toHaveBeenCalledTimes(1);
-      expect(mockChromeHelpExtensionInit).toHaveBeenCalledWith(chromeStart);
-    });
-
-    it('passes chrome service to ui/chrome/api/theme', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockChromeThemeInit).toHaveBeenCalledTimes(1);
-      expect(mockChromeThemeInit).toHaveBeenCalledWith(chromeStart);
-    });
-
-    it('passes chrome service to ui/chrome/api/breadcrumbs', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockChromeBreadcrumbsInit).toHaveBeenCalledTimes(1);
-      expect(mockChromeBreadcrumbsInit).toHaveBeenCalledWith(chromeStart);
-    });
-
-    it('passes chrome service to ui/chrome/api/global_nav_state', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockGlobalNavStateInit).toHaveBeenCalledTimes(1);
-      expect(mockGlobalNavStateInit).toHaveBeenCalledWith(chromeStart);
-    });
-
-    describe('useLegacyTestHarness = false', () => {
-      it('passes the targetDomElement to ui/chrome', () => {
-        const legacyPlatform = new LegacyPlatformService({
-          ...defaultParams,
-        });
-
-        legacyPlatform.start(defaultStartDeps);
-
-        expect(mockUiTestHarnessBootstrap).not.toHaveBeenCalled();
-        expect(mockUiChromeBootstrap).toHaveBeenCalledTimes(1);
-        expect(mockUiChromeBootstrap).toHaveBeenCalledWith(defaultParams.targetDomElement);
-      });
-    });
-
-    describe('useLegacyTestHarness = true', () => {
-      it('passes the targetDomElement to ui/test_harness', () => {
-        const legacyPlatform = new LegacyPlatformService({
-          ...defaultParams,
-          useLegacyTestHarness: true,
-        });
-
-        legacyPlatform.start(defaultStartDeps);
-
-        expect(mockUiChromeBootstrap).not.toHaveBeenCalled();
-        expect(mockUiTestHarnessBootstrap).toHaveBeenCalledTimes(1);
-        expect(mockUiTestHarnessBootstrap).toHaveBeenCalledWith(defaultParams.targetDomElement);
-      });
+      expect(mockUiChromeBootstrap).not.toHaveBeenCalled();
+      expect(mockUiTestHarnessBootstrap).toHaveBeenCalledTimes(1);
+      expect(mockUiTestHarnessBootstrap).toHaveBeenCalledWith(defaultStartDeps.targetDomElement);
     });
   });
 
@@ -383,6 +179,7 @@ describe('#start()', () => {
 
         expect(mockLoadOrder).toEqual([]);
 
+        legacyPlatform.setup(defaultSetupDeps);
         legacyPlatform.start(defaultStartDeps);
 
         expect(mockLoadOrder).toMatchSnapshot();
@@ -398,6 +195,7 @@ describe('#start()', () => {
 
         expect(mockLoadOrder).toEqual([]);
 
+        legacyPlatform.setup(defaultSetupDeps);
         legacyPlatform.start(defaultStartDeps);
 
         expect(mockLoadOrder).toMatchSnapshot();
@@ -415,23 +213,21 @@ describe('#stop()', () => {
 
     const legacyPlatform = new LegacyPlatformService({
       ...defaultParams,
-      targetDomElement,
     });
 
     legacyPlatform.stop();
     expect(targetDomElement).toMatchSnapshot();
   });
 
-  it('destroys the angular scope and empties the targetDomElement if angular is bootstraped to targetDomElement', () => {
+  it('destroys the angular scope and empties the targetDomElement if angular is bootstrapped to targetDomElement', async () => {
     const targetDomElement = document.createElement('div');
     const scopeDestroySpy = jest.fn();
 
     const legacyPlatform = new LegacyPlatformService({
       ...defaultParams,
-      targetDomElement,
     });
 
-    // simulate bootstraping with a module "foo"
+    // simulate bootstrapping with a module "foo"
     angular.module('foo', []).directive('bar', () => ({
       restrict: 'E',
       link($scope) {
@@ -445,6 +241,8 @@ describe('#stop()', () => {
 
     angular.bootstrap(targetDomElement, ['foo']);
 
+    await legacyPlatform.setup(defaultSetupDeps);
+    legacyPlatform.start({ ...defaultStartDeps, targetDomElement });
     legacyPlatform.stop();
 
     expect(targetDomElement).toMatchSnapshot();
