@@ -25,16 +25,16 @@ const SET = '__SET__';
 
 export const createStore = <
   State extends {},
-  StateMutations extends Mutators<PureMutators<State>> = {}
+  StateMutators extends Mutators<PureMutators<State>> = {}
 >(
   defaultState: State
-): AppStore<State, StateMutations> => {
+): AppStore<State, StateMutators> => {
   const pureMutators: PureMutators<State> = {};
-  const mutators: StateMutations = {} as StateMutations;
+  const mutators: StateMutators = {} as StateMutators;
   const reducer: Reducer = (state, action) => {
-    const pureMutation = pureMutators[action.type];
-    if (pureMutation) {
-      return pureMutation(state)(...action.args);
+    const pureMutator = pureMutators[action.type];
+    if (pureMutator) {
+      return pureMutator(state)(...action.args);
     }
 
     switch (action.type) {
@@ -59,7 +59,7 @@ export const createStore = <
     state$.next(get());
   });
 
-  const createMutations: AppStore<State>['createMutators'] = newPureMutators => {
+  const createMutators: AppStore<State>['createMutators'] = newPureMutators => {
     const result: Mutators<any> = {};
     for (const type of Object.keys(newPureMutators)) {
       result[type] = (...args) => {
@@ -79,7 +79,7 @@ export const createStore = <
     set,
     redux,
     state$: (state$ as unknown) as Observable<State>,
-    createMutators: createMutations,
+    createMutators,
     mutators,
   };
 };
