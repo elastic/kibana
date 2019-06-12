@@ -19,17 +19,19 @@
 
 import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
-// TODO remove
-// console.log('hit chrome mock!!!');
+const uiSettingsClient = {
+  ...uiSettingsServiceMock.createSetupContract(),
+  getUpdate$: () => ({
+    subscribe: jest.fn(),
+  }),
+};
 
 const chrome = {
-  getBasePath: jest.fn().mockReturnValue(''),
-  getUiSettingsClient: () => ({
-    ...uiSettingsServiceMock.createSetupContract(),
-    getUpdate$: () => ({
-      subscribe: jest.fn(),
-    }),
-  }),
+  getBasePath: () => '/test/base/path',
+  addBasePath: path => path,
+  getInjected: jest.fn(),
+  getUiSettingsClient: () => uiSettingsClient,
+  getXsrfToken: () => 'kbn-xsrf-token',
 };
 
 // eslint-disable-next-line import/no-default-export
