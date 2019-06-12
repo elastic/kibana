@@ -33,6 +33,9 @@ import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 
+const FROM_PLACEHOLDER = '\u2212\u221E';
+const TO_PLACEHOLDER = '+\u221E';
+
 const generateId = htmlIdGenerator();
 const isEmpty = (value: any) => value === undefined || value === null;
 
@@ -89,52 +92,63 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
 
   return (
     <>
-      {ranges.map(({ from, to, id }) => (
-        <Fragment key={id}>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem>
-              <EuiFieldNumber
-                aria-label={i18n.translate('common.ui.aggTypes.ranges.fromLabel', {
-                  defaultMessage: 'From',
-                })}
-                value={isEmpty(from) ? '' : from}
-                placeholder="&minus;∞"
-                onChange={ev => onChangeRange(id, 'from', ev.target.value)}
-                fullWidth={true}
-                compressed={true}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="sortRight" color="subdued" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFieldNumber
-                aria-label={i18n.translate('common.ui.aggTypes.ranges.toLabel', {
-                  defaultMessage: 'To',
-                })}
-                value={isEmpty(to) ? '' : to}
-                placeholder="+∞"
-                onChange={ev => onChangeRange(id, 'to', ev.target.value)}
-                fullWidth={true}
-                compressed={true}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={i18n.translate('common.ui.aggTypes.ranges.removeRangeButtonAriaLabel', {
-                  defaultMessage: 'Remove the range of {from} to {to}',
-                  values: { from: isEmpty(from) ? '-∞' : from, to: isEmpty(to) ? '+∞' : to },
-                })}
-                disabled={value.length === 1}
-                color="danger"
-                iconType="trash"
-                onClick={() => onRemoveRange(id)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-        </Fragment>
-      ))}
+      {ranges.map(({ from, to, id }) => {
+        const deleteBtnTitle = i18n.translate(
+          'common.ui.aggTypes.ranges.removeRangeButtonAriaLabel',
+          {
+            defaultMessage: 'Remove the range of {from} to {to}',
+            values: {
+              from: isEmpty(from) ? FROM_PLACEHOLDER : from,
+              to: isEmpty(to) ? TO_PLACEHOLDER : to,
+            },
+          }
+        );
+
+        return (
+          <Fragment key={id}>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem>
+                <EuiFieldNumber
+                  aria-label={i18n.translate('common.ui.aggTypes.ranges.fromLabel', {
+                    defaultMessage: 'From',
+                  })}
+                  value={isEmpty(from) ? '' : from}
+                  placeholder={FROM_PLACEHOLDER}
+                  onChange={ev => onChangeRange(id, 'from', ev.target.value)}
+                  fullWidth={true}
+                  compressed={true}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="sortRight" color="subdued" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFieldNumber
+                  aria-label={i18n.translate('common.ui.aggTypes.ranges.toLabel', {
+                    defaultMessage: 'To',
+                  })}
+                  value={isEmpty(to) ? '' : to}
+                  placeholder={TO_PLACEHOLDER}
+                  onChange={ev => onChangeRange(id, 'to', ev.target.value)}
+                  fullWidth={true}
+                  compressed={true}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  title={deleteBtnTitle}
+                  aria-label={deleteBtnTitle}
+                  disabled={value.length === 1}
+                  color="danger"
+                  iconType="trash"
+                  onClick={() => onRemoveRange(id)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+          </Fragment>
+        );
+      })}
 
       <EuiSpacer size="s" />
       <EuiFlexItem>
