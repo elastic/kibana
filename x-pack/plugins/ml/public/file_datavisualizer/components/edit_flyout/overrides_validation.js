@@ -14,12 +14,10 @@ const VALID_LETTER_GROUPS = {
   'yy': true,
   'M': true,
   'MM': true,
-  // The simple regex here is based on the fact that the %{MONTH} Grok pattern only matches English and German month names
   'MMM': true,
   'MMMM': true,
   'd': true,
   'dd': true,
-  // The simple regex here is based on the fact that the %{DAY} Grok pattern only matches English and German day names
   'EEE': true,
   'EEEE': true,
   'H': true,
@@ -40,21 +38,10 @@ function isLetter(str) {
 export function isTimestampFormatValid(timestampFormat) {
   const result = { isValid: true, errorMessage: null };
 
-  if (timestampFormat.indexOf('\n') >= 0 || timestampFormat.indexOf('\r') >= 0) {
-    result.isValid = false;
-    result.errorMessage = i18n.translate('xpack.ml.fileDatavisualizer.editFlyout.overrides.customTimestampValidationErrorMessage', {
-      defaultMessage: 'Multi-line timestamp formats {timestampFormat} not supported',
-      values: {
-        timestampFormat,
-      }
-    });
-    return result;
-  }
-
   if (timestampFormat.indexOf(INDETERMINATE_FIELD_PLACEHOLDER) >= 0) {
     result.isValid = false;
     result.errorMessage = i18n.translate('xpack.ml.fileDatavisualizer.editFlyout.overrides.customTimestampValidationErrorMessage', {
-      defaultMessage: 'Timestamp format {timestampFormat} not supported because it contains {fieldPlaceholder}',
+      defaultMessage: 'Timestamp format {timestampFormat} not supported because it contains a question mark character ({fieldPlaceholder})',
       values: {
         timestampFormat,
         fieldPlaceholder: INDETERMINATE_FIELD_PLACEHOLDER,
@@ -84,18 +71,21 @@ export function isTimestampFormatValid(timestampFormat) {
       const letterGroup = timestampFormat.substring(startPos, endPos);
 
       if (VALID_LETTER_GROUPS[letterGroup] !== true) {
+        const length = letterGroup.length;
         // Special case of fractional seconds
         if (curChar !== 'S' || FRACTIONAL_SECOND_SEPARATORS.indexOf(prevChar) === -1 ||
           !('ss' === prevLetterGroup) || endPos - startPos > 9) {
-          let msg = 'Letter group {letterGroup} in {timestampFormat} is not supported';
-          if (curChar === 'S') {
-            msg += ' because it is not preceeded by [ss] and a separator from {separators}';
-          }
-
           const values = {
             timestampFormat,
-            letterGroup
+            letterGroup,
+            length
           };
+
+          let msg = `{ length, plural, one { Letter {letterGroup} } other { Letter group {letterGroup} } } in {timestampFormat}
+            is not supported`;
+          if (curChar === 'S') {
+            msg += ' because it is not preceeded by ss and a separator from {separators}';
+          }
 
           if (msg.indexOf('separator') !== -1) {
             values.separators = FRACTIONAL_SECOND_SEPARATORS;
@@ -120,7 +110,7 @@ export function isTimestampFormatValid(timestampFormat) {
   if (prevLetterGroup == null) {
     result.isValid = false;
     result.errorMessage = i18n.translate('xpack.ml.fileDatavisualizer.editFlyout.overrides.customTimestampValidationErrorMessage', {
-      defaultMessage: 'No time format letter groups in override format {timestampFormat}',
+      defaultMessage: 'No time format letter groups in timestamp format {timestampFormat}',
       values: {
         timestampFormat,
       }

@@ -61,7 +61,7 @@ export class Overrides extends Component {
 
   customTimestampFormatErrors = i18n.translate('xpack.ml.fileDatavisualizer.editFlyout.overrides.customTimestampFormatErrorMessage', {
     defaultMessage: `Timestamp format must be a combination of these Java date/time formats:
-      yy, yyyy, M, MM, MMM, MMMM, d, dd, EEE, EEEE, H, HH, h, mm, ss, a, XX, XXX, zzz`
+      yy, yyyy, M, MM, MMM, MMMM, d, dd, EEE, EEEE, H, HH, h, mm, ss, S through SSSSSSSSS, a, XX, XXX, zzz`
   });
 
   static getDerivedStateFromProps(props, state) {
@@ -166,7 +166,7 @@ export class Overrides extends Component {
     this.setOverride({ timestampFormat });
     if (opt !== CUSTOM_DROPDOWN_OPTION) {
       this.props.setOverridesValid(true);
-  }
+    }
   }
 
   onCustomTimestampFormatChange = (e) => {
