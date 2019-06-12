@@ -110,7 +110,11 @@ Array [
         />
         <div
           className="canvasColorDot__foreground"
-          style={Object {}}
+          style={
+            Object {
+              "background": "#abcd",
+            }
+          }
         />
       </div>
     </div>
