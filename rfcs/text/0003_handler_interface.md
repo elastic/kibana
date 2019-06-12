@@ -150,6 +150,47 @@ interface HandlerService {
   handlers, so they may choose not to use the generic name `registerContext` in
   favor of something more explicit.
 
+## Context creation
+
+Before a handler is executed, each registered context provider will be called
+with the given arguments to construct a context object for the handler. Each
+provider must return an object of the correct type. The return values of these
+providers is merged into a single object where each key of the object is the
+name of the context provider and the value is the return value of the provider.
+Key facts about context providers:
+
+- **Context providers cannot access context from other providers.** They should
+  be fully self-contained and not dependent on other contexts. The order that
+  they execute is not guaranteed.
+- **Context providers may be executed with the different arguments from
+  handlers** Each service owner should define what arguments are available to
+  context providers, however the context itself should never be an argument (see
+  point above).
+- **Context providers cannot takeover the handler execution.** Context providers
+  cannot "intercept" handlers and return a different response. This is different
+  than traditional middleware. It should be noted that throwing an exception
+  will be bubbled up to the calling code and will prevent the handler from
+  getting executed at all. How the service owner handles that exception is
+  service-specific.
+- **Values returned by context providers are expected to be valid for the entire
+  scope of the handler.**
+
+Here's a simple example of how a service owner could construct a context and
+execute a handler:
+
+```js
+const contextProviders = new Map()<string, ContextProvider<unknown>>;
+
+async function executeHandler(handler, request, toolkit) {
+  const newContext = {};
+  for (const [contextName, provider] of contextProviders.entries()) {
+    newContext[contextName] = await provider(request, toolkit);
+  }
+
+  return handler(context, request, toolkit);
+}
+```
+
 ## End to end example
 
 ```js
