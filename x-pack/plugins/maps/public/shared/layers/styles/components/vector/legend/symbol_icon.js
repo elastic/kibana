@@ -43,7 +43,6 @@ export class SymbolIcon extends Component {
       imgDataUrl = buildSrcUrl(styledSvg);
     } catch (error) {
       // ignore failures - component will just not display an icon
-      console.log(error);
     }
 
     if (this._isMounted) {
