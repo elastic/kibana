@@ -48,7 +48,7 @@ const createMockClient = () => {
 ].forEach(currentSpace => {
   describe(`${currentSpace.id} space`, () => {
     describe('#get', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`allows options.namespace to be specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -60,9 +60,9 @@ const createMockClient = () => {
           types,
         });
 
-        await expect(
-          client.get('foo', '', { namespace: 'bar' })
-        ).rejects.toThrowErrorMatchingSnapshot();
+        await client.get('foo', '', { namespace: 'bar' });
+
+        expect(baseClient.get).toHaveBeenCalledWith('foo', '', { namespace: 'bar' });
       });
 
       test(`throws error if type is space`, async () => {
@@ -108,7 +108,7 @@ const createMockClient = () => {
     });
 
     describe('#bulkGet', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`allows options.namespace to be specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -120,9 +120,11 @@ const createMockClient = () => {
           types,
         });
 
-        await expect(
-          client.bulkGet([{ id: '', type: 'foo' }], { namespace: 'bar' })
-        ).rejects.toThrowErrorMatchingSnapshot();
+        await client.bulkGet([{ id: '', type: 'foo' }], { namespace: 'bar' });
+
+        expect(baseClient.bulkGet).toHaveBeenCalledWith([{ id: '', type: 'foo' }], {
+          namespace: 'bar',
+        });
       });
 
       test(`throws error if objects type is space`, async () => {
@@ -170,7 +172,7 @@ const createMockClient = () => {
     });
 
     describe('#find', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`allows options.namespace to be specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -182,7 +184,9 @@ const createMockClient = () => {
           types,
         });
 
-        await expect(client.find({ namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+        await client.find({ type: ['foo'], namespace: 'bar' });
+
+        expect(baseClient.find).toHaveBeenCalledWith({ type: ['foo'], namespace: 'bar' });
       });
 
       test(`throws error if options.type is space`, async () => {
@@ -290,7 +294,7 @@ const createMockClient = () => {
     });
 
     describe('#create', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`allows options.namespace to be specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -302,9 +306,9 @@ const createMockClient = () => {
           types,
         });
 
-        await expect(
-          client.create('foo', {}, { namespace: 'bar' })
-        ).rejects.toThrowErrorMatchingSnapshot();
+        await client.create('foo', {}, { namespace: 'bar' });
+
+        expect(baseClient.create).toHaveBeenCalledWith('foo', {}, { namespace: 'bar' });
       });
 
       test(`throws error if type is space`, async () => {
@@ -351,7 +355,7 @@ const createMockClient = () => {
     });
 
     describe('#bulkCreate', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`allows options.namespace to be specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -363,9 +367,12 @@ const createMockClient = () => {
           types,
         });
 
-        await expect(
-          client.bulkCreate([{ id: '', type: 'foo', attributes: {} }], { namespace: 'bar' })
-        ).rejects.toThrowErrorMatchingSnapshot();
+        await client.bulkCreate([{ id: '', type: 'foo', attributes: {} }], { namespace: 'bar' });
+
+        expect(baseClient.bulkCreate).toHaveBeenCalledWith(
+          [{ id: '', type: 'foo', attributes: {} }],
+          { namespace: 'bar' }
+        );
       });
 
       test(`throws error if objects type is space`, async () => {
@@ -416,7 +423,7 @@ const createMockClient = () => {
     });
 
     describe('#update', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`allows options.namespace to be specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -428,10 +435,9 @@ const createMockClient = () => {
           types,
         });
 
-        await expect(
-          // @ts-ignore
-          client.update(null, null, null, { namespace: 'bar' })
-        ).rejects.toThrowErrorMatchingSnapshot();
+        await client.update('foo', 'id', {}, { namespace: 'bar' });
+
+        expect(baseClient.update).toHaveBeenCalledWith('foo', 'id', {}, { namespace: 'bar' });
       });
 
       test(`throws error if type is space`, async () => {
@@ -479,7 +485,7 @@ const createMockClient = () => {
     });
 
     describe('#delete', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`allows options.namespace to be specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
         const spacesService = createSpacesService(server);
@@ -491,10 +497,9 @@ const createMockClient = () => {
           types,
         });
 
-        await expect(
-          // @ts-ignore
-          client.delete(null, null, { namespace: 'bar' })
-        ).rejects.toThrowErrorMatchingSnapshot();
+        await client.delete('foo', 'id', { namespace: 'bar' });
+
+        expect(baseClient.delete).toHaveBeenCalledWith('foo', 'id', { namespace: 'bar' });
       });
 
       test(`throws error if type is space`, async () => {
