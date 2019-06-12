@@ -23,8 +23,8 @@ describe('LogEntryFieldColumn', () => {
     expect(component.exists('ul')).toBe(true);
     expect(
       component.containsAllMatchingElements([
-        <li key="LogEntryFieldColumn-a-0">a</li>,
-        <li key="LogEntryFieldColumn-b-1">b</li>,
+        <li key="LogEntryFieldColumn-a-0">a,</li>,
+        <li key="LogEntryFieldColumn-b-1">b,</li>,
         <li key="LogEntryFieldColumn-c-2">c</li>,
       ])
     ).toBe(true);
