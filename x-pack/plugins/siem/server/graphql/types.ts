@@ -1209,41 +1209,41 @@ export interface NetworkDnsItem {
 }
 
 export interface OverviewNetworkData {
-  auditbeatSocket: number;
+  auditbeatSocket?: number | null;
 
-  filebeatCisco: number;
+  filebeatCisco?: number | null;
 
-  filebeatNetflow: number;
+  filebeatNetflow?: number | null;
 
-  filebeatPanw: number;
+  filebeatPanw?: number | null;
 
-  filebeatSuricata: number;
+  filebeatSuricata?: number | null;
 
-  filebeatZeek: number;
+  filebeatZeek?: number | null;
 
-  packetbeatDNS: number;
+  packetbeatDNS?: number | null;
 
-  packetbeatFlow: number;
+  packetbeatFlow?: number | null;
 
-  packetbeatTLS: number;
+  packetbeatTLS?: number | null;
 }
 
 export interface OverviewHostData {
-  auditbeatAuditd: number;
+  auditbeatAuditd?: number | null;
 
-  auditbeatFIM: number;
+  auditbeatFIM?: number | null;
 
-  auditbeatLogin: number;
+  auditbeatLogin?: number | null;
 
-  auditbeatPackage: number;
+  auditbeatPackage?: number | null;
 
-  auditbeatProcess: number;
+  auditbeatProcess?: number | null;
 
-  auditbeatUser: number;
+  auditbeatUser?: number | null;
 
-  filebeatSystemModule: number;
+  filebeatSystemModule?: number | null;
 
-  winlogbeat: number;
+  winlogbeat?: number | null;
 }
 
 export interface UncommonProcessesData {
@@ -6248,67 +6248,67 @@ export namespace NetworkDnsItemResolvers {
 
 export namespace OverviewNetworkDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = OverviewNetworkData> {
-    auditbeatSocket?: AuditbeatSocketResolver<number, TypeParent, Context>;
+    auditbeatSocket?: AuditbeatSocketResolver<number | null, TypeParent, Context>;
 
-    filebeatCisco?: FilebeatCiscoResolver<number, TypeParent, Context>;
+    filebeatCisco?: FilebeatCiscoResolver<number | null, TypeParent, Context>;
 
-    filebeatNetflow?: FilebeatNetflowResolver<number, TypeParent, Context>;
+    filebeatNetflow?: FilebeatNetflowResolver<number | null, TypeParent, Context>;
 
-    filebeatPanw?: FilebeatPanwResolver<number, TypeParent, Context>;
+    filebeatPanw?: FilebeatPanwResolver<number | null, TypeParent, Context>;
 
-    filebeatSuricata?: FilebeatSuricataResolver<number, TypeParent, Context>;
+    filebeatSuricata?: FilebeatSuricataResolver<number | null, TypeParent, Context>;
 
-    filebeatZeek?: FilebeatZeekResolver<number, TypeParent, Context>;
+    filebeatZeek?: FilebeatZeekResolver<number | null, TypeParent, Context>;
 
-    packetbeatDNS?: PacketbeatDnsResolver<number, TypeParent, Context>;
+    packetbeatDNS?: PacketbeatDnsResolver<number | null, TypeParent, Context>;
 
-    packetbeatFlow?: PacketbeatFlowResolver<number, TypeParent, Context>;
+    packetbeatFlow?: PacketbeatFlowResolver<number | null, TypeParent, Context>;
 
-    packetbeatTLS?: PacketbeatTlsResolver<number, TypeParent, Context>;
+    packetbeatTLS?: PacketbeatTlsResolver<number | null, TypeParent, Context>;
   }
 
   export type AuditbeatSocketResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FilebeatCiscoResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FilebeatNetflowResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FilebeatPanwResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FilebeatSuricataResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FilebeatZeekResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketbeatDnsResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketbeatFlowResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketbeatTlsResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6316,60 +6316,60 @@ export namespace OverviewNetworkDataResolvers {
 
 export namespace OverviewHostDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = OverviewHostData> {
-    auditbeatAuditd?: AuditbeatAuditdResolver<number, TypeParent, Context>;
+    auditbeatAuditd?: AuditbeatAuditdResolver<number | null, TypeParent, Context>;
 
-    auditbeatFIM?: AuditbeatFimResolver<number, TypeParent, Context>;
+    auditbeatFIM?: AuditbeatFimResolver<number | null, TypeParent, Context>;
 
-    auditbeatLogin?: AuditbeatLoginResolver<number, TypeParent, Context>;
+    auditbeatLogin?: AuditbeatLoginResolver<number | null, TypeParent, Context>;
 
-    auditbeatPackage?: AuditbeatPackageResolver<number, TypeParent, Context>;
+    auditbeatPackage?: AuditbeatPackageResolver<number | null, TypeParent, Context>;
 
-    auditbeatProcess?: AuditbeatProcessResolver<number, TypeParent, Context>;
+    auditbeatProcess?: AuditbeatProcessResolver<number | null, TypeParent, Context>;
 
-    auditbeatUser?: AuditbeatUserResolver<number, TypeParent, Context>;
+    auditbeatUser?: AuditbeatUserResolver<number | null, TypeParent, Context>;
 
-    filebeatSystemModule?: FilebeatSystemModuleResolver<number, TypeParent, Context>;
+    filebeatSystemModule?: FilebeatSystemModuleResolver<number | null, TypeParent, Context>;
 
-    winlogbeat?: WinlogbeatResolver<number, TypeParent, Context>;
+    winlogbeat?: WinlogbeatResolver<number | null, TypeParent, Context>;
   }
 
   export type AuditbeatAuditdResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AuditbeatFimResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AuditbeatLoginResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AuditbeatPackageResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AuditbeatProcessResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AuditbeatUserResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FilebeatSystemModuleResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type WinlogbeatResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
