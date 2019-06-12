@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
 import { LatestActive } from './latest_active';
 
@@ -19,8 +19,8 @@ describe('Latest Active', () => {
       { range: 'last1d', count: 10 },
     ];
 
-    const component = shallowWithIntl(
-      <LatestActive.WrappedComponent
+    const component = shallow(
+      <LatestActive
         latestActive={latestActive}
       />
     );

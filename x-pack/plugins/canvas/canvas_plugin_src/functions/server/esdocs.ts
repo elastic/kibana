@@ -12,11 +12,11 @@ import { Filter } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
-  index: string | null;
+  index: string;
   query: string;
-  sort: string | null;
-  fields: string | null;
-  metaFields: string | null;
+  sort: string;
+  fields: string;
+  metaFields: string;
   count: number;
 }
 
@@ -32,7 +32,7 @@ export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
     },
     args: {
       index: {
-        types: ['string', 'null'],
+        types: ['string'],
         default: '_all',
         help: argHelp.index,
       },
@@ -43,16 +43,16 @@ export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
         default: '-_index:.kibana',
       },
       sort: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.sort,
       },
       fields: {
         help: argHelp.fields,
-        types: ['string', 'null'],
+        types: ['string'],
       },
       metaFields: {
         help: argHelp.metaFields,
-        types: ['string', 'null'],
+        types: ['string'],
       },
       count: {
         types: ['number'],

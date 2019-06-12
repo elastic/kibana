@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/ColorManager default 1`] = `
+exports[`Storyshots components/Color/ColorManager default 1`] = `
 Array [
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -18,7 +18,7 @@ Array [
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "#abcdef",
+              "background": "blue",
             }
           }
         />
@@ -43,7 +43,7 @@ Array [
             onChange={[Function]}
             placeholder="Color code"
             type="text"
-            value="#abcdef"
+            value="blue"
           />
         </div>
       </div>
@@ -112,6 +112,194 @@ Array [
           className="canvasColorDot__foreground"
           style={
             Object {
+              "background": "#abcd",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#abcd"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#abcdef",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#abcdef"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#aabbccdd",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#aabbccdd"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "rgb(50, 100, 150)",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="rgb(50, 100, 150)"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
               "background": "rgba(50, 100, 150, .5)",
             }
           }
@@ -146,7 +334,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/ColorManager interactive 1`] = `
+exports[`Storyshots components/Color/ColorManager interactive 1`] = `
 <div>
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -254,7 +442,7 @@ exports[`Storyshots components/ColorManager interactive 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ColorManager invalid colors 1`] = `
+exports[`Storyshots components/Color/ColorManager invalid colors 1`] = `
 Array [
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -293,7 +481,7 @@ Array [
             onChange={[Function]}
             placeholder="Color code"
             type="text"
-            value="#abcd"
+            value="elastic"
           />
         </div>
       </div>
@@ -336,7 +524,222 @@ Array [
             onChange={[Function]}
             placeholder="Color code"
             type="text"
-            value="canvas"
+            value="#xyz"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#ghij"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#canvas"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#12345xyz"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="rgb(a,b,c)"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="rgba(w,x,y,z)"
           />
         </div>
       </div>
@@ -345,7 +748,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/ColorManager with buttons 1`] = `
+exports[`Storyshots components/Color/ColorManager with buttons 1`] = `
 Array [
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"

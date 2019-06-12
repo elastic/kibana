@@ -54,7 +54,7 @@ class Interactive extends React.Component<
   }
 }
 
-storiesOf('components/ColorPicker', module)
+storiesOf('components/Color/ColorPicker', module)
   .addDecorator(withKnobs)
   .addParameters({
     info: {

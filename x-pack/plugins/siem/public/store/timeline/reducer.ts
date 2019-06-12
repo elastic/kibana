@@ -81,25 +81,8 @@ import {
   updateTimelineTitle,
   upsertTimelineColumn,
 } from './helpers';
-import { TimelineModel } from './model';
 
-/** A map of id to timeline  */
-export interface TimelineById {
-  [id: string]: TimelineModel;
-}
-
-export interface AutoSavedWarningMsg {
-  timelineId: string | null;
-  newTimelineModel: TimelineModel | null;
-}
-
-/** The state of all timelines is stored here */
-export interface TimelineState {
-  timelineById: TimelineById;
-  autoSavedWarningMsg: AutoSavedWarningMsg;
-}
-
-const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
+import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
