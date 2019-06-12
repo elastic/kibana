@@ -17,13 +17,15 @@ import { NoData } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import 'ui/listen';
+import {
+  EuiSpacer
+} from '@elastic/eui';
 
 const REACT_NODE_ID_NO_DATA = 'noDataReact';
 
 export class NoDataController {
   constructor($injector, $scope) {
     const $executor = $injector.get('$executor');
-    this.enableTimefilter($executor, $scope);
     this.registerCleanup($scope, $executor);
 
     Object.assign(this, this.getDefaultModel());
@@ -70,12 +72,19 @@ export class NoDataController {
     $scope.$watch(
       () => model,
       props => {
-        render(
-          <I18nContext>
-            <NoData {...props} enabler={enabler} />
-          </I18nContext>,
-          document.getElementById(REACT_NODE_ID_NO_DATA)
-        );
+        if (!props.isLoading) {
+          const { errors, hasData, isCollectionEnabledUpdated } = props;
+          if (errors && !errors.length && isCollectionEnabledUpdated && !hasData) {
+            this.enableTimefilter($executor, $scope);
+          }
+          render(
+            <I18nContext>
+              <EuiSpacer size="xxl" />
+              <NoData {...props} enabler={enabler} />
+            </I18nContext>,
+            document.getElementById(REACT_NODE_ID_NO_DATA)
+          );
+        }
       },
       true // deep watch
     );

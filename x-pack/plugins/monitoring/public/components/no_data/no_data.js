@@ -28,7 +28,7 @@ function NoDataMessage(props) {
     return <ReasonFound {...props} />;
   }
 
-  return <WeTried />;
+  return <WeTried {...props} />;
 }
 
 export function NoData(props) {
