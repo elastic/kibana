@@ -112,6 +112,8 @@ test('context receives Redux store', () => {
   expect(container!.innerHTML).toBe('bar');
 });
 
+xtest('can use multiple stores in one React app', () => {});
+
 describe('hooks', () => {
   describe('useStore', () => {
     test('can select store using useStore hook', () => {

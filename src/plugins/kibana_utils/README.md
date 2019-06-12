@@ -1,3 +1,5 @@
-- [ ] Add readme.
-- [ ] Create React hooks.
-- [ ] Figure out how to store mutations in store.
+# kibana-utils
+
+Utilities for building Kibana plugins.
+
+- [Application/plugin *state containers*](./docs/store/README.md).

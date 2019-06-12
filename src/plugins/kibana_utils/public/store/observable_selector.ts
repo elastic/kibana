@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, Subject, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 export type Selector<State, Result> = (state: State) => Result;
 export type Comparator<Result> = (previous: Result, current: Result) => boolean;
