@@ -13,6 +13,7 @@ coming[7.2.0]
 
 
 * <<breaking_72_index_pattern_changes>>
+* <<breaking_72_saved_objects_migration_changes>>
 
 
 [float]
@@ -32,6 +33,17 @@ time-based index patterns to a wildcard pattern to prepare for this change.
 on the root wildcard term. For example, a query on an index pattern such as 
 `[logstash-]YYYY.MM.DD` will now query all indices that match `logstash-*`.
 
+[float]
+[[breaking_72_saved_objects_migration_changes]]
+=== Saved object migration changes
+
+[float]
+==== New error is thrown when a plugin defines a migration for a mapping it doesn't define or own
+*Details:* Kibana will now throw an error on startup if a plugin has defined
+a saved object migration inside a plugin that doesn't define or own the mappings to.
+
+*Impact:* If you define migrations within your plugin but the mappings is
+owned by another plugin, Kibana will no longer allow that and not start up.
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide
