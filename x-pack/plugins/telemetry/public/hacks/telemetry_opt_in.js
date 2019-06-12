@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('xpack_main', () => {
-    loadTestFile(require.resolve('./features'));
-    loadTestFile(require.resolve('./settings'));
-  });
-}
+import { uiModules } from 'ui/modules';
+
+import { injectBanner } from './welcome_banner';
+
+uiModules.get('telemetry/hacks').run(injectBanner);
