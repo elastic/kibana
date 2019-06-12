@@ -32,4 +32,4 @@ export declare function createRouter(
   apiBasePath: string
 ): Router;
 
-export declare function createIsEsError(server: Legacy.Server): any;
+export declare function isEsErrorFactory(server: Legacy.Server): any;

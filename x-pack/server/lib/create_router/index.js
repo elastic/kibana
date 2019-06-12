@@ -5,19 +5,19 @@
  */
 import Boom from 'boom';
 import { callWithRequestFactory } from './call_with_request_factory';
-import { isEsErrorFactory } from './is_es_error_factory';
+import { isEsErrorFactory as createIsEsError } from './is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from './error_wrappers';
 import { licensePreRoutingFactory } from'./license_pre_routing_factory';
 
 export { wrapEsError, wrapUnknownError, wrapCustomError } from './error_wrappers';
 
 // Sometimes consumers will need to check if errors are ES errors, too.
-export const createIsEsError = server => {
-  return isEsErrorFactory(server);
+export const isEsErrorFactory = server => {
+  return createIsEsError(server);
 };
 
 export const createRouter = (server, pluginId, apiBasePath = '') => {
-  const isEsError = createIsEsError(server);
+  const isEsError = isEsErrorFactory(server);
 
   // NOTE: The license-checking logic depends on the xpack_main plugin, so if your plugin
   // consumes this helper, make sure it declares 'xpack_main' as a dependency.

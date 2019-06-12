@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { createRouter, createIsEsError, Router } from '../../server/lib/create_router';
+import { createRouter, isEsErrorFactory, Router } from '../../server/lib/create_router';
 import { registerLicenseChecker } from '../../server/lib/register_license_checker';
 
 export interface CoreSetup {
@@ -29,7 +29,7 @@ export function createShim(
     coreSetup: {
       http: {
         createRouter: (basePath: string) => createRouter(server, pluginId, basePath),
-        isEsError: createIsEsError(server),
+        isEsError: isEsErrorFactory(server),
       },
     },
     pluginsSetup: {
