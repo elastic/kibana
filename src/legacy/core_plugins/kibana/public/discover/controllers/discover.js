@@ -40,7 +40,7 @@ import { timefilter } from 'ui/timefilter';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
-import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import { DocTitleProvider } from 'ui/doc_title';
 import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
@@ -199,7 +199,7 @@ function discoverController(
   let visualizeHandler;
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
-  const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
+  const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
