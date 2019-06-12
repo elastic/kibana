@@ -13,7 +13,7 @@ import { getFunctionHelp } from '../../strings';
 type Context = Datatable | null;
 
 interface Arguments {
-  expression: string[];
+  content: string[];
   font: Style;
 }
 
@@ -34,10 +34,10 @@ export function markdown(): ExpressionFunction<'markdown', Context, Arguments, R
       types: ['datatable', 'null'],
     },
     args: {
-      expression: {
-        aliases: ['_'],
+      content: {
+        aliases: ['_', 'expression'],
         types: ['string'],
-        help: argHelp.expression,
+        help: argHelp.content,
         default: '""',
         multi: true,
       },
@@ -48,7 +48,7 @@ export function markdown(): ExpressionFunction<'markdown', Context, Arguments, R
       },
     },
     fn: (context, args) => {
-      const compileFunctions = args.expression.map(str =>
+      const compileFunctions = args.content.map(str =>
         Handlebars.compile(String(str), { knownHelpersOnly: true })
       );
       const ctx = {

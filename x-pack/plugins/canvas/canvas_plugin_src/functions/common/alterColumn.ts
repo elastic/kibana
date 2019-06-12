@@ -7,16 +7,17 @@
 import { omit } from 'lodash';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Datatable, DatatableColumn, DatatableColumnType } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   column: string;
   type: DatatableColumnType | null;
-  name: string | null;
+  name: string;
 }
 
 export function alterColumn(): ExpressionFunction<'alterColumn', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().alterColumn;
+  const errors = getFunctionErrors().alterColumn;
 
   return {
     name: 'alterColumn',
@@ -29,18 +30,17 @@ export function alterColumn(): ExpressionFunction<'alterColumn', Datatable, Argu
       column: {
         aliases: ['_'],
         types: ['string'],
+        required: true,
         help: argHelp.column,
       },
       type: {
         types: ['string'],
         help: argHelp.type,
-        default: null,
-        options: ['null', 'boolean', 'number', 'string'],
+        options: ['null', 'boolean', 'number', 'string', 'date'],
       },
       name: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.name,
-        default: null,
       },
     },
     fn: (context, args) => {
@@ -50,7 +50,7 @@ export function alterColumn(): ExpressionFunction<'alterColumn', Datatable, Argu
 
       const column = context.columns.find(col => col.name === args.column);
       if (!column) {
-        throw new Error(`Column not found: '${args.column}'`);
+        throw errors.columnNotFound(args.column);
       }
 
       const name = args.name || column.name;
@@ -86,7 +86,7 @@ export function alterColumn(): ExpressionFunction<'alterColumn', Datatable, Argu
             case 'null':
               return () => null;
             default:
-              throw new Error(`Cannot convert to '${type}'`);
+              throw errors.cannotConvertType(type);
           }
         })();
       }

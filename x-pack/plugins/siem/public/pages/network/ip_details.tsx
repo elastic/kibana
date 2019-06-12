@@ -48,7 +48,7 @@ interface IPDetailsComponentReduxProps {
 
 type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
-const IPDetailsComponent = pure<IPDetailsComponentProps>(
+export const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({
     match: {
       params: { ip },
@@ -56,7 +56,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
     filterQuery,
     flowTarget,
   }) => (
-    <WithSource sourceId="default">
+    <WithSource sourceId="default" data-test-subj="ip-details-page">
       {({ indicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
           <StickyContainer>
@@ -66,8 +66,11 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
             </FiltersGlobal>
 
             <HeaderPage
-              subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
-              title={ip}
+              data-test-subj="ip-details-headline"
+              subtitle={
+                <LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={decodeIpv6(ip)} />
+              }
+              title={decodeIpv6(ip)}
             >
               <FlowTargetSelectConnected />
             </HeaderPage>
@@ -182,7 +185,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
           </StickyContainer>
         ) : (
           <>
-            <HeaderPage title={ip} />
+            <HeaderPage title={decodeIpv6(ip)} />
 
             <NetworkEmptyPage />
           </>

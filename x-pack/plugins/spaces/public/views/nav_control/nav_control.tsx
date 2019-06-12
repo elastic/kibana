@@ -10,7 +10,7 @@ import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 import template from 'plugins/spaces/views/nav_control/nav_control.html';
 import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_popover';
 // @ts-ignore
-import { PathProvider } from 'plugins/xpack_main/services/path';
+import { Path } from 'plugins/xpack_main/services/path';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import ReactDOM from 'react-dom';
@@ -44,9 +44,7 @@ let spacesManager: SpacesManager;
 
 module.controller(
   'spacesNavController',
-  ($scope: any, $http: any, chrome: any, Private: any, activeSpace: any) => {
-    const pathProvider = Private(PathProvider);
-
+  ($scope: any, $http: any, chrome: any, activeSpace: any) => {
     const domNode = document.getElementById(`spacesNavReactRoot`);
     const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
 
@@ -55,7 +53,7 @@ module.controller(
     let mounted = false;
 
     $scope.$parent.$watch('isVisible', function isVisibleWatcher(isVisible: boolean) {
-      if (isVisible && !mounted && !pathProvider.isUnauthenticated()) {
+      if (isVisible && !mounted && !Path.isUnauthenticated()) {
         render(
           <I18nContext>
             <NavControlPopover
@@ -94,33 +92,29 @@ module.service('spacesNavState', (activeSpace: any) => {
   } as SpacesNavState;
 });
 
-chromeHeaderNavControlsRegistry.register(
-  ($http: any, chrome: any, Private: any, activeSpace: any) => ({
-    name: 'spaces',
-    order: 1000,
-    side: NavControlSide.Left,
-    render(el: HTMLElement) {
-      const pathProvider = Private(PathProvider);
+chromeHeaderNavControlsRegistry.register(($http: any, chrome: any, activeSpace: any) => ({
+  name: 'spaces',
+  order: 1000,
+  side: NavControlSide.Left,
+  render(el: HTMLElement) {
+    if (Path.isUnauthenticated()) {
+      return;
+    }
 
-      if (pathProvider.isUnauthenticated()) {
-        return;
-      }
+    const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
 
-      const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
+    spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
-      spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
-
-      ReactDOM.render(
-        <I18nContext>
-          <NavControlPopover
-            spacesManager={spacesManager}
-            activeSpace={activeSpace}
-            anchorPosition="downLeft"
-            buttonClass={SpacesHeaderNavButton}
-          />
-        </I18nContext>,
-        el
-      );
-    },
-  })
-);
+    ReactDOM.render(
+      <I18nContext>
+        <NavControlPopover
+          spacesManager={spacesManager}
+          activeSpace={activeSpace}
+          anchorPosition="downLeft"
+          buttonClass={SpacesHeaderNavButton}
+        />
+      </I18nContext>,
+      el
+    );
+  },
+}));
