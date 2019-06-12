@@ -1,48 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`IndexPattern Data Source #getPublicAPI renderDimensionPanel should render a dimension panel 1`] = `
-<ChildDragDropProvider
-  setDragging={[MockFunction]}
->
-  <DragDrop
-    data-test-subj="indexPattern-dropTarget"
-    droppable={false}
-    onDrop={[Function]}
-  >
-    Dimension Panel
-    <EuiComboBox
-      compressed={false}
-      data-test-subj="indexPattern-dimension"
-      fullWidth={false}
-      isClearable={false}
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "label": "Value of timestamp",
-            "value": "0",
-          },
-          Object {
-            "label": "Value of bytes",
-            "value": "1",
-          },
-          Object {
-            "label": "Value of source",
-            "value": "2",
-          },
-        ]
-      }
-      selectedOptions={Array []}
-      singleSelection={
-        Object {
-          "asPlainText": true,
-        }
-      }
-    />
-  </DragDrop>
-</ChildDragDropProvider>
-`;
-
 exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
 <ChildDragDropProvider
   setDragging={[MockFunction]}
@@ -58,11 +15,11 @@ exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
       options={
         Array [
           Object {
-            "label": "Fake Index Pattern",
+            "label": "my-fake-index-pattern",
             "value": "1",
           },
           Object {
-            "label": "Fake Rollup Pattern",
+            "label": "my-fake-restricted-pattern",
             "value": "2",
           },
         ]
@@ -70,7 +27,7 @@ exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
       selectedOptions={
         Array [
           Object {
-            "label": "Fake Index Pattern",
+            "label": "my-fake-index-pattern",
             "value": "1",
           },
         ]

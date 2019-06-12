@@ -46,11 +46,13 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
             newVisualizationId: e.target.value,
             // TODO we probably want to have a separate API to "force" a visualization switch
             // which isn't a result of a picked suggestion
-            initialState: props.visualizationMap[e.target.value].initialize(),
+            initialState: props.visualizationMap[e.target.value].initialize(
+              props.datasourcePublicAPI
+            ),
           });
         }}
       />
-      {props.activeVisualizationId && (
+      {props.activeVisualizationId && props.visualizationState !== null && (
         <NativeRenderer
           render={props.visualizationMap[props.activeVisualizationId].renderConfigPanel}
           nativeProps={{

@@ -7,18 +7,21 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
-  value: Return;
+  value: Context;
 }
 
-type Return = boolean | number | string | null;
+type Context = boolean | number | string | null;
 
-export function eq(): ExpressionFunction<'eq', any, Arguments, Return> {
+export function eq(): ExpressionFunction<'eq', Context, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().eq;
 
   return {
     name: 'eq',
     type: 'boolean',
     help,
+    context: {
+      types: ['boolean', 'number', 'string', 'null'],
+    },
     args: {
       value: {
         aliases: ['_'],

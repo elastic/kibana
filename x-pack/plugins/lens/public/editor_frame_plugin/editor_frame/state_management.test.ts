@@ -29,20 +29,19 @@ describe('editor_frame state management', () => {
       expect(initialState.visualization.activeId).toEqual('testVis');
     });
 
-    it('should initialize visualization', () => {
-      const initialVisState = {};
-      props.visualizationMap.testVis.initialize = jest.fn(() => initialVisState);
-
+    it('should not initialize visualization but set active id', () => {
       const initialState = getInitialState(props);
 
-      expect(initialState.visualization.state).toBe(initialVisState);
-      expect(props.visualizationMap.testVis.initialize).toHaveBeenCalled();
+      expect(initialState.visualization.state).toBe(null);
+      expect(initialState.visualization.activeId).toBe('testVis');
+      expect(props.visualizationMap.testVis.initialize).not.toHaveBeenCalled();
     });
 
-    it('should not initialize visualization if no initial visualization is passed in', () => {
+    it('should not set active id if no initial visualization is passed in', () => {
       const initialState = getInitialState({ ...props, initialVisualizationId: null });
 
       expect(initialState.visualization.state).toEqual(null);
+      expect(initialState.visualization.activeId).toEqual(null);
       expect(props.visualizationMap.testVis.initialize).not.toHaveBeenCalled();
     });
   });

@@ -6,7 +6,7 @@
 
 import { AppResolverWithFields, AppResolverOf } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
-import { Note } from '../../lib/note';
+import { Note } from '../../lib/note/saved_object';
 
 export type QueryNoteResolver = AppResolverOf<QueryResolvers.GetNoteResolver>;
 

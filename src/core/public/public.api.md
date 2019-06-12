@@ -4,11 +4,9 @@
 
 ```ts
 
-import * as CSS from 'csstype';
-import { default } from 'react';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import * as PropTypes from 'prop-types';
+import React from 'react';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
@@ -241,7 +239,7 @@ export type HttpStart = HttpServiceBase;
 // @public
 export interface I18nSetup {
     Context: ({ children }: {
-        children: default.ReactNode;
+        children: React.ReactNode;
     }) => JSX.Element;
 }
 
@@ -310,8 +308,6 @@ export interface OverlayRef {
 
 // @public (undocumented)
 export interface OverlayStart {
-    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;
@@ -340,6 +336,13 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<strin
 // @public
 export interface PluginInitializerContext {
 }
+
+// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
+    [K in keyof T]: RecursiveReadonly<T[K]>;
+}> : T;
 
 export { Toast }
 

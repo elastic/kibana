@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import {
@@ -12,17 +12,15 @@ import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
   IndexPatternDataPanel,
-  IndexPatternDimensionPanel,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
-import { DropHandler } from '../drag_drop';
 
 jest.mock('./loader');
 
 const expectedIndexPatterns = {
   1: {
     id: '1',
-    title: 'Fake Index Pattern',
+    title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     fields: [
       {
@@ -47,7 +45,7 @@ const expectedIndexPatterns = {
   },
   2: {
     id: '2',
-    title: 'Fake Rollup Pattern',
+    title: 'my-fake-restricted-pattern',
     timeFieldName: 'timestamp',
     fields: [
       {
@@ -55,18 +53,50 @@ const expectedIndexPatterns = {
         type: 'date',
         aggregatable: true,
         searchable: true,
+        aggregationRestrictions: {
+          date_histogram: {
+            agg: 'date_histogram',
+            fixed_interval: '1d',
+            delay: '7d',
+            time_zone: 'UTC',
+          },
+        },
       },
       {
         name: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
+        aggregationRestrictions: {
+          // Ignored in the UI
+          histogram: {
+            agg: 'histogram',
+            interval: 1000,
+          },
+          avg: {
+            agg: 'avg',
+          },
+          max: {
+            agg: 'max',
+          },
+          min: {
+            agg: 'min',
+          },
+          sum: {
+            agg: 'sum',
+          },
+        },
       },
       {
         name: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
+        aggregationRestrictions: {
+          terms: {
+            agg: 'terms',
+          },
+        },
       },
     ],
   },
@@ -192,7 +222,7 @@ describe('IndexPattern Data Source', () => {
 
             // Private
             operationType: 'value',
-            sourceField: 'op',
+            sourceField: 'source',
           },
           col2: {
             operationId: 'op2',
@@ -202,14 +232,51 @@ describe('IndexPattern Data Source', () => {
 
             // Private
             operationType: 'value',
-            sourceField: 'op2',
+            sourceField: 'bytes',
           },
         },
       };
       const state = await indexPatternDatasource.initialize(queryPersistedState);
       expect(indexPatternDatasource.toExpression(state)).toMatchInlineSnapshot(
-        `"esdocs index=\\"1\\" fields=\\"op, op2\\" sort=\\"op, DESC\\""`
+        `"esdocs index=\\"my-fake-index-pattern\\" fields=\\"source, bytes\\" sort=\\"source, DESC\\""`
       );
+    });
+
+    it('should generate an expression for an aggregated query', async () => {
+      const queryPersistedState: IndexPatternPersistedState = {
+        currentIndexPatternId: '1',
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            operationId: 'op1',
+            label: 'Count of Documents',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'count',
+            sourceField: 'document',
+          },
+          col2: {
+            operationId: 'op2',
+            label: 'Date',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            sourceField: 'timestamp',
+          },
+        },
+      };
+      const state = await indexPatternDatasource.initialize(queryPersistedState);
+      expect(indexPatternDatasource.toExpression(state)).toMatchInlineSnapshot(`
+"esaggs
+      index=\\"1\\"
+      metricsAtAllLevels=\\"false\\"
+      partialRows=\\"false\\"
+      aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"timeRange\\":{\\"from\\":\\"now-1d\\",\\"to\\":\\"now\\"},\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1h\\",\\"drop_partials\\":false,\\"min_doc_count\\":1,\\"extended_bounds\\":{}}}]'"
+`);
     });
   });
 
@@ -239,265 +306,6 @@ describe('IndexPattern Data Source', () => {
           dataType: 'string',
           isBucketed: false,
         } as Operation);
-      });
-    });
-
-    describe('renderDimensionPanel', () => {
-      let state: IndexPatternPrivateState;
-
-      beforeEach(async () => {
-        state = await indexPatternDatasource.initialize(persistedState);
-      });
-
-      it('should render a dimension panel', () => {
-        const wrapper = shallow(
-          <IndexPatternDimensionPanel
-            dragDropContext={dragDropContext}
-            state={state}
-            setState={() => {}}
-            columnId={'col2'}
-            filterOperations={(operation: Operation) => true}
-          />
-        );
-
-        expect(wrapper).toMatchSnapshot();
-      });
-
-      describe('drag and drop', () => {
-        function dragDropState() {
-          return {
-            ...state,
-            currentIndexPatternId: 'foo',
-            indexPatterns: {
-              foo: {
-                id: 'foo',
-                title: 'Foo pattern',
-                fields: [{ aggregatable: true, name: 'bar', searchable: true, type: 'number' }],
-              },
-            },
-          };
-        }
-
-        it('is not droppable if no drag is happening', () => {
-          const component = mount(
-            <IndexPatternDimensionPanel
-              dragDropContext={dragDropContext}
-              state={dragDropState()}
-              setState={() => {}}
-              columnId={'col2'}
-              filterOperations={() => true}
-            />
-          );
-
-          const dropTarget = component
-            .find('[data-test-subj="indexPattern-dropTarget"]')
-            .first()
-            .props();
-
-          expect((dropTarget as { droppable: boolean }).droppable).toBeFalsy();
-        });
-
-        it('is not droppable if the dragged item has no type', () => {
-          const component = shallow(
-            <IndexPatternDimensionPanel
-              dragDropContext={{
-                ...dragDropContext,
-                dragging: { name: 'bar' },
-              }}
-              state={dragDropState()}
-              setState={() => {}}
-              columnId={'col2'}
-              filterOperations={() => true}
-            />
-          );
-
-          const dropTarget = component
-            .find('[data-test-subj="indexPattern-dropTarget"]')
-            .first()
-            .props();
-
-          expect((dropTarget as { droppable: boolean }).droppable).toBeFalsy();
-        });
-
-        it('is not droppable if field is not supported by filterOperations', () => {
-          const component = shallow(
-            <IndexPatternDimensionPanel
-              dragDropContext={{
-                ...dragDropContext,
-                dragging: { type: 'number', name: 'bar' },
-              }}
-              state={dragDropState()}
-              setState={() => {}}
-              columnId={'col2'}
-              filterOperations={() => false}
-            />
-          );
-
-          const dropTarget = component
-            .find('[data-test-subj="indexPattern-dropTarget"]')
-            .first()
-            .props();
-
-          expect((dropTarget as { droppable: boolean }).droppable).toBeFalsy();
-        });
-
-        it('is droppable if the field is supported by filterOperations', () => {
-          const component = shallow(
-            <IndexPatternDimensionPanel
-              dragDropContext={{
-                ...dragDropContext,
-                dragging: { type: 'number', name: 'bar' },
-              }}
-              state={dragDropState()}
-              setState={() => {}}
-              columnId={'col2'}
-              filterOperations={op => op.dataType === 'number'}
-            />
-          );
-
-          const dropTarget = component
-            .find('[data-test-subj="indexPattern-dropTarget"]')
-            .first()
-            .props();
-
-          expect((dropTarget as { droppable: boolean }).droppable).toBeTruthy();
-        });
-
-        it('appends the dropped column when a field is dropped', () => {
-          const dragging = { type: 'number', name: 'bar' };
-          const testState = dragDropState();
-          const setState = jest.fn();
-          const component = shallow(
-            <IndexPatternDimensionPanel
-              dragDropContext={{
-                ...dragDropContext,
-                dragging,
-              }}
-              state={testState}
-              setState={setState}
-              columnId={'col2'}
-              filterOperations={op => op.dataType === 'number'}
-            />
-          );
-
-          const dropTarget = component
-            .find('[data-test-subj="indexPattern-dropTarget"]')
-            .first()
-            .props();
-
-          const onDrop = (dropTarget as { onDrop: DropHandler }).onDrop;
-
-          onDrop(dragging);
-
-          expect(setState).toBeCalledTimes(1);
-          expect(setState.mock.calls).toMatchObject([
-            [
-              {
-                columns: {
-                  ...testState.columns,
-                  col2: {
-                    dataType: 'number',
-                    sourceField: 'bar',
-                  },
-                },
-              },
-            ],
-          ]);
-        });
-
-        it('ignores drops of unsupported fields', () => {
-          const dragging = { type: 'number', name: 'baz' };
-          const testState = dragDropState();
-          const setState = jest.fn();
-          const component = shallow(
-            <IndexPatternDimensionPanel
-              dragDropContext={{
-                ...dragDropContext,
-                dragging,
-              }}
-              state={testState}
-              setState={setState}
-              columnId={'col2'}
-              filterOperations={op => op.dataType === 'number'}
-            />
-          );
-
-          const dropTarget = component
-            .find('[data-test-subj="indexPattern-dropTarget"]')
-            .first()
-            .props();
-
-          const onDrop = (dropTarget as { onDrop: DropHandler }).onDrop;
-
-          onDrop(dragging);
-
-          expect(setState).not.toBeCalled();
-        });
-      });
-
-      it('should call the filterOperations function', () => {
-        const filterOperations = jest.fn().mockReturnValue(true);
-
-        shallow(
-          <IndexPatternDimensionPanel
-            dragDropContext={dragDropContext}
-            state={state}
-            setState={() => {}}
-            columnId={'col2'}
-            filterOperations={filterOperations}
-          />
-        );
-
-        expect(filterOperations).toBeCalledTimes(3);
-      });
-
-      it('should filter out all selections if the filter returns false', () => {
-        const wrapper = shallow(
-          <IndexPatternDimensionPanel
-            dragDropContext={dragDropContext}
-            state={state}
-            setState={() => {}}
-            columnId={'col2'}
-            filterOperations={() => false}
-          />
-        );
-
-        expect(wrapper.find(EuiComboBox)!.prop('options')!.length).toEqual(0);
-      });
-
-      it('should update the datasource state on selection', () => {
-        const setState = jest.fn();
-
-        const wrapper = shallow(
-          <IndexPatternDimensionPanel
-            dragDropContext={dragDropContext}
-            state={state}
-            setState={setState}
-            columnId={'col2'}
-            filterOperations={() => true}
-          />
-        );
-
-        const comboBox = wrapper.find(EuiComboBox)!;
-        const firstOption = comboBox.prop('options')![0];
-
-        comboBox.prop('onChange')!([firstOption]);
-
-        expect(setState).toHaveBeenCalledWith({
-          ...state,
-          columns: {
-            ...state.columns,
-            col2: {
-              operationId: firstOption.value,
-              label: 'Value of timestamp',
-              dataType: 'date',
-              isBucketed: false,
-              operationType: 'value',
-              sourceField: 'timestamp',
-            },
-          },
-          columnOrder: ['col1', 'col2'],
-        });
       });
     });
   });
