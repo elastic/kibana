@@ -20,7 +20,7 @@
 // @ts-ignore
 import { SearchSourceProvider, SearchSource } from 'ui/courier';
 import { IPrivate } from 'ui/private';
-import { IndexPatternEnhanced, IndexPatternsEnhanced } from 'ui/index_patterns/_index_pattern';
+import { IndexPatternEnhanced } from 'ui/index_patterns/_index_pattern';
 import { Filter } from '@kbn/es-query';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
@@ -36,13 +36,16 @@ export interface EsHitRecord {
   _source: Record<string, any>;
 }
 export type EsHitRecordList = EsHitRecord[];
+export interface IndexPatternGetProvider {
+  get: (id: string) => IndexPatternEnhanced;
+}
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
 // look from 1 day up to 10000 days into the past and future
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map(days => days * DAY_MILLIS);
 
-function fetchContextProvider(indexPatterns: IndexPatternsEnhanced, Private: IPrivate) {
+function fetchContextProvider(indexPatterns: IndexPatternGetProvider, Private: IPrivate) {
   const SearchSourcePrivate: any = Private(SearchSourceProvider);
 
   return {
