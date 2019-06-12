@@ -10,6 +10,7 @@ import moment from 'moment';
 import { resolve } from 'path';
 
 import { init } from './server/init';
+import { APP_TITLE } from './common/constants';
 
 export const code = (kibana: any) =>
   new kibana.Plugin({
@@ -20,7 +21,7 @@ export const code = (kibana: any) =>
 
     uiExports: {
       app: {
-        title: 'Code (Beta)',
+        title: APP_TITLE,
         main: 'plugins/code/app',
         euiIconType: 'codeApp',
       },
