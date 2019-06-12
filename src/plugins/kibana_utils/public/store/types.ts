@@ -20,12 +20,16 @@
 import { Observable } from 'rxjs';
 import { Store as ReduxStore } from 'redux';
 
-export interface AppStore<State extends {}> {
+export interface AppStore<
+  State extends {},
+  StateMutations extends Mutations<PureMutations<State>> = {}
+> {
   redux: ReduxStore;
   get: () => State;
   set: (state: State) => void;
   state$: Observable<State>;
-  createMutations: <Pure extends PureMutations<State>>(pureMutations: Pure) => Mutations<Pure>;
+  createMutations: <M extends PureMutations<State>>(pureMutations: M) => Mutations<M>;
+  mutations: StateMutations;
 }
 
 export type PureMutation<State extends {}> = (state: State) => (...args: any[]) => State;

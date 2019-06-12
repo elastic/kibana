@@ -157,3 +157,17 @@ test('mutation methods are not bound', () => {
   add(4);
   expect(store.get()).toEqual({ value: 1 });
 });
+
+test('created mutations are saved in store object', () => {
+  const store = createStore<any, {
+    add: (increment: number) => void
+  }>({ value: -3 });
+
+  store.createMutations({
+    add: state => increment => ({ ...state, value: state.value + increment }),
+  });
+
+  expect(typeof store.mutations.add).toBe('function');
+  store.mutations.add(5);
+  expect(store.get()).toEqual({ value: 2 });
+});

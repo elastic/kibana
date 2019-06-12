@@ -23,12 +23,18 @@ import { AppStore, Mutations, PureMutations } from './types';
 
 const SET = '__SET__';
 
-export const createStore = <State extends {}>(defaultState: State): AppStore<State> => {
-  const mutations: PureMutations<State> = {};
+export const createStore = <
+  State extends {},
+  StateMutations extends Mutations<PureMutations<State>> = {}
+>(
+  defaultState: State
+): AppStore<State, StateMutations> => {
+  const pureMutations: PureMutations<State> = {};
+  const mutations: StateMutations = {} as StateMutations;
   const reducer: Reducer = (state, action) => {
-    const mutation = mutations[action.type];
-    if (mutation) {
-      return mutation(state)(...action.args);
+    const pureMutation = pureMutations[action.type];
+    if (pureMutation) {
+      return pureMutation(state)(...action.args);
     }
 
     switch (action.type) {
@@ -53,10 +59,9 @@ export const createStore = <State extends {}>(defaultState: State): AppStore<Sta
     state$.next(get());
   });
 
-  const createMutations: AppStore<State>['createMutations'] = pureMutations => {
-    Object.assign(mutations, pureMutations);
+  const createMutations: AppStore<State>['createMutations'] = newPureMutations => {
     const result: Mutations<any> = {};
-    for (const type of Object.keys(pureMutations)) {
+    for (const type of Object.keys(newPureMutations)) {
       result[type] = (...args) => {
         redux.dispatch({
           type,
@@ -64,6 +69,8 @@ export const createStore = <State extends {}>(defaultState: State): AppStore<Sta
         });
       };
     }
+    Object.assign(pureMutations, newPureMutations);
+    Object.assign(mutations, result);
     return result;
   };
 
@@ -73,5 +80,6 @@ export const createStore = <State extends {}>(defaultState: State): AppStore<Sta
     redux,
     state$: (state$ as unknown) as Observable<State>,
     createMutations,
+    mutations,
   };
 };
