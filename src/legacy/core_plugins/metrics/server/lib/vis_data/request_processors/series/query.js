@@ -47,7 +47,9 @@ export function query(req, panel, series, esQueryConfig, indexPatternObject) {
     }
 
     if (series.filter) {
-      doc.query.bool.must.push(buildEsQuery(indexPatternObject, [series.filter], [], esQueryConfig));
+      doc.query.bool.must.push(
+        buildEsQuery(indexPatternObject, [series.filter], [], esQueryConfig)
+      );
     }
 
     return next(doc);

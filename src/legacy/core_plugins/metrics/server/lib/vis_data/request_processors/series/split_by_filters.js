@@ -30,4 +30,3 @@ export function splitByFilters(req, panel, series, esQueryConfig, indexPattern) 
     return next(doc);
   };
 }
-

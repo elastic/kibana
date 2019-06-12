@@ -20,19 +20,17 @@ describe('config schema', () => {
   describe('authc', () => {
     describe('oidc', () => {
       describe('realm', () => {
-        it(`returns a validation error when authProviders is "['oidc']" and realm is unspecified`, async () => {
+        it(`returns a validation error when authc.providers is "['oidc']" and realm is unspecified`, async () => {
           const schema = await getConfigSchema(security);
-          const validationResult = schema.validate({
-            authProviders: ['oidc'],
-          });
-          expect(validationResult.error).toMatchSnapshot();
+          expect(schema.validate({ authc: { providers: ['oidc'] } }).error).toMatchSnapshot();
+          expect(schema.validate({ authc: { providers: ['oidc'], oidc: {} } }).error).toMatchSnapshot();
         });
 
-        it(`is valid when authProviders is "['oidc']" and realm is specified`, async () => {
+        it(`is valid when authc.providers is "['oidc']" and realm is specified`, async () => {
           const schema = await getConfigSchema(security);
           const validationResult = schema.validate({
-            authProviders: ['oidc'],
             authc: {
+              providers: ['oidc'],
               oidc: {
                 realm: 'realm-1',
               },
@@ -42,19 +40,19 @@ describe('config schema', () => {
           expect(validationResult.value).toHaveProperty('authc.oidc.realm', 'realm-1');
         });
 
-        it(`returns a validation error when authProviders is "['oidc', 'basic']" and realm is unspecified`, async () => {
+        it(`returns a validation error when authc.providers is "['oidc', 'basic']" and realm is unspecified`, async () => {
           const schema = await getConfigSchema(security);
           const validationResult = schema.validate({
-            authProviders: ['oidc', 'basic'],
+            authc: { providers: ['oidc', 'basic'] },
           });
           expect(validationResult.error).toMatchSnapshot();
         });
 
-        it(`is valid when authProviders is "['oidc', 'basic']" and realm is specified`, async () => {
+        it(`is valid when authc.providers is "['oidc', 'basic']" and realm is specified`, async () => {
           const schema = await getConfigSchema(security);
           const validationResult = schema.validate({
-            authProviders: ['oidc', 'basic'],
             authc: {
+              providers: ['oidc', 'basic'],
               oidc: {
                 realm: 'realm-1',
               },
@@ -64,11 +62,11 @@ describe('config schema', () => {
           expect(validationResult.value).toHaveProperty('authc.oidc.realm', 'realm-1');
         });
 
-        it(`realm is not allowed when authProviders is "['basic']"`, async () => {
+        it(`realm is not allowed when authc.providers is "['basic']"`, async () => {
           const schema = await getConfigSchema(security);
           const validationResult = schema.validate({
-            authProviders: ['basic'],
             authc: {
+              providers: ['basic'],
               oidc: {
                 realm: 'realm-1',
               },
@@ -76,6 +74,43 @@ describe('config schema', () => {
           });
           expect(validationResult.error).toMatchSnapshot();
         });
+      });
+    });
+
+    describe('saml', () => {
+      it('`realm` is optional', async () => {
+        const schema = await getConfigSchema(security);
+
+        let validationResult = schema.validate({
+          authc: { providers: ['saml'] },
+        });
+
+        expect(validationResult.error).toBeNull();
+        expect(validationResult.value.authc.saml).toBeUndefined();
+
+        validationResult = schema.validate({
+          authc: { providers: ['saml'], saml: {} },
+        });
+
+        expect(validationResult.error).toBeNull();
+        expect(validationResult.value.authc.saml.realm).toBeUndefined();
+
+        validationResult = schema.validate({
+          authc: { providers: ['saml'], saml: { realm: 'realm-1' } },
+        });
+
+        expect(validationResult.error).toBeNull();
+        expect(validationResult.value.authc.saml.realm).toBe('realm-1');
+      });
+
+      it('`realm` is not allowed if saml provider is not enabled', async () => {
+        const schema = await getConfigSchema(security);
+        expect(schema.validate({
+          authc: {
+            providers: ['basic'],
+            saml: { realm: 'realm-1' },
+          },
+        }).error).toMatchSnapshot();
       });
     });
   });
