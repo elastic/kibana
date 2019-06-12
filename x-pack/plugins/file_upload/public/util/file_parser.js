@@ -43,7 +43,7 @@ export async function parseFile(file, previewCallback = null, transformDetails,
         }
         if (previewCallback) {
           const defaultName = _.get(cleanAndValidJson, 'name', 'Import File');
-          previewCallback(_.cloneDeep(cleanAndValidJson), defaultName);
+          previewCallback(cleanAndValidJson, defaultName);
         }
         resolve(cleanAndValidJson);
       } catch (e) {
