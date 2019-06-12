@@ -27,3 +27,15 @@ export {
   parseEsInterval,
   ParsedInterval,
 } from './parse_es_interval';
+
+export interface SearchOptions {
+  onProgress?: (shards: ShardProgress) => void;
+  signal?: AbortSignal;
+}
+
+export interface ShardProgress {
+  failed: number;
+  skipped: number;
+  successful: number;
+  total: number;
+}

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { search } from './search';
 /**
  * Search Service
  * @internal
@@ -24,7 +25,7 @@
 
 export class SearchService {
   public setup() {
-    return {};
+    return { search };
   }
 
   public stop() {}

@@ -19,6 +19,7 @@
 
 import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
+import { registerSearchApi } from './server/routes/search';
 
 // eslint-disable-next-line import/no-default-export
 export default function DataPlugin(kibana: any) {
@@ -31,7 +32,9 @@ export default function DataPlugin(kibana: any) {
         enabled: Joi.boolean().default(true),
       }).default();
     },
-    init: (server: Legacy.Server) => ({}),
+    init: (server: Legacy.Server) => {
+      registerSearchApi(server);
+    },
     uiExports: {
       injectDefaultVars: () => ({}),
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
