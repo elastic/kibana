@@ -2,4 +2,5 @@
 
 Utilities for building Kibana plugins.
 
-- [*State containers* aka `store`s](./docs/store/README.md).
+- [Store reactive serializable app state in state containers, `createStore`](./docs/store/README.md).
+- Store non-serializable or any other state in registries, `createRegistry`

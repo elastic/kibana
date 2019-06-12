@@ -1,8 +1,8 @@
 # Redux
 
 Internally `createStore()` uses Redux to manage the state. When you call `store.get()`
-it is actually calling a Redux `.getState()` method. When you execute a mutation
-it actually dispatches a Redux action.
+it is actually calling the Redux `.getState()` method. When you execute a mutation
+it is actually dispatching a Redux action.
 
 You can access Redux *store* using `.redux`.
 
@@ -10,7 +10,7 @@ You can access Redux *store* using `.redux`.
 store.redux;
 ```
 
-But you should never need it, if you think you do consult with @elastic/kibana-app-arch.
+But you should never need it, if you think you do, consult with [`@elastic/kibana-app-arch`](https://github.com/orgs/elastic/teams/kibana-app-arch).
 
 We use Redux internally for 3 main reasons:
 
