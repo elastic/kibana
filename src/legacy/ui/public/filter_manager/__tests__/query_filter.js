@@ -57,7 +57,4 @@ describe('Query Filter', function () {
     });
 
   });
-
-  describe('Actions', function () {
-  });
 });

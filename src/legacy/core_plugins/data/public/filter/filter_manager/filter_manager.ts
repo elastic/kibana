@@ -71,6 +71,7 @@ export class FilterManager {
       .subscribe((partitionedFilters: PartitionedFilters) => {
         if (!this.haveFiltersChanged(partitionedFilters)) return;
 
+        // ensure we don't mutate the filters passed in
         const newPartitionedFilters = _.cloneDeep(partitionedFilters);
 
         FilterManager.setFiltersStore(newPartitionedFilters.appFilters, FilterStateStore.APP_STATE);
@@ -85,14 +86,13 @@ export class FilterManager {
   }
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
-    // ensure we don't mutate the filters passed in
     const globalFilters = partitionedFilters.globalFilters;
     const appFilters = partitionedFilters.appFilters;
 
     // existing globalFilters should be mutated by appFilters
     _.each(appFilters, function(filter, i) {
       const match = _.find(globalFilters, function(globalFilter) {
-        return compareFilters(globalFilter, filter, COMPARATOR_OPTIONS);
+        return compareFilters(globalFilter, filter);
       });
 
       // no match, do nothing
@@ -103,7 +103,7 @@ export class FilterManager {
       appFilters.splice(i, 1);
     });
 
-    return uniqFilters(appFilters.concat(globalFilters), COMPARATOR_OPTIONS);
+    return uniqFilters(appFilters.reverse().concat(globalFilters.reverse())).reverse();
   }
 
   private haveFiltersChanged(partitionedFilters: PartitionedFilters) {
@@ -120,7 +120,7 @@ export class FilterManager {
   private shouldFetch(newFilters: Filter[]) {
     // This is legacy optimization logic.
     // TODO: What it does is - ----------
-    return !onlyDisabled(newFilters, this.filters) && !onlyStateChanged(newFilters, this.filters);
+    return true; // !onlyDisabled(newFilters, this.filters) && !onlyStateChanged(newFilters, this.filters);
   }
 
   private static partitionFilters(filters: Filter[]): PartitionedFilters {
@@ -213,11 +213,12 @@ export class FilterManager {
     FilterManager.setFiltersStore(filters, store);
 
     const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, filters);
+    const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
+    const partitionFilters = this.getPartitionedFilters();
+    partitionFilters.appFilters.push(...newPartitionedFilters.appFilters);
+    partitionFilters.globalFilters.push(...newPartitionedFilters.globalFilters);
 
-    // Order matters!
-    // uniqFilters will throw out duplicates from the back of the array,
-    // but we want newer filters to overwrite previously created filters.
-    const newFilters = uniqFilters(mappedFilters.concat(this.filters));
+    const newFilters = this.mergeIncomingFilters(partitionFilters);
     this.handleStateUpdate(newFilters);
   }
 

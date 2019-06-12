@@ -82,6 +82,7 @@ export function getFilterGenerator(queryFilter) {
           break;
       }
 
+      filter.$state = {};
       newFilters.push(filter);
     });
 

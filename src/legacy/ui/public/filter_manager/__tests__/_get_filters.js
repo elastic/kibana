@@ -25,9 +25,6 @@ import { FilterBarQueryFilterProvider } from '../query_filter';
 import { getFiltersArray } from './_get_filters_array';
 import { FilterStateStore } from '@kbn/es-query';
 
-const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
-};
 
 describe('get filters', function () {
   let queryFilter;
@@ -38,6 +35,7 @@ describe('get filters', function () {
     'kibana',
     'kibana/global_state',
     function ($provide) {
+      $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
       appState = new MockState({ filters: [] });
       $provide.service('getAppState', function () {
         return function () { return appState; };
@@ -62,27 +60,21 @@ describe('get filters', function () {
     });
 
     it('should return app and global filters', async function () {
-      appState.filters = [filters[0]];
-      globalState.filters = [filters[1]];
-
-      await sleep(100);
+      await queryFilter.addFilters(filters[0], false);
+      await queryFilter.addFilters(filters[1], true);
 
       // global filters should be listed first
       let res = queryFilter.getFilters();
       expect(res[0].$state.store).to.eql(FilterStateStore.GLOBAL_STATE);
-      expect(res[0].meta).to.eql(filters[1].meta);
+      expect(res[0].meta.disabled).to.eql(filters[1].meta.disabled);
       expect(res[0].query).to.eql(filters[1].query);
 
-
       expect(res[1].$state.store).to.eql(FilterStateStore.APP_STATE);
-      expect(res[1].meta).to.eql(filters[0].meta);
+      expect(res[1].meta.disabled).to.eql(filters[0].meta.disabled);
       expect(res[1].query).to.eql(filters[0].query);
 
       // should return updated version of filters
-      const newFilter = filters[2];
-      appState.filters.push(newFilter);
-
-      await sleep(100);
+      await queryFilter.addFilters(filters[2], false);
 
       res = queryFilter.getFilters();
       expect(res).to.have.length(3);
@@ -98,13 +90,11 @@ describe('get filters', function () {
       expect(appState.replace.called).to.be(false);
 
 
-      _.each(states, async function (state) {
+      _.each(states, async function (state, index) {
         expect(state[0].save.called).to.be(false);
         expect(state[0].replace.called).to.be(false);
 
-        state[0].filters = filters.slice(0);
-
-        await sleep(100);
+        await queryFilter.addFilters(filters.slice(0), index === 0);
 
         state[1]();
         expect(state[0].save.called).to.be(false);
@@ -121,11 +111,9 @@ describe('get filters', function () {
     });
 
     it('should skip appState filters that match globalState filters', async function () {
-      globalState.filters = filters;
+      await queryFilter.addFilters(filters, true);
       const appFilter = _.cloneDeep(filters[1]);
-      appState.filters.push(appFilter);
-
-      await sleep(100);
+      await queryFilter.addFilters(appFilter, false);
 
       // global filters should be listed first
       const res = queryFilter.getFilters();
@@ -136,12 +124,11 @@ describe('get filters', function () {
     });
 
     it('should append conflicting appState filters', async function () {
-      globalState.filters = filters;
+      await queryFilter.addFilters(filters, true);
       const appFilter = _.cloneDeep(filters[1]);
       appFilter.meta.negate = true;
-      appState.filters.push(appFilter);
-
-      await sleep(100);
+      appFilter.$state.store = FilterStateStore.APP_STATE;
+      await queryFilter.addFilters(appFilter, false);
 
       // global filters should be listed first
       const res = queryFilter.getFilters();
@@ -156,28 +143,28 @@ describe('get filters', function () {
 
     it('should not affect disabled filters - global state', async function () {
       // test adding to globalState
-      globalState.filters = _.map(filters, function (filter) {
+      const disabledFilters = _.map(filters, function (filter) {
         const f = _.cloneDeep(filter);
         f.meta.disabled = true;
         return f;
       });
-      _.each(filters, function (filter) { globalState.filters.push(filter); });
-
-      await sleep(100);
+      await queryFilter.addFilters(disabledFilters, true);
+      await queryFilter.addFilters(filters, true);
 
       const res = queryFilter.getFilters();
       expect(res).to.have.length(6);
     });
 
-    it('should not affect disabled filters - app state', async function () {
+    it('should affect disabled filters - app state', async function () {
       // test adding to appState
-      globalState.filters = _.map(filters, function (filter) {
+      const disabledFilters = _.map(filters, function (filter) {
         const f = _.cloneDeep(filter);
         f.meta.disabled = true;
         return f;
       });
-      _.each(filters, function (filter) { appState.filters.push(filter); });
-      await sleep(100);
+      await queryFilter.addFilters(disabledFilters, true);
+      await queryFilter.addFilters(filters, false);
+
       const res = queryFilter.getFilters();
       expect(res).to.have.length(6);
     });
