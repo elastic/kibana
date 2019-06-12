@@ -6,4 +6,4 @@
 
 export { AlertInstance } from './alert_instance';
 export { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
-export { throwIfAlertTypeParamsInvalid } from './throw_if_alert_type_params_invalid';
+export { validateAlertTypeParams } from './validate_alert_type_params';

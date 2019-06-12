@@ -8,7 +8,7 @@ import { ActionType } from '../../types';
 import { ActionTypeRegistry } from '../../action_type_registry';
 import { taskManagerMock } from '../../../../task_manager/task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../../../encrypted_saved_objects';
-import { throwIfActionTypeParamsInvalid } from '../../throw_if_action_type_params_invalid';
+import { validateActionTypeParams } from '../../validate_action_type_params';
 import { SavedObjectsClientMock } from '../../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 
 import { registerBuiltInActionTypes } from '../index';
@@ -55,7 +55,7 @@ describe('get()', () => {
   });
 });
 
-describe('throwIfActionTypeParamsInvalid()', () => {
+describe('validateActionTypeParams()', () => {
   let actionType: ActionType;
 
   beforeAll(() => {
@@ -64,8 +64,15 @@ describe('throwIfActionTypeParamsInvalid()', () => {
   });
 
   test('should validate and pass when params is valid', () => {
-    throwIfActionTypeParamsInvalid(actionType, { message: 'a message' });
-    throwIfActionTypeParamsInvalid(actionType, {
+    expect(validateActionTypeParams(actionType, { message: 'a message' })).toEqual({
+      message: 'a message',
+    });
+    expect(
+      validateActionTypeParams(actionType, {
+        message: 'a message',
+        tags: ['info', 'blorg'],
+      })
+    ).toEqual({
       message: 'a message',
       tags: ['info', 'blorg'],
     });
@@ -73,25 +80,25 @@ describe('throwIfActionTypeParamsInvalid()', () => {
 
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
-      throwIfActionTypeParamsInvalid(actionType, {});
+      validateActionTypeParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
       `"params invalid: child \\"message\\" fails because [\\"message\\" is required]"`
     );
 
     expect(() => {
-      throwIfActionTypeParamsInvalid(actionType, { message: 1 });
+      validateActionTypeParams(actionType, { message: 1 });
     }).toThrowErrorMatchingInlineSnapshot(
       `"params invalid: child \\"message\\" fails because [\\"message\\" must be a string]"`
     );
 
     expect(() => {
-      throwIfActionTypeParamsInvalid(actionType, { message: 'x', tags: 2 });
+      validateActionTypeParams(actionType, { message: 'x', tags: 2 });
     }).toThrowErrorMatchingInlineSnapshot(
       `"params invalid: child \\"tags\\" fails because [\\"tags\\" must be an array]"`
     );
 
     expect(() => {
-      throwIfActionTypeParamsInvalid(actionType, { message: 'x', tags: [2] });
+      validateActionTypeParams(actionType, { message: 'x', tags: [2] });
     }).toThrowErrorMatchingInlineSnapshot(
       `"params invalid: child \\"tags\\" fails because [\\"tags\\" at position 0 fails because [\\"0\\" must be a string]]"`
     );

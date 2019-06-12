@@ -7,15 +7,17 @@
 import Boom from 'boom';
 import { ActionType } from './types';
 
-export function throwIfActionTypeParamsInvalid(
+export function validateActionTypeParams(
   actionType: ActionType,
   params: Record<string, any>
-) {
+): Record<string, any> {
   const validator = actionType.validate && actionType.validate.params;
-  if (validator) {
-    const { error } = validator.validate(params);
-    if (error) {
-      throw Boom.badRequest(`params invalid: ${error.message}`);
-    }
+  if (!validator) {
+    return params;
   }
+  const { error, value } = validator.validate(params);
+  if (error) {
+    throw Boom.badRequest(`params invalid: ${error.message}`);
+  }
+  return value;
 }

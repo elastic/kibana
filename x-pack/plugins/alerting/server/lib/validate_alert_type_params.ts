@@ -7,12 +7,17 @@
 import Boom from 'boom';
 import { AlertType } from '../types';
 
-export function throwIfAlertTypeParamsInvalid(alertType: AlertType, params: Record<string, any>) {
+export function validateAlertTypeParams(
+  alertType: AlertType,
+  params: Record<string, any>
+): Record<string, any> {
   const validator = alertType.validate && alertType.validate.params;
-  if (validator) {
-    const { error } = validator.validate(params);
-    if (error) {
-      throw Boom.badRequest(`alertTypeParams invalid: ${error.message}`);
-    }
+  if (!validator) {
+    return params;
   }
+  const { error, value } = validator.validate(params);
+  if (error) {
+    throw Boom.badRequest(`alertTypeParams invalid: ${error.message}`);
+  }
+  return value;
 }

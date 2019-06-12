@@ -7,15 +7,17 @@
 import Boom from 'boom';
 import { ActionType } from './types';
 
-export function throwIfActionTypeConfigInvalid(
+export function validateActionTypeConfig(
   actionType: ActionType,
   config: Record<string, any>
-) {
+): Record<string, any> {
   const validator = actionType.validate && actionType.validate.actionTypeConfig;
-  if (validator) {
-    const { error } = validator.validate(config);
-    if (error) {
-      throw Boom.badRequest(`actionTypeConfig invalid: ${error.message}`);
-    }
+  if (!validator) {
+    return config;
   }
+  const { error, value } = validator.validate(config);
+  if (error) {
+    throw Boom.badRequest(`actionTypeConfig invalid: ${error.message}`);
+  }
+  return value;
 }

@@ -7,7 +7,7 @@
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/legacy/server/saved_objects';
 import { ActionTypeRegistry } from './action_type_registry';
 import { SavedObjectReference } from './types';
-import { throwIfActionTypeConfigInvalid } from './throw_if_action_type_config_invalid';
+import { validateActionTypeConfig } from './validate_action_type_config';
 
 interface Action extends SavedObjectAttributes {
   description: string;
@@ -68,11 +68,11 @@ export class ActionsClient {
   public async create({ data, options }: CreateOptions) {
     const { actionTypeId } = data;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    throwIfActionTypeConfigInvalid(actionType, data.actionTypeConfig);
-    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(
-      actionTypeId,
-      data
-    );
+    const validatedActionTypeConfig = validateActionTypeConfig(actionType, data.actionTypeConfig);
+    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(actionTypeId, {
+      ...data,
+      actionTypeConfig: validatedActionTypeConfig,
+    });
     return await this.savedObjectsClient.create('action', actionWithSplitActionTypeConfig, options);
   }
 
@@ -108,8 +108,11 @@ export class ActionsClient {
     const { actionTypeId } = existingObject.attributes;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
 
-    throwIfActionTypeConfigInvalid(actionType, data.actionTypeConfig);
-    data = this.moveEncryptedAttributesToSecrets(actionTypeId, data);
+    const validatedActionTypeConfig = validateActionTypeConfig(actionType, data.actionTypeConfig);
+    data = this.moveEncryptedAttributesToSecrets(actionTypeId, {
+      ...data,
+      actionTypeConfig: validatedActionTypeConfig,
+    });
     return await this.savedObjectsClient.update('action', id, { ...data, actionTypeId }, options);
   }
 

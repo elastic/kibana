@@ -7,8 +7,8 @@
 import { ActionType, Services } from './types';
 import { TaskInstance } from '../../task_manager';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
-import { throwIfActionTypeConfigInvalid } from './throw_if_action_type_config_invalid';
-import { throwIfActionTypeParamsInvalid } from './throw_if_action_type_params_invalid';
+import { validateActionTypeConfig } from './validate_action_type_config';
+import { validateActionTypeParams } from './validate_action_type_params';
 
 interface CreateTaskRunnerFunctionOptions {
   services: Services;
@@ -36,12 +36,15 @@ export function getCreateTaskRunnerFunction({
           ...(action.attributes.actionTypeConfig || {}),
           ...(action.attributes.actionTypeConfigSecrets || {}),
         };
-        throwIfActionTypeConfigInvalid(actionType, mergedActionTypeConfig);
-        throwIfActionTypeParamsInvalid(actionType, actionTypeParams);
+        const validatedActionTypeConfig = validateActionTypeConfig(
+          actionType,
+          mergedActionTypeConfig
+        );
+        const validatedACtionTypeParams = validateActionTypeParams(actionType, actionTypeParams);
         await actionType.executor({
           services,
-          actionTypeConfig: mergedActionTypeConfig,
-          params: actionTypeParams,
+          actionTypeConfig: validatedActionTypeConfig,
+          params: validatedACtionTypeParams,
         });
       },
     };
