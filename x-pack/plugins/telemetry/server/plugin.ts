@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('xpack_main', () => {
-    loadTestFile(require.resolve('./features'));
-    loadTestFile(require.resolve('./settings'));
-  });
+import { CoreSetup } from 'src/core/server';
+import { registerRoutes } from './routes';
+
+export class TelemetryPlugin {
+  public setup(core: CoreSetup) {
+    registerRoutes(core);
+  }
 }
