@@ -33,7 +33,8 @@ export XPACK_DIR="$KIBANA_DIR/x-pack"
 parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR="$parentDir"
 
-kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
+# kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
+kbnBranch="$(node -e "console.log(require('./package.json').branch)")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
 
 echo " -- KIBANA_DIR='$KIBANA_DIR'"
