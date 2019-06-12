@@ -110,7 +110,6 @@
     "common.ui.aggTypes.buckets.termsTitle": "词",
     "common.ui.aggTypes.changePrecisionLabel": "更改地图缩放的精确度",
     "common.ui.aggTypes.customMetricLabel": "定制指标",
-    "common.ui.aggTypes.dateRanges.acceptedDateFormatsLinkText": "已接受日期格式",
     "common.ui.aggTypes.dateRanges.fromColumnLabel": "从",
     "common.ui.aggTypes.dateRanges.toColumnLabel": "到",
     "common.ui.aggTypes.definiteMetricLabel": "指标：{safeMakeLabel}",

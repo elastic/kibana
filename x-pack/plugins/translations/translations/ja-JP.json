@@ -119,7 +119,6 @@
     "common.ui.aggTypes.buckets.termsTitle": "用語",
     "common.ui.aggTypes.changePrecisionLabel": "マップズームの精度を変更",
     "common.ui.aggTypes.customMetricLabel": "カスタムメトリック",
-    "common.ui.aggTypes.dateRanges.acceptedDateFormatsLinkText": "対応データフォーマット",
     "common.ui.aggTypes.dateRanges.fromColumnLabel": "From",
     "common.ui.aggTypes.dateRanges.toColumnLabel": "To",
     "common.ui.aggTypes.definiteMetricLabel": "メトリック: {safeMakeLabel}",
