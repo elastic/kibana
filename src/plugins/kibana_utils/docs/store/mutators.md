@@ -1,6 +1,6 @@
 # Mutators
 
-State *mutators* are pure functions* which receive `state` object and other&mdash;optional&mdash;arguments
+State *mutators* are pure functions which receive `state` object and other&mdash;optional&mdash;arguments
 and must return a new `state` object back.
 
 ```ts
