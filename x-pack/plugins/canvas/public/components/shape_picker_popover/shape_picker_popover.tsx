@@ -12,13 +12,19 @@ import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
 import { ShapePreview } from '../shape_preview';
 
+export enum AnchorPosition {
+  TOP = 'top',
+  BOTTOM = 'bottom',
+  LEFT = 'left',
+  RIGHT = 'right',
+}
 interface Props {
   shapes: {
     [key: string]: string;
   };
   onChange?: (key: string) => void;
   value?: string;
-  anchorPosition?: 'top' | 'bottom' | 'left' | 'right';
+  anchorPosition?: AnchorPosition;
 }
 
 export const ShapePickerPopover = ({ shapes, onChange, value, anchorPosition }: Props) => {
@@ -29,11 +35,7 @@ export const ShapePickerPopover = ({ shapes, onChange, value, anchorPosition }: 
   );
 
   return (
-    <Popover
-      panelClassName="canvas canvasPopover--popover"
-      button={button}
-      anchorPosition={anchorPosition}
-    >
+    <Popover panelClassName="canvas" button={button} anchorPosition={anchorPosition}>
       {() => <ShapePicker onChange={onChange} shapes={shapes} />}
     </Popover>
   );

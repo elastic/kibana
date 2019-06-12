@@ -12,7 +12,8 @@ import { addSerializer } from 'jest-specific-snapshot';
 // Mock EUI generated ids to be consistently predictable for snapshots.
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
-// Jest automatically mocks SVGs.  Canvas uses them in examples, so let's mock a few.
+// Jest automatically mocks SVGs to be a plain-text string that isn't an SVG.  Canvas uses
+// them in examples, so let's mock a few for tests.
 jest.mock('../canvas_plugin_src/renderers/shape/shapes', () => ({
   shapes: {
     arrow: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
