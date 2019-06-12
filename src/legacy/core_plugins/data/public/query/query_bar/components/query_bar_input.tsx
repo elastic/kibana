@@ -524,7 +524,7 @@ export class QueryBarInputUI extends Component<Props, State> {
             onMouseEnter={this.onMouseEnterSuggestion}
             loadMore={this.increaseLimit}
             append={
-              this.props.savedQuery && this.props.onSave ? (
+              this.props.onSave ? (
                 <SavedQueryRow
                   query={this.props.query}
                   savedQuery={this.props.savedQuery}

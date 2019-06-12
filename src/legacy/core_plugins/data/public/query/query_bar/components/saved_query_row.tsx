@@ -39,7 +39,7 @@ import { Query } from '../index';
 
 interface Props {
   query: Query;
-  savedQuery: SavedQuery;
+  savedQuery?: SavedQuery;
   onSave: (savedQueryDetails: SavedQueryDetails) => void;
 }
 
