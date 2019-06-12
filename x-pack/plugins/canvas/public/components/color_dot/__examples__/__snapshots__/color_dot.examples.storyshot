@@ -27,6 +27,62 @@ Array [
       className="canvasColorDot__foreground"
       style={
         Object {
+          "background": "#000",
+        }
+      }
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#aabbcc",
+        }
+      }
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#aabbccdd",
+        }
+      }
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
           "background": "rgb(100, 150, 250)",
         }
       }
@@ -43,21 +99,6 @@ Array [
       style={
         Object {
           "background": "rgba(100, 150, 250, .5)",
-        }
-      }
-    />
-  </div>,
-  <div
-    className="canvasColorDot"
-  >
-    <div
-      className="canvasColorDot__background canvasCheckered"
-    />
-    <div
-      className="canvasColorDot__foreground"
-      style={
-        Object {
-          "background": "#000",
         }
       }
     />
@@ -188,6 +229,50 @@ Array [
 
 exports[`Storyshots components/Color/ColorDot invalid dots 1`] = `
 Array [
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
   <div
     className="canvasColorDot"
   >

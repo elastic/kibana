@@ -7,7 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiPage,
@@ -46,7 +47,7 @@ import { WarmPhase } from './components/warm_phase';
 import { DeletePhase } from './components/delete_phase';
 import { ColdPhase } from './components/cold_phase';
 
-class EditPolicyUi extends Component {
+export class EditPolicy extends Component {
   static propTypes = {
     selectedPolicy: PropTypes.object.isRequired,
     errors: PropTypes.object.isRequired,
@@ -105,14 +106,12 @@ class EditPolicyUi extends Component {
   };
 
   submit = async () => {
-    const { intl } = this.props;
     this.setState({ isShowingErrors: true });
     const { saveLifecyclePolicy, lifecycle, saveAsNewPolicy, firstError } = this.props;
     if (firstError) {
       toastNotifications.addDanger(
-        intl.formatMessage({
-          id: 'xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage',
-          defaultMessage: 'Please fix the  errors on this page.',
+        i18n.translate('xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage', {
+          defaultMessage: 'Please fix the  errors on this page.'
         })
       );
       const errorRowId = `${firstError.replace('.', '-')}-row`;
@@ -136,7 +135,6 @@ class EditPolicyUi extends Component {
   };
   render() {
     const {
-      intl,
       selectedPolicy,
       errors,
       setSaveAsNewPolicy,
@@ -160,17 +158,13 @@ class EditPolicyUi extends Component {
             <EuiTitle>
               <h4>
                 {isNewPolicy
-                  ? intl.formatMessage({
-                    id: 'xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage',
-                    defaultMessage: 'Create an index lifecycle policy',
+                  ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
+                    defaultMessage: 'Create an index lifecycle policy'
                   })
-                  : intl.formatMessage(
-                    {
-                      id: 'xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage',
-                      defaultMessage: 'Edit index lifecycle policy {originalPolicyName}',
-                    },
-                    { originalPolicyName }
-                  )}
+                  : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
+                    defaultMessage: 'Edit index lifecycle policy {originalPolicyName}',
+                    values: { originalPolicyName }
+                  })}
               </h4>
             </EuiTitle>
             <div className="euiAnimateContentLoad">
@@ -255,9 +249,8 @@ class EditPolicyUi extends Component {
                   >
                     <ErrableFormRow
                       id={STRUCTURE_POLICY_NAME}
-                      label={intl.formatMessage({
-                        id: 'xpack.indexLifecycleMgmt.editPolicy.policyNameLabel',
-                        defaultMessage: 'Policy name',
+                      label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
+                        defaultMessage: 'Policy name'
                       })}
                       errorKey={STRUCTURE_POLICY_NAME}
                       isShowingErrors={isShowingErrors}
@@ -368,4 +361,3 @@ class EditPolicyUi extends Component {
     );
   }
 }
-export const EditPolicy = injectI18n(EditPolicyUi);

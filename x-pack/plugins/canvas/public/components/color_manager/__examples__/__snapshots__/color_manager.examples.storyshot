@@ -18,7 +18,7 @@ Array [
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "#abcdef",
+              "background": "blue",
             }
           }
         />
@@ -43,7 +43,7 @@ Array [
             onChange={[Function]}
             placeholder="Color code"
             type="text"
-            value="#abcdef"
+            value="blue"
           />
         </div>
       </div>
@@ -91,6 +91,190 @@ Array [
             placeholder="Color code"
             type="text"
             value="#abc"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#abcd"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#abcdef",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#abcdef"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#aabbccdd",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#aabbccdd"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "rgb(50, 100, 150)",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="rgb(50, 100, 150)"
           />
         </div>
       </div>
@@ -293,7 +477,7 @@ Array [
             onChange={[Function]}
             placeholder="Color code"
             type="text"
-            value="#abcd"
+            value="elastic"
           />
         </div>
       </div>
@@ -336,7 +520,222 @@ Array [
             onChange={[Function]}
             placeholder="Color code"
             type="text"
-            value="canvas"
+            value="#xyz"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#ghij"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#canvas"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#12345xyz"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="rgb(a,b,c)"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="rgba(w,x,y,z)"
           />
         </div>
       </div>
