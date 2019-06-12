@@ -61,7 +61,7 @@ async function callAPI(
   endpoint: string,
   clientParams: Record<string, unknown> = {},
   options: CallAPIOptions = { wrap401Errors: true }
-) {
+): Promise<any> {
   const clientPath = endpoint.split('.');
   const api: any = get(client, clientPath);
   if (!api) {
