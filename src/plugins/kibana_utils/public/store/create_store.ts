@@ -19,15 +19,15 @@
 
 import { createStore as createReduxStore, Reducer } from 'redux';
 import { Subject, Observable } from 'rxjs';
-import { AppStore } from './types';
+import { AppStore, Mutations } from './types';
+
+const SET = '__SET__';
 
 export const createStore = <State extends {}>(defaultState: State): AppStore<State> => {
   const reducer: Reducer = (state, action) => {
     switch (action.type) {
-      case 'SET':
+      case SET:
         return action.state;
-      case 'MUTATION':
-        return action.fn(state, ...action.args);
       default:
         return state;
     }
@@ -39,16 +39,29 @@ export const createStore = <State extends {}>(defaultState: State): AppStore<Sta
     state$.next(redux.getState());
   });
 
+  const get = redux.getState;
+
   const set = (state: State) =>
     redux.dispatch({
-      type: 'SET',
+      type: SET,
       state,
     });
+
+  const mutations: AppStore<State>['mutations'] = pureMutations => {
+    const result: Mutations<any> = {};
+    for (const [name, fn] of Object.entries(pureMutations)) {
+      result[name] = (...args) => {
+        set(fn(get())(...args));
+      };
+    }
+    return result;
+  };
 
   return {
     redux,
     state$: state$ as Observable<State>,
-    get: redux.getState,
+    get,
     set,
+    mutations,
   };
 };

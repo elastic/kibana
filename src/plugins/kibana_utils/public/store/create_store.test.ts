@@ -25,6 +25,7 @@ test('can create store', () => {
     get: expect.any(Function),
     set: expect.any(Function),
     state$: expect.any(Object),
+    mutations: expect.any(Function),
     redux: {
       getState: expect.any(Function),
       dispatch: expect.any(Function),
@@ -103,4 +104,56 @@ test('multiple subscribers can subscribe', () => {
   expect(spy1.mock.calls[0][0]).toEqual({ a: 1 });
   expect(spy2.mock.calls[0][0]).toEqual({ a: 1 });
   expect(spy2.mock.calls[1][0]).toEqual({ a: 2 });
+});
+
+test('creates impure mutations from pure mutations', () => {
+  const store = createStore<any>({});
+  const mutations = store.mutations({
+    setFoo: _ => bar => ({ foo: bar }),
+  });
+
+  expect(typeof mutations.setFoo).toBe('function');
+});
+
+test('mutations can update state', () => {
+  const store = createStore<any>({
+    value: 0,
+    foo: 'bar',
+  });
+  const mutations = store.mutations({
+    add: state => increment => ({ ...state, value: state.value + increment }),
+    setFoo: state => bar => ({ ...state, foo: bar }),
+  });
+
+  expect(store.get()).toEqual({
+    value: 0,
+    foo: 'bar',
+  });
+
+  mutations.add(11);
+  mutations.setFoo('baz');
+
+  expect(store.get()).toEqual({
+    value: 11,
+    foo: 'baz',
+  });
+
+  mutations.add(-20);
+  mutations.setFoo('bazooka');
+
+  expect(store.get()).toEqual({
+    value: -9,
+    foo: 'bazooka',
+  });
+});
+
+test('mutation methods are not bound', () => {
+  const store = createStore<any>({ value: -3 });
+  const { add } = store.mutations({
+    add: state => increment => ({ ...state, value: state.value + increment }),
+  });
+
+  expect(store.get()).toEqual({ value: -3 });
+  add(4);
+  expect(store.get()).toEqual({ value: 1 });
 });

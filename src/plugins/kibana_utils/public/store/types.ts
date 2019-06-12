@@ -25,4 +25,14 @@ export interface AppStore<State extends {}> {
   get: () => State;
   set: (state: State) => void;
   state$: Observable<State>;
+  mutations: <Pure extends PureMutations<State>>(pureMutations: Pure) => Mutations<Pure>;
 }
+
+export type PureMutation<State extends {}> = (state: State) => (...args: any[]) => State;
+export type Mutation<M extends PureMutation<any>> = (...args: Parameters<ReturnType<M>>) => void;
+
+export interface PureMutations<State extends {}> {
+  [name: string]: PureMutation<State>;
+}
+
+export type Mutations<M extends PureMutations<any>> = { [K in keyof M]: Mutation<M[K]> };
