@@ -81,8 +81,9 @@ beforeEach(() => {
   mockSetupContext = omit(mockSetupDeps, 'application', 'injectedMetadata');
   mockStartDeps = {
     application: applicationServiceMock.createStartContract(),
-    http: httpServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
+    fatalErrors: fatalErrorsServiceMock.createStartContract(),
+    http: httpServiceMock.createStartContract(),
     i18n: i18nServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),

@@ -84,8 +84,9 @@ const defaultSetupDeps = {
 };
 
 const applicationStart = applicationServiceMock.createStartContract();
-const httpStart = httpServiceMock.createStartContract();
 const chromeStart = chromeServiceMock.createStartContract();
+const fatalErrorsStart = fatalErrorsServiceMock.createStartContract();
+const httpStart = httpServiceMock.createStartContract();
 const i18nStart = i18nServiceMock.createStartContract();
 const injectedMetadataStart = injectedMetadataServiceMock.createStartContract();
 const notificationsStart = notificationServiceMock.createStartContract();
@@ -94,8 +95,9 @@ const overlayStart = overlayServiceMock.createStartContract();
 const defaultStartDeps = {
   core: {
     application: applicationStart,
-    http: httpStart,
     chrome: chromeStart,
+    fatalErrors: fatalErrorsStart,
+    http: httpStart,
     i18n: i18nStart,
     injectedMetadata: injectedMetadataStart,
     notifications: notificationsStart,

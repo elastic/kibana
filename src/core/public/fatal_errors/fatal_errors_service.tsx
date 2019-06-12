@@ -54,9 +54,13 @@ export interface FatalErrorsSetup {
   get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
+/** @public */
+export type FatalErrorsStart = FatalErrorsSetup;
+
 /** @interal */
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<FatalErrorInfo>();
+  private exposedApi?: FatalErrorsSetup;
 
   /**
    *
@@ -82,7 +86,7 @@ export class FatalErrorsService {
         },
       });
 
-    const fatalErrorsSetup: FatalErrorsSetup = {
+    this.exposedApi = {
       add: (error, source?) => {
         const errorInfo = getErrorInfo(error, source);
 
@@ -101,7 +105,15 @@ export class FatalErrorsService {
       },
     };
 
-    return fatalErrorsSetup;
+    return this.exposedApi;
+  }
+
+  public start() {
+    if (!this.exposedApi) {
+      throw new Error(`FatalErrorsService must be setup before started.`);
+    }
+
+    return this.exposedApi;
   }
 
   private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nStart) {

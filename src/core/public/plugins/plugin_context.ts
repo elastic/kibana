@@ -88,8 +88,9 @@ export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPlugins
     application: {
       capabilities: deps.application.capabilities,
     },
-    http: deps.http,
     chrome: deps.chrome,
+    fatalErrors: deps.fatalErrors,
+    http: deps.http,
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,

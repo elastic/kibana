@@ -67,7 +67,6 @@ export class CoreSystem {
   private readonly application: ApplicationService;
 
   private readonly rootDomElement: HTMLElement;
-  private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
     const {
@@ -108,22 +107,24 @@ export class CoreSystem {
   }
 
   public async setup() {
+    let fatalErrors: FatalErrorsSetup | undefined;
+
     try {
       // Setup FatalErrorsService and it's dependencies first so that we're
       // able to render any errors.
       const injectedMetadata = this.injectedMetadata.setup();
-      this.fatalErrorsSetup = this.fatalErrors.setup({
+      fatalErrors = this.fatalErrors.setup({
         injectedMetadata,
         i18n: this.i18n.getContext(),
       });
-      const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const http = this.http.setup({ injectedMetadata, fatalErrors });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
       const application = this.application.setup();
 
       const core: InternalCoreSetup = {
         application,
-        fatalErrors: this.fatalErrorsSetup,
+        fatalErrors,
         http,
         injectedMetadata,
         notifications,
@@ -134,10 +135,10 @@ export class CoreSystem {
       const plugins = await this.plugins.setup(core);
       await this.legacyPlatform.setup({ core, plugins: mapToObject(plugins.contracts) });
 
-      return { fatalErrors: this.fatalErrorsSetup };
+      return { fatalErrors };
     } catch (error) {
-      if (this.fatalErrorsSetup) {
-        this.fatalErrorsSetup.add(error);
+      if (fatalErrors) {
+        fatalErrors.add(error);
       } else {
         // If the FatalErrorsService has not yet been setup, log error to console
         // eslint-disable-next-line no-console
@@ -147,10 +148,14 @@ export class CoreSystem {
   }
 
   public async start() {
+    const fatalErrors = this.fatalErrors.start();
+
     try {
+      // Start FatalErrorsService and it's dependencies first so that we're
+      // able to render any errors.
       const injectedMetadata = await this.injectedMetadata.start();
-      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const i18n = await this.i18n.start();
+      const http = await this.http.start({ injectedMetadata, fatalErrors });
       const application = await this.application.start({ injectedMetadata });
 
       const notificationsTargetDomElement = document.createElement('div');
@@ -180,6 +185,7 @@ export class CoreSystem {
       const core: InternalCoreStart = {
         application,
         chrome,
+        fatalErrors,
         http,
         i18n,
         injectedMetadata,
@@ -194,13 +200,7 @@ export class CoreSystem {
         targetDomElement: legacyPlatformTargetDomElement,
       });
     } catch (error) {
-      if (this.fatalErrorsSetup) {
-        this.fatalErrorsSetup.add(error);
-      } else {
-        // If the FatalErrorsService has not yet been setup, log error to console
-        // eslint-disable-next-line no-console
-        console.error(error);
-      }
+      fatalErrors.add(error);
     }
   }
 
