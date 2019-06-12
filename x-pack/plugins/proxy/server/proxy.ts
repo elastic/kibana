@@ -7,6 +7,9 @@
 import { Agent as HTTPSAgent } from 'https';
 import { Agent as HTTPAgent } from 'http';
 import { URL } from 'url';
+import { promisify } from 'util';
+import { readFile } from 'fs';
+const readFileAsync = promisify(readFile);
 
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -25,6 +28,7 @@ import {
 import { HttpServerSetup } from 'src/core/server/http/http_server';
 
 import { RouteState, RoutingNode, ClusterDocClient } from './cluster_doc';
+import { SslConfig } from 'src/core/server/http/ssl_config';
 
 export interface ProxyServiceSetup {
   httpSetup: HttpServerSetup;
@@ -47,8 +51,12 @@ export const ProxyConfig = {
     port: schema.number(),
     maxRetry: schema.number(),
     requestBackoff: schema.number(),
+    cert: schema.string(),
+    key: schema.string(),
+    ca: schema.string(),
   }),
 };
+
 export type ProxyPluginType = TypeOf<typeof ProxyConfig.schema>;
 
 export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart> {
@@ -56,11 +64,12 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   private clusterDocClient: ClusterDocClient;
   private maxRetry = 0;
   private requestBackoff = 0;
+  private port = 0;
 
-  private readonly httpsAgent: HTTPSAgent;
-  private readonly httpAgent: HTTPAgent;
-  private readonly allowUnauthAgent: HTTPAgent;
-  private readonly wreck: typeof Wreck;
+  private httpsAgent: HTTPSAgent = new HTTPSAgent({ keepAlive: true });
+  private httpAgent: HTTPAgent = new HTTPAgent({ keepAlive: true });
+  private allowUnauthAgent: HTTPAgent = new HTTPAgent({ keepAlive: true });
+  private wreck: typeof Wreck = Wreck;
   private readonly log: Logger;
   private readonly config$: Observable<ProxyPluginType>;
 
@@ -68,16 +77,6 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     this.config$ = initializerContext.config.create<ProxyPluginType>();
     this.log = initializerContext.logger.get('proxy');
     this.clusterDocClient = new ClusterDocClient(initializerContext);
-    this.httpsAgent = new HTTPSAgent({ keepAlive: true });
-    this.httpAgent = new HTTPAgent({ keepAlive: true });
-    this.allowUnauthAgent = new HTTPAgent({ keepAlive: true });
-    this.wreck = Wreck.defaults({
-      agent: {
-        https: this.httpsAgent,
-        http: this.httpAgent,
-        httpsAllowUnauthorized: this.allowUnauthAgent,
-      },
-    });
   }
 
   public async setup(core: CoreSetup, plugins: {}) {
@@ -89,7 +88,44 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     const config = await this.config$.pipe(first()).toPromise();
     this.setConfig(config);
 
-    const httpSetup = await core.http.createNewServer({ port: config.port });
+    let sslConf: Partial<SslConfig> = {};
+    try {
+      const [tlsCert, tlsKey, tlsCa] = await Promise.all([
+        readFileAsync(config.cert),
+        readFileAsync(config.key),
+        readFileAsync(config.ca),
+      ]);
+
+      this.httpsAgent = new HTTPSAgent({
+        keepAlive: true,
+        cert: tlsCert,
+        key: tlsKey,
+        ca: tlsCa,
+      });
+
+      sslConf = {
+        enabled: true,
+        redirectHttpFromPort: this.port,
+        certificate: tlsCert.toString(),
+        key: tlsKey.toString(),
+        certificateAuthorities: [tlsCa.toString()],
+      };
+    } catch (err) {
+      this.log.warn(`Unable to read TLS certificate ${err.message}`);
+    }
+
+    this.wreck = Wreck.defaults({
+      agent: {
+        https: this.httpsAgent,
+        http: this.httpAgent,
+        httpsAllowUnauthorized: this.allowUnauthAgent,
+      },
+    });
+
+    const httpSetup = await core.http.createNewServer({
+      port: config.port,
+      ssl: sslConf,
+    });
     const setup: ProxyServiceSetup = {
       httpSetup,
     };
@@ -97,6 +133,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   }
 
   private setConfig(config: ProxyPluginType) {
+    this.port = config.port;
     this.maxRetry = config.maxRetry;
     this.requestBackoff = config.requestBackoff;
   }
