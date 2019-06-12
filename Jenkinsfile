@@ -9,6 +9,7 @@ pipeline {
         echo 'Building OSS Distro'
         // sh './ci/run.sh'
         sh 'pwd'
+        sh 'ls -R'
         echo 'Store OSS Distro'
       }
     }
