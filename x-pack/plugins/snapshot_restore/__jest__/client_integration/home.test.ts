@@ -170,7 +170,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
       });
 
       test('should have a button to reload the repositories', async () => {
-        const { component, exists, find, actions } = testBed;
+        const { component, exists, actions } = testBed;
         const totalRequests = server.requests.length;
         expect(exists('reloadButton')).toBe(true);
 
@@ -482,7 +482,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
       });
 
       test('should have a button to reload the snapshots', async () => {
-        const { component, exists, find, actions } = testBed;
+        const { component, exists, actions } = testBed;
         const totalRequests = server.requests.length;
         expect(exists('reloadButton')).toBe(true);
 
