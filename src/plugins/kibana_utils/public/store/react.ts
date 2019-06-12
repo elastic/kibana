@@ -20,10 +20,16 @@
 import * as React from 'react';
 import { Provider as ReactReduxProvider, connect as reactReduxConnect } from 'react-redux';
 import { Store } from 'redux';
-import { AppStore } from './types';
+import { AppStore, Mutators, PureMutators } from './types';
+// TODO: Below import is temporary, use `react-use` lib instead.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { useObservable } from '../../../kibana_react/public/util/use_observable';
 
-// NOTE: Types in `react-redux` seem to be quite off compared to reality
-// NOTE: that's why a lot of `any`s below.
+/**
+ * @note
+ * Types in `react-redux` seem to be quite off compared to reality
+ * that's why a lot of `any`s below.
+ */
 
 export interface ConsumerProps<State> {
   children: (state: State) => React.ReactChild;
@@ -48,7 +54,14 @@ const mergeProps: any = (stateProps: any, dispatchProps: any, ownProps: any) => 
   ...dispatchProps,
 });
 
-export const createContext = <State>({ redux }: AppStore<State>) => {
+export const createContext = <
+  State extends {},
+  StateMutators extends Mutators<PureMutators<State>> = {}
+>(
+  store: AppStore<State, StateMutators>
+) => {
+  const { redux } = store;
+  (redux as any).__appStore = store;
   const context = React.createContext<ReduxContextValue>({ store: redux });
 
   const Provider: React.FC<{}> = ({ children }) =>
@@ -60,6 +73,7 @@ export const createContext = <State>({ redux }: AppStore<State>) => {
 
   const Consumer: React.FC<ConsumerProps<State>> = ({ children }) =>
     React.createElement(context.Consumer, {
+      // eslint-disable-next-line no-shadow
       children: ({ store }: ReduxContextValue) => children(store.getState()),
     });
 
@@ -67,10 +81,37 @@ export const createContext = <State>({ redux }: AppStore<State>) => {
   const connect: Connect<State> = mapStateToProps =>
     reactReduxConnect(mapStateToProps, mapDispatchToProps, mergeProps, options) as any;
 
+  /**
+   * @todo
+   *
+   * - [x] `useStore`
+   * - [x] `useState`
+   * - [ ] `useSelector`
+   * - [x] `useMutators`
+   */
+
+  const useStore = (): AppStore<State, StateMutators> => {
+    // eslint-disable-next-line no-shadow
+    const { store } = React.useContext(context);
+    return (store as any).__appStore;
+  };
+
+  const useState = (): State => {
+    // eslint-disable-next-line no-shadow
+    const store = useStore();
+    const state = useObservable(store.state$, store.get());
+    return state;
+  };
+
+  const useMutators = (): StateMutators => useStore().mutators;
+
   return {
     Provider,
     Consumer,
     connect,
     context,
+    useStore,
+    useState,
+    useMutators,
   };
 };

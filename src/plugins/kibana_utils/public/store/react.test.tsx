@@ -19,6 +19,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { act, Simulate } from 'react-dom/test-utils';
 import { createStore } from './create_store';
 import { createContext } from './react';
 
@@ -109,4 +110,119 @@ test('context receives Redux store', () => {
   );
 
   expect(container!.innerHTML).toBe('bar');
+});
+
+describe('hooks', () => {
+  describe('useStore', () => {
+    test('can select store using useStore hook', () => {
+      const store = createStore({ foo: 'bar' });
+      const { Provider, useStore } = createContext(store);
+      const Demo: React.FC<{}> = () => {
+        // eslint-disable-next-line no-shadow
+        const store = useStore();
+        return <>{store.get().foo}</>;
+      };
+
+      ReactDOM.render(
+        <Provider>
+          <Demo />
+        </Provider>,
+        container
+      );
+
+      expect(container!.innerHTML).toBe('bar');
+    });
+  });
+
+  describe('useState', () => {
+    test('can select state using useState hook', () => {
+      const store = createStore({ foo: 'qux' });
+      const { Provider, useState } = createContext(store);
+      const Demo: React.FC<{}> = () => {
+        const { foo } = useState();
+        return <>{foo}</>;
+      };
+
+      ReactDOM.render(
+        <Provider>
+          <Demo />
+        </Provider>,
+        container
+      );
+
+      expect(container!.innerHTML).toBe('qux');
+    });
+
+    test('re-renders when state changes', () => {
+      const store = createStore({ foo: 'bar' });
+      const { setFoo } = store.createMutators({
+        setFoo: state => foo => ({ ...state, foo }),
+      });
+      const { Provider, useState } = createContext(store);
+      const Demo: React.FC<{}> = () => {
+        const { foo } = useState();
+        return <>{foo}</>;
+      };
+
+      ReactDOM.render(
+        <Provider>
+          <Demo />
+        </Provider>,
+        container
+      );
+
+      expect(container!.innerHTML).toBe('bar');
+      act(() => {
+        setFoo('baz');
+      });
+      expect(container!.innerHTML).toBe('baz');
+    });
+  });
+
+  describe('useMutations', () => {
+    test('useMutations hook returns mutations that can update state', () => {
+      const store = createStore<
+        {
+          cnt: number;
+        },
+        {
+          increment: (value: number) => void;
+        }
+      >({
+        cnt: 0,
+      });
+      store.createMutators({
+        increment: state => value => ({ ...state, cnt: state.cnt + value }),
+      });
+
+      const { Provider, useState, useMutators } = createContext(store);
+      const Demo: React.FC<{}> = () => {
+        const { cnt } = useState();
+        const { increment } = useMutators();
+        return (
+          <>
+            <strong>{cnt}</strong>
+            <button onClick={() => increment(10)}>Increment</button>
+          </>
+        );
+      };
+
+      ReactDOM.render(
+        <Provider>
+          <Demo />
+        </Provider>,
+        container
+      );
+
+      expect(container!.querySelector('strong')!.innerHTML).toBe('0');
+      act(() => {
+        Simulate.click(container!.querySelector('button')!, {});
+      });
+      expect(container!.querySelector('strong')!.innerHTML).toBe('10');
+      act(() => {
+        Simulate.click(container!.querySelector('button')!, {});
+      });
+      expect(container!.querySelector('strong')!.innerHTML).toBe('20');
+    });
+  });
 });
