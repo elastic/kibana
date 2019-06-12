@@ -32,6 +32,7 @@ export const telemetry = (kibana: any) => {
         enabled: Joi.boolean().default(true),
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
+        banner: Joi.boolean().default(true),
         url: Joi.when('$dev', {
           is: true,
           then: Joi.string().default(
@@ -66,6 +67,7 @@ export const telemetry = (kibana: any) => {
           telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
           telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
           spacesEnabled: config.get('xpack.spaces.enabled'),
+          telemetryBanner: config.get('xpack.telemetry.banner'),
           telemetryOptedIn: null,
           activeSpace: null,
         };

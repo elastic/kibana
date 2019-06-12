@@ -50,7 +50,8 @@ async function asyncInjectBanner($injector) {
  */
 export function injectBanner($injector) {
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-  if (telemetryEnabled) {
+  const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
+  if (telemetryEnabled && telemetryBanner) {
     asyncInjectBanner($injector);
   }
 }
