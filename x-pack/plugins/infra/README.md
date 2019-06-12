@@ -29,7 +29,7 @@ Since the `infra` plugin lives within the Kibana repository, [Kibana's
 contribution procedures](../../../CONTRIBUTING.md) apply. In addition to that,
 this section details a few plugin-specific aspects.
 
-### Ingesting metrics
+### Ingesting metrics for development
 
 The *Infrastructure UI* displays [ECS]-compatible metric data from indices
 matching the `metricbeat-*` pattern by default. The primary way to ingest these
@@ -40,7 +40,7 @@ module.
 A setup that ingests docker and nginx metrics is described in
 [./docs/test_setups/infra_metricbeat_docker_nginx.md].
 
-### Ingesting logs
+### Ingesting logs for development
 
 Similarly, the *Logs UI* assumes [ECS]-compatible log data to be present in
 indices matching the `filebeat-*` pattern. At the time of writing the minimum
@@ -72,13 +72,51 @@ environment's log files, e.g.:
 
 ### Creating PRs
 
-To ensure that a newly created PR gets the attention of the
-@elastic/infra-logs-ui team, the following label should be applied to PRs:
+As with all of Kibana, we welcome contributions from everyone. The usual
+life-cycle of a PR looks like the following:
 
-* `Infrastructure`
-* `Infra UI` if it relates to the *Intrastructure UI*
-* `Logs UI` if it relates to the *Logs UI*
-* Version labels for backport targets
+1. **Create draft PR**: To make ongoing work visible, we recomment creating
+   [draft PRs] as soon as possible. PRs are usually target at `master` and
+   backported later. The checklist in the PR description template can be used
+   to guide the progress of the PR.
+2. **Label the PR**: To ensure that a newly created PR gets the attention of
+   the @elastic/infra-logs-ui team, the following label should be applied to
+   PRs:
+   * `Infrastructure`
+   * `Infra UI` if it relates to the *Intrastructure UI*
+   * `Logs UI` if it relates to the *Logs UI*
+   * `[zube]: In Progress` to track the stage of the PR
+   * Version labels for merge and backport targets (see [Kibana's contribution
+     procedures]), usually:
+     * the version that `master` currently represents
+     * the version of the next minor release
+   * Release note labels (see [Kibana's contribution procedures])
+     * `release_note:enhancement` if the PR contains a new feature or enhancement
+     * `release_note:fix` if the PR contains an external-facing fix
+     * `release_note:breaking` if the PR contains a breaking change
+     * `release_note:deprecation` if the PR contains deprecations of publicly
+       documented features.
+3. **Satisfy CI**: The PR will automatically be picked up by the CI system,
+   which will run the full test suite as well as some additional checks. A
+   comment containing `jenkins, test this` can be used to manually trigger a CI
+   run. The result will be reported on the PR itself. Out of courtesy for the
+   reviewers the checks should pass before requesting reviews.
+4. **Request reviews**: Once the PR is ready for reviews it can be marked as
+   such by [changing the PR state to ready].  In addition the label `[zube]: In
+   Progress` should be replace with `[zube]: In Review` and `review`. If the
+   GitHub automation doesn't automatically request a review from
+   `@elastic/infra-logs-ui` it should be requested manually.
+5. **Incorporate review feedback**: Usually one reviewer's approval is
+   sufficient. Particularly complicated or cross-cutting concerns might warrant
+   multiple reviewers.
+6. **Merge**: Once CI is green and the reviewers are approve, PRs in the Kibana
+   repo are "squash-merged" to `master` to keep the history clean.
+7. **Backport**: After merging to `master`, the PR is backported to the
+   branches that represent the versions indicated by the labels. The `yarn
+   backport` command can be used to automate most of the process.
+
+There are always exceptions to the rule, so seeking guidance about any of the
+steps is highly recommended.
 
 [Kibana's contribution procedures]: ../../../CONTRIBUTING.md
 [Infrastructure forum]: https://discuss.elastic.co/c/infrastructure
@@ -86,3 +124,5 @@ To ensure that a newly created PR gets the attention of the
 [ECS]: https://github.com/elastic/ecs/
 [Metricbeat]: https://www.elastic.co/products/beats/metricbeat
 [Filebeat]: https://www.elastic.co/products/beats/filebeat
+[draft PRs]: https://help.github.com/en/articles/about-pull-requests#draft-pull-requests
+[changing the PR state to ready]: https://help.github.com/en/articles/changing-the-stage-of-a-pull-request
