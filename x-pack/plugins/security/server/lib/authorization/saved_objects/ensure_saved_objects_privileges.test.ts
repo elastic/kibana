@@ -5,7 +5,7 @@
  */
 
 import { Actions } from '..';
-import { checkSavedObjectsPrivilegesFactory } from '.';
+import { ensureSavedObjectsPrivilegesFactory } from '.';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 
 const createMockErrors = () => {
@@ -46,7 +46,7 @@ const createCheckSavedObjectsPrivileges = (
   const mockActions = createMockActions();
 
   const checkSavedObjectsPrivileges = jest.fn(
-    checkSavedObjectsPrivilegesFactory({
+    ensureSavedObjectsPrivilegesFactory({
       actionsService: mockActions,
       auditLogger: mockAuditLogger,
       checkPrivilegesWithRequest: () => ({
@@ -74,7 +74,7 @@ const createCheckSavedObjectsPrivileges = (
 
 describe('checkSavedObjectsPrivileges', () => {
   describe('spaces disabled', () => {
-    it('checks globally, throwing when not authorized', async () => {
+    it('checks globally, throwing forbidden error when not authorized', async () => {
       const operation = 'create';
       const username = Symbol();
       const type = 'foo';
@@ -113,6 +113,36 @@ describe('checkSavedObjectsPrivileges', () => {
         [mockActions.savedObject.get(type, operation)],
         args
       );
+    });
+
+    it('checks globally, throwing general error when checkPrivileges.globally throws an error', async () => {
+      const operation = 'create';
+      const type = 'foo';
+      const args = {
+        foo: Symbol(),
+      };
+
+      const checkPrivilegesImpl = jest.fn(async () => {
+        throw new Error('test');
+      });
+
+      const {
+        checkSavedObjectsPrivileges,
+        mockAuditLogger,
+        mockActions,
+        mockErrors,
+      } = createCheckSavedObjectsPrivileges(false, checkPrivilegesImpl);
+
+      await expect(
+        checkSavedObjectsPrivileges(type, operation, undefined, args)
+      ).rejects.toThrowError(mockErrors.generalError);
+
+      expect(checkPrivilegesImpl).toHaveBeenCalledWith([
+        mockActions.savedObject.get(type, operation),
+      ]);
+
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     });
 
     it('checks globally, resolving when authorized', async () => {
@@ -154,7 +184,7 @@ describe('checkSavedObjectsPrivileges', () => {
   });
 
   describe('spaces enabled at the default space', () => {
-    it('checks at the current space, using an undefined namespace, throwing when not authorized', async () => {
+    it('checks at the current space, using an undefined namespace, throwing forbidden error when not authorized', async () => {
       const operation = 'create';
       const username = Symbol();
       const type = 'foo';
@@ -193,6 +223,36 @@ describe('checkSavedObjectsPrivileges', () => {
         [mockActions.savedObject.get(type, operation)],
         args
       );
+    });
+
+    it('checks at the current space, using an undefined namespace, throwing general error when checkPrivileges.atSpace throws an error', async () => {
+      const operation = 'create';
+      const type = 'foo';
+      const args = {
+        foo: Symbol(),
+      };
+
+      const checkPrivilegesImpl = jest.fn(async () => {
+        throw new Error('test');
+      });
+
+      const {
+        checkSavedObjectsPrivileges,
+        mockAuditLogger,
+        mockActions,
+        mockErrors,
+      } = createCheckSavedObjectsPrivileges(true, checkPrivilegesImpl);
+
+      await expect(
+        checkSavedObjectsPrivileges(type, operation, undefined, args)
+      ).rejects.toThrowError(mockErrors.generalError);
+
+      expect(checkPrivilegesImpl).toHaveBeenCalledWith(DEFAULT_SPACE_ID, [
+        mockActions.savedObject.get(type, operation),
+      ]);
+
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     });
 
     it('checks at the current space, using an undefined namespace, resolving when authorized', async () => {
@@ -234,7 +294,7 @@ describe('checkSavedObjectsPrivileges', () => {
   });
 
   describe('spaces enabled at the my-custom space', () => {
-    it('checks at the current space, using the my-custom namespace, throwing when not authorized', async () => {
+    it('checks at the current space, using the my-custom namespace, throwing forbidden error when not authorized', async () => {
       const operation = 'create';
       const username = Symbol();
       const type = 'foo';
@@ -273,6 +333,36 @@ describe('checkSavedObjectsPrivileges', () => {
         [mockActions.savedObject.get(type, operation)],
         args
       );
+    });
+
+    it('checks at the current space, using the my-custom namespace, throwing general error when checkPrivileges.atSpace throws an error', async () => {
+      const operation = 'create';
+      const type = 'foo';
+      const args = {
+        foo: Symbol(),
+      };
+
+      const checkPrivilegesImpl = jest.fn(async () => {
+        throw new Error('test');
+      });
+
+      const {
+        checkSavedObjectsPrivileges,
+        mockAuditLogger,
+        mockActions,
+        mockErrors,
+      } = createCheckSavedObjectsPrivileges(true, checkPrivilegesImpl);
+
+      await expect(
+        checkSavedObjectsPrivileges(type, operation, 'my-custom', args)
+      ).rejects.toThrowError(mockErrors.generalError);
+
+      expect(checkPrivilegesImpl).toHaveBeenCalledWith('my-custom', [
+        mockActions.savedObject.get(type, operation),
+      ]);
+
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     });
 
     it('checks at the current space, using the my-custom namespace, resolving when authorized', async () => {
