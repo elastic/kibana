@@ -183,7 +183,7 @@ class SearchBarUI extends Component<Props, State> {
     });
   };
 
-  public onSave = (savedQueryMeta: SavedQueryMeta) => {
+  public onSave = async (savedQueryMeta: SavedQueryMeta) => {
     const savedQuery: SavedQuery = {
       title: savedQueryMeta.title,
       description: savedQueryMeta.description,
@@ -211,7 +211,12 @@ class SearchBarUI extends Component<Props, State> {
       };
     }
 
-    saveQuery(savedQuery);
+    const response = await saveQuery(savedQuery);
+    if (response.error === undefined) {
+      this.setState({
+        showSaveQueryModal: false,
+      });
+    }
   };
 
   public onInitiateSave = () => {

@@ -20,7 +20,7 @@
 import chrome from 'ui/chrome';
 import { SavedQuery } from '../../../search';
 
-export const saveQuery = (savedQuery: SavedQuery) => {
+export const saveQuery = async (savedQuery: SavedQuery) => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
 
   const query = {
@@ -47,5 +47,5 @@ export const saveQuery = (savedQuery: SavedQuery) => {
     queryObject.timefilter = JSON.stringify(savedQuery.timefilter);
   }
 
-  savedObjectsClient.create('query', queryObject);
+  return await savedObjectsClient.create('query', queryObject);
 };
