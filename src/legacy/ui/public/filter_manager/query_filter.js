@@ -19,7 +19,7 @@
 
 import { FilterManager, FilterStateManager } from 'plugins/data';
 
-export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalState) {
+export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState, globalState) {
   const filterStateManager = new FilterStateManager(globalState, getAppState);
   const filterManager = new FilterManager(indexPatterns, filterStateManager);
 
@@ -29,12 +29,12 @@ export function FilterBarQueryFilterProvider(indexPatterns, getAppState, globalS
   queryFilter.getFilters = filterManager.getFilters.bind(filterManager);
   queryFilter.getAppFilters = filterManager.getAppFilters.bind(filterManager);
   queryFilter.getGlobalFilters = filterManager.getGlobalFilters.bind(filterManager);
-  queryFilter.addFilters = filterManager.addFilters.bind(filterManager);
-  queryFilter.setFilters = filterManager.setFilters.bind(filterManager);
   queryFilter.removeFilter = filterManager.removeFilter.bind(filterManager);
   queryFilter.invertFilter = filterManager.invertFilter.bind(filterManager);
-  queryFilter.addFiltersAndChangeTimeFilter = filterManager.addFiltersAndChangeTimeFilter.bind(filterManager);
-  queryFilter.removeAll = filterManager.removeAll.bind(filterManager);
+  queryFilter.addFilters = Promise.method(filterManager.addFilters.bind(filterManager));
+  queryFilter.setFilters = Promise.method(filterManager.setFilters.bind(filterManager));
+  queryFilter.addFiltersAndChangeTimeFilter = Promise.method(filterManager.addFiltersAndChangeTimeFilter.bind(filterManager));
+  queryFilter.removeAll = Promise.method(filterManager.removeAll.bind(filterManager));
 
   queryFilter.destroy = () => {
     filterManager.destroy();

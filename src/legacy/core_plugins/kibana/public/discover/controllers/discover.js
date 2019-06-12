@@ -40,6 +40,7 @@ import { timefilter } from 'ui/timefilter';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import { DocTitleProvider } from 'ui/doc_title';
 import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
@@ -49,6 +50,7 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from '../index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getFilterGenerator } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
@@ -69,7 +71,7 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
 
-import { data, FilterManager, FilterStateManager } from 'plugins/data';
+import { data } from 'plugins/data';
 data.search.loadLegacyDirectives();
 
 const fetchStatuses = {
@@ -203,8 +205,7 @@ function discoverController(
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
-  const filterStateManager = new FilterStateManager(globalState, getAppState);
-  const queryFilter = new FilterManager(indexPatterns, filterStateManager);
+  const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterGen = getFilterGenerator(queryFilter);
 
   const inspectorAdapters = {
@@ -415,7 +416,7 @@ function discoverController(
 
   $scope.onFiltersUpdated = filters => {
     // The filters will automatically be set when the queryFilter emits an update event (see below)
-    Promise.resolve(queryFilter.setFilters(filters));
+    queryFilter.setFilters(filters);
   };
 
   $scope.applyFilters = filters => {
@@ -567,17 +568,19 @@ function discoverController(
         });
 
         // update data source when filters update
-        filterUpdateSubscription = queryFilter.getUpdates$().subscribe(
-          () => {
+        filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+          next: () => {
             $scope.filters = queryFilter.getFilters();
             $scope.updateDataSource().then(function () {
               $state.save();
             });
           }
-        );
+        });
 
         // fetch data when filters fire fetch event
-        filterFetchSubscription = queryFilter.getFetches$().subscribe($scope.fetch);
+        filterFetchSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+          next: $scope.fetch
+        });
 
         // update data source when hitting forward/back and the query changes
         $scope.$listen($state, 'fetch_with_changes', function (diff) {

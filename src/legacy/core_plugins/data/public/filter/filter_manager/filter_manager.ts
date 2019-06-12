@@ -243,8 +243,8 @@ export class FilterManager {
     filter.meta.negate = !filter.meta.negate;
   }
 
-  public removeAll() {
-    return this.setFilters([]);
+  public async removeAll() {
+    await this.setFilters([]);
   }
 
   public async addFiltersAndChangeTimeFilter(filters: Filter[]) {

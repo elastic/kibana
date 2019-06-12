@@ -46,6 +46,7 @@ import { showOptionsPopover } from './top_nav/show_options_popover';
 import { showNewVisModal } from '../visualize/wizard';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
 import { getFilterGenerator } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
@@ -256,7 +257,7 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.onFiltersUpdated = filters => {
         // The filters will automatically be set when the queryFilter emits an update event (see below)
-        Promise.resolve(queryFilter.setFilters(filters));
+        queryFilter.setFilters(filters);
       };
 
       $scope.onCancelApplyFilters = () => {
@@ -512,7 +513,7 @@ app.directive('dashboardApp', function ($injector) {
       updateViewMode(dashboardStateManager.getViewMode());
 
       // update root source when filters update
-      this.updateSubscription = queryFilter.getUpdates$().subscribe({
+      this.updateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
         next: () => {
           $scope.model.filters = queryFilter.getFilters();
           dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
@@ -520,8 +521,9 @@ app.directive('dashboardApp', function ($injector) {
       });
 
       // update data when filters fire fetch event
-
-      this.fetchSubscription = queryFilter.getFetches$().subscribe($scope.refresh);
+      this.fetchSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        next: $scope.refresh
+      });
 
       $scope.$on('$destroy', () => {
         this.updateSubscription.unsubscribe();
