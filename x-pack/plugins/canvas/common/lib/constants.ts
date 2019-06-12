@@ -25,3 +25,4 @@ export const DEFAULT_WORKPAD_CSS = '.canvasPage {\n\n}';
 export const DEFAULT_ELEMENT_CSS = '.canvasRenderEl{\n\n}';
 export const VALID_IMAGE_TYPES = ['gif', 'jpeg', 'png', 'svg+xml'];
 export const ASSET_MAX_SIZE = 25000;
+export const ZOOM_LEVELS = [0.5, 0.75, 0.9, 1, 1.5, 2, 3, 4];

@@ -20,10 +20,14 @@ import {
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
+import { ZOOM_LEVELS } from '../../../common/lib/constants';
 import { ControlSettings } from './control_settings';
 import { RefreshControl } from './refresh_control';
 import { FullscreenControl } from './fullscreen_control';
 import { WorkpadExport } from './workpad_export';
+
+const MIN_ZOOM_LEVEL = ZOOM_LEVELS[0];
+const MAX_ZOOM_LEVEL = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
 
 export class WorkpadHeader extends React.PureComponent {
   static propTypes = {
@@ -91,7 +95,14 @@ export class WorkpadHeader extends React.PureComponent {
   };
 
   render() {
-    const { isWriteable, canUserWrite, toggleWriteable } = this.props;
+    const {
+      isWriteable,
+      canUserWrite,
+      toggleWriteable,
+      zoomScale,
+      decreaseZoom,
+      increaseZoom,
+    } = this.props;
     const { isModalVisible } = this.state;
 
     return (
@@ -128,6 +139,24 @@ export class WorkpadHeader extends React.PureComponent {
                     size="s"
                     aria-label={this._getTooltipText()}
                     isDisabled={!canUserWrite}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiToolTip position="bottom" content="Decrease zoom">
+                  <EuiButtonIcon
+                    iconType="starMinusFilled"
+                    onClick={decreaseZoom}
+                    disabled={zoomScale === MIN_ZOOM_LEVEL}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiToolTip position="bottom" content="Increase zoom">
+                  <EuiButtonIcon
+                    iconType="starPlusFilled"
+                    onClick={increaseZoom}
+                    disabled={zoomScale === MAX_ZOOM_LEVEL}
                   />
                 </EuiToolTip>
               </EuiFlexItem>

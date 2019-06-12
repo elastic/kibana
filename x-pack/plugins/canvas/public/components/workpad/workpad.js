@@ -86,6 +86,7 @@ export class Workpad extends React.PureComponent {
       isFullscreen,
       registerLayout,
       unregisterLayout,
+      zoomScale,
     } = this.props;
 
     const bufferStyle = {
@@ -95,7 +96,14 @@ export class Workpad extends React.PureComponent {
 
     return (
       <div className="canvasWorkpad__buffer" style={bufferStyle}>
-        <div className="canvasCheckered" style={{ height, width }}>
+        <div
+          className="canvasCheckered"
+          style={{
+            height,
+            width,
+            transform: isFullscreen ? undefined : `scale3d(${zoomScale}, ${zoomScale}, 1)`, // don't scale in fullscreen mode
+          }}
+        >
           {!isFullscreen && (
             <Shortcuts name="EDITOR" handler={this.keyHandler} targetNodeSelector="body" global />
           )}

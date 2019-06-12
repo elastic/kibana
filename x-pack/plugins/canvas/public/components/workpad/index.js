@@ -10,7 +10,7 @@ import { pure, compose, withState, withProps, getContext, withHandlers } from 'r
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
-import { getFullscreen } from '../../state/selectors/app';
+import { getFullscreen, getZoomScale } from '../../state/selectors/app';
 import {
   getSelectedPageIndex,
   getAllElements,
@@ -30,6 +30,7 @@ const mapStateToProps = state => {
     workpadCss,
     workpadId,
     isFullscreen: getFullscreen(state),
+    zoomScale: getZoomScale(state),
   };
 };
 
