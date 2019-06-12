@@ -20,13 +20,12 @@
 import { calculateAuto } from './calculate_auto';
 import { getUnitValue } from './unit_to_seconds';
 import { getTimerangeDuration } from '../helpers/get_timerange';
-import {
-  INTERVAL_STRING_RE,
-  GTE_INTERVAL_RE,
-} from '../../../../common/interval_regexp';
+import { INTERVAL_STRING_RE, GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 
 const calculateBucketData = (timeInterval, capabilities) => {
-  const intervalString = capabilities ? capabilities.getValidTimeInterval(timeInterval) : timeInterval;
+  const intervalString = capabilities
+    ? capabilities.getValidTimeInterval(timeInterval)
+    : timeInterval;
   const intervalStringMatch = intervalString.match(INTERVAL_STRING_RE);
 
   let bucketSize = Number(intervalStringMatch[1]) * getUnitValue(intervalStringMatch[2]);
@@ -42,7 +41,7 @@ const calculateBucketData = (timeInterval, capabilities) => {
   };
 };
 
-const calculateBucketSizeForAutoInterval = (req) => {
+const calculateBucketSizeForAutoInterval = req => {
   const duration = getTimerangeDuration(req);
 
   return calculateAuto.near(100, duration).asSeconds();

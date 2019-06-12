@@ -60,9 +60,9 @@ export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObj
         buckets: 1,
       });
 
-    isLastValueTimerangeMode(panel, series) ?
-      getDateHistogramForLastBucketMode() :
-      getDateHistogramForEntireTimerangeMode();
+    isLastValueTimerangeMode(panel, series)
+      ? getDateHistogramForLastBucketMode()
+      : getDateHistogramForEntireTimerangeMode();
 
     set(doc, `aggs.${series.id}.meta`, meta);
 

@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../../common/timerange_data_modes';
+import {
+  TIME_RANGE_DATA_MODES,
+  TIME_RANGE_MODE_KEY,
+} from '../../../../common/timerange_data_modes';
 import { PANEL_TYPES } from '../../../../common/panel_types';
 
 const OVERRIDE_INDEX_PATTERN_KEY = 'override_index_pattern';
@@ -58,9 +61,9 @@ export const isEntireTimeRangeMode = (panel, series = {}) => {
     return false;
   }
 
-  const timeRangeMode = hasOverriddenIndexPattern(series) ?
-    getSeriesTimeRangeMode(series) :
-    getPanelTimeRangeMode(panel);
+  const timeRangeMode = hasOverriddenIndexPattern(series)
+    ? getSeriesTimeRangeMode(series)
+    : getPanelTimeRangeMode(panel);
 
   return timeRangeMode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
 };

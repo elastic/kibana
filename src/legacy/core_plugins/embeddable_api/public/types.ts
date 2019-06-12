@@ -54,11 +54,6 @@ export interface TimeRange {
   from: string;
 }
 
-export interface RefreshConfig {
-  pause: boolean;
-  value: number;
-}
-
 export enum QueryLanguageType {
   KUERY = 'kuery',
   LUCENE = 'lucene',

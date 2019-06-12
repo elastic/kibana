@@ -23,7 +23,6 @@ import sinon from 'sinon';
 import { DefaultSearchCapabilities } from '../../../../search_strategies/default_search_capabilities';
 
 describe('dateHistogram(req, panel, series)', () => {
-
   let panel;
   let series;
   let req;
@@ -64,7 +63,9 @@ describe('dateHistogram(req, panel, series)', () => {
   describe('last value time range mode', () => {
     it('returns valid date histogram', () => {
       const next = doc => doc;
-      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)({});
+      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
+        {}
+      );
       expect(doc).to.eql({
         aggs: {
           test: {
@@ -96,7 +97,9 @@ describe('dateHistogram(req, panel, series)', () => {
     it('returns valid date histogram (offset by 1h)', () => {
       series.offset_time = '1h';
       const next = doc => doc;
-      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)({});
+      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
+        {}
+      );
       expect(doc).to.eql({
         aggs: {
           test: {
@@ -131,7 +134,9 @@ describe('dateHistogram(req, panel, series)', () => {
       series.series_time_field = 'timestamp';
       series.series_interval = '20s';
       const next = doc => doc;
-      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)({});
+      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
+        {}
+      );
       expect(doc).to.eql({
         aggs: {
           test: {
@@ -167,7 +172,9 @@ describe('dateHistogram(req, panel, series)', () => {
       panel.type = 'timeseries';
 
       const next = doc => doc;
-      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)({});
+      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
+        {}
+      );
 
       expect(doc.aggs.test.aggs.timeseries.auto_date_histogram).to.eql(undefined);
       expect(doc.aggs.test.aggs.timeseries.date_histogram).to.exist;
@@ -177,7 +184,9 @@ describe('dateHistogram(req, panel, series)', () => {
       panel.time_range_mode = 'entire_time_range';
 
       const next = doc => doc;
-      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)({});
+      const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
+        {}
+      );
       expect(doc).to.eql({
         aggs: {
           test: {
@@ -198,5 +207,4 @@ describe('dateHistogram(req, panel, series)', () => {
       });
     });
   });
-
 });

@@ -14,9 +14,9 @@ import { TestProviders } from '../../mock/test_providers';
 import {
   addGlobalResizeCursorStyleToBody,
   globalResizeCursorClassName,
-  isResizing,
   removeGlobalResizeCursorStyleFromBody,
   Resizeable,
+  calculateDeltaX,
 } from '.';
 import { CellResizeHandle } from './styled_handles';
 
@@ -118,39 +118,17 @@ describe('Resizeable', () => {
       });
     });
 
-    describe('#isResizing', () => {
-      test('it returns true when the global-resize-cursor is present on the body', () => {
-        mount(
-          <TestProviders>
-            <Resizeable
-              handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
-              height="100%"
-              id="test"
-              onResize={jest.fn()}
-              render={() => <></>}
-            />
-          </TestProviders>
-        );
-
-        addGlobalResizeCursorStyleToBody();
-
-        expect(isResizing()).toEqual(true);
+    describe('#calculateDeltaX', () => {
+      test('it returns 0 when prevX isEqual 0', () => {
+        expect(calculateDeltaX({ prevX: 0, screenX: 189 })).toEqual(0);
       });
 
-      test('it returns false when the global-resize-cursor is NOT present on the body', () => {
-        mount(
-          <TestProviders>
-            <Resizeable
-              handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
-              height="100%"
-              id="test"
-              onResize={jest.fn()}
-              render={() => <></>}
-            />
-          </TestProviders>
-        );
+      test('it returns positive difference when screenX > prevX', () => {
+        expect(calculateDeltaX({ prevX: 10, screenX: 189 })).toEqual(179);
+      });
 
-        expect(isResizing()).toEqual(false);
+      test('it returns negative difference when prevX > screenX ', () => {
+        expect(calculateDeltaX({ prevX: 199, screenX: 189 })).toEqual(-10);
       });
     });
   });

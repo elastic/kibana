@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import React from 'react';
 
 export const UIRestrictionsContext = React.createContext();

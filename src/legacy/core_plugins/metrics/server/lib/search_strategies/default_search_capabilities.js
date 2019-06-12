@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { convertIntervalToUnit, parseInterval, getSuitableUnit } from '../vis_data/helpers/unit_to_seconds';
+import {
+  convertIntervalToUnit,
+  parseInterval,
+  getSuitableUnit,
+} from '../vis_data/helpers/unit_to_seconds';
 import { RESTRICTIONS_KEYS } from '../../../common/ui_restrictions';
 
 const getTimezoneFromRequest = request => {

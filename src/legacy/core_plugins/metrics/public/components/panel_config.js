@@ -59,7 +59,7 @@ export function PanelConfig(props) {
   if (component) {
     return (
       <UIRestrictionsContext.Provider value={uiRestrictions}>
-        { React.createElement(component, props) }
+        {React.createElement(component, props)}
       </UIRestrictionsContext.Provider>
     );
   }

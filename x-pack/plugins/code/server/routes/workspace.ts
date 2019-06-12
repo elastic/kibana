@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import hapi, { RequestQuery } from 'hapi';
 
+import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
@@ -15,7 +16,11 @@ import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { ServerLoggerFactory } from '../utils/server_logger_factory';
 import { CodeServerRouter } from '../security';
 
-export function workspaceRoute(server: CodeServerRouter, serverOptions: ServerOptions) {
+export function workspaceRoute(
+  server: CodeServerRouter,
+  serverOptions: ServerOptions,
+  gitOps: GitOperations
+) {
   server.route({
     path: '/api/code/workspace',
     method: 'GET',
@@ -36,7 +41,7 @@ export function workspaceRoute(server: CodeServerRouter, serverOptions: ServerOp
       if (repoConfig) {
         const log = new Logger(server.server, ['workspace', repoUri]);
         const workspaceHandler = new WorkspaceHandler(
-          serverOptions.repoPath,
+          gitOps,
           serverOptions.workspacePath,
           new EsClientWithRequest(req),
           new ServerLoggerFactory(server.server)

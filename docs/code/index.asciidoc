@@ -1,0 +1,19 @@
+[[code-intro]]
+= Code
+
+[partintro]
+--
+
+beta[] Interaction with source code is pervasive and essential for any technology company. How efficiently you search, navigate, and gain insight to your source code impacts how fast your organization can innovate. *Code* provides an easy-to-use code search solution that scales with your organization, so your team can focus on shipping awesome products and providing the best services. *Code* provides the following functions:
+
+Code provides:
+
+* Jump to definition and find references for a symbol
+* Typeahead search for symbol definition, file, and repo
+* Symbol table
+* Full text search with repo and language filters
+
+<<code-getting-started, Get Started>> with *Code* by importing your first repo.
+--
+
+include::code-getting-started.asciidoc[]

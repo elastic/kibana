@@ -38,11 +38,13 @@ export function YesNo(props) {
     <div>
       <EuiRadio
         id={htmlId('yes')}
-        label={(<FormattedMessage
-          id="tsvb.yesButtonLabel"
-          defaultMessage="Yes"
-          description="The 'yes' in a yes/no answer choice."
-        />)}
+        label={
+          <FormattedMessage
+            id="tsvb.yesButtonLabel"
+            defaultMessage="Yes"
+            description="The 'yes' in a yes/no answer choice."
+          />
+        }
         className="eui-displayInlineBlock"
         name={inputName}
         checked={Boolean(value)}
@@ -50,16 +52,16 @@ export function YesNo(props) {
         onChange={handleChange(1)}
         disabled={disabled}
       />
-
       &emsp;
-
       <EuiRadio
         id={htmlId('no')}
-        label={(<FormattedMessage
-          id="tsvb.noButtonLabel"
-          defaultMessage="No"
-          description="The 'no' in a yes/no answer choice."
-        />)}
+        label={
+          <FormattedMessage
+            id="tsvb.noButtonLabel"
+            defaultMessage="No"
+            description="The 'no' in a yes/no answer choice."
+          />
+        }
         className="eui-displayInlineBlock"
         name={inputName}
         checked={!Boolean(value)}
@@ -73,7 +75,7 @@ export function YesNo(props) {
 
 YesNo.propTypes = {
   name: PropTypes.string,
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
 YesNo.defaultProps = {
