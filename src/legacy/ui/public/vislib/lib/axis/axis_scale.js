@@ -151,7 +151,15 @@ export class AxisScale {
     const domain = [min, max];
     if (this.axisConfig.isUserDefined()) return this.validateUserExtents(domain);
     if (this.axisConfig.isLogScale()) return this.logDomain(min, max);
-    if (this.axisConfig.isYExtents()) return domain;
+    if (this.axisConfig.isYExtents()) {
+      const scaleBottomMargin = this.axisConfig.get('scale.bottomMargin');
+      if (scaleBottomMargin === 0) {
+        return domain;
+      } else {
+        domain[0] = domain[0] - scaleBottomMargin;
+        return domain;
+      }
+    }
     return [Math.min(0, min), Math.max(0, max)];
   }
 
