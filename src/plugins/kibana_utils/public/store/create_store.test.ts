@@ -25,7 +25,7 @@ test('can create store', () => {
     get: expect.any(Function),
     set: expect.any(Function),
     state$: expect.any(Object),
-    mutations: expect.any(Function),
+    createMutations: expect.any(Function),
     redux: {
       getState: expect.any(Function),
       dispatch: expect.any(Function),
@@ -108,7 +108,7 @@ test('multiple subscribers can subscribe', () => {
 
 test('creates impure mutations from pure mutations', () => {
   const store = createStore<any>({});
-  const mutations = store.mutations({
+  const mutations = store.createMutations({
     setFoo: _ => bar => ({ foo: bar }),
   });
 
@@ -120,7 +120,7 @@ test('mutations can update state', () => {
     value: 0,
     foo: 'bar',
   });
-  const mutations = store.mutations({
+  const mutations = store.createMutations({
     add: state => increment => ({ ...state, value: state.value + increment }),
     setFoo: state => bar => ({ ...state, foo: bar }),
   });
@@ -149,7 +149,7 @@ test('mutations can update state', () => {
 
 test('mutation methods are not bound', () => {
   const store = createStore<any>({ value: -3 });
-  const { add } = store.mutations({
+  const { add } = store.createMutations({
     add: state => increment => ({ ...state, value: state.value + increment }),
   });
 

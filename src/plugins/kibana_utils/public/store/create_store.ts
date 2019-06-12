@@ -47,7 +47,7 @@ export const createStore = <State extends {}>(defaultState: State): AppStore<Sta
     state$.next(get());
   });
 
-  const mutations: AppStore<State>['mutations'] = pureMutations => {
+  const createMutations: AppStore<State>['createMutations'] = pureMutations => {
     const result: Mutations<any> = {};
     for (const [name, fn] of Object.entries(pureMutations)) {
       result[name] = (...args) => {
@@ -68,6 +68,6 @@ export const createStore = <State extends {}>(defaultState: State): AppStore<Sta
     set,
     redux,
     state$: state$ as Observable<State>,
-    mutations,
+    createMutations,
   };
 };

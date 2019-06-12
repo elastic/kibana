@@ -25,7 +25,7 @@ export interface AppStore<State extends {}> {
   get: () => State;
   set: (state: State) => void;
   state$: Observable<State>;
-  mutations: <Pure extends PureMutations<State>>(pureMutations: Pure) => Mutations<Pure>;
+  createMutations: <Pure extends PureMutations<State>>(pureMutations: Pure) => Mutations<Pure>;
 }
 
 export type PureMutation<State extends {}> = (state: State) => (...args: any[]) => State;
