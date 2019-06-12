@@ -245,9 +245,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     /**
      * set duration formatter additional settings
      *
-     * @param from set time from what value should be start
-     * @param to set time from what value should be start
-     * @param decimalPlaces set count of decimals for `value` template
+     * @param from start format
+     * @param to end format
+     * @param decimalPlaces decimals count
      */
     public async setDurationFormatterSettings({
       from,
