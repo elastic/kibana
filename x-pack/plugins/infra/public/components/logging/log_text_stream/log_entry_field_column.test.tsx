@@ -20,14 +20,7 @@ describe('LogEntryFieldColumn', () => {
         isEnzyme
       />
     );
-    expect(component.exists('ul')).toBe(true);
-    expect(
-      component.containsAllMatchingElements([
-        <li key="LogEntryFieldColumn-a-0">a</li>,
-        <li key="LogEntryFieldColumn-b-1">b</li>,
-        <li key="LogEntryFieldColumn-c-2">c</li>,
-      ])
-    ).toBe(true);
+    expect(component.text()).toEqual('a, b, c');
   });
   it('should output just text when passed a non-Array', () => {
     const encodedValue = JSON.stringify('foo');

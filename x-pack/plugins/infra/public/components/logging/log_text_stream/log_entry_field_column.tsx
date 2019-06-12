@@ -26,15 +26,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   isEnzyme,
 }) => {
   const value = useMemo(() => JSON.parse(encodedValue), [encodedValue]);
-  const formattedValue = Array.isArray(value) ? (
-    <ul>
-      {value.map((entry, i) => (
-        <li key={`LogEntryFieldColumn-${entry}-${i}`}>{entry}</li>
-      ))}
-    </ul>
-  ) : (
-    value
-  );
+  const formattedValue = Array.isArray(value) ? value.join(', ') : value;
   return (
     <FieldColumnContent
       isHighlighted={isHighlighted}
