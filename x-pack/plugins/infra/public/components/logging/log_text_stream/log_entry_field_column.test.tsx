@@ -6,36 +6,38 @@
 
 import React from 'react';
 import { LogEntryFieldColumn } from './log_entry_field_column';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
 describe('LogEntryFieldColumn', () => {
   it('should output a <ul> when displaying an Array of values', () => {
-    const encodedValue = JSON.stringify(['a', 'b', 'c']);
-    const component = shallow(
+    const encodedValue = '["a","b","c"]'; // Using JSON.stringify here fails the test when running locally on macOS
+    const component = mount(
       <LogEntryFieldColumn
         encodedValue={encodedValue}
         isHighlighted={false}
         isHovered={false}
         isWrapped={false}
+        isEnzyme
       />
     );
     expect(component.exists('ul')).toBe(true);
     expect(
       component.containsAllMatchingElements([
         <li key="LogEntryFieldColumn-a-0">a</li>,
-        <li key="LogEntryFieldColumn-b-1">a</li>,
-        <li key="LogEntryFieldColumn-c-2">a</li>,
+        <li key="LogEntryFieldColumn-b-1">b</li>,
+        <li key="LogEntryFieldColumn-c-2">c</li>,
       ])
     ).toBe(true);
   });
   it('should output just text when passed a non-Array', () => {
     const encodedValue = JSON.stringify('foo');
-    const component = shallow(
+    const component = mount(
       <LogEntryFieldColumn
         encodedValue={encodedValue}
         isHighlighted={false}
         isHovered={false}
         isWrapped={false}
+        isEnzyme
       />
     );
     expect(component.exists('ul')).toBe(false);

@@ -15,6 +15,7 @@ interface LogEntryFieldColumnProps {
   isHighlighted: boolean;
   isHovered: boolean;
   isWrapped: boolean;
+  isEnzyme?: boolean;
 }
 
 export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnProps> = ({
@@ -22,6 +23,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   isHighlighted,
   isHovered,
   isWrapped,
+  isEnzyme,
 }) => {
   const value = useMemo(() => JSON.parse(encodedValue), [encodedValue]);
   const formattedValue = Array.isArray(value) ? (
@@ -34,7 +36,12 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
     value
   );
   return (
-    <FieldColumnContent isHighlighted={isHighlighted} isHovered={isHovered} isWrapped={isWrapped}>
+    <FieldColumnContent
+      isHighlighted={isHighlighted}
+      isHovered={isHovered}
+      isWrapped={isWrapped}
+      isEnzyme={isEnzyme}
+    >
       {formattedValue}
     </FieldColumnContent>
   );
@@ -62,8 +69,12 @@ const FieldColumnContent = LogEntryColumnContent.extend.attrs<{
   isHighlighted: boolean;
   isHovered: boolean;
   isWrapped?: boolean;
+  isEnzyme?: boolean;
 }>({})`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  background-color: ${props =>
+    props.isEnzyme
+      ? null // Themes aren't passed in Enzyme testing mode
+      : props.theme.eui.euiColorEmptyShade};
   text-overflow: ellipsis;
 
   ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
