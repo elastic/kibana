@@ -15,7 +15,7 @@ export const FORMAT_OPTIONS = [
 export const CUSTOM_DROPDOWN_OPTION = 'custom';
 
 export const TIMESTAMP_OPTIONS = [
-  'custom',
+  CUSTOM_DROPDOWN_OPTION,
   'dd/MMM/yyyy:HH:mm:ss XX',
   'EEE MMM dd HH:mm zzz yyyy',
   'EEE MMM dd HH:mm:ss yyyy',
