@@ -529,7 +529,6 @@
     "common.ui.timepicker.relOpts.yearsFromNow": "自现在开始的年数",
     "common.ui.topNav.closeAriaLabel": "关闭",
     "common.ui.topNav.toggleViewAriaLabel": "切换 {optLabel} 视图",
-    "common.ui.url.replacementFailedErrorMessage": "替换失败，未解析的表达式：{expr}",
     "common.ui.url.savedObjectIsMissingNotificationMessage": "已保存对象缺失",
     "common.ui.vis.aggConfig.percentageOfLabel": "{label} 的百分比",
     "common.ui.vis.courier.inspector.dataRequest.description": "此请求将查询 Elasticsearch 以获取可视化的数据。",

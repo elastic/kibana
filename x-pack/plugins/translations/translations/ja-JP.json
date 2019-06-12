@@ -589,7 +589,6 @@
     "common.ui.timepicker.relOpts.yearsFromNow": "現在からの年数",
     "common.ui.topNav.closeAriaLabel": "閉じる",
     "common.ui.topNav.toggleViewAriaLabel": "{optLabel} ビューを切り替える",
-    "common.ui.url.replacementFailedErrorMessage": "置換に失敗、未解決の表現式: {expr}",
     "common.ui.url.savedObjectIsMissingNotificationMessage": "保存されたオブジェクトがありません",
     "common.ui.vis.aggConfig.percentageOfLabel": "{label} のパーセンテージ",
     "common.ui.vis.courier.inspector.dataRequest.description": "このリクエストは Elasticsearch にクエリをかけ、可視化用にデータを取得します。",
