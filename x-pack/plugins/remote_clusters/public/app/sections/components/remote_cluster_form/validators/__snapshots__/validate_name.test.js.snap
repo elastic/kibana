@@ -4,6 +4,7 @@ exports[`validateName rejects empty input '   ' 1`] = `
 <FormattedMessage
   defaultMessage="Name is required."
   id="xpack.remoteClusters.form.errors.nameMissing"
+  values={Object {}}
 />
 `;
 
@@ -11,6 +12,7 @@ exports[`validateName rejects empty input 'null' 1`] = `
 <FormattedMessage
   defaultMessage="Name is required."
   id="xpack.remoteClusters.form.errors.nameMissing"
+  values={Object {}}
 />
 `;
 
@@ -18,6 +20,7 @@ exports[`validateName rejects empty input 'undefined' 1`] = `
 <FormattedMessage
   defaultMessage="Name is required."
   id="xpack.remoteClusters.form.errors.nameMissing"
+  values={Object {}}
 />
 `;
 
@@ -25,6 +28,7 @@ exports[`validateName rejects invalid characters ' ' 1`] = `
 <FormattedMessage
   defaultMessage="Name is required."
   id="xpack.remoteClusters.form.errors.nameMissing"
+  values={Object {}}
 />
 `;
 

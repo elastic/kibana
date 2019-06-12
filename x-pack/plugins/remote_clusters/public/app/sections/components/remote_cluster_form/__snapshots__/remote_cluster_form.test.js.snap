@@ -144,6 +144,11 @@ Array [
                     data-test-subj="comboBoxInput"
                     tabindex="-1"
                   >
+                    <p
+                      class="euiComboBoxPlaceholder"
+                    >
+                      host:port
+                    </p>
                     <div
                       class="euiComboBox__input"
                       style="font-size:14px;display:inline-block"
@@ -167,7 +172,14 @@ Array [
               class="euiFormHelpText euiFormRow__text"
               id="mockId-help"
             >
-              An IP address or host name, followed by the {transportPort} of the remote cluster.
+              An IP address or host name, followed by the 
+              <button
+                class="euiLink euiLink--primary"
+                type="button"
+              >
+                transport port
+              </button>
+               of the remote cluster.
             </div>
           </div>
         </div>
@@ -199,7 +211,17 @@ Array [
               class="euiTextColor euiTextColor--subdued"
             >
               <p>
-                By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable {optionName}. {learnMoreLink}
+                By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable 
+                <strong>
+                  Skip if unavailable
+                </strong>
+                . 
+                <button
+                  class="euiLink euiLink--primary"
+                  type="button"
+                >
+                  Learn more.
+                </button>
               </p>
             </div>
           </div>
@@ -248,6 +270,12 @@ Array [
                   />
                 </span>
               </span>
+              <label
+                class="euiSwitch__label"
+                for="mockId"
+              >
+                Skip if unavailable
+              </label>
             </div>
           </div>
         </div>
@@ -371,6 +399,11 @@ Array [
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
+            <p
+              class="euiComboBoxPlaceholder"
+            >
+              host:port
+            </p>
             <div
               class="euiComboBox__input"
               style="font-size: 14px; display: inline-block;"
@@ -401,7 +434,14 @@ Array [
       class="euiFormHelpText euiFormRow__text"
       id="mockId-help"
     >
-      An IP address or host name, followed by the {transportPort} of the remote cluster.
+      An IP address or host name, followed by the 
+      <button
+        class="euiLink euiLink--primary"
+        type="button"
+      >
+        transport port
+      </button>
+       of the remote cluster.
     </div>
   </div>,
   <div
@@ -445,6 +485,12 @@ Array [
           />
         </span>
       </span>
+      <label
+        class="euiSwitch__label"
+        for="mockId"
+      >
+        Skip if unavailable
+      </label>
     </div>
   </div>,
   <div

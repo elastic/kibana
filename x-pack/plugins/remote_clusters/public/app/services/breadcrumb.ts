@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { CRUD_APP_BASE_PATH } from '../constants';
 
 let _setBreadcrumbs: any;
 let _breadcrumbs: any;
 
-export function init(setGlobalBreadcrumbs: any, managementBreadcrumb: any, i18n: any): void {
+export function init(setGlobalBreadcrumbs: any, managementBreadcrumb: any): void {
   _setBreadcrumbs = setGlobalBreadcrumbs;
   _breadcrumbs = {
     management: managementBreadcrumb,

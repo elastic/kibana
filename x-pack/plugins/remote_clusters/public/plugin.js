@@ -46,7 +46,7 @@ export class Plugin {
       });
 
       // Initialize services
-      initBreadcrumbs(setBreadcrumbs, managementBreadcrumb, i18n);
+      initBreadcrumbs(setBreadcrumbs, managementBreadcrumb);
       initDocumentation(`${elasticWebsiteUrl}guide/en/elasticsearch/reference/${docLinkVersion}/`);
       initUiMetric(track);
       initNotification(toasts, fatalError);
