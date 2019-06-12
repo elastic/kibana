@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import sinon from 'sinon';
 
-import { initTestBed, mockServerResponses } from './job_create.test_helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
@@ -20,36 +19,40 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
+const { setup } = pageHelpers.jobCreate;
+
 describe('Create Rollup Job, step 4: Histogram', () => {
   let server;
+  let httpRequestsMockHelpers;
   let find;
   let exists;
-  let userActions;
-  let mockIndexPatternValidityResponse;
+  let actions;
   let getEuiStepsHorizontalActive;
   let goToStep;
-  let getMetadataFromEuiTable;
+  let table;
   let form;
-  let getFormErrorsMessages;
+
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterAll(() => {
+    server.restore();
+  });
 
   beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-    ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
+    // Set "default" mock responses by not providing any arguments
+    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+
     ({
       find,
       exists,
-      userActions,
+      actions,
       getEuiStepsHorizontalActive,
       goToStep,
-      getMetadataFromEuiTable,
+      table,
       form,
-      getFormErrorsMessages,
-    } = initTestBed());
-  });
-
-  afterEach(() => {
-    server.restore();
+    } = setup());
   });
 
   const numericFields = ['a-numericField', 'b-numericField'];
@@ -83,12 +86,12 @@ describe('Create Rollup Job, step 4: Histogram', () => {
     });
 
     it('should go to the "Terms" step when clicking the back button', async () => {
-      userActions.clickPreviousStep();
+      actions.clickPreviousStep();
       expect(getEuiStepsHorizontalActive()).toContain('Terms');
     });
 
     it('should go to the "Metrics" step when clicking the next button', async () => {
-      userActions.clickNextStep();
+      actions.clickNextStep();
       expect(getEuiStepsHorizontalActive()).toContain('Metrics');
     });
 
@@ -122,10 +125,10 @@ describe('Create Rollup Job, step 4: Histogram', () => {
 
     describe('when no histogram fields are availalbe', () => {
       it('should indicate it to the user', async () => {
-        mockIndexPatternValidityResponse({ numericFields: [] });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: [] });
         await goToStepAndOpenFieldChooser();
 
-        const { tableCellsValues } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
+        const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldChooser-table');
 
         expect(tableCellsValues).toEqual([['No items found']]);
       });
@@ -133,12 +136,12 @@ describe('Create Rollup Job, step 4: Histogram', () => {
 
     describe('when histogram fields are available', () => {
       beforeEach(async () => {
-        mockIndexPatternValidityResponse({ numericFields });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields });
         await goToStepAndOpenFieldChooser();
       });
 
       it('should display the histogram fields available', async () => {
-        const { tableCellsValues } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
+        const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldChooser-table');
 
         expect(tableCellsValues).toEqual([
           ['a-numericField'],
@@ -147,13 +150,13 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       });
 
       it('should add histogram field to the field list when clicking on it', () => {
-        let { tableCellsValues } = getMetadataFromEuiTable('rollupJobHistogramFieldList');
+        let { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldList');
         expect(tableCellsValues).toEqual([['No histogram fields added']]); // make sure the field list is empty
 
-        const { rows } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
+        const { rows } = table.getMetaData('rollupJobHistogramFieldChooser-table');
         rows[0].reactWrapper.simulate('click'); // Select first row
 
-        ({ tableCellsValues } = getMetadataFromEuiTable('rollupJobHistogramFieldList'));
+        ({ tableCellsValues } = table.getMetaData('rollupJobHistogramFieldList'));
         const [firstRow] = tableCellsValues;
         expect(firstRow[0]).toEqual('a-numericField');
       });
@@ -164,19 +167,19 @@ describe('Create Rollup Job, step 4: Histogram', () => {
     it('should have an empty field list', async () => {
       await goToStep(4);
 
-      const { tableCellsValues } = getMetadataFromEuiTable('rollupJobHistogramFieldList');
+      const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldList');
       expect(tableCellsValues).toEqual([['No histogram fields added']]);
     });
 
     it('should have a delete button on each row to remove an histogram field', async () => {
       // First let's add a term to the list
-      mockIndexPatternValidityResponse({ numericFields });
+      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields });
       await goToStepAndOpenFieldChooser();
-      const { rows: fieldChooserRows } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
+      const { rows: fieldChooserRows } = table.getMetaData('rollupJobHistogramFieldChooser-table');
       fieldChooserRows[0].reactWrapper.simulate('click');
 
       // Make sure rows value has been set
-      let { rows: fieldListRows } = getMetadataFromEuiTable('rollupJobHistogramFieldList');
+      let { rows: fieldListRows } = table.getMetaData('rollupJobHistogramFieldList');
       expect(fieldListRows[0].columns[0].value).not.toEqual('No histogram fields added');
 
       const columnsFirstRow = fieldListRows[0].columns;
@@ -184,7 +187,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button');
       deleteButton.simulate('click');
 
-      ({ rows: fieldListRows } = getMetadataFromEuiTable('rollupJobHistogramFieldList'));
+      ({ rows: fieldListRows } = table.getMetaData('rollupJobHistogramFieldList'));
       expect(fieldListRows[0].columns[0].value).toEqual('No histogram fields added');
     });
   });
@@ -192,12 +195,12 @@ describe('Create Rollup Job, step 4: Histogram', () => {
   describe('interval', () => {
     const addHistogramFieldToList = () => {
       find('rollupJobShowFieldChooserButton').simulate('click');
-      const { rows } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
+      const { rows } = table.getMetaData('rollupJobHistogramFieldChooser-table');
       rows[0].reactWrapper.simulate('click');
     };
 
     beforeEach(async () => {
-      mockIndexPatternValidityResponse({ numericFields });
+      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields });
       await goToStep(4);
       addHistogramFieldToList();
     });
@@ -210,28 +213,28 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       it('should display errors when clicking "next" without filling the interval', () => {
         expect(exists('rollupJobCreateStepError')).toBeFalsy();
 
-        userActions.clickNextStep();
+        actions.clickNextStep();
 
         expect(exists('rollupJobCreateStepError')).toBeTruthy();
-        expect(getFormErrorsMessages()).toEqual(['Interval must be a whole number.']);
+        expect(form.getErrorsMessages()).toEqual(['Interval must be a whole number.']);
       });
 
       it('should be a whole number', () => {
         form.setInputValue('rollupJobCreateHistogramInterval', 5.5);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toEqual(['Interval must be a whole number.']);
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toEqual(['Interval must be a whole number.']);
       });
 
       it('should be greater than zero', () => {
         form.setInputValue('rollupJobCreateHistogramInterval', -1);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toEqual(['Interval must be greater than zero.']);
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toEqual(['Interval must be greater than zero.']);
       });
     });
 
     it('should go to next "Metrics" step if value is valid', () => {
       form.setInputValue('rollupJobCreateHistogramInterval', 3);
-      userActions.clickNextStep();
+      actions.clickNextStep();
       expect(getEuiStepsHorizontalActive()).toContain('Metrics');
     });
   });

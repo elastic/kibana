@@ -5,24 +5,19 @@
  */
 import {
   // @ts-ignore
-  EuiButtonEmpty,
-  // @ts-ignore
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { canUserChangePassword, User } from '../../../../../common/model/user';
-import { ChangePasswordForm } from '../../../..//components/management/change_password_form';
+import { UserAPIClient } from '../../../../lib/api';
+import { AuthenticatedUser, canUserChangePassword } from '../../../../../common/model';
+import { ChangePasswordForm } from '../../../../components/management/change_password_form';
 
 interface Props {
-  user: User;
+  user: AuthenticatedUser;
 }
 
 export class ChangePassword extends Component<Props, {}> {
-  constructor(props: Props) {
-    super(props);
-  }
-
   public render() {
     const canChangePassword = canUserChangePassword(this.props.user);
 
@@ -50,7 +45,11 @@ export class ChangePassword extends Component<Props, {}> {
           </p>
         }
       >
-        <ChangePasswordForm user={this.props.user} isUserChangingOwnPassword={true} />
+        <ChangePasswordForm
+          user={this.props.user}
+          isUserChangingOwnPassword={true}
+          apiClient={new UserAPIClient()}
+        />
       </EuiDescribedFormGroup>
     );
   };

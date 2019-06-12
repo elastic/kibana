@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { isBoolean } from 'lodash';
 import React, { Fragment } from 'react';
+import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_EXC_HANDLED,
   HTTP_REQUEST_METHOD,
@@ -15,7 +16,6 @@ import {
   USER_ID
 } from '../../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { idx } from '../../../../../common/idx';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { APMLink } from '../../../shared/Links/APMLink';

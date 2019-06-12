@@ -10,6 +10,5 @@ export {
   waffleFilterActions,
   waffleTimeActions,
   waffleOptionsActions,
-  flyoutOptionsActions,
 } from './local';
 export { logEntriesActions } from './remote';

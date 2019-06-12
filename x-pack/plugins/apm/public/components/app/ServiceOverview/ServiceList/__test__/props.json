@@ -5,14 +5,16 @@
       "agentName": "nodejs",
       "transactionsPerMinute": 0,
       "errorsPerMinute": 46.06666666666667,
-      "avgResponseTime": null
+      "avgResponseTime": null,
+      "environments": ["test"]
     },
     {
       "serviceName": "opbeans-python",
       "agentName": "python",
       "transactionsPerMinute": 86.93333333333334,
       "errorsPerMinute": 12.6,
-      "avgResponseTime": 91535.42944785276
+      "avgResponseTime": 91535.42944785276,
+      "environments": []
     }
   ]
 }

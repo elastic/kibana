@@ -39,7 +39,7 @@ const defaultProps = {
   isLoading: false
 };
 
-const initTestBed = registerTestBed(JobList, defaultProps, rollupJobsStore);
+const initTestBed = registerTestBed(JobList, { defaultProps, store: rollupJobsStore });
 
 describe('<JobList />', () => {
   it('should render empty prompt when loading is complete and there are no jobs', () => {

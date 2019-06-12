@@ -30,17 +30,23 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
+// Start contract is identical to setup
+const createStartContractMock = createSetupContractMock;
+
 type I18nServiceContract = PublicMethodsOf<I18nService>;
 const createMock = () => {
   const mocked: jest.Mocked<I18nServiceContract> = {
     setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
   mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
 export const i18nServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

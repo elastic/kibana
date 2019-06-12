@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import sinon from 'sinon';
 
 import { MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from '../../public/crud_app/services';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/legacy/ui/public/index_patterns';
-import { initTestBed, mockServerResponses } from './job_create.test_helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
@@ -22,32 +21,36 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
+const { setup } = pageHelpers.jobCreate;
+
 describe('Create Rollup Job, step 1: Logistics', () => {
   let server;
+  let httpRequestsMockHelpers;
   let find;
   let exists;
-  let userActions;
-  let getFormErrorsMessages;
+  let actions;
   let form;
-  let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
 
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterAll(() => {
+    server.restore();
+  });
+
   beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-    ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
+    // Set "default" mock responses by not providing any arguments
+    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+
     ({
       find,
       exists,
-      userActions,
-      getFormErrorsMessages,
+      actions,
       form,
       getEuiStepsHorizontalActive,
-    } = initTestBed());
-  });
-
-  afterEach(() => {
-    server.restore();
+    } = setup());
   });
 
   it('should have the horizontal step active on "Logistics"', () => {
@@ -71,10 +74,10 @@ describe('Create Rollup Job, step 1: Logistics', () => {
   it('should display errors when clicking "next" without filling the form', () => {
     expect(exists('rollupJobCreateStepError')).toBeFalsy();
 
-    userActions.clickNextStep();
+    actions.clickNextStep();
 
     expect(exists('rollupJobCreateStepError')).toBeTruthy();
-    expect(getFormErrorsMessages()).toEqual([
+    expect(form.getErrorsMessages()).toEqual([
       'Name is required.',
       'Index pattern is required.',
       'Rollup index is required.',
@@ -94,38 +97,38 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
       it('should not allow spaces', async () => {
         await form.setInputValue('rollupIndexPattern', 'with space', true);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Remove the spaces from your index pattern.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Remove the spaces from your index pattern.');
       });
 
       it('should not allow an unknown index pattern', async () => {
-        mockIndexPatternValidityResponse({ doesMatchIndices: false });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ doesMatchIndices: false });
         await form.setInputValue('rollupIndexPattern', 'unknown', true);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Index pattern doesn\'t match any indices.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Index pattern doesn\'t match any indices.');
       });
 
       it('should not allow an index pattern without time fields', async () => {
-        mockIndexPatternValidityResponse({ dateFields: [] });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ dateFields: [] });
         await form.setInputValue('rollupIndexPattern', 'abc', true);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Index pattern must match indices that contain time fields.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Index pattern must match indices that contain time fields.');
       });
 
       it('should not allow an index pattern that matches a rollup index', async () => {
-        mockIndexPatternValidityResponse({ doesMatchRollupIndices: true });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ doesMatchRollupIndices: true });
         await form.setInputValue('rollupIndexPattern', 'abc', true);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Index pattern must not match rollup indices.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Index pattern must not match rollup indices.');
       });
 
       it('should not be the same as the rollup index name', async () => {
         await form.setInputValue('rollupIndexPattern', 'abc', true);
         await form.setInputValue('rollupIndexName', 'abc', true);
 
-        userActions.clickNextStep();
+        actions.clickNextStep();
 
-        const errorMessages = getFormErrorsMessages();
+        const errorMessages = form.getErrorsMessages();
         expect(errorMessages).toContain('Index pattern cannot have the same as the rollup index.');
         expect(errorMessages).toContain('Rollup index cannot have the same as the index pattern.');
       });
@@ -142,15 +145,15 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
       it('should not allow spaces', () => {
         form.setInputValue('rollupIndexName', 'with space');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Remove the spaces from your rollup index name.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Remove the spaces from your rollup index name.');
       });
 
       it('should not allow invalid characters', () => {
         const expectInvalidChar = (char) => {
           form.setInputValue('rollupIndexName', `rollup_index_${char}`);
-          userActions.clickNextStep();
-          expect(getFormErrorsMessages()).toContain(`Remove the characters ${char} from your rollup index name.`);
+          actions.clickNextStep();
+          expect(form.getErrorsMessages()).toContain(`Remove the characters ${char} from your rollup index name.`);
         };
 
         [...INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, ','].reduce((promise, char) => {
@@ -160,8 +163,8 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
       it('should not allow a dot as first character', () => {
         form.setInputValue('rollupIndexName', '.kibana');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Index names cannot begin with periods.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Index names cannot begin with periods.');
       });
     });
 
@@ -368,18 +371,18 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           activateAdvancedCronExpression();
 
           form.setInputValue('rollupAdvancedCron', '');
-          userActions.clickNextStep();
+          actions.clickNextStep();
 
-          expect(getFormErrorsMessages()).toContain('Cron pattern or basic interval is required.');
+          expect(form.getErrorsMessages()).toContain('Cron pattern or basic interval is required.');
         });
 
         it('should not allow unvalid expression', () => {
           activateAdvancedCronExpression();
 
           form.setInputValue('rollupAdvancedCron', 'invalid');
-          userActions.clickNextStep();
+          actions.clickNextStep();
 
-          expect(getFormErrorsMessages()).toContain('Expression has only 1 part. At least 5 parts are required.');
+          expect(form.getErrorsMessages()).toContain('Expression has only 1 part. At least 5 parts are required.');
         });
       });
     });
@@ -395,14 +398,14 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
       it('should not be empty', () => {
         form.setInputValue('rollupPageSize', '');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Page size is required.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Page size is required.');
       });
 
       it('should be greater than 0', () => {
         form.setInputValue('rollupPageSize', '-1');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Page size must be greater than zero.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Page size must be greater than zero.');
       });
     });
 
@@ -417,14 +420,14 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
       it('should validate the interval format', () => {
         form.setInputValue('rollupDelay', 'abc');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain('Invalid delay format.');
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain('Invalid delay format.');
       });
 
       it('should validate the calendar format', () => {
         form.setInputValue('rollupDelay', '3y');
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toContain(`The 'y' unit only allows values of 1. Try 1y.`);
+        actions.clickNextStep();
+        expect(form.getErrorsMessages()).toContain(`The 'y' unit only allows values of 1. Try 1y.`);
       });
     });
   });

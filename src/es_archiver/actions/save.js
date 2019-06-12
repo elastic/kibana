@@ -33,6 +33,7 @@ import {
   createGenerateIndexRecordsStream,
   createFormatArchiveStreams,
   createGenerateDocRecordsStream,
+  Progress
 } from '../lib';
 
 export async function saveAction({ name, indices, client, dataDir, log, raw }) {
@@ -42,6 +43,9 @@ export async function saveAction({ name, indices, client, dataDir, log, raw }) {
   log.info('[%s] Creating archive of %j', name, indices);
 
   await fromNode(cb => mkdirp(outputDir, cb));
+
+  const progress = new Progress();
+  progress.activate(log);
 
   await Promise.all([
     // export and save the matching indices to mappings.json
@@ -55,12 +59,13 @@ export async function saveAction({ name, indices, client, dataDir, log, raw }) {
     // export all documents from matching indexes into data.json.gz
     createPromiseFromStreams([
       createListStream(indices),
-      createGenerateDocRecordsStream(client, stats),
+      createGenerateDocRecordsStream(client, stats, progress),
       ...createFormatArchiveStreams({ gzip: !raw }),
       createWriteStream(resolve(outputDir, `data.json${raw ? '' : '.gz'}`))
     ])
   ]);
 
+  progress.deactivate();
   stats.forEachIndex((index, { docs }) => {
     log.info('[%s] Archived %d docs from %j', name, docs.archived, index);
   });

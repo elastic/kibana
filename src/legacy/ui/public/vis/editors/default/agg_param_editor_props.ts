@@ -19,18 +19,29 @@
 
 import { AggParam } from '../../../agg_types';
 import { AggConfig } from '../../agg_config';
+import { FieldParamType } from '../../../agg_types/param_types';
+import { EditorConfig } from '../config/types';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it
 // https://github.com/babel/babel/issues/7641
 //
-export interface AggParamEditorProps<T> {
+
+export interface AggParamCommonProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
-  indexedFields?: any[];
-  isInvalid: boolean;
+  config: any;
+  editorConfig: EditorConfig;
+  indexedFields?: FieldParamType[];
+  showValidation: boolean;
   value: T;
+  responseValueAggs: AggConfig[] | null;
+  visName: string;
   setValidity(isValid: boolean): void;
-  setValue(value?: T): void;
   setTouched(): void;
+}
+
+export interface AggParamEditorProps<T> extends AggParamCommonProps<T> {
+  wrappedWithInlineComp?: boolean;
+  setValue(value?: T): void;
 }

@@ -20,6 +20,7 @@ import { mlResultsService } from 'plugins/ml/services/results_service';
 import {
   MAX_CATEGORY_EXAMPLES,
   MAX_INFLUENCER_FIELD_VALUES,
+  SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import {
@@ -191,6 +192,7 @@ export function getSelectionTimeRange(selectedCells, interval, bounds) {
 export function getSelectionInfluencers(selectedCells, fieldName) {
   if (
     selectedCells !== null &&
+    selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
     selectedCells.viewByFieldName !== undefined &&
     selectedCells.viewByFieldName !== VIEW_BY_JOB_LABEL
   ) {

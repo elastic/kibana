@@ -62,14 +62,14 @@ export function graph(kibana) {
           all: {
             savedObject: {
               all: ['graph-workspace'],
-              read: ['config', 'index-pattern'],
+              read: ['index-pattern'],
             },
             ui: ['save', 'delete'],
           },
           read: {
             savedObject: {
               all: [],
-              read: ['config', 'index-pattern', 'graph-workspace'],
+              read: ['index-pattern', 'graph-workspace'],
             },
             ui: [],
           }

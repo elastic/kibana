@@ -110,6 +110,7 @@ export class HistogramInner extends PureComponent {
     const x = scaleLinear()
       .domain([xMin, xMax])
       .range([XY_MARGIN.left, XY_WIDTH - XY_MARGIN.right]);
+
     const y = scaleLinear()
       .domain([yMin, yMax])
       .range([XY_HEIGHT, 0])
@@ -170,7 +171,7 @@ export class HistogramInner extends PureComponent {
               header={tooltipHeader(hoveredBucket)}
               footer={tooltipFooter(hoveredBucket)}
               tooltipPoints={[{ value: formatYLong(hoveredBucket.y) }]}
-              x={hoveredBucket.x}
+              x={hoveredBucket.xCenter}
               y={yDomain[1] / 2}
             />
           )}
@@ -206,13 +207,13 @@ export class HistogramInner extends PureComponent {
             nodes={this.props.buckets.map(bucket => {
               return {
                 ...bucket,
-                x: (bucket.x0 + bucket.x) / 2
+                xCenter: (bucket.x0 + bucket.x) / 2
               };
             })}
             onClick={this.onClick}
             onHover={this.onHover}
             onBlur={this.onBlur}
-            x={d => x(d.x)}
+            x={d => x(d.xCenter)}
             y={() => 1}
           />
         </XYPlot>

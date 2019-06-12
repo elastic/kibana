@@ -16,18 +16,15 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    <h4
-      class="euiTitle euiTitle--medium"
+    <span
+      class="euiTitle euiTitle--small"
+      style="overflow-x:hidden;white-space:nowrap"
     >
       206.3 GB 
       <span
         class="fa fa-long-arrow-down"
       />
-    </h4>
-  </div>
-  <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
-  >
+    </span>
     <div
       class="euiText euiText--extraSmall"
     >
@@ -50,18 +47,15 @@ exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    <h4
-      class="euiTitle euiTitle--medium"
+    <span
+      class="euiTitle euiTitle--small"
+      style="overflow-x:hidden;white-space:nowrap"
     >
       0% 
       <span
         class="fa fa-long-arrow-down"
       />
-    </h4>
-  </div>
-  <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
-  >
+    </span>
     <div
       class="euiText euiText--extraSmall"
     >

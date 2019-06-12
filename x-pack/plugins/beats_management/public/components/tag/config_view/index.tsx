@@ -72,7 +72,7 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
     }
     return (
       <EuiFlyout onClose={this.props.onClose}>
-        <EuiFlyoutHeader>
+        <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
               {this.editMode

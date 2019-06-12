@@ -9,6 +9,7 @@ exports[`LayerControl is rendered 1`] = `
     paddingSize="none"
   >
     <EuiFlexItem
+      className="mapWidgetControl__headerFlexItem"
       grow={false}
     >
       <EuiFlexGroup
@@ -21,7 +22,6 @@ exports[`LayerControl is rendered 1`] = `
           <EuiTitle
             className="mapWidgetControl__header"
             size="xxxs"
-            textTransform="none"
           >
             <h2>
               <FormattedMessage
@@ -109,6 +109,7 @@ exports[`LayerControl props isReadOnly 1`] = `
     paddingSize="none"
   >
     <EuiFlexItem
+      className="mapWidgetControl__headerFlexItem"
       grow={false}
     >
       <EuiFlexGroup
@@ -121,7 +122,6 @@ exports[`LayerControl props isReadOnly 1`] = `
           <EuiTitle
             className="mapWidgetControl__header"
             size="xxxs"
-            textTransform="none"
           >
             <h2>
               <FormattedMessage

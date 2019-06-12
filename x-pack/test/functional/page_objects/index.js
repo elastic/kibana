@@ -19,5 +19,6 @@ export { InfraLogsPageProvider } from './infra_logs_page';
 export { GisPageProvider } from './gis_page';
 export { StatusPagePageProvider } from './status_page';
 export { UpgradeAssistantProvider } from './upgrade_assistant';
+export { CodeHomePageProvider } from './code_page';
 export { RollupPageProvider } from './rollup_page';
 export { UptimePageProvider } from './uptime_page';

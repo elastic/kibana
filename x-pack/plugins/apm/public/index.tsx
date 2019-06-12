@@ -16,8 +16,6 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import 'uiExports/autocompleteProviders';
 import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
-// @ts-ignore
-import configureStore from './store/config/configureStore';
 import { plugin } from './new-platform';
 import { REACT_APP_ROOT_ID } from './new-platform/plugin';
 import './style/global_overrides.css';

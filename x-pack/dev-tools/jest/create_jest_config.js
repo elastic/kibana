@@ -22,6 +22,7 @@ export function createJestConfig({
     ],
     moduleNameMapper: {
       '^ui/(.*)': `${kibanaDirectory}/src/legacy/ui/public/$1`,
+      '^src/core/(.*)': `${kibanaDirectory}/src/core/$1`,
       '^plugins/xpack_main/(.*);': `${xPackKibanaDirectory}/plugins/xpack_main/public/$1`,
       '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
         `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`,
@@ -40,7 +41,8 @@ export function createJestConfig({
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
     },
     transformIgnorePatterns: [
-      '[/\\\\]node_modules[/\\\\].+\\.js$'
+      // ignore all node_modules except @elastic/eui which requires babel transforms to handle dynamic import()
+      '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)[/\\\\].+\\.js$'
     ],
     snapshotSerializers: [
       `${kibanaDirectory}/node_modules/enzyme-to-json/serializer`

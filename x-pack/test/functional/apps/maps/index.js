@@ -10,6 +10,8 @@ export default function ({ loadTestFile, getService }) {
   const browser = getService('browser');
 
   describe('maps app', function () {
+    this.tags(['skipFirefox']);
+
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('maps/data');
@@ -17,7 +19,6 @@ export default function ({ loadTestFile, getService }) {
       await kibanaServer.uiSettings.replace({
         'defaultIndex': 'logstash-*'
       });
-      await kibanaServer.uiSettings.disableToastAutohide();
       browser.setWindowSize(1600, 1000);
 
     });
@@ -29,6 +30,7 @@ export default function ({ loadTestFile, getService }) {
 
     describe('', function () {
       this.tags('ciGroup7');
+      loadTestFile(require.resolve('./documents_source'));
       loadTestFile(require.resolve('./saved_object_management'));
       loadTestFile(require.resolve('./sample_data'));
       loadTestFile(require.resolve('./feature_controls/maps_security'));
@@ -36,8 +38,7 @@ export default function ({ loadTestFile, getService }) {
     });
 
     describe('', function () {
-      this.tags('ciGroup3');
-      loadTestFile(require.resolve('./es_search_source'));
+      this.tags('ciGroup10');
       loadTestFile(require.resolve('./es_geo_grid_source'));
       loadTestFile(require.resolve('./joins'));
       loadTestFile(require.resolve('./add_layer_panel'));

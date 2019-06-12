@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiIcon, EuiIconTip, EuiText, EuiTextProps, IconType } from '@elastic/eui';
+import { EuiIcon, EuiIconTip, EuiText, IconType, PropsOf } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ReactNode, SFC } from 'react';
@@ -13,7 +13,7 @@ import {
 } from '../../../../../../../lib/kibana_privilege_calculator';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 
-interface Props extends EuiTextProps {
+interface Props extends PropsOf<typeof EuiText> {
   privilege: string | string[] | undefined;
   explanation?: PrivilegeExplanation;
   iconType?: IconType;

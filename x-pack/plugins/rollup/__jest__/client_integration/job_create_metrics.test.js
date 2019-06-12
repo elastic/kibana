@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import sinon from 'sinon';
 
-import { initTestBed, mockServerResponses } from './job_create.test_helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
@@ -20,32 +19,38 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
+const { setup } = pageHelpers.jobCreate;
+
 describe('Create Rollup Job, step 5: Metrics', () => {
   let server;
+  let httpRequestsMockHelpers;
   let find;
   let exists;
-  let userActions;
-  let mockIndexPatternValidityResponse;
+  let actions;
   let getEuiStepsHorizontalActive;
   let goToStep;
-  let getMetadataFromEuiTable;
+  let table;
+
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterAll(() => {
+    server.restore();
+  });
 
   beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-    ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
+    // Set "default" mock responses by not providing any arguments
+    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+
     ({
       find,
       exists,
-      userActions,
+      actions,
       getEuiStepsHorizontalActive,
       goToStep,
-      getMetadataFromEuiTable,
-    } = initTestBed());
-  });
-
-  afterEach(() => {
-    server.restore();
+      table,
+    } = setup());
   });
 
   const numericFields = ['a-numericField', 'c-numericField'];
@@ -80,12 +85,12 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     });
 
     it('should go to the "Histogram" step when clicking the back button', async () => {
-      userActions.clickPreviousStep();
+      actions.clickPreviousStep();
       expect(getEuiStepsHorizontalActive()).toContain('Histogram');
     });
 
     it('should go to the "Review" step when clicking the next button', async () => {
-      userActions.clickNextStep();
+      actions.clickNextStep();
       expect(getEuiStepsHorizontalActive()).toContain('Review');
     });
 
@@ -119,12 +124,12 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
     describe('table', () => {
       beforeEach(async () => {
-        mockIndexPatternValidityResponse({ numericFields, dateFields });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, dateFields });
         await goToStepAndOpenFieldChooser();
       });
 
       it('should display the fields with metrics and its type', async () => {
-        const { tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+        const { tableCellsValues } = table.getMetaData('rollupJobMetricsFieldChooser-table');
 
         expect(tableCellsValues).toEqual([
           ['a-numericField', 'numeric'],
@@ -135,13 +140,13 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should add metric field to the field list when clicking on a row', () => {
-        let { tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+        let { tableCellsValues } = table.getMetaData('rollupJobMetricsFieldList');
         expect(tableCellsValues).toEqual([['No metrics fields added']]); // make sure the field list is empty
 
-        const { rows } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+        const { rows } = table.getMetaData('rollupJobMetricsFieldChooser-table');
         rows[0].reactWrapper.simulate('click'); // Select first row in field chooser
 
-        ({ tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldList'));
+        ({ tableCellsValues } = table.getMetaData('rollupJobMetricsFieldList'));
         const [firstRow] = tableCellsValues;
         const [field, type] = firstRow;
         expect(field).toEqual(rows[0].columns[0].value);
@@ -155,7 +160,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       if(!exists('rollupJobMetricsFieldChooser-table')) {
         find('rollupJobShowFieldChooserButton').simulate('click');
       }
-      const { rows } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+      const { rows } = table.getMetaData('rollupJobMetricsFieldChooser-table');
       for (let i = 0; i < rows.length; i++) {
         if (rows[i].columns[1].value === type) {
           rows[i].reactWrapper.simulate('click');
@@ -167,13 +172,13 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     it('should have an empty field list', async () => {
       await goToStep(5);
 
-      const { tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+      const { tableCellsValues } = table.getMetaData('rollupJobMetricsFieldList');
       expect(tableCellsValues).toEqual([['No metrics fields added']]);
     });
 
     describe('when fields are added', () => {
       beforeEach(async () => {
-        mockIndexPatternValidityResponse({ numericFields, dateFields });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, dateFields });
         await goToStepAndOpenFieldChooser();
       });
 
@@ -189,7 +194,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         });
 
         // Make sure there are no other checkboxes
-        const { rows: [firstRow] } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+        const { rows: [firstRow] } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
         const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
         expect(metricsCheckboxes.length).toBe(numericTypeMetrics.length);
@@ -208,7 +213,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         });
 
         // Make sure there are no other checkboxes
-        const { rows: [firstRow] } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+        const { rows: [firstRow] } = table.getMetaData('rollupJobMetricsFieldList');
         const columnWithMetricsCheckboxes = 2;
         const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
         expect(metricsCheckboxes.length).toBe(dateTypeMetrics.length);
@@ -218,7 +223,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         expect(exists('rollupJobCreateStepError')).toBeFalsy();
 
         addFieldToList('numeric');
-        userActions.clickNextStep();
+        actions.clickNextStep();
 
         const stepError = find('rollupJobCreateStepError');
         expect(stepError.length).toBeTruthy();
@@ -227,11 +232,11 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should have a delete button on each row to remove the metric field', async () => {
-        const { rows: fieldChooserRows } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+        const { rows: fieldChooserRows } = table.getMetaData('rollupJobMetricsFieldChooser-table');
         fieldChooserRows[0].reactWrapper.simulate('click'); // select first item
 
         // Make sure rows value has been set
-        let { rows: fieldListRows } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+        let { rows: fieldListRows } = table.getMetaData('rollupJobMetricsFieldList');
         expect(fieldListRows[0].columns[0].value).not.toEqual('No metrics fields added');
 
         const columnsFirstRow = fieldListRows[0].columns;
@@ -239,7 +244,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button');
         deleteButton.simulate('click');
 
-        ({ rows: fieldListRows } = getMetadataFromEuiTable('rollupJobMetricsFieldList'));
+        ({ rows: fieldListRows } = table.getMetaData('rollupJobMetricsFieldList'));
         expect(fieldListRows[0].columns[0].value).toEqual('No metrics fields added');
       });
     });

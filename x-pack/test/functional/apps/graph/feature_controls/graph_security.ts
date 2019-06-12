@@ -14,6 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'graph', 'security', 'error']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const globalNav = getService('globalNav');
 
   describe('security', () => {
     before(async () => {
@@ -80,6 +81,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('graph');
         await testSubjects.existOrFail('graphDeleteButton');
       });
+
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
+      });
     });
 
     describe('global graph read-only privileges', () => {
@@ -135,6 +140,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('graph');
         await testSubjects.existOrFail('graphOpenButton');
         await testSubjects.missingOrFail('graphDeleteButton');
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
       });
     });
 

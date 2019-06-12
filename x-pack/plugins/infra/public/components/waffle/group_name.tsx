@@ -7,7 +7,6 @@ import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraPathType } from '../../graphql/types';
 import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../lib/lib';
 
 interface Props {
@@ -47,15 +46,7 @@ export class GroupName extends React.PureComponent<Props, {}> {
       return;
     }
     const currentPath = this.props.isChild && groupBy.length > 1 ? groupBy[1] : groupBy[0];
-    if (currentPath.type === InfraPathType.terms && currentPath.field) {
-      this.props.onDrilldown(`${currentPath.field}: "${this.props.group.name}"`);
-    }
-    if (currentPath.type === InfraPathType.filters && currentPath.filters) {
-      const currentFilter = currentPath.filters.find(f => f.label === this.props.group.name);
-      if (currentFilter) {
-        this.props.onDrilldown(currentFilter.query);
-      }
-    }
+    this.props.onDrilldown(`${currentPath.field}: "${this.props.group.name}"`);
   };
 }
 

@@ -55,6 +55,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       httpClient,
       validator,
       onChange,
+      editable,
       indexPatterns,
       allowDocumentLevelSecurity,
       allowFieldLevelSecurity,
@@ -135,7 +136,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
               selectedOptions={this.props.role.elasticsearch.run_as.map(u => ({ label: u }))}
               onCreateOption={this.onCreateRunAsOption}
               onChange={this.onRunAsUserChange}
-              isDisabled={!this.props.editable}
+              isDisabled={!editable}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>

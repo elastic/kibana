@@ -80,7 +80,7 @@ export class AutoFollowPatternTable extends PureComponent {
               trackUiMetric(UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK);
               selectAutoFollowPattern(name);
             }}
-            data-test-subj="ccrAutoFollowPatternListPatternLink"
+            data-test-subj="autoFollowPatternLink"
           >
             {name}
           </EuiLink>
@@ -152,7 +152,7 @@ export class AutoFollowPatternTable extends PureComponent {
                       iconType="trash"
                       color="danger"
                       onClick={() => deleteAutoFollowPattern(name)}
-                      data-test-subj="ccrAutoFollowPatternListDeleteActionButton"
+                      data-test-subj="deleteButton"
                     />
                   )}
                 </AutoFollowPatternDeleteProvider>
@@ -176,7 +176,7 @@ export class AutoFollowPatternTable extends PureComponent {
                   iconType="pencil"
                   color="primary"
                   href={routing.getAutoFollowPatternPath(name)}
-                  data-test-subj="ccrAutoFollowPatternListEditActionButton"
+                  data-test-subj="editButton"
                 />
               </EuiToolTip>
             );
@@ -229,7 +229,7 @@ export class AutoFollowPatternTable extends PureComponent {
               iconType="trash"
               color="danger"
               onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
-              data-test-subj="ccrAutoFollowPatternListBulkDeleteActionButton"
+              data-test-subj="bulkDeleteButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.deleteAutoFollowPatternButtonLabel"
@@ -260,12 +260,12 @@ export class AutoFollowPatternTable extends PureComponent {
           selection={selection}
           isSelectable={true}
           rowProps={() => ({
-            'data-test-subj': 'ccrAutoFollowPatternListTableRow'
+            'data-test-subj': 'row'
           })}
           cellProps={(item, column) => ({
-            'data-test-subj': `ccrAutoFollowPatternListTableCell-${column.field}`
+            'data-test-subj': `cell_${column.field}`
           })}
-          data-test-subj="ccrAutoFollowPatternListTable"
+          data-test-subj="autoFollowPatternListTable"
         />
         {this.renderLoading()}
       </Fragment>

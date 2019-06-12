@@ -24,7 +24,6 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <EuiTitle
               size="s"
-              textTransform="none"
             >
               <h3>
                 <FormattedMessage
@@ -37,7 +36,7 @@ exports[`Overview that overview page renders normally 1`] = `
             <EuiSpacer
               size="s"
             />
-            <InjectIntl(LatestActiveUi)
+            <LatestActive
               latestActive={
                 Array [
                   Object {
@@ -73,7 +72,6 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <EuiTitle
               size="s"
-              textTransform="none"
             >
               <h3>
                 <FormattedMessage
@@ -114,7 +112,6 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <EuiTitle
               size="s"
-              textTransform="none"
             >
               <h3>
                 <FormattedMessage
@@ -163,7 +160,7 @@ exports[`Overview that overview page renders normally 1`] = `
             hasShadow={false}
             paddingSize="m"
           >
-            <InjectIntl(MonitoringTimeseriesContainerUI)
+            <MonitoringTimeseriesContainer
               series={1}
             />
           </EuiPanel>
@@ -181,7 +178,7 @@ exports[`Overview that overview page renders normally 1`] = `
             hasShadow={false}
             paddingSize="m"
           >
-            <InjectIntl(MonitoringTimeseriesContainerUI)
+            <MonitoringTimeseriesContainer
               series={1}
             />
           </EuiPanel>
@@ -199,7 +196,7 @@ exports[`Overview that overview page renders normally 1`] = `
             hasShadow={false}
             paddingSize="m"
           >
-            <InjectIntl(MonitoringTimeseriesContainerUI)
+            <MonitoringTimeseriesContainer
               series={1}
             />
           </EuiPanel>
@@ -217,7 +214,7 @@ exports[`Overview that overview page renders normally 1`] = `
             hasShadow={false}
             paddingSize="m"
           >
-            <InjectIntl(MonitoringTimeseriesContainerUI)
+            <MonitoringTimeseriesContainer
               series={1}
             />
           </EuiPanel>
@@ -267,7 +264,7 @@ exports[`Overview that overview page shows a message if there is no beats data 1
             hasShadow={false}
             paddingSize="m"
           >
-            <InjectIntl(MonitoringTimeseriesContainerUI)
+            <MonitoringTimeseriesContainer
               series={1}
             />
           </EuiPanel>
@@ -285,7 +282,7 @@ exports[`Overview that overview page shows a message if there is no beats data 1
             hasShadow={false}
             paddingSize="m"
           >
-            <InjectIntl(MonitoringTimeseriesContainerUI)
+            <MonitoringTimeseriesContainer
               series={1}
             />
           </EuiPanel>
@@ -303,7 +300,7 @@ exports[`Overview that overview page shows a message if there is no beats data 1
             hasShadow={false}
             paddingSize="m"
           >
-            <InjectIntl(MonitoringTimeseriesContainerUI)
+            <MonitoringTimeseriesContainer
               series={1}
             />
           </EuiPanel>
@@ -321,7 +318,7 @@ exports[`Overview that overview page shows a message if there is no beats data 1
             hasShadow={false}
             paddingSize="m"
           >
-            <InjectIntl(MonitoringTimeseriesContainerUI)
+            <MonitoringTimeseriesContainer
               series={1}
             />
           </EuiPanel>

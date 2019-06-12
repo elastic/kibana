@@ -23,7 +23,7 @@ import { EmbeddableFactory } from 'ui/embeddable';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 
 import { Legacy } from 'kibana';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import {
   EmbeddableInstanceConfiguration,
   OnEmbeddableStateChanged,
@@ -90,7 +90,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationA
   ) {
     const visId = panelMetadata.id;
     const editUrl = this.getEditPath(visId);
-    const editable: boolean = uiCapabilities.visualize.save as boolean;
+    const editable: boolean = capabilities.get().visualize.save as boolean;
 
     const loader = await getVisualizeLoader();
     const savedObject = await this.savedVisualizations.get(visId);

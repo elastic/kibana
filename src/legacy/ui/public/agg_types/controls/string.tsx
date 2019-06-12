@@ -25,25 +25,19 @@ import { AggParamEditorProps } from '../../vis/editors/default';
 function StringParamEditor({
   agg,
   aggParam,
-  isInvalid,
+  showValidation,
   value,
   setValidity,
   setValue,
   setTouched,
 }: AggParamEditorProps<string>) {
-  if (aggParam.disabled && aggParam.disabled(agg)) {
-    // reset model value
-    setValue();
-    return null;
-  }
+  const isValid = aggParam.required ? !!value : true;
 
   useEffect(
     () => {
-      if (aggParam.required) {
-        setValidity(!!value);
-      }
+      setValidity(isValid);
     },
-    [value]
+    [isValid]
   );
 
   return (
@@ -51,7 +45,7 @@ function StringParamEditor({
       label={aggParam.displayName || aggParam.name}
       fullWidth={true}
       className="visEditorSidebar__aggParamFormRow"
-      isInvalid={isInvalid}
+      isInvalid={showValidation ? !isValid : false}
     >
       <EuiFieldText
         value={value || ''}
@@ -59,7 +53,7 @@ function StringParamEditor({
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
         onBlur={setTouched}
-        isInvalid={isInvalid}
+        isInvalid={showValidation ? !isValid : false}
       />
     </EuiFormRow>
   );

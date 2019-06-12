@@ -7,7 +7,7 @@
 import { useMemo } from 'react';
 import { getWaterfall } from '../components/app/TransactionDetails/Transaction/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import { loadTrace } from '../services/rest/apm/traces';
-import { IUrlParams } from '../store/urlParams';
+import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
 const INITIAL_DATA = { trace: [], errorsPerTransaction: {} };
@@ -15,7 +15,11 @@ const INITIAL_DATA = { trace: [], errorsPerTransaction: {} };
 export function useWaterfall(urlParams: IUrlParams) {
   const { traceId, start, end, transactionId } = urlParams;
   const { data = INITIAL_DATA, status, error } = useFetcher(
-    () => loadTrace({ traceId, start, end }),
+    () => {
+      if (traceId && start && end) {
+        return loadTrace({ traceId, start, end });
+      }
+    },
     [traceId, start, end]
   );
 

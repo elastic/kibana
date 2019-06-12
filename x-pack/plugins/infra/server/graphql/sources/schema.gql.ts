@@ -15,6 +15,8 @@ export const sourcesSchema = gql`
     version: String
     "The timestamp the source configuration was last persisted at"
     updatedAt: Float
+    "The origin of the source (one of 'fallback', 'internal', 'stored')"
+    origin: String!
     "The raw configuration of the source"
     configuration: InfraSourceConfiguration!
     "The status of the source"
@@ -36,6 +38,8 @@ export const sourcesSchema = gql`
     logAlias: String!
     "The field mapping to use for this source"
     fields: InfraSourceFields!
+    "The columns to use for log display"
+    logColumns: [InfraSourceLogColumn!]!
   }
 
   "A mapping of semantic fields to their document counterparts"
@@ -53,6 +57,44 @@ export const sourcesSchema = gql`
     "The field to use as a timestamp for metrics and logs"
     timestamp: String!
   }
+
+  "The built-in timestamp log column"
+  type InfraSourceTimestampLogColumn {
+    timestampColumn: InfraSourceTimestampLogColumnAttributes!
+  }
+
+  type InfraSourceTimestampLogColumnAttributes {
+    "A unique id for the column"
+    id: ID!
+  }
+
+  "The built-in message log column"
+  type InfraSourceMessageLogColumn {
+    messageColumn: InfraSourceMessageLogColumnAttributes!
+  }
+
+  type InfraSourceMessageLogColumnAttributes {
+    "A unique id for the column"
+    id: ID!
+  }
+
+  "A log column containing a field value"
+  type InfraSourceFieldLogColumn {
+    fieldColumn: InfraSourceFieldLogColumnAttributes!
+  }
+
+  type InfraSourceFieldLogColumnAttributes {
+    "A unique id for the column"
+    id: ID!
+    "The field name this column refers to"
+    field: String!
+  }
+
+  "All known log column types"
+  union InfraSourceLogColumn =
+      InfraSourceTimestampLogColumn
+    | InfraSourceMessageLogColumn
+    | InfraSourceFieldLogColumn
 
   extend type Query {
     """
@@ -74,10 +116,10 @@ export const sourcesSchema = gql`
     allSources: [InfraSource!]!
   }
 
-  "The source to be created"
-  input CreateSourceInput {
+  "The properties to update the source with"
+  input UpdateSourceInput {
     "The name of the data source"
-    name: String!
+    name: String
     "A description of the data source"
     description: String
     "The alias to read metric data from"
@@ -85,11 +127,13 @@ export const sourcesSchema = gql`
     "The alias to read log data from"
     logAlias: String
     "The field mapping to use for this source"
-    fields: CreateSourceFieldsInput
+    fields: UpdateSourceFieldsInput
+    "The log columns to display for this source"
+    logColumns: [UpdateSourceLogColumnInput!]
   }
 
   "The mapping of semantic fields of the source to be created"
-  input CreateSourceFieldsInput {
+  input UpdateSourceFieldsInput {
     "The field to identify a container by"
     container: String
     "The fields to identify a host by"
@@ -102,61 +146,32 @@ export const sourcesSchema = gql`
     timestamp: String
   }
 
-  "The result of a successful source creation"
-  type CreateSourceResult {
-    "The source that was created"
-    source: InfraSource!
+  "One of the log column types to display for this source"
+  input UpdateSourceLogColumnInput {
+    "A custom field log column"
+    fieldColumn: UpdateSourceFieldLogColumnInput
+    "A built-in message log column"
+    messageColumn: UpdateSourceMessageLogColumnInput
+    "A built-in timestamp log column"
+    timestampColumn: UpdateSourceTimestampLogColumnInput
   }
 
-  "The update operations to be performed"
-  input UpdateSourceInput {
-    "The name update operation to be performed"
-    setName: UpdateSourceNameInput
-    "The description update operation to be performed"
-    setDescription: UpdateSourceDescriptionInput
-    "The alias update operation to be performed"
-    setAliases: UpdateSourceAliasInput
-    "The field update operation to be performed"
-    setFields: UpdateSourceFieldsInput
+  input UpdateSourceFieldLogColumnInput {
+    id: ID!
+    field: String!
   }
 
-  "A name update operation"
-  input UpdateSourceNameInput {
-    "The new name to be set"
-    name: String!
+  input UpdateSourceMessageLogColumnInput {
+    id: ID!
   }
 
-  "A description update operation"
-  input UpdateSourceDescriptionInput {
-    "The new description to be set"
-    description: String!
+  input UpdateSourceTimestampLogColumnInput {
+    id: ID!
   }
 
-  "An alias update operation"
-  input UpdateSourceAliasInput {
-    "The new log index pattern or alias to bet set"
-    logAlias: String
-    "The new metric index pattern or alias to bet set"
-    metricAlias: String
-  }
-
-  "A field update operations"
-  input UpdateSourceFieldsInput {
-    "The new container field to be set"
-    container: String
-    "The new host field to be set"
-    host: String
-    "The new pod field to be set"
-    pod: String
-    "The new tiebreaker field to be set"
-    tiebreaker: String
-    "The new timestamp field to be set"
-    timestamp: String
-  }
-
-  "The result of a sequence of source update operations"
+  "The result of a successful source update"
   type UpdateSourceResult {
-    "The source after the operations were performed"
+    "The source that was updated"
     source: InfraSource!
   }
 
@@ -168,13 +183,17 @@ export const sourcesSchema = gql`
 
   extend type Mutation {
     "Create a new source of infrastructure data"
-    createSource("The id of the source" id: ID!, source: CreateSourceInput!): CreateSourceResult!
-    "Modify an existing source using the given sequence of update operations"
+    createSource(
+      "The id of the source"
+      id: ID!
+      sourceProperties: UpdateSourceInput!
+    ): UpdateSourceResult!
+    "Modify an existing source"
     updateSource(
       "The id of the source"
       id: ID!
-      "A sequence of update operations"
-      changes: [UpdateSourceInput!]!
+      "The properties to update the source with"
+      sourceProperties: UpdateSourceInput!
     ): UpdateSourceResult!
     "Delete a source of infrastructure data"
     deleteSource("The id of the source" id: ID!): DeleteSourceResult!

@@ -12,6 +12,7 @@ import chrome from 'ui/chrome';
 import { http } from '../../services/http_service';
 
 import { annotations } from './annotations';
+import { dataFrame } from './data_frame';
 import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
@@ -261,6 +262,13 @@ export const ml = {
     });
   },
 
+  dataRecognizerModuleJobsExist(obj) {
+    return http({
+      url: `${basePath}/modules/jobs_exist/${obj.moduleId}`,
+      method: 'GET'
+    });
+  },
+
   setupDataRecognizerConfig(obj) {
     const data = pick(obj, [
       'prefix',
@@ -427,6 +435,7 @@ export const ml = {
   },
 
   annotations,
+  dataFrame,
   filters,
   results,
   jobs,

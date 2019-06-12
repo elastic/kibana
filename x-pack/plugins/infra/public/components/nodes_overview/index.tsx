@@ -11,8 +11,8 @@ import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
 import {
-  InfraMetricType,
-  InfraNode,
+  InfraSnapshotMetricType,
+  InfraSnapshotNode,
   InfraNodeType,
   InfraTimerangeInput,
 } from '../../graphql/types';
@@ -28,7 +28,7 @@ import { TableView } from './table';
 interface Props {
   options: InfraWaffleMapOptions;
   nodeType: InfraNodeType;
-  nodes: InfraNode[];
+  nodes: InfraSnapshotNode[];
   loading: boolean;
   reload: () => void;
   onDrilldown: (filter: KueryFilterQuery) => void;
@@ -51,24 +51,24 @@ interface MetricFormatters {
 }
 
 const METRIC_FORMATTERS: MetricFormatters = {
-  [InfraMetricType.count]: { formatter: InfraFormatterType.number, template: '{{value}}' },
-  [InfraMetricType.cpu]: {
+  [InfraSnapshotMetricType.count]: { formatter: InfraFormatterType.number, template: '{{value}}' },
+  [InfraSnapshotMetricType.cpu]: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },
-  [InfraMetricType.memory]: {
+  [InfraSnapshotMetricType.memory]: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },
-  [InfraMetricType.rx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
-  [InfraMetricType.tx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
-  [InfraMetricType.logRate]: {
+  [InfraSnapshotMetricType.rx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  [InfraSnapshotMetricType.tx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  [InfraSnapshotMetricType.logRate]: {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}/s',
   },
 };
 
-const calculateBoundsFromNodes = (nodes: InfraNode[]): InfraWaffleMapBounds => {
+const calculateBoundsFromNodes = (nodes: InfraSnapshotNode[]): InfraWaffleMapBounds => {
   const maxValues = nodes.map(node => node.metric.max);
   const minValues = nodes.map(node => node.metric.value);
   // if there is only one value then we need to set the bottom range to zero for min
@@ -187,7 +187,7 @@ export const NodesOverview = injectI18n(
       const metricFormatter = get(
         METRIC_FORMATTERS,
         metric.type,
-        METRIC_FORMATTERS[InfraMetricType.count]
+        METRIC_FORMATTERS[InfraSnapshotMetricType.count]
       );
       if (val == null) {
         return '';
@@ -222,7 +222,7 @@ const ViewSwitcherContainer = euiStyled.div`
 const MapContainer = euiStyled.div`
   position: absolute;
   display: flex;
-  top: 0;
+  top: 70px;
   right: 0;
   bottom: 0;
   left: 0;

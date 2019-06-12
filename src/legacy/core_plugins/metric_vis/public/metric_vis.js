@@ -18,6 +18,7 @@
  */
 
 import './metric_vis_params';
+import { i18n } from '@kbn/i18n';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -30,16 +31,16 @@ import { MetricVisComponent } from './metric_vis_controller';
 // register the provider with the visTypes registry
 VisTypesRegistryProvider.register(MetricVisProvider);
 
-function MetricVisProvider(Private, i18n) {
+function MetricVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
   return VisFactory.createReactVisualization({
     name: 'metric',
-    title: i18n('metricVis.metricTitle', { defaultMessage: 'Metric' }),
+    title: i18n.translate('metricVis.metricTitle', { defaultMessage: 'Metric' }),
     icon: 'visMetric',
-    description: i18n('metricVis.metricDescription', { defaultMessage: 'Display a calculation as a single number' }),
+    description: i18n.translate('metricVis.metricDescription', { defaultMessage: 'Display a calculation as a single number' }),
     visConfig: {
       component: MetricVisComponent,
       defaults: {
@@ -73,15 +74,15 @@ function MetricVisProvider(Private, i18n) {
         metricColorMode: [
           {
             id: 'None',
-            label: i18n('metricVis.colorModes.noneOptionLabel', { defaultMessage: 'None' })
+            label: i18n.translate('metricVis.colorModes.noneOptionLabel', { defaultMessage: 'None' })
           },
           {
             id: 'Labels',
-            label: i18n('metricVis.colorModes.labelsOptionLabel', { defaultMessage: 'Labels' })
+            label: i18n.translate('metricVis.colorModes.labelsOptionLabel', { defaultMessage: 'Labels' })
           },
           {
             id: 'Background',
-            label: i18n('metricVis.colorModes.backgroundOptionLabel', { defaultMessage: 'Background' })
+            label: i18n.translate('metricVis.colorModes.backgroundOptionLabel', { defaultMessage: 'Background' })
           }
         ],
         colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
@@ -91,7 +92,7 @@ function MetricVisProvider(Private, i18n) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('metricVis.schemas.metricTitle', { defaultMessage: 'Metric' }),
+          title: i18n.translate('metricVis.schemas.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
           aggFilter: [
             '!std_dev', '!geo_centroid',
@@ -102,7 +103,7 @@ function MetricVisProvider(Private, i18n) {
         }, {
           group: 'buckets',
           name: 'group',
-          title: i18n('metricVis.schemas.splitGroupTitle', { defaultMessage: 'Split Group' }),
+          title: i18n.translate('metricVis.schemas.splitGroupTitle', { defaultMessage: 'Split Group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']

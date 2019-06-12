@@ -10,7 +10,7 @@ import 'ui/listen';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -33,9 +33,10 @@ import {
   updateFlyout,
   FLYOUT_STATE,
   setReadOnly,
-  setIsLayerTOCOpen
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
 } from '../store/ui';
-import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -127,7 +128,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
-    store.dispatch(setReadOnly(!uiCapabilities.maps.save));
+    store.dispatch(setReadOnly(!capabilities.get().maps.save));
 
     handleStoreChanges(store);
     unsubscribe = store.subscribe(() => {
@@ -147,9 +148,11 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     if (savedMap.uiStateJSON) {
       const uiState = JSON.parse(savedMap.uiStateJSON);
       store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
+      store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
     }
 
-    const layerList = getInitialLayers(savedMap.layerListJSON);
+    const isDarkMode = config.get('theme:darkMode', false);
+    const layerList = getInitialLayers(savedMap.layerListJSON, isDarkMode);
     store.dispatch(replaceLayerList(layerList));
 
     store.dispatch(setRefreshConfig($scope.refreshConfig));
@@ -197,7 +200,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       });
     }
 
-    const nextIndexPatternIds = getUniqueIndexPatternIds(store.getState());
+    const nextIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
     if (nextIndexPatternIds !== prevIndexPatternIds) {
       prevIndexPatternIds = nextIndexPatternIds;
       updateIndexPatterns(nextIndexPatternIds);
@@ -297,7 +300,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       const inspectorAdapters = getInspectorAdapters(store.getState());
       Inspector.open(inspectorAdapters, {});
     }
-  }, ...(uiCapabilities.maps.save ? [{
+  }, ...(capabilities.get().maps.save ? [{
     key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
       defaultMessage: `save`
     }),

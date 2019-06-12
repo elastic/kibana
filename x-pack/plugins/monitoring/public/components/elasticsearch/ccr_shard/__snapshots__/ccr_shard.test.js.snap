@@ -9,12 +9,10 @@ exports[`CcrShard that is renders an exception properly 1`] = `
   <EuiTitle
     color="danger"
     size="s"
-    textTransform="none"
   >
     <h3>
       <EuiTextColor
         color="danger"
-        component="span"
       >
         <FormattedMessage
           defaultMessage="Errors"
@@ -67,7 +65,7 @@ exports[`CcrShard that it renders normally 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(StatusUI)
+    <Status
       formattedLeader="leader on remote"
       oldestStat={
         Object {
@@ -122,7 +120,7 @@ exports[`CcrShard that it renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <InjectIntl(MonitoringTimeseriesContainerUI) />
+          <MonitoringTimeseriesContainer />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
@@ -138,17 +136,14 @@ exports[`CcrShard that it renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <InjectIntl(MonitoringTimeseriesContainerUI) />
+          <MonitoringTimeseriesContainer />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiHorizontalRule />
     <EuiAccordion
       buttonContent={
-        <EuiTitle
-          size="m"
-          textTransform="none"
-        >
+        <EuiTitle>
           <h2>
             <FormattedMessage
               defaultMessage="Advanced"
@@ -164,7 +159,6 @@ exports[`CcrShard that it renders normally 1`] = `
     >
       <EuiTitle
         size="s"
-        textTransform="none"
       >
         <h4>
           September 27, 2018 9:32:09 AM

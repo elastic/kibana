@@ -7,6 +7,10 @@ import React from 'react';
 import { TelemetryOptIn } from '../public/components/telemetry_opt_in';
 import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
 
+jest.mock('ui/capabilities', () => ({
+  get: jest.fn(),
+}));
+
 describe('TelemetryOptIn', () => {
   test('should display when telemetry not opted in', () => {
     const telemetry = require('../public/lib/telemetry');

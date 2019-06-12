@@ -8,18 +8,17 @@ import React from 'react';
 import { Query } from 'react-apollo';
 
 import {
-  InfraMetricInput,
-  InfraNode,
+  InfraSnapshotMetricInput,
+  InfraSnapshotNode,
   InfraNodeType,
-  InfraPathInput,
-  InfraPathType,
+  InfraSnapshotGroupbyInput,
   InfraTimerangeInput,
   WaffleNodesQuery,
 } from '../../graphql/types';
 import { waffleNodesQuery } from './waffle_nodes.gql_query';
 
 interface WithWaffleNodesArgs {
-  nodes: InfraNode[];
+  nodes: InfraSnapshotNode[];
   loading: boolean;
   refetch: () => void;
 }
@@ -27,18 +26,12 @@ interface WithWaffleNodesArgs {
 interface WithWaffleNodesProps {
   children: (args: WithWaffleNodesArgs) => React.ReactNode;
   filterQuery: string | null | undefined;
-  metric: InfraMetricInput;
-  groupBy: InfraPathInput[];
+  metric: InfraSnapshotMetricInput;
+  groupBy: InfraSnapshotGroupbyInput[];
   nodeType: InfraNodeType;
   sourceId: string;
   timerange: InfraTimerangeInput;
 }
-
-const NODE_TYPE_TO_PATH_TYPE = {
-  [InfraNodeType.container]: InfraPathType.containers,
-  [InfraNodeType.host]: InfraPathType.hosts,
-  [InfraNodeType.pod]: InfraPathType.pods,
-};
 
 export const WithWaffleNodes = ({
   children,
@@ -56,7 +49,8 @@ export const WithWaffleNodes = ({
     variables={{
       sourceId,
       metric,
-      path: [...groupBy, { type: NODE_TYPE_TO_PATH_TYPE[nodeType] }],
+      groupBy: [...groupBy],
+      type: nodeType,
       timerange,
       filterQuery,
     }}
@@ -65,8 +59,8 @@ export const WithWaffleNodes = ({
       children({
         loading,
         nodes:
-          data && data.source && data.source.map && data.source.map.nodes
-            ? data.source.map.nodes
+          data && data.source && data.source.snapshot && data.source.snapshot.nodes
+            ? data.source.snapshot.nodes
             : [],
         refetch,
       })

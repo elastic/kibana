@@ -16,12 +16,11 @@ describe('RedirectToLogs component', () => {
     const component = shallowWithIntl(
       <RedirectToLogs {...createRouteComponentProps('/logs?time=1550671089404')} />
     ).dive();
-    const withSourceChildFunction = component.prop('children') as any;
 
-    expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
+    expect(component).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))"
+  to="/logs?logFilter=(expression:'',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
 />
 `);
   });
@@ -32,32 +31,33 @@ describe('RedirectToLogs component', () => {
         {...createRouteComponentProps('/logs?time=1550671089404&filter=FILTER_FIELD:FILTER_VALUE')}
       />
     ).dive();
-    const withSourceChildFunction = component.prop('children') as any;
 
-    expect(withSourceChildFunction(testSourceChildArgs)).toMatchInlineSnapshot(`
+    expect(component).toMatchInlineSnapshot(`
 <Redirect
   push={false}
-  to="/logs?logFilter=(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))"
+  to="/logs?logFilter=(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
+/>
+`);
+  });
+
+  it('renders a redirect with the correct custom source id', () => {
+    const component = shallowWithIntl(
+      <RedirectToLogs {...createRouteComponentProps('/SOME-OTHER-SOURCE/logs')} />
+    ).dive();
+
+    expect(component).toMatchInlineSnapshot(`
+<Redirect
+  push={false}
+  to="/logs?logFilter=(expression:'',kind:kuery)&sourceId=SOME-OTHER-SOURCE"
 />
 `);
   });
 });
 
-const testSourceChildArgs = {
-  configuration: {
-    fields: {
-      container: 'CONTAINER_FIELD',
-      host: 'HOST_FIELD',
-      pod: 'POD_FIELD',
-    },
-  },
-  isLoading: false,
-};
-
 const createRouteComponentProps = (path: string) => {
   const location = createLocation(path);
   return {
-    match: matchPath(location.pathname, { path: '/logs' }) as any,
+    match: matchPath(location.pathname, { path: '/:sourceId?/logs' }) as any,
     history: null as any,
     location,
   };

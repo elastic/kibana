@@ -6,8 +6,10 @@
 
 import { workpad } from './workpad';
 import { esFields } from './es_fields';
+import { customElements } from './custom_elements';
 
 export function routes(server) {
-  workpad(server);
+  customElements(server);
   esFields(server);
+  workpad(server);
 }

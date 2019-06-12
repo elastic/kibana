@@ -11,10 +11,25 @@ coming[8.0.0]
 
 See also <<release-highlights>> and <<release-notes>>.
 
+* <<breaking_80_index_pattern_changes>>
 * <<breaking_80_setting_changes>>
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide
+
+[float]
+[[breaking_80_index_pattern_changes]]
+=== Index pattern changes 
+
+[float]
+==== Removed support for time-based internal index patterns
+*Details:* Time-based interval index patterns were deprecated in 5.x. In 6.x, 
+you could no longer create time-based interval index patterns, but they continued 
+to function as expected. Support for these index patterns has been removed in 8.0.
+
+*Impact:* You must migrate your time_based index patterns to a wildcard pattern, 
+for example, `logstash-*`. 
+
 
 [float]
 [[breaking_80_setting_changes]]

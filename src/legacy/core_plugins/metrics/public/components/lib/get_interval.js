@@ -23,6 +23,8 @@ import { relativeOptions } from '../../../../../ui/public/timepicker/relative_op
 
 import { GTE_INTERVAL_RE, INTERVAL_STRING_RE } from '../../../common/interval_regexp';
 
+export const AUTO_INTERVAL = 'auto';
+
 export const unitLookup = {
   s: i18n.translate('tsvb.getInterval.secondsLabel', { defaultMessage: 'seconds' }),
   m: i18n.translate('tsvb.getInterval.minutesLabel', { defaultMessage: 'minutes' }),
@@ -30,12 +32,11 @@ export const unitLookup = {
   d: i18n.translate('tsvb.getInterval.daysLabel', { defaultMessage: 'days' }),
   w: i18n.translate('tsvb.getInterval.weeksLabel', { defaultMessage: 'weeks' }),
   M: i18n.translate('tsvb.getInterval.monthsLabel', { defaultMessage: 'months' }),
-  y: i18n.translate('tsvb.getInterval.yearsLabel', { defaultMessage: 'years' })
+  y: i18n.translate('tsvb.getInterval.yearsLabel', { defaultMessage: 'years' }),
 };
 
 export const convertIntervalIntoUnit = (interval, hasTranslateUnitString = true) => {
-  const units = pluck(clone(relativeOptions).reverse(), 'value')
-    .filter(s => /^[smhdwMy]$/.test(s));
+  const units = pluck(clone(relativeOptions).reverse(), 'value').filter(s => /^[smhdwMy]$/.test(s));
   const duration = moment.duration(interval, 'ms');
 
   for (let i = 0; i < units.length; i++) {
@@ -44,16 +45,18 @@ export const convertIntervalIntoUnit = (interval, hasTranslateUnitString = true)
     if (Math.abs(as) > 1) {
       return {
         unitValue: Math.round(Math.abs(as)),
-        unitString: hasTranslateUnitString ? unitLookup[units[i]] : units[i]
+        unitString: hasTranslateUnitString ? unitLookup[units[i]] : units[i],
       };
     }
   }
 };
-export const isGteInterval = (interval) => GTE_INTERVAL_RE.test(interval);
+export const isGteInterval = interval => GTE_INTERVAL_RE.test(interval);
 
-export const isIntervalValid = (interval) => {
-  return isString(interval) &&
-    (interval === 'auto' || INTERVAL_STRING_RE.test(interval) || isGteInterval(interval));
+export const isIntervalValid = interval => {
+  return (
+    isString(interval) &&
+    (interval === AUTO_INTERVAL || INTERVAL_STRING_RE.test(interval) || isGteInterval(interval))
+  );
 };
 
 export const getInterval = (visData, model) => {

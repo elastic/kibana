@@ -14,10 +14,7 @@ exports[`it renders without blowing up 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
+      <EuiTitle>
         <h2>
           <EuiIcon
             className="collapsiblePanel__logo"

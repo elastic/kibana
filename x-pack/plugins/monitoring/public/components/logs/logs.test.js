@@ -14,6 +14,13 @@ jest.mock('ui/chrome', () => {
   };
 });
 
+jest.mock('ui/capabilities',
+  () => ({
+    capabilities: {
+      get: () => ({ logs: { show: true } })
+    }
+  }), { virtual: true });
+
 const logs = {
   enabled: true,
   limit: 10,

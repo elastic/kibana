@@ -16,18 +16,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { Component } from 'react';
+import { isEmpty } from 'lodash';
 import styled from 'styled-components';
 import { Coordinate } from '../../../../../typings/timeseries';
-import { ITransactionChartData } from '../../../../store/selectors/chartSelectors';
-import { IUrlParams } from '../../../../store/urlParams';
+import { ITransactionChartData } from '../../../../selectors/chartSelectors';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
-import { LicenseContext } from '../../../app/Main/LicenseCheck';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 // @ts-ignore
 import CustomPlot from '../CustomPlot';
 import { SyncChartGroup } from '../SyncChartGroup';
+import { LicenseContext } from '../../../../context/LicenseContext';
+import { getEmptySeries } from '../CustomPlot/getEmptySeries';
 
 interface TransactionChartProps {
+  hasMLJob: boolean;
   charts: ITransactionChartData;
   location: Location;
   urlParams: IUrlParams;
@@ -75,32 +78,41 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     return this.getTPMFormatter(p.y);
   };
 
-  public renderMLHeader(mlAvailable: boolean) {
-    const hasMLJob = this.props.charts.hasMLJob;
-    if (!mlAvailable || !hasMLJob) {
+  public renderMLHeader(hasValidMlLicense: boolean) {
+    const { hasMLJob } = this.props;
+    if (!hasValidMlLicense || !hasMLJob) {
       return null;
     }
 
-    const { serviceName, transactionType } = this.props.urlParams;
-
+    const { serviceName, transactionType, kuery } = this.props.urlParams;
     if (!serviceName) {
       return null;
     }
 
+    const hasKuery = !isEmpty(kuery);
+    const icon = hasKuery ? (
+      <EuiIconTip
+        aria-label="Warning"
+        type="alert"
+        color="warning"
+        content="The Machine learning results are hidden when the search bar is used for filtering"
+      />
+    ) : (
+      <EuiIconTip
+        content={i18n.translate(
+          'xpack.apm.metrics.transactionChart.machineLearningTooltip',
+          {
+            defaultMessage:
+              'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores >= 75.'
+          }
+        )}
+      />
+    );
+
     return (
       <EuiFlexItem grow={false}>
         <ShiftedEuiText size="xs">
-          <ShiftedIconWrapper>
-            <EuiIconTip
-              content={i18n.translate(
-                'xpack.apm.metrics.transactionChart.machineLearningTooltip',
-                {
-                  defaultMessage:
-                    'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores >= 75.'
-                }
-              )}
-            />
-          </ShiftedIconWrapper>
+          <ShiftedIconWrapper>{icon}</ShiftedIconWrapper>
           <span>
             {i18n.translate(
               'xpack.apm.metrics.transactionChart.machineLearningLabel',
@@ -123,12 +135,12 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   public render() {
     const { charts, urlParams } = this.props;
     const { noHits, responseTimeSeries, tpmSeries } = charts;
-    const { transactionType } = urlParams;
+    const { transactionType, start, end } = urlParams;
 
     return (
       <SyncChartGroup
         render={hoverXHandlers => (
-          <EuiFlexGrid columns={2}>
+          <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
               <EuiPanel>
                 <React.Fragment>
@@ -146,7 +158,9 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   </EuiFlexGroup>
                   <CustomPlot
                     noHits={noHits}
-                    series={responseTimeSeries}
+                    series={
+                      noHits ? getEmptySeries(start, end) : responseTimeSeries
+                    }
                     {...hoverXHandlers}
                     tickFormatY={this.getResponseTimeTickFormatter}
                     formatTooltipValue={this.getResponseTimeTooltipFormatter}
@@ -163,7 +177,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   </EuiTitle>
                   <CustomPlot
                     noHits={noHits}
-                    series={tpmSeries}
+                    series={noHits ? getEmptySeries(start, end) : tpmSeries}
                     {...hoverXHandlers}
                     tickFormatY={this.getTPMFormatter}
                     formatTooltipValue={this.getTPMTooltipFormatter}

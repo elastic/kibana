@@ -16,7 +16,6 @@ exports[`PipelineEditor component includes required error message for falsy pipe
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Create Pipeline
@@ -341,7 +340,6 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Create Pipeline
@@ -665,7 +663,6 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Create Pipeline
@@ -989,7 +986,6 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Clone Pipeline "pipelineToClone"
@@ -1301,7 +1297,6 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Create Pipeline
@@ -1621,7 +1616,6 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         Edit Pipeline "pipelineId"

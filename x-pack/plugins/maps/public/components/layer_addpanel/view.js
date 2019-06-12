@@ -17,7 +17,6 @@ import {
   EuiCard,
   EuiIcon,
   EuiFlyoutHeader,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,8 +26,6 @@ export class AddLayerPanel extends Component {
 
   state = {
     sourceType: null,
-    isLoading: false,
-    hasLayerSelected: false,
     layer: null
   }
 
@@ -39,14 +36,21 @@ export class AddLayerPanel extends Component {
       return;
     }
 
+
+    const layerOptions = this.state.layer
+      ? { style: this.state.layer.getCurrentStyle().getDescriptor() }
+      : {};
     this.setState({
-      layer: source.createDefaultLayer({}, this.props.mapColors)
+      layer: source.createDefaultLayer(layerOptions, this.props.mapColors)
     },
     () => this.props.previewLayer(this.state.layer));
   };
 
   _clearSource = () => {
-    this.setState({ sourceType: null });
+    this.setState({
+      layer: null,
+      sourceType: null
+    });
     this.props.removeTransientLayer();
   }
 
@@ -177,12 +181,11 @@ export class AddLayerPanel extends Component {
           </EuiTitle>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody
-          className="mapLayerPanel__body"
-          data-test-subj="layerAddForm"
-        >
-          {this._renderAddLayerForm()}
-        </EuiFlyoutBody>
+        <div className="mapLayerPanel__body" data-test-subj="layerAddForm">
+          <div className="mapLayerPanel__bodyOverflow">
+            {this._renderAddLayerForm()}
+          </div>
+        </div>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>

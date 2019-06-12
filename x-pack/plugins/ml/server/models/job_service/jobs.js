@@ -140,6 +140,35 @@ export function jobsProvider(callWithRequest) {
     return jobs;
   }
 
+  async function jobsWithTimerange() {
+    const fullJobsList = await createFullJobsList();
+    const jobsMap = {};
+
+    const jobs = fullJobsList.map((job) => {
+      jobsMap[job.job_id] = job.groups || [];
+      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
+      const timeRange = {};
+
+      if (job.data_counts !== undefined) {
+        timeRange.to = job.data_counts.latest_record_timestamp;
+        timeRange.from = job.data_counts.earliest_record_timestamp;
+      }
+
+      const tempJob = {
+        id: job.job_id,
+        job_id: job.job_id,
+        groups: (Array.isArray(job.groups) ? job.groups.sort() : []),
+        isRunning: (hasDatafeed && job.datafeed_config.state === 'started'),
+        isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+        timeRange
+      };
+
+      return tempJob;
+    });
+
+    return { jobs, jobsMap };
+  }
+
   async function createFullJobsList(jobIds = []) {
     const [ JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS, CALENDARS ] = [0, 1, 2, 3, 4];
 
@@ -293,12 +322,41 @@ export function jobsProvider(callWithRequest) {
     return { jobIds };
   }
 
+  // Checks if each of the jobs in the specified list of IDs exist.
+  // Job IDs in supplied array may contain wildcard '*' characters
+  // e.g. *_low_request_rate_ecs
+  async function jobsExist(jobIds = []) {
+    // Get the list of job IDs.
+    const jobsInfo = await callWithRequest('ml.jobs', { jobId: jobIds });
+
+    const results = {};
+    if (jobsInfo.count > 0) {
+      const allJobIds = jobsInfo.jobs.map(job => job.job_id);
+
+      // Check if each of the supplied IDs match existing jobs.
+      jobIds.forEach((jobId) => {
+        // Create a Regex for each supplied ID as wildcard * is allowed.
+        const regexp = new RegExp(`^${jobId.replace(/\*+/g, '.*')}$`);
+        const exists = allJobIds.some(existsJobId => regexp.test(existsJobId));
+        results[jobId] = exists;
+      });
+    } else {
+      jobIds.forEach((jobId) => {
+        results[jobId] = false;
+      });
+    }
+
+    return results;
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
     closeJobs,
     jobsSummary,
+    jobsWithTimerange,
     createFullJobsList,
     deletingJobTasks,
+    jobsExist,
   };
 }

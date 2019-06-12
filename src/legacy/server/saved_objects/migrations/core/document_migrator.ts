@@ -64,10 +64,11 @@ import Boom from 'boom';
 import _ from 'lodash';
 import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
-import { MigrationVersion, RawSavedObjectDoc } from '../../serialization';
+import { RawSavedObjectDoc } from '../../serialization';
+import { MigrationVersion } from '../../';
 import { LogFn, Logger, MigrationLogger } from './migration_logger';
 
-export type TransformFn = (doc: RawSavedObjectDoc) => RawSavedObjectDoc;
+export type TransformFn = (doc: RawSavedObjectDoc, log?: Logger) => RawSavedObjectDoc;
 
 type ValidateDoc = (doc: RawSavedObjectDoc) => void;
 
@@ -295,7 +296,7 @@ function markAsUpToDate(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
 function wrapWithTry(version: string, prop: string, transform: TransformFn, log: Logger) {
   return function tryTransformDoc(doc: RawSavedObjectDoc) {
     try {
-      const result = transform(doc);
+      const result = transform(doc, log);
 
       // A basic sanity check to help migration authors detect basic errors
       // (e.g. forgetting to return the transformed doc)

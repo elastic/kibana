@@ -123,7 +123,6 @@ exports[`it renders without crashing 1`] = `
   <EuiSpacer />
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
     <h3>
       <FormattedMessage
@@ -138,7 +137,6 @@ exports[`it renders without crashing 1`] = `
   />
   <EuiText
     color="subdued"
-    grow={true}
     size="s"
   >
     <p>

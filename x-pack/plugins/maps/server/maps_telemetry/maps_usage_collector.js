@@ -13,37 +13,63 @@ export function initTelemetryCollection(server) {
   registerMapsUsageCollector(server);
 }
 
-export function buildCollectorObj(server) {
-  return {
-    type: 'maps',
-    fetch: async () => {
-      let docs;
-      try {
-        ({ docs } = await server.taskManager.fetch({
-          query: {
-            bool: {
-              filter: {
-                term: {
-                  _id: TASK_ID
-                }
-              }
+async function isTaskManagerReady(server) {
+  const result = await fetch(server);
+  return result !== null;
+}
+
+async function fetch(server) {
+  let docs;
+  try {
+    ({ docs } = await server.taskManager.fetch({
+      query: {
+        bool: {
+          filter: {
+            term: {
+              _id: TASK_ID
             }
           }
-        }));
-      } catch (err) {
-        const errMessage = err && err.message ? err.message : err.toString();
-        /*
-         * The usage service WILL to try to fetch from this collector before the task manager has been initialized, because the task manager
-         * has to wait for all plugins to initialize first.
-         * It's fine to ignore it as next time around it will be initialized (or it will throw a different type of error)
-         */
-        if (errMessage.indexOf('NotInitialized') >= 0) {
-          docs = {};
-        } else {
-          throw err;
         }
       }
+    }));
+  } catch (err) {
+    const errMessage = err && err.message ? err.message : err.toString();
+    /*
+    * The usage service WILL to try to fetch from this collector before the task manager has been initialized, because the task manager
+    * has to wait for all plugins to initialize first.
+    * It's fine to ignore it as next time around it will be initialized (or it will throw a different type of error)
+    */
+    if (errMessage.indexOf('NotInitialized') >= 0) {
+      return null;
+    } else {
+      throw err;
+    }
+  }
 
+  return docs;
+}
+
+export function buildCollectorObj(server) {
+  let isCollectorReady = false;
+  async function determineIfTaskManagerIsReady() {
+    let isReady = false;
+    try {
+      isReady = await isTaskManagerReady(server);
+    } catch (err) {} // eslint-disable-line
+
+    if (isReady) {
+      isCollectorReady = true;
+    } else {
+      setTimeout(determineIfTaskManagerIsReady, 500);
+    }
+  }
+  determineIfTaskManagerIsReady();
+
+  return {
+    type: 'maps',
+    isReady: () => isCollectorReady,
+    fetch: async () => {
+      const docs = await fetch(server);
       return _.get(docs, '[0].state.stats');
     },
   };

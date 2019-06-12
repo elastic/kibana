@@ -104,7 +104,7 @@ export const createFollowerIndex = (followerIndex) => {
     uiMetrics.push(UIM_FOLLOWER_INDEX_USE_ADVANCED_OPTIONS);
   }
   const request = httpClient.post(`${apiPrefix}/follower_indices`, followerIndex);
-  return trackUserRequest(request, uiMetrics.join(',')).then(extractData);
+  return trackUserRequest(request, uiMetrics).then(extractData);
 };
 
 export const pauseFollowerIndex = (id) => {
@@ -138,7 +138,7 @@ export const updateFollowerIndex = (id, followerIndex) => {
     uiMetrics.push(UIM_FOLLOWER_INDEX_USE_ADVANCED_OPTIONS);
   }
   const request = httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`, followerIndex);
-  return trackUserRequest(request, uiMetrics.join(',')).then(extractData);
+  return trackUserRequest(request, uiMetrics).then(extractData);
 };
 
 /* Stats */

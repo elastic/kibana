@@ -11,6 +11,7 @@ import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
+import { PromiseWithCancel } from '../../common/cancel_promise';
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -96,23 +97,21 @@ export class MonitoringViewBaseController {
       timefilter.enableAutoRefreshSelector();
     }
 
-    this.updateDataPromise = null;
     this.updateData = () => {
       if (this.updateDataPromise) {
         // Do not sent another request if one is inflight
         // See https://github.com/elastic/kibana/issues/24082
-        return this.updateDataPromise;
+        this.updateDataPromise.cancel();
+        this.updateDataPromise = null;
       }
       const _api = apiUrlFn ? apiUrlFn() : api;
-      return this.updateDataPromise = _getPageData($injector, _api)
-        .then(pageData => {
+      this.updateDataPromise = new PromiseWithCancel(_getPageData($injector, _api));
+      return this.updateDataPromise.promise().then((pageData) => {
+        $scope.$apply(() => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
           $scope.pageData = this.data = pageData; // update the view's data with the fetch result
-          this.updateDataPromise = null;
-        })
-        .catch(() => {
-          this.updateDataPromise = null;
         });
+      });
     };
     this.updateData();
 

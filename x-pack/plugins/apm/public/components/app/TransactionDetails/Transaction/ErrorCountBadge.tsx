@@ -9,11 +9,10 @@ import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from '../../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { fontSize } from '../../../../style/variables';
 import { APMLink } from '../../../shared/Links/APMLink';
-import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 
 const LinkLabel = styled.span`
   font-size: ${fontSize};
@@ -55,7 +54,7 @@ export const ErrorCountBadge: React.SFC<Props> = ({
     <APMLink
       path={`/${idx(transaction, _ => _.service.name)}/errors`}
       query={{
-        kuery: legacyEncodeURIComponent(
+        kuery: encodeURIComponent(
           `trace.id : "${transaction.trace.id}" and transaction.id : "${
             transaction.transaction.id
           }"`

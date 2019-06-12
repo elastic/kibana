@@ -11,10 +11,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { User } from '../../../../../common/model/user';
+import { AuthenticatedUser } from '../../../../../common/model';
 
 interface Props {
-  user: User;
+  user: AuthenticatedUser;
 }
 
 export const PersonalInfo = (props: Props) => {

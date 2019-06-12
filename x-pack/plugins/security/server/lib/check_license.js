@@ -37,9 +37,8 @@ export function checkLicense(xPackInfo) {
     };
   }
 
-  const isLicenseBasic = xPackInfo.license.isOneOf(['basic']);
   const isEnabledInES = xPackInfo.feature('security').isEnabled();
-  if (!isEnabledInES || isLicenseBasic) {
+  if (!isEnabledInES) {
     return {
       showLogin: false,
       allowLogin: false,
@@ -47,11 +46,8 @@ export function checkLicense(xPackInfo) {
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: false,
-      linksMessage: isLicenseBasic
-        ? 'Your Basic license does not support Security. Please upgrade your license.'
-        : 'Access is denied because Security is disabled in Elasticsearch.'
+      linksMessage: 'Access is denied because Security is disabled in Elasticsearch.'
     };
-
   }
 
   const isLicensePlatinumOrTrial = xPackInfo.license.isOneOf(['platinum', 'trial']);

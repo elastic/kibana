@@ -16,6 +16,7 @@ import { LogTextScaleControls } from '../../components/logging/log_text_scale_co
 import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 import { SourceConfigurationButton } from '../../components/source_configuration';
+import { LogFlyout } from '../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
 import { WithLogFilter } from '../../containers/logs/with_log_filter';
 import { WithLogPosition } from '../../containers/logs/with_log_position';
@@ -35,6 +36,7 @@ export const LogsToolbar = injectI18n(({ intl }) => {
     textWrap,
   } = useContext(LogViewConfiguration.Context);
 
+  const { setSurroundingLogsId } = useContext(LogFlyout.Context);
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -52,8 +54,14 @@ export const LogsToolbar = injectI18n(({ intl }) => {
                     isLoadingSuggestions={isLoadingSuggestions}
                     isValid={isFilterQueryDraftValid}
                     loadSuggestions={loadSuggestions}
-                    onChange={setFilterQueryDraftFromKueryExpression}
-                    onSubmit={applyFilterQueryFromKueryExpression}
+                    onChange={(expression: string) => {
+                      setSurroundingLogsId(null);
+                      setFilterQueryDraftFromKueryExpression(expression);
+                    }}
+                    onSubmit={(expression: string) => {
+                      setSurroundingLogsId(null);
+                      applyFilterQueryFromKueryExpression(expression);
+                    }}
                     placeholder={intl.formatMessage({
                       id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder',
                       defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
@@ -97,7 +105,10 @@ export const LogsToolbar = injectI18n(({ intl }) => {
                 currentTime={visibleMidpointTime}
                 isLiveStreaming={isAutoReloading}
                 jumpToTime={jumpToTargetPositionTime}
-                startLiveStreaming={startLiveStreaming}
+                startLiveStreaming={interval => {
+                  startLiveStreaming(interval);
+                  setSurroundingLogsId(null);
+                }}
                 stopLiveStreaming={stopLiveStreaming}
               />
             )}

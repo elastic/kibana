@@ -10,6 +10,9 @@ export function featuresRoute(server: Record<string, any>) {
   server.route({
     path: '/api/features/v1',
     method: 'GET',
+    options: {
+      tags: ['access:features'],
+    },
     async handler(request: Record<string, any>) {
       const xpackInfo = server.plugins.xpack_main.info;
 

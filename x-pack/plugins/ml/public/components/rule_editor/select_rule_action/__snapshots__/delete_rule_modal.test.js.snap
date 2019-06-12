@@ -47,7 +47,7 @@ exports[`DeleteRuleModal renders modal after clicking delete rule link 1`] = `
   </EuiLink>
   <EuiOverlayMask>
     <EuiConfirmModal
-      buttonColor="primary"
+      buttonColor="danger"
       cancelButtonText={
         <FormattedMessage
           defaultMessage="Cancel"

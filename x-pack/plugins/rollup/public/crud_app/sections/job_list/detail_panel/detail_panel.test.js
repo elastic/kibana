@@ -37,7 +37,7 @@ const defaultProps = {
   openDetailPanel: jest.fn(),
 };
 
-const initTestBed = registerTestBed(DetailPanel, defaultProps, rollupJobsStore);
+const initTestBed = registerTestBed(DetailPanel, { defaultProps, store: rollupJobsStore });
 
 describe('<DetailPanel />', () => {
   describe('layout', () => {
@@ -264,8 +264,8 @@ describe('<DetailPanel />', () => {
     describe('terms tab content', () => {
       // Init testBed on the TERMS tab
       const panelType = JOB_DETAILS_TAB_TERMS;
-      const { getMetadataFromEuiTable } = initTestBed({ panelType });
-      const { tableCellsValues } = getMetadataFromEuiTable('detailPanelTermsTabTable');
+      const { table } = initTestBed({ panelType });
+      const { tableCellsValues } = table.getMetaData('detailPanelTermsTabTable');
 
       it('should list the Job terms fields', () => {
         const expected = defaultJob.terms.map(term => [term.name]);
@@ -276,8 +276,8 @@ describe('<DetailPanel />', () => {
     describe('histogram tab content', () => {
       // Init testBed on the HISTOGRAM tab
       const panelType = JOB_DETAILS_TAB_HISTOGRAM;
-      const { getMetadataFromEuiTable } = initTestBed({ panelType });
-      const { tableCellsValues } = getMetadataFromEuiTable('detailPanelHistogramTabTable');
+      const { table } = initTestBed({ panelType });
+      const { tableCellsValues } = table.getMetaData('detailPanelHistogramTabTable');
 
       it('should list the Job histogram fields', () => {
         const expected = defaultJob.histogram.map(h => [h.name]);
@@ -288,8 +288,8 @@ describe('<DetailPanel />', () => {
     describe('metrics tab content', () => {
       // Init testBed on the METRICS tab
       const panelType = JOB_DETAILS_TAB_METRICS;
-      const { getMetadataFromEuiTable } = initTestBed({ panelType });
-      const { tableCellsValues } = getMetadataFromEuiTable('detailPanelMetricsTabTable');
+      const { table } = initTestBed({ panelType });
+      const { tableCellsValues } = table.getMetaData('detailPanelMetricsTabTable');
 
       it('should list the Job metrics fields and their types', () => {
         const expected = defaultJob.metrics.map(metric => [metric.name, metric.types.join(', ')]);

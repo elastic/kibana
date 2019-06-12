@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { canUserChangePassword, getUserDisplayName, User } from './user';
+import { getUserDisplayName, User } from './user';
 
 describe('#getUserDisplayName', () => {
   it(`uses the full name when available`, () => {
@@ -22,41 +22,5 @@ describe('#getUserDisplayName', () => {
         username: 'foo',
       } as User)
     ).toEqual('foo');
-  });
-});
-
-describe('#canUserChangePassword', () => {
-  ['reserved', 'native'].forEach(realm => {
-    it(`returns true for users in the ${realm} realm`, () => {
-      expect(
-        canUserChangePassword({
-          username: 'foo',
-          authentication_realm: {
-            name: 'the realm name',
-            type: realm,
-          },
-        } as User)
-      ).toEqual(true);
-    });
-  });
-
-  it(`returns true when no realm is provided`, () => {
-    expect(
-      canUserChangePassword({
-        username: 'foo',
-      } as User)
-    ).toEqual(true);
-  });
-
-  it(`returns false for all other realms`, () => {
-    expect(
-      canUserChangePassword({
-        username: 'foo',
-        authentication_realm: {
-          name: 'the realm name',
-          type: 'does not matter',
-        },
-      } as User)
-    ).toEqual(false);
   });
 });

@@ -20,7 +20,7 @@ interface FilterBarQueryResult {
 }
 
 interface FilterBarProps {
-  currentQuery?: object;
+  currentQuery?: string;
   updateQuery: UptimeSearchBarQueryChangeHandler;
 }
 
@@ -33,7 +33,7 @@ export const FilterBarComponent = ({ currentQuery, data, updateQuery }: Props) =
     return <FilterBarLoading />;
   }
   const {
-    filterBar: { ids, names, ports, schemes },
+    filterBar: { ids, locations, names, ports, schemes },
   } = data;
   // TODO: add a factory function + type for these filter options
   const filters = [
@@ -55,7 +55,16 @@ export const FilterBarComponent = ({ currentQuery, data, updateQuery }: Props) =
         },
       ],
     },
-    // TODO: add health to this select
+    {
+      type: 'field_value_selection',
+      field: 'observer.geo.name',
+      name: i18n.translate('xpack.uptime.filterBar.options.location.name', {
+        defaultMessage: 'Location',
+        description:
+          'A label applied to a button that lets users filter monitors by their location.',
+      }),
+      options: locations ? locations.map(location => ({ value: location, view: location })) : [],
+    },
     {
       type: 'field_value_selection',
       field: 'monitor.id',
@@ -125,14 +134,16 @@ export const FilterBarComponent = ({ currentQuery, data, updateQuery }: Props) =
     },
   ];
   return (
-    <EuiSearchBar
-      box={{ incremental: false }}
-      className="euiFlexGroup--gutterSmall"
-      onChange={updateQuery}
-      filters={filters}
-      query={currentQuery}
-      schema={filterBarSearchSchema}
-    />
+    <div data-test-subj="xpack.uptime.filterBar">
+      <EuiSearchBar
+        box={{ incremental: false }}
+        className="euiFlexGroup--gutterSmall"
+        onChange={updateQuery}
+        filters={filters}
+        query={currentQuery}
+        schema={filterBarSearchSchema}
+      />
+    </div>
   );
 };
 

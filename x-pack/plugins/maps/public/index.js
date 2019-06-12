@@ -6,6 +6,8 @@
 
 import './kibana_services';
 
+import { i18n } from '@kbn/i18n';
+
 // import the uiExports that we want to "use"
 import 'uiExports/autocompleteProviders';
 import 'uiExports/fieldFormats';
@@ -14,18 +16,15 @@ import 'uiExports/search';
 import 'uiExports/embeddableFactories';
 import 'ui/agg_types';
 
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import 'ui/kbn_top_nav';
-import 'ui/query_bar/directive';
 import { uiModules } from 'ui/modules';
 import { DocTitleProvider } from 'ui/doc_title';
 import 'ui/autoload/styles';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
-
-import 'mapbox-gl/dist/mapbox-gl.css';
 
 import './angular/services/gis_map_saved_object_loader';
 import './angular/map_controller';
@@ -33,6 +32,9 @@ import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
 import { MapListing } from './shared/components/map_listing';
 import { recentlyAccessed } from 'ui/persisted_log';
+
+import { data } from 'plugins/data';
+data.query.loadLegacyDirectives();
 
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
@@ -43,6 +45,23 @@ app.directive('mapListing', function (reactDirective) {
 routes.enable();
 
 routes
+  .defaults(/.*/, {
+    badge: uiCapabilities => {
+      if (uiCapabilities.maps.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n.translate('xpack.maps.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n.translate('xpack.maps.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save maps',
+        }),
+        iconType: 'glasses'
+      };
+    }
+  })
   .when('/', {
     template: listingTemplate,
     controller($scope, gisMapSavedObjectLoader, config) {
@@ -53,7 +72,7 @@ routes
       $scope.delete = (ids) => {
         return gisMapSavedObjectLoader.delete(ids);
       };
-      $scope.readOnly = !uiCapabilities.maps.save;
+      $scope.readOnly = !capabilities.get().maps.save;
     },
     resolve: {
       hasMaps: function (kbnUrl) {

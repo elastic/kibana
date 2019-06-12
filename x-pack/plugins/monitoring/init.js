@@ -69,7 +69,7 @@ export const init = (monitoringPlugin, server) => {
       privilege: {
         savedObject: {
           all: [],
-          read: ['config']
+          read: []
         },
         ui: [],
       },

@@ -8,7 +8,7 @@ import { uiModules } from 'ui/modules';
 
 const app = uiModules.get('xpack/watcher');
 
-app.controller('WatcherErrorsDisplayController', function WatcherErrorsDisplayController($scope, $modalInstance, params) {
+app.controller('WatcherErrorsDisplayController', function WatcherErrorsDisplayController($modalInstance, params) {
   this.title =  params.title;
   this.errors = params.errors;
 

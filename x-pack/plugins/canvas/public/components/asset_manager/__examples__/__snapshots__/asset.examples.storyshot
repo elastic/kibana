@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/Asset airplane 1`] = `
+exports[`Storyshots components/Assets/Asset airplane 1`] = `
 <div
   style={
     Object {
@@ -81,18 +81,14 @@ exports[`Storyshots components/Asset airplane 1`] = `
             >
               <svg
                 aria-hidden="true"
-                className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                 focusable="false"
-                height="16"
+                height={16}
                 style={null}
                 viewBox="0 0 16 16"
-                width="16"
+                width={16}
                 xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12.5 11V5H11V3.5H5V5H3.5v6H5v1.5h6V11h1.5zm1 0H15v4h-4v-1.5H5V15H1v-4h1.5V5H1V1h4v1.5h6V1h4v4h-1.5v6zM4 4V2H2v2h2zm8 0h2V2h-2v2zM2 14h2v-2H2v2zm10 0h2v-2h-2v2z"
-                />
-              </svg>
+              />
             </button>
           </span>
         </div>
@@ -118,18 +114,14 @@ exports[`Storyshots components/Asset airplane 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                   focusable="false"
-                  height="16"
+                  height={16}
                   style={null}
                   viewBox="0 0 16 16"
-                  width="16"
+                  width={16}
                   xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7 11.692V3.556C7 3.249 7.224 3 7.5 3s.5.249.5.556v8.136l4.096-4.096a.5.5 0 0 1 .707.707l-4.242 4.243a1.494 1.494 0 0 1-.925.433.454.454 0 0 1-.272 0 1.494 1.494 0 0 1-.925-.433L2.197 8.303a.5.5 0 1 1 .707-.707L7 11.692z"
-                  />
-                </svg>
+                />
               </button>
             </div>
           </span>
@@ -156,21 +148,14 @@ exports[`Storyshots components/Asset airplane 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                   focusable="false"
-                  height="16"
+                  height={16}
                   style={null}
                   viewBox="0 0 16 16"
-                  width="16"
+                  width={16}
                   xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M0 2.729V2a1 1 0 0 1 1-1h2v1H1v12h4v1H1a1 1 0 0 1-1-1V2.729zM12 5V2a1 1 0 0 0-1-1H9v1h2v3h1zm-1 1h2v9H6V6h5V5H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2v1z"
-                  />
-                  <path
-                    d="M7 10h5V9H7zM7 8h5V7H7zM7 12h5v-1H7zM7 14h5v-1H7zM9 2V1a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v1h1V1h4v1h1zM3 3h6V2H3z"
-                  />
-                </svg>
+                />
               </button>
             </div>
           </span>
@@ -194,25 +179,14 @@ exports[`Storyshots components/Asset airplane 1`] = `
             >
               <svg
                 aria-hidden="true"
-                className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                 focusable="false"
-                height="16"
+                height={16}
                 style={null}
                 viewBox="0 0 16 16"
-                width="16"
+                width={16}
                 xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-              >
-                <defs>
-                  <path
-                    d="M11 3h5v1H0V3h5V1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2zm-7.056 8H7v1H4.1l.392 2.519c.042.269.254.458.493.458h6.03c.239 0 .451-.189.493-.458l1.498-9.576H14l-1.504 9.73c-.116.747-.74 1.304-1.481 1.304h-6.03c-.741 0-1.365-.557-1.481-1.304l-1.511-9.73H9V5.95H3.157L3.476 8H8v1H3.632l.312 2zM6 3h4V1H6v2z"
-                    id="trash-a"
-                  />
-                </defs>
-                <use
-                  xlinkHref="#trash-a"
-                />
-              </svg>
+              />
             </button>
           </span>
         </div>
@@ -222,7 +196,7 @@ exports[`Storyshots components/Asset airplane 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/Asset marker 1`] = `
+exports[`Storyshots components/Assets/Asset marker 1`] = `
 <div
   style={
     Object {
@@ -303,18 +277,14 @@ exports[`Storyshots components/Asset marker 1`] = `
             >
               <svg
                 aria-hidden="true"
-                className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                 focusable="false"
-                height="16"
+                height={16}
                 style={null}
                 viewBox="0 0 16 16"
-                width="16"
+                width={16}
                 xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12.5 11V5H11V3.5H5V5H3.5v6H5v1.5h6V11h1.5zm1 0H15v4h-4v-1.5H5V15H1v-4h1.5V5H1V1h4v1.5h6V1h4v4h-1.5v6zM4 4V2H2v2h2zm8 0h2V2h-2v2zM2 14h2v-2H2v2zm10 0h2v-2h-2v2z"
-                />
-              </svg>
+              />
             </button>
           </span>
         </div>
@@ -340,18 +310,14 @@ exports[`Storyshots components/Asset marker 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                   focusable="false"
-                  height="16"
+                  height={16}
                   style={null}
                   viewBox="0 0 16 16"
-                  width="16"
+                  width={16}
                   xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7 11.692V3.556C7 3.249 7.224 3 7.5 3s.5.249.5.556v8.136l4.096-4.096a.5.5 0 0 1 .707.707l-4.242 4.243a1.494 1.494 0 0 1-.925.433.454.454 0 0 1-.272 0 1.494 1.494 0 0 1-.925-.433L2.197 8.303a.5.5 0 1 1 .707-.707L7 11.692z"
-                  />
-                </svg>
+                />
               </button>
             </div>
           </span>
@@ -378,21 +344,14 @@ exports[`Storyshots components/Asset marker 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                   focusable="false"
-                  height="16"
+                  height={16}
                   style={null}
                   viewBox="0 0 16 16"
-                  width="16"
+                  width={16}
                   xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M0 2.729V2a1 1 0 0 1 1-1h2v1H1v12h4v1H1a1 1 0 0 1-1-1V2.729zM12 5V2a1 1 0 0 0-1-1H9v1h2v3h1zm-1 1h2v9H6V6h5V5H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2v1z"
-                  />
-                  <path
-                    d="M7 10h5V9H7zM7 8h5V7H7zM7 12h5v-1H7zM7 14h5v-1H7zM9 2V1a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v1h1V1h4v1h1zM3 3h6V2H3z"
-                  />
-                </svg>
+                />
               </button>
             </div>
           </span>
@@ -416,25 +375,14 @@ exports[`Storyshots components/Asset marker 1`] = `
             >
               <svg
                 aria-hidden="true"
-                className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                 focusable="false"
-                height="16"
+                height={16}
                 style={null}
                 viewBox="0 0 16 16"
-                width="16"
+                width={16}
                 xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-              >
-                <defs>
-                  <path
-                    d="M11 3h5v1H0V3h5V1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2zm-7.056 8H7v1H4.1l.392 2.519c.042.269.254.458.493.458h6.03c.239 0 .451-.189.493-.458l1.498-9.576H14l-1.504 9.73c-.116.747-.74 1.304-1.481 1.304h-6.03c-.741 0-1.365-.557-1.481-1.304l-1.511-9.73H9V5.95H3.157L3.476 8H8v1H3.632l.312 2zM6 3h4V1H6v2z"
-                    id="trash-a"
-                  />
-                </defs>
-                <use
-                  xlinkHref="#trash-a"
-                />
-              </svg>
+              />
             </button>
           </span>
         </div>

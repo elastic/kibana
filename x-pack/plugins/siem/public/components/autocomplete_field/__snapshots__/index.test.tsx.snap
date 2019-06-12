@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Autocomplete rendering it renders against snapshot 1`] = `
+<EuiOutsideClickDetector
+  onOutsideClick={[Function]}
+>
+  <styled.div>
+    <EuiFieldSearch
+      compressed={false}
+      fullWidth={true}
+      incremental={false}
+      inputRef={[Function]}
+      isInvalid={true}
+      isLoading={false}
+      onChange={[Function]}
+      onFocus={[Function]}
+      onKeyDown={[Function]}
+      onKeyUp={[Function]}
+      onSearch={[Function]}
+      placeholder="myPlaceholder"
+      value=""
+    />
+  </styled.div>
+</EuiOutsideClickDetector>
+`;

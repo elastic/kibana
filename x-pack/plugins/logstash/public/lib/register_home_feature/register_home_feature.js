@@ -6,7 +6,9 @@
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(($injector, i18n) => {
+import { i18n } from '@kbn/i18n';
+
+FeatureCatalogueRegistryProvider.register($injector => {
 
   const licenseService = $injector.get('logstashLicenseService');
   if (!licenseService.enableLinks) {
@@ -15,10 +17,10 @@ FeatureCatalogueRegistryProvider.register(($injector, i18n) => {
 
   return {
     id: 'management_logstash',
-    title: i18n('xpack.logstash.homeFeature.logstashPipelinesTitle', {
+    title: i18n.translate('xpack.logstash.homeFeature.logstashPipelinesTitle', {
       defaultMessage: 'Logstash Pipelines',
     }),
-    description: i18n('xpack.logstash.homeFeature.logstashPipelinesDescription', {
+    description: i18n.translate('xpack.logstash.homeFeature.logstashPipelinesDescription', {
       defaultMessage: 'Create, delete, update, and clone data ingestion pipelines.',
     }),
     icon: 'pipelineApp',

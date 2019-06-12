@@ -26,9 +26,11 @@ module.directive('mlNavMenu', function () {
       scope.showTabs = false;
       if (scope.name === 'jobs' ||
         scope.name === 'settings' ||
+        scope.name === 'data_frame' ||
         scope.name === 'datavisualizer' ||
         scope.name === 'filedatavisualizer' ||
         scope.name === 'timeseriesexplorer' ||
+        scope.name === 'access-denied' ||
         scope.name === 'explorer') {
         scope.showTabs = true;
       }

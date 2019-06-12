@@ -1,0 +1,192 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render file item 1`] = `
+<SuggestionComponent
+  ariaId="suggestion-1-1"
+  innerRef={[Function]}
+  onClick={[Function]}
+  onMouseEnter={[Function]}
+  query="bar"
+  selected={false}
+  suggestion={
+    Object {
+      "description": "This is a file",
+      "end": 10,
+      "selectUrl": "http://github.com/elastic/elasticsearch/src/foo/bar.java",
+      "start": 1,
+      "text": "src/foo/bar.java",
+      "tokenType": "",
+    }
+  }
+>
+  <div
+    aria-selected={false}
+    className="codeSearch__suggestion-item "
+    id="suggestion-1-1"
+    onClick={[Function]}
+    onMouseEnter={[Function]}
+    role="option"
+  >
+    <div
+      className="codeSearch-suggestion--inner"
+    >
+      <div>
+        <div
+          className="codeSearch__suggestion-text"
+          data-test-subj="codeTypeaheadItem"
+        >
+          <span>
+            src/foo/
+            <strong>
+              bar
+            </strong>
+            .java
+          </span>
+        </div>
+        <div
+          className="codeSearch-suggestion__description"
+        >
+          This is a file
+        </div>
+      </div>
+    </div>
+  </div>
+</SuggestionComponent>
+`;
+
+exports[`render repository item 1`] = `
+<SuggestionComponent
+  ariaId="suggestion-1-1"
+  innerRef={[Function]}
+  onClick={[Function]}
+  onMouseEnter={[Function]}
+  query="kibana"
+  selected={false}
+  suggestion={
+    Object {
+      "description": "",
+      "end": 10,
+      "selectUrl": "http://github.com/elastic/kibana",
+      "start": 1,
+      "text": "elastic/kibana",
+      "tokenType": "",
+    }
+  }
+>
+  <div
+    aria-selected={false}
+    className="codeSearch__suggestion-item "
+    id="suggestion-1-1"
+    onClick={[Function]}
+    onMouseEnter={[Function]}
+    role="option"
+  >
+    <div
+      className="codeSearch-suggestion--inner"
+    >
+      <div>
+        <div
+          className="codeSearch__suggestion-text"
+          data-test-subj="codeTypeaheadItem"
+        >
+          <span>
+            elastic/
+            <strong>
+              kibana
+            </strong>
+          </span>
+        </div>
+        <div
+          className="codeSearch-suggestion__description"
+        />
+      </div>
+    </div>
+  </div>
+</SuggestionComponent>
+`;
+
+exports[`render symbol item 1`] = `
+<SuggestionComponent
+  ariaId="suggestion-1-1"
+  innerRef={[Function]}
+  onClick={[Function]}
+  onMouseEnter={[Function]}
+  query="string"
+  selected={false}
+  suggestion={
+    Object {
+      "description": "elastic/elasticsearch > src/foo/bar.java",
+      "end": 10,
+      "selectUrl": "http://github.com/elastic/elasticsearch/src/foo/bar.java",
+      "start": 1,
+      "text": "java.lang.String",
+      "tokenType": "tokenClass",
+    }
+  }
+>
+  <div
+    aria-selected={false}
+    className="codeSearch__suggestion-item "
+    id="suggestion-1-1"
+    onClick={[Function]}
+    onMouseEnter={[Function]}
+    role="option"
+  >
+    <div
+      className="codeSearch-suggestion--inner"
+    >
+      <div
+        className="codeSearch-suggestion__token"
+      >
+        <EuiToken
+          displayOptions={Object {}}
+          iconType="tokenClass"
+          size="s"
+        >
+          <div
+            className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
+          >
+            <EuiIcon
+              type="tokenClass"
+            >
+              <EuiIconEmpty
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                style={null}
+              >
+                <svg
+                  className="euiIcon euiIcon--medium euiIcon-isLoading"
+                  focusable="false"
+                  height={16}
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </EuiIconEmpty>
+            </EuiIcon>
+          </div>
+        </EuiToken>
+      </div>
+      <div>
+        <div
+          className="codeSearch__suggestion-text"
+          data-test-subj="codeTypeaheadItem"
+        >
+          <span>
+            java.lang.
+            <strong>
+              String
+            </strong>
+          </span>
+        </div>
+        <div
+          className="codeSearch-suggestion__description"
+        >
+          elastic/elasticsearch &gt; src/foo/bar.java
+        </div>
+      </div>
+    </div>
+  </div>
+</SuggestionComponent>
+`;

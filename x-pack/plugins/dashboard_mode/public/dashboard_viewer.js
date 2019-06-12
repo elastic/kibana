@@ -37,6 +37,7 @@ import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
 import 'leaflet';
+import { npStart } from 'ui/new_platform';
 
 import { showAppRedirectNotification } from 'ui/notify';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
@@ -49,7 +50,7 @@ routes.otherwise({ redirectTo: defaultUrl() });
 
 chrome
   .setRootController('kibana', function () {
-    chrome.showOnlyById('kibana:dashboard');
+    npStart.core.chrome.navLinks.showOnly('kibana:dashboard');
   });
 
 uiModules.get('kibana').run(showAppRedirectNotification);

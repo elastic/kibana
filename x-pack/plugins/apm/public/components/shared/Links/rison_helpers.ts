@@ -5,7 +5,7 @@
  */
 
 import { Location } from 'history';
-import { TIMEPICKER_DEFAULTS } from '../../../store/urlParams';
+import { TIMEPICKER_DEFAULTS } from '../../../context/UrlParamsContext/constants';
 import { toQuery } from './url_helpers';
 
 export interface TimepickerRisonData {

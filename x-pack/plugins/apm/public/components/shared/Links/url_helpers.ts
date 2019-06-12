@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createHistory from 'history/createHashHistory';
 import qs from 'querystring';
 import { StringMap } from '../../../../typings/common';
 
@@ -13,7 +12,11 @@ export function toQuery(search?: string): APMQueryParamsRaw {
 }
 
 export function fromQuery(query: StringMap<any>) {
-  return qs.stringify(query);
+  return qs.stringify(query, undefined, undefined, {
+    encodeURIComponent: (value: string) => {
+      return encodeURIComponent(value).replace(/%3A/g, ':');
+    }
+  });
 }
 
 export interface APMQueryParams {
@@ -27,6 +30,7 @@ export interface APMQueryParams {
   sortDirection?: string;
   sortField?: string;
   kuery?: string;
+  environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
   refreshPaused?: string | boolean;
@@ -40,7 +44,7 @@ type APMQueryParamsRaw = StringifyAll<APMQueryParams>;
 // This is downright horrible 😭 💔
 // Angular decodes encoded url tokens like "%2F" to "/" which causes problems when path params contains forward slashes
 // This was originally fixed in Angular, but roled back to avoid breaking backwards compatability: https://github.com/angular/angular.js/commit/2bdf7126878c87474bb7588ce093d0a3c57b0026
-export function legacyEncodeURIComponent(rawUrl?: string) {
+export function legacyEncodeURIComponent(rawUrl: string | undefined) {
   return (
     rawUrl &&
     encodeURIComponent(rawUrl)
@@ -49,12 +53,6 @@ export function legacyEncodeURIComponent(rawUrl?: string) {
   );
 }
 
-export function legacyDecodeURIComponent(encodedUrl?: string) {
+export function legacyDecodeURIComponent(encodedUrl: string | undefined) {
   return encodedUrl && decodeURIComponent(encodedUrl.replace(/~/g, '%'));
 }
-
-// Make history singleton available across APM project.
-// This is not great. Other options are to use context or withRouter helper
-// React Context API is unstable and will change soon-ish (probably 16.3)
-// withRouter helper from react-router overrides several props (eg. `location`) which makes it less desireable
-export const history = createHistory();

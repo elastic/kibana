@@ -19,13 +19,13 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggRow from './agg_row';
-import AggSelect from './agg_select';
-import MetricSelect from './metric_select';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
-import createNumberHandler from '../lib/create_number_handler';
+import { AggRow } from './agg_row';
+import { AggSelect } from './agg_select';
+import { MetricSelect } from './metric_select';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { createNumberHandler } from '../lib/create_number_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -45,7 +45,7 @@ const MovingAverageAggUi = props => {
     settings: '',
     minimize: 0,
     window: '',
-    model: 'simple'
+    model: 'simple',
   };
   const model = { ...defaults, ...props.model };
   const handleChange = createChangeHandler(props.onChange, model);
@@ -54,31 +54,42 @@ const MovingAverageAggUi = props => {
   const handleNumberChange = createNumberHandler(handleChange);
   const modelOptions = [
     {
-      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.simpleLabel', defaultMessage: 'Simple' }),
-      value: 'simple'
-    },
-    {
-      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.linearLabel', defaultMessage: 'Linear' }),
-      value: 'linear'
+      label: intl.formatMessage({
+        id: 'tsvb.movingAverage.modelOptions.simpleLabel',
+        defaultMessage: 'Simple',
+      }),
+      value: 'simple',
     },
     {
       label: intl.formatMessage({
-        id: 'tsvb.movingAverage.modelOptions.exponentiallyWeightedLabel', defaultMessage: 'Exponentially Weighted' }),
-      value: 'ewma'
+        id: 'tsvb.movingAverage.modelOptions.linearLabel',
+        defaultMessage: 'Linear',
+      }),
+      value: 'linear',
     },
     {
-      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.holtLinearLabel', defaultMessage: 'Holt-Linear' }),
-      value: 'holt'
+      label: intl.formatMessage({
+        id: 'tsvb.movingAverage.modelOptions.exponentiallyWeightedLabel',
+        defaultMessage: 'Exponentially Weighted',
+      }),
+      value: 'ewma',
     },
     {
-      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.holtWintersLabel', defaultMessage: 'Holt-Winters' }),
-      value: 'holt_winters'
-    }
+      label: intl.formatMessage({
+        id: 'tsvb.movingAverage.modelOptions.holtLinearLabel',
+        defaultMessage: 'Holt-Linear',
+      }),
+      value: 'holt',
+    },
+    {
+      label: intl.formatMessage({
+        id: 'tsvb.movingAverage.modelOptions.holtWintersLabel',
+        defaultMessage: 'Holt-Winters',
+      }),
+      value: 'holt_winters',
+    },
   ];
-  const minimizeOptions = [
-    { label: 'True', value: 1 },
-    { label: 'False', value: 0 }
-  ];
+  const minimizeOptions = [{ label: 'True', value: 1 }, { label: 'False', value: 0 }];
   const htmlId = htmlIdGenerator();
   const selectedModelOption = modelOptions.find(option => {
     return model.model === option.value;
@@ -94,6 +105,7 @@ const MovingAverageAggUi = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -114,10 +126,7 @@ const MovingAverageAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.metricLabel"
-              defaultMessage="Metric"
-            />)}
+            label={<FormattedMessage id="tsvb.movingAverage.metricLabel" defaultMessage="Metric" />}
           >
             <MetricSelect
               onChange={handleSelectChange('field')}
@@ -135,14 +144,14 @@ const MovingAverageAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('model')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.modelLabel"
-              defaultMessage="Model"
-            />)}
+            label={<FormattedMessage id="tsvb.movingAverage.modelLabel" defaultMessage="Model" />}
           >
             <EuiComboBox
               isClearable={false}
-              placeholder={intl.formatMessage({ id: 'tsvb.movingAverage.model.selectPlaceholder', defaultMessage: 'Select' })}
+              placeholder={intl.formatMessage({
+                id: 'tsvb.movingAverage.model.selectPlaceholder',
+                defaultMessage: 'Select',
+              })}
               options={modelOptions}
               selectedOptions={selectedModelOption ? [selectedModelOption] : []}
               onChange={handleSelectChange('model')}
@@ -153,10 +162,12 @@ const MovingAverageAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('windowSize')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.windowSizeLabel"
-              defaultMessage="Window Size"
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.movingAverage.windowSizeLabel"
+                defaultMessage="Window Size"
+              />
+            }
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -173,13 +184,15 @@ const MovingAverageAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('minimize')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.minimizeLabel"
-              defaultMessage="Minimize"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.movingAverage.minimizeLabel" defaultMessage="Minimize" />
+            }
           >
             <EuiComboBox
-              placeholder={intl.formatMessage({ id: 'tsvb.movingAverage.minimize.selectPlaceholder', defaultMessage: 'Select' })}
+              placeholder={intl.formatMessage({
+                id: 'tsvb.movingAverage.minimize.selectPlaceholder',
+                defaultMessage: 'Select',
+              })}
               options={minimizeOptions}
               selectedOptions={selectedMinimizeOption ? [selectedMinimizeOption] : []}
               onChange={handleSelectChange('minimize')}
@@ -190,10 +203,9 @@ const MovingAverageAggUi = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('predict')}
-            label={(<FormattedMessage
-              id="tsvb.movingAverage.predictLabel"
-              defaultMessage="Predict"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.movingAverage.predictLabel" defaultMessage="Predict" />
+            }
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -215,25 +227,20 @@ const MovingAverageAggUi = props => {
         <EuiFormRow
           fullWidth
           id={htmlId('settings')}
-          label={(<FormattedMessage
-            id="tsvb.movingAverage.settingsLabel"
-            defaultMessage="Settings"
-          />)}
+          label={
+            <FormattedMessage id="tsvb.movingAverage.settingsLabel" defaultMessage="Settings" />
+          }
           helpText={
             <span>
               <FormattedMessage
                 id="tsvb.movingAverage.settingsDescription"
                 defaultMessage="{keyValue} space-delimited"
-                values={{ keyValue: (<EuiCode>Key=Value</EuiCode>) }}
+                values={{ keyValue: <EuiCode>Key=Value</EuiCode> }}
               />
             </span>
           }
         >
-          <EuiTextArea
-            onChange={handleTextChange('settings')}
-            value={model.settings}
-            fullWidth
-          />
+          <EuiTextArea onChange={handleTextChange('settings')} value={model.settings} fullWidth />
         </EuiFormRow>
       </EuiFlexItem>
     </AggRow>

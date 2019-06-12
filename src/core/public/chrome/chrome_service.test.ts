@@ -246,6 +246,37 @@ Array [
     });
   });
 
+  describe('badge', () => {
+    it('updates/emits the current badge', async () => {
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const setup = service.setup(defaultSetupDeps());
+      const promise = setup
+        .getBadge$()
+        .pipe(toArray())
+        .toPromise();
+
+      setup.setBadge({ text: 'foo', tooltip: `foo's tooltip` });
+      setup.setBadge({ text: 'bar', tooltip: `bar's tooltip` });
+      setup.setBadge(undefined);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+Array [
+  undefined,
+  Object {
+    "text": "foo",
+    "tooltip": "foo's tooltip",
+  },
+  Object {
+    "text": "bar",
+    "tooltip": "bar's tooltip",
+  },
+  undefined,
+]
+`);
+    });
+  });
+
   describe('breadcrumbs', () => {
     it('updates/emits the current set of breadcrumbs', async () => {
       const service = new ChromeService({ browserSupportsCsp: true });

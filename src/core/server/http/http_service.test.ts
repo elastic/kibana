@@ -21,75 +21,134 @@ import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { HttpConfig, HttpService, Router } from '.';
+import { HttpService, Router } from '.';
+import { HttpConfigType, config } from './http_config';
+import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
+import { getEnvOptions } from '../config/__mocks__/env';
 
 const logger = loggingServiceMock.create();
+const env = Env.createDefault(getEnvOptions());
+
+const createConfigService = (value: Partial<HttpConfigType> = {}) => {
+  const configService = new ConfigService(
+    new BehaviorSubject<Config>(
+      new ObjectToConfigAdapter({
+        server: value,
+      })
+    ),
+    env,
+    logger
+  );
+  configService.setSchema(config.path, config.schema);
+  return configService;
+};
 
 afterEach(() => {
   jest.clearAllMocks();
 });
 
 test('creates and sets up http server', async () => {
-  const config = {
+  const configService = createConfigService({
     host: 'example.org',
     port: 1234,
-    ssl: {},
-  } as HttpConfig;
-
-  const config$ = new BehaviorSubject(config);
+  });
 
   const httpServer = {
     isListening: () => false,
+    setup: jest.fn(),
     start: jest.fn(),
     stop: noop,
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger);
+  const service = new HttpService({ configService, env, logger });
 
   expect(mockHttpServer.mock.instances.length).toBe(1);
-  expect(httpServer.start).not.toHaveBeenCalled();
+
+  expect(httpServer.setup).not.toHaveBeenCalled();
 
   await service.setup();
+  expect(httpServer.setup).toHaveBeenCalledTimes(1);
+  expect(httpServer.start).not.toHaveBeenCalled();
 
+  await service.start();
   expect(httpServer.start).toHaveBeenCalledTimes(1);
 });
 
-test('logs error if already set up', async () => {
-  const config = { ssl: {} } as HttpConfig;
+// this is an integration test!
+test('creates and sets up second http server', async () => {
+  const configService = createConfigService({
+    host: 'localhost',
+    port: 1234,
+  });
+  const { HttpServer } = jest.requireActual('./http_server');
 
-  const config$ = new BehaviorSubject(config);
+  mockHttpServer.mockImplementation((...args) => new HttpServer(...args));
+
+  const service = new HttpService({ configService, env, logger });
+  const serverSetup = await service.setup();
+  const cfg = { port: 2345 };
+  await serverSetup.createNewServer(cfg);
+  const server = await service.start();
+  expect(server.isListening()).toBeTruthy();
+  expect(server.isListening(cfg.port)).toBeTruthy();
+
+  try {
+    await serverSetup.createNewServer(cfg);
+  } catch (err) {
+    expect(err.message).toBe('port 2345 is already in use');
+  }
+
+  try {
+    await serverSetup.createNewServer({ port: 1234 });
+  } catch (err) {
+    expect(err.message).toBe('port 1234 is already in use');
+  }
+
+  try {
+    await serverSetup.createNewServer({ host: 'example.org' });
+  } catch (err) {
+    expect(err.message).toBe('port must be defined');
+  }
+  await service.stop();
+  expect(server.isListening()).toBeFalsy();
+  expect(server.isListening(cfg.port)).toBeFalsy();
+});
+
+test('logs error if already set up', async () => {
+  const configService = createConfigService();
 
   const httpServer = {
     isListening: () => true,
+    setup: jest.fn(),
     start: noop,
     stop: noop,
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger);
+  const service = new HttpService({ configService, env, logger });
 
   await service.setup();
 
-  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
+  expect(loggingServiceMock.collect(logger).warn).toMatchSnapshot();
 });
 
 test('stops http server', async () => {
-  const config = { ssl: {} } as HttpConfig;
-
-  const config$ = new BehaviorSubject(config);
+  const configService = createConfigService();
 
   const httpServer = {
     isListening: () => false,
+    setup: noop,
     start: noop,
     stop: jest.fn(),
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger);
+  const service = new HttpService({ configService, env, logger });
 
   await service.setup();
+  await service.start();
 
   expect(httpServer.stop).toHaveBeenCalledTimes(0);
 
@@ -98,52 +157,30 @@ test('stops http server', async () => {
   expect(httpServer.stop).toHaveBeenCalledTimes(1);
 });
 
-test('register route handler', () => {
-  const config = {} as HttpConfig;
+test('register route handler', async () => {
+  const configService = createConfigService();
 
-  const config$ = new BehaviorSubject(config);
-
+  const registerRouterMock = jest.fn();
   const httpServer = {
     isListening: () => false,
-    registerRouter: jest.fn(),
+    setup: () => ({ registerRouter: registerRouterMock }),
     start: noop,
     stop: noop,
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger);
+  const service = new HttpService({ configService, env, logger });
 
   const router = new Router('/foo');
-  service.registerRouter(router);
+  const { registerRouter } = await service.setup();
+  registerRouter(router);
 
-  expect(httpServer.registerRouter).toHaveBeenCalledTimes(1);
-  expect(httpServer.registerRouter).toHaveBeenLastCalledWith(router);
-  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
-});
-
-test('throws if registering route handler after http server is set up', () => {
-  const config = {} as HttpConfig;
-
-  const config$ = new BehaviorSubject(config);
-
-  const httpServer = {
-    isListening: () => true,
-    registerRouter: jest.fn(),
-    start: noop,
-    stop: noop,
-  };
-  mockHttpServer.mockImplementation(() => httpServer);
-
-  const service = new HttpService(config$.asObservable(), logger);
-
-  const router = new Router('/foo');
-  service.registerRouter(router);
-
-  expect(httpServer.registerRouter).toHaveBeenCalledTimes(0);
-  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
+  expect(registerRouterMock).toHaveBeenCalledTimes(1);
+  expect(registerRouterMock).toHaveBeenLastCalledWith(router);
 });
 
 test('returns http server contract on setup', async () => {
+  const configService = createConfigService();
   const httpServer = {
     server: {},
     options: { someOption: true },
@@ -151,11 +188,58 @@ test('returns http server contract on setup', async () => {
 
   mockHttpServer.mockImplementation(() => ({
     isListening: () => false,
-    start: jest.fn().mockReturnValue(httpServer),
+    setup: jest.fn().mockReturnValue(httpServer),
     stop: noop,
   }));
 
-  const service = new HttpService(new BehaviorSubject({ ssl: {} } as HttpConfig), logger);
+  const service = new HttpService({ configService, env, logger });
+  const { createNewServer, ...setupHttpServer } = await service.setup();
+  expect(createNewServer).toBeDefined();
+  expect(setupHttpServer).toEqual(httpServer);
+});
 
-  expect(await service.setup()).toBe(httpServer);
+test('does not start http server if process is dev cluster master', async () => {
+  const configService = createConfigService();
+  const httpServer = {
+    isListening: () => false,
+    setup: noop,
+    start: jest.fn(),
+    stop: noop,
+  };
+  mockHttpServer.mockImplementation(() => httpServer);
+
+  const service = new HttpService({
+    configService,
+    env: new Env('.', getEnvOptions({ isDevClusterMaster: true })),
+    logger,
+  });
+
+  await service.setup();
+  await service.start();
+
+  expect(httpServer.start).not.toHaveBeenCalled();
+});
+
+test('does not start http server if configured with `autoListen:false`', async () => {
+  const configService = createConfigService({
+    autoListen: false,
+  });
+  const httpServer = {
+    isListening: () => false,
+    setup: noop,
+    start: jest.fn(),
+    stop: noop,
+  };
+  mockHttpServer.mockImplementation(() => httpServer);
+
+  const service = new HttpService({
+    configService,
+    env: new Env('.', getEnvOptions()),
+    logger,
+  });
+
+  await service.setup();
+  await service.start();
+
+  expect(httpServer.start).not.toHaveBeenCalled();
 });

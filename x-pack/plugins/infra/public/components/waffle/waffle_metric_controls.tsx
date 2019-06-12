@@ -14,20 +14,24 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
-import { InfraMetricInput, InfraMetricType, InfraNodeType } from '../../graphql/types';
+import {
+  InfraSnapshotMetricInput,
+  InfraSnapshotMetricType,
+  InfraNodeType,
+} from '../../graphql/types';
 
 interface Props {
   nodeType: InfraNodeType;
-  metric: InfraMetricInput;
-  onChange: (metric: InfraMetricInput) => void;
+  metric: InfraSnapshotMetricInput;
+  onChange: (metric: InfraSnapshotMetricInput) => void;
   intl: InjectedIntl;
 }
 
-let OPTIONS: { [P in InfraNodeType]: Array<{ text: string; value: InfraMetricType }> };
+let OPTIONS: { [P in InfraNodeType]: Array<{ text: string; value: InfraSnapshotMetricType }> };
 const getOptions = (
   nodeType: InfraNodeType,
   intl: InjectedIntl
-): Array<{ text: string; value: InfraMetricType }> => {
+): Array<{ text: string; value: InfraSnapshotMetricType }> => {
   if (!OPTIONS) {
     const CPUUsage = intl.formatMessage({
       id: 'xpack.infra.waffle.metricOptions.cpuUsageText',
@@ -53,69 +57,69 @@ const getOptions = (
       [InfraNodeType.pod]: [
         {
           text: CPUUsage,
-          value: InfraMetricType.cpu,
+          value: InfraSnapshotMetricType.cpu,
         },
         {
           text: MemoryUsage,
-          value: InfraMetricType.memory,
+          value: InfraSnapshotMetricType.memory,
         },
         {
           text: InboundTraffic,
-          value: InfraMetricType.rx,
+          value: InfraSnapshotMetricType.rx,
         },
         {
           text: OutboundTraffic,
-          value: InfraMetricType.tx,
+          value: InfraSnapshotMetricType.tx,
         },
       ],
       [InfraNodeType.container]: [
         {
           text: CPUUsage,
-          value: InfraMetricType.cpu,
+          value: InfraSnapshotMetricType.cpu,
         },
         {
           text: MemoryUsage,
-          value: InfraMetricType.memory,
+          value: InfraSnapshotMetricType.memory,
         },
         {
           text: InboundTraffic,
-          value: InfraMetricType.rx,
+          value: InfraSnapshotMetricType.rx,
         },
         {
           text: OutboundTraffic,
-          value: InfraMetricType.tx,
+          value: InfraSnapshotMetricType.tx,
         },
       ],
       [InfraNodeType.host]: [
         {
           text: CPUUsage,
-          value: InfraMetricType.cpu,
+          value: InfraSnapshotMetricType.cpu,
         },
         {
           text: MemoryUsage,
-          value: InfraMetricType.memory,
+          value: InfraSnapshotMetricType.memory,
         },
         {
           text: intl.formatMessage({
             id: 'xpack.infra.waffle.metricOptions.loadText',
             defaultMessage: 'Load',
           }),
-          value: InfraMetricType.load,
+          value: InfraSnapshotMetricType.load,
         },
         {
           text: InboundTraffic,
-          value: InfraMetricType.rx,
+          value: InfraSnapshotMetricType.rx,
         },
         {
           text: OutboundTraffic,
-          value: InfraMetricType.tx,
+          value: InfraSnapshotMetricType.tx,
         },
         {
           text: intl.formatMessage({
             id: 'xpack.infra.waffle.metricOptions.hostLogRateText',
             defaultMessage: 'Log Rate',
           }),
-          value: InfraMetricType.logRate,
+          value: InfraSnapshotMetricType.logRate,
         },
       ],
     };
@@ -193,7 +197,7 @@ export const WaffleMetricControls = injectI18n(
       this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
     };
 
-    private handleClick = (value: InfraMetricType) => () => {
+    private handleClick = (value: InfraSnapshotMetricType) => () => {
       this.props.onChange({ type: value });
       this.handleClose();
     };

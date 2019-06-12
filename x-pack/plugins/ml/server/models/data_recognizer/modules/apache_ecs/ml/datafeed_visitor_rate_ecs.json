@@ -14,7 +14,7 @@
       "buckets": {
         "date_histogram": {
           "field": "@timestamp",
-          "interval": 900000,
+          "fixed_interval": "15m",
           "offset": 0,
           "order": {
             "_key": "asc"

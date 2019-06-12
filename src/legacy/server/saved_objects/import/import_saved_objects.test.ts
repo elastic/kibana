@@ -82,6 +82,7 @@ describe('importSavedObjects()', () => {
       objectLimit: 1,
       overwrite: false,
       savedObjectsClient,
+      supportedTypes: [],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -107,6 +108,7 @@ Object {
       objectLimit: 4,
       overwrite: false,
       savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -187,6 +189,7 @@ Object {
       objectLimit: 4,
       overwrite: true,
       savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -274,6 +277,7 @@ Object {
       objectLimit: 4,
       overwrite: false,
       savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -372,6 +376,7 @@ Object {
       objectLimit: 4,
       overwrite: false,
       savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -414,6 +419,98 @@ Object {
           "type": "index-pattern",
         },
       ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
+  test('validates supported types', async () => {
+    const readStream = new Readable({
+      read() {
+        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        this.push('{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}');
+        this.push(null);
+      },
+    });
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects,
+    });
+    const result = await importSavedObjects({
+      readStream,
+      objectLimit: 5,
+      overwrite: false,
+      savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "errors": Array [
+    Object {
+      "error": Object {
+        "type": "unsupported_type",
+      },
+      "id": "1",
+      "title": "my title",
+      "type": "wigwags",
+    },
+  ],
+  "success": false,
+  "successCount": 4,
+}
+`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "attributes": Object {
+            "title": "My Index Pattern",
+          },
+          "id": "1",
+          "migrationVersion": Object {},
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {
+            "title": "My Search",
+          },
+          "id": "2",
+          "migrationVersion": Object {},
+          "references": Array [],
+          "type": "search",
+        },
+        Object {
+          "attributes": Object {
+            "title": "My Visualization",
+          },
+          "id": "3",
+          "migrationVersion": Object {},
+          "references": Array [],
+          "type": "visualization",
+        },
+        Object {
+          "attributes": Object {
+            "title": "My Dashboard",
+          },
+          "id": "4",
+          "migrationVersion": Object {},
+          "references": Array [],
+          "type": "dashboard",
+        },
+      ],
+      Object {
+        "overwrite": false,
+      },
     ],
   ],
   "results": Array [

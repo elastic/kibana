@@ -339,7 +339,9 @@ describe('Saved Object', function () {
                 type: 'dashboard',
               });
             });
-            savedObject.searchSource.setField('index', new IndexPattern('my-index', null, []));
+            const indexPattern = new IndexPattern('my-index', null, []);
+            indexPattern.title = indexPattern.id;
+            savedObject.searchSource.setField('index', indexPattern);
             return savedObject
               .save()
               .then(() => {

@@ -114,7 +114,7 @@ export const getMouseTransformGesturePrev = ({ mouseTransformState }) =>
   mouseTransformState || initialTransformTuple;
 
 export const getMouseTransformState = (prev, dragging, { x0, y0, x1, y1 }) => {
-  if (dragging) {
+  if (dragging && !isNaN(x0) && !isNaN(y0) && !isNaN(x1) && !isNaN(y1)) {
     const deltaX = x1 - x0;
     const deltaY = y1 - y0;
     const transform = translate(deltaX - prev.deltaX, deltaY - prev.deltaY, 0);
@@ -484,7 +484,12 @@ const alignmentGuides = (config, shapes, guidedShapes, draggedShape) => {
       continue;
     } // fixme avoid this by not letting annotations get in here
     // key points of the dragged shape bounding box
-    for (const referenceShape of shapes) {
+    const a = config.pageWidth / 2 + 1;
+    const b = config.pageHeight / 2 + 1;
+    const pageBordersAndCenterLines = [
+      { a, b, localTransformMatrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, a - 1, b - 1, 0, 1] },
+    ];
+    for (const referenceShape of shapes.concat(pageBordersAndCenterLines)) {
       if (referenceShape.type === 'annotation') {
         continue;
       } // fixme avoid this by not letting annotations get in here
@@ -507,7 +512,7 @@ const alignmentGuides = (config, shapes, guidedShapes, draggedShape) => {
               b: d.baseAB ? d.baseAB[1] : d.b,
             }
           : referenceShape;
-      // key points of the stationery shape
+      // key points of the stationary shape
       for (let k = -1; k < 2; k++) {
         for (let l = -1; l < 2; l++) {
           if ((k && !l) || (!k && l)) {
@@ -891,7 +896,7 @@ const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
         const preexistingGroupParent = groupsToDissolve.find(
           groupShape => groupShape.id === shape.parent
         );
-        // if linked, dissociate from ad hoc group parent
+        // if linked, dissociate from group parent
         return preexistingGroupParent
           ? {
               ...shape,
@@ -904,7 +909,7 @@ const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
             }
           : shape;
       }),
-    selectedShapes,
+    selectedShapes: selectedShapes.filter(s => !groupsToDissolve.find(g => g.id === s.id)),
   };
 };
 
@@ -1029,7 +1034,9 @@ const singleSelect = (prev, config, hoveredShapes, metaHeld, uid) => {
   // cycle from top ie. from zero after the cursor position changed ie. !sameLocation
   const down = true; // this function won't be called otherwise
   const depthIndex =
-    config.depthSelect && metaHeld
+    config.depthSelect &&
+    metaHeld &&
+    (!hoveredShapes.length || hoveredShapes[0].type !== 'annotation')
       ? (prev.depthIndex + (down && !prev.down ? 1 : 0)) % hoveredShapes.length
       : 0;
   return {

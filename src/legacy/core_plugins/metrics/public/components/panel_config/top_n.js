@@ -19,13 +19,13 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesEditor from '../series_editor';
+import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import createTextHandler from '../lib/create_text_handler';
-import ColorRules from '../color_rules';
-import ColorPicker from '../color_picker';
+import { createTextHandler } from '../lib/create_text_handler';
+import { ColorRules } from '../color_rules';
+import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
-import YesNo from '../yes_no';
+import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -42,9 +42,13 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+const { QueryBarInput } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
 
-class TopNPanelConfig extends Component {
-
+export class TopNPanelConfig extends Component {
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -65,7 +69,10 @@ class TopNPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { drilldown_url: '', filter: '' };
+    const defaults = {
+      drilldown_url: '',
+      filter: { query: '', language: getDefaultQueryLanguage() },
+    };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
     const handleTextChange = createTextHandler(this.props.onChange);
@@ -87,25 +94,24 @@ class TopNPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.topN.optionsTab.dataLabel"
-                  defaultMessage="Data"
-                />
+                <FormattedMessage id="tsvb.topN.optionsTab.dataLabel" defaultMessage="Data" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiFormRow
               id={htmlId('itemUrl')}
-              label={(<FormattedMessage
-                id="tsvb.topN.optionsTab.itemUrlLabel"
-                defaultMessage="Item url"
-              />)}
+              label={
+                <FormattedMessage
+                  id="tsvb.topN.optionsTab.itemUrlLabel"
+                  defaultMessage="Item url"
+                />
+              }
               helpText={
                 <span>
                   <FormattedMessage
                     id="tsvb.topN.optionsTab.itemUrlDescription"
                     defaultMessage="This supports mustache templating. {key} is set to the term."
-                    values={{ key: (<EuiCode>{'{{key}}'}</EuiCode>) }}
+                    values={{ key: <EuiCode>{'{{key}}'}</EuiCode> }}
                   />
                 </span>
               }
@@ -130,16 +136,25 @@ class TopNPanelConfig extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label={(<FormattedMessage
-                    id="tsvb.topN.optionsTab.panelFilterLabel"
-                    defaultMessage="Panel filter"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.topN.optionsTab.panelFilterLabel"
+                      defaultMessage="Panel filter"
+                    />
+                  }
                   fullWidth
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBarInput
+                    query={{
+                      language: model.filter.language
+                        ? model.filter.language
+                        : getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    appName={'VisEditor'}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -165,10 +180,7 @@ class TopNPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.topN.optionsTab.styleLabel"
-                  defaultMessage="Style"
-                />
+                <FormattedMessage id="tsvb.topN.optionsTab.styleLabel" defaultMessage="Style" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -217,19 +229,10 @@ class TopNPanelConfig extends Component {
     return (
       <div>
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'data'}
-            onClick={() => this.switchTab('data')}
-          >
-            <FormattedMessage
-              id="tsvb.topN.dataTab.dataButtonLabel"
-              defaultMessage="Data"
-            />
+          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+            <FormattedMessage id="tsvb.topN.dataTab.dataButtonLabel" defaultMessage="Data" />
           </EuiTab>
-          <EuiTab
-            isSelected={selectedTab === 'options'}
-            onClick={() => this.switchTab('options')}
-          >
+          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
             <FormattedMessage
               id="tsvb.topN.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
@@ -240,7 +243,6 @@ class TopNPanelConfig extends Component {
       </div>
     );
   }
-
 }
 
 TopNPanelConfig.propTypes = {
@@ -249,5 +251,3 @@ TopNPanelConfig.propTypes = {
   onChange: PropTypes.func,
   visData$: PropTypes.object,
 };
-
-export default TopNPanelConfig;

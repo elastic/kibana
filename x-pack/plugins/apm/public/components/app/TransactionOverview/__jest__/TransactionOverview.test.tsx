@@ -4,36 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createHistory from 'history/createHashHistory';
 import React from 'react';
-import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
 import { queryByLabelText, render } from 'react-testing-library';
 import { TransactionOverview } from '..';
-// @ts-ignore
-import configureStore from '../../../../store/config/configureStore';
-import { IUrlParams } from '../../../../store/urlParams';
+import * as hooks from '../../../../hooks/useLocation';
+import { history } from '../../../../utils/history';
 
-function setup(props: {
-  urlParams: IUrlParams;
-  serviceTransactionTypes: string[];
-}) {
-  const store = configureStore();
-  const history = createHistory();
-  history.replace = jest.fn();
+// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
+/* eslint-disable no-console */
+const originalError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+afterAll(() => {
+  console.error = originalError;
+});
+
+function setup({
+  urlParams,
+  serviceTransactionTypes
+}: Parameters<typeof TransactionOverview>[0]) {
+  jest.spyOn(history, 'replace');
+  jest.spyOn(hooks, 'useLocation').mockReturnValue({ pathname: '' } as any);
+  jest.spyOn(hooks, 'useLocation').mockReturnValue({ pathname: '' } as any);
 
   const { container } = render(
-    <Provider store={store}>
-      <Router history={history}>
-        <TransactionOverview {...props} />
-      </Router>
-    </Provider>
+    <TransactionOverview
+      urlParams={urlParams}
+      serviceTransactionTypes={serviceTransactionTypes}
+    />
   );
 
-  return { container, history };
+  return { container };
 }
 
-describe('TransactionOverviewView', () => {
+describe('TransactionOverview', () => {
   describe('when no transaction type is given', () => {
     it('should render null', () => {
       const { container } = setup({
@@ -46,7 +51,7 @@ describe('TransactionOverviewView', () => {
     });
 
     it('should redirect to first type', () => {
-      const { history } = setup({
+      setup({
         serviceTransactionTypes: ['firstType', 'secondType'],
         urlParams: {
           serviceName: 'MyServiceName'

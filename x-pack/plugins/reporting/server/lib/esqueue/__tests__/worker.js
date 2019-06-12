@@ -27,6 +27,9 @@ const defaultWorkerOptions = {
 };
 
 describe('Worker class', function () {
+  // some of these tests might be a little slow, give them a little extra time
+  this.timeout(10000);
+
   let anchorMoment;
   let clock;
   let client;

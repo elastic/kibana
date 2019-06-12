@@ -117,7 +117,6 @@ exports[`EmptyState component doesn't render child components when count is fals
           <EuiSpacer />
           <EuiTitle
             size="l"
-            textTransform="none"
           >
             <h2>
               Loading…
@@ -132,22 +131,18 @@ exports[`EmptyState component doesn't render child components when count is fals
       >
         <EuiTextColor
           color="subdued"
-          component="span"
         >
           <span
             className="euiTextColor euiTextColor--subdued"
           >
-            <EuiText
-              grow={true}
-              size="m"
-            >
+            <EuiText>
               <div
                 className="euiText euiText--medium"
               >
                 <EuiLoadingSpinner
                   size="xl"
                 >
-                  <div
+                  <span
                     className="euiLoadingSpinner euiLoadingSpinner--xLarge"
                   />
                 </EuiLoadingSpinner>
@@ -158,7 +153,6 @@ exports[`EmptyState component doesn't render child components when count is fals
                 </EuiSpacer>
                 <EuiTitle
                   size="l"
-                  textTransform="none"
                 >
                   <h2
                     className="euiTitle euiTitle--large"
@@ -366,7 +360,6 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
                   title={
                     <EuiTitle
                       size="l"
-                      textTransform="none"
                     >
                       <h3>
                         <FormattedMessage
@@ -386,33 +379,21 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
                       size="xxl"
                       type="uptimeApp"
                     >
-                      <uptimeApp
-                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
+                      <EuiIconEmpty
+                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                         focusable="false"
-                        height="32"
                         style={null}
-                        viewBox="0 0 32 32"
-                        width="32"
-                        xmlns="http://www.w3.org/2000/svg"
                       >
                         <svg
-                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
+                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                           focusable="false"
-                          height="32"
+                          height={16}
                           style={null}
-                          viewBox="0 0 32 32"
-                          width="32"
+                          viewBox="0 0 16 16"
+                          width={16}
                           xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            className="euiIcon__fillSecondary"
-                            d="M4.216 12.377A10.948 10.948 0 0 0 2.181 17H.153a12.941 12.941 0 0 1 2.693-6.118l1.37 1.495zm2.948-2.703l-1.37-1.495A12.94 12.94 0 0 1 13 6v2c-2.144 0-4.144.613-5.836 1.674z"
-                          />
-                          <path
-                            d="M26 4.414V19c0 7.18-5.82 13-13 13C6.5 32 1.115 27.23.153 21H2.18c.94 5.12 5.427 9 10.819 9 6.075 0 11-4.925 11-11V4.414l-4.293 4.293-1.414-1.414L25 .586l6.707 6.707-1.414 1.414L26 4.414zm-7.836 9.909l1.472 1.354-7.577 8.235-4.835-4.442 1.353-1.473 3.364 3.09 6.223-6.764z"
-                          />
-                        </svg>
-                      </uptimeApp>
+                        />
+                      </EuiIconEmpty>
                     </EuiIcon>
                     <EuiSpacer
                       size="s"
@@ -423,19 +404,14 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
                     </EuiSpacer>
                     <EuiTextColor
                       color="subdued"
-                      component="span"
                     >
                       <span
                         className="euiTextColor euiTextColor--subdued"
                       >
-                        <EuiTitle
-                          size="m"
-                          textTransform="none"
-                        >
+                        <EuiTitle>
                           <EuiTitle
                             className="euiTitle euiTitle--medium"
                             size="l"
-                            textTransform="none"
                           >
                             <h3
                               className="euiTitle euiTitle--large euiTitle euiTitle--medium"
@@ -457,10 +433,7 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
                             className="euiSpacer euiSpacer--m"
                           />
                         </EuiSpacer>
-                        <EuiText
-                          grow={true}
-                          size="m"
-                        >
+                        <EuiText>
                           <div
                             className="euiText euiText--medium"
                           >
@@ -670,7 +643,6 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
           title={
             <EuiTitle
               size="l"
-              textTransform="none"
             >
               <h3>
                 Error
@@ -683,19 +655,14 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
           >
             <EuiTextColor
               color="subdued"
-              component="span"
             >
               <span
                 className="euiTextColor euiTextColor--subdued"
               >
-                <EuiTitle
-                  size="m"
-                  textTransform="none"
-                >
+                <EuiTitle>
                   <EuiTitle
                     className="euiTitle euiTitle--medium"
                     size="l"
-                    textTransform="none"
                   >
                     <h3
                       className="euiTitle euiTitle--large euiTitle euiTitle--medium"
@@ -711,10 +678,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                     className="euiSpacer euiSpacer--m"
                   />
                 </EuiSpacer>
-                <EuiText
-                  grow={true}
-                  size="m"
-                >
+                <EuiText>
                   <div
                     className="euiText euiText--medium"
                   >
@@ -851,7 +815,6 @@ exports[`EmptyState component renders loading state if no errors or doc count 1`
           <EuiSpacer />
           <EuiTitle
             size="l"
-            textTransform="none"
           >
             <h2>
               Loading…
@@ -866,22 +829,18 @@ exports[`EmptyState component renders loading state if no errors or doc count 1`
       >
         <EuiTextColor
           color="subdued"
-          component="span"
         >
           <span
             className="euiTextColor euiTextColor--subdued"
           >
-            <EuiText
-              grow={true}
-              size="m"
-            >
+            <EuiText>
               <div
                 className="euiText euiText--medium"
               >
                 <EuiLoadingSpinner
                   size="xl"
                 >
-                  <div
+                  <span
                     className="euiLoadingSpinner euiLoadingSpinner--xLarge"
                   />
                 </EuiLoadingSpinner>
@@ -892,7 +851,6 @@ exports[`EmptyState component renders loading state if no errors or doc count 1`
                 </EuiSpacer>
                 <EuiTitle
                   size="l"
-                  textTransform="none"
                 >
                   <h2
                     className="euiTitle euiTitle--large"

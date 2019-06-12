@@ -99,6 +99,7 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
               defaultMessage="Cancel"
             />
           }
+          buttonColor="danger"
           confirmButtonText={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.removePolicyButtonText"

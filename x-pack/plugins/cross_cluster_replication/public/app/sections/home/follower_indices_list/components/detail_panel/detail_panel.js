@@ -82,7 +82,7 @@ export class DetailPanel extends Component {
                     </EuiTitle>
                   </EuiDescriptionListTitle>
 
-                  <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailStatus">
+                  <EuiDescriptionListDescription data-test-subj="status">
                     {isPaused ? (
                       <EuiHealth color="subdued">
                         <FormattedMessage
@@ -115,7 +115,7 @@ export class DetailPanel extends Component {
                     </EuiTitle>
                   </EuiDescriptionListTitle>
 
-                  <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailRemoteCluster">
+                  <EuiDescriptionListDescription data-test-subj="remoteCluster">
                     {remoteCluster}
                   </EuiDescriptionListDescription>
                 </EuiFlexItem>
@@ -130,7 +130,7 @@ export class DetailPanel extends Component {
                     </EuiTitle>
                   </EuiDescriptionListTitle>
 
-                  <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailLeaderIndex">
+                  <EuiDescriptionListDescription data-test-subj="leaderIndex">
                     {leaderIndex}
                   </EuiDescriptionListDescription>
                 </EuiFlexItem>
@@ -142,7 +142,7 @@ export class DetailPanel extends Component {
 
           <section
             aria-labelledby="ccrFollowerIndexDetailSettingsTitle"
-            data-test-subj="ccrFollowerIndexDetailPanelSettingsSection"
+            data-test-subj="settingsSection"
           >
             <EuiTitle size="s">
               <h3 id="ccrFollowerIndexDetailSettingsTitle">
@@ -166,7 +166,7 @@ export class DetailPanel extends Component {
                 }
               />
             ) : (
-              <EuiDescriptionList data-test-subj="ccrFollowerIndexDetailPanelSettingsValues">
+              <EuiDescriptionList data-test-subj="settingsValues">
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <EuiDescriptionListTitle>
@@ -178,7 +178,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxReadReqOpCount">
+                    <EuiDescriptionListDescription data-test-subj="maxReadReqOpCount">
                       {maxReadRequestOperationCount}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -193,7 +193,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxOutstandingReadReq">
+                    <EuiDescriptionListDescription data-test-subj="maxOutstandingReadReq">
                       {maxOutstandingReadRequests}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -212,7 +212,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxReadReqSize">
+                    <EuiDescriptionListDescription data-test-subj="maxReadReqSize">
                       {maxReadRequestSize}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -227,7 +227,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxWriteReqOpCount">
+                    <EuiDescriptionListDescription data-test-subj="maxWriteReqOpCount">
                       {maxWriteRequestOperationCount}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -246,7 +246,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxWriteReqSize">
+                    <EuiDescriptionListDescription data-test-subj="maxWriteReqSize">
                       {maxWriteRequestSize}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -261,7 +261,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxOutstandingWriteReq">
+                    <EuiDescriptionListDescription data-test-subj="maxOutstandingWriteReq">
                       {maxOutstandingWriteRequests}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -280,7 +280,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxWriteBufferCount">
+                    <EuiDescriptionListDescription data-test-subj="maxWriteBufferCount">
                       {maxWriteBufferCount}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -295,7 +295,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxWriteBufferSize">
+                    <EuiDescriptionListDescription data-test-subj="maxWriteBufferSize">
                       {maxWriteBufferSize}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -314,7 +314,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailMaxRetryDelay">
+                    <EuiDescriptionListDescription data-test-subj="maxRetryDelay">
                       {maxRetryDelay}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -329,7 +329,7 @@ export class DetailPanel extends Component {
                       </EuiTitle>
                     </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="ccrFollowerIndexDetailReadPollTimeout">
+                    <EuiDescriptionListDescription data-test-subj="readPollTimeout">
                       {readPollTimeout}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -340,7 +340,7 @@ export class DetailPanel extends Component {
 
           <EuiSpacer size="l" />
 
-          <section data-test-subj="ccrFollowerIndexDetailPanelShardsStatsSection">
+          <section data-test-subj="shardsStatsSection">
             {shards && shards.map((shard, i) => (
               <Fragment key={i}>
                 <EuiSpacer size="m" />
@@ -366,7 +366,7 @@ export class DetailPanel extends Component {
                   editorProps={{
                     $blockScrolling: Infinity
                   }}
-                  data-test-subj={`ccrFollowerIndexDetailPanelShardsStats${i}`}
+                  data-test-subj={`shardsStats${i}`}
                 />
               </Fragment>
             ))}
@@ -457,7 +457,7 @@ export class DetailPanel extends Component {
               iconType="cross"
               flush="left"
               onClick={closeDetailPanel}
-              data-test-subj="ccrFollowerIndexDetailsFlyoutCloseButton"
+              data-test-subj="closeFlyoutButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexDetailPanel.closeButtonLabel"
@@ -471,7 +471,7 @@ export class DetailPanel extends Component {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   href={indexManagementUri}
-                  data-test-subj="ccrFollowerIndexDetailsViewIndexManagementButton"
+                  data-test-subj="viewIndexManagementButton"
                 >
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexDetailPanel.viewIndexLink"
@@ -493,7 +493,7 @@ export class DetailPanel extends Component {
                       />
                     )}
                     followerIndices={[followerIndex]}
-                    testSubj="ccrFollowerIndexDetailsViewContextMenuButton"
+                    testSubj="manageButton"
                   />
                 </EuiFlexItem>
               )}
@@ -510,7 +510,7 @@ export class DetailPanel extends Component {
     return (
       <EuiFlyout
         className="ccrFollowerIndicesDetailPanel"
-        data-test-subj="ccrFollowerIndexDetailsFlyout"
+        data-test-subj="followerIndexDetail"
         onClose={closeDetailPanel}
         aria-labelledby="followerIndexDetailsFlyoutTitle"
         size="m"
@@ -521,7 +521,7 @@ export class DetailPanel extends Component {
           <EuiTitle
             size="m"
             id="followerIndexDetailsFlyoutTitle"
-            data-test-subj="followerIndexDetailsFlyoutTitle"
+            data-test-subj="title"
           >
             <h2>{followerIndexId}</h2>
           </EuiTitle>

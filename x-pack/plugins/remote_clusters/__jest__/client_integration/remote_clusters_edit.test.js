@@ -4,61 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
-
-import { initTestBed, nextTick, registerHttpRequestMockHelpers } from './test_helpers';
-import { RemoteClusterEdit } from '../../public/sections/remote_cluster_edit';
-import { RemoteClusterAdd } from '../../public/sections/remote_cluster_add';
 import { RemoteClusterForm } from '../../public/sections/components/remote_cluster_form';
-import { registerRouter } from '../../public/services/routing';
+import { pageHelpers, setupEnvironment, nextTick } from './helpers';
+import { REMOTE_CLUSTER_EDIT, REMOTE_CLUSTER_EDIT_NAME } from './helpers/constants';
 
 jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path || '/api/remote_clusters',
   breadcrumbs: { set: () => {} },
 }));
 
-const REMOTE_CLUSTER_NAME = 'new-york';
-
-const REMOTE_CLUSTER = {
-  name: REMOTE_CLUSTER_NAME,
-  seeds: ['localhost:9400'],
-  skipUnavailable: true,
-};
-
-const testBedOptions = {
-  memoryRouter: {
-    onRouter: (router) => registerRouter(router),
-    // The remote cluster name to edit is read from the router ":id" param
-    // so we first set it in our initial entries
-    initialEntries: [`/${REMOTE_CLUSTER_NAME}`],
-    // and then we declarae the :id param on the component route path
-    componentRoutePath: '/:name'
-  }
-};
+const { setup } = pageHelpers.remoteClustersEdit;
+const { setup: setupRemoteClustersAdd } = pageHelpers.remoteClustersAdd;
 
 describe('Edit Remote cluster', () => {
   let server;
+  let httpRequestsMockHelpers;
   let component;
   let find;
   let exists;
-  let setLoadRemoteClustersResponse;
+
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterAll(() => {
+    server.restore();
+  });
 
   beforeEach(async () => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
+    httpRequestsMockHelpers.setLoadRemoteClustersResponse([REMOTE_CLUSTER_EDIT]);
 
-    // Register helpers to mock Http Requests
-    ({
-      setLoadRemoteClustersResponse,
-    } = registerHttpRequestMockHelpers(server));
-
-    // Set "default" mock responses by not providing any arguments
-    setLoadRemoteClustersResponse([REMOTE_CLUSTER]);
-
-    // Mock all HTTP Requests that have not been handled previously
-    server.respondWith([200, {}, '']);
-
-    ({ component, find, exists } = initTestBed(RemoteClusterEdit, undefined, testBedOptions));
+    ({ component, find, exists } = setup());
     await nextTick();
     component.update();
   });
@@ -78,7 +54,7 @@ describe('Edit Remote cluster', () => {
      * the form component is indeed shared between the 2 app sections.
      */
   test('should use the same Form component as the "<RemoteClusterEdit />" component', async () => {
-    const { component: addRemoteClusterComponent } = initTestBed(RemoteClusterAdd, undefined, testBedOptions);
+    const { component: addRemoteClusterComponent } = setupRemoteClustersAdd();
 
     await nextTick();
     addRemoteClusterComponent.update();
@@ -91,9 +67,9 @@ describe('Edit Remote cluster', () => {
   });
 
   test('should populate the form fields with the values from the remote cluster loaded', () => {
-    expect(find('remoteClusterFormNameInput').props().value).toBe(REMOTE_CLUSTER_NAME);
-    expect(find('remoteClusterFormSeedsInput').text()).toBe(REMOTE_CLUSTER.seeds.join(''));
-    expect(find('remoteClusterFormSkipUnavailableFormToggle').props().checked).toBe(REMOTE_CLUSTER.skipUnavailable);
+    expect(find('remoteClusterFormNameInput').props().value).toBe(REMOTE_CLUSTER_EDIT_NAME);
+    expect(find('remoteClusterFormSeedsInput').text()).toBe(REMOTE_CLUSTER_EDIT.seeds.join(''));
+    expect(find('remoteClusterFormSkipUnavailableFormToggle').props().checked).toBe(REMOTE_CLUSTER_EDIT.skipUnavailable);
   });
 
   test('should disable the form name input', () => {

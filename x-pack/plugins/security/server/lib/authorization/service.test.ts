@@ -13,7 +13,6 @@ import {
   mockPrivilegesFactory,
 } from './service.test.mocks';
 
-// @ts-ignore
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { actionsFactory } from './actions';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';

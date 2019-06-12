@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from 'plugins/interpreter/interpreter';
 import { fromExpression, getType } from '@kbn/interpreter/common';
+import { interpretAst } from 'plugins/interpreter/interpreter';
 import { notify } from './notify';
 
 /**

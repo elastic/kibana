@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/ColorManager default 1`] = `
+exports[`Storyshots components/Color/ColorManager default 1`] = `
 Array [
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -18,7 +18,7 @@ Array [
           className="canvasColorDot__foreground"
           style={
             Object {
-              "background": "#abcdef",
+              "background": "blue",
             }
           }
         />
@@ -43,7 +43,7 @@ Array [
             onChange={[Function]}
             placeholder="Color code"
             type="text"
-            value="#abcdef"
+            value="blue"
           />
         </div>
       </div>
@@ -112,6 +112,194 @@ Array [
           className="canvasColorDot__foreground"
           style={
             Object {
+              "background": "#abcd",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#abcd"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#abcdef",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#abcdef"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#aabbccdd",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#aabbccdd"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "rgb(50, 100, 150)",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="rgb(50, 100, 150)"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
               "background": "rgba(50, 100, 150, .5)",
             }
           }
@@ -146,7 +334,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/ColorManager interactive 1`] = `
+exports[`Storyshots components/Color/ColorManager interactive 1`] = `
 <div>
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -202,19 +390,14 @@ exports[`Storyshots components/ColorManager interactive 1`] = `
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -225,19 +408,14 @@ exports[`Storyshots components/ColorManager interactive 1`] = `
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M7.5 0C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882zM3.5 7h8a.5.5 0 1 1 0 1h-8a.5.5 0 0 1 0-1z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
     </div>
   </div>
@@ -264,7 +442,7 @@ exports[`Storyshots components/ColorManager interactive 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ColorManager invalid colors 1`] = `
+exports[`Storyshots components/Color/ColorManager invalid colors 1`] = `
 Array [
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -303,7 +481,7 @@ Array [
             onChange={[Function]}
             placeholder="Color code"
             type="text"
-            value="#abcd"
+            value="elastic"
           />
         </div>
       </div>
@@ -346,7 +524,222 @@ Array [
             onChange={[Function]}
             placeholder="Color code"
             type="text"
-            value="canvas"
+            value="#xyz"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#ghij"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#canvas"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="#12345xyz"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="rgb(a,b,c)"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={Object {}}
+        />
+      </div>
+    </div>
+    <div
+      className="euiFlexItem"
+      style={
+        Object {
+          "display": "inline-block",
+        }
+      }
+    >
+      <div
+        className="euiFormControlLayout"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText"
+            onChange={[Function]}
+            placeholder="Color code"
+            type="text"
+            value="rgba(w,x,y,z)"
           />
         </div>
       </div>
@@ -355,7 +748,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/ColorManager with buttons 1`] = `
+exports[`Storyshots components/Color/ColorManager with buttons 1`] = `
 Array [
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -415,19 +808,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -438,19 +826,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M7.5 0C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882zM3.5 7h8a.5.5 0 1 1 0 1h-8a.5.5 0 0 1 0-1z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
     </div>
   </div>,
@@ -512,19 +895,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -535,19 +913,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M7.5 0C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882zM3.5 7h8a.5.5 0 1 1 0 1h-8a.5.5 0 0 1 0-1z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
     </div>
   </div>,
@@ -609,19 +982,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -632,19 +1000,14 @@ Array [
       >
         <svg
           aria-hidden="true"
-          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
-          height="16"
+          height={16}
           style={null}
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M7.5 0C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882zM3.5 7h8a.5.5 0 1 1 0 1h-8a.5.5 0 0 1 0-1z"
-            fillRule="evenodd"
-          />
-        </svg>
+        />
       </button>
     </div>
   </div>,

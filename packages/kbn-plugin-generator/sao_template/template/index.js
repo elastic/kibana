@@ -61,7 +61,7 @@ export default function (kibana) {
                 api: [],
                 savedObject: {
                   all: [],
-                  read: ['config'],
+                  read: [],
                 },
                 ui: ['show'],
               },
@@ -69,7 +69,7 @@ export default function (kibana) {
                 api: [],
                 savedObject: {
                   all: [],
-                  read: ['config'],
+                  read: [],
                 },
                 ui: ['show'],
               },

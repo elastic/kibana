@@ -6,7 +6,6 @@
 
 import { Server } from 'hapi';
 
-// @ts-ignore
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { SpacesPlugin } from '../../../../spaces/types';
 import { XPackFeature, XPackMainPlugin } from '../../../../xpack_main/xpack_main';

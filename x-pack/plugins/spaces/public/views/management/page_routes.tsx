@@ -10,7 +10,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'ui/autoload/styles';
 import { I18nContext } from 'ui/i18n';
-import { kfetch } from 'ui/kfetch';
 // @ts-ignore
 import routes from 'ui/routes';
 import { SpacesManager } from '../../lib/spaces_manager';
@@ -34,15 +33,9 @@ routes.when('/management/spaces/list', {
 
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
-      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
-
       render(
         <I18nContext>
-          <SpacesGridPage
-            spacesManager={spacesManager}
-            spacesNavState={spacesNavState}
-            features={features}
-          />
+          <SpacesGridPage spacesManager={spacesManager} spacesNavState={spacesNavState} />
         </I18nContext>,
         domNode
       );
@@ -72,15 +65,9 @@ routes.when('/management/spaces/create', {
 
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
-      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
-
       render(
         <I18nContext>
-          <ManageSpacePage
-            spacesManager={spacesManager}
-            spacesNavState={spacesNavState}
-            features={features}
-          />
+          <ManageSpacePage spacesManager={spacesManager} spacesNavState={spacesNavState} />
         </I18nContext>,
         domNode
       );
@@ -117,15 +104,12 @@ routes.when('/management/spaces/edit/:spaceId', {
 
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
-      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
-
       render(
         <I18nContext>
           <ManageSpacePage
             spaceId={spaceId}
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
-            features={features}
             setBreadcrumbs={breadcrumbs => {
               chrome.breadcrumbs.set(breadcrumbs);
             }}

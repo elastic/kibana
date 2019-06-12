@@ -36,12 +36,12 @@ export class GrokDebugger extends React.Component {
 
   onRawEventChange = (rawEvent) => {
     this.setState({ rawEvent });
-    this.grokdebuggerRequest.rawEvent = rawEvent;
+    this.grokdebuggerRequest.rawEvent = rawEvent.trimEnd();
   }
 
   onPatternChange = (pattern) => {
     this.setState({ pattern });
-    this.grokdebuggerRequest.pattern = pattern;
+    this.grokdebuggerRequest.pattern = pattern.trimEnd();
   }
 
   onCustomPatternsChange = (customPatterns) => {

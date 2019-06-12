@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import template from './index.html';
@@ -23,7 +24,7 @@ uiRoutes.when('/elasticsearch/nodes', {
   },
   controllerAs: 'elasticsearchNodes',
   controller: class ElasticsearchNodesController extends MonitoringViewBaseEuiTableController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       const showCgroupMetricsElasticsearch = $injector.get('showCgroupMetricsElasticsearch');
@@ -33,7 +34,7 @@ uiRoutes.when('/elasticsearch/nodes', {
       });
 
       super({
-        title: i18n('xpack.monitoring.elasticsearch.nodes.routeTitle', {
+        title: i18n.translate('xpack.monitoring.elasticsearch.nodes.routeTitle', {
           defaultMessage: 'Elasticsearch - Nodes'
         }),
         storageKey: 'elasticsearch.nodes',
