@@ -9,16 +9,14 @@ Creates an instance of `ScopedClusterClient` based on the configuration the curr
 <b>Signature:</b>
 
 ```typescript
-asScoped(req?: {
-        headers?: Headers;
-    }): ScopedClusterClient;
+asScoped(request?: KibanaRequest | Request | FakeRequest): ScopedClusterClient;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  req | <code>{</code><br/><code>        headers?: Headers;</code><br/><code>    }</code> | Request the <code>ScopedClusterClient</code> instance will be scoped to. |
+|  request | <code>KibanaRequest &#124; Request &#124; FakeRequest</code> |  |
 
 <b>Returns:</b>
 

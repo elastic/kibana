@@ -49,10 +49,14 @@ export {
   ScopedClusterClient,
   ElasticsearchClientConfig,
   APICaller,
+  FakeRequest,
 } from './elasticsearch';
 export {
   AuthenticationHandler,
+  AuthHeaders,
+  AuthResultData,
   AuthToolkit,
+  GetAuthHeaders,
   KibanaRequest,
   KibanaRequestRoute,
   OnPreAuthHandler,

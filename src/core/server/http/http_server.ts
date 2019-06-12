@@ -26,16 +26,14 @@ import { createServer, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
-import { Router, KibanaRequest, toRawRequest } from './router';
+import { Router, KibanaRequest, getIncomingMessage } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
 import { AuthStateStorage } from './auth_state_storage';
-
-const getIncomingMessage = (request: KibanaRequest | Request) =>
-  request instanceof KibanaRequest ? toRawRequest(request).raw.req : request.raw.req;
+import { AuthHeadersStorage } from './auth_headers_storage';
 
 export interface HttpServerSetup {
   server: Server;
@@ -72,6 +70,7 @@ export interface HttpServerSetup {
   auth: {
     get: AuthStateStorage['get'];
     isAuthenticated: AuthStateStorage['isAuthenticated'];
+    getAuthHeaders: AuthHeadersStorage['get'];
   };
 }
 
@@ -83,9 +82,11 @@ export class HttpServer {
   private basePathCache = new WeakMap<ReturnType<typeof getIncomingMessage>, string>();
 
   private readonly authState: AuthStateStorage;
+  private readonly authHeaders: AuthHeadersStorage;
 
   constructor(private readonly log: Logger) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
+    this.authHeaders = new AuthHeadersStorage();
   }
 
   public isListening() {
@@ -141,6 +142,7 @@ export class HttpServer {
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
+        getAuthHeaders: this.authHeaders.get,
       },
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
@@ -251,7 +253,10 @@ export class HttpServer {
     );
 
     this.server.auth.scheme('login', () => ({
-      authenticate: adoptToHapiAuthFormat(fn, this.authState.set),
+      authenticate: adoptToHapiAuthFormat(fn, (req, { state, headers }) => {
+        this.authState.set(req, state);
+        this.authHeaders.set(req, headers);
+      }),
     }));
     this.server.auth.strategy('session', 'login');
 

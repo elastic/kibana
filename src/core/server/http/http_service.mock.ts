@@ -36,6 +36,7 @@ const createSetupContractMock = () => {
     auth: {
       get: jest.fn(),
       isAuthenticated: jest.fn(),
+      getAuthHeaders: jest.fn(),
     },
     createNewServer: async (cfg: Partial<HttpConfig>): Promise<HttpServerSetup> =>
       ({} as HttpServerSetup),
