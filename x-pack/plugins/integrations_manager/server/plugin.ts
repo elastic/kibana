@@ -5,12 +5,19 @@
  */
 
 import { CoreSetup, ServerPluginInitializerContext } from '../common/types';
+import { fetchList } from './registry';
 import { routes } from './routes';
+
+export type IntegrationsManagerPluginSetup = ReturnType<Plugin['setup']>;
 
 export class Plugin {
   constructor(initializerContext: ServerPluginInitializerContext) {}
   public setup(core: CoreSetup) {
-    const { route } = core.http;
-    routes.forEach(definition => route(definition));
+    // map routes to handlers
+    routes.forEach(core.http.route);
+
+    return {
+      getList: fetchList,
+    };
   }
 }

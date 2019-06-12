@@ -9,6 +9,7 @@ import { cacheGet, cacheSet, cacheHas } from './cache';
 import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
+import { IntegrationInfo, IntegrationList } from '../common/types';
 
 const REGISTRY = process.env.REGISTRY || 'http://integrations-registry.app.elstc.co';
 
