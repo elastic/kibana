@@ -5,9 +5,10 @@
  */
 
 import { PluginInitializerContext } from 'src/core/server';
-import { Plugin } from './plugin';
+import { TelemetryPlugin } from './plugin';
 import * as constants from '../common/constants';
 
 export { getTelemetryOptIn } from './get_telemetry_opt_in';
-export const plugin = (initializerContext: PluginInitializerContext) => new Plugin();
+export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
+  new TelemetryPlugin();
 export { constants };

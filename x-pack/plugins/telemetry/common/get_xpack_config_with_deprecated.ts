@@ -6,7 +6,7 @@
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 
-export function checkDeprecated(config: KibanaConfig, configPath: string) {
+export function getXpackConfigWithDeprecated(config: KibanaConfig, configPath: string) {
   const deprecatedConfig = config.get(`xpack.xpack_main.${configPath}`);
   if (typeof deprecatedConfig !== 'undefined') {
     return deprecatedConfig;

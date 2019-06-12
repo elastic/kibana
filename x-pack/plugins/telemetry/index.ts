@@ -10,15 +10,16 @@ import { Server } from 'hapi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import mappings from './mappings.json';
-import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
-import { plugin } from './server';
-import { REPORT_INTERVAL_MS } from './common/constants';
-import { checkDeprecated } from './common/check_deprecated';
+import { CONFIG_TELEMETRY, getConfigTelemetryDesc, REPORT_INTERVAL_MS } from './common/constants';
+import { getXpackConfigWithDeprecated } from './common/get_xpack_config_with_deprecated';
+import { telemetryPlugin } from './server';
 
 import {
   createLocalizationUsageCollector,
   createTelemetryUsageCollector,
 } from './server/collectors';
+
+const ENDPOINT_VERSION = 'v2';
 
 export const telemetry = (kibana: any) => {
   return new kibana.Plugin({
@@ -33,8 +34,12 @@ export const telemetry = (kibana: any) => {
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
         url: Joi.when('$dev', {
           is: true,
-          then: Joi.string().default('https://telemetry-staging.elastic.co/xpack/v2/send'),
-          otherwise: Joi.string().default('https://telemetry.elastic.co/xpack/v2/send'),
+          then: Joi.string().default(
+            `https://telemetry-staging.elastic.co/xpack/${ENDPOINT_VERSION}/send`
+          ),
+          otherwise: Joi.string().default(
+            `https://telemetry.elastic.co/xpack/${ENDPOINT_VERSION}/send`
+          ),
         }),
       }).default();
     },
@@ -58,8 +63,8 @@ export const telemetry = (kibana: any) => {
       injectDefaultVars(server: Server) {
         const config = server.config();
         return {
-          telemetryEnabled: checkDeprecated(config, 'telemetry.enabled'),
-          telemetryUrl: checkDeprecated(config, 'telemetry.url'),
+          telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
+          telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
           spacesEnabled: config.get('xpack.spaces.enabled'),
           telemetryOptedIn: null,
           activeSpace: null,
@@ -77,7 +82,7 @@ export const telemetry = (kibana: any) => {
         http: { server },
       } as any) as CoreSetup;
 
-      plugin(initializerContext).setup(coreSetup);
+      telemetryPlugin(initializerContext).setup(coreSetup);
 
       // register collectors
       server.usage.collectorSet.register(createLocalizationUsageCollector(server));

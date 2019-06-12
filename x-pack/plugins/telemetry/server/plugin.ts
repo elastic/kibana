@@ -7,7 +7,7 @@
 import { CoreSetup } from 'src/core/server';
 import { registerRoutes } from './routes';
 
-export class Plugin {
+export class TelemetryPlugin {
   public setup(core: CoreSetup) {
     registerRoutes(core);
   }

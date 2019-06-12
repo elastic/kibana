@@ -27,7 +27,7 @@ import { has } from 'lodash';
 function movedToTelemetry(configPath) {
   return (settings, log) => {
     if (has(settings, configPath)) {
-      log(`Config key ${configPath} is deprecated. Configuration can be inferred from the "telemetry" settings`);
+      log(`Config key ${configPath} is deprecated. Use "xpack.telemetry.${configPath}" instead.`);
     }
   };
 }

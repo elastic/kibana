@@ -11,7 +11,7 @@ import { dirname, join } from 'path';
 
 // look for telemetry.yml in the same places we expect kibana.yml
 import { ensureDeepObject } from './ensure_deep_object';
-import { checkDeprecated } from '../../../common/check_deprecated';
+import { getXpackConfigWithDeprecated } from '../../../common/get_xpack_config_with_deprecated';
 
 /**
  * The maximum file size before we ignore it (note: this limit is arbitrary).
@@ -87,7 +87,7 @@ export function createTelemetryUsageCollector(server: KibanaHapiServer) {
     isReady: () => true,
     fetch: async () => {
       const config = server.config();
-      const configPath = checkDeprecated(config, 'telemetry.config') as string;
+      const configPath = getXpackConfigWithDeprecated(config, 'telemetry.config') as string;
       const telemetryPath = join(dirname(configPath), 'telemetry.yml');
       return await readTelemetryFile(telemetryPath);
     },
