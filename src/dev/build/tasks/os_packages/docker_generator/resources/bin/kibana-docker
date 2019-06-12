@@ -137,12 +137,13 @@ kibana_vars=(
     xpack.reporting.roles.allow
     xpack.searchprofiler.enabled
     xpack.security.authProviders
+    xpack.security.authc.providers
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey
     xpack.security.secureCookies
     xpack.security.sessionTimeout
-    xpack.xpack_main.telemetry.enabled
+    xpack.telemetry.enabled
 )
 
 longopts=''
