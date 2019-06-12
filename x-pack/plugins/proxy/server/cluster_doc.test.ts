@@ -68,12 +68,9 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-it('correctly instantiates', async () => {
+it('timeouts are set correctly on the main loop', async () => {
   esClients.dataClient = {
-    callAsInternalUser: jest.fn(() => ({
-      routing_table: {},
-      nodes: {},
-    })),
+    callAsInternalUser: jest.fn(() => ({})),
   };
   const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
   const config = configService({
@@ -85,8 +82,8 @@ it('correctly instantiates', async () => {
     await clusterDoc.setup(elasticClient);
     await clusterDoc.start();
   } catch (err) {
-    console.log(err);
     expect(err).toBeFalsy();
   }
   expect(setTimeout).toHaveBeenCalledTimes(1);
+  clusterDoc.stop();
 });

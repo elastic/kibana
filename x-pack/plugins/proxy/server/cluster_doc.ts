@@ -132,7 +132,7 @@ export class ClusterDocClient {
     }, this.updateInterval);
   }
 
-  private updateRoutingTable(routingTable: { [key: string]: RoutingNode }): void {
+  private updateRoutingTable(routingTable: RoutingTable): void {
     const currentRoutes = [...Object.keys(this.routingTable)];
     for (const [key, node] of Object.entries(routingTable)) {
       this.routingTable[key] = node;
@@ -156,8 +156,8 @@ export class ClusterDocClient {
       _source: true,
     };
     const data: ClusterDoc = await client.callAsInternalUser('get', params);
-    this.updateRoutingTable(data.routing_table);
-    const nodes: NodeList = data.nodes;
+    this.updateRoutingTable(data.routing_table || {});
+    const nodes: NodeList = data.nodes || {};
     return nodes;
   }
 
