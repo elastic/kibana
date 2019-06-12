@@ -238,7 +238,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async changeDataFormatter(
       formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
     ) {
-      const formatterEl = await find.byCssSelector('[id$="date_row"] .euiComboBox');
+      const formatterEl = await find.byCssSelector('[id$="date-row"] .euiComboBox');
       await comboBox.setElement(formatterEl, formatter);
     }
 
