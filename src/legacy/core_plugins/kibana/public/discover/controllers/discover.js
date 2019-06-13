@@ -71,7 +71,7 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
 
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 data.search.loadLegacyDirectives();
 
 const fetchStatuses = {

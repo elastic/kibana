@@ -28,7 +28,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
-import { Query, data } from 'plugins/data';
+import { Query } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 
 const { QueryBarInput } = data.query.ui;
 
