@@ -99,7 +99,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 
-    const response: Pick<KibanaDatatable, 'columns' | 'rows'> = await courierRequestHandler({
+    const response = await courierRequestHandler({
       searchSource,
       aggs,
       timeRange: get(context, 'timeRange', null),
@@ -112,13 +112,18 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       queryFilter,
     });
 
-    return {
+    const table: KibanaDatatable = {
       type: 'kibana_datatable',
       rows: response.rows,
-      columns: response.columns.map(column => ({
+      columns: response.columns.map((column: any) => ({
         id: column.id,
         name: column.name,
+        formatterMapping: column.aggConfig.params.field
+          ? column.aggConfig.params.field.format.toJSON()
+          : column.aggConfig.type.getFormat().toJSON(),
       })),
     };
+
+    return table;
   },
 });

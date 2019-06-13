@@ -13,12 +13,14 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
+    tickFormat={[Function]}
     title="C"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
+    tickFormat={[Function]}
     title="A and B"
   />
   <inject-AreaSeriesSpecComponent-with-chartStore
@@ -27,12 +29,12 @@ exports[`xy_expression XYChart component it renders area 1`] = `
         Object {
           "a": 1,
           "b": 2,
-          "c": 3,
+          "c": "I",
         },
         Object {
           "a": 1,
           "b": 5,
-          "c": 4,
+          "c": "J",
         },
       ]
     }
@@ -63,12 +65,14 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
+    tickFormat={[Function]}
     title="C"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
+    tickFormat={[Function]}
     title="A and B"
   />
   <inject-BarSeriesSpecComponent-with-chartStore
@@ -77,12 +81,12 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
         Object {
           "a": 1,
           "b": 2,
-          "c": 3,
+          "c": "I",
         },
         Object {
           "a": 1,
           "b": 5,
-          "c": 4,
+          "c": "J",
         },
       ]
     }
@@ -113,12 +117,14 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
+    tickFormat={[Function]}
     title="C"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
+    tickFormat={[Function]}
     title="A and B"
   />
   <inject-LineSeriesSpecComponent-with-chartStore
@@ -127,12 +133,12 @@ exports[`xy_expression XYChart component it renders line 1`] = `
         Object {
           "a": 1,
           "b": 2,
-          "c": 3,
+          "c": "I",
         },
         Object {
           "a": 1,
           "b": 5,
-          "c": 4,
+          "c": "J",
         },
       ]
     }

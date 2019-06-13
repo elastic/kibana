@@ -24,6 +24,7 @@ const name = 'kibana_datatable';
 interface Column {
   id: string;
   name: string;
+  formatterMapping?: unknown;
 }
 
 interface Row {

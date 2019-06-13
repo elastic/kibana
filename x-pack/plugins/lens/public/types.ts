@@ -128,14 +128,6 @@ export interface TableSpecColumn {
 // TableSpec is managed by visualizations
 export type TableSpec = TableSpecColumn[];
 
-// This is a temporary type definition, to be replaced with
-// the official Kibana Datatable type definition.
-export interface KibanaDatatable {
-  type: 'kibana_datatable';
-  rows: Array<Record<string, unknown>>;
-  columns: Array<{ id: string; name: string }>;
-}
-
 export interface VisualizationProps<T = unknown> {
   dragDropContext: DragContextState;
   datasource: DatasourcePublicAPI;

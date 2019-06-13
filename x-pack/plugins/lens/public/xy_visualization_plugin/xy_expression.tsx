@@ -16,10 +16,10 @@ import {
   AreaSeries,
   BarSeries,
 } from '@elastic/charts';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
+import { ExpressionFunction, KibanaDatatable } from 'src/legacy/core_plugins/interpreter/types';
 import { XYArgs } from './types';
-import { KibanaDatatable } from '../types';
 import { RenderFunction } from './plugin';
+import { getFormat } from '../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 
 export interface XYChartProps {
   data: KibanaDatatable;
@@ -112,6 +112,18 @@ export function XYChart({ data, args }: XYChartProps) {
     data: data.rows,
   };
 
+  const xAxisColumn = data.columns.find(({ id }) => id === x.accessor);
+  const xAxisFormatter = getFormat(xAxisColumn ? xAxisColumn.formatterMapping : undefined);
+
+  let yAxisFormatter: ReturnType<typeof getFormat>;
+  if (y.accessors.length === 1) {
+    const firstYAxisColumn = data.columns.find(({ id }) => id === y.accessors[0]);
+    yAxisFormatter = getFormat(firstYAxisColumn ? firstYAxisColumn.formatterMapping : undefined);
+  } else {
+    // TODO if there are multiple y axes, try to merge the formatters for the axis
+    yAxisFormatter = getFormat({ id: 'number' });
+  }
+
   return (
     <Chart className="lnsChart">
       <Settings showLegend={legend.isVisible} legendPosition={legend.position} />
@@ -121,6 +133,7 @@ export function XYChart({ data, args }: XYChartProps) {
         position={x.position}
         title={x.title}
         showGridLines={x.showGridlines}
+        tickFormat={d => xAxisFormatter.convert(d)}
       />
 
       <Axis
@@ -128,6 +141,7 @@ export function XYChart({ data, args }: XYChartProps) {
         position={y.position}
         title={y.title}
         showGridLines={y.showGridlines}
+        tickFormat={d => yAxisFormatter.convert(d)}
       />
 
       {seriesType === 'line' ? (
