@@ -106,7 +106,6 @@
     "common.ui.aggTypes.buckets.significantTerms.includeLabel": "包括",
     "common.ui.aggTypes.buckets.significantTermsLabel": "{fieldName} 中排名前 {size} 的罕见词",
     "common.ui.aggTypes.buckets.significantTermsTitle": "重要词",
-    "common.ui.aggTypes.buckets.terms.aggNotValidLabel": "- 聚合无效 -",
     "common.ui.aggTypes.buckets.terms.excludeLabel": "排除",
     "common.ui.aggTypes.buckets.terms.includeLabel": "包括",
     "common.ui.aggTypes.buckets.terms.missingBucketLabel": "缺失",
