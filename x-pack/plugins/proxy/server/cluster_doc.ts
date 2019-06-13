@@ -46,12 +46,12 @@ interface NodeList {
 }
 
 export class ClusterDocClient {
+  public nodeName: string;
   private routingTable: RoutingTable = {};
   private elasticsearch?: Observable<ClusterClient>;
   private updateInterval?: number;
   private timeoutThreshold: number = 15 * 1000;
   private timer: null | number = null;
-  private nodeName: string;
   private configSubscription?: Subscription;
 
   private readonly proxyIndex = '.kibana';
@@ -104,16 +104,24 @@ export class ClusterDocClient {
     return this.routingTable[resource];
   }
 
-  public async assignResource(resource: string, data: RoutingNode) {
-    this.routingTable[resource] = data;
+  public async assignResource(resource: string, type: string, state: RouteState, node?: string) {
+    // getting the ndoe list will refresh the internal routing table to match
+    // whatever the es doc contains, so this needs to be done before we assign
+    // the new node to the routing table, or we lose the update
     const nodes = await this.getNodeList();
+    const data = {
+      type,
+      state,
+      node: node || this.nodeName,
+    };
+    this.routingTable[resource] = data;
     const currentTime = new Date().getTime();
     await this.updateNodeList(this.updateLocalNode(nodes, currentTime));
   }
 
   public async unassignResource(resource: string) {
-    delete this.routingTable[resource];
     const nodes = await this.getNodeList();
+    delete this.routingTable[resource];
     const currentTime = new Date().getTime();
     await this.updateNodeList(this.updateLocalNode(nodes, currentTime));
   }
@@ -155,7 +163,8 @@ export class ClusterDocClient {
       index: this.proxyIndex,
       _source: true,
     };
-    const data: ClusterDoc = await client.callAsInternalUser('get', params);
+    const reply = await client.callAsInternalUser('get', params);
+    const data: ClusterDoc = reply._source;
     this.updateRoutingTable(data.routing_table || {});
     const nodes: NodeList = data.nodes || {};
     return nodes;
@@ -185,6 +194,14 @@ export class ClusterDocClient {
     return nodes;
   }
 
+  private removeNode(node: string) {
+    for (const [resource, data] of Object.entries(this.routingTable)) {
+      if (data.node === node) {
+        delete this.routingTable[resource];
+      }
+    }
+  }
+
   private async mainLoop(): Promise<void> {
     const nodes = await this.getNodeList();
     const finishTime = new Date().getTime();
@@ -193,6 +210,7 @@ export class ClusterDocClient {
       const timeout = finishTime - node.lastUpdate;
       if (!node || timeout > this.timeoutThreshold) {
         this.log.warn(`Node ${key} has not updated in ${timeout}ms and has been dropped`);
+        this.removeNode(key);
         delete nodes[key];
       }
     }

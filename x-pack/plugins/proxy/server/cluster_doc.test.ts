@@ -5,7 +5,7 @@
  */
 import { Observable, BehaviorSubject } from 'rxjs';
 
-import { ClusterDocClient } from './cluster_doc';
+import { ClusterDocClient, RouteState } from './cluster_doc';
 import {
   Config,
   ConfigService,
@@ -66,11 +66,11 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-it('timeouts are set correctly on the main loop', async () => {
+test('initial run of main loop works', async () => {
   const esClients = {
     adminClient: {},
     dataClient: {
-      callAsInternalUser: jest.fn<Promise<any>, any>(async () => ({})),
+      callAsInternalUser: jest.fn<Promise<any>, any>(async () => ({ _source: {} })),
     },
   };
   const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
@@ -79,13 +79,123 @@ it('timeouts are set correctly on the main loop', async () => {
     timeoutThreshold: 100,
   });
   const clusterDoc = new ClusterDocClient({ config, env, logger });
+
+  try {
+    await clusterDoc.setup(elasticClient);
+    await clusterDoc.start();
+    await clusterDoc.stop();
+  } catch (err) {
+    expect(err).toBeFalsy();
+  }
+
+  expect(setTimeout).toHaveBeenCalledTimes(1);
+  expect(esClients.dataClient.callAsInternalUser.mock.calls[0][0]).toBe('get');
+  expect(esClients.dataClient.callAsInternalUser.mock.calls[1][0]).toBe('update');
+  const nodeList = esClients.dataClient.callAsInternalUser.mock.calls[1][1].doc;
+  const nodeKeys = Object.keys(nodeList.nodes);
+  expect(nodeList.routing_table).toMatchObject({});
+  expect(nodeKeys.length).toBe(1);
+  expect(nodeList.nodes[nodeKeys[0]].lastUpdate).not.toBe(0);
+  expect(nodeList.nodes[nodeKeys[0]].lastUpdate).toBeLessThan(new Date().getTime());
+});
+
+test('removes stale nodes, keeps good nodes', async () => {
+  const mockESReply = {
+    _source: {
+      nodes: {
+        '073fb287-161c-49f3-976d-1e507575e354': {
+          lastUpdate: 100,
+        },
+        'd4fa4018-8510-420c-aa99-d6d722792b3c': {
+          lastUpdate: new Date().getTime(),
+        },
+      },
+      routing_table: {
+        resource1: {
+          type: 'code',
+          node: '073fb287-161c-49f3-976d-1e507575e354',
+          state: RouteState.Started,
+        },
+        resource2: {
+          type: 'code',
+          node: 'd4fa4018-8510-420c-aa99-d6d722792b3c',
+          state: RouteState.Started,
+        },
+      },
+    },
+  };
+
+  const esClients = {
+    adminClient: {},
+    dataClient: {
+      callAsInternalUser: jest.fn<Promise<any>, any>(async () => mockESReply),
+    },
+  };
+  const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
+  const config = configService({
+    updateInterval: 100,
+    timeoutThreshold: 100,
+  });
+  const clusterDoc = new ClusterDocClient({ config, env, logger });
+
   try {
     await clusterDoc.setup(elasticClient);
     await clusterDoc.start();
   } catch (err) {
     expect(err).toBeFalsy();
   }
-  expect(setTimeout).toHaveBeenCalledTimes(1);
-  clusterDoc.stop();
-  expect(esClients.dataClient.callAsInternalUser.mock.calls[0][0]).toBe('get');
+
+  const nodeList = esClients.dataClient.callAsInternalUser.mock.calls[1][1].doc;
+  const nodeKeys = Object.keys(nodeList.nodes);
+
+  expect(nodeList.routing_table).toEqual({
+    resource2: mockESReply._source.routing_table.resource2,
+  });
+  expect(nodeKeys.length).toBe(2);
+  expect(nodeKeys.includes('073fb287-161c-49f3-976d-1e507575e354')).toBeFalsy();
+  expect(nodeKeys.includes('d4fa4018-8510-420c-aa99-d6d722792b3c')).toBeTruthy();
+  expect(nodeKeys.includes(clusterDoc.nodeName)).toBeTruthy();
+  expect(nodeList.nodes[nodeKeys[0]].lastUpdate).not.toBe(100);
+  expect(nodeList.nodes[nodeKeys[0]].lastUpdate).toBeLessThan(new Date().getTime());
+
+  await clusterDoc.stop();
+});
+
+test('assign and unassign resource', async () => {
+  const esClients = {
+    adminClient: {},
+    dataClient: {
+      callAsInternalUser: jest.fn<Promise<any>, any>(async () => ({ _source: {} })),
+    },
+  };
+  const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
+  const config = configService({
+    updateInterval: 100,
+    timeoutThreshold: 100,
+  });
+  const clusterDoc = new ClusterDocClient({ config, env, logger });
+
+  try {
+    await clusterDoc.setup(elasticClient);
+    await clusterDoc.start();
+  } catch (err) {
+    expect(err).toBeFalsy();
+  }
+
+  await clusterDoc.assignResource('/foo/bar', 'code', RouteState.Started);
+  const nodeList = esClients.dataClient.callAsInternalUser.mock.calls[3][1];
+  const expected = {
+    '/foo/bar': {
+      type: 'code',
+      state: 1,
+      node: clusterDoc.nodeName,
+    },
+  };
+  expect(nodeList.doc.routing_table).toEqual(expected);
+
+  await clusterDoc.unassignResource('/foo/bar');
+  const nodeList2 = esClients.dataClient.callAsInternalUser.mock.calls[5][1];
+  expect(nodeList2.doc.routing_table).toEqual({});
+
+  await clusterDoc.stop();
 });
