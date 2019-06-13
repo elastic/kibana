@@ -6,7 +6,6 @@
 
 import { Legacy } from 'kibana';
 import { AuthorizationService } from './authorization/service';
-import { AuthenticatedUser } from '../../common/model';
 import { isAuthorizedKibanaUser } from './is_authorized_kibana_user';
 import { PrivilegeSerializer } from './authorization';
 import { EsApplication } from './authorization/get_privileges_with_request';
@@ -43,7 +42,7 @@ function buildAuthorizationService(privileges: EsApplication[] = []) {
 
 function buildRequest(): Legacy.Request {
   const request: Legacy.Request = ({
-    auth: { credentials: { username: 'foo' } },
+    headers: { authorization: 'Basic: somegarbage' },
   } as unknown) as Legacy.Request;
 
   return request;

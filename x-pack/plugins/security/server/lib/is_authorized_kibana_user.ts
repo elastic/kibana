@@ -15,7 +15,10 @@ export const isAuthorizedKibanaUser = async (
   request: Legacy.Request,
   userRoles: string[] = []
 ) => {
-  const hasCredentials = request.auth && request.auth.credentials;
+  // While `request.auth.credentials` is the cononical way to check for credentials on Hapi requests,
+  // it is _not_ populated on the `/api/security/v1/authenticate` route, where the user's session is first established.
+  // `request.headers.authorization` is present both on the authentiate route, and on subsequent requests by the nature of our authentication provider.
+  const hasCredentials = request.headers.authorization;
   const useRbac = authorizationService.mode.useRbacForRequest(request);
 
   if (!hasCredentials || !useRbac) {
