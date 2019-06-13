@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { uniqueId, startsWith } from 'lodash';
+import { uniqueId, startsWith, find } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import chrome from 'ui/chrome';
 import styled from 'styled-components';
@@ -27,6 +27,12 @@ import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
+import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
+import {
+  TRANSACTIONS,
+  METRICS,
+  ERRORS
+} from '../../app/Main/route_config/route_names';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -48,10 +54,25 @@ export function KueryBar() {
   });
   const { urlParams } = useUrlParams();
   const location = useLocation();
+  const matchedRoutes = useMatchedRoutes();
+
   const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
   const indexPatternMissing =
     !state.isLoadingIndexPattern && !state.indexPattern;
   let currentRequestCheck;
+
+  let queryExample;
+
+  if (find(matchedRoutes, { name: TRANSACTIONS })) {
+    queryExample = 'transaction.duration.us > 300000';
+  } else if (find(matchedRoutes, { name: ERRORS })) {
+    queryExample = 'http.response.status_code >= 400';
+  } else if (find(matchedRoutes, { name: METRICS })) {
+    queryExample = 'process.pid = "1234"';
+  } else {
+    queryExample =
+      'transaction.duration.us > 300000 AND http.response.status_code = 200';
+  }
 
   useEffect(() => {
     let didCancel = false;
@@ -143,6 +164,7 @@ export function KueryBar() {
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions}
+        queryExample={queryExample}
       />
 
       {indexPatternMissing && (

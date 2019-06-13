@@ -23,6 +23,7 @@ type BreadcrumbFunction = (props: LocationMatch) => string;
 
 export interface BreadcrumbRoute extends RouteProps {
   breadcrumb: string | BreadcrumbFunction | null;
+  name: string;
 }
 
 export interface Breadcrumb extends LocationMatch {
