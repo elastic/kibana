@@ -7,6 +7,6 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { AndOrBadge } from '..';
 
-storiesOf('siem/AndOrBadge', module)
+storiesOf('components/AndOrBadge', module)
   .add('and', () => <AndOrBadge type="and" />)
   .add('or', () => <AndOrBadge type="or" />);

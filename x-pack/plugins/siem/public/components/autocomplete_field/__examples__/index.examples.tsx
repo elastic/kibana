@@ -18,7 +18,7 @@ const suggestion: AutocompleteSuggestion = {
   type: 'value',
 };
 
-storiesOf('siem/SuggestionItem', module).add('example', () => (
+storiesOf('components/SuggestionItem', module).add('example', () => (
   <ThemeProvider
     theme={() => ({
       eui: euiLightVars,

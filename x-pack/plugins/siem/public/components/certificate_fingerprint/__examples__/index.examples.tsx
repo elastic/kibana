@@ -8,7 +8,7 @@ import React from 'react';
 import { CertificateFingerprint } from '..';
 import { TestProviders } from '../../../mock';
 
-storiesOf('siem/CertificateFingerprint', module).add('example', () => (
+storiesOf('components/CertificateFingerprint', module).add('example', () => (
   <TestProviders>
     <CertificateFingerprint
       eventId="123"

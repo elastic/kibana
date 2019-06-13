@@ -7,7 +7,7 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { AutoSizer } from '..';
 
-storiesOf('siem/AutoSizer', module).add('example', () => (
+storiesOf('components/AutoSizer', module).add('example', () => (
   <div>
     <AutoSizer>
       {({ measureRef, content }) => (
