@@ -24,14 +24,13 @@ import expect from '@kbn/expect';
 import $ from 'jquery';
 import '../../../../persisted_state';
 import { Axis } from '../../../lib/axis';
-import { VislibVisConfigProvider } from '../../../lib/vis_config';
+import { VisConfig } from '../../../lib/vis_config';
 
 describe('Vislib Axis Class Test Suite', function () {
   let persistedState;
   let yAxis;
   let el;
   let fixture;
-  let VisConfig;
   let seriesData;
 
   const data = {
@@ -104,7 +103,6 @@ describe('Vislib Axis Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     persistedState = new ($injector.get('PersistedState'))();
-    VisConfig = Private(VislibVisConfigProvider);
 
     el = d3.select('body').append('div')
       .attr('class', 'visAxis--x')

@@ -56,6 +56,7 @@ module.exports = {
         'x-pack/plugins/apm/**/*',
         'x-pack/plugins/canvas/**/*',
         '**/*.{ts,tsx}',
+        'src/legacy/core_plugins/metrics/**/*.js',
       ],
       plugins: ['prettier'],
       rules: Object.assign(
