@@ -132,7 +132,7 @@ describe('MetricsExplorerChartContextMenu', () => {
       expect(getTestSubject(component, 'metricsExplorerAction-OpenInTSVB').length).toBe(0);
     });
 
-    it('should not display anything', async () => {
+    it('should not display anything when Visualize is disabled and there are no group bys.', async () => {
       const customUICapabilities = { ...uiCapabilities, visualize: { show: false } };
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
       const customOptions = { ...options, groupBy: void 0 };
