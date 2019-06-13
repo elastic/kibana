@@ -56,23 +56,23 @@ export function pointseries(): ExpressionFunction<
     },
     args: {
       x: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.x,
       },
       y: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.y,
       },
       color: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.color, // If you need categorization, transform the field.
       },
       size: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.size,
       },
       text: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.text,
       },
       // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now

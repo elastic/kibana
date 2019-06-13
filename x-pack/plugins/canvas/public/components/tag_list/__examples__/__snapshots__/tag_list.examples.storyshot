@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/TagList empty list 1`] = `null`;
+exports[`Storyshots components/Tags/TagList empty list 1`] = `null`;
 
-exports[`Storyshots components/TagList with badge tags 1`] = `
+exports[`Storyshots components/Tags/TagList with badge tags 1`] = `
 Array [
   <span
     className="euiBadge"
@@ -64,7 +64,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/TagList with health tags 1`] = `
+exports[`Storyshots components/Tags/TagList with health tags 1`] = `
 Array [
   <div
     className="euiHealth"
@@ -159,7 +159,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/TagList with lots of tags 1`] = `
+exports[`Storyshots components/Tags/TagList with lots of tags 1`] = `
 Array [
   <span
     className="euiBadge"

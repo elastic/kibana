@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/ColorPalette interactive 1`] = `
+exports[`Storyshots components/Color/ColorPalette interactive 1`] = `
 <div
   className="canvasColorPalette"
 >
@@ -167,7 +167,7 @@ exports[`Storyshots components/ColorPalette interactive 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ColorPalette six colors 1`] = `
+exports[`Storyshots components/Color/ColorPalette six colors 1`] = `
 Array [
   <div
     className="canvasColorPalette"
@@ -514,7 +514,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/ColorPalette six colors, value missing 1`] = `
+exports[`Storyshots components/Color/ColorPalette six colors, value missing 1`] = `
 <div
   className="canvasColorPalette"
 >
@@ -681,7 +681,7 @@ exports[`Storyshots components/ColorPalette six colors, value missing 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ColorPalette six colors, wrap at 4 1`] = `
+exports[`Storyshots components/Color/ColorPalette six colors, wrap at 4 1`] = `
 <div
   className="canvasColorPalette"
 >
@@ -866,7 +866,7 @@ exports[`Storyshots components/ColorPalette six colors, wrap at 4 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ColorPalette three colors 1`] = `
+exports[`Storyshots components/Color/ColorPalette three colors 1`] = `
 Array [
   <div
     className="canvasColorPalette"
