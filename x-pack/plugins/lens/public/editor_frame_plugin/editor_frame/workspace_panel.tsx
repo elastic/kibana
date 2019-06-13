@@ -37,10 +37,9 @@ export function WorkspacePanel({
   dispatch,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
-  function onDrop(item: unknown) {
+  function onDrop() {
     const datasourceSuggestions = activeDatasource.getDatasourceSuggestionsForField(
-      datasourceState,
-      item
+      datasourceState
     );
 
     const suggestions = getSuggestions(

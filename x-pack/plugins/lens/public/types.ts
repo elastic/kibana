@@ -57,7 +57,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
   toExpression: (state: T) => Ast | string | null;
 
-  getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForField: (state: T) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (state: T, setState: (newState: T) => void) => DatasourcePublicAPI;

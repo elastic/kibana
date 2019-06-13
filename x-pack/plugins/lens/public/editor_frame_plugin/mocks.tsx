@@ -35,7 +35,7 @@ export function createMockDatasource(): DatasourceMock {
   };
 
   return {
-    getDatasourceSuggestionsForField: jest.fn((_state, item) => []),
+    getDatasourceSuggestionsForField: jest.fn(_state => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
     getPersistableState: jest.fn(),
     getPublicAPI: jest.fn((_state, _setState) => publicAPIMock),
