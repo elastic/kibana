@@ -26,6 +26,14 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
+const removeWhiteSpaceOnArrayValues = (array: any[]) =>
+  array.map(value => {
+    if (!value.trim) {
+      return value;
+    }
+    return value.trim();
+  });
+
 // We need to skip the tests until react 16.9.0 is released
 // which supports asynchronous code inside act()
 describe.skip('<SnapshotRestoreHome />', () => {
@@ -157,14 +165,19 @@ describe.skip('<SnapshotRestoreHome />', () => {
           const repository = repositories[i];
           if (repository === repo8) {
             // The "repo8" is source with a delegate type
-            expect(row).toEqual([
+            expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
               '',
               repository.name,
               `${mapTypeToText[repository.settings.delegateType]} (Source-only)`,
               '',
             ]);
           } else {
-            expect(row).toEqual(['', repository.name, mapTypeToText[repository.type], '']);
+            expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
+              '',
+              repository.name,
+              mapTypeToText[repository.type],
+              '',
+            ]);
           }
         });
       });
@@ -183,7 +196,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
         expect(server.requests.length).toBe(totalRequests + 1);
         expect(server.requests[server.requests.length - 1].url).toBe(
-          '${API_BASE_PATH}repositories'
+          `${API_BASE_PATH}repositories`
         );
       });
 
@@ -217,12 +230,11 @@ describe.skip('<SnapshotRestoreHome />', () => {
           expect(
             document.body.querySelector('[data-test-subj="deleteRepositoryConfirmation"]')!
               .textContent
-          ).toContain(`Remove repository '${rows[0].columns[1].value}'?`);
+          ).toContain(`Remove repository '${repo1.name}'?`);
         });
 
         test('should send the correct HTTP request to delete repository', async () => {
-          const { component, table, actions } = testBed;
-          const { rows } = table.getMetaData('repositoryTable');
+          const { component, actions } = testBed;
 
           await actions.clickRepositoryActionAt(0, 'delete');
 
@@ -241,10 +253,9 @@ describe.skip('<SnapshotRestoreHome />', () => {
           });
 
           const latestRequest = server.requests[server.requests.length - 1];
-          const repositoryName = rows[0].columns[1].value;
 
           expect(latestRequest.method).toBe('DELETE');
-          expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repositoryName}`);
+          expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repo1.name}`);
         });
       });
 
@@ -309,7 +320,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
           });
 
           test('should have a button to verify the status of the repository', async () => {
-            const { exists, find, component, table } = testBed;
+            const { exists, find, component } = testBed;
             expect(exists('repositoryDetail.verifyRepositoryButton')).toBe(true);
 
             // @ts-ignore (remove when react 16.9.0 is released)
@@ -320,11 +331,9 @@ describe.skip('<SnapshotRestoreHome />', () => {
             });
 
             const latestRequest = server.requests[server.requests.length - 1];
-            const { rows } = table.getMetaData('repositoryTable');
-            const repositoryName = rows[0].columns[1].value;
 
             expect(latestRequest.method).toBe('GET');
-            expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repositoryName}/verify`);
+            expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repo1.name}/verify`);
           });
         });
 
@@ -494,7 +503,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
         });
 
         expect(server.requests.length).toBe(totalRequests + 1);
-        expect(server.requests[server.requests.length - 1].url).toBe('${API_BASE_PATH}snapshots');
+        expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}snapshots`);
       });
 
       describe('detail panel', () => {
@@ -597,8 +606,12 @@ describe.skip('<SnapshotRestoreHome />', () => {
                 expect(find('snapshotDetail.indices.value').text()).toBe(
                   snapshot1.indices.join('')
                 );
-                expect(find('snapshotDetail.startTime.value').text()).toBe('23 May 2019 14:25:15');
-                expect(find('snapshotDetail.endTime.value').text()).toBe('23 May 2019 14:25:16');
+                expect(find('snapshotDetail.startTime.value').text()).toBe(
+                  formatDate(snapshot1.startTimeInMillis)
+                );
+                expect(find('snapshotDetail.endTime.value').text()).toBe(
+                  formatDate(snapshot1.endTimeInMillis)
+                );
               });
 
               test('should indicate the different snapshot states', async () => {
