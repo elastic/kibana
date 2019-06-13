@@ -18,16 +18,6 @@ interface LogEntryFieldColumnProps {
   isEnzyme?: boolean;
 }
 
-const CommaSeparatedLI = styled.li`
-  display: inline;
-  &:not(:last-child) {
-    margin-right: 1ex;
-    &::after {
-      content: ',';
-    }
-  }
-`;
-
 export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnProps> = ({
   encodedValue,
   isHighlighted,
@@ -39,7 +29,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   const formattedValue = Array.isArray(value) ? (
     <ul>
       {value.map((entry, i) => (
-        <CommaSeparatedLI key={`LogEntryFieldColumn-${i}`}>{entry}</CommaSeparatedLI>
+        <CommaSeparatedLi key={`LogEntryFieldColumn-${i}`}>{entry}</CommaSeparatedLi>
       ))}
     </ul>
   ) : (
@@ -73,6 +63,16 @@ const wrappedContentStyle = css`
 const unwrappedContentStyle = css`
   overflow: hidden;
   white-space: pre;
+`;
+
+const CommaSeparatedLi = styled.li`
+  display: inline;
+  &:not(:last-child) {
+    margin-right: 1ex;
+    &::after {
+      content: ',';
+    }
+  }
 `;
 
 const FieldColumnContent = LogEntryColumnContent.extend.attrs<{
