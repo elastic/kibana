@@ -5,6 +5,7 @@
  */
 
 import isEqual from 'lodash/fp/isEqual';
+import debounce from 'lodash/debounce';
 import React from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 
@@ -37,6 +38,7 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
   public element: HTMLElement | null = null;
   public resizeObserver: ResizeObserver | null = null;
   public windowWidth: number = -1;
+  public windowHeight: number = -1;
 
   public readonly state = {
     boundsMeasurement: {
@@ -73,7 +75,7 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
     }
   }
 
-  public measure = (entry: ResizeObserverEntry | null) => {
+  public measure = debounce((entry: ResizeObserverEntry | null) => {
     if (!this.element) {
       return;
     }
@@ -87,22 +89,31 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
     const boundsRect = bounds ? this.element.getBoundingClientRect() : null;
     const boundsMeasurement = boundsRect
       ? {
-          height: this.element.getBoundingClientRect().height,
-          width: this.element.getBoundingClientRect().width,
+          height: boundsRect.height,
+          width: boundsRect.width,
         }
       : previousBoundsMeasurement;
 
-    if (
-      this.props.detectAnyWindowResize &&
-      boundsMeasurement &&
-      boundsMeasurement.width &&
-      this.windowWidth !== -1 &&
-      this.windowWidth > window.innerWidth
-    ) {
-      const gap = this.windowWidth - window.innerWidth;
-      boundsMeasurement.width = boundsMeasurement.width - gap;
+    if (this.props.detectAnyWindowResize && boundsMeasurement) {
+      if (
+        boundsMeasurement.width &&
+        this.windowWidth !== -1 &&
+        this.windowWidth > window.innerWidth
+      ) {
+        const gap = this.windowWidth - window.innerWidth;
+        boundsMeasurement.width = boundsMeasurement.width - gap;
+      }
+      if (
+        boundsMeasurement.height &&
+        this.windowHeight !== -1 &&
+        this.windowHeight > window.innerHeight
+      ) {
+        const gap = this.windowHeight - window.innerHeight;
+        boundsMeasurement.height = boundsMeasurement.height - gap;
+      }
     }
     this.windowWidth = window.innerWidth;
+    this.windowHeight = window.innerHeight;
     const contentRect = content && entry ? entry.contentRect : null;
     const contentMeasurement =
       contentRect && entry
@@ -111,7 +122,6 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
             width: entry.contentRect.width,
           }
         : previousContentMeasurement;
-
     if (
       isEqual(boundsMeasurement, previousBoundsMeasurement) &&
       isEqual(contentMeasurement, previousContentMeasurement)
@@ -133,12 +143,11 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
         });
       }
     });
-  };
+  }, 250);
 
   public render() {
     const { children } = this.props;
     const { boundsMeasurement, contentMeasurement } = this.state;
-
     return children({
       bounds: boundsMeasurement,
       content: contentMeasurement,
