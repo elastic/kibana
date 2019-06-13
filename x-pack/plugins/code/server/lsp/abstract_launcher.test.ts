@@ -190,7 +190,8 @@ test('launcher can reconnect if process died', async () => {
   await delay(1000);
 });
 
-test('passive launcher can start and end a process', async () => {
+// FLAKY: https://github.com/elastic/kibana/issues/38849
+test.skip('passive launcher can start and end a process', async () => {
   const launcher = new PassiveMockLauncher('mock', 'localhost', options);
   const proxy = await launcher.launch(false, 1, '');
   await retryUtil(30000, () => {
