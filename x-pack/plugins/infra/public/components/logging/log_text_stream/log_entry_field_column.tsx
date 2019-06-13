@@ -23,6 +23,9 @@ const CommaSeparatedLI = styled.li`
   &:not(:last-child) {
     margin-right: 1ex;
   }
+  &::after {
+    content: ',';
+  }
 `;
 
 export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnProps> = ({
@@ -36,10 +39,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   const formattedValue = Array.isArray(value) ? (
     <ul>
       {value.map((entry, i) => (
-        <CommaSeparatedLI key={`LogEntryFieldColumn-${i}`}>
-          {entry}
-          {i < value.length - 1 && ','}
-        </CommaSeparatedLI>
+        <CommaSeparatedLI key={`LogEntryFieldColumn-${i}`}>{entry}</CommaSeparatedLI>
       ))}
     </ul>
   ) : (
