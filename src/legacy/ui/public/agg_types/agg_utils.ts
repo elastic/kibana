@@ -17,37 +17,23 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/vis';
 import { i18n } from '@kbn/i18n';
-
-const aggFilter = [
-  '!top_hits',
-  '!percentiles',
-  '!median',
-  '!std_dev',
-  '!derivative',
-  '!moving_avg',
-  '!serial_diff',
-  '!cumulative_sum',
-  '!avg_bucket',
-  '!max_bucket',
-  '!min_bucket',
-  '!sum_bucket',
-];
-
-// Returns true if the agg is compatible with the terms bucket
-function isCompatibleAgg(agg: AggConfig) {
-  return !aggFilter.includes(`!${agg.type.name}`);
-}
+import { AggConfig } from '../vis/agg_config';
 
 function safeMakeLabel(agg: AggConfig) {
   try {
     return agg.makeLabel();
   } catch (e) {
-    return i18n.translate('common.ui.aggTypes.buckets.terms.aggNotValidLabel', {
+    return i18n.translate('common.ui.aggTypes.aggNotValidLabel', {
       defaultMessage: '- agg not valid -',
     });
   }
 }
 
-export { aggFilter, isCompatibleAgg, safeMakeLabel };
+function isCompatibleAggregation(aggFilter: string[]) {
+  return (agg: AggConfig) => {
+    return !aggFilter.includes(`!${agg.type.name}`);
+  };
+}
+
+export { safeMakeLabel, isCompatibleAggregation };

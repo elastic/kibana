@@ -209,7 +209,6 @@
     "common.ui.aggTypes.metrics.topHitTitle": "最高命中结果",
     "common.ui.aggTypes.metrics.uniqueCountLabel": "“{field}” 的唯一计数",
     "common.ui.aggTypes.metrics.uniqueCountTitle": "唯一计数",
-    "common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage": "使用 “{type}” 指标聚合时，上一存储桶聚合必须是“Date Histogram”或“Histogram”！",
     "common.ui.aggTypes.numberInterval.minimumIntervalLabel": "最小时间间隔",
     "common.ui.aggTypes.numberInterval.minimumIntervalTooltip": "提供的值创建的存储桶数目大于“高级设置”的 {histogramMaxBars} 指定的数目时，将自动缩放时间间隔",
     "common.ui.aggTypes.numberInterval.selectIntervalPlaceholder": "输入时间间隔",
