@@ -41,14 +41,12 @@ jest.mock('../../registry/field_formats', () => ({
 }));
 
 jest.mock('../../utils/mapping_setup', () => ({
-  mappingSetupService: jest.fn().mockImplementation(() => ({
-    expandShorthand: jest.fn().mockImplementation(() => ({
-      id: true,
-      title: true,
-      fieldFormatMap: {
-        _deserialize: jest.fn().mockImplementation(() => ([])),
-      },
-    }))
+  expandShorthand: jest.fn().mockImplementation(() => ({
+    id: true,
+    title: true,
+    fieldFormatMap: {
+      _deserialize: jest.fn().mockImplementation(() => ([])),
+    },
   }))
 }));
 
@@ -80,13 +78,6 @@ jest.mock('../../saved_objects', () => {
     findObjectByTitle: jest.fn(),
   };
 });
-
-jest.mock('../config', () => ({
-  getConfig: jest.fn(),
-}));
-
-
-
 
 let object;
 const savedObjectsClient = {

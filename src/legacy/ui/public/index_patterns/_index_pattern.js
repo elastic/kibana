@@ -18,9 +18,10 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
 import { fieldFormats } from 'ui/registry/field_formats';
-import { mappingSetupService } from 'ui/utils/mapping_setup';
+import { expandShorthand } from 'ui/utils/mapping_setup';
 import { toastNotifications } from 'ui/notify';
 import { findObjectByTitle } from 'ui/saved_objects';
 
@@ -30,79 +31,13 @@ import { getRoutes } from './get_routes';
 import { formatHitProvider } from './_format_hit';
 import { FieldList } from './_field_list';
 import { flattenHitWrapper } from './_flatten_hit';
-import { getConfig } from './config';
-
-import { i18n } from '@kbn/i18n';
-
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
-
-
-
 const type = 'index-pattern';
-
-function serializeFieldFormatMap(flat, format, field) {
-  if (format) {
-    flat[field] = format;
-  }
-}
-
-function deserializeFieldFormatMap(mapping) {
-  const FieldFormat = fieldFormats.byId[mapping.id];
-  return FieldFormat && new FieldFormat(mapping.params, getConfig);
-}
-
-
-
-function isFieldRefreshRequired(indexPattern) {
-  if (!indexPattern.fields) {
-    return true;
-  }
-
-  return indexPattern.fields.every(field => {
-    // See https://github.com/elastic/kibana/pull/8421
-    const hasFieldCaps = ('aggregatable' in field) && ('searchable' in field);
-
-    // See https://github.com/elastic/kibana/pull/11969
-    const hasDocValuesFlag = ('readFromDocValues' in field);
-
-    return !hasFieldCaps || !hasDocValuesFlag;
-  });
-}
-
-async function indexFields(indexPattern, forceFieldRefresh = false) {
-  if (!indexPattern.id) {
-    return;
-  }
-
-  if (forceFieldRefresh || isFieldRefreshRequired(indexPattern)) {
-    await indexPattern.refreshFields();
-  }
-
-  initFields(indexPattern);
-}
-
-function setId(indexPattern, id) {
-  indexPattern.id = id;
-  return id;
-}
-
-function setVersion(indexPattern, version) {
-  indexPattern.version = version;
-  return version;
-}
-
-function initFields(indexPattern, input) {
-  const oldValue = indexPattern.fields;
-  const newValue = input || oldValue || [];
-  indexPattern.fields = new FieldList(indexPattern, newValue);
-}
-
-const mappingSetup = mappingSetupService();
 
 export class IndexPattern {
   constructor(id, savedObjectsClient, patternCache, fieldsFetcher, getIds, metaFields, shortDotsEnable = false) {
-    setId(this, id);
+    this._setId(id);
     this.savedObjectsClient = savedObjectsClient;
     this.patternCache = patternCache;
     this.fieldsFetcher = fieldsFetcher;
@@ -115,7 +50,18 @@ export class IndexPattern {
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
     this.formatField = this.formatHit.formatField;
 
-    this.mapping = mappingSetup.expandShorthand({
+    function serializeFieldFormatMap(flat, format, field) {
+      if (format) {
+        flat[field] = format;
+      }
+    }
+
+    function deserializeFieldFormatMap(mapping) {
+      const FieldFormat = fieldFormats.byId[mapping.id];
+      return FieldFormat && new FieldFormat(mapping.params);
+    }
+
+    this.mapping = expandShorthand({
       title: 'text',
       timeFieldName: 'keyword',
       intervalName: 'keyword',
@@ -134,6 +80,50 @@ export class IndexPattern {
       type: 'keyword',
       typeMeta: 'json',
     });
+  }
+
+  _setId(id) {
+    this.id = id;
+    return this;
+  }
+
+  _setVersion(version) {
+    this.version = version;
+    return this;
+  }
+
+  _initFields(input) {
+    const oldValue = this.fields;
+    const newValue = input || oldValue || [];
+    this.fields = new FieldList(this, newValue);
+  }
+
+  async _indexFields(forceFieldRefresh = false) {
+    if (!this.id) {
+      return;
+    }
+
+    function isFieldRefreshRequired(indexPattern) {
+      if (!indexPattern.fields) {
+        return true;
+      }
+
+      return indexPattern.fields.every(field => {
+        // See https://github.com/elastic/kibana/pull/8421
+        const hasFieldCaps = ('aggregatable' in field) && ('searchable' in field);
+
+        // See https://github.com/elastic/kibana/pull/11969
+        const hasDocValuesFlag = ('readFromDocValues' in field);
+
+        return !hasFieldCaps || !hasDocValuesFlag;
+      });
+    }
+
+    if (forceFieldRefresh || isFieldRefreshRequired(this)) {
+      await this.refreshFields();
+    }
+
+    this._initFields();
   }
 
   _updateFromElasticSearch(response, forceFieldRefresh = false) {
@@ -159,7 +149,7 @@ export class IndexPattern {
       this.title = this.id;
     }
 
-    return indexFields(this, forceFieldRefresh);
+    return this._indexFields(forceFieldRefresh);
   }
 
   get routes() {
@@ -173,7 +163,7 @@ export class IndexPattern {
     }
 
     const savedObject = await this.savedObjectsClient.get(type, this.id);
-    setVersion(this, savedObject._version);
+    this._setVersion(savedObject._version);
 
     const response = {
       _id: savedObject.id,
@@ -304,7 +294,9 @@ export class IndexPattern {
 
       const body = this.prepBody();
       const response = await this.savedObjectsClient.create(type, body, { id: this.id });
-      return setId(this, response.id);
+
+      this._setId(response.id);
+      return response.id;
     };
 
     const potentialDuplicateByTitle = await findObjectByTitle(this.savedObjectsClient, type, this.title);
@@ -327,8 +319,8 @@ export class IndexPattern {
     const originalChangedKeys = Object.keys(body).filter(key => body[key] !== this.originalBody[key]);
     return this.savedObjectsClient.update(type, this.id, body, { version: this.version })
       .then(({ id, _version }) => {
-        setId(this, id);
-        setVersion(this, _version);
+        this._setId(id);
+        this._setVersion(_version);
       })
       .catch(err => {
         if (_.get(err, 'res.status') === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
@@ -376,7 +368,7 @@ export class IndexPattern {
                 this[key] = samePattern[key];
               });
 
-              setVersion(this, samePattern.version);
+              this._setVersion(samePattern.version);
 
               // Clear cache
               this.patternCache.clear(this.id);
@@ -393,7 +385,7 @@ export class IndexPattern {
     const fields = await this.fieldsFetcher.fetch(this);
     const scripted = this.getScriptedFields();
     const all = fields.concat(scripted);
-    await initFields(this, all);
+    await this._initFields(all);
   }
 
   refreshFields() {

@@ -25,14 +25,12 @@ import { createIndexPatternCache } from './_pattern_cache';
 import { indexPatternsGetProvider } from './_get';
 import { FieldsFetcher } from './fields_fetcher';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
-import { setConfig } from './config';
 
 export class IndexPatterns {
   constructor(basePath, config, savedObjectsClient) {
     const getProvider = indexPatternsGetProvider(savedObjectsClient);
     const apiClient = new IndexPatternsApiClient(basePath);
 
-    setConfig(config);
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
 
