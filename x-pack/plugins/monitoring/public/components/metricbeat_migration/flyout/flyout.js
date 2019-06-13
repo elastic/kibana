@@ -34,7 +34,7 @@ import {
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL
 } from '../constants';
-import { KIBANA_SYSTEM_ID } from '../../../../../xpack_main/common/constants';
+import { KIBANA_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 import { Monospace } from '../instruction_steps/components/monospace';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
