@@ -193,14 +193,24 @@ describe('Vislib Line Chart', function () {
             vis.render(data, persistedState);
           });
 
-          it('should return yAxis extents equal to data extents - boundsMargin', function () {
+          it('should return yAxis extents equal to data extents with boundsMargin', function () {
             vis.handler.charts.forEach(function (chart) {
               const yAxis = chart.handler.valueAxes[0];
               const min = vis.handler.valueAxes[0].axisScale.getYMin();
               const max = vis.handler.valueAxes[0].axisScale.getYMax();
               const domain = yAxis.getScale().domain();
-              expect(domain[0] + boundsMarginValue).to.equal(min);
-              expect(domain[1]).to.equal(max);
+              if (min < 0 && max < 0) {
+                expect(domain[0]).to.equal(min);
+                expect(domain[1] - boundsMarginValue).to.equal(max);
+              }
+              else if (min > 0 && max > 0) {
+                expect(domain[0] + boundsMarginValue).to.equal(min);
+                expect(domain[1]).to.equal(max);
+              }
+              else {
+                expect(domain[0]).to.equal(min);
+                expect(domain[1]).to.equal(max);
+              }
             });
           });
         });
