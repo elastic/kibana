@@ -8,6 +8,8 @@ import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
 import { createSpacesService } from '../create_spaces_service';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
+import { Namespace, SavedObjectsService } from 'src/legacy/server/saved_objects';
+import { createGetNamespace } from './get_namespace';
 
 const config: any = {
   'server.basePath': '/',
@@ -27,6 +29,11 @@ const createMockRequest = (space: Partial<Space>) => ({
   getBasePath: () => (space.id !== DEFAULT_SPACE_ID ? `/s/${space.id}` : ''),
 });
 
+const createMockSavedObjectsService = () =>
+  (({
+    createNamespace: jest.fn().mockImplementation((id?: string) => ({ id } as Namespace)),
+  } as unknown) as SavedObjectsService);
+
 const createMockClient = () => {
   const errors = Symbol() as any;
 
@@ -44,7 +51,7 @@ const createMockClient = () => {
 
 [
   { id: DEFAULT_SPACE_ID, expectedNamespace: undefined },
-  { id: 'space_1', expectedNamespace: 'space_1' },
+  { id: 'space_1', expectedNamespace: { id: 'space_1' } },
 ].forEach(currentSpace => {
   describe(`${currentSpace.id} space`, () => {
     describe('#get', () => {
@@ -57,12 +64,13 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.get('foo', '', { namespace: 'bar' });
+        await client.get('foo', '', { namespace: { id: 'bar' } });
 
-        expect(baseClient.get).toHaveBeenCalledWith('foo', '', { namespace: 'bar' });
+        expect(baseClient.get).toHaveBeenCalledWith('foo', '', { namespace: { id: 'bar' } });
       });
 
       test(`throws error if type is space`, async () => {
@@ -74,6 +82,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -91,6 +100,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
         const type = Symbol();
@@ -117,13 +127,14 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.bulkGet([{ id: '', type: 'foo' }], { namespace: 'bar' });
+        await client.bulkGet([{ id: '', type: 'foo' }], { namespace: { id: 'bar' } });
 
         expect(baseClient.bulkGet).toHaveBeenCalledWith([{ id: '', type: 'foo' }], {
-          namespace: 'bar',
+          namespace: { id: 'bar' },
         });
       });
 
@@ -136,11 +147,14 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
         await expect(
-          client.bulkGet([{ id: '', type: 'foo' }, { id: '', type: 'space' }], { namespace: 'bar' })
+          client.bulkGet([{ id: '', type: 'foo' }, { id: '', type: 'space' }], {
+            namespace: { id: 'bar' },
+          })
         ).rejects.toThrowErrorMatchingSnapshot();
       });
 
@@ -155,6 +169,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -181,12 +196,13 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.find({ type: ['foo'], namespace: 'bar' });
+        await client.find({ type: ['foo'], namespace: { id: 'bar' } });
 
-        expect(baseClient.find).toHaveBeenCalledWith({ type: ['foo'], namespace: 'bar' });
+        expect(baseClient.find).toHaveBeenCalledWith({ type: ['foo'], namespace: { id: 'bar' } });
       });
 
       test(`throws error if options.type is space`, async () => {
@@ -200,6 +216,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -217,6 +234,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
         const options = Object.freeze({ type: 'foo' });
@@ -241,6 +259,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -260,6 +279,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -279,6 +299,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -303,12 +324,13 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.create('foo', {}, { namespace: 'bar' });
+        await client.create('foo', {}, { namespace: { id: 'bar' } });
 
-        expect(baseClient.create).toHaveBeenCalledWith('foo', {}, { namespace: 'bar' });
+        expect(baseClient.create).toHaveBeenCalledWith('foo', {}, { namespace: { id: 'bar' } });
       });
 
       test(`throws error if type is space`, async () => {
@@ -320,6 +342,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -337,6 +360,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -364,14 +388,17 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.bulkCreate([{ id: '', type: 'foo', attributes: {} }], { namespace: 'bar' });
+        await client.bulkCreate([{ id: '', type: 'foo', attributes: {} }], {
+          namespace: { id: 'bar' },
+        });
 
         expect(baseClient.bulkCreate).toHaveBeenCalledWith(
           [{ id: '', type: 'foo', attributes: {} }],
-          { namespace: 'bar' }
+          { namespace: { id: 'bar' } }
         );
       });
 
@@ -384,6 +411,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -406,6 +434,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -432,12 +461,18 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.update('foo', 'id', {}, { namespace: 'bar' });
+        await client.update('foo', 'id', {}, { namespace: { id: 'bar' } });
 
-        expect(baseClient.update).toHaveBeenCalledWith('foo', 'id', {}, { namespace: 'bar' });
+        expect(baseClient.update).toHaveBeenCalledWith(
+          'foo',
+          'id',
+          {},
+          { namespace: { id: 'bar' } }
+        );
       });
 
       test(`throws error if type is space`, async () => {
@@ -449,6 +484,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -466,6 +502,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -494,12 +531,13 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
-        await client.delete('foo', 'id', { namespace: 'bar' });
+        await client.delete('foo', 'id', { namespace: { id: 'bar' } });
 
-        expect(baseClient.delete).toHaveBeenCalledWith('foo', 'id', { namespace: 'bar' });
+        expect(baseClient.delete).toHaveBeenCalledWith('foo', 'id', { namespace: { id: 'bar' } });
       });
 
       test(`throws error if type is space`, async () => {
@@ -511,6 +549,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 
@@ -528,6 +567,7 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
+          getNamespace: createGetNamespace(createMockSavedObjectsService()),
           types,
         });
 

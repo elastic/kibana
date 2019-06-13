@@ -19,6 +19,7 @@
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
+import { Namespace } from '../namespace';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -59,11 +60,15 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  *  Gets the clause that will filter for the type in the namespace.
  *  Some types are namespace agnostic, so they must be treated differently.
  */
-function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefined, type: string) {
-  if (namespace && !schema.isNamespaceAgnostic(type)) {
+function getClauseForType(
+  schema: SavedObjectsSchema,
+  namespace: Namespace | undefined,
+  type: string
+) {
+  if (namespace && namespace.id && !schema.isNamespaceAgnostic(type)) {
     return {
       bool: {
-        must: [{ term: { type } }, { term: { namespace } }],
+        must: [{ term: { type } }, { term: { namespace: namespace.id } }],
       },
     };
   }
@@ -82,7 +87,7 @@ function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefi
 export function getQueryParams(
   mappings: IndexMapping,
   schema: SavedObjectsSchema,
-  namespace?: string,
+  namespace?: Namespace,
   type?: string | string[],
   search?: string,
   searchFields?: string[],

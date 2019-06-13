@@ -19,6 +19,7 @@
 
 import { schemaMock } from '../../../schema/schema.mock';
 import { getQueryParams } from './query_params';
+import { Namespace } from '../namespace';
 
 const SCHEMA = schemaMock.create();
 const MAPPINGS = {
@@ -108,7 +109,7 @@ describe('searchDsl/queryParams', () => {
 
   describe('namespace', () => {
     it('filters namespaced types for namespace, and ensures namespace agnostic types have no namespace', () => {
-      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace')).toEqual({
+      expect(getQueryParams(MAPPINGS, SCHEMA, new Namespace('foo-namespace'))).toEqual({
         query: {
           bool: {
             filter: [
@@ -188,7 +189,9 @@ describe('searchDsl/queryParams', () => {
 
   describe('namespace, type (plural, namespaced and global)', () => {
     it('includes a terms filter for type and namespace not being specified', () => {
-      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'])).toEqual({
+      expect(
+        getQueryParams(MAPPINGS, SCHEMA, new Namespace('foo-namespace'), ['saved', 'global'])
+      ).toEqual({
         query: {
           bool: {
             filter: [
@@ -239,7 +242,9 @@ describe('searchDsl/queryParams', () => {
 
   describe('namespace, search', () => {
     it('includes a sqs query and namespaced types with the namespace and global types without a namespace', () => {
-      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', undefined, 'us*')).toEqual({
+      expect(
+        getQueryParams(MAPPINGS, SCHEMA, new Namespace('foo-namespace'), undefined, 'us*')
+      ).toEqual({
         query: {
           bool: {
             filter: [
@@ -299,34 +304,31 @@ describe('searchDsl/queryParams', () => {
 
   describe('namespace, type (plural, namespaced and global), search', () => {
     it('includes a sqs query and namespace type with a namespace and global type without a namespace', () => {
-      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], 'us*')).toEqual(
-        {
-          query: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      createTypeClause('saved', 'foo-namespace'),
-                      createTypeClause('global'),
-                    ],
-                    minimum_should_match: 1,
-                  },
+      expect(
+        getQueryParams(MAPPINGS, SCHEMA, new Namespace('foo-namespace'), ['saved', 'global'], 'us*')
+      ).toEqual({
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [createTypeClause('saved', 'foo-namespace'), createTypeClause('global')],
+                  minimum_should_match: 1,
                 },
-              ],
-              must: [
-                {
-                  simple_query_string: {
-                    query: 'us*',
-                    lenient: true,
-                    fields: ['*'],
-                  },
+              },
+            ],
+            must: [
+              {
+                simple_query_string: {
+                  query: 'us*',
+                  lenient: true,
+                  fields: ['*'],
                 },
-              ],
-            },
+              },
+            ],
           },
-        }
-      );
+        },
+      });
     });
   });
 
@@ -428,38 +430,40 @@ describe('searchDsl/queryParams', () => {
 
   describe('namespace, search, searchFields', () => {
     it('includes all types for field', () => {
-      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', undefined, 'y*', ['title'])).toEqual(
-        {
-          query: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      createTypeClause('pending', 'foo-namespace'),
-                      createTypeClause('saved', 'foo-namespace'),
-                      createTypeClause('global'),
-                    ],
-                    minimum_should_match: 1,
-                  },
+      expect(
+        getQueryParams(MAPPINGS, SCHEMA, new Namespace('foo-namespace'), undefined, 'y*', ['title'])
+      ).toEqual({
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    createTypeClause('pending', 'foo-namespace'),
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1,
                 },
-              ],
-              must: [
-                {
-                  simple_query_string: {
-                    query: 'y*',
-                    fields: ['pending.title', 'saved.title', 'global.title'],
-                  },
+              },
+            ],
+            must: [
+              {
+                simple_query_string: {
+                  query: 'y*',
+                  fields: ['pending.title', 'saved.title', 'global.title'],
                 },
-              ],
-            },
+              },
+            ],
           },
-        }
-      );
+        },
+      });
     });
     it('supports field boosting', () => {
       expect(
-        getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', undefined, 'y*', ['title^3'])
+        getQueryParams(MAPPINGS, SCHEMA, new Namespace('foo-namespace'), undefined, 'y*', [
+          'title^3',
+        ])
       ).toEqual({
         query: {
           bool: {
@@ -489,7 +493,10 @@ describe('searchDsl/queryParams', () => {
     });
     it('supports field and multi-field', () => {
       expect(
-        getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', undefined, 'y*', ['title', 'title.raw'])
+        getQueryParams(MAPPINGS, SCHEMA, new Namespace('foo-namespace'), undefined, 'y*', [
+          'title',
+          'title.raw',
+        ])
       ).toEqual({
         query: {
           bool: {
@@ -613,7 +620,14 @@ describe('searchDsl/queryParams', () => {
   describe('namespace, type (plural, namespaced and global), search, searchFields', () => {
     it('includes all types for field', () => {
       expect(
-        getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], 'y*', ['title'])
+        getQueryParams(
+          MAPPINGS,
+          SCHEMA,
+          new Namespace('foo-namespace'),
+          ['saved', 'global'],
+          'y*',
+          ['title']
+        )
       ).toEqual({
         query: {
           bool: {
@@ -639,7 +653,14 @@ describe('searchDsl/queryParams', () => {
     });
     it('supports field boosting', () => {
       expect(
-        getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], 'y*', ['title^3'])
+        getQueryParams(
+          MAPPINGS,
+          SCHEMA,
+          new Namespace('foo-namespace'),
+          ['saved', 'global'],
+          'y*',
+          ['title^3']
+        )
       ).toEqual({
         query: {
           bool: {
@@ -665,10 +686,14 @@ describe('searchDsl/queryParams', () => {
     });
     it('supports field and multi-field', () => {
       expect(
-        getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], 'y*', [
-          'title',
-          'title.raw',
-        ])
+        getQueryParams(
+          MAPPINGS,
+          SCHEMA,
+          new Namespace('foo-namespace'),
+          ['saved', 'global'],
+          'y*',
+          ['title', 'title.raw']
+        )
       ).toEqual({
         query: {
           bool: {
@@ -700,7 +725,7 @@ describe('searchDsl/queryParams', () => {
         getQueryParams(
           MAPPINGS,
           SCHEMA,
-          'foo-namespace',
+          new Namespace('foo-namespace'),
           ['saved', 'global'],
           'foo',
           undefined,
@@ -774,7 +799,7 @@ describe('searchDsl/queryParams', () => {
         getQueryParams(
           MAPPINGS,
           SCHEMA,
-          'foo-namespace',
+          new Namespace('foo-namespace'),
           ['saved', 'global'],
           undefined,
           undefined,

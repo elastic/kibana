@@ -17,26 +17,6 @@
  * under the License.
  */
 
-import { ScopedSavedObjectsClientProvider, Namespace } from './lib';
-import { SavedObjectsClient } from './saved_objects_client';
-
-export interface SavedObjectsService<Request = any> {
-  // ATTENTION: these types are incomplete
-  addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<
-    Request
-  >['addClientWrapperFactory'];
-  getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
-  SavedObjectsClient: typeof SavedObjectsClient;
-  createNamespace: (id?: string) => Namespace;
-  types: string[];
-  getSavedObjectsRepository(...rest: any[]): any;
+export class Namespace {
+  constructor(public readonly id?: string) {}
 }
-
-export {
-  SavedObjectsRepository,
-  ScopedSavedObjectsClientProvider,
-  SavedObjectsClientWrapperFactory,
-  Namespace,
-} from './lib';
-
-export * from './saved_objects_client';

@@ -21,12 +21,14 @@ export default function esoPlugin(kibana: any) {
         method: 'GET',
         path: '/api/saved_objects/get-decrypted-as-internal-user/{id}',
         async handler(request: Request) {
-          const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
+          const spaceId = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
+          const namespaceId = spaceId === 'default' ? undefined : spaceId;
+          const namespace = server.savedObjects.createNamespace(namespaceId);
           try {
             return await (server.plugins as any).encrypted_saved_objects.getDecryptedAsInternalUser(
               SAVED_OBJECT_WITH_SECRET_TYPE,
               request.params.id,
-              { namespace: namespace === 'default' ? undefined : namespace }
+              { namespace }
             );
           } catch (err) {
             if ((server.plugins as any).encrypted_saved_objects.isEncryptionError(err)) {

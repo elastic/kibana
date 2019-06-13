@@ -18,12 +18,13 @@
  */
 
 import { errors, SavedObjectsRepository } from './lib';
+import { Namespace } from './lib/namespace';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export interface BaseOptions {
   /** Specify the namespace for this operation */
-  namespace?: string;
+  namespace?: Namespace;
 }
 
 export interface CreateOptions extends BaseOptions {

@@ -21,6 +21,7 @@ import { KibanaMigrator } from './migrations';
 import { SavedObjectsSchema } from './schema';
 import { SavedObjectsSerializer } from './serialization';
 import {
+  Namespace,
   SavedObjectsClient,
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
@@ -136,6 +137,7 @@ export function savedObjectsMixin(kbnServer, server) {
     types: visibleTypes,
     SavedObjectsClient,
     SavedObjectsRepository,
+    createNamespace: id => new Namespace(id),
     getSavedObjectsRepository: createRepository,
     getScopedSavedObjectsClient: (...args) => provider.getClient(...args),
     setScopedSavedObjectsClientFactory: (...args) => provider.setClientFactory(...args),

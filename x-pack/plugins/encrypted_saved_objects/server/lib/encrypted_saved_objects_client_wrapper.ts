@@ -63,7 +63,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       await this.options.baseClient.create(
         type,
         await this.options.service.encryptAttributes(
-          { type, id, namespace: options.namespace },
+          { type, id, namespace: options.namespace && options.namespace.id },
           attributes
         ),
         { ...options, id }
@@ -95,7 +95,11 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
           ...object,
           id,
           attributes: await this.options.service.encryptAttributes(
-            { type: object.type, id, namespace: options && options.namespace },
+            {
+              type: object.type,
+              id,
+              namespace: options && options.namespace && options.namespace.id,
+            },
             object.attributes
           ),
         };
@@ -144,7 +148,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         type,
         id,
         await this.options.service.encryptAttributes(
-          { type, id, namespace: options && options.namespace },
+          { type, id, namespace: options && options.namespace && options.namespace.id },
           attributes
         ),
         options

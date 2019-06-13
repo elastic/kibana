@@ -5,6 +5,7 @@
  */
 import Boom from 'boom';
 import { omit } from 'lodash';
+import { Namespace } from 'src/legacy/server/saved_objects/service';
 import { isReservedSpace } from '../../common/is_reserved_space';
 import { Space } from '../../common/model/space';
 import { SpacesAuditLogger } from './audit_logger';
@@ -17,7 +18,8 @@ export class SpacesClient {
     private readonly callWithRequestSavedObjectRepository: any,
     private readonly config: any,
     private readonly internalSavedObjectRepository: any,
-    private readonly request: any
+    private readonly request: any,
+    private readonly createNamespace: (id?: string) => Namespace
   ) {}
 
   public async canEnumerateSpaces(): Promise<boolean> {
@@ -192,7 +194,7 @@ export class SpacesClient {
 
     await repository.delete('space', id);
 
-    await repository.deleteByNamespace(id);
+    await repository.deleteByNamespace(this.createNamespace(id));
   }
 
   private useRbac(): boolean {

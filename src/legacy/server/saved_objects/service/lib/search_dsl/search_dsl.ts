@@ -23,6 +23,7 @@ import { IndexMapping } from '../../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
+import { Namespace } from '../namespace';
 
 interface GetSearchDslOptions {
   type: string | string[];
@@ -31,7 +32,7 @@ interface GetSearchDslOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
-  namespace?: string;
+  namespace?: Namespace;
   hasReference?: {
     type: string;
     id: string;

@@ -143,7 +143,8 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
             mockSavedObjectsRepository,
             mockConfig,
             mockSavedObjectsRepository,
-            req
+            req,
+            id => ({ id })
           );
         }),
       },

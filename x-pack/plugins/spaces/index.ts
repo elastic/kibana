@@ -154,7 +154,8 @@ export const spaces = (kibana: Record<string, any>) =>
             callWithRequestRepository,
             server.config(),
             internalRepository,
-            request
+            request,
+            savedObjects.createNamespace
           );
         },
       });
@@ -165,7 +166,7 @@ export const spaces = (kibana: Record<string, any>) =>
       } = server.savedObjects as SavedObjectsService;
       addScopedSavedObjectsClientWrapperFactory(
         Number.MIN_SAFE_INTEGER,
-        spacesSavedObjectsClientWrapperFactory(spacesService, types)
+        spacesSavedObjectsClientWrapperFactory(spacesService, server.savedObjects, types)
       );
 
       server.addScopedTutorialContextFactory(createSpacesTutorialContextFactory(spacesService));

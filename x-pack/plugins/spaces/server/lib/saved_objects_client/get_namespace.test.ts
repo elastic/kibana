@@ -5,26 +5,51 @@
  */
 
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
-import { getNamespace } from './get_namespace';
+import { createGetNamespace } from './get_namespace';
+import { Namespace, SavedObjectsService, BaseOptions } from 'src/legacy/server/saved_objects';
 
 describe('getNamespace', () => {
+  let getNamespace: (options: BaseOptions, spaceId: string) => Namespace | undefined;
+
+  beforeEach(() => {
+    const savedObjectsService = {
+      createNamespace: (id?: string) => ({ id } as Namespace),
+    } as SavedObjectsService;
+
+    getNamespace = createGetNamespace(savedObjectsService);
+  });
+
   describe(`without specifying 'options.namespace'`, () => {
     it(`returns 'undefined' for the default space`, () => {
       expect(getNamespace({}, DEFAULT_SPACE_ID)).toBeUndefined();
     });
 
     it(`returns the space id for non-default spaces`, () => {
-      expect(getNamespace({}, 'some-space')).toEqual('some-space');
+      expect(getNamespace({}, 'some-space')).toEqual({ id: 'some-space' });
+    });
+  });
+
+  describe(`when specifying 'options.namespace' with an undefined id`, () => {
+    it(`returns the empty namespace for the default space`, () => {
+      expect(getNamespace({ namespace: {} }, DEFAULT_SPACE_ID)).toEqual({});
+    });
+
+    it(`returns the empty namespace for non-default spaces`, () => {
+      expect(getNamespace({ namespace: {} }, 'some-space')).toEqual({});
     });
   });
 
   describe(`when specifying 'options.namespace'`, () => {
     it(`returns 'undefined' when specified via options.namespace`, () => {
-      expect(getNamespace({ namespace: undefined }, 'some-space')).toBeUndefined();
+      expect(getNamespace({ namespace: { id: 'override-space' } }, DEFAULT_SPACE_ID)).toEqual({
+        id: 'override-space',
+      });
     });
 
     it(`returns the namespace from options`, () => {
-      expect(getNamespace({ namespace: 'override-space' }, 'some-space')).toEqual('override-space');
+      expect(getNamespace({ namespace: { id: 'override-space' } }, 'some-space')).toEqual({
+        id: 'override-space',
+      });
     });
   });
 });

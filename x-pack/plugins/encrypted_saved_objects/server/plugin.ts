@@ -84,7 +84,7 @@ export class Plugin {
         return {
           ...savedObject,
           attributes: await service.decryptAttributes(
-            { type, id, namespace: options && options.namespace },
+            { type, id, namespace: options && options.namespace && options.namespace.id },
             savedObject.attributes
           ),
         };

@@ -24,6 +24,7 @@ import { schemaMock } from '../../../schema/schema.mock';
 import * as queryParamsNS from './query_params';
 import { getSearchDsl } from './search_dsl';
 import * as sortParamsNS from './sorting_params';
+import { Namespace } from '..';
 
 const getQueryParams = queryParamsNS.getQueryParams as jest.Mock;
 const getSortingParams = sortParamsNS.getSortingParams as jest.Mock;
@@ -59,7 +60,7 @@ describe('getSearchDsl', () => {
   describe('passes control', () => {
     it('passes (mappings, schema, namespace, type, search, searchFields, hasReference) to getQueryParams', () => {
       const opts = {
-        namespace: 'foo-namespace',
+        namespace: new Namespace('foo-namespace'),
         type: 'foo',
         search: 'bar',
         searchFields: ['baz'],

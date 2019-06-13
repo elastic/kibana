@@ -7,6 +7,7 @@
 import { Actions } from '..';
 import { ensureSavedObjectsPrivilegesFactory } from './ensure_saved_objects_privileges';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
+import { Namespace } from 'src/legacy/server/saved_objects/service/lib';
 
 const createMockErrors = () => {
   const forbiddenError = new Error('Mock ForbiddenError');
@@ -317,7 +318,7 @@ describe('checkSavedObjectsPrivileges', () => {
       } = createCheckSavedObjectsPrivileges(true, checkPrivilegesImpl);
 
       await expect(
-        checkSavedObjectsPrivileges(type, operation, 'my-custom', args)
+        checkSavedObjectsPrivileges(type, operation, { id: 'my-custom' } as Namespace, args)
       ).rejects.toThrowError(mockErrors.forbiddenError);
 
       expect(checkPrivilegesImpl).toHaveBeenCalledWith('my-custom', [
@@ -353,7 +354,7 @@ describe('checkSavedObjectsPrivileges', () => {
       } = createCheckSavedObjectsPrivileges(true, checkPrivilegesImpl);
 
       await expect(
-        checkSavedObjectsPrivileges(type, operation, 'my-custom', args)
+        checkSavedObjectsPrivileges(type, operation, { id: 'my-custom' } as Namespace, args)
       ).rejects.toThrowError(mockErrors.generalError);
 
       expect(checkPrivilegesImpl).toHaveBeenCalledWith('my-custom', [
@@ -386,7 +387,7 @@ describe('checkSavedObjectsPrivileges', () => {
         mockActions,
       } = createCheckSavedObjectsPrivileges(true, checkPrivilegesImpl);
 
-      await checkSavedObjectsPrivileges(type, operation, 'my-custom', args);
+      await checkSavedObjectsPrivileges(type, operation, { id: 'my-custom' } as Namespace, args);
 
       expect(checkPrivilegesImpl).toHaveBeenCalledWith('my-custom', [
         mockActions.savedObject.get(type, operation),

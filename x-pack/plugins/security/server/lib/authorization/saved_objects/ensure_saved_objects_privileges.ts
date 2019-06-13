@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { Namespace } from 'src/legacy/server/saved_objects';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 import { CheckPrivileges, CheckPrivilegesAtResourceResponse } from '../check_privileges';
 import { Actions } from '../actions';
@@ -32,7 +33,7 @@ interface Deps {
 export type EnsureSavedObjectsPrivileges = (
   typeOrTypes: string | string[] | undefined,
   operation: SavedObjectsOperation,
-  namespace: string | undefined,
+  namespace: Namespace | undefined,
   args: any
 ) => Promise<void>;
 
@@ -42,7 +43,7 @@ export function ensureSavedObjectsPrivilegesFactory(deps: Deps) {
   const ensureSavedObjectsPrivileges: EnsureSavedObjectsPrivileges = async (
     typeOrTypes: string | string[] | undefined,
     operation: SavedObjectsOperation,
-    namespace: string | undefined,
+    namespace: Namespace | undefined,
     args: any
   ) => {
     const types = normalizeTypes(typeOrTypes);
@@ -99,11 +100,11 @@ function normalizeTypes(typeOrTypes: string | string[] | undefined): string[] {
   return [typeOrTypes];
 }
 
-function namespaceToSpaceId(namespace: string | undefined) {
-  if (namespace == null) {
+function namespaceToSpaceId(namespace: Namespace | undefined) {
+  if (!namespace || !namespace.id) {
     return DEFAULT_SPACE_ID;
   }
-  return namespace;
+  return namespace.id;
 }
 
 function getMissingPrivileges(response: Record<string, boolean>): string[] {

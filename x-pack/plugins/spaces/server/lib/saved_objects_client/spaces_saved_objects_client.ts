@@ -13,14 +13,15 @@ import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
   UpdateOptions,
+  Namespace,
 } from 'src/legacy/server/saved_objects';
 import { SpacesService } from '../create_spaces_service';
-import { getNamespace } from './get_namespace';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
   request: any;
   spacesService: SpacesService;
+  getNamespace: (options: BaseOptions, currentSpaceId: string) => Namespace | undefined;
   types: string[];
 }
 
@@ -48,14 +49,20 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly client: SavedObjectsClientContract;
   private readonly spaceId: string;
   private readonly types: string[];
+  private readonly getNamespace: (
+    options: BaseOptions,
+    currentSpaceId: string
+  ) => Namespace | undefined;
+
   public readonly errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SpacesSavedObjectsClientOptions) {
-    const { baseClient, request, spacesService, types } = options;
+    const { baseClient, request, spacesService, types, getNamespace } = options;
 
     this.client = baseClient;
     this.spaceId = spacesService.getSpaceId(request);
     this.types = types;
+    this.getNamespace = getNamespace;
     this.errors = baseClient.errors;
   }
 
@@ -79,7 +86,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     return await this.client.create(type, attributes, {
       ...options,
-      namespace: getNamespace(options, this.spaceId),
+      namespace: this.getNamespace(options, this.spaceId),
     });
   }
 
@@ -97,7 +104,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     return await this.client.bulkCreate(objects, {
       ...options,
-      namespace: getNamespace(options, this.spaceId),
+      namespace: this.getNamespace(options, this.spaceId),
     });
   }
 
@@ -115,7 +122,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     return await this.client.delete(type, id, {
       ...options,
-      namespace: getNamespace(options, this.spaceId),
+      namespace: this.getNamespace(options, this.spaceId),
     });
   }
 
@@ -145,7 +152,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       type: (options.type ? coerceToArray(options.type) : this.types).filter(
         type => type !== 'space'
       ),
-      namespace: getNamespace(options, this.spaceId),
+      namespace: this.getNamespace(options, this.spaceId),
     });
   }
 
@@ -168,7 +175,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     return await this.client.bulkGet(objects, {
       ...options,
-      namespace: getNamespace(options, this.spaceId),
+      namespace: this.getNamespace(options, this.spaceId),
     });
   }
 
@@ -186,7 +193,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     return await this.client.get(type, id, {
       ...options,
-      namespace: getNamespace(options, this.spaceId),
+      namespace: this.getNamespace(options, this.spaceId),
     });
   }
 
@@ -210,7 +217,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     return await this.client.update(type, id, attributes, {
       ...options,
-      namespace: getNamespace(options, this.spaceId),
+      namespace: this.getNamespace(options, this.spaceId),
     });
   }
 }

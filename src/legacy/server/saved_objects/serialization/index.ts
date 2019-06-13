@@ -28,6 +28,7 @@ import uuid from 'uuid';
 import { SavedObjectsSchema } from '../schema';
 import { decodeVersion, encodeVersion } from '../version';
 import { MigrationVersion, SavedObjectReference } from '../service/saved_objects_client';
+import { Namespace } from '../service/lib';
 
 /**
  * A raw document as represented directly in the saved object index.
@@ -50,7 +51,7 @@ interface SavedObjectDoc {
   attributes: object;
   id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
-  namespace?: string;
+  namespace?: Namespace;
   migrationVersion?: MigrationVersion;
   version?: string;
   updated_at?: string;
@@ -116,7 +117,8 @@ export class SavedObjectsSerializer {
     return {
       type,
       id: this.trimIdPrefix(namespace, type, _id),
-      ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
+      ...(namespace &&
+        !this.schema.isNamespaceAgnostic(type) && { namespace: new Namespace(namespace) }),
       attributes: _source[type],
       references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
@@ -145,7 +147,9 @@ export class SavedObjectsSerializer {
       [type]: attributes,
       type,
       references,
-      ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
+      ...(namespace &&
+        namespace.id &&
+        !this.schema.isNamespaceAgnostic(type) && { namespace: namespace.id }),
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
     };
@@ -164,9 +168,9 @@ export class SavedObjectsSerializer {
    * @param {string} type - The saved object type
    * @param {string} id - The id of the saved object
    */
-  public generateRawId(namespace: string | undefined, type: string, id?: string) {
+  public generateRawId(namespace: Namespace | undefined, type: string, id?: string) {
     const namespacePrefix =
-      namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
+      namespace && namespace.id && !this.schema.isNamespaceAgnostic(type) ? `${namespace.id}:` : '';
     return `${namespacePrefix}${type}:${id || uuid.v1()}`;
   }
 

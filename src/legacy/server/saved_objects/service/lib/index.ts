@@ -24,5 +24,7 @@ export {
   ScopedSavedObjectsClientProvider,
 } from './scoped_client_provider';
 
+export { Namespace } from './namespace';
+
 import * as errors from './errors';
 export { errors };
