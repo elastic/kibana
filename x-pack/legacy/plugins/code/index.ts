@@ -49,7 +49,7 @@ export const code = (kibana: any) =>
       });
       return Joi.object({
         ui: Joi.object({
-          enabled: Joi.boolean().default(true),
+          enabled: Joi.boolean().default(false),
         }).default(),
         enabled: Joi.boolean().default(true),
         queueIndex: Joi.string().default('.code_internal-worker-queue'),
