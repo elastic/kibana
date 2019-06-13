@@ -19,7 +19,7 @@ export const RollupPrompt = () => (
     <p>
       Kibana&apos;s support for rollup index patterns is in beta. You might encounter
       issues using these patterns in saved searches, visualizations, and dashboards.
-      They are not supported in advanced features, such as Visual Builder, Timelion,
+      They are not supported in advanced features, such as Timeseries, Timelion,
       and Machine Learning.
     </p>
     <p>

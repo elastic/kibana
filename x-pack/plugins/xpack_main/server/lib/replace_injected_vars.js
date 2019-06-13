@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getTelemetryOptIn } from './get_telemetry_opt_in';
+import { getTelemetryOptIn } from '../../../telemetry/server';
 
 export async function replaceInjectedVars(originalInjectedVars, request, server) {
   const xpackInfo = server.plugins.xpack_main.info;

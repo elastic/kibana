@@ -18,7 +18,7 @@
  */
 
 import { functionsRegistry } from 'plugins/interpreter/registries';
-import { VislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
+import { vislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
 import { i18n } from '@kbn/i18n';
 
 export const kibanaPie = () => ({

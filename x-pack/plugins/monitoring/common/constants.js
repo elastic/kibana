@@ -164,3 +164,8 @@ export const INDEX_PATTERN_FILEBEAT = 'filebeat-*';
 
 // This is the unique token that exists in monitoring indices collected by metricbeat
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
+
+/**
+ * The id of the infra source owned by the monitoring plugin.
+ */
+export const INFRA_SOURCE_ID = 'internal-stack-monitoring';

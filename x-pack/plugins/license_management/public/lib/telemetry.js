@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchTelemetry } from '../../../xpack_main/public/hacks/fetch_telemetry';
-export { PRIVACY_STATEMENT_URL } from '../../../xpack_main/common/constants';
-export { TelemetryOptInProvider } from '../../../xpack_main/public/services/telemetry_opt_in';
-export { OptInExampleFlyout } from '../../../xpack_main/public/components';
+import { fetchTelemetry } from '../../../telemetry/public/hacks/fetch_telemetry';
+export { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
+export { TelemetryOptInProvider } from '../../../telemetry/public/services/telemetry_opt_in';
+export { OptInExampleFlyout } from '../../../telemetry/public/components';
 
 let telemetryEnabled;
 let httpClient;

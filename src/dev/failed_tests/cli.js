@@ -17,6 +17,11 @@
  * under the License.
  */
 
+const { resolve } = require('path');
+
+// force cwd
+process.chdir(resolve(__dirname, '../../..'));
+
 if (!process.env.JOB_NAME) {
   console.log('Unable to determine job name');
   process.exit(1);
