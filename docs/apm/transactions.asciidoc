@@ -7,7 +7,7 @@ The APM agents automatically collect performance metrics on HTTP requests, datab
 Selecting a <<services,*service*>> brings you to the *transactions* overview.
 The *transaction duration* and *requests per minute* chart display information on all transactions associated with the selected service.
 The *Transactions* table, however, provides only a list of _transaction groups_ for the selected service.
-In other words, this view groups all transactions of the same name together, and only displays each like transaction once.
+In other words, this view groups all transactions of the same name together, and only displays one transaction for each group.
 
 [role="screenshot"]
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM UI in Kibana]

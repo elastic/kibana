@@ -4,8 +4,8 @@
 When querying, you're simply searching and selecting data from fields in Elasticsearch documents.
 It may be helpful to view some of your documents in {kibana-ref}/discover.html[Discover] to better understand how APM data is stored in Elasticsearch. 
 
-Interactions with the query bar change the URL of the page you're on.
-This means you can simply copy and paste the URL of your page to share a specific query or view with others.
+Queries entered into the query bar are also added as parameters to the URL,
+so it's easy to share a specific query or view with others.
 
 In the screenshot below, you can begin to see some of the transaction fields available for filtering on:  
 
