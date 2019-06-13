@@ -17,6 +17,8 @@
  * under the License.
  */
 
+jest.unmock('ui/kfetch');
+
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 import './kfetch.test.mocks';
