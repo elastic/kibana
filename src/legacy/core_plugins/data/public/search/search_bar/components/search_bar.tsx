@@ -64,7 +64,7 @@ interface Props {
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  onSaved?: (newSavedQuery: SavedQuery) => void;
+  onSaved?: (id: string, newSavedQuery: SavedQuery) => void;
 }
 
 interface State {
@@ -217,7 +217,16 @@ class SearchBarUI extends Component<Props, State> {
       showSaveQueryModal: false,
     });
     if (this.props.onSaved) {
-      this.props.onSaved(response);
+      this.props.onSaved(response.id, response.savedQuery);
+    }
+    if (this.props.onQuerySubmit) {
+      this.props.onQuerySubmit({
+        query: this.state.query,
+        dateRange: {
+          from: this.state.dateRangeFrom,
+          to: this.state.dateRangeTo,
+        },
+      });
     }
   };
 

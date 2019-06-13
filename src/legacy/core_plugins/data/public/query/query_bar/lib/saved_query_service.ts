@@ -70,5 +70,5 @@ export const saveQuery = async (savedQuery: SavedQuery) => {
   if (rawQueryResponse.attributes.timefilter) {
     responseObject.timefilter = JSON.parse(rawQueryResponse.attributes.timefilter);
   }
-  return responseObject;
+  return { id: rawQueryResponse.id, savedQuery: responseObject };
 };

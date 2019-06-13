@@ -930,8 +930,10 @@ function discoverController(
   $scope.showAllRows = function () {
     $scope.minimumVisibleRows = $scope.hits;
   };
-  $scope.onQuerySaved = function (newSavedQuery) {
+  $scope.onQuerySaved = function (id, newSavedQuery) {
     $scope.savedQuery = newSavedQuery;
+    $state.savedQuery = id;
+    $state.save();
   };
 
   async function setupVisualization() {
