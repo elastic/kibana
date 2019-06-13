@@ -4,20 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type FontValue = typeof fonts[number]['value'];
+/**
+ * This type contains a unions of all supported font labels, or the the name of
+ * the font the user would see in a UI.
+ */
 export type FontLabel = typeof fonts[number]['label'];
 
+/**
+ * This type contains a union of all supported font values, equivalent to the CSS
+ * `font-value` property.
+ */
+export type FontValue = typeof fonts[number]['value'];
+
+/**
+ * An interface representing a font in Canvas, with a textual label and the CSS
+ * `font-value`.
+ */
 export interface Font {
   label: FontLabel;
   value: FontValue;
 }
 
-/**
- * This function allows one to create a strongly-typed font for inclusion in
- * the font collection.  As a result, the values and labels are known to the
- * type system, preventing one from specifying a non-existent font at build
- * time.
- */
+// This function allows one to create a strongly-typed font for inclusion in
+// the font collection.  As a result, the values and labels are known to the
+// type system, preventing one from specifying a non-existent font at build
+// time.
 function createFont<
   RawFont extends { value: RawFontValue; label: RawFontLabel },
   RawFontValue extends string,
@@ -104,6 +115,9 @@ export const palatino = createFont({
   value: "Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif",
 });
 
+/**
+ * A collection of supported fonts.
+ */
 export const fonts = [
   americanTypewriter,
   arial,

@@ -327,8 +327,7 @@ describe('#encryptAttributes', () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/37518
-describe.skip('#decryptAttributes', () => {
+describe('#decryptAttributes', () => {
   it('does not decrypt attributes for unknown types', async () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
@@ -383,9 +382,9 @@ describe.skip('#decryptAttributes', () => {
       attributes
     );
     expect(encryptedAttributes).toEqual({
-      attrOne: expect.not.stringMatching('one'),
+      attrOne: expect.not.stringMatching(/^one$/),
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
       attrFour: null,
     });
 
@@ -418,7 +417,7 @@ describe.skip('#decryptAttributes', () => {
     );
     expect(encryptedAttributes).toEqual({
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
     });
 
     await expect(
@@ -450,7 +449,7 @@ describe.skip('#decryptAttributes', () => {
     expect(encryptedAttributes).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
     });
 
     const attributesWithoutAttr = { attrTwo: 'two', attrThree: encryptedAttributes.attrThree };
@@ -483,7 +482,7 @@ describe.skip('#decryptAttributes', () => {
     expect(encryptedAttributes).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
     });
 
     const attributesInDifferentOrder = {
@@ -524,7 +523,7 @@ describe.skip('#decryptAttributes', () => {
     expect(encryptedAttributes).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
     });
 
     await expect(
@@ -557,8 +556,8 @@ describe.skip('#decryptAttributes', () => {
       attributes
     );
     expect(encryptedAttributes).toEqual({
-      attrOne: expect.not.stringMatching('one'),
-      attrThree: expect.not.stringMatching('three'),
+      attrOne: expect.not.stringMatching(/^one$/),
+      attrThree: expect.not.stringMatching(/^three$/),
     });
 
     await expect(
@@ -594,9 +593,9 @@ describe.skip('#decryptAttributes', () => {
       attributes
     );
     expect(encryptedAttributes).toEqual({
-      attrOne: expect.not.stringMatching('one'),
+      attrOne: expect.not.stringMatching(/^one$/),
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
       attrFour: null,
       attrFive: expect.any(String),
       attrSix: expect.any(String),

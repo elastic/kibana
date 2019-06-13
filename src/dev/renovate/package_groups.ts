@@ -112,8 +112,13 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
 
   {
     name: 'webpack',
-    packageWords: ['webpack', 'loader'],
+    packageWords: ['webpack', 'loader', 'acorn', 'terser'],
     packageNames: ['mini-css-extract-plugin', 'chokidar'],
+  },
+
+  {
+    name: 'vega',
+    packageWords: ['vega'],
   },
 
   {
