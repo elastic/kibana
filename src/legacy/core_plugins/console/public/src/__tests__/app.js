@@ -21,7 +21,6 @@ import sinon from 'sinon';
 import $ from 'jquery';
 
 import history from '../history';
-import mappings from '../mappings';
 import init from '../app';
 
 describe('app initialization', () => {
@@ -34,7 +33,6 @@ describe('app initialization', () => {
     ajaxDoneStub = sinon.stub();
     sandbox.stub($, 'ajax').returns({ done: ajaxDoneStub });
     sandbox.stub(history, 'getSavedEditorState');
-    sandbox.stub(mappings, 'startPolling');
 
     inputMock = {
       update: sinon.stub(),
