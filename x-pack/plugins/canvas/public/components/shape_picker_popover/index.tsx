@@ -6,6 +6,6 @@
 
 import { pure } from 'recompose';
 
-import { ShapePickerMini as Component } from './shape_picker_mini';
+import { ShapePickerPopover as Component } from './shape_picker_popover';
 
-export const ShapePickerMini = pure(Component);
+export const ShapePickerPopover = pure(Component);
