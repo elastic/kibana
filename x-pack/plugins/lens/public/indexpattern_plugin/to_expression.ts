@@ -13,10 +13,7 @@ export function toExpression(state: IndexPatternPrivateState) {
     return null;
   }
 
-  const fieldNames = state.columnOrder.map(col => state.columns[col].sourceField);
   const sortedColumns = state.columnOrder.map(col => state.columns[col]);
-
-  const indexName = state.indexPatterns[state.currentIndexPatternId].title;
 
   if (sortedColumns.length) {
     const firstMetric = sortedColumns.findIndex(({ isBucketed }) => !isBucketed);

@@ -28,17 +28,6 @@ export function getOperationDisplay(): Record<
   }
 > {
   return {
-    value: {
-      type: 'value',
-      displayName: i18n.translate('xpack.lens.indexPattern.value', {
-        defaultMessage: 'Value',
-      }),
-      ofName: name =>
-        i18n.translate('xpack.lens.indexPattern.valueOf', {
-          defaultMessage: 'Value of {name}',
-          values: { name },
-        }),
-    },
     terms: {
       type: 'terms',
       displayName: i18n.translate('xpack.lens.indexPattern.terms', {
@@ -144,8 +133,6 @@ export function getOperationTypesForField({
 
 export function getOperationResultType({ type }: IndexPatternField, op: OperationType): DataType {
   switch (op) {
-    case 'value':
-      return type as DataType;
     case 'avg':
     case 'min':
     case 'max':

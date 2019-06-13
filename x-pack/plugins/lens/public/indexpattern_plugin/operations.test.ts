@@ -275,8 +275,8 @@ describe('getColumnOrder', () => {
           isBucketed: true,
 
           // Private
-          operationType: 'value',
-          sourceField: 'timestamp',
+          operationType: 'terms',
+          sourceField: 'category',
           suggestedOrder: 2,
         },
         col2: {
@@ -286,7 +286,7 @@ describe('getColumnOrder', () => {
           isBucketed: false,
 
           // Private
-          operationType: 'value',
+          operationType: 'avg',
           sourceField: 'bytes',
           suggestedOrder: 0,
         },
