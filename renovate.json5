@@ -224,6 +224,20 @@
         enabled: false,
       },
       {
+        groupSlug: 'axios',
+        groupName: 'axios related packages',
+        packagePatterns: [
+          '(\\b|_)axios(\\b|_)',
+        ],
+        labels: [
+          'release_note:skip',
+          'renovate',
+          'v8.0.0',
+          'v7.3.0',
+          ':Elasticsearch UI',
+        ],
+      },
+      {
         groupSlug: 'json-stable-stringify',
         groupName: 'json-stable-stringify related packages',
         packageNames: [
