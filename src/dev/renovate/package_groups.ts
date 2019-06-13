@@ -143,6 +143,12 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
     packageNames: ['@microsoft/api-documenter', '@microsoft/api-extractor'],
     enabled: false,
   },
+
+  {
+    name: 'axios',
+    packageWords: ['axios'],
+    extraLabels: [':Elasticsearch UI'],
+  },
 ];
 
 /**
