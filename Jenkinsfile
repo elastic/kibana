@@ -1,6 +1,7 @@
 pipeline {
-  agent any
-  tools {nodejs "node"}
+  // TODO: Follow up on Dockerfile-Jenkinsfile integration @ 
+  // https://jenkins.io/doc/book/pipeline/docker/
+  agent { dockerfile true }
   environment {
     BASE_DIR = "."
   }
