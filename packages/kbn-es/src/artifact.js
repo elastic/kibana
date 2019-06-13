@@ -97,7 +97,7 @@ exports.Artifact = class Artifact {
     const urlBuild = encodeURIComponent(TEST_ES_SNAPSHOT_VERSION);
     const url = `${V1_VERSIONS_API}/${urlVersion}/builds/${urlBuild}/projects/elasticsearch`;
 
-    const json = retry(log, async () => {
+    const json = await retry(log, async () => {
       log.info('downloading artifact info from %s', chalk.bold(url));
 
       const abc = new AbortController();
