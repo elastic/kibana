@@ -42,41 +42,6 @@ export interface AuthToolkit {
 // @internal (undocumented)
 export function bootstrap({ configs, cliArgs, applyConfigOverrides, features, }: BootstrapArgs): Promise<void>;
 
-// @public (undocumented)
-export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
-    // (undocumented)
-    attributes: T;
-    // (undocumented)
-    id?: string;
-    // (undocumented)
-    migrationVersion?: MigrationVersion;
-    // (undocumented)
-    references?: SavedObjectReference[];
-    // (undocumented)
-    type: string;
-}
-
-// @public (undocumented)
-export interface BulkGetObject {
-    fields?: string[];
-    // (undocumented)
-    id: string;
-    // (undocumented)
-    type: string;
-}
-
-// @public (undocumented)
-export interface BulkResponse<T extends SavedObjectAttributes = any> {
-    // (undocumented)
-    saved_objects: Array<SavedObject<T>>;
-}
-
-// @public (undocumented)
-export interface BulkResponse<T extends SavedObjectAttributes = any> {
-    // (undocumented)
-    saved_objects: Array<SavedObject<T>>;
-}
-
 // @public
 export interface CallAPIOptions {
     signal?: AbortSignal;
@@ -163,18 +128,6 @@ export interface ElasticsearchServiceSetup {
     readonly legacy: {
         readonly config$: Observable<ElasticsearchConfig>;
     };
-}
-
-// @public (undocumented)
-export interface FindResponse<T extends SavedObjectAttributes = any> {
-    // (undocumented)
-    page: number;
-    // (undocumented)
-    per_page: number;
-    // (undocumented)
-    saved_objects: Array<SavedObject<T>>;
-    // (undocumented)
-    total: number;
 }
 
 // @public (undocumented)
@@ -317,12 +270,6 @@ export interface LogRecord {
     timestamp: Date;
 }
 
-// @public
-export interface MigrationVersion {
-    // (undocumented)
-    [pluginName: string]: string;
-}
-
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
@@ -447,7 +394,7 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
     // (undocumented)
     id: string;
     // (undocumented)
-    migrationVersion?: MigrationVersion;
+    migrationVersion?: SavedObjectsMigrationVersion;
     // (undocumented)
     references: SavedObjectReference[];
     // (undocumented)
@@ -479,14 +426,48 @@ export interface SavedObjectsBaseOptions {
     namespace?: string;
 }
 
+// @public (undocumented)
+export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    attributes: T;
+    // (undocumented)
+    id?: string;
+    // (undocumented)
+    migrationVersion?: SavedObjectsMigrationVersion;
+    // (undocumented)
+    references?: SavedObjectReference[];
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkGetObject {
+    fields?: string[];
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    saved_objects: Array<SavedObject<T>>;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    saved_objects: Array<SavedObject<T>>;
+}
+
 // @internal (undocumented)
 export class SavedObjectsClient {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepository" needs to be exported by the entry point index.d.ts
     constructor(repository: SavedObjectsRepository);
-    bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<BulkCreateObject<T>>, options?: CreateOptions): Promise<BulkResponse<T>>;
-    bulkGet<T extends SavedObjectAttributes = any>(objects?: BulkGetObject[], options?: SavedObjectsBaseOptions): Promise<BulkResponse<T>>;
-    // Warning: (ae-forgotten-export) The symbol "CreateOptions" needs to be exported by the entry point index.d.ts
-    create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: CreateOptions): Promise<SavedObject<T>>;
+    bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
+    create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
     // (undocumented)
     errors: {
@@ -501,7 +482,7 @@ export class SavedObjectsClient {
         isNotAuthorizedError: typeof import("./lib/errors").isNotAuthorizedError;
         decorateForbiddenError: typeof import("./lib/errors").decorateForbiddenError;
         isForbiddenError: typeof import("./lib/errors").isForbiddenError;
-        decorateRequestEntityTooLargeError: typeof import("./lib/errors").decorateRequestEntityTooLargeError; /** see Elasticsearch Simple Query String Query field argument for more information */
+        decorateRequestEntityTooLargeError: typeof import("./lib/errors").decorateRequestEntityTooLargeError;
         isRequestEntityTooLargeError: typeof import("./lib/errors").isRequestEntityTooLargeError;
         createGenericNotFoundError: typeof import("./lib/errors").createGenericNotFoundError;
         isNotFoundError: typeof import("./lib/errors").isNotFoundError;
@@ -525,7 +506,7 @@ export class SavedObjectsClient {
         isNotAuthorizedError: typeof import("./lib/errors").isNotAuthorizedError;
         decorateForbiddenError: typeof import("./lib/errors").decorateForbiddenError;
         isForbiddenError: typeof import("./lib/errors").isForbiddenError;
-        decorateRequestEntityTooLargeError: typeof import("./lib/errors").decorateRequestEntityTooLargeError; /** see Elasticsearch Simple Query String Query field argument for more information */
+        decorateRequestEntityTooLargeError: typeof import("./lib/errors").decorateRequestEntityTooLargeError;
         isRequestEntityTooLargeError: typeof import("./lib/errors").isRequestEntityTooLargeError;
         createGenericNotFoundError: typeof import("./lib/errors").createGenericNotFoundError;
         isNotFoundError: typeof import("./lib/errors").isNotFoundError;
@@ -537,15 +518,25 @@ export class SavedObjectsClient {
         isEsAutoCreateIndexError: typeof import("./lib/errors").isEsAutoCreateIndexError;
         decorateGeneralError: typeof import("./lib/errors").decorateGeneralError;
     };
-    find<T extends SavedObjectAttributes = any>(options: SavedObjectsFindOptions): Promise<FindResponse<T>>;
+    find<T extends SavedObjectAttributes = any>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T extends SavedObjectAttributes = any>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    update<T extends SavedObjectAttributes = any>(type: string, id: string, attributes: Partial<T>, options?: UpdateOptions): Promise<UpdateResponse<T>>;
+    update<T extends SavedObjectAttributes = any>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
 // Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClientContract" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
 // 
 // @public (undocumented)
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
+
+// @public (undocumented)
+export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
+    id?: string;
+    // (undocumented)
+    migrationVersion?: SavedObjectsMigrationVersion;
+    overwrite?: boolean;
+    // (undocumented)
+    references?: SavedObjectReference[];
+}
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
@@ -573,6 +564,82 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     type?: string | string[];
 }
 
+// @public (undocumented)
+export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    page: number;
+    // (undocumented)
+    per_page: number;
+    // (undocumented)
+    saved_objects: Array<SavedObject<T>>;
+    // (undocumented)
+    total: number;
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsManagement" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export class SavedObjectsManagement {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsManagementDefinition" needs to be exported by the entry point index.d.ts
+    constructor(managementDefinition?: SavedObjectsManagementDefinition);
+    // (undocumented)
+    getDefaultSearchField(type: string): string | undefined;
+    // (undocumented)
+    getEditUrl(savedObject: SavedObject): string | undefined;
+    // (undocumented)
+    getIcon(type: string): string | undefined;
+    // (undocumented)
+    getInAppUrl(savedObject: SavedObject): {
+        path: string;
+        uiCapabilitiesPath: string;
+    } | undefined;
+    // (undocumented)
+    getTitle(savedObject: SavedObject): string | undefined;
+    // (undocumented)
+    isImportAndExportable(type: string): boolean;
+}
+
+// @public
+export interface SavedObjectsMigrationVersion {
+    // (undocumented)
+    [pluginName: string]: string;
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsService<Request = any> {
+    // Warning: (ae-forgotten-export) The symbol "ScopedSavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<Request>['addClientWrapperFactory'];
+    // (undocumented)
+    getSavedObjectsRepository(...rest: any[]): any;
+    // (undocumented)
+    getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+    // Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClient" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
+    // 
+    // (undocumented)
+    SavedObjectsClient: typeof SavedObjectsClient;
+    // (undocumented)
+    types: string[];
+}
+
+// @public (undocumented)
+export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
+    // (undocumented)
+    references?: SavedObjectReference[];
+    version?: string;
+}
+
+// Warning: (ae-forgotten-export) The symbol "Omit" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes'> {
+    // (undocumented)
+    attributes: Partial<T>;
+}
+
 // @public
 export class ScopedClusterClient {
     constructor(internalAPICaller: APICaller, scopedAPICaller: APICaller, headers?: Record<string, string | string[] | undefined> | undefined);
@@ -591,21 +658,6 @@ export interface SessionStorage<T> {
 export interface SessionStorageFactory<T> {
     // (undocumented)
     asScoped: (request: Readonly<Request> | KibanaRequest) => SessionStorage<T>;
-}
-
-// @public (undocumented)
-export interface UpdateOptions extends SavedObjectsBaseOptions {
-    // (undocumented)
-    references?: SavedObjectReference[];
-    version?: string;
-}
-
-// Warning: (ae-forgotten-export) The symbol "Omit" needs to be exported by the entry point index.d.ts
-// 
-// @public (undocumented)
-export interface UpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes'> {
-    // (undocumented)
-    attributes: Partial<T>;
 }
 
 

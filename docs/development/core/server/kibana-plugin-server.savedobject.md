@@ -18,7 +18,7 @@ export interface SavedObject<T extends SavedObjectAttributes = any>
 |  [attributes](./kibana-plugin-server.savedobject.attributes.md) | <code>T</code> |  |
 |  [error](./kibana-plugin-server.savedobject.error.md) | <code>{</code><br/><code>        message: string;</code><br/><code>        statusCode: number;</code><br/><code>    }</code> |  |
 |  [id](./kibana-plugin-server.savedobject.id.md) | <code>string</code> |  |
-|  [migrationVersion](./kibana-plugin-server.savedobject.migrationversion.md) | <code>MigrationVersion</code> |  |
+|  [migrationVersion](./kibana-plugin-server.savedobject.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> |  |
 |  [references](./kibana-plugin-server.savedobject.references.md) | <code>SavedObjectReference[]</code> |  |
 |  [type](./kibana-plugin-server.savedobject.type.md) | <code>string</code> |  |
 |  [updated\_at](./kibana-plugin-server.savedobject.updated_at.md) | <code>string</code> |  |

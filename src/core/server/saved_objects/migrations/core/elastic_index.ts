@@ -24,7 +24,7 @@
 
 import _ from 'lodash';
 import { IndexMapping } from '../../mappings';
-import { MigrationVersion } from '../../';
+import { SavedObjectsMigrationVersion } from '../../';
 import { AliasAction, CallCluster, NotFound, RawDoc, ShardsInfo } from './call_cluster';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
@@ -147,12 +147,12 @@ export async function write(callCluster: CallCluster, index: string, docs: RawDo
  *
  * @param {CallCluster} callCluster
  * @param {string} index
- * @param {MigrationVersion} migrationVersion - The latest versions of the migrations
+ * @param {SavedObjectsMigrationVersion} migrationVersion - The latest versions of the migrations
  */
 export async function migrationsUpToDate(
   callCluster: CallCluster,
   index: string,
-  migrationVersion: MigrationVersion,
+  migrationVersion: SavedObjectsMigrationVersion,
   retryCount: number = 10
 ): Promise<boolean> {
   try {

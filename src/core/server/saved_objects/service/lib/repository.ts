@@ -29,18 +29,18 @@ import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
 import { SavedObjectsSerializer, SanitizedSavedObjectDoc, RawDoc } from '../../serialization';
 import {
-  BulkCreateObject,
-  CreateOptions,
   SavedObject,
-  SavedObjectsFindOptions,
   SavedObjectAttributes,
-  FindResponse,
-  BulkGetObject,
-  BulkResponse,
-  UpdateOptions,
   SavedObjectsBaseOptions,
-  MigrationVersion,
-  UpdateResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsMigrationVersion,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
 } from '../saved_objects_client';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
@@ -74,7 +74,7 @@ export interface SavedObjectsRepositoryOptions {
 }
 
 export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
-  migrationVersion?: MigrationVersion;
+  migrationVersion?: SavedObjectsMigrationVersion;
 }
 
 export class SavedObjectsRepository {
@@ -141,7 +141,7 @@ export class SavedObjectsRepository {
   public async create<T extends SavedObjectAttributes>(
     type: string,
     attributes: T,
-    options: CreateOptions = { overwrite: false, references: [] }
+    options: SavedObjectsCreateOptions = { overwrite: false, references: [] }
   ): Promise<SavedObject<T>> {
     const { id, migrationVersion, overwrite, namespace, references } = options;
 
@@ -196,9 +196,9 @@ export class SavedObjectsRepository {
    * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
   async bulkCreate<T extends SavedObjectAttributes = any>(
-    objects: Array<BulkCreateObject<T>>,
-    options: CreateOptions = {}
-  ): Promise<BulkResponse<T>> {
+    objects: Array<SavedObjectsBulkCreateObject<T>>,
+    options: SavedObjectsCreateOptions = {}
+  ): Promise<SavedObjectsBulkResponse<T>> {
     const { namespace, overwrite = false } = options;
     const time = this._getCurrentTime();
     const bulkCreateParams: object[] = [];
@@ -397,7 +397,7 @@ export class SavedObjectsRepository {
     fields,
     namespace,
     type,
-  }: SavedObjectsFindOptions): Promise<FindResponse<T>> {
+  }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
     if (!type) {
       throw new TypeError(`options.type must be a string or an array of strings`);
     }
@@ -479,9 +479,9 @@ export class SavedObjectsRepository {
    * ])
    */
   async bulkGet<T extends SavedObjectAttributes = any>(
-    objects: BulkGetObject[] = [],
+    objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
-  ): Promise<BulkResponse<T>> {
+  ): Promise<SavedObjectsBulkResponse<T>> {
     const { namespace } = options;
 
     if (objects.length === 0) {
@@ -601,8 +601,8 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: UpdateOptions = {}
-  ): Promise<UpdateResponse<T>> {
+    options: SavedObjectsUpdateOptions = {}
+  ): Promise<SavedObjectsUpdateResponse<T>> {
     if (!this._allowedTypes.includes(type)) {
       throw errors.createGenericNotFoundError(type, id);
     }

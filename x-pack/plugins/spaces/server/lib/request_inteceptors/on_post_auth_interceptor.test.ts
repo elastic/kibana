@@ -7,7 +7,7 @@
 import { Server } from 'hapi';
 import sinon from 'sinon';
 
-import { SavedObject } from 'src/legacy/server/saved_objects';
+import { SavedObject } from 'src/core/server';
 import { Feature } from '../../../../xpack_main/types';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';

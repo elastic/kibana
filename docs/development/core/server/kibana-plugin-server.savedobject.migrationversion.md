@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-migrationVersion?: MigrationVersion;
+migrationVersion?: SavedObjectsMigrationVersion;
 ```

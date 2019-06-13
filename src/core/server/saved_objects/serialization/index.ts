@@ -27,7 +27,10 @@
 import uuid from 'uuid';
 import { SavedObjectsSchema } from '../schema';
 import { decodeVersion, encodeVersion } from '../version';
-import { MigrationVersion, SavedObjectReference } from '../service/saved_objects_client';
+import {
+  SavedObjectsMigrationVersion,
+  SavedObjectReference,
+} from '../service/saved_objects_client';
 
 /**
  * A raw document as represented directly in the saved object index.
@@ -51,7 +54,7 @@ interface SavedObjectDoc {
   id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
   namespace?: string;
-  migrationVersion?: MigrationVersion;
+  migrationVersion?: SavedObjectsMigrationVersion;
   version?: string;
   updated_at?: string;
 

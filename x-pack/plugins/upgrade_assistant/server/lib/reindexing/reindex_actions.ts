@@ -7,7 +7,7 @@
 import moment from 'moment';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { FindResponse, SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { SavedObjectsFindResponse, SavedObjectsClientContract } from 'src/core/server';
 import {
   IndexGroup,
   REINDEX_OP_TYPE,
@@ -68,7 +68,7 @@ export interface ReindexActions {
    * Finds the reindex operation saved object for the given index.
    * @param indexName
    */
-  findReindexOperations(indexName: string): Promise<FindResponse<ReindexOperation>>;
+  findReindexOperations(indexName: string): Promise<SavedObjectsFindResponse<ReindexOperation>>;
 
   /**
    * Returns an array of all reindex operations that have a status.
@@ -110,7 +110,7 @@ export interface ReindexActions {
 }
 
 export const reindexActionsFactory = (
-  client: SavedObjectsClient,
+  client: SavedObjectsClientContract,
   callCluster: CallCluster
 ): ReindexActions => {
   // ----- Internal functions

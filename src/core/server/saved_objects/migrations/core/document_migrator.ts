@@ -65,7 +65,7 @@ import _ from 'lodash';
 import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
 import { RawSavedObjectDoc } from '../../serialization';
-import { MigrationVersion } from '../../';
+import { SavedObjectsMigrationVersion } from '../../';
 import { LogFn, Logger, MigrationLogger } from './migration_logger';
 
 export type TransformFn = (doc: RawSavedObjectDoc, log?: Logger) => RawSavedObjectDoc;
@@ -97,7 +97,7 @@ interface ActiveMigrations {
  * Manages migration of individual documents.
  */
 export interface VersionedTransformer {
-  migrationVersion: MigrationVersion;
+  migrationVersion: SavedObjectsMigrationVersion;
   migrate: TransformFn;
 }
 
@@ -134,10 +134,10 @@ export class DocumentMigrator implements VersionedTransformer {
    * Gets the latest version of each migratable property.
    *
    * @readonly
-   * @type {MigrationVersion}
+   * @type {SavedObjectsMigrationVersion}
    * @memberof DocumentMigrator
    */
-  public get migrationVersion(): MigrationVersion {
+  public get migrationVersion(): SavedObjectsMigrationVersion {
     return _.mapValues(this.migrations, ({ latestVersion }) => latestVersion);
   }
 
@@ -387,7 +387,7 @@ function applicableTransforms(migrations: ActiveMigrations, doc: RawSavedObjectD
  */
 function updateMigrationVersion(
   doc: RawSavedObjectDoc,
-  migrationVersion: MigrationVersion,
+  migrationVersion: SavedObjectsMigrationVersion,
   prop: string,
   version: string
 ) {
@@ -403,7 +403,7 @@ function updateMigrationVersion(
  */
 function assertNoDowngrades(
   doc: RawSavedObjectDoc,
-  migrationVersion: MigrationVersion,
+  migrationVersion: SavedObjectsMigrationVersion,
   prop: string,
   version: string
 ) {

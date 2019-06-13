@@ -34,12 +34,12 @@ export interface SavedObjectsBaseOptions {
  *
  * @public
  */
-export interface CreateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   /** (not recommended) Specify an id for the document */
   id?: string;
   /** Overwrite existing documents (defaults to false) */
   overwrite?: boolean;
-  migrationVersion?: MigrationVersion;
+  migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
 }
 
@@ -47,19 +47,19 @@ export interface CreateOptions extends SavedObjectsBaseOptions {
  *
  * @public
  */
-export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = any> {
   id?: string;
   type: string;
   attributes: T;
   references?: SavedObjectReference[];
-  migrationVersion?: MigrationVersion;
+  migrationVersion?: SavedObjectsMigrationVersion;
 }
 
 /**
  *
  * @public
  */
-export interface BulkResponse<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
@@ -85,7 +85,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
  *
  * @public
  */
-export interface FindResponse<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
   total: number;
   per_page: number;
@@ -96,7 +96,7 @@ export interface FindResponse<T extends SavedObjectAttributes = any> {
  *
  * @public
  */
-export interface UpdateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   /** Ensures version matches that of persisted object */
   version?: string;
   references?: SavedObjectReference[];
@@ -106,7 +106,7 @@ export interface UpdateOptions extends SavedObjectsBaseOptions {
  *
  * @public
  */
-export interface BulkGetObject {
+export interface SavedObjectsBulkGetObject {
   id: string;
   type: string;
   /** SavedObject fields to include in the response */
@@ -117,7 +117,7 @@ export interface BulkGetObject {
  *
  * @public
  */
-export interface BulkResponse<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
@@ -125,7 +125,7 @@ export interface BulkResponse<T extends SavedObjectAttributes = any> {
  *
  * @public
  */
-export interface UpdateResponse<T extends SavedObjectAttributes = any>
+export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any>
   extends Omit<SavedObject<T>, 'attributes'> {
   attributes: Partial<T>;
 }
@@ -136,7 +136,7 @@ export interface UpdateResponse<T extends SavedObjectAttributes = any>
  *
  * @public
  */
-export interface MigrationVersion {
+export interface SavedObjectsMigrationVersion {
   [pluginName: string]: string;
 }
 
@@ -163,7 +163,7 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
   };
   attributes: T;
   references: SavedObjectReference[];
-  migrationVersion?: MigrationVersion;
+  migrationVersion?: SavedObjectsMigrationVersion;
 }
 
 /**
@@ -272,7 +272,7 @@ export class SavedObjectsClient {
   async create<T extends SavedObjectAttributes = any>(
     type: string,
     attributes: T,
-    options?: CreateOptions
+    options?: SavedObjectsCreateOptions
   ) {
     return await this._repository.create(type, attributes, options);
   }
@@ -284,8 +284,8 @@ export class SavedObjectsClient {
    * @param options
    */
   async bulkCreate<T extends SavedObjectAttributes = any>(
-    objects: Array<BulkCreateObject<T>>,
-    options?: CreateOptions
+    objects: Array<SavedObjectsBulkCreateObject<T>>,
+    options?: SavedObjectsCreateOptions
   ) {
     return await this._repository.bulkCreate(objects, options);
   }
@@ -308,7 +308,7 @@ export class SavedObjectsClient {
    */
   async find<T extends SavedObjectAttributes = any>(
     options: SavedObjectsFindOptions
-  ): Promise<FindResponse<T>> {
+  ): Promise<SavedObjectsFindResponse<T>> {
     return await this._repository.find(options);
   }
 
@@ -324,9 +324,9 @@ export class SavedObjectsClient {
    * ])
    */
   async bulkGet<T extends SavedObjectAttributes = any>(
-    objects: BulkGetObject[] = [],
+    objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
-  ): Promise<BulkResponse<T>> {
+  ): Promise<SavedObjectsBulkResponse<T>> {
     return await this._repository.bulkGet(objects, options);
   }
 
@@ -356,8 +356,8 @@ export class SavedObjectsClient {
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: UpdateOptions = {}
-  ): Promise<UpdateResponse<T>> {
+    options: SavedObjectsUpdateOptions = {}
+  ): Promise<SavedObjectsUpdateResponse<T>> {
     return await this._repository.update(type, id, attributes, options);
   }
 }

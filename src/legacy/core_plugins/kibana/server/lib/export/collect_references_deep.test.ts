@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObject, SavedObjectsClient } from '../../../../../server/saved_objects';
+import { SavedObject, SavedObjectsClient } from 'src/core/server';
 import { collectReferencesDeep } from './collect_references_deep';
 
 const data = [

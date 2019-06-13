@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { SavedObject, SavedObjectAttributes } from 'src/legacy/server/saved_objects';
+import { SavedObject, SavedObjectAttributes } from 'src/core/server';
 
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.

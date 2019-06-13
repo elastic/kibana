@@ -17,6 +17,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>). |
 |  [KibanaRequest](./kibana-plugin-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
 |  [Router](./kibana-plugin-server.router.md) |  |
+|  [SavedObjectsManagement](./kibana-plugin-server.savedobjectsmanagement.md) |  |
 |  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API |
 
 ## Interfaces
@@ -24,15 +25,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Interface | Description |
 |  --- | --- |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
-|  [BulkCreateObject](./kibana-plugin-server.bulkcreateobject.md) |  |
-|  [BulkGetObject](./kibana-plugin-server.bulkgetobject.md) |  |
-|  [BulkResponse](./kibana-plugin-server.bulkresponse.md) |  |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [DiscoveredPlugin](./kibana-plugin-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
-|  [FindResponse](./kibana-plugin-server.findresponse.md) |  |
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
 |  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [InternalCoreStart](./kibana-plugin-server.internalcorestart.md) |  |
@@ -40,7 +37,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Logger](./kibana-plugin-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
 |  [LoggerFactory](./kibana-plugin-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
-|  [MigrationVersion](./kibana-plugin-server.migrationversion.md) | A dictionary of saved object type -<!-- -->&gt; version used to determine what migrations need to be applied to a saved object. |
 |  [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
@@ -52,11 +48,18 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectAttributes](./kibana-plugin-server.savedobjectattributes.md) |  |
 |  [SavedObjectReference](./kibana-plugin-server.savedobjectreference.md) | A reference to another saved object. |
 |  [SavedObjectsBaseOptions](./kibana-plugin-server.savedobjectsbaseoptions.md) |  |
+|  [SavedObjectsBulkCreateObject](./kibana-plugin-server.savedobjectsbulkcreateobject.md) |  |
+|  [SavedObjectsBulkGetObject](./kibana-plugin-server.savedobjectsbulkgetobject.md) |  |
+|  [SavedObjectsBulkResponse](./kibana-plugin-server.savedobjectsbulkresponse.md) |  |
+|  [SavedObjectsCreateOptions](./kibana-plugin-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-server.savedobjectsfindoptions.md) |  |
+|  [SavedObjectsFindResponse](./kibana-plugin-server.savedobjectsfindresponse.md) |  |
+|  [SavedObjectsMigrationVersion](./kibana-plugin-server.savedobjectsmigrationversion.md) | A dictionary of saved object type -<!-- -->&gt; version used to determine what migrations need to be applied to a saved object. |
+|  [SavedObjectsService](./kibana-plugin-server.savedobjectsservice.md) |  |
+|  [SavedObjectsUpdateOptions](./kibana-plugin-server.savedobjectsupdateoptions.md) |  |
+|  [SavedObjectsUpdateResponse](./kibana-plugin-server.savedobjectsupdateresponse.md) |  |
 |  [SessionStorage](./kibana-plugin-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
-|  [UpdateOptions](./kibana-plugin-server.updateoptions.md) |  |
-|  [UpdateResponse](./kibana-plugin-server.updateresponse.md) |  |
 
 ## Type Aliases
 

@@ -9,7 +9,7 @@ import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 
-import { SavedObjectsFindOptions } from 'src/legacy/server/saved_objects';
+import { SavedObjectsFindOptions } from 'src/core/server';
 
 import { Pick3 } from '../../../common/utility_types';
 import { PageInfoNote, ResponseNote, ResponseNotes, SortNote } from '../../graphql/types';

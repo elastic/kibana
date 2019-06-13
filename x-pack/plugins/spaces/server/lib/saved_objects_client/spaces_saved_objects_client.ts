@@ -5,15 +5,15 @@
  */
 
 import {
-  SavedObjectsBaseOptions,
-  BulkCreateObject,
-  BulkGetObject,
-  CreateOptions,
-  SavedObjectsFindOptions,
   SavedObjectAttributes,
+  SavedObjectsBaseOptions,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
   SavedObjectsClientContract,
-  UpdateOptions,
-} from 'src/legacy/server/saved_objects';
+  SavedObjectsCreateOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsUpdateOptions,
+} from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SpacesService } from '../create_spaces_service';
 
@@ -87,7 +87,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   public async create<T extends SavedObjectAttributes>(
     type: string,
     attributes: T = {} as T,
-    options: CreateOptions = {}
+    options: SavedObjectsCreateOptions = {}
   ) {
     throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);
@@ -107,7 +107,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
-  public async bulkCreate(objects: BulkCreateObject[], options: SavedObjectsBaseOptions = {}) {
+  public async bulkCreate(
+    objects: SavedObjectsBulkCreateObject[],
+    options: SavedObjectsBaseOptions = {}
+  ) {
     throwErrorIfTypesContainsSpace(objects.map(object => object.type));
     throwErrorIfNamespaceSpecified(options);
 
@@ -182,7 +185,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  public async bulkGet(objects: BulkGetObject[] = [], options: SavedObjectsBaseOptions = {}) {
+  public async bulkGet(
+    objects: SavedObjectsBulkGetObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ) {
     throwErrorIfTypesContainsSpace(objects.map(object => object.type));
     throwErrorIfNamespaceSpecified(options);
 
@@ -225,7 +231,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: UpdateOptions = {}
+    options: SavedObjectsUpdateOptions = {}
   ) {
     throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);

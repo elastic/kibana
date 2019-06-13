@@ -21,13 +21,13 @@ import { cloneDeep, pick, throttle } from 'lodash';
 import { resolve as resolveUrl } from 'url';
 
 import {
-  MigrationVersion,
   SavedObject,
   SavedObjectAttributes,
   SavedObjectReference,
-  SavedObjectsClient as SavedObjectsApi,
+  SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions,
-} from '../../../server/saved_objects';
+  SavedObjectsMigrationVersion,
+} from 'src/core/server';
 import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
 import { kfetch, KFetchQuery } from '../kfetch';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../utils/case_conversion';
@@ -43,7 +43,7 @@ interface RequestParams {
 interface CreateOptions {
   id?: string;
   overwrite?: boolean;
-  migrationVersion?: MigrationVersion;
+  migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
 }
 
@@ -55,7 +55,7 @@ interface BulkCreateOptions<T extends SavedObjectAttributes = SavedObjectAttribu
 
 interface UpdateOptions {
   version?: string;
-  migrationVersion?: MigrationVersion;
+  migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
 }
 

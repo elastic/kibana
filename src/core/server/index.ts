@@ -76,20 +76,23 @@ export {
 } from './plugins';
 
 export {
-  BulkCreateObject,
-  BulkGetObject,
-  BulkResponse,
-  FindResponse,
-  MigrationVersion,
   SavedObject,
   SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsBaseOptions,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
   SavedObjectsClient,
   SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
-  UpdateOptions,
-  UpdateResponse,
+  SavedObjectsFindResponse,
+  SavedObjectsManagement,
+  SavedObjectsMigrationVersion,
+  SavedObjectsService,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';
