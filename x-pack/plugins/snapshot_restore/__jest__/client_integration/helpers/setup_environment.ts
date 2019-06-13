@@ -5,6 +5,8 @@
  */
 
 import axios from 'axios';
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
+
 import { i18n } from '@kbn/i18n';
 
 import { httpService } from '../../../public/app/services/http';
@@ -14,7 +16,9 @@ import { chrome } from '../../../public/test/mocks';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
-  httpService.init(axios.create(), { addBasePath: (path: string) => path });
+  httpService.init(axios.create({ adapter: axiosXhrAdapter }), {
+    addBasePath: (path: string) => path,
+  });
   breadcrumbService.init(chrome, {});
   textService.init(i18n);
 
