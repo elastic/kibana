@@ -16,4 +16,5 @@ export const {
   getOperationDisplay,
   getOperationTypesForField,
   getOperationResultType,
+  operationDefinitionMap,
 } = actual;

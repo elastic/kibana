@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOperationTypesForField, getPotentialColumns, getColumnOrder } from '.';
-import { IndexPatternPrivateState } from '../indexpattern';
+import { getOperationTypesForField, getPotentialColumns, getColumnOrder } from './operations';
+import { IndexPatternPrivateState } from './indexpattern';
 
 const expectedIndexPatterns = {
   1: {

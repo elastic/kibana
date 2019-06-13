@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { CountIndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
-import { OperationDefinition } from '.';
+import { OperationDefinition } from '../operations';
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   type: 'count',

@@ -5,18 +5,23 @@
  */
 
 import _ from 'lodash';
-import { DimensionPriority } from '../../types';
+import { DimensionPriority } from '../types';
 import {
   IndexPatternColumn,
   IndexPatternField,
   IndexPatternPrivateState,
   OperationType,
   BaseIndexPatternColumn,
-} from '../indexpattern';
-import { termsOperation } from './terms';
-import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
-import { dateHistogramOperation } from './date_histogram';
-import { countOperation } from './count';
+} from './indexpattern';
+import { termsOperation } from './operation_definitions/terms';
+import {
+  minOperation,
+  averageOperation,
+  sumOperation,
+  maxOperation,
+} from './operation_definitions/metrics';
+import { dateHistogramOperation } from './operation_definitions/date_histogram';
+import { countOperation } from './operation_definitions/count';
 
 type PossibleOperationDefinitions<
   U extends IndexPatternColumn = IndexPatternColumn

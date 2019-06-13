@@ -8,9 +8,9 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { IndexPatternPrivateState } from '../indexpattern';
-import { getColumnOrder, getPotentialColumns } from '../operations';
+import { getPotentialColumns, getColumnOrder } from '../operations';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { DragContextState, DropHandler } from '../../drag_drop';
+import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 
 jest.mock('../operations');
@@ -74,7 +74,7 @@ describe('IndexPatternDimensionPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('should display a call to action in the popover button', () => {
+  it('should display a configure button if dimension has no column yet', () => {
     const wrapper = mount(
       <IndexPatternDimensionPanel
         dragDropContext={dragDropContext}
@@ -86,7 +86,7 @@ describe('IndexPatternDimensionPanel', () => {
     );
     expect(
       wrapper
-        .find('[data-test-subj="indexPattern-dimensionPopover-button"]')
+        .find('[data-test-subj="indexPattern-configure-dimension"]')
         .first()
         .text()
     ).toEqual('Configure dimension');

@@ -43,7 +43,10 @@ export function FieldSelect({
     <>
       <EuiFlexItem grow={true}>
         {!isFieldSelectOpen ? (
-          <EuiButtonEmpty onClick={() => setFieldSelectOpen(true)}>
+          <EuiButtonEmpty
+            data-test-subj="indexPattern-configure-dimension"
+            onClick={() => setFieldSelectOpen(true)}
+          >
             {selectedColumn
               ? selectedColumn.label
               : i18n.translate('xpack.lens.indexPattern.configureDimensionLabel', {

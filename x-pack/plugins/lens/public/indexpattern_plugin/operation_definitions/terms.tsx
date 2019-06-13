@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiRange, EuiSelect, EuiContextMenuItem } from '@elastic/eui';
 import { IndexPatternField, TermsIndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
-import { OperationDefinition } from '.';
+import { OperationDefinition } from '../operations';
 import { updateColumnParam } from './utils';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;

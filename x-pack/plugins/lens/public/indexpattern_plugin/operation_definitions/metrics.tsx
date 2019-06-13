@@ -14,7 +14,7 @@ import {
   MaxIndexPatternColumn,
 } from '../indexpattern';
 import { DimensionPriority } from '../../types';
-import { OperationDefinition } from '.';
+import { OperationDefinition } from '../operations';
 
 function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
   type: T['operationType'],
