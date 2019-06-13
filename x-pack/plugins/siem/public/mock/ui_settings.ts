@@ -11,7 +11,7 @@ chrome.getUiSettingsClient().get.mockImplementation((key: string) => {
     case 'timepicker:timeDefaults':
       return { from: 'now-15m', to: 'now', mode: 'quick' };
     case 'timepicker:refreshIntervalDefaults':
-      return { display: 'Off', pause: false, value: 0 };
+      return { pause: false, value: 0 };
     case 'siem:defaultIndex':
       return ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
     default:

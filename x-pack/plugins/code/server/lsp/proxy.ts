@@ -60,8 +60,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   private readonly logger: Logger;
   private readonly lspOptions: LspOptions;
   private eventEmitter = new EventEmitter();
-  private passiveConnection: boolean = false;
-
   private connectingPromise: Cancelable<MessageConnection> | null = null;
 
   constructor(targetPort: number, targetHost: string, logger: Logger, lspOptions: LspOptions) {
@@ -112,7 +110,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     if (this.error) {
       throw this.error;
     }
-    const clientConn = await this.tryConnect();
+    const clientConn = await this.connect();
     const rootUri = workspaceFolders[0].uri;
     const params = {
       processId: null,
@@ -145,7 +143,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
         this.logger.debug('received request method: ' + method);
       }
 
-      return this.tryConnect().then(clientConn => {
+      return this.connect().then(clientConn => {
         if (this.lspOptions.verbose) {
           this.logger.info(`proxy method:${method} to Language Server `);
         } else {
@@ -159,7 +157,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   }
 
   public async shutdown() {
-    const clientConn = await this.tryConnect();
+    const clientConn = await this.connect();
     this.logger.info(`sending shutdown request`);
     return await clientConn.sendRequest('shutdown');
   }
@@ -185,7 +183,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   public awaitServerConnection() {
     // prevent calling this method multiple times which may cause 'port already in use' error
     if (!this.connectingPromise) {
-      this.passiveConnection = true;
       this.connectingPromise = new Cancelable((res, rej, onCancel) => {
         const server = net.createServer(socket => {
           this.initialized = false;
@@ -309,12 +306,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
           break;
       }
     });
-  }
-
-  private tryConnect() {
-    return this.passiveConnection
-      ? ((this.connectingPromise as unknown) as Promise<MessageConnection>)
-      : this.connect();
   }
 
   public changePort(port: number) {
