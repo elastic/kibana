@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export * from './src/tooling_log';
-export * from './src/serializers';
-export * from './src/proc_runner';
+export * from './with_proc_runner';

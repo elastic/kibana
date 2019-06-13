@@ -17,6 +17,22 @@
  * under the License.
  */
 
-export * from './src/tooling_log';
-export * from './src/serializers';
-export * from './src/proc_runner';
+export class ProcRunner {
+  run(
+    name: string,
+    options: {
+      cmd: string;
+      args?: string[];
+      cwd?: string;
+      stdin?: string | Buffer;
+      wait?: RegExp | true;
+      env?: { [key: string]: string };
+    }
+  ): Promise<void>;
+
+  stop(name: string, signal?: string): Promise<void>;
+
+  waitForAllToStop(): Promise<void>;
+
+  teardown(signal: string): Promise<void>;
+}

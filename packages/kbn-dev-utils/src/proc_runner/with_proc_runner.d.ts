@@ -17,6 +17,10 @@
  * under the License.
  */
 
-export * from './src/tooling_log';
-export * from './src/serializers';
-export * from './src/proc_runner';
+import { ToolingLog } from '../tooling_log';
+import { ProcRunner } from './proc_runner';
+
+export function withProcRunner(
+  log: ToolingLog,
+  block: (procs: ProcRunner) => Promise<void>
+): Promise<void>;
