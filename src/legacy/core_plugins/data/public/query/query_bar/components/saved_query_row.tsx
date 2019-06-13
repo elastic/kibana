@@ -19,12 +19,12 @@
 
 import React, { FunctionComponent, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiLink } from '@elastic/eui';
-import { SavedQuery } from '../../../search/search_bar';
+import { SavedQueryAttributes } from '../../../search/search_bar';
 import { Query } from '../index';
 
 interface Props {
   query: Query;
-  savedQuery?: SavedQuery;
+  savedQuery?: SavedQueryAttributes;
   onSave: () => void;
 }
 
@@ -39,7 +39,13 @@ export interface SavedQueryDetails {
 export const SavedQueryRow: FunctionComponent<Props> = ({ query, savedQuery, onSave }) => {
   let rowContent;
   if (savedQuery) {
-    rowContent = <EuiFlexItem grow={false}>{savedQuery.title}</EuiFlexItem>;
+    rowContent = (
+      <EuiFlexItem grow={false}>
+        <p>
+          <EuiLink onClick={onSave}>Save changes</EuiLink> to {savedQuery.title}
+        </p>
+      </EuiFlexItem>
+    );
   } else if (query.query.length !== 0) {
     rowContent = (
       <EuiFlexItem grow={false}>

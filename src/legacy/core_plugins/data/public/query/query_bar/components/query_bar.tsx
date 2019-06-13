@@ -39,7 +39,7 @@ import { QueryBarInput } from './query_bar_input';
 
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
-import { SavedQuery } from '../../../search/search_bar';
+import { SavedQueryAttributes } from '../../../search/search_bar';
 
 const config = chrome.getUiSettingsClient();
 
@@ -50,7 +50,7 @@ interface DateRange {
 
 interface Props {
   query: Query;
-  savedQuery: SavedQuery;
+  savedQuery?: SavedQueryAttributes;
   onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   onChange: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;

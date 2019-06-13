@@ -32,8 +32,10 @@ import {
   EuiFieldText,
   EuiSwitch,
 } from '@elastic/eui';
+import { SavedQueryAttributes } from '../index';
 
 interface Props {
+  savedQuery?: SavedQueryAttributes;
   onSave: (savedQueryMeta: SavedQueryMeta) => void;
   onClose: () => void;
 }
@@ -45,11 +47,15 @@ export interface SavedQueryMeta {
   shouldIncludeTimefilter: boolean;
 }
 
-export const SaveQueryForm: FunctionComponent<Props> = ({ onSave, onClose }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [shouldIncludeFilters, setShouldIncludeFilters] = useState(false);
-  const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(false);
+export const SaveQueryForm: FunctionComponent<Props> = ({ savedQuery, onSave, onClose }) => {
+  const [title, setTitle] = useState(savedQuery ? savedQuery.title : '');
+  const [description, setDescription] = useState(savedQuery ? savedQuery.description : '');
+  const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
+    !!(savedQuery && savedQuery.filters)
+  );
+  const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
+    !!(savedQuery && savedQuery.timefilter)
+  );
 
   const saveQueryForm = (
     <EuiForm>
@@ -86,8 +92,8 @@ export const SaveQueryForm: FunctionComponent<Props> = ({ onSave, onClose }) => 
 
       <EuiFormRow>
         <EuiSwitch
-          name="shouldIncludeFilters"
-          label="Include filters"
+          name="shouldIncludeTimefilter"
+          label="Include time filter"
           checked={shouldIncludeTimefilter}
           onChange={() => {
             setIncludeTimefilter(!shouldIncludeTimefilter);

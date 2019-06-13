@@ -31,6 +31,11 @@ interface RefreshInterval {
 }
 
 export interface SavedQuery {
+  id: string;
+  attributes: SavedQueryAttributes;
+}
+
+export interface SavedQueryAttributes {
   title: string;
   description: string;
   query: Query;

@@ -18,17 +18,17 @@
  */
 
 import chrome from 'ui/chrome';
-import { SavedQuery } from '../../../search';
+import { SavedQueryAttributes } from '../../../search/search_bar';
 
-export const saveQuery = async (savedQuery: SavedQuery) => {
+export const saveQuery = async (attributes: SavedQueryAttributes, id: string = '') => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
 
   const query = {
     query:
-      typeof savedQuery.query.query === 'string'
-        ? savedQuery.query.query
-        : JSON.stringify(savedQuery.query.query),
-    language: savedQuery.query.language,
+      typeof attributes.query.query === 'string'
+        ? attributes.query.query
+        : JSON.stringify(attributes.query.query),
+    language: attributes.query.language,
   };
 
   const queryObject: {
@@ -41,24 +41,34 @@ export const saveQuery = async (savedQuery: SavedQuery) => {
     filters?: string;
     timefilter?: string;
   } = {
-    title: savedQuery.title,
-    description: savedQuery.description,
+    title: attributes.title,
+    description: attributes.description,
     query,
   };
 
-  if (savedQuery.filters) {
-    queryObject.filters = JSON.stringify(savedQuery.filters);
+  if (attributes.filters) {
+    queryObject.filters = JSON.stringify(attributes.filters);
   }
 
-  if (savedQuery.timefilter) {
-    queryObject.timefilter = JSON.stringify(savedQuery.timefilter);
+  if (attributes.timefilter) {
+    queryObject.timefilter = JSON.stringify(attributes.timefilter);
   }
 
-  const rawQueryResponse = await savedObjectsClient.create('query', queryObject);
+  let rawQueryResponse;
+  if (id === undefined) {
+    rawQueryResponse = await savedObjectsClient.create('query', queryObject);
+  } else {
+    rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
+      id,
+      overwrite: true,
+    });
+  }
+
   if (rawQueryResponse.error) {
     throw new Error(rawQueryResponse.error.message);
   }
-  const responseObject: SavedQuery = {
+
+  const responseObject: SavedQueryAttributes = {
     title: rawQueryResponse.attributes.title,
     description: rawQueryResponse.attributes.description,
     query: rawQueryResponse.attributes.query,
@@ -69,5 +79,5 @@ export const saveQuery = async (savedQuery: SavedQuery) => {
   if (rawQueryResponse.attributes.timefilter) {
     responseObject.timefilter = JSON.parse(rawQueryResponse.attributes.timefilter);
   }
-  return { id: rawQueryResponse.id, savedQuery: responseObject };
+  return { id: rawQueryResponse.id, attributes: responseObject };
 };

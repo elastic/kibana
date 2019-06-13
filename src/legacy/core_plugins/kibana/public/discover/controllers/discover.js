@@ -194,9 +194,12 @@ uiRoutes
             }
 
             return {
-              ...savedQuery.attributes,
-              filters: filters,
-              timefilter: time,
+              id: savedQuery.id,
+              attributes: {
+                ...savedQuery.attributes,
+                filters: filters,
+                timefilter: time,
+              }
             };
           });
         }
@@ -523,7 +526,7 @@ function discoverController(
 
   function getStateDefaults() {
     return {
-      query: ($route.current.locals.savedQuery && $route.current.locals.savedQuery.query)
+      query: ($scope.savedQuery && $scope.savedQuery.attributes.query)
         || $scope.searchSource.getField('query')
         || {
           query: '',
@@ -533,7 +536,7 @@ function discoverController(
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
-      filters: ($route.current.locals.savedQuery && $route.current.locals.savedQuery.filters)
+      filters: ($scope.savedQuery && $scope.savedQuery.attributes.filters)
         || _.cloneDeep($scope.searchSource.getOwnField('filter'))
     };
   }
@@ -930,9 +933,9 @@ function discoverController(
   $scope.showAllRows = function () {
     $scope.minimumVisibleRows = $scope.hits;
   };
-  $scope.onQuerySaved = function (id, newSavedQuery) {
-    $scope.savedQuery = newSavedQuery;
-    $state.savedQuery = id;
+  $scope.onQuerySaved = function (savedQuery) {
+    $scope.savedQuery = savedQuery;
+    $state.savedQuery = savedQuery.id;
     $state.save();
   };
 

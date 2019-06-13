@@ -31,7 +31,7 @@ import { get, isEqual } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { Query, QueryBar } from '../../../query/query_bar';
 import { FilterBar } from '../../../filter/filter_bar';
-import { SavedQuery } from '../index';
+import { SavedQuery, SavedQueryAttributes } from '../index';
 import { saveQuery } from '../../../query/query_bar/lib/saved_query_service';
 import { SavedQueryMeta, SaveQueryForm } from './save_query_form';
 
@@ -53,7 +53,7 @@ interface Props {
   indexPatterns: IndexPattern[];
   store: Storage;
   filters: Filter[];
-  savedQuery: SavedQuery;
+  savedQuery?: SavedQuery;
   onFiltersUpdated: (filters: Filter[]) => void;
   showQueryBar: boolean;
   showFilterBar: boolean;
@@ -65,7 +65,7 @@ interface Props {
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  onSaved?: (id: string, newSavedQuery: SavedQuery) => void;
+  onSaved?: (savedQuery: SavedQuery) => void;
 }
 
 interface State {
@@ -186,14 +186,14 @@ class SearchBarUI extends Component<Props, State> {
   };
 
   public onSave = async (savedQueryMeta: SavedQueryMeta) => {
-    const savedQuery: SavedQuery = {
+    const savedQueryAttributes: SavedQueryAttributes = {
       title: savedQueryMeta.title,
       description: savedQueryMeta.description,
       query: this.state.query,
     };
 
     if (savedQueryMeta.shouldIncludeFilters) {
-      savedQuery.filters = this.props.filters;
+      savedQueryAttributes.filters = this.props.filters;
     }
 
     if (
@@ -203,7 +203,7 @@ class SearchBarUI extends Component<Props, State> {
       this.props.refreshInterval !== undefined &&
       this.props.isRefreshPaused !== undefined
     ) {
-      savedQuery.timefilter = {
+      savedQueryAttributes.timefilter = {
         timeFrom: this.state.dateRangeFrom,
         timeTo: this.state.dateRangeTo,
         refreshInterval: {
@@ -214,15 +214,21 @@ class SearchBarUI extends Component<Props, State> {
     }
 
     try {
-      const response = await saveQuery(savedQuery);
-      toastNotifications.addSuccess(`Your query "${response.savedQuery.title}" was saved`);
+      let response;
+      if (this.props.savedQuery) {
+        response = await saveQuery(savedQueryAttributes, this.props.savedQuery.id);
+      } else {
+        response = await saveQuery(savedQueryAttributes);
+      }
+
+      toastNotifications.addSuccess(`Your query "${response.attributes.title}" was saved`);
 
       this.setState({
         showSaveQueryModal: false,
       });
 
       if (this.props.onSaved) {
-        this.props.onSaved(response.id, response.savedQuery);
+        this.props.onSaved(response);
       }
 
       if (this.props.onQuerySubmit) {
@@ -236,6 +242,7 @@ class SearchBarUI extends Component<Props, State> {
       }
     } catch (error) {
       toastNotifications.addDanger(`An error occured while saving your query: ${error.message}`);
+      throw error;
     }
   };
 
@@ -324,7 +331,7 @@ class SearchBarUI extends Component<Props, State> {
         {this.props.showQueryBar ? (
           <QueryBar
             query={this.state.query}
-            savedQuery={this.props.savedQuery}
+            savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
             screenTitle={this.props.screenTitle}
             onSubmit={this.onQueryBarSubmit}
             appName={this.props.appName}
@@ -373,6 +380,7 @@ class SearchBarUI extends Component<Props, State> {
 
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
+            savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}
           />

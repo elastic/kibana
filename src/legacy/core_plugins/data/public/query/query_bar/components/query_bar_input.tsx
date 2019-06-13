@@ -42,13 +42,13 @@ import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { SavedQueryRow } from './saved_query_row';
-import { SavedQuery } from '../../../search/search_bar';
+import { SavedQueryAttributes } from '../../../search/search_bar';
 
 interface Props {
   indexPatterns: Array<IndexPattern | string>;
   intl: InjectedIntl;
   query: Query;
-  savedQuery?: SavedQuery;
+  savedQuery?: SavedQueryAttributes;
   appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;

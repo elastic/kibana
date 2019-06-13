@@ -42,4 +42,4 @@ export class SearchService {
 /** @public */
 export type SearchSetup = ReturnType<SearchService['setup']>;
 
-export { SavedQuery } from './search_bar';
+export { SavedQueryAttributes } from './search_bar';
