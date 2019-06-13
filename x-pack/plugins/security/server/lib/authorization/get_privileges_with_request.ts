@@ -5,14 +5,12 @@
  */
 
 import { Legacy } from 'kibana';
-import { RESERVED_PRIVILEGES_APPLICATION_WILDCARD } from '../../../common/constants';
+import { transformKibanaApplicationsFromEs } from './transform_kibana_applications_from_es';
+import { TransformApplicationsFromEsResponse } from './types';
 
-export type GetPrivilegesWithRequest = (request: Legacy.Request) => Promise<EsApplication[]>;
-export interface EsApplication {
-  application: string;
-  privileges: string[];
-  resources: string[];
-}
+export type GetPrivilegesWithRequest = (
+  request: Legacy.Request
+) => Promise<TransformApplicationsFromEsResponse>;
 
 export function getPrivilegesWithRequestFactory(
   application: string,
@@ -22,12 +20,9 @@ export function getPrivilegesWithRequestFactory(
 
   return async function getPrivilegesWithRequest(
     request: Legacy.Request
-  ): Promise<EsApplication[]> {
+  ): Promise<TransformApplicationsFromEsResponse> {
     const userPrivilegesResponse = await callWithRequest(request, 'shield.userPrivileges');
-    return (userPrivilegesResponse.applications as EsApplication[]).filter(
-      app =>
-        app.application === application ||
-        app.application === RESERVED_PRIVILEGES_APPLICATION_WILDCARD
-    );
+
+    return transformKibanaApplicationsFromEs(application, userPrivilegesResponse.applications);
   };
 }

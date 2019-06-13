@@ -5,10 +5,8 @@
  */
 
 import { Legacy } from 'kibana';
-import { AuthorizationService } from './authorization/service';
-import { RESERVED_PRIVILEGES_APPLICATION_WILDCARD } from '../../common/constants';
-import { serializePrivileges } from './authorization/privileges_serializer';
-import { PrivilegeSerializer } from './authorization';
+import { AuthorizationService } from './service';
+import { KibanaApplication } from './types';
 
 export const isAuthorizedKibanaUser = async (
   authorizationService: AuthorizationService,
@@ -29,21 +27,19 @@ export const isAuthorizedKibanaUser = async (
     return true;
   }
 
-  const { application, privileges } = authorizationService;
-
-  const serializedPrivileges = serializePrivileges(application, privileges.get());
-
-  // Reserved privileges on their own do not grant access to kibana; rather, they augment existing kibana access.
-  // Therefore, a user is said to be an authorized Kibana user iff they have at least one known privilege that isn't reserved.
-  const knownUnreservedPrivileges = Object.keys(serializedPrivileges[application]).filter(
-    knownPriv => !PrivilegeSerializer.isSerializedReservedPrivilege(knownPriv)
-  );
-
   const userPrivileges = await authorizationService.getPrivilegesWithRequest(request);
+  if (!userPrivileges.success) {
+    // TODO: what to do?
+    return true;
+  }
 
-  return userPrivileges.some(
-    privilege =>
-      privilege.application !== RESERVED_PRIVILEGES_APPLICATION_WILDCARD &&
-      privilege.privileges.some(priv => knownUnreservedPrivileges.includes(priv))
-  );
+  const userKibanaPrivileges = userPrivileges.value as KibanaApplication[];
+
+  return userKibanaPrivileges.some(privilege => {
+    const hasBasePrivileges = privilege.base.length > 0;
+    const hasFeaturePrivileges = Object.values(privilege.feature).some(
+      featurePrivileges => featurePrivileges.length > 0
+    );
+    return hasBasePrivileges || hasFeaturePrivileges;
+  });
 };

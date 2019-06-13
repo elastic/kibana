@@ -5,8 +5,9 @@
  */
 
 import { RESERVED_PRIVILEGES_APPLICATION_WILDCARD } from '../../../common/constants';
-import { EsApplication, getPrivilegesWithRequestFactory } from './get_privileges_with_request';
+import { getPrivilegesWithRequestFactory } from './get_privileges_with_request';
 import { Legacy } from 'kibana';
+import { EsApplication } from './types';
 
 const application = 'kibana-our_application';
 

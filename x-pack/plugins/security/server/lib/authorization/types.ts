@@ -17,3 +17,23 @@ export interface HasPrivilegesResponse {
     [applicationName: string]: HasPrivilegesResponseApplication;
   };
 }
+
+export interface EsApplication {
+  application: string;
+  privileges: string[];
+  resources: string[];
+}
+
+export interface KibanaApplication {
+  base: string[];
+  feature: {
+    [featureId: string]: string[];
+  };
+  _reserved?: string[];
+  spaces: string[];
+}
+
+export interface TransformApplicationsFromEsResponse {
+  success: boolean;
+  value?: KibanaApplication[];
+}

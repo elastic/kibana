@@ -5,10 +5,10 @@
  */
 
 import { Legacy } from 'kibana';
-import { AuthorizationService } from './authorization/service';
+import { AuthorizationService } from './service';
 import { isAuthorizedKibanaUser } from './is_authorized_kibana_user';
-import { PrivilegeSerializer } from './authorization';
-import { EsApplication } from './authorization/get_privileges_with_request';
+import { PrivilegeSerializer } from './privilege_serializer';
+import { EsApplication } from './types';
 
 function buildAuthorizationService(privileges: EsApplication[] = []) {
   return ({

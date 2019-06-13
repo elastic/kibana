@@ -28,13 +28,13 @@ import {
   initAPIAuthorization,
   initAppAuthorization,
   registerPrivilegesWithCluster,
-  validateFeaturePrivileges
+  validateFeaturePrivileges,
+  isAuthorizedKibanaUser
 } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
 import { createOptionalPlugin } from './server/lib/optional_plugin';
-import { isAuthorizedKibanaUser } from './server/lib/is_authorized_kibana_user';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',

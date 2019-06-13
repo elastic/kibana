@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { wrapError } from '../../../lib/errors';
-import { isAuthorizedKibanaUser } from '../../../lib/is_authorized_kibana_user';
+import { isAuthorizedKibanaUser } from '../../../lib/authorization';
 import { canRedirectRequest } from '../../../lib/can_redirect_request';
 
 export function initAuthenticateApi(server) {
