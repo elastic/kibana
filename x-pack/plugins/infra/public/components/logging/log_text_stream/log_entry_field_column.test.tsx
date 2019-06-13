@@ -7,6 +7,7 @@
 import React from 'react';
 import { LogEntryFieldColumn } from './log_entry_field_column';
 import { mount } from 'enzyme';
+import { EuiThemeProvider } from '../../../../../../common/eui_styled_components';
 
 describe('LogEntryFieldColumn', () => {
   it('should output a <ul> when displaying an Array of values', () => {
@@ -17,14 +18,14 @@ describe('LogEntryFieldColumn', () => {
         isHighlighted={false}
         isHovered={false}
         isWrapped={false}
-        isEnzyme
-      />
+      />,
+      { wrappingComponent: EuiThemeProvider }
     );
     expect(component.exists('ul')).toBe(true);
     expect(
       component.containsAllMatchingElements([
-        <li key="LogEntryFieldColumn-a-0">a,</li>,
-        <li key="LogEntryFieldColumn-b-1">b,</li>,
+        <li key="LogEntryFieldColumn-a-0">a</li>,
+        <li key="LogEntryFieldColumn-b-1">b</li>,
         <li key="LogEntryFieldColumn-c-2">c</li>,
       ])
     ).toBe(true);
@@ -37,8 +38,8 @@ describe('LogEntryFieldColumn', () => {
         isHighlighted={false}
         isHovered={false}
         isWrapped={false}
-        isEnzyme
-      />
+      />,
+      { wrappingComponent: EuiThemeProvider }
     );
     expect(component.exists('ul')).toBe(false);
     expect(component.text()).toEqual('foo');
