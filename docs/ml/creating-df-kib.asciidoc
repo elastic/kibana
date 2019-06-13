@@ -4,7 +4,8 @@
 beta[]
 
 If you want to use the {dataframe-transforms} feature, you must have the required 
-user roles and permissions: 
+user roles and permissions:
+
 * `data_frame_transforms_user`: to get transforms and transforms stats,
 * `data_frame_transforms_admin`: to create/start/stop/delete transforms,
 * read permissions on the source indices,
