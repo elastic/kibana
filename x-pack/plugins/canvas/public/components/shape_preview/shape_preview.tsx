@@ -7,17 +7,31 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const ShapePreview = ({ shape }) => {
+interface Props {
+  shape?: string;
+}
+
+export const ShapePreview = ({ shape }: Props) => {
+  if (!shape) {
+    return <div className="canvasShapePreview" />;
+  }
+
   const weight = 5;
   const parser = new DOMParser();
-  const [shapeSvg] = parser.parseFromString(shape, 'image/svg+xml').getElementsByTagName('svg');
+  const shapeSvg = parser
+    .parseFromString(shape, 'image/svg+xml')
+    .getElementsByTagName('svg')
+    .item(0);
+
+  if (!shapeSvg) {
+    throw new Error('An unexpected error occurred: the SVG was not parseable');
+  }
+
   shapeSvg.setAttribute('fill', 'none');
   shapeSvg.setAttribute('stroke', 'black');
 
-  const initialViewBox = shapeSvg
-    .getAttribute('viewBox')
-    .split(' ')
-    .map(v => parseInt(v, 10));
+  const viewBox = shapeSvg.getAttribute('viewBox') || '0 0 0 0';
+  const initialViewBox = viewBox.split(' ').map((v: string) => parseInt(v, 10));
 
   let [minX, minY, width, height] = initialViewBox;
   minX -= weight / 2;
