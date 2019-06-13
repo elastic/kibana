@@ -404,6 +404,37 @@ describe('IndexPattern Data Source', () => {
           ],
         });
       });
+
+      it('should not make any suggestions for a number without a time field', async () => {
+        const state: IndexPatternPrivateState = {
+          currentIndexPatternId: '1',
+          columnOrder: [],
+          columns: {},
+          indexPatterns: {
+            1: {
+              id: '1',
+              title: 'no timefield',
+              fields: [
+                {
+                  name: 'bytes',
+                  type: 'number',
+                  aggregatable: true,
+                  searchable: true,
+                },
+              ],
+            },
+          },
+        };
+
+        const suggestions = indexPatternDatasource.getDatasourceSuggestionsForField(state, {
+          name: 'bytes',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        });
+
+        expect(suggestions).toHaveLength(0);
+      });
     });
 
     describe('with a prior column', () => {

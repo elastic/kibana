@@ -392,8 +392,6 @@ Object {
     });
 
     it("should do nothing when the visualization can't use the suggestions", () => {
-      mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([]);
-
       instance.childAt(0).prop('onDrop')({
         name: '@timestamp',
         type: 'date',
