@@ -156,7 +156,12 @@ export class AxisScale {
       if (scaleBoundsMargin === 0) {
         return domain;
       } else {
-        domain[0] = domain[0] - scaleBoundsMargin; // TODO check if there are negative values
+        if (min < 0 && max < 0) {
+          domain[1] = domain[1] + scaleBoundsMargin;
+        }
+        if (min > 0 && max > 0) {
+          domain[0] = domain[0] - scaleBoundsMargin;
+        }
         return domain;
       }
     }
