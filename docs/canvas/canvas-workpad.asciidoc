@@ -8,5 +8,29 @@ When you create a workpad, you'll start with a single blank page, ready for you 
 
 //Insert image
 
-For advanced example workpads, install one or more of the sample Kibana data sets, then find the related sample workpads on the Canvas home page.
+For advanced example workpads, install one or more of the {kibana-ref}/add-sample-data.html[sample Kibana data sets], then find the related sample workpads on the Canvas home page.
+
+We'll talk more about how to import and export workpads in Sharing workpads, but keep in mind that you can import workpad JSON files by dragging them onto the Canvas home page. Maybe your data-loving friends have some that they care share!
+
+No need to worry about cluttering up your space with too many workpads. The bulk editing actions allow you to clean up whenever you need.
+
+Now, let's create a workpad and see what Canvas can do!
+
+==== Navigate Canvas
+
+Now that you have a workpad, take a look at the tools surrounding the page.
+
+On the panel to the right, enter the workpad name, change the page size, change the background color, and more. 
+
+//insert image
+
+There's more to cover in this area, but let's check out another section.
+
+Once you're ready to show off what you've created, use the presentation-related options in the upper left corner. These options control things such as data refresh intervals, display modes, and sharing capabilities.
+
+//insert image
+
+
+
+
 
