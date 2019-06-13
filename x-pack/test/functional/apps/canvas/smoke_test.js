@@ -48,7 +48,9 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       // check that workpad loaded in url
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(parse(url).hash).to.equal(`#/workpad/${testWorkpadId}/page/1`);
+        // remove all the search params, just compare the route
+        const hashRoute = parse(url).hash.split('?')[0];
+        expect(hashRoute).to.equal(`#/workpad/${testWorkpadId}/page/1`);
       });
     });
 
