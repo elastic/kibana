@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { resolve } from 'path';
 import { get, has } from 'lodash';
 import { getUserProvider } from './server/lib/get_user';
@@ -143,7 +142,7 @@ export const security = (kibana) => new kibana.Plugin({
     replaceInjectedVars: async function (injectedVars, request, server) {
       const { security } = server.plugins;
 
-      const userRoles = _.get(request, 'auth.credentials.roles', []);
+      const userRoles = get(request, 'auth.credentials.roles', []);
 
       return {
         ...injectedVars,
