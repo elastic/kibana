@@ -4,22 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiForm,
   EuiFormRow,
   EuiButton,
   EuiFieldNumber,
+  EuiButtonIcon,
+  EuiPopover,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-export class SetView  extends React.Component {
+export class SetViewControl extends Component {
 
   state = {
     lat: this.props.center.lat,
     lon: this.props.center.lon,
     zoom: this.props.zoom,
   }
+
+  _togglePopover = () => {
+    if (this.props.isSetViewOpen) {
+      this.props.closeSetView();
+      return;
+    }
+
+    this.props.openSetView();
+  };
 
   _onLatChange = evt => {
     this._onChange('lat', evt);
@@ -63,7 +75,7 @@ export class SetView  extends React.Component {
     };
   }
 
-  onSubmit = () => {
+  _onSubmit = () => {
     const {
       lat,
       lon,
@@ -72,7 +84,7 @@ export class SetView  extends React.Component {
     this.props.onSubmit({ lat, lon, zoom });
   }
 
-  render() {
+  _renderSetViewForm() {
     const { isInvalid: isLatInvalid, component: latFormRow } = this._renderNumberFormRow({
       value: this.state.lat,
       min: -90,
@@ -113,7 +125,7 @@ export class SetView  extends React.Component {
           <EuiButton
             size="s"
             disabled={isLatInvalid || isLonInvalid || isZoomInvalid}
-            onClick={this.onSubmit}
+            onClick={this._onSubmit}
             data-test-subj="submitViewButton"
           >
             Go
@@ -123,13 +135,43 @@ export class SetView  extends React.Component {
       </EuiForm>
     );
   }
+
+  render() {
+    return (
+      <EuiPopover
+        anchorPosition="leftUp"
+        button={(
+          <EuiButtonIcon
+            className="mapToolbarOverlay__button"
+            onClick={this._togglePopover}
+            data-test-subj="toggleSetViewVisibilityButton"
+            iconType="crosshairs"
+            color="text"
+            aria-label={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
+              defaultMessage: 'Go to'
+            })}
+            title={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
+              defaultMessage: 'Go to'
+            })}
+          />
+        )}
+        isOpen={this.props.isSetViewOpen}
+        closePopover={this.props.closeSetView}
+      >
+        {this._renderSetViewForm()}
+      </EuiPopover>
+    );
+  }
 }
 
-SetView.propTypes = {
+SetViewControl.propTypes = {
+  isSetViewOpen: PropTypes.bool.isRequired,
   zoom: PropTypes.number.isRequired,
   center: PropTypes.shape({
     lat: PropTypes.number.isRequired,
     lon: PropTypes.number.isRequired
   }),
   onSubmit: PropTypes.func.isRequired,
+  closeSetView: PropTypes.func.isRequired,
+  openSetView: PropTypes.func.isRequired,
 };

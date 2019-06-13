@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
 
 export class ToolbarOverlay extends React.Component {
@@ -75,7 +76,6 @@ export class ToolbarOverlay extends React.Component {
 
   _renderToolsControl() {
     const { uniqueIndexPatternsAndGeoFields } = this.state;
-    console.log(uniqueIndexPatternsAndGeoFields);
     if (
       !this.props.isFilterable ||
       !uniqueIndexPatternsAndGeoFields.length
@@ -101,6 +101,10 @@ export class ToolbarOverlay extends React.Component {
         alignItems="flexEnd"
         gutterSize="s"
       >
+
+        <EuiFlexItem>
+          <SetViewControl />
+        </EuiFlexItem>
 
         {this._renderToolsControl()}
 

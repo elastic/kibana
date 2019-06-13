@@ -62,7 +62,7 @@ export class ToolsControl extends Component {
     this.setState({ drawType: DRAW_TYPE.BOUNDS });
   }
 
-  _getDrawActionsPanel() {
+  _getDrawPanels() {
 
     const needsIndexPatternSelectionPanel = this.props.uniqueIndexPatternsAndGeoFields.length > 1;
 
@@ -193,7 +193,7 @@ export class ToolsControl extends Component {
       >
         <EuiContextMenu
           initialPanelId={0}
-          panels={this._getDrawActionsPanel()}
+          panels={this._getDrawPanels()}
         />
       </EuiPopover>
     );
