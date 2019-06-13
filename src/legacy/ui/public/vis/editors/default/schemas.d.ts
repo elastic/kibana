@@ -17,19 +17,4 @@
  * under the License.
  */
 
-import { uiModules } from '../../../modules';
-import { AggAddReactWrapper } from './add_aggregation';
-import { wrapInI18nContext } from 'ui/i18n';
-
-uiModules
-  .get('kibana')
-  .directive('visEditorAggAdd', reactDirective =>
-    reactDirective(wrapInI18nContext(AggAddReactWrapper), [
-      ['aggs', { watchDepth: 'reference' }],
-      ['availableSchema', { watchDepth: 'collection' }],
-      ['stats', { watchDepth: 'reference' }],
-      'groupName',
-      'groupNameLabel',
-      'addSchema'
-    ])
-  );
+export type Schemas = any;

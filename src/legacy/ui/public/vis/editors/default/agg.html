@@ -105,5 +105,11 @@
 
 <vis-editor-agg-add
   ng-if="$index + 1 === stats.count"
-  ng-hide="dragging">
+  ng-hide="dragging"
+  aggs="state.aggs"
+  available-schema="availableSchema"
+  group-name="groupName"
+  group-name-label="groupNameLabel"
+  stats="stats"
+  add-schema="addSchema">
 </vis-editor-agg-add>
