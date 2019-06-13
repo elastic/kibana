@@ -3253,7 +3253,6 @@
     "tsvb.indexPattern.timeFieldLabel": "時間フィールド",
     "tsvb.indexPatternLabel": "インデックスパターン",
     "tsvb.kbnVisTypes.metricsDescription": "ビジュアルパイプラインインターフェースを使用して時間数列を作成します",
-    "tsvb.kbnVisTypes.metricsTitle": "ビジュアルビルダー",
     "tsvb.markdown.alignOptions.bottomLabel": "一番下",
     "tsvb.markdown.alignOptions.middleLabel": "真ん中",
     "tsvb.markdown.alignOptions.topLabel": "一番上",
