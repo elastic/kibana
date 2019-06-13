@@ -21,7 +21,8 @@ import { read } from '../../lib';
 import { getDllEntries } from './webpack_dll';
 
 jest.mock('../../lib', () => ({
-  read: jest.fn()
+  read: jest.fn(),
+  isFileAccessible: jest.fn(),
 }));
 
 const manifestContentMock = JSON.stringify({

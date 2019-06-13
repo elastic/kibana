@@ -39,6 +39,10 @@ const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const utimesAsync = promisify(fs.utimes);
 
+export function isFileAccessible(path) {
+  return fs.accessSync(path);
+}
+
 export function assertAbsolute(path) {
   if (!isAbsolute(path)) {
     throw new TypeError(

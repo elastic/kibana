@@ -17,22 +17,23 @@
  * under the License.
  */
 
-import { deleteAll, read, write } from '../../lib';
-import { dirname, sep, relative } from 'path';
-import { accessSync } from 'fs';
+import { deleteAll, isFileAccessible, read, write } from '../../lib';
+import { dirname, sep, relative, resolve } from 'path';
 import pkgUp from 'pkg-up';
 import globby from 'globby';
 
-function checkDllEntryAccess(baseDir, entry) {
+function checkDllEntryAccess(entry, baseDir = '') {
+  const resolvedPath = baseDir ? resolve(baseDir, entry) : entry;
+
   try {
-    accessSync(`${baseDir}/${entry}`);
+    isFileAccessible(resolvedPath);
     return true;
   } catch (e) {
     return false;
   }
 }
 
-export async function getDllEntries(baseDir, manifestPath, whiteListedModules) {
+export async function getDllEntries(manifestPath, whiteListedModules, baseDir = '') {
   const manifest = JSON.parse(await read(manifestPath));
 
   if (!manifest || !manifest.content) {
@@ -64,7 +65,7 @@ export async function getDllEntries(baseDir, manifestPath, whiteListedModules) {
     // More info:
     // https://github.com/webpack/webpack/blob/master/examples/code-splitting-harmony/README.md
     // https://webpack.js.org/guides/dependency-management/#require-with-expression
-    const isAccessible = checkDllEntryAccess(baseDir, entry);
+    const isAccessible = checkDllEntryAccess(entry, baseDir);
 
     return !isWhiteListed && isNodeModule && isAccessible;
   });
