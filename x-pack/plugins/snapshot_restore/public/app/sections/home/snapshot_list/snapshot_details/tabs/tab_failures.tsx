@@ -46,8 +46,8 @@ export const TabFailures: React.SFC<Props> = ({ indexFailures, snapshotState }) 
     const { index, failures } = indexObject;
 
     return (
-      <div key={index}>
-        <EuiTitle size="xs">
+      <div key={index} data-test-subj="indexFailure">
+        <EuiTitle size="xs" data-test-subj="index">
           <h3>{index}</h3>
         </EuiTitle>
 
@@ -57,8 +57,8 @@ export const TabFailures: React.SFC<Props> = ({ indexFailures, snapshotState }) 
           const { status, reason, shard_id: shardId } = failure;
 
           return (
-            <div key={`${shardId}${reason}`}>
-              <EuiText size="xs">
+            <div key={`${shardId}${reason}`} data-test-subj="failure">
+              <EuiText size="xs" data-test-subj="shard">
                 <p>
                   <strong>
                     <FormattedMessage
@@ -70,7 +70,7 @@ export const TabFailures: React.SFC<Props> = ({ indexFailures, snapshotState }) 
                 </p>
               </EuiText>
 
-              <EuiCodeBlock paddingSize="s">
+              <EuiCodeBlock paddingSize="s" data-test-subj="reason">
                 {status}: {reason}
               </EuiCodeBlock>
 

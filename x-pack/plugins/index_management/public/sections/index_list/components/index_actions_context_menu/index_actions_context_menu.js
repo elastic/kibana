@@ -5,7 +5,8 @@
  */
 
 import React, { Component } from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { all } from 'lodash';
 import {
   EuiButton,
@@ -24,7 +25,7 @@ import { INDEX_OPEN } from '../../../../../common/constants';
 import { getActionExtensions } from '../../../../index_management_extensions';
 import { getHttpClient } from '../../../../services/api';
 
-class IndexActionsContextMenuUi extends Component {
+export class IndexActionsContextMenu extends Component {
   constructor(props) {
     super(props);
 
@@ -55,7 +56,6 @@ class IndexActionsContextMenuUi extends Component {
       indexStatusByName,
       performExtensionAction,
       indices,
-      intl,
       reloadIndices,
       unfreezeIndices,
     } = this.props;
@@ -68,39 +68,39 @@ class IndexActionsContextMenuUi extends Component {
     const items = [];
     if (!detailPanel && selectedIndexCount === 1) {
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel', {
           defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } settings',
-        }, { selectedIndexCount }),
+          values: { selectedIndexCount }
+        }),
         onClick: () => {
           this.closePopoverAndExecute(showSettings);
         }
       });
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsMenu.showIndexMappingLabel',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexMappingLabel', {
           defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } mapping',
-        }, { selectedIndexCount }),
+          values: { selectedIndexCount }
+        }),
         onClick: () => {
           this.closePopoverAndExecute(showMapping);
         }
       });
       if (allOpen) {
         items.push({
-          name: intl.formatMessage({
-            id: 'xpack.idxMgmt.indexActionsMenu.showIndexStatsLabel',
+          name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexStatsLabel', {
             defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } stats',
-          }, { selectedIndexCount }),
+            values: { selectedIndexCount }
+          }),
           onClick: () => {
             this.closePopoverAndExecute(showStats);
           }
         });
       }
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsMenu.editIndexSettingsLabel',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.editIndexSettingsLabel', {
           defaultMessage: 'Edit {selectedIndexCount, plural, one {index} other {indices} } settings',
-        }, { selectedIndexCount }),
+          values: { selectedIndexCount }
+        }),
         onClick: () => {
           this.closePopoverAndExecute(editIndex);
         }
@@ -108,67 +108,67 @@ class IndexActionsContextMenuUi extends Component {
     }
     if (allOpen) {
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsMenu.closeIndexLabel',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.closeIndexLabel', {
           defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {indices} }',
-        }, { selectedIndexCount }),
+          values: { selectedIndexCount }
+        }),
         onClick: () => {
           this.closePopoverAndExecute(closeIndices);
         }
       });
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsMenu.forceMergeIndexLabel',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.forceMergeIndexLabel', {
           defaultMessage: 'Force merge {selectedIndexCount, plural, one {index} other {indices} }',
-        }, { selectedIndexCount }),
+          values: { selectedIndexCount }
+        }),
         onClick: () => {
           this.closePopover();
           this.setState({ renderConfirmModal: this.renderForcemergeSegmentsModal });
         }
       });
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsMenu.refreshIndexLabel',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.refreshIndexLabel', {
           defaultMessage: 'Refresh {selectedIndexCount, plural, one {index} other {indices} }',
-        }, { selectedIndexCount }),
+          values: { selectedIndexCount }
+        }),
         onClick: () => {
           this.closePopoverAndExecute(refreshIndices);
         }
       });
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsMenu.clearIndexCacheLabel',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.clearIndexCacheLabel', {
           defaultMessage: 'Clear {selectedIndexCount, plural, one {index} other {indices} } cache',
-        }, { selectedIndexCount }),
+          values: { selectedIndexCount }
+        }),
         onClick: () => {
           this.closePopoverAndExecute(clearCacheIndices);
         }
       });
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsMenu.flushIndexLabel',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.flushIndexLabel', {
           defaultMessage: 'Flush {selectedIndexCount, plural, one {index} other {indices} }',
-        }, { selectedIndexCount }),
+          values: { selectedIndexCount }
+        }),
         onClick: () => {
           this.closePopoverAndExecute(flushIndices);
         }
       });
       if (allFrozen) {
         items.push({
-          name: intl.formatMessage({
-            id: 'xpack.idxMgmt.indexActionsMenu.unfreezeIndexLabel',
+          name: i18n.translate('xpack.idxMgmt.indexActionsMenu.unfreezeIndexLabel', {
             defaultMessage: 'Unfreeze {selectedIndexCount, plural, one {index} other {indices} }',
-          }, { selectedIndexCount }),
+            values: { selectedIndexCount }
+          }),
           onClick: () => {
             this.closePopoverAndExecute(unfreezeIndices);
           }
         });
       } else if (allUnfrozen) {
         items.push({
-          name: intl.formatMessage({
-            id: 'xpack.idxMgmt.indexActionsMenu.freezeIndexLabel',
+          name: i18n.translate('xpack.idxMgmt.indexActionsMenu.freezeIndexLabel', {
             defaultMessage: 'Freeze {selectedIndexCount, plural, one {index} other {indices} }',
-          }, { selectedIndexCount }),
+            values: { selectedIndexCount }
+          }),
           onClick: () => {
             this.closePopover();
             this.setState({ renderConfirmModal: this.renderConfirmFreezeModal });
@@ -177,20 +177,20 @@ class IndexActionsContextMenuUi extends Component {
       }
     } else {
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsMenu.openIndexLabel',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.openIndexLabel', {
           defaultMessage: 'Open {selectedIndexCount, plural, one {index} other {indices} }',
-        }, { selectedIndexCount }),
+          values: { selectedIndexCount }
+        }),
         onClick: () => {
           this.closePopoverAndExecute(openIndices);
         }
       });
     }
     items.push({
-      name: intl.formatMessage({
-        id: 'xpack.idxMgmt.indexActionsMenu.deleteIndexLabel',
+      name: i18n.translate('xpack.idxMgmt.indexActionsMenu.deleteIndexLabel', {
         defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
-      }, { selectedIndexCount }),
+        values: { selectedIndexCount }
+      }),
       onClick: () => {
         this.closePopover();
         this.setState({ renderConfirmModal: this.renderConfirmDeleteModal });
@@ -225,10 +225,10 @@ class IndexActionsContextMenuUi extends Component {
     });
     const panelTree = {
       id: 0,
-      title: intl.formatMessage({
-        id: 'xpack.idxMgmt.indexActionsMenu.panelTitle',
+      title: i18n.translate('xpack.idxMgmt.indexActionsMenu.panelTitle', {
         defaultMessage: '{selectedIndexCount, plural, one {Index} other {Indices} } options',
-      }, { selectedIndexCount }),
+        values: { selectedIndexCount }
+      }),
       items
     };
     return flattenPanelTree(panelTree);
@@ -257,30 +257,26 @@ class IndexActionsContextMenuUi extends Component {
 
   forcemergeSegmentsError = () => {
     const { forcemergeSegments } = this.state;
-    const { intl } = this.props;
     if (!forcemergeSegments || forcemergeSegments.match(/^([1-9][0-9]*)?$/)) {
       return;
     } else {
-      return intl.formatMessage({
-        id: 'xpack.idxMgmt.indexActionsMenu.segmentsNumberErrorMessage',
-        defaultMessage: 'The number of segments must be greater than zero.',
+      return i18n.translate('xpack.idxMgmt.indexActionsMenu.segmentsNumberErrorMessage', {
+        defaultMessage: 'The number of segments must be greater than zero.'
       });
     }
   };
   renderForcemergeSegmentsModal = () => {
-    const { forcemergeIndices, indexNames, intl } = this.props;
-    const helpText = intl.formatMessage({
-      id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeSegmentsHelpText',
-      defaultMessage: 'Merge the segments in an index until the number is reduced to this or fewer segments. The default is 1.',
+    const { forcemergeIndices, indexNames } = this.props;
+    const helpText = i18n.translate('xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeSegmentsHelpText', {
+      defaultMessage: 'Merge the segments in an index until the number is reduced to this or fewer segments. The default is 1.'
     });
     const selectedIndexCount = indexNames.length;
 
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={intl.formatMessage({
-            id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.modalTitle',
-            defaultMessage: 'Force merge',
+          title={i18n.translate('xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.modalTitle', {
+            defaultMessage: 'Force merge'
           })}
           onCancel={this.closeConfirmModal}
           onConfirm={() => {
@@ -295,16 +291,20 @@ class IndexActionsContextMenuUi extends Component {
             }
           }}
           cancelButtonText={
-            intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.cancelButtonText',
-              defaultMessage: 'Cancel',
-            })
+            i18n.translate(
+              'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.cancelButtonText',
+              {
+                defaultMessage: 'Cancel'
+              }
+            )
           }
           confirmButtonText={
-            intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.confirmButtonText',
-              defaultMessage: 'Force merge',
-            })
+            i18n.translate(
+              'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.confirmButtonText',
+              {
+                defaultMessage: 'Force merge'
+              }
+            )
           }
         >
           <div>
@@ -321,10 +321,12 @@ class IndexActionsContextMenuUi extends Component {
               ))}
             </ul>
             <EuiCallOut
-              title={intl.formatMessage({
-                id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.proceedWithCautionCallOutTitle',
-                defaultMessage: 'Proceed with caution!',
-              })}
+              title={i18n.translate(
+                'xpack.idxMgmt.indexActionsMenu.forceMerge.proceedWithCautionCallOutTitle',
+                {
+                  defaultMessage: 'Proceed with caution!'
+                }
+              )}
               color="warning"
               iconType="help"
             >
@@ -345,10 +347,12 @@ class IndexActionsContextMenuUi extends Component {
               error={this.forcemergeSegmentsError()}
             >
               <EuiFormRow
-                label={intl.formatMessage({
-                  id: 'xpack.idxMgmt.indexActionsMenu.forceMerge.maximumNumberOfSegmentsFormRowLabel',
-                  defaultMessage: 'Maximum number of segments per shard',
-                })}
+                label={i18n.translate(
+                  'xpack.idxMgmt.indexActionsMenu.forceMerge.maximumNumberOfSegmentsFormRowLabel',
+                  {
+                    defaultMessage: 'Maximum number of segments per shard'
+                  }
+                )}
                 helpText={helpText}
               >
                 <EuiFieldText
@@ -366,30 +370,34 @@ class IndexActionsContextMenuUi extends Component {
   };
 
   renderConfirmDeleteModal = () => {
-    const { deleteIndices, indexNames, intl } = this.props;
+    const { deleteIndices, indexNames } = this.props;
     const selectedIndexCount = indexNames.length;
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
           title={
-            intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
+            i18n.translate('xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle', {
               defaultMessage: 'Confirm delete {selectedIndexCount, plural, one {index} other {indices} }',
-            }, { selectedIndexCount })
+              values: { selectedIndexCount }
+            })
           }
           onCancel={this.closeConfirmModal}
           onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
           cancelButtonText={
-            intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
-              defaultMessage: 'Cancel',
-            })
+            i18n.translate(
+              'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
+              {
+                defaultMessage: 'Cancel'
+              }
+            )
           }
           confirmButtonText={
-            intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
-              defaultMessage: 'Confirm',
-            })
+            i18n.translate(
+              'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
+              {
+                defaultMessage: 'Confirm'
+              }
+            )
           }
         >
           <div>
@@ -407,10 +415,12 @@ class IndexActionsContextMenuUi extends Component {
             </ul>
             <EuiCallOut
               title={
-                intl.formatMessage({
-                  id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutTitle',
-                  defaultMessage: 'Proceed with caution!',
-                })
+                i18n.translate(
+                  'xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutTitle',
+                  {
+                    defaultMessage: 'Proceed with caution!'
+                  }
+                )
               }
               color="warning"
               iconType="help"
@@ -430,29 +440,34 @@ class IndexActionsContextMenuUi extends Component {
   renderConfirmFreezeModal = () => {
     const oneIndexSelected = this.oneIndexSelected();
     const entity = this.getEntity(oneIndexSelected);
-    const { freezeIndices, indexNames, intl } = this.props;
+    const { freezeIndices, indexNames } = this.props;
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
           title={
-            intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.modalTitle',
+            i18n.translate('xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.modalTitle', {
               defaultMessage: 'Confirm Freeze {entity}',
-            }, { entity })
+              values: { entity }
+            })
           }
           onCancel={this.closeConfirmModal}
           onConfirm={() => this.closePopoverAndExecute(freezeIndices)}
           cancelButtonText={
-            intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.cancelButtonText',
-              defaultMessage: 'Cancel',
-            })
+            i18n.translate(
+              'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.cancelButtonText',
+              {
+                defaultMessage: 'Cancel'
+              }
+            )
           }
           confirmButtonText={
-            intl.formatMessage({
-              id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText',
-              defaultMessage: 'Freeze {entity}',
-            }, { entity })
+            i18n.translate(
+              'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText',
+              {
+                defaultMessage: 'Freeze {entity}',
+                values: { entity }
+              }
+            )
           }
         >
           <div>
@@ -472,10 +487,12 @@ class IndexActionsContextMenuUi extends Component {
             </ul>
             <EuiCallOut
               title={
-                intl.formatMessage({
-                  id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.proceedWithCautionCallOutTitle',
-                  defaultMessage: 'Proceed with caution',
-                })
+                i18n.translate(
+                  'xpack.idxMgmt.indexActionsMenu.freezeEntity.proceedWithCautionCallOutTitle',
+                  {
+                    defaultMessage: 'Proceed with caution'
+                  }
+                )
               }
               color="warning"
               iconType="help"
@@ -499,29 +516,26 @@ class IndexActionsContextMenuUi extends Component {
     return this.props.indexNames.length === 1;
   };
   getEntity = oneIndexSelected => {
-    const { intl } = this.props;
     return oneIndexSelected ? (
-      intl.formatMessage({
-        id: 'xpack.idxMgmt.indexActionsMenu.indexMessage',
+      i18n.translate('xpack.idxMgmt.indexActionsMenu.indexMessage', {
         defaultMessage: 'index'
       })
     ) : (
-      intl.formatMessage({
-        id: 'xpack.idxMgmt.indexActionsMenu.indicesMessage',
+      i18n.translate('xpack.idxMgmt.indexActionsMenu.indicesMessage', {
         defaultMessage: 'indices'
       })
     );
   };
   render() {
-    const { indexNames, intl } = this.props;
+    const { indexNames } = this.props;
     const selectedIndexCount = indexNames.length;
     const {
       iconSide = 'right',
       anchorPosition = 'rightUp',
-      label = intl.formatMessage({
-        id: 'xpack.idxMgmt.indexActionsMenu.manageButtonLabel',
+      label = i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonLabel', {
         defaultMessage: 'Manage {selectedIndexCount, plural, one {index} other {indices}}',
-      }, { selectedIndexCount }),
+        values: { selectedIndexCount }
+      }),
       iconType = 'arrowDown'
     } = this.props;
     const panels = this.panels();
@@ -529,10 +543,10 @@ class IndexActionsContextMenuUi extends Component {
       <EuiButton
         data-test-subj="indexActionsContextMenuButton"
         iconSide={iconSide}
-        aria-label={intl.formatMessage({
-          id: 'xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel',
+        aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel', {
           defaultMessage: '{selectedIndexCount, plural, one {index} other {indices} } options',
-        }, { selectedIndexCount })}
+          values: { selectedIndexCount }
+        })}
         onClick={this.onButtonClick}
         iconType={iconType}
         fill
@@ -560,5 +574,3 @@ class IndexActionsContextMenuUi extends Component {
     );
   }
 }
-
-export const IndexActionsContextMenu = injectI18n(IndexActionsContextMenuUi);

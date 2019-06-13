@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-
-import { ShapePickerMini as Component } from './shape_picker_mini';
-
-export const ShapePickerMini = pure(Component);
+export * from './repository';
+export * from './snapshot';

@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Chance from 'chance';
+import { pure } from 'recompose';
 
-const chance = new Chance();
-const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
+import { ShapePickerPopover as Component } from './shape_picker_popover';
 
-export const getRandomString = (options = {}) =>
-  `${chance.string({ pool: CHARS_POOL, ...options })}-${Date.now()}`;
+export const ShapePickerPopover = pure(Component);
