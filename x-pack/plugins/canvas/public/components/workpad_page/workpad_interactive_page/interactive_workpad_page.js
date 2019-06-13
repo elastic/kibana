@@ -47,6 +47,7 @@ export class InteractiveWorkpadPage extends PureComponent {
       canvasOrigin,
       saveCanvasOrigin,
       commit,
+      zoomScale,
     } = this.props;
 
     let shortcuts = null;
@@ -95,6 +96,7 @@ export class InteractiveWorkpadPage extends PureComponent {
                 width: node.width,
                 height: node.height,
                 text: node.text,
+                zoomScale,
               };
 
               switch (node.subtype) {

@@ -44,31 +44,31 @@ export class Workpad extends React.PureComponent {
       previousPage,
       grid, // TODO: Get rid of grid when we improve the layout engine
       setGrid,
+      zoomIn,
+      zoomOut,
     } = this.props;
 
     // handle keypress events for editor and presentation events
     // this exists in both contexts
-    if (action === 'REFRESH') {
-      return fetchAllRenderables();
-    }
-
-    // editor events
-    if (action === 'UNDO') {
-      return undoHistory();
-    }
-    if (action === 'REDO') {
-      return redoHistory();
-    }
-    if (action === 'GRID') {
-      return setGrid(!grid);
-    }
-
-    // presentation events
-    if (action === 'PREV') {
-      return previousPage();
-    }
-    if (action === 'NEXT') {
-      return nextPage();
+    switch (action) {
+      case 'REFRESH':
+        return fetchAllRenderables();
+      case 'ZOOM_IN':
+        return zoomIn();
+      case 'ZOOM_OUT':
+        return zoomOut();
+      // editor events
+      case 'UNDO':
+        return undoHistory();
+      case 'REDO':
+        return redoHistory();
+      case 'GRID':
+        return setGrid(!grid);
+      // presentation events
+      case 'PREV':
+        return previousPage();
+      case 'NEXT':
+        return nextPage();
     }
   };
 
@@ -90,8 +90,8 @@ export class Workpad extends React.PureComponent {
     } = this.props;
 
     const bufferStyle = {
-      height: isFullscreen ? height : height + WORKPAD_CANVAS_BUFFER,
-      width: isFullscreen ? width : width + WORKPAD_CANVAS_BUFFER,
+      height: isFullscreen ? height : (height + 2 * WORKPAD_CANVAS_BUFFER) * zoomScale,
+      width: isFullscreen ? width : (width + 2 * WORKPAD_CANVAS_BUFFER) * zoomScale,
     };
 
     return (

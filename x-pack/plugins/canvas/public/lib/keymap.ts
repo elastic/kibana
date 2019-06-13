@@ -39,7 +39,7 @@ const getShortcuts = (
     modifiers = [modifiers];
   }
 
-  let macShortcuts = shortcuts;
+  let macShortcuts = [...shortcuts];
 
   // handle shift modifier
   if (modifiers.includes('shift')) {
@@ -117,6 +117,8 @@ export const keymap: KeyMap = {
     EDITING: getShortcuts('e', { modifiers: 'alt', help: 'Toggle edit mode' }),
     GRID: getShortcuts('g', { modifiers: 'alt', help: 'Show grid' }),
     REFRESH: refreshShortcut,
+    ZOOM_IN: getShortcuts('plus', { modifiers: ['ctrl', 'alt'], help: 'Zoom in' }),
+    ZOOM_OUT: getShortcuts('minus', { modifiers: ['ctrl', 'alt'], help: 'Zoom out' }),
   },
   PRESENTATION: {
     displayName: 'Presentation controls',

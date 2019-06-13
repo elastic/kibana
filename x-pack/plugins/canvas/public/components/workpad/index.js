@@ -10,6 +10,7 @@ import { pure, compose, withState, withProps, getContext, withHandlers } from 'r
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
+import { setZoomScale } from '../../state/actions/transient';
 import { getFullscreen, getZoomScale } from '../../state/selectors/app';
 import {
   getSelectedPageIndex,
@@ -17,6 +18,7 @@ import {
   getWorkpad,
   getPages,
 } from '../../state/selectors/workpad';
+import { zoomHandlerCreators } from '../../lib/app_handler_creators';
 import { Workpad as Component } from './workpad';
 
 const mapStateToProps = state => {
@@ -38,6 +40,7 @@ const mapDispatchToProps = {
   undoHistory,
   redoHistory,
   fetchAllRenderables,
+  setZoomScale,
 };
 
 export const Workpad = compose(
@@ -93,5 +96,6 @@ export const Workpad = compose(
       const pageNumber = Math.max(1, props.selectedPageNumber - 1);
       props.onPageChange(pageNumber);
     },
-  })
+  }),
+  withHandlers(zoomHandlerCreators)
 )(Component);
