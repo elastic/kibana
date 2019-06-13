@@ -24,11 +24,9 @@ import { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_mon
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
 import { Timefilter } from 'ui/timefilter';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { Filter } from '@kbn/es-query';
 import moment from 'moment';
-import { RefreshInterval } from 'ui/timefilter/timefilter';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { TimeRange } from 'ui/timefilter/time_history';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
@@ -278,7 +276,7 @@ export class DashboardStateManager {
 
   _pushFiltersToStore() {
     const state = store.getState();
-    const dashboardFilters = this.getDashboardFilterBars();
+    const dashboardFilters = this.savedDashboard.searchSource.getOwnField('filter');
     if (
       !_.isEqual(
         FilterUtils.cleanFiltersForComparison(dashboardFilters),
@@ -386,8 +384,8 @@ export class DashboardStateManager {
     return {
       timeTo: this.savedDashboard.timeTo,
       timeFrom: this.savedDashboard.timeFrom,
-      filterBars: this.getDashboardFilterBars(),
-      query: this.getDashboardQuery(),
+      filterBars: this.savedDashboard.searchSource.getOwnField('filter'),
+      query: this.savedDashboard.searchSource.getOwnField('query'),
     };
   }
 
@@ -453,14 +451,6 @@ export class DashboardStateManager {
    */
   public getIsTimeSavedWithDashboard() {
     return this.savedDashboard.timeRestore;
-  }
-
-  public getDashboardFilterBars() {
-    return FilterUtils.getFilterBarsForDashboard(this.savedDashboard);
-  }
-
-  public getDashboardQuery() {
-    return FilterUtils.getQueryFilterForDashboard(this.savedDashboard);
   }
 
   public getLastSavedFilterBars(): Filter[] {
