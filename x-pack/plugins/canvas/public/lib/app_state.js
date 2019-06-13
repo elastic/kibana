@@ -24,7 +24,7 @@ export function getCurrentAppState() {
   const history = historyProvider(getWindow());
   const { search } = history.getLocation();
   const qs = !!search ? querystring.parse(search.replace(/^\?/, '')) : {};
-  const appState = !!qs.appState ? rison.decode(qs.appState) : {};
+  const appState = !!qs._a ? rison.decode(qs._a) : {};
   return appState;
 }
 

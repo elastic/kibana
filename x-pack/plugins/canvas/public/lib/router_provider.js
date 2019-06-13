@@ -39,7 +39,7 @@ export function routerProvider(routes) {
   const appendAppState = (path, appState = getCurrentAppState()) =>
     modifyUrl(path, parts => {
       // always append the app state to the url
-      parts.query.appState = rison.encode(appState);
+      parts.query._a = rison.encode(appState);
     });
 
   // add or replace history with new url, either from path or derived path via name and params
