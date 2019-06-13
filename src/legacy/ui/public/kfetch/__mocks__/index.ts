@@ -17,10 +17,4 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
-// TODO: Docs!
-
-jest.mock('ui/kfetch');
-jest.mock('ui/metadata');
-jest.mock('ui/chrome');
+export const kfetch = () => Promise.resolve();
