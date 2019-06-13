@@ -194,6 +194,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--stats.maximumWaitTimeForAllCollectorsInS=0',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
+        '--xpack.code.ui.enabled=true', // Enable Code Ui just in tests
         '--xpack.code.security.enableGitCertCheck=false', // Disable git certificate check
         '--timelion.ui.enabled=true',
       ],
