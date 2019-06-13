@@ -8,10 +8,11 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiContextMenuItem } from '@elastic/eui';
 import { IndexPatternPrivateState } from '../indexpattern';
-import { getPotentialColumns, getColumnOrder } from '../operations';
+import { getPotentialColumns, getColumnOrder, operationDefinitionMap } from '../operations';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../operations');
 
@@ -159,6 +160,68 @@ describe('IndexPatternDimensionPanel', () => {
       .simulate('click');
 
     expect(wrapper.find(EuiComboBox)!.prop('options')!.length).toEqual(0);
+  });
+
+  it('should render the inline options directly', () => {
+    mount(
+      <IndexPatternDimensionPanel
+        dragDropContext={dragDropContext}
+        state={state}
+        setState={() => {}}
+        columnId={'col1'}
+        filterOperations={() => false}
+      />
+    );
+
+    expect(operationDefinitionMap.date_histogram.inlineOptions as jest.Mock).toHaveBeenCalled();
+  });
+
+  it('should not render the settings button if there are no settings or options', () => {
+    const wrapper = mount(
+      <IndexPatternDimensionPanel
+        dragDropContext={dragDropContext}
+        state={state}
+        setState={() => {}}
+        columnId={'col1'}
+        filterOperations={() => false}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="indexPattern-dimensionPopover-button"]').length).toBe(0);
+  });
+
+  it('should render the settings button if there are settings', () => {
+    const wrapper = mount(
+      <IndexPatternDimensionPanel
+        dragDropContext={dragDropContext}
+        state={{
+          ...state,
+          columns: {
+            col1: {
+              operationId: 'op1',
+              label: 'Values of category',
+              dataType: 'string',
+              isBucketed: true,
+
+              // Private
+              operationType: 'terms',
+              params: {
+                orderBy: { type: 'alphabetical' },
+                size: 5,
+              },
+              sourceField: 'category',
+            },
+          },
+        }}
+        setState={() => {}}
+        columnId={'col1'}
+        filterOperations={() => false}
+      />
+    );
+
+    expect(
+      wrapper.find('EuiButtonIcon[data-test-subj="indexPattern-dimensionPopover-button"]').length
+    ).toBe(1);
   });
 
   it('should list all field names and document as a whole in sorted order', () => {

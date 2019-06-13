@@ -8,6 +8,7 @@ const actual = jest.requireActual('../operations');
 
 jest.spyOn(actual, 'getPotentialColumns');
 jest.spyOn(actual, 'getColumnOrder');
+jest.spyOn(actual.operationDefinitionMap.date_histogram, 'inlineOptions');
 
 export const {
   getPotentialColumns,
