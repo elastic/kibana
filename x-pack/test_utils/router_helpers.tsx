@@ -25,7 +25,8 @@ export const WithRoute = (componentRoutePath = '/', onRouter = (router: any) => 
     class extends Component<any> {
       componentDidMount() {
         const { match, location, history } = this.props;
-        onRouter({ match, location, history });
+        const router = { route: { match, location }, history };
+        onRouter(router);
       }
 
       render() {
