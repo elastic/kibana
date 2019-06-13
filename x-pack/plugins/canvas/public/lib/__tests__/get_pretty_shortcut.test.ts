@@ -59,4 +59,20 @@ describe('getPrettyShortcut', () => {
     expect(getPrettyShortcut('command+shift+down')).toBe('⌘+SHIFT+↓');
     expect(getPrettyShortcut('command+option+shift+down')).toBe('⌘+⌥+SHIFT+↓');
   });
+  test(`replaces 'plus' with +`, () => {
+    expect(getPrettyShortcut('plus')).toBe('+');
+    expect(getPrettyShortcut('command+plus')).toBe('⌘++');
+    expect(getPrettyShortcut('option+plus')).toBe('⌥++');
+    expect(getPrettyShortcut('option+shift+plus')).toBe('⌥+SHIFT++');
+    expect(getPrettyShortcut('command+shift+plus')).toBe('⌘+SHIFT++');
+    expect(getPrettyShortcut('command+option+shift+plus')).toBe('⌘+⌥+SHIFT++');
+  });
+  test(`replaces 'minus' with -`, () => {
+    expect(getPrettyShortcut('minus')).toBe('-');
+    expect(getPrettyShortcut('command+minus')).toBe('⌘+-');
+    expect(getPrettyShortcut('option+minus')).toBe('⌥+-');
+    expect(getPrettyShortcut('option+shift+minus')).toBe('⌥+SHIFT+-');
+    expect(getPrettyShortcut('command+shift+minus')).toBe('⌘+SHIFT+-');
+    expect(getPrettyShortcut('command+option+shift+minus')).toBe('⌘+⌥+SHIFT+-');
+  });
 });
