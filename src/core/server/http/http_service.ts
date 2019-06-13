@@ -183,8 +183,9 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
         // long running tasks (build assets, saved objects migrations etc.)
         // we should let client know that and ask to retry after 30 seconds.
         return responseToolkit
-          .response('Kibana server is not ready yet')
+          .response('Kibana server is not ready yet. Your web browser should automatically refresh this page in 5 minutes.')
           .code(503)
+          .header('Refresh', '300')
           .header('Retry-After', '30');
       },
     });
