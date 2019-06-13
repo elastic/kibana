@@ -110,7 +110,9 @@ export function Settings({
                 setSettingsOpen(!isSettingsOpen);
               }}
               iconType="gear"
-              aria-label="Settings"
+              aria-label={i18n.translate('xpack.lens.indexPattern.settingsLabel', {
+                defaultMessage: 'Settings',
+              })}
             />
           </EuiFlexItem>
         }

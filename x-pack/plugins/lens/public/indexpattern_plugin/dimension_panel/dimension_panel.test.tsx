@@ -12,7 +12,6 @@ import { getPotentialColumns, getColumnOrder } from '../operations';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('../operations');
 

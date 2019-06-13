@@ -48,14 +48,18 @@ export function FieldSelect({
   const fieldLessColumn = filteredColumns.find(column => !('sourceField' in column));
   if (fieldLessColumn) {
     fieldOptions.push({
-      label: 'Document',
+      label: i18n.translate('xpack.lens.indexPattern.documentField', {
+        defaultMessage: 'Document',
+      }),
       value: fieldLessColumn.operationId,
     });
   }
 
   if (uniqueColumnsByField.length > 0) {
     fieldOptions.push({
-      label: 'Individual fields',
+      label: i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
+        defaultMessage: 'Individual fields',
+      }),
       options: uniqueColumnsByField.map(col => ({
         label: col.sourceField,
         value: col.operationId,
@@ -89,7 +93,9 @@ export function FieldSelect({
               setFieldSelectOpen(false);
             }}
             data-test-subj="indexPattern-dimension-field"
-            placeholder="Field"
+            placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
+              defaultMessage: 'Field',
+            })}
             options={fieldOptions}
             selectedOptions={
               selectedColumn && 'sourceField' in selectedColumn
@@ -129,7 +135,9 @@ export function FieldSelect({
             iconType="cross"
             iconSize="s"
             color="danger"
-            aria-label="Remove"
+            aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+              defaultMessage: 'Remove',
+            })}
             onClick={() => {
               const newColumns: IndexPatternPrivateState['columns'] = {
                 ...state.columns,
