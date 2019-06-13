@@ -19,7 +19,7 @@ describe('LogEntryFieldColumn', () => {
         isHovered={false}
         isWrapped={false}
       />,
-      { wrappingComponent: EuiThemeProvider }
+      { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
     );
     expect(component.exists('ul')).toBe(true);
     expect(
@@ -39,7 +39,7 @@ describe('LogEntryFieldColumn', () => {
         isHovered={false}
         isWrapped={false}
       />,
-      { wrappingComponent: EuiThemeProvider }
+      { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
     );
     expect(component.exists('ul')).toBe(false);
     expect(component.text()).toEqual('foo');
