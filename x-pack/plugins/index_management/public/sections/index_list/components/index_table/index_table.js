@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 
 import {
@@ -71,7 +71,7 @@ const HEADERS = {
   }),
 };
 
-export class IndexTableUi extends Component {
+export class IndexTable extends Component {
   static getDerivedStateFromProps(props, state) {
     // Deselct any indices which no longer exist, e.g. they've been deleted.
     const { selectedIndicesMap } = state;
@@ -116,7 +116,6 @@ export class IndexTableUi extends Component {
     sortChanged(column, newIsSortAscending);
   };
   renderFilterError() {
-    const { intl } = this.props;
     const { filterError } = this.state;
     if (!filterError) {
       return;
@@ -126,15 +125,13 @@ export class IndexTableUi extends Component {
         <EuiCallOut
           iconType="faceSad"
           color="danger"
-          title={intl.formatMessage(
-            {
-              id: 'xpack.idxMgmt.indexTable.invalidSearchErrorMessage',
-              defaultMessage: 'Invalid search: {errorMessage}',
-            },
-            {
+          title={i18n.translate('xpack.idxMgmt.indexTable.invalidSearchErrorMessage', {
+            defaultMessage: 'Invalid search: {errorMessage}',
+
+            values: {
               errorMessage: filterError.message,
             }
-          )}
+          })}
         />
         <EuiSpacer size="l" />
       </Fragment>
@@ -342,7 +339,6 @@ export class IndexTableUi extends Component {
       showSystemIndices,
       showSystemIndicesChanged,
       indices,
-      intl,
       loadIndices,
       indicesLoading,
       allIndices,
@@ -430,14 +426,12 @@ export class IndexTableUi extends Component {
                   query={filter}
                   box={{
                     incremental: true,
-                    placeholder: intl.formatMessage({
-                      id: 'xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder',
-                      defaultMessage: 'Search',
+                    placeholder: i18n.translate('xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder', {
+                      defaultMessage: 'Search'
                     }),
                   }}
-                  aria-label={intl.formatMessage({
-                    id: 'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
-                    defaultMessage: 'Search indices',
+                  aria-label={i18n.translate('xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel', {
+                    defaultMessage: 'Search indices'
                   })}
                   data-test-subj="indexTableFilterInput"
                   onChange={this.onFilterChanged}
@@ -490,5 +484,3 @@ export class IndexTableUi extends Component {
     );
   }
 }
-
-export const IndexTable = injectI18n(IndexTableUi);
