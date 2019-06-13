@@ -16,6 +16,8 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { TickFormatter } from '@elastic/charts/dist/lib/series/specs';
+import chrome from 'ui/chrome';
+import moment from 'moment-timezone';
 
 const chartHeight = 74;
 const FlexGroup = styled(EuiFlexGroup)`
@@ -115,3 +117,6 @@ export const getTheme = () => {
   };
   return mergeWithDefaultTheme(theme);
 };
+
+const kibanaTimezone = chrome.getUiSettingsClient().get('dateFormat:tz');
+export const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;

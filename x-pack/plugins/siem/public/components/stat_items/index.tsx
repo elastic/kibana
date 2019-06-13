@@ -17,13 +17,13 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { get, getOr } from 'lodash/fp';
-import { ScaleType } from '@elastic/charts';
-import moment from 'moment';
+import { ScaleType, niceTimeFormatter } from '@elastic/charts';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { getEmptyTagValue } from '../empty_value';
 import { ChartConfigsData, ChartData, ChartSeriesConfigs } from '../charts/common';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
+import { GlobalTime } from '../../containers/global_time';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -61,19 +61,16 @@ export interface StatItemsProps extends StatItems {
 }
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
-
-export const areachartConfigs = {
+export const areachartConfigs = (from: number, to: number) => ({
   series: {
     xScaleType: ScaleType.Time,
     yScaleType: ScaleType.Linear,
   },
   axis: {
-    xTickFormatter: (value: number): string => {
-      return moment(value).format('YY-MM-DD HH:mm:ss');
-    },
+    xTickFormatter: niceTimeFormatter([from, to]),
     yTickFormatter: numberFormatter,
   },
-};
+});
 export const barchartConfigs = {
   series: {
     xScaleType: ScaleType.Ordinal,
@@ -211,7 +208,11 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
 
             {enableAreaChart && (
               <FlexItem>
-                <AreaChart areaChart={areaChart} configs={areachartConfigs} />
+                <GlobalTime>
+                  {({ from, to }) => (
+                    <AreaChart areaChart={areaChart} configs={areachartConfigs(from, to)} />
+                  )}
+                </GlobalTime>
               </FlexItem>
             )}
           </EuiFlexGroup>

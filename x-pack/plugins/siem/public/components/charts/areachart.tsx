@@ -24,6 +24,7 @@ import {
   WrappedByAutoSizer,
   getTheme,
   ChartSeriesConfigs,
+  browserTimezone,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -84,6 +85,7 @@ export const AreaChartBaseComponent = React.memo<{
               data={series.value}
               xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
               yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
+              timeZone={browserTimezone}
               xAccessor="x"
               yAccessors={['y']}
               areaSeriesStyle={getSeriesLineStyle(series.color)}
