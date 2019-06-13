@@ -5,7 +5,7 @@
  */
 
 import { parseIsPaused } from './parse_is_paused';
-import { parseAutorefreshInterval } from './parse_autorefresh_interval';
+import { parseUrlInt } from './parse_url_int';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
 
 export interface UptimeUrlParams {
@@ -13,6 +13,8 @@ export interface UptimeUrlParams {
   autorefreshIsPaused: boolean;
   dateRangeStart: string;
   dateRangeEnd: string;
+  monitorListPageIndex: number;
+  monitorListPageSize: number;
   search: string;
   selectedPingStatus: string;
 }
@@ -22,6 +24,8 @@ const {
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
+  MONITOR_LIST_PAGE_INDEX,
+  MONITOR_LIST_PAGE_SIZE,
   SEARCH,
   SELECTED_PING_LIST_STATUS,
 } = CLIENT_DEFAULTS;
@@ -34,15 +38,19 @@ export const getSupportedUrlParams = (params: {
     autorefreshIsPaused,
     dateRangeStart,
     dateRangeEnd,
+    monitorListPageIndex,
+    monitorListPageSize,
     search,
     selectedPingStatus,
   } = params;
 
   return {
-    autorefreshInterval: parseAutorefreshInterval(autorefreshInterval, AUTOREFRESH_INTERVAL),
+    autorefreshInterval: parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
+    monitorListPageIndex: parseUrlInt(monitorListPageIndex, MONITOR_LIST_PAGE_INDEX),
+    monitorListPageSize: parseUrlInt(monitorListPageSize, MONITOR_LIST_PAGE_SIZE),
     search: search || SEARCH,
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,

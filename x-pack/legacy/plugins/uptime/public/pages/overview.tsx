@@ -14,7 +14,7 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { StatesTable } from '../components/functional/states_table/states_table';
+import { StatesTable, Criteria } from '../components/functional/states_table/states_table';
 
 interface OverviewPageProps {
   basePath: string;
@@ -44,7 +44,13 @@ export const OverviewPage = ({
     UptimeSettingsContext
   );
   const [params, updateUrl] = useUrlParams(history, location);
-  const { dateRangeStart, dateRangeEnd, search } = params;
+  const {
+    dateRangeStart,
+    dateRangeEnd,
+    monitorListPageIndex,
+    monitorListPageSize,
+    search,
+  } = params;
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -81,6 +87,13 @@ export const OverviewPage = ({
     refreshApp();
   };
 
+  const onMonitorListChange = ({ page: { index, size } }: Criteria) => {
+    updateUrl({
+      monitorListPageIndex: index,
+      monitorListPageSize: size,
+    });
+  };
+
   const linkParameters = stringifyUrlParams(params);
 
   return (
@@ -100,7 +113,12 @@ export const OverviewPage = ({
           variables={sharedProps}
         />
         <EuiSpacer size="s" />
-        <StatesTable />
+        <StatesTable
+          pageIndex={monitorListPageIndex}
+          pageSize={monitorListPageSize}
+          onChange={onMonitorListChange}
+          variables={{ pageIndex: monitorListPageIndex, pageSize: monitorListPageSize }}
+        />
         <MonitorList
           absoluteStartDate={absoluteStartDate}
           absoluteEndDate={absoluteEndDate}

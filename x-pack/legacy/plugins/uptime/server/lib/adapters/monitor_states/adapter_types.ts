@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorSummary } from '../../../../common/graphql/types';
+import { MonitorSummary, DocCount } from '../../../../common/graphql/types';
 
 export interface UMMonitorStatesAdapter {
-  getMonitorStates(request: any): Promise<MonitorSummary[]>;
+  getMonitorStates(request: any, pageIndex: number, pageSize: number): Promise<MonitorSummary[]>;
+  getSummaryCount(request: any): Promise<DocCount>;
 }

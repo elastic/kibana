@@ -1,8 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 /* tslint:disable */
 
 // ====================================================
@@ -39,7 +34,7 @@ export interface Query {
 
   getMonitorPageTitle?: MonitorPageTitle | null;
 
-  getMonitorStates?: (MonitorSummary | null)[] | null;
+  getMonitorStates?: MonitorSummaryResult | null;
 }
 
 export interface PingResults {
@@ -500,6 +495,12 @@ export interface MonitorPageTitle {
   name?: string | null;
 }
 
+export interface MonitorSummaryResult {
+  summaries?: MonitorSummary[] | null;
+
+  totalSummaryCount: DocCount;
+}
+
 export interface MonitorSummary {
   monitor_id: string;
 
@@ -675,6 +676,11 @@ export interface GetErrorsListQueryArgs {
 }
 export interface GetMonitorPageTitleQueryArgs {
   monitorId: string;
+}
+export interface GetMonitorStatesQueryArgs {
+  pageIndex: number;
+
+  pageSize: number;
 }
 
 // ====================================================

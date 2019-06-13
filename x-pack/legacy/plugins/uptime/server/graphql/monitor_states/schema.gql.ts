@@ -96,7 +96,12 @@ export const monitorStatesSchema = gql`
     state: State
   }
 
+  type MonitorSummaryResult {
+    summaries: [MonitorSummary!]
+    totalSummaryCount: DocCount!
+  }
+
   extend type Query {
-    getMonitorStates: [MonitorSummary]
+    getMonitorStates(pageIndex: Int!, pageSize: Int!): MonitorSummaryResult
   }
 `;

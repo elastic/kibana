@@ -5,13 +5,18 @@
  */
 
 import { UMMonitorStatesAdapter } from '../adapters/monitor_states';
+import { DocCount } from '../../../common/graphql/types';
 
 export class UMMonitorStatesDomain {
   constructor(private readonly adapter: UMMonitorStatesAdapter, libs: {}) {
     this.adapter = adapter;
   }
 
-  public async getMonitorStates(request: any): Promise<any> {
-    return this.adapter.getMonitorStates(request);
+  public async getMonitorStates(request: any, pageIndex: number, pageSize: number): Promise<any> {
+    return this.adapter.getMonitorStates(request, pageIndex, pageSize);
+  }
+
+  public async getSummaryCount(request: any): Promise<DocCount> {
+    return this.adapter.getSummaryCount(request);
   }
 }

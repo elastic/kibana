@@ -7,12 +7,12 @@
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
 import { UMServerLibs } from '../../lib/lib';
 import { UMResolver } from '../../../common/graphql/resolver_types';
-import { MonitorSummary } from '../../../common/graphql/types';
+import { GetMonitorStatesQueryArgs, MonitorSummaryResult } from '../../../common/graphql/types';
 
 export type UMGetMonitorStatesResolver = UMResolver<
-  MonitorSummary[] | Promise<MonitorSummary[]>,
+  MonitorSummaryResult | Promise<MonitorSummaryResult>,
   any,
-  any,
+  GetMonitorStatesQueryArgs,
   UMContext
 >;
 
@@ -23,8 +23,19 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
 } => {
   return {
     Query: {
-      async getMonitorStates(resolver, params, { req }): Promise<MonitorSummary[]> {
-        return await libs.monitorStates.getMonitorStates(req);
+      async getMonitorStates(
+        resolver,
+        { pageIndex, pageSize },
+        { req }
+      ): Promise<MonitorSummaryResult> {
+        const [totalSummaryCount, summaries] = await Promise.all([
+          libs.monitorStates.getSummaryCount(req),
+          libs.monitorStates.getMonitorStates(req, pageIndex, pageSize),
+        ]);
+        return {
+          summaries,
+          totalSummaryCount,
+        };
       },
     },
   };

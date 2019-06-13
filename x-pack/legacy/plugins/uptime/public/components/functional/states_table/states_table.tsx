@@ -19,15 +19,26 @@ import React, { useState } from 'react';
 import moment from 'moment';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
-import { MonitorSummary, Summary, State } from '../../../../common/graphql/types';
+import {
+  MonitorSummary,
+  Summary,
+  State,
+  MonitorSummaryResult,
+} from '../../../../common/graphql/types';
 import { MonitorListStatusColumn } from '../monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 
 interface StatesTableQueryResult {
-  monitorStates?: MonitorSummary[];
+  monitorStates?: MonitorSummaryResult;
 }
 
-type Props = UptimeGraphQLQueryProps<StatesTableQueryResult>;
+interface StatesTableProps {
+  pageIndex: number;
+  pageSize: number;
+  onChange: (criteria: Criteria) => void;
+}
+
+type Props = UptimeGraphQLQueryProps<StatesTableQueryResult> & StatesTableProps;
 
 const inferStatus = (summary: Summary): 'up' | 'down' | 'mixed' => {
   if (summary.up && !summary.down) {
@@ -71,10 +82,41 @@ const drawer = (summary: MonitorSummary | undefined) => {
   );
 };
 
+interface Pagination {
+  pageIndex: number;
+  pageSize: number;
+  totalItemCount: number;
+  pageSizeOptions: number[];
+  hidePerPageOptions: boolean;
+}
+
+export interface Criteria {
+  page: {
+    index: number;
+    size: number;
+  };
+  sort: {
+    field: string;
+    direction: 'asc' | 'desc';
+  };
+}
+
 export const StatesTableComponent = (props: Props) => {
-  const { data, errors, loading } = props;
+  const { data, errors, loading, onChange, pageIndex, pageSize } = props;
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: JSX.Element | null }>({});
-  const items = data && data.monitorStates ? data.monitorStates : [];
+  if (!data || !data.monitorStates) return null;
+  const {
+    summaries: items,
+    totalSummaryCount: { count },
+  } = data.monitorStates;
+
+  const pagination: Pagination = {
+    pageIndex,
+    pageSize,
+    pageSizeOptions: [5, 10, 20],
+    totalItemCount: count,
+    hidePerPageOptions: false,
+  };
 
   return (
     <EuiPanel paddingSize="s">
@@ -92,7 +134,9 @@ export const StatesTableComponent = (props: Props) => {
         isExpandable
         itemId="monitor_id"
         itemIdToExpandedRowMap={expandedItems}
-        items={items}
+        items={items || []}
+        onChange={onChange}
+        pagination={pagination}
         columns={[
           {
             field: 'monitor_id',
@@ -164,7 +208,7 @@ export const StatesTableComponent = (props: Props) => {
   );
 };
 
-export const StatesTable = withUptimeGraphQL<StatesTableQueryResult>(
+export const StatesTable = withUptimeGraphQL<StatesTableQueryResult, StatesTableProps>(
   StatesTableComponent,
   monitorStatesQuery
 );

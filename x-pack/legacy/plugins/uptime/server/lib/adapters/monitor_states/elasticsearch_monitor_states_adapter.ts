@@ -7,20 +7,30 @@
 import { get } from 'lodash';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorStatesAdapter } from './adapter_types';
-import { MonitorSummary } from '../../../../common/graphql/types';
+import { MonitorSummary, DocCount } from '../../../../common/graphql/types';
 
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
     this.database = database;
   }
 
-  public async getMonitorStates(request: any): Promise<MonitorSummary[]> {
+  public async getMonitorStates(
+    request: any,
+    pageIndex: number,
+    pageSize: number
+  ): Promise<MonitorSummary[]> {
     const params = {
       index: 'heartbeat-states-8.0.0',
       body: {
-        query: {
-          match_all: {},
-        },
+        sort: [
+          {
+            monitor_id: {
+              order: 'asc',
+            },
+          },
+        ],
+        from: pageIndex * pageSize,
+        size: pageSize,
       },
     };
 
@@ -45,5 +55,11 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       };
       return f;
     });
+  }
+
+  public async getSummaryCount(request: any): Promise<DocCount> {
+    const { count } = await this.database.count(request, { index: 'heartbeat-states-8.0.0' });
+
+    return { count };
   }
 }
