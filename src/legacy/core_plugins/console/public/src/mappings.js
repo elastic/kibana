@@ -22,8 +22,6 @@ const _ = require('lodash');
 const es = require('./es');
 const settings = require('./settings');
 
-
-
 let perIndexTypes = {};
 let perAliasIndexes = [];
 let templates = [];
@@ -61,12 +59,13 @@ function expandAliases(indicesOrAliases) {
 function getTemplates() {
   return [ ...templates ];
 }
+
 function getFields(indices, types) {
   // get fields for indices and types. Both can be a list, a string or null (meaning all).
   let ret = [];
   indices = expandAliases(indices);
-  if (typeof indices === 'string') {
 
+  if (typeof indices === 'string') {
     const typeDict = perIndexTypes[indices];
     if (!typeDict) {
       return [];
@@ -75,8 +74,7 @@ function getFields(indices, types) {
     if (typeof types === 'string') {
       const f = typeDict[types];
       ret = f ? f : [];
-    }
-    else {
+    } else {
       // filter what we need
       $.each(typeDict, function (type, fields) {
         if (!types || types.length === 0 || $.inArray(type, types) !== -1) {
@@ -86,8 +84,7 @@ function getFields(indices, types) {
 
       ret = [].concat.apply([], ret);
     }
-  }
-  else {
+  } else {
     // multi index mode.
     $.each(perIndexTypes, function (index) {
       if (!indices || indices.length === 0 || $.inArray(index, indices) !== -1) {
@@ -128,9 +125,7 @@ function getTypes(indices) {
   }
 
   return _.uniq(ret);
-
 }
-
 
 function getIndices(includeAliases) {
   const ret = [];
@@ -164,7 +159,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
 
   if (fieldMapping.properties) {
     // derived object type
-    nestedFields = getFieldNamesFromTypeMapping(fieldMapping);
+    nestedFields = getFieldNamesFromProperties(fieldMapping.properties);
     return applyPathSettings(nestedFields);
   }
 
@@ -196,9 +191,9 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   return [ret];
 }
 
-function getFieldNamesFromTypeMapping(typeMapping) {
+function getFieldNamesFromProperties(properties = {}) {
   const fieldList =
-    $.map(typeMapping.properties || {}, function (fieldMapping, fieldName) {
+    $.map(properties, function (fieldMapping, fieldName) {
       return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
     });
 
@@ -214,16 +209,24 @@ function loadTemplates(templatesObject = {}) {
 
 function loadMappings(mappings) {
   perIndexTypes = {};
+
   $.each(mappings, function (index, indexMapping) {
     const normalizedIndexMappings = {};
-    // 1.0.0 mapping format has changed, extract underlying mapping
+
+    // Migrate 1.0.0 mappings. This format has changed, so we need to extract the underlying mapping.
     if (indexMapping.mappings && _.keys(indexMapping).length === 1) {
       indexMapping = indexMapping.mappings;
     }
+
     $.each(indexMapping, function (typeName, typeMapping) {
-      const fieldList = getFieldNamesFromTypeMapping(typeMapping);
-      normalizedIndexMappings[typeName] = fieldList;
+      if (typeName === 'properties') {
+        const fieldList = getFieldNamesFromProperties(typeMapping);
+        normalizedIndexMappings[typeName] = fieldList;
+      } else {
+        normalizedIndexMappings[typeName] = [];
+      }
     });
+
     perIndexTypes[index] = normalizedIndexMappings;
   });
 }
