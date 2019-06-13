@@ -1,17 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-
-function report {
-  if [[ -z "$PR_SOURCE_BRANCH" ]]; then
-    node src/dev/failed_tests/cli
-  else
-    echo "Failure issues not created on pull requests"
-
-  fi
-}
-
-trap report EXIT
+trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
 node scripts/build --debug --oss;
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-oss-*-linux-x86_64.tar.gz')"
