@@ -208,39 +208,6 @@ describe('IndexPattern Data Source', () => {
       expect(indexPatternDatasource.toExpression(state)).toEqual(null);
     });
 
-    it('should generate an expression for a values query', async () => {
-      const queryPersistedState: IndexPatternPersistedState = {
-        currentIndexPatternId: '1',
-        columnOrder: ['col1', 'col2'],
-        columns: {
-          col1: {
-            operationId: 'op1',
-            label: 'My Op',
-            dataType: 'string',
-            isBucketed: false,
-
-            // Private
-            operationType: 'value',
-            sourceField: 'source',
-          },
-          col2: {
-            operationId: 'op2',
-            label: 'My Op 2',
-            dataType: 'number',
-            isBucketed: false,
-
-            // Private
-            operationType: 'value',
-            sourceField: 'bytes',
-          },
-        },
-      };
-      const state = await indexPatternDatasource.initialize(queryPersistedState);
-      expect(indexPatternDatasource.toExpression(state)).toMatchInlineSnapshot(
-        `"esdocs index=\\"my-fake-index-pattern\\" fields=\\"source, bytes\\" sort=\\"source, DESC\\" | lens_rename_columns idMap='{\\"source\\":\\"col1\\",\\"bytes\\":\\"col2\\"}'"`
-      );
-    });
-
     it('should generate an expression for an aggregated query', async () => {
       const queryPersistedState: IndexPatternPersistedState = {
         currentIndexPatternId: '1',

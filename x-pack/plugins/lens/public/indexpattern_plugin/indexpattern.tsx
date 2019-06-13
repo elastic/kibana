@@ -25,15 +25,7 @@ import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { makeOperation, getOperationTypesForField } from './operations';
 
-export type OperationType =
-  | 'value'
-  | 'terms'
-  | 'date_histogram'
-  | 'sum'
-  | 'avg'
-  | 'min'
-  | 'max'
-  | 'count';
+export type OperationType = 'terms' | 'date_histogram' | 'sum' | 'avg' | 'min' | 'max' | 'count';
 
 export interface IndexPatternColumn {
   // Public

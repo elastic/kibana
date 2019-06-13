@@ -18,18 +18,7 @@ export function toExpression(state: IndexPatternPrivateState) {
 
   const indexName = state.indexPatterns[state.currentIndexPatternId].title;
 
-  if (sortedColumns.every(({ operationType }) => operationType === 'value')) {
-    const idMap = fieldNames.reduce(
-      (currentIdMap, fieldName, index) => ({
-        ...currentIdMap,
-        [fieldName]: state.columnOrder[index],
-      }),
-      {} as Record<string, string>
-    );
-    return `esdocs index="${indexName}" fields="${fieldNames.join(', ')}" sort="${
-      fieldNames[0]
-    }, DESC" | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
-  } else if (sortedColumns.length) {
+  if (sortedColumns.length) {
     const firstMetric = sortedColumns.findIndex(({ isBucketed }) => !isBucketed);
     const aggs = sortedColumns.map((col, index) => {
       if (col.operationType === 'date_histogram') {

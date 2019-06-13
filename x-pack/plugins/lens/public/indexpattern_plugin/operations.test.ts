@@ -238,8 +238,8 @@ describe('getColumnOrder', () => {
           isBucketed: true,
 
           // Private
-          operationType: 'value',
-          sourceField: 'timestamp',
+          operationType: 'terms',
+          sourceField: 'category',
         },
         col2: {
           operationId: 'op2',
@@ -248,7 +248,7 @@ describe('getColumnOrder', () => {
           isBucketed: false,
 
           // Private
-          operationType: 'value',
+          operationType: 'avg',
           sourceField: 'bytes',
         },
         col3: {
