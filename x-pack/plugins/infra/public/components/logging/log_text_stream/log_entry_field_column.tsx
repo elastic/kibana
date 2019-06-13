@@ -22,9 +22,9 @@ const CommaSeparatedLI = styled.li`
   display: inline;
   &:not(:last-child) {
     margin-right: 1ex;
-  }
-  &::after {
-    content: ',';
+    &::after {
+      content: ',';
+    }
   }
 `;
 
