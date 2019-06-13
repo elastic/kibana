@@ -112,7 +112,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       text: 'Alphabetical',
     });
     return [
-      <EuiContextMenuItem key={`orderby-${toValue(currentColumn.params.orderBy)}`}>
+      <EuiContextMenuItem
+        data-test-subj="lns-indexPatternSettings-termsOrderBy"
+        key={`orderby-${toValue(currentColumn.params.orderBy)}`}
+      >
         <EuiFormRow label="Order by">
           <EuiSelect
             options={orderOptions}
