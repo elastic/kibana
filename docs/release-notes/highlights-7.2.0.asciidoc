@@ -160,7 +160,7 @@ We welcome your feedback in the form of a https://github.com/elastic/kibana/issu
 You can also https://github.com/elastic/kibana/pulls[issue a pull request in GitHub].
 
 [role="screenshot"]
-image::release-notes/images/7.2-localization.png[Kibana in Japanese]
+image::release-notes/images/7.2-localization.jpg[Kibana in Japanese]
 
 
 [float]
