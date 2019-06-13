@@ -14,7 +14,6 @@ import { FeaturePrivilegeBuilder } from './feature_privilege_builder';
 import { FeaturePrivilegeManagementBuilder } from './management';
 import { FeaturePrivilegeNavlinkBuilder } from './navlink';
 import { FeaturePrivilegeSavedObjectBuilder } from './saved_object';
-import { FeaturePrivilegeSavedObjectsManagementBuilder } from './saved_objects_management';
 import { FeaturePrivilegeUIBuilder } from './ui';
 export { FeaturePrivilegeBuilder };
 
@@ -26,7 +25,6 @@ export const featurePrivilegeBuilderFactory = (actions: Actions): FeaturePrivile
     new FeaturePrivilegeManagementBuilder(actions),
     new FeaturePrivilegeNavlinkBuilder(actions),
     new FeaturePrivilegeSavedObjectBuilder(actions),
-    new FeaturePrivilegeSavedObjectsManagementBuilder(actions),
     new FeaturePrivilegeUIBuilder(actions),
   ];
 

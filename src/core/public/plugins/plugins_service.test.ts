@@ -73,10 +73,8 @@ beforeEach(() => {
       ]);
       return metadata;
     })(),
-    chrome: chromeServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
-    i18n: i18nServiceMock.createSetupContract(),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract() as jest.Mocked<UiSettingsClient>,
   };

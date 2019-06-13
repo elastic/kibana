@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { isSystemApiRequest } from 'ui/system_api';
-import { PathProvider } from 'plugins/xpack_main/services/path';
+import { Path } from 'plugins/xpack_main/services/path';
 import { toastNotifications } from 'ui/notify';
 import 'plugins/security/services/auto_logout';
 import { SessionExpirationWarning } from '../components/session_expiration_warning';
@@ -39,7 +39,7 @@ module.config(($httpProvider) => {
       clearNotifications();
     }
 
-    const isUnauthenticated = Private(PathProvider).isUnauthenticated();
+    const isUnauthenticated = Path.isUnauthenticated();
     const notificationLifetime = 60 * 1000;
     const notificationOptions = {
       color: 'warning',
