@@ -72,7 +72,11 @@ export class MapEmbeddable extends Embeddable {
       this._dispatchSetQuery(containerState);
     }
 
-    if (!_.isEqual(containerState.refreshConfig, this._prevRefreshConfig)) {
+    const refreshConfig = {
+      isPaused: containerState.refreshConfig.pause,
+      interval: containerState.refreshConfig.value
+    };
+    if (!_.isEqual(refreshConfig, this._prevRefreshConfig)) {
       this._dispatchSetRefreshConfig(containerState);
     }
   }
@@ -89,8 +93,12 @@ export class MapEmbeddable extends Embeddable {
   }
 
   _dispatchSetRefreshConfig({ refreshConfig }) {
-    this._prevRefreshConfig = refreshConfig;
-    this._store.dispatch(setRefreshConfig(refreshConfig));
+    const internalRefreshConfig = {
+      isPaused: refreshConfig.pause,
+      interval: refreshConfig.value
+    };
+    this._prevRefreshConfig = internalRefreshConfig;
+    this._store.dispatch(setRefreshConfig(internalRefreshConfig));
   }
 
   /**

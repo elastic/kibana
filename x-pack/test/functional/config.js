@@ -190,8 +190,8 @@ export default async function ({ readConfigFile }) {
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
         '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
-        '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.maps.showMapsInspectorAdapter=true',
+        '--xpack.telemetry.banner=false',
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
         '--stats.maximumWaitTimeForAllCollectorsInS=0',
@@ -203,6 +203,7 @@ export default async function ({ readConfigFile }) {
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
       },
     },
     // the apps section defines the urls that

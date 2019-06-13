@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { ContainerStyle } from '../types';
+import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../types';
 import { getFunctionHelp, getFunctionErrors } from '../../strings';
 // @ts-ignore untyped local
 import { isValidUrl } from '../../../common/lib/url';
@@ -55,13 +55,13 @@ export function containerStyle(): ExpressionFunction<
         types: ['string'],
         help: argHelp.backgroundSize,
         default: 'contain',
-        options: ['contain', 'cover', 'auto'],
+        options: Object.values(BackgroundSize),
       },
       backgroundRepeat: {
         types: ['string'],
         help: argHelp.backgroundRepeat,
         default: 'no-repeat',
-        options: ['repeat-x', 'repeat', 'space', 'round', 'no-repeat', 'space'],
+        options: Object.values(BackgroundRepeat),
       },
       opacity: {
         types: ['number'],
@@ -70,7 +70,7 @@ export function containerStyle(): ExpressionFunction<
       overflow: {
         types: ['string'],
         help: argHelp.overflow,
-        options: ['visible', 'hidden', 'scroll', 'auto'],
+        options: Object.values(Overflow),
         default: 'hidden',
       },
     },
