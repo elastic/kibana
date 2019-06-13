@@ -17,6 +17,7 @@ export const SectionLoading: React.FunctionComponent<Props> = ({ children }) => 
     <EuiEmptyPrompt
       title={<EuiLoadingSpinner size="xl" />}
       body={<EuiText color="subdued">{children}</EuiText>}
+      data-test-subj="sectionLoading"
     />
   );
 };
