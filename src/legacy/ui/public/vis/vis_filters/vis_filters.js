@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import { pushFilterBarFilters } from '../push_filters';
-import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
 import { onBrushEvent } from './brush_event';
 
 /**
@@ -83,51 +82,49 @@ const createFilter = (aggConfigs, table, columnIndex, rowIndex, cellValue) => {
   return filter;
 };
 
-const VisFiltersProvider = (Private, getAppState) => {
-  const queryFilter = Private(FilterBarQueryFilterProvider);
+
+const createFiltersFromEvent = (event) => {
+  const filters = [];
+  const dataPoints = event.data || [event];
+
+  dataPoints.filter(point => point).forEach(val => {
+    const { table, column, row, value } = val;
+    const filter = createFilter(event.aggConfigs, table, column, row, value);
+    if (filter) {
+      filter.forEach(f => {
+        if (event.negate) {
+          f.meta.negate = !f.meta.negate;
+        }
+        filters.push(f);
+      });
+    }
+  });
+
+  return filters;
+};
+
+const VisFiltersProvider = (getAppState, $timeout) => {
 
   const pushFilters = (filters, simulate) => {
     const appState = getAppState();
     if (filters.length && !simulate) {
       const flatFilters = _.flatten(filters);
-      const deduplicatedFilters = flatFilters.filter((v, i) => i === flatFilters.findIndex(f => _.isEqual(v, f)));
+      const deduplicatedFilters = flatFilters.filter((v, i) => {
+        return i === flatFilters.findIndex(f => _.isEqual(v, f));
+      });
       pushFilterBarFilters(appState, deduplicatedFilters);
+      // to trigger angular digest cycle, we can get rid of this once we have either new filterManager or actions API
+      $timeout(_.noop, 0);
     }
   };
 
-  const filter = (event, { simulate = false } = {}) => {
-    const dataPoints = event.data;
-    const filters = [];
-
-    dataPoints.filter(point => point).forEach(val => {
-      const { table, column, row, value } = val;
-      const filter = createFilter(event.aggConfigs, table, column, row, value);
-      if (filter) {
-        filter.forEach(f => {
-          if (event.negate) {
-            f.meta.negate = !f.meta.negate;
-          }
-          filters.push(f);
-        });
-      }
-    });
-
-    pushFilters(filters, simulate);
-    return filters;
-  };
-
-  const addFilter = (event) => {
-    const filter = createFilter(event.aggConfigs, event.table, event.column, event.row, event.value);
-    queryFilter.addFilters(filter);
-  };
 
   return {
-    addFilter,
-    filter,
+    pushFilters,
     brush: (event) => {
       onBrushEvent(event, getAppState());
     },
   };
 };
 
-export { VisFiltersProvider, createFilter };
+export { VisFiltersProvider, createFilter, createFiltersFromEvent };
