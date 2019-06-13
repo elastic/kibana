@@ -133,7 +133,14 @@ export class WorkpadHeader extends React.PureComponent {
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiToolTip position="bottom" content="Zoom out">
+                <EuiToolTip
+                  position="bottom"
+                  content={
+                    <span>
+                      Zoom Out <ToolTipShortcut namespace="EDITOR" action="ZOOM_OUT" />
+                    </span>
+                  }
+                >
                   <EuiButtonIcon
                     iconType="starMinusFilled"
                     onClick={zoomOut}
@@ -143,7 +150,14 @@ export class WorkpadHeader extends React.PureComponent {
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiToolTip position="bottom" content="Zoom in">
+                <EuiToolTip
+                  position="bottom"
+                  content={
+                    <span>
+                      Zoom In <ToolTipShortcut namespace="EDITOR" action="ZOOM_IN" />
+                    </span>
+                  }
+                >
                   <EuiButtonIcon
                     iconType="starPlusFilled"
                     onClick={zoomIn}
