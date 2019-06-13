@@ -7,8 +7,6 @@
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
-import { HttpLink } from 'apollo-link-http';
-import { withClientState } from 'apollo-link-state';
 import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
 import chrome from 'ui/chrome';
@@ -18,11 +16,11 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore: path dynamic for kibana
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
-import { errorLink, refetchOnErrorLink } from '../../containers/errors';
 import introspectionQueryResultData from '../../graphql/introspection.json';
 import { AppKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { AppKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
 import { AppFrontendLibs } from '../lib';
+import { getLinks } from './helpers';
 
 export function compose(): AppFrontendLibs {
   const cache = new InMemoryCache({
@@ -40,21 +38,7 @@ export function compose(): AppFrontendLibs {
   const graphQLOptions = {
     connectToDevTools: process.env.NODE_ENV !== 'production',
     cache,
-    link: ApolloLink.from([
-      errorLink,
-      refetchOnErrorLink,
-      withClientState({
-        cache,
-        resolvers: {},
-      }),
-      new HttpLink({
-        credentials: 'same-origin',
-        headers: {
-          'kbn-xsrf': chrome.getXsrfToken(),
-        },
-        uri: `${chrome.getBasePath()}/api/siem/graphql`,
-      }),
-    ]),
+    link: ApolloLink.from(getLinks(cache)),
   };
 
   const apolloClient = new ApolloClient(graphQLOptions);
