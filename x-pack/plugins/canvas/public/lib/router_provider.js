@@ -48,8 +48,8 @@ export function routerProvider(routes) {
     execute(path = history.getPath()) {
       return this.parse(path);
     },
-    getPath: history.getPath,
-    getFullPath: history.getFullPath,
+    getPath: () => history.getPath(),
+    getFullPath: () => history.getFullPath(),
     navigateTo(name, params, state) {
       updateLocation(name, params, state);
     },
