@@ -216,8 +216,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
       describe('delete repository', () => {
         test('should show a confirmation when clicking the delete repository button', async () => {
-          const { table, actions } = testBed;
-          const { rows } = table.getMetaData('repositoryTable');
+          const { actions } = testBed;
 
           await actions.clickRepositoryActionAt(0, 'delete');
 
