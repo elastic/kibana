@@ -33,6 +33,8 @@ if (process.env.NODE_ENV === 'test') {
   addDecorator(withKnobs);
 }
 
+const KIBANA_PLUGIN = process.env.KIBANA_PLUGIN;
+
 function loadStories() {
   require('./dll_contexts');
 
@@ -45,13 +47,18 @@ function loadStories() {
   );
   css.keys().forEach(filename => css(filename));
 
-  // Find all files ending in *.examples.ts in x-pack
-  const xpack = require.context('./../../../../x-pack/plugins', true, /.examples.tsx$/);
-  xpack.keys().forEach(filename => xpack(filename));
-  
-  // Find all files ending in *.examples.ts in src
-  const src = require.context('./../../../../src', true, /.examples.tsx$/);
-  src.keys().forEach(filename => src(filename));
+  if (KIBANA_PLUGIN === 'canvas') {
+    const req = require.context('./../../../../x-pack/plugins/canvas', true, /.examples.tsx$/);
+    req.keys().forEach(filename => req(filename));
+  } else if (KIBANA_PLUGIN === 'siem') {
+    const req = require.context('./../../../../x-pack/plugins/siem', true, /.examples.tsx$/);
+    req.keys().forEach(filename => req(filename));
+  } else {
+    const xpack = require.context('./../../../../x-pack/plugins', true, /.examples.tsx$/);
+    const src = require.context('./../../../../src', true, /.examples.tsx$/);
+    xpack.keys().forEach(filename => xpack(filename));
+    src.keys().forEach(filename => src(filename));
+  }
 }
 
 // Set up the Storybook environment with custom settings.
