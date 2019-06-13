@@ -131,5 +131,5 @@ export default function init(input, output, sourceLocation = 'stored') {
   };
   setupAutosave();
   loadSavedState();
-  mappings.startRetrievingAutoCompleteInfo();
+  mappings.startPolling();
 }

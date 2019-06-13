@@ -22,6 +22,11 @@ const _ = require('lodash');
 const es = require('./es');
 const settings = require('./settings');
 
+// NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
+// due to timing issues in our app.js tests.
+const POLL_INTERVAL = 60000;
+let pollTimeoutId;
+
 let perIndexTypes = {};
 let perAliasIndexes = [];
 let templates = [];
@@ -259,20 +264,21 @@ function clear() {
   templates = [];
 }
 
-function retrieveSettings(settingsKey, changedFields) {
-  const autocompleteSettings = settings.getAutocomplete();
+function retrieveSettings(settingsKey, settingsToRetrieve) {
+  const currentSettings = settings.getAutocomplete();
   const settingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
     templates: '_template',
   };
-  // Fetch autocomplete info if setting is set to true, and if user has made changes
-  if (autocompleteSettings[settingsKey] && changedFields[settingsKey]) {
+
+  // Fetch autocomplete info if setting is set to true, and if user has made changes.
+  if (currentSettings[settingsKey] && settingsToRetrieve[settingsKey]) {
     return es.send('GET', settingKeyToPathMap[settingsKey], null, null, true);
   } else {
     const settingsPromise = new $.Deferred();
     // If a user has saved settings, but a field remains checked and unchanged, no need to make changes
-    if (autocompleteSettings[settingsKey]) {
+    if (currentSettings[settingsKey]) {
       return settingsPromise.resolve();
     }
     // If the user doesn't want autocomplete suggestions, then clear any that exist
@@ -280,10 +286,15 @@ function retrieveSettings(settingsKey, changedFields) {
   }
 }
 
-function retrieveAutocompleteInfoFromServer(changedFields) {
-  const mappingPromise = retrieveSettings('fields', changedFields);
-  const aliasesPromise = retrieveSettings('indices', changedFields);
-  const templatesPromise = retrieveSettings('templates', changedFields);
+// Retrieve all selected settings by default.
+function retrieveAutoCompleteInfo(settingsToRetrieve = settings.getAutocomplete()) {
+  if (pollTimeoutId) {
+    clearTimeout(pollTimeoutId);
+  }
+
+  const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
+  const aliasesPromise = retrieveSettings('indices', settingsToRetrieve);
+  const templatesPromise = retrieveSettings('templates', settingsToRetrieve);
 
   $.when(mappingPromise, aliasesPromise, templatesPromise)
     .done((mappings, aliases, templates) => {
@@ -311,26 +322,28 @@ function retrieveAutocompleteInfoFromServer(changedFields) {
         // Trigger an update event with the mappings, aliases
         $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
       }
+
+      // Schedule next request.
+      pollTimeoutId = setTimeout(retrieveAutoCompleteInfo, POLL_INTERVAL);
     });
 }
 
-function autocompleteRetriever() {
-  const changedFields = settings.getAutocomplete();
-  retrieveAutocompleteInfoFromServer(changedFields);
-  setTimeout(function () {
-    autocompleteRetriever();
-  }, 60000);
+function startPolling() {
+  // Technically, we don't need this method and we could just expose retrieveAutoCompleteInfo.
+  // However, we'll want to allow the user to turn polling on and off eventually so we'll leave this
+  // here to support this eventual functionality.
+  retrieveAutoCompleteInfo();
 }
 
 export default _.assign(mappingObj, {
-  getFields: getFields,
-  getTemplates: getTemplates,
-  getIndices: getIndices,
-  getTypes: getTypes,
-  loadMappings: loadMappings,
-  loadAliases: loadAliases,
-  expandAliases: expandAliases,
-  clear: clear,
-  startRetrievingAutoCompleteInfo: autocompleteRetriever,
-  retrieveAutoCompleteInfo: retrieveAutocompleteInfoFromServer
+  getFields,
+  getTemplates,
+  getIndices,
+  getTypes,
+  loadMappings,
+  loadAliases,
+  expandAliases,
+  clear,
+  startPolling,
+  retrieveAutoCompleteInfo,
 });
