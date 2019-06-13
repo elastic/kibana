@@ -6,10 +6,18 @@
 
 import { connect } from 'react-redux';
 import { setFullscreen } from '../../state/actions/transient';
+import {
+  setRefreshInterval,
+  enableAutoplay,
+  setAutoplayInterval,
+} from '../../state/actions/workpad';
 import { Router as Component } from './router';
 
 const mapDispatchToState = {
   setFullscreen,
+  setRefreshInterval,
+  enableAutoplay,
+  setAutoplayInterval,
 };
 
 export const Router = connect(

@@ -8,6 +8,7 @@ import { fetchAllRenderables } from '../actions/elements';
 import { setRefreshInterval } from '../actions/workpad';
 import { inFlightComplete } from '../actions/resolved_args';
 import { getInFlight } from '../selectors/resolved_args';
+import { setAppState } from '../../lib/app_state';
 
 export const workpadRefresh = ({ dispatch, getState }) => next => {
   let refreshTimeout;
@@ -48,6 +49,7 @@ export const workpadRefresh = ({ dispatch, getState }) => next => {
     if (action.type === setRefreshInterval.toString()) {
       // update the refresh interval
       refreshInterval = action.payload;
+      setAppState('autorefresh', { interval: refreshInterval });
 
       // clear any pending timeout
       clearTimeout(refreshTimeout);

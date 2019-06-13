@@ -63,6 +63,9 @@ export class Router extends React.PureComponent {
         // dispatch actions based on the app state
         const appState = getAppState();
         this.props.setFullscreen(appState.fullscreen);
+        this.props.setRefreshInterval(appState.autorefresh.interval);
+        this.props.enableAutoplay(appState.autoplay.enabled);
+        this.props.setAutoplayInterval(appState.autoplay.interval);
 
         // execute the route
         router
