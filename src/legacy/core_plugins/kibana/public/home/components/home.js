@@ -140,7 +140,7 @@ export class Home extends Component {
             <h1>
               <FormattedMessage
                 id="kbn.home.welcomeHomePageHeader"
-                defaultMessage="Kibana home page"
+                defaultMessage="Kibana home"
               />
             </h1>
           </EuiScreenReaderOnly>
