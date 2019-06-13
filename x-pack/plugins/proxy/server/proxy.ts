@@ -15,12 +15,6 @@ import crypto from 'crypto';
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412
 const cryptoConstants = (crypto as any).constants;
 
-const protocolMap = new Map<string, number>([
-  ['TLSv1', cryptoConstants.SSL_OP_NO_TLSv1],
-  ['TLSv1.1', cryptoConstants.SSL_OP_NO_TLSv1_1],
-  ['TLSv1.2', cryptoConstants.SSL_OP_NO_TLSv1_2],
-]);
-
 const readFileAsync = promisify(readFile);
 
 import { Observable, Subscription } from 'rxjs';
@@ -36,11 +30,10 @@ import {
   CoreSetup,
   KibanaRequest,
 } from 'src/core/server';
-
+import { SslConfig } from 'src/core/server/http/ssl_config';
 import { HttpServerSetup } from 'src/core/server/http/http_server';
 
 import { RouteState, RoutingNode, ClusterDocClient } from './cluster_doc';
-import { SslConfig } from 'src/core/server/http/ssl_config';
 
 export interface ProxyServiceSetup {
   httpSetup: HttpServerSetup;
@@ -67,7 +60,7 @@ export const ProxyConfig = {
     key: schema.string(),
     ca: schema.string(),
     cipherSuites: schema.arrayOf(schema.string(), {
-      defaultValue: cryptoConstants.defulatCoreCipherList.split(':'),
+      defaultValue: cryptoConstants.defaultCoreCipherList.split(':'),
     }),
     supportedProtocols: schema.arrayOf(
       schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
@@ -151,6 +144,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
       cipherSuites: config.cipherSuites,
       keyPassphrase: undefined,
       supportedProtocols: config.supportedProtocols,
+      requireCert: true,
     });
     return ssl;
   }

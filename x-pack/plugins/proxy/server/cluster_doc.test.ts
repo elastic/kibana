@@ -28,10 +28,13 @@ const createConfigService = (value: Partial<ProxyPluginType> = {}) => {
       port: 0,
       maxRetry: 0,
       requestBackoff: 0,
+      cert: '',
+      key: '',
+      ca: '',
     },
     value
   );
-  const configService = new ConfigService(
+  const cs = new ConfigService(
     new BehaviorSubject<Config>(
       new ObjectToConfigAdapter({
         xpack: {
@@ -42,8 +45,8 @@ const createConfigService = (value: Partial<ProxyPluginType> = {}) => {
     env,
     logger
   );
-  configService.setSchema('xpack.proxy', ProxyConfig.schema);
-  return configService;
+  cs.setSchema('xpack.proxy', ProxyConfig.schema);
+  return cs;
 };
 
 function configService(value: Partial<ProxyPluginType>) {
@@ -55,11 +58,6 @@ function configService(value: Partial<ProxyPluginType>) {
   };
 }
 
-const esClients = {
-  adminClient: {},
-  dataClient: {},
-};
-
 beforeEach(() => {
   jest.useFakeTimers();
 });
@@ -69,8 +67,11 @@ afterEach(() => {
 });
 
 it('timeouts are set correctly on the main loop', async () => {
-  esClients.dataClient = {
-    callAsInternalUser: jest.fn(() => ({})),
+  const esClients = {
+    adminClient: {},
+    dataClient: {
+      callAsInternalUser: jest.fn<Promise<any>, any>(async () => ({})),
+    },
   };
   const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
   const config = configService({
@@ -86,4 +87,5 @@ it('timeouts are set correctly on the main loop', async () => {
   }
   expect(setTimeout).toHaveBeenCalledTimes(1);
   clusterDoc.stop();
+  expect(esClients.dataClient.callAsInternalUser.mock.calls[0][0]).toBe('get');
 });
