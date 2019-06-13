@@ -42,7 +42,12 @@ export interface ProxyServiceSetup {
 type ProxyRequest = (req: KibanaRequest) => Promise<any>;
 
 export interface ProxyServiceStart {
-  assignResource: (resource: string, data: RoutingNode) => Promise<void>;
+  assignResource: (
+    resource: string,
+    type: string,
+    state: RouteState,
+    node?: string
+  ) => Promise<void>;
   unassignResource: (resource: string) => Promise<void>;
   proxyResource: (resource: string) => ProxyRequest;
   proxyRequest: ProxyRequest;
@@ -144,7 +149,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
       cipherSuites: config.cipherSuites,
       keyPassphrase: undefined,
       supportedProtocols: config.supportedProtocols,
-      requireCert: true,
+      requestCert: true,
     });
     return ssl;
   }
@@ -177,8 +182,13 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     this.configSubscription = undefined;
   }
 
-  public async assignResource(resource: string, data: RoutingNode): Promise<void> {
-    await this.clusterDocClient.assignResource(resource, data);
+  public async assignResource(
+    resource: string,
+    type: string,
+    state: RouteState,
+    node?: string
+  ): Promise<void> {
+    await this.clusterDocClient.assignResource(resource, type, state, node);
   }
 
   public async unassignResource(resource: string) {
