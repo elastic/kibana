@@ -5,8 +5,11 @@
  */
 
 import createRouter from '@scant/router';
+import rison from 'rison-node';
+import { modifyUrl } from 'ui/url';
 import { getWindow } from './get_window';
 import { historyProvider } from './history_provider';
+import { getCurrentAppState } from './app_state';
 
 // used to make this provider a singleton
 let router;
@@ -20,8 +23,10 @@ export function routerProvider(routes) {
   const history = historyProvider(getWindow());
   const componentListeners = [];
 
+  // assume any string starting with a / is a path
   const isPath = str => typeof str === 'string' && str.substr(0, 1) === '/';
 
+  // helper to get the current state in history
   const getState = (name, params, state) => {
     // given a path, assuming params is the state
     if (isPath(name)) {
@@ -30,15 +35,24 @@ export function routerProvider(routes) {
     return state || history.getLocation().state;
   };
 
+  // helper to append appState to a given url path
+  const appendAppState = path =>
+    modifyUrl(path, parts => {
+      // always append the app state to the url
+      parts.query.appState = rison.encode(getCurrentAppState());
+    });
+
+  // add or replace history with new url, either from path or derived path via name and params
   const updateLocation = (name, params, state, replace = false) => {
     const currentState = getState(name, params, state);
     const method = replace ? 'replace' : 'push';
 
     // given a path, go there directly
     if (isPath(name)) {
-      return history[method](currentState, name);
+      return history[method](currentState, appendAppState(name));
     }
-    history[method](currentState, baseRouter.create(name, params));
+
+    history[method](currentState, appendAppState(baseRouter.create(name, params)));
   };
 
   // our router is an extended version of the imported router
