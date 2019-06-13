@@ -10,7 +10,8 @@ import {
   deleteIndicesSuccess,
   loadIndicesSuccess,
   reloadIndicesSuccess,
-  loadIndicesStart
+  loadIndicesStart,
+  loadIndicesError,
 } from '../actions';
 
 const byId = handleActions({
@@ -70,16 +71,30 @@ const allIds = handleActions({
     return state;
   }
 }, []);
+
 const loading = handleActions({
   [loadIndicesStart]() {
     return true;
   },
   [loadIndicesSuccess]() {
     return false;
+  },
+  [loadIndicesError]() {
+    return false;
   }
 }, true);
+
+const error = handleActions({
+  [loadIndicesError](state, action) {
+    const error = action.payload;
+    const newState = { ...error };
+    return newState;
+  }
+}, false);
+
 export const indices = combineReducers({
   loading,
+  error,
   byId,
   allIds
 });
