@@ -2451,8 +2451,6 @@
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.positionLabel": "配置",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.rotateLabel": "回転",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBoundsLabel": "データバウンドに合わせる",
-    "kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.bottomMargin": "下余白",
-    "kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBottomMargin": "下マージンは0以上でなければなりません",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleTypeLabel": "スケールタイプ",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.setAxisExtentsLabel": "軸の範囲の設定",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.showAdvancedOptionsLabel": "高度なオプションを表示",

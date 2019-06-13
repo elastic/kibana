@@ -2029,8 +2029,6 @@
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.positionLabel": "位置",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.rotateLabel": "旋转",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBoundsLabel": "缩放到数据边界",
-    "kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.bottomMargin": "底部保证金",
-    "kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBottomMargin": "底部保证金必须大于或等于0",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleTypeLabel": "缩放类型",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.setAxisExtentsLabel": "设置轴范围",
     "kbnVislibVisTypes.controls.pointSeries.valueAxes.showAdvancedOptionsLabel": "显示高级选项",
