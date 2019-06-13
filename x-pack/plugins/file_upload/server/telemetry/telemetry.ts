@@ -12,8 +12,6 @@ export const TELEMETRY_DOC_ID = 'file-upload-telemetry';
 
 export interface Telemetry {
   filesUploadedTotalCount: number;
-  filesUploadedTypesTotalCounts: object;
-  filesUploadedByApp: object;
 }
 
 export interface TelemetrySavedObject {
@@ -29,8 +27,6 @@ export function getInternalRepository(server: Server): any {
 export function initTelemetry(): Telemetry {
   return {
     filesUploadedTotalCount: 0,
-    filesUploadedTypesTotalCounts: {},
-    filesUploadedByApp: {},
   };
 }
 
@@ -55,51 +51,19 @@ export async function getTelemetry(server: Server, internalRepo?: object): Promi
 export async function updateTelemetry({
   server,
   internalRepo,
-  app = 'unspecified-app',
-  fileType = 'unspecified-file-type',
 }: {
   server: any;
   internalRepo?: object;
-  app?: string;
-  fileType?: string;
 }) {
   const telemetry = await getTelemetry(server, internalRepo);
   const internalRepository = internalRepo || getInternalRepository(server);
 
-  await internalRepository.update(
-    TELEMETRY_DOC_ID,
-    TELEMETRY_DOC_ID,
-    incrementCounts({ app, fileType, ...telemetry })
-  );
+  await internalRepository.update(TELEMETRY_DOC_ID, TELEMETRY_DOC_ID, incrementCounts(telemetry));
 }
 
-export function incrementCounts({
-  filesUploadedTotalCount,
-  filesUploadedTypesTotalCounts,
-  filesUploadedByApp,
-  fileType,
-  app,
-}: {
-  filesUploadedTotalCount: number;
-  filesUploadedTypesTotalCounts: object;
-  filesUploadedByApp: object;
-  fileType: string;
-  app: string;
-}) {
+export function incrementCounts({ filesUploadedTotalCount }: { filesUploadedTotalCount: number }) {
   return {
+    // TODO: get telemetry for app, total file counts, file type
     filesUploadedTotalCount: filesUploadedTotalCount + 1,
-    filesUploadedTypesTotalCounts: {
-      ...filesUploadedTypesTotalCounts,
-      // Example: 'json', 'txt', 'csv', etc.
-      [fileType]: _.get(filesUploadedTypesTotalCounts, fileType, 0) + 1,
-    },
-    filesUploadedByApp: {
-      ...filesUploadedByApp,
-      // Example: 'maps', 'ml', etc.
-      [app]: {
-        ..._.get(filesUploadedByApp, app, {}),
-        [fileType]: _.get(filesUploadedByApp, `${app}.${fileType}`, 0) + 1,
-      },
-    },
   };
 }
