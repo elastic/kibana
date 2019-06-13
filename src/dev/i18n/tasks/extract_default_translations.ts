@@ -18,12 +18,10 @@
  */
 
 import chalk from 'chalk';
-import Listr from 'listr';
-
 import { ErrorReporter, extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
 import { createFailError } from '../../run';
 
-export async function extractDefaultMessages({
+export function extractDefaultMessages({
   path,
   config,
 }: {
@@ -31,7 +29,7 @@ export async function extractDefaultMessages({
   config: I18nConfig;
 }) {
   const inputPaths = Array.isArray(path) ? path : [path || './'];
-  const filteredPaths = filterConfigPaths(inputPaths, config);
+  const filteredPaths = filterConfigPaths(inputPaths, config) as string[];
   if (filteredPaths.length === 0) {
     throw createFailError(
       `${chalk.white.bgRed(
@@ -40,30 +38,25 @@ export async function extractDefaultMessages({
     );
   }
 
-  return new Listr(
-    filteredPaths.map(filteredPath => ({
-      task: async ({
-        messages,
-        reporter,
-      }: {
-        messages: Map<string, unknown>;
-        reporter: ErrorReporter;
-      }) => {
-        const initialErrorsNumber = reporter.errors.length;
+  return filteredPaths.map(filteredPath => ({
+    task: async ({
+      messages,
+      reporter,
+    }: {
+      messages: Map<string, unknown>;
+      reporter: ErrorReporter;
+    }) => {
+      const initialErrorsNumber = reporter.errors.length;
 
-        // Return result if no new errors were reported for this path.
-        const result = await extractMessagesFromPathToMap(filteredPath, messages, config, reporter);
-        if (reporter.errors.length === initialErrorsNumber) {
-          return result;
-        }
+      // Return result if no new errors were reported for this path.
+      const result = await extractMessagesFromPathToMap(filteredPath, messages, config, reporter);
+      if (reporter.errors.length === initialErrorsNumber) {
+        return result;
+      }
 
-        // Throw an empty error to make Listr mark the task as failed without any message.
-        throw new Error('');
-      },
-      title: filteredPath,
-    })),
-    {
-      exitOnError: false,
-    }
-  );
+      // Throw an empty error to make Listr mark the task as failed without any message.
+      throw new Error('');
+    },
+    title: filteredPath,
+  }));
 }

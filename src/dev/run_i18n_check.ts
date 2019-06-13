@@ -73,54 +73,64 @@ run(
       return;
     }
 
-    const extractDefaultMessagesTask = () => extractDefaultMessages({ path, config });
+    const extractDefaultMessagesTasks = () => {
+      return extractDefaultMessages({ path, config });
+    }
 
-    const compatibiltyChecksTask = () =>
-      new Listr(
-        config.translations.map(translationsPath => ({
-          task: async ({ messages }: { messages: Map<string, { message: string }> }) => {
-            // If `--fix` is set we should try apply all possible fixes and override translations file.
-            await integrateLocaleFiles(messages, {
-              sourceFileName: translationsPath,
-              targetFileName: fix ? translationsPath : undefined,
-              dryRun: !fix,
-              ignoreIncompatible: fix || !!ignoreIncompatible,
-              ignoreUnused: fix || !!ignoreUnused,
-              ignoreMissing: fix || !!ignoreMissing,
-              config,
-              log,
-            });
-          },
-          title: `Compatibility check with ${translationsPath}`,
-        })),
-        { concurrent: true, exitOnError: false }
-      );
+    const compatibiltyChecksTasks = () => {
+      return config.translations.map(translationsPath => ({
+        task: async ({ messages }: { messages: Map<string, { message: string }> }) => {
+          // If `--fix` is set we should try apply all possible fixes and override translations file.
+          await integrateLocaleFiles(messages, {
+            sourceFileName: translationsPath,
+            targetFileName: fix ? translationsPath : undefined,
+            dryRun: !fix,
+            ignoreIncompatible: fix || !!ignoreIncompatible,
+            ignoreUnused: fix || !!ignoreUnused,
+            ignoreMissing: fix || !!ignoreMissing,
+            config,
+            log,
+          });
+        },
+        title: `Compatibility check with ${translationsPath}`,
+      }));
+    }
 
     const srcCodePaths = ['./src', './packages', './x-pack'];
-    const untrackedMessagesTask = async () =>
-      new Listr(
-        srcCodePaths.map(srcPath => ({
-          task: async () => {
-            await extractUntrackedMessages({ path: srcPath, config });
-          },
-          title: `Checking untracked messages in ${srcPath}`,
-        }))
-      );
+
+    const untrackedMessagesTasks = (reporter: any) => {
+      return srcCodePaths.map(srcPath => ({
+        task: async () => {
+          await extractUntrackedMessages({ path: srcPath, config, reporter });
+        },
+        title: `Checking untracked messages in ${srcPath}`,
+        exitOnError: false
+      }));
+    }
 
     const list = new Listr(
       [
         {
           title: 'Checking untracked messages',
           enabled: () => !ignoreUntracked,
-          task: untrackedMessagesTask,
+          task: ({ reporter }) => new Listr(
+            untrackedMessagesTasks(reporter),
+            { concurrent: false, exitOnError: true }
+          ),
         },
         {
           title: 'Extracting Default Messages',
-          task: extractDefaultMessagesTask,
+          task: () => new Listr(
+            extractDefaultMessagesTasks(),
+            { exitOnError: false }
+          )
         },
         {
           title: 'Compatibility Checks',
-          task: compatibiltyChecksTask,
+          task: () => new Listr(
+            compatibiltyChecksTasks(),
+            { concurrent: true, exitOnError: false }
+          )
         },
       ],
       {

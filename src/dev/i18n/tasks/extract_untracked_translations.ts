@@ -24,6 +24,7 @@ import {
   normalizePath,
   readFileAsync,
 } from '..';
+import { createFailError } from '../../run';
 
 function filterEntries(entries: string[], exclude: string[]) {
   return entries.filter((entry: string) =>
@@ -34,9 +35,11 @@ function filterEntries(entries: string[], exclude: string[]) {
 export async function extractUntrackedMessages({
   path,
   config,
+  reporter,
 }: {
   path?: string | string[];
   config: I18nConfig;
+  reporter: any;
 }) {
   const inputPaths = Array.isArray(path) ? path : [path || './'];
   const availablePaths = Object.values(config.paths);
@@ -55,9 +58,8 @@ export async function extractUntrackedMessages({
     '**/scripts/**',
     'src/dev/**',
     '**/target/**',
-    'plugins/canvas/**',
   ]);
-  const reporter = new ErrorReporter();
+  const errorMessages: string[] = [];
   for (const inputPath of inputPaths) {
     const categorizedEntries = await matchEntriesWithExctractors(inputPath, {
       additionalIgnore: ignore,
@@ -65,31 +67,41 @@ export async function extractUntrackedMessages({
       absolute: true,
     });
 
-    await Promise.all(
-      categorizedEntries.map(async ([entries, extractFunction]) => {
-        const files: any = await Promise.all(
-          filterEntries(entries, config.exclude)
-            .filter(entry => {
-              const normalizedEntry = normalizePath(entry);
-              return !availablePaths.some(
-                availablePath =>
-                  normalizedEntry.startsWith(`${normalizePath(availablePath)}/`) ||
-                  normalizePath(availablePath) === normalizedEntry
-              );
-            })
-            .map(async (entry: any) => ({
-              name: entry,
-              content: await readFileAsync(entry),
-            }))
-        );
+    for (const [entries, extractFunction] of categorizedEntries) {
+      const files: any = await Promise.all(
+        filterEntries(entries, config.exclude)
+        .filter(entry => {
+          const normalizedEntry = normalizePath(entry);
+          return !availablePaths.some(
+            availablePath =>
 
-        for (const { name, content } of files) {
-          const reporterWithContext = reporter.withContext({ name });
-          for (const [id] of extractFunction(content, reporterWithContext)) {
-            reporterWithContext.report(`File ${name} contains i18n label (${id}).`);
-          }
+            normalizedEntry.startsWith(`${normalizePath(availablePath)}/`) ||
+            normalizePath(availablePath) === normalizedEntry
+          );
+        })
+        .map(async (entry: any) => ({
+          name: entry,
+          content: await readFileAsync(entry),
+        }))
+      );
+
+      for (const { name, content } of files) {
+        const reporterWithContext = reporter.withContext({ name });
+        for (const [id] of extractFunction(content, reporterWithContext)) {
+          const errorMessage = `File ${name} contains i18n label (${id}).`;
+          reporterWithContext.report(createFailError(errorMessage));
+          errorMessages.push(errorMessage);
         }
-      })
-    );
+      }
+    }
+  }
+
+  // console.log('errorMessages::', errorMessages);
+  if (errorMessages.length) {
+    // const reporterWithContext = reporter.withContext({ name: 'AHMAD BAMIEH' });
+    // const failError = errorMessages.join('\n');
+
+    // throw createFailError(failError);
+    throw Error("");
   }
 }
