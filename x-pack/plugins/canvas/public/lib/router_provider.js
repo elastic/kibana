@@ -36,10 +36,10 @@ export function routerProvider(routes) {
   };
 
   // helper to append appState to a given url path
-  const appendAppState = path =>
+  const appendAppState = (path, appState = getCurrentAppState()) =>
     modifyUrl(path, parts => {
       // always append the app state to the url
-      parts.query.appState = rison.encode(getCurrentAppState());
+      parts.query.appState = rison.encode(appState);
     });
 
   // add or replace history with new url, either from path or derived path via name and params
@@ -69,6 +69,12 @@ export function routerProvider(routes) {
     },
     redirectTo(name, params, state) {
       updateLocation(name, params, state, true);
+    },
+    updateAppState(appState, replace = true) {
+      const method = replace ? 'replace' : 'push';
+      const newPath = appendAppState(this.getPath(), appState);
+      const currentState = history.getLocation().state;
+      history[method](currentState, newPath);
     },
     onPathChange(fn) {
       const execOnMatch = location => {

@@ -9,6 +9,7 @@ import { get } from 'lodash';
 import { getInitialState } from '../state/initial_state';
 import { getWindow } from './get_window';
 import { historyProvider } from './history_provider';
+import { routerProvider } from './router_provider';
 
 function getDefaultState() {
   const transientState = getInitialState('transient');
@@ -53,6 +54,7 @@ export function setAppState(type, payload) {
       throw new Error(`Invalid appState type: ${type}`);
   }
 
-  // TODO: push new route, with appState search params, into the route
-  console.log('new appState', appState);
+  // update appState in the url via the router
+  const router = routerProvider(); // singleton, always provides the same router once it's created
+  router.updateAppState(appState);
 }
