@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import Ipv4Address from '../../../utils/ipv4_address';
 import { InputList, InputListConfig, InputModel, InputObject, InputItem } from './input_list';
@@ -94,6 +94,9 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
             value={item.from.value}
             onBlur={onBlur}
           />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="sortRight" color="subdued" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
