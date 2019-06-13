@@ -19,16 +19,16 @@ function getDefaultState() {
   };
 }
 
-function getCurrentAppState() {
+export function getCurrentAppState() {
   const history = historyProvider(getWindow());
   const { search } = history.getLocation();
   const qs = !!search ? querystring.parse(search.replace(/^\?/, '')) : {};
-  const appState = !!qs._a ? rison.decode(qs._a) : {};
-  return { ...getDefaultState(), ...appState };
+  const appState = !!qs.appState ? rison.decode(qs.appState) : {};
+  return appState;
 }
 
 export function getAppState(key) {
-  const appState = getCurrentAppState();
+  const appState = { ...getDefaultState(), ...getCurrentAppState() };
   return key != null ? get(appState, key) : appState;
 }
 
