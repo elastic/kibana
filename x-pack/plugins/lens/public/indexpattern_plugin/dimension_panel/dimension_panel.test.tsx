@@ -7,11 +7,11 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { IndexPatternPrivateState } from './indexpattern';
-import { getColumnOrder, getPotentialColumns } from './operations';
+import { IndexPatternPrivateState } from '../indexpattern';
+import { getColumnOrder, getPotentialColumns } from '../operations';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 
-jest.mock('./operations');
+jest.mock('../operations');
 
 const expectedIndexPatterns = {
   1: {
@@ -57,7 +57,10 @@ describe('IndexPatternDimensionPanel', () => {
           isBucketed: false,
 
           // Private
-          operationType: 'value',
+          operationType: 'date_histogram',
+          params: {
+            interval: '1d',
+          },
           sourceField: 'timestamp',
         },
       },
@@ -158,12 +161,6 @@ describe('IndexPatternDimensionPanel', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-value"]').prop('color')
-    ).toEqual('primary');
-    expect(
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-value"]').prop('isDisabled')
-    ).toEqual(false);
-    expect(
       wrapper.find('[data-test-subj="lns-indexPatternDimension-terms"]').prop('isDisabled')
     ).toEqual(true);
     expect(
@@ -180,7 +177,7 @@ describe('IndexPatternDimensionPanel', () => {
     ).toEqual(true);
   });
 
-  it('should update the datasource state on selection of a value operation', () => {
+  it('should update the datasource state on selection of an operation', () => {
     const setState = jest.fn();
 
     const wrapper = shallow(
@@ -257,10 +254,10 @@ describe('IndexPatternDimensionPanel', () => {
         ...state.columns,
         col2: expect.objectContaining({
           operationId: firstField.value,
-          label: 'Value of bytes',
+          label: 'Average of bytes',
           dataType: 'number',
           isBucketed: false,
-          operationType: 'value',
+          operationType: 'avg',
           sourceField: 'bytes',
         }),
       },

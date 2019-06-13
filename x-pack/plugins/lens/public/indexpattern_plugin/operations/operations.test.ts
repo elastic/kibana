@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOperationTypesForField, getPotentialColumns, getColumnOrder } from './operations';
-import { IndexPatternPrivateState } from './indexpattern';
+import { getOperationTypesForField, getPotentialColumns, getColumnOrder } from '.';
+import { IndexPatternPrivateState } from '../indexpattern';
 
 const expectedIndexPatterns = {
   1: {
@@ -45,7 +45,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['value', 'terms']));
+      ).toEqual(expect.arrayContaining(['terms']));
     });
 
     it('should return operations on numbers', () => {
@@ -56,7 +56,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['value', 'avg', 'sum', 'min', 'max']));
+      ).toEqual(expect.arrayContaining(['avg', 'sum', 'min', 'max']));
     });
 
     it('should return operations on dates', () => {
@@ -67,7 +67,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['value', 'date_histogram']));
+      ).toEqual(expect.arrayContaining(['date_histogram']));
     });
 
     it('should return no operations on unknown types', () => {
@@ -121,7 +121,7 @@ describe('getOperationTypesForField', () => {
     it('should return operations on dates', () => {
       expect(
         getOperationTypesForField({
-          type: 'dates',
+          type: 'date',
           name: 'a',
           aggregatable: true,
           searchable: true,
@@ -154,8 +154,11 @@ describe('getOperationTypesForField', () => {
             isBucketed: false,
 
             // Private
-            operationType: 'value',
+            operationType: 'date_histogram',
             sourceField: 'timestamp',
+            params: {
+              interval: 'h',
+            },
           },
         },
       };
@@ -170,20 +173,13 @@ describe('getOperationTypesForField', () => {
     it('should list operations by field for a regular index pattern', () => {
       const columns = getPotentialColumns(state);
 
-      expect(columns.map(col => [('sourceField' in col) ? col.sourceField : '_documents_', col.operationType])).toMatchInlineSnapshot(`
+      expect(
+        columns.map(col => [
+          'sourceField' in col ? col.sourceField : '_documents_',
+          col.operationType,
+        ])
+      ).toMatchInlineSnapshot(`
 Array [
-  Array [
-    "bytes",
-    "value",
-  ],
-  Array [
-    "bytes",
-    "sum",
-  ],
-  Array [
-    "bytes",
-    "avg",
-  ],
   Array [
     "bytes",
     "min",
@@ -193,20 +189,20 @@ Array [
     "max",
   ],
   Array [
+    "bytes",
+    "avg",
+  ],
+  Array [
     "_documents_",
     "count",
   ],
   Array [
-    "source",
-    "value",
+    "bytes",
+    "sum",
   ],
   Array [
     "source",
     "terms",
-  ],
-  Array [
-    "timestamp",
-    "value",
   ],
   Array [
     "timestamp",
@@ -233,8 +229,11 @@ describe('getColumnOrder', () => {
           isBucketed: false,
 
           // Private
-          operationType: 'value',
+          operationType: 'date_histogram',
           sourceField: 'timestamp',
+          params: {
+            interval: 'h',
+          },
         },
       })
     ).toEqual(['col1']);
@@ -250,8 +249,14 @@ describe('getColumnOrder', () => {
           isBucketed: true,
 
           // Private
-          operationType: 'value',
-          sourceField: 'timestamp',
+          operationType: 'terms',
+          sourceField: 'category',
+          params: {
+            size: 5,
+            orderBy: {
+              type: 'alphabetical',
+            },
+          },
         },
         col2: {
           operationId: 'op2',
@@ -260,7 +265,7 @@ describe('getColumnOrder', () => {
           isBucketed: false,
 
           // Private
-          operationType: 'value',
+          operationType: 'avg',
           sourceField: 'bytes',
         },
         col3: {
@@ -273,8 +278,8 @@ describe('getColumnOrder', () => {
           operationType: 'date_histogram',
           sourceField: 'timestamp',
           params: {
-            interval: '1d'
-          }
+            interval: '1d',
+          },
         },
       })
     ).toEqual(['col1', 'col3', 'col2']);
@@ -290,8 +295,14 @@ describe('getColumnOrder', () => {
           isBucketed: true,
 
           // Private
-          operationType: 'value',
-          sourceField: 'timestamp',
+          operationType: 'terms',
+          sourceField: 'category',
+          params: {
+            size: 5,
+            orderBy: {
+              type: 'alphabetical',
+            },
+          },
           suggestedOrder: 2,
         },
         col2: {
@@ -301,7 +312,7 @@ describe('getColumnOrder', () => {
           isBucketed: false,
 
           // Private
-          operationType: 'value',
+          operationType: 'avg',
           sourceField: 'bytes',
           suggestedOrder: 0,
         },
@@ -316,8 +327,8 @@ describe('getColumnOrder', () => {
           sourceField: 'timestamp',
           suggestedOrder: 1,
           params: {
-            interval: '1d'
-          }
+            interval: '1d',
+          },
         },
       })
     ).toEqual(['col3', 'col1', 'col2']);

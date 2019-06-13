@@ -26,7 +26,6 @@ export type OperationType = IndexPatternColumn['operationType'];
 export type IndexPatternColumn =
   | DateHistogramIndexPatternColumn
   | TermsIndexPatternColumn
-  | ValueIndexPatternColumn
   | SumIndexPatternColumn
   | AvgIndexPatternColumn
   | MinIndexPatternColumn
@@ -71,7 +70,6 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   };
 }
 
-export type ValueIndexPatternColumn = ParameterlessIndexPatternColumn<'value'>;
 export type CountIndexPatternColumn = ParameterlessIndexPatternColumn<
   'count',
   BaseIndexPatternColumn

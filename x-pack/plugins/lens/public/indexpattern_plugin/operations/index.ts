@@ -16,12 +16,8 @@ import {
 import { termsOperation } from './terms';
 import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 import { dateHistogramOperation } from './date_histogram';
-import { valueOperation } from './value';
 import { countOperation } from './count';
 
-export function getOperations(): OperationType[] {
-  return ['value', 'terms', 'date_histogram', 'sum', 'avg', 'min', 'max', 'count'];
-}
 type PossibleOperationDefinitions<
   U extends IndexPatternColumn = IndexPatternColumn
 > = U extends IndexPatternColumn ? OperationDefinition<U> : never;
@@ -43,10 +39,13 @@ export const operationDefinitionMap: AllOperationDefinitions = {
   max: maxOperation,
   avg: averageOperation,
   sum: sumOperation,
-  value: valueOperation,
   count: countOperation,
 };
 const operationDefinitions: PossibleOperationDefinitions[] = Object.values(operationDefinitionMap);
+
+export function getOperations(): OperationType[] {
+  return Object.keys(operationDefinitionMap) as OperationType[];
+}
 
 export interface ParamEditorProps {
   state: IndexPatternPrivateState;

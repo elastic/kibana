@@ -27,7 +27,7 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
     isApplicableWithoutField: false,
     isApplicableForField: ({ aggregationRestrictions, type: fieldType }: IndexPatternField) => {
       return Boolean(
-        fieldType === 'number' && (!aggregationRestrictions || aggregationRestrictions[fieldType])
+        fieldType === 'number' && (!aggregationRestrictions || aggregationRestrictions[type])
       );
     },
     buildColumn(

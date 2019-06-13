@@ -6,11 +6,7 @@
 
 import _ from 'lodash';
 
-import {
-  IndexPatternPrivateState,
-  IndexPatternColumn,
-  ValueIndexPatternColumn,
-} from './indexpattern';
+import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap, OperationDefinition } from './operations';
 
 export function toExpression(state: IndexPatternPrivateState) {
@@ -19,8 +15,6 @@ export function toExpression(state: IndexPatternPrivateState) {
   }
 
   const sortedColumns = state.columnOrder.map(col => state.columns[col]);
-
-  const indexName = state.indexPatterns[state.currentIndexPatternId].title;
 
   function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
     // Typescript is not smart enough to infer that definitionMap[C['operationType']] is always OperationDefinition<C>,
@@ -31,22 +25,7 @@ export function toExpression(state: IndexPatternPrivateState) {
     return operationDefinition.toEsAggsConfig(column, columnId);
   }
 
-  if (sortedColumns.every(({ operationType }) => operationType === 'value')) {
-    const fieldNames = (sortedColumns as ValueIndexPatternColumn[]).map(
-      column => column.sourceField
-    );
-
-    const idMap = fieldNames.reduce(
-      (currentIdMap, fieldName, index) => ({
-        ...currentIdMap,
-        [fieldName]: state.columnOrder[index],
-      }),
-      {} as Record<string, string>
-    );
-    return `esdocs index="${indexName}" fields="${fieldNames.join(', ')}" sort="${
-      fieldNames[0]
-    }, DESC" | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
-  } else if (sortedColumns.length) {
+  if (sortedColumns.length) {
     const aggs = sortedColumns.map((col, index) => {
       return getEsAggsConfig(col, state.columnOrder[index]);
     });
