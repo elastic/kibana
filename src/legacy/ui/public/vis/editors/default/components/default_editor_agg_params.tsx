@@ -16,21 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get, has } from 'lodash';
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, createContext } from 'react';
 
 import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggType } from 'ui/agg_types';
-import { AggConfig } from 'ui/vis/agg_config';
+import { AggConfig, Vis } from 'ui/vis';
 import { DefaultEditorAggSelect } from './default_editor_agg_select';
 import { aggTypeFilters } from '../../../../agg_types/filter';
 import { aggTypes } from '../../../../agg_types';
 import { groupAggregationsBy } from '../default_editor_utils';
 import { editorConfigProviders } from '../../config/editor_config_providers';
-import { aggTypeFieldFilters } from '../../../../agg_types/param_types/filter';
-import { Vis } from '../../../../vis';
 import { AggParamReactWrapper } from '../agg_param_react_wrapper';
+import { getAggParamsToRender, getError } from './default_editor_agg_params_helper';
 
 function reducer(state: any, action: any) {
   switch (action.type) {
@@ -45,6 +43,62 @@ function reducer(state: any, action: any) {
   }
 }
 
+const aggParamsReducer = (state: any, action: any) => {
+  const targetParam = state[action.paramName] || {
+    value: undefined,
+    validity: true,
+    touched: false,
+  };
+  switch (action.type) {
+    case 'agg_params_value':
+      return {
+        ...state,
+        [action.paramName]: {
+          ...targetParam,
+          value: action.value,
+        },
+      };
+    case 'agg_params_touched':
+      return {
+        ...state,
+        [action.paramName]: {
+          ...targetParam,
+          touched: action.touched,
+        },
+      };
+    case 'agg_params_validity':
+      return {
+        ...state,
+        [action.paramName]: {
+          ...targetParam,
+          validity: action.validity,
+        },
+      };
+    case 'agg_params_values':
+      const newState = { ...state };
+      Object.keys(action.params).forEach(paramName => {
+        const model = newState[paramName] || { validity: true, touched: false };
+        model.value = action.params[paramName];
+      });
+      return newState;
+    default:
+      throw new Error();
+  }
+};
+
+const initaggParams = (params: any) => {
+  const state: any = {};
+  Object.keys(params).forEach((paramName: any) => {
+    state[paramName] = {
+      value: params[paramName],
+      validity: true,
+      touched: false,
+    };
+  });
+
+  return state;
+};
+
 interface DefaultEditorAggParamsProps {
   id: string;
   agg: AggConfig;
@@ -54,6 +108,7 @@ interface DefaultEditorAggParamsProps {
   vis: Vis;
   groupName: string;
   indexPattern: any;
+  responseValueAggs: AggConfig[] | null;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   setTouched: () => void;
   setValidity: (isValid: boolean) => void;
@@ -66,6 +121,7 @@ function DefaultEditorAggParams({
   groupName,
   formIsTouched,
   indexPattern,
+  responseValueAggs,
   vis,
   onAggTypeChange,
   setTouched,
@@ -74,9 +130,25 @@ function DefaultEditorAggParams({
   const aggTypeOptions = aggTypeFilters.filter(aggTypes.byType[groupName], indexPattern, agg);
   const groupedAggTypeOptions = groupAggregationsBy(aggTypeOptions, 'subtype');
   const isSubAggregation = aggIndex >= 1 && groupName === 'buckets';
-  const advancedToggled = false;
+  const errors = getError(agg, aggIsTooLow);
+
+  const editorConfig = editorConfigProviders.getConfigForAgg(
+    aggTypes.byType[groupName],
+    indexPattern,
+    agg
+  );
 
   const [aggType, onChangeAggType] = useReducer(reducer, { value: agg.type, touched: false });
+  const [aggParams, onChangeAggParams] = useReducer(aggParamsReducer, agg.params, initaggParams);
+
+  const params = getAggParamsToRender(
+    agg,
+    editorConfig,
+    vis,
+    responseValueAggs,
+    aggParams,
+    onChangeAggParams
+  );
 
   useEffect(
     () => {
@@ -110,83 +182,13 @@ function DefaultEditorAggParams({
     [formIsTouched]
   );
 
-  const errors = [];
-  if (aggIsTooLow) {
-    errors.push(
-      i18n.translate('common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage', {
-        defaultMessage: '"{schema}" aggs must run before all other buckets!',
-        values: { schema: agg.schema.title },
-      })
-    );
-  }
-  if (agg.error) {
-    errors.push(agg.error);
-  }
-  if (agg.schema.deprecate) {
-    errors.push(
-      agg.schema.deprecateMessage
-        ? agg.schema.deprecateMessage
-        : i18n.translate('common.ui.vis.editors.aggParams.errors.schemaIsDeprecatedErrorMessage', {
-            defaultMessage: '"{schema}" has been deprecated.',
-            values: { schema: agg.schema.title },
-          })
-    );
-  }
-
-  const editorConfig = editorConfigProviders.getConfigForAgg(
-    aggTypes.byType[groupName],
-    indexPattern,
-    agg
+  useEffect(
+    () => {
+      // when params were updated
+      onChangeAggParams({ type: 'agg_params_values', params: agg.params });
+    },
+    [agg.params]
   );
-
-  const params = {
-    basic: [] as any,
-    advanced: [] as any,
-  };
-
-  const paramsToRender =
-    (agg.type &&
-      agg.type.params
-        // Filter out, i.e. don't render, any parameter that is hidden via the editor config.
-        .filter((param: any) => !get(editorConfig, [param.name, 'hidden'], false))) ||
-    [];
-  paramsToRender.forEach((param: any, i: number) => {
-    let indexedFields: any = [];
-
-    if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
-      return;
-    }
-    // if field param exists, compute allowed fields
-    if (param.type === 'field') {
-      const availableFields = param.getAvailableFields(agg.getIndexPattern().fields);
-      const fields = aggTypeFieldFilters.filter(availableFields, param.type, agg, vis);
-      indexedFields = groupAggregationsBy(fields, 'type', 'displayName');
-    }
-
-    if (indexedFields.length && i > 0) {
-      // don't draw the rest of the options if there are no indexed fields.
-      return;
-    }
-
-    const type = param.advanced ? 'advanced' : 'basic';
-
-    if (param.editorComponent) {
-      params[type].push({
-        aggParam: param,
-        paramEditor: param.editorComponent,
-        indexedFields,
-        onChange: () => {},
-        setValidity: () => {},
-        setTouched: () => {},
-        agg,
-        config: {},
-        editorConfig,
-        showValidation: true,
-        value: agg.params[param.name],
-        visName: vis.type.name,
-      } as any);
-    }
-  });
 
   return (
     <EuiForm isInvalid={!!errors.length} error={errors}>

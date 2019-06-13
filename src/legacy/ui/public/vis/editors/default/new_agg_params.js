@@ -30,6 +30,7 @@ uiModules
     ['aggType', { watchDepth: 'reference' }],
     ['onAggTypeChange', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
+    ['responseValueAggs', { watchDepth: 'reference' }],
     'id',
     'aggIndex',
     'groupName',
@@ -50,6 +51,7 @@ uiModules
             agg-type="agg.type"
             group-name="groupName"
             index-pattern="indexPattern"
+            response-value-aggs="responseValueAggs"
             vis="vis"
             on-agg-type-change="onAggTypeChange"
             form-is-touched="formIsTouched"

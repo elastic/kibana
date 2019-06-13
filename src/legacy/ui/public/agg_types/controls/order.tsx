@@ -25,7 +25,7 @@ import { SelectValueProp, SelectParamEditorProps } from '../param_types/select';
 
 function OrderParamEditor({
   aggParam,
-  value,
+  value = {} as SelectValueProp,
   showValidation,
   setValue,
   setValidity,
