@@ -64,6 +64,7 @@ interface Props {
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
+  onSaved?: (newSavedQuery: SavedQuery) => void;
 }
 
 interface State {
@@ -212,10 +213,11 @@ class SearchBarUI extends Component<Props, State> {
     }
 
     const response = await saveQuery(savedQuery);
-    if (response.error === undefined) {
-      this.setState({
-        showSaveQueryModal: false,
-      });
+    this.setState({
+      showSaveQueryModal: false,
+    });
+    if (this.props.onSaved) {
+      this.props.onSaved(response);
     }
   };
 

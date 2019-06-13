@@ -930,6 +930,9 @@ function discoverController(
   $scope.showAllRows = function () {
     $scope.minimumVisibleRows = $scope.hits;
   };
+  $scope.onQuerySaved = function (newSavedQuery) {
+    $scope.savedQuery = newSavedQuery;
+  };
 
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages

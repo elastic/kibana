@@ -19,6 +19,7 @@
 
 import chrome from 'ui/chrome';
 import { SavedQuery } from '../../../search';
+import { Query } from '../../query_service';
 
 export const saveQuery = async (savedQuery: SavedQuery) => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
@@ -31,12 +32,19 @@ export const saveQuery = async (savedQuery: SavedQuery) => {
     language: savedQuery.query.language,
   };
 
-  const queryObject = {
+  const queryObject: {
+    title: string;
+    description: string;
+    query: {
+      query: string;
+      language: string;
+    };
+    filters?: string;
+    timefilter?: string;
+  } = {
     title: savedQuery.title,
     description: savedQuery.description,
     query,
-    filters: '',
-    timefilter: '',
   };
 
   if (savedQuery.filters) {
@@ -47,5 +55,20 @@ export const saveQuery = async (savedQuery: SavedQuery) => {
     queryObject.timefilter = JSON.stringify(savedQuery.timefilter);
   }
 
-  return await savedObjectsClient.create('query', queryObject);
+  const rawQueryResponse = await savedObjectsClient.create('query', queryObject);
+  if (rawQueryResponse.error) {
+    throw new Error(rawQueryResponse.error.message);
+  }
+  const responseObject: SavedQuery = {
+    title: rawQueryResponse.attributes.title,
+    description: rawQueryResponse.attributes.description,
+    query: rawQueryResponse.attributes.query,
+  };
+  if (rawQueryResponse.attributes.filters) {
+    responseObject.filters = JSON.parse(rawQueryResponse.attributes.filters);
+  }
+  if (rawQueryResponse.attributes.timefilter) {
+    responseObject.timefilter = JSON.parse(rawQueryResponse.attributes.timefilter);
+  }
+  return responseObject;
 };
