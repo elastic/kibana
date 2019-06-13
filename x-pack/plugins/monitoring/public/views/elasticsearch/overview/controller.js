@@ -37,7 +37,7 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
     this.toggleShardActivityHistory = () => {
       this.showShardActivityHistory = !this.showShardActivityHistory;
       $scope.$evalAsync(() => {
-        this.renderReact(this.data);
+        this.renderReact(this.data, $scope.cluster);
       });
     };
 
