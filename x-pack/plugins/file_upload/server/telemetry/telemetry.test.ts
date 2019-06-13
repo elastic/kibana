@@ -32,13 +32,6 @@ function mockInit(getVal: any = { attributes: {} }): any {
 
 describe('file upload plugin telemetry', () => {
   describe('getTelemetry', () => {
-    it('should create new telemetry if no telemetry exists', async () => {
-      const internalRepo = mockInit({});
-      await getTelemetry(server, internalRepo);
-      expect(internalRepo.get.mock.calls.length).toBe(1);
-      expect(internalRepo.create.mock.calls.length).toBe(1);
-    });
-
     it('should get existing telemetry', async () => {
       const internalRepo = mockInit();
       await getTelemetry(server, internalRepo);

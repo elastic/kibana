@@ -40,12 +40,7 @@ export async function getTelemetry(server: Server, internalRepo?: object): Promi
     // Fail silently
   }
 
-  if (!telemetrySavedObject || _.isEmpty(telemetrySavedObject)) {
-    telemetrySavedObject = await internalRepository.create(TELEMETRY_DOC_ID, initTelemetry(), {
-      id: TELEMETRY_DOC_ID,
-    });
-  }
-  return telemetrySavedObject.attributes;
+  return telemetrySavedObject ? telemetrySavedObject.attributes : null;
 }
 
 export async function updateTelemetry({
@@ -53,10 +48,19 @@ export async function updateTelemetry({
   internalRepo,
 }: {
   server: any;
-  internalRepo?: object;
+  internalRepo?: any;
 }) {
-  const telemetry = await getTelemetry(server, internalRepo);
   const internalRepository = internalRepo || getInternalRepository(server);
+  let telemetry = await getTelemetry(server, internalRepository);
+  // Create if doesn't exist
+  if (!telemetry || _.isEmpty(telemetry)) {
+    const newTelemetrySavedObject = await internalRepository.create(
+      TELEMETRY_DOC_ID,
+      initTelemetry(),
+      { id: TELEMETRY_DOC_ID }
+    );
+    telemetry = newTelemetrySavedObject.attributes;
+  }
 
   await internalRepository.update(TELEMETRY_DOC_ID, TELEMETRY_DOC_ID, incrementCounts(telemetry));
 }
