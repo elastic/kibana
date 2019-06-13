@@ -1,0 +1,31 @@
+[[creating-df-kib]]
+== Creating {dataframe-transforms}
+
+beta[]
+
+If you want to use the {dataframe-transforms} feature, you must have the required 
+user roles and permissions: 
+* `data_frame_transforms_user`: to get transforms and transforms stats,
+* `data_frame_transforms_admin`: to create/start/stop/delete transforms,
+* read permissions on the source indices,
+* index permissions on the target index (if the target index does not exist, you 
+need permission to create the index as well).
+
+[role="screenshot"]
+image::ml/images/ml-definepivot.jpg["Defining a {dataframe} pivot"]
+
+You can create {dataframe-transforms} in the {kib} Machine Learning application. 
+Select an index or a search pattern you want to transform and a field that the data 
+will be grouped-by, then define the desired aggregation. The {dataframe} pivot 
+preview on the right side provides a visual verification.
+
+Once you created the pivot, add a job ID and define the index dedicated to the 
+transformed data (_target index_). If the target index does not exist, it will be 
+created automatically if you have the required permission. At the end of the process, 
+a {dataframe} job is created as a result. After the job is started, you have further
+options to continue exploring it.
+
+[role="screenshot"]
+image::ml/images/ml-jobid.jpg["Job ID and target index"]
+
+
