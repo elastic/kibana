@@ -85,7 +85,12 @@ describe('code in multiple nodes', () => {
             port: codePort,
           },
           plugins: { paths: [pluginPaths] },
-          xpack: xpackOption,
+          xpack: {
+            ...xpackOption,
+            code: {
+              ui: { enabled: true },
+            },
+          },
         },
       },
     });
@@ -102,7 +107,10 @@ describe('code in multiple nodes', () => {
       plugins: { paths: [pluginPaths] },
       xpack: {
         ...xpackOption,
-        code: { codeNodeUrl: `http://localhost:${codePort}` },
+        code: {
+          ui: { enabled: true },
+          codeNodeUrl: `http://localhost:${codePort}`,
+        },
       },
     };
     nonCodeNode = createRootWithCorePlugins(setting);

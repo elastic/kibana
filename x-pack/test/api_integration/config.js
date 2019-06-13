@@ -62,6 +62,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
+        '--xpack.code.ui.enabled=true', // Enable Code Ui just in tests
       ],
     },
     esTestCluster: {
