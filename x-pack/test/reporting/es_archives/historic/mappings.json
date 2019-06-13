@@ -82,6 +82,13 @@
             }
           }
         },
+        "file-upload-telemetry": {
+          "properties": {
+            "filesUploadedTotalCount": {
+              "type": "long"
+            }
+          }
+        },
         "graph-workspace": {
           "dynamic": "strict",
           "properties": {
