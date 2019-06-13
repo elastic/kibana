@@ -10,6 +10,7 @@ import { Shortcuts } from 'react-shortcuts';
 import Style from 'style-it';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
+import { isTextInput } from '../../lib/is_text_input';
 
 const WORKPAD_CANVAS_BUFFER = 32; // 32px padding around the workpad
 
@@ -35,40 +36,25 @@ export class Workpad extends React.PureComponent {
     unregisterLayout: PropTypes.func.isRequired,
   };
 
-  keyHandler = action => {
-    const {
-      fetchAllRenderables,
-      undoHistory,
-      redoHistory,
-      nextPage,
-      previousPage,
-      grid, // TODO: Get rid of grid when we improve the layout engine
-      setGrid,
-      zoomIn,
-      zoomOut,
-    } = this.props;
-
-    // handle keypress events for editor and presentation events
+  // handle keypress events for editor and presentation events
+  _keyMap = {
     // this exists in both contexts
-    switch (action) {
-      case 'REFRESH':
-        return fetchAllRenderables();
-      case 'ZOOM_IN':
-        return zoomIn();
-      case 'ZOOM_OUT':
-        return zoomOut();
-      // editor events
-      case 'UNDO':
-        return undoHistory();
-      case 'REDO':
-        return redoHistory();
-      case 'GRID':
-        return setGrid(!grid);
-      // presentation events
-      case 'PREV':
-        return previousPage();
-      case 'NEXT':
-        return nextPage();
+    REFRESH: this.props.fetchAllRenderables,
+    // editor events
+    ZOOM_IN: this.props.zoomIn,
+    UNDO: this.props.blah,
+    REDO: this.props.blah,
+    GRID: this.props.blah,
+    ZOOM_OUT: this.props.zoomOut,
+    // presentation events
+    PREV: this.props.blah,
+    NEXT: this.props.blah,
+  };
+
+  _keyHandler = (action, event) => {
+    if (!isTextInput(event.target)) {
+      event.preventDefault();
+      this._keyMap[action]();
     }
   };
 
@@ -106,7 +92,7 @@ export class Workpad extends React.PureComponent {
           }}
         >
           {!isFullscreen && (
-            <Shortcuts name="EDITOR" handler={this.keyHandler} targetNodeSelector="body" global />
+            <Shortcuts name="EDITOR" handler={this._keyHandler} targetNodeSelector="body" global />
           )}
 
           <Fullscreen>
