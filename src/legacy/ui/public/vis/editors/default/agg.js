@@ -36,6 +36,7 @@ uiModules
       require: 'form',
       link: function ($scope, $el, attrs, kbnForm) {
         $scope.editorOpen = !!$scope.agg.brandNew;
+        $scope.aggIsTooLow = false;
 
         $scope.$watch('editorOpen', function (open) {
         // make sure that all of the form inputs are "touched"

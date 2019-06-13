@@ -17,27 +17,43 @@
  * under the License.
  */
 import { get, has } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useReducer, useEffect } from 'react';
 
-import { EuiFlexGroup, EuiFormErrorText, EuiForm } from '@elastic/eui';
+import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { AggType } from 'ui/agg_types';
 import { AggConfig } from 'ui/vis/agg_config';
 import { DefaultEditorAggSelect } from './default_editor_agg_select';
 import { aggTypeFilters } from '../../../../agg_types/filter';
 import { aggTypes } from '../../../../agg_types';
 import { groupAggregationsBy } from '../default_editor_utils';
+import { editorConfigProviders } from '../../config/editor_config_providers';
+import { aggTypeFieldFilters } from '../../../../agg_types/param_types/filter';
+import { Vis } from '../../../../vis';
+import { AggParamReactWrapper } from '../agg_param_react_wrapper';
+
+function reducer(state: any, action: any) {
+  switch (action.type) {
+    case 'agg_selector':
+      return { ...state, value: action.value };
+    case 'agg_selector_touched':
+      return { ...state, touched: action.touched };
+    case 'agg_selector_validity':
+      return { ...state, validity: action.validity };
+    default:
+      throw new Error();
+  }
+}
 
 interface DefaultEditorAggParamsProps {
   id: string;
   agg: AggConfig;
   aggIndex: number;
   aggIsTooLow: boolean;
-  vis: any;
+  formIsTouched: boolean;
+  vis: Vis;
   groupName: string;
   indexPattern: any;
-  showValidation: boolean;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   setTouched: () => void;
   setValidity: (isValid: boolean) => void;
@@ -48,8 +64,9 @@ function DefaultEditorAggParams({
   aggIndex,
   aggIsTooLow,
   groupName,
+  formIsTouched,
   indexPattern,
-  showValidation = false,
+  vis,
   onAggTypeChange,
   setTouched,
   setValidity,
@@ -57,6 +74,41 @@ function DefaultEditorAggParams({
   const aggTypeOptions = aggTypeFilters.filter(aggTypes.byType[groupName], indexPattern, agg);
   const groupedAggTypeOptions = groupAggregationsBy(aggTypeOptions, 'subtype');
   const isSubAggregation = aggIndex >= 1 && groupName === 'buckets';
+  const advancedToggled = false;
+
+  const [aggType, onChangeAggType] = useReducer(reducer, { value: agg.type, touched: false });
+
+  useEffect(
+    () => {
+      // when a user selectes agg.type we need to update agg.type in angular
+      onAggTypeChange(agg, aggType.value);
+    },
+    [aggType.value]
+  );
+
+  useEffect(
+    () => {
+      // when agg.type was changed in angular
+      onChangeAggType({ type: 'agg_selector', value: agg.type });
+    },
+    [agg.type]
+  );
+
+  useEffect(
+    () => {
+      // when validitywas changed
+      setValidity(aggType.validity);
+    },
+    [aggType.validity]
+  );
+
+  useEffect(
+    () => {
+      // when a form were applied
+      onChangeAggType({ type: 'agg_selector_touched', touched: formIsTouched });
+    },
+    [formIsTouched]
+  );
 
   const errors = [];
   if (aggIsTooLow) {
@@ -81,37 +133,98 @@ function DefaultEditorAggParams({
     );
   }
 
+  const editorConfig = editorConfigProviders.getConfigForAgg(
+    aggTypes.byType[groupName],
+    indexPattern,
+    agg
+  );
+
+  const params = {
+    basic: [] as any,
+    advanced: [] as any,
+  };
+
+  const paramsToRender =
+    (agg.type &&
+      agg.type.params
+        // Filter out, i.e. don't render, any parameter that is hidden via the editor config.
+        .filter((param: any) => !get(editorConfig, [param.name, 'hidden'], false))) ||
+    [];
+  paramsToRender.forEach((param: any, i: number) => {
+    let indexedFields: any = [];
+
+    if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
+      return;
+    }
+    // if field param exists, compute allowed fields
+    if (param.type === 'field') {
+      const availableFields = param.getAvailableFields(agg.getIndexPattern().fields);
+      const fields = aggTypeFieldFilters.filter(availableFields, param.type, agg, vis);
+      indexedFields = groupAggregationsBy(fields, 'type', 'displayName');
+    }
+
+    if (indexedFields.length && i > 0) {
+      // don't draw the rest of the options if there are no indexed fields.
+      return;
+    }
+
+    const type = param.advanced ? 'advanced' : 'basic';
+
+    if (param.editorComponent) {
+      params[type].push({
+        aggParam: param,
+        paramEditor: param.editorComponent,
+        indexedFields,
+        onChange: () => {},
+        setValidity: () => {},
+        setTouched: () => {},
+        agg,
+        config: {},
+        editorConfig,
+        showValidation: true,
+        value: agg.params[param.name],
+        visName: vis.type.name,
+      } as any);
+    }
+  });
+
   return (
     <EuiForm isInvalid={!!errors.length} error={errors}>
       {/* {SchemaEditorComponent && <SchemaEditorComponent />}*/}
       <DefaultEditorAggSelect
         agg={agg}
-        value={agg.type}
+        value={aggType.value}
         aggTypeOptions={groupedAggTypeOptions}
-        showValidation={showValidation}
         isSubAggregation={isSubAggregation}
-        setValue={value => onAggTypeChange(agg, value)}
-        setTouched={setTouched}
-        setValidity={setValidity}
+        showValidation={aggType.touched ? !aggType.validity : false}
+        setValue={value => onChangeAggType({ type: 'agg_selector', value })}
+        setTouched={() => onChangeAggType({ type: 'agg_selector_touched', touched: true })}
+        setValidity={validity => onChangeAggType({ type: 'agg_selector_validity', validity })}
       />
 
-      {/* {params.basic.map((param: any) => (
-        <VisEditorAggParam editor={param.editor} agg={agg} {...param.attrs} />
+      {params.basic.map((param: any) => (
+        <AggParamReactWrapper {...param} />
       ))}
 
-      {params.advanced && (
-        <EuiAccordion
-          id="advancedAccordion"
-          buttonContent={i18n.translate('common.ui.vis.editors.advancedToggle.advancedLinkLabel', {
-            defaultMessage: 'Advanced',
-          })}
-          paddingSize="l"
-        >
-          {params.advanced.map((param: any) => (
-            <VisEditorAggParam editor={param.editor} agg={agg} {...param.attrs} />
-          ))}
-        </EuiAccordion>
-      )} */}
+      {params.advanced.length ? (
+        <>
+          <EuiAccordion
+            id="advancedAccordion"
+            buttonContent={i18n.translate(
+              'common.ui.vis.editors.advancedToggle.advancedLinkLabel',
+              {
+                defaultMessage: 'Advanced',
+              }
+            )}
+            paddingSize="none"
+          >
+            {params.advanced.map((param: any) => (
+              <AggParamReactWrapper {...param} />
+            ))}
+          </EuiAccordion>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
     </EuiForm>
   );
 }

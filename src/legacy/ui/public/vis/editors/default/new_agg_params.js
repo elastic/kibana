@@ -26,15 +26,15 @@ uiModules
   .directive('visAggParamsReactWrapper', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggParams), [
     ['agg', { watchDepth: 'collection' }],
     ['indexPattern', { watchDepth: 'reference' }],
-    ['onAggTypeChange', { watchDepth: 'reference' }],
+    ['vis', { watchDepth: 'reference' }],
     ['aggType', { watchDepth: 'reference' }],
-    ['setTouched', { watchDepth: 'reference' }],
+    ['onAggTypeChange', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
     'id',
     'aggIndex',
     'groupName',
     'aggIsTooLow',
-    'showValidation'
+    'formIsTouched'
   ]))
   .directive('newVisEditorAggParams', function () {
     return {
@@ -43,60 +43,39 @@ uiModules
       require: '^ngModel',
       template: function () {
         return `<vis-agg-params-react-wrapper
-            ng-if="setValidity"
+            ng-if="onAggTypeChange"
             agg="agg"
             agg-index="aggIndex"
             agg-is-too-low="aggIsTooLow"
             agg-type="agg.type"
             group-name="groupName"
             index-pattern="indexPattern"
+            vis="vis"
             on-agg-type-change="onAggTypeChange"
+            form-is-touched="formIsTouched"
             set-validity="setValidity"
-            set-touched="setTouched"
-            show-validation="showValidation"
           ></vis-agg-params-react-wrapper>`;
       },
       link: {
         pre: function ($scope, $el, attr) {
           $scope.$bind('agg', attr.agg);
           $scope.$bind('aggIndex', attr.aggIndex);
-          $scope.$bind('aggIsTooLow', attr.aggIsTooLow);
           $scope.$bind('indexPattern', attr.indexPattern);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
-          $scope.showValidation = false;
-
-          // $scope.$watch('agg.type', (value) => {
-          //   // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
-          //   // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
-          //   $scope.paramValue = value;
-          // });
+          $scope.formIsTouched = false;
 
           $scope.$watch(() => {
             // The model can become touched either onBlur event or when the form is submitted.
             return ngModelCtrl.$touched;
           }, (value) => {
             if (value) {
-              $scope.showValidation = true;
+              $scope.formIsTouched = true;
             }
           }, true);
 
-          // $scope.onChange = (value) => {
-          //   $scope.paramValue = value;
-          //   // This is obviously not a good code quality, but without using scope binding (which we can't see above)
-          //   // to bind function values, this is right now the best temporary fix, until all of this will be gone.
-          //   $scope.$parent.onAggTypeChange($scope.agg, value);
-          //   $scope.showValidation = true;
-          //   ngModelCtrl.$setDirty();
-          // };
-
-          $scope.setTouched = () => {
-            ngModelCtrl.$setTouched();
-            $scope.showValidation = true;
-          };
-
           $scope.setValidity = (isValid) => {
-            ngModelCtrl.$setValidity(`agg${$scope.agg.id}`, isValid);
+            ngModelCtrl.$setValidity(`aggParams${$scope.agg.id}`, isValid);
           };
         }
       }
