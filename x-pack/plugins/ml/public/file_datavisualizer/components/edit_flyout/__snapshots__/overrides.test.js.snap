@@ -91,6 +91,9 @@ exports[`Overrides render overrides 1`] = `
       options={
         Array [
           Object {
+            "label": "custom",
+          },
+          Object {
             "label": "dd/MMM/yyyy:HH:mm:ss XX",
           },
           Object {
@@ -278,87 +281,6 @@ exports[`Overrides render overrides 1`] = `
           },
           Object {
             "label": "yyyy-MM-dd HH:mm:ss:SSSSSSSSSXXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss,SSS",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss,SSSSSS",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss,SSSSSSSSS",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss.SSS",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss:SSS",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss:SSSSSS",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss:SSSSSSSSS",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss,SSSXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss,SSSSSSXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss,SSSSSSSSSXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss:SSSXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss:SSSSSSXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss:SSSSSSSSSXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss,SSSXXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss,SSSSSSXXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss,SSSSSSSSSXXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSXXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss:SSSXXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss:SSSSSSXXX",
-          },
-          Object {
-            "label": "yyyy-MM-dd'T'HH:mm:ss:SSSSSSSSSXXX",
           },
           Object {
             "label": "yyyy-MM-dd HH:mm:ssXX",

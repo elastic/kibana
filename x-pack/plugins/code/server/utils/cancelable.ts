@@ -5,7 +5,7 @@
  */
 type Resolve<T> = (t: T) => void;
 type Reject = (error: any) => void;
-type Cancel = () => void;
+type Cancel = (error: any) => void;
 type OnCancel = (cancel: Cancel) => void;
 
 export class Cancelable<T> {
@@ -24,9 +24,17 @@ export class Cancelable<T> {
     });
   }
 
-  public cancel(): void {
+  public cancel(error = 'canceled'): void {
     if (this._cancel) {
-      this._cancel();
+      this._cancel(error);
+    } else if (this.reject) {
+      this.reject(error);
+    }
+  }
+
+  public error(error: any) {
+    if (this.reject) {
+      this.reject(error);
     }
   }
 }

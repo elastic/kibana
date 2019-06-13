@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { LearnMoreLink } from '../../components';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import {
   EuiFieldNumber,
   EuiFlexGroup,
@@ -12,36 +14,35 @@ import {
   EuiFormRow,
   EuiSelect,
 } from '@elastic/eui';
+
 import {
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
 } from '../../../constants';
+import { LearnMoreLink } from '../../components';
 import { ErrableFormRow } from '../form_errors';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-const MinAgeInputUi = props => {
-  const { rolloverEnabled, errors, phaseData, phase, setPhaseData, isShowingErrors, intl } = props;
+
+export const MinAgeInput = props => {
+  const { rolloverEnabled, errors, phaseData, phase, setPhaseData, isShowingErrors } = props;
+
   const fromMessage = rolloverEnabled
-    ? intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.editPolicy.fromRolloverMessage',
-      defaultMessage: 'from rollover',
+    ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.fromRolloverMessage', {
+      defaultMessage: 'from rollover'
     })
-    : intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.editPolicy.fromIndexCreationMessage',
-      defaultMessage: 'from index creation',
+    : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.fromIndexCreationMessage', {
+      defaultMessage: 'from index creation'
     });
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem style={{ maxWidth: 188 }}>
         <ErrableFormRow
           id={`${phase}-${PHASE_ROLLOVER_MINIMUM_AGE}`}
           label={
-            intl.formatMessage(
-              {
-                id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeLabel',
-                defaultMessage: 'Timing for {phase} phase',
-              },
-              { phase }
-            )
+            i18n.translate('xpack.indexLifecycleMgmt.editPolicy.minimimAgeLabel', {
+              defaultMessage: 'Timing for {phase} phase',
+              values: { phase }
+            })
           }
           errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
           isShowingErrors={isShowingErrors}
@@ -71,39 +72,30 @@ const MinAgeInputUi = props => {
       <EuiFlexItem style={{ maxWidth: 220 }}>
         <EuiFormRow hasEmptyLabelSpace >
           <EuiSelect
-            aria-label={intl.formatMessage(
-              {
-                id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeUnitsAriaLabel',
-                defaultMessage: '{phaseUpper} phase after units',
-              },
-              { phaseUpper: `${phase.charAt(0).toUpperCase()}${phase.slice(1)}` }
-            )}
+            aria-label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.minimimAgeUnitsAriaLabel', {
+              defaultMessage: '{phaseUpper} phase after units',
+              values: { phaseUpper: `${phase.charAt(0).toUpperCase()}${phase.slice(1)}` }
+            })}
             value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}
             onChange={e => setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value)}
             options={[
               {
                 value: 'd',
-                text: intl.formatMessage(
-                  {
-                    id: 'xpack.indexLifecycleMgmt.editPolicy.daysLabel',
-                    defaultMessage: 'days {fromMessage}',
-                  },
-                  {
+                text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.daysLabel', {
+                  defaultMessage: 'days {fromMessage}',
+                  values: {
                     fromMessage,
                   }
-                ),
+                }),
               },
               {
                 value: 'h',
-                text: intl.formatMessage(
-                  {
-                    id: 'xpack.indexLifecycleMgmt.editPolicy.hoursLabel',
-                    defaultMessage: 'hours {fromMessage}',
-                  },
-                  {
+                text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hoursLabel', {
+                  defaultMessage: 'hours {fromMessage}',
+                  values: {
                     fromMessage,
                   }
-                ),
+                }),
               },
             ]}
           />
@@ -112,4 +104,3 @@ const MinAgeInputUi = props => {
     </EuiFlexGroup>
   );
 };
-export const MinAgeInput = injectI18n(MinAgeInputUi);
