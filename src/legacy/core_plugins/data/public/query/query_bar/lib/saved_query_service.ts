@@ -19,7 +19,6 @@
 
 import chrome from 'ui/chrome';
 import { SavedQuery } from '../../../search';
-import { Query } from '../../query_service';
 
 export const saveQuery = async (savedQuery: SavedQuery) => {
   const savedObjectsClient = chrome.getSavedObjectsClient();

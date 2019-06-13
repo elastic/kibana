@@ -28,6 +28,7 @@ import { IndexPattern } from 'ui/index_patterns';
 import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
 
+import { toastNotifications } from 'ui/notify';
 import { Query, QueryBar } from '../../../query/query_bar';
 import { FilterBar } from '../../../filter/filter_bar';
 import { SavedQuery } from '../index';
@@ -212,21 +213,29 @@ class SearchBarUI extends Component<Props, State> {
       };
     }
 
-    const response = await saveQuery(savedQuery);
-    this.setState({
-      showSaveQueryModal: false,
-    });
-    if (this.props.onSaved) {
-      this.props.onSaved(response.id, response.savedQuery);
-    }
-    if (this.props.onQuerySubmit) {
-      this.props.onQuerySubmit({
-        query: this.state.query,
-        dateRange: {
-          from: this.state.dateRangeFrom,
-          to: this.state.dateRangeTo,
-        },
+    try {
+      const response = await saveQuery(savedQuery);
+      toastNotifications.addSuccess(`Your query "${response.savedQuery.title}" was saved`);
+
+      this.setState({
+        showSaveQueryModal: false,
       });
+
+      if (this.props.onSaved) {
+        this.props.onSaved(response.id, response.savedQuery);
+      }
+
+      if (this.props.onQuerySubmit) {
+        this.props.onQuerySubmit({
+          query: this.state.query,
+          dateRange: {
+            from: this.state.dateRangeFrom,
+            to: this.state.dateRangeTo,
+          },
+        });
+      }
+    } catch (error) {
+      toastNotifications.addDanger(`An error occured while saving your query: ${error.message}`);
     }
   };
 
