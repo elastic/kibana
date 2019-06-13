@@ -68,6 +68,7 @@ export class SslConfig {
   public certificate: string | undefined;
   public certificateAuthorities: string[] | undefined;
   public keyPassphrase: string | undefined;
+  public requestCert: boolean | undefined;
 
   public cipherSuites: string[];
   public supportedProtocols: string[];
