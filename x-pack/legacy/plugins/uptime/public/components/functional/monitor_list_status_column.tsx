@@ -8,11 +8,45 @@ import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elas
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+type StatusValues = 'up' | 'down' | 'mixed';
+
 interface MonitorListStatusColumnProps {
   absoluteTime: string;
   relativeTime: string;
-  status: string;
+  status: StatusValues;
 }
+
+const getHealthColor = (status: StatusValues): string => {
+  switch (status) {
+    case 'up':
+      return 'success';
+    case 'down':
+      return 'danger';
+    case 'mixed':
+      return 'warning';
+    default:
+      return '';
+  }
+};
+
+const getHealthMessage = (status: StatusValues): string | null => {
+  switch (status) {
+    case 'up':
+      return i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
+        defaultMessage: 'Up',
+      });
+    case 'down':
+      return i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
+        defaultMessage: 'Down',
+      });
+    case 'mixed':
+      return i18n.translate('xpack.uptime.monitorList.statusColumn.mixedLabel', {
+        defaultMessage: 'Mixed',
+      });
+    default:
+      return null;
+  }
+};
 
 export const MonitorListStatusColumn = ({
   absoluteTime,
@@ -21,14 +55,8 @@ export const MonitorListStatusColumn = ({
 }: MonitorListStatusColumnProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem>
-      <EuiHealth color={status === 'up' ? 'success' : 'danger'} style={{ display: 'block' }}>
-        {status === 'up'
-          ? i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
-              defaultMessage: 'Up',
-            })
-          : i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
-              defaultMessage: 'Down',
-            })}
+      <EuiHealth color={getHealthColor(status)} style={{ display: 'block' }}>
+        {getHealthMessage(status)}
       </EuiHealth>
       <EuiToolTip
         content={

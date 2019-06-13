@@ -88,7 +88,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   };
 } => ({
   Query: {
-    // @ts-ignore TODO update typings and remove this comment
     async getMonitors(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
       const result = await libs.monitors.getMonitors(req, dateRangeStart, dateRangeEnd, filters);
       return {

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { UMAuthDomain } from './auth';
-export { UMMonitorsDomain } from './monitors';
-export { UMMonitorStatesDomain } from './monitor_states';
-export { UMPingsDomain } from './pings';
+import { MonitorSummary } from '../../../../common/graphql/types';
+
+export interface UMMonitorStatesAdapter {
+  getMonitorStates(request: any): Promise<MonitorSummary[]>;
+}

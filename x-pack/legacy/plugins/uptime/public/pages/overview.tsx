@@ -14,6 +14,7 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
+import { StatesTable } from '../components/functional/states_table/states_table';
 
 interface OverviewPageProps {
   basePath: string;
@@ -99,6 +100,7 @@ export const OverviewPage = ({
           variables={sharedProps}
         />
         <EuiSpacer size="s" />
+        <StatesTable />
         <MonitorList
           absoluteStartDate={absoluteStartDate}
           absoluteEndDate={absoluteEndDate}

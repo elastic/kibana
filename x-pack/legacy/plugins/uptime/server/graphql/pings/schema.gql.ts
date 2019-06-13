@@ -222,11 +222,6 @@ export const pingsSchema = gql`
     rtt: RTT
   }
 
-  type Summary {
-    up: Int
-    down: Int
-  }
-
   type TCP {
     port: Int
     rtt: RTT

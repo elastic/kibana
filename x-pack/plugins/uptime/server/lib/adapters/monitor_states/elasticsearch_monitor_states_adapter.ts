@@ -1,0 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { get } from 'lodash';
+import { DatabaseAdapter } from '../database';
+import { UMMonitorStatesAdapter } from './adapter_types';
+import { MonitorSummary } from '../../../../common/graphql/types';
+
+export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
+  constructor(private readonly database: DatabaseAdapter) {
+    this.database = database;
+  }
+
+  public async getMonitorStates(request: any): Promise<MonitorSummary[]> {
+    const params = {
+      index: 'heartbeat-states-8.0.0',
+      body: {
+        query: {
+          match_all: {},
+        },
+      },
+    };
+
+    const result = await this.database.search(request, params);
+    const hits = get(result, 'hits.hits', []);
+    return hits.map(({ _source }: any) => {
+      const { monitor_id } = _source;
+      const sourceState = get<any>(_source, 'state');
+      const state = {
+        ...sourceState,
+        timestamp: sourceState['@timestamp'],
+      };
+      if (state.checks) {
+        state.checks = state.checks.map((check: any) => ({
+          ...check,
+          timestamp: check['@timestamp'],
+        }));
+      }
+      const f = {
+        monitor_id,
+        state,
+      };
+      return f;
+    });
+  }
+}

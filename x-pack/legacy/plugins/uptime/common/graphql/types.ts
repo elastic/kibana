@@ -38,6 +38,8 @@ export interface Query {
   getErrorsList?: ErrorListItem[] | null;
 
   getMonitorPageTitle?: MonitorPageTitle | null;
+
+  getMonitorStates?: (MonitorSummary | null)[] | null;
 }
 
 export interface PingResults {
@@ -317,6 +319,20 @@ export interface Summary {
   up?: number | null;
 
   down?: number | null;
+
+  geo?: CheckGeo | null;
+}
+
+export interface CheckGeo {
+  name?: string | null;
+
+  location?: Location | null;
+}
+
+export interface Location {
+  lat?: number | null;
+
+  lon?: number | null;
 }
 
 export interface Tcp {
@@ -484,10 +500,112 @@ export interface MonitorPageTitle {
   name?: string | null;
 }
 
+export interface MonitorSummary {
+  monitor_id: string;
+
+  state?: State | null;
+}
+
+export interface State {
+  agent?: Agent | null;
+
+  checks?: Check[] | null;
+
+  geo?: StateGeo | null;
+
+  observer?: StateObserver | null;
+
+  monitor?: MonitorState | null;
+
+  summary: Summary;
+
+  timestamp: UnsignedInteger;
+
+  url?: StateUrl | null;
+}
+
+export interface Agent {
+  id: string;
+}
+
+export interface Check {
+  agent?: Agent | null;
+
+  monitor?: CheckMonitor | null;
+
+  observer?: CheckObserver | null;
+
+  timestamp?: string | null;
+}
+
+export interface CheckMonitor {
+  ip?: string | null;
+
+  status?: string | null;
+}
+
+export interface CheckObserver {
+  geo?: CheckGeo | null;
+}
+
+export interface StateGeo {
+  name?: (string | null)[] | null;
+
+  location?: Location | null;
+}
+
+export interface StateObserver {
+  geo?: StateGeo | null;
+}
+
+export interface MonitorState {
+  status?: string | null;
+
+  name?: string | null;
+
+  id?: string | null;
+
+  type?: string | null;
+}
+
+export interface StateUrl {
+  domain?: string | null;
+
+  full?: string | null;
+
+  path?: string | null;
+
+  port?: number | null;
+
+  scheme?: string | null;
+}
+
 export interface DataPoint {
   x?: UnsignedInteger | null;
 
   y?: number | null;
+}
+
+export interface MonitorSummaryUrl {
+  domain?: string | null;
+
+  fragment?: string | null;
+
+  full?: string | null;
+
+  original?: string | null;
+
+  password?: string | null;
+
+  path?: string | null;
+
+  port?: number | null;
+
+  query?: string | null;
+
+  scheme?: string | null;
+
+  username?: string | null;
 }
 
 // ====================================================
