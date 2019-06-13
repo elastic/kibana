@@ -21,7 +21,7 @@ import Boom from 'boom';
 
 const code = Symbol('SavedObjectsClientErrorCode');
 
-interface DecoratedError extends Boom {
+export interface DecoratedError extends Boom {
   [code]?: string;
 }
 

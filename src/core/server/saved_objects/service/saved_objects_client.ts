@@ -21,11 +21,19 @@ import { errors, SavedObjectsRepository } from './lib';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsBaseOptions {
   /** Specify the namespace for this operation */
   namespace?: string;
 }
 
+/**
+ *
+ * @public
+ */
 export interface CreateOptions extends SavedObjectsBaseOptions {
   /** (not recommended) Specify an id for the document */
   id?: string;
@@ -35,6 +43,10 @@ export interface CreateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
 }
 
+/**
+ *
+ * @public
+ */
 export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
   id?: string;
   type: string;
@@ -43,10 +55,18 @@ export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
   migrationVersion?: MigrationVersion;
 }
 
+/**
+ *
+ * @public
+ */
 export interface BulkResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   type?: string | string[];
   page?: number;
@@ -61,6 +81,10 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   defaultSearchOperator?: 'AND' | 'OR';
 }
 
+/**
+ *
+ * @public
+ */
 export interface FindResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
   total: number;
@@ -68,12 +92,20 @@ export interface FindResponse<T extends SavedObjectAttributes = any> {
   page: number;
 }
 
+/**
+ *
+ * @public
+ */
 export interface UpdateOptions extends SavedObjectsBaseOptions {
   /** Ensures version matches that of persisted object */
   version?: string;
   references?: SavedObjectReference[];
 }
 
+/**
+ *
+ * @public
+ */
 export interface BulkGetObject {
   id: string;
   type: string;
@@ -81,10 +113,18 @@ export interface BulkGetObject {
   fields?: string[];
 }
 
+/**
+ *
+ * @public
+ */
 export interface BulkResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
+/**
+ *
+ * @public
+ */
 export interface UpdateResponse<T extends SavedObjectAttributes = any>
   extends Omit<SavedObject<T>, 'attributes'> {
   attributes: Partial<T>;
@@ -93,15 +133,25 @@ export interface UpdateResponse<T extends SavedObjectAttributes = any>
 /**
  * A dictionary of saved object type -> version used to determine
  * what migrations need to be applied to a saved object.
+ *
+ * @public
  */
 export interface MigrationVersion {
   [pluginName: string]: string;
 }
 
+/**
+ *
+ * @public
+ */
 export interface SavedObjectAttributes {
   [key: string]: SavedObjectAttributes | string | number | boolean | null;
 }
 
+/**
+ *
+ * @public
+ */
 export interface SavedObject<T extends SavedObjectAttributes = any> {
   id: string;
   type: string;
@@ -118,6 +168,8 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
 
 /**
  * A reference to another saved object.
+ *
+ * @public
  */
 export interface SavedObjectReference {
   name: string;
@@ -125,8 +177,16 @@ export interface SavedObjectReference {
   id: string;
 }
 
+/**
+ *
+ * @public
+ */
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
+/**
+ *
+ * @internal
+ */
 export class SavedObjectsClient {
   /**
    * ## SavedObjectsClient errors

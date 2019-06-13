@@ -76,11 +76,20 @@ export {
 } from './plugins';
 
 export {
-  SavedObjectAttributes,
+  BulkCreateObject,
+  BulkGetObject,
+  BulkResponse,
+  FindResponse,
+  MigrationVersion,
   SavedObject,
-  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  SavedObjectReference,
   SavedObjectsBaseOptions,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
   SavedObjectsFindOptions,
+  UpdateOptions,
+  UpdateResponse,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';

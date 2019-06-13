@@ -24,5 +24,54 @@ export {
   ScopedSavedObjectsClientProvider,
 } from './scoped_client_provider';
 
-import * as errors from './errors';
+import {
+  isSavedObjectsClientError,
+  decorateBadRequestError,
+  createBadRequestError,
+  createUnsupportedTypeError,
+  isBadRequestError,
+  createInvalidVersionError,
+  isInvalidVersionError,
+  decorateNotAuthorizedError,
+  isNotAuthorizedError,
+  decorateForbiddenError,
+  isForbiddenError,
+  decorateRequestEntityTooLargeError,
+  isRequestEntityTooLargeError,
+  createGenericNotFoundError,
+  isNotFoundError,
+  decorateConflictError,
+  isConflictError,
+  decorateEsUnavailableError,
+  isEsUnavailableError,
+  createEsAutoCreateIndexError,
+  isEsAutoCreateIndexError,
+  decorateGeneralError,
+} from './errors';
+
+const errors = {
+  isSavedObjectsClientError,
+  decorateBadRequestError,
+  createBadRequestError,
+  createUnsupportedTypeError,
+  isBadRequestError,
+  createInvalidVersionError,
+  isInvalidVersionError,
+  decorateNotAuthorizedError,
+  isNotAuthorizedError,
+  decorateForbiddenError,
+  isForbiddenError,
+  decorateRequestEntityTooLargeError,
+  isRequestEntityTooLargeError,
+  createGenericNotFoundError,
+  isNotFoundError,
+  decorateConflictError,
+  isConflictError,
+  decorateEsUnavailableError,
+  isEsUnavailableError,
+  createEsAutoCreateIndexError,
+  isEsAutoCreateIndexError,
+  decorateGeneralError,
+};
+
 export { errors };

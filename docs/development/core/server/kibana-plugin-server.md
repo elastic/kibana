@@ -24,11 +24,15 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Interface | Description |
 |  --- | --- |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
+|  [BulkCreateObject](./kibana-plugin-server.bulkcreateobject.md) |  |
+|  [BulkGetObject](./kibana-plugin-server.bulkgetobject.md) |  |
+|  [BulkResponse](./kibana-plugin-server.bulkresponse.md) |  |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [DiscoveredPlugin](./kibana-plugin-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
+|  [FindResponse](./kibana-plugin-server.findresponse.md) |  |
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
 |  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [InternalCoreStart](./kibana-plugin-server.internalcorestart.md) |  |
@@ -36,6 +40,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Logger](./kibana-plugin-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
 |  [LoggerFactory](./kibana-plugin-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
+|  [MigrationVersion](./kibana-plugin-server.migrationversion.md) | A dictionary of saved object type -<!-- -->&gt; version used to determine what migrations need to be applied to a saved object. |
 |  [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
@@ -43,8 +48,15 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginsServiceSetup](./kibana-plugin-server.pluginsservicesetup.md) |  |
 |  [PluginsServiceStart](./kibana-plugin-server.pluginsservicestart.md) |  |
 |  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Route specific configuration. |
+|  [SavedObject](./kibana-plugin-server.savedobject.md) |  |
+|  [SavedObjectAttributes](./kibana-plugin-server.savedobjectattributes.md) |  |
+|  [SavedObjectReference](./kibana-plugin-server.savedobjectreference.md) | A reference to another saved object. |
+|  [SavedObjectsBaseOptions](./kibana-plugin-server.savedobjectsbaseoptions.md) |  |
+|  [SavedObjectsFindOptions](./kibana-plugin-server.savedobjectsfindoptions.md) |  |
 |  [SessionStorage](./kibana-plugin-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
+|  [UpdateOptions](./kibana-plugin-server.updateoptions.md) |  |
+|  [UpdateResponse](./kibana-plugin-server.updateresponse.md) |  |
 
 ## Type Aliases
 
@@ -60,4 +72,5 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginName](./kibana-plugin-server.pluginname.md) | Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays that use it as a key or value more obvious. |
 |  [RecursiveReadonly](./kibana-plugin-server.recursivereadonly.md) |  |
 |  [RouteMethod](./kibana-plugin-server.routemethod.md) | The set of common HTTP methods supported by Kibana routing. |
+|  [SavedObjectsClientContract](./kibana-plugin-server.savedobjectsclientcontract.md) |  |
 
