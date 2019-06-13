@@ -125,9 +125,9 @@ module.directive('vislibValueAxes', function () {
         }
       };
 
-      $scope.updateBottomMargin = function (axis) {
+      $scope.updateBoundsMargin = function (axis) {
         if (!axis.scale.defaultYExtents) {
-          delete axis.scale.bottomMargin;
+          delete axis.scale.boundsMargin;
         }
       };
 

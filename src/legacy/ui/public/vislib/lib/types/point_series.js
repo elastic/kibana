@@ -111,7 +111,7 @@ function create(opts) {
             type: config.scale,
             setYExtents: config.setYExtents,
             defaultYExtents: config.defaultYExtents,
-            bottomMargin: defaultYExtents ? config.bottomMargin : 0,
+            boundsMargin: defaultYExtents ? config.boundsMargin : 0,
             min: isUserDefinedYAxis ? config.yAxis.min : undefined,
             max: isUserDefinedYAxis ? config.yAxis.max : undefined,
             mode: mode

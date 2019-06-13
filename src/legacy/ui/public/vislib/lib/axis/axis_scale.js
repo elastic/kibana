@@ -152,11 +152,11 @@ export class AxisScale {
     if (this.axisConfig.isUserDefined()) return this.validateUserExtents(domain);
     if (this.axisConfig.isLogScale()) return this.logDomain(min, max);
     if (this.axisConfig.isYExtents()) {
-      const scaleBottomMargin = this.axisConfig.get('scale.bottomMargin');
-      if (scaleBottomMargin === 0) {
+      const scaleBoundsMargin = this.axisConfig.get('scale.boundsMargin');
+      if (scaleBoundsMargin === 0) {
         return domain;
       } else {
-        domain[0] = domain[0] - scaleBottomMargin;
+        domain[0] = domain[0] - scaleBoundsMargin; // TODO check if there are negative values
         return domain;
       }
     }

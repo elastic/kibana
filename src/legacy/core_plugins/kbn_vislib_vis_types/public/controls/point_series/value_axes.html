@@ -255,7 +255,7 @@
               i18n-default-message="Scale to Data Bounds"
             ></label>
             <div class="visEditorSidebar__formControl">
-              <input class="kuiCheckBox" id="{ 'defaultYExtents' + $index }" type="checkbox" ng-model="axis.scale.defaultYExtents" ng-change="updateBottomMargin(axis)">
+              <input class="kuiCheckBox" id="{ 'defaultYExtents' + $index }" type="checkbox" ng-model="axis.scale.defaultYExtents" ng-change="updateBoundsMargin(axis)">
             </div>
           </div>
 
@@ -263,24 +263,24 @@
             <div class="visEditorSidebar__formRow">
               <label
                 class="visEditorSidebar__formLabel"
-                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.bottomMargin"
-                i18n-default-message="Bottom Margin"
+                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.boundsMargin"
+                i18n-default-message="Bounds Margin"
               ></label>
               <div class="visEditorSidebar__formControl">
                 <input
-                  name="yBottomMargin"
+                  name="yBoundsMargin"
                   class="kuiInput visEditorSidebar__input"
                   type="number"
                   step="0.1"
                   greater-or-equal-than="0"
-                  ng-model="axis.scale.bottomMargin">
+                  ng-model="axis.scale.boundsMargin">
               </div>
             </div>
-            <div ng-show="axis.scale.bottomMargin < 0">
+            <div ng-show="axis.scale.boundsMargin < 0">
               <span
                 class="text-danger"
-                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBottomMargin"
-                i18n-default-message="Bottom Margin must be greater than or equal to 0"
+                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBoundsMargin"
+                i18n-default-message="Bounds Margin must be greater than or equal to 0"
               ></span>
             </div>
           </div>

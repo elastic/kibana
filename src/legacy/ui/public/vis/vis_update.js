@@ -34,7 +34,7 @@ const updateVisualizationConfig = (stateConfig, config) => {
     type: config.scale || 'linear',
     setYExtents: config.setYExtents || false,
     defaultYExtents: config.defaultYExtents || false,
-    bottomMargin: defaultYExtents ? config.bottomMargin : 0,
+    boundsMargin: defaultYExtents ? config.boundsMargin : 0,
     min: isUserDefinedYAxis ? config.yAxis.min : undefined,
     max: isUserDefinedYAxis ? config.yAxis.max : undefined,
     mode: mode

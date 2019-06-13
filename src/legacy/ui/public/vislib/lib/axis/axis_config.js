@@ -31,7 +31,7 @@ const defaults = {
     expandLastBucket: true,
     inverted: false,
     defaultYExtents: null,
-    bottomMargin: 0,
+    boundsMargin: 0,
     setYExtents: null,
     min: null,
     max: null,
