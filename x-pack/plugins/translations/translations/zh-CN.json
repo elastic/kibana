@@ -3263,7 +3263,6 @@
     "tsvb.indexPattern.timeFieldLabel": "时间字段",
     "tsvb.indexPatternLabel": "索引模式",
     "tsvb.kbnVisTypes.metricsDescription": "使用可视化管道界面构建时间序列",
-    "tsvb.kbnVisTypes.metricsTitle": "Visual Builder",
     "tsvb.markdown.alignOptions.bottomLabel": "下",
     "tsvb.markdown.alignOptions.middleLabel": "中",
     "tsvb.markdown.alignOptions.topLabel": "上",
