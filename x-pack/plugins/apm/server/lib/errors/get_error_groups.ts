@@ -111,21 +111,25 @@ export async function getErrorGroups({
 
   const resp = await client.search<unknown, typeof params>(params);
 
-  const hits = resp.aggregations.error_groups.buckets.map(bucket => {
-    const source = bucket.sample.hits.hits[0]._source as SampleError;
-    const message =
-      idx(source, _ => _.error.log.message) ||
-      idx(source, _ => _.error.exception[0].message);
+  // aggregations can be undefined when no matching indices are found.
+  // this is an exception rather than the rule so the ES type does not account for this.
+  const hits = (idx(resp, _ => _.aggregations.error_groups.buckets) || []).map(
+    bucket => {
+      const source = bucket.sample.hits.hits[0]._source as SampleError;
+      const message =
+        idx(source, _ => _.error.log.message) ||
+        idx(source, _ => _.error.exception[0].message);
 
-    return {
-      message,
-      occurrenceCount: bucket.doc_count,
-      culprit: idx(source, _ => _.error.culprit),
-      groupId: idx(source, _ => _.error.grouping_key),
-      latestOccurrenceAt: source['@timestamp'],
-      handled: idx(source, _ => _.error.exception[0].handled)
-    };
-  });
+      return {
+        message,
+        occurrenceCount: bucket.doc_count,
+        culprit: idx(source, _ => _.error.culprit),
+        groupId: idx(source, _ => _.error.grouping_key),
+        latestOccurrenceAt: source['@timestamp'],
+        handled: idx(source, _ => _.error.exception[0].handled)
+      };
+    }
+  );
 
   return hits;
 }
