@@ -18,7 +18,7 @@
  */
 
 import React, { FunctionComponent, Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { SavedQuery } from '../../../search/search_bar';
 import { Query } from '../index';
 
@@ -47,7 +47,11 @@ export const SavedQueryRow: FunctionComponent<Props> = ({ query, savedQuery, onS
       </EuiFlexItem>
     );
   } else {
-    rowContent = 'Manage saved queries';
+    rowContent = (
+      <EuiFlexItem>
+        <EuiLink href={`#/management/kibana/objects`}>Manage Saved Queries</EuiLink>
+      </EuiFlexItem>
+    );
   }
 
   return (
