@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { onError } from 'apollo-link-error';
+import { onError, ErrorLink } from 'apollo-link-error';
 import uuid from 'uuid';
 
+import { get } from 'lodash/fp';
 import { getStore } from '../../store';
 import { appActions } from '../../store/actions';
 
 import * as i18n from './translations';
-
-export const errorLink = onError(({ graphQLErrors, networkError }) => {
+export const errorLinkHandler: ErrorLink.ErrorHandler = ({ graphQLErrors, networkError }) => {
   const store = getStore();
+
   if (graphQLErrors != null && store != null) {
     graphQLErrors.forEach(({ message }) =>
       store.dispatch(
@@ -31,10 +32,20 @@ export const errorLink = onError(({ graphQLErrors, networkError }) => {
       })
     );
   }
-});
+};
+export const errorLink = onError(errorLinkHandler);
 
-export const refetchOnErrorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
-  if (graphQLErrors != null || networkError != null) {
-    return forward(operation);
+export const reTryOneTimeOnErrorHandler: ErrorLink.ErrorHandler = ({
+  networkError,
+  operation,
+  forward,
+}) => {
+  if (networkError != null) {
+    const statusCode = get('statusCode', networkError);
+    if (statusCode != null && statusCode === 503) {
+      return forward(operation);
+    }
   }
-});
+};
+
+export const reTryOneTimeOnErrorLink = onError(reTryOneTimeOnErrorHandler);
