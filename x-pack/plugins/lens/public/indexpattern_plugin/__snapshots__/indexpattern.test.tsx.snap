@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
-<div>
+<ChildDragDropProvider
+  setDragging={[MockFunction]}
+>
   Index Pattern Data Source
   <div>
     <EuiComboBox
@@ -37,22 +39,49 @@ exports[`IndexPattern Data Source #renderDataPanel should match snapshot 1`] = `
       }
     />
     <div>
-      <div
+      <DragDrop
+        draggable={true}
         key="timestamp"
+        value={
+          Object {
+            "aggregatable": true,
+            "name": "timestamp",
+            "searchable": true,
+            "type": "date",
+          }
+        }
       >
         timestamp
-      </div>
-      <div
+      </DragDrop>
+      <DragDrop
+        draggable={true}
         key="bytes"
+        value={
+          Object {
+            "aggregatable": true,
+            "name": "bytes",
+            "searchable": true,
+            "type": "number",
+          }
+        }
       >
         bytes
-      </div>
-      <div
+      </DragDrop>
+      <DragDrop
+        draggable={true}
         key="source"
+        value={
+          Object {
+            "aggregatable": true,
+            "name": "source",
+            "searchable": true,
+            "type": "string",
+          }
+        }
       >
         source
-      </div>
+      </DragDrop>
     </div>
   </div>
-</div>
+</ChildDragDropProvider>
 `;

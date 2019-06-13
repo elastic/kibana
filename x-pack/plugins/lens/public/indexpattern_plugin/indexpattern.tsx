@@ -18,6 +18,7 @@ import {
   DimensionPriority,
 } from '../types';
 import { getIndexPatterns } from './loader';
+import { ChildDragDropProvider, DragDrop } from '../drag_drop';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 
@@ -120,7 +121,7 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
 
 export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
   return (
-    <div>
+    <ChildDragDropProvider {...props.dragDropContext}>
       Index Pattern Data Source
       <div>
         <EuiComboBox
@@ -151,11 +152,13 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
         <div>
           {props.state.currentIndexPatternId &&
             props.state.indexPatterns[props.state.currentIndexPatternId].fields.map(field => (
-              <div key={field.name}>{field.name}</div>
+              <DragDrop key={field.name} value={field} draggable>
+                {field.name}
+              </DragDrop>
             ))}
         </div>
       </div>
-    </div>
+    </ChildDragDropProvider>
   );
 }
 

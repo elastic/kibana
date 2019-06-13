@@ -14,6 +14,7 @@ import {
   IndexPatternDataPanel,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
+import { createMockedDragDropContext } from './mocks';
 
 jest.mock('./loader');
 
@@ -161,14 +162,25 @@ describe('IndexPattern Data Source', () => {
 
     it('should match snapshot', () => {
       expect(
-        shallow(<IndexPatternDataPanel state={state} setState={() => {}} />)
+        shallow(
+          <IndexPatternDataPanel
+            dragDropContext={createMockedDragDropContext()}
+            state={state}
+            setState={() => {}}
+          />
+        )
       ).toMatchSnapshot();
     });
 
     it('should call setState when the index pattern is switched', async () => {
       const setState = jest.fn();
 
-      const wrapper = shallow(<IndexPatternDataPanel {...{ state, setState }} />);
+      const wrapper = shallow(
+        <IndexPatternDataPanel
+          dragDropContext={createMockedDragDropContext()}
+          {...{ state, setState }}
+        />
+      );
 
       const comboBox = wrapper.find(EuiComboBox);
 
