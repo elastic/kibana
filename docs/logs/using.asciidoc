@@ -70,4 +70,4 @@ When you are streaming logs, the most recent log appears at the bottom on the co
 [role="screenshot"]
 image::logs/images/logs-usage-streaming-indicator.png[Logs streaming indicator]
 
-Historical data offer infinite scrolling.
+Historical data offers infinite scrolling.
