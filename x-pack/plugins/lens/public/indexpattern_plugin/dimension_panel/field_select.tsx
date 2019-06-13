@@ -39,6 +39,30 @@ export function FieldSelect({
       .concat(fieldColumns),
     col => col.sourceField
   );
+
+  uniqueColumnsByField.sort((column1, column2) => {
+    return column1.sourceField.localeCompare(column2.sourceField);
+  });
+
+  const fieldOptions = [];
+  const fieldLessColumn = filteredColumns.find(column => !('sourceField' in column));
+  if (fieldLessColumn) {
+    fieldOptions.push({
+      label: 'Document',
+      value: fieldLessColumn.operationId,
+    });
+  }
+
+  if (uniqueColumnsByField.length > 0) {
+    fieldOptions.push({
+      label: 'Individual fields',
+      options: uniqueColumnsByField.map(col => ({
+        label: col.sourceField,
+        value: col.operationId,
+      })),
+    });
+  }
+
   return (
     <>
       <EuiFlexItem grow={true}>
@@ -66,19 +90,7 @@ export function FieldSelect({
             }}
             data-test-subj="indexPattern-dimension-field"
             placeholder="Field"
-            options={[
-              {
-                label: 'Document',
-                value: filteredColumns.find(column => !('sourceField' in column))!.operationId,
-              },
-              {
-                label: 'Individual fields',
-                options: uniqueColumnsByField.map(col => ({
-                  label: col.sourceField,
-                  value: col.operationId,
-                })),
-              },
-            ]}
+            options={fieldOptions}
             selectedOptions={
               selectedColumn && 'sourceField' in selectedColumn
                 ? [

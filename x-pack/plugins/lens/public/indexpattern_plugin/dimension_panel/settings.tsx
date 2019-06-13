@@ -62,6 +62,7 @@ export function Settings({
     .filter(o => selectedColumn && functionsFromField.some(col => col.operationType === o))
     .map(o => (
       <EuiContextMenuItem
+        data-test-subj={`lns-indexPatternDimension-${o}`}
         key={o}
         icon={selectedColumn && selectedColumn.operationType === o ? 'check' : 'empty'}
         onClick={() => {
