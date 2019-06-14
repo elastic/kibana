@@ -11,7 +11,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
     <EuiScreenReaderOnly>
       <h1>
         <FormattedMessage
-          defaultMessage="Kibana home page"
+          defaultMessage="Kibana home"
           id="kbn.home.welcomeHomePageHeader"
           values={Object {}}
         />
@@ -134,7 +134,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
     <EuiScreenReaderOnly>
       <h1>
         <FormattedMessage
-          defaultMessage="Kibana home page"
+          defaultMessage="Kibana home"
           id="kbn.home.welcomeHomePageHeader"
           values={Object {}}
         />
@@ -270,7 +270,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
     <EuiScreenReaderOnly>
       <h1>
         <FormattedMessage
-          defaultMessage="Kibana home page"
+          defaultMessage="Kibana home"
           id="kbn.home.welcomeHomePageHeader"
           values={Object {}}
         />
@@ -406,7 +406,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
     <EuiScreenReaderOnly>
       <h1>
         <FormattedMessage
-          defaultMessage="Kibana home page"
+          defaultMessage="Kibana home"
           id="kbn.home.welcomeHomePageHeader"
           values={Object {}}
         />
@@ -529,7 +529,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
     <EuiScreenReaderOnly>
       <h1>
         <FormattedMessage
-          defaultMessage="Kibana home page"
+          defaultMessage="Kibana home"
           id="kbn.home.welcomeHomePageHeader"
           values={Object {}}
         />
@@ -652,7 +652,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
     <EuiScreenReaderOnly>
       <h1>
         <FormattedMessage
-          defaultMessage="Kibana home page"
+          defaultMessage="Kibana home"
           id="kbn.home.welcomeHomePageHeader"
           values={Object {}}
         />
@@ -775,7 +775,7 @@ exports[`home should render home component 1`] = `
     <EuiScreenReaderOnly>
       <h1>
         <FormattedMessage
-          defaultMessage="Kibana home page"
+          defaultMessage="Kibana home"
           id="kbn.home.welcomeHomePageHeader"
           values={Object {}}
         />
@@ -898,7 +898,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     <EuiScreenReaderOnly>
       <h1>
         <FormattedMessage
-          defaultMessage="Kibana home page"
+          defaultMessage="Kibana home"
           id="kbn.home.welcomeHomePageHeader"
           values={Object {}}
         />
@@ -1021,7 +1021,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
     <EuiScreenReaderOnly>
       <h1>
         <FormattedMessage
-          defaultMessage="Kibana home page"
+          defaultMessage="Kibana home"
           id="kbn.home.welcomeHomePageHeader"
           values={Object {}}
         />
@@ -1151,7 +1151,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     <EuiScreenReaderOnly>
       <h1>
         <FormattedMessage
-          defaultMessage="Kibana home page"
+          defaultMessage="Kibana home"
           id="kbn.home.welcomeHomePageHeader"
           values={Object {}}
         />
