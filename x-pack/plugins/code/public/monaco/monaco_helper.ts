@@ -158,7 +158,9 @@ export class MonacoHelper {
   }
 
   public clearLineSelection() {
-    this.decorations = this.editor!.deltaDecorations(this.decorations, []);
+    if (this.editor) {
+      this.decorations = this.editor.deltaDecorations(this.decorations, []);
+    }
   }
 
   private handleCopy(e: any) {
