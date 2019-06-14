@@ -27,7 +27,7 @@ export async function fetch(setup: Setup, serviceName: string) {
       }
     },
     gcCountAll: {
-      derivative: {
+      serial_diff: {
         buckets_path: 'gcCountMax'
       }
     },
@@ -57,19 +57,27 @@ export async function fetch(setup: Setup, serviceName: string) {
         }
       },
       aggs: {
-        perAgent: {
+        perLabelName: {
           terms: {
-            field: 'agent.ephemeral_id',
+            field: 'labels.name',
             size: 10
           },
           aggs: {
-            timeseriesData: {
-              date_histogram: getMetricsDateHistogramParams(start, end),
-              aggs
-            },
-            gcCountAll: {
-              sum_bucket: {
-                buckets_path: 'timeseriesData>gcCountAll'
+            perAgent: {
+              terms: {
+                field: 'agent.ephemeral_id',
+                size: 10
+              },
+              aggs: {
+                timeseriesData: {
+                  date_histogram: getMetricsDateHistogramParams(start, end),
+                  aggs
+                },
+                gcCountAll: {
+                  sum_bucket: {
+                    buckets_path: 'timeseriesData>gcCountAll'
+                  }
+                }
               }
             }
           }
@@ -77,6 +85,5 @@ export async function fetch(setup: Setup, serviceName: string) {
       }
     }
   };
-
   return client.search<void, JavaGcMetricsAggs<GcRateMetrics>>(params);
 }

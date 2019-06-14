@@ -27,7 +27,7 @@ export async function fetch(setup: Setup, serviceName: string) {
       }
     },
     gcTimeAll: {
-      derivative: {
+      serial_diff: {
         buckets_path: 'gcTimeMax'
       }
     },
@@ -57,19 +57,27 @@ export async function fetch(setup: Setup, serviceName: string) {
         }
       },
       aggs: {
-        perAgent: {
+        perLabelName: {
           terms: {
-            field: 'agent.ephemeral_id',
+            field: 'labels.name',
             size: 10
           },
           aggs: {
-            timeseriesData: {
-              date_histogram: getMetricsDateHistogramParams(start, end),
-              aggs
-            },
-            gcTimeAll: {
-              sum_bucket: {
-                buckets_path: 'timeseriesData>gcTimeAll'
+            perAgent: {
+              terms: {
+                field: 'agent.ephemeral_id',
+                size: 10
+              },
+              aggs: {
+                timeseriesData: {
+                  date_histogram: getMetricsDateHistogramParams(start, end),
+                  aggs
+                },
+                gcTimeAll: {
+                  sum_bucket: {
+                    buckets_path: 'timeseriesData>gcTimeAll'
+                  }
+                }
               }
             }
           }

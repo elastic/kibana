@@ -13,7 +13,8 @@ import {
   asDynamicBytes,
   asPercent,
   getFixedByteFormatter,
-  asDecimal
+  asDecimal,
+  asInteger
 } from '../../../utils/formatters';
 import { Coordinate } from '../../../../typings/timeseries';
 import { getEmptySeries } from '../../shared/charts/CustomPlot/getEmptySeries';
@@ -66,6 +67,9 @@ function getYTickFormatter(chart: GenericMetricsChart) {
     case 'percent': {
       return (y: number | null) => asPercent(y || 0, 1);
     }
+    case 'integer': {
+      return (y: number | null) => (y === null ? y : asInteger(y));
+    }
     default: {
       return (y: number | null) => (y === null ? y : asDecimal(y));
     }
@@ -79,6 +83,9 @@ function getTooltipFormatter({ yUnit }: GenericMetricsChart) {
     }
     case 'percent': {
       return (c: Coordinate) => asPercent(c.y || 0, 1);
+    }
+    case 'integer': {
+      return (c: Coordinate) => (c.y === null ? c.y : asInteger(c.y));
     }
     default: {
       return (c: Coordinate) => (c.y === null ? c.y : asDecimal(c.y));

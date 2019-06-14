@@ -10,18 +10,17 @@ import { Setup } from '../../../../helpers/setup_request';
 import { fetch, GcRateMetrics } from './fetcher';
 import { ChartBase } from '../../../types';
 import { transformJavaGcDataToMetricsChart } from '../../../transform_metrics_chart';
-
 const chartBase: ChartBase<GcRateMetrics> = {
   title: i18n.translate('xpack.apm.agentMetrics.java.gcRateChartTitle', {
-    defaultMessage: 'Garbage collection rate'
+    defaultMessage: 'Garbage collection activity'
   }),
   key: 'gc_rate_line_chart',
-  type: 'bar',
-  yUnit: 'number',
+  type: 'linemark',
+  yUnit: 'integer',
   series: {
     gcCountAll: {
       title: i18n.translate('xpack.apm.agentMetrics.java.gcCountAll', {
-        defaultMessage: 'GC activity'
+        defaultMessage: 'GC cycles'
       }),
       color: theme.euiColorVis0
     }

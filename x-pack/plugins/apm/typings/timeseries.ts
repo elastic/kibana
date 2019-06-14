@@ -15,4 +15,4 @@ export interface RectCoordinate {
 }
 
 export type ChartType = 'area' | 'linemark' | 'bar';
-export type YUnit = 'percent' | 'bytes' | 'number';
+export type YUnit = 'percent' | 'bytes' | 'number' | 'integer';

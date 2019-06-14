@@ -16,8 +16,8 @@ const chartBase: ChartBase<GcTimeMetrics> = {
     defaultMessage: 'Garbage collection time'
   }),
   key: 'gc_time_line_chart',
-  type: 'bar',
-  yUnit: 'number',
+  type: 'linemark',
+  yUnit: 'integer',
   series: {
     gcTimeAll: {
       title: i18n.translate('xpack.apm.agentMetrics.java.gcTimeAll', {
