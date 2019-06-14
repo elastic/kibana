@@ -66,7 +66,10 @@ export class SearchBar extends React.PureComponent<Props> {
   }
 
   public onSubmit = (q: string) => {
-    this.onSearchChanged(q);
+    // ignore empty query
+    if (q.trim().length > 0) {
+      this.onSearchChanged(q);
+    }
   };
 
   public onSelect = (item: AutocompleteSuggestion) => {

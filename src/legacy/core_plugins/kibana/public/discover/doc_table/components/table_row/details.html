@@ -21,7 +21,7 @@
             class="euiLink"
             data-test-subj="docTableRowAction"
             ng-href="{{ getContextAppHref() }}"
-            ng-if="indexPattern.isTimeBased() && !indexPattern.isTimeNanosBased()"
+            ng-if="indexPattern.isTimeBased()"
             i18n-id="kbn.docTable.tableRow.viewSurroundingDocumentsLinkText"
             i18n-default-message="View surrounding documents"
           ></a>

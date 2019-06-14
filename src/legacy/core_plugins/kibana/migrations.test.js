@@ -849,7 +849,11 @@ Object {
     });
   });
   describe('7.3.0', () => {
-    const migrate = doc => migrations.visualization['7.3.0'](doc);
+    const logMsgArr = [];
+    const logger = {
+      warning: msg => logMsgArr.push(msg),
+    };
+    const migrate = doc => migrations.visualization['7.3.0'](doc, logger);
 
     it('migrates type = gauge verticalSplit: false to alignment: vertical', () => {
       const migratedDoc = migrate({
@@ -881,7 +885,7 @@ Object {
 `);
     });
 
-    it('doesnt migrate type = gauge containing invalid visState object', () => {
+    it('doesnt migrate type = gauge containing invalid visState object, adds message to log', () => {
       const migratedDoc = migrate({
         attributes: {
           visState: JSON.stringify({ type: 'gauge' }),
@@ -893,6 +897,12 @@ Object {
     "visState": "{\\"type\\":\\"gauge\\"}",
   },
 }
+`);
+      expect(logMsgArr).toMatchInlineSnapshot(`
+Array [
+  "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read property 'gauge' of undefined",
+  "Exception @ migrateGaugeVerticalSplitToAlignment! Payload: {\\"type\\":\\"gauge\\"}",
+]
 `);
     });
 

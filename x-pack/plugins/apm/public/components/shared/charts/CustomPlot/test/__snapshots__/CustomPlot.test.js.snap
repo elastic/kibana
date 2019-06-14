@@ -2859,7 +2859,7 @@ Array [
   transform: translateY(-50%);
   border: 1px solid #d3dae6;
   background: #ffffff;
-  border-radius: 5px;
+  border-radius: 4px;
   font-size: 14px;
   color: #000000;
 }
@@ -2867,7 +2867,7 @@ Array [
 .c1 {
   background: #f5f7fa;
   border-bottom: 1px solid #d3dae6;
-  border-radius: 5px 5px 0 0;
+  border-radius: 4px 4px 0 0;
   padding: 8px;
   color: #98a2b3;
 }
