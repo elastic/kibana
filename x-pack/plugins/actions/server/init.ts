@@ -22,7 +22,7 @@ import { registerBuiltInActionTypes } from './builtin_action_types';
 
 export function init(server: Legacy.Server) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const savedObjectsClientWithInternalUser = server.savedObjects.getSavedObjectsRepository(
+  const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
 
@@ -33,15 +33,21 @@ export function init(server: Legacy.Server) {
     attributesToExcludeFromAAD: new Set(['description']),
   });
 
-  const services: Services = {
-    log: server.log,
-    callCluster: callWithInternalUser,
-    savedObjectsClient: savedObjectsClientWithInternalUser,
-  };
+  function getServices(basePath: string): Services {
+    const fakeRequest: any = {
+      headers: {},
+      getBasePath: () => basePath,
+    };
+    return {
+      log: server.log,
+      callCluster: callWithInternalUser,
+      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
+    };
+  }
 
   const { taskManager } = server;
   const actionTypeRegistry = new ActionTypeRegistry({
-    services,
+    getServices,
     taskManager: taskManager!,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
   });
@@ -58,7 +64,7 @@ export function init(server: Legacy.Server) {
 
   const fireFn = createFireFunction({
     taskManager: taskManager!,
-    savedObjectsClient: savedObjectsClientWithInternalUser,
+    internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
   });
 
   // Expose functions to server

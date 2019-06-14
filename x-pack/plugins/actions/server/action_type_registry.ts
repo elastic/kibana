@@ -12,19 +12,19 @@ import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 
 interface ConstructorOptions {
-  services: Services;
+  getServices: (basePath: string) => Services;
   taskManager: TaskManager;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 }
 
 export class ActionTypeRegistry {
-  private services: Services;
+  private getServices: (basePath: string) => Services;
   private taskManager: TaskManager;
   private actionTypes: Record<string, ActionType> = {};
   private encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 
-  constructor({ services, taskManager, encryptedSavedObjectsPlugin }: ConstructorOptions) {
-    this.services = services;
+  constructor({ getServices, taskManager, encryptedSavedObjectsPlugin }: ConstructorOptions) {
+    this.getServices = getServices;
     this.taskManager = taskManager;
     this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
   }
@@ -56,8 +56,8 @@ export class ActionTypeRegistry {
         title: actionType.name,
         type: `actions:${actionType.id}`,
         createTaskRunner: getCreateTaskRunnerFunction({
-          services: this.services,
           actionType,
+          getServices: this.getServices,
           encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
         }),
       },

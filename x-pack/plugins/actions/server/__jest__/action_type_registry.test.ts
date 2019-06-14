@@ -15,13 +15,15 @@ import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_o
 
 const mockTaskManager = taskManagerMock.create();
 
-const services = {
-  log: jest.fn(),
-  callCluster: jest.fn(),
-  savedObjectsClient: SavedObjectsClientMock.create(),
-};
+function getServices() {
+  return {
+    log: jest.fn(),
+    callCluster: jest.fn(),
+    savedObjectsClient: SavedObjectsClientMock.create(),
+  };
+}
 const actionTypeRegistryParams = {
-  services,
+  getServices,
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
 };
@@ -63,7 +65,7 @@ Object {
 }
 `);
     expect(call.encryptedSavedObjectsPlugin).toBeTruthy();
-    expect(call.services).toBeTruthy();
+    expect(call.getServices).toBeTruthy();
   });
 
   test('throws error if action type already registered', () => {

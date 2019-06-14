@@ -11,7 +11,7 @@ import { validateActionTypeConfig } from './validate_action_type_config';
 import { validateActionTypeParams } from './validate_action_type_params';
 
 interface CreateTaskRunnerFunctionOptions {
-  services: Services;
+  getServices: (basePath: string) => Services;
   actionType: ActionType;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 }
@@ -21,7 +21,7 @@ interface TaskRunnerOptions {
 }
 
 export function getCreateTaskRunnerFunction({
-  services,
+  getServices,
   actionType,
   encryptedSavedObjectsPlugin,
 }: CreateTaskRunnerFunctionOptions) {
@@ -42,7 +42,7 @@ export function getCreateTaskRunnerFunction({
         );
         const validatedActionTypeParams = validateActionTypeParams(actionType, actionTypeParams);
         await actionType.executor({
-          services,
+          services: getServices(taskInstance.params.basePath),
           config: validatedActionTypeConfig,
           params: validatedActionTypeParams,
         });

@@ -19,6 +19,7 @@ const alertsClientParams = {
   taskManager,
   alertTypeRegistry,
   savedObjectsClient,
+  basePath: '/s/default',
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -173,6 +174,7 @@ Array [
   Object {
     "params": Object {
       "alertId": "1",
+      "basePath": "/s/default",
     },
     "scope": Array [
       "alerting",

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Handlebars from 'handlebars';
+import Mustache from 'mustache';
 import { isPlainObject } from 'lodash';
 import { AlertActionParams, State, Context } from '../types';
 
@@ -20,8 +20,7 @@ export function transformActionParams(params: AlertActionParams, state: State, c
       result[key] = value;
       continue;
     }
-    const template = Handlebars.compile(value);
-    result[key] = template({ context, state });
+    result[key] = Mustache.render(value, { context, state });
   }
   return result;
 }

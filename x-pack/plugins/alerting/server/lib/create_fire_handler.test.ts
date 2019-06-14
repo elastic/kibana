@@ -7,6 +7,7 @@
 import { createFireHandler } from './create_fire_handler';
 
 const createFireHandlerParams = {
+  basePath: '/s/default',
   fireAction: jest.fn(),
   alertSavedObject: {
     id: '1',
@@ -48,6 +49,7 @@ test('calls fireAction per selected action', async () => {
   expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
   Object {
+    "basePath": "/s/default",
     "id": "1",
     "params": Object {
       "contextVal": "My  goes here",
@@ -72,6 +74,7 @@ test('context attribute gets parameterized', async () => {
   expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
   Object {
+    "basePath": "/s/default",
     "id": "1",
     "params": Object {
       "contextVal": "My context-val goes here",
@@ -90,6 +93,7 @@ test('state attribute gets parameterized', async () => {
   expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
   Object {
+    "basePath": "/s/default",
     "id": "1",
     "params": Object {
       "contextVal": "My  goes here",
@@ -103,6 +107,7 @@ Array [
 
 test('throws error if reference not found', async () => {
   const params = {
+    basePath: '/s/default',
     fireAction: jest.fn(),
     alertSavedObject: {
       id: '1',

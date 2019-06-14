@@ -22,6 +22,10 @@ const services = {
   savedObjectsClient: SavedObjectsClientMock.create(),
 };
 
+function getServices() {
+  return services;
+}
+
 let actionTypeRegistry: ActionTypeRegistry;
 
 const mockEncryptedSavedObjectsPlugin = {
@@ -30,7 +34,7 @@ const mockEncryptedSavedObjectsPlugin = {
 
 beforeAll(() => {
   actionTypeRegistry = new ActionTypeRegistry({
-    services,
+    getServices,
     taskManager: taskManagerMock.create(),
     encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
   });

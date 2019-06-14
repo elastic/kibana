@@ -13,24 +13,29 @@ import { getCreateTaskRunnerFunction } from './lib';
 import { ActionsPlugin } from '../../actions';
 
 interface ConstructorOptions {
-  services: Services;
+  getServices: (basePath: string) => Services;
   taskManager: TaskManager;
   fireAction: ActionsPlugin['fire'];
-  savedObjectsClient: SavedObjectsClientContract;
+  internalSavedObjectsRepository: SavedObjectsClientContract;
 }
 
 export class AlertTypeRegistry {
-  private services: Services;
+  private getServices: (basePath: string) => Services;
   private taskManager: TaskManager;
   private fireAction: ActionsPlugin['fire'];
   private alertTypes: Record<string, AlertType> = {};
-  private savedObjectsClient: SavedObjectsClientContract;
+  private internalSavedObjectsRepository: SavedObjectsClientContract;
 
-  constructor({ savedObjectsClient, fireAction, taskManager, services }: ConstructorOptions) {
+  constructor({
+    internalSavedObjectsRepository,
+    fireAction,
+    taskManager,
+    getServices,
+  }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.fireAction = fireAction;
-    this.savedObjectsClient = savedObjectsClient;
-    this.services = services;
+    this.internalSavedObjectsRepository = internalSavedObjectsRepository;
+    this.getServices = getServices;
   }
 
   public has(id: string) {
@@ -54,10 +59,10 @@ export class AlertTypeRegistry {
         title: alertType.name,
         type: `alerting:${alertType.id}`,
         createTaskRunner: getCreateTaskRunnerFunction({
-          services: this.services,
           alertType,
+          getServices: this.getServices,
           fireAction: this.fireAction,
-          savedObjectsClient: this.savedObjectsClient,
+          internalSavedObjectsRepository: this.internalSavedObjectsRepository,
         }),
       },
     });

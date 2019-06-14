@@ -17,7 +17,7 @@ describe('fire()', () => {
   test('schedules the action with all given parameters', async () => {
     const fireFn = createFireFunction({
       taskManager: mockTaskManager,
-      savedObjectsClient,
+      internalSavedObjectsRepository: savedObjectsClient,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -31,6 +31,7 @@ describe('fire()', () => {
       id: '123',
       params: { baz: false },
       namespace: 'abc',
+      basePath: '/s/default',
     });
     expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
     expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
@@ -40,6 +41,7 @@ Array [
       "actionTypeParams": Object {
         "baz": false,
       },
+      "basePath": "/s/default",
       "id": "123",
       "namespace": "abc",
     },

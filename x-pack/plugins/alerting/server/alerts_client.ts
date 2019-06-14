@@ -16,6 +16,7 @@ interface ConstructorOptions {
   taskManager: TaskManager;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
+  basePath: string;
 }
 
 interface FindOptions {
@@ -53,12 +54,20 @@ interface UpdateOptions {
 
 export class AlertsClient {
   private log: Log;
+  private basePath: string;
   private taskManager: TaskManager;
   private savedObjectsClient: SavedObjectsClientContract;
   private alertTypeRegistry: AlertTypeRegistry;
 
-  constructor({ alertTypeRegistry, savedObjectsClient, taskManager, log }: ConstructorOptions) {
+  constructor({
+    alertTypeRegistry,
+    savedObjectsClient,
+    taskManager,
+    log,
+    basePath,
+  }: ConstructorOptions) {
     this.log = log;
+    this.basePath = basePath;
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
@@ -80,7 +89,7 @@ export class AlertsClient {
     });
     let scheduledTask;
     try {
-      scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert);
+      scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert, this.basePath);
     } catch (e) {
       // Cleanup data, something went wrong scheduling the task
       try {
@@ -155,11 +164,12 @@ export class AlertsClient {
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
-  private async scheduleAlert(id: string, alert: RawAlert) {
+  private async scheduleAlert(id: string, alert: RawAlert, basePath: string) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alert.alertTypeId}`,
       params: {
         alertId: id,
+        basePath,
       },
       state: {
         // This is here because we can't rely on the task manager's internal runAt.

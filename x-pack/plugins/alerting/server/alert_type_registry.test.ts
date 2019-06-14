@@ -15,14 +15,16 @@ import { taskManagerMock } from '../../task_manager/task_manager.mock';
 const taskManager = taskManagerMock.create();
 
 const alertTypeRegistryParams = {
-  services: {
-    log: jest.fn(),
-    callCluster: jest.fn(),
-    savedObjectsClient: SavedObjectsClientMock.create(),
+  getServices() {
+    return {
+      log: jest.fn(),
+      callCluster: jest.fn(),
+      savedObjectsClient: SavedObjectsClientMock.create(),
+    };
   },
   taskManager,
   fireAction: jest.fn(),
-  savedObjectsClient: SavedObjectsClientMock.create(),
+  internalSavedObjectsRepository: SavedObjectsClientMock.create(),
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -76,7 +78,7 @@ Object {
   "name": "Test",
 }
 `);
-    expect(firstCall.savedObjectsClient).toBeTruthy();
+    expect(firstCall.internalSavedObjectsRepository).toBeTruthy();
     expect(firstCall.fireAction).toMatchInlineSnapshot(`[MockFunction]`);
   });
 

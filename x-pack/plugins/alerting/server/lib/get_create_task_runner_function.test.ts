@@ -20,10 +20,12 @@ const mockedLastRunAt = new Date('2019-06-03T18:55:20.982Z');
 const savedObjectsClient = SavedObjectsClientMock.create();
 
 const getCreateTaskRunnerFunctionParams = {
-  services: {
-    log: jest.fn(),
-    callCluster: jest.fn(),
-    savedObjectsClient: SavedObjectsClientMock.create(),
+  getServices() {
+    return {
+      log: jest.fn(),
+      callCluster: jest.fn(),
+      savedObjectsClient: SavedObjectsClientMock.create(),
+    };
   },
   alertType: {
     id: 'test',
@@ -31,7 +33,7 @@ const getCreateTaskRunnerFunctionParams = {
     execute: jest.fn(),
   },
   fireAction: jest.fn(),
-  savedObjectsClient,
+  internalSavedObjectsRepository: savedObjectsClient,
 };
 
 const mockedTaskInstance = {
@@ -119,6 +121,7 @@ test('fireAction is called per alert instance that fired', async () => {
   expect(getCreateTaskRunnerFunctionParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
   Object {
+    "basePath": undefined,
     "id": "1",
     "params": Object {
       "foo": true,

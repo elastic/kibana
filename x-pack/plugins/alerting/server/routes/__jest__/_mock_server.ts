@@ -40,6 +40,7 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
   });
 
   server.decorate('request', 'getAlertsClient', () => alertsClient);
+  server.decorate('request', 'getBasePath', () => '/s/default');
 
   return { server, alertsClient, alertTypeRegistry };
 }

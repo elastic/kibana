@@ -15,10 +15,10 @@ import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from './validate_alert_type_params';
 
 interface CreateTaskRunnerFunctionOptions {
-  services: Services;
+  getServices: (basePath: string) => Services;
   alertType: AlertType;
   fireAction: ActionsPlugin['fire'];
-  savedObjectsClient: SavedObjectsClientContract;
+  internalSavedObjectsRepository: SavedObjectsClientContract;
 }
 
 interface TaskRunnerOptions {
@@ -26,15 +26,18 @@ interface TaskRunnerOptions {
 }
 
 export function getCreateTaskRunnerFunction({
-  services,
+  getServices,
   alertType,
   fireAction,
-  savedObjectsClient,
+  internalSavedObjectsRepository,
 }: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
-        const alertSavedObject = await savedObjectsClient.get('alert', taskInstance.params.alertId);
+        const alertSavedObject = await internalSavedObjectsRepository.get(
+          'alert',
+          taskInstance.params.alertId
+        );
 
         // Validate
         const validatedAlertTypeParams = validateAlertTypeParams(
@@ -42,7 +45,11 @@ export function getCreateTaskRunnerFunction({
           alertSavedObject.attributes.alertTypeParams
         );
 
-        const fireHandler = createFireHandler({ alertSavedObject, fireAction });
+        const fireHandler = createFireHandler({
+          alertSavedObject,
+          fireAction,
+          basePath: taskInstance.params.basePath,
+        });
         const alertInstances: Record<string, AlertInstance> = {};
         const alertInstancesData = taskInstance.state.alertInstances || {};
         for (const id of Object.keys(alertInstancesData)) {
@@ -51,7 +58,7 @@ export function getCreateTaskRunnerFunction({
         const alertInstanceFactory = createAlertInstanceFactory(alertInstances);
 
         const alertTypeServices: AlertServices = {
-          ...services,
+          ...getServices(taskInstance.params.basePath),
           alertInstanceFactory,
         };
 

@@ -19,14 +19,16 @@ const mockEncryptedSavedObjectsPlugin = {
   getDecryptedAsInternalUser: jest.fn() as EncryptedSavedObjectsPlugin['getDecryptedAsInternalUser'],
 } as EncryptedSavedObjectsPlugin;
 
-const services = {
-  log: jest.fn(),
-  callCluster: jest.fn(),
-  savedObjectsClient: SavedObjectsClientMock.create(),
-};
+function getServices() {
+  return {
+    log: jest.fn(),
+    callCluster: jest.fn(),
+    savedObjectsClient: SavedObjectsClientMock.create(),
+  };
+}
 
 const actionTypeRegistryParams = {
-  services,
+  getServices,
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
 };

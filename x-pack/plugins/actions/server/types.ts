@@ -24,7 +24,9 @@ export interface Services {
 export interface ActionsPlugin {
   registerType: ActionTypeRegistry['register'];
   listTypes: ActionTypeRegistry['list'];
-  fire: ({ id, params }: { id: string; params: Record<string, any> }) => Promise<void>;
+  fire: (
+    { id, params, basePath }: { id: string; params: Record<string, any>; basePath: string }
+  ) => Promise<void>;
 }
 
 export interface ActionTypeExecutorOptions {

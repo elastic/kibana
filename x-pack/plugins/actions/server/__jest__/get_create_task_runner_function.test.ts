@@ -12,10 +12,12 @@ import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_o
 const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 
 const getCreateTaskRunnerFunctionParams = {
-  services: {
-    log: jest.fn(),
-    callCluster: jest.fn(),
-    savedObjectsClient: SavedObjectsClientMock.create(),
+  getServices() {
+    return {
+      log: jest.fn(),
+      callCluster: jest.fn(),
+      savedObjectsClient: SavedObjectsClientMock.create(),
+    };
   },
   actionType: {
     id: '1',

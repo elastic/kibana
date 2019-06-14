@@ -19,22 +19,28 @@ import { AlertsClient } from './alerts_client';
 
 export function init(server: Legacy.Server) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const savedObjectsClientWithInternalUser = server.savedObjects.getSavedObjectsRepository(
+  const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
 
-  const services: Services = {
-    log: server.log,
-    callCluster: callWithInternalUser,
-    savedObjectsClient: savedObjectsClientWithInternalUser,
-  };
+  function getServices(basePath: string): Services {
+    const fakeRequest: any = {
+      headers: {},
+      getBasePath: () => basePath,
+    };
+    return {
+      log: server.log,
+      callCluster: callWithInternalUser,
+      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
+    };
+  }
 
   const { taskManager } = server;
   const alertTypeRegistry = new AlertTypeRegistry({
-    services,
+    getServices,
     taskManager: taskManager!,
     fireAction: server.plugins.actions!.fire,
-    savedObjectsClient: savedObjectsClientWithInternalUser,
+    internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
   });
 
   // Register routes
@@ -54,6 +60,7 @@ export function init(server: Legacy.Server) {
       savedObjectsClient,
       alertTypeRegistry,
       taskManager: taskManager!,
+      basePath: request.getBasePath(),
     });
     return alertsClient;
   });
