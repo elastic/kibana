@@ -44,7 +44,7 @@ export class RemovePanelAction extends Action {
   }
 
   public getDisplayName() {
-    return i18n.translate('kbn.embeddable.panel.removePanel.displayName', {
+    return i18n.translate('kbnEmbeddables.panel.removePanel.displayName', {
       defaultMessage: 'Delete from dashboard',
     });
   }

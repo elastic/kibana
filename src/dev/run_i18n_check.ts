@@ -20,9 +20,37 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
-import { ErrorReporter, integrateLocaleFiles, mergeConfigs } from './i18n';
+import { ToolingLog } from '@kbn/dev-utils';
+import { ErrorReporter, integrateLocaleFiles, mergeConfigs, I18nConfig } from './i18n';
 import { extractDefaultMessages, extractUntrackedMessages } from './i18n/tasks';
 import { createFailError, run } from './run';
+
+export interface I18nFlags {
+  fix: boolean;
+  ignoreIncompatible: boolean;
+  ignoreUnused: boolean;
+  ignoreMissing: boolean;
+}
+
+function checkCompatibilty(config: I18nConfig, flags: I18nFlags, log: ToolingLog) {
+  const { fix, ignoreIncompatible, ignoreUnused, ignoreMissing } = flags;
+  return config.translations.map(translationsPath => ({
+    task: async ({ messages }: { messages: Map<string, { message: string }> }) => {
+      // If `fix` is set we should try apply all possible fixes and override translations file.
+      await integrateLocaleFiles(messages, {
+        dryRun: !fix,
+        ignoreIncompatible: fix || ignoreIncompatible,
+        ignoreUnused: fix || ignoreUnused,
+        ignoreMissing: fix || ignoreMissing,
+        sourceFileName: translationsPath,
+        targetFileName: fix ? translationsPath : undefined,
+        config,
+        log,
+      });
+    },
+    title: `Compatibility check with ${translationsPath}`,
+  }));
+}
 
 run(
   async ({
@@ -31,7 +59,6 @@ run(
       'ignore-missing': ignoreMissing,
       'ignore-unused': ignoreUnused,
       'include-config': includeConfig,
-      'ignore-untracked': ignoreUntracked,
       fix = false,
       path,
     },
@@ -41,13 +68,12 @@ run(
       fix &&
       (ignoreIncompatible !== undefined ||
         ignoreUnused !== undefined ||
-        ignoreMissing !== undefined ||
-        ignoreUntracked !== undefined)
+        ignoreMissing !== undefined)
     ) {
       throw createFailError(
         `${chalk.white.bgRed(
           ' I18N ERROR '
-        )} none of the --ignore-incompatible, --ignore-unused or --ignore-missing or --ignore-untracked is allowed when --fix is set.`
+        )} none of the --ignore-incompatible, --ignore-unused or --ignore-missing is allowed when --fix is set.`
       );
     }
 
@@ -61,76 +87,40 @@ run(
       throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
     }
 
-    if (typeof ignoreUntracked !== 'undefined' && typeof ignoreUntracked !== 'boolean') {
-      throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} --ignore-untracked can't have a value`
-      );
-    }
-
     const config = await mergeConfigs(includeConfig);
+    const srcPaths = ['./src', './packages', './x-pack'];
 
     if (config.translations.length === 0) {
       return;
-    }
-
-    const extractDefaultMessagesTasks = () => {
-      return extractDefaultMessages({ path, config });
-    }
-
-    const compatibiltyChecksTasks = () => {
-      return config.translations.map(translationsPath => ({
-        task: async ({ messages }: { messages: Map<string, { message: string }> }) => {
-          // If `--fix` is set we should try apply all possible fixes and override translations file.
-          await integrateLocaleFiles(messages, {
-            sourceFileName: translationsPath,
-            targetFileName: fix ? translationsPath : undefined,
-            dryRun: !fix,
-            ignoreIncompatible: fix || !!ignoreIncompatible,
-            ignoreUnused: fix || !!ignoreUnused,
-            ignoreMissing: fix || !!ignoreMissing,
-            config,
-            log,
-          });
-        },
-        title: `Compatibility check with ${translationsPath}`,
-      }));
-    }
-
-    const srcCodePaths = ['./src', './packages', './x-pack'];
-
-    const untrackedMessagesTasks = (reporter: any) => {
-      return srcCodePaths.map(srcPath => ({
-        task: async () => {
-          await extractUntrackedMessages({ path: srcPath, config, reporter });
-        },
-        title: `Checking untracked messages in ${srcPath}`,
-        exitOnError: false
-      }));
     }
 
     const list = new Listr(
       [
         {
           title: 'Checking untracked messages',
-          enabled: () => !ignoreUntracked,
-          task: ({ reporter }) => new Listr(
-            untrackedMessagesTasks(reporter),
-            { concurrent: false, exitOnError: true }
-          ),
+          task: () => new Listr(extractUntrackedMessages(srcPaths, config), { exitOnError: true }),
         },
         {
           title: 'Extracting Default Messages',
-          task: () => new Listr(
-            extractDefaultMessagesTasks(),
-            { exitOnError: false }
-          )
+          task: () =>
+            new Listr(extractDefaultMessages({ path: srcPaths, config }), { exitOnError: true }),
         },
         {
           title: 'Compatibility Checks',
-          task: () => new Listr(
-            compatibiltyChecksTasks(),
-            { concurrent: true, exitOnError: false }
-          )
+          task: () =>
+            new Listr(
+              checkCompatibilty(
+                config,
+                {
+                  ignoreIncompatible: !!ignoreIncompatible,
+                  ignoreUnused: !!ignoreUnused,
+                  ignoreMissing: !!ignoreMissing,
+                  fix,
+                },
+                log
+              ),
+              { exitOnError: true }
+            ),
         },
       ],
       {
@@ -144,19 +134,11 @@ run(
       await list.run({ messages: new Map(), reporter });
     } catch (error) {
       process.exitCode = 1;
-
-      if (!error.errors) {
+      if (error instanceof ErrorReporter) {
+        reporter.errors.forEach((e: string | Error) => log.error(e));
+      } else {
         log.error('Unhandled exception!');
         log.error(error);
-        process.exit();
-      }
-
-      if (error.name === 'ListrError' && reporter.errors.length) {
-        throw createFailError(reporter.errors.join('\n\n'));
-      }
-
-      for (const e of error.errors) {
-        log.error(e);
       }
     }
   },

@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import {
-  ErrorReporter,
-  I18nConfig,
-  matchEntriesWithExctractors,
-  normalizePath,
-  readFileAsync,
-} from '..';
+import { I18nConfig, matchEntriesWithExctractors, normalizePath, readFileAsync } from '..';
 import { createFailError } from '../../run';
+import { ErrorReporter, TaskError } from '..';
 
 function filterEntries(entries: string[], exclude: string[]) {
   return entries.filter((entry: string) =>
@@ -32,7 +27,7 @@ function filterEntries(entries: string[], exclude: string[]) {
   );
 }
 
-export async function extractUntrackedMessages({
+export async function extractUntrackedMessagesTask({
   path,
   config,
   reporter,
@@ -51,6 +46,9 @@ export async function extractUntrackedMessages({
     'built_assets/**',
     'docs/**',
     'optimize/**',
+    '**/packages/kbn-i18n/**',
+    '**/packages/kbn-plugin-generator/sao_template/**',
+    '**/packages/kbn-ui-framework/generator-kui/**',
     'data/**',
     '**/target/**',
     'tasks/**',
@@ -58,8 +56,8 @@ export async function extractUntrackedMessages({
     '**/scripts/**',
     'src/dev/**',
     '**/target/**',
+    '**/dist/**',
   ]);
-  const errorMessages: string[] = [];
   for (const inputPath of inputPaths) {
     const categorizedEntries = await matchEntriesWithExctractors(inputPath, {
       additionalIgnore: ignore,
@@ -70,38 +68,42 @@ export async function extractUntrackedMessages({
     for (const [entries, extractFunction] of categorizedEntries) {
       const files: any = await Promise.all(
         filterEntries(entries, config.exclude)
-        .filter(entry => {
-          const normalizedEntry = normalizePath(entry);
-          return !availablePaths.some(
-            availablePath =>
-
-            normalizedEntry.startsWith(`${normalizePath(availablePath)}/`) ||
-            normalizePath(availablePath) === normalizedEntry
-          );
-        })
-        .map(async (entry: any) => ({
-          name: entry,
-          content: await readFileAsync(entry),
-        }))
+          .filter(entry => {
+            const normalizedEntry = normalizePath(entry);
+            return !availablePaths.some(
+              availablePath =>
+                normalizedEntry.startsWith(`${normalizePath(availablePath)}/`) ||
+                normalizePath(availablePath) === normalizedEntry
+            );
+          })
+          .map(async (entry: any) => ({
+            name: entry,
+            content: await readFileAsync(entry),
+          }))
       );
 
       for (const { name, content } of files) {
         const reporterWithContext = reporter.withContext({ name });
         for (const [id] of extractFunction(content, reporterWithContext)) {
-          const errorMessage = `File ${name} contains i18n label (${id}).`;
+          const errorMessage = `Untracked file contains i18n label (${id}).`;
           reporterWithContext.report(createFailError(errorMessage));
-          errorMessages.push(errorMessage);
         }
       }
     }
   }
+}
 
-  // console.log('errorMessages::', errorMessages);
-  if (errorMessages.length) {
-    // const reporterWithContext = reporter.withContext({ name: 'AHMAD BAMIEH' });
-    // const failError = errorMessages.join('\n');
+export function extractUntrackedMessages(srcPaths: string[], config: I18nConfig) {
+  return srcPaths.map(srcPath => ({
+    title: `Checking untracked messages in ${srcPath}`,
+    task: async ({ reporter }: { reporter: ErrorReporter }) => {
+      const initialErrorsNumber = reporter.errors.length;
+      const result = await extractUntrackedMessagesTask({ path: srcPath, config, reporter });
+      if (reporter.errors.length === initialErrorsNumber) {
+        return result;
+      }
 
-    // throw createFailError(failError);
-    throw Error("");
-  }
+      throw reporter;
+    },
+  }));
 }

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 export class EmbeddableFactoryNotFoundError extends Error {
   constructor(type: string) {
     super(
-      i18n.translate('embeddableApi.errors.embeddableFactoryNotFound', {
+      i18n.translate('kbnEmbeddables.errors.embeddableFactoryNotFound', {
         defaultMessage: `{type} can't be loaded. Please upgrade to the default distribution of Elasticsearch and Kibana with the appropriate license.`,
         values: {
           type,

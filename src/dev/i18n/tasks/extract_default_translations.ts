@@ -54,8 +54,7 @@ export function extractDefaultMessages({
         return result;
       }
 
-      // Throw an empty error to make Listr mark the task as failed without any message.
-      throw new Error('');
+      throw reporter;
     },
     title: filteredPath,
   }));

@@ -48,7 +48,7 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
   }
 
   public getDisplayName() {
-    return i18n.translate('embeddableApi.actions.applyFilterActionTitle', {
+    return i18n.translate('kbnEmbeddables.actions.applyFilterActionTitle', {
       defaultMessage: 'Apply filter to current view',
     });
   }
