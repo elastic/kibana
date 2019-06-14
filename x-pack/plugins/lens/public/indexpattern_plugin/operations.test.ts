@@ -6,6 +6,7 @@
 
 import { getOperationTypesForField, getPotentialColumns } from './operations';
 import { IndexPatternPrivateState } from './indexpattern';
+import { hasField } from './state_helpers';
 
 const expectedIndexPatterns = {
   1: {
@@ -174,10 +175,7 @@ describe('getOperationTypesForField', () => {
       const columns = getPotentialColumns(state);
 
       expect(
-        columns.map(col => [
-          'sourceField' in col ? col.sourceField : '_documents_',
-          col.operationType,
-        ])
+        columns.map(col => [hasField(col) ? col.sourceField : '_documents_', col.operationType])
       ).toMatchInlineSnapshot(`
 Array [
   Array [

@@ -17,7 +17,7 @@ import {
 import { IndexPatternColumn } from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
 import { operationDefinitionMap, getOperations, getOperationDisplay } from '../operations';
-import { changeColumn } from '../state_helpers';
+import { changeColumn, hasField } from '../state_helpers';
 
 export interface SettingsProps extends IndexPatternDimensionPanelProps {
   selectedColumn: IndexPatternColumn;
@@ -46,9 +46,9 @@ export function Settings({
   const functionsFromField = selectedColumn
     ? filteredColumns.filter(col => {
         return (
-          (!('sourceField' in selectedColumn) && !('sourceField' in col)) ||
-          ('sourceField' in selectedColumn &&
-            'sourceField' in col &&
+          (!hasField(selectedColumn) && !hasField(col)) ||
+          (hasField(selectedColumn) &&
+            hasField(col) &&
             col.sourceField === selectedColumn.sourceField)
         );
       })
@@ -65,8 +65,8 @@ export function Settings({
           const newColumn: IndexPatternColumn = filteredColumns.find(
             col =>
               col.operationType === o &&
-              (!('sourceField' in col) ||
-                !('sourceField' in selectedColumn) ||
+              (!hasField(col) ||
+                !hasField(selectedColumn) ||
                 col.sourceField === selectedColumn.sourceField)
           )!;
 

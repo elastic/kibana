@@ -56,8 +56,8 @@ describe('workspace_panel', () => {
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]').length).toBe(1);
-    expect(instance.find(expressionRendererMock).length).toBe(0);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
   it('should render an explanatory text if the visualization does not produce an expression', () => {
@@ -76,8 +76,8 @@ describe('workspace_panel', () => {
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]').length).toBe(1);
-    expect(instance.find(expressionRendererMock).length).toBe(0);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
   it('should render an explanatory text if the datasource does not produce an expression', () => {
@@ -96,8 +96,8 @@ describe('workspace_panel', () => {
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]').length).toBe(1);
-    expect(instance.find(expressionRendererMock).length).toBe(0);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
   it('should render the resulting expression using the expression renderer', () => {
@@ -158,8 +158,8 @@ Object {
         />
       );
 
-      expect(instance.find('[data-test-subj="expression-failure"]').length).toBe(1);
-      expect(instance.find(expressionRendererMock).length).toBe(0);
+      expect(instance.find('[data-test-subj="expression-failure"]')).toHaveLength(1);
+      expect(instance.find(expressionRendererMock)).toHaveLength(0);
     });
 
     it('should show an error message if the expression fails to render', async () => {
@@ -191,8 +191,8 @@ Object {
 
       instance.update();
 
-      expect(instance.find('[data-test-subj="expression-failure"]').length).toBe(1);
-      expect(instance.find(expressionRendererMock).length).toBe(0);
+      expect(instance.find('[data-test-subj="expression-failure"]')).toHaveLength(1);
+      expect(instance.find(expressionRendererMock)).toHaveLength(0);
     });
 
     it('should not attempt to run the expression again if it does not change', async () => {
@@ -271,7 +271,7 @@ Object {
 
       expect(expressionRendererMock).toHaveBeenCalledTimes(2);
 
-      expect(instance.find(expressionRendererMock).length).toBe(1);
+      expect(instance.find(expressionRendererMock)).toHaveLength(1);
     });
   });
 });

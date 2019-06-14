@@ -141,7 +141,7 @@ describe('IndexPatternDimensionPanel', () => {
       .first()
       .simulate('click');
 
-    expect(wrapper.find(EuiComboBox).length).toEqual(1);
+    expect(wrapper.find(EuiComboBox)).toHaveLength(1);
   });
 
   it('should not show any choices if the filter returns false', () => {
@@ -160,7 +160,7 @@ describe('IndexPatternDimensionPanel', () => {
       .first()
       .simulate('click');
 
-    expect(wrapper.find(EuiComboBox)!.prop('options')!.length).toEqual(0);
+    expect(wrapper.find(EuiComboBox)!.prop('options')!).toHaveLength(0);
   });
 
   it('should render the inline options directly', () => {
@@ -174,7 +174,9 @@ describe('IndexPatternDimensionPanel', () => {
       />
     );
 
-    expect(operationDefinitionMap.date_histogram.inlineOptions as jest.Mock).toHaveBeenCalled();
+    expect(operationDefinitionMap.date_histogram.inlineOptions as jest.Mock).toHaveBeenCalledTimes(
+      1
+    );
   });
 
   it('should not render the settings button if there are no settings or options', () => {
@@ -188,7 +190,7 @@ describe('IndexPatternDimensionPanel', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="indexPattern-dimensionPopover-button"]').length).toBe(0);
+    expect(wrapper.find('[data-test-subj="indexPattern-dimensionPopover-button"]')).toHaveLength(0);
   });
 
   it('should render the settings button if there are settings', () => {

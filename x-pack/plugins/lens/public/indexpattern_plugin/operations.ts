@@ -21,6 +21,7 @@ import {
 } from './operation_definitions/metrics';
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
+import { hasField, sortByField } from './state_helpers';
 
 type PossibleOperationDefinitions<
   U extends IndexPatternColumn = IndexPatternColumn
@@ -127,12 +128,5 @@ export function getPotentialColumns(
     }
   });
 
-  columns.sort((column1, column2) => {
-    if ('sourceField' in column1 && 'sourceField' in column2) {
-      return column1.sourceField.localeCompare(column2.sourceField);
-    }
-    return column1.operationType.localeCompare(column2.operationType);
-  });
-
-  return columns;
+  return sortByField(columns);
 }

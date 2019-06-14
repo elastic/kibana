@@ -9,6 +9,7 @@ import {
   IndexPatternPrivateState,
   IndexPatternColumn,
   BaseIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
 } from './indexpattern';
 
 export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
@@ -88,4 +89,17 @@ export function deleteColumn(state: IndexPatternPrivateState, columnId: string) 
     columns: newColumns,
     columnOrder: getColumnOrder(newColumns),
   };
+}
+
+export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIndexPatternColumn {
+  return 'sourceField' in column;
+}
+
+export function sortByField<C extends BaseIndexPatternColumn>(columns: C[]) {
+  return [...columns].sort((column1, column2) => {
+    if (hasField(column1) && hasField(column2)) {
+      return column1.sourceField.localeCompare(column2.sourceField);
+    }
+    return column1.operationType.localeCompare(column2.operationType);
+  });
 }

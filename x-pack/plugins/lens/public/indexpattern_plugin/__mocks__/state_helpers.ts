@@ -8,4 +8,11 @@ const actual = jest.requireActual('../state_helpers');
 
 jest.spyOn(actual, 'changeColumn');
 
-export const { getColumnOrder, changeColumn, deleteColumn, updateColumnParam } = actual;
+export const {
+  getColumnOrder,
+  changeColumn,
+  deleteColumn,
+  updateColumnParam,
+  sortByField,
+  hasField,
+} = actual;

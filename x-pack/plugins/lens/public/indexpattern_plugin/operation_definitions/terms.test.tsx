@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { IndexPatternPrivateState, TermsIndexPatternColumn } from '../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
 
-describe('date_histogram', () => {
+describe('terms', () => {
   let state: IndexPatternPrivateState;
   const InlineOptions = termsOperation.inlineOptions!;
   const contextMenu = termsOperation.contextMenu!;
