@@ -36,12 +36,13 @@ interface State {
 }
 
 class OptionsMenuUi extends Component<Props, State> {
+  state = {
+    useMargins: this.props.useMargins,
+    hidePanelTitles: this.props.hidePanelTitles,
+  };
+
   constructor(props: Props) {
     super(props);
-    this.state = {
-      useMargins: this.props.useMargins,
-      hidePanelTitles: this.props.hidePanelTitles,
-    };
   }
 
   handleUseMarginsChange = (evt: any) => {

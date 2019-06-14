@@ -252,7 +252,6 @@ class DashboardAppController {
 
     $scope.getDashboardState = () => dashboardStateManager;
     $scope.appState = dashboardStateManager.getAppState();
-    $scope.refreshInterval = timefilter.getRefreshInterval();
 
     // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.

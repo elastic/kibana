@@ -57,13 +57,13 @@ interface State {
 }
 
 class DashboardSaveModalUi extends React.Component<Props, State> {
+  state: State = {
+    description: this.props.description,
+    timeRestore: this.props.timeRestore,
+  };
+
   constructor(props: Props) {
     super(props);
-
-    this.state = {
-      description: props.description,
-      timeRestore: props.timeRestore,
-    };
   }
 
   saveDashboard = ({
