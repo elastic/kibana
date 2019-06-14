@@ -5,7 +5,7 @@
  */
 
 import { Server } from 'hapi';
-import { getTelemetry, Telemetry } from './telemetry';
+import { getTelemetry, initTelemetry, Telemetry } from './telemetry';
 
 // TODO this type should be defined by the platform
 interface KibanaHapiServer extends Server {
@@ -21,7 +21,7 @@ export function makeUsageCollector(server: KibanaHapiServer): void {
   const fileUploadUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'fileUploadTelemetry',
     isReady: () => true,
-    fetch: async (): Promise<Telemetry> => await getTelemetry(server),
+    fetch: async (): Promise<Telemetry> => (await getTelemetry(server)) || initTelemetry(),
   });
   server.usage.collectorSet.register(fileUploadUsageCollector);
 }
