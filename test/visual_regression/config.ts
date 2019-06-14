@@ -17,9 +17,21 @@
  * under the License.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
-
-import { pageObjects } from './page_objects';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export default async function({ readConfigFile }: FtrConfigProviderContext) {
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+
+  return {
+    ...functionalConfig.getAll(),
+
+    testFiles: [require.resolve('./tests/console_app')],
+
+    services,
+
+    junit: {
+      reportName: 'Kibana Visual Regression Tests',
+    },
+  };
+}
