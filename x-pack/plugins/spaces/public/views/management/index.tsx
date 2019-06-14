@@ -11,12 +11,13 @@ import {
   PAGE_SUBTITLE_COMPONENT,
   PAGE_TITLE_COMPONENT,
   registerSettingsComponent,
-  // @ts-ignore
 } from 'ui/management';
+import { SavedObjectsManagementActionRegistry } from 'ui/management/saved_objects_management';
 // @ts-ignore
 import routes from 'ui/routes';
 import { AdvancedSettingsSubtitle } from './components/advanced_settings_subtitle';
 import { AdvancedSettingsTitle } from './components/advanced_settings_title';
+import { CopyToSpaceSavedObjectsManagementAction } from './lib/copy_to_space_action';
 
 const MANAGE_SPACES_KEY = 'spaces';
 
@@ -45,6 +46,12 @@ routes.defaults(/\/management/, {
           });
         }
 
+        // Customize Saved Objects Management
+        SavedObjectsManagementActionRegistry.register(
+          new CopyToSpaceSavedObjectsManagementAction()
+        );
+
+        // Customize Advanced Settings
         const PageTitle = () => <AdvancedSettingsTitle space={activeSpace.space} />;
         registerSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle, true);
 
