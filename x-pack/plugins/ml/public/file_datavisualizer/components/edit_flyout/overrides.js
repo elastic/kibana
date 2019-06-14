@@ -269,7 +269,9 @@ export class Overrides extends Component {
     const timestampFormatHelp = (
       <EuiText size="xs">
         <EuiLink href={docsUrl} target="_blank">
-          {'See more on accepted formats'}
+          {i18n.translate('xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampFormatHelpText', {
+            defaultMessage: 'See more on accepted formats'
+          })}
         </EuiLink>
       </EuiText>
     );
