@@ -46,7 +46,7 @@ export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments,
       },
       quote: {
         types: ['string'],
-        default: 'DEFAULT',
+        default: `"'"`,
         help: 'Quote character around values',
       },
     },
