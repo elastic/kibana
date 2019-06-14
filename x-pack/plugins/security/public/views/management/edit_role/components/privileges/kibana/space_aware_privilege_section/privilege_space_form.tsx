@@ -18,7 +18,6 @@ import {
   EuiFormRow,
   EuiOverlayMask,
   EuiSpacer,
-  // @ts-ignore
   EuiSuperSelect,
   EuiText,
   EuiTitle,
@@ -261,10 +260,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               },
             ]}
             hasDividers
-            valueOfSelected={`basePrivilege_${this.getDisplayedBasePrivilege(
-              allowedPrivileges,
-              baseExplanation
-            )}`}
+            valueOfSelected={this.getDisplayedBasePrivilege(allowedPrivileges, baseExplanation)}
             disabled={!hasSelectedSpaces}
           />
         </EuiFormRow>
@@ -486,6 +482,8 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     allowedPrivileges: AllowedPrivilege,
     explanation: PrivilegeExplanation
   ) => {
+    let displayedBasePrivilege = explanation.actualPrivilege;
+
     if (this.canCustomizeFeaturePrivileges(explanation, allowedPrivileges)) {
       const form = this.state.role.kibana[this.state.editingIndex];
 
@@ -494,11 +492,11 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         explanation.actualPrivilege === NO_PRIVILEGE_VALUE ||
         this.state.isCustomizingFeaturePrivileges
       ) {
-        return CUSTOM_PRIVILEGE_VALUE;
+        displayedBasePrivilege = CUSTOM_PRIVILEGE_VALUE;
       }
     }
 
-    return explanation.actualPrivilege;
+    return displayedBasePrivilege ? `basePrivilege_${displayedBasePrivilege}` : undefined;
   };
 
   private canCustomizeFeaturePrivileges = (
