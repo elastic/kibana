@@ -706,130 +706,131 @@ describe('Integration', () => {
     ]
   );
 
-  // TODO: This test broke when we updated mappings.js to accommdate the removal of mapping types.
-  // It breaks with an unhelpful error and it's proven resistant to debugging.
-  // contextTests(
-  //   {
-  //     a: {
-  //       b: {},
-  //       c: {},
-  //       d: {
-  //         t1a: {},
-  //       },
-  //       e: {},
-  //       f: [{}],
-  //       g: {},
-  //       h: {},
-  //     },
-  //   },
-  //   MAPPING,
-  //   {
-  //     globals: {
-  //       gtarget: {
-  //         t1: 2,
-  //         t1a: {
-  //           __scope_link: '.',
-  //         },
-  //       },
-  //     },
-  //     endpoints: {
-  //       _current: {
-  //         patterns: ['_current'],
-  //         data_autocomplete_rules: {
-  //           a: {
-  //             b: {
-  //               __scope_link: '.a',
-  //             },
-  //             c: {
-  //               __scope_link: 'ext.target',
-  //             },
-  //             d: {
-  //               __scope_link: 'GLOBAL.gtarget',
-  //             },
-  //             e: {
-  //               __scope_link: 'ext',
-  //             },
-  //             f: [
-  //               {
-  //                 __scope_link: 'ext.target',
-  //               },
-  //             ],
-  //             g: {
-  //               __scope_link: function () {
-  //                 return {
-  //                   a: 1,
-  //                   b: 2,
-  //                 };
-  //               },
-  //             },
-  //             h: {
-  //               __scope_link: 'GLOBAL.broken',
-  //             },
-  //           },
-  //         },
-  //       },
-  //       ext: {
-  //         patterns: ['ext'],
-  //         data_autocomplete_rules: {
-  //           target: {
-  //             t2: 1,
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  //   'GET _current',
-  //   [
-  //     {
-  //       name: 'Relative scope link test',
-  //       cursor: { row: 2, column: 12 },
-  //       autoCompleteSet: [
-  //         tt('b', {}),
-  //         tt('c', {}),
-  //         tt('d', {}),
-  //         tt('e', {}),
-  //         tt('f', [{}]),
-  //         tt('g', {}),
-  //         tt('h', {}),
-  //       ],
-  //     },
-  //     {
-  //       name: 'External scope link test',
-  //       cursor: { row: 3, column: 12 },
-  //       autoCompleteSet: [tt('t2', 1)],
-  //     },
-  //     {
-  //       name: 'Global scope link test',
-  //       cursor: { row: 4, column: 12 },
-  //       autoCompleteSet: [tt('t1', 2), tt('t1a', {})],
-  //     },
-  //     {
-  //       name: 'Global scope link with an internal scope link',
-  //       cursor: { row: 5, column: 17 },
-  //       autoCompleteSet: [tt('t1', 2), tt('t1a', {})],
-  //     },
-  //     {
-  //       name: 'Entire endpoint scope link test',
-  //       cursor: { row: 7, column: 12 },
-  //       autoCompleteSet: [tt('target', {})],
-  //     },
-  //     {
-  //       name: 'A scope link within an array',
-  //       cursor: { row: 9, column: 10 },
-  //       autoCompleteSet: [tt('t2', 1)],
-  //     },
-  //     {
-  //       name: 'A function based scope link',
-  //       cursor: { row: 11, column: 12 },
-  //       autoCompleteSet: [tt('a', 1), tt('b', 2)],
-  //     },
-  //     {
-  //       name: 'A global scope link with wrong link',
-  //       cursor: { row: 12, column: 12 },
-  //       assertThrows: /broken/,
-  //     },
-  //   ]
-  // );
+  // NOTE: This test emits "error while getting completion terms Error: failed to resolve link
+  // [GLOBAL.broken]: Error: failed to resolve global components for  ['broken']". but that's
+  // expected.
+  contextTests(
+    {
+      a: {
+        b: {},
+        c: {},
+        d: {
+          t1a: {},
+        },
+        e: {},
+        f: [{}],
+        g: {},
+        h: {},
+      },
+    },
+    MAPPING,
+    {
+      globals: {
+        gtarget: {
+          t1: 2,
+          t1a: {
+            __scope_link: '.',
+          },
+        },
+      },
+      endpoints: {
+        _current: {
+          patterns: ['_current'],
+          data_autocomplete_rules: {
+            a: {
+              b: {
+                __scope_link: '.a',
+              },
+              c: {
+                __scope_link: 'ext.target',
+              },
+              d: {
+                __scope_link: 'GLOBAL.gtarget',
+              },
+              e: {
+                __scope_link: 'ext',
+              },
+              f: [
+                {
+                  __scope_link: 'ext.target',
+                },
+              ],
+              g: {
+                __scope_link: function () {
+                  return {
+                    a: 1,
+                    b: 2,
+                  };
+                },
+              },
+              h: {
+                __scope_link: 'GLOBAL.broken',
+              },
+            },
+          },
+        },
+        ext: {
+          patterns: ['ext'],
+          data_autocomplete_rules: {
+            target: {
+              t2: 1,
+            },
+          },
+        },
+      },
+    },
+    'GET _current',
+    [
+      {
+        name: 'Relative scope link test',
+        cursor: { row: 2, column: 12 },
+        autoCompleteSet: [
+          tt('b', {}),
+          tt('c', {}),
+          tt('d', {}),
+          tt('e', {}),
+          tt('f', [{}]),
+          tt('g', {}),
+          tt('h', {}),
+        ],
+      },
+      {
+        name: 'External scope link test',
+        cursor: { row: 3, column: 12 },
+        autoCompleteSet: [tt('t2', 1)],
+      },
+      {
+        name: 'Global scope link test',
+        cursor: { row: 4, column: 12 },
+        autoCompleteSet: [tt('t1', 2), tt('t1a', {})],
+      },
+      {
+        name: 'Global scope link with an internal scope link',
+        cursor: { row: 5, column: 17 },
+        autoCompleteSet: [tt('t1', 2), tt('t1a', {})],
+      },
+      {
+        name: 'Entire endpoint scope link test',
+        cursor: { row: 7, column: 12 },
+        autoCompleteSet: [tt('target', {})],
+      },
+      {
+        name: 'A scope link within an array',
+        cursor: { row: 9, column: 10 },
+        autoCompleteSet: [tt('t2', 1)],
+      },
+      {
+        name: 'A function based scope link',
+        cursor: { row: 11, column: 12 },
+        autoCompleteSet: [tt('a', 1), tt('b', 2)],
+      },
+      {
+        name: 'A global scope link with wrong link',
+        cursor: { row: 12, column: 12 },
+        assertThrows: /broken/,
+      },
+    ]
+  );
 
   contextTests(
     {},
@@ -978,17 +979,16 @@ describe('Integration', () => {
     ]
   );
 
-  // TODO: This test broke when we updated mappings.js to accommdate the removal of mapping types.
-  // It breaks with an unhelpful error and it's proven resistant to debugging.
-  // contextTests('POST _search\n', MAPPING, SEARCH_KB, null, [
-  //   {
-  //     name: 'initial doc start',
-  //     cursor: { row: 1, column: 0 },
-  //     autoCompleteSet: ['{'],
-  //     prefixToAdd: '',
-  //     suffixToAdd: '',
-  //   },
-  // ]);
+  // NOTE: This test emits "Can't extract a valid url token path", but that's expected.
+  contextTests('POST _search\n', MAPPING, SEARCH_KB, null, [
+    {
+      name: 'initial doc start',
+      cursor: { row: 1, column: 0 },
+      autoCompleteSet: ['{'],
+      prefixToAdd: '',
+      suffixToAdd: '',
+    },
+  ]);
 
   contextTests(
     '{\n' + '   "query": {} \n' + '}\n' + '\n' + '\n',
