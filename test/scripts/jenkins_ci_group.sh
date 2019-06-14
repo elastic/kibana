@@ -5,7 +5,7 @@ trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
 
 if [[ "$JOB" != "firefox-intake"* ]]; then
-  "$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
+  yarn run grunt functionalTests:ensureAllTestsInCiGroup;
 fi
 
 node scripts/build --debug --oss;
@@ -26,6 +26,6 @@ if [ "$CI_GROUP" == "1" ]; then
 fi
 
 if [[ "$JOB" = "firefox-intake"* ]]; then
-  # Firefox functional tests dedicated run
+  # Firefox functional tests
   node scripts/functional_tests --bail --debug --kibana-install-dir "$installDir" --config "test/functional/config.firefox.js" --include-tag "smoke"
 fi
