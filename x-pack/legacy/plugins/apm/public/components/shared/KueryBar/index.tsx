@@ -71,7 +71,7 @@ export function KueryBar() {
     queryExample = 'process.pid = "1234"';
   } else {
     queryExample =
-      'transaction.duration.us > 300000 AND http.response.status_code = 200';
+      'transaction.duration.us > 300000 AND http.response.status_code >= 400';
   }
 
   useEffect(() => {
