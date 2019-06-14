@@ -21,6 +21,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
 import React, { useState } from 'react';
+import { where } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -31,6 +32,7 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { Schemas } from './schemas';
 
 const GROUP_NAMES = {
@@ -38,9 +40,9 @@ const GROUP_NAMES = {
 };
 
 interface AggAddReactWrapperProps {
-  availableSchema: Schemas[];
+  group: any;
   groupName: string;
-  groupNameLabel: string;
+  schemas: Schemas[];
   stats: {
     max: number;
     min: number;
@@ -51,9 +53,9 @@ interface AggAddReactWrapperProps {
 }
 
 function AggAddReactWrapper<T>({
-  availableSchema,
+  group,
   groupName,
-  groupNameLabel,
+  schemas,
   addSchema,
   stats,
 }: AggAddReactWrapperProps) {
@@ -74,6 +76,16 @@ function AggAddReactWrapper<T>({
     </EuiButtonEmpty>
   );
 
+  const groupNameLabel =
+    groupName === GROUP_NAMES.BUCKETS
+      ? i18n.translate('common.ui.vis.editors.aggAdd.bucketLabel', { defaultMessage: 'bucket' })
+      : i18n.translate('common.ui.vis.editors.aggAdd.metricLabel', { defaultMessage: 'metric' });
+
+  const isSchemaDisabled = (schema: Schemas): boolean => {
+    const count = where(group, { schema }).length;
+    return count >= schema.max;
+  };
+
   return stats.max > stats.count ? (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>
@@ -81,7 +93,7 @@ function AggAddReactWrapper<T>({
           id={`addGroupButtonPopover_${groupName}`}
           button={addButton}
           isOpen={isPopoverOpen}
-          panelPaddingSize="s"
+          panelPaddingSize="none"
           closePopover={() => setIsPopoverOpen(false)}
         >
           <EuiPopoverTitle>
@@ -101,13 +113,13 @@ function AggAddReactWrapper<T>({
             )}
           </EuiPopoverTitle>
           <EuiContextMenuPanel
-            items={availableSchema.map(
+            items={schemas.map(
               schema =>
                 !schema.deprecate && (
                   <EuiContextMenuItem
                     key={`${schema.name}_${schema.title}`}
                     data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
-                    icon={schema.icon}
+                    disabled={isSchemaDisabled(schema)}
                     onClick={() => onSelectSchema(schema)}
                   >
                     {schema.title}

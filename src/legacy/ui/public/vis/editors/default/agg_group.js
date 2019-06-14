@@ -68,11 +68,6 @@ uiModules
             stats.max += schema.max;
             stats.deprecate = schema.deprecate;
           });
-
-          $scope.availableSchema = $scope.schemas.filter(function (schema) {
-            const count = _.where($scope.group, { schema }).length;
-            if (count < schema.max) return true;
-          });
         });
 
         function reorderFinished() {
