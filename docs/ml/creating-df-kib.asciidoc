@@ -26,6 +26,9 @@ image::ml/images/ml-jobid.jpg["Job ID and target index"]
 After you create {dataframe} jobs, you can start, stop, and delete them 
 and explore their progress and statistics from the jobs list.
 
+For a more detailed example of using {dataframes} with the {kib} sample data,
+see {stack-ov}/ecommerce-dataframes.html[Transforming your data].
+
 [NOTE]
 ===============================
 If {stack} {security-features} are enabled, you must have appropriate authority
