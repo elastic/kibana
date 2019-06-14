@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import yauzl, { Entry, ZipFile } from 'yauzl';
 import fetch, { Response } from 'node-fetch';
+import { Readable } from 'stream';
 import tar from 'tar';
 
 const REGISTRY = process.env.REGISTRY || 'http://localhost:8080';
@@ -16,12 +17,16 @@ const cacheGet = (key: string) => cache.get(key);
 const cacheSet = (key: string, value: Buffer) => cache.set(key, value);
 const cacheHas = (key: string) => cache.has(key);
 
-function unzipFromBuffer(buffer: Buffer): Promise<ZipFile> {
-  return new Promise((resolve, reject) =>
-    yauzl.fromBuffer(buffer, { lazyEntries: true }, (err?: Error, zipfile?: ZipFile) =>
-      err ? reject(err) : resolve(zipfile)
-    )
-  );
+export async function fetchList() {
+  return fetchJson(`${REGISTRY}/list`);
+}
+
+export async function fetchInfo(key: string) {
+  return fetchJson(`${REGISTRY}/package/${key}`);
+}
+
+export async function getArchiveInfo(key: string): Promise<string[]> {
+  return getFiles(key);
 }
 
 function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
@@ -57,14 +62,6 @@ async function getResponseStream(url: string): Promise<NodeJS.ReadableStream> {
   return res.body;
 }
 
-export async function fetchList() {
-  return fetchJson(`${REGISTRY}/list`);
-}
-
-export async function fetchInfo(key: string) {
-  return fetchJson(`${REGISTRY}/package/${key}`);
-}
-
 async function fetchUrl(url: string): Promise<string> {
   return getResponseStream(url).then(streamToString);
 }
@@ -75,41 +72,13 @@ async function fetchJson(url: string): Promise<object> {
   return data;
 }
 
-async function filesFromBuffer(
-  buffer: Buffer,
-  predicate = (entry: Entry): boolean => true
-): Promise<string[]> {
-  const zipfile = await unzipFromBuffer(buffer);
-  const files: string[] = [];
-  zipfile.readEntry();
-  zipfile.on('entry', async (entry: Entry) => {
-    if (!predicate(entry)) return zipfile.readEntry();
-    if (cacheHas(entry.fileName)) return files.push(entry.fileName) && zipfile.readEntry();
-
-    const stream: NodeJS.ReadableStream = await new Promise((resolve, reject) =>
-      zipfile.openReadStream(entry, (err?: Error, readStream?: NodeJS.ReadableStream) =>
-        err ? reject(err) : resolve(readStream)
-      )
-    );
-
-    const entryBuffer = await streamToBuffer(stream);
-    cacheSet(entry.fileName, entryBuffer);
-    files.push(entry.fileName);
-    zipfile.readEntry();
-  });
-  return new Promise(resolve => zipfile.on('end', () => resolve(files)));
-}
-
-export async function getArchiveInfo(key: string): Promise<string[]> {
-  return getFiles(key);
-}
-
 async function getFiles(
   key: string,
   predicate = (entry: Entry): boolean => true
 ): Promise<string[]> {
   const archiveBuffer = await getOrFetchArchiveBuffer(key);
-  const files = await filesFromBuffer(archiveBuffer, predicate);
+  const extract = key.endsWith('.zip') ? unzipBuffer : untarBuffer;
+  const files = await extract(archiveBuffer, predicate);
 
   return files;
 }
@@ -129,8 +98,42 @@ async function fetchArchiveBuffer(key: string): Promise<Buffer> {
   return getResponseStream(`${REGISTRY}/package/${key}`).then(streamToBuffer);
 }
 
-export async function fetchGz(key: string): Promise<string[]> {
-  const body: NodeJS.ReadableStream = await getResponseStream(`${REGISTRY}/package/${key}`);
+async function unzipBuffer(
+  buffer: Buffer,
+  predicate = (entry: Entry): boolean => true
+): Promise<string[]> {
+  const files: string[] = [];
+  const zipfile: ZipFile = await new Promise((resolve, reject) =>
+    yauzl.fromBuffer(buffer, { lazyEntries: true }, (err?, handle?) =>
+      err ? reject(err) : resolve(handle)
+    )
+  );
+  zipfile.readEntry();
+  zipfile.on('entry', async (entry: Entry) => {
+    if (!predicate(entry)) return zipfile.readEntry();
+    if (cacheHas(entry.fileName)) return files.push(entry.fileName) && zipfile.readEntry();
+
+    const stream: NodeJS.ReadableStream = await new Promise((resolve, reject) =>
+      zipfile.openReadStream(entry, (err?: Error, readStream?: NodeJS.ReadableStream) =>
+        err ? reject(err) : resolve(readStream)
+      )
+    );
+
+    const entryBuffer = await streamToBuffer(stream);
+    cacheSet(entry.fileName, entryBuffer);
+    files.push(entry.fileName);
+    zipfile.readEntry();
+  });
+  return new Promise(resolve => zipfile.on('end', () => resolve(files)));
+}
+
+async function untarBuffer(
+  buffer: Buffer,
+  predicate = (entry: Entry): boolean => true
+): Promise<string[]> {
+  const body: Readable = new Readable();
+  body.push(buffer);
+  body.push(null);
   const paths: string[] = [];
   return new Promise((resolve, reject) => {
     // ts erroring with:

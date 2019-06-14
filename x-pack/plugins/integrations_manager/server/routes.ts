@@ -12,7 +12,7 @@ import {
   SAVED_OBJECT_TYPE,
 } from '../common/constants';
 import { Request, ServerRoute } from '../common/types';
-import { fetchInfo, fetchList, fetchGz, getArchiveInfo } from './registry';
+import { fetchInfo, fetchList, getArchiveInfo } from './registry';
 import { getClient } from './saved_objects';
 
 interface PostRequest extends Request {
@@ -51,7 +51,7 @@ export const routes: ServerRoute[] = [
     options: { tags: [`access:${PLUGIN_ID}`] },
     handler: async (req: Request) => {
       const { pkgkey } = req.params;
-      const paths = await fetchGz(`${pkgkey}.tar.gz`);
+      const paths = await getArchiveInfo(`${pkgkey}.tar.gz`);
       return { meta: { pkgkey, paths } };
     },
   },
