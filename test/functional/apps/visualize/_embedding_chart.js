@@ -22,6 +22,7 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const log = getService('log');
+  const renderable = getService('renderable');
   const embedding = getService('embedding');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
@@ -51,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should allow opening table vis in embedded mode', async () => {
         await embedding.openInEmbeddedMode();
-        await PageObjects.visualize.waitForVisualization();
+        await renderable.waitForRender();
 
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
@@ -71,7 +72,8 @@ export default function ({ getService, getPageObjects }) {
 
       it('should allow to filter in embedded mode', async () => {
         await filterBar.addFilter('@timestamp', 'is between', '2015-09-21', '2015-09-23');
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
 
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
@@ -91,7 +93,8 @@ export default function ({ getService, getPageObjects }) {
 
       it('should allow to change timerange from the visualization in embedded mode', async () => {
         await PageObjects.visualize.filterOnTableCell(1, 7);
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
 
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
