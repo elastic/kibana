@@ -53,9 +53,10 @@ export class SpacesService {
     spacesAuditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
     const getSpaceId = (request: RequestFacade) => {
-      const isLegacyRequest = typeof (request as any).getBasePath === 'function';
+      // Currently utilized by reporting
+      const isFakeRequest = typeof (request as any).getBasePath === 'function';
 
-      const basePath = isLegacyRequest
+      const basePath = isFakeRequest
         ? (request as Record<string, any>).getBasePath()
         : http.getBasePathFor(request);
 
