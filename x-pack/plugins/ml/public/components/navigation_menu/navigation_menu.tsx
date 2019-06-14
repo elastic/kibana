@@ -5,9 +5,10 @@
  */
 
 import React, { Fragment, SFC, useState } from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
+import { TopNav } from './top_nav';
 
 interface Tab {
   id: string;
@@ -18,6 +19,8 @@ interface Tab {
 interface Props {
   disableLinks: boolean;
   tabId: string;
+  timefilter: any;
+  timeHistory: any;
 }
 
 function moveToSelectedTab(selectedTabId: string) {
@@ -71,7 +74,7 @@ function getTabs(disableLinks: boolean): Tab[] {
   ];
 }
 
-export const NavigationMenu: SFC<Props> = ({ disableLinks, tabId }) => {
+export const NavigationMenu: SFC<Props> = ({ disableLinks, tabId, timefilter, timeHistory }) => {
   const [tabs] = useState(getTabs(disableLinks));
   const [selectedTabId, setSelectedTabId] = useState(tabId);
 
@@ -84,6 +87,7 @@ export const NavigationMenu: SFC<Props> = ({ disableLinks, tabId }) => {
   function renderTabs() {
     return tabs.map((tab: Tab) => (
       <EuiTab
+        className="MlNavigationMenu__tab"
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
         disabled={tab.disabled}
@@ -96,6 +100,11 @@ export const NavigationMenu: SFC<Props> = ({ disableLinks, tabId }) => {
 
   return (
     <Fragment>
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" className="MlNavigationMenu__topNav">
+        <EuiFlexItem grow={false}>
+          <TopNav timefilter={timefilter} timeHistory={timeHistory} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiTabs>{renderTabs()}</EuiTabs>
     </Fragment>
   );

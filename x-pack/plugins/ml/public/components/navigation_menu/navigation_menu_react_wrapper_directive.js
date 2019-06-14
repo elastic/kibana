@@ -9,6 +9,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { NavigationMenu } from './navigation_menu';
 import { isFullLicense } from '../../license/check_license';
+import { timefilter } from 'ui/timefilter';
+import { timeHistory } from 'ui/timefilter/time_history';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
@@ -23,7 +25,9 @@ module.directive('mlNavMenu', function () {
       // TODO: set showTabs to pass as prop
       const props = {
         disableLinks: (isFullLicense() === false),
-        tabId: attrs.name
+        tabId: attrs.name,
+        timefilter,
+        timeHistory
       };
 
       ReactDOM.render(React.createElement(NavigationMenu, props),

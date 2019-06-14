@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './navigation_menu_react_wrapper_directive';
+export { TopNav } from './top_nav';
