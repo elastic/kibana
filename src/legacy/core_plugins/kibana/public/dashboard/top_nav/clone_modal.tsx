@@ -18,8 +18,7 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -36,8 +35,28 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-class DashboardCloneModalUi extends React.Component {
-  constructor(props) {
+interface Props {
+  onClone: (
+    newTitle: string,
+    isTitleDuplicateConfirmed: boolean,
+    onTitleDuplicate: () => void
+  ) => Promise<void>;
+  onClose: () => void;
+  title: string;
+  intl: InjectedIntl;
+}
+
+interface State {
+  newDashboardName: string;
+  isTitleDuplicateConfirmed: boolean;
+  hasTitleDuplicate: boolean;
+  isLoading: boolean;
+}
+
+class DashboardCloneModalUi extends React.Component<Props, State> {
+  private isMounted = false;
+
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -48,11 +67,11 @@ class DashboardCloneModalUi extends React.Component {
     };
   }
   componentDidMount() {
-    this._isMounted = true;
+    this.isMounted = true;
   }
 
   componentWillUnmount() {
-    this._isMounted = false;
+    this.isMounted = false;
   }
 
   onTitleDuplicate = () => {
@@ -60,23 +79,27 @@ class DashboardCloneModalUi extends React.Component {
       isTitleDuplicateConfirmed: true,
       hasTitleDuplicate: true,
     });
-  }
+  };
 
   cloneDashboard = async () => {
     this.setState({
       isLoading: true,
     });
 
-    await this.props.onClone(this.state.newDashboardName, this.state.isTitleDuplicateConfirmed, this.onTitleDuplicate);
+    await this.props.onClone(
+      this.state.newDashboardName,
+      this.state.isTitleDuplicateConfirmed,
+      this.onTitleDuplicate
+    );
 
-    if (this._isMounted) {
+    if (this.isMounted) {
       this.setState({
         isLoading: false,
       });
     }
   };
 
-  onInputChange = (event) => {
+  onInputChange = (event: any) => {
     this.setState({
       newDashboardName: event.target.value,
       isTitleDuplicateConfirmed: false,
@@ -94,12 +117,15 @@ class DashboardCloneModalUi extends React.Component {
         <EuiSpacer />
         <EuiCallOut
           size="s"
-          title={this.props.intl.formatMessage({
-            id: 'kbn.dashboard.topNav.cloneModal.dashboardExistsTitle',
-            defaultMessage: 'A dashboard with the title {newDashboardName} already exists.',
-          }, {
-            newDashboardName: `'${this.state.newDashboardName}'`,
-          })}
+          title={this.props.intl.formatMessage(
+            {
+              id: 'kbn.dashboard.topNav.cloneModal.dashboardExistsTitle',
+              defaultMessage: 'A dashboard with the title {newDashboardName} already exists.',
+            },
+            {
+              newDashboardName: `'${this.state.newDashboardName}'`,
+            }
+          )}
           color="warning"
           data-test-subj="titleDupicateWarnMsg"
         >
@@ -122,7 +148,7 @@ class DashboardCloneModalUi extends React.Component {
         </EuiCallOut>
       </Fragment>
     );
-  }
+  };
 
   render() {
     return (
@@ -162,14 +188,10 @@ class DashboardCloneModalUi extends React.Component {
             />
 
             {this.renderDuplicateTitleCallout()}
-
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty
-              data-test-subj="cloneCancelButton"
-              onClick={this.props.onClose}
-            >
+            <EuiButtonEmpty data-test-subj="cloneCancelButton" onClick={this.props.onClose}>
               <FormattedMessage
                 id="kbn.dashboard.topNav.cloneModal.cancelButtonLabel"
                 defaultMessage="Cancel"
@@ -193,11 +215,5 @@ class DashboardCloneModalUi extends React.Component {
     );
   }
 }
-
-DashboardCloneModalUi.propTypes = {
-  onClone: PropTypes.func,
-  onClose: PropTypes.func,
-  title: PropTypes.string
-};
 
 export const DashboardCloneModal = injectI18n(DashboardCloneModalUi);

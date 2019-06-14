@@ -17,25 +17,7 @@
  * under the License.
  */
 
-import { SearchSource } from 'ui/courier';
-import { SavedObject } from 'ui/saved_objects/saved_object';
-import moment from 'moment';
-import { RefreshInterval } from 'ui/timefilter/timefilter';
-
-export interface SavedObjectDashboard extends SavedObject {
-  id?: string;
-  copyOnSave: boolean;
-  timeRestore: boolean;
-  timeTo?: string;
-  timeFrom?: string;
-  title: string;
-  description?: string;
-  panelsJSON: string;
-  optionsJSON?: string;
-  // TODO: write a migration to rid of this, it's only around for bwc.
-  uiStateJSON?: string;
-  lastSavedTitle: string;
-  searchSource: SearchSource;
-  destroy: () => void;
-  refreshInterval?: RefreshInterval;
+export interface KbnUrl {
+  change: (url: string) => void;
+  removeParam: (param: string) => void;
 }
