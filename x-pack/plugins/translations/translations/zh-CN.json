@@ -422,7 +422,6 @@
     "common.ui.flotCharts.thuLabel": "周四",
     "common.ui.flotCharts.tueLabel": "周二",
     "common.ui.flotCharts.wedLabel": "周三",
-    "common.ui.indexPattern.bannerLabel": "若要在 Kibana 中可视化和浏览数据，您需要创建索引模式，以从 Elasticsearch 检索数据。",
     "common.ui.indexPattern.unableWriteLabel": "无法写入索引模式！请刷新页面以获取此索引模式的最新更改。",
     "common.ui.indexPattern.unknownFieldErrorMessage": "indexPattern “{title}” 中的字段 “{name}” 使用未知字段类型。",
     "common.ui.indexPattern.unknownFieldHeader": "未知字段类型 {type}",
