@@ -100,8 +100,8 @@ export function getElasticsearchInstructionsForDisablingInternalCollection(produ
             <p>
               <FormattedMessage
                 id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.partiallyMigratedStatusDescription"
-                defaultMessage={`Note that it can take up to {secondsAgo} seconds to detect, but
-                we will continuously check every {timePeriod} seconds in the background.`}
+                defaultMessage="Note that it can take up to {secondsAgo} seconds to detect, but
+                we will continuously check every {timePeriod} seconds in the background."
                 values={{
                   secondsAgo: meta.secondsAgo,
                   timePeriod: autoCheckIntervalInMs / 1000,
