@@ -35,23 +35,31 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/moving_fn_
     });
 
     test('should return an expected result of the UNWEIGHTED model type', () => {
-      expect(MODEL_SCRIPTS[MODEL_TYPES.UNWEIGHTED](bucket)).toBe('MovingFunctions.unweightedAvg(values)');
+      expect(MODEL_SCRIPTS[MODEL_TYPES.UNWEIGHTED](bucket)).toBe(
+        'MovingFunctions.unweightedAvg(values)'
+      );
     });
 
     test('should return an expected result of the WEIGHTED_LINEAR model type', () => {
-      expect(MODEL_SCRIPTS[MODEL_TYPES.WEIGHTED_LINEAR](bucket)).toBe('MovingFunctions.linearWeightedAvg(values)');
+      expect(MODEL_SCRIPTS[MODEL_TYPES.WEIGHTED_LINEAR](bucket)).toBe(
+        'MovingFunctions.linearWeightedAvg(values)'
+      );
     });
 
     test('should return an expected result of the WEIGHTED_EXPONENTIAL model type', () => {
       const { alpha } = bucket;
 
-      expect(MODEL_SCRIPTS[MODEL_TYPES.WEIGHTED_EXPONENTIAL](bucket)).toBe(`MovingFunctions.ewma(values, ${alpha})`);
+      expect(MODEL_SCRIPTS[MODEL_TYPES.WEIGHTED_EXPONENTIAL](bucket)).toBe(
+        `MovingFunctions.ewma(values, ${alpha})`
+      );
     });
 
     test('should return an expected result of the WEIGHTED_EXPONENTIAL_DOUBLE model type', () => {
       const { alpha, beta } = bucket;
 
-      expect(MODEL_SCRIPTS[MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE](bucket)).toBe(`MovingFunctions.holt(values, ${alpha}, ${beta})`);
+      expect(MODEL_SCRIPTS[MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE](bucket)).toBe(
+        `MovingFunctions.holt(values, ${alpha}, ${beta})`
+      );
     });
 
     test('should return an expected result of the WEIGHTED_EXPONENTIAL_TRIPLE model type', () => {
@@ -63,4 +71,3 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/moving_fn_
     });
   });
 });
-

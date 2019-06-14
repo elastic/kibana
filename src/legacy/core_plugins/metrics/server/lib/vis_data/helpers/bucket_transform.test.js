@@ -35,13 +35,13 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_tra
         window: 10,
         field: '61ca57f2-469d-11e7-af02-69e470af7417',
         id: 'e815ae00-7881-11e9-9392-cbca66a4cf76',
-        type: 'moving_average'
+        type: 'moving_average',
       };
       metrics = [
         {
           id: '61ca57f2-469d-11e7-af02-69e470af7417',
           numerator: 'FlightDelay:true',
-          type: 'count'
+          type: 'count',
         },
         {
           model_type: 'holt_winters',
@@ -53,8 +53,8 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_tra
           window: 10,
           field: '61ca57f2-469d-11e7-af02-69e470af7417',
           id: 'e815ae00-7881-11e9-9392-cbca66a4cf76',
-          type: 'moving_average'
-        }
+          type: 'moving_average',
+        },
       ];
     });
 
@@ -65,4 +65,3 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_tra
     });
   });
 });
-

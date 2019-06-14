@@ -26,4 +26,3 @@ describe('src/legacy/core_plugins/metrics/common/model_options.js', () => {
     });
   });
 });
-
