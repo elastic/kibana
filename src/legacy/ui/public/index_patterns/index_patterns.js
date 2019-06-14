@@ -65,12 +65,11 @@ export class IndexPatterns {
 
   make = (id) => {
     return (new IndexPattern(id,
+      this.config,
       this.savedObjectsClient,
       this.cache,
       this.fieldsFetcher,
       this.getIds,
-      this.config.get('metaFields'),
-      this.config.get('shortDots:enable')
     )).init();
   };
 
