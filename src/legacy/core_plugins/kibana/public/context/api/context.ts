@@ -20,7 +20,7 @@
 // @ts-ignore
 import { SearchSourceProvider, SearchSource } from 'ui/courier';
 import { IPrivate } from 'ui/private';
-import { IndexPatternEnhanced } from 'ui/index_patterns/_index_pattern';
+import { IndexPatternEnhanced, IndexPatternGetProvider } from 'ui/index_patterns/_index_pattern';
 import { Filter } from '@kbn/es-query';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
@@ -36,9 +36,6 @@ export interface EsHitRecord {
   _source: Record<string, any>;
 }
 export type EsHitRecordList = EsHitRecord[];
-export interface IndexPatternGetProvider {
-  get: (id: string) => IndexPatternEnhanced;
-}
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
