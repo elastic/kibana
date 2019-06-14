@@ -25,7 +25,6 @@ uiModules
   .get('kibana')
   .directive('visEditorAggAdd', reactDirective =>
     reactDirective(wrapInI18nContext(AggAddReactWrapper), [
-      ['aggs', { watchDepth: 'reference' }],
       ['availableSchema', { watchDepth: 'collection' }],
       ['stats', { watchDepth: 'reference' }],
       'groupName',

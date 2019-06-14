@@ -135,8 +135,7 @@ export default function ({ getService, getPageObjects }) {
     2. Choose the Max aggregation and select the speech_number field.
     */
     it('should configure Max aggregation metric on speech_number', async function () {
-      await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
+      await PageObjects.visualize.clickBucket('Y-Axis', 'metrics');
       log.debug('Aggregation = Max');
       await PageObjects.visualize.selectYAxisAggregation('Max', 'speech_number', 'Max Speaking Parts', aggIndex);
       await PageObjects.visualize.clickGo();

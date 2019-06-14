@@ -68,7 +68,7 @@ VisTypesRegistryProvider.register(function (Private) {
         {
           group: 'buckets',
           name: 'segment',
-          icon: 'fa fa-cloud',
+          icon: 'visTagCloud',
           title: i18n.translate('tagCloud.vis.schemas.segmentTitle', { defaultMessage: 'Tags' }),
           min: 1,
           max: 1,

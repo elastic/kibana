@@ -45,10 +45,8 @@ export default function ({ getService, getPageObjects }) {
     log.debug('Field = @timestamp');
     await PageObjects.visualize.selectField('@timestamp');
     // add another metrics
-    log.debug('Add Metric');
-    await PageObjects.visualize.clickAddMetric();
     log.debug('Metric = Value Axis');
-    await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
+    await PageObjects.visualize.clickBucket('Y-Axis', 'metrics');
     log.debug('Aggregation = Average');
     await PageObjects.visualize.selectAggregation('Average', 'metrics');
     log.debug('Field = memory');

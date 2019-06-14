@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Date Histogram');
         await PageObjects.visualize.selectField('@timestamp');
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
         await PageObjects.visualize.clickBucket('Split Rows');
         await PageObjects.visualize.selectAggregation('Histogram');
         await PageObjects.visualize.selectField('bytes');

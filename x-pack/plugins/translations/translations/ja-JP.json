@@ -602,8 +602,6 @@
     "common.ui.vis.editors.agg.toggleEditorButtonAriaLabel": "{schema} エディターを切り替える",
     "common.ui.vis.editors.aggAdd.addGroupButtonLabel": "{groupNameLabel} を追加",
     "common.ui.vis.editors.aggAdd.addSubGroupButtonLabel": "サブ {groupNameLabel} を追加",
-    "common.ui.vis.editors.aggAdd.cancelButtonLabel": "キャンセル",
-    "common.ui.vis.editors.aggAdd.selectGroupTypeLabel": "{groupNameLabel} タイプを選択してください",
     "common.ui.vis.editors.aggGroups.bucketsText": "バケット",
     "common.ui.vis.editors.aggGroups.metricsText": "メトリック",
     "common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage": "「{schema}」集約は他のバケットの前に実行する必要があります！",

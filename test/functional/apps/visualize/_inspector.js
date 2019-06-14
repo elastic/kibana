@@ -42,8 +42,7 @@ export default function ({ getService, getPageObjects }) {
         await inspector.expectTableHeaders(['Count']);
 
         log.debug('Add Average Metric on machine.ram field');
-        await PageObjects.visualize.clickAddMetric();
-        await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
+        await PageObjects.visualize.clickBucket('Y-Axis', 'metrics');
         await PageObjects.visualize.selectAggregation('Average', 'metrics');
         await PageObjects.visualize.selectField('machine.ram', 'metrics');
         await PageObjects.visualize.clickGo();

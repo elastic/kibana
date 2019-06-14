@@ -183,7 +183,6 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct series', async function () {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
         await PageObjects.visualize.clickBucket('Split Series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
@@ -204,14 +203,12 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct series', async function () {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
         await PageObjects.visualize.clickBucket('Split Series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.visualize.toggleOpenEditor(3, 'false');
-        await PageObjects.visualize.clickAddBucket();
         await PageObjects.visualize.clickBucket('Split Series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('machine.os');

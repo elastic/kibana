@@ -126,7 +126,6 @@ export default function ({ getService, getPageObjects }) {
           'Other', 'Other', 'IN', 'CN', 'US', 'ID', 'BR', 'Other' ];
 
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
         await PageObjects.visualize.clickBucket('Split Slices');
         await PageObjects.visualize.selectAggregation('Terms');
         log.debug('Click field geo.src');
@@ -148,7 +147,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show correct result with one agg disabled', async () => {
         const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'osx'  ];
 
-        await PageObjects.visualize.clickAddBucket();
         await PageObjects.visualize.clickBucket('Split Slices');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('machine.os.raw');
@@ -230,7 +228,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.setNumericInterval('40000');
         log.debug('Toggle previous editor');
         await PageObjects.visualize.toggleAggregationEditor(2);
-        await PageObjects.visualize.clickAddBucket();
         log.debug('select bucket Split Slices');
         await PageObjects.visualize.clickBucket('Split Slices');
         await PageObjects.visualize.selectAggregation('Terms');
@@ -287,9 +284,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.setFilterAggregationValue('geo.dest:"US"');
         log.debug('Toggle previous editor');
         await PageObjects.visualize.toggleAggregationEditor(2);
-        log.debug('Add a new series');
-        await PageObjects.visualize.clickAddBucket();
-        log.debug('select bucket Split Slices');
+        log.debug('Add a new series, select bucket Split Slices');
         await PageObjects.visualize.clickBucket('Split Slices');
         log.debug('Click aggregation Filters');
         await PageObjects.visualize.selectAggregation('Filters');
@@ -313,9 +308,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('machine.os.raw');
         await PageObjects.visualize.toggleAggregationEditor(2);
-        log.debug('Add a new series');
-        await PageObjects.visualize.clickAddBucket();
-        log.debug('select bucket Split Slices');
+        log.debug('Add a new series, select bucket Split Slices');
         await PageObjects.visualize.clickBucket('Split Slices');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('geo.src');

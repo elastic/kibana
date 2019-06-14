@@ -22,15 +22,15 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormLabel,
-  EuiSpacer,
+  EuiPopover,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggConfig } from '../../agg_config';
 import { Schemas } from './schemas';
 
 const GROUP_NAMES = {
@@ -38,7 +38,6 @@ const GROUP_NAMES = {
 };
 
 interface AggAddReactWrapperProps {
-  aggs: AggConfig[];
   availableSchema: Schemas[];
   groupName: string;
   groupNameLabel: string;
@@ -52,100 +51,74 @@ interface AggAddReactWrapperProps {
 }
 
 function AggAddReactWrapper<T>({
-  aggs,
   availableSchema,
   groupName,
   groupNameLabel,
   addSchema,
   stats,
 }: AggAddReactWrapperProps) {
-  if (!aggs && !availableSchema) return null;
-
-  const [formVisibility, setformVisibility] = useState(stats.count < 1);
-  const onSelectSchema = (schema: any) => {
-    setformVisibility(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onSelectSchema = (schema: Schemas) => {
+    setIsPopoverOpen(false);
     addSchema(schema);
   };
 
-  return (
-    <>
-      {formVisibility && (
-        <EuiForm className="form-group">
-          <EuiFormLabel>
-            <FormattedMessage
-              id="common.ui.vis.editors.aggAdd.selectGroupTypeLabel"
-              defaultMessage="Select {groupNameLabel} type"
-              values={{ groupNameLabel }}
-            />
-          </EuiFormLabel>
-          <ul className="list-group list-group-menu">
-            {availableSchema.map(
-              (schema, index) =>
+  const addButton = (
+    <EuiButtonEmpty
+      size="xs"
+      iconType="plusInCircleFilled"
+      data-test-subj={`visEditorAdd_${groupName}`}
+      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+    >
+      <FormattedMessage id="common.ui.vis.editors.aggAdd.addButtonLabel" defaultMessage="Add" />
+    </EuiButtonEmpty>
+  );
+
+  return stats.max > stats.count ? (
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          id={`addGroupButtonPopover_${groupName}`}
+          button={addButton}
+          isOpen={isPopoverOpen}
+          panelPaddingSize="s"
+          closePopover={() => setIsPopoverOpen(false)}
+        >
+          <EuiPopoverTitle>
+            {(groupName !== GROUP_NAMES.BUCKETS || (!stats.count && !stats.deprecate)) && (
+              <FormattedMessage
+                id="common.ui.vis.editors.aggAdd.addGroupButtonLabel"
+                defaultMessage="Add {groupNameLabel}"
+                values={{ groupNameLabel }}
+              />
+            )}
+            {groupName === GROUP_NAMES.BUCKETS && stats.count > 0 && !stats.deprecate && (
+              <FormattedMessage
+                id="common.ui.vis.editors.aggAdd.addSubGroupButtonLabel"
+                defaultMessage="Add sub-{groupNameLabel}"
+                values={{ groupNameLabel }}
+              />
+            )}
+          </EuiPopoverTitle>
+          <EuiContextMenuPanel
+            items={availableSchema.map(
+              schema =>
                 !schema.deprecate && (
-                  <li
+                  <EuiContextMenuItem
                     key={`${schema.name}_${schema.title}`}
-                    tabIndex={0}
-                    id={`aggSchemaListItem-${index}`}
-                    className="list-group-item list-group-menu-item"
-                    data-test-subj={schema.title}
+                    data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
+                    icon={schema.icon}
                     onClick={() => onSelectSchema(schema)}
                   >
-                    {schema.icon && (
-                      <>
-                        <i className={schema.icon} />{' '}
-                      </>
-                    )}
                     {schema.title}
-                  </li>
+                  </EuiContextMenuItem>
                 )
             )}
-          </ul>
-        </EuiForm>
-      )}
-
-      <EuiSpacer size="s" />
-
-      {stats.max > stats.count ? (
-        formVisibility ? (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiButton color="danger" size="s" onClick={() => setformVisibility(false)}>
-                <FormattedMessage
-                  id="common.ui.vis.editors.aggAdd.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiButton
-                size="s"
-                data-test-subj="visualizeEditorAddAggregationButton"
-                onClick={() => setformVisibility(true)}
-              >
-                {(groupName !== GROUP_NAMES.BUCKETS || (!stats.count && !stats.deprecate)) && (
-                  <FormattedMessage
-                    id="common.ui.vis.editors.aggAdd.addGroupButtonLabel"
-                    defaultMessage="Add {groupNameLabel}"
-                    values={{ groupNameLabel }}
-                  />
-                )}
-                {groupName === GROUP_NAMES.BUCKETS && stats.count > 0 && !stats.deprecate && (
-                  <FormattedMessage
-                    id="common.ui.vis.editors.aggAdd.addSubGroupButtonLabel"
-                    defaultMessage="Add sub-{groupNameLabel}"
-                    values={{ groupNameLabel }}
-                  />
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )
-      ) : null}
-    </>
-  );
+          />
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : null;
 }
 
 export { AggAddReactWrapper };

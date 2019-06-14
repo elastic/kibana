@@ -80,7 +80,7 @@ export default function HistogramVisType(Private) {
         {
           group: 'buckets',
           name: 'segment',
-          icon: 'fa fa-scissors',
+          icon: 'cut',
           title: i18n.translate('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split Slices' }),
           min: 0,
           max: Infinity,
@@ -89,7 +89,7 @@ export default function HistogramVisType(Private) {
         {
           group: 'buckets',
           name: 'split',
-          icon: 'fa fa-th',
+          icon: 'grid',
           title: i18n.translate('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split Chart' }),
           mustBeFirst: true,
           min: 0,

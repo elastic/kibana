@@ -540,8 +540,6 @@
     "common.ui.vis.editors.agg.toggleEditorButtonAriaLabel": "切换 {schema} 编辑器",
     "common.ui.vis.editors.aggAdd.addGroupButtonLabel": "添加{groupNameLabel}",
     "common.ui.vis.editors.aggAdd.addSubGroupButtonLabel": "添加子{groupNameLabel}",
-    "common.ui.vis.editors.aggAdd.cancelButtonLabel": "取消",
-    "common.ui.vis.editors.aggAdd.selectGroupTypeLabel": "选择{groupNameLabel}类型",
     "common.ui.vis.editors.aggGroups.bucketsText": "存储桶",
     "common.ui.vis.editors.aggGroups.metricsText": "指标",
     "common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage": "“{schema}” 聚合必须在所有其他存储桶之前运行！",
