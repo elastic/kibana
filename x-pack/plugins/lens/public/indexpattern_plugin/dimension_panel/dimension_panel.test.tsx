@@ -172,7 +172,7 @@ describe('IndexPatternDimensionPanel', () => {
       />
     );
 
-    expect(operationDefinitionMap.date_histogram.inlineOptions as jest.Mock).toHaveBeenCalled();
+    expect(operationDefinitionMap.date_histogram.paramEditor as jest.Mock).toHaveBeenCalled();
   });
 
   it('should not render the settings button if there are no settings or options', () => {

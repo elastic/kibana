@@ -1,0 +1,12 @@
+.lnsConfigPanel__axis {
+  background: $euiColorLightestShade;
+  padding: $euiSizeS;
+  margin-bottom: $euiSizeS;
+  border-radius: $euiBorderRadius;
+}
+
+.lnsConfigPanel__axisTitle {
+  @include euiTitle('xxxs');
+  color: $euiColorMediumShade;
+  display: block;
+}

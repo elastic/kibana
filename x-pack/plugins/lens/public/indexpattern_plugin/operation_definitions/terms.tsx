@@ -78,7 +78,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       missingBucketLabel: 'Missing',
     },
   }),
-  contextMenu: ({ state, setState, columnId: currentColumnId }) => {
+  paramEditor: ({ state, setState, columnId: currentColumnId }) => {
     const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
@@ -111,27 +111,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       value: toValue({ type: 'alphabetical' }),
       text: 'Alphabetical',
     });
-    return [
-      <EuiContextMenuItem
-        data-test-subj="lns-indexPatternSettings-termsOrderBy"
-        key={`orderby-${toValue(currentColumn.params.orderBy)}`}
-      >
-        <EuiFormRow label="Order by">
-          <EuiSelect
-            options={orderOptions}
-            value={toValue(currentColumn.params.orderBy)}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setState(
-                updateColumnParam(state, currentColumn, 'orderBy', fromValue(e.target.value))
-              )
-            }
-          />
-        </EuiFormRow>
-      </EuiContextMenuItem>,
-    ];
-  },
-  inlineOptions: ({ state, setState, columnId: currentColumnId }) => {
-    const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
     return (
       <EuiForm>
         <EuiFormRow label="Number of values">
@@ -145,6 +124,17 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
               setState(updateColumnParam(state, currentColumn, 'size', Number(e.target.value)))
             }
             aria-label="Number of values"
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Order by">
+          <EuiSelect
+            options={orderOptions}
+            value={toValue(currentColumn.params.orderBy)}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setState(
+                updateColumnParam(state, currentColumn, 'orderBy', fromValue(e.target.value))
+              )
+            }
           />
         </EuiFormRow>
       </EuiForm>

@@ -1,0 +1,44 @@
+/*
+ * 1. Truncate long words
+ */
+
+.lnsConfigPanel__summary {
+  @include euiFontSizeS;
+  background: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
+  display: flex;
+  align-items: center;
+  margin-top: $euiSizeXS;
+  padding: $euiSizeXS;
+}
+
+.lnsConfigPanel__summaryPopover {
+  flex-grow: 1;
+  line-height: 0;
+  overflow: hidden; /* 1 */
+}
+
+.lnsConfigPanel__summaryPopoverAnchor {
+  max-width: 100%; /* 1 */
+}
+
+.lnsConfigPanel__summaryIcon {
+  margin-right: $euiSizeXS;
+}
+
+.lnsConfigPanel__summaryLink {
+  max-width: 100%; /* 1 */
+  display: flex;
+  padding: $euiSizeS $euiSizeXS;
+
+  > span {
+    max-width: 100%; /* 1 */
+    overflow: hidden; /* 1 */
+    text-overflow: ellipsis; /* 1 */
+    flex-grow: 1;
+  }
+}
+
+.lnsConfigPanel__summaryField {
+  color: $euiColorPrimary;
+}

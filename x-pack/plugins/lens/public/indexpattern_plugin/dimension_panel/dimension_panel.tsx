@@ -35,9 +35,6 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
 
   const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
 
-  const ParamEditor =
-    selectedColumn && operationDefinitionMap[selectedColumn.operationType].inlineOptions;
-
   function canHandleDrop() {
     const { dragging } = props.dragDropContext;
     const field = dragging as IndexPatternField;
@@ -78,30 +75,13 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
           });
         }}
       >
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={null}>
-            <EuiFlexGroup alignItems="center">
-              <Settings
-                {...props}
-                selectedColumn={selectedColumn}
-                filteredColumns={filteredColumns}
-              />
-              <FieldSelect
-                {...props}
-                selectedColumn={selectedColumn}
-                filteredColumns={filteredColumns}
-              />
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {ParamEditor && (
-            <EuiFlexItem grow={2}>
-              <ParamEditor
-                state={props.state}
-                setState={props.setState}
-                columnId={props.columnId}
-              />
-            </EuiFlexItem>
-          )}
+        <EuiFlexGroup alignItems="center">
+          <Settings {...props} selectedColumn={selectedColumn} filteredColumns={filteredColumns} />
+          <FieldSelect
+            {...props}
+            selectedColumn={selectedColumn}
+            filteredColumns={filteredColumns}
+          />
         </EuiFlexGroup>
       </DragDrop>
     </ChildDragDropProvider>

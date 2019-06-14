@@ -68,8 +68,7 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn = BaseInde
     suggestedOrder?: DimensionPriority,
     field?: IndexPatternField
   ) => C;
-  inlineOptions?: React.ComponentType<ParamEditorProps>;
-  contextMenu?: (props: ParamEditorProps) => JSX.Element[];
+  paramEditor?: React.ComponentType<ParamEditorProps>;
   toEsAggsConfig: (column: C, columnId: string) => unknown;
 }
 
