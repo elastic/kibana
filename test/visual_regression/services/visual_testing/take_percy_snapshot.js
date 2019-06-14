@@ -17,9 +17,23 @@
  * under the License.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+var readFileSync = require('fs').readFileSync;
+var agentJsFilename = require('@percy/agent').agentJsFilename;
 
-import { pageObjects } from './page_objects';
-import { services } from './services';
+export function takePercySnapshot() {
+  if (!window.PercyAgent) {
+    return false;
+  }
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+  var agent = new window.PercyAgent({
+    handleAgentCommunication: false
+  });
+
+  return agent.domSnapshot(window.document);
+}
+
+export var takePercySnapshotWithAgent = `
+  ${readFileSync(agentJsFilename(), 'utf8')}
+
+  return (${takePercySnapshot.toString()})();
+`;
