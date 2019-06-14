@@ -28,10 +28,10 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
   >
     <Styled(EuiFlexItem)>
       <EuiFlexItem
-        className="sc-bxivhb bQCHAr"
+        className="sc-bwzfXH hrDDAP"
       >
         <div
-          className="euiFlexItem sc-bxivhb bQCHAr"
+          className="euiFlexItem sc-bwzfXH hrDDAP"
         >
           <EuiPanel
             grow={true}
@@ -58,10 +58,10 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                     key="stat-items-field-hosts"
                   >
                     <EuiFlexItem
-                      className="sc-bxivhb bQCHAr"
+                      className="sc-bwzfXH hrDDAP"
                     >
                       <div
-                        className="euiFlexItem sc-bxivhb bQCHAr"
+                        className="euiFlexItem sc-bwzfXH hrDDAP"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -73,17 +73,17 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                           >
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-bxivhb bQCHAr"
+                                className="sc-bwzfXH hrDDAP"
                               >
                                 <div
-                                  className="euiFlexItem sc-bxivhb bQCHAr"
+                                  className="euiFlexItem sc-bwzfXH hrDDAP"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-ifAKCX bfXlPM"
+                                      className="sc-htpNat bTDdmQ"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-ifAKCX bfXlPM"
+                                        className="euiTitle euiTitle--medium sc-htpNat bTDdmQ"
                                         data-test-subj="stat-title"
                                       >
                                         --
@@ -145,10 +145,10 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
   >
     <Styled(EuiFlexItem)>
       <EuiFlexItem
-        className="sc-bxivhb bQCHAr"
+        className="sc-bwzfXH hrDDAP"
       >
         <div
-          className="euiFlexItem sc-bxivhb bQCHAr"
+          className="euiFlexItem sc-bwzfXH hrDDAP"
         >
           <EuiPanel
             grow={true}
@@ -175,10 +175,10 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                     key="stat-items-field-hosts"
                   >
                     <EuiFlexItem
-                      className="sc-bxivhb bQCHAr"
+                      className="sc-bwzfXH hrDDAP"
                     >
                       <div
-                        className="euiFlexItem sc-bxivhb bQCHAr"
+                        className="euiFlexItem sc-bwzfXH hrDDAP"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -191,17 +191,17 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                             0
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-bxivhb bQCHAr"
+                                className="sc-bwzfXH hrDDAP"
                               >
                                 <div
-                                  className="euiFlexItem sc-bxivhb bQCHAr"
+                                  className="euiFlexItem sc-bwzfXH hrDDAP"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-ifAKCX bfXlPM"
+                                      className="sc-htpNat bTDdmQ"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-ifAKCX bfXlPM"
+                                        className="euiTitle euiTitle--medium sc-htpNat bTDdmQ"
                                         data-test-subj="stat-title"
                                       >
                                         --
@@ -253,16 +253,16 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
           "key": "uniqueSourceIpsHistogram",
           "value": Array [
             Object {
-              "x": 1556686800000,
-              "y": 580213,
+              "x": 1556888400000,
+              "y": 565975,
             },
             Object {
-              "x": 1556730000000,
-              "y": 1096175,
+              "x": 1556931600000,
+              "y": 1084366,
             },
             Object {
-              "x": 1556773200000,
-              "y": 12382,
+              "x": 1556974800000,
+              "y": 12280,
             },
           ],
         },
@@ -271,15 +271,15 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
           "key": "uniqueDestinationIpsHistogram",
           "value": Array [
             Object {
-              "x": 1556686800000,
+              "x": 1556888400000,
               "y": 565975,
             },
             Object {
-              "x": 1556730000000,
+              "x": 1556931600000,
               "y": 1084366,
             },
             Object {
-              "x": 1556773200000,
+              "x": 1556974800000,
               "y": 12280,
             },
           ],
@@ -335,10 +335,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
   >
     <Styled(EuiFlexItem)>
       <EuiFlexItem
-        className="sc-bxivhb bQCHAr"
+        className="sc-bwzfXH hrDDAP"
       >
         <div
-          className="euiFlexItem sc-bxivhb bQCHAr"
+          className="euiFlexItem sc-bwzfXH hrDDAP"
         >
           <EuiPanel
             grow={true}
@@ -365,10 +365,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     key="stat-items-field-uniqueSourceIps"
                   >
                     <EuiFlexItem
-                      className="sc-bxivhb bQCHAr"
+                      className="sc-bwzfXH hrDDAP"
                     >
                       <div
-                        className="euiFlexItem sc-bxivhb bQCHAr"
+                        className="euiFlexItem sc-bwzfXH hrDDAP"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -382,11 +382,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               grow={false}
                             >
                               <EuiFlexItem
-                                className="sc-bxivhb bQCHAr"
+                                className="sc-bwzfXH hrDDAP"
                                 grow={false}
                               >
                                 <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bxivhb bQCHAr"
+                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bwzfXH hrDDAP"
                                 >
                                   <EuiIcon
                                     color="#DB1374"
@@ -425,17 +425,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             </Styled(EuiFlexItem)>
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-bxivhb bQCHAr"
+                                className="sc-bwzfXH hrDDAP"
                               >
                                 <div
-                                  className="euiFlexItem sc-bxivhb bQCHAr"
+                                  className="euiFlexItem sc-bwzfXH hrDDAP"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-ifAKCX bfXlPM"
+                                      className="sc-htpNat bTDdmQ"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-ifAKCX bfXlPM"
+                                        className="euiTitle euiTitle--medium sc-htpNat bTDdmQ"
                                         data-test-subj="stat-title"
                                       >
                                         1,714
@@ -456,10 +456,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     key="stat-items-field-uniqueDestinationIps"
                   >
                     <EuiFlexItem
-                      className="sc-bxivhb bQCHAr"
+                      className="sc-bwzfXH hrDDAP"
                     >
                       <div
-                        className="euiFlexItem sc-bxivhb bQCHAr"
+                        className="euiFlexItem sc-bwzfXH hrDDAP"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -473,11 +473,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               grow={false}
                             >
                               <EuiFlexItem
-                                className="sc-bxivhb bQCHAr"
+                                className="sc-bwzfXH hrDDAP"
                                 grow={false}
                               >
                                 <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bxivhb bQCHAr"
+                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bwzfXH hrDDAP"
                                 >
                                   <EuiIcon
                                     color="#490092"
@@ -516,17 +516,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             </Styled(EuiFlexItem)>
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-bxivhb bQCHAr"
+                                className="sc-bwzfXH hrDDAP"
                               >
                                 <div
-                                  className="euiFlexItem sc-bxivhb bQCHAr"
+                                  className="euiFlexItem sc-bwzfXH hrDDAP"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-ifAKCX bfXlPM"
+                                      className="sc-htpNat bTDdmQ"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-ifAKCX bfXlPM"
+                                        className="euiTitle euiTitle--medium sc-htpNat bTDdmQ"
                                         data-test-subj="stat-title"
                                       >
                                         2,359
@@ -556,12 +556,12 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                 >
                   <Styled(EuiFlexItem)>
                     <EuiFlexItem
-                      className="sc-bxivhb bQCHAr"
+                      className="sc-bwzfXH hrDDAP"
                     >
                       <div
-                        className="euiFlexItem sc-bxivhb bQCHAr"
+                        className="euiFlexItem sc-bwzfXH hrDDAP"
                       >
-                        <Component
+                        <mockConstructor
                           barChart={
                             Array [
                               Object {
@@ -597,105 +597,16 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               },
                             }
                           }
-                        >
-                          <AutoSizer
-                            content={true}
-                            detectAnyWindowResize={false}
-                          >
-                            <styled.div
-                              innerRef={[Function]}
-                            >
-                              <div
-                                className="sc-bwzfXH ffMqh"
-                              >
-                                <Component
-                                  configs={
-                                    Object {
-                                      "axis": Object {
-                                        "xTickFormatter": [Function],
-                                      },
-                                      "series": Object {
-                                        "xScaleType": "ordinal",
-                                        "yScaleType": "linear",
-                                      },
-                                    }
-                                  }
-                                  data={
-                                    Array [
-                                      Object {
-                                        "color": "#DB1374",
-                                        "key": "uniqueSourceIps",
-                                        "value": Array [
-                                          Object {
-                                            "x": "uniqueSourceIps",
-                                            "y": "1714",
-                                          },
-                                        ],
-                                      },
-                                      Object {
-                                        "color": "#490092",
-                                        "key": "uniqueDestinationIps",
-                                        "value": Array [
-                                          Object {
-                                            "x": "uniqueDestinationIps",
-                                            "y": 2354,
-                                          },
-                                        ],
-                                      },
-                                    ]
-                                  }
-                                >
-                                  <Component
-                                    configs={
-                                      Object {
-                                        "axis": Object {
-                                          "xTickFormatter": [Function],
-                                        },
-                                        "series": Object {
-                                          "xScaleType": "ordinal",
-                                          "yScaleType": "linear",
-                                        },
-                                      }
-                                    }
-                                    data={
-                                      Array [
-                                        Object {
-                                          "color": "#DB1374",
-                                          "key": "uniqueSourceIps",
-                                          "value": Array [
-                                            Object {
-                                              "x": "uniqueSourceIps",
-                                              "y": "1714",
-                                            },
-                                          ],
-                                        },
-                                        Object {
-                                          "color": "#490092",
-                                          "key": "uniqueDestinationIps",
-                                          "value": Array [
-                                            Object {
-                                              "x": "uniqueDestinationIps",
-                                              "y": 2354,
-                                            },
-                                          ],
-                                        },
-                                      ]
-                                    }
-                                  />
-                                </Component>
-                              </div>
-                            </styled.div>
-                          </AutoSizer>
-                        </Component>
+                        />
                       </div>
                     </EuiFlexItem>
                   </Styled(EuiFlexItem)>
                   <Styled(EuiFlexItem)>
                     <EuiFlexItem
-                      className="sc-bxivhb bQCHAr"
+                      className="sc-bwzfXH hrDDAP"
                     >
                       <div
-                        className="euiFlexItem sc-bxivhb bQCHAr"
+                        className="euiFlexItem sc-bwzfXH hrDDAP"
                       >
                         <Connect(GlobalTimeComponent)>
                           <GlobalTimeComponent
@@ -704,7 +615,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             setGlobalQuery={[Function]}
                             to={1}
                           >
-                            <Component
+                            <mockConstructor
                               areaChart={
                                 Array [
                                   Object {
@@ -712,16 +623,16 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     "key": "uniqueSourceIpsHistogram",
                                     "value": Array [
                                       Object {
-                                        "x": 1556686800000,
-                                        "y": 580213,
+                                        "x": 1556888400000,
+                                        "y": 565975,
                                       },
                                       Object {
-                                        "x": 1556730000000,
-                                        "y": 1096175,
+                                        "x": 1556931600000,
+                                        "y": 1084366,
                                       },
                                       Object {
-                                        "x": 1556773200000,
-                                        "y": 12382,
+                                        "x": 1556974800000,
+                                        "y": 12280,
                                       },
                                     ],
                                   },
@@ -730,15 +641,15 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     "key": "uniqueDestinationIpsHistogram",
                                     "value": Array [
                                       Object {
-                                        "x": 1556686800000,
+                                        "x": 1556888400000,
                                         "y": 565975,
                                       },
                                       Object {
-                                        "x": 1556730000000,
+                                        "x": 1556931600000,
                                         "y": 1084366,
                                       },
                                       Object {
-                                        "x": 1556773200000,
+                                        "x": 1556974800000,
                                         "y": 12280,
                                       },
                                     ],
@@ -757,130 +668,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                   },
                                 }
                               }
-                            >
-                              <AutoSizer
-                                content={true}
-                                detectAnyWindowResize={false}
-                              >
-                                <styled.div
-                                  innerRef={[Function]}
-                                >
-                                  <div
-                                    className="sc-bwzfXH ffMqh"
-                                  >
-                                    <Component
-                                      configs={
-                                        Object {
-                                          "axis": Object {
-                                            "xTickFormatter": [Function],
-                                            "yTickFormatter": [Function],
-                                          },
-                                          "series": Object {
-                                            "xScaleType": "time",
-                                            "yScaleType": "linear",
-                                          },
-                                        }
-                                      }
-                                      data={
-                                        Array [
-                                          Object {
-                                            "color": "#DB1374",
-                                            "key": "uniqueSourceIpsHistogram",
-                                            "value": Array [
-                                              Object {
-                                                "x": 1556686800000,
-                                                "y": 580213,
-                                              },
-                                              Object {
-                                                "x": 1556730000000,
-                                                "y": 1096175,
-                                              },
-                                              Object {
-                                                "x": 1556773200000,
-                                                "y": 12382,
-                                              },
-                                            ],
-                                          },
-                                          Object {
-                                            "color": "#490092",
-                                            "key": "uniqueDestinationIpsHistogram",
-                                            "value": Array [
-                                              Object {
-                                                "x": 1556686800000,
-                                                "y": 565975,
-                                              },
-                                              Object {
-                                                "x": 1556730000000,
-                                                "y": 1084366,
-                                              },
-                                              Object {
-                                                "x": 1556773200000,
-                                                "y": 12280,
-                                              },
-                                            ],
-                                          },
-                                        ]
-                                      }
-                                    >
-                                      <Component
-                                        configs={
-                                          Object {
-                                            "axis": Object {
-                                              "xTickFormatter": [Function],
-                                              "yTickFormatter": [Function],
-                                            },
-                                            "series": Object {
-                                              "xScaleType": "time",
-                                              "yScaleType": "linear",
-                                            },
-                                          }
-                                        }
-                                        data={
-                                          Array [
-                                            Object {
-                                              "color": "#DB1374",
-                                              "key": "uniqueSourceIpsHistogram",
-                                              "value": Array [
-                                                Object {
-                                                  "x": 1556686800000,
-                                                  "y": 580213,
-                                                },
-                                                Object {
-                                                  "x": 1556730000000,
-                                                  "y": 1096175,
-                                                },
-                                                Object {
-                                                  "x": 1556773200000,
-                                                  "y": 12382,
-                                                },
-                                              ],
-                                            },
-                                            Object {
-                                              "color": "#490092",
-                                              "key": "uniqueDestinationIpsHistogram",
-                                              "value": Array [
-                                                Object {
-                                                  "x": 1556686800000,
-                                                  "y": 565975,
-                                                },
-                                                Object {
-                                                  "x": 1556730000000,
-                                                  "y": 1084366,
-                                                },
-                                                Object {
-                                                  "x": 1556773200000,
-                                                  "y": 12280,
-                                                },
-                                              ],
-                                            },
-                                          ]
-                                        }
-                                      />
-                                    </Component>
-                                  </div>
-                                </styled.div>
-                              </AutoSizer>
-                            </Component>
+                            />
                           </GlobalTimeComponent>
                         </Connect(GlobalTimeComponent)>
                       </div>

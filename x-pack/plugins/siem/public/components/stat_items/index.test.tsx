@@ -30,6 +30,8 @@ import { mockGlobalState, apolloClientObservable } from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { KpiNetworkData, KpiHostsData } from '../../graphql/types';
+jest.mock('../charts/barchart');
+jest.mock('../charts/areachart');
 
 describe('Stat Items Component', () => {
   const state: State = mockGlobalState;
@@ -111,18 +113,18 @@ describe('Stat Items Component', () => {
         {
           key: 'uniqueSourceIpsHistogram',
           value: [
-            { x: 1556686800000, y: 580213 },
-            { x: 1556730000000, y: 1096175 },
-            { x: 1556773200000, y: 12382 },
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
           ],
           color: '#DB1374',
         },
         {
           key: 'uniqueDestinationIpsHistogram',
           value: [
-            { x: 1556686800000, y: 565975 },
-            { x: 1556730000000, y: 1084366 },
-            { x: 1556773200000, y: 12280 },
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
           ],
           color: '#490092',
         },

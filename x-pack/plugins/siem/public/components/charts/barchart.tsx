@@ -17,6 +17,7 @@ import {
   getSeriesStyle,
   getTheme,
   ChartSeriesConfigs,
+  browserTimezone,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -27,6 +28,7 @@ export const BarChartBaseComponent = React.memo<{
   height: number | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }>(({ data, ...chartConfigs }) => {
+  const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = getAxisId(`stat-items-barchart-${data[0].key}-x`);
   const yAxisId = getAxisId(`stat-items-barchart-${data[0].key}-y`);
@@ -47,6 +49,7 @@ export const BarChartBaseComponent = React.memo<{
             yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
             xAccessor="x"
             yAccessors={['y']}
+            timeZone={browserTimezone}
             splitSeriesAccessors={['g']}
             data={series.value!}
             stackAccessors={['y']}
@@ -55,9 +58,23 @@ export const BarChartBaseComponent = React.memo<{
         );
       })}
 
-      <Axis id={xAxisId} position={Position.Bottom} showOverlappingTicks={false} tickSize={0} />
+      {xTickFormatter ? (
+        <Axis
+          id={xAxisId}
+          position={Position.Bottom}
+          showOverlappingTicks={false}
+          tickSize={0}
+          tickFormat={xTickFormatter}
+        />
+      ) : (
+        <Axis id={xAxisId} position={Position.Bottom} showOverlappingTicks={false} tickSize={0} />
+      )}
 
-      <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
+      {yTickFormatter ? (
+        <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
+      ) : (
+        <Axis id={yAxisId} position={Position.Left} tickSize={0} />
+      )}
     </Chart>
   ) : null;
 });
