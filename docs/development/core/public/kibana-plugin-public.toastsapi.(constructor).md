@@ -11,7 +11,6 @@ Constructs a new instance of the `ToastsApi` class
 ```typescript
 constructor(deps: {
         uiSettings: UiSettingsSetup;
-        i18n: I18nSetup;
     });
 ```
 
@@ -19,5 +18,5 @@ constructor(deps: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  deps | <code>{</code><br/><code>        uiSettings: UiSettingsSetup;</code><br/><code>        i18n: I18nSetup;</code><br/><code>    }</code> |  |
+|  deps | <code>{</code><br/><code>        uiSettings: UiSettingsSetup;</code><br/><code>    }</code> |  |
 
