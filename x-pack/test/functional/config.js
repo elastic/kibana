@@ -27,6 +27,7 @@ import {
   CodeHomePageProvider,
   RollupPageProvider,
   UptimePageProvider,
+  MachineLearningPageProvider,
 } from './page_objects';
 
 import {
@@ -174,6 +175,7 @@ export default async function ({ readConfigFile }) {
       code: CodeHomePageProvider,
       uptime: UptimePageProvider,
       rollup: RollupPageProvider,
+      machineLearning: MachineLearningPageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),

@@ -41,7 +41,7 @@ describe('Settings', () => {
       <Settings canGetFilters={true} canGetCalendars={false} />
     );
 
-    const button = wrapper.find('[data-testid="ml_calendar_mng_button"]');
+    const button = wrapper.find('[data-test-subj="ml_calendar_mng_button"]');
     const calendarButton = button.find('EuiButtonEmpty');
     expect(calendarButton.prop('isDisabled')).toBe(true);
   });

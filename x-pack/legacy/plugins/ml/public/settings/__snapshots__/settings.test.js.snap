@@ -35,7 +35,7 @@ exports[`Settings Renders settings page 1`] = `
         >
           <EuiButtonEmpty
             color="primary"
-            data-testid="ml_calendar_mng_button"
+            data-test-subj="ml_calendar_mng_button"
             href="undefined/app/ml#/settings/calendars_list"
             iconSide="left"
             isDisabled={false}
@@ -54,7 +54,7 @@ exports[`Settings Renders settings page 1`] = `
         >
           <EuiButtonEmpty
             color="primary"
-            data-testid="ml_filter_lists_button"
+            data-test-subj="ml_filter_lists_button"
             href="undefined/app/ml#/settings/filter_lists"
             iconSide="left"
             isDisabled={false}
