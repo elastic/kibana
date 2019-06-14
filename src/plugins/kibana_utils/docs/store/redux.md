@@ -10,7 +10,7 @@ You can access Redux *store* using `.redux`.
 store.redux;
 ```
 
-But you should never need it, if you think you do, consult with [`@elastic/kibana-app-arch`](https://github.com/orgs/elastic/teams/kibana-app-arch).
+But you should never need it, if you think you do, consult with Kibana App Architecture team.
 
 We use Redux internally for 3 main reasons:
 
