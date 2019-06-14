@@ -3,30 +3,35 @@
 
 beta[]
 
+You can create {stack-ov}/ml-dataframes.html[{dataframe-transforms}] in the 
+{kib} Machine Learning application.
+
+[role="screenshot"]
+image::ml/images/ml-definepivot.jpg["Defining a {dataframe} pivot"]
+
+Select the index pattern or saved search you want to transform. To pivot your 
+data, you must group the data by at least one field and apply at least one 
+aggregation. The {dataframe} pivot preview on the right side provides a visual 
+verification.
+
+Once you have created the pivot, add a job ID and define the index for the 
+transformed data (_target index_). If the target index does not exist, it will be 
+created automatically. You can optionally select to create a {kib} index pattern 
+for the target index. At the end of the process, a {dataframe} job is created as 
+a result. After you create {dataframe} jobs, you can start, stop, and delete them 
+and explore their progress and statistics from the jobs list.
+
+[role="screenshot"]
+image::ml/images/ml-jobid.jpg["Job ID and target index"]
+
+[NOTE]
+===============================
 If you want to use the {dataframe-transforms} feature, you must have the required 
 user roles and permissions:
 
 * `data_frame_transforms_user`: to get transforms and transforms stats,
 * `data_frame_transforms_admin`: to create/start/stop/delete transforms,
-* read permissions on the source indices,
-* index permissions on the target index (if the target index does not exist, you 
-need permission to create the index as well).
-
-[role="screenshot"]
-image::ml/images/ml-definepivot.jpg["Defining a {dataframe} pivot"]
-
-You can create {dataframe-transforms} in the {kib} Machine Learning application. 
-Select an index or a search pattern you want to transform and a field that the data 
-will be grouped-by, then define the desired aggregation. The {dataframe} pivot 
-preview on the right side provides a visual verification.
-
-Once you created the pivot, add a job ID and define the index dedicated to the 
-transformed data (_target index_). If the target index does not exist, it will be 
-created automatically if you have the required permission. At the end of the process, 
-a {dataframe} job is created as a result. After the job is started, you have further
-options to continue exploring it.
-
-[role="screenshot"]
-image::ml/images/ml-jobid.jpg["Job ID and target index"]
-
-
+* read permissions and `view_index_metadata` on the source indices,
+* index and read permissions on the target index (if the target index does not 
+exist, you need permission to create the index as well).
+===============================
