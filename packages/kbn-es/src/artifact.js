@@ -208,7 +208,7 @@ exports.Artifact = class Artifact {
    * @return {Promise<void>}
    */
   async download(dest) {
-    await retry(async () => {
+    await retry(this._log, async () => {
       const cacheMeta = cache.readMeta(dest);
       const tmpPath = `${dest}.tmp`;
 
