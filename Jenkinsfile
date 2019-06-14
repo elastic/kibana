@@ -10,6 +10,7 @@ pipeline {
     stage('Build Stuff? :)') {
       steps {
         dir("${env.BASE_DIR}"){
+            sh './.ci/packer_cache.sh'
             sh './.ci/run.sh'
         }
       }
