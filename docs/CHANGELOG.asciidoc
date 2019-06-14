@@ -139,6 +139,7 @@ Visualize::
 * Shows a reload dialog when users change a setting requiring a page reload {pull}34780[#34780]
 * Improves scripted field script editor {pull}36064[#36064]
 * Changes default quick ranges {pull}35066[#35066]
+* Adds basic rollup support to Visual builder {pull}28762[#28762]
 
 [float]
 [[bug-7.2.0]]
@@ -298,40 +299,27 @@ Monitoring::
 * Adds a link to License Management {pull}37771[#37771]
 
 Operations::
-* Sets branch in package.json to 7.2 {pull}37446[#37446]
 * Reverts [kbn/es] pin 7.x snapshot to elastic/elasticsearch#39582 i… {pull}32580[#32580]
 * Exits if starting Kibana as root {pull}21563[#21563]
-* Derives bootstrap cache path from base branch, makes optional {pull}32793[#32793]
 * Uses default keys when running from source {pull}36452[#36452]
 * Allows running --dev without kibana.dev.yml {pull}36400[#36400]
 * Reenables github checks reporter {pull}37280[#37280]
 * Fixes inefficiencies in the dev/license_checker module and rewrites it in Typescript {pull}37807[#37807]
-* Enables the use of the cache-loader across all the environments {pull}35406[#35406]
 * Adds exception to transpile normalize-url mode to es5 when bundled into the DLL {pull}35804[#35804]
-* Uses script to clean Storybook DLL {pull}35243[#35243]
 * Upgrades jQuery to 3.4.1 {pull}35908[#35908]
 * Enforces all packages to use the same Typescript version {pull}32440[#32440]
 * Fixes plugin generator package.json paths {pull}33728[#33728]
 
 Platform::
 * Fixes version for plugin showing as undefined {pull}36219[#36219]
-* Updates Japanese translation files {pull}37993[#37993]
 * Adds Japanese locale {pull}36940[#36940]
-* Adds Japanese translations {pull}37229[#37229]
-* Prefers third-party plugin development in ./plugins instead of ../kibana-extra {pull}31748[#31748]
-* Exposes an HTTP-request browser client {pull}35486[#35486]
-* Removes dependency on config inject {pull}36109[#36109]
 * Provides Initial framework for data plugin {pull}34350[#34350]
 * Fixes errors and adds more examples in export saved objects API docs {pull}37991[#37991]
 * Updates import saved objects API docs to use curl examples {pull}37997[#37997]
 * Fixes URLs from displaying too long in saved objects management UI {pull}37987[#37987]
-* Restricts import from core and plugin internals for ts files {pull}34688[#34688]
-* Overlays core service {pull}34261[#34261]
 * Enforces the base path proxy to redirect requests that happen within a space {pull}36300[#36300]
 * Automatically strips xpack config when running --oss {pull}36403[#36403]
-* Integrates HTTP and Security in New Platform {pull}34631[#34631]
 * Removes unused ui/field_editor reference {pull}34969[#34969]
-
 
 Reporting::
 * Includes the error object job decryption errors {pull}32216[#32216]
