@@ -1591,10 +1591,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@11.0.1":
-  version "11.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-11.0.1.tgz#fbf8650bd766f955b611d6aa9f652bab680a8874"
-  integrity sha512-/RJOFPTiFu1UIqhLEzsY0n3tv5XwXxH1W3dica8YtfaTl+6GvvQhYP9MAjqzOwDd0y8E7+130ZTFszwP+cyBcQ==
+"@elastic/eui@11.3.2":
+  version "11.3.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-11.3.2.tgz#d578ab2d6ebe9c85a445376fad190564d43bcdb4"
+  integrity sha512-lnf7ZCEI443uwXJX9rWD/nK10asBTFOmd8HiH1Mn6iggOBchk4QCrI8XDqfJRp2bUqMetBGI6Az7WgqF4uZsEw==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -1609,7 +1609,6 @@
     prop-types "^15.6.0"
     react-ace "^5.5.0"
     react-beautiful-dnd "^10.1.0"
-    react-color "^2.13.8"
     react-focus-lock "^1.17.7"
     react-input-autosize "^2.2.1"
     react-is "~16.3.0"
