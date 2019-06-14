@@ -1,8 +1,16 @@
 JOB:
   # - kibana-intake
   # - x-pack-intake
-  - firefox-intake
-  - x-pack-firefox-intake
+  - firefox-intake-1
+  - x-pack-firefox-intake-1
+  - firefox-intake-2
+  - x-pack-firefox-intake-2
+  - firefox-intake-3
+  - x-pack-firefox-intake-3
+  - firefox-intake-4
+  - x-pack-firefox-intake-4
+  - firefox-intake-5
+  - x-pack-firefox-intake-5
   # - kibana-ciGroup1
   # - kibana-ciGroup2
   # - kibana-ciGroup3
