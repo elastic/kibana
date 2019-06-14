@@ -17,21 +17,26 @@
  * under the License.
  */
 
-import { useLayoutEffect, useState } from 'react';
 import { Observable } from 'rxjs';
+import { Store as ReduxStore } from 'redux';
 
-export function useObservable<T>(observable$: Observable<T>): T | undefined;
-export function useObservable<T>(observable$: Observable<T>, initialValue: T): T;
-export function useObservable<T>(observable$: Observable<T>, initialValue?: T): T | undefined {
-  const [value, update] = useState<T | undefined>(initialValue);
-
-  useLayoutEffect(
-    () => {
-      const s = observable$.subscribe(update);
-      return () => s.unsubscribe();
-    },
-    [observable$]
-  );
-
-  return value;
+export interface AppStore<
+  State extends {},
+  StateMutators extends Mutators<PureMutators<State>> = {}
+> {
+  redux: ReduxStore;
+  get: () => State;
+  set: (state: State) => void;
+  state$: Observable<State>;
+  createMutators: <M extends PureMutators<State>>(pureMutators: M) => Mutators<M>;
+  mutators: StateMutators;
 }
+
+export type PureMutator<State extends {}> = (state: State) => (...args: any[]) => State;
+export type Mutator<M extends PureMutator<any>> = (...args: Parameters<ReturnType<M>>) => void;
+
+export interface PureMutators<State extends {}> {
+  [name: string]: PureMutator<State>;
+}
+
+export type Mutators<M extends PureMutators<any>> = { [K in keyof M]: Mutator<M[K]> };
