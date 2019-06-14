@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexedArray } from '../indexed_array';
+import { IndexedArray } from 'ui/indexed_array';
 import { Field } from './_field';
 
 export class FieldList extends IndexedArray {
