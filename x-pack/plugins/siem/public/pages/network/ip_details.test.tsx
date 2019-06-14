@@ -8,15 +8,31 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { Router } from 'react-router-dom';
+import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../mock/match_media';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
 import { IPDetailsComponent, IPDetails } from './ip_details';
 import { FlowTarget } from '../../graphql/types';
 import { createStore, State } from '../../store';
+import { cloneDeep } from 'lodash/fp';
+import { mocksSource } from '../../containers/source/mock';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
+
+let localSource: Array<{
+  request: {};
+  result: {
+    data: {
+      source: {
+        status: {
+          indicesExist: boolean;
+        };
+      };
+    };
+  };
+}>;
 
 const getMockHistory = (ip: string) => ({
   length: 2,
@@ -50,13 +66,30 @@ const getMockProps = (ip: string) => ({
   match: { params: { ip }, isExact: true, path: '', url: '' },
 });
 
+jest.mock('ui/documentation_links', () => ({
+  documentationLinks: {
+    siem: 'http://www.example.com',
+  },
+}));
+// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
+/* eslint-disable no-console */
+const originalError = console.error;
+
 describe('Ip Details', () => {
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+
+  afterAll(() => {
+    console.error = originalError;
+  });
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
+    localSource = cloneDeep(mocksSource);
   });
   test('it renders', () => {
     const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
@@ -73,15 +106,21 @@ describe('Ip Details', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  test('it renders ipv6 headline', () => {
+  test('it renders ipv6 headline', async () => {
+    localSource[0].result.data.source.status.indicesExist = true;
     const ip = 'fe80--24ce-f7ff-fede-a571';
     const wrapper = mount(
       <TestProviders store={store}>
-        <Router history={getMockHistory(ip)}>
-          <IPDetails {...getMockProps(ip)} />
-        </Router>
+        <MockedProvider mocks={localSource} addTypename={false}>
+          <Router history={getMockHistory(ip)}>
+            <IPDetails {...getMockProps(ip)} />
+          </Router>
+        </MockedProvider>
       </TestProviders>
     );
+    // Why => https://github.com/apollographql/react-apollo/issues/1711
+    await new Promise(resolve => setTimeout(resolve));
+    wrapper.update();
     expect(
       wrapper
         .find('[data-test-subj="ip-details-headline"] [data-test-subj="page_headline_title"]')

@@ -161,9 +161,8 @@ uiRoutes
     template,
     k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
-      indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
-        return indexPatterns
-          .get($route.current.params.indexPatternId)
+      indexPattern: function ($route, Promise, redirectWhenMissing, indexPatterns) {
+        return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId))
           .catch(redirectWhenMissing('/management/kibana/index_patterns'));
       }
     },
@@ -171,7 +170,7 @@ uiRoutes
 
 uiModules.get('apps/management')
   .controller('managementIndexPatternsEdit', function (
-    $scope, $location, $route, config, indexPatterns, Private, AppState, confirmModal) {
+    $scope, $location, $route, Promise, config, indexPatterns, Private, AppState, confirmModal) {
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
     const indexPatternListProvider = Private(IndexPatternListFactory)();
@@ -262,7 +261,7 @@ uiModules.get('apps/management')
           }
         }
 
-        indexPatterns.delete($scope.indexPattern)
+        Promise.resolve(indexPatterns.delete($scope.indexPattern))
           .then(function () {
             $location.url('/management/kibana/index_patterns');
           })

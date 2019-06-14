@@ -29,7 +29,7 @@ import uuid from 'uuid';
 import { IconSelect } from './icon_select';
 import { YesNo } from './yes_no';
 import { Storage } from 'ui/storage';
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 const { QueryBarInput } = data.query.ui;
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
@@ -56,7 +56,7 @@ function newAnnotation() {
     time_field: '@timestamp',
     icon: 'fa-tag',
     ignore_global_filters: 1,
-    ignore_panel_filters: 1
+    ignore_panel_filters: 1,
   };
 }
 
@@ -70,7 +70,7 @@ export class AnnotationsEditor extends Component {
   }
 
   handleChange(item, name) {
-    return (e) => {
+    return e => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, '[0].value', _.get(e, 'target.value'));
@@ -81,7 +81,7 @@ export class AnnotationsEditor extends Component {
     const part = { query_string: filter };
     collectionActions.handleChange(this.props, {
       ...model,
-      ...part
+      ...part,
     });
   };
   renderRow(row) {
@@ -89,10 +89,10 @@ export class AnnotationsEditor extends Component {
       fields: '',
       template: '',
       index_pattern: '*',
-      query_string: { query: '', language: getDefaultQueryLanguage() }
+      query_string: { query: '', language: getDefaultQueryLanguage() },
     };
     const model = { ...defaults, ...row };
-    const handleChange = (part) => {
+    const handleChange = part => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
@@ -102,10 +102,8 @@ export class AnnotationsEditor extends Component {
       });
     };
     const htmlId = htmlIdGenerator(model.id);
-    const handleAdd = collectionActions.handleAdd
-      .bind(null, this.props, newAnnotation);
-    const handleDelete = collectionActions.handleDelete
-      .bind(null, this.props, model);
+    const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
+    const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     return (
       <div className="tvbAnnotationsEditor" key={model.id}>
         <EuiFlexGroup responsive={false}>
@@ -123,10 +121,12 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('indexPattern')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.indexPatternLabel"
-                    defaultMessage="Index pattern (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.indexPatternLabel"
+                      defaultMessage="Index pattern (required)"
+                    />
+                  }
                   fullWidth
                 >
                   <EuiFieldText
@@ -139,10 +139,12 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('timeField')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.timeFieldLabel"
-                    defaultMessage="Time field (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.timeFieldLabel"
+                      defaultMessage="Time field (required)"
+                    />
+                  }
                   fullWidth
                 >
                   <FieldSelect
@@ -163,10 +165,12 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('queryString')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.queryStringLabel"
-                    defaultMessage="Query string"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.queryStringLabel"
+                      defaultMessage="Query string"
+                    />
+                  }
                   fullWidth
                 >
                   <QueryBarInput
@@ -218,24 +222,25 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('icon')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.iconLabel"
-                    defaultMessage="Icon (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.iconLabel"
+                      defaultMessage="Icon (required)"
+                    />
+                  }
                 >
-                  <IconSelect
-                    value={model.icon}
-                    onChange={this.handleChange(model, 'icon')}
-                  />
+                  <IconSelect value={model.icon} onChange={this.handleChange(model, 'icon')} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('fields')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.fieldsLabel"
-                    defaultMessage="Fields (required - comma separated paths)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.fieldsLabel"
+                      defaultMessage="Fields (required - comma separated paths)"
+                    />
+                  }
                   fullWidth
                 >
                   <EuiFieldText
@@ -248,16 +253,18 @@ export class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('rowTemplate')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.rowTemplateLabel"
-                    defaultMessage="Row template (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.rowTemplateLabel"
+                      defaultMessage="Row template (required)"
+                    />
+                  }
                   helpText={
                     <span>
                       <FormattedMessage
                         id="tsvb.annotationsEditor.rowTemplateHelpText"
                         defaultMessage="eg.{rowTemplateExample}"
-                        values={{ rowTemplateExample: (<EuiCode>{'{{field}}'}</EuiCode>) }}
+                        values={{ rowTemplateExample: <EuiCode>{'{{field}}'}</EuiCode> }}
                       />
                     </span>
                   }
@@ -290,8 +297,7 @@ export class AnnotationsEditor extends Component {
     const { model } = this.props;
     let content;
     if (!model.annotations || !model.annotations.length) {
-      const handleAdd = collectionActions.handleAdd
-        .bind(null, this.props, newAnnotation);
+      const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
       content = (
         <EuiText textAlign="center">
           <p>
@@ -322,25 +328,21 @@ export class AnnotationsEditor extends Component {
           </EuiTitle>
           <EuiSpacer size="m" />
 
-          { annotations }
+          {annotations}
         </div>
       );
     }
-    return(
-      <div className="tvbAnnotationsEditor__container">
-        { content }
-      </div>
-    );
+    return <div className="tvbAnnotationsEditor__container">{content}</div>;
   }
 }
 
 AnnotationsEditor.defaultProps = {
-  name: 'annotations'
+  name: 'annotations',
 };
 
 AnnotationsEditor.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   name: PropTypes.string,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };

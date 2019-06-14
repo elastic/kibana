@@ -40,18 +40,17 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 import { Storage } from 'ui/storage';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 class TableSeriesConfigUI extends Component {
-
   componentWillMount() {
     const { model } = this.props;
     if (!model.color_rules || (model.color_rules && model.color_rules.length === 0)) {
       this.props.onChange({
-        color_rules: [{ id: uuid.v1() }]
+        color_rules: [{ id: uuid.v1() }],
       });
     }
   }
@@ -65,15 +64,57 @@ class TableSeriesConfigUI extends Component {
     const { intl } = this.props;
 
     const functionOptions = [
-      { label: intl.formatMessage({ id: 'tsvb.table.sumLabel', defaultMessage: 'Sum' }), value: 'sum' },
-      { label: intl.formatMessage({ id: 'tsvb.table.maxLabel', defaultMessage: 'Max' }), value: 'max' },
-      { label: intl.formatMessage({ id: 'tsvb.table.minLabel', defaultMessage: 'Min' }), value: 'min' },
-      { label: intl.formatMessage({ id: 'tsvb.table.avgLabel', defaultMessage: 'Avg' }), value: 'mean' },
-      { label: intl.formatMessage({ id: 'tsvb.table.overallSumLabel', defaultMessage: 'Overall Sum' }), value: 'overall_sum' },
-      { label: intl.formatMessage({ id: 'tsvb.table.overallMaxLabel', defaultMessage: 'Overall Max' }), value: 'overall_max' },
-      { label: intl.formatMessage({ id: 'tsvb.table.overallMinLabel', defaultMessage: 'Overall Min' }), value: 'overall_min' },
-      { label: intl.formatMessage({ id: 'tsvb.table.overallAvgLabel', defaultMessage: 'Overall Avg' }), value: 'overall_avg' },
-      { label: intl.formatMessage({ id: 'tsvb.table.cumulativeSumLabel', defaultMessage: 'Cumulative Sum' }), value: 'cumulative_sum' },
+      {
+        label: intl.formatMessage({ id: 'tsvb.table.sumLabel', defaultMessage: 'Sum' }),
+        value: 'sum',
+      },
+      {
+        label: intl.formatMessage({ id: 'tsvb.table.maxLabel', defaultMessage: 'Max' }),
+        value: 'max',
+      },
+      {
+        label: intl.formatMessage({ id: 'tsvb.table.minLabel', defaultMessage: 'Min' }),
+        value: 'min',
+      },
+      {
+        label: intl.formatMessage({ id: 'tsvb.table.avgLabel', defaultMessage: 'Avg' }),
+        value: 'mean',
+      },
+      {
+        label: intl.formatMessage({
+          id: 'tsvb.table.overallSumLabel',
+          defaultMessage: 'Overall Sum',
+        }),
+        value: 'overall_sum',
+      },
+      {
+        label: intl.formatMessage({
+          id: 'tsvb.table.overallMaxLabel',
+          defaultMessage: 'Overall Max',
+        }),
+        value: 'overall_max',
+      },
+      {
+        label: intl.formatMessage({
+          id: 'tsvb.table.overallMinLabel',
+          defaultMessage: 'Overall Min',
+        }),
+        value: 'overall_min',
+      },
+      {
+        label: intl.formatMessage({
+          id: 'tsvb.table.overallAvgLabel',
+          defaultMessage: 'Overall Avg',
+        }),
+        value: 'overall_avg',
+      },
+      {
+        label: intl.formatMessage({
+          id: 'tsvb.table.cumulativeSumLabel',
+          defaultMessage: 'Cumulative Sum',
+        }),
+        value: 'cumulative_sum',
+      },
     ];
     const selectedAggFuncOption = functionOptions.find(option => {
       return model.aggregate_function === option.value;
@@ -81,27 +122,20 @@ class TableSeriesConfigUI extends Component {
 
     return (
       <div className="tvbAggRow">
-
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
-            <DataFormatPicker
-              onChange={handleSelectChange('formatter')}
-              value={model.formatter}
-            />
+            <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('template')}
-              label={(<FormattedMessage
-                id="tsvb.table.templateLabel"
-                defaultMessage="Template"
-              />)}
+              label={<FormattedMessage id="tsvb.table.templateLabel" defaultMessage="Template" />}
               helpText={
                 <span>
                   <FormattedMessage
                     id="tsvb.table.templateHelpText"
                     defaultMessage="eg.{templateExample}"
-                    values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
+                    values={{ templateExample: <EuiCode>{'{{value}}/s'}</EuiCode> }}
                   />
                 </span>
               }
@@ -122,16 +156,16 @@ class TableSeriesConfigUI extends Component {
           <EuiFlexItem grow={true}>
             <EuiFormRow
               id={htmlId('filterInput')}
-              label={(<FormattedMessage
-                id="tsvb.table.filterLabel"
-                defaultMessage="Filter"
-              />)}
+              label={<FormattedMessage id="tsvb.table.filterLabel" defaultMessage="Filter" />}
               fullWidth
             >
               <QueryBarInput
                 query={{
-                  language: (model.filter && model.filter.language) ? model.filter.language : getDefaultQueryLanguage(),
-                  query: (model.filter && model.filter.query) ? model.filter.query : ''
+                  language:
+                    model.filter && model.filter.language
+                      ? model.filter.language
+                      : getDefaultQueryLanguage(),
+                  query: model.filter && model.filter.query ? model.filter.query : '',
                 }}
                 onChange={filter => this.props.onChange({ filter })}
                 appName={'VisEditor'}
@@ -148,11 +182,7 @@ class TableSeriesConfigUI extends Component {
               />
             </EuiFormLabel>
             <EuiSpacer size="s" />
-            <YesNo
-              value={model.trend_arrows}
-              name="trend_arrows"
-              onChange={this.props.onChange}
-            />
+            <YesNo value={model.trend_arrows} name="trend_arrows" onChange={this.props.onChange} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -162,10 +192,7 @@ class TableSeriesConfigUI extends Component {
           <EuiFlexItem grow={true}>
             <EuiFormRow
               id={htmlId('field')}
-              label={(<FormattedMessage
-                id="tsvb.table.fieldLabel"
-                defaultMessage="Field"
-              />)}
+              label={<FormattedMessage id="tsvb.table.fieldLabel" defaultMessage="Field" />}
             >
               <FieldSelect
                 fields={this.props.fields}
@@ -179,10 +206,12 @@ class TableSeriesConfigUI extends Component {
           <EuiFlexItem grow={true}>
             <EuiFormRow
               id={htmlId('aggregateFunctionInput')}
-              label={(<FormattedMessage
-                id="tsvb.table.aggregateFunctionLabel"
-                defaultMessage="Aggregate function"
-              />)}
+              label={
+                <FormattedMessage
+                  id="tsvb.table.aggregateFunctionLabel"
+                  defaultMessage="Aggregate function"
+                />
+              }
               fullWidth
             >
               <EuiComboBox
@@ -200,10 +229,7 @@ class TableSeriesConfigUI extends Component {
 
         <EuiTitle size="xxs">
           <span>
-            <FormattedMessage
-              id="tsvb.table.colorRulesLabel"
-              defaultMessage="Color rules"
-            />
+            <FormattedMessage id="tsvb.table.colorRulesLabel" defaultMessage="Color rules" />
           </span>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -219,16 +245,13 @@ class TableSeriesConfigUI extends Component {
       </div>
     );
   }
-
 }
 
 TableSeriesConfigUI.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  indexPatternForQuery: PropTypes.string
+  indexPatternForQuery: PropTypes.string,
 };
 
 export const TableSeriesConfig = injectI18n(TableSeriesConfigUI);
-
-

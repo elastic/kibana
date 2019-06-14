@@ -114,6 +114,45 @@ describe('elasticsearch_adapter', () => {
         },
       },
     };
+    const bucket3: UncommonProcessBucket = {
+      key: '789',
+      hosts: {
+        buckets: [
+          {
+            key: '789',
+            host: {
+              hits: {
+                total: 0,
+                max_score: 0,
+                hits: [
+                  {
+                    _index: 'hit-9',
+                    _type: 'type-9',
+                    _id: 'id-9',
+                    _score: 0,
+                    _source: {
+                      // @ts-ignore ts doesn't like seeing the object written this way, but sometimes this is the data we get!
+                      'host.id': ['host-id-9'],
+                      'host.name': ['host-9'],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      },
+      process: {
+        hits: {
+          total: {
+            value: 1,
+            relation: 'eq',
+          },
+          max_score: 5,
+          hits: [],
+        },
+      },
+    };
 
     test('will return a single host correctly', () => {
       const hosts = getHosts(bucket1.hosts.buckets);
@@ -123,6 +162,11 @@ describe('elasticsearch_adapter', () => {
     test('will return two hosts correctly', () => {
       const hosts = getHosts(bucket2.hosts.buckets);
       expect(hosts).toEqual([{ id: ['123'], name: ['host-1'] }, { id: ['345'], name: ['host-2'] }]);
+    });
+
+    test('will return a dot notation host', () => {
+      const hosts = getHosts(bucket3.hosts.buckets);
+      expect(hosts).toEqual([{ id: ['789'], name: ['host-9'] }]);
     });
 
     test('will return no hosts when given an empty array', () => {

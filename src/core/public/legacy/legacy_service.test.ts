@@ -59,10 +59,8 @@ import { LegacyPlatformService } from './legacy_service';
 import { applicationServiceMock } from '../application/application_service.mock';
 
 const applicationSetup = applicationServiceMock.createSetupContract();
-const chromeSetup = chromeServiceMock.createSetupContract();
 const fatalErrorsSetup = fatalErrorsServiceMock.createSetupContract();
 const httpSetup = httpServiceMock.createSetupContract();
-const i18nSetup = i18nServiceMock.createSetupContract();
 const injectedMetadataSetup = injectedMetadataServiceMock.createSetupContract();
 const notificationsSetup = notificationServiceMock.createSetupContract();
 const uiSettingsSetup = uiSettingsServiceMock.createSetupContract();
@@ -76,13 +74,11 @@ const defaultParams = {
 const defaultSetupDeps = {
   core: {
     application: applicationSetup,
-    i18n: i18nSetup,
     fatalErrors: fatalErrorsSetup,
     injectedMetadata: injectedMetadataSetup,
     notifications: notificationsSetup,
     http: httpSetup,
     uiSettings: uiSettingsSetup,
-    chrome: chromeSetup,
   },
   plugins: {},
 };
