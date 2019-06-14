@@ -20,14 +20,16 @@
 // @ts-ignore @types are outdated and module is super simple
 import exitHook from 'exit-hook';
 
-import { pickLevelFromFlags, ToolingLog } from '@kbn/dev-utils';
+import { pickLevelFromFlags, ToolingLog, withProcRunner, ProcRunner } from '@kbn/dev-utils';
 import { createFlagError, isFailError } from './fail';
 import { Flags, getFlags, getHelp } from './flags';
 
 type CleanupTask = () => void;
+
 type RunFn = (args: {
   log: ToolingLog;
   flags: Flags;
+  procRunner: ProcRunner;
   addCleanupTask: (task: CleanupTask) => void;
 }) => Promise<void> | void;
 
@@ -102,10 +104,13 @@ export async function run(fn: RunFn, options: Options = {}) {
     }
 
     try {
-      await fn({
-        log,
-        flags,
-        addCleanupTask: (task: CleanupTask) => cleanupTasks.push(task),
+      await withProcRunner(log, async procRunner => {
+        await fn({
+          log,
+          flags,
+          procRunner,
+          addCleanupTask: (task: CleanupTask) => cleanupTasks.push(task),
+        });
       });
     } finally {
       doCleanup();

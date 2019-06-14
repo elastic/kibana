@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { ToolingLog } from '../tooling_log';
-import { ProcRunner } from './proc_runner';
+export class Storage {
+  get(key) {
+    return this[key];
+  }
 
-export { ProcRunner };
-export function withProcRunner(
-  log: ToolingLog,
-  block: (procs: ProcRunner) => Promise<void>
-): Promise<void>;
+  set(key, value) {
+    this[key] = value;
+  }
+}

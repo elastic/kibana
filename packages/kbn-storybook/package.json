@@ -1,0 +1,37 @@
+{
+  "name": "@kbn/storybook",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "rm -rf target && tsc"
+  },
+  "dependencies": {
+    "@kbn/dev-utils": "1.0.0",
+    "@storybook/addon-actions": "^5.0.5",
+    "@storybook/addon-console": "^1.1.0",
+    "@storybook/addon-info": "^5.0.5",
+    "@storybook/addon-knobs": "^5.0.5",
+    "@storybook/addon-options": "^5.0.5",
+    "@storybook/addon-storyshots": "^5.0.5",
+    "@storybook/react": "^5.0.5",
+    "@storybook/theming": "^5.0.5",
+    "@types/storybook__addon-actions": "^3.4.2",
+    "@types/storybook__addon-info": "^4.1.1",
+    "@types/storybook__addon-knobs": "^4.0.4",
+    "@types/storybook__react": "^4.0.1",
+    "copy-webpack-plugin": "5.0.3",
+    "execa": "1.0.0",
+    "fast-glob": "2.2.7",
+    "glob-watcher": "5.0.3",
+    "jest-specific-snapshot": "2.0.0",
+    "jest-styled-components": "6.3.1",
+    "mkdirp": "0.5.1",
+    "mini-css-extract-plugin": "0.7.0",
+    "normalize-path": "3.0.0",
+    "react-docgen-typescript-loader": "3.1.0",
+    "rxjs": "6.5.2",
+    "serve-static": "1.14.1",
+    "styled-components": "^3",
+    "webpack": "4.34.0"
+  }
+}

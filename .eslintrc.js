@@ -52,6 +52,7 @@ module.exports = {
         'packages/kbn-test-subj-selector/**/*',
         'packages/kbn-test/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
+        'packages/kbn-storybook/**/*',
         'src/legacy/server/saved_objects/**/*',
         'x-pack/legacy/plugins/apm/**/*',
         'x-pack/legacy/plugins/canvas/**/*',
@@ -229,6 +230,7 @@ module.exports = {
         'packages/kbn-ui-framework/**/*.js',
         'x-pack/**/*.js',
         'packages/kbn-interpreter/**/*.js',
+        'packages/kbn-storybook/**/*',
       ],
       rules: {
         'import/no-extraneous-dependencies': [

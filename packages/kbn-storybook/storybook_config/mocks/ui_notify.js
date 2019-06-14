@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import { ToolingLog } from '../tooling_log';
-import { ProcRunner } from './proc_runner';
+const notifierProto = {
+  error: msg => `error: ${msg}`,
+  warning: msg => `warning: ${msg}`,
+  info: msg => `info: ${msg}`,
+};
 
-export { ProcRunner };
-export function withProcRunner(
-  log: ToolingLog,
-  block: (procs: ProcRunner) => Promise<void>
-): Promise<void>;
+export class Notifier {
+  constructor() {
+    Object.assign(this, notifierProto);
+  }
+}

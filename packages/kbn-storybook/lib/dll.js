@@ -17,11 +17,25 @@
  * under the License.
  */
 
-import { ToolingLog } from '../tooling_log';
-import { ProcRunner } from './proc_runner';
+const { resolve } = require('path');
+const { existsSync } = require('fs');
 
-export { ProcRunner };
-export function withProcRunner(
-  log: ToolingLog,
-  block: (procs: ProcRunner) => Promise<void>
-): Promise<void>;
+const { REPO_ROOT, DLL_DIST_DIR } = require('./constants');
+
+exports.buildDll = async ({ rebuildDll, log, procRunner }) => {
+  if (rebuildDll) {
+    log.info('rebuilding dll');
+  } else if (!existsSync(resolve(DLL_DIST_DIR, 'dll.js'))) {
+    log.info('dll missing, rebuilding');
+  } else {
+    log.info('dll exists');
+    return;
+  }
+
+  await procRunner.run('build dll ', {
+    cmd: require.resolve('webpack/bin/webpack'),
+    args: ['--config', require.resolve('./webpack.dll.config.js')],
+    cwd: REPO_ROOT,
+    wait: true,
+  });
+};

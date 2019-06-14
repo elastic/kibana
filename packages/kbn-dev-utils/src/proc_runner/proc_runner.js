@@ -19,6 +19,7 @@
 
 import moment from 'moment';
 import { filter, first, catchError } from 'rxjs/operators';
+import supportsColor from 'supports-color';
 
 import { createCliError } from './errors';
 import { createProc } from './proc';
@@ -71,7 +72,14 @@ export class ProcRunner {
       cwd = process.cwd(),
       stdin = null,
       wait = false,
-      env = process.env,
+      env = supportsColor || process.env.FORCE_COLOR
+        ? {
+            ...process.env,
+            FORCE_COLOR: 'true',
+          }
+        : {
+            ...process.env,
+          },
     } = options;
 
     if (this._closing) {

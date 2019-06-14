@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { ToolingLog } from '../tooling_log';
-import { ProcRunner } from './proc_runner';
+const serve = require('serve-static');
+const path = require('path');
 
-export { ProcRunner };
-export function withProcRunner(
-  log: ToolingLog,
-  block: (procs: ProcRunner) => Promise<void>
-): Promise<void>;
+// Extend the Storybook Middleware to include a route to access Legacy UI assets
+module.exports = function(router) {
+  router.get('/ui', serve(path.resolve(__dirname, '../../../../src/legacy/ui/public/assets')));
+};

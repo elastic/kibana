@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { ToolingLog } from '../tooling_log';
-import { ProcRunner } from './proc_runner';
-
-export { ProcRunner };
-export function withProcRunner(
-  log: ToolingLog,
-  block: (procs: ProcRunner) => Promise<void>
-): Promise<void>;
+export function getState() {
+  return {
+    assets: {
+      yay: { value: 'here is your image' },
+    },
+  };
+}
