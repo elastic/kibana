@@ -15,7 +15,7 @@ import {
 import { mockHttpServer } from '../../../../src/core/server/http/http_service.test.mocks';
 import { loggingServiceMock } from '../../../../src/core/server/logging/logging_service.mock';
 import { getEnvOptions } from '../../../../src/core/server/config/__mocks__/env';
-import { ProxyConfig, ProxyPluginType } from './proxy';
+import { ProxyService, ProxyConfig, ProxyPluginType } from './proxy';
 
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
@@ -59,6 +59,7 @@ function configService(value: Partial<ProxyPluginType>) {
 }
 
 beforeEach(() => {
+  jest.mock('./cluster_doc');
   jest.useFakeTimers();
 });
 
@@ -74,4 +75,5 @@ test('creates and sets up proxy server', async () => {
     stop: noop,
   };
   mockHttpServer.mockImplementation(() => httpServer);
+  const proxy = new ProxyService({ config: configService({}), env, logger });
 });

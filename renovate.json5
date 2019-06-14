@@ -249,6 +249,14 @@
         ],
       },
       {
+        groupSlug: 'wreck',
+        groupName: 'wreck related packages',
+        packageNames: [
+          'wreck',
+          '@types/wreck',
+        ],
+      },
+      {
         groupSlug: 'bluebird',
         groupName: 'bluebird related packages',
         packageNames: [
