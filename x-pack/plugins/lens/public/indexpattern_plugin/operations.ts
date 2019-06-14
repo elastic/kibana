@@ -21,7 +21,7 @@ import {
 } from './operation_definitions/metrics';
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
-import { hasField, sortByField } from './state_helpers';
+import { sortByField } from './state_helpers';
 
 type PossibleOperationDefinitions<
   U extends IndexPatternColumn = IndexPatternColumn
