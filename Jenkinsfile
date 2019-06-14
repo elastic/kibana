@@ -1,3 +1,6 @@
+#!/usr/bin/env groovy
+@Library('apm@current') _
+
 pipeline {
   agent { label 'master || immutable' }
   environment {
@@ -12,7 +15,6 @@ pipeline {
             }
         }
       }
-    }
     // stage('Build OSS Distro') {
     //   steps {
     //     echo 'Building OSS Distro'
