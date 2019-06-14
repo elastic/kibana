@@ -27,12 +27,9 @@ export function isDashboardDoc(
     return false;
   }
 
-  if (
-    (doc as DashboardDoc).attributes.panelsJSON !== undefined ||
-    typeof (doc as DashboardDoc).attributes.panelsJSON === 'string'
-  ) {
-    return true;
+  if (typeof (doc as DashboardDoc).attributes.panelsJSON !== 'string') {
+    return false;
   }
 
-  return false;
+  return true;
 }
