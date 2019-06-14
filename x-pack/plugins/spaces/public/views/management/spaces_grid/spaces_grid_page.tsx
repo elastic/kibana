@@ -72,7 +72,7 @@ class SpacesGridPageUI extends Component<Props, State> {
 
   public render() {
     return (
-      <div className="spcGridPage">
+      <div className="spcGridPage" data-test-subj="spaces-grid-page">
         <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
         <SecureSpaceMessage />
         {this.getConfirmDeleteModal()}

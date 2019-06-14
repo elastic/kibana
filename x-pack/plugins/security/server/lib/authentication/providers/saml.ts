@@ -100,17 +100,21 @@ function isSAMLRequestQuery(query: any): query is SAMLRequestQuery {
  */
 export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
-   * Optionally specifies Elasticsearch SAML realm name that Kibana should use. If not specified
-   * Kibana ACS URL is used for realm matching instead.
+   * Specifies Elasticsearch SAML realm name that Kibana should use.
    */
-  private readonly realm?: string;
+  private readonly realm: string;
 
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
     samlOptions?: Readonly<{ realm?: string }>
   ) {
     super(options);
-    this.realm = samlOptions && samlOptions.realm;
+
+    if (!samlOptions || !samlOptions.realm) {
+      throw new Error('Realm name must be specified');
+    }
+
+    this.realm = samlOptions.realm;
   }
 
   /**
@@ -506,14 +510,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      // Prefer realm name if it's specified, otherwise fallback to ACS.
-      const preparePayload = this.realm ? { realm: this.realm } : { acs: this.getACS() };
-
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
       const { id: requestId, redirect } = await this.options.client.callWithInternalUser(
         'shield.samlPrepare',
-        { body: preparePayload }
+        { body: { realm: this.realm } }
       );
 
       this.debug('Redirecting to Identity Provider with SAML request.');
@@ -599,32 +600,19 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   private async performIdPInitiatedSingleLogout(request: Legacy.Request) {
     this.debug('Single logout has been initiated by the Identity Provider.');
 
-    // Prefer realm name if it's specified, otherwise fallback to ACS.
-    const invalidatePayload = this.realm ? { realm: this.realm } : { acs: this.getACS() };
-
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/invalidate`.
     const { redirect } = await this.options.client.callWithInternalUser('shield.samlInvalidate', {
       // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
       body: {
         queryString: request.url.search ? request.url.search.slice(1) : '',
-        ...invalidatePayload,
+        realm: this.realm,
       },
     });
 
     this.debug('User session has been successfully invalidated.');
 
     return redirect;
-  }
-
-  /**
-   * Constructs and returns Kibana's Assertion consumer service URL.
-   */
-  private getACS() {
-    return (
-      `${this.options.protocol}://${this.options.hostname}:${this.options.port}` +
-      `${this.options.basePath}/api/security/v1/saml`
-    );
   }
 
   /**
