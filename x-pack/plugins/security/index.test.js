@@ -78,24 +78,19 @@ describe('config schema', () => {
     });
 
     describe('saml', () => {
-      it('`realm` is optional', async () => {
+      it('fails if authc.providers includes `saml`, but `saml.realm` is not specified', async () => {
         const schema = await getConfigSchema(security);
 
-        let validationResult = schema.validate({
-          authc: { providers: ['saml'] },
-        });
+        expect(schema.validate({ authc: { providers: ['saml'] } }).error).toMatchInlineSnapshot(
+          `[ValidationError: child "authc" fails because [child "saml" fails because ["saml" is required]]]`
+        );
+        expect(
+          schema.validate({ authc: { providers: ['saml'], saml: {} } }).error
+        ).toMatchInlineSnapshot(
+          `[ValidationError: child "authc" fails because [child "saml" fails because [child "realm" fails because ["realm" is required]]]]`
+        );
 
-        expect(validationResult.error).toBeNull();
-        expect(validationResult.value.authc.saml).toBeUndefined();
-
-        validationResult = schema.validate({
-          authc: { providers: ['saml'], saml: {} },
-        });
-
-        expect(validationResult.error).toBeNull();
-        expect(validationResult.value.authc.saml.realm).toBeUndefined();
-
-        validationResult = schema.validate({
+        const validationResult = schema.validate({
           authc: { providers: ['saml'], saml: { realm: 'realm-1' } },
         });
 
@@ -105,12 +100,16 @@ describe('config schema', () => {
 
       it('`realm` is not allowed if saml provider is not enabled', async () => {
         const schema = await getConfigSchema(security);
-        expect(schema.validate({
-          authc: {
-            providers: ['basic'],
-            saml: { realm: 'realm-1' },
-          },
-        }).error).toMatchSnapshot();
+        expect(
+          schema.validate({
+            authc: {
+              providers: ['basic'],
+              saml: { realm: 'realm-1' },
+            },
+          }).error
+        ).toMatchInlineSnapshot(
+          `[ValidationError: child "authc" fails because [child "saml" fails because ["saml" is not allowed]]]`
+        );
       });
     });
   });
