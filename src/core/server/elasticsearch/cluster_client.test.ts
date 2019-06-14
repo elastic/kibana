@@ -351,6 +351,17 @@ describe('#asScoped', () => {
     );
   });
 
+  test('does not fail when scope to a request without headers', async () => {
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient.asScoped({} as any);
+    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockScopedClusterClient).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      {}
+    );
+  });
+
   test('calls getAuthHeaders and filters results for a real request', async () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger, () => ({ one: '1', three: '3' }));
     clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { two: '2' } }));

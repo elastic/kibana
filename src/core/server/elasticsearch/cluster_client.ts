@@ -235,7 +235,7 @@ export class ClusterClient {
     request?: KibanaRequest | Request | FakeRequest
   ): Record<string, string | string[] | undefined> {
     if (!isRealRequest(request)) {
-      return request ? request.headers : {};
+      return request && request.headers ? request.headers : {};
     }
     const authHeaders = this.getAuthHeaders(request);
     const headers = ensureRawRequest(request).headers;
