@@ -29,8 +29,7 @@ export default function ({ getService, getPageObjects }) {
   const fromTime = '2015-09-19 06:31:44.000';
   const toTime = '2015-09-23 18:31:44.000';
 
-  describe('embedding', function () {
-    this.tags('smoke');
+  describe('embedding', () => {
 
     describe('a data table', () => {
       before(async function () {
