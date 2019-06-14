@@ -25,7 +25,8 @@ export class ChartSettings {
     this._interval.setMaxBars(this.MAX_BARS);
     this._interval.setInterval('auto');
 
-    const bounds = timefilter.getActiveBounds();
+    const tf = timefilter as any;
+    const bounds = tf.getActiveBounds();
     this._interval.setBounds(bounds);
   }
 

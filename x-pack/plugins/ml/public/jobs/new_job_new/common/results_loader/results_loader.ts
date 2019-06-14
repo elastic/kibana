@@ -62,11 +62,24 @@ export class ResultsLoader {
   }
 
   progressSubscriber = async (progress: number) => {
-    if (progress - this._results.progress > 5 || progress === 100) {
-      this._results.progress = progress;
-      this._results.model = await this.loadModelData(0);
-      this._results.anomalies = await this.loadAnomalyData(0);
-      this._results$.next(this._results);
+    if (this._resultsSearchRunning === false) {
+      if (progress - this._results.progress > 5 || progress === 100) {
+        this._resultsSearchRunning = true;
+        // this._checkModelReset(progress);
+        this._results.progress = progress;
+
+        const [model, anomalies] = await Promise.all([
+          this._loadModelData(0),
+          this._loadAnomalyData(0),
+        ]);
+        this._results.model = model;
+        this._results.anomalies = anomalies;
+
+        this._resultsSearchRunning = false;
+        this._results$.next(this._results);
+      }
+    } else {
+      // console.log('results search already running');
     }
   };
 
@@ -78,7 +91,7 @@ export class ResultsLoader {
     return this._results.progress;
   }
 
-  private async loadModelData(dtrIndex: number): Promise<ModelItem[]> {
+  private async _loadModelData(dtrIndex: number): Promise<ModelItem[]> {
     const agg = this._jobCreator.getAggregation(dtrIndex);
     if (agg === null) {
       return [emptyModelItem];
@@ -93,16 +106,42 @@ export class ResultsLoader {
       agg.mlModelPlotAgg
     );
 
-    return Object.entries(resp.results).map(
+    return this._createModel(resp);
+  }
+
+  private _checkModelReset(progress: number) {
+    if (progress === 100) {
+      this._results.model.length = 0;
+      this._lastModelTimeStamp = 0;
+      // console.log('reseting model');
+    }
+  }
+
+  private _createModel(resp: any): ModelItem[] {
+    // create ModelItem list from search results
+    const model = Object.entries(resp.results).map(
       ([time, modelItems]) =>
         ({
           time: +time,
           ...modelItems,
         } as ModelItem)
     );
+
+    if (model.length > 10) {
+      // discard the last 5 buckets in the previously loaded model to avoid partial results
+      // set the _lastModelTimeStamp to be 5 buckets behind so we load the correct
+      // section of results next time.
+      this._lastModelTimeStamp = model[model.length - 5].time;
+      for (let i = 0; i < 5; i++) {
+        this._results.model.pop();
+      }
+    }
+
+    // return a new array from the old and new model
+    return this._results.model.concat(model);
   }
 
-  private async loadAnomalyData(dtrIndex: number): Promise<Anomaly[]> {
+  private async _loadAnomalyData(dtrIndex: number): Promise<Anomaly[]> {
     const resp = await mlResultsService.getScoresByBucket(
       [this._jobCreator.jobId],
       this._jobCreator.start,

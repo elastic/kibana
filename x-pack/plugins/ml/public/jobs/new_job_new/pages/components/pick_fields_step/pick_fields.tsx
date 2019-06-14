@@ -177,7 +177,7 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
               modelData={modelData}
               anomalyData={anomalyData}
               progress={progress}
-              height="300px"
+              height="400px"
               width="100%"
             />
           )}
@@ -201,7 +201,7 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
               modelData={modelData}
               anomalyData={anomalyData}
               progress={progress}
-              height="300px"
+              height="400px"
               width="100%"
             />
           )}

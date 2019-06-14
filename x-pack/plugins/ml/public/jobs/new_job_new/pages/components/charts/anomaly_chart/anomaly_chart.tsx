@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { EuiProgress } from '@elastic/eui';
-import { Chart, Settings } from '@elastic/charts';
+import { Chart, Settings, TooltipType } from '@elastic/charts';
 import { ModelItem, Anomaly } from '../../../../common/results_loader';
 import { Anomalies } from './anomalies';
 import { ModelBounds } from './model_bounds';
@@ -36,7 +36,7 @@ export const AnomalyChart: FC<Props> = ({
   return (
     <div style={{ width, height }}>
       <Chart>
-        <Settings xDomain={xDomain} />
+        <Settings xDomain={xDomain} tooltipType={TooltipType.None} />
         <Axes chartData={lineChartData} />
         <Anomalies anomalyData={anomalyData} />
         <ModelBounds modelData={modelData} />
