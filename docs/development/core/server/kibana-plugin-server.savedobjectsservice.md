@@ -4,6 +4,7 @@
 
 ## SavedObjectsService interface
 
+
 <b>Signature:</b>
 
 ```typescript

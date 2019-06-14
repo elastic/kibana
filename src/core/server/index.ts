@@ -88,7 +88,6 @@ export {
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
-  SavedObjectsManagement,
   SavedObjectsMigrationVersion,
   SavedObjectsService,
   SavedObjectsUpdateOptions,

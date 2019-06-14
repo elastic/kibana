@@ -576,37 +576,12 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
     total: number;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsManagement" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
-export class SavedObjectsManagement {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsManagementDefinition" needs to be exported by the entry point index.d.ts
-    constructor(managementDefinition?: SavedObjectsManagementDefinition);
-    // (undocumented)
-    getDefaultSearchField(type: string): string | undefined;
-    // (undocumented)
-    getEditUrl(savedObject: SavedObject): string | undefined;
-    // (undocumented)
-    getIcon(type: string): string | undefined;
-    // (undocumented)
-    getInAppUrl(savedObject: SavedObject): {
-        path: string;
-        uiCapabilitiesPath: string;
-    } | undefined;
-    // (undocumented)
-    getTitle(savedObject: SavedObject): string | undefined;
-    // (undocumented)
-    isImportAndExportable(type: string): boolean;
-}
-
 // @public
 export interface SavedObjectsMigrationVersion {
     // (undocumented)
     [pluginName: string]: string;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export interface SavedObjectsService<Request = any> {
     // Warning: (ae-forgotten-export) The symbol "ScopedSavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
