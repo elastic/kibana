@@ -935,9 +935,29 @@ function discoverController(
   };
   $scope.onQuerySaved = function (savedQuery) {
     $scope.savedQuery = savedQuery;
-    $state.savedQuery = savedQuery.id;
-    $state.save();
   };
+
+  $scope.onSavedQueryUpdated = function (savedQuery) {
+    $scope.savedQuery = savedQuery;
+  };
+
+  $scope.$watch('savedQuery', (newSavedQuery) => {
+    if (!newSavedQuery) return;
+
+    if (newSavedQuery.attributes.timefilter) {
+      timefilter.setTime({
+        from: newSavedQuery.attributes.timefilter.timeFrom,
+        to: newSavedQuery.attributes.timefilter.timeTo,
+      });
+    }
+
+    queryFilter.setFilters(newSavedQuery.attributes.filters || []);
+
+    $state.query = newSavedQuery.attributes.query;
+    $state.savedQuery = newSavedQuery.id;
+    $state.save();
+    $scope.fetch();
+  });
 
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages

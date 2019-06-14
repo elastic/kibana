@@ -66,6 +66,7 @@ interface Props {
   showAutoRefreshOnly?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   onSaved?: (savedQuery: SavedQuery) => void;
+  onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
 }
 
 interface State {
@@ -260,12 +261,15 @@ class SearchBarUI extends Component<Props, State> {
     });
   };
 
-  public onQueryBarSubmit = (queryAndDateRange: { dateRange: DateRange; query: Query }) => {
+  public onQueryBarSubmit = (queryAndDateRange: { dateRange?: DateRange; query: Query }) => {
     this.setState(
       {
         query: queryAndDateRange.query,
-        dateRangeFrom: queryAndDateRange.dateRange.from,
-        dateRangeTo: queryAndDateRange.dateRange.to,
+        dateRangeFrom:
+          (queryAndDateRange.dateRange && queryAndDateRange.dateRange.from) ||
+          this.state.dateRangeFrom,
+        dateRangeTo:
+          (queryAndDateRange.dateRange && queryAndDateRange.dateRange.to) || this.state.dateRangeTo,
       },
       () => {
         this.props.onQuerySubmit({
@@ -277,6 +281,23 @@ class SearchBarUI extends Component<Props, State> {
         });
       }
     );
+  };
+
+  public onLoadSavedQuery = (savedQuery: SavedQuery) => {
+    const dateRangeFrom = get(
+      savedQuery,
+      'attributes.timefilter.timeFrom',
+      this.state.dateRangeFrom
+    );
+    const dateRangeTo = get(savedQuery, 'attributes.timefilter.timeTo', this.state.dateRangeTo);
+
+    this.setState({
+      query: savedQuery.attributes.query,
+      dateRangeFrom,
+      dateRangeTo,
+    });
+
+    this.props.onSavedQueryUpdated(savedQuery);
   };
 
   public componentDidMount() {
@@ -347,6 +368,7 @@ class SearchBarUI extends Component<Props, State> {
             onRefreshChange={this.props.onRefreshChange}
             onSave={this.onInitiateSave}
             onChange={this.onQueryBarChange}
+            onLoadSavedQuery={this.onLoadSavedQuery}
             isDirty={this.isDirty()}
           />
         ) : (

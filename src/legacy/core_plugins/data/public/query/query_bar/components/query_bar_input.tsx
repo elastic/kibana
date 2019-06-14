@@ -60,6 +60,7 @@ interface Props {
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
+  onLoadSavedQuery?: (savedQuery: SavedQuery) => void;
   onSave?: () => void;
 }
 
@@ -185,7 +186,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       const start = 0;
       const end = searchText.length;
       const description = savedQuery.attributes.description;
-      return { type: savedQueryType, text, start, end, description };
+      return { type: savedQueryType, text, start, end, description, savedQuery };
     });
   };
 
@@ -203,6 +204,14 @@ export class QueryBarInputUI extends Component<Props, State> {
       }
 
       this.props.onSubmit({ query: fromUser(query.query), language: query.language });
+    }
+  };
+
+  private onLoadSavedQuery = (savedQuery: SavedQuery) => {
+    this.updateSuggestions();
+
+    if (this.props.onLoadSavedQuery) {
+      this.props.onLoadSavedQuery(savedQuery);
     }
   };
 
@@ -316,23 +325,31 @@ export class QueryBarInputUI extends Component<Props, State> {
     text,
     start,
     end,
+    savedQuery,
   }: {
     type: AutocompleteSuggestionType;
     text: string;
     start: number;
     end: number;
+    savedQuery?: SavedQuery;
   }) => {
     if (!this.inputRef) {
       return;
     }
 
-    const query = this.getQueryString();
+    if (savedQuery) {
+      this.setState({ isSuggestionsVisible: false, index: null });
+      this.onLoadSavedQuery(savedQuery);
+      return;
+    }
+
+    const queryString = this.getQueryString();
     const { selectionStart, selectionEnd } = this.inputRef;
     if (selectionStart === null || selectionEnd === null) {
       return;
     }
 
-    const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
+    const value = queryString.substr(0, selectionStart) + queryString.substr(selectionEnd);
     const newQueryString = value.substr(0, start) + text + value.substr(end);
 
     this.onQueryStringChange(newQueryString);
@@ -459,6 +476,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'onChange',
       'onSubmit',
       'onSave',
+      'onLoadSavedQuery',
     ]);
 
     return (

@@ -21,6 +21,7 @@
  * WARNING: these typings are incomplete
  */
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { SavedQuery } from 'plugins/data';
 
 export type AutocompleteProvider = (
   args: {
@@ -54,6 +55,7 @@ export interface AutocompleteSuggestion {
   start: number;
   text: string;
   type: AutocompleteSuggestionType;
+  savedQuery?: SavedQuery;
 }
 
 export function addAutocompleteProvider(language: string, provider: AutocompleteProvider): void;

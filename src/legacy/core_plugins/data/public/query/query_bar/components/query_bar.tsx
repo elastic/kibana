@@ -39,7 +39,7 @@ import { QueryBarInput } from './query_bar_input';
 
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
-import { SavedQueryAttributes } from '../../../search/search_bar';
+import { SavedQuery, SavedQueryAttributes } from '../../../search/search_bar';
 
 const config = chrome.getUiSettingsClient();
 
@@ -69,6 +69,7 @@ interface Props {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
   onSave: () => void;
+  onLoadSavedQuery: (savedQuery: SavedQuery) => void;
   isDirty: boolean;
 }
 
@@ -185,6 +186,7 @@ export class QueryBarUI extends Component<Props, State> {
             persistedLog={this.persistedLog}
             savedQuery={this.props.savedQuery}
             onSave={this.props.onSave}
+            onLoadSavedQuery={this.props.onLoadSavedQuery}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>

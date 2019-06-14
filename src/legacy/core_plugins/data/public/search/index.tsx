@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SearchService, SearchSetup, SavedQueryAttributes } from './search_service';
+export { SearchService, SearchSetup, SavedQueryAttributes, SavedQuery } from './search_service';
