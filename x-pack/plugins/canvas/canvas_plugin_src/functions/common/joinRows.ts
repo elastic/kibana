@@ -51,8 +51,6 @@ export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments,
       },
     },
     fn: (context, { column, separator, quote }) => {
-      // work around having single quote as the default value not working.
-      const quotechar = quote === 'DEFAULT' ? "'" : quote;
       return context.rows
         .reduce((acc, row) => {
           const value = row[column];
@@ -62,7 +60,7 @@ export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments,
           if (acc.includes(value)) return acc;
           return acc.concat(value);
         }, [])
-        .map((x: any) => `${quotechar}${escapeString(x, quotechar)}${quotechar}`)
+        .map((x: any) => `${quote}${escapeString(x, quote)}${quote}`)
         .join(separator);
     },
   };
