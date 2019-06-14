@@ -9,7 +9,6 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
-  EuiSpacer,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
@@ -21,21 +20,18 @@ import {
   EuiButtonEmpty,
   EuiLink,
   EuiText,
-  EuiCallOut
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
 import { Storage } from '../../../../../../../src/legacy/ui/public/storage/storage';
 import { STORAGE_KEY, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
 import { ensureMinimumTime } from '../../../lib/ensure_minimum_time';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   INSTRUCTION_STEP_SET_MONITORING_URL,
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL
 } from '../constants';
 import { KIBANA_SYSTEM_ID } from '../../../../../telemetry/common/constants';
-import { Monospace } from '../instruction_steps/components/monospace';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 const storage = new Storage(window.localStorage);
@@ -120,7 +116,7 @@ export class Flyout extends Component {
   }
 
   renderActiveStep() {
-    const { product, productName, onClose, meta, instance } = this.props;
+    const { product, productName, onClose, meta } = this.props;
     const {
       activeStep,
       esMonitoringUrl,
@@ -143,6 +139,7 @@ export class Flyout extends Component {
               })}
             >
               <EuiFieldText
+                fullWidth
                 value={esMonitoringUrl}
                 onChange={e => this.setEsMonitoringUrl(e.target.value)}
               />
@@ -160,47 +157,8 @@ export class Flyout extends Component {
           autoCheckIntervalInMs: AUTO_CHECK_INTERVAL_IN_MS,
         });
 
-        let calloutTitle = null;
-        if (productName === KIBANA_SYSTEM_ID) {
-          calloutTitle = (
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.flyout.kibana.migrationDescriptionLabel"
-              defaultMessage="Migrating instance {instance}"
-              values={{
-                instance: (<Monospace>{instance.name}</Monospace>)
-              }}
-            />
-          );
-        }
-        else if (productName === ELASTICSEARCH_CUSTOM_ID) {
-          if (instance) {
-            calloutTitle = (
-              <FormattedMessage
-                id="xpack.monitoring.metricbeatMigration.flyout.elasticsearch.migrationDescriptionLabel"
-                defaultMessage="Migrating node {instance}"
-                values={{
-                  instance: (<Monospace>{instance.name}</Monospace>)
-                }}
-              />
-            );
-          }
-          else {
-            calloutTitle = (
-              <FormattedMessage
-                id="xpack.monitoring.metricbeatMigration.flyout.elasticsearch.migrationDescriptionNoInstanceLabel"
-                defaultMessage="Migrating Elasticsearch nodes"
-              />
-            );
-          }
-        }
-
         return (
           <Fragment>
-            <EuiCallOut
-              size="s"
-              title={calloutTitle}
-            />
-            <EuiSpacer size="l"/>
             <EuiSteps steps={instructionSteps}/>
           </Fragment>
         );
@@ -301,7 +259,28 @@ export class Flyout extends Component {
   }
 
   render() {
-    const { onClose } = this.props;
+    const { onClose, instance, productName } = this.props;
+
+    let instanceType = null;
+    let instanceName = instance ? instance.name : null;
+
+    if (productName === KIBANA_SYSTEM_ID) {
+      instanceType = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.kibanaInstance', {
+        defaultMessage: 'instance',
+      });
+    }
+    else if (productName === ELASTICSEARCH_CUSTOM_ID) {
+      if (instance) {
+        instanceType = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.elasticsearchNode', {
+          defaultMessage: 'node',
+        });
+      }
+      else {
+        instanceName = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.elasticsearchNodesTitle', {
+          defaultMessage: 'Elasticsearch nodes',
+        });
+      }
+    }
 
     return (
       <EuiFlyout
@@ -312,7 +291,11 @@ export class Flyout extends Component {
           <EuiTitle size="m">
             <h2 id="flyoutTitle">
               {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitle', {
-                defaultMessage: 'Migrate to Metricbeat'
+                defaultMessage: 'Migrate {instanceName} {instanceType} to Metricbeat',
+                values: {
+                  instanceName,
+                  instanceType
+                }
               })}
             </h2>
           </EuiTitle>

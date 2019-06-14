@@ -33,7 +33,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
         <EuiSpacer size="s"/>
         <EuiCallOut
           title={i18n.translate(
-            'xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.restartWarningTitle',
+            'xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.restartWarningTitle',
             {
               defaultMessage: 'Warning'
             }
@@ -44,7 +44,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.restartNote"
+                id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.restartNote"
                 defaultMessage="This step requires you to restart the Kibana server.
                 Expect to see errors until the server is running again."
               />
@@ -56,7 +56,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
   }
 
   const disableInternalCollectionStep = {
-    title: i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.title', {
+    title: i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.title', {
       defaultMessage: 'Disable internal collection of Kibana monitoring metrics'
     }),
     children: (
@@ -64,7 +64,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.description"
+              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.description"
               defaultMessage="Add the following setting in the Kibana configuration file ({file}):"
               values={{
                 file: (
@@ -85,7 +85,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.note"
+              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.note"
               defaultMessage="Leave the {config} set to its default value ({defaultValue})."
               values={{
                 config: (
@@ -117,7 +117,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
         const secondsSinceLastInternalCollectionLabel =
           formatTimestampToDuration(lastInternallyCollectedTimestamp, CALCULATE_DURATION_SINCE);
         lastInternallyCollectedMessage = (<FormattedMessage
-          id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.partiallyMigratedStatusDescription"
+          id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.partiallyMigratedStatusDescription"
           defaultMessage="Last internal collection occurred {secondsSinceLastInternalCollectionLabel} ago."
           values={{
             secondsSinceLastInternalCollectionLabel,
@@ -133,17 +133,24 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
             color="warning"
             title={i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.partiallyMigratedStatusTitle',
               {
-                defaultMessage: `We still see data coming from internal collection of Kibana.
-                Note that it can take up to {secondsAgo} seconds to detect.
-                We will continuously check every {timePeriod} seconds in the background.`,
-                values: {
-                  secondsAgo: meta.secondsAgo,
-                  timePeriod: autoCheckIntervalInMs / 1000,
-                }
+                defaultMessage: `We still see data coming from internal collection of Kibana.`
               }
             )}
           >
-            <EuiText>{lastInternallyCollectedMessage}</EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.metricbeatMigration.kibanaInstructions.partiallyMigratedStatusDescription"
+                defaultMessage={`Note that it can take up to {secondsAgo} seconds to detect, but
+                we will continuously check every {timePeriod} seconds in the background.`}
+                values={{
+                  secondsAgo: meta.secondsAgo,
+                  timePeriod: autoCheckIntervalInMs / 1000,
+                }}
+              />
+            </p>
+            <p>
+              {lastInternallyCollectedMessage}
+            </p>
           </EuiCallOut>
         </Fragment>
       );
@@ -152,14 +159,14 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
     let buttonLabel;
     if (checkingMigrationStatus) {
       buttonLabel = i18n.translate(
-        'xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.checkingStatusButtonLabel',
+        'xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.checkingStatusButtonLabel',
         {
           defaultMessage: 'Checking...'
         }
       );
     } else {
       buttonLabel = i18n.translate(
-        'xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.checkStatusButtonLabel',
+        'xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.checkStatusButtonLabel',
         {
           defaultMessage: 'Check'
         }
@@ -176,7 +183,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
               <EuiText>
                 <p>
                   {i18n.translate(
-                    'xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.statusDescription',
+                    'xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.statusDescription',
                     {
                       defaultMessage: 'Check that no documents are coming from internal collection.'
                     }
@@ -204,12 +211,19 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
           size="s"
           color="success"
           title={i18n.translate(
-            'xpack.monitoring.metricbeatMigration.kibanaInstructions.disable_internal_collection.fullyMigratedStatusTitle',
+            'xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.fullyMigratedStatusTitle',
             {
-              defaultMessage: 'Congratulations! We are not seeing any documents from internal collection. Migration complete!'
+              defaultMessage: 'Congratulations!'
             }
           )}
-        />
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.fullyMigratedStatusDescription"
+              defaultMessage="We are not seeing any documents from internal collection. Migration complete!"
+            />
+          </p>
+        </EuiCallOut>
       )
     };
   }

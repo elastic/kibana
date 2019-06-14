@@ -229,9 +229,9 @@ export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElas
                 but you need to disable internal collection to finish the migration.`
               })}
             </p>
-            <EuiButton onClick={() => setupMode.openFlyout()}>
+            <EuiButton onClick={() => setupMode.openFlyout()} size="s" color="warning" fill>
               {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionMigrationButtonLabel', {
-                defaultMessage: 'Finish migration'
+                defaultMessage: 'Disable and finish migration'
               })}
             </EuiButton>
           </EuiCallOut>

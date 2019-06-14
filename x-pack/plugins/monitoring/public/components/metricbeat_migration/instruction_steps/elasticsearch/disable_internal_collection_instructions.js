@@ -51,8 +51,7 @@ export function getElasticsearchInstructionsForDisablingInternalCollection(produ
           isCopyable
           language="curl"
         >
-          {`
-PUT _cluster/settings
+          {`PUT _cluster/settings
 {
   "persistent": {
     "xpack.monitoring.elasticsearch.collection.enabled": false
@@ -78,7 +77,7 @@ PUT _cluster/settings
         const secondsSinceLastInternalCollectionLabel =
           formatTimestampToDuration(lastInternallyCollectedTimestamp, CALCULATE_DURATION_SINCE);
         lastInternallyCollectedMessage = (<FormattedMessage
-          id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disable_internal_collection.partiallyMigratedStatusDescription"
+          id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollection.partiallyMigratedStatusDescription"
           defaultMessage="Last internal collection occurred {secondsSinceLastInternalCollectionLabel} ago."
           values={{
             secondsSinceLastInternalCollectionLabel,
@@ -94,17 +93,24 @@ PUT _cluster/settings
             color="warning"
             title={i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.partiallyMigratedStatusTitle',
               {
-                defaultMessage: `We still see data coming from internal collection of Elasticsearch.
-                Note that it can take up to {secondsAgo} seconds to detect.
-                We will continuously check every {timePeriod} seconds in the background.`,
-                values: {
-                  secondsAgo: meta.secondsAgo,
-                  timePeriod: autoCheckIntervalInMs / 1000,
-                }
+                defaultMessage: `We still see data coming from internal collection of Elasticsearch.`
               }
             )}
           >
-            <EuiText>{lastInternallyCollectedMessage}</EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.partiallyMigratedStatusDescription"
+                defaultMessage={`Note that it can take up to {secondsAgo} seconds to detect, but
+                we will continuously check every {timePeriod} seconds in the background.`}
+                values={{
+                  secondsAgo: meta.secondsAgo,
+                  timePeriod: autoCheckIntervalInMs / 1000,
+                }}
+              />
+            </p>
+            <p>
+              {lastInternallyCollectedMessage}
+            </p>
           </EuiCallOut>
         </Fragment>
       );
@@ -113,14 +119,14 @@ PUT _cluster/settings
     let buttonLabel;
     if (checkingMigrationStatus) {
       buttonLabel = i18n.translate(
-        'xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disable_internal_collection.checkingStatusButtonLabel',
+        'xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollection.checkingStatusButtonLabel',
         {
           defaultMessage: 'Checking...'
         }
       );
     } else {
       buttonLabel = i18n.translate(
-        'xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disable_internal_collection.checkStatusButtonLabel',
+        'xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollection.checkStatusButtonLabel',
         {
           defaultMessage: 'Check'
         }
@@ -137,7 +143,7 @@ PUT _cluster/settings
               <EuiText>
                 <p>
                   {i18n.translate(
-                    'xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disable_internal_collection.statusDescription',
+                    'xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollection.statusDescription',
                     {
                       defaultMessage: 'Check that no documents are coming from internal collection.'
                     }
@@ -165,12 +171,19 @@ PUT _cluster/settings
           size="s"
           color="success"
           title={i18n.translate(
-            'xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disable_internal_collection.fullyMigratedStatusTitle',
+            'xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollection.fullyMigratedStatusTitle',
             {
-              defaultMessage: 'Congratulations! We are not seeing any documents from internal collection. Migration complete!'
+              defaultMessage: 'Congratulations!'
             }
           )}
-        />
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollection.fullyMigratedStatusDescription"
+              defaultMessage="We are not seeing any documents from internal collection. Migration complete!"
+            />
+          </p>
+        </EuiCallOut>
       )
     };
   }

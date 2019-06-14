@@ -68,23 +68,15 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
     children: (
       <EuiText>
         <p>
-          <FormattedMessage
-            id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatDescription"
-            defaultMessage="Follow {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation.html`}
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatLinkText"
-                    defaultMessage="the instructions here"
-                  />
-                </EuiLink>
-              )
-            }}
-          />
+          <EuiLink
+            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation.html`}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatLinkText"
+              defaultMessage="Follow the instructions here"
+            />
+          </EuiLink>
         </p>
       </EuiText>
     )
@@ -148,8 +140,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
         <EuiCodeBlock
           isCopyable
         >
-          {`
-output.elasticsearch:
+          {`output.elasticsearch:
   hosts: ["${esMonitoringUrl}"] ## Monitoring cluster
 
   # Optional protocol and basic auth credentials.
@@ -171,23 +162,15 @@ output.elasticsearch:
     children: (
       <EuiText>
         <p>
-          <FormattedMessage
-            id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatDescription"
-            defaultMessage="Follow {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-starting.html`}
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatLinkText"
-                    defaultMessage="the instructions here"
-                  />
-                </EuiLink>
-              )
-            }}
-          />
+          <EuiLink
+            href={`${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-starting.html`}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatLinkText"
+              defaultMessage="Follow the instructions here"
+            />
+          </EuiLink>
         </p>
       </EuiText>
     )
@@ -260,10 +243,20 @@ output.elasticsearch:
         <EuiCallOut
           size="s"
           color="success"
-          title={i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.fullyMigratedStatusTitle', {
-            defaultMessage: 'Congratulations! We are now seeing monitoring data shipping from Metricbeat!'
-          })}
-        />
+          title={i18n.translate(
+            'xpack.monitoring.metricbeatMigration.elasticsearchInstructions.fullyMigratedStatusTitle',
+            {
+              defaultMessage: 'Congratulations!'
+            }
+          )}
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.fullyMigratedStatusDescription"
+              defaultMessage="We are now seeing monitoring data shipping from Metricbeat!"
+            />
+          </p>
+        </EuiCallOut>
       )
     };
   }
