@@ -18,12 +18,14 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { capabilities } from 'ui/capabilities';
-import { toastNotifications } from 'ui/notify';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { toastNotifications, Toast } from 'ui/notify';
+import {
+  SavedObjectFinder,
+  SavedObjectMetaData,
+} from 'ui/saved_objects/components/saved_object_finder';
 
 import {
   EuiFlexGroup,
@@ -35,9 +37,20 @@ import {
   EuiButton,
   EuiTitle,
 } from '@elastic/eui';
+import { SavedObjectAttributes } from 'src/legacy/server/saved_objects';
+import { EmbeddableFactoryRegistry } from '../types';
 
-export class DashboardAddPanel extends React.Component {
-  onAddPanel = (id, type, name) => {
+interface Props {
+  onClose: () => void;
+  addNewPanel: (id: string, type: string) => void;
+  addNewVis: () => void;
+  embeddableFactories: EmbeddableFactoryRegistry;
+}
+
+export class DashboardAddPanel extends React.Component<Props> {
+  private lastToast?: Toast;
+
+  onAddPanel = (id: string, type: string, name: string) => {
     this.props.addNewPanel(id, type);
 
     // To avoid the clutter of having toast messages cover flyout
@@ -76,9 +89,13 @@ export class DashboardAddPanel extends React.Component {
         <EuiFlyoutBody>
           <SavedObjectFinder
             onChoose={this.onAddPanel}
-            savedObjectMetaData={this.props.embeddableFactories
-              .filter(embeddableFactory => Boolean(embeddableFactory.savedObjectMetaData))
-              .map(({ savedObjectMetaData }) => savedObjectMetaData)}
+            savedObjectMetaData={
+              this.props.embeddableFactories
+                .filter(embeddableFactory => Boolean(embeddableFactory.savedObjectMetaData))
+                .map(({ savedObjectMetaData }) => savedObjectMetaData) as Array<
+                SavedObjectMetaData<SavedObjectAttributes>
+              >
+            }
             showFilter={true}
             noItemsMessage={i18n.translate(
               'kbn.dashboard.topNav.addPanel.noMatchingObjectsMessage',
@@ -88,11 +105,15 @@ export class DashboardAddPanel extends React.Component {
             )}
           />
         </EuiFlyoutBody>
-        { capabilities.get().visualize.save ? (
+        {capabilities.get().visualize.save ? (
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={this.props.addNewVis} data-test-subj="addNewSavedObjectLink">
+                <EuiButton
+                  fill
+                  onClick={this.props.addNewVis}
+                  data-test-subj="addNewSavedObjectLink"
+                >
                   <FormattedMessage
                     id="kbn.dashboard.topNav.addPanel.createNewVisualizationButtonLabel"
                     defaultMessage="Create new visualization"
@@ -101,14 +122,8 @@ export class DashboardAddPanel extends React.Component {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>
-        ) : null }
+        ) : null}
       </EuiFlyout>
     );
   }
 }
-
-DashboardAddPanel.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  addNewPanel: PropTypes.func.isRequired,
-  addNewVis: PropTypes.func.isRequired,
-};

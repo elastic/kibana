@@ -18,27 +18,65 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-import {
-  EuiFormRow,
-  EuiTextArea,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
-class DashboardSaveModalUi extends React.Component {
-  constructor(props) {
+interface SaveOptions {
+  newTitle: string;
+  newDescription: string;
+  newCopyOnSave: boolean;
+  newTimeRestore: boolean;
+  isTitleDuplicateConfirmed: boolean;
+  onTitleDuplicate: () => void;
+}
+
+interface Props {
+  onSave: (
+    {
+      newTitle,
+      newDescription,
+      newCopyOnSave,
+      newTimeRestore,
+      isTitleDuplicateConfirmed,
+      onTitleDuplicate,
+    }: SaveOptions
+  ) => void;
+  onClose: () => void;
+  title: string;
+  description: string;
+  timeRestore: boolean;
+  showCopyOnSave: boolean;
+  intl: InjectedIntl;
+}
+
+interface State {
+  description: string;
+  timeRestore: boolean;
+}
+
+class DashboardSaveModalUi extends React.Component<Props, State> {
+  state: State = {
+    description: this.props.description,
+    timeRestore: this.props.timeRestore,
+  };
+
+  constructor(props: Props) {
     super(props);
-
-    this.state = {
-      description: props.description,
-      timeRestore: props.timeRestore,
-    };
   }
 
-  saveDashboard = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+  saveDashboard = ({
+    newTitle,
+    newCopyOnSave,
+    isTitleDuplicateConfirmed,
+    onTitleDuplicate,
+  }: {
+    newTitle: string;
+    newCopyOnSave: boolean;
+    isTitleDuplicateConfirmed: boolean;
+    onTitleDuplicate: () => void;
+  }) => {
     this.props.onSave({
       newTitle,
       newDescription: this.state.description,
@@ -49,13 +87,13 @@ class DashboardSaveModalUi extends React.Component {
     });
   };
 
-  onDescriptionChange = (event) => {
+  onDescriptionChange = (event: any) => {
     this.setState({
       description: event.target.value,
     });
   };
 
-  onTimeRestoreChange = (event) => {
+  onTimeRestoreChange = (event: any) => {
     this.setState({
       timeRestore: event.target.checked,
     });
@@ -65,33 +103,38 @@ class DashboardSaveModalUi extends React.Component {
     return (
       <Fragment>
         <EuiFormRow
-          label={<FormattedMessage
-            id="kbn.dashboard.topNav.saveModal.descriptionFormRowLabel"
-            defaultMessage="Description"
-          />}
+          label={
+            <FormattedMessage
+              id="kbn.dashboard.topNav.saveModal.descriptionFormRowLabel"
+              defaultMessage="Description"
+            />
+          }
         >
           <EuiTextArea
             data-test-subj="dashboardDescription"
             value={this.state.description}
             onChange={this.onDescriptionChange}
-            compressed
           />
         </EuiFormRow>
 
         <EuiFormRow
-          helpText={<FormattedMessage
-            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
-            defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
-          />}
+          helpText={
+            <FormattedMessage
+              id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
+              defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
+            />
+          }
         >
           <EuiSwitch
             data-test-subj="storeTimeWithDashboard"
             checked={this.state.timeRestore}
             onChange={this.onTimeRestoreChange}
-            label={<FormattedMessage
-              id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
-              defaultMessage="Store time with dashboard"
-            />}
+            label={
+              <FormattedMessage
+                id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+                defaultMessage="Store time with dashboard"
+              />
+            }
           />
         </EuiFormRow>
       </Fragment>
@@ -111,14 +154,5 @@ class DashboardSaveModalUi extends React.Component {
     );
   }
 }
-
-DashboardSaveModalUi.propTypes = {
-  onSave: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired,
-  title: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  timeRestore: PropTypes.bool.isRequired,
-  showCopyOnSave: PropTypes.bool.isRequired,
-};
 
 export const DashboardSaveModal = injectI18n(DashboardSaveModalUi);
