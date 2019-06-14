@@ -92,7 +92,11 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     }
     return (
       <EuiForm>
-        <EuiFormRow label="Level of detail">
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
+            defaultMessage: 'Level of detail',
+          })}
+        >
           <FixedEuiRange
             min={0}
             max={intervals.length - 1}
@@ -110,7 +114,9 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                 )
               )
             }
-            aria-label="Level of Detail"
+            aria-label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
+              defaultMessage: 'Level of detail',
+            })}
           />
         </EuiFormRow>
       </EuiForm>
