@@ -65,6 +65,12 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
         },
         type: 'STATIC',
       },
+      symbol: {
+        options: {
+          symbolId: 'airfield',
+          symbolizeAs: 'circle',
+        },
+      },
     });
   });
 });
