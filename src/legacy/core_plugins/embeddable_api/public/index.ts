@@ -51,3 +51,6 @@ export {
 } from './containers';
 
 export { AddPanelAction, EmbeddablePanel, openAddPanelFlyout } from './panel';
+
+// TODO: replace with version from kibana-utils plugin when available
+export { createRegistry } from './create_registry';

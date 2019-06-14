@@ -1,0 +1,5 @@
+
+@import 'src/legacy/ui/public/styles/styling_constants';
+
+// MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
+@import './embeddable/index';

@@ -17,32 +17,17 @@
  * under the License.
  */
 
-import { Legacy } from 'kibana';
+import { resolve } from 'path';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['kibana'],
     uiExports: {
-      app: {
-        title: 'Embeddable Explorer',
-        order: 1,
-        main: 'plugins/kbn_tp_embeddable_explorer',
-      },
-      embeddableActions: [
-        'plugins/embeddable_api/test_samples/actions/hello_world_action',
-        'plugins/embeddable_api/test_samples/actions/say_hello_action',
-        'plugins/embeddable_api/test_samples/actions/send_message_action',
-      ],
+      embeddableActions: ['plugins/dashboard_embeddable_container/actions/expand_panel_action'],
       embeddableFactories: [
-        'plugins/embeddable_api/test_samples/embeddables/hello_world/hello_world_embeddable_factory',
-        'plugins/embeddable_api/test_samples/embeddables/contact_card/contact_card_embeddable_factory',
+        'plugins/dashboard_embeddable_container/embeddable/dashboard_container_factory',
       ],
-    },
-    init(server: Legacy.Server) {
-      server.injectUiAppVars('kbn_tp_embeddable_explorer', async () =>
-        server.getInjectedUiAppVars('kibana')
-      );
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
   });
 }
