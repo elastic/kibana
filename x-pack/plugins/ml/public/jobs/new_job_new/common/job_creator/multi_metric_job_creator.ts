@@ -8,11 +8,17 @@ import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
 import { Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
+import { JOB_TYPE } from './util/contants';
 
 export class MultiMetricJobCreator extends JobCreator {
   // a multi metric job has one optional overall partition field
   // which is the same for all detectors.
   private _splitField: SplitField = null;
+  private _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
+
+  public get type(): JOB_TYPE {
+    return this._type;
+  }
 
   // set the split field, applying it to each detector
   public setSplitField(field: SplitField) {
@@ -39,12 +45,12 @@ export class MultiMetricJobCreator extends JobCreator {
 
   public addDetector(agg: Aggregation, field: Field | null) {
     const dtr: Detector = this._createDetector(agg, field);
-    this._addDetector(dtr);
+    this._addDetector(dtr, agg);
   }
 
   public editDetector(agg: Aggregation, field: Field | null, index: number) {
     const dtr: Detector = this._createDetector(agg, field);
-    this._editDetector(dtr, index);
+    this._editDetector(dtr, agg, index);
   }
 
   // create a new detector object, applying the overall split field

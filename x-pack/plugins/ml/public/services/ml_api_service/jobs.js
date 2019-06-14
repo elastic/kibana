@@ -134,4 +134,29 @@ export const jobs = {
       method: 'GET',
     });
   },
+
+  newJobLineChart(
+    indexPatternTitle,
+    timeField,
+    start,
+    end,
+    intervalMs,
+    query,
+    field,
+    aggName) {
+    return http({
+      url: `${basePath}/jobs/new_job_line_chart`,
+      method: 'POST',
+      data: {
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        field,
+        aggName,
+      }
+    });
+  },
 };

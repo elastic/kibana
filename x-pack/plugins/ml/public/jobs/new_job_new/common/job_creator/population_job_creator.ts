@@ -8,12 +8,18 @@ import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
 import { Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
+import { JOB_TYPE } from './util/contants';
 
 export class PopulationJobCreator extends JobCreator {
   // a population job has one overall over (split) field, which is the same for all detectors
   // each detector has an optional by field
   private _splitField: SplitField = null;
   private _byFields: SplitField[] = [];
+  private _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
+
+  public get type(): JOB_TYPE {
+    return this._type;
+  }
 
   // add a by field to a specific detector
   public setByField(field: SplitField, index: number) {
@@ -70,7 +76,7 @@ export class PopulationJobCreator extends JobCreator {
   public addDetector(agg: Aggregation, field: Field | null) {
     const dtr: Detector = this._createDetector(agg, field);
 
-    this._addDetector(dtr);
+    this._addDetector(dtr, agg);
     this._byFields.push(null);
   }
 
@@ -84,7 +90,7 @@ export class PopulationJobCreator extends JobCreator {
       dtr.by_field_name = sp.id;
     }
 
-    this._editDetector(dtr, index);
+    this._editDetector(dtr, agg, index);
   }
 
   // create a detector object, adding the current over field
