@@ -26,14 +26,12 @@ export interface SavedObjectDashboard extends SavedObject {
   id?: string;
   copyOnSave: boolean;
   timeRestore: boolean;
-  // These optionally being moment objects rather than strings seems more like a bug than by design. It's due to
-  // some code in udpate_saved_dashboard that should probably get cleaned up.
-  timeTo: string | moment.Moment | undefined;
-  timeFrom: string | moment.Moment | undefined;
+  timeTo?: string;
+  timeFrom?: string;
   title: string;
   description?: string;
   panelsJSON: string;
-  optionsJSON: string | undefined;
+  optionsJSON?: string;
   // TODO: write a migration to rid of this, it's only around for bwc.
   uiStateJSON?: string;
   lastSavedTitle: string;

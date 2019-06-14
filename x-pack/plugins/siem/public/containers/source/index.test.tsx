@@ -11,6 +11,8 @@ import { MockedProvider } from 'react-apollo/test-utils';
 
 import { wait } from '../../lib/helpers';
 
+import '../../mock/ui_settings';
+
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
 
@@ -54,10 +56,10 @@ describe('Index Fields & Browser Fields', () => {
   });
 
   describe('indicesExistOrDataTemporarilyUnavailable', () => {
-    test('it returns false when undefined', () => {
+    test('it returns true when undefined', () => {
       let undefVar;
       const result = indicesExistOrDataTemporarilyUnavailable(undefVar);
-      expect(result).toBeFalsy();
+      expect(result).toBeTruthy();
     });
     test('it returns true when true', () => {
       const result = indicesExistOrDataTemporarilyUnavailable(true);

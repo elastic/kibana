@@ -14,6 +14,7 @@ import {
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
+import { INFRA_SOURCE_ID } from '../../../common/constants';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -110,7 +111,7 @@ const clusterColumns = [
 ];
 
 function getLogsUiLink(clusterUuid, nodeId, indexUuid) {
-  const base = `${chrome.getBasePath()}/app/infra#/link-to/logs`;
+  const base = `${chrome.getBasePath()}/app/infra#/link-to/${INFRA_SOURCE_ID}/logs`;
 
   const params = [];
   if (clusterUuid) {
