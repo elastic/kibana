@@ -4,52 +4,59 @@
     <div data-transclude-slots>
       <!-- Tabs -->
       <div data-transclude-slot="bottomRow">
-        <div ng-if="monitoringMain.inElasticsearch" class="kuiLocalTabs" role="navigation">
+        <div ng-if="monitoringMain.inElasticsearch" class="euiTabs" role="navigation">
           <a
             ng-if="!monitoringMain.instance"
             kbn-href="#/elasticsearch"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('overview')}"
+            class="euiTab"
+            ng-class="{
+              'euiTab-isSelected': monitoringMain.isActiveTab('overview'),
+              'euiTab-isDisabled': monitoringMain.isDisabledTab('elasticsearch', 'overview')
+            }"
             i18n-id="xpack.monitoring.esNavigation.overviewLinkText"
             i18n-default-message="Overview"
           ></a>
           <a
             ng-if="!monitoringMain.instance"
             kbn-href="#/elasticsearch/nodes"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('nodes')}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('nodes')}"
             i18n-id="xpack.monitoring.esNavigation.nodesLinkText"
             i18n-default-message="Nodes"
           ></a>
           <a
             ng-if="!monitoringMain.instance"
             kbn-href="#/elasticsearch/indices"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('indices')}"
+            class="euiTab"
+            ng-disabled="true"
+            ng-class="{
+              'euiTab-isSelected': monitoringMain.isActiveTab('indices'),
+              'euiTab-isDisabled': monitoringMain.isDisabledTab('elasticsearch', 'indices')
+            }"
             i18n-id="xpack.monitoring.esNavigation.indicesLinkText"
             i18n-default-message="Indices"
           ></a>
           <a
             ng-if="!monitoringMain.instance && monitoringMain.isMlSupported()"
             kbn-href="#/elasticsearch/ml_jobs"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('ml')}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('ml')}"
             i18n-id="xpack.monitoring.esNavigation.jobsLinkText"
             i18n-default-message="Jobs"
           ></a>
           <a
             ng-if="(monitoringMain.isCcrEnabled || monitoringMain.isActiveTab('ccr')) && !monitoringMain.instance"
             kbn-href="#/elasticsearch/ccr"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('ccr')}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('ccr')}"
             i18n-id="xpack.monitoring.esNavigation.ccrLinkText"
             i18n-default-message="CCR"
           ></a>
           <a
             ng-if="monitoringMain.instance && (monitoringMain.name === 'nodes' || monitoringMain.name === 'indices')"
             kbn-href="#/elasticsearch/{{ monitoringMain.name }}/{{ monitoringMain.resolver }}"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'overview'}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.page === 'overview'}"
           >
             <span ng-if="monitoringMain.tabIconClass" class="fa {{ monitoringMain.tabIconClass }}" title="{{ monitoringMain.tabIconLabel }}"></span>
             <span
@@ -60,8 +67,8 @@
           <a
             ng-if="monitoringMain.instance && (monitoringMain.name === 'nodes' || monitoringMain.name === 'indices')"
             kbn-href="#/elasticsearch/{{ monitoringMain.name }}/{{ monitoringMain.resolver }}/advanced"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'advanced'}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.page === 'advanced'}"
             i18n-id="xpack.monitoring.esNavigation.instance.advancedLinkText"
             i18n-default-message="Advanced"
           >
@@ -69,55 +76,55 @@
             <!-- ML Instance (for use later) -->
           <a
             ng-if="monitoringMain.instance && monitoringMain.name !== 'nodes' && monitoringMain.name !== 'indices'"
-            class="kuiLocalTab">{{ monitoringMain.instance }}</a>
+            class="euiTab">{{ monitoringMain.instance }}</a>
         </div>
 
-        <div ng-if="monitoringMain.inKibana" class="kuiLocalTabs" role="navigation">
+        <div ng-if="monitoringMain.inKibana" class="euiTabs" role="navigation">
           <a
             ng-if="!monitoringMain.instance"
             kbn-href="#/kibana"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('overview')}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
             i18n-id="xpack.monitoring.kibanaNavigation.overviewLinkText"
             i18n-default-message="Overview"
           ></a>
           <a
             ng-if="!monitoringMain.instance"
             kbn-href="#/kibana/instances"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('kibanas')}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('kibanas')}"
             i18n-id="xpack.monitoring.kibanaNavigation.instancesLinkText"
             i18n-default-message="Instances"
           ></a>
-          <a ng-if="monitoringMain.instance" class="kuiLocalTab">{{ monitoringMain.instance }}</a>
+          <a ng-if="monitoringMain.instance" class="euiTab">{{ monitoringMain.instance }}</a>
         </div>
 
-        <div ng-if="monitoringMain.inApm" class="kuiLocalTabs" role="navigation">
+        <div ng-if="monitoringMain.inApm" class="euiTabs" role="navigation">
           <a
             ng-if="!monitoringMain.instance"
             kbn-href="#/apm"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('overview')}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
             i18n-id="xpack.monitoring.apmNavigation.overviewLinkText"
             i18n-default-message="Overview"
           ></a>
           <a
             ng-if="!monitoringMain.instance"
             kbn-href="#/apm/instances"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('apms')}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('apms')}"
             i18n-id="xpack.monitoring.apmNavigation.instancesLinkText"
             i18n-default-message="Instances"
           ></a>
-          <a ng-if="monitoringMain.instance" class="kuiLocalTab">{{ monitoringMain.instance }}</a>
+          <a ng-if="monitoringMain.instance" class="euiTab">{{ monitoringMain.instance }}</a>
         </div>
 
-        <div ng-if="monitoringMain.inBeats" class="kuiLocalTabs" role="navigation">
+        <div ng-if="monitoringMain.inBeats" class="euiTabs" role="navigation">
           <a
             ng-if="!monitoringMain.instance"
             kbn-href="#/beats"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected':
+            class="euiTab"
+            ng-class="{'euiTab-isSelected':
             monitoringMain.isActiveTab('overview')}"
             i18n-id="xpack.monitoring.beatsNavigation.overviewLinkText"
             i18n-default-message="Overview"
@@ -126,8 +133,8 @@
           <a
             ng-if="!monitoringMain.instance"
             kbn-href="#/beats/beats"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('beats')}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('beats')}"
             i18n-id="xpack.monitoring.beatsNavigation.instancesLinkText"
             i18n-default-message="Instances"
           >
@@ -135,20 +142,20 @@
           <a
             ng-if="monitoringMain.instance"
             kbn-href="#/beats/beat/{{ monitoringMain.resolver }}"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'overview'}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.page === 'overview'}"
             i18n-id="xpack.monitoring.beatsNavigation.instance.overviewLinkText"
             i18n-default-message="Overview"
           >
           </a>
         </div>
 
-        <div ng-if="monitoringMain.inLogstash" class="kuiLocalTabs" role="navigation">
+        <div ng-if="monitoringMain.inLogstash" class="euiTabs" role="navigation">
           <a
             ng-if="!monitoringMain.instance && !monitoringMain.pipelineId"
             kbn-href="#/logstash"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('overview')}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('overview')}"
             i18n-id="xpack.monitoring.logstashNavigation.overviewLinkText"
             i18n-default-message="Overview"
           >
@@ -156,8 +163,8 @@
           <a
             ng-if="!monitoringMain.instance && !monitoringMain.pipelineId"
             kbn-href="#/logstash/nodes"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('nodes')}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('nodes')}"
             i18n-id="xpack.monitoring.logstashNavigation.nodesLinkText"
             i18n-default-message="Nodes"
           >
@@ -165,8 +172,8 @@
           <a
             ng-if="!monitoringMain.instance && !monitoringMain.pipelineId"
             kbn-href="#/logstash/pipelines"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('pipelines')}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('pipelines')}"
           >
             <span
               i18n-id="xpack.monitoring.logstashNavigation.pipelinesLinkText"
@@ -177,8 +184,8 @@
           <a
             ng-if="monitoringMain.instance"
             kbn-href="#/logstash/node/{{ monitoringMain.resolver }}"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'overview'}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.page === 'overview'}"
             i18n-id="xpack.monitoring.logstashNavigation.instance.overviewLinkText"
             i18n-default-message="Overview"
           >
@@ -186,8 +193,8 @@
           <a
             ng-if="monitoringMain.instance"
             kbn-href="#/logstash/node/{{ monitoringMain.resolver }}/pipelines"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'pipelines'}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.page === 'pipelines'}"
           >
             <span
               i18n-id="xpack.monitoring.logstashNavigation.instance.pipelinesLinkText"
@@ -198,36 +205,36 @@
           <a
             ng-if="monitoringMain.instance"
             kbn-href="#/logstash/node/{{ monitoringMain.resolver }}/advanced"
-            class="kuiLocalTab"
-            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'advanced'}"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': monitoringMain.page === 'advanced'}"
             i18n-id="xpack.monitoring.logstashNavigation.instance.advancedLinkText"
             i18n-default-message="Advanced"
           >
           </a>
           <div
-            class="kuiLocalTab"
+            class="euiTab"
             ng-if="monitoringMain.pipelineVersions.length"
             id="dropdown-elm"
             ng-init="monitoringMain.dropdownLoadedHandler()">
           </div>
         </div>
 
-        <div ng-if="monitoringMain.inOverview" class="kuiLocalTabs" role="navigation">
-          <a class="kuiLocalTab" data-test-subj="clusterName">{{ pageData.cluster_name }}</a>
+        <div ng-if="monitoringMain.inOverview" class="euiTabs" role="navigation">
+          <a class="euiTab" data-test-subj="clusterName">{{ pageData.cluster_name }}</a>
         </div>
 
-        <div ng-if="monitoringMain.inAlerts" class="kuiLocalTabs" role="navigation">
+        <div ng-if="monitoringMain.inAlerts" class="euiTabs" role="navigation">
           <a
-            class="kuiLocalTab"
+            class="euiTab"
             data-test-subj="clusterAlertsListingPage"
             i18n-id="xpack.monitoring.clusterAlertsNavigation.clusterAlertsLinkText"
             i18n-default-message="Cluster Alerts"
           ></a>
         </div>
 
-        <div ng-if="monitoringMain.inListing" class="kuiLocalTabs" role="navigation">
+        <div ng-if="monitoringMain.inListing" class="euiTabs" role="navigation">
          <a
-          class="kuiLocalTab"
+          class="euiTab"
           i18n-id="xpack.monitoring.clustersNavigation.clustersLinkText"
           i18n-default-message="Clusters"
         ></a>

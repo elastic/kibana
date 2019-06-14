@@ -184,7 +184,8 @@ export class Flyout extends Component {
 
     if (activeStep === INSTRUCTION_STEP_ENABLE_METRICBEAT && productName === ELASTICSEARCH_CUSTOM_ID) {
       willShowNextButton = false;
-      willDisableDoneButton = !product.isPartiallyMigrated;
+      // ES can be fully migrated for net new users
+      willDisableDoneButton = !product.isPartiallyMigrated && !product.isFullyMigrated;
     }
 
     if (willShowNextButton) {

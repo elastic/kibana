@@ -7,6 +7,7 @@
 import { get, uniq } from 'lodash';
 import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
 import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
+import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
 
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 const APM_CUSTOM_ID = 'apm';
@@ -225,7 +226,8 @@ function shouldSkipBucket(product, bucket) {
 
 /**
  * This function will scan all monitoring documents within the past 30s (or a custom time range is supported too)
- * and determine which products fall into one of three states:
+ * and determine which products fall into one of four states:
+ * - isNetNewUser: This means we have detected this instance without monitoring and know that monitoring isn't connected to it. This is really only applicable to ES nodes from the same cluster Kibana is talking to.
  * - isPartiallyMigrated: This means we are seeing some monitoring documents from MB and some from internal collection
  * - isFullyMigrated: This means we are only seeing monitoring documents from MB
  * - isInternalCollector: This means we are only seeing monitoring documents from internal collection
@@ -266,6 +268,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     await detectProducts(req)
   ]);
 
+  const liveEsNodes = await getLivesNodes(req);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
 
   const status = PRODUCTS.reduce((products, product) => {
@@ -289,6 +292,15 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     if (!indexBuckets || indexBuckets.length === 0) {
       productStatus.totalUniqueInstanceCount = 0;
       productStatus.detected = detectedProducts[product.name];
+
+      if (product.name === ELASTICSEARCH_CUSTOM_ID && liveEsNodes.length) {
+        productStatus.byUuid = liveEsNodes.reduce((accum, esNode) => ({
+          ...accum,
+          [esNode.id]: {
+            isNetNewUser: true
+          },
+        }), {});
+      }
     }
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
     else if (indexBuckets.length === 1) {

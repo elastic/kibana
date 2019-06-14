@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './no_data';
+import './loading';
 import './access_denied';
 import './alerts';
 import './license';

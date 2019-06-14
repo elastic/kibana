@@ -211,9 +211,12 @@ export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElas
   const columns = getColumns(showCgroupMetricsElasticsearch);
   const { sorting, pagination, onTableChange, setupMode } = props;
 
+  let netNewUserMessage = null;
   let disableInternalCollectionForMigrationMessage = null;
   if (setupMode.data) {
-    if (setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
+    // Think net new user scenario
+    const hasInstances = setupMode.data.totalUniqueInstanceCount > 0;
+    if (hasInstances && setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
       disableInternalCollectionForMigrationMessage = (
         <Fragment>
           <EuiCallOut
@@ -239,16 +242,50 @@ export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElas
         </Fragment>
       );
     }
+    else if (!hasInstances) {
+      netNewUserMessage = (
+        <Fragment>
+          <EuiCallOut
+            title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.netNewUserTitle', {
+              defaultMessage: 'No monitoring data detected',
+            })}
+            color="danger"
+            iconType="cross"
+          >
+            <p>
+              {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.netNewUserDescription', {
+                defaultMessage: `We did not detect any monitoring data, but we did detect the following Elasticsearch nodes.
+                Each detected node is listed below along with a Setup button. Clicking this button will guide you through
+                the process of enabling monitoring for each node.`
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m"/>
+        </Fragment>
+      );
+    }
+  }
+
+  function renderClusterStatus() {
+    if (!clusterStatus) {
+      return null;
+    }
+    return (
+      <Fragment>
+        <EuiPanel>
+          <ClusterStatus stats={clusterStatus} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
+      </Fragment>
+    );
   }
 
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPanel>
-          <ClusterStatus stats={clusterStatus} />
-        </EuiPanel>
-        <EuiSpacer size="m" />
+        {renderClusterStatus()}
         {disableInternalCollectionForMigrationMessage}
+        {netNewUserMessage}
         <EuiPageContent>
           <EuiMonitoringTable
             className="elasticsearchNodesTable"

@@ -84,6 +84,15 @@ export class EuiMonitoringTable extends React.PureComponent {
               </EuiBadge>
             );
           }
+          else if (status.isNetNewUser) {
+            statusBadge = (
+              <EuiHealth color="danger">
+                {i18n.translate('xpack.monitoring.euiTable.isNetNewUserLabel', {
+                  defaultMessage: 'No monitoring detected'
+                })}
+              </EuiHealth>
+            );
+          }
           else {
             statusBadge = i18n.translate('xpack.monitoring.euiTable.migrationStatusUnknown', {
               defaultMessage: 'N/A'
@@ -119,6 +128,16 @@ export class EuiMonitoringTable extends React.PureComponent {
               <EuiButtonEmpty flush="left" size="s" color="primary" onClick={() => setupMode.openFlyout(instance)}>
                 {i18n.translate('xpack.monitoring.euiTable.migrateButtonLabel', {
                   defaultMessage: 'Migrate'
+                })}
+              </EuiButtonEmpty>
+            );
+          }
+
+          if (status.isNetNewUser) {
+            return (
+              <EuiButtonEmpty flush="left" size="s" color="primary" onClick={() => setupMode.openFlyout(instance)}>
+                {i18n.translate('xpack.monitoring.euiTable.setupButtonLabel', {
+                  defaultMessage: 'Setup'
                 })}
               </EuiButtonEmpty>
             );

@@ -64,19 +64,27 @@ export const updateSetupModeData = async () => {
 };
 
 export const toggleSetupMode = inSetupMode => {
-  checkAngularState();
-
-  const globalState = angularState.injector.get('globalState');
-  angularState.scope.$evalAsync(async () => {
-    setupModeState.enabled = inSetupMode;
-    globalState.inSetupMode = inSetupMode;
-    globalState.save();
-    setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
-    notifySetupModeDataChange();
-
-    if (inSetupMode) {
-      await updateSetupModeData();
+  return new Promise((resolve, reject) => {
+    try {
+      checkAngularState();
+    } catch (err) {
+      return reject(err);
     }
+
+    const globalState = angularState.injector.get('globalState');
+    angularState.scope.$evalAsync(async () => {
+      setupModeState.enabled = inSetupMode;
+      globalState.inSetupMode = inSetupMode;
+      globalState.save();
+      setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
+      notifySetupModeDataChange();
+
+      if (inSetupMode) {
+        await updateSetupModeData();
+      }
+
+      resolve();
+    });
   });
 };
 
