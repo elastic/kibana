@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectReference } from 'src/legacy/server/saved_objects';
+import { SavedObjectReference } from '../../../../legacy/server/saved_objects/routes/types';
 
 export interface SavedObjectAttributes {
   kibanaSavedObjectMeta: {

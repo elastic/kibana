@@ -40,6 +40,8 @@ export function getSavedDashboardMock(
     save: () => {
       return Promise.resolve('123');
     },
+    getQuery: () => ({ query: '', language: 'kuery' }),
+    getFilters: () => [],
     ...config,
   };
 }

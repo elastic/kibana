@@ -27,6 +27,8 @@ import { Timefilter } from 'ui/timefilter';
 import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { Filter } from '@kbn/es-query';
 import moment from 'moment';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { TimeRange } from 'ui/timefilter/time_history';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
