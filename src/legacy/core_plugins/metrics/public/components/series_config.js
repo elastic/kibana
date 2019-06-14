@@ -36,7 +36,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 import { Storage } from 'ui/storage';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 const { QueryBarInput } = data.query.ui;
@@ -48,31 +48,29 @@ export const SeriesConfig = props => {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const htmlId = htmlIdGenerator();
-  const seriesIndexPattern = (props.model.override_index_pattern && props.model.series_index_pattern) ?
-    props.model.series_index_pattern : props.indexPatternForQuery;
+  const seriesIndexPattern =
+    props.model.override_index_pattern && props.model.series_index_pattern
+      ? props.model.series_index_pattern
+      : props.indexPatternForQuery;
 
   return (
     <div className="tvbAggRow">
-
-      <DataFormatPicker
-        onChange={handleSelectChange('formatter')}
-        value={model.formatter}
-      />
+      <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
 
       <EuiHorizontalRule margin="s" />
 
       <EuiFormRow
         id={htmlId('series_filter')}
-        label={(<FormattedMessage
-          id="tsvb.seriesConfig.filterLabel"
-          defaultMessage="Filter"
-        />)}
+        label={<FormattedMessage id="tsvb.seriesConfig.filterLabel" defaultMessage="Filter" />}
         fullWidth
       >
         <QueryBarInput
           query={{
-            language: (model.filter && model.filter.language) ? model.filter.language : getDefaultQueryLanguage(),
-            query: (model.filter && model.filter.query) ? model.filter.query : ''
+            language:
+              model.filter && model.filter.language
+                ? model.filter.language
+                : getDefaultQueryLanguage(),
+            query: model.filter && model.filter.query ? model.filter.query : '',
           }}
           onChange={filter => props.onChange({ filter })}
           appName={'VisEditor'}
@@ -88,19 +86,18 @@ export const SeriesConfig = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('template')}
-            label={(<FormattedMessage
-              id="tsvb.seriesConfig.templateLabel"
-              defaultMessage="Template"
-            />)}
-            helpText={(
+            label={
+              <FormattedMessage id="tsvb.seriesConfig.templateLabel" defaultMessage="Template" />
+            }
+            helpText={
               <span>
                 <FormattedMessage
                   id="tsvb.seriesConfig.templateHelpText"
                   defaultMessage="eg. {templateExample}"
-                  values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
+                  values={{ templateExample: <EuiCode>{'{{value}}/s'}</EuiCode> }}
                 />
               </span>
-            )}
+            }
             fullWidth
           >
             <EuiFieldText
@@ -113,11 +110,13 @@ export const SeriesConfig = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('offsetSeries')}
-            label={(<FormattedMessage
-              id="tsvb.seriesConfig.offsetSeriesTimeLabel"
-              defaultMessage="Offset series time by (1m, 1h, 1w, 1d)"
-              description="1m, 1h, 1w and 1d are required values and must not be translated."
-            />)}
+            label={
+              <FormattedMessage
+                id="tsvb.seriesConfig.offsetSeriesTimeLabel"
+                defaultMessage="Offset series time by (1m, 1h, 1w, 1d)"
+                description="1m, 1h, 1w and 1d are required values and must not be translated."
+              />
+            }
           >
             <EuiFieldText
               data-test-subj="offsetTimeSeries"
@@ -155,7 +154,6 @@ export const SeriesConfig = props => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
     </div>
   );
 };

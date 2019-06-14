@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import chrome from 'ui/chrome';
 
 export function getDefaultQueryLanguage() {
