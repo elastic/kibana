@@ -52,9 +52,6 @@ Canvas::
 Design::
 * Upgrades EUI to 9.2.1 and improves dark mode {pull}32728[#32728]
 
-Elasticsearch UI::
-* Adds UI for Snapshot Repositories {pull}34407[#34407]
-
 Geo::
 * Allows maps to be embeddable {pull}31473[#31473]
 * Registers `savedObjectMetaData` so Maps saved objects show up in dashboard add panel {pull}32895[#32895]
@@ -76,17 +73,6 @@ Geo::
 * Adds draw filter action to layer {pull}33686[#33686]
 * Adds WKT and geohash string support {pull}34472[#34472]
 
-Kibana App::
-* Allows multiple values for percentile ranks in Time Series Visual Builder {pull}33642[#33642]
-* Allows non numeric fields in Top Hits in Time Series Visual Builder {pull}35661[#35661]
-* Adds Include and Exclude fields to the Terms group in Time Series Visual Builder {pull}34153[#34153]
-* Adds ability to submit Save modals using the Enter key {pull}34417[#34417]
-* Improves KQL error messages {pull}34900[#34900]
-* Uses embeddable registry in add panel {pull}31400[#31400]
-* Shows a reload dialog when users change a setting requiring a page reload {pull}34780[#34780]
-* Improves scripted field script editor {pull}36064[#36064]
-* Changes default quick ranges {pull}35066[#35066]
-
 Kibana Home &amp; Add Data::
 * Injects anomalies into the Kibana sample datasets to enable ML sample jobs {pull}36714[#36714]
 * Allows plugins to register additional view data links in sample data {pull}33052[#33052]
@@ -97,13 +83,13 @@ Logs::
 * Adds flyout action menu with Uptime link {pull}36721[#36721]
 
 Machine Learning::
-* Adds Kibana sample dataset data recognizer modules  {pull}35138[#35138]
+* Adds Kibana sample dataset data recognizer modules {pull}35138[#35138]
 * Adds File data viz filter to Index Management link {pull}36166[#36166]
 * Adds query bar to Anomaly Explorer for filtering of anomaly results for one or more influencers {pull}31763[#31763]
-* Adds the ability to add and remove filters in the Anomaly Explorer via the Anomalies table  {pull}33377[#33377]
+* Adds the ability to add and remove filters in the Anomaly Explorer via the Anomalies table {pull}33377[#33377]
 * Adds the ability to add and remove filters in the Anomaly Explorer via the Top influencers list {pull}33626[#33626]
 * Converts Job Selector to React {pull}35638[#35638]
-* Always show time warning message in delete modal in Job Management {pull}36729[#36729]
+* Always show time warning message in the delete modal in Job Management {pull}36729[#36729]
 * Makes layout of Edit Filter List consistent with other settings pages {pull}33421[#33421]
 * Adds created_by field to Auditbeat and APM data recognizer jobs {pull}33863[#33863]
 * Extends support for anomaly charts when model plot is enabled {pull}34079[#34079]
@@ -113,9 +99,12 @@ Machine Learning::
 * Converts full time range selector control to EUI / React {pull}35074[#35074]
 * Uses KQL as the query language for custom URLs to Kibana pages {pull}35469[#35469]
 * Adds Metricbeat System data recognizer module {pull}35580[#35580]
-* Removes check for forecast duration 8 weeks or less {pull}35583[#35583]
-* Add links to ML jobs to the Kibana sample dataset View data menu {pull}36702[#36702]
+* Removes check for forecast duration of 8 weeks or less {pull}35583[#35583]
+* Adds links to ML jobs to the Kibana sample dataset View data menu {pull}36702[#36702]
 * Adds Data Frame UI {pull}33427[#33427]
+
+Management::
+* Adds UI for Snapshot Repositories {pull}34407[#34407]
 
 Monitoring::
 * Adds Telemetry sample data {pull}33166[#33166]
@@ -141,16 +130,19 @@ Uptime::
 * Integrates Uptime to Logging {pull}35853[#35853]
 * Cleans up design of Uptime app {pull}31663[#31663]
 
-
+Visualize::
+* Allows multiple values for percentile ranks in Time Series Visual Builder {pull}33642[#33642]
+* Allows non numeric fields in Top Hits in Time Series Visual Builder {pull}35661[#35661]
+* Adds Include and Exclude fields to the Terms group in Time Series Visual Builder {pull}34153[#34153]
+* Adds ability to submit Save modals using the Enter key {pull}34417[#34417]
+* Improves KQL error messages {pull}34900[#34900]
+* Shows a reload dialog when users change a setting requiring a page reload {pull}34780[#34780]
+* Improves scripted field script editor {pull}36064[#36064]
+* Changes default quick ranges {pull}35066[#35066]
 
 [float]
 [[bug-7.2.0]]
 === Bug fixes
-
-App Architecture::
-* Adds yml switch for using interpreter in expressions {pull}33832[#33832]
-* Removes unused ui/field_editor reference {pull}34969[#34969]
-* Disables grow for IE 11 for index pattern management header {pull}37756[#37756]
 
 APM::
 * Moves the APM index creation from server startup {pull}37965[#37965]
@@ -199,10 +191,15 @@ Console::
 * Refetches autocomplete info after updating Dev Console settings {pull}32587[#32587]
 * Fixes issue with request body not being sent for Console DELETE requests {pull}32407[#32407]
 
-Elasticsearch UI::
-* Internationalizes Rollup Jobs, Remote Clusters, and Watcher app titles. {pull}34470[#34470]
-* Removes rollup section in advanced settings for OSS {pull}32814[#32814]
-* Fixes Create Rollup Index Pattern button badge color error {pull}32954[#32954]
+Dashboard::
+* Allows embeddable to specify edit label {pull}36296[#36296]
+* Fixes courier:ignoreFilterIfFieldNotInIndex with chained input controls {pull}36369[#36369]
+* Fetches options for input control child select boxes {pull}38148[#38148]
+
+Discover::
+* Fixes problem with Discover not using an index pattern when two patterns are created {pull}38053[#38053]
+* Converts dashboard panels to Typescript {pull}27167[#27167]
+* Enables optional use of the timezone set in Advanced Settings in queries {pull}34602[#34602]
 
 Geo::
 * Changes tooltip to use description list for IE compatibility {pull}37396[#37396]
@@ -258,35 +255,6 @@ Infrastructure::
 * Adds View Surrounding Logs functionality {pull}35727[#35727]
 * Changes popover position of Node context menu {pull}36352[#36352]
 
-Kibana App::
-* Fixes typo in top hit fields filter {pull}38391[#38391]
-* Resets FilterEditor on filter prop change {pull}34494[#34494]
-* Adds table with conflicting indices in field editor {pull}35783[#35783]
-* Fixes sorting of index pattern table in Chrome and Firefox {pull}37613[#37613]
-* Allows embeddable to specify edit label {pull}36296[#36296]
-* Fixes courier:ignoreFilterIfFieldNotInIndex with chained input controls {pull}36369[#36369]
-* Fetches options for input control child select boxes {pull}38148[#38148]
-* Fixes hanging UI when custom index pattern with existing ID created {pull}36097[#36097]
-* Fixes problem with Discover not using an index pattern when two patterns are created {pull}38053[#38053]
-* Fixes Tableview in Time Series Visual Builder to show correct data {pull}34343[#34343]
-* Fixes Aggregation by "Static value" in Time Series Visual Builder so that it works properly {pull}34624[#34624]
-* Fixes problem in Time Series Visual Builder with shift in historic data after daylight savings time {pull}34283[#34283]
-* Triggers request for api/metrics/fields after all UI changes in Time Series Visual Builder {pull}34436[#34436]
-* Fixes problem with query bar showing randomly in editor page in Time Series Visual Builder {pull}35081[#35081]
-* Makes Time Series Visual Builder signal render-complete equals true on rendering {pull}35215[#35215]
-* Filters annotations by the last series timestamp in Time Series Visual Builder {pull}35230[#35230]
-* Allows negative values for custom ranges in metric and gauge visualizations {pull}33814[#33814]
-* Fixes broken filtering on metric visualizations {pull}38029[#38029]
-* Restores line rendering in point series vis using percentile agg {pull}35649[#35649]
-* Fixes range filtering in XY charts when field is a scripted date field {pull}25379[#25379]
-* Fixes clipping of wide Vega tooltip tables {pull}33465[#33465]
-* Migrates serialization of include/exclude options to strings instead of objects in significant terms bucket aggregation {pull}34392[#34392]
-* Converts dashboard panels to Typescript {pull}27167[#27167]
-* Initializes correct value of time picker's  refresh interval  {pull}35839[#35839]
-* Enables optional use of the timezone set in Advanced Settings in queries {pull}34602[#34602]
-* Updates tab counters on filter change {pull}34246[#34246]
-* Resolves issue that occurs when migrations are partially complete and a new Kibana instance starts up {pull}37674[#37674]
-
 Kibana Home &amp; Add Data::
 * Adds `utc_time` of sample web logs to list of timeFields so that it is dynamic {pull}35879[#35879]
 
@@ -299,6 +267,13 @@ Machine Learning::
 * Fixes Java time access in ML watch Painless script {pull}37074[#37074]
 * Provides fix for constant polling of deleting job tasks {pull}38013[#38013]
 * Fixes check when opening ML from Kibana Sample Data sets if no ML jobs are created {pull}38649[#38649]
+
+Management::
+* Disables grow for IE 11 for index pattern management header {pull}37756[#37756]
+* Internationalizes Rollup Jobs, Remote Clusters, and Watcher app titles. {pull}34470[#34470]
+* Removes rollup section in advanced settings for OSS {pull}32814[#32814]
+* Fixes Create Rollup Index Pattern button badge color error {pull}32954[#32954]
+* Fixes hanging UI when custom index pattern with existing ID created {pull}36097[#36097]
 
 Monitoring::
 * Improves performance of the Logstash Pipeline Viewer {pull}31293[#31293]
@@ -357,6 +332,8 @@ Platform::
 * Enforces the base path proxy to redirect requests that happen within a space {pull}36300[#36300]
 * Automatically strips xpack config when running --oss {pull}36403[#36403]
 * Integrates HTTP and Security in New Platform {pull}34631[#34631]
+* Removes unused ui/field_editor reference {pull}34969[#34969]
+
 
 Reporting::
 * Includes the error object job decryption errors {pull}32216[#32216]
@@ -380,6 +357,30 @@ Uptime::
 * Removes several default common DatePicker values {pull}37395[#37395]
 * Supports KQL `OR` filters {pull}37564[#37564]
 * Updates documentation link for location column {pull}37511[#37511]
+
+Visualize::
+* Fixes typo in top hit fields filter {pull}38391[#38391]
+* Resets FilterEditor on filter prop change {pull}34494[#34494]
+* Adds table with conflicting indices in field editor {pull}35783[#35783]
+* Fixes sorting of index pattern table in Chrome and Firefox {pull}37613[#37613]
+* Fixes Tableview in Time Series Visual Builder to show correct data {pull}34343[#34343]
+* Fixes Aggregation by "Static value" in Time Series Visual Builder so that it works properly {pull}34624[#34624]
+* Fixes problem in Time Series Visual Builder with shift in historic data after daylight savings time {pull}34283[#34283]
+* Triggers request for api/metrics/fields after all UI changes in Time Series Visual Builder {pull}34436[#34436]
+* Fixes problem with query bar showing randomly in editor page in Time Series Visual Builder {pull}35081[#35081]
+* Makes Time Series Visual Builder signal render-complete equals true on rendering {pull}35215[#35215]
+* Filters annotations by the last series timestamp in Time Series Visual Builder {pull}35230[#35230]
+* Allows negative values for custom ranges in metric and gauge visualizations {pull}33814[#33814]
+* Fixes broken filtering on metric visualizations {pull}38029[#38029]
+* Restores line rendering in point series vis using percentile agg {pull}35649[#35649]
+* Fixes range filtering in XY charts when field is a scripted date field {pull}25379[#25379]
+* Fixes clipping of wide Vega tooltip tables {pull}33465[#33465]
+* Migrates serialization of include/exclude options to strings instead of objects in significant terms bucket aggregation {pull}34392[#34392]
+* Initializes correct value of time picker's  refresh interval  {pull}35839[#35839]
+* Updates tab counters on filter change {pull}34246[#34246]
+* Resolves issue that occurs when migrations are partially complete and a new Kibana instance starts up {pull}37674[#37674]
+* Adds yml switch for using interpreter in expressions {pull}33832[#33832]
+
 
 
 [[release-notes-7.1.1]]
