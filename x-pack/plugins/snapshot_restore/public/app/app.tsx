@@ -91,7 +91,7 @@ export const App: React.FunctionComponent = () => {
   const sectionsRegex = sections.join('|');
 
   return (
-    <div>
+    <div data-test-subj="snapshotRestoreApp">
       <Switch>
         <Route exact path={`${BASE_PATH}/add_repository`} component={RepositoryAdd} />
         <Route exact path={`${BASE_PATH}/edit_repository/:name*`} component={RepositoryEdit} />

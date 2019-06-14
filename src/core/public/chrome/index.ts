@@ -21,7 +21,6 @@ export {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeService,
-  ChromeSetup,
   ChromeStart,
   ChromeBrand,
   ChromeHelpExtension,

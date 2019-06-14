@@ -70,9 +70,6 @@ describe('rendering - rendering', () => {
   beforeEach(() => {
     localSource = cloneDeep(mocksSource);
   });
-  beforeEach(() => {
-    localSource = cloneDeep(mocksSource);
-  });
 
   test('it renders the Setup Instructions text when no index is available', async () => {
     localSource[0].result.data.source.status.indicesExist = false;

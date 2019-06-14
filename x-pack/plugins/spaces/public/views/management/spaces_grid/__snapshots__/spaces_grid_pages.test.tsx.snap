@@ -3,6 +3,7 @@
 exports[`SpacesGridPage renders as expected 1`] = `
 <div
   className="spcGridPage"
+  data-test-subj="spaces-grid-page"
 >
   <EuiPageContent
     horizontalPosition="center"

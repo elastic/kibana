@@ -12,6 +12,7 @@ import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
+import { APP_TITLE } from '../common/constants';
 import { App } from './components/app';
 import { HelpMenu } from './components/help_menu';
 import { store } from './stores';
@@ -48,7 +49,7 @@ if (chrome.getInjected('codeUiEnabled')) {
   chrome.setRootController('code', RootController);
   chrome.breadcrumbs.set([
     {
-      text: 'Code (Beta)',
+      text: APP_TITLE,
       href: '#/',
     },
   ]);

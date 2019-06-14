@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -70,7 +70,7 @@ const COLUMNS = {
   },
 };
 
-export class PolicyTableUi extends Component {
+export class PolicyTable extends Component {
   constructor(props) {
     super(props);
 
@@ -218,26 +218,24 @@ export class PolicyTableUi extends Component {
     }
   }
   buildActionPanelTree(policy) {
-    const { intl } = this.props;
     const hasLinkedIndices = Boolean(policy.linkedIndices && policy.linkedIndices.length);
 
-    const viewIndicesLabel = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
-      defaultMessage: 'View indices linked to policy',
+    const viewIndicesLabel = i18n.translate('xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText', {
+      defaultMessage: 'View indices linked to policy'
     });
-    const addPolicyToTemplateLabel = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.policyTable.addPolicyToTemplateButtonText',
-      defaultMessage: 'Add policy to index template',
+    const addPolicyToTemplateLabel = i18n.translate('xpack.indexLifecycleMgmt.policyTable.addPolicyToTemplateButtonText', {
+      defaultMessage: 'Add policy to index template'
     });
-    const deletePolicyLabel = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText',
-      defaultMessage: 'Delete policy',
+    const deletePolicyLabel = i18n.translate('xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText', {
+      defaultMessage: 'Delete policy'
     });
     const deletePolicyTooltip = hasLinkedIndices
-      ? intl.formatMessage({
-        id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
-        defaultMessage: 'You cannot delete a policy that is being used by an index',
-      })
+      ? i18n.translate(
+        'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
+        {
+          defaultMessage: 'You cannot delete a policy that is being used by an index'
+        }
+      )
       : null;
     const items = [];
     if (hasLinkedIndices) {
@@ -271,9 +269,8 @@ export class PolicyTableUi extends Component {
     });
     const panelTree = {
       id: 0,
-      title: intl.formatMessage({
-        id: 'xpack.indexLifecycleMgmt.policyTable.policyActionsMenu.panelTitle',
-        defaultMessage: 'Policy options',
+      title: i18n.translate('xpack.indexLifecycleMgmt.policyTable.policyActionsMenu.panelTitle', {
+        defaultMessage: 'Policy options'
       }),
       items,
     };
@@ -298,7 +295,6 @@ export class PolicyTableUi extends Component {
     this.setState({ policyPopover: policy.name });
   };
   buildRowCells(policy) {
-    const { intl } = this.props;
     const { name } = policy;
     const cells = Object.entries(COLUMNS).map(([fieldName, { width }]) => {
       const value = policy[fieldName];
@@ -320,9 +316,8 @@ export class PolicyTableUi extends Component {
         onClick={() => this.togglePolicyPopover(policy)}
         color="primary"
       >
-        {intl.formatMessage({
-          id: 'xpack.indexLifecycleMgmt.policyTable.actionsButtonText',
-          defaultMessage: 'Actions',
+        {i18n.translate('xpack.indexLifecycleMgmt.policyTable.actionsButtonText', {
+          defaultMessage: 'Actions'
         })}
       </EuiButtonEmpty>
     );
@@ -382,7 +377,6 @@ export class PolicyTableUi extends Component {
       totalNumberOfPolicies,
       policyFilterChanged,
       filter,
-      intl,
       policyListLoaded,
     } = this.props;
     const { selectedPoliciesMap } = this.state;
@@ -428,14 +422,18 @@ export class PolicyTableUi extends Component {
                   policyFilterChanged(event.target.value);
                 }}
                 data-test-subj="policyTableFilterInput"
-                placeholder={intl.formatMessage({
-                  id: 'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputPlaceholder',
-                  defaultMessage: 'Search',
-                })}
-                aria-label={intl.formatMessage({
-                  id: 'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputAriaLabel',
-                  defaultMessage: 'Search policies',
-                })}
+                placeholder={i18n.translate(
+                  'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputPlaceholder',
+                  {
+                    defaultMessage: 'Search'
+                  }
+                )}
+                aria-label={i18n.translate(
+                  'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputAriaLabel',
+                  {
+                    defaultMessage: 'Search policies'
+                  }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -491,5 +489,3 @@ export class PolicyTableUi extends Component {
     );
   }
 }
-
-export const PolicyTable = injectI18n(PolicyTableUi);
