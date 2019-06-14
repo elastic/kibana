@@ -196,7 +196,7 @@ export class VectorLayer extends AbstractLayer {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
 
-  async _canSkipSourceUpdate(source, sourceDataId, searchFilters) {
+  async _canSkipSourceUpdate(source, sourceDataId, nextMeta) {
 
     const timeAware = await source.isTimeAware();
     const refreshTimerAware = await source.isRefreshTimerAware();
@@ -221,24 +221,24 @@ export class VectorLayer extends AbstractLayer {
     if (!sourceDataRequest) {
       return false;
     }
-    const meta = sourceDataRequest.getMeta();
-    if (!meta) {
+    const prevMeta = sourceDataRequest.getMeta();
+    if (!prevMeta) {
       return false;
     }
 
     let updateDueToTime = false;
     if (timeAware) {
-      updateDueToTime = !_.isEqual(meta.timeFilters, searchFilters.timeFilters);
+      updateDueToTime = !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters);
     }
 
     let updateDueToRefreshTimer = false;
-    if (refreshTimerAware && searchFilters.refreshTimerLastTriggeredAt) {
-      updateDueToRefreshTimer = !_.isEqual(meta.refreshTimerLastTriggeredAt, searchFilters.refreshTimerLastTriggeredAt);
+    if (refreshTimerAware && nextMeta.refreshTimerLastTriggeredAt) {
+      updateDueToRefreshTimer = !_.isEqual(prevMeta.refreshTimerLastTriggeredAt, nextMeta.refreshTimerLastTriggeredAt);
     }
 
     let updateDueToFields = false;
     if (isFieldAware) {
-      updateDueToFields = !_.isEqual(meta.fieldNames, searchFilters.fieldNames);
+      updateDueToFields = !_.isEqual(prevMeta.fieldNames, nextMeta.fieldNames);
     }
 
     let updateDueToQuery = false;
@@ -246,24 +246,26 @@ export class VectorLayer extends AbstractLayer {
     let updateDueToLayerQuery = false;
     let updateDueToApplyGlobalQuery = false;
     if (isQueryAware) {
-      updateDueToApplyGlobalQuery = meta.applyGlobalQuery !== searchFilters.applyGlobalQuery;
-      updateDueToLayerQuery = !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
-      if (searchFilters.applyGlobalQuery) {
-        updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
-        updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+      updateDueToApplyGlobalQuery = prevMeta.applyGlobalQuery !== nextMeta.applyGlobalQuery;
+      updateDueToLayerQuery = !_.isEqual(prevMeta.layerQuery, nextMeta.layerQuery);
+      if (nextMeta.applyGlobalQuery) {
+        updateDueToQuery = !_.isEqual(prevMeta.query, nextMeta.query);
+        updateDueToFilters = !_.isEqual(prevMeta.filters, nextMeta.filters);
       } else {
         // Global filters and query are not applied to layer search request so no re-fetch required.
         // Exception is "Refresh" query.
-        updateDueToQuery = isRefreshOnlyQuery(meta.query, searchFilters.query);
+        updateDueToQuery = isRefreshOnlyQuery(prevMeta.query, nextMeta.query);
       }
     }
 
     let updateDueToPrecisionChange = false;
     if (isGeoGridPrecisionAware) {
-      updateDueToPrecisionChange = !_.isEqual(meta.geogridPrecision, searchFilters.geogridPrecision);
+      updateDueToPrecisionChange = !_.isEqual(prevMeta.geogridPrecision, nextMeta.geogridPrecision);
     }
 
-    const updateDueToExtentChange = this.updateDueToExtent(source, meta, searchFilters);
+    const updateDueToExtentChange = this.updateDueToExtent(source, prevMeta, nextMeta);
+
+    const updateDueToSourceMetaChange = !_.isEqual(prevMeta.sourceMeta, nextMeta.sourceMeta);
 
     return !updateDueToTime
       && !updateDueToRefreshTimer
@@ -273,7 +275,8 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToFilters
       && !updateDueToLayerQuery
       && !updateDueToApplyGlobalQuery
-      && !updateDueToPrecisionChange;
+      && !updateDueToPrecisionChange
+      && !updateDueToSourceMetaChange;
   }
 
   async _syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -319,7 +322,6 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-
   async _syncJoins({ startLoading, stopLoading, onLoadError, dataFilters }) {
     const joinSyncs = this.getValidJoins().map(async join => {
       return this._syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters });
@@ -343,6 +345,7 @@ export class VectorLayer extends AbstractLayer {
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
       layerQuery: this.getQuery(),
       applyGlobalQuery: this.getApplyGlobalQuery(),
+      sourceMeta: this._source.getSyncMeta(),
     };
   }
 

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/ElementTypes/ElementControls has two buttons 1`] = `
+exports[`Storyshots components/Elements/ElementControls has two buttons 1`] = `
 <div
   style={
     Object {

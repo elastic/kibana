@@ -95,9 +95,6 @@ export interface ChromeNavLink {
 // Warning: (ae-forgotten-export) The symbol "ChromeService" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type ChromeSetup = ReturnType<ChromeService['setup']>;
-
-// @public (undocumented)
 export type ChromeStart = ReturnType<ChromeService['start']>;
 
 // @internal (undocumented)
@@ -107,13 +104,9 @@ export interface CoreContext {
 // @public
 export interface CoreSetup {
     // (undocumented)
-    chrome: ChromeSetup;
-    // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     http: HttpSetup;
-    // (undocumented)
-    i18n: I18nSetup;
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
@@ -237,14 +230,11 @@ export type HttpSetup = HttpServiceBase;
 export type HttpStart = HttpServiceBase;
 
 // @public
-export interface I18nSetup {
+export interface I18nStart {
     Context: ({ children }: {
         children: React.ReactNode;
     }) => JSX.Element;
 }
-
-// @public (undocumented)
-export type I18nStart = I18nSetup;
 
 // @internal (undocumented)
 export interface InternalCoreSetup extends CoreSetup {
@@ -355,7 +345,6 @@ export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 export class ToastsApi {
     constructor(deps: {
         uiSettings: UiSettingsSetup;
-        i18n: I18nSetup;
     });
     // (undocumented)
     add(toastOrTitle: ToastInput): Toast;

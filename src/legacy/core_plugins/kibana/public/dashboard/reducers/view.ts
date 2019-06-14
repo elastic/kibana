@@ -20,8 +20,9 @@
 import { cloneDeep } from 'lodash';
 import { Reducer } from 'redux';
 
-import { Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
+import { Filters, Query, TimeRange } from 'ui/embeddable';
 import { QueryLanguageType } from 'ui/embeddable/types';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { ViewActions, ViewActionTypeKeys } from '../actions';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelId, ViewState } from '../selectors';
@@ -61,7 +62,7 @@ const updateTimeRange = (view: ViewState, timeRange: TimeRange) => ({
   timeRange,
 });
 
-const updateRefreshConfig = (view: ViewState, refreshConfig: RefreshConfig) => ({
+const updateRefreshConfig = (view: ViewState, refreshConfig: RefreshInterval) => ({
   ...view,
   refreshConfig,
 });
@@ -93,7 +94,7 @@ export const viewReducer: Reducer<ViewState> = (
     isFullScreenMode: false,
     query: { language: QueryLanguageType.LUCENE, query: '' },
     timeRange: { to: 'now', from: 'now-15m' },
-    refreshConfig: { isPaused: true, interval: 0 },
+    refreshConfig: { pause: true, value: 0 },
     useMargins: true,
     viewMode: DashboardViewMode.VIEW,
   },

@@ -382,9 +382,9 @@ describe('#decryptAttributes', () => {
       attributes
     );
     expect(encryptedAttributes).toEqual({
-      attrOne: expect.not.stringMatching('one'),
+      attrOne: expect.not.stringMatching(/^one$/),
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
       attrFour: null,
     });
 
@@ -417,7 +417,7 @@ describe('#decryptAttributes', () => {
     );
     expect(encryptedAttributes).toEqual({
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
     });
 
     await expect(
@@ -449,7 +449,7 @@ describe('#decryptAttributes', () => {
     expect(encryptedAttributes).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
     });
 
     const attributesWithoutAttr = { attrTwo: 'two', attrThree: encryptedAttributes.attrThree };
@@ -482,7 +482,7 @@ describe('#decryptAttributes', () => {
     expect(encryptedAttributes).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
     });
 
     const attributesInDifferentOrder = {
@@ -523,7 +523,7 @@ describe('#decryptAttributes', () => {
     expect(encryptedAttributes).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
     });
 
     await expect(
@@ -556,8 +556,8 @@ describe('#decryptAttributes', () => {
       attributes
     );
     expect(encryptedAttributes).toEqual({
-      attrOne: expect.not.stringMatching('one'),
-      attrThree: expect.not.stringMatching('three'),
+      attrOne: expect.not.stringMatching(/^one$/),
+      attrThree: expect.not.stringMatching(/^three$/),
     });
 
     await expect(
@@ -593,9 +593,9 @@ describe('#decryptAttributes', () => {
       attributes
     );
     expect(encryptedAttributes).toEqual({
-      attrOne: expect.not.stringMatching('one'),
+      attrOne: expect.not.stringMatching(/^one$/),
       attrTwo: 'two',
-      attrThree: expect.not.stringMatching('three'),
+      attrThree: expect.not.stringMatching(/^three$/),
       attrFour: null,
       attrFive: expect.any(String),
       attrSix: expect.any(String),
