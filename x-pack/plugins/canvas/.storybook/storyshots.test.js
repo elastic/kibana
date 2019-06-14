@@ -9,6 +9,7 @@ import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-story
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
 
+jest.mock('ui/kfetch');
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
 addSerializer(styleSheetSerializer);

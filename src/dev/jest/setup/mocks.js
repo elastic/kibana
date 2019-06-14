@@ -34,7 +34,6 @@
  * The mocks that are enabled that way live inside the `__mocks__` folders beside their implementation files.
  */
 
-jest.mock('ui/kfetch');
 jest.mock('ui/metadata');
 jest.mock('ui/chrome');
 
