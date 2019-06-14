@@ -31,18 +31,28 @@ describe('joinRows', () => {
   };
 
   it('returns a string from rows joined with sparator and quote, and remove duplicates', () => {
-    expect(fn(testTable, { column: 'name' })).to.be(
+    expect(fn(testTable, { column: 'name', quote: `'` })).to.be(
       "'product1','product2','product3','product4','product5'"
     );
   });
 
   it('escapes names with quote character in them', () => {
-    expect(fn(joesTable, { column: 'name' })).to.be("'joe\\'s product'");
+    expect(fn(joesTable, { column: 'name', quote: `'` })).to.be("'joe\\'s product'");
+  });
+
+  it('does not escape if no quote character is given', () => {
+    expect(fn(joesTable, { column: 'name', quote: '' })).to.be("joe's product");
   });
 
   it('returns a string from rows joined with sparator without quote, and remove duplicates', () => {
     expect(fn(testTable, { column: 'name', quote: '' })).to.be(
       'product1,product2,product3,product4,product5'
+    );
+  });
+
+  it('does not remove duplicates if distinct is false', () => {
+    expect(fn(testTable, { column: 'name', quote: '', distinct: false })).to.be(
+      'product1,product1,product1,product2,product2,product2,product3,product4,product5'
     );
   });
 

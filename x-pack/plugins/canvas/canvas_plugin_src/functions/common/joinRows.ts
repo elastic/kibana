@@ -11,6 +11,7 @@ interface Arguments {
   column: string;
   separator: string;
   quote: string;
+  distinct: boolean;
 }
 
 const escapeString = (data: string, quotechar: string): string => {
@@ -49,15 +50,20 @@ export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments,
         default: `"'"`,
         help: 'Quote character around values',
       },
+      distinct: {
+        types: ['boolean'],
+        default: true,
+        help: 'Extract unique values from the column',
+      },
     },
-    fn: (context, { column, separator, quote }) => {
+    fn: (context, { column, separator, quote, distinct }) => {
       return context.rows
         .reduce((acc, row) => {
           const value = row[column];
           if (typeof value === 'undefined') {
             throw errors.columnNotFound(column);
           }
-          if (acc.includes(value)) return acc;
+          if (distinct && acc.includes(value)) return acc;
           return acc.concat(value);
         }, [])
         .map((x: any) => `${quote}${escapeString(x, quote)}${quote}`)

@@ -11,7 +11,7 @@ import { FunctionFactory } from '../../functions/types';
 
 export const help: FunctionHelp<FunctionFactory<typeof joinRows>> = {
   help: i18n.translate('xpack.canvas.functions.joinRowsHelpText', {
-    defaultMessage: 'Add a column calculated as the result of other columns, or not',
+    defaultMessage: 'Join values from rows in a datatable into a string',
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.joinRows.args.columnHelpText', {
@@ -23,16 +23,19 @@ export const help: FunctionHelp<FunctionFactory<typeof joinRows>> = {
     quote: i18n.translate('xpack.canvas.functions.joinRows.args.quoteHelpText', {
       defaultMessage: 'Quote character around values',
     }),
+    distinct: i18n.translate('xpack.canvas.functions.joinRows.args.distinctHelpText', {
+      defaultMessage: 'Removes duplicate values if enabled',
+    }),
   },
 };
 
 export const errors = {
-  rowNotFound: (row: number) =>
+  columnNotFound: (column: string) =>
     new Error(
-      i18n.translate('xpack.canvas.functions.joinRows.rowNotFoundErrorMessage', {
-        defaultMessage: "Row not found: '{row}'",
+      i18n.translate('xpack.canvas.functions.joinRows.columnNotFoundErrorMessage', {
+        defaultMessage: "Column not found: '{column}'",
         values: {
-          row,
+          column,
         },
       })
     ),
