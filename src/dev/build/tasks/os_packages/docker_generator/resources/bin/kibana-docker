@@ -136,7 +136,6 @@ kibana_vars=(
     xpack.reporting.queue.timeout
     xpack.reporting.roles.allow
     xpack.searchprofiler.enabled
-    xpack.security.authProviders
     xpack.security.authc.providers
     xpack.security.cookieName
     xpack.security.enabled
