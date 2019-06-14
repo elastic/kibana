@@ -30,7 +30,7 @@ export default function ({ loadTestFile, getService }) {
 
     describe('', function () {
       this.tags('ciGroup7');
-      loadTestFile(require.resolve('./es_search_source'));
+      loadTestFile(require.resolve('./documents_source'));
       loadTestFile(require.resolve('./saved_object_management'));
       loadTestFile(require.resolve('./sample_data'));
       loadTestFile(require.resolve('./feature_controls/maps_security'));
