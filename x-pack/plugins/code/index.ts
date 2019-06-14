@@ -10,6 +10,7 @@ import moment from 'moment';
 import { resolve } from 'path';
 
 import { init } from './server/init';
+import { APP_TITLE } from './common/constants';
 
 export const code = (kibana: any) =>
   new kibana.Plugin({
@@ -20,7 +21,7 @@ export const code = (kibana: any) =>
 
     uiExports: {
       app: {
-        title: 'Code (Beta)',
+        title: APP_TITLE,
         main: 'plugins/code/app',
         euiIconType: 'codeApp',
       },
@@ -38,7 +39,7 @@ export const code = (kibana: any) =>
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
         }).default(),
-        enabled: Joi.boolean().default(false),
+        enabled: Joi.boolean().default(true),
         queueIndex: Joi.string().default('.code_internal-worker-queue'),
         // 1 hour by default.
         queueTimeoutMs: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),

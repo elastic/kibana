@@ -92,9 +92,9 @@ const steps = [
           <EuiLink href={documentationLinks.codeOtherFeatures} target="_blank">
             navigating
           </EuiLink>{' '}
-          the repo. If language support is available to the repo, also make sure{' '}
+          the repo. If language support is available to the repo, make sure{' '}
           <EuiLink href={documentationLinks.semanticNavigation} target="_blank">
-            Semantic Navigation
+            semantic navigation
           </EuiLink>{' '}
           is available as well.
         </p>

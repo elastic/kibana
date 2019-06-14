@@ -1,6 +1,6 @@
 [role="xpack"]
 [[code-settings-kibana]]
-== Code Settings in Kibana
+=== Code Settings in Kibana
 ++++
 <titleabbrev>Code settings</titleabbrev>
 ++++
