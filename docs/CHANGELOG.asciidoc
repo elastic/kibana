@@ -195,10 +195,10 @@ Dashboard::
 * Allows embeddable to specify edit label {pull}36296[#36296]
 * Fixes courier:ignoreFilterIfFieldNotInIndex with chained input controls {pull}36369[#36369]
 * Fetches options for input control child select boxes {pull}38148[#38148]
+* Converts dashboard panels to Typescript {pull}27167[#27167]
 
 Discover::
 * Fixes problem with Discover not using an index pattern when two patterns are created {pull}38053[#38053]
-* Converts dashboard panels to Typescript {pull}27167[#27167]
 * Enables optional use of the timezone set in Advanced Settings in queries {pull}34602[#34602]
 
 Geo::
@@ -223,9 +223,6 @@ Geo::
 
 Graph::
 * Fixes default drilldown link on index pattern switch {pull}34251[#34251]
-
-Index Patterns::
-* Bumps numeral.js to fix negative time formatting bug {pull}35298[#35298]
 
 Infrastructure::
 * Fixes autocomplete overflow in Safari browser {pull}36820[#36820]
@@ -274,6 +271,7 @@ Management::
 * Removes rollup section in advanced settings for OSS {pull}32814[#32814]
 * Fixes Create Rollup Index Pattern button badge color error {pull}32954[#32954]
 * Fixes hanging UI when custom index pattern with existing ID created {pull}36097[#36097]
+* Bumps numeral.js to fix negative time formatting bug {pull}35298[#35298]
 
 Monitoring::
 * Improves performance of the Logstash Pipeline Viewer {pull}31293[#31293]
