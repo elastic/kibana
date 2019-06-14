@@ -30,24 +30,14 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
 
-if [[ "$JOB" != "x-pack-firefox-intake"* ]]; then
-  checks-reporter-with-killswitch "X-Pack Chrome Functional tests / Group ${CI_GROUP}" \
-    node scripts/functional_tests \
-      --debug --bail \
-      --kibana-install-dir "$installDir" \
-      --include-tag "ciGroup$CI_GROUP"
+checks-reporter-with-killswitch "X-Pack Chrome Functional tests / Group ${CI_GROUP}" \
+  node scripts/functional_tests \
+    --debug --bail \
+    --kibana-install-dir "$installDir" \
+    --include-tag "ciGroup$CI_GROUP"
 
-  echo ""
-  echo ""
-fi
-
-if [[ "$JOB" = "x-pack-firefox-intake"* ]]; then
-  # Firefox functional tests
-  node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag "smoke" --config "test/functional/config.firefox.js"
-
-  echo ""
-  echo ""
-fi
+echo ""
+echo ""
 
 # checks-reporter-with-killswitch "X-Pack Firefox Functional tests / Group ${CI_GROUP}" \
 #   node scripts/functional_tests --debug --bail \
