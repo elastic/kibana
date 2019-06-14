@@ -42,12 +42,7 @@ export default function ({ getService }) {
           .expect(200);
 
         expect(body).to.eql({
-          name: 'test_cluster',
-          seeds: [
-            NODE_SEED
-          ],
-          skipUnavailable: 'true', // ES issue #35671
-          isConfiguredByNode: false,
+          acknowledged: true,
         });
       });
 
@@ -96,18 +91,6 @@ export default function ({ getService }) {
           ],
           isConfiguredByNode: false,
         });
-      });
-
-      it(`fails if seeds aren't provided`, async () => {
-        const uri = `${API_BASE_PATH}/test_cluster`;
-
-        await supertest
-          .put(uri)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            skipUnavailable: true,
-          })
-          .expect(400);
       });
     });
 

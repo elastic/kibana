@@ -32,7 +32,15 @@ interface EuiValues {
  * @internal
  */
 export class I18nService {
-  public setup() {
+  /**
+   * Used exclusively to give a Context component to FatalErrorsService which
+   * may render before Core successfully sets up or starts.
+   *
+   * Separated from `start` to disambiguate that this can be called from within
+   * Core outside the lifecycle flow.
+   * @internal
+   */
+  public getContext(): I18nStart {
     const mapping = {
       'euiBasicTable.selectAllRows': i18n.translate('core.euiBasicTable.selectAllRows', {
         defaultMessage: 'Select all rows',
@@ -268,7 +276,7 @@ export class I18nService {
       }),
     };
 
-    const setup: I18nSetup = {
+    return {
       Context: function I18nContext({ children }) {
         return (
           <I18nProvider>
@@ -277,12 +285,10 @@ export class I18nService {
         );
       },
     };
-
-    return setup;
   }
 
-  public start() {
-    return this.setup();
+  public start(): I18nStart {
+    return this.getContext();
   }
 
   public stop() {
@@ -291,20 +297,15 @@ export class I18nService {
 }
 
 /**
- * I18nSetup.Context is required by any localizable React component from \@kbn/i18n and \@elastic/eui packages
+ * I18nStart.Context is required by any localizable React component from \@kbn/i18n and \@elastic/eui packages
  * and is supposed to be used as the topmost component for any i18n-compatible React tree.
  *
  * @public
  *
  */
-export interface I18nSetup {
+export interface I18nStart {
   /**
    * React Context provider required as the topmost component for any i18n-compatible React tree.
    */
   Context: ({ children }: { children: React.ReactNode }) => JSX.Element;
 }
-
-/**
- * @public
- */
-export type I18nStart = I18nSetup;
