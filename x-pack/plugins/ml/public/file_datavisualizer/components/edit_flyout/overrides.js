@@ -10,17 +10,20 @@ import { i18n } from '@kbn/i18n';
 import React, {
   Component,
 } from 'react';
+import { metadata } from 'ui/metadata';
 
 import {
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
   EuiComboBox,
   EuiCheckbox,
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiLink,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiTextArea,
-  EuiFieldNumber,
 } from '@elastic/eui';
 
 import {
@@ -260,6 +263,16 @@ export class Overrides extends Component {
 
     const fieldOptions = getSortedFields(fields);
     const timestampFormatErrorsList = [this.customTimestampFormatErrors, timestampFormatError];
+    // metadata.branch corresponds to the version used in documentation links.
+    const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern`;
+
+    const timestampFormatHelp = (
+      <EuiText size="xs">
+        <EuiLink href={docsUrl} target="_blank">
+          {'See more on accepted formats'}
+        </EuiLink>
+      </EuiText>
+    );
 
     return (
 
@@ -401,6 +414,7 @@ export class Overrides extends Component {
           </React.Fragment>
         }
         <EuiFormRow
+          helpText={timestampFormatHelp}
           label={
             <FormattedMessage
               id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampFormatFormRowLabel"
