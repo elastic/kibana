@@ -6,10 +6,28 @@
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { get } from 'lodash';
+import { CallAPIOptions } from 'src/core/server';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 // @ts-ignore
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
+
+type CallCluster = <T = unknown>(
+  endpoint: string,
+  clientParams: Record<string, unknown>,
+  options?: CallAPIOptions
+) => Promise<T>;
+
+interface SpacesAggregationResponse {
+  hits: {
+    total: { value: number };
+  };
+  aggregations: {
+    [aggName: string]: {
+      buckets: Array<{ key: string; doc_count: number }>;
+    };
+  };
+}
 
 /**
  *
@@ -19,7 +37,7 @@ import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
  * @return {UsageStats}
  */
 async function getSpacesUsage(
-  callCluster: any,
+  callCluster: CallCluster,
   kibanaIndex: string,
   xpackMainPlugin: XPackMainPlugin,
   spacesAvailable: boolean
@@ -30,7 +48,7 @@ async function getSpacesUsage(
 
   const knownFeatureIds = xpackMainPlugin.getFeatures().map(feature => feature.id);
 
-  const resp = await callCluster('search', {
+  const resp = await callCluster<SpacesAggregationResponse>('search', {
     index: kibanaIndex,
     body: {
       track_total_hits: true,
@@ -110,7 +128,7 @@ export function getSpacesUsageCollector(deps: CollectorDeps) {
   return collectorSet.makeUsageCollector({
     type: KIBANA_SPACES_STATS_TYPE,
     isReady: () => true,
-    fetch: async (callCluster: any) => {
+    fetch: async (callCluster: CallCluster) => {
       const xpackInfo = deps.xpackMain.info;
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of spaces is available for all valid licenses
       const enabled = deps.config.get('xpack.spaces.enabled');
