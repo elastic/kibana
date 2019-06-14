@@ -1,4 +1,4 @@
-[[code-intro]]
+[[code]]
 = Code
 
 [partintro]

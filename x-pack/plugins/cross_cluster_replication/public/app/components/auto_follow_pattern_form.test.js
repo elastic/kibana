@@ -12,11 +12,11 @@ jest.mock('../services/auto_follow_pattern_validators', () => ({
 }));
 
 jest.mock('ui/index_patterns/index_patterns.js', () => ({
-  IndexPatternsProvider: jest.fn(),
+  IndexPatterns: jest.fn(),
 }));
 
-jest.mock('ui/index_patterns/index_patterns_api_client_provider.js', () => ({
-  IndexPatternsApiClientProvider: jest.fn(),
+jest.mock('ui/index_patterns/index_patterns_api_client.js', () => ({
+  IndexPatternsApiClient: jest.fn(),
 }));
 
 describe('<AutoFollowPatternForm state update', () => {

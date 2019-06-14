@@ -40,6 +40,7 @@
     "xpack.ml": "x-pack/plugins/ml",
     "xpack.logstash": "x-pack/plugins/logstash",
     "xpack.main": "x-pack/plugins/xpack_main",
+    "xpack.telemetry": "x-pack/plugins/telemetry",
     "xpack.monitoring": "x-pack/plugins/monitoring",
     "xpack.remoteClusters": "x-pack/plugins/remote_clusters",
     "xpack.reporting": "x-pack/plugins/reporting",

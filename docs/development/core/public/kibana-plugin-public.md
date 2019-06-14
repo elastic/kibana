@@ -35,7 +35,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) |  |
 |  [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |  |
-|  [I18nSetup](./kibana-plugin-public.i18nsetup.md) | I18nSetup.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
+|  [I18nStart](./kibana-plugin-public.i18nstart.md) | I18nStart.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [LegacyNavLink](./kibana-plugin-public.legacynavlink.md) |  |
 |  [NotificationsSetup](./kibana-plugin-public.notificationssetup.md) |  |
 |  [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |  |
@@ -50,11 +50,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Type Alias | Description |
 |  --- | --- |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
-|  [ChromeSetup](./kibana-plugin-public.chromesetup.md) |  |
 |  [ChromeStart](./kibana-plugin-public.chromestart.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
-|  [I18nStart](./kibana-plugin-public.i18nstart.md) |  |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) |  |

@@ -18,7 +18,7 @@ import routes from 'ui/routes';
 import { AdvancedSettingsSubtitle } from './components/advanced_settings_subtitle';
 import { AdvancedSettingsTitle } from './components/advanced_settings_title';
 
-const MANAGE_SPACES_KEY = 'manage_spaces';
+const MANAGE_SPACES_KEY = 'spaces';
 
 routes.defaults(/\/management/, {
   resolve: {
