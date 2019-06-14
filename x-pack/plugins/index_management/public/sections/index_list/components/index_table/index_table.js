@@ -384,15 +384,23 @@ export class IndexTable extends Component {
       allIndices,
     } = this.props;
 
-    const emptyState = indicesLoading ? (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ) : (
-      <NoMatch />
-    );
+    let emptyState;
+
+    if (indicesLoading) {
+      emptyState = (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (!indicesLoading && !indicesError) {
+      emptyState = (
+        <NoMatch />
+      );
+    }
 
     const { selectedIndicesMap } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
