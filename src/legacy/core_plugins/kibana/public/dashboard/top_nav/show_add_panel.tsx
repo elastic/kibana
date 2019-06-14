@@ -18,35 +18,43 @@
  */
 
 import { I18nContext } from 'ui/i18n';
-import { DashboardCloneModal } from './clone_modal';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { i18n } from '@kbn/i18n';
+import { DashboardAddPanel } from './add_panel';
+import { EmbeddableFactoryRegistry } from '../types';
 
-export function showCloneModal(onClone, title) {
+let isOpen = false;
+
+export function showAddPanel(
+  addNewPanel: (id: string, type: string) => void,
+  addNewVis: () => void,
+  embeddableFactories: EmbeddableFactoryRegistry
+) {
+  if (isOpen) {
+    return;
+  }
+
+  isOpen = true;
   const container = document.createElement('div');
-  const closeModal = () => {
+  const onClose = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
+    isOpen = false;
   };
 
-  const onCloneConfirmed = (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) => {
-    onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate).then(({ id, error }) => {
-      if (id || error) {
-        closeModal();
-      }
-    });
+  const addNewVisWithCleanup = () => {
+    onClose();
+    addNewVis();
   };
+
   document.body.appendChild(container);
   const element = (
     <I18nContext>
-      <DashboardCloneModal
-        onClone={onCloneConfirmed}
-        onClose={closeModal}
-        title={i18n.translate('kbn.dashboard.topNav.showCloneModal.dashboardCopyTitle', {
-          defaultMessage: '{title} Copy',
-          values: { title },
-        })}
+      <DashboardAddPanel
+        onClose={onClose}
+        addNewPanel={addNewPanel}
+        addNewVis={addNewVisWithCleanup}
+        embeddableFactories={embeddableFactories}
       />
     </I18nContext>
   );
