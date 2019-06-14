@@ -24,6 +24,12 @@ x-pack-ciGroup*)
   export CI_GROUP="${JOB##x-pack-ciGroup}"
   ./test/scripts/jenkins_xpack_ci_group.sh
   ;;
+firefox-intake*)
+  ./test/scripts/jenkins_ci_group.sh
+  ;;
+x-pack-firefox-intake*)
+  ./test/scripts/jenkins_xpack_ci_group.sh
+  ;;
 *)
   echo "JOB '$JOB' is not implemented."
   exit 1

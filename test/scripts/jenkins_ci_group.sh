@@ -3,13 +3,18 @@
 set -e
 trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
-"$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
+
+if [[ "$JOB" != "firefox-intake"* ]]; then
+  "$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
+fi
 
 node scripts/build --debug --oss;
 
 export TEST_BROWSER_HEADLESS=1
 
-checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
+if [[ "$JOB" != "firefox-intake"* ]]; then
+  checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
+fi
 
 if [ "$CI_GROUP" == "1" ]; then
   # build kbn_tp_sample_panel_action
@@ -18,4 +23,9 @@ if [ "$CI_GROUP" == "1" ]; then
   cd -;
   yarn run grunt run:pluginFunctionalTestsRelease --from=source;
   yarn run grunt run:interpreterFunctionalTestsRelease;
+fi
+
+if [[ "$JOB" = "firefox-intake"* ]]; then
+  # Firefox functional tests dedicated run
+  node scripts/functional_tests --bail --debug --kibana-install-dir "$installDir" --config "test/functional/config.firefox.js" --include-tag "smoke"
 fi
