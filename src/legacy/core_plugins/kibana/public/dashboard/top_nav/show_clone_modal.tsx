@@ -18,38 +18,50 @@
  */
 
 import { I18nContext } from 'ui/i18n';
-import { DashboardAddPanel } from './add_panel';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { i18n } from '@kbn/i18n';
+import { DashboardCloneModal } from './clone_modal';
 
-let isOpen = false;
-
-export function showAddPanel(addNewPanel, addNewVis, embeddableFactories) {
-  if (isOpen) {
-    return;
-  }
-
-  isOpen = true;
+export function showCloneModal(
+  onClone: (
+    newTitle: string,
+    isTitleDuplicateConfirmed: boolean,
+    onTitleDuplicate: () => void
+  ) => Promise<{ id?: string } | { error: Error }>,
+  title: string
+) {
   const container = document.createElement('div');
-  const onClose = () => {
+  const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
-    isOpen = false;
   };
 
-  const addNewVisWithCleanup = () => {
-    onClose();
-    addNewVis();
+  const onCloneConfirmed = async (
+    newTitle: string,
+    isTitleDuplicateConfirmed: boolean,
+    onTitleDuplicate: () => void
+  ) => {
+    onClone(newTitle, isTitleDuplicateConfirmed, onTitleDuplicate).then(
+      (response: { id?: string } | { error: Error }) => {
+        // The only time you don't want to close the modal is if it's asking you
+        // to confirm a duplicate title, in which case there will be no error and no id.
+        if ((response as { error: Error }).error || (response as { id?: string }).id) {
+          closeModal();
+        }
+      }
+    );
   };
-
   document.body.appendChild(container);
   const element = (
     <I18nContext>
-      <DashboardAddPanel
-        onClose={onClose}
-        addNewPanel={addNewPanel}
-        addNewVis={addNewVisWithCleanup}
-        embeddableFactories={embeddableFactories}
+      <DashboardCloneModal
+        onClone={onCloneConfirmed}
+        onClose={closeModal}
+        title={i18n.translate('kbn.dashboard.topNav.showCloneModal.dashboardCopyTitle', {
+          defaultMessage: '{title} Copy',
+          values: { title },
+        })}
       />
     </I18nContext>
   );
