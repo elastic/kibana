@@ -13,16 +13,16 @@ first-class applications.
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { MyApp } from './components';
-
 class MyPlugin {
   setup({ application }) {
     application.register({
       id: 'my-app',
       title: 'My Application',
-      mount(context, targetDomElement) {
+      async mount(context, targetDomElement) {
+        const { MyApp } = await import('./components');
+
         ReactDOM.render(
-          <MyAppRoot mountContext={context} deps={pluginStart} />,
+          <MyApp mountContext={context} deps={pluginStart} />,
           targetDomElement
         );
 
@@ -90,7 +90,7 @@ export interface AppSpec {
    * @param targetDomElement An HTMLElement to mount the application onto.
    * @returns An unmounting function that will be called to unmount the application.
    */
-  mount(context: MountContext, targetDomElement: HTMLElement): Unmount;
+  mount(context: MountContext, targetDomElement: HTMLElement): Unmount | Promise<Unmount>;
 
   /**
    * A EUI iconType that will be used for the app's icon. This icon
@@ -135,10 +135,11 @@ When an app is registered via `registerApp`, it must provide a `mount` function
 that will be invoked whenever the window's location has changed from another app
 to this app.
 
-This function is called with an `HTMLElement` for the application
-to render itself to. The application must also return a function that can be
-called by the ApplicationService to unmount the application at the given DOM
-node.
+This function is called with an `HTMLElement` for the application to render
+itself to. The mount function must also return a function that can be called by
+the ApplicationService to unmount the application at the given DOM node. The
+mount function may return a Promise of an unmount function in order to import UI
+code dynamically.
 
 The ApplicationService's `registerApp` method will only be available during the
 *setup* lifecycle event. This allows the system to know when all applications
