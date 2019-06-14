@@ -113,7 +113,7 @@ export class SetViewControl extends Component {
     });
 
     return (
-      <EuiForm>
+      <EuiForm data-test-subj="mapSetViewForm">
 
         {latFormRow}
 
