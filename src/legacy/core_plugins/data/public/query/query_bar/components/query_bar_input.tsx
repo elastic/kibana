@@ -42,7 +42,8 @@ import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { SavedQueryRow } from './saved_query_row';
-import { SavedQueryAttributes } from '../../../search/search_bar';
+import { SavedQueryAttributes, SavedQuery } from '../../../search/search_bar';
+import { findSavedQueries } from '../lib/saved_query_service';
 
 interface Props {
   indexPatterns: Array<IndexPattern | string>;
@@ -86,6 +87,7 @@ const KEY_CODES = {
 
 const config = chrome.getUiSettingsClient();
 const recentSearchType: AutocompleteSuggestionType = 'recentSearch';
+const savedQueryType: AutocompleteSuggestionType = 'savedQuery';
 
 export class QueryBarInputUI extends Component<Props, State> {
   public state = {
@@ -131,6 +133,7 @@ export class QueryBarInputUI extends Component<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
+    const savedQuerySuggestions = await this.getSavedQueriesSuggestions(queryString);
 
     const autocompleteProvider = getAutocompleteProvider(language);
     if (
@@ -138,7 +141,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       !Array.isArray(this.state.indexPatterns) ||
       compact(this.state.indexPatterns).length === 0
     ) {
-      return recentSearchSuggestions;
+      return [...recentSearchSuggestions, ...savedQuerySuggestions];
     }
 
     const indexPatterns = this.state.indexPatterns;
@@ -154,7 +157,8 @@ export class QueryBarInputUI extends Component<Props, State> {
       selectionStart,
       selectionEnd,
     });
-    return [...suggestions, ...recentSearchSuggestions];
+
+    return [...suggestions, ...recentSearchSuggestions, ...savedQuerySuggestions];
   };
 
   private getRecentSearchSuggestions = (query: string) => {
@@ -171,6 +175,16 @@ export class QueryBarInputUI extends Component<Props, State> {
       const start = 0;
       const end = query.length;
       return { type: recentSearchType, text, start, end };
+    });
+  };
+
+  private getSavedQueriesSuggestions = async (searchText: string) => {
+    const savedQueries = await findSavedQueries(searchText);
+    return savedQueries.map((savedQuery: SavedQuery) => {
+      const text = toUser(savedQuery.attributes.title);
+      const start = 0;
+      const end = searchText.length;
+      return { type: savedQueryType, text, start, end };
     });
   };
 

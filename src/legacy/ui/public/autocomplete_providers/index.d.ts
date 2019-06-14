@@ -45,7 +45,8 @@ export type AutocompleteSuggestionType =
   | 'value'
   | 'operator'
   | 'conjunction'
-  | 'recentSearch';
+  | 'recentSearch'
+  | 'savedQuery';
 
 export interface AutocompleteSuggestion {
   description?: string;

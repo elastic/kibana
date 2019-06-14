@@ -18,7 +18,19 @@
  */
 
 import chrome from 'ui/chrome';
-import { SavedQueryAttributes } from '../../../search/search_bar';
+import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
+import { SavedQueryAttributes, SavedQuery } from '../../../search/search_bar';
+
+interface SerializedSavedQueryAttributes extends SavedObjectAttributes {
+  title: string;
+  description: string;
+  query: {
+    query: string;
+    language: string;
+  };
+  filters?: string;
+  timefilter?: string;
+}
 
 export const saveQuery = async (attributes: SavedQueryAttributes, id: string = '') => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
@@ -80,4 +92,42 @@ export const saveQuery = async (attributes: SavedQueryAttributes, id: string = '
     responseObject.timefilter = JSON.parse(rawQueryResponse.attributes.timefilter);
   }
   return { id: rawQueryResponse.id, attributes: responseObject };
+};
+
+export const findSavedQueries = async (searchText: string = ''): Promise<SavedQuery[]> => {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+
+  const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
+    type: 'query',
+    search: searchText,
+    searchFields: ['title^5', 'description'],
+    sortField: '_score',
+  });
+
+  return response.savedObjects.map(savedObject => {
+    let queryString;
+    try {
+      queryString = JSON.parse(savedObject.attributes.query.query);
+    } catch (error) {
+      queryString = savedObject.attributes.query.query;
+    }
+    const savedQuery: SavedQueryAttributes = {
+      title: savedObject.attributes.title || '',
+      description: savedObject.attributes.description || '',
+      query: {
+        query: queryString,
+        language: savedObject.attributes.query.language,
+      },
+    };
+    if (savedObject.attributes.filters) {
+      savedQuery.filters = JSON.parse(savedObject.attributes.filters);
+    }
+    if (savedObject.attributes.timefilter) {
+      savedQuery.timefilter = JSON.parse(savedObject.attributes.timefilter);
+    }
+    return {
+      id: savedObject.id,
+      attributes: savedQuery,
+    };
+  });
 };
