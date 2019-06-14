@@ -181,6 +181,7 @@
     "@kbn/es-query": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/interpreter": "1.0.0",
+    "@kbn/maki": "6.1.0",
     "@kbn/ui-framework": "1.0.0",
     "@mapbox/mapbox-gl-draw": "^1.1.1",
     "@samverschueren/stream-to-observable": "^0.3.0",
