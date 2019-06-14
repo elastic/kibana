@@ -5,14 +5,14 @@
  */
 
 import { get, uniq } from 'lodash';
-import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN } from '../../../../common/constants';
+import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
 import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 
+const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 const APM_CUSTOM_ID = 'apm';
-const ELASTICSEARCH_CUSTOM_ID = 'elasticsearch';
 
 const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
-  const start = get(req.payload, 'timeRange.min', 'now-30s');
+  const start = get(req.payload, 'timeRange.min', `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`);
   const end = get(req.payload, 'timeRange.max', 'now');
 
   const filters = [
@@ -247,6 +247,9 @@ function shouldSkipBucket(product, bucket) {
  * @param {*} clusterUuid Optional and will be used to filter down the query if used
  */
 export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
+  const config = req.server.config();
+  const kibanaUuid = config.get('server.uuid');
+
   const PRODUCTS = [
     { name: KIBANA_SYSTEM_ID },
     { name: BEATS_SYSTEM_ID },
@@ -273,8 +276,9 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     const productStatus = {
       totalUniqueInstanceCount: 0,
       totalUniqueFullyMigratedCount: 0,
+      totalUniquePartiallyMigratedCount: 0,
       detected: null,
-      byUuid: null,
+      byUuid: {},
     };
 
     const fullyMigratedUuidsMap = {};
@@ -291,7 +295,6 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
       const singleIndexBucket = indexBuckets[0];
       const isFullyMigrated = singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
 
-
       const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
       const uuidBuckets = get(singleIndexBucket, `${uuidBucketName}.buckets`, []);
       for (const bucket of uuidBuckets) {
@@ -301,9 +304,13 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
         const { key, by_timestamp: byTimestamp } = bucket;
         if (!map[key]) {
           map[key] = { lastTimestamp: get(byTimestamp, 'value') };
+          if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
+            map[key].isPrimary = true;
+          }
         }
       }
       productStatus.totalUniqueInstanceCount = Object.keys(map).length;
+      productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
@@ -337,11 +344,14 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
           const { key, by_timestamp: byTimestamp } = bucket;
           if (!map[key]) {
             if (otherMap[key]) {
-              partiallyMigratedUuidsMap[key] = true;
+              partiallyMigratedUuidsMap[key] = otherMap[key] || {};
               delete otherMap[key];
             }
             else {
-              map[key] = true;
+              map[key] = {};
+              if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
+                map[key].isPrimary = true;
+              }
             }
           }
           if (!isFullyMigrated) {
@@ -355,19 +365,30 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
         ...Object.keys(fullyMigratedUuidsMap),
         ...Object.keys(partiallyMigratedUuidsMap)
       ]).length;
+      productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isInternalCollector: true }
+          [uuid]: {
+            isInternalCollector: true,
+            ...internalCollectorsUuidsMap[uuid]
+          }
         }), {}),
         ...Object.keys(partiallyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isPartiallyMigrated: true, lastInternallyCollectedTimestamp: internalTimestamps[0] }
+          [uuid]: {
+            isPartiallyMigrated: true,
+            lastInternallyCollectedTimestamp: internalTimestamps[0],
+            ...partiallyMigratedUuidsMap[uuid]
+          }
         }), {}),
         ...Object.keys(fullyMigratedUuidsMap).reduce((accum, uuid) => ({
           ...accum,
-          [uuid]: { isFullyMigrated: true }
+          [uuid]: {
+            isFullyMigrated: true,
+            ...fullyMigratedUuidsMap[uuid]
+          }
         }), {}),
       };
     }
@@ -377,6 +398,10 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
       [product.name]: productStatus,
     };
   }, {});
+
+  status._meta = {
+    secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
+  };
 
   return status;
 };
