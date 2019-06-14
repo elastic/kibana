@@ -65,6 +65,7 @@ function profileVizController($scope, $route, $interval, $http, HighlightService
   $scope.description = 'Search profiling and visualization';
   $scope.profileResponse = [];
   $scope.highlight = HighlightService;
+  $scope.index = '_all';
 
   // TODO this map controls which tab is active, but due to how
   // the tab directive works, we cannot use a single variable to hold the state.
