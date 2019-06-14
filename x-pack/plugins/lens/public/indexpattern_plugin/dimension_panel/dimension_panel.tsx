@@ -15,10 +15,11 @@ import {
   IndexPatternField,
 } from '../indexpattern';
 
-import { getPotentialColumns, operationDefinitionMap, getColumnOrder } from '../operations';
+import { getPotentialColumns, operationDefinitionMap } from '../operations';
 import { FieldSelect } from './field_select';
 import { Settings } from './settings';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
+import { changeColumn } from '../state_helpers';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -66,16 +67,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
             return;
           }
 
-          const newColumns: IndexPatternPrivateState['columns'] = {
-            ...props.state.columns,
-            [props.columnId]: column,
-          };
-
-          props.setState({
-            ...props.state,
-            columnOrder: getColumnOrder(newColumns),
-            columns: newColumns,
-          });
+          props.setState(changeColumn(props.state, props.columnId, column));
         }}
       >
         <EuiFlexGroup direction="column">

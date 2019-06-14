@@ -16,12 +16,8 @@ import {
 } from '@elastic/eui';
 import { IndexPatternColumn } from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
-import {
-  getColumnOrder,
-  operationDefinitionMap,
-  getOperations,
-  getOperationDisplay,
-} from '../operations';
+import { operationDefinitionMap, getOperations, getOperationDisplay } from '../operations';
+import { changeColumn } from '../state_helpers';
 
 export interface SettingsProps extends IndexPatternDimensionPanelProps {
   selectedColumn: IndexPatternColumn;
@@ -74,16 +70,7 @@ export function Settings({
                 col.sourceField === selectedColumn.sourceField)
           )!;
 
-          const newColumns = {
-            ...state.columns,
-            [columnId]: newColumn,
-          };
-
-          setState({
-            ...state,
-            columnOrder: getColumnOrder(newColumns),
-            columns: newColumns,
-          });
+          setState(changeColumn(state, columnId, newColumn));
         }}
       >
         {operationPanels[o].displayName}

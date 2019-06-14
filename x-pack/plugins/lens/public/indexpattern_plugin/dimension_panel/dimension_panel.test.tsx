@@ -8,11 +8,13 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiContextMenuItem } from '@elastic/eui';
 import { IndexPatternPrivateState } from '../indexpattern';
-import { getPotentialColumns, getColumnOrder, operationDefinitionMap } from '../operations';
+import { changeColumn } from '../state_helpers';
+import { getPotentialColumns, operationDefinitionMap } from '../operations';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 
+jest.mock('../state_helpers');
 jest.mock('../operations');
 
 const expectedIndexPatterns = {
@@ -417,7 +419,7 @@ describe('IndexPatternDimensionPanel', () => {
     });
   });
 
-  it('should always request the new sort order when changing the function', () => {
+  it('should use helper function when changing the function', () => {
     const setState = jest.fn();
 
     const wrapper = mount(
@@ -456,12 +458,14 @@ describe('IndexPatternDimensionPanel', () => {
       .first()
       .simulate('click');
 
-    expect(getColumnOrder).toHaveBeenCalledWith({
-      col1: expect.objectContaining({
+    expect(changeColumn).toHaveBeenCalledWith(
+      expect.anything(),
+      'col1',
+      expect.objectContaining({
         sourceField: 'bytes',
         operationType: 'min',
-      }),
-    });
+      })
+    );
   });
 
   it('should clear the dimension with the clear button', () => {

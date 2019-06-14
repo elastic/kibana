@@ -8,13 +8,9 @@ import _ from 'lodash';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiButtonEmpty, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import {
-  IndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  IndexPatternPrivateState,
-} from '../indexpattern';
+import { IndexPatternColumn, FieldBasedIndexPatternColumn } from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
-import { getColumnOrder } from '../operations';
+import { changeColumn, deleteColumn } from '../state_helpers';
 
 export interface FieldSelectProps extends IndexPatternDimensionPanelProps {
   selectedColumn: IndexPatternColumn;
@@ -113,17 +109,9 @@ export function FieldSelect({
               const column: IndexPatternColumn = filteredColumns.find(
                 ({ operationId }) => operationId === choices[0].value
               )!;
-              const newColumns: IndexPatternPrivateState['columns'] = {
-                ...state.columns,
-                [columnId]: column,
-              };
 
               setFieldSelectOpen(false);
-              setState({
-                ...state,
-                columns: newColumns,
-                columnOrder: getColumnOrder(newColumns),
-              });
+              setState(changeColumn(state, columnId, column));
             }}
           />
         )}
@@ -139,16 +127,7 @@ export function FieldSelect({
               defaultMessage: 'Remove',
             })}
             onClick={() => {
-              const newColumns: IndexPatternPrivateState['columns'] = {
-                ...state.columns,
-              };
-              delete newColumns[columnId];
-
-              setState({
-                ...state,
-                columns: newColumns,
-                columnOrder: getColumnOrder(newColumns),
-              });
+              setState(deleteColumn(state, columnId));
             }}
           />
         </EuiFlexItem>

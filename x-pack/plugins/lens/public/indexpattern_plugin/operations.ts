@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { DimensionPriority } from '../types';
 import {
   IndexPatternColumn,
@@ -35,6 +34,7 @@ type UnionToIntersection<U> = (U extends U ? (k: U) => void : never) extends ((k
   ? I
   : never;
 
+// this type makes sure that there is an operation definition for each column type
 export type AllOperationDefinitions = UnionToIntersection<PossibleOperationDefinitionMapEntyries>;
 
 export const operationDefinitionMap: AllOperationDefinitions = {
@@ -57,7 +57,7 @@ export interface ParamEditorProps {
   setState: (newState: IndexPatternPrivateState) => void;
   columnId: string;
 }
-export interface OperationDefinition<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> {
+export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   type: C['operationType'];
   displayName: string;
   // TODO make this a function dependend on the indexpattern with typeMeta information
@@ -135,21 +135,4 @@ export function getPotentialColumns(
   });
 
   return columns;
-}
-
-export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
-  const entries = Object.entries(columns);
-
-  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
-
-  return aggregations
-    .sort(([id, col], [id2, col2]) => {
-      return (
-        // Sort undefined orders last
-        (col.suggestedOrder !== undefined ? col.suggestedOrder : Number.MAX_SAFE_INTEGER) -
-        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : Number.MAX_SAFE_INTEGER)
-      );
-    })
-    .map(([id]) => id)
-    .concat(metrics.map(([id]) => id));
 }

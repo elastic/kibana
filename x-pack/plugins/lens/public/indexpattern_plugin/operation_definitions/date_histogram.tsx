@@ -10,7 +10,7 @@ import { EuiForm, EuiFormRow, EuiRange } from '@elastic/eui';
 import { IndexPatternField, DateHistogramIndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
-import { updateColumnParam } from './utils';
+import { updateColumnParam } from '../state_helpers';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 

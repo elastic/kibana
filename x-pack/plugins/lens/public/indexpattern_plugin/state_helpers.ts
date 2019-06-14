@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import _ from 'lodash';
+import {
+  IndexPatternPrivateState,
+  IndexPatternColumn,
+  BaseIndexPatternColumn,
+} from './indexpattern';
+
+export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
+  const entries = Object.entries(columns);
+
+  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
+
+  return aggregations
+    .sort(([id, col], [id2, col2]) => {
+      return (
+        // Sort undefined orders last
+        (col.suggestedOrder !== undefined ? col.suggestedOrder : Number.MAX_SAFE_INTEGER) -
+        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : Number.MAX_SAFE_INTEGER)
+      );
+    })
+    .map(([id]) => id)
+    .concat(metrics.map(([id]) => id));
+}
+
+export function updateColumnParam<
+  C extends BaseIndexPatternColumn & { params: object },
+  K extends keyof C['params']
+>(
+  state: IndexPatternPrivateState,
+  currentColumn: C,
+  paramName: K,
+  value: C['params'][K]
+): IndexPatternPrivateState {
+  const columnId = Object.entries(state.columns).find(
+    ([_columnId, column]) => column === currentColumn
+  )![0];
+
+  if (!('params' in state.columns[columnId])) {
+    throw new Error('Invariant: no params in this column');
+  }
+
+  return {
+    ...state,
+    columns: {
+      ...state.columns,
+      [columnId]: ({
+        ...currentColumn,
+        params: {
+          ...currentColumn.params,
+          [paramName]: value,
+        },
+      } as unknown) as IndexPatternColumn,
+    },
+  };
+}
+
+export function changeColumn(
+  state: IndexPatternPrivateState,
+  columnId: string,
+  newColumn: IndexPatternColumn
+) {
+  const newColumns: IndexPatternPrivateState['columns'] = {
+    ...state.columns,
+    [columnId]: newColumn,
+  };
+
+  return {
+    ...state,
+    columnOrder: getColumnOrder(newColumns),
+    columns: newColumns,
+  };
+}
+
+export function deleteColumn(state: IndexPatternPrivateState, columnId: string) {
+  const newColumns: IndexPatternPrivateState['columns'] = {
+    ...state.columns,
+  };
+  delete newColumns[columnId];
+
+  return {
+    ...state,
+    columns: newColumns,
+    columnOrder: getColumnOrder(newColumns),
+  };
+}
