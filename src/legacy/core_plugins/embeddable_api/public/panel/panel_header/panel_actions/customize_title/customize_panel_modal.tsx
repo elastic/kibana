@@ -97,7 +97,7 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
               label={
                 <FormattedMessage
                   defaultMessage="Show panel title"
-                  id="kbnEmbeddables.customizePanel.modal.showTitle"
+                  id="embeddableApi.customizePanel.modal.showTitle"
                 />
               }
               onChange={this.onHideTitleToggle}
@@ -105,7 +105,7 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
           </EuiFormRow>
           <EuiFormRow
             label={this.props.intl.formatMessage({
-              id: 'kbnEmbeddables.customizePanel.modal.optionsMenuForm.panelTitleFormRowLabel',
+              id: 'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleFormRowLabel',
               defaultMessage: 'Panel title',
             })}
           >
@@ -119,7 +119,7 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
               value={this.state.title || ''}
               onChange={e => this.updateTitle(e.target.value)}
               aria-label={this.props.intl.formatMessage({
-                id: 'kbnEmbeddables.customizePanel.modal.optionsMenuForm.panelTitleInputAriaLabel',
+                id: 'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleInputAriaLabel',
                 defaultMessage: 'Enter a custom title for your panel',
               })}
               append={
@@ -129,7 +129,7 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
                   disabled={this.state.hideTitle}
                 >
                   <FormattedMessage
-                    id="kbnEmbeddables.customizePanel.modal.optionsMenuForm.resetCustomDashboardButtonLabel"
+                    id="embeddableApi.customizePanel.modal.optionsMenuForm.resetCustomDashboardButtonLabel"
                     defaultMessage="Reset"
                   />
                 </EuiButtonEmpty>
@@ -143,14 +143,14 @@ export class CustomizePanelModalUi extends Component<CustomizePanelProps, State>
           >
             {' '}
             <FormattedMessage
-              id="kbnEmbeddables.customizePanel.modal.cancel"
+              id="embeddableApi.customizePanel.modal.cancel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
 
           <EuiButton data-test-subj="saveNewTitleButton" onClick={this.save} fill>
             <FormattedMessage
-              id="kbnEmbeddables.customizePanel.modal.saveButtonTitle"
+              id="embeddableApi.customizePanel.modal.saveButtonTitle"
               defaultMessage="Save"
             />
           </EuiButton>

@@ -63,7 +63,7 @@ export class AddPanelFlyout extends React.Component<Props> {
 
     this.lastToast = toastNotifications.addSuccess({
       title: i18n.translate(
-        'kbnEmbeddables.addPanel.savedObjectAddedToContainerSuccessMessageTitle',
+        'embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle',
         {
           defaultMessage: '{savedObjectName} was added',
           values: {
@@ -103,7 +103,7 @@ export class AddPanelFlyout extends React.Component<Props> {
         inputDisplay: (
           <EuiText>
             <FormattedMessage
-              id="kbnEmbeddables.addPanel.createNewDefaultOption"
+              id="embeddableApi.addPanel.createNewDefaultOption"
               defaultMessage="Create new ..."
             />
           </EuiText>
@@ -119,7 +119,7 @@ export class AddPanelFlyout extends React.Component<Props> {
           inputDisplay: (
             <EuiText>
               <FormattedMessage
-                id="kbnEmbeddables.addPanel.createNew"
+                id="embeddableApi.addPanel.createNew"
                 defaultMessage="Create new {factoryName}"
                 values={{
                   factoryName: factory.getDisplayName(),
@@ -139,7 +139,7 @@ export class AddPanelFlyout extends React.Component<Props> {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <FormattedMessage id="kbnEmbeddables.addPanelsTitle" defaultMessage="Add panels" />
+              <FormattedMessage id="embeddableApi.addPanelsTitle" defaultMessage="Add panels" />
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
@@ -159,7 +159,7 @@ export class AddPanelFlyout extends React.Component<Props> {
               >
             }
             showFilter={true}
-            noItemsMessage={i18n.translate('kbnEmbeddables.addPanel.noMatchingObjectsMessage', {
+            noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
               defaultMessage: 'No matching objects found.',
             })}
           />

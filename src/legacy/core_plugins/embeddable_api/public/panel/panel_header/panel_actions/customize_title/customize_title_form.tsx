@@ -46,7 +46,7 @@ function CustomizeTitleFormUi({
     <div className="embPanel__optionsMenuForm" data-test-subj="dashboardPanelTitleInputMenuItem">
       <EuiFormRow
         label={intl.formatMessage({
-          id: 'kbnEmbeddables.customizeTitle.optionsMenuForm.panelTitleFormRowLabel',
+          id: 'embeddableApi.customizeTitle.optionsMenuForm.panelTitleFormRowLabel',
           defaultMessage: 'Panel title',
         })}
       >
@@ -58,7 +58,7 @@ function CustomizeTitleFormUi({
           value={title}
           onChange={onInputChange}
           aria-label={intl.formatMessage({
-            id: 'kbnEmbeddables.customizeTitle.optionsMenuForm.panelTitleInputAriaLabel',
+            id: 'embeddableApi.customizeTitle.optionsMenuForm.panelTitleInputAriaLabel',
             defaultMessage: 'Changes to this input are applied immediately. Press enter to exit.',
           })}
         />
@@ -66,7 +66,7 @@ function CustomizeTitleFormUi({
 
       <EuiButtonEmpty data-test-subj="resetCustomEmbeddablePanelTitle" onClick={onReset}>
         <FormattedMessage
-          id="kbnEmbeddables.customizeTitle.optionsMenuForm.resetCustomDashboardButtonLabel"
+          id="embeddableApi.customizeTitle.optionsMenuForm.resetCustomDashboardButtonLabel"
           defaultMessage="Reset title"
         />
       </EuiButtonEmpty>

@@ -40,7 +40,7 @@ export class CustomizePanelTitleAction extends Action {
   }
 
   public getDisplayName() {
-    return i18n.translate('kbnEmbeddables.customizePanel.action.displayName', {
+    return i18n.translate('embeddableApi.customizePanel.action.displayName', {
       defaultMessage: 'Customize panel',
     });
   }

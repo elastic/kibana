@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 export class PanelNotFoundError extends Error {
   constructor() {
     super(
-      i18n.translate('kbnEmbeddables.errors.paneldoesNotExist', {
+      i18n.translate('embeddableApi.errors.paneldoesNotExist', {
         defaultMessage: 'Panel not found',
       })
     );

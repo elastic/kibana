@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 export class IncompatibleActionError extends Error {
   constructor() {
     super(
-      i18n.translate('kbnEmbeddables.errors.incompatibleAction', {
+      i18n.translate('embeddableApi.errors.incompatibleAction', {
         defaultMessage: 'Action is incompatible',
       })
     );

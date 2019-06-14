@@ -34,7 +34,7 @@ export class InspectPanelAction extends Action {
   }
 
   public getDisplayName() {
-    return i18n.translate('kbnEmbeddables.panel.inspectPanel.displayName', {
+    return i18n.translate('embeddableApi.panel.inspectPanel.displayName', {
       defaultMessage: 'Inspect',
     });
   }

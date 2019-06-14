@@ -70,7 +70,7 @@ function PanelHeaderUi({
         title={title}
         aria-label={intl.formatMessage(
           {
-            id: 'kbnEmbeddables.panel.dashboardPanelAriaLabel',
+            id: 'embeddableApi.panel.dashboardPanelAriaLabel',
             defaultMessage: 'Dashboard panel: {title}',
           },
           {

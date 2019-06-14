@@ -35,7 +35,7 @@ export class AddPanelAction extends Action {
   }
 
   public getDisplayName() {
-    return i18n.translate('kbnEmbeddables.panel.addPanel.displayName', {
+    return i18n.translate('embeddableApi.panel.addPanel.displayName', {
       defaultMessage: 'Add panel',
     });
   }

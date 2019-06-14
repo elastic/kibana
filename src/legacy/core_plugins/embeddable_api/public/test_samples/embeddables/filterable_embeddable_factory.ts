@@ -34,7 +34,7 @@ export class FilterableEmbeddableFactory extends EmbeddableFactory<FilterableEmb
   }
 
   public getDisplayName() {
-    return i18n.translate('kbnEmbeddables.samples.filterableEmbeddable.displayName', {
+    return i18n.translate('embeddableApi.samples.filterableEmbeddable.displayName', {
       defaultMessage: 'filterable',
     });
   }
