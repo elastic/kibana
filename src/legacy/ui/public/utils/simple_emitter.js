@@ -63,7 +63,6 @@ SimpleEmitter.prototype.off = function (name, handler) {
 
   // remove a specific handler
   if (handler) _.pull(this._listeners[name], handler);
-
   // or remove all listeners
   else this._listeners[name] = null;
 
