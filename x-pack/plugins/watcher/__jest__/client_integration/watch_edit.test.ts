@@ -49,7 +49,7 @@ jest.mock('../../public/lib/api', () => ({
 
 const { setup } = pageHelpers.watchEdit;
 
-describe('<WatchEdit />', () => {
+describe.skip('<WatchEdit />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchEditTestBed;
 

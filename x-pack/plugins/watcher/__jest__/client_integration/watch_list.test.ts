@@ -27,7 +27,7 @@ jest.mock('ui/time_buckets', () => {});
 
 const { setup } = pageHelpers.watchList;
 
-describe('<WatchList />', () => {
+describe.skip('<WatchList />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchListTestBed;
 

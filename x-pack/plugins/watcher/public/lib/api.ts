@@ -41,9 +41,8 @@ export const loadWatches = (interval: number) => {
     path: `${basePath}/watches`,
     method: 'get',
     interval,
-    processData: ({ watches }: { watches: any }) => {
-      const watchesArray = watches && watches.length ? watches : [];
-      return watchesArray.map((watch: any) => Watch.fromUpstreamJson(watch));
+    processData: ({ watches = [] }: { watches: any[] }) => {
+      return watches.map((watch: any) => Watch.fromUpstreamJson(watch));
     },
   });
 };
@@ -52,12 +51,7 @@ export const loadWatchDetail = (id: string) => {
   return useRequest({
     path: `${basePath}/watch/${id}`,
     method: 'get',
-    processData: ({ watch }: { watch: any }) => {
-      if (watch) {
-        return Watch.fromUpstreamJson(watch);
-      }
-      return {};
-    },
+    processData: ({ watch = {} }: { watch: any }) => Watch.fromUpstreamJson(watch),
   });
 };
 
@@ -71,11 +65,10 @@ export const loadWatchHistory = (id: string, startTime: string) => {
   return useRequest({
     path,
     method: 'get',
-    processData: ({ watchHistoryItems: items }: { watchHistoryItems: any }) => {
-      if (items && items.length) {
-        return items.map((historyItem: any) => WatchHistoryItem.fromUpstreamJson(historyItem));
-      }
-      return [];
+    processData: ({ watchHistoryItems = [] }: { watchHistoryItems: any }) => {
+      return watchHistoryItems.map((historyItem: any) =>
+        WatchHistoryItem.fromUpstreamJson(historyItem)
+      );
     },
   });
 };

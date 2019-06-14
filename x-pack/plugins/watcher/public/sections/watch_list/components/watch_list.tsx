@@ -410,7 +410,7 @@ const WatchListUi = () => {
           'data-test-subj': 'row',
         })}
         cellProps={() => ({
-          'data-test-subj': `cell`,
+          'data-test-subj': 'cell',
         })}
         data-test-subj="watchesTable"
       />
