@@ -1,6 +1,6 @@
 # Creating a *state container*
 
-Create TypeScript annotation of you state shape.
+Create a TypeScript annotation of your state shape.
 
 ```ts
 interface MySavedObject {
