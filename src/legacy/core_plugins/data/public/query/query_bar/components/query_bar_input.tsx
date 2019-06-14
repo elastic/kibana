@@ -184,7 +184,8 @@ export class QueryBarInputUI extends Component<Props, State> {
       const text = toUser(savedQuery.attributes.title);
       const start = 0;
       const end = searchText.length;
-      return { type: savedQueryType, text, start, end };
+      const description = savedQuery.attributes.description;
+      return { type: savedQueryType, text, start, end, description };
     });
   };
 
