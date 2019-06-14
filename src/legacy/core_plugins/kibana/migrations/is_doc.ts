@@ -23,9 +23,9 @@ export function isDoc(doc: { [key: string]: unknown } | Doc): doc is Doc {
   return (
     typeof doc.id === 'string' &&
     typeof doc.type === 'string' &&
-    doc.attributes !== undefined &&
+    doc.attributes !== null &&
     typeof doc.attributes === 'object' &&
-    doc.references !== undefined &&
+    doc.references !== null &&
     typeof doc.references === 'object'
   );
 }
