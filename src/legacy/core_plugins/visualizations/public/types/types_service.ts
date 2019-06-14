@@ -24,6 +24,9 @@ import { VisProvider as Vis } from 'ui/vis/index.js';
 // @ts-ignore
 import { VisFactoryProvider as VisFactory } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import * as types from 'ui/vis/vis';
+
+import { createVisTypeLinksRegistry } from './vis_type_links';
 
 /**
  * Vis Types Service
@@ -37,6 +40,7 @@ export class TypesService {
       VisFactory,
       VisTypesRegistryProvider,
       defaultFeedbackMessage, // make default in base vis type, or move?
+      visTypeLinksRegistry: createVisTypeLinksRegistry(),
     };
   }
 
@@ -49,7 +53,6 @@ export class TypesService {
 export type TypesSetup = ReturnType<TypesService['setup']>;
 
 /** @public types */
-import * as types from 'ui/vis/vis';
 export type Vis = types.Vis;
 export type VisParams = types.VisParams;
 export type VisProvider = types.VisProvider;
