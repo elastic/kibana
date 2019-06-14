@@ -16,19 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SortDirection } from './sorting';
 
-import expect from '@kbn/expect';
+type EsQuerySortValue = Record<string, SortDirection>;
 
-import {
-  reverseSortDirection,
-} from '../sorting';
+export type EsQuerySort = [EsQuerySortValue, EsQuerySortValue];
 
-
-describe('context app', function () {
-  describe('function reverseSortDirection', function () {
-    it('should reverse a direction given as a string', function () {
-      expect(reverseSortDirection('asc')).to.eql('desc');
-      expect(reverseSortDirection('desc')).to.eql('asc');
-    });
-  });
-});
+/**
+ * Returns `EsQuerySort` which is used to sort records in the ES query
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html
+ * @param timeField
+ * @param tieBreakerField
+ * @param sortDir
+ */
+export function getEsQuerySort(
+  timeField: string,
+  tieBreakerField: string,
+  sortDir: SortDirection
+): EsQuerySort {
+  return [{ [timeField]: sortDir }, { [tieBreakerField]: sortDir }];
+}
