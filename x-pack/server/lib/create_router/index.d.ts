@@ -7,6 +7,8 @@ import { Request, ResponseToolkit } from 'hapi';
 import { Legacy } from 'kibana';
 import { CallWithRequest } from './call_with_request_factory';
 
+export * from './error_wrappers';
+
 export type RouterRouteHandler = (
   req: Request,
   callWithRequest: ReturnType<CallWithRequest>,
@@ -21,6 +23,7 @@ export interface Router {
   put: RouterRoute;
   delete: RouterRoute;
   patch: RouterRoute;
+  isEsError: any;
 }
 
 export declare function createRouter(
@@ -28,3 +31,5 @@ export declare function createRouter(
   pluginId: string,
   apiBasePath: string
 ): Router;
+
+export declare function isEsErrorFactory(server: Legacy.Server): any;
