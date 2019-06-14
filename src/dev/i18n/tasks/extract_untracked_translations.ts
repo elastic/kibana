@@ -60,7 +60,7 @@ export async function extractUntrackedMessagesTask({
     });
 
     for (const [entries, extractFunction] of categorizedEntries) {
-      const files: any = await Promise.all(
+      const files = await Promise.all(
         filterEntries(entries, config.exclude)
           .filter(entry => {
             const normalizedEntry = normalizePath(entry);
