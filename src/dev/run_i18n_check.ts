@@ -60,7 +60,7 @@ run(
     }
 
     const config = await mergeConfigs(includeConfig);
-    const srcPaths = ['./src', './packages', './x-pack'];
+    const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
 
     if (config.translations.length === 0) {
       return;
@@ -101,13 +101,14 @@ run(
       }
     );
 
-    const reporter = new ErrorReporter();
     try {
-      await list.run({ messages: new Map(), reporter });
+      const reporter = new ErrorReporter();
+      const messages: Map<string, { message: string }> = new Map();
+      await list.run({ messages, reporter });
     } catch (error) {
       process.exitCode = 1;
       if (error instanceof ErrorReporter) {
-        reporter.errors.forEach((e: string | Error) => log.error(e));
+        error.errors.forEach((e: string | Error) => log.error(e));
       } else {
         log.error('Unhandled exception!');
         log.error(error);

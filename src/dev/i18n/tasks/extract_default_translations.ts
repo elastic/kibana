@@ -39,13 +39,11 @@ export function extractDefaultMessages({
   }
 
   return filteredPaths.map(filteredPath => ({
-    task: async ({
-      messages,
-      reporter,
-    }: {
-      messages: Map<string, unknown>;
+    task: async (context: {
+      messages: Map<string, { message: string }>;
       reporter: ErrorReporter;
     }) => {
+      const { messages, reporter } = context;
       const initialErrorsNumber = reporter.errors.length;
 
       // Return result if no new errors were reported for this path.

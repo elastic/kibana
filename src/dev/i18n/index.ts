@@ -17,10 +17,9 @@
  * under the License.
  */
 
-// @ts-ignore
 export {
   extractMessagesFromPathToMap,
-  matchEntriesWithExctractors,
+  matchEntriesWithExctractors, // @ts-ignore
 } from './extract_default_translations';
 
 // @ts-ignore

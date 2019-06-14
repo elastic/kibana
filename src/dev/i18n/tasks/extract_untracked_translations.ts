@@ -17,9 +17,14 @@
  * under the License.
  */
 
-import { I18nConfig, matchEntriesWithExctractors, normalizePath, readFileAsync } from '..';
+import {
+  I18nConfig,
+  matchEntriesWithExctractors,
+  normalizePath,
+  readFileAsync,
+  ErrorReporter,
+} from '..';
 import { createFailError } from '../../run';
-import { ErrorReporter, TaskError } from '..';
 
 function filterEntries(entries: string[], exclude: string[]) {
   return entries.filter((entry: string) =>
@@ -90,7 +95,8 @@ export async function extractUntrackedMessagesTask({
 export function extractUntrackedMessages(srcPaths: string[], config: I18nConfig) {
   return srcPaths.map(srcPath => ({
     title: `Checking untracked messages in ${srcPath}`,
-    task: async ({ reporter }: { reporter: ErrorReporter }) => {
+    task: async (context: { reporter: ErrorReporter }) => {
+      const { reporter } = context;
       const initialErrorsNumber = reporter.errors.length;
       const result = await extractUntrackedMessagesTask({ path: srcPath, config, reporter });
       if (reporter.errors.length === initialErrorsNumber) {

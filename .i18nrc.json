@@ -10,7 +10,7 @@
     "interpreter": "src/legacy/core_plugins/interpreter",
     "kbn": "src/legacy/core_plugins/kibana",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
-    "kbnEmbeddables": "src/legacy/core_plugins/embeddable_api",
+    "embeddableApi": "src/legacy/core_plugins/embeddable_api",
     "kbnVislibVisTypes": "src/legacy/core_plugins/kbn_vislib_vis_types",
     "markdownVis": "src/legacy/core_plugins/markdown_vis",
     "metricVis": "src/legacy/core_plugins/metric_vis",
