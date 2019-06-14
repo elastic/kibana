@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
+import { i18n } from '@kbn/i18n';
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
@@ -16,11 +17,13 @@ import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
   DimensionPriority,
+  DatasourceSuggestion,
 } from '../types';
 import { getIndexPatterns } from './loader';
 import { ChildDragDropProvider, DragDrop } from '../drag_drop';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
+import { makeOperation, getOperationTypesForField } from './operations';
 
 export type OperationType = 'terms' | 'date_histogram' | 'sum' | 'avg' | 'min' | 'max' | 'count';
 
@@ -235,11 +238,105 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       };
     },
 
-    getDatasourceSuggestionsForField() {
+    getDatasourceSuggestionsForField(
+      state,
+      item
+    ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+      const field: IndexPatternField = item as IndexPatternField;
+
+      if (Object.keys(state.columns).length) {
+        // Not sure how to suggest multiple fields yet
+        return [];
+      }
+
+      const operations = getOperationTypesForField(field);
+      const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
+
+      if (hasBucket) {
+        const column = makeOperation(0, hasBucket, field);
+
+        const countColumn: IndexPatternColumn = {
+          operationId: 'count',
+          label: i18n.translate('xpack.lens.indexPatternOperations.countOfDocuments', {
+            defaultMessage: 'Count of Documents',
+          }),
+          dataType: 'number',
+          isBucketed: false,
+
+          operationType: 'count',
+          sourceField: 'documents',
+        };
+
+        const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
+          state: {
+            ...state,
+            columns: {
+              col1: column,
+              col2: countColumn,
+            },
+            columnOrder: ['col1', 'col2'],
+          },
+
+          table: {
+            columns: [
+              {
+                columnId: 'col1',
+                operation: columnToOperation(column),
+              },
+              {
+                columnId: 'col2',
+                operation: columnToOperation(countColumn),
+              },
+            ],
+            isMultiRow: true,
+            datasourceSuggestionId: 0,
+          },
+        };
+
+        return [suggestion];
+      } else if (state.indexPatterns[state.currentIndexPatternId].timeFieldName) {
+        const currentIndexPattern = state.indexPatterns[state.currentIndexPatternId];
+        const dateField = currentIndexPattern.fields.find(
+          f => f.name === currentIndexPattern.timeFieldName
+        )!;
+
+        const column = makeOperation(0, operations[0], field);
+
+        const dateColumn = makeOperation(1, 'date_histogram', dateField);
+
+        const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
+          state: {
+            ...state,
+            columns: {
+              col1: dateColumn,
+              col2: column,
+            },
+            columnOrder: ['col1', 'col2'],
+          },
+
+          table: {
+            columns: [
+              {
+                columnId: 'col1',
+                operation: columnToOperation(column),
+              },
+              {
+                columnId: 'col2',
+                operation: columnToOperation(dateColumn),
+              },
+            ],
+            isMultiRow: true,
+            datasourceSuggestionId: 0,
+          },
+        };
+
+        return [suggestion];
+      }
+
       return [];
     },
 
-    getDatasourceSuggestionsFromCurrentState() {
+    getDatasourceSuggestionsFromCurrentState(state) {
       return [];
     },
   };
