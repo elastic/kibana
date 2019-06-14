@@ -60,13 +60,7 @@ function getProviderOptions(server: Legacy.Server) {
   return {
     client: getClient(server),
     log: server.log.bind(server),
-
-    protocol: server.info.protocol,
-    hostname: config.get<string>('server.host'),
-    port: config.get<number>('server.port'),
     basePath: config.get<string>('server.basePath'),
-
-    ...config.get('xpack.security.public'),
   };
 }
 
