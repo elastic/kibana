@@ -35,11 +35,25 @@ export const isAuthorizedKibanaUser = async (
 
   const userKibanaPrivileges = userPrivileges.value as KibanaApplication[];
 
+  const knownPrivileges = authorizationService.privileges.get();
+
   return userKibanaPrivileges.some(privilege => {
-    const hasBasePrivileges = privilege.base.length > 0;
-    const hasFeaturePrivileges = Object.values(privilege.feature).some(
-      featurePrivileges => featurePrivileges.length > 0
+    const hasBasePrivileges = privilege.base.some(basePrivilege =>
+      Object.keys(knownPrivileges.global).includes(basePrivilege)
     );
+
+    const hasFeaturePrivileges = Object.entries(privilege.feature).some(
+      ([featureId, privileges]) => {
+        const knownFeaturePrivilege = knownPrivileges.features[featureId];
+        if (knownFeaturePrivilege) {
+          return Object.keys(knownFeaturePrivilege).some(knownPrivilege =>
+            privileges.includes(knownPrivilege)
+          );
+        }
+        return false;
+      }
+    );
+
     return hasBasePrivileges || hasFeaturePrivileges;
   });
 };

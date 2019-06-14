@@ -7,13 +7,14 @@
 import { Legacy } from 'kibana';
 import { AuthorizationService } from './service';
 import { isAuthorizedKibanaUser } from './is_authorized_kibana_user';
-import { PrivilegeSerializer } from './privilege_serializer';
-import { EsApplication } from './types';
+import { TransformApplicationsFromEsResponse } from './types';
 
-function buildAuthorizationService(privileges: EsApplication[] = []) {
+function buildAuthorizationService(
+  privilegesResponse: TransformApplicationsFromEsResponse = { success: true, value: [] }
+) {
   return ({
     application: 'kibana-.kibana',
-    getPrivilegesWithRequest: jest.fn().mockResolvedValue([...privileges]),
+    getPrivilegesWithRequest: jest.fn().mockResolvedValue(privilegesResponse),
     mode: {
       useRbacForRequest: jest.fn().mockReturnValue(true),
     },
@@ -28,7 +29,7 @@ function buildAuthorizationService(privileges: EsApplication[] = []) {
           read: ['actions'],
         },
         features: {
-          feature_1: {
+          feature1: {
             all: ['actions'],
           },
         },
@@ -67,71 +68,88 @@ describe('isAuthorizedKibanaUser', () => {
 
   it('returns false for users with only reserved privileges', async () => {
     const request = buildRequest();
-    const authService = buildAuthorizationService([
-      {
-        application: 'kibana-.kibana',
-        privileges: [PrivilegeSerializer.serializeReservedPrivilege('foo')],
-        resources: ['*'],
-      },
-    ]);
+    const authService = buildAuthorizationService({
+      success: true,
+      value: [
+        {
+          base: [],
+          feature: {},
+          _reserved: ['foo'],
+          spaces: ['*'],
+        },
+      ],
+    });
 
     await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(false);
   });
 
   it('returns true for users with a base privilege', async () => {
     const request = buildRequest();
-    const authService = buildAuthorizationService([
-      {
-        application: 'kibana-.kibana',
-        privileges: [PrivilegeSerializer.serializeGlobalBasePrivilege('all')],
-        resources: ['*'],
-      },
-    ]);
+    const authService = buildAuthorizationService({
+      success: true,
+      value: [
+        {
+          base: ['all'],
+          feature: {},
+          spaces: ['*'],
+        },
+      ],
+    });
 
     await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(true);
   });
 
   it('returns true for users with a feature privilege', async () => {
     const request = buildRequest();
-    const authService = buildAuthorizationService([
-      {
-        application: 'kibana-.kibana',
-        privileges: [PrivilegeSerializer.serializeFeaturePrivilege('feature_1', 'all')],
-        resources: ['*'],
-      },
-    ]);
+    const authService = buildAuthorizationService({
+      success: true,
+      value: [
+        {
+          base: [],
+          feature: {
+            feature1: ['all'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    });
 
     await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(true);
   });
 
   it('returns true for users with both reserved and non-reserved privileges', async () => {
     const request = buildRequest();
-    const authService = buildAuthorizationService([
-      {
-        application: 'kibana-.kibana',
-        privileges: [
-          PrivilegeSerializer.serializeFeaturePrivilege('feature_1', 'all'),
-          PrivilegeSerializer.serializeReservedPrivilege('foo'),
-        ],
-        resources: ['*'],
-      },
-    ]);
+    const authService = buildAuthorizationService({
+      success: true,
+      value: [
+        {
+          base: [],
+          feature: {
+            feature1: ['all'],
+          },
+          _reserved: ['foo'],
+          spaces: ['*'],
+        },
+      ],
+    });
 
     await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(true);
   });
 
   it('returns false for users with unknown privileges', async () => {
     const request = buildRequest();
-    const authService = buildAuthorizationService([
-      {
-        application: 'kibana-.kibana',
-        privileges: [
-          PrivilegeSerializer.serializeFeaturePrivilege('feature_1', 'unknown'),
-          PrivilegeSerializer.serializeReservedPrivilege('foo'),
-        ],
-        resources: ['*'],
-      },
-    ]);
+    const authService = buildAuthorizationService({
+      success: true,
+      value: [
+        {
+          base: [],
+          feature: {
+            feature1: ['unknown'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    });
 
     await expect(isAuthorizedKibanaUser(authService, request)).resolves.toEqual(false);
   });
