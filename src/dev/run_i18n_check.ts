@@ -20,37 +20,9 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
-import { ToolingLog } from '@kbn/dev-utils';
-import { ErrorReporter, integrateLocaleFiles, mergeConfigs, I18nConfig } from './i18n';
-import { extractDefaultMessages, extractUntrackedMessages } from './i18n/tasks';
+import { ErrorReporter, mergeConfigs } from './i18n';
+import { extractDefaultMessages, extractUntrackedMessages, checkCompatibility } from './i18n/tasks';
 import { createFailError, run } from './run';
-
-export interface I18nFlags {
-  fix: boolean;
-  ignoreIncompatible: boolean;
-  ignoreUnused: boolean;
-  ignoreMissing: boolean;
-}
-
-function checkCompatibilty(config: I18nConfig, flags: I18nFlags, log: ToolingLog) {
-  const { fix, ignoreIncompatible, ignoreUnused, ignoreMissing } = flags;
-  return config.translations.map(translationsPath => ({
-    task: async ({ messages }: { messages: Map<string, { message: string }> }) => {
-      // If `fix` is set we should try apply all possible fixes and override translations file.
-      await integrateLocaleFiles(messages, {
-        dryRun: !fix,
-        ignoreIncompatible: fix || ignoreIncompatible,
-        ignoreUnused: fix || ignoreUnused,
-        ignoreMissing: fix || ignoreMissing,
-        sourceFileName: translationsPath,
-        targetFileName: fix ? translationsPath : undefined,
-        config,
-        log,
-      });
-    },
-    title: `Compatibility check with ${translationsPath}`,
-  }));
-}
 
 run(
   async ({
@@ -109,7 +81,7 @@ run(
           title: 'Compatibility Checks',
           task: () =>
             new Listr(
-              checkCompatibilty(
+              checkCompatibility(
                 config,
                 {
                   ignoreIncompatible: !!ignoreIncompatible,
