@@ -39,6 +39,5 @@ export const processors = [
   mathAgg,
   seriesAgg,
   timeShift,
-  dropLastBucket
+  dropLastBucket,
 ];
-

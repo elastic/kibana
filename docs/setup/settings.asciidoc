@@ -308,6 +308,7 @@ Rollup user interface.
 
 
 include::{docdir}/settings/apm-settings.asciidoc[]
+include::{docdir}/settings/code-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]
 include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]
