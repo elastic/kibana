@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { joinRows } from '../joinRows';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { getFunctionErrors } from '../../../strings/functions';
-import { emptyTable, testTable } from './fixtures/test_tables';
+import { testTable } from './fixtures/test_tables';
 
 const errors = getFunctionErrors().getCell;
 
@@ -28,6 +28,17 @@ describe('joinRows', () => {
         name: "joe's product",
       },
     ],
+  };
+
+  const emptyTable = {
+    type: 'datatable',
+    columns: [
+      {
+        name: 'name',
+        type: 'string',
+      },
+    ],
+    rows: [],
   };
 
   it('returns a string from rows joined with sparator and quote, and remove duplicates', () => {

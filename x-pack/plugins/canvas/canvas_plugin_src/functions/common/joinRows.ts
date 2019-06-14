@@ -57,12 +57,13 @@ export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments,
       },
     },
     fn: (context, { column, separator, quote, distinct }) => {
+      const columnMatch = context.columns.find(col => col.name === column);
+      if (!columnMatch) {
+        throw errors.columnNotFound(column);
+      }
       return context.rows
         .reduce((acc, row) => {
           const value = row[column];
-          if (typeof value === 'undefined') {
-            throw errors.columnNotFound(column);
-          }
           if (distinct && acc.includes(value)) return acc;
           return acc.concat(value);
         }, [])
