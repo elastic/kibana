@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import chrome from '../chrome';
-import { createIndexPatternsApiClient } from './index_patterns_api_client';
+import { createStore, createContext } from '.';
 
-export function IndexPatternsApiClientProvider($http) {
-  return createIndexPatternsApiClient($http, chrome.getBasePath());
-}
+test('exports store methods', () => {
+  expect(typeof createStore).toBe('function');
+  expect(typeof createContext).toBe('function');
+});

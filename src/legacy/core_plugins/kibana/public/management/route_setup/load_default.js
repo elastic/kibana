@@ -19,10 +19,9 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { banners } from '../../notify';
-import { NoDefaultIndexPattern } from '../../errors';
-import { IndexPatternsGetProvider } from '../_get';
-import uiRoutes from '../../routes';
+import { banners } from 'ui/notify';
+import { NoDefaultIndexPattern } from 'ui/index_patterns/errors';
+import uiRoutes from 'ui/routes';
 import {
   EuiCallOut,
 } from '@elastic/eui';
@@ -44,7 +43,7 @@ function displayBanner() {
         color="warning"
         iconType="iInCircle"
         title={
-          i18n.translate('common.ui.indexPattern.bannerLabel',
+          i18n.translate('kbn.management.indexPattern.bannerLabel',
             //eslint-disable-next-line max-len
             { defaultMessage: 'In order to visualize and explore data in Kibana, you\'ll need to create an index pattern to retrieve data from Elasticsearch.' })
         }
@@ -65,15 +64,14 @@ export default function (opts) {
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
 
   uiRoutes
-    .addSetupWork(function loadDefaultIndexPattern(Private, $route, config) {
-      const getIds = Private(IndexPatternsGetProvider)('id');
+    .addSetupWork(function loadDefaultIndexPattern(Promise, $route, config, indexPatterns) {
       const route = _.get($route, 'current.$$route');
 
       if (!route.requireDefaultIndex) {
         return;
       }
 
-      return getIds()
+      return indexPatterns.getIds()
         .then(function (patterns) {
           let defaultId = config.get('defaultIndex');
           let defined = !!defaultId;
