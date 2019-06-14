@@ -45,6 +45,7 @@ import {
 } from '../../../../index_management_extensions';
 import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch } from '../../../no_match';
+import { PageErrorForbidden } from '../../../page_error';
 import { IndexActionsContextMenu } from '../../components';
 
 const HEADERS = {
@@ -254,6 +255,44 @@ export class IndexTableUi extends Component {
       );
     });
   }
+
+  renderError() {
+    const { indicesError } = this.props;
+    const data = indicesError.data ? indicesError.data : indicesError;
+
+    const {
+      error: errorString,
+      cause,
+      message,
+    } = data;
+
+    return (
+      <Fragment>
+        <EuiCallOut
+          title={(
+            <FormattedMessage
+              id="xpack.idxMgmt.indexTable.serverErrorTitle"
+              defaultMessage="Error loading indices"
+            />
+          )}
+          color="danger"
+          iconType="alert"
+        >
+          <div>{message || errorString}</div>
+          {cause && (
+            <Fragment>
+              <EuiSpacer size="m" />
+              <ul>
+                {cause.map((message, i) => <li key={i}>{message}</li>)}
+              </ul>
+            </Fragment>
+          )}
+        </EuiCallOut>
+        <EuiSpacer size="xl" />
+      </Fragment>
+    );
+  }
+
   renderBanners() {
     const { allIndices = [], filterChanged } = this.props;
     return getBannerExtensions().map((bannerExtension, i) => {
@@ -345,19 +384,35 @@ export class IndexTableUi extends Component {
       intl,
       loadIndices,
       indicesLoading,
+      indicesError,
       allIndices,
     } = this.props;
-    const emptyState = indicesLoading ? (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ) : (
-      <NoMatch />
-    );
+
+    let emptyState;
+
+    if (indicesLoading) {
+      emptyState = (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (!indicesLoading && !indicesError) {
+      emptyState = (
+        <NoMatch />
+      );
+    }
+
     const { selectedIndicesMap } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
+
+    if (indicesError && indicesError.status === 403) {
+      return <PageErrorForbidden />;
+    }
+
     return (
       <EuiPageContent>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -381,7 +436,7 @@ export class IndexTableUi extends Component {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {indicesLoading && allIndices.length === 0 ? null : (
+            {((indicesLoading && allIndices.length === 0) || indicesError) ? null : (
               <EuiFlexGroup>
                 {getToggleExtensions().map((toggle) => {
                   return this.renderToggleControl(toggle);
@@ -405,6 +460,7 @@ export class IndexTableUi extends Component {
         </EuiFlexGroup>
         <EuiSpacer />
         {this.renderBanners()}
+        {indicesError && this.renderError()}
         <EuiFlexGroup gutterSize="l" alignItems="center">
           {atLeastOneItemSelected ? (
             <EuiFlexItem grow={false}>
@@ -421,7 +477,7 @@ export class IndexTableUi extends Component {
               />
             </EuiFlexItem>
           ) : null}
-          {indicesLoading && allIndices.length === 0 ? null : (
+          {((indicesLoading && allIndices.length === 0) || indicesError) ? null : (
             <Fragment>
               <EuiFlexItem>
                 <EuiSearchBar
