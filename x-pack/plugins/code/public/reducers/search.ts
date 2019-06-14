@@ -22,6 +22,7 @@ import {
   saveSearchOptions,
   searchReposForScope,
   searchReposForScopeSuccess,
+  suggestionSearch,
   turnOffDefaultRepoScope,
   turnOnDefaultRepoScope,
 } from '../actions';
@@ -137,6 +138,12 @@ export const search = handleActions<SearchState, any>(
         return state;
       }
     },
+    [String(suggestionSearch)]: (state: SearchState, action: Action<string>) =>
+      produce<SearchState>(state, draft => {
+        if (action.payload) {
+          draft.query = action.payload;
+        }
+      }),
     [String(repositorySearchAction)]: (
       state: SearchState,
       action: Action<RepositorySearchPayload>

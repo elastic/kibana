@@ -29,7 +29,6 @@ uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify({
 
 // default autorefresh to active and refreshing every 10 seconds
 uiSettings.overrideLocalDefault('timepicker:refreshIntervalDefaults', JSON.stringify({
-  display: '10 seconds',
   pause: false,
   value: 10000
 }));
