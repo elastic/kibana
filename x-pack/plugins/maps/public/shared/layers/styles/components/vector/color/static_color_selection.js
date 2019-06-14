@@ -17,13 +17,10 @@ export function StaticColorSelection({ onChange, styleOptions }) {
   };
 
   return (
-    <div className="mapColorPicker">
-      <EuiColorPicker
-        onChange={onColorChange}
-        color={styleOptions.color}
-        popoverZIndex={9000}
-      />
-    </div>
+    <EuiColorPicker
+      onChange={onColorChange}
+      color={styleOptions.color}
+    />
   );
 }
 
