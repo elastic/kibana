@@ -40,11 +40,11 @@ export function getCreateTaskRunnerFunction({
           actionType,
           mergedActionTypeConfig
         );
-        const validatedACtionTypeParams = validateActionTypeParams(actionType, actionTypeParams);
+        const validatedActionTypeParams = validateActionTypeParams(actionType, actionTypeParams);
         await actionType.executor({
           services,
-          actionTypeConfig: validatedActionTypeConfig,
-          params: validatedACtionTypeParams,
+          config: validatedActionTypeConfig,
+          params: validatedActionTypeParams,
         });
       },
     };

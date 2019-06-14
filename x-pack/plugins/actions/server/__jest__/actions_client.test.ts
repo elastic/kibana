@@ -92,7 +92,7 @@ Array [
       id: 'my-action-type',
       name: 'My action type',
       validate: {
-        actionTypeConfig: Joi.object()
+        config: Joi.object()
           .keys({
             param1: Joi.string().required(),
           })
@@ -334,7 +334,7 @@ Array [
       id: 'my-action-type',
       name: 'My action type',
       validate: {
-        actionTypeConfig: Joi.object()
+        config: Joi.object()
           .keys({
             param1: Joi.string().required(),
           })

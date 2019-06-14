@@ -5,8 +5,8 @@
  */
 
 import Joi from 'joi';
-import { AlertExecuteOptions } from '../../../../../plugins/alerting';
-import { ActionTypeExecutorOptions } from '../../../../../plugins/actions';
+import { AlertExecuteOptions, AlertType } from '../../../../../plugins/alerting';
+import { ActionTypeExecutorOptions, ActionType } from '../../../../../plugins/actions';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -15,7 +15,7 @@ export default function(kibana: any) {
     name: 'alerts',
     init(server: any) {
       // Action types
-      server.plugins.actions.registerType({
+      const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
         unencryptedAttributes: ['unencrypted'],
@@ -27,27 +27,27 @@ export default function(kibana: any) {
               message: Joi.string().required(),
             })
             .required(),
-          actionTypeConfig: Joi.object()
+          config: Joi.object()
             .keys({
               encrypted: Joi.string().required(),
               unencrypted: Joi.string().required(),
             })
             .required(),
         },
-        async executor({ actionTypeConfig, params, services }: ActionTypeExecutorOptions) {
+        async executor({ config, params, services }: ActionTypeExecutorOptions) {
           return await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
               params,
-              config: actionTypeConfig,
+              config,
               reference: params.reference,
               source: 'action:test.index-record',
             },
           });
         },
-      });
-      server.plugins.actions.registerType({
+      };
+      const failingActionType: ActionType = {
         id: 'test.failing',
         name: 'Test: Failing',
         validate: {
@@ -58,23 +58,25 @@ export default function(kibana: any) {
             })
             .required(),
         },
-        async executor({ actionTypeConfig, params, services }: ActionTypeExecutorOptions) {
+        async executor({ config, params, services }: ActionTypeExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
               params,
-              config: actionTypeConfig,
+              config,
               reference: params.reference,
               source: 'action:test.failing',
             },
           });
           throw new Error('Failed to execute action type');
         },
-      });
+      };
+      server.plugins.actions.registerType(indexRecordActionType);
+      server.plugins.actions.registerType(failingActionType);
 
       // Alert types
-      server.plugins.alerting.registerType({
+      const alwaysFiringAlertType: AlertType = {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
         async execute({ services, params, state }: AlertExecuteOptions) {
@@ -99,8 +101,8 @@ export default function(kibana: any) {
             globalStateValue: true,
           };
         },
-      });
-      server.plugins.alerting.registerType({
+      };
+      const neverFiringAlertType: AlertType = {
         id: 'test.never-firing',
         name: 'Test: Never firing',
         async execute({ services, params, state }: AlertExecuteOptions) {
@@ -118,8 +120,8 @@ export default function(kibana: any) {
             globalStateValue: true,
           };
         },
-      });
-      server.plugins.alerting.registerType({
+      };
+      const failingAlertType: AlertType = {
         id: 'test.failing',
         name: 'Test: Failing',
         async execute({ services, params, state }: AlertExecuteOptions) {
@@ -135,8 +137,8 @@ export default function(kibana: any) {
           });
           throw new Error('Failed to execute alert type');
         },
-      });
-      server.plugins.alerting.registerType({
+      };
+      const validationAlertType: AlertType = {
         id: 'test.validation',
         name: 'Test: Validation',
         validate: {
@@ -147,12 +149,17 @@ export default function(kibana: any) {
             .required(),
         },
         async execute({ services, params, state }: AlertExecuteOptions) {},
-      });
-      server.plugins.alerting.registerType({
+      };
+      const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
         async execute({ services, params, state }: AlertExecuteOptions) {},
-      });
+      };
+      server.plugins.alerting.registerType(alwaysFiringAlertType);
+      server.plugins.alerting.registerType(neverFiringAlertType);
+      server.plugins.alerting.registerType(failingAlertType);
+      server.plugins.alerting.registerType(validationAlertType);
+      server.plugins.alerting.registerType(noopAlertType);
     },
   });
 }

@@ -65,7 +65,7 @@ Array [
 `);
   expect(getCreateTaskRunnerFunctionParams.actionType.executor).toHaveBeenCalledTimes(1);
   const call = getCreateTaskRunnerFunctionParams.actionType.executor.mock.calls[0][0];
-  expect(call.actionTypeConfig).toMatchInlineSnapshot(`
+  expect(call.config).toMatchInlineSnapshot(`
 Object {
   "bar": true,
   "foo": true,
@@ -114,7 +114,7 @@ test('validates config before executing the task', async () => {
     actionType: {
       ...getCreateTaskRunnerFunctionParams.actionType,
       validate: {
-        actionTypeConfig: Joi.object()
+        config: Joi.object()
           .keys({
             param1: Joi.string().required(),
           })

@@ -27,7 +27,7 @@ test('should validate and apply defaults when actionTypeConfig is valid', () => 
       id: 'my-action-type',
       name: 'My action type',
       validate: {
-        actionTypeConfig: Joi.object()
+        config: Joi.object()
           .keys({
             param1: Joi.string().required(),
             param2: Joi.strict().default('default-value'),
@@ -51,7 +51,7 @@ test('should validate and throw error when actionTypeConfig is invalid', () => {
         id: 'my-action-type',
         name: 'My action type',
         validate: {
-          actionTypeConfig: Joi.object()
+          config: Joi.object()
             .keys({
               param1: Joi.string().required(),
             })

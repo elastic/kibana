@@ -29,7 +29,7 @@ export interface ActionsPlugin {
 
 export interface ActionTypeExecutorOptions {
   services: Services;
-  actionTypeConfig: Record<string, any>;
+  config: Record<string, any>;
   params: Record<string, any>;
 }
 
@@ -39,7 +39,7 @@ export interface ActionType {
   unencryptedAttributes?: string[];
   validate?: {
     params?: any;
-    actionTypeConfig?: any;
+    config?: any;
   };
-  executor({ services, actionTypeConfig, params }: ActionTypeExecutorOptions): Promise<any>;
+  executor({ services, config, params }: ActionTypeExecutorOptions): Promise<any>;
 }

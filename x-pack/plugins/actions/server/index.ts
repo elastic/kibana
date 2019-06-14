@@ -5,5 +5,5 @@
  */
 
 export { init } from './init';
-export { ActionsPlugin, ActionTypeExecutorOptions } from './types';
+export { ActionsPlugin, ActionTypeExecutorOptions, ActionType } from './types';
 export { ActionsClient } from './actions_client';

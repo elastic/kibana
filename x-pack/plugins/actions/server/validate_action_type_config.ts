@@ -11,7 +11,7 @@ export function validateActionTypeConfig(
   actionType: ActionType,
   config: Record<string, any>
 ): Record<string, any> {
-  const validator = actionType.validate && actionType.validate.actionTypeConfig;
+  const validator = actionType.validate && actionType.validate.config;
   if (!validator) {
     return config;
   }

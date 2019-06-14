@@ -118,7 +118,7 @@ describe('execute()', () => {
         callCluster: NO_OP_FN,
         savedObjectsClient: SavedObjectsClientMock.create(),
       },
-      actionTypeConfig: {},
+      config: {},
       params: { message: 'message text here', tags: ['tag1', 'tag2'] },
     });
     expect(mockLog).toMatchInlineSnapshot(`
