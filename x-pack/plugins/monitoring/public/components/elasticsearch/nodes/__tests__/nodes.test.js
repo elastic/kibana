@@ -75,6 +75,7 @@ const getProps = (field) => {
       upTime: 28056934,
       version: ['8.0.0']
     },
+    setupMode: {},
     nodes,
     sorting: {
       sort: { field: 'name', direction: 'asc' }
