@@ -494,6 +494,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       await driver.executeScript('document.body.scrollLeft = ' + scrollSize);
       return this.getScrollLeft();
     }
+
+    public async getCoverage(): Promise<void> {
+      return await driver.executeScript('return window.__coverage__;');
+    }
   }
 
   return new BrowserService();
