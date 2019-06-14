@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { createFieldsFetcher } from './fields_fetcher';
-import { IndexPatternsApiClientProvider } from './index_patterns_api_client_provider';
-
-export function FieldsFetcherProvider(Private, config) {
-  const apiClient = Private(IndexPatternsApiClientProvider);
-  return createFieldsFetcher(apiClient, config);
+export function getRoutes() {
+  return {
+    edit: '/management/kibana/index_patterns/{{id}}',
+    addField: '/management/kibana/index_patterns/{{id}}/create-field',
+    indexedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:scriptedFields)',
+    sourceFilters: '/management/kibana/index_patterns/{{id}}?_a=(tab:sourceFilters)'
+  };
 }
