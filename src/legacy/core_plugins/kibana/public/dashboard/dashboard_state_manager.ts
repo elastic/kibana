@@ -276,7 +276,7 @@ export class DashboardStateManager {
 
   _pushFiltersToStore() {
     const state = store.getState();
-    const dashboardFilters = this.savedDashboard.searchSource.getOwnField('filter');
+    const dashboardFilters = this.savedDashboard.getFilters();
     if (
       !_.isEqual(
         FilterUtils.cleanFiltersForComparison(dashboardFilters),
@@ -384,8 +384,8 @@ export class DashboardStateManager {
     return {
       timeTo: this.savedDashboard.timeTo,
       timeFrom: this.savedDashboard.timeFrom,
-      filterBars: this.savedDashboard.searchSource.getOwnField('filter'),
-      query: this.savedDashboard.searchSource.getOwnField('query'),
+      filterBars: this.savedDashboard.getFilters(),
+      query: this.savedDashboard.getQuery(),
     };
   }
 
