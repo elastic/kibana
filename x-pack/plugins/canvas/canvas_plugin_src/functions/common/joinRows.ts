@@ -23,7 +23,7 @@ const escapeString = (data: string, quotechar: string): string => {
 };
 
 export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments, string> {
-  const errors = getFunctionErrors().getCell;
+  const errors = getFunctionErrors().joinRows;
   return {
     name: 'joinRows',
     type: 'string',

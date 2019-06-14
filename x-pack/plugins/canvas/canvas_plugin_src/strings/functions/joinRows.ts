@@ -25,3 +25,15 @@ export const help: FunctionHelp<FunctionFactory<typeof joinRows>> = {
     }),
   },
 };
+
+export const errors = {
+  rowNotFound: (row: number) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.joinRows.rowNotFoundErrorMessage', {
+        defaultMessage: "Row not found: '{row}'",
+        values: {
+          row,
+        },
+      })
+    ),
+};
