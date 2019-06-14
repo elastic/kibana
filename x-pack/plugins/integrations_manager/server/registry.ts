@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import yauzl, { Entry, ZipFile } from 'yauzl';
+import yauzl from 'yauzl';
 import fetch, { Response } from 'node-fetch';
 import { Readable } from 'stream';
 import tar from 'tar';
@@ -27,6 +27,13 @@ export async function fetchInfo(key: string) {
 
 export async function getArchiveInfo(key: string): Promise<string[]> {
   return getFiles(key);
+}
+
+function bufferToStream(buffer: Buffer): Readable {
+  const stream = new Readable();
+  stream.push(buffer);
+  stream.push(null);
+  return stream;
 }
 
 function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
@@ -74,7 +81,7 @@ async function fetchJson(url: string): Promise<object> {
 
 async function getFiles(
   key: string,
-  predicate = (entry: Entry): boolean => true
+  predicate = (entry: yauzl.Entry | tar.FileStat): boolean => true
 ): Promise<string[]> {
   const archiveBuffer = await getOrFetchArchiveBuffer(key);
   const extract = key.endsWith('.zip') ? unzipBuffer : untarBuffer;
@@ -85,7 +92,9 @@ async function getFiles(
 
 async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
   if (!cacheHas(key)) {
-    await fetchArchiveBuffer(key).then(buffer => cacheSet(key, buffer));
+    await getResponseStream(`${REGISTRY}/package/${key}`)
+      .then(streamToBuffer)
+      .then(buffer => cacheSet(key, buffer));
   }
 
   const buffer = cacheGet(key);
@@ -94,32 +103,18 @@ async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
   return buffer;
 }
 
-async function fetchArchiveBuffer(key: string): Promise<Buffer> {
-  return getResponseStream(`${REGISTRY}/package/${key}`).then(streamToBuffer);
-}
-
 async function unzipBuffer(
   buffer: Buffer,
-  predicate = (entry: Entry): boolean => true
+  predicate = (entry: yauzl.Entry): boolean => true
 ): Promise<string[]> {
   const files: string[] = [];
-  const zipfile: ZipFile = await new Promise((resolve, reject) =>
-    yauzl.fromBuffer(buffer, { lazyEntries: true }, (err?, handle?) =>
-      err ? reject(err) : resolve(handle)
-    )
-  );
+  const zipfile = await yauzlFromBuffer(buffer, { lazyEntries: true });
   zipfile.readEntry();
-  zipfile.on('entry', async (entry: Entry) => {
+  zipfile.on('entry', async (entry: yauzl.Entry) => {
     if (!predicate(entry)) return zipfile.readEntry();
     if (cacheHas(entry.fileName)) return files.push(entry.fileName) && zipfile.readEntry();
 
-    const stream: NodeJS.ReadableStream = await new Promise((resolve, reject) =>
-      zipfile.openReadStream(entry, (err?: Error, readStream?: NodeJS.ReadableStream) =>
-        err ? reject(err) : resolve(readStream)
-      )
-    );
-
-    const entryBuffer = await streamToBuffer(stream);
+    const entryBuffer = await getZipReadStream(zipfile, entry).then(streamToBuffer);
     cacheSet(entry.fileName, entryBuffer);
     files.push(entry.fileName);
     zipfile.readEntry();
@@ -129,11 +124,9 @@ async function unzipBuffer(
 
 async function untarBuffer(
   buffer: Buffer,
-  predicate = (entry: Entry): boolean => true
+  predicate = (entry: tar.FileStat): boolean => true
 ): Promise<string[]> {
-  const body: Readable = new Readable();
-  body.push(buffer);
-  body.push(null);
+  const stream = bufferToStream(buffer);
   const paths: string[] = [];
   return new Promise((resolve, reject) => {
     // ts erroring with:
@@ -141,11 +134,33 @@ async function untarBuffer(
     const parser: NodeJS.ReadWriteStream = new tar.Parse();
     parser
       .on('entry', (entry: tar.FileStat) => {
-        streamToBuffer(entry).then(_ => entry.header.path && paths.push(entry.header.path));
+        if (!predicate(entry)) return;
+        streamToBuffer(entry).then(entryBuffer => {
+          if (!entry.header.path) return;
+          cacheSet(entry.header.path, entryBuffer);
+          paths.push(entry.header.path);
+        });
       })
       .on('end', () => resolve(paths))
       .on('error', reject);
 
-    body.pipe(parser);
+    stream.pipe(parser);
   });
+}
+
+function yauzlFromBuffer(buffer: Buffer, opts: yauzl.Options): Promise<yauzl.ZipFile> {
+  return new Promise((resolve, reject) =>
+    yauzl.fromBuffer(buffer, opts, (err?, handle?) => (err ? reject(err) : resolve(handle)))
+  );
+}
+
+function getZipReadStream(
+  zipfile: yauzl.ZipFile,
+  entry: yauzl.Entry
+): Promise<NodeJS.ReadableStream> {
+  return new Promise((resolve, reject) =>
+    zipfile.openReadStream(entry, (err?: Error, readStream?: NodeJS.ReadableStream) =>
+      err ? reject(err) : resolve(readStream)
+    )
+  );
 }
