@@ -97,11 +97,11 @@ run(
     const list = new Listr(
       [
         {
-          title: 'Checking untracked messages',
+          title: 'Checking For Untracked Messages',
           task: () => new Listr(extractUntrackedMessages(srcPaths, config), { exitOnError: true }),
         },
         {
-          title: 'Extracting Default Messages',
+          title: 'Validating Default Messages',
           task: () =>
             new Listr(extractDefaultMessages({ path: srcPaths, config }), { exitOnError: true }),
         },
