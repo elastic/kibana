@@ -5,6 +5,7 @@
  */
 
 import { Annotation } from '../../../common/types/annotations';
+import { DslName } from '../../../common/types/fields';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -50,6 +51,16 @@ declare interface Ml {
     jobAuditMessages(jobId: string, from: string): Promise<object>;
     deletingJobTasks(): Promise<object>;
     newJobCaps(indexPatternTitle: string, isRollup: boolean): Promise<object>;
+    newJobLineChart(
+      indexPatternTitle: string,
+      timeField: string,
+      start: number,
+      end: number,
+      intervalMs: number,
+      query: object,
+      field: string | null,
+      aggName: DslName
+    ): Promise<any>;
   };
 }
 

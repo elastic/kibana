@@ -196,4 +196,35 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     }
   });
 
+  server.route({
+    method: 'POST',
+    path: '/api/ml/jobs/new_job_line_chart',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const {
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        field,
+        aggName } = request.payload;
+      const { newJobLineChart } = jobServiceProvider(callWithRequest, request);
+      return newJobLineChart(
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        field,
+        aggName)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

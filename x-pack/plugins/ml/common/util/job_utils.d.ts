@@ -3,5 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { FullTimeRangeSelector } from './full_time_range_selector';
-export { getTimeFilterRange } from './full_time_range_selector_service';
+
+export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: number): number;
+
+export function isTimeSeriesViewJob(job: any): boolean;
+
+export const ML_MEDIAN_PERCENTS: number;
+
+export const ML_DATA_PREVIEW_COUNT: number;

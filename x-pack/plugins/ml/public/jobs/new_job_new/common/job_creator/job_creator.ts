@@ -7,6 +7,7 @@
 import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPatternWithType, IndexPatternTitle } from '../../../../../common/types/kibana';
 import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
+import { Aggregation } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
@@ -23,6 +24,7 @@ export class JobCreator {
   protected _start: number = 0;
   protected _end: number = 0;
   protected _subscribers: ProgressSubscriber[];
+  protected _aggs: Aggregation[] = [];
 
   constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
     this._indexPattern = indexPattern;
@@ -42,22 +44,34 @@ export class JobCreator {
     this._subscribers = [];
   }
 
-  protected _addDetector(detector: Detector) {
+  protected _addDetector(detector: Detector, agg: Aggregation) {
     this._detectors.push(detector);
+    this._aggs.push(agg);
   }
 
-  protected _editDetector(detector: Detector, index: number) {
+  protected _editDetector(detector: Detector, agg: Aggregation, index: number) {
     if (this._detectors[index] !== undefined) {
       this._detectors[index] = detector;
+      this._aggs[index] = agg;
     }
   }
 
   protected _removeDetector(index: number) {
     this._detectors.splice(index, 1);
+    this._aggs.splice(index, 1);
   }
 
   public get detectors(): Detector[] {
     return this._detectors;
+  }
+
+  public get aggregationsInDetectors(): Aggregation[] {
+    return this._aggs;
+  }
+
+  public getAggregation(index: number): Aggregation | null {
+    const agg = this._aggs[index];
+    return agg !== undefined ? agg : null;
   }
 
   public set bucketSpan(bucketSpan: BucketSpan) {
@@ -222,5 +236,13 @@ export class JobCreator {
 
   public subscribeToProgress(func: ProgressSubscriber) {
     this._subscribers.push(func);
+  }
+
+  public get jobConfig(): Job {
+    return this._job_config;
+  }
+
+  public get datafeedConfig(): Datafeed {
+    return this._datafeed_config;
   }
 }

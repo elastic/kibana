@@ -100,7 +100,7 @@ export class JobRunner {
   public async getProgress(): Promise<Progress> {
     const lrts = await this.getLatestRecordTimeStamp();
     const progress = (lrts - this._start) / (this._end - this._start);
-    return Math.round(progress * 100);
+    return progress > 0 ? Math.round(progress * 100) : 0;
   }
 
   public subscribeToProgress(func: ProgressSubscriber) {
