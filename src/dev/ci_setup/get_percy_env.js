@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+const execa = require('execa');
+const pkg = require('../../../package.json');
 
-import { pageObjects } from './page_objects';
-import { services } from './services';
+const { stdout: commit } = execa.sync('git', ['rev-parse', 'HEAD']);
+const shortCommit = commit.slice(0, 8);
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+const isPr = process.env.JOB_NAME.includes('elastic+kibana+pull-request');
+
+console.log(`export PERCY_PARALLEL_TOTAL=2;`);
+console.log(`export PERCY_PARALLEL_NONCE="${shortCommit}/${isPr ? 'PR' : pkg.branch}/${process.env.BUILD_ID}";`);

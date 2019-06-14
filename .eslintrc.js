@@ -163,7 +163,14 @@ module.exports = {
      * Allow default exports
      */
     {
-      files: ['x-pack/test/functional/apps/**/*.js', 'x-pack/plugins/apm/**/*.js'],
+      files: [
+        'x-pack/test/functional/apps/**/*.js',
+        'x-pack/plugins/apm/**/*.js',
+        'test/*/config.ts',
+        'test/visual_regression/tests/**/*',
+        'x-pack/test/visual_regression/tests/**/*',
+        'x-pack/test/*/config.ts',
+      ],
       rules: {
         'import/no-default-export': 'off',
         'import/no-named-as-default': 'off',
@@ -295,6 +302,7 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
+        'test/visual_regression/services/visual_testing/take_percy_snapshot.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
