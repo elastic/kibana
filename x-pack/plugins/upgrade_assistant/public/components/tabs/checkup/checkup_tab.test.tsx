@@ -11,6 +11,8 @@ import { LoadingState } from '../../types';
 import AssistanceData from '../__fixtures__/checkup_api_response.json';
 import { CheckupTab } from './checkup_tab';
 
+jest.mock('ui/kfetch');
+
 const defaultProps = {
   checkupLabel: 'index',
   deprecations: AssistanceData.indices,
