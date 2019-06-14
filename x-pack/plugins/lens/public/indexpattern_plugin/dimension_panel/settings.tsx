@@ -16,6 +16,7 @@ import {
   EuiComboBox,
   EuiCallOut,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import {
   IndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -66,11 +67,14 @@ export function Settings({
       items: operations.map(op => ({
         name: operationPanels[op].displayName,
         id: op,
-        isSelected:
-          op === invalidOperationType || (selectedColumn && selectedColumn.operationType === op),
-        className: !functionsFromField.some(col => col.operationType === op)
-          ? 'lnsConfigPanel__operation--disabled'
-          : '',
+        className: classNames({
+          'lnsConfigPanel__operation--unsupported':
+            !invalidOperationType && !functionsFromField.some(col => col.operationType === op),
+          'lnsConfigPanel__operation--selected': Boolean(
+            invalidOperationType === op ||
+              (!invalidOperationType && selectedColumn && selectedColumn.operationType === op)
+          ),
+        }),
         onClick() {
           if (!functionsFromField.some(col => col.operationType === op)) {
             setInvalidOperationType(op);

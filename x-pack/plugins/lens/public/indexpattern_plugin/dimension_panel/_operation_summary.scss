@@ -42,3 +42,12 @@
 .lnsConfigPanel__summaryField {
   color: $euiColorPrimary;
 }
+
+.lnsConfigPanel__operation--selected .euiSideNavItemButton__label {
+  color: $euiColorPrimary;
+}
+
+.lnsConfigPanel__operation--unsupported .euiSideNavItemButton__label {
+  // TODO solve this in a sane way 
+  opacity: 0.7;
+}
