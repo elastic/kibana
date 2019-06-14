@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+import { services as functionalServices } from '../../functional/services';
+import { VisualTestingProvider } from './visual_testing';
 
-import { pageObjects } from './page_objects';
-import { services } from './services';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export const services = {
+  ...functionalServices,
+  visualTesting: VisualTestingProvider,
+};
