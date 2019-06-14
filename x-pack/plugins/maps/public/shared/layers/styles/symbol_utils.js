@@ -76,8 +76,7 @@ export async function styleSvg(svgString, fill) {
 
 function addImageToMap(imageUrl, imageId, symbolId, mbMap) {
   return new Promise((resolve, reject) => {
-    const symbolSize = symbolId.includes('11') ? 11 : 15;
-    const img = new Image(symbolSize, symbolSize);
+    const img = new Image(LARGE_MAKI_ICON_SIZE, LARGE_MAKI_ICON_SIZE);
     img.onload = () => {
       mbMap.addImage(imageId, img);
       resolve();
