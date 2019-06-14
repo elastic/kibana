@@ -15,7 +15,8 @@ import {
 } from './indexpattern';
 
 export function getOperations(): OperationType[] {
-  return ['value', 'terms', 'date_histogram', 'sum', 'avg', 'min', 'max', 'count'];
+  // Raw value is not listed in the MVP
+  return ['terms', 'date_histogram', 'sum', 'avg', 'min', 'max', 'count'];
 }
 
 export function getOperationDisplay(): Record<
@@ -27,17 +28,6 @@ export function getOperationDisplay(): Record<
   }
 > {
   return {
-    value: {
-      type: 'value',
-      displayName: i18n.translate('xpack.lens.indexPattern.value', {
-        defaultMessage: 'Value',
-      }),
-      ofName: name =>
-        i18n.translate('xpack.lens.indexPattern.valueOf', {
-          defaultMessage: 'Value of {name}',
-          values: { name },
-        }),
-    },
     terms: {
       type: 'terms',
       displayName: i18n.translate('xpack.lens.indexPattern.terms', {
@@ -132,19 +122,17 @@ export function getOperationTypesForField({
 
   switch (type) {
     case 'date':
-      return ['value', 'date_histogram'];
+      return ['date_histogram'];
     case 'number':
-      return ['value', 'sum', 'avg', 'min', 'max'];
+      return ['sum', 'avg', 'min', 'max'];
     case 'string':
-      return ['value', 'terms'];
+      return ['terms'];
   }
   return [];
 }
 
 export function getOperationResultType({ type }: IndexPatternField, op: OperationType): DataType {
   switch (op) {
-    case 'value':
-      return type as DataType;
     case 'avg':
     case 'min':
     case 'max':
