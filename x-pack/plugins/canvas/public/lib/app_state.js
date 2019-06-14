@@ -5,7 +5,7 @@
  */
 import querystring from 'querystring';
 import rison from 'rison-node';
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 import { getInitialState } from '../state/initial_state';
 import { getWindow } from './get_window';
 import { historyProvider } from './history_provider';
@@ -35,18 +35,23 @@ export function getAppState(key) {
 
 export function setAppState(type, payload) {
   const appState = getCurrentAppState();
+  const fullAppState = getAppState();
+  let isChanged = false;
 
   // TODO: validate payloads
   switch (type) {
     case 'fullscreen':
+      isChanged = !isEqual(fullAppState.fullscreen, payload);
       appState.fullscreen = payload;
       break;
 
     case 'autoplay':
+      isChanged = !isEqual(fullAppState.autoplay, payload);
       appState.autoplay = payload;
       break;
 
     case 'autorefresh':
+      isChanged = !isEqual(fullAppState.autorefresh, payload);
       appState.autorefresh = payload;
       break;
 
@@ -55,6 +60,8 @@ export function setAppState(type, payload) {
   }
 
   // update appState in the url via the router
-  const router = routerProvider(); // singleton, always provides the same router once it's created
-  router.updateAppState(appState);
+  if (isChanged) {
+    const router = routerProvider(); // singleton, always provides the same router once it's created
+    router.updateAppState(appState);
+  }
 }
