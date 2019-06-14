@@ -7,13 +7,12 @@ import {
   PLUGIN_ID,
   API_INTEGRATIONS_LIST,
   API_INTEGRATIONS_INFO,
-  API_INTEGRATIONS_FILE,
   API_SAVED_OBJECTS_DETAIL,
   API_SAVED_OBJECTS_ROOT,
   SAVED_OBJECT_TYPE,
 } from '../common/constants';
 import { Request, ServerRoute } from '../common/types';
-import { fetchInfo, fetchList, getZipInfo } from './registry';
+import { fetchInfo, fetchList, fetchGz, getArchiveInfo } from './registry';
 import { getClient } from './saved_objects';
 
 interface PostRequest extends Request {
@@ -38,11 +37,21 @@ export const routes: ServerRoute[] = [
   },
   {
     method: 'GET',
-    path: API_INTEGRATIONS_FILE,
+    path: `${API_INTEGRATIONS_INFO}.zip`,
     options: { tags: [`access:${PLUGIN_ID}`] },
     handler: async (req: Request) => {
       const { pkgkey } = req.params;
-      const paths = await getZipInfo(pkgkey);
+      const paths = await getArchiveInfo(`${pkgkey}.zip`);
+      return { meta: { pkgkey, paths } };
+    },
+  },
+  {
+    method: 'GET',
+    path: `${API_INTEGRATIONS_INFO}.tar.gz`,
+    options: { tags: [`access:${PLUGIN_ID}`] },
+    handler: async (req: Request) => {
+      const { pkgkey } = req.params;
+      const paths = await fetchGz(`${pkgkey}.tar.gz`);
       return { meta: { pkgkey, paths } };
     },
   },

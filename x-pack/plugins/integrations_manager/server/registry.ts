@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import http from 'http';
-import https from 'https';
 import Boom from 'boom';
 import yauzl, { Entry, ZipFile } from 'yauzl';
-import { Readable } from 'stream';
+import fetch, { Response } from 'node-fetch';
+import tar from 'tar';
 
 const REGISTRY = process.env.REGISTRY || 'http://localhost:8080';
 
@@ -25,37 +24,37 @@ function unzipFromBuffer(buffer: Buffer): Promise<ZipFile> {
   );
 }
 
-function responseToString(response: http.IncomingMessage): Promise<string> {
+function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
   return new Promise((resolve, reject) => {
     const body: string[] = [];
-    response.on('data', (chunk: string) => body.push(chunk));
-    response.on('end', () => resolve(body.join('')));
-    response.on('error', reject);
+    stream.on('data', (chunk: string) => body.push(chunk));
+    stream.on('end', () => resolve(body.join('')));
+    stream.on('error', reject);
   });
 }
 
-function responseToBuffer(response: http.IncomingMessage): Promise<Buffer> {
+function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-    response
-      .on('data', chunk => chunks.push(Buffer.from(chunk)))
-      .on('end', () => resolve(Buffer.concat(chunks)))
-      .on('error', reject);
+    stream.on('data', chunk => chunks.push(Buffer.from(chunk)));
+    stream.on('end', () => resolve(Buffer.concat(chunks)));
+    stream.on('error', reject);
   });
 }
 
-function getResponse(url: string): Promise<http.IncomingMessage> {
-  const lib = url.startsWith('https') ? https : http;
+function getResponse(url: string): Promise<Response> {
   return new Promise((resolve, reject) =>
-    lib
-      .get(url, (response: http.IncomingMessage) => {
-        if (response.statusCode && response.statusCode === 200) {
-          return resolve(response);
-        }
-        return reject(new Boom(response.statusMessage, { statusCode: response.statusCode }));
-      })
-      .on('error', reject)
+    fetch(url).then((response: Response) =>
+      response.ok
+        ? resolve(response)
+        : reject(new Boom(response.statusText, { statusCode: response.status }))
+    )
   );
+}
+
+async function getResponseStream(url: string): Promise<NodeJS.ReadableStream> {
+  const res = await getResponse(url);
+  return res.body;
 }
 
 export async function fetchList() {
@@ -67,17 +66,13 @@ export async function fetchInfo(key: string) {
 }
 
 async function fetchUrl(url: string): Promise<string> {
-  return getResponse(url).then(responseToString);
+  return getResponseStream(url).then(streamToString);
 }
 
 async function fetchJson(url: string): Promise<object> {
   const json = await fetchUrl(url);
   const data = JSON.parse(json);
   return data;
-}
-
-async function fetchArchiveBuffer(key: string): Promise<Buffer> {
-  return getResponse(`${REGISTRY}/package/${key}/get`).then(responseToBuffer);
 }
 
 async function filesFromBuffer(
@@ -91,20 +86,22 @@ async function filesFromBuffer(
     if (!predicate(entry)) return zipfile.readEntry();
     if (cacheHas(entry.fileName)) return files.push(entry.fileName) && zipfile.readEntry();
 
-    const chunks: Buffer[] = [];
-    const stream: Readable = await new Promise((resolve, reject) =>
-      zipfile.openReadStream(entry, (err?: Error, readStream?: Readable) =>
+    const stream: NodeJS.ReadableStream = await new Promise((resolve, reject) =>
+      zipfile.openReadStream(entry, (err?: Error, readStream?: NodeJS.ReadableStream) =>
         err ? reject(err) : resolve(readStream)
       )
     );
-    stream.on('data', chunk => chunks.push(Buffer.from(chunk)));
-    stream.on('end', () => {
-      cacheSet(entry.fileName, Buffer.concat(chunks));
-      files.push(entry.fileName);
-      zipfile.readEntry();
-    });
+
+    const entryBuffer = await streamToBuffer(stream);
+    cacheSet(entry.fileName, entryBuffer);
+    files.push(entry.fileName);
+    zipfile.readEntry();
   });
   return new Promise(resolve => zipfile.on('end', () => resolve(files)));
+}
+
+export async function getArchiveInfo(key: string): Promise<string[]> {
+  return getFiles(key);
 }
 
 async function getFiles(
@@ -118,21 +115,34 @@ async function getFiles(
 }
 
 async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
-  const archiveKey = `${key}-archive`;
-  if (!cacheHas(archiveKey)) {
-    await fetchArchiveBuffer(key).then(buffer => cacheSet(archiveKey, buffer));
+  if (!cacheHas(key)) {
+    await fetchArchiveBuffer(key).then(buffer => cacheSet(key, buffer));
   }
 
-  const buffer = cacheGet(archiveKey);
+  const buffer = cacheGet(key);
   if (!buffer) throw new Error(`no archive buffer for ${key}`);
 
   return buffer;
 }
 
-export async function getZipInfo(key: string): Promise<string[]> {
-  // quick hack to show processing & some info. won't really use/do this
-  const stripRoot = (fileName: string) => fileName.replace(key, '');
-  const isThisPackage = (entry: Entry) => entry.fileName.startsWith(key);
+async function fetchArchiveBuffer(key: string): Promise<Buffer> {
+  return getResponseStream(`${REGISTRY}/package/${key}`).then(streamToBuffer);
+}
 
-  return getFiles(key, isThisPackage).then(files => files.map(stripRoot));
+export async function fetchGz(key: string): Promise<string[]> {
+  const body: NodeJS.ReadableStream = await getResponseStream(`${REGISTRY}/package/${key}`);
+  const paths: string[] = [];
+  return new Promise((resolve, reject) => {
+    // ts erroring with:
+    // 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.
+    const parser: NodeJS.ReadWriteStream = new tar.Parse();
+    parser
+      .on('entry', (entry: tar.FileStat) => {
+        streamToBuffer(entry).then(_ => entry.header.path && paths.push(entry.header.path));
+      })
+      .on('end', () => resolve(paths))
+      .on('error', reject);
+
+    body.pipe(parser);
+  });
 }
