@@ -17,13 +17,22 @@
  * under the License.
  */
 
-import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
+import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
-jest.doMock('ui/new_platform', () => ({
-  npSetup: {
-    core: {
-      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-      notifications: notificationServiceMock.createSetupContract(),
-    }
-  },
-}));
+const uiSettingsClient = {
+  ...uiSettingsServiceMock.createSetupContract(),
+  getUpdate$: () => ({
+    subscribe: jest.fn(),
+  }),
+};
+
+const chrome = {
+  getBasePath: () => '/test/base/path',
+  addBasePath: path => path,
+  getInjected: jest.fn(),
+  getUiSettingsClient: () => uiSettingsClient,
+  getXsrfToken: () => 'kbn-xsrf-token',
+};
+
+// eslint-disable-next-line import/no-default-export
+export default chrome;

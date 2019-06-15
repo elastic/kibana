@@ -36,6 +36,7 @@ const findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
         '**/_*.js',
         '**/*.test.js',
         '**/*.test.mocks.js',
+        '**/__mocks__/**/*',
       ],
       symlinks: findSourceFiles.symlinks,
       statCache: findSourceFiles.statCache,
