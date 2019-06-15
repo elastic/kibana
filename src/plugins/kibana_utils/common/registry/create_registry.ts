@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Observable, Subject } from 'rxjs';
 import { Registry, Predicate } from './types';
 
@@ -38,9 +39,10 @@ export const createRegistry = <T>(): Registry<T> => {
     for (const [, record] of iterable) yield record;
   }
 
-  const filter = function*(predicate: Predicate<T>) {
+  function* filter(predicate: Predicate<T>) {
     for (const record of records()) if (predicate(record)) yield record;
-  };
+  }
+
   const filterBy = (attribute: keyof T, value: T[keyof T]) => filter(a => a[attribute] === value);
   const find = (predicate: Predicate<T>) => filter(predicate).next().value;
   const findBy = (attribute: keyof T, value: T[keyof T]) => filterBy(attribute, value).next().value;

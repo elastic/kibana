@@ -50,6 +50,3 @@ export interface RegistryMutable<T extends {}> {
 }
 
 export interface Registry<T extends {}> extends RegistryReadOnly<T>, RegistryMutable<T> {}
-export type Freeze = <T = unknown>(
-  registry: Registry<T> | RegistryReadOnly<T>
-) => RegistryReadOnly<T>;
