@@ -17,13 +17,9 @@
  * under the License.
  */
 
-import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
+import { metadata as metadataImpl } from '../metadata';
 
-jest.doMock('ui/new_platform', () => ({
-  npSetup: {
-    core: {
-      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-      notifications: notificationServiceMock.createSetupContract(),
-    }
-  },
-}));
+export const metadata: typeof metadataImpl = {
+  branch: 'jest-metadata-mock-branch',
+  version: '42.23.26',
+};

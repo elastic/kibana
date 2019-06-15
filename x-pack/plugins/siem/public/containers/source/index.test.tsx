@@ -11,6 +11,8 @@ import { MockedProvider } from 'react-apollo/test-utils';
 
 import { wait } from '../../lib/helpers';
 
+import '../../mock/ui_settings';
+
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
 
