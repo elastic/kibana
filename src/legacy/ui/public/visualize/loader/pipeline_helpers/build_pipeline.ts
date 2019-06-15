@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
@@ -105,6 +105,22 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
         params: { id: format.id, ...format.params },
       }),
     };
+
+    if (vislibCharts.includes(vis.type.name)) {
+      const visState = vis.getCurrentState();
+      const visConfig = visState.params;
+      const curSeriesParams = (visConfig.seriesParams || []).find(
+        (param: any) => param.data.id === agg.id
+      );
+      if (curSeriesParams) {
+        const usedValueAxis = (visConfig.valueAxes || []).find(
+          (valueAxis: any) => valueAxis.id === curSeriesParams.valueAxis
+        );
+        if (get(usedValueAxis, 'scale.mode') === 'percentage') {
+          return { id: 'percent' };
+        }
+      }
+    }
 
     return formats[agg.type.name] ? formats[agg.type.name]() : format;
   };
