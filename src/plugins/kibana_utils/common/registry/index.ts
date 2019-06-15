@@ -17,10 +17,6 @@
  * under the License.
  */
 
-import { createStore, createContext, createRegistry } from '.';
-
-test('exports store methods', () => {
-  expect(typeof createStore).toBe('function');
-  expect(typeof createContext).toBe('function');
-  expect(typeof createRegistry).toBe('function');
-});
+export * from './types';
+export { createRegistry } from './create_registry';
+export { freeze } from './freeze';

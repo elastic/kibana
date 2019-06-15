@@ -17,4 +17,5 @@
  * under the License.
  */
 
+export * from '../common';
 export * from './store';
