@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { IRegistry, Trigger } from '../types';
+import { Trigger } from '../types';
+import { Registry } from '../../../../../plugins/kibana_utils/public';
 
 export function attachAction(
-  triggerRegistry: IRegistry<Trigger>,
+  triggerRegistry: Registry<Trigger>,
   { triggerId, actionId }: { triggerId: string; actionId: string }
 ) {
   const trigger = triggerRegistry.get(triggerId);

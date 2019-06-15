@@ -55,13 +55,13 @@ class TestAction extends Action {
 }
 
 beforeEach(() => {
-  triggerRegistry.reset();
+  triggerRegistry.clear();
   actionRegistry.reset();
   executeFn.mockReset();
 });
 
 afterAll(() => {
-  triggerRegistry.reset();
+  triggerRegistry.clear();
 });
 
 test('executeTriggerActions executes a single action mapped to a trigger', async () => {

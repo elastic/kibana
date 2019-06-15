@@ -34,12 +34,12 @@ import { attachAction } from './triggers/attach_action';
 
 beforeEach(() => {
   actionRegistry.reset();
-  triggerRegistry.reset();
+  triggerRegistry.clear();
 });
 
 afterAll(() => {
   actionRegistry.reset();
-  triggerRegistry.reset();
+  triggerRegistry.clear();
 });
 
 test('ActionRegistry adding and getting an action', async () => {

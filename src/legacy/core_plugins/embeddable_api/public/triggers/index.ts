@@ -23,7 +23,7 @@ export { executeTriggerActions } from './execute_trigger_actions';
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const APPLY_FILTER_TRIGGER = 'FITLER_TRIGGER';
 
-import { createRegistry } from '../create_registry';
+import { createRegistry } from '../../../../../plugins/kibana_utils/public';
 import { Trigger } from '../types';
 
 export const triggerRegistry = createRegistry<Trigger>();
