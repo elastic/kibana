@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { ChartBase, MetricSearchResponse } from './types';
+import { AggregationSearchResponse, AggregatedValue } from 'elasticsearch';
+import { ChartBase } from './types';
 
 const colors = [
   theme.euiColorVis0,
@@ -20,17 +21,31 @@ export type GenericMetricsChart = ReturnType<
   typeof transformDataToMetricsChart
 >;
 
-type TimeseriesBucket = {
-  key: number;
-  doc_count: number;
-} & {
-  [key: string]: {
-    value: number;
+interface AggregatedParams {
+  body: {
+    aggs: {
+      timeseriesData: {
+        date_histogram: any;
+        aggs: {
+          min?: any;
+          max?: any;
+          sum?: any;
+          avg?: any;
+        };
+      };
+    } & {
+      [key: string]: {
+        min?: any;
+        max?: any;
+        sum?: any;
+        avg?: any;
+      };
+    };
   };
-};
+}
 
-export function transformDataToMetricsChart<MetricNames extends string>(
-  result: MetricSearchResponse<MetricNames>,
+export function transformDataToMetricsChart<Params extends AggregatedParams>(
+  result: AggregationSearchResponse<unknown, Params>,
   chartBase: ChartBase
 ) {
   const { aggregations, hits } = result;
@@ -42,11 +57,7 @@ export function transformDataToMetricsChart<MetricNames extends string>(
     yUnit: chartBase.yUnit,
     totalHits: hits.total,
     series: Object.keys(chartBase.series).map((seriesKey, i) => {
-      const agg = aggregations[seriesKey];
-
-      if (!(agg && 'value' in agg)) {
-        throw new Error('No value found for metric aggregation');
-      }
+      const agg = aggregations[seriesKey] as AggregatedValue;
 
       return {
         title: chartBase.series[seriesKey].title,
@@ -54,8 +65,8 @@ export function transformDataToMetricsChart<MetricNames extends string>(
         type: chartBase.type,
         color: chartBase.series[seriesKey].color || colors[i],
         overallValue: agg.value,
-        data: (timeseriesData.buckets as TimeseriesBucket[]).map(bucket => {
-          const { value } = bucket[seriesKey];
+        data: timeseriesData.buckets.map(bucket => {
+          const { value } = bucket[seriesKey] as AggregatedValue;
           const y = value === null || isNaN(value) ? null : value;
           return {
             x: bucket.key,

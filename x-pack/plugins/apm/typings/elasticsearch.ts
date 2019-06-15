@@ -47,21 +47,17 @@ declare module 'elasticsearch' {
     >;
   };
 
+  interface AggregatedValue {
+    value: number | null;
+  }
+
   type AggregationResultMap<AggregationOption> = IndexAsString<
     {
       [AggregationName in keyof AggregationOption]: {
-        avg: {
-          value: number | null;
-        };
-        max: {
-          value: number | null;
-        };
-        min: {
-          value: number | null;
-        };
-        sum: {
-          value: number | null;
-        };
+        avg: AggregatedValue;
+        max: AggregatedValue;
+        min: AggregatedValue;
+        sum: AggregatedValue;
         terms: BucketAggregation<AggregationOption[AggregationName]>;
         date_histogram: BucketAggregation<
           AggregationOption[AggregationName],

@@ -5,12 +5,9 @@
  */
 import { transformDataToMetricsChart } from './transform_metrics_chart';
 import { ChartType, YUnit } from '../../../typings/timeseries';
-import { MetricSearchResponse } from './types';
 
 test('transformDataToMetricsChart should transform an ES result into a chart object', () => {
-  type R = MetricSearchResponse<'a' | 'b' | 'c'>;
-
-  const response = ({
+  const response = {
     hits: { total: 5000 },
     aggregations: {
       a: { value: 1000 },
@@ -42,7 +39,7 @@ test('transformDataToMetricsChart should transform an ES result into a chart obj
         ]
       }
     }
-  } as unknown) as R;
+  } as any;
 
   const chartBase = {
     title: 'Test Chart Title',
