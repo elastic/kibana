@@ -168,30 +168,6 @@ describe('iterators', () => {
 });
 
 describe('search', () => {
-  describe('find()', () => {
-    const registry = createRegistry<{ id: string; name: string }>();
-    const { find } = registry;
-    const a = { id: 'a', name: 'Bob' };
-    const b = { id: 'b', name: 'Joe' };
-    registry.set('a', a);
-    registry.set('b', b);
-
-    test('can find by predicate', () => {
-      expect(find(({ id }) => id === 'b')).toBe(b);
-      expect(find(({ name }) => name === 'Bob')).toBe(a);
-    });
-
-    test('returns undefined if item not found', () => {
-      expect(find(({ id }) => id === 'c')).toBe(undefined);
-      expect(find(({ name }) => name === 'John')).toBe(undefined);
-    });
-
-    test('returns original objects', () => {
-      const aa = find(({ id }) => id === 'a');
-      expect(aa).toBe(a);
-    });
-  });
-
   describe('filter()', () => {
     const registry = createRegistry<any>();
     const { filter } = registry;
@@ -211,6 +187,88 @@ describe('search', () => {
     test('iterates through all matched records', () => {
       const records = [...filter(({ name }) => name === 'Bob')];
       expect(records).toHaveLength(2);
+    });
+
+    test('returns original records', () => {
+      const records = [...filter(({ name }) => name === 'Bob')];
+      records.sort((record1, record2) => (record1.id > record2.id ? 1 : -1));
+      expect(records[0]).toEqual(a);
+      expect(records[1]).toEqual(c);
+    });
+  });
+
+  describe('filterBy()', () => {
+    const registry = createRegistry<any>();
+    const { filterBy } = registry;
+    const a = { id: 'a', name: 'Bob' };
+    const b = { id: 'b', name: 'Joe' };
+    const c = { id: 'c', name: 'Bob' };
+    registry.set('a', a);
+    registry.set('c', c);
+    registry.set('b', b);
+
+    test('returns an iterable', () => {
+      const iterable = filterBy('name', 'Bob');
+      for (const _ of iterable);
+      expect(typeof iterable[Symbol.iterator]).toBe('function');
+    });
+
+    test('iterates through all matched records', () => {
+      const records = [...filterBy('name', 'Bob')];
+      expect(records).toHaveLength(2);
+    });
+
+    test('returns original records', () => {
+      const records = [...filterBy('name', 'Bob')];
+      records.sort((record1, record2) => (record1.id > record2.id ? 1 : -1));
+      expect(records[0]).toEqual(a);
+      expect(records[1]).toEqual(c);
+    });
+  });
+
+  describe('find', () => {
+    const registry = createRegistry<{ id: string; name: string }>();
+    const a = { id: 'a', name: 'Bob' };
+    const b = { id: 'b', name: 'Joe' };
+    registry.set('a', a);
+    registry.set('b', b);
+
+    describe('find()', () => {
+      const { find } = registry;
+
+      test('can find by predicate', () => {
+        expect(find(({ id }) => id === 'b')).toBe(b);
+        expect(find(({ name }) => name === 'Bob')).toBe(a);
+      });
+
+      test('returns undefined if item not found', () => {
+        expect(find(({ id }) => id === 'c')).toBe(undefined);
+        expect(find(({ name }) => name === 'John')).toBe(undefined);
+      });
+
+      test('returns original objects', () => {
+        const aa = find(({ id }) => id === 'a');
+        expect(aa).toBe(a);
+      });
+    });
+
+    describe('findBy()', () => {
+      const { findBy } = registry;
+
+      test('can find by predicate', () => {
+        expect(findBy('id', 'b')).toBe(b);
+        expect(findBy('name', 'Bob')).toBe(a);
+      });
+
+      test('returns undefined if item not found', () => {
+        expect(findBy('id', 'c')).toBe(undefined);
+        expect(findBy('name', 'John')).toBe(undefined);
+      });
+
+      test('returns original objects', () => {
+        const aa = findBy('id', 'a');
+        expect(aa).toBe(a);
+      });
     });
   });
 });

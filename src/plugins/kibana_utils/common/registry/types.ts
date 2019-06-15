@@ -41,13 +41,13 @@ export interface RegistryReadOnly<T extends {}> extends RegistryIterators<T> {
   find: Find<T>;
   findBy: FindBy<T>;
   filter: Find<T, Iterable<T>>;
-  filterBy: FindBy<T, T[]>;
+  filterBy: FindBy<T, Iterable<T>>;
 }
 
 export interface RegistryMutable<T extends {}> {
   set: (key: string, record: T) => void;
-  set$: Observable<T>;
   clear: () => void;
+  set$: Observable<T>;
   clear$: Observable<void>;
 }
 

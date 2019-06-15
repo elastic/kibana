@@ -43,7 +43,12 @@ export const createRegistry = <T>(): Registry<T> => {
     for (const record of records()) if (predicate(record)) yield record;
   };
 
+  const filterBy = function*(attribute: keyof T, value: T[keyof T]) {
+    for (const record of records()) if (record[attribute] === value) yield record;
+  };
+
   const find = (predicate: Predicate<T>) => filter(predicate).next().value;
+  const findBy = (attribute: keyof T, value: T[keyof T]) => filterBy(attribute, value).next().value;
 
   const set = (id: string, record: T) => {
     data.set(id, record);
@@ -66,12 +71,12 @@ export const createRegistry = <T>(): Registry<T> => {
     get: id => data.get(id),
     size: () => data.size,
     find,
-    findBy: ni,
+    findBy,
     filter,
-    filterBy: ni,
+    filterBy,
     set,
-    set$: (set$ as unknown) as Observable<T>,
     clear,
+    set$: (set$ as unknown) as Observable<T>,
     clear$: (clear$ as unknown) as Observable<void>,
   };
 };
