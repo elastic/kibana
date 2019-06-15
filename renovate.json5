@@ -231,6 +231,14 @@
         ],
       },
       {
+        groupSlug: 'tar',
+        groupName: 'tar related packages',
+        packageNames: [
+          'tar',
+          '@types/tar',
+        ],
+      },
+      {
         groupSlug: 'yauzl',
         groupName: 'yauzl related packages',
         packageNames: [
