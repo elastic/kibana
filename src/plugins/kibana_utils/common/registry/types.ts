@@ -20,8 +20,6 @@
 import { Observable } from 'rxjs';
 
 export type Predicate<T> = (item: T) => boolean;
-export type Find<T, Result = T | undefined> = (predicate: Predicate<T>) => Result;
-export type FindBy<T, Result = T | undefined> = (attribute: keyof T, value: T[keyof T]) => Result;
 
 /**
  * @todo `Iterable` interface seems to be overwritten by JQuery, so it is redefined here.
@@ -38,10 +36,10 @@ export interface RegistryIterators<T> extends Iterable<[string, T]> {
 export interface RegistryReadOnly<T extends {}> extends RegistryIterators<T> {
   get: (key: string) => T | undefined;
   size: () => number;
-  find: Find<T>;
-  findBy: FindBy<T>;
-  filter: Find<T, Iterable<T>>;
-  filterBy: FindBy<T, Iterable<T>>;
+  find: (predicate: Predicate<T>) => T;
+  findBy: (attribute: keyof T, value: T[keyof T]) => T;
+  filter: (predicate: Predicate<T>) => Iterable<T>;
+  filterBy: (attribute: keyof T, value: T[keyof T]) => Iterable<T>;
 }
 
 export interface RegistryMutable<T extends {}> {

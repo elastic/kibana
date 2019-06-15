@@ -20,8 +20,7 @@ import { Observable, Subject } from 'rxjs';
 import { Registry, Predicate } from './types';
 
 export const createRegistry = <T>(): Registry<T> => {
-  let data = new Map<string, T>();
-
+  const data = new Map<string, T>();
   const set$ = new Subject();
   const clear$ = new Subject();
 
@@ -42,11 +41,7 @@ export const createRegistry = <T>(): Registry<T> => {
   const filter = function*(predicate: Predicate<T>) {
     for (const record of records()) if (predicate(record)) yield record;
   };
-
-  const filterBy = function*(attribute: keyof T, value: T[keyof T]) {
-    for (const record of records()) if (record[attribute] === value) yield record;
-  };
-
+  const filterBy = (attribute: keyof T, value: T[keyof T]) => filter(a => a[attribute] === value);
   const find = (predicate: Predicate<T>) => filter(predicate).next().value;
   const findBy = (attribute: keyof T, value: T[keyof T]) => filterBy(attribute, value).next().value;
 
@@ -56,12 +51,8 @@ export const createRegistry = <T>(): Registry<T> => {
   };
 
   const clear = () => {
-    data = new Map<string, T>();
+    data.clear();
     clear$.next();
-  };
-
-  const ni = () => {
-    throw new Error('not implemented');
   };
 
   return {
