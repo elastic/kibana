@@ -37,7 +37,6 @@ import { RequestHandlerParams, Vis } from '../../vis';
 import { VisFiltersProvider } from '../../vis/vis_filters';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
-import { VisualizeDataLoader } from './visualize_data_loader';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
@@ -99,7 +98,7 @@ export class EmbeddedVisualizeHandler {
   private dataLoaderParams: RequestHandlerParams;
   private readonly appState?: AppState;
   private uiState: PersistedState;
-  private dataLoader: VisualizeDataLoader | PipelineDataLoader;
+  private dataLoader: PipelineDataLoader;
   private dataSubject: Rx.Subject<any>;
   private actions: any = {};
   private events$: Rx.Observable<any>;
@@ -179,9 +178,7 @@ export class EmbeddedVisualizeHandler {
       });
     };
 
-    this.dataLoader = pipelineDataLoader
-      ? new PipelineDataLoader(vis)
-      : new VisualizeDataLoader(vis, Private);
+    this.dataLoader = new PipelineDataLoader(vis);
     const visFilters: any = Private(VisFiltersProvider);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
