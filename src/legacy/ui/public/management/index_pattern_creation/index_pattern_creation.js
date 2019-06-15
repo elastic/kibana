@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { indexPatternCreationTypeRegistry } from './index_pattern_creation_config_registry';
+import { indexPatternTypes } from './index_pattern_types';
 
 class IndexPatternCreation {
   constructor(httpClient, type) {
-    this._allTypes = [...indexPatternCreationTypeRegistry.records()].map(Plugin => new Plugin({ httpClient }));
+    this._allTypes = [...indexPatternTypes.records()].map(Plugin => new Plugin({ httpClient }));
     this._setCurrentType(type);
   }
 
   _setCurrentType = (type) => {
-    const index = type ? [...indexPatternCreationTypeRegistry.records()].findIndex(Plugin => Plugin.key === type) : -1;
+    const index = type ? [...indexPatternTypes.records()].findIndex(Plugin => Plugin.key === type) : -1;
     this._currentType = index > -1 && this._allTypes[index] ? this._allTypes[index] : null;
   }
 

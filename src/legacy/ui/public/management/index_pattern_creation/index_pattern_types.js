@@ -19,4 +19,4 @@
 
 import { createRegistry } from '../../../../../plugins/kibana_utils/public';
 
-export const indexPatternCreationTypeRegistry = createRegistry();
+export const indexPatternTypes = createRegistry();

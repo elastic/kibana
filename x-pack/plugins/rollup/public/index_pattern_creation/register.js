@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { indexPatternCreationTypeRegistry } from 'ui/management/index_pattern_creation';
+import { indexPatternTypes } from 'ui/management/index_pattern_creation';
 import { RollupIndexPatternCreationConfig } from './rollup_index_pattern_creation_config';
 
 export function initIndexPatternCreation() {
-  indexPatternCreationTypeRegistry.set(RollupIndexPatternCreationConfig.key, RollupIndexPatternCreationConfig);
+  indexPatternTypes.set(RollupIndexPatternCreationConfig.key, RollupIndexPatternCreationConfig);
 }
