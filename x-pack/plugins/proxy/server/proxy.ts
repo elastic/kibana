@@ -26,7 +26,6 @@ import {
   Plugin,
   PluginInitializerContext,
   Logger,
-  CoreStart,
   CoreSetup,
   KibanaRequest,
 } from 'src/core/server';
@@ -39,8 +38,6 @@ export interface ProxyServiceSetup {
   httpSetup: HttpServerSetup;
 }
 
-type ProxyRequest = (req: KibanaRequest) => Promise<any>;
-
 export interface ProxyServiceStart {
   assignResource: (
     resource: string,
@@ -49,8 +46,8 @@ export interface ProxyServiceStart {
     node?: string
   ) => Promise<void>;
   unassignResource: (resource: string) => Promise<void>;
-  proxyResource: (resource: string) => ProxyRequest;
-  proxyRequest: ProxyRequest;
+  proxyResource: (resource: string) => (req: KibanaRequest) => Promise<any>;
+  proxyRequest: (req: KibanaRequest, resource: string) => Promise<any>;
   getAllocation: () => Observable<[string, RoutingNode]>;
 }
 
@@ -77,6 +74,7 @@ export const ProxyConfig = {
 export type ProxyPluginType = TypeOf<typeof ProxyConfig.schema>;
 
 export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart> {
+  public nodeName: string;
   private configSubscription?: Subscription;
   private clusterDocClient: ClusterDocClient;
   private maxRetry = 0;
@@ -94,6 +92,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     this.config$ = initializerContext.config.create<ProxyPluginType>();
     this.log = initializerContext.logger.get('proxy');
     this.clusterDocClient = new ClusterDocClient(initializerContext);
+    this.nodeName = this.clusterDocClient.nodeName;
   }
 
   public async setup(core: CoreSetup, plugins: {}) {
@@ -195,7 +194,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     await this.clusterDocClient.unassignResource(resource);
   }
 
-  public proxyResource(resource: string): ProxyRequest {
+  public proxyResource(resource: string): (req: KibanaRequest) => Promise<any> {
     return (req: KibanaRequest) => {
       return this.proxyRequest(req, resource);
     };
