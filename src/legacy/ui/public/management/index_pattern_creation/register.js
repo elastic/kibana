@@ -18,6 +18,6 @@
  */
 
 import { IndexPatternCreationConfig } from './index_pattern_creation_config';
-import { IndexPatternCreationConfigRegistry } from './index_pattern_creation_config_registry';
+import { indexPatternCreationTypeRegistry } from './index_pattern_creation_config_registry';
 
-IndexPatternCreationConfigRegistry.register(() => IndexPatternCreationConfig);
+indexPatternCreationTypeRegistry.set(IndexPatternCreationConfig.key, IndexPatternCreationConfig);

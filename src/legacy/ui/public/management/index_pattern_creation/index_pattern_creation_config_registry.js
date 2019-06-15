@@ -17,10 +17,6 @@
  * under the License.
  */
 
-import { uiRegistry } from 'ui/registry/_registry';
+import { createRegistry } from '../../../../../plugins/kibana_utils/public';
 
-export const IndexPatternCreationConfigRegistry = uiRegistry({
-  name: 'indexPatternCreation',
-  index: ['name'],
-  order: ['order'],
-});
+export const indexPatternCreationTypeRegistry = createRegistry();
