@@ -20,14 +20,13 @@
 import { indexPatternCreationTypeRegistry } from './index_pattern_creation_config_registry';
 
 class IndexPatternCreation {
-  constructor(registry, httpClient, type) {
-    this._registry = registry;
-    this._allTypes = [...registry.records()].map(Plugin => new Plugin({ httpClient }));
+  constructor(httpClient, type) {
+    this._allTypes = [...indexPatternCreationTypeRegistry.records()].map(Plugin => new Plugin({ httpClient }));
     this._setCurrentType(type);
   }
 
   _setCurrentType = (type) => {
-    const index = type ? [...this._registry.records()].findIndex(Plugin => Plugin.key === type) : -1;
+    const index = type ? [...indexPatternCreationTypeRegistry.records()].findIndex(Plugin => Plugin.key === type) : -1;
     this._currentType = index > -1 && this._allTypes[index] ? this._allTypes[index] : null;
   }
 
@@ -49,7 +48,7 @@ class IndexPatternCreation {
 
 export const IndexPatternCreationFactory = (Private, $http) => {
   return (type = 'default') => {
-    const indexPatternCreationProvider = new IndexPatternCreation(indexPatternCreationTypeRegistry, $http, type);
+    const indexPatternCreationProvider = new IndexPatternCreation($http, type);
     return indexPatternCreationProvider;
   };
 };
