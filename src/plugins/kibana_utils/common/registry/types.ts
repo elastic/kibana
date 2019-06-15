@@ -40,7 +40,7 @@ export interface RegistryReadOnly<T extends {}> extends RegistryIterators<T> {
   size: () => number;
   find: Find<T>;
   findBy: FindBy<T>;
-  filter: Find<T, T[]>;
+  filter: Find<T, Iterable<T>>;
   filterBy: FindBy<T, T[]>;
 }
 

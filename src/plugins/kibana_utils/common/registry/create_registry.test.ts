@@ -169,20 +169,48 @@ describe('iterators', () => {
 
 describe('search', () => {
   describe('find()', () => {
-    const registry = createRegistry<any>();
+    const registry = createRegistry<{ id: string; name: string }>();
+    const { find } = registry;
     const a = { id: 'a', name: 'Bob' };
     const b = { id: 'b', name: 'Joe' };
     registry.set('a', a);
     registry.set('b', b);
 
     test('can find by predicate', () => {
-      expect(registry.find(({ id }) => id === 'b')).toBe(b);
-      expect(registry.find(({ name }) => name === 'Bob')).toBe(a);
+      expect(find(({ id }) => id === 'b')).toBe(b);
+      expect(find(({ name }) => name === 'Bob')).toBe(a);
     });
 
     test('returns undefined if item not found', () => {
-      expect(registry.find(({ id }) => id === 'c')).toBe(undefined);
-      expect(registry.find(({ name }) => name === 'John')).toBe(undefined);
+      expect(find(({ id }) => id === 'c')).toBe(undefined);
+      expect(find(({ name }) => name === 'John')).toBe(undefined);
+    });
+
+    test('returns original objects', () => {
+      const aa = find(({ id }) => id === 'a');
+      expect(aa).toBe(a);
+    });
+  });
+
+  describe('filter()', () => {
+    const registry = createRegistry<any>();
+    const { filter } = registry;
+    const a = { id: 'a', name: 'Bob' };
+    const b = { id: 'b', name: 'Joe' };
+    const c = { id: 'c', name: 'Bob' };
+    registry.set('a', a);
+    registry.set('c', c);
+    registry.set('b', b);
+
+    test('returns an iterable', () => {
+      const iterable = filter(({ name }) => name === 'Bob');
+      for (const _ of iterable);
+      expect(typeof iterable[Symbol.iterator]).toBe('function');
+    });
+
+    test('iterates through all matched records', () => {
+      const records = [...filter(({ name }) => name === 'Bob')];
+      expect(records).toHaveLength(2);
     });
   });
 });

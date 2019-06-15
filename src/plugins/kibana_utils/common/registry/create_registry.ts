@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Observable, Subject } from 'rxjs';
-import { Registry } from './types';
+import { Registry, Predicate } from './types';
 
 export const createRegistry = <T>(): Registry<T> => {
   let data = new Map<string, T>();
@@ -39,12 +39,11 @@ export const createRegistry = <T>(): Registry<T> => {
     for (const [, record] of iterable) yield record;
   }
 
-  const find: Registry<T>['find'] = predicate => {
-    for (const record of records()) {
-      if (predicate(record)) return record;
-    }
-    return undefined;
+  const filter = function*(predicate: Predicate<T>) {
+    for (const record of records()) if (predicate(record)) yield record;
   };
+
+  const find = (predicate: Predicate<T>) => filter(predicate).next().value;
 
   const set = (id: string, record: T) => {
     data.set(id, record);
@@ -68,7 +67,7 @@ export const createRegistry = <T>(): Registry<T> => {
     size: () => data.size,
     find,
     findBy: ni,
-    filter: ni,
+    filter,
     filterBy: ni,
     set,
     set$: (set$ as unknown) as Observable<T>,
