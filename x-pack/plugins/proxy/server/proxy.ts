@@ -160,7 +160,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     this.requestBackoff = config.requestBackoff;
   }
 
-  public async start(core: CoreStart) {
+  public async start() {
     await this.clusterDocClient.start();
     const start: ProxyServiceStart = {
       assignResource: this.assignResource.bind(this),

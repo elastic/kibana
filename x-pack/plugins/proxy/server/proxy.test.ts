@@ -18,8 +18,8 @@ import { loggingServiceMock } from '../../../../src/core/server/logging/logging_
 import { getEnvOptions } from '../../../../src/core/server/config/__mocks__/env';
 import { elasticsearchServiceMock } from '../../../../src/core/server/elasticsearch/elasticsearch_service.mock';
 import { mockReadFile } from './fs.mock';
-import { ProxyService, ProxyConfig, ProxyPluginType } from './proxy';
 import { mockClusterDocClient } from './cluster_doc.test.mock';
+import { ProxyService, ProxyConfig, ProxyPluginType } from './proxy';
 
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
@@ -77,8 +77,8 @@ test('creates and sets up proxy server', async () => {
     stop: noop,
   };
 
-  const elasticClient = elasticsearchServiceMock.createSetupContract();
   mockClusterDocClient.mockImplementation(() => clusterDocClient);
+  const elasticClient = elasticsearchServiceMock.createSetupContract();
   const httpService = httpServiceMock.createSetupContract();
 
   const core = {
@@ -86,10 +86,22 @@ test('creates and sets up proxy server', async () => {
     http: httpService,
   };
 
-  mockReadFile.mockImplementation((x, cb) => cb(null, Buffer.from('')));
+  mockReadFile.mockImplementation((x, cb) => cb(null, Buffer.from('foo')));
 
   const proxy = new ProxyService({ config: configService({}), env, logger });
   await proxy.setup(core, {});
+
   expect(clusterDocClient.setup.mock.calls.length).toBe(1);
   expect(httpService.createNewServer.mock.calls.length).toBe(1);
+  expect(mockReadFile.mock.calls.length).toBe(3);
+  const passedConfig = httpService.createNewServer.mock.calls[0][0];
+  expect(passedConfig.ssl).toBeTruthy();
+  expect(passedConfig.ssl.certificate).toBe('foo');
+
+  const proxyStart = await proxy.start();
+
+  expect(clusterDocClient.start.mock.calls.length).toBe(1);
+  expect(proxyStart).toBeTruthy();
+
+  await proxy.stop();
 });
