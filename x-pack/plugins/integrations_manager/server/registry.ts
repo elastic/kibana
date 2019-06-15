@@ -5,10 +5,10 @@
  */
 
 import Boom from 'boom';
-import yauzl from 'yauzl';
 import fetch, { Response } from 'node-fetch';
-import { Readable } from 'stream';
+import { PassThrough } from 'stream';
 import tar from 'tar';
+import yauzl from 'yauzl';
 
 const REGISTRY = process.env.REGISTRY || 'http://localhost:8080';
 
@@ -29,10 +29,9 @@ export async function getArchiveInfo(key: string): Promise<string[]> {
   return getFiles(key);
 }
 
-function bufferToStream(buffer: Buffer): Readable {
-  const stream = new Readable();
-  stream.push(buffer);
-  stream.push(null);
+async function bufferToStream(buffer: Buffer): Promise<PassThrough> {
+  const stream = new PassThrough();
+  stream.end(buffer);
   return stream;
 }
 
@@ -126,12 +125,12 @@ async function untarBuffer(
   buffer: Buffer,
   predicate = (entry: tar.FileStat): boolean => true
 ): Promise<string[]> {
-  const stream = bufferToStream(buffer);
+  const stream = await bufferToStream(buffer);
   const paths: string[] = [];
   return new Promise((resolve, reject) => {
     // ts erroring with:
     // 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.
-    const parser: NodeJS.ReadWriteStream = new tar.Parse();
+    const parser = tar.t();
     parser
       .on('entry', (entry: tar.FileStat) => {
         if (!predicate(entry)) return;
