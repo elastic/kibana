@@ -24,7 +24,7 @@ import expect from '@kbn/expect';
 import $ from 'jquery';
 import '../../../persisted_state';
 import { Axis } from '../../lib/axis';
-import { VislibVisConfigProvider } from '../../lib/vis_config';
+import { VisConfig } from '../../lib/vis_config';
 
 const YAxis = Axis;
 let persistedState;
@@ -32,7 +32,6 @@ let el;
 let buildYAxis;
 let yAxis;
 let yAxisDiv;
-let VisConfig;
 
 const timeSeries = [
   1408734060000,
@@ -113,7 +112,6 @@ describe('Vislib yAxis Class Test Suite', function () {
 
   beforeEach(ngMock.inject(function (Private, $injector) {
     persistedState = new ($injector.get('PersistedState'))();
-    VisConfig = Private(VislibVisConfigProvider);
 
     expect($('.y-axis-wrapper')).to.have.length(0);
   }));

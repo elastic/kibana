@@ -6,13 +6,23 @@
 
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
+import chrome from 'ui/chrome'; // eslint-disable-line import/no-unresolved
+import { MANAGEMENT_BREADCRUMB } from 'ui/management'; // eslint-disable-line import/no-unresolved
+import { fatalError, toastNotifications } from 'ui/notify'; // eslint-disable-line import/no-unresolved
 
-import { setHttpClient } from '../../../public/services/api';
+import { init as initBreadcrumb } from '../../../public/app/services/breadcrumb';
+import { init as initHttp } from '../../../public/app/services/http';
+import { init as initNotification } from '../../../public/app/services/notification';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
+  chrome.breadcrumbs = {
+    set: () => {},
+  };
   // axios has a $http like interface so using it to simulate $http
-  setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
+  initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
+  initBreadcrumb(() => {}, MANAGEMENT_BREADCRUMB);
+  initNotification(toastNotifications, fatalError);
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

@@ -52,21 +52,23 @@ export class MachineLearningFlyout extends Component<Props, State> {
     }, 0);
   }
 
-  public onClickCreate = async () => {
+  public onClickCreate = async ({
+    transactionType
+  }: {
+    transactionType: string;
+  }) => {
     this.setState({ isCreatingJob: true });
     try {
-      const { serviceName, transactionType } = this.props.urlParams;
-      if (!serviceName || !transactionType) {
-        throw new Error(
-          'Service name and transaction type are required to create this ML job'
-        );
+      const { serviceName } = this.props.urlParams;
+      if (!serviceName) {
+        throw new Error('Service name is required to create this ML job');
       }
       const res = await startMLJob({ serviceName, transactionType });
       const didSucceed = res.datafeeds[0].success && res.jobs[0].success;
       if (!didSucceed) {
         throw new Error('Creating ML job failed');
       }
-      this.addSuccessToast();
+      this.addSuccessToast({ transactionType });
     } catch (e) {
       this.addErrorToast();
     }
@@ -104,9 +106,13 @@ export class MachineLearningFlyout extends Component<Props, State> {
     });
   };
 
-  public addSuccessToast = () => {
+  public addSuccessToast = ({
+    transactionType
+  }: {
+    transactionType: string;
+  }) => {
     const { urlParams } = this.props;
-    const { serviceName, transactionType } = urlParams;
+    const { serviceName } = urlParams;
 
     if (!serviceName) {
       return;

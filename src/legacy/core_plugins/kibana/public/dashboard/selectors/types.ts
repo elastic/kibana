@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { EmbeddableMetadata, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
+import { EmbeddableMetadata, Query, TimeRange } from 'ui/embeddable';
 import { Filter } from '@kbn/es-query';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { SavedDashboardPanelMap } from '../types';
 
@@ -29,7 +30,7 @@ export interface ViewState {
   readonly maximizedPanelId?: string;
   readonly visibleContextMenuPanelId?: string;
   readonly timeRange: TimeRange;
-  readonly refreshConfig: RefreshConfig;
+  readonly refreshConfig: RefreshInterval;
   readonly hidePanelTitles: boolean;
   readonly useMargins: boolean;
   readonly query: Query;

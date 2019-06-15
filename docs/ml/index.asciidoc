@@ -72,4 +72,5 @@ For more information about {ml}, see
 
 include::creating-jobs.asciidoc[]
 include::job-tips.asciidoc[]
+include::creating-df-kib.asciidoc[]
 
