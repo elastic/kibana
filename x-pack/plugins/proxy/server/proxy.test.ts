@@ -12,10 +12,12 @@ import {
   Env,
   ObjectToConfigAdapter,
 } from '../../../../src/core/server/config';
-import { mockHttpServer } from '../../../../src/core/server/http/http_service.test.mocks';
+import { httpServiceMock } from '../../../../src/core/server/http/http_service.mock';
 import { loggingServiceMock } from '../../../../src/core/server/logging/logging_service.mock';
 import { getEnvOptions } from '../../../../src/core/server/config/__mocks__/env';
+import { elasticsearchServiceMock } from '../../../../src/core/server/elasticsearch/elasticsearch_service.mock';
 import { ProxyService, ProxyConfig, ProxyPluginType } from './proxy';
+import { mockClusterDocClient } from './cluster_doc.test.mock';
 
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
@@ -59,7 +61,6 @@ function configService(value: Partial<ProxyPluginType>) {
 }
 
 beforeEach(() => {
-  jest.mock('./cluster_doc');
   jest.useFakeTimers();
 });
 
@@ -68,12 +69,23 @@ afterEach(() => {
 });
 
 test('creates and sets up proxy server', async () => {
-  const httpServer = {
-    isListening: () => false,
+  const clusterDocClient = {
     setup: jest.fn(),
     start: jest.fn(),
     stop: noop,
   };
-  mockHttpServer.mockImplementation(() => httpServer);
+
+  const elasticClient = elasticsearchServiceMock.createSetupContract();
+  mockClusterDocClient.mockImplementation(() => clusterDocClient);
+  const httpService = httpServiceMock.createSetupContract();
+
+  const core = {
+    elasticsearch: elasticClient,
+    http: httpService,
+  };
+
   const proxy = new ProxyService({ config: configService({}), env, logger });
+  await proxy.setup(core, {});
+  expect(clusterDocClient.setup.mock.calls.length).toBe(1);
+  expect(httpService.createNewServer.mock.calls.length).toBe(1);
 });
