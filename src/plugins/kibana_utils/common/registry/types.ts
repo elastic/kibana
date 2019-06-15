@@ -26,14 +26,30 @@ export type FindBy<Item, Result = Item | undefined> = (
   value: Item[keyof Item]
 ) => Result;
 
-export interface Registry<T extends {}> {
-  get: (id: string) => T | undefined;
-  set: (id: string, obj: T) => void;
-  set$: Observable<T>;
-  reset: () => void;
-  reset$: Observable<void>;
+/**
+ * @todo `Iterable` interface seems to be overwritten by JQuery, so it is redefined here.
+ */
+interface Iterable<T> {
+  [Symbol.iterator](): Iterator<T>;
+}
+
+export interface RegistryIterators<T> extends Iterable<[string, T]>, Pick<Map<string, T>, 'entries' | 'values' | 'keys'> {}
+
+export interface RegistryReadOnly<T extends {}> extends RegistryIterators<T> {
+  get: (key: string) => T | undefined,
+  size: () => number;
   find: Find<T>;
   findBy: FindBy<T>;
   filter: Find<T, T[]>;
   filterBy: FindBy<T, T[]>;
 }
+
+export interface RegistryMutable<T extends {}> {
+  set: (key: string, entry: T) => void;
+  set$: Observable<T>;
+  clear: () => {},
+  clear$: Observable<void>;
+  freeze: () => RegistryReadOnly<T>;
+}
+
+export interface Registry<T extends {}> extends RegistryReadOnly<T>, RegistryMutable<T> {}
