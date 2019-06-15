@@ -23,7 +23,6 @@ import {
   EmbeddablePanel,
   Container,
   embeddableFactories,
-  IRegistry,
   EmbeddableFactory,
 } from 'plugins/embeddable_api';
 import {
@@ -31,9 +30,10 @@ import {
   CONTACT_CARD_EMBEDDABLE,
   HELLO_WORLD_EMBEDDABLE_TYPE,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
+import { Registry } from '../../../../../../src/plugins/kibana_utils/public';
 
 interface Props {
-  embeddableFactories: IRegistry<EmbeddableFactory>;
+  embeddableFactories: Registry<EmbeddableFactory>;
 }
 
 export class HelloWorldContainerExample extends React.Component<Props> {
