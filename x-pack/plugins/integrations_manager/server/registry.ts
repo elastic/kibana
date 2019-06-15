@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import fetch, { Response } from 'node-fetch';
-import { PassThrough } from 'stream';
 import tar from 'tar';
 import yauzl from 'yauzl';
+import { cacheGet, cacheSet, cacheHas } from './cache';
+import { fetchJson, getResponseStream } from './requests';
+import { bufferToStream, streamToBuffer } from './streams';
 
 const REGISTRY = process.env.REGISTRY || 'http://localhost:8080';
-
-const cache: Map<string, Buffer> = new Map();
-const cacheGet = (key: string) => cache.get(key);
-const cacheSet = (key: string, value: Buffer) => cache.set(key, value);
-const cacheHas = (key: string) => cache.has(key);
 
 export async function fetchList() {
   return fetchJson(`${REGISTRY}/list`);
@@ -25,60 +20,7 @@ export async function fetchInfo(key: string) {
   return fetchJson(`${REGISTRY}/package/${key}`);
 }
 
-export async function getArchiveInfo(key: string): Promise<string[]> {
-  return getFiles(key);
-}
-
-function bufferToStream(buffer: Buffer): PassThrough {
-  const stream = new PassThrough();
-  stream.end(buffer);
-  return stream;
-}
-
-function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const body: string[] = [];
-    stream.on('data', (chunk: string) => body.push(chunk));
-    stream.on('end', () => resolve(body.join('')));
-    stream.on('error', reject);
-  });
-}
-
-function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    stream.on('data', chunk => chunks.push(Buffer.from(chunk)));
-    stream.on('end', () => resolve(Buffer.concat(chunks)));
-    stream.on('error', reject);
-  });
-}
-
-function getResponse(url: string): Promise<Response> {
-  return new Promise((resolve, reject) =>
-    fetch(url).then((response: Response) =>
-      response.ok
-        ? resolve(response)
-        : reject(new Boom(response.statusText, { statusCode: response.status }))
-    )
-  );
-}
-
-async function getResponseStream(url: string): Promise<NodeJS.ReadableStream> {
-  const res = await getResponse(url);
-  return res.body;
-}
-
-async function fetchUrl(url: string): Promise<string> {
-  return getResponseStream(url).then(streamToString);
-}
-
-async function fetchJson(url: string): Promise<object> {
-  const json = await fetchUrl(url);
-  const data = JSON.parse(json);
-  return data;
-}
-
-async function getFiles(
+export async function getArchiveInfo(
   key: string,
   predicate = (entry: yauzl.Entry | tar.FileStat): boolean => true
 ): Promise<string[]> {
@@ -106,19 +48,21 @@ async function unzipBuffer(
   buffer: Buffer,
   predicate = (entry: yauzl.Entry): boolean => true
 ): Promise<string[]> {
-  const files: string[] = [];
+  const paths: string[] = [];
   const zipfile = await yauzlFromBuffer(buffer, { lazyEntries: true });
   zipfile.readEntry();
   zipfile.on('entry', async (entry: yauzl.Entry) => {
     if (!predicate(entry)) return zipfile.readEntry();
-    if (cacheHas(entry.fileName)) return files.push(entry.fileName) && zipfile.readEntry();
+    if (cacheHas(entry.fileName)) return paths.push(entry.fileName) && zipfile.readEntry();
 
     const entryBuffer = await getZipReadStream(zipfile, entry).then(streamToBuffer);
     cacheSet(entry.fileName, entryBuffer);
-    files.push(entry.fileName);
+    paths.push(entry.fileName);
     zipfile.readEntry();
   });
-  return new Promise(resolve => zipfile.on('end', () => resolve(files)));
+  return new Promise((resolve, reject) =>
+    zipfile.on('end', () => resolve(paths)).on('error', reject)
+  );
 }
 
 async function untarBuffer(
@@ -138,7 +82,8 @@ async function untarBuffer(
   });
 
   return new Promise((resolve, reject) => {
-    deflatedStream.pipe(inflateStream.on('end', () => resolve(paths)).on('error', reject));
+    inflateStream.on('end', () => resolve(paths)).on('error', reject);
+    deflatedStream.pipe(inflateStream);
   });
 }
 
