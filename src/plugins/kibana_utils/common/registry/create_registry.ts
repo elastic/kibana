@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Registry } from './types';
 import { Observable, Subject } from 'rxjs';
+import { Registry } from './types';
 
 export const createRegistry = <T>(): Registry<T> => {
   let data = new Map<string, T>();
@@ -25,9 +25,30 @@ export const createRegistry = <T>(): Registry<T> => {
   const set$ = new Subject();
   const clear$ = new Subject();
 
-  const set = (id: string, obj: T) => {
-    data.set(id, obj);
-    set$.next(obj);
+  const iterable = {
+    *[Symbol.iterator]() {
+      for (const item of data) yield item;
+    },
+  };
+
+  function* ids() {
+    for (const [id] of iterable) yield id;
+  }
+
+  function* records() {
+    for (const [, record] of iterable) yield record;
+  }
+
+  const find: Registry<T>['find'] = predicate => {
+    for (const record of records()) {
+      if (predicate(record)) return record;
+    }
+    return undefined;
+  };
+
+  const set = (id: string, record: T) => {
+    data.set(id, record);
+    set$.next(record);
   };
 
   const clear = () => {
@@ -35,40 +56,23 @@ export const createRegistry = <T>(): Registry<T> => {
     clear$.next();
   };
 
-  const ni = () => { throw new Error('not implemented'); };
-
-  const iterable = {
-    * [Symbol.iterator]() {
-      for (const item of data) yield item;
-    }
+  const ni = () => {
+    throw new Error('not implemented');
   };
-
-  function * entries () {
-    for (const entry of iterable) yield entry;
-  }
-
-  function * keys () {
-    for (const [key] of iterable) yield key;
-  }
-
-  function * values () {
-    for (const [, value] of iterable) yield value;
-  }
 
   return {
     ...iterable,
-    entries,
-    keys,
-    values,
+    ids,
+    records,
     get: id => data.get(id),
-    set,
-    set$: (set$ as unknown) as Observable<T>,
-    clear: () => data.clear(),
-    clear$: (clear as unknown) as Observable<void>,
     size: () => data.size,
-    find: ni,
+    find,
     findBy: ni,
     filter: ni,
     filterBy: ni,
-  }
-}
+    set,
+    set$: (set$ as unknown) as Observable<T>,
+    clear,
+    clear$: (clear$ as unknown) as Observable<void>,
+  };
+};
