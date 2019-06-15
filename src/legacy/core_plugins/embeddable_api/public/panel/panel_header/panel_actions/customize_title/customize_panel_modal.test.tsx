@@ -34,7 +34,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { CustomizePanelModal } from './customize_panel_modal';
 import { Container, isErrorEmbeddable } from '../../../..';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { createRegistry } from '../../../../create_registry';
+import { createRegistry } from '../../../../../../../../plugins/kibana_utils/public';
 import { EmbeddableFactory } from '../../../../embeddables';
 
 let container: Container;

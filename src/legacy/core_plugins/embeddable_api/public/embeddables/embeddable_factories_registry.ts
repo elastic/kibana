@@ -18,6 +18,6 @@
  */
 
 import { EmbeddableFactory } from './embeddable_factory';
-import { createRegistry } from '../create_registry';
+import { createRegistry } from '../../../../../plugins/kibana_utils/public';
 
 export const embeddableFactories = createRegistry<EmbeddableFactory>();

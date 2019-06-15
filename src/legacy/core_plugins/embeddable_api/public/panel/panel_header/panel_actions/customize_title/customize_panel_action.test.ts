@@ -33,7 +33,7 @@ import { Container, isErrorEmbeddable } from '../../../..';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { CustomizePanelTitleAction } from './customize_panel_action';
-import { createRegistry } from '../../../../create_registry';
+import { createRegistry } from '../../../../../../../../plugins/kibana_utils/public';
 import { EmbeddableFactory } from '../../../../embeddables';
 
 let container: Container;

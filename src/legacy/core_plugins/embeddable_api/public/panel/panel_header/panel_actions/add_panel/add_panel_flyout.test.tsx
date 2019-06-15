@@ -35,7 +35,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
-import { createRegistry } from '../../../../create_registry';
+import { createRegistry } from '../../../../../../../../plugins/kibana_utils/public';
 import { EmbeddableFactory } from '../../../../embeddables';
 
 const onClose = jest.fn();

@@ -30,7 +30,7 @@ import {
 
 import { ViewMode, EmbeddableOutput, isErrorEmbeddable } from '../../../../';
 import { AddPanelAction } from './add_panel_action';
-import { createRegistry } from '../../../../create_registry';
+import { createRegistry } from '../../../../../../../../plugins/kibana_utils/public';
 import { EmbeddableFactory } from '../../../../embeddables';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 

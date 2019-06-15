@@ -45,7 +45,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { attachAction } from '../triggers/attach_action';
-import { createRegistry } from '../create_registry';
+import { createRegistry } from '../../../../../plugins/kibana_utils/public';
 import { EmbeddableFactory } from '../embeddables';
 
 const editModeAction = new EditModeAction();

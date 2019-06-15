@@ -19,15 +19,13 @@
 import { I18nContext } from 'ui/i18n';
 import { EuiTab } from '@elastic/eui';
 import React, { Component } from 'react';
-import {
-  IRegistry,
-  EmbeddableFactory,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
+import { EmbeddableFactory } from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
 import { ContactCardEmbeddableExample } from './hello_world_embeddable_example';
 import { HelloWorldContainerExample } from './hello_world_container_example';
+import { Registry } from '../../../../../../src/plugins/kibana_utils/public';
 
 export interface AppProps {
-  embeddableFactories: IRegistry<EmbeddableFactory>;
+  embeddableFactories: Registry<EmbeddableFactory>;
 }
 
 export class App extends Component<AppProps, { selectedTabId: string }> {

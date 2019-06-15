@@ -38,7 +38,7 @@ import {
 import { isErrorEmbeddable, EmbeddableOutput, EmbeddableFactory } from '../embeddables';
 import { ContainerInput } from './i_container';
 import { ViewMode } from '../types';
-import { createRegistry } from '../create_registry';
+import { createRegistry } from '../../../../../plugins/kibana_utils/public';
 import {
   FilterableEmbeddableInput,
   FilterableEmbeddable,
@@ -555,7 +555,7 @@ test('Container changes made directly after adding a new embeddable are propagat
     embeddableFactories
   );
 
-  embeddableFactories.reset();
+  embeddableFactories.clear();
   embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
     new SlowContactCardEmbeddableFactory({ loadTickCount: 3 })
@@ -678,7 +678,7 @@ test('untilEmbeddableLoaded throws an error if there is no such child panel in t
 });
 
 test('untilEmbeddableLoaded resolves if child is has an type that does not exist', async done => {
-  embeddableFactories.reset();
+  embeddableFactories.clear();
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -699,7 +699,7 @@ test('untilEmbeddableLoaded resolves if child is has an type that does not exist
 });
 
 test('untilEmbeddableLoaded resolves if child is loaded in the container', async done => {
-  embeddableFactories.reset();
+  embeddableFactories.clear();
   embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
 
   const container = new HelloWorldContainer(
@@ -722,7 +722,7 @@ test('untilEmbeddableLoaded resolves if child is loaded in the container', async
 });
 
 test('untilEmbeddableLoaded rejects with an error if child is subsequently removed', async done => {
-  embeddableFactories.reset();
+  embeddableFactories.clear();
   embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
     new SlowContactCardEmbeddableFactory({ loadTickCount: 3 })

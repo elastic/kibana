@@ -18,8 +18,8 @@
  */
 import { Filter } from '@kbn/es-query';
 import { EmbeddableFactory } from '../../embeddables';
-import { IRegistry } from '../../types';
 import { Container, ContainerInput } from '../../containers';
+import { Registry } from '../../../../../../plugins/kibana_utils/public';
 
 export const FILTERABLE_CONTAINER = 'FILTERABLE_CONTAINER';
 
@@ -40,7 +40,7 @@ export class FilterableContainer extends Container<
 
   constructor(
     initialInput: FilterableContainerInput,
-    embeddableFactories: IRegistry<EmbeddableFactory>,
+    embeddableFactories: Registry<EmbeddableFactory>,
     parent?: Container
   ) {
     super(initialInput, { embeddableLoaded: {} }, embeddableFactories, parent);

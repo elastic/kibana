@@ -110,8 +110,7 @@ export class AddPanelFlyout extends React.Component<Props> {
         ),
       },
 
-      ...this.props.container.embeddableFactories
-        .getAll()
+      ...[...this.props.container.embeddableFactories.records()]
         .filter(
           factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
         )
@@ -147,8 +146,7 @@ export class AddPanelFlyout extends React.Component<Props> {
           <SavedObjectFinder
             onChoose={this.onAddPanel}
             savedObjectMetaData={
-              this.props.container.embeddableFactories
-                .getAll()
+              [...this.props.container.embeddableFactories.records()]
                 .filter(
                   embeddableFactory =>
                     Boolean(embeddableFactory.savedObjectMetaData) &&
