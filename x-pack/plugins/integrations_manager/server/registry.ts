@@ -29,7 +29,7 @@ export async function getArchiveInfo(key: string): Promise<string[]> {
   return getFiles(key);
 }
 
-async function bufferToStream(buffer: Buffer): Promise<PassThrough> {
+function bufferToStream(buffer: Buffer): PassThrough {
   const stream = new PassThrough();
   stream.end(buffer);
   return stream;
@@ -125,25 +125,20 @@ async function untarBuffer(
   buffer: Buffer,
   predicate = (entry: tar.FileStat): boolean => true
 ): Promise<string[]> {
-  const stream = await bufferToStream(buffer);
   const paths: string[] = [];
-  return new Promise((resolve, reject) => {
-    // ts erroring with:
-    // 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.
-    const parser = tar.t();
-    parser
-      .on('entry', (entry: tar.FileStat) => {
-        if (!predicate(entry)) return;
-        streamToBuffer(entry).then(entryBuffer => {
-          if (!entry.header.path) return;
-          cacheSet(entry.header.path, entryBuffer);
-          paths.push(entry.header.path);
-        });
-      })
-      .on('end', () => resolve(paths))
-      .on('error', reject);
+  const deflatedStream = bufferToStream(buffer);
+  // use tar.list vs .extract to avoid writing to disk
+  const inflateStream = tar.list().on('entry', (entry: tar.FileStat) => {
+    if (!predicate(entry)) return;
+    streamToBuffer(entry).then(entryBuffer => {
+      if (!entry.header.path) return;
+      cacheSet(entry.header.path, entryBuffer);
+      paths.push(entry.header.path);
+    });
+  });
 
-    stream.pipe(parser);
+  return new Promise((resolve, reject) => {
+    deflatedStream.pipe(inflateStream.on('end', () => resolve(paths)).on('error', reject));
   });
 }
 
