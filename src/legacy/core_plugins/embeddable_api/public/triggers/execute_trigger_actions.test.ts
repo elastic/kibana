@@ -56,7 +56,7 @@ class TestAction extends Action {
 
 beforeEach(() => {
   triggerRegistry.clear();
-  actionRegistry.reset();
+  actionRegistry.clear();
   executeFn.mockReset();
 });
 

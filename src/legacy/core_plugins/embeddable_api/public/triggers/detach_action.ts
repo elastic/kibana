@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IRegistry, Trigger } from '../types';
+import { Trigger } from '../types';
 import { Registry } from '../../../../../plugins/kibana_utils/public';
 
 export function detachAction(

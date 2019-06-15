@@ -19,7 +19,7 @@
 export { Action, ActionContext } from './action';
 export { IncompatibleActionError } from './incompatible_action_error';
 
-import { createRegistry } from '../create_registry';
+import { createRegistry } from '../../../../../plugins/kibana_utils/public';
 import { Action } from './action';
 
 export const actionRegistry = createRegistry<Action>();

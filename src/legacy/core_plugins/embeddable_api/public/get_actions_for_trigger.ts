@@ -20,11 +20,11 @@
 import { Action } from './actions';
 import { IEmbeddable } from './embeddables';
 import { IContainer } from './containers';
-import { IRegistry, Trigger } from './types';
+import { Trigger } from './types';
 import { Registry } from '../../../../plugins/kibana_utils/public';
 
 export async function getActionsForTrigger(
-  actionRegistry: IRegistry<Action>,
+  actionRegistry: Registry<Action>,
   triggerRegistry: Registry<Trigger>,
   triggerId: string,
   context: { embeddable: IEmbeddable; container?: IContainer }
