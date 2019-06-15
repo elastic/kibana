@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { Observable, BehaviorSubject } from 'rxjs';
 import { noop } from 'lodash';
 
@@ -16,6 +17,7 @@ import { httpServiceMock } from '../../../../src/core/server/http/http_service.m
 import { loggingServiceMock } from '../../../../src/core/server/logging/logging_service.mock';
 import { getEnvOptions } from '../../../../src/core/server/config/__mocks__/env';
 import { elasticsearchServiceMock } from '../../../../src/core/server/elasticsearch/elasticsearch_service.mock';
+import { mockReadFile } from './fs.mock';
 import { ProxyService, ProxyConfig, ProxyPluginType } from './proxy';
 import { mockClusterDocClient } from './cluster_doc.test.mock';
 
@@ -83,6 +85,8 @@ test('creates and sets up proxy server', async () => {
     elasticsearch: elasticClient,
     http: httpService,
   };
+
+  mockReadFile.mockImplementation((x, cb) => cb(null, Buffer.from('')));
 
   const proxy = new ProxyService({ config: configService({}), env, logger });
   await proxy.setup(core, {});
