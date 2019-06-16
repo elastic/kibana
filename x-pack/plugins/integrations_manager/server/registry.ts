@@ -22,13 +22,22 @@ export async function fetchInfo(key: string) {
 
 export async function getArchiveInfo(
   key: string,
-  predicate = (entry: yauzl.Entry | tar.FileStat): boolean => true
+  filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
   const archiveBuffer = await getOrFetchArchiveBuffer(key);
   const extract = key.endsWith('.zip') ? unzipBuffer : untarBuffer;
-  const files = await extract(archiveBuffer, predicate);
 
-  return files;
+  const paths: string[] = [];
+  const onEntry = (entry: ArchiveEntry) => {
+    const { path, buffer } = entry;
+    paths.push(path);
+    if (cacheHas(path)) return;
+    if (buffer) cacheSet(path, buffer);
+  };
+
+  await extract(archiveBuffer, filter, onEntry);
+
+  return paths;
 }
 
 async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
@@ -46,43 +55,37 @@ async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
 
 async function unzipBuffer(
   buffer: Buffer,
-  predicate = (entry: yauzl.Entry): boolean => true
+  filter = (entry: ArchiveEntry): boolean => true,
+  onEntry = (entry: ArchiveEntry) => {}
 ): Promise<string[]> {
-  const paths: string[] = [];
   const zipfile = await yauzlFromBuffer(buffer, { lazyEntries: true });
   zipfile.readEntry();
   zipfile.on('entry', async (entry: yauzl.Entry) => {
-    if (!predicate(entry)) return zipfile.readEntry();
-    if (cacheHas(entry.fileName)) return paths.push(entry.fileName) && zipfile.readEntry();
+    const path = entry.fileName;
+    if (!filter({ path })) return zipfile.readEntry();
 
     const entryBuffer = await getZipReadStream(zipfile, entry).then(streamToBuffer);
-    cacheSet(entry.fileName, entryBuffer);
-    paths.push(entry.fileName);
+    onEntry({ buffer: entryBuffer, path });
     zipfile.readEntry();
   });
-  return new Promise((resolve, reject) =>
-    zipfile.on('end', () => resolve(paths)).on('error', reject)
-  );
+  return new Promise((resolve, reject) => zipfile.on('end', resolve).on('error', reject));
 }
 
 async function untarBuffer(
   buffer: Buffer,
-  predicate = (entry: tar.FileStat): boolean => true
+  filter = (entry: ArchiveEntry): boolean => true,
+  onEntry = (entry: ArchiveEntry) => {}
 ): Promise<string[]> {
-  const paths: string[] = [];
   const deflatedStream = bufferToStream(buffer);
   // use tar.list vs .extract to avoid writing to disk
   const inflateStream = tar.list().on('entry', (entry: tar.FileStat) => {
-    if (!predicate(entry)) return;
-    streamToBuffer(entry).then(entryBuffer => {
-      if (!entry.header.path) return;
-      cacheSet(entry.header.path, entryBuffer);
-      paths.push(entry.header.path);
-    });
+    const path = entry.header.path || '';
+    if (!filter({ path })) return;
+    streamToBuffer(entry).then(entryBuffer => onEntry({ buffer: entryBuffer, path }));
   });
 
   return new Promise((resolve, reject) => {
-    inflateStream.on('end', () => resolve(paths)).on('error', reject);
+    inflateStream.on('end', resolve).on('error', reject);
     deflatedStream.pipe(inflateStream);
   });
 }
@@ -102,4 +105,9 @@ function getZipReadStream(
       err ? reject(err) : resolve(readStream)
     )
   );
+}
+
+interface ArchiveEntry {
+  path: string;
+  buffer?: Buffer;
 }
