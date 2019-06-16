@@ -11,6 +11,8 @@ import { MLLink } from './MLLink';
 import chrome from 'ui/chrome';
 import * as savedObjects from '../../../../services/rest/savedObjects';
 
+jest.mock('ui/kfetch');
+
 jest
   .spyOn(chrome, 'addBasePath')
   .mockImplementation(path => `/basepath${path}`);

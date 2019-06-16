@@ -8,7 +8,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  // @ts-ignore
   EuiSuperSelect,
   EuiText
 } from '@elastic/eui';
