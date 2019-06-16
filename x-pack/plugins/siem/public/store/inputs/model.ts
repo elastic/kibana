@@ -26,15 +26,11 @@ export interface RelativeTimeRange {
 
 export const isRelativeTimeRange = (
   timeRange: RelativeTimeRange | AbsoluteTimeRange | URLTimeRange
-): timeRange is RelativeTimeRange => {
-  return timeRange.kind === 'relative';
-};
+): timeRange is RelativeTimeRange => timeRange.kind === 'relative';
 
 export const isAbsoluteTimeRange = (
   timeRange: RelativeTimeRange | AbsoluteTimeRange | URLTimeRange
-): timeRange is AbsoluteTimeRange => {
-  return timeRange.kind === 'absolute';
-};
+): timeRange is AbsoluteTimeRange => timeRange.kind === 'absolute';
 
 export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
 
