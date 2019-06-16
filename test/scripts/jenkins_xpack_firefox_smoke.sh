@@ -13,8 +13,9 @@ export TEST_BROWSER_HEADLESS=1
 
 cd "$XPACK_DIR"
 
-node scripts/functional_tests \
-  --debug --bail \
-  --kibana-install-dir "$installDir" \
-  --include-tag "smoke" \
-  --config test/functional/config.firefox.js;
+checks-reporter-with-killswitch "X-Pack firefox smoke test" \
+  node scripts/functional_tests \
+    --debug --bail \
+    --kibana-install-dir "$installDir" \
+    --include-tag "smoke" \
+    --config test/functional/config.firefox.js;

@@ -11,8 +11,9 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
 export TEST_BROWSER_HEADLESS=1
 
-node scripts/functional_tests \
-  --bail --debug \
-  --kibana-install-dir "$installDir" \
-  --include-tag "smoke" \
-  --config test/functional/config.firefox.js;
+checks-reporter-with-killswitch "Firefox smoke test" \
+  node scripts/functional_tests \
+    --bail --debug \
+    --kibana-install-dir "$installDir" \
+    --include-tag "smoke" \
+    --config test/functional/config.firefox.js;
