@@ -27,10 +27,6 @@ import { npSetup } from 'ui/new_platform';
 // @ts-ignore
 import { compareFilters } from './lib/compare_filters';
 // @ts-ignore
-import { onlyDisabled } from './lib/only_disabled';
-// @ts-ignore
-import { onlyStateChanged } from './lib/only_state_changed';
-// @ts-ignore
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 // @ts-ignore
 import { uniqFilters } from './lib/uniq_filters';
@@ -117,12 +113,6 @@ export class FilterManager {
     return !_.isEqual(this.filters, newFilters);
   }
 
-  private shouldFetch(newFilters: Filter[]) {
-    // This is legacy optimization logic.
-    // TODO: What it does is - ----------
-    return true; // !onlyDisabled(newFilters, this.filters) && !onlyStateChanged(newFilters, this.filters);
-  }
-
   private static partitionFilters(filters: Filter[]): PartitionedFilters {
     const [globalFilters, appFilters] = _.partition(filters, isFilterPinned);
     return {
@@ -161,9 +151,9 @@ export class FilterManager {
     if (filtersUpdated) {
       this.filterState.updateAppState(FilterManager.partitionFilters(newFilters));
       this.updated$.next();
-      if (this.shouldFetch(newFilters)) {
-        this.fetch$.next();
-      }
+      // Fired together with updated$, because historically (~4 years ago) there was a fetch optimization, that didn't call fetch for very specific cases.
+      // This optimization seems irrelevant at the moment, but I didn't want to change the logic of all consumers.
+      this.fetch$.next();
     }
   }
 
