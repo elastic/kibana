@@ -122,6 +122,7 @@
 .code-top-bar__container {
   box-sizing: content-box;
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
   justify-content: space-between;
   min-height: 80px;
