@@ -213,9 +213,35 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('addLayerButton');
     }
 
+    async openSetViewPopover() {
+      const isOpen = await testSubjects.exists('mapSetViewForm');
+      if (!isOpen) {
+        await retry.try(async () => {
+          await testSubjects.click('toggleSetViewVisibilityButton');
+          const isOpenAfterClick = await testSubjects.exists('mapSetViewForm');
+          if (!isOpenAfterClick) {
+            throw new Error('set view popover not opened');
+          }
+        });
+      }
+    }
+
+    async closeSetViewPopover() {
+      const isOpen = await testSubjects.exists('mapSetViewForm');
+      if (isOpen) {
+        await retry.try(async () => {
+          await testSubjects.click('toggleSetViewVisibilityButton');
+          const isOpenAfterClick = await testSubjects.exists('mapSetViewForm');
+          if (isOpenAfterClick) {
+            throw new Error('set view popover not closed');
+          }
+        });
+      }
+    }
+
     async setView(lat, lon, zoom) {
       log.debug(`Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`);
-      await testSubjects.click('toggleSetViewVisibilityButton');
+      await this.openSetViewPopover();
       await testSubjects.setValue('latitudeInput', lat.toString());
       await testSubjects.setValue('longitudeInput', lon.toString());
       await testSubjects.setValue('zoomInput', zoom.toString());
@@ -225,11 +251,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async getView() {
       log.debug('Get view');
-      await testSubjects.click('toggleSetViewVisibilityButton');
+      await this.openSetViewPopover();
       const lat = await testSubjects.getAttribute('latitudeInput', 'value');
       const lon = await testSubjects.getAttribute('longitudeInput', 'value');
       const zoom = await testSubjects.getAttribute('zoomInput', 'value');
-      await testSubjects.click('toggleSetViewVisibilityButton');
+      await this.closeSetViewPopover();
       return {
         lat: parseFloat(lat),
         lon: parseFloat(lon),

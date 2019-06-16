@@ -96,8 +96,8 @@ uiRoutes
       });
     },
     resolve: {
-      indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
-        return indexPatterns.get($route.current.params.indexPatternId)
+      indexPattern: function ($route, Promise, redirectWhenMissing, indexPatterns) {
+        return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId))
           .catch(redirectWhenMissing('/management/kibana/index_patterns'));
       }
     },

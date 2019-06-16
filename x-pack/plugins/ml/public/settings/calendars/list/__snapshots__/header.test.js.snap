@@ -93,7 +93,7 @@ exports[`CalendarListsHeader renders header 1`] = `
               "br": <br />,
               "learnMoreLink": <EuiLink
                 color="primary"
-                href="https://www.elastic.co/guide/en/elastic-stack-overview/my-metadata-branch/ml-calendars.html"
+                href="https://www.elastic.co/guide/en/elastic-stack-overview/jest-metadata-mock-branch/ml-calendars.html"
                 target="_blank"
                 type="button"
               >
