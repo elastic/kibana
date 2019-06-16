@@ -128,10 +128,8 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
             get('global.timerange', timerangeStateData)
           );
           this.props.setAbsoluteTimerange({
-            ...{
-              ...absoluteRange,
-              id: globalId,
-            },
+            ...absoluteRange,
+            id: globalId,
           });
         }
         if (globalType === 'relative') {
