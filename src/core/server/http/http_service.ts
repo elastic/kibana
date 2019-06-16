@@ -31,11 +31,13 @@ import { HttpsRedirectServer } from './https_redirect_server';
 /** @public */
 export interface HttpServiceSetup extends HttpServerSetup {
   createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
+  /** Indicates if http server has configured to start listening on a configured port */
+  shouldListen: () => boolean;
 }
 /** @public */
 export interface HttpServiceStart {
-  /** Indicates if http server is listening on a port */
-  isListening: () => boolean;
+  /** Indicates if http server is listening on a given port */
+  isListening: (port: number) => boolean;
 }
 
 /** @internal */
@@ -78,19 +80,17 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     const httpSetup = (this.httpServer.setup(config) || {}) as HttpServiceSetup;
     const setup = {
       ...httpSetup,
-      ...{ createNewServer: this.createServer.bind(this) },
+      ...{
+        createNewServer: this.createServer.bind(this),
+        shouldListen: this.shouldListen.bind(this, config),
+      },
     };
     return setup;
   }
 
   public async start() {
     const config = await this.config$.pipe(first()).toPromise();
-
-    // We shouldn't set up http service in two cases:`
-    // 1. If `server.autoListen` is explicitly set to `false`.
-    // 2. When the process is run as dev cluster master in which case cluster manager
-    // will fork a dedicated process where http service will be set up instead.
-    if (!this.coreContext.env.isDevClusterMaster && config.autoListen) {
+    if (this.shouldListen(config)) {
       // If a redirect port is specified, we start an HTTP server at this port and
       // redirect all requests to the SSL port.
       if (config.ssl.enabled && config.ssl.redirectHttpFromPort !== undefined) {
@@ -102,12 +102,20 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     }
 
     return {
-      isListening: (port = 0) => {
+      isListening: (port: number) => {
         const server = this.secondaryServers.get(port);
         if (server) return server.isListening();
         return this.httpServer.isListening();
       },
     };
+  }
+
+  private shouldListen(config: HttpConfig) {
+    // We shouldn't start http service in two cases:`
+    // 1. If `server.autoListen` is explicitly set to `false`.
+    // 2. When the process is run as dev cluster master in which case cluster manager
+    // will fork a dedicated process where http service will be set up instead.
+    return !this.coreContext.env.isDevClusterMaster && config.autoListen;
   }
 
   private async createServer(cfg: Partial<HttpConfig>) {

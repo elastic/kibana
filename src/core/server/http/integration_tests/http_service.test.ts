@@ -76,7 +76,7 @@ describe('http service', () => {
           .get(root, legacyUrl)
           .expect(200, 'ok from legacy server');
 
-        expect(response.header['set-cookie']).toBe(undefined);
+        expect(response.header['set-cookie']).toHaveLength(1);
       });
 
       it('Should pass associated auth state to Legacy platform', async () => {
@@ -106,7 +106,7 @@ describe('http service', () => {
         expect(response.body.state).toEqual(user);
         expect(response.body.status).toEqual('authenticated');
 
-        expect(response.header['set-cookie']).toBe(undefined);
+        expect(response.header['set-cookie']).toHaveLength(1);
       });
     });
 
@@ -118,7 +118,7 @@ describe('http service', () => {
       afterEach(async () => await root.shutdown());
 
       it('Should support passing request through to the route handler', async () => {
-        const router = new Router('');
+        const router = new Router('/new-platform');
         router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
 
         const { http } = await root.setup();
@@ -130,7 +130,7 @@ describe('http service', () => {
         http.registerRouter(router);
         await root.start();
 
-        await kbnTestServer.request.get(root, '/').expect(200, { content: 'ok' });
+        await kbnTestServer.request.get(root, '/new-platform/').expect(200, { content: 'ok' });
       });
 
       it('Should support redirecting to configured url', async () => {
@@ -139,7 +139,7 @@ describe('http service', () => {
         http.registerOnPostAuth(async (req, t) => t.redirected(redirectTo));
         await root.start();
 
-        const response = await kbnTestServer.request.get(root, '/').expect(302);
+        const response = await kbnTestServer.request.get(root, '/new-platform/').expect(302);
         expect(response.header.location).toBe(redirectTo);
       });
 
@@ -151,7 +151,7 @@ describe('http service', () => {
         await root.start();
 
         await kbnTestServer.request
-          .get(root, '/')
+          .get(root, '/new-platform/')
           .expect(400, { statusCode: 400, error: 'Bad Request', message: 'unexpected error' });
       });
 
@@ -162,7 +162,7 @@ describe('http service', () => {
         });
         await root.start();
 
-        await kbnTestServer.request.get(root, '/').expect({
+        await kbnTestServer.request.get(root, '/new-platform/').expect({
           statusCode: 500,
           error: 'Internal Server Error',
           message: 'An internal server error occurred',
@@ -183,7 +183,7 @@ describe('http service', () => {
           }
           return t.next();
         });
-        const router = new Router('');
+        const router = new Router('/new-platform');
         router.get({ path: '/', validate: false }, async (req, res) =>
           // @ts-ignore. don't complain customField is not defined on Request type
           res.ok({ customField: String(req.customField) })
@@ -191,7 +191,9 @@ describe('http service', () => {
         http.registerRouter(router);
         await root.start();
 
-        await kbnTestServer.request.get(root, '/').expect(200, { customField: 'undefined' });
+        await kbnTestServer.request
+          .get(root, '/new-platform/')
+          .expect(200, { customField: 'undefined' });
       });
     });
 
@@ -205,10 +207,10 @@ describe('http service', () => {
       it('supports Url change on the flight', async () => {
         const { http } = await root.setup();
         http.registerOnPreAuth((req, t) => {
-          return t.redirected('/new-url', { forward: true });
+          return t.redirected('/new-platform/new-url', { forward: true });
         });
 
-        const router = new Router('/');
+        const router = new Router('/new-platform');
         router.get({ path: '/new-url', validate: false }, async (req, res) =>
           res.ok({ key: 'new-url-reached' })
         );
