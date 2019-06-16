@@ -74,7 +74,7 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
     }
   };
 
-  const response = await client.search<void, typeof params>(params);
+  const response = await client.search(params);
 
   return transformDataToMetricsChart(response, chartBase);
 }

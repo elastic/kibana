@@ -57,7 +57,7 @@ export async function getEnvironments(setup: Setup, serviceName?: string) {
     }
   };
 
-  const resp = await client.search<void, typeof params>(params);
+  const resp = await client.search(params);
   const aggs = resp.aggregations;
   const environmentsBuckets = idx(aggs, _ => _.environments.buckets) || [];
 

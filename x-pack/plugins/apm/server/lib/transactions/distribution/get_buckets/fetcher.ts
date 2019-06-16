@@ -74,5 +74,5 @@ export function bucketFetcher(
     }
   };
 
-  return client.search<void, typeof params>(params);
+  return client.search(params);
 }

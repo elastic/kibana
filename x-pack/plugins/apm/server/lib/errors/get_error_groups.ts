@@ -109,7 +109,7 @@ export async function getErrorGroups({
     };
   }
 
-  const resp = await client.search<unknown, typeof params>(params);
+  const resp = await client.search(params);
 
   // aggregations can be undefined when no matching indices are found.
   // this is an exception rather than the rule so the ES type does not account for this.

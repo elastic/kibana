@@ -87,5 +87,5 @@ export function timeseriesFetcher({
     }
   };
 
-  return client.search<{}, typeof params>(params);
+  return client.search(params);
 }

@@ -61,7 +61,7 @@ export async function getBuckets({
     }
   };
 
-  const resp = await client.search<unknown, typeof params>(params);
+  const resp = await client.search(params);
 
   const buckets = resp.aggregations.distribution.buckets.map(bucket => ({
     key: bucket.key,

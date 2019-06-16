@@ -45,7 +45,7 @@ export async function getTraceErrorsPerTransaction(
     }
   };
 
-  const resp = await client.search<never, typeof params>(params);
+  const resp = await client.search(params);
 
   return resp.aggregations.transactions.buckets.reduce(
     (acc, bucket) => ({

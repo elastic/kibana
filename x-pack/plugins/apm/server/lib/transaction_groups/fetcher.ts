@@ -47,5 +47,5 @@ export function transactionGroupsFetcher(setup: Setup, bodyQuery: StringMap) {
     }
   };
 
-  return client.search<void, typeof params>(params);
+  return client.search(params);
 }

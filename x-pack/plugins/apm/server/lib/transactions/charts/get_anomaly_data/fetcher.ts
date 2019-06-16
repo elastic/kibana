@@ -74,7 +74,7 @@ export async function anomalySeriesFetcher({
   };
 
   try {
-    const response = await client.search<void, typeof params>(params);
+    const response = await client.search(params);
     return response;
   } catch (err) {
     const isHttpError = 'statusCode' in err;
