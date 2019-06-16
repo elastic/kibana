@@ -45,7 +45,7 @@ import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
 
 // @ts-ignore
-import { FilterManagerProvider } from 'ui/filter_manager';
+import { getFilterGenerator } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { ContextMenuActionsRegistryProvider, Query, EmbeddableFactory } from 'ui/embeddable';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -213,8 +213,8 @@ class DashboardAppController {
     ) => void;
     addFilter: AddFilterFn;
   }) {
-    const filterManager = Private(FilterManagerProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
+    const filterGen = getFilterGenerator(queryFilter);
     const docTitle = Private<{ change: (title: string) => void }>(DocTitleProvider);
     const embeddableFactories = Private(
       EmbeddableFactoriesRegistryProvider
@@ -245,7 +245,7 @@ class DashboardAppController {
           operator,
           index,
           dashboardStateManager.getAppState(),
-          filterManager
+          filterGen
         );
       },
     });
@@ -710,7 +710,8 @@ app.directive('dashboardApp', function($injector: IInjector) {
 
   const Private = $injector.get<IPrivate>('Private');
 
-  const filterManager = Private(FilterManagerProvider);
+  const queryFilter = Private(FilterBarQueryFilterProvider);
+  const filterGen = getFilterGenerator(queryFilter);
   const addFilter = (
     {
       field,
@@ -725,7 +726,7 @@ app.directive('dashboardApp', function($injector: IInjector) {
     },
     appState: TAppState
   ) => {
-    filterActions.addFilter(field, value, operator, index, appState, filterManager);
+    filterActions.addFilter(field, value, operator, index, appState, filterGen);
   };
 
   const indexPatterns = $injector.get<{
