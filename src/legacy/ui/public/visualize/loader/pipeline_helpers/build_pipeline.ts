@@ -120,6 +120,9 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
           return { id: 'percent' };
         }
       }
+      if (get(visConfig, 'gauge.percentageMode') === true) {
+        return { id: 'percent' };
+      }
     }
 
     return formats[agg.type.name] ? formats[agg.type.name]() : format;
