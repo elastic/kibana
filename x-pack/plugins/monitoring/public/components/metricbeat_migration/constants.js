@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const metadata = {
-  branch: 'my-metadata-branch',
-  version: 'my-metadata-version'
-};
+export const INSTRUCTION_STEP_SET_MONITORING_URL = 'setMonitoringUrl';
+export const INSTRUCTION_STEP_ENABLE_METRICBEAT = 'enableMetricbeat';
+export const INSTRUCTION_STEP_DISABLE_INTERNAL = 'disableInternal';

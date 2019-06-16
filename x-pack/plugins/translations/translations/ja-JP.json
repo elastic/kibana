@@ -771,8 +771,6 @@
     "core.euiCodeEditor.stopEditing": "完了したら Esc キーで編集を終了します。",
     "core.euiCodeEditor.stopInteracting": "完了したら Esc キーでコードの操作を終了します。",
     "core.euiCollapsedItemActions.allActions": "すべてのアクション",
-    "core.euiColorPicker.colorSelectionLabel": "選択された色は {colorValue} です",
-    "core.euiColorPicker.transparentColor": "透明",
     "core.euiComboBoxOptionsList.allOptionsSelected": "利用可能なオプションをすべて選択しました",
     "core.euiComboBoxOptionsList.alreadyAdded": "{label} は既に追加されています",
     "core.euiComboBoxOptionsList.createCustomOption": "{searchValue} をカスタムオプションとして追加するには、{key} を押してください。",

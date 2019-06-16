@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const kfetch = () => {
-  return Promise.resolve('mock value');
-};
+
+import React from 'react';
+
+export const Monospace = ({ children }) => (
+  <span style={{ fontFamily: 'monospace' }}>{children}</span>
+);

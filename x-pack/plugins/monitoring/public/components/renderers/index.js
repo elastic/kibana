@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function fromKueryExpression() {}
-export function toElasticsearchQuery() {}
-export function getSuggestionsProvider() {}
+export { SetupModeRenderer } from './setup_mode';
