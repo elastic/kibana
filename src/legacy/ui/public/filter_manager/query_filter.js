@@ -31,10 +31,10 @@ export function FilterBarQueryFilterProvider(Promise, indexPatterns, getAppState
   queryFilter.getGlobalFilters = filterManager.getGlobalFilters.bind(filterManager);
   queryFilter.removeFilter = filterManager.removeFilter.bind(filterManager);
   queryFilter.invertFilter = filterManager.invertFilter.bind(filterManager);
-  queryFilter.addFilters = Promise.method(filterManager.addFilters.bind(filterManager));
-  queryFilter.setFilters = Promise.method(filterManager.setFilters.bind(filterManager));
-  queryFilter.addFiltersAndChangeTimeFilter = Promise.method(filterManager.addFiltersAndChangeTimeFilter.bind(filterManager));
-  queryFilter.removeAll = Promise.method(filterManager.removeAll.bind(filterManager));
+  queryFilter.addFilters = filterManager.addFilters.bind(filterManager);
+  queryFilter.setFilters = filterManager.setFilters.bind(filterManager);
+  queryFilter.addFiltersAndChangeTimeFilter = filterManager.addFiltersAndChangeTimeFilter.bind(filterManager);
+  queryFilter.removeAll = filterManager.removeAll.bind(filterManager);
 
   queryFilter.destroy = () => {
     filterManager.destroy();

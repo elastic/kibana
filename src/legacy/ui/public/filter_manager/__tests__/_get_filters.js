@@ -122,51 +122,5 @@ describe('get filters', function () {
         expect(filter.$state.store).to.be(FilterStateStore.GLOBAL_STATE);
       });
     });
-
-    it('should append conflicting appState filters', async function () {
-      await queryFilter.addFilters(filters, true);
-      const appFilter = _.cloneDeep(filters[1]);
-      appFilter.meta.negate = true;
-      appFilter.$state.store = FilterStateStore.APP_STATE;
-      await queryFilter.addFilters(appFilter, false);
-
-      // global filters should be listed first
-      const res = queryFilter.getFilters();
-      expect(res).to.have.length(4);
-      expect(res.filter(function (filter) {
-        return filter.$state.store === FilterStateStore.GLOBAL_STATE;
-      }).length).to.be(3);
-      expect(res.filter(function (filter) {
-        return filter.$state.store === FilterStateStore.APP_STATE;
-      }).length).to.be(1);
-    });
-
-    it('should not affect disabled filters - global state', async function () {
-      // test adding to globalState
-      const disabledFilters = _.map(filters, function (filter) {
-        const f = _.cloneDeep(filter);
-        f.meta.disabled = true;
-        return f;
-      });
-      await queryFilter.addFilters(disabledFilters, true);
-      await queryFilter.addFilters(filters, true);
-
-      const res = queryFilter.getFilters();
-      expect(res).to.have.length(6);
-    });
-
-    it('should affect disabled filters - app state', async function () {
-      // test adding to appState
-      const disabledFilters = _.map(filters, function (filter) {
-        const f = _.cloneDeep(filter);
-        f.meta.disabled = true;
-        return f;
-      });
-      await queryFilter.addFilters(disabledFilters, true);
-      await queryFilter.addFilters(filters, false);
-
-      const res = queryFilter.getFilters();
-      expect(res).to.have.length(6);
-    });
   });
 });

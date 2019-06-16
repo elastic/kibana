@@ -185,5 +185,54 @@ describe('add filters', function () {
         expect(filter.meta.negate).to.be(i === idx);
       });
     });
+
+    it('should merge conflicting appState filters', async function () {
+      await queryFilter.addFilters(filters, true);
+      const appFilter = _.cloneDeep(filters[1]);
+      appFilter.meta.negate = true;
+      appFilter.$state.store = FilterStateStore.APP_STATE;
+      await queryFilter.addFilters(appFilter, false);
+
+      // global filters should be listed first
+      const res = queryFilter.getFilters();
+      expect(res).to.have.length(3);
+      expect(res.filter(function (filter) {
+        return filter.$state.store === FilterStateStore.GLOBAL_STATE;
+      }).length).to.be(3);
+    });
+
+    it('should enable disabled filters - global state', async function () {
+      // test adding to globalState
+      const disabledFilters = _.map(filters, function (filter) {
+        const f = _.cloneDeep(filter);
+        f.meta.disabled = true;
+        return f;
+      });
+      await queryFilter.addFilters(disabledFilters, true);
+      await queryFilter.addFilters(filters, true);
+
+      const res = queryFilter.getFilters();
+      expect(res).to.have.length(3);
+      expect(res.filter(function (filter) {
+        return filter.meta.disabled === false;
+      }).length).to.be(3);
+    });
+
+    it('should enable disabled filters - app state', async function () {
+      // test adding to appState
+      const disabledFilters = _.map(filters, function (filter) {
+        const f = _.cloneDeep(filter);
+        f.meta.disabled = true;
+        return f;
+      });
+      await queryFilter.addFilters(disabledFilters, true);
+      await queryFilter.addFilters(filters, false);
+
+      const res = queryFilter.getFilters();
+      expect(res).to.have.length(3);
+      expect(res.filter(function (filter) {
+        return filter.meta.disabled === false;
+      }).length).to.be(3);
+    });
   });
 });
