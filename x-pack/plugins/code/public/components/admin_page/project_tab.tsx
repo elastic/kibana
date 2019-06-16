@@ -20,7 +20,6 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiSpacer,
-  // @ts-ignore
   EuiSuperSelect,
   EuiText,
   EuiTitle,
@@ -167,6 +166,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
                   isLoading={this.props.importLoading}
                   fullWidth={true}
                   isInvalid={this.state.isInvalid}
+                  autoFocus={true}
                 />
               </EuiFormRow>
             </EuiForm>

@@ -109,6 +109,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
               });
             }}
             aria-describedby="hdfsRepositoryUriDescription hdfsRepositoryUriProtocolDescription"
+            data-test-subj="uriInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -154,6 +155,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 path: e.target.value,
               });
             }}
+            data-test-subj="pathInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -199,6 +201,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 loadDefaults: e.target.checked,
               });
             }}
+            data-test-subj="loadDefaultsToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -244,6 +247,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 compress: e.target.checked,
               });
             }}
+            data-test-subj="compressToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -290,6 +294,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 chunkSize: e.target.value,
               });
             }}
+            data-test-subj="chunkSizeInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -335,6 +340,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 'security.principal': e.target.value,
               });
             }}
+            data-test-subj="securityPrincipalInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -434,6 +440,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 setIsConfInvalid(true);
               }
             }}
+            data-test-subj="codeEditor"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -480,6 +487,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 maxSnapshotBytesPerSec: e.target.value,
               });
             }}
+            data-test-subj="maxSnapshotBytesInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -526,6 +534,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 maxRestoreBytesPerSec: e.target.value,
               });
             }}
+            data-test-subj="maxRestoreBytesInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -571,6 +580,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 readonly: e.target.checked,
               });
             }}
+            data-test-subj="readOnlyToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

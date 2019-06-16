@@ -281,7 +281,7 @@ NodeList [
         class="euiTableCellContent euiTableCellContent--overflowingContent"
       >
         <span
-          class="euiBadge euiBadge--hollow"
+          class="euiBadge euiBadge--iconLeft euiBadge--hollow"
         >
           <span
             class="euiBadge__content"
@@ -294,7 +294,7 @@ NodeList [
           </span>
         </span>
         <span
-          class="euiBadge euiBadge--hollow"
+          class="euiBadge euiBadge--iconLeft euiBadge--hollow"
         >
           <span
             class="euiBadge__content"
