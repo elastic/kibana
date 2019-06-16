@@ -150,7 +150,7 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           this.props.toggleTimelineLinkTo({ linkToId: 'timeline' });
         }
         if (timelineType === 'absolute') {
-          const absoluteRange: AbsoluteTimeRange = normalizeTimeRange<AbsoluteTimeRange>(
+          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
             get('timeline.timerange', timerangeStateData)
           );
           this.props.setAbsoluteTimerange({
@@ -159,7 +159,7 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           });
         }
         if (timelineType === 'relative') {
-          const relativeRange: RelativeTimeRange = normalizeTimeRange<RelativeTimeRange>(
+          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
             get('timeline.timerange', timerangeStateData)
           );
           this.props.setRelativeTimerange({
