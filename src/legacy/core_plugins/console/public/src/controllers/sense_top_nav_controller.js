@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KbnTopNavControllerProvider } from 'ui/kbn_top_nav/kbn_top_nav_controller';
+import { KbnTopNavControllerProvider } from './kbn_top_nav_controller';
 import { i18n } from '@kbn/i18n';
 import storage from '../storage';
 
