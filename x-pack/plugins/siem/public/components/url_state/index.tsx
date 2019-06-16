@@ -48,6 +48,7 @@ import {
 } from './types';
 import { CONSTANTS } from './constants';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
+import { normalizeTimeRange } from './normalize_time_range';
 
 export class UrlStateContainerLifecycle extends React.Component<UrlStateContainerPropTypes> {
   public render() {
@@ -123,14 +124,20 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           this.props.toggleTimelineLinkTo({ linkToId: 'global' });
         }
         if (globalType === 'absolute') {
-          const absoluteRange: AbsoluteTimeRange = get('global.timerange', timerangeStateData);
+          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+            get('global.timerange', timerangeStateData)
+          );
           this.props.setAbsoluteTimerange({
-            ...absoluteRange,
-            id: globalId,
+            ...{
+              ...absoluteRange,
+              id: globalId,
+            },
           });
         }
         if (globalType === 'relative') {
-          const relativeRange: RelativeTimeRange = get('global.timerange', timerangeStateData);
+          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+            get('global.timerange', timerangeStateData)
+          );
           this.props.setRelativeTimerange({
             ...relativeRange,
             id: globalId,
@@ -145,14 +152,18 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           this.props.toggleTimelineLinkTo({ linkToId: 'timeline' });
         }
         if (timelineType === 'absolute') {
-          const absoluteRange: AbsoluteTimeRange = get('timeline.timerange', timerangeStateData);
+          const absoluteRange: AbsoluteTimeRange = normalizeTimeRange<AbsoluteTimeRange>(
+            get('timeline.timerange', timerangeStateData)
+          );
           this.props.setAbsoluteTimerange({
             ...absoluteRange,
             id: timelineId,
           });
         }
         if (timelineType === 'relative') {
-          const relativeRange: RelativeTimeRange = get('timeline.timerange', timerangeStateData);
+          const relativeRange: RelativeTimeRange = normalizeTimeRange<RelativeTimeRange>(
+            get('timeline.timerange', timerangeStateData)
+          );
           this.props.setRelativeTimerange({
             ...relativeRange,
             id: timelineId,
