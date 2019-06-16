@@ -16,8 +16,8 @@ export interface ArchiveEntry {
 export async function untarBuffer(
   buffer: Buffer,
   filter = (entry: ArchiveEntry): boolean => true,
-  onEntry = (entry: ArchiveEntry) => {}
-): Promise<string[]> {
+  onEntry = (entry: ArchiveEntry): void => {}
+): Promise<void> {
   const deflatedStream = bufferToStream(buffer);
   // use tar.list vs .extract to avoid writing to disk
   const inflateStream = tar.list().on('entry', (entry: tar.FileStat) => {
@@ -35,8 +35,8 @@ export async function untarBuffer(
 export async function unzipBuffer(
   buffer: Buffer,
   filter = (entry: ArchiveEntry): boolean => true,
-  onEntry = (entry: ArchiveEntry) => {}
-): Promise<string[]> {
+  onEntry = (entry: ArchiveEntry): void => {}
+): Promise<void> {
   const zipfile = await yauzlFromBuffer(buffer, { lazyEntries: true });
   zipfile.readEntry();
   zipfile.on('entry', async (entry: yauzl.Entry) => {
@@ -52,7 +52,9 @@ export async function unzipBuffer(
 
 function yauzlFromBuffer(buffer: Buffer, opts: yauzl.Options): Promise<yauzl.ZipFile> {
   return new Promise((resolve, reject) =>
-    yauzl.fromBuffer(buffer, opts, (err?, handle?) => (err ? reject(err) : resolve(handle)))
+    yauzl.fromBuffer(buffer, opts, (err?: Error, handle?: yauzl.ZipFile) =>
+      err ? reject(err) : resolve(handle)
+    )
   );
 }
 
