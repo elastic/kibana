@@ -16,7 +16,6 @@ import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
 // TODO: remove ui imports completely (move to plugins)
-import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/input_focus';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
