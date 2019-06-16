@@ -16,4 +16,5 @@ export interface HttpServiceSetup extends HttpServerSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [createNewServer](./kibana-plugin-server.httpservicesetup.createnewserver.md) | <code>(cfg: Partial&lt;HttpConfig&gt;) =&gt; Promise&lt;HttpServerSetup&gt;</code> |  |
+|  [shouldListen](./kibana-plugin-server.httpservicesetup.shouldlisten.md) | <code>() =&gt; boolean</code> | Indicates if http server has configured to start listening on a configured port |
 

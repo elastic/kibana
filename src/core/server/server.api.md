@@ -140,11 +140,12 @@ export interface HttpServiceSetup extends HttpServerSetup {
     // 
     // (undocumented)
     createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
+    shouldListen: () => boolean;
 }
 
 // @public (undocumented)
 export interface HttpServiceStart {
-    isListening: () => boolean;
+    isListening: (port: number) => boolean;
 }
 
 // @internal (undocumented)
@@ -159,8 +160,6 @@ export interface InternalCoreSetup {
 
 // @public (undocumented)
 export interface InternalCoreStart {
-    // (undocumented)
-    http: HttpServiceStart;
     // (undocumented)
     plugins: PluginsServiceStart;
 }
