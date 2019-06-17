@@ -76,7 +76,7 @@ As with all of Kibana, we welcome contributions from everyone. The usual
 life-cycle of a PR looks like the following:
 
 1. **Create draft PR**: To make ongoing work visible, we recommend creating
-   [draft PRs] as soon as possible. PRs are usually target at `master` and
+   [draft PRs] as soon as possible. PRs are usually targetted at `master` and
    backported later. The checklist in the PR description template can be used
    to guide the progress of the PR.
 2. **Label the PR**: To ensure that a newly created PR gets the attention of
@@ -103,7 +103,7 @@ life-cycle of a PR looks like the following:
    reviewers the checks should pass before requesting reviews.
 4. **Request reviews**: Once the PR is ready for reviews it can be marked as
    such by [changing the PR state to ready].  In addition the label `[zube]: In
-   Progress` should be replace with `[zube]: In Review` and `review`. If the
+   Progress` should be replaced with `[zube]: In Review` and `review`. If the
    GitHub automation doesn't automatically request a review from
    `@elastic/infra-logs-ui` it should be requested manually.
 5. **Incorporate review feedback**: Usually one reviewer's approval is
