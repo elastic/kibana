@@ -2,7 +2,7 @@
 // @Library('apm@current') _
 
 pipeline {
-  agent { label 'master || immutable' }
+  agent { label 'immutable' }
   environment {
     BASE_DIR = "."
   }
@@ -10,7 +10,6 @@ pipeline {
     stage('Build Stuff? :)') {
       steps {
         dir("${env.BASE_DIR}"){
-            sh './.ci/packer_cache.sh'
             sh './.ci/run.sh'
         }
       }
