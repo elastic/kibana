@@ -5,6 +5,7 @@
  */
 
 import { connect } from 'react-redux';
+import chrome from 'ui/chrome';
 import { IndexActionsContextMenu as PresentationComponent } from './index_actions_context_menu';
 import {
   TAB_SETTINGS,
@@ -30,18 +31,23 @@ import {
 
 import {
   getIndexStatusByIndexName,
-  getIndicesByName
+  getIndicesByName,
+  getKbnIndex,
 } from '../../../../store/selectors';
 
 const mapStateToProps = (state, ownProps) => {
   const indexStatusByName = {};
   const { indexNames } = ownProps;
+  const kbnIndexName = chrome.getInjected('kbnIndex');
+
   indexNames.forEach((indexName) => {
     indexStatusByName[indexName] = getIndexStatusByIndexName(state, indexName);
   });
+
   return {
     indexStatusByName,
-    indices: getIndicesByName(state, indexNames)
+    indices: getIndicesByName(state, indexNames),
+    kbnIndex: getKbnIndex(state, indexNames, kbnIndexName)
   };
 };
 

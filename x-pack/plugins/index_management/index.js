@@ -24,7 +24,13 @@ export function indexManagement(kibana)  {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [
         'plugins/index_management',
-      ]
+      ],
+      injectDefaultVars(server) {
+        const config = server.config();
+        return {
+          kbnIndex: config.get('kibana.index'),
+        };
+      },
     },
     init: function (server) {
       const router = createRouter(server, PLUGIN.ID, '/api/index_management/');

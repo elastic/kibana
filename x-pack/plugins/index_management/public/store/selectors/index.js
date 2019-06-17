@@ -28,6 +28,12 @@ export const getFilteredIds = (state) => state.indices.filteredIds;
 export const getRowStatuses = (state) => state.rowStatus;
 export const getTableState = (state) => state.tableState;
 export const getAllIds = (state) => state.indices.allIds;
+export const getKbnIndex = (state, indexNames, kbnIndexName) => {
+  const indices = getIndicesByName(state, indexNames);
+  return indices && indices.find(index =>
+    index.name === kbnIndexName || (index.aliases && index.aliases.includes(kbnIndexName))
+  );
+};
 export const getIndexStatusByIndexName = (state, indexName) => {
   const indices = getIndices(state);
   const { status } = indices[indexName] || {};

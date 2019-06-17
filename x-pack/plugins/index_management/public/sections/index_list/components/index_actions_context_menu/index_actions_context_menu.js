@@ -58,6 +58,7 @@ export class IndexActionsContextMenu extends Component {
       indices,
       reloadIndices,
       unfreezeIndices,
+      kbnIndex,
     } = this.props;
     const allOpen = all(indexNames, indexName => {
       return indexStatusByName[indexName] === INDEX_OPEN;
@@ -113,6 +114,11 @@ export class IndexActionsContextMenu extends Component {
           values: { selectedIndexCount }
         }),
         onClick: () => {
+          if (Boolean(kbnIndex)) {
+            this.closePopover();
+            this.setState({ renderConfirmModal: this.renderConfirmCloseModal });
+            return;
+          }
           this.closePopoverAndExecute(closeIndices);
         }
       });
@@ -370,8 +376,9 @@ export class IndexActionsContextMenu extends Component {
   };
 
   renderConfirmDeleteModal = () => {
-    const { deleteIndices, indexNames } = this.props;
+    const { deleteIndices, indexNames, kbnIndex } = this.props;
     const selectedIndexCount = indexNames.length;
+
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
@@ -383,6 +390,7 @@ export class IndexActionsContextMenu extends Component {
           }
           onCancel={this.closeConfirmModal}
           onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
+          buttonColor="danger"
           cancelButtonText={
             i18n.translate(
               'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
@@ -395,7 +403,7 @@ export class IndexActionsContextMenu extends Component {
             i18n.translate(
               'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
               {
-                defaultMessage: 'Confirm'
+                defaultMessage: 'Delete'
               }
             )
           }
@@ -422,13 +430,95 @@ export class IndexActionsContextMenu extends Component {
                   }
                 )
               }
-              color="warning"
+              color={Boolean(kbnIndex) ? 'danger' : 'warning'}
+              iconType="help"
+            >
+              <p>
+                {Boolean(kbnIndex) ? (
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDangerDescription"
+                    defaultMessage="You are about to delete {kbnIndexName} index.
+                      This operation cannot be undone and will break Kibana."
+                    values={{ kbnIndexName: <strong>{kbnIndex.name}</strong> }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription"
+                    defaultMessage="This operation cannot be undone. Make sure you have appropriate backups."
+                  />
+                )}
+              </p>
+            </EuiCallOut>
+          </div>
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    );
+  };
+
+  renderConfirmCloseModal = () => {
+    const { closeIndices, indexNames, kbnIndex } = this.props;
+    const selectedIndexCount = indexNames.length;
+
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title={
+            i18n.translate('xpack.idxMgmt.indexActionsMenu.closeIndex.confirmModal.modalTitle', {
+              defaultMessage: 'Confirm close {selectedIndexCount, plural, one {index} other {indices} }',
+              values: { selectedIndexCount }
+            })
+          }
+          onCancel={this.closeConfirmModal}
+          onConfirm={() => this.closePopoverAndExecute(closeIndices)}
+          buttonColor="danger"
+          cancelButtonText={
+            i18n.translate(
+              'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
+              {
+                defaultMessage: 'Cancel'
+              }
+            )
+          }
+          confirmButtonText={
+            i18n.translate(
+              'xpack.idxMgmt.indexActionsMenu.closeIndex.confirmModal.confirmButtonText',
+              {
+                defaultMessage: 'Close'
+              }
+            )
+          }
+        >
+          <div>
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.indexActionsMenu.closeIndex.closeDescription"
+                defaultMessage="You are about to close {selectedIndexCount, plural, one {this index} other {these indices} }:"
+                values={{ selectedIndexCount }}
+              />
+            </p>
+            <ul>
+              {indexNames.map(indexName => (
+                <li key={indexName}>{indexName}</li>
+              ))}
+            </ul>
+            <EuiCallOut
+              title={
+                i18n.translate(
+                  'xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutTitle',
+                  {
+                    defaultMessage: 'Proceed with caution!'
+                  }
+                )
+              }
+              color="danger"
               iconType="help"
             >
               <p>
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription"
-                  defaultMessage="This operation cannot be undone. Make sure you have appropriate backups."
+                  id="xpack.idxMgmt.indexActionsMenu.closeIndex.closeWarningDescription"
+                  defaultMessage="You are about to close {kbnIndexName} index.
+                      This operation cannot be undone and will break Kibana."
+                  values={{ kbnIndexName: <strong>{kbnIndex.name}</strong> }}
                 />
               </p>
             </EuiCallOut>
@@ -437,6 +527,7 @@ export class IndexActionsContextMenu extends Component {
       </EuiOverlayMask>
     );
   };
+
   renderConfirmFreezeModal = () => {
     const oneIndexSelected = this.oneIndexSelected();
     const entity = this.getEntity(oneIndexSelected);
