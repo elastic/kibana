@@ -75,7 +75,7 @@ environment's log files, e.g.:
 As with all of Kibana, we welcome contributions from everyone. The usual
 life-cycle of a PR looks like the following:
 
-1. **Create draft PR**: To make ongoing work visible, we recomment creating
+1. **Create draft PR**: To make ongoing work visible, we recommend creating
    [draft PRs] as soon as possible. PRs are usually target at `master` and
    backported later. The checklist in the PR description template can be used
    to guide the progress of the PR.
