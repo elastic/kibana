@@ -14,6 +14,8 @@ import * as rest from '../../../../../services/rest/watcher';
 import { createErrorGroupWatch } from '../createErrorGroupWatch';
 import { esResponse } from './esResponse';
 
+jest.mock('ui/kfetch');
+
 // disable html escaping since this is also disabled in watcher\s mustache implementation
 mustache.escape = value => value;
 

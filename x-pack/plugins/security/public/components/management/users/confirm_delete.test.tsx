@@ -9,6 +9,8 @@ import { ConfirmDeleteUsers } from './confirm_delete';
 import React from 'react';
 import { UserAPIClient } from '../../../lib/api';
 
+jest.mock('ui/kfetch');
+
 describe('ConfirmDeleteUsers', () => {
   it('renders a warning for a single user', () => {
     const wrapper = mountWithIntl(

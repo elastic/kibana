@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
-import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, EuiLink } from '@elastic/eui';
+
+import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, isValidHex } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component } from 'react';
 import { MAX_SPACE_INITIALS } from '../../../../../common/constants';
@@ -37,6 +37,9 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
 
     const { initialsHasFocus, pendingInitials } = this.state;
 
+    const spaceColor = getSpaceColor(space);
+    const isInvalidSpaceColor = !isValidHex(spaceColor) && spaceColor !== '';
+
     return (
       <form onSubmit={() => false}>
         <EuiFlexItem grow={false}>
@@ -62,8 +65,13 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
               id: 'xpack.spaces.management.customizeSpaceAvatar.colorFormRowLabel',
               defaultMessage: 'Color',
             })}
+            isInvalid={isInvalidSpaceColor}
           >
-            <EuiColorPicker color={getSpaceColor(space)} onChange={this.onColorChange} />
+            <EuiColorPicker
+              color={spaceColor}
+              onChange={this.onColorChange}
+              isInvalid={isInvalidSpaceColor}
+            />
           </EuiFormRow>
         </EuiFlexItem>
       </form>
