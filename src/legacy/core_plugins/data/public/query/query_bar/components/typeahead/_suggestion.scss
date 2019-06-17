@@ -135,11 +135,16 @@ $kbnTypeaheadTypes: (
   flex-basis: auto; /* 2 */
   font-family: $euiCodeFontFamily;
   margin-right: $euiSizeXL;
-  width: auto;
+  width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
   padding: $euiSizeXS $euiSizeS;
   color: $euiTextColor;
+}
+
+//https://github.com/elastic/kibana/issues/34971
+.kbnSuggestionItem--value .kbnSuggestionItem__text {
+  width: auto;
 }
 
 .kbnSuggestionItem__description {
