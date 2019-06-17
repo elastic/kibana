@@ -7,10 +7,7 @@
 import expect from '@kbn/expect';
 import { progress } from '../progress';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { getFunctionErrors } from '../../../strings';
 import { fontStyle } from './fixtures/test_styles';
-
-const errors = getFunctionErrors().progress;
 
 describe('progress', () => {
   const fn = functionWrapper(progress);
@@ -19,19 +16,21 @@ describe('progress', () => {
   it('returns a render as progress', () => {
     const result = fn(0.2);
     expect(result)
-      .to.have.property('type', 'render')
-      .and.to.have.property('as', 'progress');
+      .toHaveProperty('type', 'render')
+      .and.toHaveProperty('as', 'progress');
   });
 
   it('sets the progress to context', () => {
     const result = fn(0.58);
-    expect(result.value).to.have.property('value', 0.58);
+    expect(result.value).toHaveProperty('value', 0.58);
   });
 
   it(`throws when context is outside of the valid range`, () => {
     expect(fn)
       .withArgs(3)
-      .to.throwException(new RegExp(errors.invalidValue(3).message));
+      .to.throwException(e => {
+        expect(e.message).toBe(`Invalid value: '3'. Value must be between 0 and 1`);
+      });
   });
 
   describe('args', () => {
@@ -40,12 +39,12 @@ describe('progress', () => {
         const result = fn(value, {
           shape: 'wheel',
         });
-        expect(result.value).to.have.property('shape', 'wheel');
+        expect(result.value).toHaveProperty('shape', 'wheel');
       });
 
       it(`defaults to 'gauge'`, () => {
         const result = fn(value);
-        expect(result.value).to.have.property('shape', 'gauge');
+        expect(result.value).toHaveProperty('shape', 'gauge');
       });
     });
 
@@ -54,18 +53,20 @@ describe('progress', () => {
         const result = fn(value, {
           max: 2,
         });
-        expect(result.value).to.have.property('max', 2);
+        expect(result.value).toHaveProperty('max', 2);
       });
 
       it('defaults to 1', () => {
         const result = fn(value);
-        expect(result.value).to.have.property('max', 1);
+        expect(result.value).toHaveProperty('max', 1);
       });
 
       it('throws if max <= 0', () => {
         expect(fn)
           .withArgs(value, { max: -0.5 })
-          .to.throwException(new RegExp(errors.invalidMaxValue(-0.5).message));
+          .to.throwException(e => {
+            expect(e.message).toBe(`Invalid max value: '-0.5'. 'max' must be greater than 0`);
+          });
       });
     });
 
@@ -74,12 +75,12 @@ describe('progress', () => {
         const result = fn(value, {
           valueColor: '#000000',
         });
-        expect(result.value).to.have.property('valueColor', '#000000');
+        expect(result.value).toHaveProperty('valueColor', '#000000');
       });
 
       it(`defaults to '#1785b0'`, () => {
         const result = fn(value);
-        expect(result.value).to.have.property('valueColor', '#1785b0');
+        expect(result.value).toHaveProperty('valueColor', '#1785b0');
       });
     });
 
@@ -88,12 +89,12 @@ describe('progress', () => {
         const result = fn(value, {
           barColor: '#FFFFFF',
         });
-        expect(result.value).to.have.property('barColor', '#FFFFFF');
+        expect(result.value).toHaveProperty('barColor', '#FFFFFF');
       });
 
       it(`defaults to '#f0f0f0'`, () => {
         const result = fn(value);
-        expect(result.value).to.have.property('barColor', '#f0f0f0');
+        expect(result.value).toHaveProperty('barColor', '#f0f0f0');
       });
     });
 
@@ -103,12 +104,12 @@ describe('progress', () => {
           valuWeight: 100,
         });
 
-        expect(result.value).to.have.property('valuWeight', 100);
+        expect(result.value).toHaveProperty('valuWeight', 100);
       });
 
       it(`defaults to 20`, () => {
         const result = fn(value);
-        expect(result.value).to.have.property('barWeight', 20);
+        expect(result.value).toHaveProperty('barWeight', 20);
       });
     });
 
@@ -118,12 +119,12 @@ describe('progress', () => {
           barWeight: 50,
         });
 
-        expect(result.value).to.have.property('barWeight', 50);
+        expect(result.value).toHaveProperty('barWeight', 50);
       });
 
       it(`defaults to 20`, () => {
         const result = fn(value);
-        expect(result.value).to.have.property('barWeight', 20);
+        expect(result.value).toHaveProperty('barWeight', 20);
       });
     });
 
@@ -131,19 +132,19 @@ describe('progress', () => {
       it('sets the label of the progress', () => {
         const result = fn(value, { label: 'foo' });
 
-        expect(result.value).to.have.property('label', 'foo');
+        expect(result.value).toHaveProperty('label', 'foo');
       });
 
       it('hides the label if false', () => {
         const result = fn(value, {
           label: false,
         });
-        expect(result.value).to.have.property('label', '');
+        expect(result.value).toHaveProperty('label', '');
       });
 
       it('defaults to true which sets the context as the label', () => {
         const result = fn(value);
-        expect(result.value).to.have.property('label', '0.33');
+        expect(result.value).toHaveProperty('label', '0.33');
       });
     });
 
@@ -153,7 +154,7 @@ describe('progress', () => {
           font: fontStyle,
         });
 
-        expect(result.value).to.have.property('font');
+        expect(result.value).toHaveProperty('font');
         expect(result.value.font).to.have.keys(Object.keys(fontStyle));
         expect(result.value.font.spec).to.have.keys(Object.keys(fontStyle.spec));
       });
@@ -162,7 +163,7 @@ describe('progress', () => {
         const result = fn(value, {
           font: fontStyle,
         });
-        expect(result.value.font.spec).to.have.property('fill', fontStyle.spec.color);
+        expect(result.value.font.spec).toHaveProperty('fill', fontStyle.spec.color);
       });
 
       // TODO: write test when using an instance of the interpreter
