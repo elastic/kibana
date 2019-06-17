@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { v4 } from 'uuid';
 import { Observable, Subscription, pairs } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -41,19 +42,29 @@ interface ClusterDoc {
 export interface RoutingTable {
   [key: string]: RoutingNode;
 }
+
 interface NodeList {
   [key: string]: LivenessNode;
 }
 
+function randomInt(min: number, max: number) {
+  return Math.floor(Math.random() * (min - max) + min);
+}
+
 export class ClusterDocClient {
   public nodeName: string;
+  private readonly updateFloor = 30 * 1000; // 30 seconds is the fastest you can update
   private routingTable: RoutingTable = {};
   private elasticsearch?: Observable<ClusterClient>;
-  private updateInterval?: number;
-  private timeoutThreshold: number = 15 * 1000;
+  private updateInterval? = this.updateFloor;
+  private timeoutThreshold = 15 * 1000;
   private timer: null | number = null;
   private configSubscription?: Subscription;
+  private seq_no = 0;
+  private primary_term = 0;
 
+  private readonly minUpdateShuffle = 0;
+  private readonly maxUpdateShuffle = 1000;
   private readonly proxyIndex = '.kibana';
   private readonly proxyDoc = 'proxy-resource-list';
   private readonly log: Logger;
@@ -109,6 +120,9 @@ export class ClusterDocClient {
     // whatever the es doc contains, so this needs to be done before we assign
     // the new node to the routing table, or we lose the update
     const nodes = await this.getNodeList();
+    if (this.routingTable[resource]) {
+      throw new Error(`${resource} already exists on ${this.routingTable[resource].node}`);
+    }
     const data = {
       type,
       state,
@@ -127,8 +141,19 @@ export class ClusterDocClient {
   }
 
   private setConfig(config: ProxyPluginType) {
-    this.updateInterval = config.updateInterval;
-    this.timeoutThreshold = config.timeoutThreshold;
+    let update = randomInt(this.minUpdateShuffle, this.maxUpdateShuffle);
+    if (config.updateInterval < this.updateFloor) {
+      update += this.updateFloor;
+    } else {
+      update += this.updateFloor;
+    }
+
+    let timeout = config.timeoutThreshold;
+    if (timeout < update) {
+      timeout = update + randomInt(this.minUpdateShuffle, this.maxUpdateShuffle);
+    }
+    this.updateInterval = update;
+    this.timeoutThreshold = timeout;
   }
 
   private setTimer() {
@@ -155,7 +180,8 @@ export class ClusterDocClient {
 
   private async getNodeList(): Promise<NodeList> {
     if (!this.elasticsearch) {
-      throw new Error('You must call setup first');
+      const err = Boom.boomify(new Error('You must call setup first'), { statusCode: 412 });
+      throw err;
     }
     const client = await this.elasticsearch.pipe(first()).toPromise();
     const params = {
@@ -164,6 +190,8 @@ export class ClusterDocClient {
       _source: true,
     };
     const reply = await client.callAsInternalUser('get', params);
+    this.seq_no = reply._seq_no;
+    this.primary_term = reply._primary_term;
     const data: ClusterDoc = reply._source;
     this.updateRoutingTable(data.routing_table || {});
     const nodes: NodeList = data.nodes || {};
@@ -172,7 +200,8 @@ export class ClusterDocClient {
 
   private async updateNodeList(nodes: NodeList): Promise<void> {
     if (!this.elasticsearch) {
-      throw new Error('You must call setup first');
+      const err = Boom.boomify(new Error('You must call setup first'), { statusCode: 412 });
+      throw err;
     }
     const doc = {
       nodes,
@@ -182,9 +211,11 @@ export class ClusterDocClient {
     const params = {
       id: this.proxyDoc,
       index: this.proxyIndex,
-      doc,
+      if_seq_no: this.seq_no,
+      if_primary_term: this.primary_term,
+      body: doc,
     };
-    await client.callAsInternalUser('update', params);
+    await client.callAsInternalUser('index', params);
   }
 
   private updateLocalNode(nodes: NodeList, finishTime: number): NodeList {
@@ -215,7 +246,14 @@ export class ClusterDocClient {
       }
     }
 
-    this.updateNodeList(this.updateLocalNode(nodes, finishTime));
+    try {
+      await this.updateNodeList(this.updateLocalNode(nodes, finishTime));
+    } catch (err) {
+      // on conflict, skip until next loop
+      if (err.statusCode !== 409) {
+        throw err;
+      }
+    }
     this.setTimer();
   }
 }

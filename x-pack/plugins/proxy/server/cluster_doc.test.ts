@@ -90,8 +90,8 @@ test('initial run of main loop works', async () => {
 
   expect(setTimeout).toHaveBeenCalledTimes(1);
   expect(esClients.dataClient.callAsInternalUser.mock.calls[0][0]).toBe('get');
-  expect(esClients.dataClient.callAsInternalUser.mock.calls[1][0]).toBe('update');
-  const nodeList = esClients.dataClient.callAsInternalUser.mock.calls[1][1].doc;
+  expect(esClients.dataClient.callAsInternalUser.mock.calls[1][0]).toBe('index');
+  const nodeList = esClients.dataClient.callAsInternalUser.mock.calls[1][1].body;
   const nodeKeys = Object.keys(nodeList.nodes);
   expect(nodeList.routing_table).toMatchObject({});
   expect(nodeKeys.length).toBe(1);
@@ -145,7 +145,7 @@ test('removes stale nodes, keeps good nodes', async () => {
     expect(err).toBeFalsy();
   }
 
-  const nodeList = esClients.dataClient.callAsInternalUser.mock.calls[1][1].doc;
+  const nodeList = esClients.dataClient.callAsInternalUser.mock.calls[1][1].body;
   const nodeKeys = Object.keys(nodeList.nodes);
 
   expect(nodeList.routing_table).toEqual({
@@ -191,11 +191,11 @@ test('assign and unassign resource', async () => {
       node: clusterDoc.nodeName,
     },
   };
-  expect(nodeList.doc.routing_table).toEqual(expected);
+  expect(nodeList.body.routing_table).toEqual(expected);
 
   await clusterDoc.unassignResource('/foo/bar');
   const nodeList2 = esClients.dataClient.callAsInternalUser.mock.calls[5][1];
-  expect(nodeList2.doc.routing_table).toEqual({});
+  expect(nodeList2.body.routing_table).toEqual({});
 
   await clusterDoc.stop();
 });
