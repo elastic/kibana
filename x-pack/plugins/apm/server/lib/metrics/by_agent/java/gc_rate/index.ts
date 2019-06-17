@@ -10,6 +10,7 @@ import { Setup } from '../../../../helpers/setup_request';
 import { fetch, GcRateMetrics } from './fetcher';
 import { ChartBase } from '../../../types';
 import { transformJavaGcDataToMetricsChart } from '../../../transform_metrics_chart';
+
 const chartBase: ChartBase<GcRateMetrics> = {
   title: i18n.translate('xpack.apm.agentMetrics.java.gcRateChartTitle', {
     defaultMessage: 'Garbage collection activity'
@@ -18,11 +19,17 @@ const chartBase: ChartBase<GcRateMetrics> = {
   type: 'linemark',
   yUnit: 'integer',
   series: {
-    gcCountAll: {
-      title: i18n.translate('xpack.apm.agentMetrics.java.gcCountAll', {
-        defaultMessage: 'GC cycles'
+    gcCountMax: {
+      title: i18n.translate('xpack.apm.agentMetrics.java.gcCountMax', {
+        defaultMessage: 'GC cycles max'
       }),
       color: theme.euiColorVis0
+    },
+    gcCountAvg: {
+      title: i18n.translate('xpack.apm.agentMetrics.java.gcCountAvg', {
+        defaultMessage: 'GC cycles avg'
+      }),
+      color: theme.euiColorVis1
     }
   }
 };

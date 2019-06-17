@@ -19,11 +19,17 @@ const chartBase: ChartBase<GcTimeMetrics> = {
   type: 'linemark',
   yUnit: 'integer',
   series: {
-    gcTimeAll: {
-      title: i18n.translate('xpack.apm.agentMetrics.java.gcTimeAll', {
-        defaultMessage: 'GC time (ms)'
+    gcTimeMax: {
+      title: i18n.translate('xpack.apm.agentMetrics.java.gcTimeMax', {
+        defaultMessage: 'GC time max (ms)'
       }),
       color: theme.euiColorVis0
+    },
+    gcTimeAvg: {
+      title: i18n.translate('xpack.apm.agentMetrics.java.gcTimeAvg', {
+        defaultMessage: 'GC time avg (ms)'
+      }),
+      color: theme.euiColorVis1
     }
   }
 };

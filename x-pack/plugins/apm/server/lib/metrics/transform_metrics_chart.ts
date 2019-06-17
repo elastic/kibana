@@ -118,45 +118,50 @@ export function transformJavaGcDataToMetricsChart<T extends MetricSeriesKeys>(
     key: chartBase.key,
     yUnit: chartBase.yUnit,
     totalHits: hits.total,
-    series: perLabelName.buckets.reduce(
-      (
-        acc: GenericMetricsChart['series'],
-        { key: labelName, perAgent },
-        labelIdx
-      ) => {
-        const timeseriesData = mergeTimeseriesDataBuckets(
-          perAgent.buckets,
-          chartBase
-        );
+    series: perLabelName.buckets
+      .reduce(
+        (
+          acc: GenericMetricsChart['series'],
+          { key: labelName, perAgent },
+          labelIdx
+        ) => {
+          const timeseriesData = mergeTimeseriesDataBuckets(
+            perAgent.buckets,
+            chartBase
+          );
 
-        return [
-          ...acc,
-          ...Object.keys(chartBase.series).map((seriesKey, i) => {
-            colorId++;
-            return {
-              title: `${chartBase.series[seriesKey].title} (${labelName})`,
-              key: seriesKey,
-              type: chartBase.type,
-              color: colors[colorId - (1 % colors.length)],
-              overallValue: perAgent.buckets[0][seriesKey].value,
-              data: timeseriesData.buckets.map(bucket => {
-                let y = null;
-                if (bucket[seriesKey]) {
-                  const { value } = bucket[seriesKey];
-                  if (value !== null && !isNaN(value)) {
-                    y = value;
+          return [
+            ...acc,
+            ...Object.keys(chartBase.series).map((seriesKey, i) => {
+              colorId++;
+              return {
+                title: `${chartBase.series[seriesKey].title} (${labelName})`,
+                key: seriesKey,
+                type: chartBase.type,
+                color: colors[colorId - (1 % colors.length)],
+                overallValue: perAgent.buckets[0][seriesKey].value,
+                data: timeseriesData.buckets.map(bucket => {
+                  let y = null;
+                  if (bucket[seriesKey]) {
+                    const { value } = bucket[seriesKey];
+                    if (value !== null && !isNaN(value)) {
+                      y = value;
+                    }
                   }
-                }
-                return {
-                  x: bucket.key,
-                  y
-                };
-              })
-            };
-          })
-        ];
-      },
-      []
-    )
+                  return {
+                    x: bucket.key,
+                    y
+                  };
+                })
+              };
+            })
+          ];
+        },
+        []
+      )
+      .sort(
+        ({ overallValue: overallValue0 }, { overallValue: overallValue1 }) =>
+          (overallValue1 || 0) - (overallValue0 || 0)
+      )
   };
 }

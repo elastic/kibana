@@ -14,29 +14,48 @@ import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { rangeFilter } from '../../../../helpers/range_filter';
 
 export interface GcRateMetrics extends MetricSeriesKeys {
-  gcCountAll: AggValue;
+  gcCountMax: AggValue;
+  gcCountAvg: AggValue;
 }
 
 export async function fetch(setup: Setup, serviceName: string) {
   const { start, end, uiFiltersES, client, config } = setup;
 
   const aggs = {
-    gcCountMax: {
+    gcCountMaxSeq: {
       max: {
         field: 'jvm.gc.count'
       }
     },
-    gcCountAll: {
-      serial_diff: {
-        buckets_path: 'gcCountMax'
-      }
-    },
-    gcCount: {
+    gcCountMaxSeqNatural: {
       bucket_script: {
         buckets_path: {
-          value: 'gcCountMax'
+          value: 'gcCountMaxSeq'
         },
         script: 'params.value > 0.0 ? params.value : 0.0'
+      }
+    },
+    gcCountMax: {
+      serial_diff: {
+        buckets_path: 'gcCountMaxSeqNatural'
+      }
+    },
+    gcCountAvgSeq: {
+      avg: {
+        field: 'jvm.gc.count'
+      }
+    },
+    gcCountAvgSeqNatural: {
+      bucket_script: {
+        buckets_path: {
+          value: 'gcCountAvgSeq'
+        },
+        script: 'params.value > 0.0 ? params.value : 0.0'
+      }
+    },
+    gcCountAvg: {
+      serial_diff: {
+        buckets_path: 'gcCountAvgSeqNatural'
       }
     }
   };
@@ -73,9 +92,14 @@ export async function fetch(setup: Setup, serviceName: string) {
                   date_histogram: getMetricsDateHistogramParams(start, end),
                   aggs
                 },
-                gcCountAll: {
-                  sum_bucket: {
-                    buckets_path: 'timeseriesData>gcCountAll'
+                gcCountMax: {
+                  max_bucket: {
+                    buckets_path: 'timeseriesData>gcCountMax'
+                  }
+                },
+                gcCountAvg: {
+                  avg_bucket: {
+                    buckets_path: 'timeseriesData>gcCountAvg'
                   }
                 }
               }
