@@ -41,14 +41,14 @@ export class Workpad extends React.PureComponent {
     // this exists in both contexts
     REFRESH: this.props.fetchAllRenderables,
     // editor events
+    UNDO: this.props.undoHistory,
+    REDO: this.props.redoHistory,
+    GRID: () => this.props.setGrid(!this.props.grid),
     ZOOM_IN: this.props.zoomIn,
-    UNDO: this.props.blah,
-    REDO: this.props.blah,
-    GRID: this.props.blah,
     ZOOM_OUT: this.props.zoomOut,
     // presentation events
-    PREV: this.props.blah,
-    NEXT: this.props.blah,
+    PREV: this.props.previousPage,
+    NEXT: this.props.nextPage,
   };
 
   _keyHandler = (action, event) => {
