@@ -122,7 +122,7 @@ export class MonitoringMainController {
 
   isDisabledTab(product, _tab) {
     const setupMode = getSetupModeState();
-    if (!setupMode.enabled) {
+    if (!setupMode.enabled || !setupMode.data) {
       return false;
     }
 

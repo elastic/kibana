@@ -64,7 +64,7 @@ export const updateSetupModeData = async () => {
 };
 
 export const toggleSetupMode = inSetupMode => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       checkAngularState();
     } catch (err) {
@@ -72,19 +72,17 @@ export const toggleSetupMode = inSetupMode => {
     }
 
     const globalState = angularState.injector.get('globalState');
-    angularState.scope.$evalAsync(async () => {
-      setupModeState.enabled = inSetupMode;
-      globalState.inSetupMode = inSetupMode;
-      globalState.save();
-      setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
-      notifySetupModeDataChange();
+    setupModeState.enabled = inSetupMode;
+    globalState.inSetupMode = inSetupMode;
+    globalState.save();
+    setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
+    notifySetupModeDataChange();
 
-      if (inSetupMode) {
-        await updateSetupModeData();
-      }
+    if (inSetupMode) {
+      await updateSetupModeData();
+    }
 
-      resolve();
-    });
+    resolve();
   });
 };
 
