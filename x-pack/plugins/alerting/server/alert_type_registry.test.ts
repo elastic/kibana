@@ -18,7 +18,7 @@ const alertTypeRegistryParams = {
   getServices() {
     return {
       log: jest.fn(),
-      callCluster: jest.fn(),
+      callClusterWithInternalUser: jest.fn(),
       savedObjectsClient: SavedObjectsClientMock.create(),
     };
   },

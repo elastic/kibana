@@ -20,7 +20,7 @@ export type Log = (
 
 export interface Services {
   log: Log;
-  callCluster: any;
+  callClusterWithInternalUser: any;
   savedObjectsClient: SavedObjectsClientContract;
 }
 

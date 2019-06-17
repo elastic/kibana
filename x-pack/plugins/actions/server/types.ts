@@ -16,7 +16,7 @@ export interface SavedObjectReference {
 }
 
 export interface Services {
-  callCluster: any;
+  callClusterWithInternalUser: any;
   savedObjectsClient: SavedObjectsClientContract;
   log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
 }
