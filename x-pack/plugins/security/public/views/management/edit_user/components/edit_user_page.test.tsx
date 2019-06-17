@@ -11,6 +11,8 @@ import { UserAPIClient } from '../../../../lib/api';
 import { User, Role } from '../../../../../common/model';
 import { ReactWrapper } from 'enzyme';
 
+jest.mock('ui/kfetch');
+
 const buildClient = () => {
   const apiClient = new UserAPIClient();
 
