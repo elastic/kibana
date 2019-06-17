@@ -11,6 +11,8 @@ import { EnrichedDeprecationInfo } from '../../../../../server/lib/es_migration_
 import { GroupByOption } from '../../../types';
 import { DeprecationList } from './list';
 
+jest.mock('ui/kfetch');
+
 describe('DeprecationList', () => {
   describe('group by message', () => {
     const defaultProps = {

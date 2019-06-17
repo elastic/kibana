@@ -19,7 +19,6 @@
 
 import { Moment } from 'moment';
 import { TimeRange } from './time_history';
-import moment = require('moment');
 
 // NOTE: These types are somewhat guessed, they may be incorrect.
 
@@ -29,23 +28,9 @@ export interface RefreshInterval {
 }
 
 export interface Timefilter {
-  time: {
-    // NOTE: It's unclear if this is supposed to actually allow a moment object, or undefined, or if this is just
-    // a bug... should be investigated.  This should probably be the TimeRange type, but most TimeRange interfaces
-    // don't account for the possibility of the moment object, and it is actually a possibility.
-    to: string | moment.Moment | undefined;
-    from: string | moment.Moment | undefined;
-  };
-  getTime: () => {
-    to: string | moment.Moment | undefined;
-    from: string | moment.Moment | undefined;
-  };
-  setTime: (
-    timeRange: {
-      to: string | moment.Moment | undefined;
-      from: string | moment.Moment | undefined;
-    }
-  ) => void;
+  time: TimeRange;
+  getTime: () => TimeRange;
+  setTime: (timeRange: TimeRange) => void;
   setRefreshInterval: (refreshInterval: RefreshInterval) => void;
   getRefreshInterval: () => RefreshInterval;
   disableAutoRefreshSelector: () => void;
