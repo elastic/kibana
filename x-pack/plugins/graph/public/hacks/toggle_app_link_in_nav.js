@@ -7,11 +7,11 @@
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
 
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 uiModules.get('xpack/graph')
-  .run($http => {
-    const xpackInfo = xpackInfoService($http);
+  .run(Private => {
+    const xpackInfo = Private(XPackInfoProvider);
 
     const navLinkUpdates = {};
     navLinkUpdates.hidden = true;

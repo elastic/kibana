@@ -16,7 +16,7 @@ import App from './app';
 import { BASE_PATH } from '../common/constants/base_path';
 
 import routes from 'ui/routes';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { XPackInfoProvider as xpackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import template from './main.html';
 import { licenseManagementStore } from './store';
@@ -79,7 +79,7 @@ routes
     controllerAs: 'licenseManagement',
     controller: class LicenseManagementController {
 
-      constructor($injector, $rootScope, $scope, $route, kbnUrl, $http) {
+      constructor($injector, $window, $rootScope, $scope, $route, kbnUrl) {
         initializeTelemetry($injector);
         let autoLogout = null;
         /* if security is disabled, there will be no autoLogout service,
@@ -92,7 +92,7 @@ routes
 
         $scope.$$postDigest(() => {
           const elem = document.getElementById('licenseReactRoot');
-          const xPackInfo = xpackInfoService($http);
+          const xPackInfo = xpackInfoProvider($window, $injector, $injector.get('Private'));
           const initialState = { license: xPackInfo.get('license') };
           const kbnUrlWrapper = {
             change(url) {

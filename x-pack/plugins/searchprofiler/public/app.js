@@ -13,7 +13,7 @@ import 'ui/capabilities/route_setup';
 import { notify } from 'ui/notify';
 
 // License
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 // Our imports
 import _ from 'lodash';
@@ -60,7 +60,7 @@ uiModules
     return service;
   });
 
-function profileVizController($scope, $http, HighlightService) {
+function profileVizController($scope, $http, HighlightService, Private) {
   $scope.title = 'Search Profile';
   $scope.description = 'Search profiling and visualization';
   $scope.profileResponse = [];
@@ -76,7 +76,8 @@ function profileVizController($scope, $http, HighlightService) {
   };
   $scope.markers = [];
   $scope.query = defaultQuery;
-  $scope.licenseEnabled = xpackInfoService($http).get('features.searchprofiler.enableAppLink');
+  const xpackInfo = Private(XPackInfoProvider);
+  $scope.licenseEnabled = xpackInfo.get('features.searchprofiler.enableAppLink');
 
   $scope.aceLoaded = (_editor) => {
     $scope.ace = _editor;

@@ -29,7 +29,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
 
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import appTemplate from './templates/index.html';
 import { getHomeBreadcrumbs, getWorkspaceBreadcrumbs } from './breadcrumbs';
@@ -58,8 +58,8 @@ import settingsTemplate from './templates/settings.html';
 
 const app = uiModules.get('app/graph');
 
-function checkLicense($http, Promise, kbnBaseUrl) {
-  const xpackInfo = xpackInfoService($http);
+function checkLicense(Private, Promise, kbnBaseUrl) {
+  const xpackInfo = Private(XPackInfoProvider);
   const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') && xpackInfo.get('features.graph.enableAppLink');
   if (!licenseAllowsToShowThisPage) {
     const message = xpackInfo.get('features.graph.message');

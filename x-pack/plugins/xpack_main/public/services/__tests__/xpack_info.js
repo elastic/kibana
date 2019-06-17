@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { mockWindow } from './_mock_window';
 
 const XPACK_INFO_KEY = 'xpackMain.info';
@@ -30,8 +30,8 @@ describe('xpack_info service', () => {
     sessionStorage.removeItem.restore();
   });
 
-  beforeEach(ngMock.inject($http => {
-    xpackInfo = xpackInfoService($http);
+  beforeEach(ngMock.inject((Private) => {
+    xpackInfo = Private(XPackInfoProvider);
   }));
 
   it ('updates the stored xpack info', () => {

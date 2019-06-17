@@ -72,3 +72,7 @@ export function xpackInfoService($http) {
   };
 }
 
+export function XPackInfoProvider($http) {
+  return xpackInfoService($http);
+}
+

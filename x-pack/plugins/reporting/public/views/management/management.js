@@ -7,14 +7,14 @@
 import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
 import routes from 'ui/routes';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import 'plugins/reporting/views/management/jobs';
 
 routes.defaults(/\/management/, {
   resolve: {
-    reportingManagementSection: function ($http) {
-      const xpackInfo = xpackInfoService($http);
+    reportingManagementSection: function (Private) {
+      const xpackInfo = Private(XPackInfoProvider);
       const kibanaManagementSection = management.getSection('kibana');
       const showReportingLinks = xpackInfo.get('features.reporting.management.showLinks');
 

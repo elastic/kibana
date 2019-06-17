@@ -5,10 +5,13 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { LogstashSecurityService } from './logstash_security_service';
 
 uiModules.get('xpack/logstash')
-  .factory('logstashSecurityService', $http => {
-    return new LogstashSecurityService(xpackInfoService($http));
+  .factory('logstashSecurityService', ($injector) => {
+    const Private = $injector.get('Private');
+    const xpackInfoService = Private(XPackInfoProvider);
+
+    return new LogstashSecurityService(xpackInfoService);
   });

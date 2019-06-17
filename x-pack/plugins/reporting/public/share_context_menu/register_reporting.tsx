@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { I18nServiceType } from '@kbn/i18n/angular';
 import moment from 'moment-timezone';
 // @ts-ignore: implicit any for JS file
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import React from 'react';
 import chrome from 'ui/chrome';
 import { ShareActionProps } from 'ui/share/share_action';
@@ -15,8 +15,8 @@ import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_actio
 import { unhashUrl } from 'ui/state_management/state_hashing';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
 
-function reportingProvider($http: any, dashboardConfig: any) {
-  const xpackInfo = xpackInfoService($http);
+function reportingProvider(Private: any, dashboardConfig: any, i18n: I18nServiceType) {
+  const xpackInfo = Private(XPackInfoProvider);
   const getShareActions = ({
     objectType,
     objectId,
@@ -72,7 +72,7 @@ function reportingProvider($http: any, dashboardConfig: any) {
 
     const shareActions = [];
     if (xpackInfo.get('features.reporting.printablePdf.showLinks', false)) {
-      const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
+      const panelTitle = i18n('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
         defaultMessage: 'PDF Reports',
       });
 

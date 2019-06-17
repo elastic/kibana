@@ -18,7 +18,7 @@ import template from 'plugins/security/views/nav_control/nav_control.html';
 import 'plugins/security/services/shield_user';
 import '../account/account';
 import { Path } from 'plugins/xpack_main/services/path';
-import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
+import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { SecurityNavControl } from './nav_control_component';
@@ -31,8 +31,9 @@ chromeNavControlsRegistry.register(constant({
 }));
 
 const module = uiModules.get('security', ['kibana']);
-module.controller('securityNavController', ($scope, ShieldUser, globalNavState, kbnBaseUrl, $http) => {
-  const showSecurityLinks = xpackInfoService($http).get('features.security.showLinks');
+module.controller('securityNavController', ($scope, ShieldUser, globalNavState, kbnBaseUrl, Private) => {
+  const xpackInfo = Private(XPackInfoProvider);
+  const showSecurityLinks = xpackInfo.get('features.security.showLinks');
   if (Path.isUnauthenticated() || !showSecurityLinks) return;
 
   $scope.user = ShieldUser.getCurrent();
@@ -53,12 +54,13 @@ module.controller('securityNavController', ($scope, ShieldUser, globalNavState, 
 });
 
 
-chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl, $http) => ({
+chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
   name: 'security',
   order: 1000,
   side: NavControlSide.Right,
   render(el) {
-    const showSecurityLinks = xpackInfoService($http).get('features.security.showLinks');
+    const xpackInfo = Private(XPackInfoProvider);
+    const showSecurityLinks = xpackInfo.get('features.security.showLinks');
     if (Path.isUnauthenticated() || !showSecurityLinks) return null;
 
     const props = {
