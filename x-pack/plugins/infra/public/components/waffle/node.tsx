@@ -170,24 +170,23 @@ const ValueInner = euiStyled.button`
   }
 `;
 
-const Value = euiStyled<ColorProps, 'div'>('div')`
-  font-weight: bold;
-  font-size: 0.9em;
+const SquareTextContent = euiStyled<ColorProps, 'div'>('div')`
   text-align: center;
   width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   flex: 1 0 auto;
-  line-height: 1.2em;
   color: ${props => readableColor(props.color)};
 `;
 
-const Label = euiStyled<ColorProps, 'div'>('div')`
-  text-overflow: ellipsis;
+const Value = euiStyled(SquareTextContent)`
+  font-weight: bold;
+  font-size: 0.9em;
+  line-height: 1.2em;
+`;
+
+const Label = euiStyled(SquareTextContent)`
   font-size: 0.7em;
   margin-bottom: 0.7em;
-  text-align: center;
-  width: 100%;
-  flex: 1 0 auto;
-  white-space: nowrap;
-  overflow: hidden;
-  color: ${props => readableColor(props.color)};
 `;
