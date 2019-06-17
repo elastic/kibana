@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import Boom from 'boom';
 import { Observable, BehaviorSubject } from 'rxjs';
 
 import { ClusterDocClient, RouteState } from './cluster_doc';
@@ -204,4 +205,37 @@ test('assign and unassign resource', async () => {
   expect(nodeList2.body.routing_table).toEqual({});
 
   await clusterDoc.stop();
+});
+
+test('honeybadgers on conflicts', async () => {
+  const esClients = {
+    adminClient: {},
+    dataClient: {
+      callAsInternalUser: jest.fn<Promise<any>, any>(async method => {
+        if (method === 'get') {
+          return { _source: {} };
+        }
+        const err = Boom.boomify(new Error('foo'), { statusCode: 409 });
+        throw err;
+      }),
+    },
+  };
+  const elasticClient = elasticsearchServiceMock.createSetupContract(esClients);
+  const config = configService({
+    updateInterval: 100,
+    timeoutThreshold: 100,
+  });
+  const clusterDoc = new ClusterDocClient({ config, env, logger });
+
+  try {
+    await clusterDoc.setup(elasticClient);
+    await clusterDoc.start();
+  } catch (err) {}
+
+  expect(setTimeout).toHaveBeenCalledTimes(1);
+  try {
+    await clusterDoc.stop();
+  } catch (err) {
+    expect(err.output.statusCode).toBe(409);
+  }
 });

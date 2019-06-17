@@ -86,7 +86,7 @@ export class ClusterDocClient {
   }
 
   public async start() {
-    await this.mainLoop();
+    return await this.mainLoop();
   }
 
   public async stop() {
@@ -250,7 +250,7 @@ export class ClusterDocClient {
       await this.updateNodeList(this.updateLocalNode(nodes, finishTime));
     } catch (err) {
       // on conflict, skip until next loop
-      if (err.statusCode !== 409) {
+      if (err.output.statusCode !== 409) {
         throw err;
       }
     }
