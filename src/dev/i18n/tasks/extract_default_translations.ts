@@ -18,19 +18,18 @@
  */
 
 import chalk from 'chalk';
-import Listr from 'listr';
-
 import { ErrorReporter, extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
 import { createFailError } from '../../run';
 
-export async function extractDefaultMessages({
+export function extractDefaultMessages({
   path,
   config,
 }: {
   path?: string | string[];
   config: I18nConfig;
 }) {
-  const filteredPaths = filterConfigPaths(Array.isArray(path) ? path : [path || './'], config);
+  const inputPaths = Array.isArray(path) ? path : [path || './'];
+  const filteredPaths = filterConfigPaths(inputPaths, config) as string[];
   if (filteredPaths.length === 0) {
     throw createFailError(
       `${chalk.white.bgRed(
@@ -39,36 +38,22 @@ export async function extractDefaultMessages({
     );
   }
 
-  const reporter = new ErrorReporter();
+  return filteredPaths.map(filteredPath => ({
+    task: async (context: {
+      messages: Map<string, { message: string }>;
+      reporter: ErrorReporter;
+    }) => {
+      const { messages, reporter } = context;
+      const initialErrorsNumber = reporter.errors.length;
 
-  const list = new Listr(
-    filteredPaths.map(filteredPath => ({
-      task: async (messages: Map<string, unknown>) => {
-        const initialErrorsNumber = reporter.errors.length;
+      // Return result if no new errors were reported for this path.
+      const result = await extractMessagesFromPathToMap(filteredPath, messages, config, reporter);
+      if (reporter.errors.length === initialErrorsNumber) {
+        return result;
+      }
 
-        // Return result if no new errors were reported for this path.
-        const result = await extractMessagesFromPathToMap(filteredPath, messages, config, reporter);
-        if (reporter.errors.length === initialErrorsNumber) {
-          return result;
-        }
-
-        // Throw an empty error to make Listr mark the task as failed without any message.
-        throw new Error('');
-      },
-      title: filteredPath,
-    })),
-    {
-      exitOnError: false,
-    }
-  );
-
-  try {
-    return await list.run(new Map());
-  } catch (error) {
-    if (error.name === 'ListrError' && reporter.errors.length) {
-      throw createFailError(reporter.errors.join('\n\n'));
-    }
-
-    throw error;
-  }
+      throw reporter;
+    },
+    title: filteredPath,
+  }));
 }
