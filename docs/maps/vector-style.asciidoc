@@ -41,8 +41,7 @@ image::maps/images/vector_style_static.png[]
 
 Use data driven styling to symbolize features from a range of numeric property values.
 To enable data driven styling, click image:maps/images/gs_link_icon.png[] next to the property.
-
-NOTE: The image:maps/images/gs_link_icon.png[] button is only available for vector features that contain numeric properties.
+This button is only available when vector features contain numeric properties.
 
 NOTE: *The Fill color* and *Border color* style properties are set to transparent and are not visible
 when the property value is undefined for a feature.
