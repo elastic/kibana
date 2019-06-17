@@ -40,7 +40,7 @@ describe('SuricataDetails', () => {
           <SuricataDetails data={mockTimelineData[0].ecs} browserFields={mockBrowserFields} />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
   });
 });

@@ -39,7 +39,7 @@ describe('ProcessDraggable', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if everything is undefined', () => {
@@ -54,7 +54,7 @@ describe('ProcessDraggable', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns process name if that is all that is passed in', () => {
