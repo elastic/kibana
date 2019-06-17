@@ -240,7 +240,7 @@ describe('http service', () => {
       });
     });
 
-    describe('#getBasePathFor()/#setBasePathFor()', () => {
+    describe('#basePath()', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
         root = kbnTestServer.createRoot();
@@ -251,7 +251,7 @@ describe('http service', () => {
         const reqBasePath = '/requests-specific-base-path';
         const { http } = await root.setup();
         http.registerOnPreAuth((req, t) => {
-          http.setBasePathFor(req, reqBasePath);
+          http.basePath.set(req, reqBasePath);
           return t.next();
         });
 
@@ -262,7 +262,7 @@ describe('http service', () => {
         kbnServer.server.route({
           method: 'GET',
           path: legacyUrl,
-          handler: kbnServer.newPlatform.setup.core.http.getBasePathFor,
+          handler: kbnServer.newPlatform.setup.core.http.basePath.get,
         });
 
         await kbnTestServer.request.get(root, legacyUrl).expect(200, reqBasePath);

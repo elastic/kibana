@@ -1546,10 +1546,10 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@elastic/charts@^4.2.6":
-  version "4.2.6"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-4.2.6.tgz#19b8fa79758f58ebae6eeba750bea6a418b15659"
-  integrity sha512-ROsv3YwSCDsp09ObeVkAL9YsiNJsAY2kAtBwovRaNCcotI9ybNSQcqbTLlC9vZkduyQSsHBvRL/RAwY8btXE8g==
+"@elastic/charts@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-6.0.1.tgz#dd3fd512946870d941baf16402ec82741d680ae9"
+  integrity sha512-31n/ceU5b0USc2Mfbli+/xBadjWCbakP2Nr/KjIWaJCMIljY/VXkeSWL//CK+wA3T19utyxQWlP+s2B9Ol0isA==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     "@types/luxon" "^1.11.1"
@@ -1560,7 +1560,6 @@
     d3-shape "^1.3.4"
     fp-ts "^1.14.2"
     konva "^2.6.0"
-    lodash "^4.17.11"
     luxon "^1.11.3"
     mobx "^4.9.2"
     mobx-react "^5.4.3"
@@ -1571,6 +1570,8 @@
     react-konva "16.8.3"
     react-spring "^8.0.8"
     resize-observer-polyfill "^1.5.1"
+    ts-debounce "^1.0.0"
+    uuid "^3.3.2"
 
 "@elastic/elasticsearch@^7.0.0-rc.2":
   version "7.0.0-rc.2"
@@ -26778,6 +26779,11 @@ trunc-text@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/trunc-text/-/trunc-text-1.0.2.tgz#b582bb3ddea9c9adc25017d737c48ebdd2157406"
   integrity sha1-tYK7Pd6pya3CUBfXN8SOvdIVdAY=
+
+ts-debounce@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/ts-debounce/-/ts-debounce-1.0.0.tgz#e433301744ba75fe25466f7f23e1382c646aae6a"
+  integrity sha512-V+IzWj418IoqqxVJD6I0zjPtgIyvAJ8VyViqzcxZ0JRiJXsi5mCmy1yUKkWd2gUygT28a8JsVFCgqdrf2pLUHQ==
 
 ts-invariant@^0.2.1:
   version "0.2.1"
