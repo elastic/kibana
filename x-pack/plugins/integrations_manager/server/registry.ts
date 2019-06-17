@@ -40,14 +40,19 @@ export async function getArchiveInfo(
 }
 
 async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
-  if (!cacheHas(key)) {
-    await getResponseStream(`${REGISTRY}/package/${key}`)
-      .then(streamToBuffer)
-      .then(buffer => cacheSet(key, buffer));
+  let buffer = cacheGet(key);
+  if (!buffer) {
+    buffer = await fetchArchiveBuffer(key);
+    cacheSet(key, buffer);
   }
 
-  const buffer = cacheGet(key);
-  if (!buffer) throw new Error(`no archive buffer for ${key}`);
+  if (buffer) {
+    return buffer;
+  } else {
+    throw new Error(`no archive buffer for ${key}`);
+  }
+}
 
-  return buffer;
+async function fetchArchiveBuffer(key: string): Promise<Buffer> {
+  return getResponseStream(`${REGISTRY}/package/${key}`).then(streamToBuffer);
 }

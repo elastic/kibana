@@ -8,14 +8,17 @@ import Boom from 'boom';
 import fetch, { Response } from 'node-fetch';
 import { streamToString } from './streams';
 
-export function getResponse(url: string): Promise<Response> {
-  return new Promise((resolve, reject) =>
-    fetch(url).then((response: Response) =>
-      response.ok
-        ? resolve(response)
-        : reject(new Boom(response.statusText, { statusCode: response.status }))
-    )
-  );
+export async function getResponse(url: string): Promise<Response> {
+  try {
+    const response = await fetch(url);
+    if (response.ok) {
+      return response;
+    } else {
+      throw new Boom(response.statusText, { statusCode: response.status });
+    }
+  } catch (e) {
+    throw Boom.boomify(e);
+  }
 }
 
 export async function getResponseStream(url: string): Promise<NodeJS.ReadableStream> {
