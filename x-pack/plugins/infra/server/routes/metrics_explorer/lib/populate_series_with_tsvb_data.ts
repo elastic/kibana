@@ -47,7 +47,7 @@ export const populateSeriesWithTSVBData = (
           query: options.filterQuery,
           analyze_wildcard: true,
         },
-      } as JsonObject);
+      });
     }
   }
   const timerange = { min: options.timerange.from, max: options.timerange.to };
