@@ -11,6 +11,8 @@ import { UsersListPage } from './users_list_page';
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 
+jest.mock('ui/kfetch');
+
 describe('UsersListPage', () => {
   it('renders the list of users', async () => {
     const apiClient = new UserAPIClient();
