@@ -30,7 +30,7 @@ Defining an action type contains the following attributes:
 - `unencryptedAttributes` (array<string>): A list of opt-out attributes that don't need to be encrypted, these attributes won't need to be re-entered on import / export when the feature becomes available.
 - `validate` (optional)
   - `params`: (optional) Joi object validation
-  - `actionTypeConfig` (optional) Joi object validation
+  - `config` (optional) Joi object validation
 - `executor` (function): A function to be called for executing an action.
 
 Action type executors are provided the following:
@@ -39,7 +39,7 @@ Action type executors are provided the following:
   - `callCluster`: use this to do elasticsearch queries on the cluster Kibana connects to. NOTE: This currently authenticates as the Kibana internal user, this will change in a future PR.
   - `savedObjectsClient`: use this to manipulate saved objects. NOTE: This currently uses the saved objects repository which bypasses security and user authorization.
   - `log`: use this to create server logs.
-- `actionTypeConfig`: The decrypted configuration given to an action
+- `config`: The decrypted configuration given to an action
 - `params`: Parameters for the execution
 
 ### Example
@@ -56,14 +56,14 @@ server.plugins.actions.registerType({
         param2: Joi.string().default('value'),
       })
       .required(),
-    actionTypeConfig: Joi.object()
+    config: Joi.object()
       .keys({
         param1: Joi.string().required(),
         param2: Joi.string().default('value'),
       })
       .required(),
   },
-  async executor({ actionTypeConfig, params, services }) {
+  async executor({ config, params, services }) {
     // Some execution code here
   },
 });

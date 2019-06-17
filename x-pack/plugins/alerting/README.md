@@ -6,6 +6,18 @@ The Kibana alerting plugin provides a common place to setup alerts. It supports:
 - List the registered types of alerts
 - CRUD on alerts
 
+## Terminology
+
+Alert Type: A function that takes parameters and fires actions to alert instances.
+
+Alert: A configuration that defines a schedule, an alert type w/ parameters, state information and actions.
+
+## Usage
+
+Before using alerts, there needs to be an alert type that can execute the alert on an interval basis. For example, beofre being able to check CPU usage, there needs to be a check CPU usage type of alert. (See Alert types -> Example)
+
+Once the alert type exists, the RESTful API can be used to create alerts. (See Alerts -> Create)
+
 ## Alert types
 
 Defining an alert type contains the following attributes:
