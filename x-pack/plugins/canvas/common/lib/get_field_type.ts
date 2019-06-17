@@ -14,7 +14,7 @@ import { unquoteString } from './unquote_string';
  * @field Name of the column that we are looking for the type of
  * @returns The column type or the string 'null'
  */
-export function getFieldType(columns: DatatableColumn[], field?: string) {
+export function getFieldType(columns: DatatableColumn[], field?: string): string {
   if (!field) {
     return 'null';
   }

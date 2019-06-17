@@ -14,7 +14,7 @@ export function pivotObjectArray<
 >(
   rows: RowType[],
   columns?: string[]
-): { [s in ReturnColumns]: s extends keyof RowType ? Array<RowType[s]> : undefined[] } {
+): { [Column in ReturnColumns]: Column extends keyof RowType ? Array<RowType[Column]> : never } {
   const columnNames = columns || Object.keys(rows[0]);
   if (!columnNames.every(isString)) {
     throw new Error('Columns should be an array of strings');
