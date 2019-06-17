@@ -21,7 +21,7 @@ export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaul
       );
 
       await datePickerInput.type(Array(30).fill(browser.keys.BACK_SPACE));
-      await datePickerInput.type([moment(time).format('L LTS'), browser.keys.RETURN]);
+      await datePickerInput.type([moment.tz(time, 'UTC').format('L LTS'), browser.keys.RETURN]);
     },
 
     async getWaffleMap() {
