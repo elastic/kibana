@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isValidEsInterval } from 'plugins/data';
+import { isValidEsInterval } from '../../../core_plugins/data/common';
 import { leastCommonInterval } from '../vis/lib/least_common_interval';
 
 /**

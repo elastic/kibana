@@ -27,7 +27,7 @@ import { intervalOptions } from './_interval_options';
 import { TimeIntervalParamEditor } from '../controls/time_interval';
 import { timefilter } from '../../timefilter';
 import { DropPartialsParamEditor } from '../controls/drop_partials';
-import { dateHistogramInterval } from 'plugins/data';
+import { dateHistogramInterval } from '../../../../core_plugins/data/common';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();

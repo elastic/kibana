@@ -24,4 +24,4 @@ export {
   ParsedInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
-} from 'plugins/data';
+} from '../../../core_plugins/data/common';

@@ -22,8 +22,10 @@ export function createJestConfig({
     ],
     moduleNameMapper: {
       '^ui/(.*)': `${kibanaDirectory}/src/legacy/ui/public/$1`,
+      'uiExports/(.*)': `${kibanaDirectory}/src/dev/jest/mocks/file_mocks.js`,
       '^src/core/(.*)': `${kibanaDirectory}/src/core/$1`,
       '^plugins/xpack_main/(.*);': `${xPackKibanaDirectory}/plugins/xpack_main/public/$1`,
+      '^plugins/([^\/.]*)(.*)': `${kibanaDirectory}/src/legacy/core_plugins/$1/public$2`,
       '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
         `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`,
       '\\.(css|less|scss)$': `${kibanaDirectory}/src/dev/jest/mocks/style_mock.js`,
