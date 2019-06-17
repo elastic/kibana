@@ -41,12 +41,11 @@ import {
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeNavLink,
-  ChromeSetup,
   ChromeStart,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
-import { HttpServiceBase, HttpSetup, HttpStart } from './http';
-import { I18nSetup, I18nStart } from './i18n';
+import { HttpServiceBase, HttpSetup, HttpStart, HttpInterceptor } from './http';
+import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
   ErrorToastOptions,
@@ -62,6 +61,7 @@ import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_setting
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 
 export { CoreContext, CoreSystem } from './core_system';
+export { RecursiveReadonly } from '../utils';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -73,14 +73,10 @@ export { CoreContext, CoreSystem } from './core_system';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
-  /** {@link ChromeSetup} */
-  chrome: ChromeSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
   http: HttpSetup;
-  /** {@link I18nSetup} */
-  i18n: I18nSetup;
   /** {@link NotificationsSetup} */
   notifications: NotificationsSetup;
   /** {@link UiSettingsSetup} */
@@ -129,18 +125,17 @@ export {
   HttpServiceBase,
   HttpSetup,
   HttpStart,
+  HttpInterceptor,
   ErrorToastOptions,
   FatalErrorsSetup,
   FatalErrorInfo,
   Capabilities,
-  ChromeSetup,
   ChromeStart,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeHelpExtension,
   ChromeNavLink,
-  I18nSetup,
   I18nStart,
   LegacyNavLink,
   Plugin,

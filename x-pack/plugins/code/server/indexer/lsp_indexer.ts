@@ -11,7 +11,10 @@ import { ResponseError } from 'vscode-jsonrpc';
 
 import { ProgressReporter } from '.';
 import { TEXT_FILE_LIMIT } from '../../common/file';
-import { LanguageServerNotInstalled } from '../../common/lsp_error_codes';
+import {
+  LanguageServerNotInstalled,
+  LanguageServerStartFailed,
+} from '../../common/lsp_error_codes';
 import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
@@ -31,19 +34,27 @@ import { ALL_RESERVED, DocumentIndexName, ReferenceIndexName, SymbolIndexName } 
 
 export class LspIndexer extends AbstractIndexer {
   protected type: string = 'lsp';
-  protected batchIndexHelper: BatchIndexHelper;
+  // Batch index helper for symbols/references
+  protected lspBatchIndexHelper: BatchIndexHelper;
+  // Batch index helper for documents
+  protected docBatchIndexHelper: BatchIndexHelper;
+
+  private LSP_BATCH_INDEX_SIZE = 1000;
+  private DOC_BATCH_INDEX_SIZE = 50;
 
   constructor(
     protected readonly repoUri: RepositoryUri,
     protected readonly revision: string,
     protected readonly lspService: LspService,
     protected readonly options: ServerOptions,
+    protected readonly gitOps: GitOperations,
     protected readonly client: EsClient,
     protected readonly log: Logger
   ) {
     super(repoUri, revision, client, log);
 
-    this.batchIndexHelper = new BatchIndexHelper(client, log);
+    this.lspBatchIndexHelper = new BatchIndexHelper(client, log, this.LSP_BATCH_INDEX_SIZE);
+    this.docBatchIndexHelper = new BatchIndexHelper(client, log, this.DOC_BATCH_INDEX_SIZE);
   }
 
   public async start(progressReporter?: ProgressReporter, checkpointReq?: LspIndexRequest) {
@@ -52,13 +63,15 @@ export class LspIndexer extends AbstractIndexer {
     } finally {
       if (!this.isCancelled()) {
         // Flush all the index request still in the cache for bulk index.
-        this.batchIndexHelper.flush();
+        this.lspBatchIndexHelper.flush();
+        this.docBatchIndexHelper.flush();
       }
     }
   }
 
   public cancel() {
-    this.batchIndexHelper.cancel();
+    this.lspBatchIndexHelper.cancel();
+    this.docBatchIndexHelper.cancel();
     super.cancel();
   }
 
@@ -88,14 +101,15 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIndexRequest> {
+    let repo;
     try {
       const {
         workspaceRepo,
         workspaceRevision,
       } = await this.lspService.workspaceHandler.openWorkspace(this.repoUri, 'head');
+      repo = workspaceRepo;
       const workspaceDir = workspaceRepo.workdir();
-      const gitOperator = new GitOperations(this.options.repoPath);
-      const fileIterator = await gitOperator.iterateRepo(this.repoUri, 'head');
+      const fileIterator = await this.gitOps.iterateRepo(this.repoUri, 'head');
       for await (const file of fileIterator) {
         const filePath = file.path!;
         const req: LspIndexRequest = {
@@ -110,13 +124,16 @@ export class LspIndexer extends AbstractIndexer {
       this.log.error(`Prepare lsp indexing requests error.`);
       this.log.error(error);
       throw error;
+    } finally {
+      if (repo) {
+        repo.cleanup();
+      }
     }
   }
 
   protected async getIndexRequestCount(): Promise<number> {
     try {
-      const gitOperator = new GitOperations(this.options.repoPath);
-      return await gitOperator.countRepoFiles(this.repoUri, 'head');
+      return await this.gitOps.countRepoFiles(this.repoUri, 'head');
     } catch (error) {
       this.log.error(`Get lsp index requests count error.`);
       this.log.error(error);
@@ -186,6 +203,8 @@ export class LspIndexer extends AbstractIndexer {
       .set(IndexStatsKey.Reference, 0)
       .set(IndexStatsKey.File, 0);
     const { repoUri, revision, filePath, localRepoPath } = request;
+
+    this.log.debug(`Indexing ${filePath} at revision ${revision} for ${repoUri}`);
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const symbolNames = new Set<string>();
 
@@ -193,16 +212,16 @@ export class LspIndexer extends AbstractIndexer {
     const lstat = util.promisify(fs.lstat);
     const stat = await lstat(localFilePath);
 
+    if (stat.size > TEXT_FILE_LIMIT) {
+      this.log.debug(`File size exceeds limit. Skip index.`);
+      return stats;
+    }
+
     const readLink = util.promisify(fs.readlink);
     const readFile = util.promisify(fs.readFile);
     const content = stat.isSymbolicLink()
       ? await readLink(localFilePath, 'utf8')
       : await readFile(localFilePath, 'utf8');
-
-    if (content.length > TEXT_FILE_LIMIT) {
-      this.log.debug(`File size exceeds limit. Skip index.`);
-      return stats;
-    }
 
     try {
       const lang = detectLanguageByFilename(filePath);
@@ -218,13 +237,13 @@ export class LspIndexer extends AbstractIndexer {
         if (response && response.result && response.result.length > 0 && response.result[0]) {
           const { symbols, references } = response.result[0];
           for (const symbol of symbols) {
-            await this.batchIndexHelper.index(SymbolIndexName(repoUri), symbol);
+            await this.lspBatchIndexHelper.index(SymbolIndexName(repoUri), symbol);
             symbolNames.add(symbol.symbolInformation.name);
           }
           stats.set(IndexStatsKey.Symbol, symbols.length);
 
           for (const ref of references) {
-            await this.batchIndexHelper.index(ReferenceIndexName(repoUri), ref);
+            await this.lspBatchIndexHelper.index(ReferenceIndexName(repoUri), ref);
           }
           stats.set(IndexStatsKey.Reference, references.length);
         } else {
@@ -237,9 +256,13 @@ export class LspIndexer extends AbstractIndexer {
       if (error instanceof ResponseError && error.code === LanguageServerNotInstalled) {
         // TODO maybe need to report errors to the index task and warn user later
         this.log.debug(`Index symbols or references error due to language server not installed`);
+      } else if (error instanceof ResponseError && error.code === LanguageServerStartFailed) {
+        this.log.debug(
+          `Index symbols or references error due to language server can't be started.`
+        );
       } else {
-        this.log.error(`Index symbols or references error.`);
-        this.log.error(error);
+        this.log.warn(`Index symbols or references error.`);
+        this.log.warn(error);
       }
     }
 
@@ -251,7 +274,7 @@ export class LspIndexer extends AbstractIndexer {
       language,
       qnames: Array.from(symbolNames),
     };
-    await this.batchIndexHelper.index(DocumentIndexName(repoUri), body);
+    await this.docBatchIndexHelper.index(DocumentIndexName(repoUri), body);
     stats.set(IndexStatsKey.File, 1);
     return stats;
   }

@@ -11,7 +11,11 @@ import { getErrorStatusCode } from '../../errors';
 import { AuthenticatedUser } from '../../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { BaseAuthenticationProvider, RequestWithLoginAttempt } from './base';
+import {
+  AuthenticationProviderOptions,
+  BaseAuthenticationProvider,
+  RequestWithLoginAttempt,
+} from './base';
 
 /**
  * The state supported by the provider (for the SAML handshake or established session).
@@ -96,6 +100,24 @@ function isSAMLRequestQuery(query: any): query is SAMLRequestQuery {
  */
 export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
+   * Specifies Elasticsearch SAML realm name that Kibana should use.
+   */
+  private readonly realm: string;
+
+  constructor(
+    protected readonly options: Readonly<AuthenticationProviderOptions>,
+    samlOptions?: Readonly<{ realm?: string }>
+  ) {
+    super(options);
+
+    if (!samlOptions || !samlOptions.realm) {
+      throw new Error('Realm name must be specified');
+    }
+
+    this.realm = samlOptions.realm;
+  }
+
+  /**
    * Performs SAML request authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
@@ -103,6 +125,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
     this.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
+    // We should get rid of `Bearer` scheme support as soon as Reporting doesn't need it anymore.
     let {
       authenticationResult,
       // eslint-disable-next-line prefer-const
@@ -491,7 +514,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
       const { id: requestId, redirect } = await this.options.client.callWithInternalUser(
         'shield.samlPrepare',
-        { body: { acs: this.getACS() } }
+        { body: { realm: this.realm } }
       );
 
       this.debug('Redirecting to Identity Provider with SAML request.');
@@ -583,23 +606,13 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
       body: {
         queryString: request.url.search ? request.url.search.slice(1) : '',
-        acs: this.getACS(),
+        realm: this.realm,
       },
     });
 
     this.debug('User session has been successfully invalidated.');
 
     return redirect;
-  }
-
-  /**
-   * Constructs and returns Kibana's Assertion consumer service URL.
-   */
-  private getACS() {
-    return (
-      `${this.options.protocol}://${this.options.hostname}:${this.options.port}` +
-      `${this.options.basePath}/api/security/v1/saml`
-    );
   }
 
   /**

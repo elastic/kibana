@@ -6,7 +6,8 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { InputsModelId, Refetch } from './model';
+import { Refetch } from './model';
+import { InputsModelId } from './constants';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/inputs');
 

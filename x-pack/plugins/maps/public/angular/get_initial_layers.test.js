@@ -8,36 +8,16 @@ jest.mock('../meta', () => {
   return {};
 });
 
-jest.mock('ui/chrome', () => ({
-  getInjected: (key) => {
-    if (key === 'emsTileLayerId') {
-      return {
-        bright: 'road_map',
-        desaturated: 'road_map_desaturated',
-        dark: 'dark_map',
-      };
-    }
-    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
-  }
-}));
+jest.mock('ui/chrome', () => {
+  return {};
+});
 
 import { getInitialLayers } from './get_initial_layers';
 
-const mockKibanaDataSource = {
-  tilemap: {
-    url: 'myTileUrl'
-  }
-};
-const mockEmsDataSource = {
-  tms: [
-    {
-      id: 'elasticTilesAreTheBest'
-    }
-  ]
-};
+const layerListNotProvided = undefined;
 
 describe('Saved object has layer list', () => {
-  it('Should get initial layers from saved object first', () => {
+  it('Should get initial layers from saved object', () => {
     const layerListFromSavedObject = [
       {
         id: 'layerId',
@@ -49,34 +29,18 @@ describe('Saved object has layer list', () => {
   });
 });
 
+describe('kibana.yml configured with map.tilemap.url', () => {
 
-
-describe('Saved object does not have layer list', () => {
-
-  beforeEach(() => {
-    require('../meta').isMetaDataLoaded = () => {
-      return true;
+  beforeAll(() => {
+    require('../meta').getKibanaTileMap = () => {
+      return {
+        url: 'myTileUrl'
+      };
     };
   });
 
-  function mockDataSourceResponse(dataSources) {
-    require('../meta').getEMSDataSourcesSync = () => {
-      return dataSources;
-    };
-    require('../meta').isMetaDataLoaded = () => {
-      return true;
-    };
-    require('../meta').getKibanaTileMap = () => {
-      return null;
-    };
-  }
-
-  it('should get the default EMS layer when metadata has not loaded yet', () => {
-    mockDataSourceResponse();
-    require('../meta').isMetaDataLoaded = () => {
-      return false;
-    };
-    const layers = getInitialLayers(null);
+  it('Should get initial layer with from Kibana tilemap data source', () => {
+    const layers = getInitialLayers(layerListNotProvided);
     expect(layers).toEqual([{
       alpha: 1,
       __dataRequests: [],
@@ -86,8 +50,54 @@ describe('Saved object does not have layer list', () => {
       maxZoom: 24,
       minZoom: 0,
       sourceDescriptor: {
-        type: 'EMS_TMS',
+        type: 'KIBANA_TILEMAP'
+      },
+      style: {
+        properties: {},
+        type: 'TILE',
+      },
+      type: 'TILE',
+      visible: true,
+    }]);
+  });
+});
+
+describe('EMS is enabled', () => {
+
+  beforeAll(() => {
+    require('../meta').getKibanaTileMap = () => {
+      return null;
+    };
+    require('ui/chrome').getInjected = (key) => {
+      switch (key) {
+        case 'emsTileLayerId':
+          return {
+            bright: 'road_map',
+            desaturated: 'road_map_desaturated',
+            dark: 'dark_map',
+          };
+        case 'isEmsEnabled':
+          return true;
+        default:
+          throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+      }
+    };
+  });
+
+  it('Should get initial layer from EMS data source', () => {
+    const layers = getInitialLayers(layerListNotProvided, false);
+    expect(layers).toEqual([{
+      alpha: 1,
+      __dataRequests: [],
+      id: layers[0].id,
+      applyGlobalQuery: true,
+      label: null,
+      maxZoom: 24,
+      minZoom: 0,
+      source: undefined,
+      sourceDescriptor: {
         id: 'road_map',
+        type: 'EMS_TMS'
       },
       style: {
         properties: {},
@@ -99,11 +109,7 @@ describe('Saved object does not have layer list', () => {
   });
 
   it('Should use the default dark EMS layer when Kibana dark theme is set', () => {
-    mockDataSourceResponse();
-    require('../meta').isMetaDataLoaded = () => {
-      return false;
-    };
-    const layers = getInitialLayers(null, true);
+    const layers = getInitialLayers(layerListNotProvided, true);
     expect(layers).toEqual([{
       alpha: 1,
       __dataRequests: [],
@@ -124,79 +130,25 @@ describe('Saved object does not have layer list', () => {
       visible: true,
     }]);
   });
+});
 
-
-  it('Should get initial layer from Kibana tilemap data source when Kibana tilemap is configured ', () => {
-
-    mockDataSourceResponse({
-      ems: mockEmsDataSource
-    });
+describe('EMS is not enabled', () => {
+  beforeAll(() => {
     require('../meta').getKibanaTileMap = () => {
-      return mockKibanaDataSource.tilemap;
+      return null;
     };
 
-    const layers = getInitialLayers(null);
-    expect(layers).toEqual([{
-      alpha: 1,
-      __dataRequests: [],
-      id: layers[0].id,
-      applyGlobalQuery: true,
-      label: null,
-      maxZoom: 24,
-      minZoom: 0,
-      sourceDescriptor: {
-        type: 'KIBANA_TILEMAP'
-      },
-      style: {
-        properties: {},
-        type: 'TILE',
-      },
-      type: 'TILE',
-      visible: true,
-    }]);
-  });
-
-  it('Should get initial layer from ems data source when Kibana tilemap is not configured', () => {
-    const dataSources = {
-      ems: mockEmsDataSource
-    };
-    mockDataSourceResponse(dataSources);
-
-    const layers = getInitialLayers(null);
-    expect(layers).toEqual([{
-      alpha: 1,
-      __dataRequests: [],
-      id: layers[0].id,
-      applyGlobalQuery: true,
-      label: null,
-      maxZoom: 24,
-      minZoom: 0,
-      source: undefined,
-      sourceDescriptor: {
-        id: 'elasticTilesAreTheBest',
-        type: 'EMS_TMS'
-      },
-      style: {
-        properties: {},
-        type: 'TILE',
-      },
-      type: 'TILE',
-      visible: true,
-    }]);
-  });
-
-  it('Should return empty list when no ems.tms sources are provided', () => {
-    const dataSources = {
-      ems: {
-        tms: []
+    require('ui/chrome').getInjected = (key) => {
+      switch (key) {
+        case 'isEmsEnabled':
+          return false;
+        default:
+          throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
       }
     };
-    mockDataSourceResponse(dataSources);
-    expect((getInitialLayers(null))).toEqual([]);
   });
 
-  it('Should return empty list when no dataSoures are provided', () => {
-    mockDataSourceResponse(null);
-    expect((getInitialLayers(null))).toEqual([]);
+  it('Should return empty layer list since there are no configured tile layers', () => {
+    expect((getInitialLayers(layerListNotProvided))).toEqual([]);
   });
 });

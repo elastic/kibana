@@ -22,14 +22,12 @@ import {
 } from '../../store';
 import {
   AbsoluteTimeRange,
-  InputsModelId,
   LinkTo,
   RelativeTimeRange,
-  TimeRangeKinds,
   UrlInputsModel,
 } from '../../store/inputs/model';
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
-import { URL_STATE_KEYS, CONSTANTS, LOCATION_MAPPED_TO_MODEL, LOCATION_KEYS } from './constants';
+import { URL_STATE_KEYS, LOCATION_MAPPED_TO_MODEL, LOCATION_KEYS } from './types';
 import {
   decodeRisonUrlState,
   getCurrentLocation,
@@ -48,6 +46,8 @@ import {
   UrlStateContainerPropTypes,
   UrlStateProps,
 } from './types';
+import { CONSTANTS } from './constants';
+import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 
 export class UrlStateContainerLifecycle extends React.Component<UrlStateContainerPropTypes> {
   public render() {
@@ -58,7 +58,8 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
     location: prevLocation,
     urlState: prevUrlState,
   }: UrlStateContainerPropTypes) {
-    const { urlState } = this.props;
+    const { location, urlState } = this.props;
+
     if (JSON.stringify(urlState) !== JSON.stringify(prevUrlState)) {
       URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
         if (
@@ -83,10 +84,12 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           }
         }
       });
+    } else if (location.pathname !== prevLocation.pathname) {
+      this.handleInitialize(location);
     }
   }
 
-  public componentDidMount() {
+  public componentWillMount() {
     const { location } = this.props;
     this.handleInitialize(location);
   }

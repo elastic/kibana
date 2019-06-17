@@ -47,7 +47,8 @@ export default async function ({ readConfigFile }) {
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
         '--server.xsrf.whitelist=[\"/api/security/v1/saml\"]',
-        `--xpack.security.authProviders=${JSON.stringify(['saml', 'basic'])}`,
+        `--xpack.security.authc.providers=${JSON.stringify(['saml', 'basic'])}`,
+        '--xpack.security.authc.saml.realm=saml1',
       ],
     },
   };

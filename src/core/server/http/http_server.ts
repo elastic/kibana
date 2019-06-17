@@ -19,7 +19,6 @@
 
 import { Request, Server, ServerOptions } from 'hapi';
 
-import { modifyUrl } from '../../utils';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
 import { createServer, getServerOptions } from './http_tools';
@@ -31,7 +30,9 @@ import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
+import { SessionStorageFactory } from './session_storage';
 import { AuthStateStorage } from './auth_state_storage';
+import { BasePath } from './base_path_service';
 
 export interface HttpServerSetup {
   server: Server;
@@ -44,9 +45,9 @@ export interface HttpServerSetup {
    * Only one AuthenticationHandler can be registered.
    */
   registerAuth: <T>(
-    handler: AuthenticationHandler<T>,
+    handler: AuthenticationHandler,
     cookieOptions: SessionStorageCookieOptions<T>
-  ) => Promise<void>;
+  ) => Promise<{ sessionStorageFactory: SessionStorageFactory<T> }>;
   /**
    * To define custom logic to perform for incoming requests. Runs the handler before Auth
    * hook performs a check that user has access to requested resources, so it's the only
@@ -63,8 +64,12 @@ export interface HttpServerSetup {
    * (from the first registered to the last).
    */
   registerOnPostAuth: (handler: OnPostAuthHandler) => void;
-  getBasePathFor: (request: KibanaRequest | Request) => string;
-  setBasePathFor: (request: KibanaRequest | Request, basePath: string) => void;
+  basePath: {
+    get: (request: KibanaRequest | Request) => string;
+    set: (request: KibanaRequest | Request, basePath: string) => void;
+    prepend: (url: string) => string;
+    remove: (url: string) => string;
+  };
   auth: {
     get: AuthStateStorage['get'];
     isAuthenticated: AuthStateStorage['isAuthenticated'];
@@ -76,10 +81,6 @@ export class HttpServer {
   private config?: HttpConfig;
   private registeredRouters = new Set<Router>();
   private authRegistered = false;
-  private basePathCache = new WeakMap<
-    ReturnType<KibanaRequest['unstable_getIncomingMessage']>,
-    string
-  >();
 
   private readonly authState: AuthStateStorage;
 
@@ -100,46 +101,22 @@ export class HttpServer {
     this.registeredRouters.add(router);
   }
 
-  // passing hapi Request works for BWC. can be deleted once we remove legacy server.
-  private getBasePathFor(config: HttpConfig, request: KibanaRequest | Request) {
-    const incomingMessage =
-      request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
-
-    const requestScopePath = this.basePathCache.get(incomingMessage) || '';
-    const serverBasePath = config.basePath || '';
-    return `${serverBasePath}${requestScopePath}`;
-  }
-
-  // should work only for KibanaRequest as soon as spaces migrate to NP
-  private setBasePathFor(request: KibanaRequest | Request, basePath: string) {
-    const incomingMessage =
-      request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
-    if (this.basePathCache.has(incomingMessage)) {
-      throw new Error(
-        'Request basePath was previously set. Setting multiple times is not supported.'
-      );
-    }
-    this.basePathCache.set(incomingMessage, basePath);
-  }
-
   public setup(config: HttpConfig): HttpServerSetup {
     const serverOptions = getServerOptions(config);
     this.server = createServer(serverOptions);
     this.config = config;
 
-    this.setupBasePathRewrite(config);
+    const basePathService = new BasePath(config.basePath);
+    this.setupBasePathRewrite(config, basePathService);
 
     return {
       options: serverOptions,
       registerRouter: this.registerRouter.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
-      registerAuth: <T>(
-        fn: AuthenticationHandler<T>,
-        cookieOptions: SessionStorageCookieOptions<T>
-      ) => this.registerAuth(fn, cookieOptions, config.basePath),
-      getBasePathFor: this.getBasePathFor.bind(this, config),
-      setBasePathFor: this.setBasePathFor.bind(this),
+      registerAuth: <T>(fn: AuthenticationHandler, cookieOptions: SessionStorageCookieOptions<T>) =>
+        this.registerAuth(fn, cookieOptions, config.basePath),
+      basePath: basePathService,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
@@ -159,13 +136,14 @@ export class HttpServer {
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
-        const isAuthRequired = Boolean(this.authRegistered && route.authRequired);
+        const { authRequired = true, tags } = route.options;
         this.server.route({
           handler: route.handler,
           method: route.method,
           path: this.getRouteFullPath(router.path, route.path),
           options: {
-            auth: isAuthRequired ? undefined : false,
+            auth: authRequired ? undefined : false,
+            tags: tags ? Array.from(tags) : undefined,
           },
         });
       }
@@ -186,26 +164,19 @@ export class HttpServer {
     this.server = undefined;
   }
 
-  private setupBasePathRewrite(config: HttpConfig) {
+  private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {
     if (config.basePath === undefined || !config.rewriteBasePath) {
       return;
     }
 
-    const basePath = config.basePath;
     this.registerOnPreAuth((request, toolkit) => {
-      const newURL = modifyUrl(request.url.href!, urlParts => {
-        if (urlParts.pathname != null && urlParts.pathname.startsWith(basePath)) {
-          urlParts.pathname = urlParts.pathname.replace(basePath, '') || '/';
-        } else {
-          return {};
-        }
-      });
-
-      if (!newURL) {
-        return toolkit.rejected(new Error('not found'), { statusCode: 404 });
+      const oldUrl = request.url.href!;
+      const newURL = basePathService.remove(oldUrl);
+      const shouldRedirect = newURL !== oldUrl;
+      if (shouldRedirect) {
+        return toolkit.redirected(newURL, { forward: true });
       }
-
-      return toolkit.redirected(newURL, { forward: true });
+      return toolkit.rejected(new Error('not found'), { statusCode: 404 });
     });
   }
 
@@ -233,7 +204,7 @@ export class HttpServer {
   }
 
   private async registerAuth<T>(
-    fn: AuthenticationHandler<T>,
+    fn: AuthenticationHandler,
     cookieOptions: SessionStorageCookieOptions<T>,
     basePath?: string
   ) {
@@ -245,14 +216,14 @@ export class HttpServer {
     }
     this.authRegistered = true;
 
-    const sessionStorage = await createCookieSessionStorageFactory<T>(
+    const sessionStorageFactory = await createCookieSessionStorageFactory<T>(
       this.server,
       cookieOptions,
       basePath
     );
 
     this.server.auth.scheme('login', () => ({
-      authenticate: adoptToHapiAuthFormat(fn, sessionStorage, this.authState.set),
+      authenticate: adoptToHapiAuthFormat(fn, this.authState.set),
     }));
     this.server.auth.strategy('session', 'login');
 
@@ -261,5 +232,7 @@ export class HttpServer {
     // should be applied for all routes if they don't specify auth strategy in route declaration
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
+
+    return { sessionStorageFactory };
   }
 }

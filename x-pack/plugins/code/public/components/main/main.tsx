@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 
 import chrome from 'ui/chrome';
+import { APP_TITLE } from '../../../common/constants';
 import { MainRouteParams } from '../../common/types';
 import { ShortcutsProvider } from '../shortcuts';
 import { Content } from './content';
@@ -35,7 +36,7 @@ class CodeMain extends React.Component<Props> {
   public setBreadcrumbs() {
     const { resource, org, repo } = this.props.match.params;
     chrome.breadcrumbs.set([
-      { text: 'Code', href: '#/' },
+      { text: APP_TITLE, href: '#/' },
       {
         text: `${org} → ${repo}`,
         href: `#/${resource}/${org}/${repo}`,
@@ -44,7 +45,7 @@ class CodeMain extends React.Component<Props> {
   }
 
   public componentWillUnmount() {
-    chrome.breadcrumbs.set([{ text: 'Code', href: '#/' }]);
+    chrome.breadcrumbs.set([{ text: APP_TITLE, href: '#/' }]);
   }
 
   public render() {
@@ -74,7 +75,7 @@ class CodeMain extends React.Component<Props> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  loadingFileTree: state.file.rootFileTreeLoading,
+  loadingFileTree: state.file.fileTreeLoadingPaths.includes(''),
   loadingStructureTree: state.symbol.loading,
   hasStructure: structureSelector(state).length > 0 && !state.symbol.error,
   languageServerInitializing: state.symbol.languageServerInitializing,

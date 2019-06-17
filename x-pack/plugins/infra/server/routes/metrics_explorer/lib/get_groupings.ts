@@ -32,11 +32,20 @@ export const getGroupings = async (
   }
   const limit = options.limit || 9;
   const params = {
+    allowNoIndices: true,
+    ignoreUnavailable: true,
     index: options.indexPattern,
     body: {
       size: 0,
       query: {
         bool: {
+          should: [
+            ...options.metrics
+              .filter(m => m.field)
+              .map(m => ({
+                exists: { field: m.field },
+              })),
+          ],
           filter: [
             {
               range: {
@@ -47,11 +56,6 @@ export const getGroupings = async (
                 },
               },
             },
-            ...options.metrics
-              .filter(m => m.field)
-              .map(m => ({
-                exists: { field: m.field },
-              })),
           ] as object[],
         },
       },
@@ -68,6 +72,10 @@ export const getGroupings = async (
       },
     },
   };
+
+  if (params.body.query.bool.should.length !== 0) {
+    set(params, 'body.query.bool.minimum_should_match', 1);
+  }
 
   if (options.afterKey) {
     set(params, 'body.aggs.groupings.composite.after', { groupBy: options.afterKey });

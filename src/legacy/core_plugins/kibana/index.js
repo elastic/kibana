@@ -201,7 +201,7 @@ export default function (kibana) {
           defaultSearchField: 'url',
           isImportableAndExportable: true,
           getTitle(obj) {
-            return obj.attributes.url;
+            return `/goto/${encodeURIComponent(obj.id)}`;
           },
         },
         config: {
@@ -240,9 +240,7 @@ export default function (kibana) {
       migrations,
     },
 
-    uiCapabilities: async function (server) {
-      const { savedObjects } = server;
-
+    uiCapabilities: async function () {
       return {
         discover: {
           show: true,
@@ -275,14 +273,11 @@ export default function (kibana) {
         indexPatterns: {
           save: true,
         },
-        savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
-          ...acc,
-          [type]: {
-            delete: true,
-            edit: true,
-            read: true,
-          }
-        }), {}),
+        savedObjectsManagement: {
+          delete: true,
+          edit: true,
+          read: true,
+        },
         management: {
           /*
            * Management settings correspond to management section/link ids, and should not be changed

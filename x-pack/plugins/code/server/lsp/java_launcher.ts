@@ -40,7 +40,7 @@ export class JavaLauncher extends AbstractLauncher {
   }
 
   startConnect(proxy: LanguageServerProxy) {
-    proxy.awaitServerConnection();
+    proxy.awaitServerConnection().catch(this.log.debug);
   }
 
   async getPort(): Promise<number> {
@@ -123,6 +123,7 @@ export class JavaLauncher extends AbstractLauncher {
       '-Dosgi.bundles.defaultStartLevel=4',
       '-Declipse.product=org.elastic.jdt.ls.core.product',
       '-Dlog.level=ALL',
+      '-Dfile.encoding=utf8',
       '-noverify',
       '-Xmx4G',
       '-jar',

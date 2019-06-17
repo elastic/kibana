@@ -20,7 +20,7 @@ const wrapChild = ({ label, value, ...props }, index) => (
   >
     <EuiStat
       title={value}
-      titleSize="s"
+      titleSize="xs"
       textAlign="left"
       description={label ? `${label}` : ''}
     />
@@ -67,7 +67,7 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
             {capitalize(status)}
           </Fragment>
         )}
-        titleSize="s"
+        titleSize="xs"
         textAlign="left"
         description={i18n.translate('xpack.monitoring.summaryStatus.statusDescription', {
           defaultMessage: 'Status',
@@ -79,7 +79,7 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
 
 export function SummaryStatus({ metrics, status, isOnline, IconComponent = DefaultIconComponent, ...props }) {
   return (
-    <div {...props}>
+    <div {...props} className="monSummaryStatusNoWrap">
       <EuiFlexGroup justifyContent="spaceBetween">
         <StatusIndicator status={status} IconComponent={IconComponent} isOnline={isOnline} />
         {metrics.map(wrapChild)}

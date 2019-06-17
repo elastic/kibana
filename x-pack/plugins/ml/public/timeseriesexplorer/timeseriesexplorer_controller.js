@@ -43,7 +43,7 @@ import {
   processRecordScoreResults,
   processScheduledEventsForChart } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
-import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
+import { MlTimeBuckets, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import template from './timeseriesexplorer.html';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
@@ -100,7 +100,6 @@ module.controller('MlTimeSeriesExplorerController', function (
 
   const CHARTS_POINT_TARGET = 500;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
-  const TimeBuckets = Private(IntervalHelperProvider);
 
   $scope.jobPickerSelections = [];
   $scope.selectedJob;
@@ -120,6 +119,13 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.showForecastCheckbox = false;
 
   $scope.focusAnnotationData = [];
+
+  // Used in the template to indicate the chart is being plotted across
+  // all partition field values, where the cardinality of the field cannot be
+  // obtained as it is not aggregatable e.g. 'all distinct kpi_indicator values'
+  $scope.allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionValuesLabel', {
+    defaultMessage: 'all',
+  });
 
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
   const tzConfig = config.get('dateFormat:tz');
@@ -713,7 +719,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     jobSelectServiceSub.unsubscribe();
   });
 
-  $scope.$on('contextChartSelected', function (event, selection) { // eslint-disable-line no-unused-vars
+  $scope.$on('contextChartSelected', function (event, selection) {
     // Save state of zoom (adds to URL) if it is different to the default.
     if (($scope.contextChartData === undefined || $scope.contextChartData.length === 0) &&
       ($scope.contextForecastData === undefined || $scope.contextForecastData.length === 0)) {
@@ -986,7 +992,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     const barTarget = (bucketsTarget !== undefined ? bucketsTarget : 100);
     // Use a maxBars of 10% greater than the target.
     const maxBars = Math.floor(1.1 * barTarget);
-    const buckets = new TimeBuckets();
+    const buckets = new MlTimeBuckets();
     buckets.setInterval('auto');
     buckets.setBounds(bounds);
     buckets.setBarTarget(Math.floor(barTarget));
@@ -1023,7 +1029,7 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     // Use a maxBars of 10% greater than the target.
     const maxBars = Math.floor(1.1 * CHARTS_POINT_TARGET);
-    const buckets = new TimeBuckets();
+    const buckets = new MlTimeBuckets();
     buckets.setInterval('auto');
     buckets.setBarTarget(Math.floor(CHARTS_POINT_TARGET));
     buckets.setMaxBars(maxBars);

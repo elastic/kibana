@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Load More Events Table Component rendering it renders the default Events table 1`] = `
+exports[`Load More Events Table Component rendering it renders the events table 1`] = `
 <Connect(pure(Component))
   data={
     Array [
