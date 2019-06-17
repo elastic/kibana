@@ -20,9 +20,6 @@ export interface RequestWithLoginAttempt extends Legacy.Request {
  * Represents available provider options.
  */
 export interface AuthenticationProviderOptions {
-  protocol: string;
-  hostname: string;
-  port: number;
   basePath: string;
   client: Legacy.Plugins.elasticsearch.Cluster;
   log: (tags: string[], message: string) => void;

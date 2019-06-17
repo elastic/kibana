@@ -13,6 +13,7 @@ import { mockFirstLastSeenDomainQuery } from '../../../../containers/domains/fir
 import { FlowTarget } from '../../../../graphql/types';
 import { wait } from '../../../../lib/helpers';
 import { TestProviders } from '../../../../mock';
+import '../../../../mock/ui_settings';
 
 import { FirstLastSeenDomain } from './index';
 

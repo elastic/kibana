@@ -621,10 +621,12 @@ export class DashboardStateManager {
       );
     }
 
-    timeFilter.setTime({
-      from: this.savedDashboard.timeFrom,
-      to: this.savedDashboard.timeTo,
-    });
+    if (this.savedDashboard.timeFrom && this.savedDashboard.timeTo) {
+      timeFilter.setTime({
+        from: this.savedDashboard.timeFrom,
+        to: this.savedDashboard.timeTo,
+      });
+    }
 
     if (this.savedDashboard.refreshInterval) {
       timeFilter.setRefreshInterval(this.savedDashboard.refreshInterval);
@@ -642,7 +644,7 @@ export class DashboardStateManager {
    * Applies the current filter state to the dashboard.
    * @param filter {Array.<Object>} An array of filter bar filters.
    */
-  public applyFilters(query: Query, filters: Filter[]) {
+  public applyFilters(query: Query | string, filters: Filter[]) {
     this.appState.query = query;
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);

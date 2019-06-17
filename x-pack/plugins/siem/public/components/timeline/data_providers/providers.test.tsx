@@ -141,7 +141,7 @@ describe('Providers', () => {
         </TestProviders>
       );
       wrapper
-        .find('[data-test-subj="providerBadge"]')
+        .find('button[data-test-subj="providerBadge"]')
         .first()
         .simulate('click');
 
@@ -176,7 +176,7 @@ describe('Providers', () => {
         </TestProviders>
       );
       wrapper
-        .find('[data-test-subj="providerBadge"]')
+        .find('button[data-test-subj="providerBadge"]')
         .first()
         .simulate('click');
 
@@ -221,7 +221,7 @@ describe('Providers', () => {
       );
 
       wrapper
-        .find('[data-test-subj="providerBadge"]')
+        .find('button[data-test-subj="providerBadge"]')
         .first()
         .simulate('click');
       wrapper.update();
@@ -259,7 +259,7 @@ describe('Providers', () => {
       );
 
       wrapper
-        .find('[data-test-subj="providerBadge"]')
+        .find('button[data-test-subj="providerBadge"]')
         .first()
         .simulate('click');
       wrapper.update();
@@ -296,7 +296,7 @@ describe('Providers', () => {
       );
 
       wrapper
-        .find('[data-test-subj="providerBadge"]')
+        .find('button[data-test-subj="providerBadge"]')
         .first()
         .simulate('click');
 
@@ -337,7 +337,7 @@ describe('Providers', () => {
       );
 
       wrapper
-        .find('[data-test-subj="providerBadge"]')
+        .find('button[data-test-subj="providerBadge"]')
         .first()
         .simulate('click');
 
@@ -483,6 +483,8 @@ describe('Providers', () => {
       wrapper
         .find('[data-test-subj="providerBadge"]')
         .at(4)
+        .find('button')
+        .first()
         .simulate('click');
 
       wrapper.update();
@@ -527,6 +529,8 @@ describe('Providers', () => {
       wrapper
         .find('[data-test-subj="providerBadge"]')
         .at(4)
+        .find('button')
+        .first()
         .simulate('click');
 
       wrapper.update();
@@ -565,6 +569,8 @@ describe('Providers', () => {
       wrapper
         .find('[data-test-subj="providerBadge"]')
         .at(4)
+        .find('button')
+        .first()
         .simulate('click');
 
       wrapper.update();
@@ -609,6 +615,8 @@ describe('Providers', () => {
       wrapper
         .find('[data-test-subj="providerBadge"]')
         .at(4)
+        .find('button')
+        .first()
         .simulate('click');
 
       wrapper.update();
