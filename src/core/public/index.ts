@@ -153,4 +153,5 @@ export {
   UiSettingsClient,
   UiSettingsState,
   UiSettingsSetup,
+  UiSettingsStart,
 };
