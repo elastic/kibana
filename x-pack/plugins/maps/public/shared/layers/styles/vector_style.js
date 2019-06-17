@@ -554,7 +554,7 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
         ['linear'],
-        ['get', targetName],
+        ['coalesce', ['get', targetName], 0],
         0, iconSize.options.minSize / halfIconPixels,
         1, iconSize.options.maxSize / halfIconPixels
       ]);
