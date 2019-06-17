@@ -20,6 +20,7 @@
 import './agg_params';
 import './new_agg_params';
 import './agg_add';
+import angular from 'angular';
 import { Direction } from './keyboard_move';
 import _ from 'lodash';
 import '../../../fancy_forms';
@@ -123,6 +124,13 @@ uiModules
         $scope.onAggTypeChange = (agg, value) => {
           if (agg.type !== value) {
             agg.type = value;
+          }
+        };
+
+
+        $scope.onAggParamsChange = (agg, params) => {
+          if (!angular.equals(agg.params, params)) {
+            agg.params = params;
           }
         };
       }

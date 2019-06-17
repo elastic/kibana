@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useReducer, useEffect, createContext } from 'react';
+import React, { useReducer, useEffect } from 'react';
 
 import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +24,7 @@ import { AggType } from 'ui/agg_types';
 import { AggConfig, Vis } from 'ui/vis';
 import { DefaultEditorAggSelect } from './default_editor_agg_select';
 import { aggTypeFilters } from '../../../../agg_types/filter';
+// @ts-ignore
 import { aggTypes } from '../../../../agg_types';
 import { groupAggregationsBy } from '../default_editor_utils';
 import { editorConfigProviders } from '../../config/editor_config_providers';
@@ -86,7 +87,7 @@ const aggParamsReducer = (state: any, action: any) => {
   }
 };
 
-const initaggParams = (params: any) => {
+const initaggParams = (params: object) => {
   const state: any = {};
   Object.keys(params).forEach((paramName: any) => {
     state[paramName] = {
@@ -109,6 +110,7 @@ interface DefaultEditorAggParamsProps {
   groupName: string;
   indexPattern: any;
   responseValueAggs: AggConfig[] | null;
+  onAggParamsChange: (agg: AggConfig, aggParams: any) => void;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   setTouched: () => void;
   setValidity: (isValid: boolean) => void;
@@ -123,6 +125,7 @@ function DefaultEditorAggParams({
   indexPattern,
   responseValueAggs,
   vis,
+  onAggParamsChange,
   onAggTypeChange,
   setTouched,
   setValidity,
@@ -131,12 +134,29 @@ function DefaultEditorAggParams({
   const groupedAggTypeOptions = groupAggregationsBy(aggTypeOptions, 'subtype');
   const isSubAggregation = aggIndex >= 1 && groupName === 'buckets';
   const errors = getError(agg, aggIsTooLow);
+  const SchemaEditorComponent = agg.schema.editorComponent;
 
   const editorConfig = editorConfigProviders.getConfigForAgg(
     aggTypes.byType[groupName],
     indexPattern,
     agg
   );
+
+  Object.keys(editorConfig).forEach(param => {
+    const config = editorConfig[param];
+    const paramOptions = agg.type.params.find((paramOption: any) => paramOption.name === param);
+    // `default` when agg.type changed
+    const property = 'fixedValue' || 'default';
+    // If the parameter has a fixed value in the config, set this value.
+    // Also for all supported configs we should freeze the editor for this param.
+    if (config.hasOwnProperty('fixedValue')) {
+      if (paramOptions && paramOptions.deserialize) {
+        agg.params[param] = paramOptions.deserialize(config[property]);
+      } else {
+        agg.params[param] = config[property];
+      }
+    }
+  });
 
   const [aggType, onChangeAggType] = useReducer(reducer, { value: agg.type, touched: false });
   const [aggParams, onChangeAggParams] = useReducer(aggParamsReducer, agg.params, initaggParams);
@@ -168,7 +188,7 @@ function DefaultEditorAggParams({
 
   useEffect(
     () => {
-      // when validitywas changed
+      // when validity was changed
       setValidity(aggType.validity);
     },
     [aggType.validity]
@@ -184,15 +204,37 @@ function DefaultEditorAggParams({
 
   useEffect(
     () => {
-      // when params were updated
+      // when a form were touched
+      if (aggType.touched) {
+        setTouched();
+      }
+    },
+    [aggType.touched]
+  );
+
+  useEffect(
+    () => {
+      // when params were updated in AngularJS
       onChangeAggParams({ type: 'agg_params_values', params: agg.params });
     },
-    [agg.params]
+    [JSON.stringify(agg.params)]
+  );
+
+  useEffect(
+    () => {
+      // when params were updated in React
+      const newParams = {} as any;
+      Object.keys(aggParams).forEach((paramsName: any) => {
+        newParams[paramsName] = aggParams[paramsName].value;
+      });
+      onAggParamsChange(agg, newParams);
+    },
+    [aggParams]
   );
 
   return (
     <EuiForm isInvalid={!!errors.length} error={errors}>
-      {/* {SchemaEditorComponent && <SchemaEditorComponent />}*/}
+      {SchemaEditorComponent && <SchemaEditorComponent />}
       <DefaultEditorAggSelect
         agg={agg}
         value={aggType.value}

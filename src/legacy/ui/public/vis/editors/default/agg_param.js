@@ -68,7 +68,6 @@ uiModules
             value="paramValue"
             vis-name="vis.type.name"
             on-change="onChange"
-            set-touched="setTouched"
             set-validity="setValidity"
             response-value-aggs="responseValueAggs"
           ></vis-agg-param-react-wrapper>`;

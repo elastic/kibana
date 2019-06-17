@@ -95,15 +95,16 @@
   </div>
 
   <new-vis-editor-agg-params
+    ng-show="editorOpen"
+    ng-model="_internalNgModelStateAggParams"
     id="visAggEditorParams{{agg.id}}"
     agg="agg"
     agg-index="$index"
     agg-is-too-low="aggIsTooLow"
-    on-agg-type-change="onAggTypeChange"
     group-name="groupName"
-    ng-show="editorOpen"
     index-pattern="vis.indexPattern"
-    ng-model="_internalNgModelStateAggParams">
+    on-agg-type-change="onAggTypeChange"
+    on-agg-params-change="onAggParamsChange">
   </new-vis-editor-agg-params>
 
   <vis-editor-agg-params

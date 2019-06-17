@@ -25,12 +25,14 @@ uiModules
   .get('app/visualize')
   .directive('visAggParamsReactWrapper', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggParams), [
     ['agg', { watchDepth: 'collection' }],
-    ['indexPattern', { watchDepth: 'reference' }],
-    ['vis', { watchDepth: 'reference' }],
     ['aggType', { watchDepth: 'reference' }],
-    ['onAggTypeChange', { watchDepth: 'reference' }],
-    ['setValidity', { watchDepth: 'reference' }],
+    ['indexPattern', { watchDepth: 'reference' }],
     ['responseValueAggs', { watchDepth: 'reference' }],
+    ['vis', { watchDepth: 'reference' }],
+    ['onAggTypeChange', { watchDepth: 'reference' }],
+    ['onAggParamsChange', { watchDepth: 'reference' }],
+    ['setTouched', { watchDepth: 'reference' }],
+    ['setValidity', { watchDepth: 'reference' }],
     'id',
     'aggIndex',
     'groupName',
@@ -49,12 +51,14 @@ uiModules
             agg-index="aggIndex"
             agg-is-too-low="aggIsTooLow"
             agg-type="agg.type"
+            form-is-touched="formIsTouched"
             group-name="groupName"
             index-pattern="indexPattern"
             response-value-aggs="responseValueAggs"
             vis="vis"
             on-agg-type-change="onAggTypeChange"
-            form-is-touched="formIsTouched"
+            on-agg-params-change="onAggParamsChange"
+            set-touched="setTouched"
             set-validity="setValidity"
           ></vis-agg-params-react-wrapper>`;
       },
@@ -78,6 +82,10 @@ uiModules
 
           $scope.setValidity = (isValid) => {
             ngModelCtrl.$setValidity(`aggParams${$scope.agg.id}`, isValid);
+          };
+
+          $scope.setTouched = () => {
+            ngModelCtrl.$setTouched();
           };
         }
       }
