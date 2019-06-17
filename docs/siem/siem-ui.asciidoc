@@ -64,7 +64,7 @@ the SIEM app to get to the bottom of the alert. The analyst can drag items of
 interest to the timeline for further analysis.
 
 Within the timeline, the analyst can investigate further--drilling down,
-searching, and filtering--and add notes and pin items of interest, 
+searching, and filtering--and add notes and pin items of interest. 
 
 The analyst can name the timeline, write summary notes, and share it with others
 if appropriate.
