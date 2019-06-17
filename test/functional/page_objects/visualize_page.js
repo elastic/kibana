@@ -171,7 +171,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await this.clickVisType('markdown');
     }
 
-    // clickBucket(bucketName) 'X-Axis', 'Split Area', 'Split Chart'
+    // clickBucket(bucketName) 'X-axis', 'Split area', 'Split chart'
     async clickBucket(bucketName, type = 'buckets') {
       await testSubjects.click(`visEditorAdd_${type}`);
       await find.clickByCssSelector(`[data-test-subj="visEditorAdd_${type}_${bucketName}"`);
