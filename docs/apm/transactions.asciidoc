@@ -4,9 +4,10 @@
 TIP: A {apm-overview-ref-v}/transactions.html[transaction] describes an event captured by an Elastic APM agent instrumenting a service.
 The APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
 
-// Clicking *service* brings you to detail of transaction
-Selecting a <<services,*service*>> will display all associated *transactions*.
-The charts and table on this dashboard display the transaction duration, requests per minute, and a list of transactions for the selected service.
+Selecting a <<services,*service*>> brings you to the *transactions* overview.
+The *transaction duration* and *requests per minute* chart display information on all transactions associated with the selected service.
+The *Transactions* table, however, provides only a list of _transaction groups_ for the selected service.
+In other words, this view groups all transactions of the same name together, and only displays one transaction for each group.
 
 [role="screenshot"]
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM UI in Kibana]
@@ -20,9 +21,9 @@ and all of the data on the page will update accordingly.
 and is useful for determining if you're serving more of one code than you typically do.
 Like in the Transaction duration graph, you can zoom in on anomalies to further investigate them.
 
-The table at the bottom is similar to the <<traces,traces>> overview and shows the name of each transaction occurring in the selected service.
+The *Transactions* table is similar to the <<traces,traces>> overview and shows the name of each transaction occurring in the selected service.
 Transactions with the same name are grouped together and only shown once in this table.
-By default, transactions are sorted by _Impact_.
+By default, transaction groups are sorted by _Impact_.
 Impact helps show the most used and slowest endpoints in your service - in other words,
 it's the collective amount of pain a specific endpoint is causing your users.
 If there's a particular endpoint you're worried about, you can click on it to view the <<transaction-details, transaction details>>.
@@ -73,18 +74,18 @@ image::apm/images/apm-transaction-sample.png[Example view of transactions sample
 
 NOTE: More information on timeline waterfalls is available in <<spans, spans>>.
 
-For a particular transaction sample, we can get even more information in the tabs:
+For a particular transaction sample, we can get even more information in the *metadata* tab:
 
-* *Timeline* - See the <<spans, Spans>> section for more information.
-* *Request* - The URL, headers, body, etc..
-* *Response* - The response.
-* *System* - The system hostname, architecture, platform, etc..
-* *Service* - The service/application runtime, agent, name, etc..
-* *Process* - The process id that served up the request.
-* *User* - This requires additional configuration, but allows you to see which user experienced the current transaction.
-This can be extremely useful if it's determined that specific users are getting slow requests.
-* *Tags* - Useful if you want to start correlating transactions with log files or metrics from Metricbeat.
-* *Custom* - You can configure your agent to add custom contextual information on transactions.
+* Labels - Custom labels added by agents
+* HTTP request/response information
+* Host information
+* Container information
+* Service - The service/application runtime, agent, name, etc..
+* Process - The process id that served up the request.
+* Agent information
+* URL
+* User - Requires additional configuration, but allows you to see which user experienced the current transaction.
+* Custom - You can configure your agent to add custom contextual information on transactions.
 
 TIP: All of this data is stored in documents in Elasticsearch.
 This means you can select "Actions - View sample document" to see the actual Elasticsearch document under the discover tab.

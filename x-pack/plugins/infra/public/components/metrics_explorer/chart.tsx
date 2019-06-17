@@ -8,7 +8,6 @@ import React, { useCallback } from 'react';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Chart, Axis, Position, timeFormatter, getAxisId, Settings } from '@elastic/charts';
-import '@elastic/charts/dist/style.css';
 import { first } from 'lodash';
 import { niceTimeFormatByDay } from '@elastic/charts/dist/utils/data/formatters';
 import moment from 'moment';
@@ -24,6 +23,7 @@ import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { SourceQuery } from '../../graphql/types';
 import { MetricsExplorerEmptyChart } from './empty_chart';
 import { MetricsExplorerNoMetrics } from './no_metrics';
+import { getChartTheme } from './helpers/get_chart_theme';
 
 interface Props {
   intl: InjectedIntl;
@@ -103,7 +103,7 @@ export const MetricsExplorerChart = injectI18n(
                 tickFormat={dateFormatter}
               />
               <Axis id={getAxisId('values')} position={Position.Left} tickFormat={yAxisFormater} />
-              <Settings onBrushEnd={handleTimeChange} />
+              <Settings onBrushEnd={handleTimeChange} theme={getChartTheme()} />
             </Chart>
           ) : options.metrics.length > 0 ? (
             <MetricsExplorerEmptyChart />

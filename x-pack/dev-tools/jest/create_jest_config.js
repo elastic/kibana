@@ -34,6 +34,9 @@ export function createJestConfig({
       `<rootDir>/dev-tools/jest/setup/polyfills.js`,
       `<rootDir>/dev-tools/jest/setup/enzyme.js`,
     ],
+    setupFilesAfterEnv: [
+      `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
+    ],
     testMatch: [
       '**/*.test.{js,ts,tsx}'
     ],
