@@ -14,7 +14,7 @@ services that are not necessarily known to the service owner.
 
 ```js
 // services can register context providers to route handlers
-http.registerContext('myApi', request => ({ getId() { return request.params.myApiId } }));
+http.registerContext('myApi', (context, request) => ({ getId() { return request.params.myApiId } }));
 
 http.router.route({
   method: 'GET',
@@ -44,7 +44,7 @@ taskManager.registerTaskDefinitions({
     createTaskRunner(context) {
       return {
         async run() {
-          const docs = await context.elasticsearch.search();
+          const docs = await context.core.elasticsearch.search();
           doSomethingWithDocs(docs);
         }
       }
@@ -56,7 +56,10 @@ taskManager.registerTaskDefinitions({
 application.registerApp({
   id: 'myApp',
   mount(context, domElement) {
-    ReactDOM.render(<MyApp overlaysService={context.overlays} />, domElement);
+    ReactDOM.render(
+      <MyApp overlaysService={context.core.overlays} />,
+      domElement
+    );
     return () => ReactDOM.unmountComponentAtNode(domElement);
   }
 });
@@ -65,7 +68,7 @@ application.registerApp({
 alerting.registerType({
   id: 'myAlert',
   async execute(context, params, state) {
-    const indexPatterns = await context.savedObjects.find('indexPattern');
+    const indexPatterns = await context.core.savedObjects.find('indexPattern');
     // use index pattern to search
   }
 })
@@ -116,11 +119,11 @@ their handlers extensible.
 
 ```ts
 interface Context {
-  core: unknown;
+  core: Record<string, unknown>;
   [contextName: string]: unknown;
 }
 
-type Handler = (context: Partial<Context>, ...args: unknown[]) => Promise<unknown>;
+type Handler = (context: Context, ...args: unknown[]) => Promise<unknown>;
 ```
 
 - `args` in this example is specific to the handler type, for instance in a
@@ -133,7 +136,10 @@ type Handler = (context: Partial<Context>, ...args: unknown[]) => Promise<unknow
 ## Registering new contexts
 
 ```ts
-type ContextProvider<T extends keyof Context> = (...args: unknown[]) => Promise<Context[T]>;
+type ContextProvider<T extends keyof Context> = (
+  context: Partial<Context>,
+  ...args: unknown[]
+) => Promise<Context[T]>;
 
 interface HandlerService {
   registerContext<T extends keyof Context>(contextName: T, provider: ContextProvider<T>): void;
@@ -159,21 +165,24 @@ providers is merged into a single object where each key of the object is the
 name of the context provider and the value is the return value of the provider.
 Key facts about context providers:
 
-- **Context providers cannot access context from other providers.** They should
-  be fully self-contained and not dependent on other contexts. The order that
-  they execute is not guaranteed.
+- **Context providers are executed in registration order.** Providers are
+  registered during the setup phase, which happens in topological dependency
+  order, which will cause the context providers to execute in the same order.
+  Providers can leverage this property to rely on the context of dependencies to
+  be present during the execution of its own providers. All context registered
+  by Core will be present during all plugin context provider executions.
 - **Context providers may be executed with the different arguments from
-  handlers** Each service owner should define what arguments are available to
+  handlers.** Each service owner should define what arguments are available to
   context providers, however the context itself should never be an argument (see
   point above).
 - **Context providers cannot takeover the handler execution.** Context providers
   cannot "intercept" handlers and return a different response. This is different
   than traditional middleware. It should be noted that throwing an exception
-  will be bubbled up to the calling code and will prevent the handler from
+  will be bubbled up to the calling code and may prevent the handler from
   getting executed at all. How the service owner handles that exception is
   service-specific.
 - **Values returned by context providers are expected to be valid for the entire
-  scope of the handler.**
+  execution scope of the handler.**
 
 Here's a simple example of how a service owner could construct a context and
 execute a handler:
@@ -184,7 +193,7 @@ const contextProviders = new Map()<string, ContextProvider<unknown>>;
 async function executeHandler(handler, request, toolkit) {
   const newContext = {};
   for (const [contextName, provider] of contextProviders.entries()) {
-    newContext[contextName] = await provider(request, toolkit);
+    newContext[contextName] = await provider(newContext, request, toolkit);
   }
 
   return handler(context, request, toolkit);
@@ -194,7 +203,7 @@ async function executeHandler(handler, request, toolkit) {
 ## End to end example
 
 ```js
-http.router.registerRequestContext('elasticsearch', async request => {
+http.router.registerRequestContext('elasticsearch', async (context, request) => {
   const client = await core.elasticsearch.client$.toPromise();
   return client.child({
     headers: { authorization: request.headers.authorization },
@@ -204,7 +213,7 @@ http.router.registerRequestContext('elasticsearch', async request => {
 http.router.route({
   path: '/foo',
   async routeHandler(context) {
-    context.elasticsearch.search(); // === callWithRequest(request, 'search')
+    context.core.elasticsearch.search(); // === callWithRequest(request, 'search')
   },
 });
 ```
@@ -230,7 +239,7 @@ interface HttpSetup {
 
   registerRequestContext<T extends keyof RequestContext>(
     contextName: T,
-    provider: (request: Request) => RequestContext[T] | Promise<RequestContext[T]>
+    provider: (context: Partial<RequestContext>, request: Request) => RequestContext[T] | Promise<RequestContext[T]>
   ): void;
 
   // ...
@@ -258,7 +267,7 @@ declare module "../../core/server" {
 class MyPlugin {
   setup(core) {
     // This will be type-safe!
-    core.http.registerRequestContext('myPlugin', (request) => ({
+    core.http.registerRequestContext('myPlugin', (context, request) => ({
       getFoo() { return 'foo!' }
     }))
   }
@@ -267,7 +276,7 @@ class MyPlugin {
 
 # Drawbacks
 
-- Since the context properties that are present changes if plugins are disabled,
+- Since the context properties that are present change if plugins are disabled,
   they are all marked as optional properties which makes consuming the context
   type awkward. We can expose types at the core and plugin level, but consumers
   of those types might need to define which properties are present manually to
@@ -275,7 +284,9 @@ class MyPlugin {
   ```ts
   type RequiredDependencies = 'data' | 'timepicker';
   type OptionalDependencies = 'telemetry';
-  type MyPluginContext = Pick<RequestContext, 'core'> & Pick<RequestContext, RequiredDependencies> & Pick<Partial<RequestContext>, OptionalDependencies>;
+  type MyPluginContext = Pick<RequestContext, 'core'> &
+    Pick<RequestContext, RequiredDependencies> &
+    Pick<Partial<RequestContext>, OptionalDependencies>;
   // => { core: {}, data: Data, timepicker: Timepicker, telemetry?: Telemetry };
   ```
   This could even be provided as a generic type:
@@ -297,9 +308,14 @@ class MyPlugin {
   necessarily associate similar patterns elsewhere as the same set of problems.
 - "Chicken and egg" questions will arise around where context providers should be
   registered. For example, does the `http` service invoke its
-  registerCapabilities for `elasticsearch`, or does the `elasticsearch` service
-  invoke `http.registerCapabilities`, or does core itself register the
+  registerRequestContext for `elasticsearch`, or does the `elasticsearch` service
+  invoke `http.registerRequestContext`, or does core itself register the
   provider so neither service depends directly on the other.
+- The existence of plugins that a given plugin does not depend on may leak
+  through the context object. This becomes a problem if a plugin uses any
+  context properties provided by a plugin that it does not depend on and that
+  plugin gets disabled in production. This can be solved by service owners, but
+  may need to be reimplemented for each one.
 
 # Alternatives
 
