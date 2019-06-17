@@ -22,7 +22,7 @@ import {
 } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
-import { UseUrlState } from '../../components/url_state/use_url_state';
+import { UseUrlState } from '../../components/url_state';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';

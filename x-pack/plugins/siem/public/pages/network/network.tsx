@@ -17,7 +17,7 @@ import { LastEventTime } from '../../components/last_event_time';
 import { manageQuery } from '../../components/page/manage_query';
 import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
 import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
-import { UseUrlState } from '../../components/url_state/use_url_state';
+import { UseUrlState } from '../../components/url_state';
 import { GlobalTime } from '../../containers/global_time';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { NetworkDnsQuery } from '../../containers/network_dns';

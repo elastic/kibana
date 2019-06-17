@@ -6,21 +6,9 @@
 
 import { Location } from 'history';
 import { throttle, get } from 'lodash/fp';
-import React, { useState, useEffect, useRef } from 'react';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
-import {
-  hostsModel,
-  hostsSelectors,
-  inputsSelectors,
-  networkModel,
-  networkSelectors,
-  State,
-} from '../../store';
-import { hostsActions, inputsActions, networkActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
   AbsoluteTimeRange,
@@ -39,11 +27,9 @@ import {
   decodeRisonUrlState,
   isKqlForRoute,
 } from './helpers';
+import { normalizeTimeRange } from './normalize_time_range';
 import {
   UrlStateContainerPropTypes,
-  UrlStateProps,
-  KqlQueryObject,
-  UrlState,
   PreviousLocationUrlState,
   URL_STATE_KEYS,
   KeyUrlState,
@@ -62,7 +48,7 @@ function usePrevious(value: PreviousLocationUrlState) {
   return ref.current;
 }
 
-const useUrlStateHooks = ({
+export const useUrlStateHooks = ({
   location,
   indexPattern,
   history,
@@ -128,14 +114,18 @@ const useUrlStateHooks = ({
           toggleTimelineLinkTo({ linkToId: 'global' });
         }
         if (globalType === 'absolute') {
-          const absoluteRange: AbsoluteTimeRange = get('global.timerange', timerangeStateData);
+          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+            get('global.timerange', timerangeStateData)
+          );
           setAbsoluteTimerange({
             ...absoluteRange,
             id: globalId,
           });
         }
         if (globalType === 'relative') {
-          const relativeRange: RelativeTimeRange = get('global.timerange', timerangeStateData);
+          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+            get('global.timerange', timerangeStateData)
+          );
           setRelativeTimerange({
             ...relativeRange,
             id: globalId,
@@ -150,14 +140,18 @@ const useUrlStateHooks = ({
           toggleTimelineLinkTo({ linkToId: 'timeline' });
         }
         if (timelineType === 'absolute') {
-          const absoluteRange: AbsoluteTimeRange = get('timeline.timerange', timerangeStateData);
+          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+            get('timeline.timerange', timerangeStateData)
+          );
           setAbsoluteTimerange({
             ...absoluteRange,
             id: timelineId,
           });
         }
         if (timelineType === 'relative') {
-          const relativeRange: RelativeTimeRange = get('timeline.timerange', timerangeStateData);
+          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+            get('timeline.timerange', timerangeStateData)
+          );
           setRelativeTimerange({
             ...relativeRange,
             id: timelineId,
@@ -202,17 +196,7 @@ const useUrlStateHooks = ({
   useEffect(() => {
     if (isInitializing) {
       setIsInitializing(false);
-      /*
-       * Why are we doing that, it is because angular-ui router is encoding the `+` back to `2%0` after
-       * that react router is getting the data with the `+` and convert to `2%B`
-       * so we need to get back the value from the window location at initialization to avoid
-       * to bring back the `+` in the kql
-       */
-      const substringIndex =
-        window.location.href.indexOf(`#${location.pathname}`) + location.pathname.length + 1;
-      location.search = window.location.href.substring(substringIndex);
-      /* End of why */
-      handleInitialize(location);
+      handleInitialize(initializeLocation(location));
     } else if (JSON.stringify(urlState) !== JSON.stringify(prevProps.urlState)) {
       URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
         if (
@@ -245,73 +229,19 @@ const useUrlStateHooks = ({
   return { isInitializing };
 };
 
-const UrlStateContainer = (props: UrlStateContainerPropTypes) => {
-  const { isInitializing } = useUrlStateHooks(props);
-  return props.children({ isInitializing });
+/*
+ * Why are we doing that, it is because angular-ui router is encoding the `+` back to `2%0` after
+ * that react router is getting the data with the `+` and convert to `2%B`
+ * so we need to get back the value from the window location at initialization to avoid
+ * to bring back the `+` in the kql
+ */
+export const initializeLocation = (location: Location): Location => {
+  const substringIndex =
+    window.location.href.indexOf(`#${location.pathname}`) >= 0
+      ? window.location.href.indexOf(`#${location.pathname}`) + location.pathname.length + 1
+      : -1;
+  if (substringIndex >= 0) {
+    location.search = window.location.href.substring(substringIndex);
+  }
+  return location;
 };
-
-const makeMapStateToProps = () => {
-  const getInputsSelector = inputsSelectors.inputsSelector();
-  const getHostsFilterQueryAsKuery = hostsSelectors.hostsFilterQueryAsKuery();
-  const getNetworkFilterQueryAsKuery = networkSelectors.networkFilterQueryAsKuery();
-  const mapStateToProps = (state: State) => {
-    const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
-    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-
-    const kqlQueryInitialState: KqlQueryObject = {
-      [CONSTANTS.hostsDetails]: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
-        queryLocation: CONSTANTS.hostsDetails,
-        type: hostsModel.HostsType.details,
-      },
-      [CONSTANTS.hostsPage]: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
-        queryLocation: CONSTANTS.hostsPage,
-        type: hostsModel.HostsType.page,
-      },
-      [CONSTANTS.networkDetails]: {
-        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.details),
-        queryLocation: CONSTANTS.networkDetails,
-        type: networkModel.NetworkType.details,
-      },
-      [CONSTANTS.networkPage]: {
-        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
-        queryLocation: CONSTANTS.networkPage,
-        type: networkModel.NetworkType.page,
-      },
-    };
-
-    return {
-      urlState: {
-        [CONSTANTS.timerange]: {
-          global: {
-            [CONSTANTS.timerange]: globalTimerange,
-            linkTo: globalLinkTo,
-          },
-          timeline: {
-            [CONSTANTS.timerange]: timelineTimerange,
-            linkTo: timelineLinkTo,
-          },
-        },
-        [CONSTANTS.kqlQuery]: kqlQueryInitialState,
-      },
-    };
-  };
-
-  return mapStateToProps;
-};
-
-export const UseUrlState = compose<React.ComponentClass<UrlStateProps>>(
-  withRouter,
-  connect(
-    makeMapStateToProps,
-    {
-      setAbsoluteTimerange: inputsActions.setAbsoluteRangeDatePicker,
-      setHostsKql: hostsActions.applyHostsFilterQuery,
-      setNetworkKql: networkActions.applyNetworkFilterQuery,
-      setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
-      toggleTimelineLinkTo: inputsActions.toggleTimelineLinkTo,
-    }
-  )
-)(UrlStateContainer);
