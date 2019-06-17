@@ -20,11 +20,11 @@ interface ConstructorOptions {
 }
 
 export class AlertTypeRegistry {
-  private getServices: (basePath: string) => Services;
-  private taskManager: TaskManager;
-  private fireAction: ActionsPlugin['fire'];
-  private alertTypes: Record<string, AlertType> = {};
-  private internalSavedObjectsRepository: SavedObjectsClientContract;
+  private readonly getServices: (basePath: string) => Services;
+  private readonly taskManager: TaskManager;
+  private readonly fireAction: ActionsPlugin['fire'];
+  private readonly alertTypes: Record<string, AlertType> = {};
+  private readonly internalSavedObjectsRepository: SavedObjectsClientContract;
 
   constructor({
     internalSavedObjectsRepository,

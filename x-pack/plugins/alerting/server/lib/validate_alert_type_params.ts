@@ -7,10 +7,10 @@
 import Boom from 'boom';
 import { AlertType } from '../types';
 
-export function validateAlertTypeParams(
+export function validateAlertTypeParams<T extends Record<string, any>>(
   alertType: AlertType,
-  params: Record<string, any>
-): Record<string, any> {
+  params: T
+): T {
   const validator = alertType.validate && alertType.validate.params;
   if (!validator) {
     return params;

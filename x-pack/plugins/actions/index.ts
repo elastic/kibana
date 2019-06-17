@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { Root } from 'joi';
 import mappings from './mappings.json';
 import { init } from './server';
@@ -15,7 +16,7 @@ export function actions(kibana: any) {
     id: 'actions',
     configPrefix: 'xpack.actions',
     require: ['kibana', 'elasticsearch', 'task_manager', 'encrypted_saved_objects'],
-    isEnabled(config: any) {
+    isEnabled(config: Legacy.KibanaConfig) {
       return (
         config.get('xpack.encrypted_saved_objects.enabled') === true &&
         config.get('xpack.actions.enabled') === true &&

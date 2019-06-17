@@ -8,7 +8,6 @@ import { omit } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/legacy/server/saved_objects';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
 import { TaskManager } from '../../task_manager';
-import { TASK_MANAGER_SCOPE } from '../common/constants';
 import { validateAlertTypeParams } from './lib';
 
 interface ConstructorOptions {
@@ -53,11 +52,11 @@ interface UpdateOptions {
 }
 
 export class AlertsClient {
-  private log: Log;
-  private basePath: string;
-  private taskManager: TaskManager;
-  private savedObjectsClient: SavedObjectsClientContract;
-  private alertTypeRegistry: AlertTypeRegistry;
+  private readonly log: Log;
+  private readonly basePath: string;
+  private readonly taskManager: TaskManager;
+  private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly alertTypeRegistry: AlertTypeRegistry;
 
   constructor({
     alertTypeRegistry,
@@ -179,7 +178,7 @@ export class AlertsClient {
         alertTypeState: {},
         alertInstances: {},
       },
-      scope: [TASK_MANAGER_SCOPE],
+      scope: ['alerting'],
     });
   }
 

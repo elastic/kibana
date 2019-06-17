@@ -7,10 +7,10 @@
 import Boom from 'boom';
 import { ActionType } from './types';
 
-export function validateActionTypeParams(
+export function validateActionTypeParams<T extends Record<string, any>>(
   actionType: ActionType,
-  params: Record<string, any>
-): Record<string, any> {
+  params: T
+): T {
   const validator = actionType.validate && actionType.validate.params;
   if (!validator) {
     return params;

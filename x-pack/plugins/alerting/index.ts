@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { Root } from 'joi';
 import { init } from './server';
 import mappings from './mappings.json';
@@ -15,7 +16,7 @@ export function alerting(kibana: any) {
     id: 'alerting',
     configPrefix: 'xpack.alerting',
     require: ['kibana', 'elasticsearch', 'actions', 'task_manager'],
-    isEnabled(config: any) {
+    isEnabled(config: Legacy.KibanaConfig) {
       return (
         config.get('xpack.alerting.enabled') === true &&
         config.get('xpack.actions.enabled') === true &&

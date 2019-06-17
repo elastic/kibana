@@ -13,7 +13,6 @@ const createActionTypeRegistryMock = () => {
     has: jest.fn(),
     register: jest.fn(),
     get: jest.fn(),
-    getUnencryptedAttributes: jest.fn(),
     list: jest.fn(),
   };
   return mocked;

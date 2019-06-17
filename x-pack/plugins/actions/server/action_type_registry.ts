@@ -18,10 +18,10 @@ interface ConstructorOptions {
 }
 
 export class ActionTypeRegistry {
-  private getServices: (basePath: string) => Services;
-  private taskManager: TaskManager;
-  private actionTypes: Record<string, ActionType> = {};
-  private encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  private readonly getServices: (basePath: string) => Services;
+  private readonly taskManager: TaskManager;
+  private readonly actionTypes: Record<string, ActionType> = {};
+  private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 
   constructor({ getServices, taskManager, encryptedSavedObjectsPlugin }: ConstructorOptions) {
     this.getServices = getServices;
@@ -79,14 +79,6 @@ export class ActionTypeRegistry {
       );
     }
     return this.actionTypes[id];
-  }
-
-  /**
-   * Returns attributes to be treated as unencrypted
-   */
-  public getUnencryptedAttributes(id: string) {
-    const actionType = this.get(id);
-    return actionType.unencryptedAttributes || [];
   }
 
   /**

@@ -5,7 +5,6 @@
  */
 
 import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
-import { TASK_MANAGER_SCOPE } from '../common/constants';
 import { TaskManager } from '../../task_manager';
 
 interface CreateFireFunctionOptions {
@@ -35,7 +34,7 @@ export function createFireFunction({
         actionTypeParams: params,
       },
       state: {},
-      scope: [TASK_MANAGER_SCOPE],
+      scope: ['actions'],
     });
   };
 }

@@ -7,10 +7,10 @@
 import Boom from 'boom';
 import { ActionType } from './types';
 
-export function validateActionTypeConfig(
+export function validateActionTypeConfig<T extends Record<string, any>>(
   actionType: ActionType,
-  config: Record<string, any>
-): Record<string, any> {
+  config: T
+): T {
   const validator = actionType.validate && actionType.validate.config;
   if (!validator) {
     return config;

@@ -7,10 +7,8 @@
 import { Plugin } from './plugin';
 type EncryptedSavedObjectsPlugin = ReturnType<Plugin['setup']>;
 
-type Contract = PublicMethodsOf<EncryptedSavedObjectsPlugin>;
-
 const createEncryptedSavedObjectsMock = () => {
-  const mocked: jest.Mocked<Contract> = {
+  const mocked: jest.Mocked<EncryptedSavedObjectsPlugin> = {
     isEncryptionError: jest.fn(),
     registerType: jest.fn(),
     getDecryptedAsInternalUser: jest.fn(),

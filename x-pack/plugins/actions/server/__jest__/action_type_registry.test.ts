@@ -114,31 +114,6 @@ Object {
   });
 });
 
-describe('getUnencryptedAttributes()', () => {
-  test('returns empty array when unencryptedAttributes is undefined', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      async executor() {},
-    });
-    const result = actionTypeRegistry.getUnencryptedAttributes('my-action-type');
-    expect(result).toEqual([]);
-  });
-
-  test('returns values inside unencryptedAttributes array when it exists', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      unencryptedAttributes: ['a', 'b', 'c'],
-      async executor() {},
-    });
-    const result = actionTypeRegistry.getUnencryptedAttributes('my-action-type');
-    expect(result).toEqual(['a', 'b', 'c']);
-  });
-});
-
 describe('list()', () => {
   test('returns list of action types', () => {
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);

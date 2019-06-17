@@ -34,6 +34,9 @@ export function init(server: Legacy.Server) {
   });
 
   function getServices(basePath: string): Services {
+    // Fake request is here to allow creating a scoped saved objects client
+    // and use it when security is disabled. This will be replaced when the
+    // future phase of API tokens is complete.
     const fakeRequest: any = {
       headers: {},
       getBasePath: () => basePath,

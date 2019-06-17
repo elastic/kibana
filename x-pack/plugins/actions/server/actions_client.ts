@@ -54,8 +54,8 @@ interface UpdateOptions {
 }
 
 export class ActionsClient {
-  private savedObjectsClient: SavedObjectsClientContract;
-  private actionTypeRegistry: ActionTypeRegistry;
+  private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly actionTypeRegistry: ActionTypeRegistry;
 
   constructor({ actionTypeRegistry, savedObjectsClient }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
@@ -69,10 +69,13 @@ export class ActionsClient {
     const { actionTypeId } = data;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateActionTypeConfig(actionType, data.actionTypeConfig);
-    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(actionTypeId, {
-      ...data,
-      actionTypeConfig: validatedActionTypeConfig,
-    });
+    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(
+      actionType.unencryptedAttributes,
+      {
+        ...data,
+        actionTypeConfig: validatedActionTypeConfig,
+      }
+    );
     return await this.savedObjectsClient.create('action', actionWithSplitActionTypeConfig, options);
   }
 
@@ -109,7 +112,7 @@ export class ActionsClient {
     const actionType = this.actionTypeRegistry.get(actionTypeId);
 
     const validatedActionTypeConfig = validateActionTypeConfig(actionType, data.actionTypeConfig);
-    data = this.moveEncryptedAttributesToSecrets(actionTypeId, {
+    data = this.moveEncryptedAttributesToSecrets(actionType.unencryptedAttributes, {
       ...data,
       actionTypeConfig: validatedActionTypeConfig,
     });
@@ -120,24 +123,21 @@ export class ActionsClient {
    * Set actionTypeConfigSecrets values on a given action
    */
   private moveEncryptedAttributesToSecrets(
-    actionTypeId: string,
+    unencryptedAttributes: string[] = [],
     action: Action | UpdateOptions['data']
   ) {
-    const unencryptedAttributes = this.actionTypeRegistry.getUnencryptedAttributes(actionTypeId);
-    const config = { ...action.actionTypeConfig };
-    const configSecrets: Record<string, any> = {};
-    for (const key of Object.keys(config)) {
-      if (unencryptedAttributes.includes(key)) {
-        continue;
-      }
-      configSecrets[key] = config[key];
-      delete config[key];
+    const actionTypeConfig: Record<string, any> = {};
+    const actionTypeConfigSecrets = { ...action.actionTypeConfig };
+    for (const attributeKey of unencryptedAttributes) {
+      actionTypeConfig[attributeKey] = actionTypeConfigSecrets[attributeKey];
+      delete actionTypeConfigSecrets[attributeKey];
     }
+
     return {
       ...action,
       // Important these overwrite attributes in data for encryption purposes
-      actionTypeConfig: config,
-      actionTypeConfigSecrets: configSecrets,
+      actionTypeConfig,
+      actionTypeConfigSecrets,
     };
   }
 }
