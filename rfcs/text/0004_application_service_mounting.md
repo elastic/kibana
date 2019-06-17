@@ -58,6 +58,8 @@ defined here.
 ```ts
 /** A context type that implements the Handler Context pattern from RFC-0003 */
 export interface MountContext {
+  /** This is the base path for setting up your router. */
+  basename: string;
   core: {
     chrome: ChromeStart;
     http: HttpStart;
@@ -65,7 +67,7 @@ export interface MountContext {
     notifications: NotificationStart;
     overlays: OverlayStart;
     uiSettings: UISettingsStart;
-  }
+  };
   // Other plugins can inject context by registering additional context providers
   [contextName: string]: unknown;
 }
@@ -117,7 +119,7 @@ export interface ApplicationSetup {
   register(app: AppSpec): void;
   registerMountContext<T extends keyof MountContext>(
     contextName: T,
-    provider: () => MountContext[T] | Promise<MountContext[T]>
+    provider: (context: Partial<MountContext>) => MountContext[T] | Promise<MountContext[T]>
   ): void;
 }
 
@@ -131,24 +133,23 @@ export interface ApplicationStart {
 
 ## Mounting
 
-When an app is registered via `registerApp`, it must provide a `mount` function
+When an app is registered via `register`, it must provide a `mount` function
 that will be invoked whenever the window's location has changed from another app
 to this app.
 
-This function is called with an `HTMLElement` for the application to render
-itself to. The mount function must also return a function that can be called by
-the ApplicationService to unmount the application at the given DOM node. The
-mount function may return a Promise of an unmount function in order to import UI
-code dynamically.
+This function is called with a `MountContext` and an `HTMLElement` for the
+application to render itself to. The mount function must also return a function
+that can be called by the ApplicationService to unmount the application at the
+given DOM node. The mount function may return a Promise of an unmount function
+in order to import UI code dynamically.
 
-The ApplicationService's `registerApp` method will only be available during the
+The ApplicationService's `register` method will only be available during the
 *setup* lifecycle event. This allows the system to know when all applications
 have been registered.
 
-However, the `mount` function will also get access to the `MountContext`
-that has many of the same core services available during the `start` lifecycle.
-Plugins can also register additional context attributes via the
-`registerMountContext` function.
+The `mount` function will also get access to the `MountContext` that has many of
+the same core services available during the `start` lifecycle. Plugins can also
+register additional context attributes via the `registerMountContext` function.
 
 ## Routing
 
@@ -167,6 +168,9 @@ An example:
 - MyApp's internal router takes over rest of routing. Redirects to initial
   "overview" page: mykibana.com/app/my-app/overview
 
+When setting up a router, your application should only handle the part of the
+URL following the `context.basename` provided when you application is mounted.
+
 ### Legacy Applications
 
 In order to introduce this service now, the ApplicationService will need to be
@@ -179,7 +183,70 @@ legacy applications. Internally, this will be managed by registering legacy apps
 with the ApplicationService separately and handling those top-level routes by
 starting a full-page refresh rather than a mounting cycle.
 
-## Bundling
+## Complete Example
+
+Here is a complete example that demonstrates rendering a React application with
+a full-featured router and code-splitting. Note that using React or any other
+3rd party tools featured here is not required to build a Kibana Application.
+
+```tsx
+// my_plugin/public/components/index.ts
+
+import React from 'react';
+import { BrowserRouter, Route } from 'react-router-dom';
+import loadable from '@loadable/component';
+
+// Apps can choose to load components statically in the same bundle or
+// dynamically when routes are rendered.
+import { HomePage } from './pages';
+const LazyDashboard = loadable(() => import('./pages/dashboard'));
+
+export const MyApp = ({ basename }) => (
+  // Setup router's basename from the basename provided from MountContext
+  <BrowserRouter basename={basename}>
+
+    {/* mykibana.com/app/my-app/ */}
+    <Route path="/" exact component={HomePage} />
+
+    {/* mykibana.com/app/my-app/dashboard/42 */}
+    <Route
+      path="/dashboard/:id"
+      render={({ match }) => <LazyDashboard dashboardId={match.params.id} />}
+    />
+
+  </BrowserRouter>,
+);
+```
+
+```tsx
+// my_plugin/public/plugin.tsx
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+export class MyPlugin {
+  setup({ application }) {
+    application.register({
+      id: 'my-app',
+      async mount(context, targetDomElem) {
+        const { MyApp } = await import('./components');
+
+        ReactDOM.render(
+          // `context.basename` would be `/app/my-app` in this example.
+          // This exact string is not guaranteed to be stable, always reference
+          // `context.basename`.
+          <MyApp basename={context.basename} />,
+          targetDomElem
+        );
+
+        return () => ReactDOM.unmountComponentAtNode(targetDomElem);
+      }
+    });
+  }
+}
+```
+
+## Core Entry Point
 
 Once we can support application routing for new and legacy applications, we
 should create a new entry point bundle that only includes Core and any necessary
