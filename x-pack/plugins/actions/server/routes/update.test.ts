@@ -5,7 +5,7 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { updateRoute } from '../update';
+import { updateRoute } from './update';
 
 const { server, actionsClient } = createMockServer();
 updateRoute(server);

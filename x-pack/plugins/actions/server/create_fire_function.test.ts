@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { taskManagerMock } from '../../../task_manager/task_manager.mock';
-import { createFireFunction } from '../create_fire_function';
-import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
+import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { createFireFunction } from './create_fire_function';
+import { SavedObjectsClientMock } from '../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 
 const mockTaskManager = taskManagerMock.create();
 const savedObjectsClient = SavedObjectsClientMock.create();

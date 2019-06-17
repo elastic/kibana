@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType } from '../../types';
-import { ActionTypeRegistry } from '../../action_type_registry';
-import { taskManagerMock } from '../../../../task_manager/task_manager.mock';
-import { EncryptedSavedObjectsPlugin } from '../../../../encrypted_saved_objects';
-import { validateActionTypeParams } from '../../validate_action_type_params';
-import { SavedObjectsClientMock } from '../../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
+import { ActionType } from '../types';
+import { ActionTypeRegistry } from '../action_type_registry';
+import { taskManagerMock } from '../../../task_manager/task_manager.mock';
+import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { validateActionTypeParams } from '../lib';
+import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 
-import { registerBuiltInActionTypes } from '../index';
+import { registerBuiltInActionTypes } from './index';
 
 const ACTION_TYPE_ID = 'kibana.server-log';
 const NO_OP_FN = () => {};

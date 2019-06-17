@@ -5,28 +5,26 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { deleteRoute } from '../delete';
+import { deleteAlertRoute } from './delete';
 
-const { server, actionsClient } = createMockServer();
-deleteRoute(server);
+const { server, alertsClient } = createMockServer();
+deleteAlertRoute(server);
 
-beforeEach(() => {
-  jest.resetAllMocks();
-});
+beforeEach(() => jest.resetAllMocks());
 
-it('deletes an action with proper parameters', async () => {
+test('deletes an alert with proper parameters', async () => {
   const request = {
     method: 'DELETE',
-    url: '/api/action/1',
+    url: '/api/alert/1',
   };
 
-  actionsClient.delete.mockResolvedValueOnce({ success: true });
+  alertsClient.delete.mockResolvedValueOnce({});
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toEqual({ success: true });
-  expect(actionsClient.delete).toHaveBeenCalledTimes(1);
-  expect(actionsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(response).toEqual({});
+  expect(alertsClient.delete).toHaveBeenCalledTimes(1);
+  expect(alertsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
   Object {
     "id": "1",

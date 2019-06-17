@@ -5,7 +5,7 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { listAlertTypesRoute } from '../list_alert_types';
+import { listAlertTypesRoute } from './list_alert_types';
 
 const { server, alertTypeRegistry } = createMockServer();
 listAlertTypesRoute(server);

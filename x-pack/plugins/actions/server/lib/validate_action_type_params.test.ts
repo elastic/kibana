@@ -5,10 +5,10 @@
  */
 
 import Joi from 'joi';
-import { validateActionTypeConfig } from '../validate_action_type_config';
+import { validateActionTypeParams } from './validate_action_type_params';
 
-test('should return passed in config when validation not defined', () => {
-  const result = validateActionTypeConfig(
+test('should return passed in params when validation not defined', () => {
+  const result = validateActionTypeParams(
     {
       id: 'my-action-type',
       name: 'My action type',
@@ -18,19 +18,21 @@ test('should return passed in config when validation not defined', () => {
       foo: true,
     }
   );
-  expect(result).toEqual({ foo: true });
+  expect(result).toEqual({
+    foo: true,
+  });
 });
 
-test('should validate and apply defaults when actionTypeConfig is valid', () => {
-  const result = validateActionTypeConfig(
+test('should validate and apply defaults when params is valid', () => {
+  const result = validateActionTypeParams(
     {
       id: 'my-action-type',
       name: 'My action type',
       validate: {
-        config: Joi.object()
+        params: Joi.object()
           .keys({
             param1: Joi.string().required(),
-            param2: Joi.strict().default('default-value'),
+            param2: Joi.string().default('default-value'),
           })
           .required(),
       },
@@ -44,14 +46,14 @@ test('should validate and apply defaults when actionTypeConfig is valid', () => 
   });
 });
 
-test('should validate and throw error when actionTypeConfig is invalid', () => {
+test('should validate and throw error when params is invalid', () => {
   expect(() =>
-    validateActionTypeConfig(
+    validateActionTypeParams(
       {
         id: 'my-action-type',
         name: 'My action type',
         validate: {
-          config: Joi.object()
+          params: Joi.object()
             .keys({
               param1: Joi.string().required(),
             })
@@ -62,6 +64,6 @@ test('should validate and throw error when actionTypeConfig is invalid', () => {
       {}
     )
   ).toThrowErrorMatchingInlineSnapshot(
-    `"actionTypeConfig invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+    `"params invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
   );
 });

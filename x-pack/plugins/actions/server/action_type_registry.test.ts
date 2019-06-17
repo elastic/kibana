@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../get_create_task_runner_function', () => ({
+jest.mock('./lib/get_create_task_runner_function', () => ({
   getCreateTaskRunnerFunction: jest.fn(),
 }));
 
-import { taskManagerMock } from '../../../task_manager/task_manager.mock';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
-import { ActionTypeRegistry } from '../action_type_registry';
-import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
+import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
+import { ActionTypeRegistry } from './action_type_registry';
+import { SavedObjectsClientMock } from '../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
 
 const mockTaskManager = taskManagerMock.create();
 
@@ -34,7 +34,7 @@ describe('register()', () => {
   test('able to register action types', () => {
     const executor = jest.fn();
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getCreateTaskRunnerFunction } = require('../get_create_task_runner_function');
+    const { getCreateTaskRunnerFunction } = require('./lib/get_create_task_runner_function');
     getCreateTaskRunnerFunction.mockReturnValueOnce(jest.fn());
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({

@@ -5,7 +5,7 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { findRoute } from '../find';
+import { findRoute } from './find';
 
 const { server, actionsClient } = createMockServer();
 findRoute(server);

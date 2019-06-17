@@ -5,8 +5,8 @@
  */
 
 import Hapi from 'hapi';
-import { alertsClientMock } from '../../alerts_client.mock';
-import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
+import { alertsClientMock } from '../alerts_client.mock';
+import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 
 const defaultConfig = {
   'kibana.index': '.kibana',

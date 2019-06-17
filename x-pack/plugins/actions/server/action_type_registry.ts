@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ActionType, Services } from './types';
 import { TaskManager } from '../../task_manager';
-import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
+import { getCreateTaskRunnerFunction } from './lib';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 
 interface ConstructorOptions {

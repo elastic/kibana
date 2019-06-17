@@ -5,7 +5,7 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { getRoute } from '../get';
+import { getRoute } from './get';
 
 const { server, alertsClient } = createMockServer();
 getRoute(server);

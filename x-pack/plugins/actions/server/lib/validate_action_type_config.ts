@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { ActionType } from './types';
+import { ActionType } from '../types';
 
 export function validateActionTypeConfig<T extends Record<string, any>>(
   actionType: ActionType,

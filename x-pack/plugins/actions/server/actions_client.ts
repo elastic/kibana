@@ -7,7 +7,7 @@
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/legacy/server/saved_objects';
 import { ActionTypeRegistry } from './action_type_registry';
 import { SavedObjectReference } from './types';
-import { validateActionTypeConfig } from './validate_action_type_config';
+import { validateActionTypeConfig } from './lib';
 
 interface Action extends SavedObjectAttributes {
   description: string;

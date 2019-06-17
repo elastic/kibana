@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType, Services } from './types';
-import { TaskInstance } from '../../task_manager';
-import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
+import { ActionType, Services } from '../types';
+import { TaskInstance } from '../../../task_manager';
+import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 import { validateActionTypeConfig } from './validate_action_type_config';
 import { validateActionTypeParams } from './validate_action_type_params';
 

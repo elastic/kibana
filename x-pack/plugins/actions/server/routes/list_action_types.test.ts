@@ -5,38 +5,32 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { getRoute } from '../get';
+import { listActionTypesRoute } from './list_action_types';
 
-const { server, actionsClient } = createMockServer();
-getRoute(server);
+const { server, actionTypeRegistry } = createMockServer();
+listActionTypesRoute(server);
 
 beforeEach(() => {
   jest.resetAllMocks();
 });
 
-it('calls get with proper parameters', async () => {
+it('calls the list function', async () => {
   const request = {
     method: 'GET',
-    url: '/api/action/1',
+    url: '/api/action/types',
   };
-  const expectedResult = {
-    id: '1',
-    type: 'action',
-    attributes: {},
-    references: [],
-  };
+  const expectedResult = [
+    {
+      id: '1',
+      name: 'One',
+    },
+  ];
 
-  actionsClient.get.mockResolvedValueOnce(expectedResult);
+  actionTypeRegistry.list.mockReturnValueOnce(expectedResult);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toEqual(expectedResult);
-  expect(actionsClient.get).toHaveBeenCalledTimes(1);
-  expect(actionsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "id": "1",
-  },
-]
-`);
+  expect(actionTypeRegistry.list).toHaveBeenCalledTimes(1);
+  expect(actionTypeRegistry.list.mock.calls[0]).toMatchInlineSnapshot(`Array []`);
 });
