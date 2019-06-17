@@ -86,6 +86,7 @@ class CodeImportProject extends React.PureComponent<
                 fullWidth={true}
                 onBlur={this.updateIsInvalid}
                 isInvalid={this.state.isInvalid}
+                autoFocus={true}
               />
             </EuiFormRow>
           </EuiFlexItem>

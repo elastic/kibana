@@ -27,6 +27,7 @@ import { TimeRange, Query } from 'ui/embeddable';
 import { Timefilter } from 'ui/timefilter';
 import { Filter } from '@kbn/es-query';
 import moment from 'moment';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
@@ -212,13 +213,8 @@ export class DashboardStateManager {
     );
   }
 
-  public handleRefreshConfigChange({ pause, value }: { pause: boolean; value: number }) {
-    store.dispatch(
-      updateRefreshConfig({
-        isPaused: pause,
-        interval: value,
-      })
-    );
+  public handleRefreshConfigChange(refreshInterval: RefreshInterval) {
+    store.dispatch(updateRefreshConfig(refreshInterval));
   }
 
   /**
@@ -625,10 +621,12 @@ export class DashboardStateManager {
       );
     }
 
-    timeFilter.setTime({
-      from: this.savedDashboard.timeFrom,
-      to: this.savedDashboard.timeTo,
-    });
+    if (this.savedDashboard.timeFrom && this.savedDashboard.timeTo) {
+      timeFilter.setTime({
+        from: this.savedDashboard.timeFrom,
+        to: this.savedDashboard.timeTo,
+      });
+    }
 
     if (this.savedDashboard.refreshInterval) {
       timeFilter.setRefreshInterval(this.savedDashboard.refreshInterval);
@@ -646,7 +644,7 @@ export class DashboardStateManager {
    * Applies the current filter state to the dashboard.
    * @param filter {Array.<Object>} An array of filter bar filters.
    */
-  public applyFilters(query: Query, filters: Filter[]) {
+  public applyFilters(query: Query | string, filters: Filter[]) {
     this.appState.query = query;
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);

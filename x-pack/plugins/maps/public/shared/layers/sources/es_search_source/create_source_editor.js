@@ -208,7 +208,7 @@ export class CreateSourceEditor extends Component {
           <EuiSwitch
             label={
               i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
-                defaultMessage: `Dynamically filter for data in the visible map area.`
+                defaultMessage: `Dynamically filter for data in the visible map area`
               })
 
             }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
 import { ClusterStatus } from '../cluster_status';
@@ -18,6 +18,8 @@ import {
   EuiPageContent,
   EuiPageBody,
   EuiPanel,
+  EuiCallOut,
+  EuiButton,
   EuiText
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -207,7 +209,37 @@ const getColumns = showCgroupMetricsElasticsearch => {
 
 export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElasticsearch, ...props }) {
   const columns = getColumns(showCgroupMetricsElasticsearch);
-  const { sorting, pagination, onTableChange } = props;
+  const { sorting, pagination, onTableChange, setupMode } = props;
+
+  let disableInternalCollectionForMigrationMessage = null;
+  if (setupMode.data) {
+    if (setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
+      disableInternalCollectionForMigrationMessage = (
+        <Fragment>
+          <EuiCallOut
+            title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionTitle', {
+              defaultMessage: 'Disable internal collection to finish the migration',
+            })}
+            color="warning"
+            iconType="help"
+          >
+            <p>
+              {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionDescription', {
+                defaultMessage: `All of your Elasticsearch servers are monitored using Metricbeat,
+                but you need to disable internal collection to finish the migration.`
+              })}
+            </p>
+            <EuiButton onClick={() => setupMode.openFlyout()} size="s" color="warning" fill>
+              {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.disableInternalCollectionMigrationButtonLabel', {
+                defaultMessage: 'Disable and finish migration'
+              })}
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m"/>
+        </Fragment>
+      );
+    }
+  }
 
   return (
     <EuiPage>
@@ -216,6 +248,7 @@ export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElas
           <ClusterStatus stats={clusterStatus} />
         </EuiPanel>
         <EuiSpacer size="m" />
+        {disableInternalCollectionForMigrationMessage}
         <EuiPageContent>
           <EuiMonitoringTable
             className="elasticsearchNodesTable"
@@ -223,6 +256,9 @@ export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElas
             columns={columns}
             sorting={sorting}
             pagination={pagination}
+            setupMode={setupMode}
+            uuidField="resolver"
+            nameField="name"
             search={{
               box: {
                 incremental: true,

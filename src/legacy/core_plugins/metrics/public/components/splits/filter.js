@@ -21,7 +21,7 @@ import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 const { QueryBarInput } = data.query.ui;
 import { Storage } from 'ui/storage';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
@@ -40,10 +40,9 @@ export const SplitByFilter = props => {
       <EuiFlexItem>
         <EuiFormRow
           id={htmlId('group')}
-          label={(<FormattedMessage
-            id="tsvb.splits.filter.groupByLabel"
-            defaultMessage="Group by"
-          />)}
+          label={
+            <FormattedMessage id="tsvb.splits.filter.groupByLabel" defaultMessage="Group by" />
+          }
         >
           <GroupBySelect
             value={model.split_mode}
@@ -55,10 +54,12 @@ export const SplitByFilter = props => {
       <EuiFlexItem>
         <EuiFormRow
           id={htmlId('query')}
-          label={(<FormattedMessage
-            id="tsvb.splits.filter.queryStringLabel"
-            defaultMessage="Query string"
-          />)}
+          label={
+            <FormattedMessage
+              id="tsvb.splits.filter.queryStringLabel"
+              defaultMessage="Query string"
+            />
+          }
         >
           <QueryBarInput
             query={{

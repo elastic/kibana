@@ -318,7 +318,13 @@ describe('features', () => {
           actions.login,
           actions.version,
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
-          ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
+          ...(expectManageSpaces
+            ? [
+                actions.space.manage,
+                actions.ui.get('spaces', 'manage'),
+                actions.ui.get('management', 'kibana', 'spaces'),
+              ]
+            : []),
           actions.app.get('app-1'),
           actions.app.get('app-2'),
           actions.ui.get('catalogue', 'catalogue-1'),
@@ -403,7 +409,13 @@ describe('features', () => {
         actions.login,
         actions.version,
         ...(expectGetFeatures ? [actions.api.get('features')] : []),
-        ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
+        ...(expectManageSpaces
+          ? [
+              actions.space.manage,
+              actions.ui.get('spaces', 'manage'),
+              actions.ui.get('management', 'kibana', 'spaces'),
+            ]
+          : []),
         actions.ui.get('catalogue', 'bar-catalogue-1'),
         actions.ui.get('catalogue', 'bar-catalogue-2'),
         actions.ui.get('management', 'bar-management', 'bar-management-1'),
@@ -614,95 +626,17 @@ describe('features', () => {
         actions.login,
         actions.version,
         ...(expectGetFeatures ? [actions.api.get('features')] : []),
-        ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
+        ...(expectManageSpaces
+          ? [
+              actions.space.manage,
+              actions.ui.get('spaces', 'manage'),
+              actions.ui.get('management', 'kibana', 'spaces'),
+            ]
+          : []),
         actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
-  });
-});
-
-describe('savedObjectsManagement feature', () => {
-  test(`saved objects privileges create 'savedObjectsManagement' actions`, () => {
-    const features: Feature[] = [
-      {
-        id: 'savedObjectsManagement',
-        name: 'Saved Objects Management',
-        icon: 'arrowDown',
-        app: [],
-        catalogue: [],
-        management: {},
-        privileges: {
-          all: {
-            ui: [],
-            savedObject: {
-              all: ['all-savedObject-all-1'],
-              read: ['all-savedObject-read-1'],
-            },
-          },
-          read: {
-            ui: [],
-            savedObject: {
-              all: ['read-savedObject-all-1'],
-              read: ['read-savedObject-read-1'],
-            },
-          },
-        },
-      },
-    ];
-
-    const mockXPackMainPlugin = {
-      getFeatures: jest.fn().mockReturnValue(features),
-    };
-
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
-
-    const actual = privileges.get();
-    expect(actual).toHaveProperty('features.savedObjectsManagement.all', [
-      actions.login,
-      actions.version,
-      actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
-      actions.savedObject.get('all-savedObject-all-1', 'get'),
-      actions.savedObject.get('all-savedObject-all-1', 'find'),
-      actions.savedObject.get('all-savedObject-all-1', 'create'),
-      actions.savedObject.get('all-savedObject-all-1', 'bulk_create'),
-      actions.savedObject.get('all-savedObject-all-1', 'update'),
-      actions.savedObject.get('all-savedObject-all-1', 'delete'),
-
-      actions.savedObject.get('all-savedObject-read-1', 'bulk_get'),
-      actions.savedObject.get('all-savedObject-read-1', 'get'),
-      actions.savedObject.get('all-savedObject-read-1', 'find'),
-
-      actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'delete'),
-      actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'edit'),
-      actions.ui.get('savedObjectsManagement', 'all-savedObject-all-1', 'read'),
-
-      actions.ui.get('savedObjectsManagement', 'all-savedObject-read-1', 'read'),
-
-      actions.allHack,
-    ]);
-
-    expect(actual).toHaveProperty('features.savedObjectsManagement.read', [
-      actions.login,
-      actions.version,
-      actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
-      actions.savedObject.get('read-savedObject-all-1', 'get'),
-      actions.savedObject.get('read-savedObject-all-1', 'find'),
-      actions.savedObject.get('read-savedObject-all-1', 'create'),
-      actions.savedObject.get('read-savedObject-all-1', 'bulk_create'),
-      actions.savedObject.get('read-savedObject-all-1', 'update'),
-      actions.savedObject.get('read-savedObject-all-1', 'delete'),
-
-      actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
-      actions.savedObject.get('read-savedObject-read-1', 'get'),
-      actions.savedObject.get('read-savedObject-read-1', 'find'),
-
-      actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'delete'),
-      actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'edit'),
-      actions.ui.get('savedObjectsManagement', 'read-savedObject-all-1', 'read'),
-
-      actions.ui.get('savedObjectsManagement', 'read-savedObject-read-1', 'read'),
-    ]);
   });
 });
 
