@@ -34,7 +34,7 @@ export const populateSeriesWithTSVBData = (
   }
 
   // Set the filter for the group by or match everything
-  const filters = options.groupBy
+  const filters: JsonObject[] = options.groupBy
     ? [{ match: { [options.groupBy]: series.id } } as JsonObject]
     : [];
   if (options.filterQuery) {
