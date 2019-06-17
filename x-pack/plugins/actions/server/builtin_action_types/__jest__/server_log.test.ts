@@ -18,7 +18,7 @@ const NO_OP_FN = () => {};
 
 const services = {
   log: NO_OP_FN,
-  callClusterWithInternalUser: NO_OP_FN,
+  callCluster: async (path: string, opts: any) => {},
   savedObjectsClient: SavedObjectsClientMock.create(),
 };
 
@@ -119,7 +119,7 @@ describe('execute()', () => {
     await actionType.executor({
       services: {
         log: mockLog,
-        callClusterWithInternalUser: NO_OP_FN,
+        callCluster: async (path: string, opts: any) => {},
         savedObjectsClient: SavedObjectsClientMock.create(),
       },
       config: {},

@@ -35,7 +35,7 @@ export default function(kibana: any) {
             .required(),
         },
         async executor({ config, params, services }: ActionTypeExecutorOptions) {
-          return await services.callClusterWithInternalUser('index', {
+          return await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -59,7 +59,7 @@ export default function(kibana: any) {
             .required(),
         },
         async executor({ config, params, services }: ActionTypeExecutorOptions) {
-          await services.callClusterWithInternalUser('index', {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -87,7 +87,7 @@ export default function(kibana: any) {
             .fire(actionGroupToFire, {
               instanceContextValue: true,
             });
-          await services.callClusterWithInternalUser('index', {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -106,7 +106,7 @@ export default function(kibana: any) {
         id: 'test.never-firing',
         name: 'Test: Never firing',
         async execute({ services, params, state }: AlertExecuteOptions) {
-          await services.callClusterWithInternalUser('index', {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -125,7 +125,7 @@ export default function(kibana: any) {
         id: 'test.failing',
         name: 'Test: Failing',
         async execute({ services, params, state }: AlertExecuteOptions) {
-          await services.callClusterWithInternalUser('index', {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {

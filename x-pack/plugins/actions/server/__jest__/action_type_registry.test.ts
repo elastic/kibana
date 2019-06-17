@@ -18,7 +18,7 @@ const mockTaskManager = taskManagerMock.create();
 function getServices() {
   return {
     log: jest.fn(),
-    callClusterWithInternalUser: jest.fn(),
+    callCluster: jest.fn(),
     savedObjectsClient: SavedObjectsClientMock.create(),
   };
 }

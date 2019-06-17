@@ -23,7 +23,7 @@ const getCreateTaskRunnerFunctionParams = {
   getServices() {
     return {
       log: jest.fn(),
-      callClusterWithInternalUser: jest.fn(),
+      callCluster: jest.fn(),
       savedObjectsClient: SavedObjectsClientMock.create(),
     };
   },
@@ -103,7 +103,7 @@ Object {
   expect(call.scheduledRunAt).toMatchInlineSnapshot(`2019-06-03T18:55:20.982Z`);
   expect(call.state).toMatchInlineSnapshot(`Object {}`);
   expect(call.services.alertInstanceFactory).toBeTruthy();
-  expect(call.services.callClusterWithInternalUser).toBeTruthy();
+  expect(call.services.callCluster).toBeTruthy();
   expect(call.services).toBeTruthy();
 });
 

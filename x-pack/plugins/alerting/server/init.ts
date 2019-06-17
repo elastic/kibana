@@ -30,7 +30,7 @@ export function init(server: Legacy.Server) {
     };
     return {
       log: server.log,
-      callClusterWithInternalUser: callWithInternalUser,
+      callCluster: callWithInternalUser,
       savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
     };
   }
