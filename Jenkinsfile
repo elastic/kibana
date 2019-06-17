@@ -2,7 +2,7 @@
 // @Library('apm@current') _
 
 pipeline {
-  agent { label 'immutable' }
+  agent { label 'linux || immutable' }
   environment {
     BASE_DIR = "."
   }
