@@ -125,6 +125,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               name: e.target.value,
             });
           }}
+          data-test-subj="nameInput"
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -159,6 +160,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             onClick: () => onTypeChange(type),
             isSelected: isSelectedType,
           }}
+          data-test-subj={`${type}RepositoryType`}
         />
       </EuiFlexItem>
     );
@@ -331,6 +333,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               });
             }
           }}
+          data-test-subj="sourceOnlyToggle"
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -343,7 +346,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
       fill
       iconType="arrowRight"
       iconSide="right"
-      data-test-subj="srRepositoryFormNextButton"
+      data-test-subj="nextButton"
     >
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryForm.nextButtonLabel"

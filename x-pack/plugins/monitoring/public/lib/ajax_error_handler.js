@@ -40,13 +40,12 @@ export function formatMonitoringError(err) {
 
 export function ajaxErrorHandlersProvider($injector) {
   const kbnUrl = $injector.get('kbnUrl');
-  const $window = $injector.get('$window');
 
   return (err) => {
     if (err.status === 403) {
       // redirect to error message view
       kbnUrl.redirect('access-denied');
-    } else if (err.status === 404 && !contains($window.location.hash, 'no-data')) { // pass through if this is a 404 and we're already on the no-data page
+    } else if (err.status === 404 && !contains(window.location.hash, 'no-data')) { // pass through if this is a 404 and we're already on the no-data page
       toastNotifications.addDanger({
         title: (
           <FormattedMessage
@@ -60,7 +59,7 @@ export function ajaxErrorHandlersProvider($injector) {
             <EuiButton
               size="s"
               color="danger"
-              onClick={() => $window.location.reload()}
+              onClick={() => window.location.reload()}
             >
               <FormattedMessage
                 id="xpack.monitoring.ajaxErrorHandler.requestFailedNotification.retryButtonLabel"

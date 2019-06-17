@@ -1,19 +1,9 @@
 #!/usr/bin/env bash
 
 set -e
+trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
-function report {
-  if [[ -z "$PR_SOURCE_BRANCH" ]]; then
-    node src/dev/failed_tests/cli
-  else
-    echo "Failure issues not created on pull requests"
-
-  fi
-}
-
-trap report EXIT
-
-"$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
+yarn run grunt functionalTests:ensureAllTestsInCiGroup;
 
 node scripts/build --debug --oss;
 
