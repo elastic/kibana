@@ -42,7 +42,7 @@ const createConfigService = (value: Partial<ProxyPluginType> = {}) => {
       updateInterval: 0,
       timeoutThreshold: 0,
       port: 0,
-      maxRetry: 0,
+      maxRetry: 1,
       requestBackoff: 0,
       cert: '',
       key: '',
@@ -74,9 +74,7 @@ function configService(value: Partial<ProxyPluginType>) {
   };
 }
 
-beforeEach(() => {
-  jest.useFakeTimers();
-});
+beforeEach(() => {});
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -108,7 +106,7 @@ test('creates and sets up proxy server', async () => {
   expect(mockReadFile.mock.calls.length).toBe(3);
   const passedConfig = httpService.createNewServer.mock.calls[0][0];
   expect(passedConfig.ssl).toBeTruthy();
-  expect(passedConfig.ssl.certificate).toBe('foo');
+  expect(passedConfig.ssl!.certificate).toBe('foo');
 
   const proxyStart = await proxy.start();
 
@@ -187,6 +185,7 @@ test('proxy resource', async () => {
   });
   const req = KibanaRequest.from(r);
 
+  // everything is ok
   await agent(req);
   expect(clusterDocClient.getNodeForResource.mock.calls.length).toBe(1);
   expect(mockWreck.request.mock.calls.length).toBe(1);
@@ -194,5 +193,96 @@ test('proxy resource', async () => {
   await proxyStart.proxyRequest(req, '/foo/bar');
   expect(clusterDocClient.getNodeForResource.mock.calls.length).toBe(2);
   expect(mockWreck.request.mock.calls.length).toBe(2);
+
+  // node does not exist
+  clusterDocClient.getNodeForResource = jest.fn().mockReturnValue(undefined);
+
+  try {
+    await agent(req);
+  } catch (err) {
+    // this gets reset when we return a new value ¯\_(ツ)_/¯
+    expect(clusterDocClient.getNodeForResource.mock.calls.length).toBe(1);
+    expect(err.message).toBe('No node was found for resource /foo/bar');
+  }
+
+  // node is closed
+  clusterDocClient.getNodeForResource = jest.fn().mockReturnValue({
+    type: 'code',
+    state: RouteState.Closed,
+    node: 'beep',
+  });
+
+  try {
+    await agent(req);
+  } catch (err) {
+    expect(clusterDocClient.getNodeForResource.mock.calls.length).toBe(1);
+    expect(err.message).toBe('No node was found for resource /foo/bar');
+  }
+
+  // wreck error
+  mockWreck.request = jest.fn(async () => {
+    throw new Error('robots');
+  });
+
+  // node is closed
+  clusterDocClient.getNodeForResource = jest.fn().mockReturnValue({
+    type: 'code',
+    state: RouteState.Started,
+    node: 'beep',
+  });
+
+  try {
+    await agent(req);
+  } catch (err) {
+    expect(clusterDocClient.getNodeForResource.mock.calls.length).toBe(1);
+    expect(err.message).toBe('Unable to complete request to beep for /foo/bar because robots');
+  }
+});
+
+test('proxy resource retry', async () => {
+  const clusterDocClient = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    assignResource: jest.fn(),
+    unassignResource: jest.fn(),
+    getNodeForResource: jest.fn(() => ({
+      type: 'code',
+      state: RouteState.Initializing,
+      node: 'beep',
+    })),
+    stop: noop,
+  };
+
+  mockClusterDocClient.mockImplementation(() => clusterDocClient);
+  const elasticClient = elasticsearchServiceMock.createSetupContract();
+  const httpService = httpServiceMock.createSetupContract();
+
+  const core = {
+    elasticsearch: elasticClient,
+    http: httpService,
+  };
+
+  mockReadFile.mockImplementation((x, cb) => cb(null, Buffer.from('foo')));
+
+  const proxy = new ProxyService({ config: configService({}), env, logger });
+  await proxy.setup(core, {});
+  const proxyStart = await proxy.start();
+  await proxyStart.assignResource('/foo/bar', 'code', RouteState.Started, proxy.nodeName);
+  const agent = proxyStart.proxyResource('/foo/bar');
+  const r = httpServerMock.createRawRequest({
+    headers: {},
+    url: new URL('https://beep/foo/bar'),
+    path: '/foo/bar',
+    method: 'get',
+  });
+  const req = KibanaRequest.from(r);
+
+  try {
+    await agent(req);
+  } catch (err) {
+    expect(clusterDocClient.getNodeForResource.mock.calls.length).toBe(3);
+    expect(err.message).toBe('maxRetries exceeded and node has not yet initialized');
+  }
+
   await proxy.stop();
 });

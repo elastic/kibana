@@ -209,7 +209,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     resource = resource || url.pathname;
     const node = this.clusterDocClient.getNodeForResource(resource);
 
-    if (!node) {
+    if (!node || node.state === RouteState.Closed) {
       const msg = `No node was found for resource ${resource}`;
       this.log.debug(msg);
       throw new Error(msg);
@@ -222,10 +222,14 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
         }`
       );
       if (retryCount <= this.maxRetry) {
-        return await new Promise(resolve => {
+        return await new Promise((resolve, reject) => {
           setTimeout(async () => {
-            await this.proxyRequest(req, resource, ++retryCount);
-            resolve();
+            try {
+              const reply = await this.proxyRequest(req, resource, ++retryCount);
+              resolve(reply);
+            } catch (err) {
+              reject(err);
+            }
           }, this.requestBackoff);
         });
       } else {
