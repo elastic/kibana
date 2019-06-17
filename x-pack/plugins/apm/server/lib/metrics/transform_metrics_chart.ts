@@ -57,7 +57,7 @@ export function transformDataToMetricsChart<Params extends AggregatedParams>(
     yUnit: chartBase.yUnit,
     totalHits: hits.total,
     series: Object.keys(chartBase.series).map((seriesKey, i) => {
-      const agg = aggregations[seriesKey] as AggregatedValue;
+      const agg = aggregations[seriesKey];
 
       return {
         title: chartBase.series[seriesKey].title,

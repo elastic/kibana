@@ -55,7 +55,7 @@ export async function calculateBucketSize(
     }
   };
 
-  const resp = await client.search<void, typeof params>(params);
+  const resp = await client.search(params);
 
   const minBucketSize: number = config.get('xpack.apm.minimumBucketSize');
   const bucketTargetCount: number = config.get('xpack.apm.bucketTargetCount');
