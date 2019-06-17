@@ -39,7 +39,7 @@ export function search(index: string, body: any, options: SearchOptions = {}) {
   const { signal, onProgress = () => {} } = options;
   const promise = kfetch({
     method: 'POST',
-    pathname: `../api/fsearch/${index}`,
+    pathname: `../api/search/${index}`,
     body: JSON.stringify(body),
     signal,
   });

@@ -21,6 +21,7 @@ import 'abortcontroller-polyfill';
 import { Legacy } from 'kibana';
 import { SearchOptions } from '../../common';
 import { Request } from '../../../elasticsearch';
+import { getSearchStrategy } from '../lib';
 
 export function registerSearchApi(server: Legacy.Server): void {
   server.route({
@@ -29,15 +30,8 @@ export function registerSearchApi(server: Legacy.Server): void {
     handler: async req => {
       const body = req.payload;
       const { index } = req.params;
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const controller = new AbortController();
-      const { signal } = controller;
-      req.events.once('disconnect', () => controller.abort());
-      try {
-        return await callWithRequest(req, 'search', { index, body }, { signal });
-      } catch (e) {
-        return server.plugins.kibana.handleEsError(e);
-      }
+      const searchStrategy = await getSearchStrategy(server, req, index, body);
+      return searchStrategy.search(server, req, index, body);
     },
   });
 

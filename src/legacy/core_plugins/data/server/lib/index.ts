@@ -17,15 +17,5 @@
  * under the License.
  */
 
-export interface IndexPatternsService {
-  // ATTENTION: this interface is incomplete
-
-  getFieldsForWildcard(options: { pattern: string | string[] }): Promise<FieldDescriptor[]>;
-}
-
-export interface FieldDescriptor {
-  aggregatable: boolean;
-  name: string;
-  readFromDocValues: boolean;
-  searchable: boolean;
-}
+export * from './get_index_pattern';
+export * from './search_strategy_registry';
