@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Stat Items Component disable charts it renders the default widget 1`] = `
-<Component
+<Memo()
   description="HOSTS"
   fields={
     Array [
@@ -99,11 +99,11 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
       </div>
     </EuiFlexItem>
   </Styled(EuiFlexItem)>
-</Component>
+</Memo()>
 `;
 
 exports[`Stat Items Component disable charts it renders the default widget 2`] = `
-<Component
+<Memo()
   areaChart={Array []}
   barChart={Array []}
   description="HOSTS"
@@ -204,11 +204,11 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
       </div>
     </EuiFlexItem>
   </Styled(EuiFlexItem)>
-</Component>
+</Memo()>
 `;
 
 exports[`Stat Items Component rendering kpis with charts it renders the default widget 1`] = `
-<Component
+<Memo()
   areaChart={
     Array [
       Object {
@@ -523,7 +523,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     <div
                       className="euiFlexItem sc-bxivhb bQCHAr"
                     >
-                      <Component
+                      <Memo()
                         barChart={
                           Array [
                             Object {
@@ -559,7 +559,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             <div
                               className="sc-bwzfXH ffMqh"
                             >
-                              <Component
+                              <Memo()
                                 data={
                                   Array [
                                     Object {
@@ -585,7 +585,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                   ]
                                 }
                               >
-                                <Component
+                                <Memo()
                                   data={
                                     Array [
                                       Object {
@@ -611,11 +611,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     ]
                                   }
                                 />
-                              </Component>
+                              </Memo()>
                             </div>
                           </styled.div>
                         </AutoSizer>
-                      </Component>
+                      </Memo()>
                     </div>
                   </EuiFlexItem>
                 </Styled(EuiFlexItem)>
@@ -626,7 +626,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     <div
                       className="euiFlexItem sc-bxivhb bQCHAr"
                     >
-                      <Component
+                      <Memo()
                         areaChart={
                           Array [
                             Object {
@@ -678,7 +678,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             <div
                               className="sc-bwzfXH ffMqh"
                             >
-                              <Component
+                              <Memo()
                                 data={
                                   Array [
                                     Object {
@@ -720,7 +720,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                   ]
                                 }
                               >
-                                <Component
+                                <Memo()
                                   data={
                                     Array [
                                       Object {
@@ -762,11 +762,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     ]
                                   }
                                 />
-                              </Component>
+                              </Memo()>
                             </div>
                           </styled.div>
                         </AutoSizer>
-                      </Component>
+                      </Memo()>
                     </div>
                   </EuiFlexItem>
                 </Styled(EuiFlexItem)>
@@ -777,5 +777,5 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
       </div>
     </EuiFlexItem>
   </Styled(EuiFlexItem)>
-</Component>
+</Memo()>
 `;
