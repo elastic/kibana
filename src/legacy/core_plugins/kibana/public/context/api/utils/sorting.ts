@@ -17,52 +17,36 @@
  * under the License.
  */
 
+import { IndexPattern } from 'src/legacy/core_plugins/data/public';
+
+export enum SortDirection {
+  asc = 'asc',
+  desc = 'desc',
+}
+
 /**
  * The list of field names that are allowed for sorting, but not included in
  * index pattern fields.
- *
- * @constant
- * @type {string[]}
  */
-const META_FIELD_NAMES = ['_seq_no', '_doc', '_uid'];
+const META_FIELD_NAMES: string[] = ['_seq_no', '_doc', '_uid'];
 
 /**
  * Returns a field from the intersection of the set of sortable fields in the
  * given index pattern and a given set of candidate field names.
- *
- * @param {IndexPattern} indexPattern - The index pattern to search for
- *     sortable fields
- * @param {string[]} fields - The list of candidate field names
- *
- * @returns {string[]}
  */
-function getFirstSortableField(indexPattern, fieldNames) {
-  const sortableFields = fieldNames.filter((fieldName) => (
-    META_FIELD_NAMES.includes(fieldName)
-    || (indexPattern.fields.byName[fieldName] || { sortable: false }).sortable
-  ));
+export function getFirstSortableField(indexPattern: IndexPattern, fieldNames: string[]) {
+  const sortableFields = fieldNames.filter(
+    fieldName =>
+      META_FIELD_NAMES.includes(fieldName) ||
+      // @ts-ignore
+      (indexPattern.fields.byName[fieldName] || { sortable: false }).sortable
+  );
   return sortableFields[0];
 }
 
 /**
- * A sort order string.
- *
- * @typedef {('asc'|'desc')} SortDirection
- */
-
-/**
  * Return the reversed sort direction.
- *
- * @param {(SortDirection)} sortDirection
- *
- * @returns {(SortDirection)}
  */
-function reverseSortDirection(sortDirection) {
-  return (sortDirection === 'asc' ? 'desc' : 'asc');
+export function reverseSortDir(sortDirection: SortDirection) {
+  return sortDirection === SortDirection.asc ? SortDirection.desc : SortDirection.asc;
 }
-
-
-export {
-  getFirstSortableField,
-  reverseSortDirection,
-};

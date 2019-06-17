@@ -150,13 +150,6 @@ else
 fi
 
 ###
-### skip chomium download, use the system chrome install
-###
-export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-PUPPETEER_EXECUTABLE_PATH="$(command -v google-chrome-stable)"
-export PUPPETEER_EXECUTABLE_PATH
-
-###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
@@ -171,13 +164,6 @@ if [ "$GIT_CHANGES" ]; then
   echo -e "$GIT_CHANGES\n"
   exit 1
 fi
-
-###
-### Set Percy parallel build support environment vars
-###
-eval "$(node ./src/dev/ci_setup/get_percy_env)"
-echo " -- PERCY_PARALLEL_NONCE='$PERCY_PARALLEL_NONCE'"
-echo " -- PERCY_PARALLEL_TOTAL='$PERCY_PARALLEL_TOTAL'"
 
 ###
 ### rebuild kbn-pm distributable to ensure it's not out of date

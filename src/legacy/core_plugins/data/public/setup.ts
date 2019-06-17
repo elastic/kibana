@@ -17,18 +17,11 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import { DataPlugin } from './index';
 
-import {
-  reverseSortDirection,
-} from '../sorting';
-
-
-describe('context app', function () {
-  describe('function reverseSortDirection', function () {
-    it('should reverse a direction given as a string', function () {
-      expect(reverseSortDirection('asc')).to.eql('desc');
-      expect(reverseSortDirection('desc')).to.eql('asc');
-    });
-  });
-});
+/**
+ * We export data here so that users importing from 'plugins/data'
+ * will automatically receive the response value of the `setup` contract, mimicking
+ * the data that will eventually be injected by the new platform.
+ */
+export const data = new DataPlugin().setup();
