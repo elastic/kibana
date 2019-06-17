@@ -10,8 +10,6 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metrics/timeseries function 1`] = `"timeseries_vis params='{\\"foo\\":\\"bar\\"}'  uiState='{}' "`;
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metrics/tsvb function 1`] = `"tsvb params='{\\"foo\\":\\"bar\\"}'  uiState='{}' "`;
-
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles pie function 1`] = `"kibana_pie visConfig='{\\"dimensions\\":{\\"metric\\":0,\\"buckets\\":[1,2]}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function with buckets 1`] = `"regionmap visConfig='{\\"metric\\":0,\\"bucket\\":1}' "`;
