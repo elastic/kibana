@@ -38,7 +38,7 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if args is null', () => {
@@ -52,7 +52,7 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns empty string if args happens to be an empty string', () => {
