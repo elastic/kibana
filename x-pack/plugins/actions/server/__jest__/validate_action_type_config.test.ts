@@ -65,3 +65,25 @@ test('should validate and throw error when actionTypeConfig is invalid', () => {
     `"actionTypeConfig invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
   );
 });
+
+test('should not return values when actionTypeConfig is invalid', () => {
+  expect(() =>
+    validateActionTypeConfig(
+      {
+        id: 'my-action-type',
+        name: 'My action type',
+        validate: {
+          config: Joi.object()
+            .keys({
+              param1: Joi.number().required(),
+            })
+            .required(),
+        },
+        async executor() {},
+      },
+      { param1: 'my secret value' }
+    )
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"actionTypeConfig invalid: child \\"param1\\" fails because [\\"param1\\" must be a number]"`
+  );
+});
