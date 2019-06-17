@@ -30,7 +30,7 @@ import $ from 'jquery';
 import { Layout } from '../../../lib/layout/layout';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import '../../../../persisted_state';
-import { VislibVisConfigProvider } from '../../../lib/vis_config';
+import { VisConfig } from '../../../lib/vis_config';
 
 const dateHistogramArray = [
   series,
@@ -51,7 +51,6 @@ dateHistogramArray.forEach(function (data, i) {
     let persistedState;
     let numberOfCharts;
     let testLayout;
-    let VisConfig;
 
     beforeEach(ngMock.module('kibana'));
 
@@ -59,7 +58,6 @@ dateHistogramArray.forEach(function (data, i) {
       ngMock.inject(function (Private, $injector) {
         vis = Private(FixturesVislibVisFixtureProvider)();
         persistedState = new ($injector.get('PersistedState'))();
-        VisConfig = Private(VislibVisConfigProvider);
         vis.render(data, persistedState);
         numberOfCharts = vis.handler.charts.length;
       });
