@@ -71,7 +71,7 @@ interface Props {
   onSave: () => void;
   onSaveNew: () => void;
   onLoadSavedQuery: (savedQuery: SavedQuery) => void;
-  isDirty: () => boolean;
+  isDirty: boolean;
 }
 
 interface State {

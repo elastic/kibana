@@ -379,7 +379,7 @@ class SearchBarUI extends Component<Props, State> {
             onSaveNew={this.onInitiateSaveNew}
             onChange={this.onQueryBarChange}
             onLoadSavedQuery={this.onLoadSavedQuery}
-            isDirty={this.isDirty}
+            isDirty={this.isDirty()}
           />
         ) : (
           ''

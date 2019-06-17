@@ -63,7 +63,7 @@ interface Props {
   onLoadSavedQuery?: (savedQuery: SavedQuery) => void;
   onSave?: () => void;
   onSaveNew?: () => void;
-  isDirty?: () => boolean;
+  isDirty?: boolean;
 }
 
 interface State {
@@ -558,7 +558,7 @@ export class QueryBarInputUI extends Component<Props, State> {
             onMouseEnter={this.onMouseEnterSuggestion}
             loadMore={this.increaseLimit}
             append={
-              this.props.onSave && this.props.onSaveNew && this.props.isDirty ? (
+              this.props.onSave && this.props.onSaveNew && this.props.isDirty !== undefined ? (
                 <SavedQueryRow
                   query={this.props.query}
                   savedQuery={this.props.savedQuery}
