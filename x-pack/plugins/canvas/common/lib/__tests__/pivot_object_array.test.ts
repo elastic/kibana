@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { pivotObjectArray } from '../pivot_object_array';
 
+interface Car {
+  make: string;
+  model: string;
+  price: string;
+}
+
 describe('pivotObjectArray', () => {
-  let rows;
+  let rows: Car[] = [];
 
   beforeEach(() => {
     rows = [
@@ -19,37 +24,39 @@ describe('pivotObjectArray', () => {
   });
 
   it('converts array of objects', () => {
-    const data = pivotObjectArray(rows);
+    const data = pivotObjectArray<Car>(rows);
 
-    expect(data).to.be.an('object');
-    expect(data).to.have.property('make');
-    expect(data).to.have.property('model');
-    expect(data).to.have.property('price');
+    expect(typeof data).toBe('object');
 
-    expect(data.make).to.eql(['honda', 'toyota', 'tesla']);
-    expect(data.model).to.eql(['civic', 'corolla', 'model 3']);
-    expect(data.price).to.eql(['10000', '12000', '35000']);
+    expect(data).toHaveProperty('make');
+    expect(data).toHaveProperty('model');
+    expect(data).toHaveProperty('price');
+
+    expect(data.make).toEqual(['honda', 'toyota', 'tesla']);
+    expect(data.model).toEqual(['civic', 'corolla', 'model 3']);
+    expect(data.price).toEqual(['10000', '12000', '35000']);
   });
 
   it('uses passed in column list', () => {
-    const data = pivotObjectArray(rows, ['price']);
+    const data = pivotObjectArray<Car, 'price'>(rows, ['price']);
 
-    expect(data).to.be.an('object');
-    expect(data).to.eql({ price: ['10000', '12000', '35000'] });
+    expect(typeof data).toBe('object');
+    expect(data).toEqual({ price: ['10000', '12000', '35000'] });
   });
 
   it('adds missing columns with undefined values', () => {
-    const data = pivotObjectArray(rows, ['price', 'missing']);
+    const data = pivotObjectArray<Car, 'price' | 'missing'>(rows, ['price', 'missing']);
 
-    expect(data).to.be.an('object');
-    expect(data).to.eql({
+    expect(typeof data).toBe('object');
+    expect(data).toEqual({
       price: ['10000', '12000', '35000'],
       missing: [undefined, undefined, undefined],
     });
   });
 
   it('throws when given an invalid column list', () => {
+    // @ts-ignore testing potential calls from legacy code that should throw
     const check = () => pivotObjectArray(rows, [{ name: 'price' }, { name: 'missing' }]);
-    expect(check).to.throwException('Columns should be an array of strings');
+    expect(check).toThrowError('Columns should be an array of strings');
   });
 });
