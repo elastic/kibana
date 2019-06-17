@@ -21,7 +21,6 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
 import React, { useState } from 'react';
-import { where } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -33,6 +32,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { AggConfig } from 'ui/vis';
 import { Schemas } from './schemas';
 
 const GROUP_NAMES = {
@@ -40,7 +40,7 @@ const GROUP_NAMES = {
 };
 
 interface AggAddReactWrapperProps {
-  group: any;
+  group?: AggConfig[];
   groupName: string;
   schemas: Schemas[];
   stats: {
@@ -53,7 +53,7 @@ interface AggAddReactWrapperProps {
 }
 
 function AggAddReactWrapper<T>({
-  group,
+  group = [],
   groupName,
   schemas,
   addSchema,
@@ -82,7 +82,7 @@ function AggAddReactWrapper<T>({
       : i18n.translate('common.ui.vis.editors.aggAdd.metricLabel', { defaultMessage: 'metric' });
 
   const isSchemaDisabled = (schema: Schemas): boolean => {
-    const count = where(group, { schema }).length;
+    const count = group.filter(agg => agg.schema.name === schema.name).length;
     return count >= schema.max;
   };
 
@@ -94,6 +94,7 @@ function AggAddReactWrapper<T>({
           button={addButton}
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
+          repositionOnScroll={true}
           closePopover={() => setIsPopoverOpen(false)}
         >
           <EuiPopoverTitle>
@@ -119,7 +120,7 @@ function AggAddReactWrapper<T>({
                   <EuiContextMenuItem
                     key={`${schema.name}_${schema.title}`}
                     data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
-                    disabled={isSchemaDisabled(schema)}
+                    disabled={isPopoverOpen && isSchemaDisabled(schema)}
                     onClick={() => onSelectSchema(schema)}
                   >
                     {schema.title}
