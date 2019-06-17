@@ -5,6 +5,8 @@
  */
 
 import React, { PureComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
 import copy from 'copy-to-clipboard';
@@ -19,10 +21,8 @@ import {
   EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-
-export class PolicyJsonFlyoutUi extends PureComponent {
+export class PolicyJsonFlyout extends PureComponent {
   static propTypes = {
     close: PropTypes.func.isRequired,
     lifecycle: PropTypes.object.isRequired,
@@ -35,12 +35,13 @@ export class PolicyJsonFlyoutUi extends PureComponent {
     }, null, 4);
   }
   copyToClipboard(lifecycle) {
-    const { intl } = this.props;
     copy(this.getEsJson(lifecycle));
-    toastNotifications.add(intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.editPolicy.policyJsonFlyout.copiedToClipboardMessage',
-      defaultMessage: 'JSON copied to clipboard',
-    }));
+    toastNotifications.add(i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.policyJsonFlyout.copiedToClipboardMessage',
+      {
+        defaultMessage: 'JSON copied to clipboard'
+      }
+    ));
   }
   render() {
     const { lifecycle, close, policyName } = this.props;
@@ -81,5 +82,3 @@ export class PolicyJsonFlyoutUi extends PureComponent {
     );
   }
 }
-export const PolicyJsonFlyout = injectI18n(PolicyJsonFlyoutUi);
-

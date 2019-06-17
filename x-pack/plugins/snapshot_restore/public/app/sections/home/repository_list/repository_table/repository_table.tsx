@@ -62,6 +62,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             <EuiLink
               onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
               href={openRepositoryDetailsUrl(name)}
+              data-test-subj="repositoryLink"
             >
               {name}
             </EuiLink>
@@ -117,6 +118,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                   iconType="pencil"
                   color="primary"
                   href={`#${BASE_PATH}/edit_repository/${name}`}
+                  data-test-subj="editRepositoryButton"
                 />
               </EuiToolTip>
             );
@@ -151,7 +153,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                         )}
                         iconType="trash"
                         color="danger"
-                        data-test-subj="srRepositoryListDeleteActionButton"
+                        data-test-subj="deleteRepositoryButton"
                         onClick={() => deleteRepositoryPrompt([name], onRepositoryDeleted)}
                         isDisabled={Boolean(name === managedRepository)}
                       />
@@ -235,7 +237,12 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     toolsRight: (
       <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
         <EuiFlexItem>
-          <EuiButton color="secondary" iconType="refresh" onClick={reload}>
+          <EuiButton
+            color="secondary"
+            iconType="refresh"
+            onClick={reload}
+            data-test-subj="reloadButton"
+          >
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
               defaultMessage="Reload"
@@ -247,7 +254,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             href={`#${BASE_PATH}/add_repository`}
             fill
             iconType="plusInCircle"
-            data-test-subj="srRepositoriesAddButton"
+            data-test-subj="registerRepositoryButton"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryList.addRepositoryButtonLabel"
@@ -293,11 +300,12 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       pagination={pagination}
       isSelectable={true}
       rowProps={() => ({
-        'data-test-subj': 'srRepositoryListTableRow',
+        'data-test-subj': 'row',
       })}
       cellProps={(item: any, column: any) => ({
-        'data-test-subj': `srRepositoryListTableCell-${column.field}`,
+        'data-test-subj': `cell`,
       })}
+      data-test-subj="repositoryTable"
     />
   );
 };

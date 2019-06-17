@@ -89,7 +89,6 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
             defaultMessage="Summary"
           />
         ),
-        testSubj: 'srSnapshotDetailsSummaryTab',
       },
       {
         id: TAB_FAILURES,
@@ -100,7 +99,6 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
             values={{ failuresCount: indexFailures.length }}
           />
         ),
-        testSubj: 'srSnapshotDetailsFailuresTab',
       },
     ];
 
@@ -116,7 +114,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
               }}
               isSelected={tab.id === activeTab}
               key={tab.id}
-              data-test-subject={tab.testSubj}
+              data-test-subj="tab"
             >
               {tab.name}
             </EuiTab>
@@ -177,7 +175,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
             iconType="cross"
             flush="left"
             onClick={onClose}
-            data-test-subj="srSnapshotDetailsFlyoutCloseButton"
+            data-test-subj="closeButton"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.closeButtonLabel"
@@ -235,7 +233,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
   return (
     <EuiFlyout
       onClose={onClose}
-      data-test-subj="srSnapshotDetailsFlyout"
+      data-test-subj="snapshotDetail"
       aria-labelledby="srSnapshotDetailsFlyoutTitle"
       size="m"
       maxWidth={400}
@@ -244,7 +242,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="srSnapshotDetailsFlyoutTitle">
+              <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="detailTitle">
                 {snapshotId}
               </h2>
             </EuiTitle>
@@ -253,7 +251,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
           <EuiFlexItem>
             <EuiText size="s">
               <p>
-                <EuiLink href={linkToRepository(repositoryName)}>
+                <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
                   <FormattedMessage
                     id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
                     defaultMessage="'{repositoryName}' repository"
@@ -268,7 +266,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
         {tabs}
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody data-test-subj="srSnapshotDetailsContent">{content}</EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="content">{content}</EuiFlyoutBody>
       <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
     </EuiFlyout>
   );

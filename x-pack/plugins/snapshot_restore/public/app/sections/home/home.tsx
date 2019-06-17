@@ -53,7 +53,6 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage="Snapshots"
         />
       ),
-      testSubj: 'srSnapshotsTab',
     },
     {
       id: 'repositories' as Section,
@@ -63,7 +62,6 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage="Repositories"
         />
       ),
-      testSubj: 'srRepositoriesTab',
     },
   ];
 
@@ -82,7 +80,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiTitle size="l">
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={true}>
-              <h1>
+              <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.snapshotRestore.home.snapshotRestoreTitle"
                   defaultMessage="Snapshot and Restore"
@@ -94,6 +92,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
                 href={documentationLinksService.getRepositoryTypeDocUrl()}
                 target="_blank"
                 iconType="help"
+                data-test-subj="documentationLink"
               >
                 <FormattedMessage
                   id="xpack.snapshotRestore.home.snapshotRestoreDocsLinkText"
@@ -121,7 +120,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}
               key={tab.id}
-              data-test-subject={tab.testSubj}
+              data-test-subj="tab"
             >
               {tab.name}
             </EuiTab>

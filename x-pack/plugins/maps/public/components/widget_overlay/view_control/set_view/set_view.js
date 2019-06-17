@@ -101,7 +101,7 @@ export class SetView  extends React.Component {
     });
 
     return (
-      <EuiForm>
+      <EuiForm data-test-subj="mapSetViewForm">
 
         {latFormRow}
 

@@ -8,7 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
-import { CoreSetup } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import { history } from '../utils/history';
 import { LocationProvider } from '../context/LocationContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
@@ -51,7 +51,7 @@ function App() {
 }
 
 export class Plugin {
-  public setup(core: CoreSetup) {
+  public start(core: CoreStart) {
     const { i18n } = core;
     ReactDOM.render(
       <i18n.Context>

@@ -59,6 +59,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         <EuiLink
           onClick={() => trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
           href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}
+          data-test-subj="snapshotLink"
         >
           {snapshotId}
         </EuiLink>
@@ -72,7 +73,9 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (repositoryName: string) => (
-        <EuiLink href={linkToRepository(repositoryName)}>{repositoryName}</EuiLink>
+        <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
+          {repositoryName}
+        </EuiLink>
       ),
     },
     {
@@ -271,7 +274,12 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       undefined
     ),
     toolsRight: (
-      <EuiButton color="secondary" iconType="refresh" onClick={reload}>
+      <EuiButton
+        color="secondary"
+        iconType="refresh"
+        onClick={reload}
+        data-test-subj="reloadButton"
+      >
         <FormattedMessage
           id="xpack.snapshotRestore.snapshotList.table.reloadSnapshotsButton"
           defaultMessage="Reload"
@@ -315,11 +323,12 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       selection={selection}
       pagination={pagination}
       rowProps={() => ({
-        'data-test-subj': 'srSnapshotListTableRow',
+        'data-test-subj': 'row',
       })}
       cellProps={(item: any, column: any) => ({
-        'data-test-subj': `srSnapshotListTableCell-${column.field}`,
+        'data-test-subj': 'cell',
       })}
+      data-test-subj="snapshotTable"
     />
   );
 };

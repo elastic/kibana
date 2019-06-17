@@ -39,7 +39,7 @@ describe('AuthSsh', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if sshSignature and sshMethod are both undefined', () => {
@@ -53,7 +53,7 @@ describe('AuthSsh', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if sshSignature is null and sshMethod is undefined', () => {
@@ -67,7 +67,7 @@ describe('AuthSsh', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if sshSignature is undefined and sshMethod is null', () => {
@@ -81,7 +81,7 @@ describe('AuthSsh', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns sshSignature if sshMethod is null', () => {

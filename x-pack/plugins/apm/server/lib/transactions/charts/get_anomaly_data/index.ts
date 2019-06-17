@@ -55,10 +55,12 @@ export async function getAnomalySeries({
     setup
   });
 
-  return anomalySeriesTransform(
-    esResponse,
-    mlBucketSize,
-    bucketSize,
-    timeSeriesDates
-  );
+  return esResponse
+    ? anomalySeriesTransform(
+        esResponse,
+        mlBucketSize,
+        bucketSize,
+        timeSeriesDates
+      )
+    : undefined;
 }
