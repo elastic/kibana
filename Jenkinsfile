@@ -5,6 +5,7 @@ pipeline {
   agent { label 'linux || immutable' }
   environment {
     BASE_DIR = "."
+    GIT_BRANCH = "master"
   }
   stages {
     stage('Kickoff') {
