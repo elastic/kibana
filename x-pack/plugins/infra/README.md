@@ -96,6 +96,8 @@ life-cycle of a PR looks like the following:
      * `release_note:breaking` if the PR contains a breaking change
      * `release_note:deprecation` if the PR contains deprecations of publicly
        documented features.
+     * `release_note:skip` if the PR contains only house-keeping changes, fixes
+       to unreleased code or documentation changes
 3. **Satisfy CI**: The PR will automatically be picked up by the CI system,
    which will run the full test suite as well as some additional checks. A
    comment containing `jenkins, test this` can be used to manually trigger a CI
