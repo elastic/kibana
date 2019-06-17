@@ -77,7 +77,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
       let spaceId: string = '';
       let space: Space;
       try {
-        spaceId = getSpaceIdFromPath(http.getBasePathFor(request), serverBasePath);
+        spaceId = getSpaceIdFromPath(http.basePath.get(request), serverBasePath);
 
         log.debug(`Verifying access to space "${spaceId}"`);
 

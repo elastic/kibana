@@ -30,7 +30,7 @@ export function initSpacesOnRequestInterceptor({ config, http }: OnRequestInterc
     if (spaceId !== DEFAULT_SPACE_ID) {
       const reqBasePath = `/s/${spaceId}`;
 
-      http.setBasePathFor(request, reqBasePath);
+      http.basePath.set(request, reqBasePath);
 
       const newLocation = (path && path.substr(reqBasePath.length)) || '/';
 

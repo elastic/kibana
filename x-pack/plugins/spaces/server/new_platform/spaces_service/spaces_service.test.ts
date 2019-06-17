@@ -26,7 +26,7 @@ const createService = async () => {
   const spacesService = new SpacesService(mockLogger, '/base-path');
 
   const httpSetup = httpServiceMock.createSetupContract();
-  httpSetup.getBasePathFor = jest.fn().mockImplementation((request: KibanaRequest) => {
+  httpSetup.basePath.get = jest.fn().mockImplementation((request: KibanaRequest) => {
     const spaceId = getSpaceIdFromPath(request.url.path);
 
     if (spaceId !== DEFAULT_SPACE_ID) {

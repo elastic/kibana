@@ -130,7 +130,7 @@ export class Plugin {
       try {
         const activeSpace = await getActiveSpace(
           spacesClient,
-          core.http.getBasePathFor(request),
+          core.http.basePath.get(request),
           this.initializerContext.legacyConfig.get('server.basePath')
         );
 

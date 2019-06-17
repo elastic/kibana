@@ -42,35 +42,35 @@ describe('onPostAuthRequestInterceptor', () => {
         method: 'GET',
         path: '/foo',
         handler: (req: any) => {
-          return { path: req.path, basePath: http.getBasePathFor(req) };
+          return { path: req.path, basePath: http.basePath.get(req) };
         },
       },
       {
         method: 'GET',
         path: '/app/kibana',
         handler: (req: any) => {
-          return { path: req.path, basePath: http.getBasePathFor(req) };
+          return { path: req.path, basePath: http.basePath.get(req) };
         },
       },
       {
         method: 'GET',
         path: '/app/app-1',
         handler: (req: any) => {
-          return { path: req.path, basePath: http.getBasePathFor(req) };
+          return { path: req.path, basePath: http.basePath.get(req) };
         },
       },
       {
         method: 'GET',
         path: '/app/app-2',
         handler: (req: any) => {
-          return { path: req.path, basePath: http.getBasePathFor(req) };
+          return { path: req.path, basePath: http.basePath.get(req) };
         },
       },
       {
         method: 'GET',
         path: '/api/test/foo',
         handler: (req: any) => {
-          return { path: req.path, basePath: http.getBasePathFor(req) };
+          return { path: req.path, basePath: http.basePath.get(req) };
         },
       },
     ]);
@@ -176,8 +176,8 @@ describe('onPostAuthRequestInterceptor', () => {
 
       const httpMock = httpServiceMock.createSetupContract();
 
-      httpMock.getBasePathFor = jest.fn().mockImplementation(() => basePath);
-      httpMock.setBasePathFor = jest.fn().mockImplementation((req: any, newPath: string) => {
+      httpMock.basePath.get = jest.fn().mockImplementation(() => basePath);
+      httpMock.basePath.set = jest.fn().mockImplementation((req: any, newPath: string) => {
         basePath = newPath;
       });
       httpMock.registerOnPreAuth = jest.fn().mockImplementation(async handler => {

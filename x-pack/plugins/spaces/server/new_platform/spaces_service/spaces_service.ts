@@ -58,7 +58,7 @@ export class SpacesService {
 
       const basePath = isFakeRequest
         ? (request as Record<string, any>).getBasePath()
-        : http.getBasePathFor(request);
+        : http.basePath.get(request);
 
       const spaceId = getSpaceIdFromPath(basePath, this.serverBasePath);
 

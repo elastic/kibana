@@ -29,14 +29,14 @@ describe('onRequestInterceptor', () => {
           method: 'GET',
           path: '/foo',
           handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: http.getBasePathFor(req) });
+            return h.response({ path: req.path, basePath: http.basePath.get(req) });
           },
         },
         {
           method: 'GET',
           path: '/some/path/s/foo/bar',
           handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: http.getBasePathFor(req) });
+            return h.response({ path: req.path, basePath: http.basePath.get(req) });
           },
         },
         {
@@ -45,7 +45,7 @@ describe('onRequestInterceptor', () => {
           handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
             return h.response({
               path: req.path,
-              basePath: http.getBasePathFor(req),
+              basePath: http.basePath.get(req),
               query: req.query,
             });
           },
@@ -57,13 +57,13 @@ describe('onRequestInterceptor', () => {
       const router = new Router('/');
 
       router.get({ path: '/foo', validate: false }, (req: KibanaRequest, h: any) => {
-        return h.ok({ path: req.url.pathname, basePath: http.getBasePathFor(req) });
+        return h.ok({ path: req.url.pathname, basePath: http.basePath.get(req) });
       });
 
       router.get(
         { path: '/some/path/s/foo/bar', validate: false },
         (req: KibanaRequest, h: any) => {
-          return h.ok({ path: req.url.pathname, basePath: http.getBasePathFor(req) });
+          return h.ok({ path: req.url.pathname, basePath: http.basePath.get(req) });
         }
       );
 
@@ -83,7 +83,7 @@ describe('onRequestInterceptor', () => {
         (req: KibanaRequest, h: any) => {
           return h.ok({
             path: req.url.pathname,
-            basePath: http.getBasePathFor(req),
+            basePath: http.basePath.get(req),
             query: req.query,
           });
         }
