@@ -74,7 +74,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       expect(actual).toMatchSnapshot();
     });
 
-    it('handles metrics/tsvb function', () => {
+    it('handles metrics/timeseries function', () => {
       const params = { foo: 'bar' };
       const actual = buildPipelineVisFunction.metrics({ params });
       expect(actual).toMatchSnapshot();
