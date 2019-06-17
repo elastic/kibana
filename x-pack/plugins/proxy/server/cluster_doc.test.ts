@@ -193,6 +193,12 @@ test('assign and unassign resource', async () => {
   };
   expect(nodeList.body.routing_table).toEqual(expected);
 
+  try {
+    await clusterDoc.assignResource('/foo/bar', 'code', RouteState.Started);
+  } catch (err) {
+    expect(err.message).toBe(`/foo/bar already exists on ${clusterDoc.nodeName}`);
+  }
+
   await clusterDoc.unassignResource('/foo/bar');
   const nodeList2 = esClients.dataClient.callAsInternalUser.mock.calls[5][1];
   expect(nodeList2.body.routing_table).toEqual({});
