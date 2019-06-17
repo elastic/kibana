@@ -35,7 +35,6 @@ import { rollup } from './plugins/rollup';
 import { siem } from './plugins/siem';
 import { remoteClusters } from './plugins/remote_clusters';
 import { crossClusterReplication } from './plugins/cross_cluster_replication';
-import { translations } from './plugins/translations';
 import { upgradeAssistant } from './plugins/upgrade_assistant';
 import { uptime } from './plugins/uptime';
 import { ossTelemetry } from './plugins/oss_telemetry';
@@ -77,7 +76,6 @@ module.exports = function (kibana) {
     siem(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),
-    translations(kibana),
     upgradeAssistant(kibana),
     uptime(kibana),
     ossTelemetry(kibana),
