@@ -20,6 +20,6 @@
 export function setupBasePathProvider(kbnServer) {
   kbnServer.server.decorate('request', 'getBasePath', function () {
     const request = this;
-    return kbnServer.newPlatform.setup.core.http.getBasePathFor(request);
+    return kbnServer.newPlatform.setup.core.http.basePath.get(request);
   });
 }

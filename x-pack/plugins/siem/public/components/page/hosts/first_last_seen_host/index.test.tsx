@@ -12,6 +12,7 @@ import { render } from 'react-testing-library';
 import { mockFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen/mock';
 import { wait } from '../../../../lib/helpers';
 import { TestProviders } from '../../../../mock';
+import '../../../../mock/ui_settings';
 
 import { FirstLastSeenHost, FirstLastSeenHostType } from '.';
 

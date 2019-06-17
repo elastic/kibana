@@ -20,7 +20,6 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiSpacer,
-  // @ts-ignore
   EuiSuperSelect,
   EuiText,
   EuiTitle,

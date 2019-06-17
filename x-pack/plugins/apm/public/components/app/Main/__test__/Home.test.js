@@ -8,6 +8,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Home } from '../Home';
 
+jest.mock('ui/kfetch');
+
 describe('Home component', () => {
   it('should render', () => {
     expect(shallow(<Home />)).toMatchSnapshot();
