@@ -7,7 +7,7 @@ pipeline {
     BASE_DIR = "."
   }
   stages {
-    stage('Build Stuff? :)') {
+    stage('Kickoff') {
       steps {
         dir("${env.BASE_DIR}"){
             sh './.ci/run.sh'
