@@ -91,7 +91,7 @@ test('creates and sets up second http server', async () => {
   const cfg = { port: 2345 };
   await serverSetup.createNewServer(cfg);
   const server = await service.start();
-  expect(server.isListening(9222)).toBeTruthy();
+  expect(server.isListening()).toBeTruthy();
   expect(server.isListening(cfg.port)).toBeTruthy();
 
   try {
@@ -112,7 +112,7 @@ test('creates and sets up second http server', async () => {
     expect(err.message).toBe('port must be defined');
   }
   await service.stop();
-  expect(server.isListening(9222)).toBeFalsy();
+  expect(server.isListening()).toBeFalsy();
   expect(server.isListening(cfg.port)).toBeFalsy();
 });
 

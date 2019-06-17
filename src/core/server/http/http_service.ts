@@ -99,7 +99,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     }
 
     return {
-      isListening: (port: number) => {
+      isListening: (port: number = 0) => {
         const server = this.secondaryServers.get(port);
         if (server) return server.isListening();
         return this.httpServer.isListening();
