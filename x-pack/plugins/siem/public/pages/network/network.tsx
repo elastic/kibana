@@ -28,7 +28,6 @@ import { networkModel, networkSelectors, State } from '../../store';
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
-import { UrlStateContainer } from '../../components/url_state';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
@@ -45,7 +44,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
         <StickyContainer>
           <FiltersGlobal>
             <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
-            <UrlStateContainer indexPattern={indexPattern} />
           </FiltersGlobal>
 
           <HeaderPage
