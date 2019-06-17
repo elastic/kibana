@@ -33,7 +33,6 @@ We're using a long-running feature branch [`feature-integrations-manager`](https
 Develop new features under branches in your own fork of `elastic/kibana`, then make PR's against [`elastic:feature-integrations-manager`](https://github.com/elastic/kibana/tree/feature-integrations-manager). e.g. work in `yourname:123456-feature-description` and create a PR to merge that into `elastic:feature-integrations-manager`. See https://github.com/elastic/kibana/pull/37950 for an example.
 
 ### Getting started
- 1. In one shell: start the [registry service](https://github.com/elastic/integrations-registry). See [thier docs](https://github.com/elastic/integrations-registry/blob/master/README.md#running) for more information.
  1. In another shell: `yarn es snapshot`
  1. In another shell: `yarn start --no-base-path`
  

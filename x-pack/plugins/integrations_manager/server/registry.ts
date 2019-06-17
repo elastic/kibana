@@ -9,7 +9,7 @@ import { fetchJson, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 
-const REGISTRY = process.env.REGISTRY || 'http://localhost:8080';
+const REGISTRY = process.env.REGISTRY || 'http://integrations-registry.app.elstc.co';
 
 export async function fetchList() {
   return fetchJson(`${REGISTRY}/list`);
