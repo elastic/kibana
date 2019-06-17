@@ -69,8 +69,9 @@ interface Props {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
   onSave: () => void;
+  onSaveNew: () => void;
   onLoadSavedQuery: (savedQuery: SavedQuery) => void;
-  isDirty: boolean;
+  isDirty: () => boolean;
 }
 
 interface State {
@@ -186,7 +187,9 @@ export class QueryBarUI extends Component<Props, State> {
             persistedLog={this.persistedLog}
             savedQuery={this.props.savedQuery}
             onSave={this.props.onSave}
+            onSaveNew={this.props.onSaveNew}
             onLoadSavedQuery={this.props.onLoadSavedQuery}
+            isDirty={this.props.isDirty}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>

@@ -26,6 +26,8 @@ interface Props {
   query: Query;
   savedQuery?: SavedQueryAttributes;
   onSave: () => void;
+  onSaveNew: () => void;
+  isDirty: () => boolean;
 }
 
 export interface SavedQueryDetails {
@@ -36,16 +38,37 @@ export interface SavedQueryDetails {
   query: Query;
 }
 
-export const SavedQueryRow: FunctionComponent<Props> = ({ query, savedQuery, onSave }) => {
+export const SavedQueryRow: FunctionComponent<Props> = ({
+  query,
+  savedQuery,
+  onSave,
+  onSaveNew,
+  isDirty,
+}) => {
   let rowContent;
   if (savedQuery) {
-    rowContent = (
-      <EuiFlexItem grow={false}>
-        <p>
-          <EuiLink onClick={onSave}>Save changes</EuiLink> to {savedQuery.title}
-        </p>
-      </EuiFlexItem>
-    );
+    if (isDirty()) {
+      rowContent = (
+        <Fragment>
+          <EuiFlexItem grow={false}>
+            <p>
+              <EuiLink onClick={onSave}>Save changes</EuiLink> to {savedQuery.title}
+            </p>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <p>
+              <EuiLink onClick={onSaveNew}>Save as new</EuiLink>
+            </p>
+          </EuiFlexItem>
+        </Fragment>
+      );
+    } else {
+      rowContent = (
+        <EuiFlexItem grow={false}>
+          <p>{savedQuery.title}</p>
+        </EuiFlexItem>
+      );
+    }
   } else if (query.query.length !== 0) {
     rowContent = (
       <EuiFlexItem grow={false}>
@@ -62,7 +85,7 @@ export const SavedQueryRow: FunctionComponent<Props> = ({ query, savedQuery, onS
 
   return (
     <Fragment>
-      <EuiFlexGroup>{rowContent}</EuiFlexGroup>
+      <EuiFlexGroup justifyContent="spaceBetween">{rowContent}</EuiFlexGroup>
     </Fragment>
   );
 };

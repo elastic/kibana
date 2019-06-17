@@ -72,6 +72,7 @@ interface Props {
 interface State {
   isFiltersVisible: boolean;
   showSaveQueryModal: boolean;
+  showSaveNewQueryModal: boolean;
   currentProps?: Props;
   query: Query;
   dateRangeFrom: string;
@@ -144,6 +145,7 @@ class SearchBarUI extends Component<Props, State> {
   public state = {
     isFiltersVisible: true,
     showSaveQueryModal: false,
+    showSaveNewQueryModal: false,
     currentProps: this.props,
     query: {
       query: this.props.query.query,
@@ -186,7 +188,7 @@ class SearchBarUI extends Component<Props, State> {
     });
   };
 
-  public onSave = async (savedQueryMeta: SavedQueryMeta) => {
+  public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     const savedQueryAttributes: SavedQueryAttributes = {
       title: savedQueryMeta.title,
       description: savedQueryMeta.description,
@@ -216,7 +218,7 @@ class SearchBarUI extends Component<Props, State> {
 
     try {
       let response;
-      if (this.props.savedQuery) {
+      if (this.props.savedQuery && !saveAsNew) {
         response = await saveQuery(savedQueryAttributes, this.props.savedQuery.id);
       } else {
         response = await saveQuery(savedQueryAttributes);
@@ -226,6 +228,7 @@ class SearchBarUI extends Component<Props, State> {
 
       this.setState({
         showSaveQueryModal: false,
+        showSaveNewQueryModal: false,
       });
 
       if (this.props.onSaved) {
@@ -250,6 +253,12 @@ class SearchBarUI extends Component<Props, State> {
   public onInitiateSave = () => {
     this.setState({
       showSaveQueryModal: true,
+    });
+  };
+
+  public onInitiateSaveNew = () => {
+    this.setState({
+      showSaveNewQueryModal: true,
     });
   };
 
@@ -367,9 +376,10 @@ class SearchBarUI extends Component<Props, State> {
             showAutoRefreshOnly={this.props.showAutoRefreshOnly}
             onRefreshChange={this.props.onRefreshChange}
             onSave={this.onInitiateSave}
+            onSaveNew={this.onInitiateSaveNew}
             onChange={this.onQueryBarChange}
             onLoadSavedQuery={this.onLoadSavedQuery}
-            isDirty={this.isDirty()}
+            isDirty={this.isDirty}
           />
         ) : (
           ''
@@ -405,6 +415,12 @@ class SearchBarUI extends Component<Props, State> {
             savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}
+          />
+        ) : null}
+        {this.state.showSaveNewQueryModal ? (
+          <SaveQueryForm
+            onSave={savedQueryMeta => this.onSave(savedQueryMeta, true)}
+            onClose={() => this.setState({ showSaveNewQueryModal: false })}
           />
         ) : null}
       </div>
