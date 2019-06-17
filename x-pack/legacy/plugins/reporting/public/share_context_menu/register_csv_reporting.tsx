@@ -12,8 +12,8 @@ import { ShareActionProps } from 'ui/share/share_action';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_action_registry';
 import { ReportingPanelContent } from '../components/reporting_panel_content';
 
-function reportingProvider($http: any) {
-  const xpackInfo = xpackInfoService($http);
+function reportingProvider($injector: any) {
+  const xpackInfo = xpackInfoService($injector);
   const getShareActions = ({
     objectType,
     objectId,

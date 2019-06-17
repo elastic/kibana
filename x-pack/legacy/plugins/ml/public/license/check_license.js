@@ -17,8 +17,8 @@ let licenseHasExpired = true;
 let licenseType = null;
 let expiredLicenseBannerId;
 
-export function checkFullLicense($http, kbnBaseUrl, kbnUrl) {
-  const features = getFeatures($http);
+export function checkFullLicense($injector, kbnBaseUrl, kbnUrl) {
+  const features = getFeatures($injector);
   licenseType = features.licenseType;
 
   if (features.isAvailable === false) {
@@ -38,8 +38,8 @@ export function checkFullLicense($http, kbnBaseUrl, kbnUrl) {
   }
 }
 
-export function checkBasicLicense($http, kbnBaseUrl) {
-  const features = getFeatures($http);
+export function checkBasicLicense($injector, kbnBaseUrl) {
+  const features = getFeatures($injector);
   licenseType = features.licenseType;
 
   if (features.isAvailable === false) {
@@ -57,8 +57,8 @@ export function checkBasicLicense($http, kbnBaseUrl) {
 // a wrapper for checkFullLicense which doesn't resolve if the license has expired.
 // this is used by all create jobs pages to redirect back to the jobs list
 // if the user's license has expired.
-export function checkLicenseExpired($http, kbnBaseUrl, kbnUrl) {
-  return checkFullLicense($http, kbnBaseUrl, kbnUrl)
+export function checkLicenseExpired($injector, kbnBaseUrl, kbnUrl) {
+  return checkFullLicense($injector, kbnBaseUrl, kbnUrl)
     .then((features) => {
       if (features.hasExpired) {
         kbnUrl.redirect('/jobs');
@@ -94,8 +94,8 @@ function setLicenseExpired(features) {
   }
 }
 
-function getFeatures($http) {
-  return xpackInfoService($http).get('features.ml');
+function getFeatures($injector) {
+  return xpackInfoService($injector).get('features.ml');
 }
 
 function redirectToKibana(features, kbnBaseUrl) {
@@ -118,8 +118,8 @@ export function isFullLicense() {
   return (licenseType === LICENSE_TYPE.FULL);
 }
 
-export function xpackFeature($http) {
-  const xpackInfo = xpackInfoService($http);
+export function xpackFeature($injector) {
+  const xpackInfo = xpackInfoService($injector);
 
   return {
     isAvailable(feature) {

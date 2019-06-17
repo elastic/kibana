@@ -79,7 +79,7 @@ routes
     controllerAs: 'licenseManagement',
     controller: class LicenseManagementController {
 
-      constructor($injector, $rootScope, $scope, $route, kbnUrl, $http) {
+      constructor($injector, $rootScope, $scope, $route, kbnUrl) {
         initializeTelemetry($injector);
         let autoLogout = null;
         /* if security is disabled, there will be no autoLogout service,
@@ -92,7 +92,7 @@ routes
 
         $scope.$$postDigest(() => {
           const elem = document.getElementById('licenseReactRoot');
-          const xPackInfo = xpackInfoService($http);
+          const xPackInfo = xpackInfoService($injector);
           const initialState = { license: xPackInfo.get('license') };
           const kbnUrlWrapper = {
             change(url) {

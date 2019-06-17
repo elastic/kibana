@@ -25,7 +25,7 @@ import { npStart } from 'ui/new_platform';
  * Poll for changes to reports. Inform the user of changes when the license is active.
  */
 uiModules.get('kibana')
-  .run(($http, reportingPollConfig) => {
+  .run(($injector, reportingPollConfig) => {
     // Don't show users any reporting toasts until they're logged in.
     if (Path.isUnauthenticated()) {
       return;
@@ -33,7 +33,7 @@ uiModules.get('kibana')
 
     // We assume that all license types offer Reporting, and that we only need to check if the
     // license is active or expired.
-    const isLicenseActive = xpackInfoService($http).getLicense().isActive;
+    const isLicenseActive = xpackInfoService($injector).getLicense().isActive;
 
     async function showCompletionNotification(job) {
       const reportObjectTitle = job._source.payload.title;

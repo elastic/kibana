@@ -30,8 +30,8 @@ describe('xpack_info service', () => {
     sessionStorage.removeItem.restore();
   });
 
-  beforeEach(ngMock.inject($http => {
-    xpackInfo = xpackInfoService($http);
+  beforeEach(ngMock.inject($injector => {
+    xpackInfo = xpackInfoService($injector);
   }));
 
   it ('updates the stored xpack info', () => {

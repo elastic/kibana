@@ -10,8 +10,8 @@ import 'ui/url';
 import { LogstashLicenseService } from './logstash_license_service';
 
 uiModules.get('xpack/logstash')
-  .factory('logstashLicenseService', ($injector, $http) => {
-    const xpackInfo = xpackInfoService($http);
+  .factory('logstashLicenseService', $injector => {
+    const xpackInfo = xpackInfoService($injector);
     const kbnUrlService = $injector.get('kbnUrl');
     const $timeout = $injector.get('$timeout');
 
