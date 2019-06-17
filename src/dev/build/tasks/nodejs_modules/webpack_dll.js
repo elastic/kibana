@@ -24,13 +24,7 @@ import globby from 'globby';
 
 function checkDllEntryAccess(entry, baseDir = '') {
   const resolvedPath = baseDir ? resolve(baseDir, entry) : entry;
-
-  try {
-    isFileAccessible(resolvedPath);
-    return true;
-  } catch (e) {
-    return false;
-  }
+  return isFileAccessible(resolvedPath);
 }
 
 export async function getDllEntries(manifestPath, whiteListedModules, baseDir = '') {
