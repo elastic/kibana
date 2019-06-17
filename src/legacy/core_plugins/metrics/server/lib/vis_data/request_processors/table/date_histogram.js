@@ -71,9 +71,9 @@ export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, cap
       });
     };
 
-    isLastValueTimerangeMode(panel) ?
-      getDateHistogramForLastBucketMode() :
-      getDateHistogramForEntireTimerangeMode();
+    isLastValueTimerangeMode(panel)
+      ? getDateHistogramForLastBucketMode()
+      : getDateHistogramForEntireTimerangeMode();
 
     return next(doc);
   };
