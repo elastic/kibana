@@ -12,51 +12,51 @@ interface ConstructorOptions {
 }
 
 export class AlertInstance {
-  private _shouldFire: boolean = false;
-  private _fireOptions?: Record<string, any>;
-  private _meta: Record<string, any>;
-  private _state: Record<string, any>;
+  private internalShouldFire: boolean = false;
+  private fireOptions?: Record<string, any>;
+  private meta: Record<string, any>;
+  private state: Record<string, any>;
 
   constructor({ state = {}, meta = {} }: ConstructorOptions = {}) {
-    this._state = state;
-    this._meta = meta;
+    this.state = state;
+    this.meta = meta;
   }
 
   shouldFire() {
-    return this._shouldFire;
+    return this.internalShouldFire;
   }
 
   getFireOptions() {
-    return this._fireOptions;
+    return this.fireOptions;
   }
 
   resetFire() {
-    this._shouldFire = false;
-    delete this._fireOptions;
+    this.internalShouldFire = false;
+    delete this.fireOptions;
     return this;
   }
 
   getState() {
-    return this._state;
+    return this.state;
   }
 
   getMeta() {
-    return this._meta;
+    return this.meta;
   }
 
   fire(actionGroup: string, context: Context = {}) {
-    this._shouldFire = true;
-    this._fireOptions = { actionGroup, context, state: this._state };
+    this.internalShouldFire = true;
+    this.fireOptions = { actionGroup, context, state: this.state };
     return this;
   }
 
   replaceState(state: State) {
-    this._state = state;
+    this.state = state;
     return this;
   }
 
   replaceMeta(meta: Record<string, any>) {
-    this._meta = meta;
+    this.meta = meta;
     return this;
   }
 
@@ -65,8 +65,8 @@ export class AlertInstance {
    */
   toJSON() {
     return {
-      state: this._state,
-      meta: this._meta,
+      state: this.state,
+      meta: this.meta,
     };
   }
 }
