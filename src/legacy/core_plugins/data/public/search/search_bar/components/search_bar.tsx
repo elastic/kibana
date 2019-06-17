@@ -18,9 +18,15 @@
  */
 
 // @ts-ignore
-import { EuiFilterButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiButtonEmpty,
+  EuiButton,
+} from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
@@ -34,6 +40,7 @@ import { FilterBar } from '../../../filter/filter_bar';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { saveQuery } from '../../../query/query_bar/lib/saved_query_service';
 import { SavedQueryMeta, SaveQueryForm } from './save_query_form';
+import { EuiFlexGroup, EuiFlexItem } from '../../../../../../../../../eui/src/components/flex';
 
 interface DateRange {
   from: string;
@@ -73,6 +80,7 @@ interface State {
   isFiltersVisible: boolean;
   showSaveQueryModal: boolean;
   showSaveNewQueryModal: boolean;
+  showSavedQueryPopover: boolean;
   currentProps?: Props;
   query: Query;
   dateRangeFrom: string;
@@ -146,6 +154,7 @@ class SearchBarUI extends Component<Props, State> {
     isFiltersVisible: true,
     showSaveQueryModal: false,
     showSaveNewQueryModal: false,
+    showSavedQueryPopover: false,
     currentProps: this.props,
     query: {
       query: this.props.query.query,
@@ -182,9 +191,21 @@ class SearchBarUI extends Component<Props, State> {
   public ro = new ResizeObserver(this.setFilterBarHeight);
   /* eslint-enable */
 
-  public toggleFiltersVisible = () => {
+  public showSavedQueryPopover = () => {
     this.setState({
-      isFiltersVisible: !this.state.isFiltersVisible,
+      showSavedQueryPopover: true,
+    });
+  };
+
+  public hideSavedQueryPopover = () => {
+    this.setState({
+      showSavedQueryPopover: false,
+    });
+  };
+
+  public toggleSavedQueryPopover = () => {
+    this.setState({
+      showSavedQueryPopover: !this.state.showSavedQueryPopover,
     });
   };
 
@@ -338,9 +359,19 @@ class SearchBarUI extends Component<Props, State> {
           defaultMessage: 'Select to show',
         });
 
+    const savedQueryDescriptionText = this.props.intl.formatMessage({
+      id: 'data.search.searchBar.savedQueryDescriptionText',
+      defaultMessage: 'Saved queries allow you to store sets of queries, filters and time filters.',
+    });
+
+    const savedQueryPopoverTitleText = this.props.intl.formatMessage({
+      id: 'data.search.searchBar.savedQueryPopoverTitleText',
+      defaultMessage: 'Saved Queries',
+    });
+
     const filterTriggerButton = (
       <EuiFilterButton
-        onClick={this.toggleFiltersVisible}
+        onClick={this.toggleSavedQueryPopover}
         isSelected={this.state.isFiltersVisible}
         hasActiveFilters={this.state.isFiltersVisible}
         numFilters={this.props.filters.length > 0 ? this.props.filters.length : undefined}
@@ -348,8 +379,53 @@ class SearchBarUI extends Component<Props, State> {
         aria-expanded={!!this.state.isFiltersVisible}
         title={`${this.props.filters.length} ${filtersAppliedText} ${clickToShowOrHideText}`}
       >
-        Filters
+        Manage
       </EuiFilterButton>
+    );
+
+    const savedQueryPopover = (
+      <EuiPopover
+        id="savedQueryPopover"
+        button={filterTriggerButton}
+        isOpen={this.state.showSavedQueryPopover}
+        closePopover={this.hideSavedQueryPopover}
+        anchorPosition="downLeft"
+      >
+        <EuiPopoverTitle>{savedQueryPopoverTitleText}</EuiPopoverTitle>
+
+        <EuiFlexGroup>
+          <p>{savedQueryDescriptionText}</p>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup direction="rowReverse" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={() => {
+                if (this.props.savedQuery) {
+                  this.onInitiateSave();
+                } else {
+                  this.onInitiateSaveNew();
+                }
+              }}
+            >
+              <FormattedMessage
+                id="data.search.searchBar.savedQueryPopoverSaveButtonText"
+                defaultMessage="Save"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty flush="right" onClick={() => {}} href={`#/management/kibana/objects`}>
+              <FormattedMessage
+                id="data.search.searchBar.savedQueryPopoverManageQueriesButtonText"
+                defaultMessage="Manage queries"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem />
+        </EuiFlexGroup>
+      </EuiPopover>
     );
 
     const classes = classNames('globalFilterGroup__wrapper', {
@@ -367,7 +443,7 @@ class SearchBarUI extends Component<Props, State> {
             appName={this.props.appName}
             indexPatterns={this.props.indexPatterns}
             store={this.props.store}
-            prepend={this.props.showFilterBar ? filterTriggerButton : ''}
+            prepend={this.props.showFilterBar ? savedQueryPopover : ''}
             showDatePicker={this.props.showDatePicker}
             dateRangeFrom={this.state.dateRangeFrom}
             dateRangeTo={this.state.dateRangeTo}
