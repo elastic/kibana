@@ -18,7 +18,7 @@ interface Props {
   };
 }
 
-export const SectionError: React.FunctionComponent<Props> = ({ title, error }) => {
+export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...rest }) => {
   const {
     error: errorString,
     cause, // wrapEsError() on the server adds a "cause" array
@@ -26,7 +26,7 @@ export const SectionError: React.FunctionComponent<Props> = ({ title, error }) =
   } = error.data;
 
   return (
-    <EuiCallOut title={title} color="danger" iconType="alert">
+    <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
       <div>{message || errorString}</div>
       {cause && (
         <Fragment>

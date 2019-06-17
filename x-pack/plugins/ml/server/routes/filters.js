@@ -48,13 +48,13 @@ function deleteFilter(callWithRequest, filterId) {
   return mgr.deleteFilter(filterId);
 }
 
-export function filtersRoutes(server, commonRouteConfig) {
+export function filtersRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/filters',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return getAllFilters(callWithRequest)
         .catch(resp => wrapError(resp));
     },
@@ -63,11 +63,11 @@ export function filtersRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/filters/_stats',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return getAllFilterStats(callWithRequest)
         .catch(resp => wrapError(resp));
     },
@@ -76,11 +76,11 @@ export function filtersRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/filters/{filterId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const filterId = request.params.filterId;
       return getFilter(callWithRequest, filterId)
         .catch(resp => wrapError(resp));
@@ -90,11 +90,11 @@ export function filtersRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'PUT',
     path: '/api/ml/filters',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const body = request.payload;
       return newFilter(callWithRequest, body)
         .catch(resp => wrapError(resp));
@@ -104,11 +104,11 @@ export function filtersRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'PUT',
     path: '/api/ml/filters/{filterId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const filterId = request.params.filterId;
       const payload = request.payload;
       return updateFilter(
@@ -124,11 +124,11 @@ export function filtersRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'DELETE',
     path: '/api/ml/filters/{filterId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const filterId = request.params.filterId;
       return deleteFilter(callWithRequest, filterId)
         .catch(resp => wrapError(resp));

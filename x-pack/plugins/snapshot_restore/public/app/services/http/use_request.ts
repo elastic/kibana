@@ -30,7 +30,7 @@ export const sendRequest = async ({
   try {
     const response = await httpService.httpClient[method](path, body);
 
-    if (!response.data) {
+    if (typeof response.data === 'undefined') {
       throw new Error(response.statusText);
     }
 
@@ -44,7 +44,7 @@ export const sendRequest = async ({
     };
   } catch (e) {
     return {
-      error: e,
+      error: e.response ? e.response : e,
     };
   }
 };
@@ -83,16 +83,7 @@ export const useRequest = ({
       uimActionType,
     };
 
-    let response;
-
-    if (timeout) {
-      [response] = await Promise.all([
-        sendRequest(requestBody),
-        new Promise(resolve => setTimeout(resolve, timeout)),
-      ]);
-    } else {
-      response = await sendRequest(requestBody);
-    }
+    const response = await sendRequest(requestBody);
 
     // Don't update state if an outdated request has resolved.
     if (isOutdatedRequest) {

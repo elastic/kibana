@@ -80,7 +80,7 @@ export async function getHasMLJob({
 }) {
   try {
     await callApi<MLJobApiResponse>({
-      method: 'HEAD',
+      method: 'GET',
       pathname: `/api/ml/anomaly_detectors/${getMlJobId(
         serviceName,
         transactionType
