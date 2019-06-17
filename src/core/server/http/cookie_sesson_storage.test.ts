@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Chance from 'chance';
 import request from 'request';
 import supertest from 'supertest';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -28,15 +27,12 @@ import { loggingServiceMock } from '../logging/logging_service.mock';
 
 import { createCookieSessionStorageFactory } from './cookie_session_storage';
 
-const chance = new Chance();
-
 let server: HttpServer;
 
 const logger = loggingServiceMock.create();
 const config = {
   host: '127.0.0.1',
   maxPayload: new ByteSizeValue(1024),
-  port: chance.integer({ min: 10000, max: 15000 }),
   ssl: {},
 } as HttpConfig;
 

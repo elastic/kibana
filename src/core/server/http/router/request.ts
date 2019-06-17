@@ -38,7 +38,7 @@ export interface KibanaRequestRoute {
   options: Required<RouteConfigOptions>;
 }
 
-const securedHeaders = ['authorization'];
+const secretHeaders = ['authorization'];
 /**
  * Kibana specific abstraction for an incoming request.
  * @public
@@ -52,7 +52,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     req: Request,
     routeSchemas?: RouteSchemas<P, Q, B>,
-    secured: boolean = true
+    withoutSecretHeaders: boolean = true
   ) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
     return new KibanaRequest(
@@ -60,7 +60,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
       requestParts.params,
       requestParts.query,
       requestParts.body,
-      secured
+      withoutSecretHeaders
     );
   }
 
@@ -106,7 +106,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     readonly params: Params,
     readonly query: Query,
     readonly body: Body,
-    private readonly secured: boolean
+    private readonly withoutSecretHeaders: boolean
   ) {
     this.url = request.url;
 
@@ -123,7 +123,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     return filterHeaders(
       this[requestSymbol].headers,
       headersToKeep,
-      this.secured ? securedHeaders : []
+      this.withoutSecretHeaders ? secretHeaders : []
     );
   }
 

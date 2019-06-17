@@ -22,7 +22,7 @@ import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 import { Request } from 'hapi';
 
-import { GetAuthHeaders, isRealRequest } from '../http/';
+import { GetAuthHeaders, isRealRequest } from '../http';
 import { filterHeaders, KibanaRequest, ensureRawRequest } from '../http/router';
 import { Logger } from '../logging';
 import {
@@ -30,6 +30,14 @@ import {
   parseElasticsearchClientConfig,
 } from './elasticsearch_client_config';
 import { ScopedClusterClient } from './scoped_cluster_client';
+
+/**
+ * Support Legacy platform request for the period of migration.
+ *
+ * @public
+ */
+
+export type LegacyRequest = Request;
 
 const noop = () => undefined;
 /**
@@ -101,13 +109,11 @@ async function callAPI(
 
 /**
  * Fake request object created manually by Kibana plugins.
- * @deprecated
  * @public
  */
 export interface FakeRequest {
   /** Headers used for authentication against Elasticsearch */
   headers: Record<string, string>;
-  [key: string]: any;
 }
 
 /**
@@ -130,7 +136,7 @@ export class ClusterClient {
   private scopedClient?: Client;
 
   /**
-   * Indicates whether this cluster client (and all internal raw Elasticsearch JS clients)       57 |   describe('returns fakeRequest headers as is been closed.
+   * Indicates whether this cluster client (and all internal raw Elasticsearch JS clients) has been closed.
    */
   private isClosed = false;
 
@@ -182,10 +188,10 @@ export class ClusterClient {
    * scoped to the provided req. Consumers shouldn't worry about closing
    * scoped client instances, these will be automatically closed as soon as the
    * original cluster client isn't needed anymore and closed.
-   * @param req - Request the `ScopedClusterClient` instance will be scoped to.
+   * @param request - Request the `ScopedClusterClient` instance will be scoped to.
    * Supports request optionality, Legacy.Request & FakeRequest for BWC with LegacyPlatform
    */
-  public asScoped(request?: KibanaRequest | Request | FakeRequest) {
+  public asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest) {
     // It'd have been quite expensive to create and configure client for every incoming
     // request since it involves parsing of the config, reading of the SSL certificate and
     // key files etc. Moreover scoped client needs two Elasticsearch JS clients at the same
@@ -232,7 +238,7 @@ export class ClusterClient {
   }
 
   private getHeaders(
-    request?: KibanaRequest | Request | FakeRequest
+    request?: KibanaRequest | LegacyRequest | FakeRequest
   ): Record<string, string | string[] | undefined> {
     if (!isRealRequest(request)) {
       return request && request.headers ? request.headers : {};

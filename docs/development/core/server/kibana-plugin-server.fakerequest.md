@@ -4,10 +4,6 @@
 
 ## FakeRequest interface
 
-> Warning: This API is now obsolete.
-> 
-> 
-
 Fake request object created manually by Kibana plugins.
 
 <b>Signature:</b>

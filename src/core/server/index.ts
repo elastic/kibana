@@ -50,6 +50,7 @@ export {
   ElasticsearchClientConfig,
   APICaller,
   FakeRequest,
+  LegacyRequest,
 } from './elasticsearch';
 export {
   AuthenticationHandler,

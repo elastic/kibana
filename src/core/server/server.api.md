@@ -59,7 +59,7 @@ export interface CallAPIOptions {
 // @public
 export class ClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
-    asScoped(request?: KibanaRequest | Request | FakeRequest): ScopedClusterClient;
+    asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): ScopedClusterClient;
     callAsInternalUser: (endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
     close(): void;
     }
@@ -135,10 +135,8 @@ export interface ElasticsearchServiceSetup {
     };
 }
 
-// @public @deprecated
+// @public
 export interface FakeRequest {
-    // (undocumented)
-    [key: string]: any;
     headers: Record<string, string>;
 }
 
@@ -185,13 +183,13 @@ export interface InternalCoreStart {
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     // @internal (undocumented)
     protected readonly [requestSymbol]: Request;
-    constructor(request: Request, params: Params, query: Query, body: Body, secured: boolean);
+    constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
     // Warning: (ae-forgotten-export) The symbol "RouteSchemas" needs to be exported by the entry point index.d.ts
     // 
     // @internal
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, secured?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
+    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
     // (undocumented)
     getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
     // (undocumented)
@@ -213,6 +211,9 @@ export interface KibanaRequestRoute {
     // (undocumented)
     path: string;
 }
+
+// @public
+export type LegacyRequest = Request;
 
 // @public
 export interface Logger {
