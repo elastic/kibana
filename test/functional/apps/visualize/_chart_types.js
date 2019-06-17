@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
         'Region Map',
         'Tag Cloud',
         'Timelion',
-        'Timeseries',
+        'TSVB',
         'Vega',
         'Vertical Bar',
       ];
