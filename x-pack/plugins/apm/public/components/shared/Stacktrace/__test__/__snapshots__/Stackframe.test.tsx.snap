@@ -15,7 +15,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 
 .c4 {
   position: relative;
-  border-radius: 0 0 5px 5px;
+  border-radius: 0 0 4px 4px;
 }
 
 .c5 {
@@ -31,7 +31,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 0 0 0 5px;
+  border-radius: 0 0 0 4px;
   background: #f5f7fa;
 }
 
@@ -47,7 +47,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 }
 
 .c7:last-of-type {
-  border-radius: 0 0 0 5px;
+  border-radius: 0 0 0 4px;
 }
 
 .c8 {
@@ -63,7 +63,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 }
 
 .c8:last-of-type {
-  border-radius: 0 0 0 5px;
+  border-radius: 0 0 0 4px;
 }
 
 .c9 {
@@ -74,7 +74,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 }
 
 .c9:last-of-type {
-  border-radius: 0 0 5px 0;
+  border-radius: 0 0 4px 0;
 }
 
 .c10 {
@@ -98,7 +98,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 
 .c1 {
   border-bottom: 1px solid #d3dae6;
-  border-radius: 5px 5px 0 0;
+  border-radius: 4px 4px 0 0;
 }
 
 .c0 {
@@ -106,7 +106,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
   font-size: 14px;
   border: 1px solid #d3dae6;
-  border-radius: 5px;
+  border-radius: 4px;
   background: #f5f7fa;
 }
 

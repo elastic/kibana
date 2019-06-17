@@ -97,13 +97,13 @@ export function getOperationTypesForField(field: IndexPatternField): OperationTy
     .map(({ type }) => type);
 }
 
-function buildColumnForOperationType<T extends OperationType>(
+export function buildColumnForOperationType<T extends OperationType>(
+  index: number,
   op: T,
-  operationId: string,
   suggestedOrder?: DimensionPriority,
   field?: IndexPatternField
 ): IndexPatternColumn {
-  return operationDefinitionMap[op].buildColumn(operationId, suggestedOrder, field);
+  return operationDefinitionMap[op].buildColumn(`${index}${op}`, suggestedOrder, field);
 }
 
 export function getPotentialColumns(
@@ -117,7 +117,7 @@ export function getPotentialColumns(
       const validOperations = getOperationTypesForField(field);
 
       return validOperations.map(op =>
-        buildColumnForOperationType(op, `${op}${index}`, suggestedOrder, field)
+        buildColumnForOperationType(index, op, suggestedOrder, field)
       );
     })
     .reduce((prev, current) => prev.concat(current));

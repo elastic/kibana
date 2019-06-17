@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAvatar } from '@elastic/eui';
+import { EuiAvatar, isValidHex } from '@elastic/eui';
 import React, { SFC } from 'react';
 import { getSpaceColor, getSpaceInitials, MAX_SPACE_INITIALS } from '../../common';
 import { Space } from '../../common/model/space';
@@ -21,6 +21,8 @@ export const SpaceAvatar: SFC<Props> = (props: Props) => {
 
   const spaceName = space.name ? space.name.trim() : '';
 
+  const spaceColor = getSpaceColor(space);
+
   return (
     <EuiAvatar
       type="space"
@@ -34,7 +36,7 @@ export const SpaceAvatar: SFC<Props> = (props: Props) => {
       size={size || 'm'}
       initialsLength={MAX_SPACE_INITIALS}
       initials={getSpaceInitials(space)}
-      color={getSpaceColor(space)}
+      color={isValidHex(spaceColor) ? spaceColor : ''}
       {...rest}
     />
   );

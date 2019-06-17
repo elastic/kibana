@@ -48,7 +48,6 @@ exports[`Timeline should render with data 1`] = `
         <div
           style={
             Object {
-              "backgroundColor": "#ffffff",
               "borderBottom": "1px solid #98a2b3",
               "height": "100px",
               "position": "absolute",
@@ -83,7 +82,7 @@ exports[`Timeline should render with data 1`] = `
                 style={
                   Object {
                     "text": Object {
-                      "fill": "#98a2b3",
+                      "fill": "#69707d",
                     },
                   }
                 }
@@ -98,7 +97,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                         },
                       }
                     }
@@ -109,7 +108,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -123,9 +122,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -140,7 +139,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                         },
                       }
                     }
@@ -151,7 +150,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -165,9 +164,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -182,7 +181,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                         },
                       }
                     }
@@ -193,7 +192,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -207,9 +206,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -224,7 +223,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                         },
                       }
                     }
@@ -235,7 +234,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -249,9 +248,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -266,7 +265,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                         },
                       }
                     }
@@ -277,7 +276,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -291,9 +290,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -308,7 +307,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                         },
                       }
                     }
@@ -319,7 +318,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -333,9 +332,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -350,7 +349,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                         },
                       }
                     }
@@ -361,7 +360,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -375,9 +374,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -392,7 +391,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                         },
                       }
                     }
@@ -403,7 +402,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -417,9 +416,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -434,7 +433,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                         },
                       }
                     }
@@ -445,7 +444,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -459,9 +458,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -476,7 +475,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                         },
                       }
                     }
@@ -487,7 +486,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }
@@ -501,9 +500,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98a2b3",
+                          "fill": "#69707d",
                           "text": Object {
-                            "fill": "#98a2b3",
+                            "fill": "#69707d",
                           },
                         }
                       }

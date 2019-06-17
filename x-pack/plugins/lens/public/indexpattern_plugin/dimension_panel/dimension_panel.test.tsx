@@ -57,7 +57,7 @@ describe('IndexPatternDimensionPanel', () => {
       columns: {
         col1: {
           operationId: 'op1',
-          label: 'Value of timestamp',
+          label: 'Date Histogram of timestamp',
           dataType: 'date',
           isBucketed: true,
 

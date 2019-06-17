@@ -486,6 +486,17 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "type": "keyword",
         "width": 180,
       },
+      Object {
+        "aggregatable": false,
+        "category": "base",
+        "columnHeaderType": "not-filtered",
+        "description": "For log events the message field contains the log message.
+In other use cases the message field can be used to concatenate different values which are then freely searchable. If multiple messages exist, they can be combined into one message.",
+        "example": "Hello World",
+        "id": "message",
+        "type": "text",
+        "width": 180,
+      },
     ]
   }
   dataProviders={

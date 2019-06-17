@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { indexPatternService } from '../../../kibana_services';
 import { Storage } from 'ui/storage';
 
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 const { QueryBar } = data.query.ui;
 
 const settings = chrome.getUiSettingsClient();
