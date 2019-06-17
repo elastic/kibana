@@ -25,8 +25,9 @@ import {
   searchReposForScope,
   searchReposForScopeFailed,
   searchReposForScopeSuccess,
+  turnOffDefaultRepoScope,
 } from '../actions';
-import { searchRoutePattern } from './patterns';
+import { adminRoutePattern, searchRoutePattern } from './patterns';
 
 function requestDocumentSearch(payload: DocumentSearchPayload) {
   const { query, page, languages, repositories, repoScope } = payload;
@@ -123,8 +124,14 @@ function* handleSearchRouteChange(action: Action<Match>) {
   }
 }
 
+function* resetDefaultRepoScope() {
+  yield put(turnOffDefaultRepoScope());
+}
+
 export function* watchSearchRouteChange() {
   yield takeLatest(searchRoutePattern, handleSearchRouteChange);
+  // Reset the default search scope if enters the admin page.
+  yield takeLatest(adminRoutePattern, resetDefaultRepoScope);
 }
 
 function* handleReposSearchForScope(action: Action<RepositorySearchPayload>) {

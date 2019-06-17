@@ -46,7 +46,7 @@ describe('FeatureRegistry', () => {
           app: ['app1'],
           savedObject: {
             all: ['space', 'etc', 'telemetry'],
-            read: ['canvas', 'config'],
+            read: ['canvas', 'config', 'url'],
           },
           api: ['someApiEndpointTag', 'anotherEndpointTag'],
           ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -62,7 +62,7 @@ describe('FeatureRegistry', () => {
           app: ['app1'],
           savedObject: {
             all: ['space', 'etc', 'telemetry'],
-            read: ['canvas', 'config'],
+            read: ['canvas', 'config', 'url'],
           },
           api: ['someApiEndpointTag', 'anotherEndpointTag'],
           ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -105,7 +105,7 @@ describe('FeatureRegistry', () => {
     expect(allPrivilege.savedObject.all).toEqual(['telemetry']);
   });
 
-  it(`automatically grants 'read' access to config saved objects for both privileges`, () => {
+  it(`automatically grants 'read' access to config and url saved objects for both privileges`, () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
@@ -134,11 +134,11 @@ describe('FeatureRegistry', () => {
 
     const allPrivilege = result[0].privileges.all;
     const readPrivilege = result[0].privileges.read;
-    expect(allPrivilege.savedObject.read).toEqual(['config']);
-    expect(readPrivilege.savedObject.read).toEqual(['config']);
+    expect(allPrivilege.savedObject.read).toEqual(['config', 'url']);
+    expect(readPrivilege.savedObject.read).toEqual(['config', 'url']);
   });
 
-  it(`automatically grants 'all' access to telemetry and 'read' to config saved objects for the reserved privilege`, () => {
+  it(`automatically grants 'all' access to telemetry and 'read' to [config, url] saved objects for the reserved privilege`, () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
@@ -162,7 +162,7 @@ describe('FeatureRegistry', () => {
 
     const reservedPrivilege = result[0]!.reserved!.privilege;
     expect(reservedPrivilege.savedObject.all).toEqual(['telemetry']);
-    expect(reservedPrivilege.savedObject.read).toEqual(['config']);
+    expect(reservedPrivilege.savedObject.read).toEqual(['config', 'url']);
   });
 
   it(`does not duplicate the automatic grants if specified on the incoming feature`, () => {
@@ -175,14 +175,14 @@ describe('FeatureRegistry', () => {
           ui: [],
           savedObject: {
             all: ['telemetry'],
-            read: ['config'],
+            read: ['config', 'url'],
           },
         },
         read: {
           ui: [],
           savedObject: {
             all: [],
-            read: ['config'],
+            read: ['config', 'url'],
           },
         },
       },
@@ -195,8 +195,8 @@ describe('FeatureRegistry', () => {
     const allPrivilege = result[0].privileges.all;
     const readPrivilege = result[0].privileges.read;
     expect(allPrivilege.savedObject.all).toEqual(['telemetry']);
-    expect(allPrivilege.savedObject.read).toEqual(['config']);
-    expect(readPrivilege.savedObject.read).toEqual(['config']);
+    expect(allPrivilege.savedObject.read).toEqual(['config', 'url']);
+    expect(readPrivilege.savedObject.read).toEqual(['config', 'url']);
   });
 
   it(`does not allow duplicate features to be registered`, () => {

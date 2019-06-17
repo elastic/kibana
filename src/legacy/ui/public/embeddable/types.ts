@@ -17,24 +17,19 @@
  * under the License.
  */
 
+import { Filter } from '@kbn/es-query';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
+
+// Should go away soon once everyone imports from kbn/es-query
+export { Filter } from '@kbn/es-query';
+
 export interface TimeRange {
   to: string;
   from: string;
 }
 
-export interface RefreshConfig {
-  isPaused: boolean;
-  interval: number;
-}
-
 export interface FilterMeta {
   disabled: boolean;
-}
-
-// TODO: Filter object representation needs to be fleshed out.
-export interface Filter {
-  meta: FilterMeta;
-  query: object;
 }
 
 export type Filters = Filter[];
@@ -44,10 +39,13 @@ export enum QueryLanguageType {
   LUCENE = 'lucene',
 }
 
+// It's a string sometimes in old version formats, before Kuery came along and there
+// was the language specifier.
 export interface Query {
   language: QueryLanguageType;
   query: string;
 }
+
 export interface EmbeddableCustomization {
   [key: string]: object | string;
 }
@@ -58,9 +56,9 @@ export interface ContainerState {
 
   timeRange: TimeRange;
 
-  filters: Filters;
+  filters: Filter[];
 
-  refreshConfig: RefreshConfig;
+  refreshConfig: RefreshInterval;
 
   query: Query;
 

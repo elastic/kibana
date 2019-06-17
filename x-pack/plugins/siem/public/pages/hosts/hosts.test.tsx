@@ -9,14 +9,13 @@ import * as React from 'react';
 import { Router } from 'react-router-dom';
 
 import '../../mock/match_media';
+import '../../mock/ui_settings';
 import { Hosts } from './hosts';
 
 import { mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { cloneDeep } from 'lodash/fp';
-
-import * as i18n from './translations';
 
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
@@ -89,7 +88,7 @@ describe('Hosts - rendering', () => {
     // Why => https://github.com/apollographql/react-apollo/issues/1711
     await new Promise(resolve => setTimeout(resolve));
     wrapper.update();
-    expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
+    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
@@ -106,6 +105,6 @@ describe('Hosts - rendering', () => {
     // Why => https://github.com/apollographql/react-apollo/issues/1711
     await new Promise(resolve => setTimeout(resolve));
     wrapper.update();
-    expect(wrapper.text()).not.toContain(i18n.SETUP_INSTRUCTIONS);
+    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
   });
 });

@@ -14,15 +14,21 @@ import {
   watchLspMethods,
   watchMainRouteChange,
 } from './editor';
-import { watchFetchBranchesAndCommits, watchFetchRepoTree, watchRepoRouteChange } from './file';
+import {
+  watchFetchBranchesAndCommits,
+  watchFetchRepoTree,
+  watchRepoRouteChange,
+  watchFetchRootRepoTree,
+} from './file';
 import { watchInstallLanguageServer, watchLoadLanguageServers } from './language_server';
-import { watchLoadConfigs, watchSwitchProjectLanguageServer } from './project_config';
 import {
   watchLoadRepoListStatus,
   watchLoadRepoStatus,
+  watchPollingRepoStatus,
   watchRepoCloneStatusPolling,
   watchRepoDeleteStatusPolling,
   watchRepoIndexStatusPolling,
+  watchResetPollingStatus,
 } from './project_status';
 import {
   watchAdminRouteChange,
@@ -52,6 +58,7 @@ export function* rootSaga() {
   yield fork(watchIndexRepo);
   yield fork(watchImportRepo);
   yield fork(watchFetchRepoTree);
+  yield fork(watchFetchRootRepoTree);
   yield fork(watchFetchBranchesAndCommits);
   yield fork(watchDocumentSearch);
   yield fork(watchRepositorySearch);
@@ -73,12 +80,16 @@ export function* rootSaga() {
   yield fork(watchRepoDeleteFinished);
   yield fork(watchLoadLanguageServers);
   yield fork(watchInstallLanguageServer);
-  yield fork(watchSwitchProjectLanguageServer);
-  yield fork(watchLoadConfigs);
   yield fork(watchLoadRepoListStatus);
   yield fork(watchLoadRepoStatus);
+
+  // Repository status polling sagas begin
+  yield fork(watchPollingRepoStatus);
+  yield fork(watchResetPollingStatus);
   yield fork(watchRepoDeleteStatusPolling);
   yield fork(watchRepoIndexStatusPolling);
   yield fork(watchRepoCloneStatusPolling);
+  // Repository status polling sagas end
+
   yield fork(watchRepoScopeSearch);
 }

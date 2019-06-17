@@ -31,16 +31,15 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   repositoryFilter,
 }) => {
   const {
-    core: {
-      i18n: { FormattedMessage, translate },
-    },
+    core: { i18n },
   } = useAppDependencies();
+  const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
 
   const columns = [
     {
       field: 'snapshot',
-      name: translate('xpack.snapshotRestore.snapshotList.table.snapshotColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.snapshotColumnTitle', {
         defaultMessage: 'Snapshot',
       }),
       truncateText: true,
@@ -49,6 +48,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         <EuiLink
           onClick={() => trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
           href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}
+          data-test-subj="snapshotLink"
         >
           {snapshotId}
         </EuiLink>
@@ -56,18 +56,20 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'repository',
-      name: translate('xpack.snapshotRestore.snapshotList.table.repositoryColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.repositoryColumnTitle', {
         defaultMessage: 'Repository',
       }),
       truncateText: true,
       sortable: true,
       render: (repositoryName: string) => (
-        <EuiLink href={linkToRepository(repositoryName)}>{repositoryName}</EuiLink>
+        <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
+          {repositoryName}
+        </EuiLink>
       ),
     },
     {
       field: 'startTimeInMillis',
-      name: translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
         defaultMessage: 'Date created',
       }),
       truncateText: true,
@@ -78,7 +80,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'durationInMillis',
-      name: translate('xpack.snapshotRestore.snapshotList.table.durationColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.durationColumnTitle', {
         defaultMessage: 'Duration',
       }),
       truncateText: true,
@@ -101,7 +103,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'indices',
-      name: translate('xpack.snapshotRestore.snapshotList.table.indicesColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.indicesColumnTitle', {
         defaultMessage: 'Indices',
       }),
       truncateText: true,
@@ -111,7 +113,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'shards.total',
-      name: translate('xpack.snapshotRestore.snapshotList.table.shardsColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.shardsColumnTitle', {
         defaultMessage: 'Shards',
       }),
       truncateText: true,
@@ -121,7 +123,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'shards.failed',
-      name: translate('xpack.snapshotRestore.snapshotList.table.failedShardsColumnTitle', {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.failedShardsColumnTitle', {
         defaultMessage: 'Failed shards',
       }),
       truncateText: true,
@@ -154,7 +156,12 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
 
   const search = {
     toolsRight: (
-      <EuiButton color="secondary" iconType="refresh" onClick={reload}>
+      <EuiButton
+        color="secondary"
+        iconType="refresh"
+        onClick={reload}
+        data-test-subj="reloadButton"
+      >
         <FormattedMessage
           id="xpack.snapshotRestore.snapshotList.table.reloadSnapshotsButton"
           defaultMessage="Reload"
@@ -196,11 +203,12 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       sorting={sorting}
       pagination={pagination}
       rowProps={() => ({
-        'data-test-subj': 'srSnapshotListTableRow',
+        'data-test-subj': 'row',
       })}
       cellProps={(item: any, column: any) => ({
-        'data-test-subj': `srSnapshotListTableCell-${column.field}`,
+        'data-test-subj': 'cell',
       })}
+      data-test-subj="snapshotTable"
     />
   );
 };

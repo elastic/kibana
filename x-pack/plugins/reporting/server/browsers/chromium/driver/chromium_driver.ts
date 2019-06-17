@@ -36,6 +36,7 @@ export class HeadlessChromiumDriver {
 
   constructor(page: Chrome.Page, { logger, inspect }: ChromiumDriverOptions) {
     this.page = page;
+    // @ts-ignore https://github.com/elastic/kibana/issues/32140
     this.logger = logger.clone(['headless-chromium-driver']);
     this.inspect = inspect;
   }

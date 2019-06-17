@@ -125,7 +125,7 @@ export async function getErrorGroups({
     };
   }
 
-  const resp = await client<void, Aggs>('search', params);
+  const resp = await client.search<void, Aggs>(params);
   const buckets = idx(resp, _ => _.aggregations.error_groups.buckets) || [];
 
   const hits = buckets.map(bucket => {

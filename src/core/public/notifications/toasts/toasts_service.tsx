@@ -21,25 +21,39 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { Toast } from '@elastic/eui';
-import { I18nSetup } from '../../i18n';
+import { I18nStart } from '../../i18n';
+import { UiSettingsSetup } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi } from './toasts_api';
+import { OverlayStart } from '../../overlays';
+
+interface SetupDeps {
+  uiSettings: UiSettingsSetup;
+}
 
 interface StartDeps {
-  i18n: I18nSetup;
+  i18n: I18nStart;
+  overlays: OverlayStart;
   targetDomElement: HTMLElement;
 }
+
+/** @public */
+export type ToastsSetup = Pick<ToastsApi, Exclude<keyof ToastsApi, 'registerOverlays'>>;
+
+/** @public */
+export type ToastsStart = ToastsSetup;
 
 export class ToastsService {
   private api?: ToastsApi;
   private targetDomElement?: HTMLElement;
 
-  public setup() {
-    this.api = new ToastsApi();
+  public setup({ uiSettings }: SetupDeps) {
+    this.api = new ToastsApi({ uiSettings });
     return this.api!;
   }
 
-  public start({ i18n, targetDomElement }: StartDeps) {
+  public start({ i18n, overlays, targetDomElement }: StartDeps) {
+    this.api!.registerOverlays(overlays);
     this.targetDomElement = targetDomElement;
 
     render(

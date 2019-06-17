@@ -11,6 +11,7 @@ import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
 
+import { GitOperations } from '../git_operations';
 import { WorkerReservedProgress } from '../../model';
 import { LspIndexer } from '../indexer/lsp_indexer';
 import { RepositoryGitStatusReservedField } from '../indexer/schema';
@@ -57,9 +58,10 @@ function prepareProject(url: string, p: string) {
   });
 }
 
-const repoUri = 'github.com/Microsoft/TypeScript-Node-Starter';
+const repoUri = 'github.com/elastic/TypeScript-Node-Starter';
 
 const serverOptions = createTestServerOption();
+const gitOps = new GitOperations(serverOptions.repoPath);
 
 function cleanWorkspace() {
   return new Promise(resolve => {
@@ -73,7 +75,7 @@ function setupEsClientSpy() {
     Promise.resolve({
       _source: {
         [RepositoryGitStatusReservedField]: {
-          uri: 'github.com/Microsoft/TypeScript-Node-Starter',
+          uri: repoUri,
           progress: WorkerReservedProgress.COMPLETED,
           timestamp: new Date(),
           cloneProgress: {
@@ -125,8 +127,7 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
   );
 }
 
-// FAILING https://github.com/elastic/kibana/issues/36478
-describe.skip('lsp_indexer unit tests', function(this: any) {
+describe('lsp_indexer unit tests', function(this: any) {
   this.timeout(20000);
 
   // @ts-ignore
@@ -140,7 +141,7 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
     // @ts-ignore
     this.timeout(200000);
     return await prepareProject(
-      'https://github.com/Microsoft/TypeScript-Node-Starter.git',
+      `https://${repoUri}.git`,
       path.join(serverOptions.repoPath, repoUri)
     );
   });
@@ -166,19 +167,29 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
       new RepositoryConfigController(esClient as EsClient)
     );
 
-    lspservice.sendRequest = setupLsServiceSendRequestSpy();
+    const lspSendRequestSpy = setupLsServiceSendRequestSpy();
+    lspservice.sendRequest = lspSendRequestSpy;
+    const supportLanguageSpy = sinon.stub();
+
+    // Setup supported languages, so that unsupported source files won't be
+    // sent for lsp requests.
+    supportLanguageSpy.withArgs('javascript').returns(true);
+    supportLanguageSpy.withArgs('typescript').returns(true);
+    lspservice.supportLanguage = supportLanguageSpy;
 
     const indexer = new LspIndexer(
-      'github.com/Microsoft/TypeScript-Node-Starter',
+      repoUri,
       'master',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
@@ -193,11 +204,18 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
     assert.strictEqual(createSpy.callCount, 3);
     assert.strictEqual(putAliasSpy.callCount, 3);
 
-    // There are 22 files in the repo. 1 file + 1 symbol + 1 reference = 3 objects to
-    // index for each file. Total doc indexed should be 3 * 22 = 66, which can be
-    // fitted into a single batch index.
-    assert.ok(bulkSpy.calledOnce);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 66 * 2);
+    // There are 22 files which are written in supported languages in the repo. 1 file + 1 symbol + 1 reference = 3 objects to
+    // index for each file. Total doc indexed for these files should be 3 * 22 = 66.
+    // The rest 158 files will only be indexed for document.
+    // There are also 10 binary files to be excluded.
+    // So the total number of index requests will be 66 + 158 - 10 = 214.
+    assert.strictEqual(bulkSpy.callCount, 5);
+    assert.strictEqual(lspSendRequestSpy.callCount, 22);
+    let total = 0;
+    for (let i = 0; i < bulkSpy.callCount; i++) {
+      total += bulkSpy.getCall(i).args[0].body.length;
+    }
+    assert.strictEqual(total, 214 * 2);
     // @ts-ignore
   }).timeout(20000);
 
@@ -214,6 +232,7 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
@@ -223,10 +242,11 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
     lspservice.sendRequest = setupLsServiceSendRequestSpy();
 
     const indexer = new LspIndexer(
-      'github.com/Microsoft/TypeScript-Node-Starter',
+      repoUri,
       'master',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
@@ -261,19 +281,29 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
     const lspservice = new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient as EsClient,
       {} as InstallManager,
       new ConsoleLoggerFactory(),
       new RepositoryConfigController(esClient as EsClient)
     );
 
-    lspservice.sendRequest = setupLsServiceSendRequestSpy();
+    const lspSendRequestSpy = setupLsServiceSendRequestSpy();
+    lspservice.sendRequest = lspSendRequestSpy;
+    const supportLanguageSpy = sinon.stub();
+
+    // Setup supported languages, so that unsupported source files won't be
+    // sent for lsp requests.
+    supportLanguageSpy.withArgs('javascript').returns(true);
+    supportLanguageSpy.withArgs('typescript').returns(true);
+    lspservice.supportLanguage = supportLanguageSpy;
 
     const indexer = new LspIndexer(
-      'github.com/Microsoft/TypeScript-Node-Starter',
-      '46971a8',
+      repoUri,
+      '261557d',
       lspservice,
       serverOptions,
+      gitOps,
       esClient as EsClient,
       log
     );
@@ -282,7 +312,7 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
     await indexer.start(undefined, {
       repoUri: '',
       filePath: 'src/public/js/main.ts',
-      revision: '46971a8',
+      revision: '261557d',
       localRepoPath: '',
     });
 
@@ -295,12 +325,19 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
     assert.strictEqual(createSpy.callCount, 0);
     assert.strictEqual(putAliasSpy.callCount, 0);
 
-    // There are 22 files in the repo, but only 11 files after the checkpoint.
-    // 1 file + 1 symbol + 1 reference = 3 objects to index for each file.
-    // Total doc indexed should be 3 * 11 = 33, which can be fitted into a
-    // single batch index.
-    assert.ok(bulkSpy.calledOnce);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 33 * 2);
+    // There are 22 files with supported language in the repo, but only 11
+    // files after the checkpoint. 1 file + 1 symbol + 1 reference = 3 objects
+    // to index for each file. Total doc indexed for these files should be
+    // 3 * 11 = 33. Also there are 15 files without supported language. Only one
+    // document will be index for these files. So total index requests would be
+    // 33 + 15 = 48.
+    assert.strictEqual(bulkSpy.callCount, 2);
+    assert.strictEqual(lspSendRequestSpy.callCount, 11);
+    let total = 0;
+    for (let i = 0; i < bulkSpy.callCount; i++) {
+      total += bulkSpy.getCall(i).args[0].body.length;
+    }
+    assert.strictEqual(total, 48 * 2);
     // @ts-ignore
   }).timeout(20000);
 });

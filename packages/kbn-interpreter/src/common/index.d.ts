@@ -18,3 +18,5 @@
  */
 
 export { Registry } from './lib/registry';
+
+export { fromExpression, Ast } from './lib/ast';

@@ -22,13 +22,13 @@ import { render } from 'react-dom';
 import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
-import { I18nSetup } from '../i18n';
-import { InjectedMetadataSetup } from '../';
+import { I18nStart } from '../i18n';
+import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { FatalErrorInfo, getErrorInfo } from './get_error_info';
 
 interface Deps {
-  i18n: I18nSetup;
+  i18n: I18nStart;
   injectedMetadata: InjectedMetadataSetup;
 }
 
@@ -104,7 +104,7 @@ export class FatalErrorsService {
     return fatalErrorsSetup;
   }
 
-  private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nSetup) {
+  private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nStart) {
     // delete all content in the rootDomElement
     this.rootDomElement.textContent = '';
 

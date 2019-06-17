@@ -13,6 +13,8 @@ import sinon from 'sinon';
 
 import assert from 'assert';
 import { Server } from 'hapi';
+
+import { GitOperations } from '../git_operations';
 import { RepositoryConfigReservedField, RepositoryGitStatusReservedField } from '../indexer/schema';
 import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';
@@ -81,6 +83,7 @@ describe('lsp_service tests', () => {
 
   const serverOptions = createTestServerOption();
   const installManager = new InstallManager(new Server(), serverOptions);
+  const gitOps = new GitOperations(serverOptions.repoPath);
 
   function mockEsClient(): any {
     const api = {
@@ -129,6 +132,7 @@ describe('lsp_service tests', () => {
     return new LspService(
       '127.0.0.1',
       serverOptions,
+      gitOps,
       esClient,
       installManager,
       new ConsoleLoggerFactory(),

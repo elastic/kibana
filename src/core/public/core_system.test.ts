@@ -18,14 +18,12 @@
  */
 
 import {
-  BasePathServiceConstructor,
   ChromeServiceConstructor,
   FatalErrorsServiceConstructor,
   HttpServiceConstructor,
   I18nServiceConstructor,
   InjectedMetadataServiceConstructor,
   LegacyPlatformServiceConstructor,
-  MockBasePathService,
   MockChromeService,
   MockFatalErrorsService,
   MockHttpService,
@@ -78,7 +76,6 @@ describe('constructor', () => {
     expect(FatalErrorsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
     expect(HttpServiceConstructor).toHaveBeenCalledTimes(1);
-    expect(BasePathServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UiSettingsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
@@ -169,19 +166,9 @@ describe('#setup()', () => {
     expect(MockHttpService.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls basePath#setup()', async () => {
-    await setupCore();
-    expect(MockBasePathService.setup).toHaveBeenCalledTimes(1);
-  });
-
   it('calls uiSettings#setup()', async () => {
     await setupCore();
     expect(MockUiSettingsService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls i18n#setup()', async () => {
-    await setupCore();
-    expect(MockI18nService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls fatalErrors#setup()', async () => {
@@ -192,11 +179,6 @@ describe('#setup()', () => {
   it('calls notifications#setup()', async () => {
     await setupCore();
     expect(MockNotificationsService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls chrome#setup()', async () => {
-    await setupCore();
-    expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls plugin#setup()', async () => {
@@ -243,6 +225,7 @@ describe('#start()', () => {
     expect(MockNotificationsService.start).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService.start).toHaveBeenCalledWith({
       i18n: expect.any(Object),
+      overlays: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });

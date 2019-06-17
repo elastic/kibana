@@ -10,6 +10,7 @@ import uniqBy from 'lodash.uniqby';
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit, values } from 'lodash';
 import moment from 'moment';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore Untyped local
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
 // @ts-ignore Untyped local
@@ -18,9 +19,8 @@ import { unquoteString } from '../../../../common/lib/unquote_string';
 import { isColumnReference } from './lib/is_column_reference';
 // @ts-ignore Untyped local
 import { getExpressionType } from './lib/get_expression_type';
-import { getFunctionHelp } from '../../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../../strings';
 import {
-  ContextFunction,
   Datatable,
   DatatableRow,
   PointSeries,
@@ -39,7 +39,12 @@ function keysOf<T, K extends keyof T>(obj: T): K[] {
 
 type Arguments = { [key in PointSeriesColumnName]: string | null };
 
-export function pointseries(): ContextFunction<'pointseries', Datatable, Arguments, PointSeries> {
+export function pointseries(): ExpressionFunction<
+  'pointseries',
+  Datatable,
+  Arguments,
+  PointSeries
+> {
   const { help, args: argHelp } = getFunctionHelp().pointseries;
 
   return {
@@ -51,29 +56,30 @@ export function pointseries(): ContextFunction<'pointseries', Datatable, Argumen
     },
     args: {
       x: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.x,
       },
       y: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.y,
       },
       color: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.color, // If you need categorization, transform the field.
       },
       size: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.size,
       },
       text: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.text,
       },
       // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
       // The way the function below is written you can add as many arbitrary named args as you want.
     },
     fn: (context, args) => {
+      const errors = getFunctionErrors().pointseries;
       // Note: can't replace pivotObjectArray with datatableToMathContext, lose name of non-numeric columns
       const columnNames = context.columns.map(col => col.name);
       const mathScope = pivotObjectArray(context.rows, columnNames);
@@ -186,7 +192,7 @@ export function pointseries(): ContextFunction<'pointseries', Datatable, Argumen
           try {
             const ev = evaluate(args[measure], subScope);
             if (Array.isArray(ev)) {
-              throw new Error('Expressions must be wrapped in a function such as sum()');
+              throw errors.unwrappedExpression();
             }
 
             return ev;

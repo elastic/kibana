@@ -37,13 +37,19 @@ function ReactEditorControllerProvider(config) {
 
     fetchDefaultIndexPattern = async () => {
       const savedObjectsClient = chrome.getSavedObjectsClient();
-      const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
+      const indexPattern = await savedObjectsClient.get(
+        'index-pattern',
+        config.get('defaultIndex')
+      );
 
-      return indexPattern.attributes.title;
+      return indexPattern.attributes;
     };
 
     fetchDefaultParams = async () => {
-      this.state.vis.params.default_index_pattern = await this.fetchDefaultIndexPattern();
+      const { title, timeFieldName } = await this.fetchDefaultIndexPattern();
+
+      this.state.vis.params.default_index_pattern = title;
+      this.state.vis.params.default_timefield = timeFieldName;
       this.state.vis.fields = await fetchIndexPatternFields(this.state.vis);
 
       this.state.isLoaded = true;
@@ -56,7 +62,7 @@ function ReactEditorControllerProvider(config) {
     async render(params) {
       const Component = this.getComponent();
 
-      !this.state.isLoaded && await this.fetchDefaultParams();
+      !this.state.isLoaded && (await this.fetchDefaultParams());
 
       render(
         <I18nContext>
@@ -72,7 +78,8 @@ function ReactEditorControllerProvider(config) {
             appState={params.appState}
           />
         </I18nContext>,
-        this.el);
+        this.el
+      );
     }
 
     destroy() {

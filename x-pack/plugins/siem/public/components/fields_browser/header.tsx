@@ -91,7 +91,7 @@ const TitleRow = pure<{ onOutsideClick: () => void; onUpdateColumns: OnUpdateCol
     >
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
-          <h2>{i18n.SELECT_FIELDS}</h2>
+          <h2>{i18n.CUSTOMIZE_COLUMNS}</h2>
         </EuiTitle>
       </EuiFlexItem>
 

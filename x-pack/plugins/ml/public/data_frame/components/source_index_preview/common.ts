@@ -6,7 +6,7 @@
 
 import { Dictionary } from '../../../../common/types/common';
 
-import { SimpleQuery } from '../../common';
+import { PivotQuery } from '../../common';
 
 export type EsFieldName = string;
 
@@ -81,10 +81,7 @@ export const toggleSelectedField = (
   return selectedFields;
 };
 
-export const getSourceIndexDevConsoleStatement = (
-  query: SimpleQuery,
-  indexPatternTitle: string
-) => {
+export const getSourceIndexDevConsoleStatement = (query: PivotQuery, indexPatternTitle: string) => {
   return `GET ${indexPatternTitle}/_search\n${JSON.stringify(
     {
       query,

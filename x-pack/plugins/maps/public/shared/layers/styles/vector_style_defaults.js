@@ -5,12 +5,26 @@
  */
 
 import { VectorStyle } from './vector_style';
-import { COLOR_GRADIENTS } from './components/vector/color/color_ramp_select';
+import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
+import { COLOR_GRADIENTS } from './color_utils';
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
+const DEFAULT_ICON = 'airfield';
 
 export const DEFAULT_MIN_SIZE = 1;
 export const DEFAULT_MAX_SIZE = 64;
+
+export function getDefaultProperties(mapColors = []) {
+  return {
+    ...getDefaultStaticProperties(mapColors),
+    symbol: {
+      options: {
+        symbolizeAs: SYMBOLIZE_AS_CIRCLE,
+        symbolId: DEFAULT_ICON,
+      }
+    },
+  };
+}
 
 export function getDefaultStaticProperties(mapColors = []) {
   // Colors must be state-aware to reduce unnecessary incrementation
@@ -40,9 +54,9 @@ export function getDefaultStaticProperties(mapColors = []) {
     iconSize: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        size: 10
+        size: DEFAULT_ICON_SIZE
       }
-    },
+    }
   };
 }
 
@@ -64,7 +78,7 @@ export function getDefaultDynamicProperties() {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         minSize: DEFAULT_MIN_SIZE,
-        maxSize: 64
+        maxSize: DEFAULT_MAX_SIZE
       }
     },
     iconSize: {
@@ -73,6 +87,6 @@ export function getDefaultDynamicProperties() {
         minSize: DEFAULT_MIN_SIZE,
         maxSize: DEFAULT_MAX_SIZE
       }
-    },
+    }
   };
 }

@@ -205,6 +205,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
 exports[`ObjectsTable import should show the flyout 1`] = `
 <InjectIntl(FlyoutUI)
   close={[Function]}
+  confirmModalPromise={[MockFunction]}
   done={[Function]}
   indexPatterns={
     Object {
@@ -256,7 +257,7 @@ exports[`ObjectsTable should render normally 1`] = `
     size="xs"
   />
   <InjectIntl(TableUI)
-    canDeleteSavedObjectTypes={Array []}
+    canDelete={false}
     filterOptions={
       Array [
         Object {

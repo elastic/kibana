@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import parseSettings from './parse_settings';
-import getBucketsPath from './get_buckets_path';
+import { parseSettings } from './parse_settings';
+import { getBucketsPath } from './get_buckets_path';
 import { parseInterval } from './parse_interval';
 import { set, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -29,7 +29,7 @@ function checkMetric(metric, fields) {
       throw new Error(
         i18n.translate('tsvb.metricMissingErrorMessage', {
           defaultMessage: 'Metric missing {field}',
-          values: { field }
+          values: { field },
         })
       );
     }
@@ -63,7 +63,7 @@ function extendStatsBucket(bucket, metrics) {
   return body;
 }
 
-export default {
+export const bucketTransform = {
   count: () => {
     return {
       bucket_script: {
@@ -115,9 +115,7 @@ export default {
       },
     };
     if (bucket.order_by) {
-      set(body, 'aggs.docs.top_hits.sort', [
-        { [bucket.order_by]: { order: bucket.order } },
-      ]);
+      set(body, 'aggs.docs.top_hits.sort', [{ [bucket.order_by]: { order: bucket.order } }]);
     }
     return body;
   },
@@ -132,7 +130,7 @@ export default {
 
   percentile: bucket => {
     checkMetric(bucket, ['type', 'field', 'percentiles']);
-    let percents = bucket.percentiles.map(p => p.value ? Number(p.value) : 0);
+    let percents = bucket.percentiles.map(p => (p.value ? Number(p.value) : 0));
     if (bucket.percentiles.some(p => p.mode === 'band')) {
       percents = percents.concat(
         bucket.percentiles.filter(p => p.percentile).map(p => p.percentile)
@@ -153,12 +151,10 @@ export default {
     return {
       percentile_ranks: {
         field: bucket.field,
-        values: (bucket.values || [])
-          .map(value => isEmpty(value) ? 0 : value),
+        values: (bucket.values || []).map(value => (isEmpty(value) ? 0 : value)),
       },
     };
   },
-
 
   derivative: (bucket, metrics, bucketSize) => {
     checkMetric(bucket, ['type', 'field']);
@@ -171,9 +167,7 @@ export default {
     };
     if (bucket.gap_policy) body.derivative.gap_policy = bucket.gap_policy;
     if (bucket.unit) {
-      body.derivative.unit = /^([\d]+)([shmdwMy]|ms)$/.test(bucket.unit)
-        ? bucket.unit
-        : bucketSize;
+      body.derivative.unit = /^([\d]+)([shmdwMy]|ms)$/.test(bucket.unit) ? bucket.unit : bucketSize;
     }
     return body;
   },

@@ -18,7 +18,7 @@
  */
 
 import { includes, startsWith } from 'lodash';
-import lookup from './agg_lookup';
+import { lookup } from './agg_lookup';
 import { i18n } from '@kbn/i18n';
 
 const paths = [
@@ -35,25 +35,36 @@ const paths = [
   'serial_diff',
   'positive_only',
 ];
-export default function calculateLabel(metric, metrics) {
-  if (!metric) return i18n.translate('tsvb.calculateLabel.unknownLabel', { defaultMessage: 'Unknown' });
+
+export function calculateLabel(metric, metrics) {
+  if (!metric)
+    return i18n.translate('tsvb.calculateLabel.unknownLabel', { defaultMessage: 'Unknown' });
   if (metric.alias) return metric.alias;
 
-  if (metric.type === 'count') return i18n.translate('tsvb.calculateLabel.countLabel', { defaultMessage: 'Count' });
+  if (metric.type === 'count')
+    return i18n.translate('tsvb.calculateLabel.countLabel', { defaultMessage: 'Count' });
   if (metric.type === 'calculation') {
-    return i18n.translate('tsvb.calculateLabel.bucketScriptsLabel', { defaultMessage: 'Bucket Script' });
+    return i18n.translate('tsvb.calculateLabel.bucketScriptsLabel', {
+      defaultMessage: 'Bucket Script',
+    });
   }
-  if (metric.type === 'math') return i18n.translate('tsvb.calculateLabel.mathLabel', { defaultMessage: 'Math' });
+  if (metric.type === 'math')
+    return i18n.translate('tsvb.calculateLabel.mathLabel', { defaultMessage: 'Math' });
   if (metric.type === 'series_agg') {
-    return i18n.translate('tsvb.calculateLabel.seriesAggLabel',
-      { defaultMessage: 'Series Agg ({metricFunction})', values: { metricFunction: metric.function } }
-    );
+    return i18n.translate('tsvb.calculateLabel.seriesAggLabel', {
+      defaultMessage: 'Series Agg ({metricFunction})',
+      values: { metricFunction: metric.function },
+    });
   }
-  if (metric.type === 'filter_ratio') return i18n.translate('tsvb.calculateLabel.filterRatioLabel', { defaultMessage: 'Filter Ratio' });
+  if (metric.type === 'filter_ratio')
+    return i18n.translate('tsvb.calculateLabel.filterRatioLabel', {
+      defaultMessage: 'Filter Ratio',
+    });
   if (metric.type === 'static') {
-    return i18n.translate('tsvb.calculateLabel.staticValueLabel',
-      { defaultMessage: 'Static Value of {metricValue}', values: { metricValue: metric.value } }
-    );
+    return i18n.translate('tsvb.calculateLabel.staticValueLabel', {
+      defaultMessage: 'Static Value of {metricValue}',
+      values: { metricValue: metric.value },
+    });
   }
 
   if (includes(paths, metric.type)) {
@@ -69,18 +80,22 @@ export default function calculateLabel(metric, metrics) {
       if (matches) {
         return i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfTargetWithAdditionalLabel', {
           defaultMessage: '{lookupMetricType} of {targetLabel} ({additionalLabel})',
-          values: { lookupMetricType: lookup[metric.type], targetLabel, additionalLabel: matches[1] }
+          values: {
+            lookupMetricType: lookup[metric.type],
+            targetLabel,
+            additionalLabel: matches[1],
+          },
         });
       }
     }
     return i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfTargetLabel', {
       defaultMessage: '{lookupMetricType} of {targetLabel}',
-      values: { lookupMetricType: lookup[metric.type], targetLabel }
+      values: { lookupMetricType: lookup[metric.type], targetLabel },
     });
   }
 
   return i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {
     defaultMessage: '{lookupMetricType} of {metricField}',
-    values: { lookupMetricType: lookup[metric.type], metricField: metric.field }
+    values: { lookupMetricType: lookup[metric.type], metricField: metric.field },
   });
 }

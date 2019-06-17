@@ -4,6 +4,7 @@ exports[`HeaderToolTipContent it renders the expected table content 1`] = `
 <Component
   header={
     Object {
+      "aggregatable": true,
       "category": "base",
       "columnHeaderType": "not-filtered",
       "description": "Date/time when the event originated.

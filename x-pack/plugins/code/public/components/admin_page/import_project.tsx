@@ -72,7 +72,7 @@ class CodeImportProject extends React.PureComponent<
           <EuiFlexItem>
             <EuiFormRow
               label="Repository URL"
-              helpText="e.g. https://github.com/elastic/elasticsearch"
+              helpText="e.g. https://github.com/Microsoft/TypeScript-Node-Starter"
               fullWidth
               isInvalid={this.state.isInvalid}
               error="The URL shouldn't be empty."
@@ -86,6 +86,7 @@ class CodeImportProject extends React.PureComponent<
                 fullWidth={true}
                 onBlur={this.updateIsInvalid}
                 isInvalid={this.state.isInvalid}
+                autoFocus={true}
               />
             </EuiFormRow>
           </EuiFlexItem>

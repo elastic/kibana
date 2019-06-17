@@ -21,13 +21,13 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import { get } from 'lodash';
-
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';
 import { SplitByFilters } from './splits/filters';
 import { SplitByEverything } from './splits/everything';
 import { SplitUnsupported } from './splits/unsupported_split';
 import { isGroupByFieldsEnabled } from '../lib/check_ui_restrictions';
+import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 const SPLIT_MODES = {
   FILTERS: 'filters',
@@ -36,13 +36,20 @@ const SPLIT_MODES = {
   EVERYTHING: 'everything',
 };
 
-class Split extends Component {
+export class Split extends Component {
   componentWillReceiveProps(nextProps) {
     const { model } = nextProps;
     if (model.split_mode === 'filters' && !model.split_filters) {
       this.props.onChange({
         split_filters: [
-          { color: model.color, id: uuid.v1() },
+          {
+            color: model.color,
+            id: uuid.v1(),
+            filter: {
+              query: '',
+              language: getDefaultQueryLanguage(),
+            },
+          },
         ],
       });
     }
@@ -67,9 +74,9 @@ class Split extends Component {
 
   render() {
     const { model, panel, uiRestrictions } = this.props;
-    const indexPattern = model.override_index_pattern &&
-      model.series_index_pattern ||
-      panel.index_pattern;
+    const indexPattern =
+      (model.override_index_pattern && model.series_index_pattern) ||
+      (panel.index_pattern || panel.default_index_pattern);
 
     const splitMode = get(this.props, 'model.split_mode', SPLIT_MODES.EVERYTHING);
 
@@ -82,7 +89,8 @@ class Split extends Component {
         fields={this.props.fields}
         onChange={this.props.onChange}
         uiRestrictions={uiRestrictions}
-      />);
+      />
+    );
   }
 }
 
@@ -92,5 +100,3 @@ Split.propTypes = {
   onChange: PropTypes.func,
   panel: PropTypes.object,
 };
-
-export default Split;

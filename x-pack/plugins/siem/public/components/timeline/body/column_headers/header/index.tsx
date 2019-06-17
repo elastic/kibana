@@ -61,6 +61,7 @@ interface Props {
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
   onFilterChange?: OnFilterChange;
+  setIsResizing: (isResizing: boolean) => void;
   sort: Sort;
   timelineId: string;
 }
@@ -93,7 +94,16 @@ export class Header extends React.PureComponent<Props> {
   }
 
   private renderActions = (isResizing: boolean) => {
-    const { header, isLoading, sort, onColumnRemoved, onFilterChange = noop } = this.props;
+    const {
+      header,
+      isLoading,
+      onColumnRemoved,
+      onFilterChange = noop,
+      setIsResizing,
+      sort,
+    } = this.props;
+
+    setIsResizing(isResizing);
 
     return (
       <HeaderFlexItem grow={false} width={`${header.width - CELL_RESIZE_HANDLE_WIDTH}px`}>
@@ -149,7 +159,7 @@ export class Header extends React.PureComponent<Props> {
   private onClick = () => {
     const { header, isLoading, onColumnSorted, sort } = this.props;
 
-    if (!isLoading) {
+    if (!isLoading && header.aggregatable) {
       onColumnSorted!({
         columnId: header.id,
         sortDirection: getNewSortDirectionOnClick({

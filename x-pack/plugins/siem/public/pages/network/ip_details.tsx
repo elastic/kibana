@@ -10,9 +10,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
-import chrome, { Breadcrumb } from 'ui/chrome';
+import { Breadcrumb } from 'ui/chrome';
 
-import { EmptyPage } from '../../components/empty_page';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -31,13 +30,11 @@ import { networkModel, networkSelectors, State } from '../../store';
 import { TlsTable } from '../../components/page/network/tls_table';
 
 import { NetworkKql } from './kql';
+import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 import { TlsQuery } from '../../containers/tls';
 import { UsersTable } from '../../components/page/network/users_table';
 import { UsersQuery } from '../../containers/users';
-import { UrlStateContainer } from '../../components/url_state';
-
-const basePath = chrome.getBasePath();
 
 const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);
@@ -50,7 +47,7 @@ interface IPDetailsComponentReduxProps {
 
 type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
-const IPDetailsComponent = pure<IPDetailsComponentProps>(
+export const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({
     match: {
       params: { ip },
@@ -58,18 +55,20 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
     filterQuery,
     flowTarget,
   }) => (
-    <WithSource sourceId="default">
+    <WithSource sourceId="default" data-test-subj="ip-details-page">
       {({ indicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
           <StickyContainer>
             <FiltersGlobal>
               <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
-              <UrlStateContainer indexPattern={indexPattern} />
             </FiltersGlobal>
 
             <HeaderPage
-              subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
-              title={ip}
+              data-test-subj="ip-details-headline"
+              subtitle={
+                <LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={decodeIpv6(ip)} />
+              }
+              title={decodeIpv6(ip)}
             >
               <FlowTargetSelectConnected />
             </HeaderPage>
@@ -183,12 +182,11 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
             </GlobalTime>
           </StickyContainer>
         ) : (
-          <EmptyPage
-            title={i18n.NO_FILEBEAT_INDICES}
-            message={i18n.LETS_ADD_SOME}
-            actionLabel={i18n.SETUP_INSTRUCTIONS}
-            actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-          />
+          <>
+            <HeaderPage title={decodeIpv6(ip)} />
+
+            <NetworkEmptyPage />
+          </>
         )
       }
     </WithSource>
@@ -208,7 +206,7 @@ export const IPDetails = connect(makeMapStateToProps)(IPDetailsComponent);
 
 export const getBreadcrumbs = (ip: string): Breadcrumb[] => [
   {
-    text: i18n.NETWORK,
+    text: i18n.PAGE_TITLE,
     href: getNetworkUrl(),
   },
   {

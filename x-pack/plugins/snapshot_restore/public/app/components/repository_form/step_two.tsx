@@ -25,6 +25,7 @@ import { textService } from '../../services/text';
 
 interface Props {
   repository: Repository;
+  isManagedRepository?: boolean;
   isEditing?: boolean;
   isSaving: boolean;
   onSave: () => void;
@@ -36,6 +37,7 @@ interface Props {
 
 export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   repository,
+  isManagedRepository,
   isEditing,
   isSaving,
   onSave,
@@ -64,7 +66,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
-            <h2>
+            <h2 data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.fields.settingsTitle"
                 defaultMessage="{repositoryName} settings"
@@ -133,7 +135,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
               color="primary"
               iconType="arrowLeft"
               onClick={onBack}
-              data-test-subj="srRepositoryFormSubmitButton"
+              data-test-subj="backButton"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.backButtonLabel"
@@ -144,11 +146,11 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
         )}
         <EuiFlexItem grow={false}>
           <EuiButton
-            color="secondary"
+            color={isManagedRepository ? 'warning' : 'secondary'}
             iconType="check"
             onClick={onSave}
-            fill
-            data-test-subj="srRepositoryFormSubmitButton"
+            fill={isManagedRepository ? false : true}
+            data-test-subj="submitButton"
             isLoading={isSaving}
           >
             {isSaving ? savingLabel : saveLabel}
@@ -193,11 +195,11 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   };
 
   return (
-    <Fragment>
+    <div data-test-subj="stepTwo">
       {renderSettings()}
       {renderFormValidationError()}
       {renderSaveError()}
       {renderActions()}
-    </Fragment>
+    </div>
   );
 };

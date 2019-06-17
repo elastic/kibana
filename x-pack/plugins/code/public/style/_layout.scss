@@ -92,6 +92,7 @@
 }
 
 .codeContainer__search--main {
+  overflow: hidden;
   width: 100%;
   flex-grow: 1;
   display: flex;
@@ -99,7 +100,7 @@
   height: 100%;
 }
 
-.codeContainer__symbolTree {
+.codeContainer__sideTabTree {
   position: relative;
   display: inline-block;
   min-width: 100%;

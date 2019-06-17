@@ -17,6 +17,7 @@
  * under the License.
  */
 import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';
+import { sortBy, isNumber } from 'lodash';
 
 const units = {
   ms: 0.001,
@@ -29,28 +30,49 @@ const units = {
   y: 86400 * 7 * 4 * 12, // Leap year?
 };
 
-export const parseInterval = (intervalString) => {
+const sortedUnits = sortBy(Object.keys(units), key => units[key]);
+
+export const parseInterval = intervalString => {
   let value;
   let unit;
 
   if (intervalString) {
     const matches = intervalString.match(INTERVAL_STRING_RE);
 
-    value = Number(matches[1]);
-    unit = matches[2];
+    if (matches) {
+      value = Number(matches[1]);
+      unit = matches[2];
+    }
   }
 
   return { value, unit };
 };
 
-export const convertIntervalToUnit = (intervalString, unit) => {
+export const convertIntervalToUnit = (intervalString, newUnit) => {
   const parsedInterval = parseInterval(intervalString);
-  const value = Number((parsedInterval.value * units[parsedInterval.unit] / units[unit]).toFixed(2));
+  let value;
+  let unit;
+
+  if (parsedInterval.value && units[newUnit]) {
+    value = Number(
+      ((parsedInterval.value * units[parsedInterval.unit]) / units[newUnit]).toFixed(2)
+    );
+    unit = newUnit;
+  }
 
   return { value, unit };
 };
 
-export default (unit) => {
-  return units[unit];
-};
+export const getSuitableUnit = intervalInSeconds =>
+  sortedUnits.find((key, index, array) => {
+    const nextUnit = array[index + 1];
+    const isValidInput = isNumber(intervalInSeconds) && intervalInSeconds > 0;
+    const isLastItem = index + 1 === array.length;
 
+    return (
+      isValidInput &&
+      ((intervalInSeconds >= units[key] && intervalInSeconds < units[nextUnit]) || isLastItem)
+    );
+  });
+
+export const getUnitValue = unit => units[unit];

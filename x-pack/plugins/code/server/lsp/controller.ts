@@ -73,21 +73,17 @@ export class LanguageServerController implements ILanguageServerHandler {
     );
   }
 
-  public async handleRequest(request: LspRequest) {
+  public async handleRequest(request: LspRequest): Promise<ResponseMessage> {
     const file = request.resolvedFilePath;
     if (file) {
       // #todo add test for this
       const lang = await detectLanguage(file.replace('file://', ''));
       if (await this.repoConfigController.isLanguageDisabled(request.documentUri!, lang)) {
-        return Promise.reject(
-          new ResponseError(LanguageDisabled, `language disabled for the file`)
-        );
+        throw new ResponseError(LanguageDisabled, `language disabled for the file`);
       }
-      return this.dispatchRequest(lang, request);
+      return await this.dispatchRequest(lang, request);
     } else {
-      return Promise.reject(
-        new ResponseError(UnknownErrorCode, `can't detect language without a file`)
-      );
+      throw new ResponseError(UnknownErrorCode, `can't detect language without a file`);
     }
   }
 
@@ -102,19 +98,17 @@ export class LanguageServerController implements ILanguageServerHandler {
             this.installManager.installationPath(ls.definition)
           );
         }
-        const handler = ls.languageServerHandlers as Promise<ILanguageServerHandler>;
-        return (await handler).handleRequest(request);
+        const handler = await (ls.languageServerHandlers as Promise<ILanguageServerHandler>);
+        return await handler.handleRequest(request);
       } else {
         const handler = await this.findOrCreateHandler(ls, request);
         handler.lastAccess = Date.now();
-        return handler.handleRequest(request);
+        return await handler.handleRequest(request);
       }
     } else {
-      return Promise.reject(
-        new ResponseError(
-          UnknownFileLanguage,
-          `can't detect language from file:${request.resolvedFilePath}`
-        )
+      throw new ResponseError(
+        UnknownFileLanguage,
+        `can't detect language from file:${request.resolvedFilePath}`
       );
     }
   }

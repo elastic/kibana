@@ -8,9 +8,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { dynamicColorShape, staticColorShape } from '../style_option_shapes';
-import { ColorableLine, FillableCircle, FillableRectangle } from '../../../../../icons/additional_layer_icons';
+import { CircleIcon } from './circle_icon';
+import { LineIcon } from './line_icon';
+import { PolygonIcon } from './polygon_icon';
+import { SymbolIcon } from './symbol_icon';
 import { VectorStyle } from '../../../vector_style';
-import { getColorRampCenterColor } from '../../../../../utils/color_utils';
+import { getColorRampCenterColor } from '../../../color_utils';
 
 export class VectorIcon extends Component {
 
@@ -50,7 +53,7 @@ export class VectorIcon extends Component {
         strokeWidth: '4px',
       };
       return (
-        <ColorableLine style={style}/>
+        <LineIcon style={style}/>
       );
     }
 
@@ -60,9 +63,20 @@ export class VectorIcon extends Component {
       fill: extractColorFromStyleProperty(this.props.fillColor, 'grey'),
     };
 
-    return this.state.isPointsOnly
-      ? <FillableCircle style={style}/>
-      : <FillableRectangle style={style}/>;
+    if (!this.state.isPointsOnly) {
+      return (<PolygonIcon style={style}/>);
+    }
+
+    if (!this.props.symbolId) {
+      return (<CircleIcon style={style}/>);
+    }
+
+    return (
+      <SymbolIcon
+        symbolId={this.props.symbolId}
+        fill={style.fill}
+      />
+    );
   }
 }
 
@@ -90,6 +104,7 @@ const colorStylePropertyShape = PropTypes.shape({
 VectorIcon.propTypes = {
   fillColor: colorStylePropertyShape,
   lineColor: colorStylePropertyShape,
+  symbolId: PropTypes.string,
   loadIsPointsOnly: PropTypes.func.isRequired,
   loadIsLinesOnly: PropTypes.func.isRequired,
 };

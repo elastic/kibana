@@ -3,23 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreSetup } from 'src/core/server';
+import { InternalCoreSetup } from 'src/core/server';
 import { getSavedObjectsClient } from '../helpers/saved_objects_client';
-import indexPattern from '../../../../../../src/legacy/core_plugins/kibana/server/tutorials/apm/index_pattern.json';
+import apmIndexPattern from '../../../../../../src/legacy/core_plugins/kibana/server/tutorials/apm/index_pattern.json';
 
-export async function ensureIndexPatternExists(core: CoreSetup) {
+export async function getIndexPattern(core: InternalCoreSetup) {
   const { server } = core.http;
   const config = server.config();
   const apmIndexPatternTitle = config.get('apm_oss.indexPattern');
   const savedObjectsClient = getSavedObjectsClient(server);
-  const savedObjects = [
-    {
-      ...indexPattern,
-      attributes: {
-        ...indexPattern.attributes,
+  try {
+    return await savedObjectsClient.get('index-pattern', apmIndexPattern.id);
+  } catch (error) {
+    // if GET fails, then create a new index pattern saved object
+    return await savedObjectsClient.create(
+      'index-pattern',
+      {
+        ...apmIndexPattern.attributes,
         title: apmIndexPatternTitle
-      }
-    }
-  ];
-  await savedObjectsClient.bulkCreate(savedObjects, { overwrite: false });
+      },
+      { id: apmIndexPattern.id, overwrite: false }
+    );
+  }
 }

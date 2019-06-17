@@ -241,136 +241,76 @@ export const mockResult = {
   hosts: 986,
   hostsHistogram: [
     {
-      key_as_string: '2019-05-03T13:00:00.000Z',
-      key: 1556888400000,
-      doc_count: 3158515,
-      count: {
-        value: 919,
-      },
+      x: '2019-05-03T13:00:00.000Z',
+      y: 919,
     },
     {
-      key_as_string: '2019-05-04T01:00:00.000Z',
-      key: 1556931600000,
-      doc_count: 703032,
-      count: {
-        value: 82,
-      },
+      x: '2019-05-04T01:00:00.000Z',
+      y: 82,
     },
     {
-      key_as_string: '2019-05-04T13:00:00.000Z',
-      key: 1556974800000,
-      doc_count: 1780,
-      count: {
-        value: 4,
-      },
+      x: '2019-05-04T13:00:00.000Z',
+      y: 4,
     },
   ],
   authSuccess: 61,
   authSuccessHistogram: [
     {
-      key_as_string: '2019-05-03T13:00:00.000Z',
-      key: 1556888400000,
-      doc_count: 11739,
-      count: {
-        doc_count: 8,
-      },
+      x: '2019-05-03T13:00:00.000Z',
+      y: 8,
     },
     {
-      key_as_string: '2019-05-04T01:00:00.000Z',
-      key: 1556931600000,
-      doc_count: 4031,
-      count: {
-        doc_count: 52,
-      },
+      x: '2019-05-04T01:00:00.000Z',
+      y: 52,
     },
     {
-      key_as_string: '2019-05-04T13:00:00.000Z',
-      key: 1556974800000,
-      doc_count: 13,
-      count: {
-        doc_count: 1,
-      },
+      x: '2019-05-04T13:00:00.000Z',
+      y: 1,
     },
   ],
   authFailure: 15722,
   authFailureHistogram: [
     {
-      key_as_string: '2019-05-03T13:00:00.000Z',
-      key: 1556888400000,
-      doc_count: 11739,
-      count: {
-        doc_count: 11731,
-      },
+      x: '2019-05-03T13:00:00.000Z',
+      y: 11731,
     },
     {
-      key_as_string: '2019-05-04T01:00:00.000Z',
-      key: 1556931600000,
-      doc_count: 4031,
-      count: {
-        doc_count: 3979,
-      },
+      x: '2019-05-04T01:00:00.000Z',
+      y: 3979,
     },
     {
-      key_as_string: '2019-05-04T13:00:00.000Z',
-      key: 1556974800000,
-      doc_count: 13,
-      count: {
-        doc_count: 12,
-      },
+      x: '2019-05-04T13:00:00.000Z',
+      y: 12,
     },
   ],
   uniqueSourceIps: 1407,
   uniqueSourceIpsHistogram: [
     {
-      key_as_string: '2019-05-03T13:00:00.000Z',
-      key: 1556888400000,
-      doc_count: 3158515,
-      count: {
-        value: 1182,
-      },
+      x: '2019-05-03T13:00:00.000Z',
+      y: 1182,
     },
     {
-      key_as_string: '2019-05-04T01:00:00.000Z',
-      key: 1556931600000,
-      doc_count: 703032,
-      count: {
-        value: 364,
-      },
+      x: '2019-05-04T01:00:00.000Z',
+      y: 364,
     },
     {
-      key_as_string: '2019-05-04T13:00:00.000Z',
-      key: 1556974800000,
-      doc_count: 1780,
-      count: {
-        value: 63,
-      },
+      x: '2019-05-04T13:00:00.000Z',
+      y: 63,
     },
   ],
   uniqueDestinationIps: 1954,
   uniqueDestinationIpsHistogram: [
     {
-      key_as_string: '2019-05-03T13:00:00.000Z',
-      key: 1556888400000,
-      doc_count: 3158515,
-      count: {
-        value: 1809,
-      },
+      x: '2019-05-03T13:00:00.000Z',
+      y: 1809,
     },
     {
-      key_as_string: '2019-05-04T01:00:00.000Z',
-      key: 1556931600000,
-      doc_count: 703032,
-      count: {
-        value: 407,
-      },
+      x: '2019-05-04T01:00:00.000Z',
+      y: 407,
     },
     {
-      key_as_string: '2019-05-04T13:00:00.000Z',
-      key: 1556974800000,
-      doc_count: 1780,
-      count: {
-        value: 64,
-      },
+      x: '2019-05-04T13:00:00.000Z',
+      y: 64,
     },
   ],
 };

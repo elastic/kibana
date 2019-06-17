@@ -6,7 +6,7 @@
 
 import { AppResolverOf } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
-import { PinnedEvent } from '../../lib/pinned_event';
+import { PinnedEvent } from '../../lib/pinned_event/saved_object';
 
 export type QueryAllPinnedEventsByTimelineIdResolver = AppResolverOf<
   QueryResolvers.GetAllPinnedEventsByTimelineIdResolver
