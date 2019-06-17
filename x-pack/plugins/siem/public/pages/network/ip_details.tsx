@@ -35,7 +35,6 @@ import * as i18n from './translations';
 import { TlsQuery } from '../../containers/tls';
 import { UsersTable } from '../../components/page/network/users_table';
 import { UsersQuery } from '../../containers/users';
-import { UrlStateContainer } from '../../components/url_state';
 
 const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);
@@ -62,7 +61,6 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
           <StickyContainer>
             <FiltersGlobal>
               <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
-              <UrlStateContainer indexPattern={indexPattern} />
             </FiltersGlobal>
 
             <HeaderPage
