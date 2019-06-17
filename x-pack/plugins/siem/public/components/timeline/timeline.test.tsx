@@ -263,7 +263,7 @@ describe('Timeline', () => {
           </TestProviders>
         );
         wrapper
-          .find('[data-test-subj="providerBadge"]')
+          .find('button[data-test-subj="providerBadge"]')
           .first()
           .simulate('click');
 
@@ -315,7 +315,7 @@ describe('Timeline', () => {
         );
 
         wrapper
-          .find('[data-test-subj="providerBadge"]')
+          .find('button[data-test-subj="providerBadge"]')
           .first()
           .simulate('click');
 
@@ -371,6 +371,8 @@ describe('Timeline', () => {
 
         wrapper
           .find('[data-test-subj="providerBadge"]')
+          .first()
+          .find('button')
           .first()
           .simulate('click');
 
@@ -476,6 +478,8 @@ describe('Timeline', () => {
         wrapper
           .find('[data-test-subj="providerBadge"]')
           .at(3)
+          .find('button')
+          .first()
           .simulate('click');
 
         wrapper.update();
@@ -528,6 +532,8 @@ describe('Timeline', () => {
         wrapper
           .find('[data-test-subj="providerBadge"]')
           .at(3)
+          .find('button')
+          .first()
           .simulate('click');
 
         wrapper.update();
@@ -584,6 +590,8 @@ describe('Timeline', () => {
         wrapper
           .find('[data-test-subj="providerBadge"]')
           .at(3)
+          .find('button')
+          .first()
           .simulate('click');
 
         wrapper.update();

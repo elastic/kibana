@@ -19,7 +19,7 @@
 
 import { MarkdownVisWrapper } from './markdown_vis_controller';
 import { i18n } from '@kbn/i18n';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visFactory } from 'ui/vis/vis_factory';
 import markdownVisParamsTemplate from './markdown_vis_params.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
@@ -30,12 +30,10 @@ import { DefaultEditorSize } from 'ui/vis/editor_size';
 // register the provider with the visTypes registry so that other know it exists
 VisTypesRegistryProvider.register(MarkdownVisProvider);
 
-function MarkdownVisProvider(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-
+function MarkdownVisProvider() {
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return VisFactory.createReactVisualization({
+  return visFactory.createReactVisualization({
     name: 'markdown',
     title: 'Markdown',
     isAccessible: true,
@@ -45,7 +43,8 @@ function MarkdownVisProvider(Private) {
       component: MarkdownVisWrapper,
       defaults: {
         fontSize: 12,
-        openLinksInNewTab: false
+        openLinksInNewTab: false,
+        markdown: '',
       }
     },
     editorConfig: {
