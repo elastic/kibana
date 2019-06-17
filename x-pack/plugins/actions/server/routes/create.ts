@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import Joi from 'joi';
 import Hapi from 'hapi';
 import { WithoutQueryAndParams, SavedObjectReference } from '../types';
+
+function defaultErrorHandler(err: Error) {
+  // eslint-disable-next-line
+  throw Boom.boomify(err, { statusCode: 400 });
+}
 
 interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   query: {
@@ -59,13 +65,20 @@ export function createRoute(server: Hapi.Server) {
     async handler(request: CreateRequest) {
       const actionsClient = request.getActionsClient!();
 
-      return await actionsClient.create({
-        data: request.payload.attributes,
-        options: {
-          migrationVersion: request.payload.migrationVersion,
-          references: request.payload.references,
-        },
-      });
+      // TODO: this isn't quite right, but at least gets the response to a 400 instead of 500
+      //       when cofnig is missing a required attribute;
+      //       see: x-pack/test/api_integration/apis/actions/builtin_action_types/slack.ts
+      try {
+        return await actionsClient.create({
+          data: request.payload.attributes,
+          options: {
+            migrationVersion: request.payload.migrationVersion,
+            references: request.payload.references,
+          },
+        });
+      } catch (err) {
+        defaultErrorHandler(err);
+      }
     },
   });
 }

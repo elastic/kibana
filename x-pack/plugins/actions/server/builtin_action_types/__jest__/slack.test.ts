@@ -6,8 +6,9 @@
 
 import { ActionTypeRegistry } from '../../action_type_registry';
 
+import { setIncomingWebhookImpl } from '../slack';
 import { registerBuiltInActionTypes } from '../index';
-import { useMockIncomingWebhook } from '../slack';
+import { MockIncomingWebhook } from './incoming_webhook.mock';
 
 const ACTION_TYPE_ID = 'kibana.slack';
 
@@ -22,11 +23,11 @@ const services = {
 beforeAll(() => {
   actionTypeRegistry = new ActionTypeRegistry({ services });
   registerBuiltInActionTypes(actionTypeRegistry);
-  useMockIncomingWebhook(true);
+  setIncomingWebhookImpl(MockIncomingWebhook);
 });
 
 afterAll(() => {
-  useMockIncomingWebhook(false);
+  setIncomingWebhookImpl();
 });
 
 describe('action is registered', () => {

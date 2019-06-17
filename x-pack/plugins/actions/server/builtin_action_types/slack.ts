@@ -5,35 +5,15 @@
  */
 
 import Joi from 'joi';
-import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
+import { IncomingWebhook } from '@slack/webhook';
 
 import { ActionType, ExecutorOptions } from '../action_type_registry';
 
-class MockIncomingWebhook extends IncomingWebhook {
-  async send(message: string): Promise<IncomingWebhookResult> {
-    if (message == null) throw new Error('message property required in parameter');
+let IncomingWebhookImpl = IncomingWebhook;
 
-    const failureMatch = message.match(/^failure: (.*)$/);
-    if (failureMatch != null) {
-      const failMessage = failureMatch[1];
-      throw new Error(`mockIncomingWebhook failure: ${failMessage}`);
-    }
-
-    return {
-      text: `mockIncomingWebhook success: ${message}`,
-    };
-  }
-}
-
-let UsedIncomingWebhook = IncomingWebhook;
-
-export function useMockIncomingWebhook(useMock: boolean) {
-  if (useMock === true) {
-    UsedIncomingWebhook = MockIncomingWebhook;
-    return;
-  }
-
-  UsedIncomingWebhook = IncomingWebhook;
+// for testing
+export function setIncomingWebhookImpl(incomingWebHook: any = IncomingWebhook): void {
+  IncomingWebhookImpl = incomingWebHook;
 }
 
 const CONFIG_SCHEMA = Joi.object().keys({
@@ -47,6 +27,7 @@ const PARAMS_SCHEMA = Joi.object().keys({
 export const actionType: ActionType = {
   id: 'kibana.slack',
   name: 'slack',
+  unencryptedAttributes: [],
   validate: {
     params: PARAMS_SCHEMA,
     actionTypeConfig: CONFIG_SCHEMA,
@@ -59,7 +40,7 @@ async function executor({ actionTypeConfig, params, services }: ExecutorOptions)
   const { message } = params;
 
   // TODO: do we need an agent for proxy access?
-  const webhook = new UsedIncomingWebhook(webhookUrl);
+  const webhook = new IncomingWebhookImpl(webhookUrl);
 
   // TODO: should we have a standardize response for executor?
   return await webhook.send(message);
