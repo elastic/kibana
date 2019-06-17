@@ -89,6 +89,38 @@ interface Props {
    * ungroups selected group
    */
   ungroupNodes: () => void;
+  /**
+   * left align selected elements
+   */
+  leftAlign: () => void;
+  /**
+   * center align selected elements
+   */
+  centerAlign: () => void;
+  /**
+   * right align selected elements
+   */
+  rightAlign: () => void;
+  /**
+   * top align selected elements
+   */
+  topAlign: () => void;
+  /**
+   * middle align selected elements
+   */
+  middleAlign: () => void;
+  /**
+   * bottom align selected elements
+   */
+  bottomAlign: () => void;
+  /**
+   * horizontally distribute selected elements
+   */
+  horizontalDistribution: () => void;
+  /**
+   * vertically distribute selected elements
+   */
+  verticalDistribution: () => void;
 }
 
 interface State {
@@ -96,6 +128,11 @@ interface State {
    *  indicates whether or not the custom element modal is open
    */
   isModalVisible: boolean;
+}
+
+interface MenuTuple {
+  menuItem: EuiContextMenuPanelItemDescriptor;
+  panel: EuiContextMenuPanelDescriptor;
 }
 
 const contextMenuButton = (handleClick: (event: MouseEvent) => void) => (
@@ -125,6 +162,14 @@ export class SidebarHeader extends Component<Props, State> {
     selectedNodes: PropTypes.array,
     groupNodes: PropTypes.func.isRequired,
     ungroupNodes: PropTypes.func.isRequired,
+    leftAlign: PropTypes.func.isRequired,
+    centerAlign: PropTypes.func.isRequired,
+    rightAlign: PropTypes.func.isRequired,
+    topAlign: PropTypes.func.isRequired,
+    middleAlign: PropTypes.func.isRequired,
+    bottomAlign: PropTypes.func.isRequired,
+    horizontalDistribution: PropTypes.func.isRequired,
+    verticalDistribution: PropTypes.func.isRequired,
   };
 
   public static defaultProps = {
@@ -229,10 +274,7 @@ export class SidebarHeader extends Component<Props, State> {
     );
   };
 
-  private _getLayerMenuItems = (): {
-    menuItem: EuiContextMenuPanelItemDescriptor;
-    panel: EuiContextMenuPanelDescriptor;
-  } => {
+  private _getLayerMenuItems = (): MenuTuple => {
     const { bringToFront, bringForward, sendBackward, sendToBack } = this.props;
 
     return {
@@ -264,6 +306,82 @@ export class SidebarHeader extends Component<Props, State> {
         ],
       },
     };
+  };
+
+  private _getAlignmentMenuItems = (close: (fn: () => void) => () => void): MenuTuple[] => {
+    const {
+      leftAlign,
+      centerAlign,
+      rightAlign,
+      topAlign,
+      middleAlign,
+      bottomAlign,
+      selectedNodes,
+    } = this.props;
+
+    return selectedNodes.length < 2
+      ? []
+      : [
+          {
+            menuItem: { name: 'Align elements', className: topBorderClassName, panel: 2 },
+            panel: {
+              id: 2,
+              title: 'Alignment',
+              items: [
+                {
+                  name: 'Left',
+                  icon: 'arrowLeft',
+                  onClick: close(leftAlign),
+                },
+                {
+                  name: 'Center',
+                  icon: 'sortDown',
+                  onClick: close(centerAlign),
+                },
+                {
+                  name: 'Right',
+                  icon: 'arrowRight',
+                  onClick: close(rightAlign),
+                },
+                {
+                  name: 'Top',
+                  icon: 'arrowUp',
+                  onClick: close(topAlign),
+                },
+                {
+                  name: 'Middle',
+                  icon: 'indexOpen',
+                  onClick: close(middleAlign),
+                },
+                {
+                  name: 'Bottom',
+                  icon: 'arrowDown',
+                  onClick: close(bottomAlign),
+                },
+              ],
+            },
+          },
+        ];
+  };
+
+  private _getDistributionMenuItems = (close: (fn: () => void) => () => void): MenuTuple[] => {
+    const { horizontalDistribution, verticalDistribution, selectedNodes } = this.props;
+
+    return selectedNodes.length < 2
+      ? []
+      : [
+          {
+            menuItem: { name: 'Distribute elements', className: topBorderClassName, panel: 3 },
+            panel: {
+              id: 3,
+              title: 'Distribution',
+              items: [
+                { name: 'Horizontal', icon: 'arrowLeft', onClick: close(horizontalDistribution) },
+                { name: 'Vertical', icon: 'arrowUp', onClick: close(verticalDistribution) },
+              ],
+            },
+          },
+        ];
   };
 
   private _getGroupMenuItems = (
@@ -348,6 +466,14 @@ export class SidebarHeader extends Component<Props, State> {
       // add nested panel for layers controls
       panels.push(panel);
     }
+
+    const menuFiller = ({ menuItem, panel }: MenuTuple) => {
+      items.push(menuItem);
+      panels.push(panel);
+    };
+
+    this._getAlignmentMenuItems(close).forEach(menuFiller);
+    this._getDistributionMenuItems(close).forEach(menuFiller);
 
     items.push({
       name: 'Save as new element',

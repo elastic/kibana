@@ -22,7 +22,16 @@ const handlers = {
   createCustomElement: action('createCustomElement'),
   groupNodes: action('groupNodes'),
   ungroupNodes: action('ungroupNodes'),
+  leftAlign: action('leftAlign'),
+  middleAlign: action('middleAlign'),
+  rightAlign: action('rightAlign'),
+  topAlign: action('topAlign'),
+  centerAlign: action('centerAlign'),
+  bottomAlign: action('bottomAlign'),
+  horizontalDistribution: action('horizontalDistribution'),
+  verticalDistribution: action('verticalDistribution'),
 };
+
 storiesOf('components/Sidebar/SidebarHeader', module)
   .addDecorator(story => <div style={{ width: '300px' }}>{story()}</div>)
   .add('default', () => <SidebarHeader title="Selected layer" {...handlers} />)
