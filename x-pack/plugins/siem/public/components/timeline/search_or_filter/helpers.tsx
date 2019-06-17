@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiSpacer,
-  // @ts-ignore
-  EuiSuperSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 

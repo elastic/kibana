@@ -9,6 +9,8 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { IndexDeprecationTableProps, IndexDeprecationTableUI } from './index_table';
 
+jest.mock('ui/kfetch');
+
 describe('IndexDeprecationTable', () => {
   const defaultProps = {
     indices: [
