@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export let mlLog = () => {};
+import { Plugin, MlInitializerContext } from './plugin';
 
-export function initMlServerLog(log) {
-  mlLog = (level, message) => log(['ml', level], message);
+export function plugin(initializerContext: MlInitializerContext) {
+  return new Plugin(initializerContext);
 }
