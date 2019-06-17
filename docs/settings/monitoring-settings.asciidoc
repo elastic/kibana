@@ -91,6 +91,10 @@ However, the defaults work best in most circumstances. For more information
 about configuring {kib}, see
 {kibana-ref}/settings.html[Setting Kibana Server Properties].
 
+`xpack.monitoring.elasticsearch.logFetchCount`::
+Specifies the number of logs to display in the Monitoring UI. Defaults to `10`.
+The maximum value is `50`.
+
 `xpack.monitoring.ui.enabled`::
 Set to `false` to hide the Monitoring UI in {kib}. The monitoring back-end
 continues to run as an agent for sending {kib} stats to the monitoring
