@@ -42,6 +42,10 @@ export interface CallAPIOptions {
    * then `Basic realm="Authorization Required"` is used as `WWW-Authenticate`.
    */
   wrap401Errors: boolean;
+  /**
+   * A signal object that allows you to abort the request via an AbortController object.
+   */
+  signal?: AbortSignal;
 }
 
 /**
@@ -57,7 +61,7 @@ async function callAPI(
   endpoint: string,
   clientParams: Record<string, unknown> = {},
   options: CallAPIOptions = { wrap401Errors: true }
-) {
+): Promise<any> {
   const clientPath = endpoint.split('.');
   const api: any = get(client, clientPath);
   if (!api) {
@@ -66,7 +70,16 @@ async function callAPI(
 
   const apiContext = clientPath.length === 1 ? client : get(client, clientPath.slice(0, -1));
   try {
-    return await api.call(apiContext, clientParams);
+    return await new Promise((resolve, reject) => {
+      const request = api.call(apiContext, clientParams);
+      if (options.signal) {
+        options.signal.addEventListener('abort', () => {
+          request.abort();
+          reject(new Error('Request was aborted'));
+        });
+      }
+      return request.then(resolve, reject);
+    });
   } catch (err) {
     if (!options.wrap401Errors || err.statusCode !== 401) {
       throw err;

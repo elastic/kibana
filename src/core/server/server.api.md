@@ -43,6 +43,7 @@ export function bootstrap({ configs, cliArgs, applyConfigOverrides, features, }:
 
 // @public
 export interface CallAPIOptions {
+    signal?: AbortSignal;
     wrap401Errors: boolean;
 }
 
@@ -86,8 +87,7 @@ export interface CoreSetup {
         registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-        getBasePathFor: HttpServiceSetup['getBasePathFor'];
-        setBasePathFor: HttpServiceSetup['setBasePathFor'];
+        basePath: HttpServiceSetup['basePath'];
         createNewServer: HttpServiceSetup['createNewServer'];
     };
 }

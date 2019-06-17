@@ -58,7 +58,8 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
     location: prevLocation,
     urlState: prevUrlState,
   }: UrlStateContainerPropTypes) {
-    const { urlState } = this.props;
+    const { location, urlState } = this.props;
+
     if (JSON.stringify(urlState) !== JSON.stringify(prevUrlState)) {
       URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
         if (
@@ -83,10 +84,12 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           }
         }
       });
+    } else if (location.pathname !== prevLocation.pathname) {
+      this.handleInitialize(location);
     }
   }
 
-  public componentDidMount() {
+  public componentWillMount() {
     const { location } = this.props;
     this.handleInitialize(location);
   }

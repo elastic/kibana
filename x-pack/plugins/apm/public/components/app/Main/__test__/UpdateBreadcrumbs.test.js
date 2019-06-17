@@ -10,6 +10,8 @@ import { MemoryRouter } from 'react-router-dom';
 import chrome from 'ui/chrome';
 import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
 
+jest.mock('ui/kfetch');
+
 jest.mock(
   'ui/chrome',
   () => ({
