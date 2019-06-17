@@ -49,6 +49,11 @@ export const spaces = (kibana: Record<string, any>) =>
         spaces: {
           manage: true,
         },
+        management: {
+          kibana: {
+            spaces: true,
+          },
+        },
       };
     },
 

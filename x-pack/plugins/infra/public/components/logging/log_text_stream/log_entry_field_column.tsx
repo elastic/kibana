@@ -7,7 +7,7 @@
 import { darken, transparentize } from 'polished';
 import React, { useMemo } from 'react';
 
-import { css } from '../../../../../../common/eui_styled_components';
+import styled, { css } from '../../../../../../common/eui_styled_components';
 import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryFieldColumnProps {
@@ -24,10 +24,18 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   isWrapped,
 }) => {
   const value = useMemo(() => JSON.parse(encodedValue), [encodedValue]);
-
+  const formattedValue = Array.isArray(value) ? (
+    <ul>
+      {value.map((entry, i) => (
+        <CommaSeparatedLi key={`LogEntryFieldColumn-${i}`}>{entry}</CommaSeparatedLi>
+      ))}
+    </ul>
+  ) : (
+    value
+  );
   return (
     <FieldColumnContent isHighlighted={isHighlighted} isHovered={isHovered} isWrapped={isWrapped}>
-      {value}
+      {formattedValue}
     </FieldColumnContent>
   );
 };
@@ -48,6 +56,16 @@ const wrappedContentStyle = css`
 const unwrappedContentStyle = css`
   overflow: hidden;
   white-space: pre;
+`;
+
+const CommaSeparatedLi = styled.li`
+  display: inline;
+  &:not(:last-child) {
+    margin-right: 1ex;
+    &::after {
+      content: ',';
+    }
+  }
 `;
 
 const FieldColumnContent = LogEntryColumnContent.extend.attrs<{

@@ -191,9 +191,10 @@ export default async function ({ readConfigFile }) {
         '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.maps.showMapsInspectorAdapter=true',
+        '--xpack.telemetry.banner=false',
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
-        '--stats.maximumWaitTimeForAllCollectorsInS=0',
+        '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.code.security.enableGitCertCheck=false', // Disable git certificate check
         '--timelion.ui.enabled=true',
@@ -202,7 +203,7 @@ export default async function ({ readConfigFile }) {
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
-        'xPackMonitoring:showBanner': false,
+        'dateFormat:tz': 'UTC',
       },
     },
     // the apps section defines the urls that
