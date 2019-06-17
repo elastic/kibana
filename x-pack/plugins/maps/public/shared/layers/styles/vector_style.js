@@ -320,7 +320,7 @@ export class VectorStyle extends AbstractStyle {
         const name = options.field.name;
 
         // "feature-state" data expressions are not supported with layout properties.
-        // To work around this limitation, some scaled values must fall back to geojson property values.
+        // To work around this limitation, some styling values must fall back to geojson property values.
         let supportsFeatureState = true;
         let isScaled = true;
         if (styleName === 'iconSize'
@@ -406,10 +406,10 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setFeatureState(tmpFeatureIdentifier, tmpFeatureState);
     }
 
-    const hasScaledGeoJsonProperties = styleFields.some(({ supportsFeatureState }) => {
+    const hasGeoJsonProperties = styleFields.some(({ supportsFeatureState }) => {
       return !supportsFeatureState;
     });
-    return hasScaledGeoJsonProperties;
+    return hasGeoJsonProperties;
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
