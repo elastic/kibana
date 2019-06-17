@@ -26,7 +26,7 @@ export const help: FunctionHelp<FunctionFactory<typeof table>> = {
     }),
     perPage: i18n.translate('xpack.canvas.functions.table.args.perPageHelpText', {
       defaultMessage:
-        'Show this many rows per page. You probably want to raise this is disabling pagination',
+        'Show this many rows per page. You probably want to raise this if disabling pagination',
     }),
     showHeader: i18n.translate('xpack.canvas.functions.table.args.showHeaderHelpText', {
       defaultMessage: 'Show or hide the header row with titles for each column',
