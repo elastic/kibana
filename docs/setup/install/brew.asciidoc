@@ -7,7 +7,7 @@ To install with Homebrew, you first need to tap the Elastic Homebrew repository:
 
 [source,sh]
 -------------------------
-brew tap elastic/elastic-stack
+brew tap elastic/tap
 -------------------------
 
 Once you've tapped the Elastic Homebrew repo, you can use `brew install` to
@@ -15,13 +15,13 @@ install {kib}:
 
 [source,sh]
 -------------------------
-brew install elastic/elastic-stack/kibana
+brew install elastic/tap/kibana
 -------------------------
 
 This installs the most recently released default distribution of {kib}.
 Append the version number to install a previous version, for example
-`elastic/elastic-stack/kibana@6.8`. To install the OSS distribution,
-specify `elastic/elastic-stack/kibana-oss`.
+`elastic/tap/kibana@6.8`. To install the OSS distribution,
+specify `elastic/tap/kibana-oss`.
 
 [[brew-layout]]
 ==== Directory layout for Homebrew installs
