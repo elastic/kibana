@@ -23,7 +23,7 @@ export function createFireHandler({
   return async (actionGroup: string, context: Context, state: State) => {
     const alertActions: RawAlertAction[] = alertSavedObject.attributes.actions;
     const actions = alertActions
-      .filter(({ group }: { group: string }) => group === actionGroup)
+      .filter(({ group }) => group === actionGroup)
       .map(action => {
         const actionReference = alertSavedObject.references.find(
           obj => obj.name === action.actionRef

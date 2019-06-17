@@ -14,13 +14,11 @@ export function transformActionParams(params: AlertActionParams, state: State, c
     const value = params[key];
     if (isPlainObject(value)) {
       result[key] = transformActionParams(value as AlertActionParams, state, context);
-      continue;
-    }
-    if (typeof value !== 'string') {
+    } else if (typeof value !== 'string') {
       result[key] = value;
-      continue;
+    } else {
+      result[key] = Mustache.render(value, { context, state });
     }
-    result[key] = Mustache.render(value, { context, state });
   }
   return result;
 }

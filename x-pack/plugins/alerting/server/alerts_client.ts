@@ -75,9 +75,7 @@ export class AlertsClient {
   public async create({ data, options }: CreateOptions) {
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
-    // Validate
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
-    // Create alert
     const { alert: rawAlert, references } = this.getRawAlert({
       ...data,
       alertTypeParams: validatedAlertTypeParams,

@@ -23,7 +23,7 @@ export class AlertTypeRegistry {
   private readonly getServices: (basePath: string) => Services;
   private readonly taskManager: TaskManager;
   private readonly fireAction: ActionsPlugin['fire'];
-  private readonly alertTypes: Record<string, AlertType> = {};
+  private readonly alertTypes: Map<string, AlertType> = new Map();
   private readonly internalSavedObjectsRepository: SavedObjectsClientContract;
 
   constructor({
@@ -39,7 +39,7 @@ export class AlertTypeRegistry {
   }
 
   public has(id: string) {
-    return !!this.alertTypes[id];
+    return this.alertTypes.has(id);
   }
 
   public register(alertType: AlertType) {
@@ -53,7 +53,7 @@ export class AlertTypeRegistry {
         })
       );
     }
-    this.alertTypes[alertType.id] = alertType;
+    this.alertTypes.set(alertType.id, alertType);
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
@@ -68,7 +68,7 @@ export class AlertTypeRegistry {
     });
   }
 
-  public get(id: string) {
+  public get(id: string): AlertType {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.alerting.alertTypeRegistry.get.missingAlertTypeError', {
@@ -79,11 +79,11 @@ export class AlertTypeRegistry {
         })
       );
     }
-    return this.alertTypes[id];
+    return this.alertTypes.get(id)!;
   }
 
   public list() {
-    return Object.entries(this.alertTypes).map(([alertTypeId, alertType]) => ({
+    return Array.from(this.alertTypes).map(([alertTypeId, alertType]) => ({
       id: alertTypeId,
       name: alertType.name,
     }));

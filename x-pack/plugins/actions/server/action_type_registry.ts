@@ -20,7 +20,7 @@ interface ConstructorOptions {
 export class ActionTypeRegistry {
   private readonly getServices: (basePath: string) => Services;
   private readonly taskManager: TaskManager;
-  private readonly actionTypes: Record<string, ActionType> = {};
+  private readonly actionTypes: Map<string, ActionType> = new Map();
   private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 
   constructor({ getServices, taskManager, encryptedSavedObjectsPlugin }: ConstructorOptions) {
@@ -33,7 +33,7 @@ export class ActionTypeRegistry {
    * Returns if the action type registry has the given action type registered
    */
   public has(id: string) {
-    return !!this.actionTypes[id];
+    return this.actionTypes.has(id);
   }
 
   /**
@@ -50,7 +50,7 @@ export class ActionTypeRegistry {
         })
       );
     }
-    this.actionTypes[actionType.id] = actionType;
+    this.actionTypes.set(actionType.id, actionType);
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
@@ -67,7 +67,7 @@ export class ActionTypeRegistry {
   /**
    * Returns an action type, throws if not registered
    */
-  public get(id: string) {
+  public get(id: string): ActionType {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeError', {
@@ -78,14 +78,14 @@ export class ActionTypeRegistry {
         })
       );
     }
-    return this.actionTypes[id];
+    return this.actionTypes.get(id)!;
   }
 
   /**
    * Returns a list of registered action types [{ id, name }]
    */
   public list() {
-    return Object.entries(this.actionTypes).map(([actionTypeId, actionType]) => ({
+    return Array.from(this.actionTypes).map(([actionTypeId, actionType]) => ({
       id: actionTypeId,
       name: actionType.name,
     }));
