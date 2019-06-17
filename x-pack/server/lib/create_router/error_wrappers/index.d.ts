@@ -8,3 +8,5 @@ import Boom from 'boom';
 export declare function wrapCustomError(error: Error, statusCode: number): Boom<null>;
 
 export declare function wrapEsError(error: Error, statusCodeToMessageMap?: object): Boom<null>;
+
+export declare function wrapUnknownError(error: Error): Boom<null>;

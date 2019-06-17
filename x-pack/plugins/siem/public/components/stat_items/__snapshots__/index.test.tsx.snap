@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Stat Items disable charts it renders the default widget 1`] = `
-<Component
+exports[`Stat Items Component disable charts it renders the default widget 1`] = `
+<Memo()
   description="HOSTS"
   fields={
     Array [
@@ -99,11 +99,11 @@ exports[`Stat Items disable charts it renders the default widget 1`] = `
       </div>
     </EuiFlexItem>
   </Styled(EuiFlexItem)>
-</Component>
+</Memo()>
 `;
 
-exports[`Stat Items disable charts it renders the default widget 2`] = `
-<Component
+exports[`Stat Items Component disable charts it renders the default widget 2`] = `
+<Memo()
   areaChart={Array []}
   barChart={Array []}
   description="HOSTS"
@@ -204,11 +204,11 @@ exports[`Stat Items disable charts it renders the default widget 2`] = `
       </div>
     </EuiFlexItem>
   </Styled(EuiFlexItem)>
-</Component>
+</Memo()>
 `;
 
-exports[`Stat Items rendering kpis with charts it renders the default widget 1`] = `
-<Component
+exports[`Stat Items Component rendering kpis with charts it renders the default widget 1`] = `
+<Memo()
   areaChart={
     Array [
       Object {
@@ -256,8 +256,8 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
         "key": "uniqueSourceIps",
         "value": Array [
           Object {
-            "x": 1714,
-            "y": "uniqueSourceIps",
+            "x": "uniqueSourceIps",
+            "y": "1714",
           },
         ],
       },
@@ -266,8 +266,8 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
         "key": "uniqueDestinationIps",
         "value": Array [
           Object {
-            "x": 2354,
-            "y": "uniqueDestinationIps",
+            "x": "uniqueDestinationIps",
+            "y": 2354,
           },
         ],
       },
@@ -356,39 +356,31 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                   size="l"
                                   type="cross"
                                 >
-                                  <cross
-                                    className="euiIcon euiIcon--large"
+                                  <EuiIconEmpty
+                                    className="euiIcon euiIcon--large euiIcon-isLoading"
                                     data-test-subj="stat-icon"
                                     focusable="false"
-                                    height="16"
                                     style={
                                       Object {
                                         "fill": "#DB1374",
                                       }
                                     }
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <svg
-                                      className="euiIcon euiIcon--large"
+                                      className="euiIcon euiIcon--large euiIcon-isLoading"
                                       data-test-subj="stat-icon"
                                       focusable="false"
-                                      height="16"
+                                      height={16}
                                       style={
                                         Object {
                                           "fill": "#DB1374",
                                         }
                                       }
                                       viewBox="0 0 16 16"
-                                      width="16"
+                                      width={16}
                                       xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <path
-                                        d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                                      />
-                                    </svg>
-                                  </cross>
+                                    />
+                                  </EuiIconEmpty>
                                 </EuiIcon>
                               </div>
                             </EuiFlexItem>
@@ -455,39 +447,31 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                   size="l"
                                   type="cross"
                                 >
-                                  <cross
-                                    className="euiIcon euiIcon--large"
+                                  <EuiIconEmpty
+                                    className="euiIcon euiIcon--large euiIcon-isLoading"
                                     data-test-subj="stat-icon"
                                     focusable="false"
-                                    height="16"
                                     style={
                                       Object {
                                         "fill": "#490092",
                                       }
                                     }
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <svg
-                                      className="euiIcon euiIcon--large"
+                                      className="euiIcon euiIcon--large euiIcon-isLoading"
                                       data-test-subj="stat-icon"
                                       focusable="false"
-                                      height="16"
+                                      height={16}
                                       style={
                                         Object {
                                           "fill": "#490092",
                                         }
                                       }
                                       viewBox="0 0 16 16"
-                                      width="16"
+                                      width={16}
                                       xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <path
-                                        d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                                      />
-                                    </svg>
-                                  </cross>
+                                    />
+                                  </EuiIconEmpty>
                                 </EuiIcon>
                               </div>
                             </EuiFlexItem>
@@ -539,7 +523,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                     <div
                       className="euiFlexItem sc-bxivhb bQCHAr"
                     >
-                      <Component
+                      <Memo()
                         barChart={
                           Array [
                             Object {
@@ -547,8 +531,8 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                               "key": "uniqueSourceIps",
                               "value": Array [
                                 Object {
-                                  "x": 1714,
-                                  "y": "uniqueSourceIps",
+                                  "x": "uniqueSourceIps",
+                                  "y": "1714",
                                 },
                               ],
                             },
@@ -557,8 +541,8 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                               "key": "uniqueDestinationIps",
                               "value": Array [
                                 Object {
-                                  "x": 2354,
-                                  "y": "uniqueDestinationIps",
+                                  "x": "uniqueDestinationIps",
+                                  "y": 2354,
                                 },
                               ],
                             },
@@ -573,9 +557,9 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                             innerRef={[Function]}
                           >
                             <div
-                              className="sc-bwzfXH gluXfG"
+                              className="sc-bwzfXH ffMqh"
                             >
-                              <Component
+                              <Memo()
                                 data={
                                   Array [
                                     Object {
@@ -583,8 +567,8 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                       "key": "uniqueSourceIps",
                                       "value": Array [
                                         Object {
-                                          "x": 1714,
-                                          "y": "uniqueSourceIps",
+                                          "x": "uniqueSourceIps",
+                                          "y": "1714",
                                         },
                                       ],
                                     },
@@ -593,72 +577,45 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                       "key": "uniqueDestinationIps",
                                       "value": Array [
                                         Object {
-                                          "x": 2354,
-                                          "y": "uniqueDestinationIps",
+                                          "x": "uniqueDestinationIps",
+                                          "y": 2354,
                                         },
                                       ],
                                     },
                                   ]
                                 }
                               >
-                                <ChartHolder>
-                                  <Styled(EuiFlexGroup)
-                                    alignItems="center"
-                                    justifyContent="center"
-                                  >
-                                    <EuiFlexGroup
-                                      alignItems="center"
-                                      className="sc-bdVaJa dGIfxd"
-                                      justifyContent="center"
-                                    >
-                                      <div
-                                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bdVaJa dGIfxd"
-                                      >
-                                        <EuiFlexItem
-                                          grow={false}
-                                        >
-                                          <div
-                                            className="euiFlexItem euiFlexItem--flexGrowZero"
-                                          >
-                                            <EuiText
-                                              color="subdued"
-                                              size="s"
-                                              textAlign="center"
-                                            >
-                                              <div
-                                                className="euiText euiText--small"
-                                              >
-                                                <EuiTextAlign
-                                                  textAlign="center"
-                                                >
-                                                  <div
-                                                    className="euiTextAlign euiTextAlign--center"
-                                                  >
-                                                    <EuiTextColor
-                                                      color="subdued"
-                                                      component="div"
-                                                    >
-                                                      <div
-                                                        className="euiTextColor euiTextColor--subdued"
-                                                      >
-                                                        Chart Data Not Available
-                                                      </div>
-                                                    </EuiTextColor>
-                                                  </div>
-                                                </EuiTextAlign>
-                                              </div>
-                                            </EuiText>
-                                          </div>
-                                        </EuiFlexItem>
-                                      </div>
-                                    </EuiFlexGroup>
-                                  </Styled(EuiFlexGroup)>
-                                </ChartHolder>
-                              </Component>
+                                <Memo()
+                                  data={
+                                    Array [
+                                      Object {
+                                        "color": "#DB1374",
+                                        "key": "uniqueSourceIps",
+                                        "value": Array [
+                                          Object {
+                                            "x": "uniqueSourceIps",
+                                            "y": "1714",
+                                          },
+                                        ],
+                                      },
+                                      Object {
+                                        "color": "#490092",
+                                        "key": "uniqueDestinationIps",
+                                        "value": Array [
+                                          Object {
+                                            "x": "uniqueDestinationIps",
+                                            "y": 2354,
+                                          },
+                                        ],
+                                      },
+                                    ]
+                                  }
+                                />
+                              </Memo()>
                             </div>
                           </styled.div>
                         </AutoSizer>
-                      </Component>
+                      </Memo()>
                     </div>
                   </EuiFlexItem>
                 </Styled(EuiFlexItem)>
@@ -669,7 +626,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                     <div
                       className="euiFlexItem sc-bxivhb bQCHAr"
                     >
-                      <Component
+                      <Memo()
                         areaChart={
                           Array [
                             Object {
@@ -719,9 +676,9 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                             innerRef={[Function]}
                           >
                             <div
-                              className="sc-bwzfXH gluXfG"
+                              className="sc-bwzfXH ffMqh"
                             >
-                              <Component
+                              <Memo()
                                 data={
                                   Array [
                                     Object {
@@ -763,7 +720,7 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                   ]
                                 }
                               >
-                                <Component
+                                <Memo()
                                   data={
                                     Array [
                                       Object {
@@ -805,11 +762,11 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
                                     ]
                                   }
                                 />
-                              </Component>
+                              </Memo()>
                             </div>
                           </styled.div>
                         </AutoSizer>
-                      </Component>
+                      </Memo()>
                     </div>
                   </EuiFlexItem>
                 </Styled(EuiFlexItem)>
@@ -820,5 +777,5 @@ exports[`Stat Items rendering kpis with charts it renders the default widget 1`]
       </div>
     </EuiFlexItem>
   </Styled(EuiFlexItem)>
-</Component>
+</Memo()>
 `;

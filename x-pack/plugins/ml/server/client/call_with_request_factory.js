@@ -9,15 +9,15 @@
 import { once } from 'lodash';
 import { elasticsearchJsPlugin } from './elasticsearch_ml';
 
-const callWithRequest = once((server) => {
+const callWithRequest = once((elasticsearchPlugin) => {
   const config = { plugins: [ elasticsearchJsPlugin ] };
-  const cluster = server.plugins.elasticsearch.createCluster('ml', config);
+  const cluster = elasticsearchPlugin.createCluster('ml', config);
 
   return cluster.callWithRequest;
 });
 
-export const callWithRequestFactory = (server, request) => {
+export const callWithRequestFactory = (elasticsearchPlugin, request) => {
   return (...args) => {
-    return callWithRequest(server)(request, ...args);
+    return callWithRequest(elasticsearchPlugin)(request, ...args);
   };
 };

@@ -68,6 +68,7 @@ export class MonacoHelper {
           scrollBeyondLastLine: false,
           renderIndentGuides: false,
           automaticLayout: false,
+          lineDecorationsWidth: 16,
         },
         {
           textModelService: new TextModelResolverService(monaco),
@@ -157,7 +158,9 @@ export class MonacoHelper {
   }
 
   public clearLineSelection() {
-    this.decorations = this.editor!.deltaDecorations(this.decorations, []);
+    if (this.editor) {
+      this.decorations = this.editor.deltaDecorations(this.decorations, []);
+    }
   }
 
   private handleCopy(e: any) {

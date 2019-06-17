@@ -43,8 +43,10 @@ export const statusSelector = (state: RootState, repoUri: RepositoryUri) => {
 
 export const allStatusSelector = (state: RootState) => state.status.status;
 
+export const currentPathSelector = (state: RootState) => state.route.match.params.path;
+
 export const treeCommitsSelector = (state: RootState) => {
-  const path = state.file.currentPath;
+  const path = currentPathSelector(state);
   if (path === '') {
     return state.file.commits;
   } else {
@@ -53,7 +55,7 @@ export const treeCommitsSelector = (state: RootState) => {
 };
 
 export const hasMoreCommitsSelector = (state: RootState) => {
-  const path = state.file.currentPath;
+  const path = currentPathSelector(state);
   const isLoading = state.file.loadingCommits;
   if (isLoading) {
     return false;
@@ -86,7 +88,7 @@ function find(tree: FileTree, paths: string[]): FileTree | null {
 
 export const currentTreeSelector = (state: RootState) => {
   const tree = getTree(state);
-  const path = state.file.currentPath;
+  const path = currentPathSelector(state) || '';
   return find(tree, path.split('/'));
 };
 

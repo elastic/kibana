@@ -26,13 +26,18 @@
   @include euiFontSizeM;
 }
 
+.monTableCell__status {
+  overflow-x: hidden;
+  white-space: nowrap;
+}
+
 .monTableCell__transportAddress {
   color: $euiColorDarkShade;
   @include euiFontSizeS;
 }
 
 .monTableCell__number {
-  @include euiFontSizeXL;
+  @include euiFontSizeL;
 }
 
 .monTableCell__splitNumber {

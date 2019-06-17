@@ -22,14 +22,12 @@ import {
 } from '../../store';
 import {
   AbsoluteTimeRange,
-  InputsModelId,
   LinkTo,
   RelativeTimeRange,
-  TimeRangeKinds,
   UrlInputsModel,
 } from '../../store/inputs/model';
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
-import { URL_STATE_KEYS, CONSTANTS, LOCATION_MAPPED_TO_MODEL, LOCATION_KEYS } from './constants';
+import { URL_STATE_KEYS, LOCATION_MAPPED_TO_MODEL, LOCATION_KEYS } from './types';
 import {
   decodeRisonUrlState,
   getCurrentLocation,
@@ -48,6 +46,9 @@ import {
   UrlStateContainerPropTypes,
   UrlStateProps,
 } from './types';
+import { CONSTANTS } from './constants';
+import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
+import { normalizeTimeRange } from './normalize_time_range';
 
 export class UrlStateContainerLifecycle extends React.Component<UrlStateContainerPropTypes> {
   public render() {
@@ -58,7 +59,8 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
     location: prevLocation,
     urlState: prevUrlState,
   }: UrlStateContainerPropTypes) {
-    const { urlState } = this.props;
+    const { location, urlState } = this.props;
+
     if (JSON.stringify(urlState) !== JSON.stringify(prevUrlState)) {
       URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
         if (
@@ -83,10 +85,12 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           }
         }
       });
+    } else if (location.pathname !== prevLocation.pathname) {
+      this.handleInitialize(location);
     }
   }
 
-  public componentDidMount() {
+  public componentWillMount() {
     const { location } = this.props;
     this.handleInitialize(location);
   }
@@ -120,14 +124,18 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           this.props.toggleTimelineLinkTo({ linkToId: 'global' });
         }
         if (globalType === 'absolute') {
-          const absoluteRange: AbsoluteTimeRange = get('global.timerange', timerangeStateData);
+          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+            get('global.timerange', timerangeStateData)
+          );
           this.props.setAbsoluteTimerange({
             ...absoluteRange,
             id: globalId,
           });
         }
         if (globalType === 'relative') {
-          const relativeRange: RelativeTimeRange = get('global.timerange', timerangeStateData);
+          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+            get('global.timerange', timerangeStateData)
+          );
           this.props.setRelativeTimerange({
             ...relativeRange,
             id: globalId,
@@ -142,14 +150,18 @@ export class UrlStateContainerLifecycle extends React.Component<UrlStateContaine
           this.props.toggleTimelineLinkTo({ linkToId: 'timeline' });
         }
         if (timelineType === 'absolute') {
-          const absoluteRange: AbsoluteTimeRange = get('timeline.timerange', timerangeStateData);
+          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+            get('timeline.timerange', timerangeStateData)
+          );
           this.props.setAbsoluteTimerange({
             ...absoluteRange,
             id: timelineId,
           });
         }
         if (timelineType === 'relative') {
-          const relativeRange: RelativeTimeRange = get('timeline.timerange', timerangeStateData);
+          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+            get('timeline.timerange', timerangeStateData)
+          );
           this.props.setRelativeTimerange({
             ...relativeRange,
             id: timelineId,

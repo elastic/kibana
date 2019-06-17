@@ -6,31 +6,33 @@
 
 // @ts-ignore no @typed def
 import inlineStyle from 'inline-style';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 import {
   CSSStyle,
   FontFamily,
   FontWeight,
-  NullContextFunction,
+  TextDecoration,
   Style,
   TextAlignment,
-  TEXT_ALIGNMENTS,
+  FontStyle,
 } from '../types';
 
 interface Arguments {
   align: TextAlignment;
-  color: string | null;
+  color: string;
   family: FontFamily;
   italic: boolean;
-  lHeight: number;
+  lHeight: number | null;
   size: number;
   underline: boolean;
   weight: FontWeight;
 }
 
-export function font(): NullContextFunction<'font', Arguments, Style> {
+export function font(): ExpressionFunction<'font', null, Arguments, Style> {
   const { help, args: argHelp } = getFunctionHelp().font;
+  const errors = getFunctionErrors().font;
 
   return {
     name: 'font',
@@ -44,12 +46,12 @@ export function font(): NullContextFunction<'font', Arguments, Style> {
       align: {
         default: 'left',
         help: argHelp.align,
-        options: TEXT_ALIGNMENTS,
+        options: Object.values(TextAlignment),
         types: ['string'],
       },
       color: {
         help: argHelp.color,
-        types: ['string', 'null'],
+        types: ['string'],
       },
       family: {
         default: `"${openSans.value}"`,
@@ -65,12 +67,12 @@ export function font(): NullContextFunction<'font', Arguments, Style> {
       lHeight: {
         aliases: ['lineHeight'],
         help: argHelp.lHeight,
-        types: ['number'],
+        types: ['number', 'null'],
       },
       size: {
+        types: ['number'],
         default: 14,
         help: argHelp.size,
-        types: ['number'],
       },
       underline: {
         default: false,
@@ -87,21 +89,21 @@ export function font(): NullContextFunction<'font', Arguments, Style> {
     },
     fn: (_context, args) => {
       if (!Object.values(FontWeight).includes(args.weight)) {
-        throw new Error(`Invalid font weight: '${args.weight}'`);
+        throw errors.invalidFontWeight(args.weight);
       }
-      if (!TEXT_ALIGNMENTS.includes(args.align)) {
-        throw new Error(`Invalid text alignment: '${args.align}'`);
+      if (!Object.values(TextAlignment).includes(args.align)) {
+        throw errors.invalidTextAlignment(args.align);
       }
 
       // the line height shouldn't ever be lower than the size, and apply as a
       // pixel setting
-      const lineHeight = args.lHeight ? `${args.lHeight}px` : 1;
+      const lineHeight = args.lHeight != null ? `${args.lHeight}px` : '1';
 
       const spec: CSSStyle = {
         fontFamily: args.family,
         fontWeight: args.weight,
-        fontStyle: args.italic ? 'italic' : 'normal',
-        textDecoration: args.underline ? 'underline' : 'none',
+        fontStyle: args.italic ? FontStyle.ITALIC : FontStyle.NORMAL,
+        textDecoration: args.underline ? TextDecoration.UNDERLINE : TextDecoration.NONE,
         textAlign: args.align,
         fontSize: `${args.size}px`, // apply font size as a pixel setting
         lineHeight, // apply line height as a pixel setting

@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AggregationSearchResponse } from 'elasticsearch';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { ChartBase, MetricsAggs, MetricSeriesKeys } from './types';
+import { AggregationSearchResponse, AggregatedValue } from 'elasticsearch';
+import { ChartBase } from './types';
 
 const colors = [
   theme.euiColorVis0,
@@ -20,9 +20,33 @@ const colors = [
 export type GenericMetricsChart = ReturnType<
   typeof transformDataToMetricsChart
 >;
-export function transformDataToMetricsChart<T extends MetricSeriesKeys>(
-  result: AggregationSearchResponse<void, MetricsAggs<T>>,
-  chartBase: ChartBase<T>
+
+interface AggregatedParams {
+  body: {
+    aggs: {
+      timeseriesData: {
+        date_histogram: any;
+        aggs: {
+          min?: any;
+          max?: any;
+          sum?: any;
+          avg?: any;
+        };
+      };
+    } & {
+      [key: string]: {
+        min?: any;
+        max?: any;
+        sum?: any;
+        avg?: any;
+      };
+    };
+  };
+}
+
+export function transformDataToMetricsChart<Params extends AggregatedParams>(
+  result: AggregationSearchResponse<unknown, Params>,
+  chartBase: ChartBase
 ) {
   const { aggregations, hits } = result;
   const { timeseriesData } = aggregations;
@@ -32,20 +56,24 @@ export function transformDataToMetricsChart<T extends MetricSeriesKeys>(
     key: chartBase.key,
     yUnit: chartBase.yUnit,
     totalHits: hits.total,
-    series: Object.keys(chartBase.series).map((seriesKey, i) => ({
-      title: chartBase.series[seriesKey].title,
-      key: seriesKey,
-      type: chartBase.type,
-      color: chartBase.series[seriesKey].color || colors[i],
-      overallValue: aggregations[seriesKey].value,
-      data: timeseriesData.buckets.map(bucket => {
-        const { value } = bucket[seriesKey];
-        const y = value === null || isNaN(value) ? null : value;
-        return {
-          x: bucket.key,
-          y
-        };
-      })
-    }))
+    series: Object.keys(chartBase.series).map((seriesKey, i) => {
+      const agg = aggregations[seriesKey];
+
+      return {
+        title: chartBase.series[seriesKey].title,
+        key: seriesKey,
+        type: chartBase.type,
+        color: chartBase.series[seriesKey].color || colors[i],
+        overallValue: agg.value,
+        data: timeseriesData.buckets.map(bucket => {
+          const { value } = bucket[seriesKey] as AggregatedValue;
+          const y = value === null || isNaN(value) ? null : value;
+          return {
+            x: bucket.key,
+            y
+          };
+        })
+      };
+    })
   };
 }

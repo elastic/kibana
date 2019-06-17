@@ -22,7 +22,8 @@ import { MonitoringTableToolBar } from './toolbar';
 import { MonitoringTableNoData } from './no_data';
 import { MonitoringTableFooter } from './footer';
 import classNames from 'classnames';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 /*
  * State and data management for Monitoring Tables
@@ -47,7 +48,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
  *  }
  * ];
  */
-class MonitoringTableUI extends React.Component {
+export class MonitoringTable extends React.Component {
   constructor(props) {
     super(props);
 
@@ -123,10 +124,12 @@ class MonitoringTableUI extends React.Component {
         break;
       default:
         throw new Error(
-          this.props.intl.formatMessage({
-            id: 'xpack.monitoring.table.unknownTableActionTypeErrorMessage',
-            defaultMessage: `Unknown table action type {action}! This shouldn't happen!` }, {
-            action
+          i18n.translate('xpack.monitoring.table.unknownTableActionTypeErrorMessage', {
+            defaultMessage: `Unknown table action type {action}! This shouldn't happen!`,
+
+            values: {
+              action
+            }
           })
         );
     }
@@ -464,12 +467,10 @@ const defaultGetNoDataMessage = filterText => {
   return DEFAULT_NO_DATA_MESSAGE;
 };
 
-MonitoringTableUI.defaultProps = {
+MonitoringTable.defaultProps = {
   rows: [],
   filterFields: [],
   getNoDataMessage: defaultGetNoDataMessage,
   alwaysShowPageControls: false,
   rowsPerPage: 20
 };
-
-export const MonitoringTable = injectI18n(MonitoringTableUI);
