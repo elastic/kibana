@@ -11,7 +11,7 @@ import { convertKeysToCamelCaseDeep } from '../../../../server/lib/key_case_conv
 
 const XPACK_INFO_KEY = 'xpackMain.info';
 
-export function XPackInfoProvider($window, $injector) {
+export function XPackInfoProvider($injector) {
 
   class XPackInfo {
     constructor(initialInfo = {}) {
@@ -20,7 +20,7 @@ export function XPackInfoProvider($window, $injector) {
     }
 
     get = (path, defaultValue = undefined) => {
-      const xpackInfoValuesJson = $window.sessionStorage.getItem(XPACK_INFO_KEY);
+      const xpackInfoValuesJson = sessionStorage.getItem(XPACK_INFO_KEY);
       const xpackInfoValues = xpackInfoValuesJson ? JSON.parse(xpackInfoValuesJson) : {};
       return get(xpackInfoValues, path, defaultValue);
     };
@@ -30,11 +30,11 @@ export function XPackInfoProvider($window, $injector) {
       // convention of using kebabe-case/snake-case in API response bodies but camel-case in JS
       // objects. See pull #29304 for more info.
       const camelCasedXPackInfo = convertKeysToCamelCaseDeep(updatedXPackInfo);
-      $window.sessionStorage.setItem(XPACK_INFO_KEY, JSON.stringify(camelCasedXPackInfo));
+      sessionStorage.setItem(XPACK_INFO_KEY, JSON.stringify(camelCasedXPackInfo));
     };
 
     clear = () => {
-      $window.sessionStorage.removeItem(XPACK_INFO_KEY);
+      sessionStorage.removeItem(XPACK_INFO_KEY);
     };
 
     refresh = () => {
