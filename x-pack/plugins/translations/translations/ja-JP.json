@@ -3187,7 +3187,6 @@
     "tsvb.filterRatio.fieldLabel": "フィールド",
     "tsvb.filterRatio.metricAggregationLabel": "メトリック集約",
     "tsvb.filterRatio.numeratorLabel": "分子",
-    "tsvb.function.help": "TSVB ビジュアライゼーション",
     "tsvb.gauge.dataTab.dataButtonLabel": "データ",
     "tsvb.gauge.dataTab.metricsButtonLabel": "メトリック",
     "tsvb.gauge.editor.addSeriesTooltip": "数列を追加します",

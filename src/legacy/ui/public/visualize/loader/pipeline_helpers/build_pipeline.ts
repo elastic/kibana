@@ -217,7 +217,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     const paramsJson = prepareJson('params', visState.params);
     const uiStateJson = prepareJson('uiState', uiState);
 
-    return `tsvb ${paramsJson} ${uiStateJson}`;
+    return `timeseries_vis ${paramsJson} ${uiStateJson}`;
   },
   timelion: visState => {
     const expression = prepareString('expression', visState.params.expression);

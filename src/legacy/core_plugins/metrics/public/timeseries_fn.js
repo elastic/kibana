@@ -25,14 +25,14 @@ import { PersistedState } from 'ui/persisted_state';
 
 import chrome from 'ui/chrome';
 
-export const tsvb = () => ({
-  name: 'tsvb',
+export const timeseries = () => ({
+  name: 'timeseries_vis',
   type: 'render',
   context: {
     types: ['kibana_context', 'null'],
   },
   help: i18n.translate('tsvb.function.help', {
-    defaultMessage: 'TSVB visualization',
+    defaultMessage: 'Timeseries visualization',
   }),
   args: {
     params: {
@@ -76,4 +76,4 @@ export const tsvb = () => ({
   },
 });
 
-functionsRegistry.register(tsvb);
+functionsRegistry.register(timeseries);

@@ -29,7 +29,7 @@ export default function(kibana) {
 
     uiExports: {
       visTypes: ['plugins/metrics/kbn_vis_types'],
-      interpreter: ['plugins/metrics/tsvb_fn'],
+      interpreter: ['plugins/metrics/timeseries_fn'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
 
