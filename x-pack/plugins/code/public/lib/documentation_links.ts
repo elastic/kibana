@@ -15,7 +15,7 @@ export const documentationLinks = {
   codeGettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-getting-started.html`,
   codeRepoManagement: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-repo-management.html`,
   codeSearch: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-search.html`,
-  codeOtherFeatures: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-other-navigation-features.html`,
-  semanticNavigation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-semantic-code-navigation.html`,
+  codeOtherFeatures: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-basic-nav.html`,
+  semanticNavigation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/code-semantic-nav.html`,
   kibanaRoleManagement: `${ELASTIC_WEBSITE_URL}guide/en/kibana/7.2/_kibana_role_management.html`,
 };

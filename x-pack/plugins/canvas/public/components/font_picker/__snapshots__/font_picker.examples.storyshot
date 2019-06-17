@@ -31,8 +31,8 @@ exports[`Storyshots components/FontPicker default 1`] = `
         <button
           aria-haspopup="true"
           aria-labelledby="undefined generated-id"
+          aria-selected={true}
           className="euiSuperSelectControl euiSuperSelectControl--compressed"
-          onChange={[Function]}
           onClick={[Function]}
           onKeyDown={[Function]}
           role="option"
@@ -105,8 +105,8 @@ exports[`Storyshots components/FontPicker with value 1`] = `
         <button
           aria-haspopup="true"
           aria-labelledby="undefined generated-id"
+          aria-selected={true}
           className="euiSuperSelectControl euiSuperSelectControl--compressed"
-          onChange={[Function]}
           onClick={[Function]}
           onKeyDown={[Function]}
           role="option"

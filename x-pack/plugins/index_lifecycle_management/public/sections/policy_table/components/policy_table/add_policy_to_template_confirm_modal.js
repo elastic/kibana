@@ -7,8 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import { get, find } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { LearnMoreLink } from '../../../components/learn_more_link';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCallOut,
   EuiSelect,
@@ -21,9 +20,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
+
 import { addLifecyclePolicyToTemplate, loadIndexTemplates } from '../../../../services/api';
 import { showApiError } from '../../../../services/api_errors';
-export class AddPolicyToTemplateConfirmModalUi extends Component {
+import { LearnMoreLink } from '../../../components/learn_more_link';
+
+export class AddPolicyToTemplateConfirmModal extends Component {
   state = {
     templates: []
   }
@@ -32,7 +34,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
     this.setState({ templates });
   }
   addPolicyToTemplate = async () => {
-    const { intl, policy, callback, onCancel } = this.props;
+    const { policy, callback, onCancel } = this.props;
     const { templateName, aliasName } = this.state;
     const policyName = policy.name;
     if (!templateName) {
@@ -47,17 +49,23 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
         templateName,
         aliasName
       });
-      const message = intl.formatMessage({
-        id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.successMessage',
-        defaultMessage: 'Added policy {policyName} to index template {templateName}',
-      }, { policyName, templateName });
+      const message = i18n.translate(
+        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.successMessage',
+        {
+          defaultMessage: 'Added policy {policyName} to index template {templateName}',
+          values: { policyName, templateName }
+        }
+      );
       toastNotifications.addSuccess(message);
       onCancel();
     } catch (e) {
-      const title = intl.formatMessage({
-        id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.errorMessage',
-        defaultMessage: 'Error adding policy "{policyName}" to index template {templateName}',
-      }, { policyName, templateName });
+      const title = i18n.translate(
+        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.errorMessage',
+        {
+          defaultMessage: 'Error adding policy "{policyName}" to index template {templateName}',
+          values: { policyName, templateName }
+        }
+      );
       showApiError(e, title);
     }
     if (callback) {
@@ -168,25 +176,32 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
     );
   };
   render() {
-    const { intl, policy, onCancel } = this.props;
-    const title = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.title',
-      defaultMessage: 'Add policy "{name}" to index template',
-    }, { name: policy.name });
+    const { policy, onCancel } = this.props;
+    const title = i18n.translate(
+      'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.title',
+      {
+        defaultMessage: 'Add policy "{name}" to index template',
+        values: { name: policy.name }
+      }
+    );
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
           title={title}
           onCancel={onCancel}
           onConfirm={this.addPolicyToTemplate}
-          cancelButtonText={intl.formatMessage({
-            id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.cancelButton',
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={intl.formatMessage({
-            id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.confirmButton',
-            defaultMessage: 'Add policy',
-          })}
+          cancelButtonText={i18n.translate(
+            'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.cancelButton',
+            {
+              defaultMessage: 'Cancel'
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.confirmButton',
+            {
+              defaultMessage: 'Add policy'
+            }
+          )}
           onClose={onCancel}
         >
           <EuiText>
@@ -213,4 +228,3 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
     );
   }
 }
-export const AddPolicyToTemplateConfirmModal = injectI18n(AddPolicyToTemplateConfirmModalUi);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 
@@ -19,37 +19,45 @@ export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
  */
 let DependenciesContext: React.Context<AppDependencies>;
 
-export const useAppDependencies = () => useContext<AppDependencies>(DependenciesContext);
+export const setAppDependencies = (deps: AppDependencies) => {
+  DependenciesContext = createContext<AppDependencies>(deps);
+  return DependenciesContext.Provider;
+};
 
-const ReactApp: React.FunctionComponent<AppDependencies> = ({ core, plugins }) => {
+export const useAppDependencies = () => {
+  if (!DependenciesContext) {
+    throw new Error(`The app dependencies Context hasn't been set.
+    Use the "setAppDependencies()" method when bootstrapping the app.`);
+  }
+  return useContext<AppDependencies>(DependenciesContext);
+};
+
+const getAppProviders = (deps: AppDependencies) => {
   const {
     i18n: { Context: I18nContext },
-  } = core;
+  } = deps.core;
 
-  const appDependencies: AppDependencies = {
-    core,
-    plugins,
-  };
+  // Create App dependencies context and get its provider
+  const AppDependenciesProvider = setAppDependencies(deps);
 
-  DependenciesContext = createContext<AppDependencies>(appDependencies);
-
-  return (
+  return ({ children }: { children: ReactNode }) => (
     <I18nContext>
       <HashRouter>
-        <DependenciesContext.Provider value={appDependencies}>
-          <AppStateProvider value={useReducer(reducer, initialState)}>
-            <App />
-          </AppStateProvider>
-        </DependenciesContext.Provider>
+        <AppDependenciesProvider value={deps}>
+          <AppStateProvider value={useReducer(reducer, initialState)}>{children}</AppStateProvider>
+        </AppDependenciesProvider>
       </HashRouter>
     </I18nContext>
   );
 };
 
-export const renderReact = async (
-  elem: Element,
-  core: AppCore,
-  plugins: AppPlugins
-): Promise<void> => {
-  render(<ReactApp core={core} plugins={plugins} />, elem);
+export const renderReact = async (elem: Element, core: AppCore, plugins: AppPlugins) => {
+  const Providers = getAppProviders({ core, plugins });
+
+  render(
+    <Providers>
+      <App />
+    </Providers>,
+    elem
+  );
 };
