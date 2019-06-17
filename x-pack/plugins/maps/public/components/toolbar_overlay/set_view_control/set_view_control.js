@@ -16,12 +16,31 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+function getViewString(lat, lon, zoom) {
+  return `${lat},${lon},${zoom}`;
+}
+
 export class SetViewControl extends Component {
 
   state = {
     lat: this.props.center.lat,
     lon: this.props.center.lon,
     zoom: this.props.zoom,
+    prevView: getViewString(this.props.center.lat, this.props.center.lon, this.props.zoom)
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const nextView = getViewString(nextProps.center.lat, nextProps.center.lon, nextProps.zoom);
+    if (nextView !== prevState.prevView) {
+      return {
+        lat: nextProps.center.lat,
+        lon: nextProps.center.lon,
+        zoom: nextProps.zoom,
+        prevView: nextView,
+      };
+    }
+
+    return null;
   }
 
   _togglePopover = () => {
