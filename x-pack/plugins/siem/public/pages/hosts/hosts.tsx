@@ -35,7 +35,6 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
-import { UrlStateContainer } from '../../components/url_state';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
@@ -55,7 +54,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
         <StickyContainer>
           <FiltersGlobal>
             <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
-            <UrlStateContainer indexPattern={indexPattern} />
           </FiltersGlobal>
 
           <HeaderPage

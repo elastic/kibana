@@ -12,7 +12,10 @@ export const FORMAT_OPTIONS = [
   // 'xml',
 ];
 
+export const CUSTOM_DROPDOWN_OPTION = 'custom';
+
 export const TIMESTAMP_OPTIONS = [
+  CUSTOM_DROPDOWN_OPTION,
   'dd/MMM/yyyy:HH:mm:ss XX',
   'EEE MMM dd HH:mm zzz yyyy',
   'EEE MMM dd HH:mm:ss yyyy',
@@ -96,36 +99,6 @@ export const TIMESTAMP_OPTIONS = [
   'yyyy-MM-dd HH:mm:ss:SSSSSSXXX',
   'yyyy-MM-dd HH:mm:ss:SSSSSSSSSXXX',
 
-  `yyyy-MM-dd'T'HH:mm:ss,SSS`,
-  `yyyy-MM-dd'T'HH:mm:ss,SSSSSS`,
-  `yyyy-MM-dd'T'HH:mm:ss,SSSSSSSSS`,
-  `yyyy-MM-dd'T'HH:mm:ss.SSS`,
-  `yyyy-MM-dd'T'HH:mm:ss.SSSSSS`,
-  `yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS`,
-  `yyyy-MM-dd'T'HH:mm:ss:SSS`,
-  `yyyy-MM-dd'T'HH:mm:ss:SSSSSS`,
-  `yyyy-MM-dd'T'HH:mm:ss:SSSSSSSSS`,
-
-  `yyyy-MM-dd'T'HH:mm:ss,SSSXX`,
-  `yyyy-MM-dd'T'HH:mm:ss,SSSSSSXX`,
-  `yyyy-MM-dd'T'HH:mm:ss,SSSSSSSSSXX`,
-  `yyyy-MM-dd'T'HH:mm:ss.SSSXX`,
-  `yyyy-MM-dd'T'HH:mm:ss.SSSSSSXX`,
-  `yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSXX`,
-  `yyyy-MM-dd'T'HH:mm:ss:SSSXX`,
-  `yyyy-MM-dd'T'HH:mm:ss:SSSSSSXX`,
-  `yyyy-MM-dd'T'HH:mm:ss:SSSSSSSSSXX`,
-
-  `yyyy-MM-dd'T'HH:mm:ss,SSSXXX`,
-  `yyyy-MM-dd'T'HH:mm:ss,SSSSSSXXX`,
-  `yyyy-MM-dd'T'HH:mm:ss,SSSSSSSSSXXX`,
-  `yyyy-MM-dd'T'HH:mm:ss.SSSXXX`,
-  `yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX`,
-  `yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSXXX`,
-  `yyyy-MM-dd'T'HH:mm:ss:SSSXXX`,
-  `yyyy-MM-dd'T'HH:mm:ss:SSSSSSXXX`,
-  `yyyy-MM-dd'T'HH:mm:ss:SSSSSSSSSXXX`,
-
   'yyyy-MM-dd HH:mm:ssXX',
   'yyyy-MM-dd HH:mm:ssXXX',
   'yyyyMMddHHmmss',
@@ -137,7 +110,7 @@ export const DELIMITER_OPTIONS = [
   'semicolon',
   'pipe',
   'space',
-  'other',
+  CUSTOM_DROPDOWN_OPTION,
 ];
 
 export const QUOTE_OPTIONS = [

@@ -9,6 +9,7 @@ import * as React from 'react';
 import { Router } from 'react-router-dom';
 
 import '../../mock/match_media';
+import '../../mock/ui_settings';
 import { Hosts } from './hosts';
 
 import { mocksSource } from '../../containers/source/mock';

@@ -96,6 +96,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
                 location: e.target.value,
               });
             }}
+            data-test-subj="locationInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -141,6 +142,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
                 compress: e.target.checked,
               });
             }}
+            data-test-subj="compressToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -187,6 +189,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
                 chunkSize: e.target.value,
               });
             }}
+            data-test-subj="chunkSizeInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -233,6 +236,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
                 maxSnapshotBytesPerSec: e.target.value,
               });
             }}
+            data-test-subj="maxSnapshotBytesInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -279,6 +283,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
                 maxRestoreBytesPerSec: e.target.value,
               });
             }}
+            data-test-subj="maxRestoreBytesInput"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -324,6 +329,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
                 readonly: e.target.checked,
               });
             }}
+            data-test-subj="readOnlyToggle"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
