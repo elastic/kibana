@@ -9,7 +9,7 @@ import { throttle } from 'lodash/fp';
 import * as React from 'react';
 import { UrlStateContainerLifecycle } from './';
 import { getMockPropsObj, mockHistory, filterQuery, testCases } from './test_dependencies';
-import { networkModel } from '../../store';
+import { hostsModel, networkModel } from '../../store';
 import { UrlStateContainerPropTypes } from './types';
 import { CONSTANTS } from './constants';
 
@@ -127,6 +127,39 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
             state: '',
           });
         });
+      });
+
+      test('url state is set from redux data when location updates', () => {
+        mockProps = getMockPropsObj({
+          page: CONSTANTS.hostsPage,
+          examplePath: '/hosts',
+          namespaceLower: 'hosts',
+          type: hostsModel.HostsType.page,
+        }).noSearch.undefinedQuery;
+        const updatedProps = getMockPropsObj({
+          page: CONSTANTS.networkPage,
+          examplePath: '/network',
+          namespaceLower: 'network',
+          type: networkModel.NetworkType.page,
+        }).noSearch.undefinedQuery;
+        const wrapper = shallow(<UrlStateContainerLifecycle {...mockProps} />);
+
+        // @ts-ignore ignore staticContext warning
+        wrapper.setProps(updatedProps);
+        wrapper.update();
+        // sets new kqlQuery
+        expect(mockHistory.replace.mock.calls[2][0]).toEqual({
+          hash: '',
+          pathname: '/network',
+          search: `?_g=()&kqlQuery=(filterQuery:!n,queryLocation:${CONSTANTS.networkPage},type:${
+            networkModel.NetworkType.page
+          })`,
+          state: '',
+        });
+        // sets same timeline
+        expect(mockHistory.replace.mock.calls[3][0].search).toEqual(
+          mockHistory.replace.mock.calls[1][0].search
+        );
       });
     });
   });

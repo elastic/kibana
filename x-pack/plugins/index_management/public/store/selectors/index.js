@@ -17,6 +17,7 @@ export const isDetailPanelOpen = (state) => !!getDetailPanelType(state);
 export const getDetailPanelIndexName = (state) => state.detailPanel.indexName;
 export const getIndices = (state) => state.indices.byId;
 export const indicesLoading = (state) => state.indices.loading;
+export const indicesError = (state) => state.indices.error;
 export const getIndicesAsArray = (state) => Object.values(state.indices.byId);
 export const getIndicesByName = (state, indexNames) => {
   const indices = getIndices(state);

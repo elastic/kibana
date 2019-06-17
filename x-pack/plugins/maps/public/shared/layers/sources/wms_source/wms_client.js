@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { parseString } from 'xml2js';
+import { parseXmlString } from '../../../../../common/parse_xml_string';
 import fetch from 'node-fetch';
 import { parse, format } from 'url';
 
@@ -76,16 +76,7 @@ export class WmsClient {
     }
     const body = await resp.text();
 
-    const parsePromise = new Promise((resolve, reject) => {
-      parseString(body, (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
-      });
-    });
-    return await parsePromise;
+    return await parseXmlString(body);
   }
 
   async getCapabilities() {
