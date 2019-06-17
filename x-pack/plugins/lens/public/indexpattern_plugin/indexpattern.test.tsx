@@ -283,7 +283,6 @@ describe('IndexPattern Data Source', () => {
               }),
               col2: expect.objectContaining({
                 operationType: 'count',
-                sourceField: 'documents',
               }),
             },
           })
@@ -321,7 +320,6 @@ describe('IndexPattern Data Source', () => {
               }),
               col2: expect.objectContaining({
                 operationType: 'count',
-                sourceField: 'documents',
               }),
             },
           })
@@ -359,7 +357,7 @@ describe('IndexPattern Data Source', () => {
               }),
               col2: expect.objectContaining({
                 sourceField: 'bytes',
-                operationType: 'sum',
+                operationType: 'min',
               }),
             },
           })

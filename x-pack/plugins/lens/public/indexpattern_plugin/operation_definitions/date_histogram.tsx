@@ -6,12 +6,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiForm, EuiFormRow, EuiRange } from '@elastic/eui';
 import { IndexPatternField, DateHistogramIndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
-import { parseEsInterval } from './utils/parse_es_interval';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -100,25 +100,13 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       state.indexPatterns[state.currentIndexPatternId].fields.find(
         currentField => currentField.name === column.sourceField
       );
-    const aggregationRestrictions =
+    const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
-    const intervals = ['M', 'w', 'd', 'h'].filter(interval => {
-      if (!aggregationRestrictions) {
-        return true;
-      }
-
-      if (!aggregationRestrictions.calendar_interval) {
-        return true;
-      }
-
-      const restrictedInterval = parseEsInterval(aggregationRestrictions.calendar_interval);
-      return restrictedInterval.unit === interval && restrictedInterval.value === 1;
-    });
+    const intervals = ['M', 'w', 'd', 'h'];
 
     function intervalToNumeric(interval: string) {
-      const parsedInterval = parseEsInterval(interval);
-      return intervals.indexOf(parsedInterval.unit);
+      return intervals.indexOf(interval);
     }
 
     function numericToInterval(i: number) {
@@ -132,7 +120,15 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
             defaultMessage: 'Level of detail',
           })}
         >
-          {intervals.length > 1 ? (
+          {intervalIsRestricted ? (
+            <FormattedMessage
+              id="xpack.lens.indexPattern.dateHistogram.restrictedInterval"
+              defaultMessage="Interval fixed to {intervalValue} due to aggregation restrictions."
+              values={{
+                intervalValue: column.params.interval,
+              }}
+            />
+          ) : (
             <FixedEuiRange
               min={0}
               max={intervals.length - 1}
@@ -154,8 +150,6 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                 defaultMessage: 'Level of detail',
               })}
             />
-          ) : (
-            <>Interval fixed to {column.params.interval} due to aggregation restrictions.</>
           )}
         </EuiFormRow>
       </EuiForm>
