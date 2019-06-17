@@ -9,9 +9,9 @@ The Kibana actions plugin provides a common place to execute actions. It support
 
 ## Terminology
 
-Action Type: A programatically defined integration with another service, with an expected set of configuration and parameters.
+**Action Type**: A programatically defined integration with another service, with an expected set of configuration and parameters.
 
-Action: A user-defined configuration that satisfies an action type's expected configuration.
+**Action**: A user-defined configuration that satisfies an action type's expected configuration.
 
 ## Usage
 
@@ -19,7 +19,7 @@ Before using actions, there needs to be an action type that can handle the type 
 
 Once the action type exists, an action saved object must be created before firing. The action saved object will contain which action type to use as well as what configuration to pass in at execution time. These actions are created via the RESTful API. (See Actions -> Create action)
 
-Once the action saved object exists, the it can now be fired as many times as you like. (See Firing actions)
+Once the action saved object exists, it can now be fired as many times as you like. (See Firing actions)
 
 ## Action types
 
@@ -33,12 +33,12 @@ Defining an action type contains the following attributes:
   - `config` (optional) Joi object validation
 - `executor` (function): A function to be called for executing an action.
 
-Action type executors are provided the following:
+Action type executors are provided the following as the first argument object:
 
 - `services`:
   - `callCluster`: use this to do elasticsearch queries on the cluster Kibana connects to. NOTE: This currently authenticates as the Kibana internal user, this will change in a future PR.
-  - `savedObjectsClient`: use this to manipulate saved objects. NOTE: This currently uses the saved objects repository which bypasses security and user authorization.
-  - `log`: use this to create server logs.
+  - `savedObjectsClient`: use this to manipulate saved objects. NOTE: This currently only works when security is disabled. A future PR will add support for enabled security using Elasticsearch API tokens.
+  - `log`: use this to create server logs. (This is the same function as server.log)
 - `config`: The decrypted configuration given to an action
 - `params`: Parameters for the execution
 
@@ -46,25 +46,30 @@ Action type executors are provided the following:
 
 ```
 server.plugins.actions.registerType({
-  id: 'my-action',
-  name: 'My action',
-  unencryptedAttributes: ['unencryptedAttribute'],
+  id: 'smtp',
+  name: 'Email',
+  unencryptedAttributes: ['host', 'port'],
   validate: {
     params: Joi.object()
       .keys({
-        param1: Joi.string().required(),
-        param2: Joi.string().default('value'),
+        to: Joi.array().items(Joi.string()).required(),
+        from: Joi.string().required(),
+        subject: Joi.string().required(),
+        body: Joi.string().required(),
       })
       .required(),
     config: Joi.object()
       .keys({
-        param1: Joi.string().required(),
-        param2: Joi.string().default('value'),
+        host: Joi.string().required(),
+        port: Joi.number().default(465),
+        username: Joi.string().required(),
+        password: Joi.string().required(),
       })
       .required(),
   },
   async executor({ config, params, services }) {
-    // Some execution code here
+    const transporter = nodemailer. createTransport(config);
+    await transporter.sendMail(params);
   },
 });
 ```

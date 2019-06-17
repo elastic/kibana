@@ -8,9 +8,11 @@ The Kibana alerting plugin provides a common place to setup alerts. It supports:
 
 ## Terminology
 
-Alert Type: A function that takes parameters and fires actions to alert instances.
+**Alert Type**: A function that takes parameters and fires actions to alert instances.
 
-Alert: A configuration that defines a schedule, an alert type w/ parameters, state information and actions.
+**Alert**: A configuration that defines a schedule, an alert type w/ parameters, state information and actions.
+
+**Alert Instance**: The instances created from the an alert type execution.
 
 ## Usage
 
@@ -28,7 +30,7 @@ Defining an alert type contains the following attributes:
   - `params` (optional): Joi object validation
 - `execute` (function): A function to be called for executing an alert.
 
-Alert type executors are provided the following:
+Alert type executors are provided the following as the first argument object:
 
 - `services`:
   - `callCluster`: use this to do elasticsearch queries on the cluster Kibana connects to. NOTE: This currently authenticates as the Kibana internal user, this will change in a future PR.
