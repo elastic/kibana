@@ -316,47 +316,48 @@ function migrateFiltersAggQuery(doc) {
   return doc;
 }
 
-function replaceMovAvgToMovFn(doc) {
+function replaceMovAvgToMovFn(doc, logger) {
   const visStateJSON = get(doc, 'attributes.visState');
   let visState;
 
   if (visStateJSON) {
     try {
       visState = JSON.parse(visStateJSON);
+
+      if (visState && visState.type === 'metrics') {
+        const series = get(visState, 'params.series', []);
+
+        series.forEach(part => {
+          if (part.metrics && Array.isArray(part.metrics)) {
+            part.metrics.forEach(metric => {
+              if (metric.type === 'moving_average') {
+                metric.model_type = metric.model;
+                metric.alpha = get(metric, 'settings.alpha', 0.3);
+                metric.beta = get(metric, 'settings.beta', 0.1);
+                metric.gamma = get(metric, 'settings.gamma', 0.3);
+                metric.period = get(metric, 'settings.period', 1);
+                metric.multiplicative = get(metric, 'settings.type') === 'mult';
+
+                delete metric.minimize;
+                delete metric.model;
+                delete metric.settings;
+                delete metric.predict;
+              }
+            });
+          }
+        });
+
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            visState: JSON.stringify(visState),
+          },
+        };
+      }
     } catch (e) {
-      // Let it go, the data is invalid and we'll leave it as is
-    }
-
-    if (visState && visState.type === 'metrics') {
-      const series = get(visState, 'params.series', []);
-
-      series.forEach(part => {
-        if (part.metrics && Array.isArray(part.metrics)) {
-          part.metrics.forEach(metric => {
-            if (metric.type === 'moving_average') {
-              metric.model_type = metric.model;
-              metric.alpha = get(metric, 'settings.alpha', 0.3);
-              metric.beta = get(metric, 'settings.beta', 0.1);
-              metric.gamma = get(metric, 'settings.gamma', 0.3);
-              metric.period = get(metric, 'settings.period', 1);
-              metric.multiplicative = get(metric, 'settings.type') === 'mult';
-
-              delete metric.minimize;
-              delete metric.model;
-              delete metric.settings;
-              delete metric.predict;
-            }
-          });
-        }
-      });
-
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          visState: JSON.stringify(visState),
-        },
-      };
+      logger.warning(`Exception @ replaceMovAvgToMovFn! ${e}`);
+      logger.warning(`Exception @ replaceMovAvgToMovFn! Payload: ${visStateJSON}`);
     }
   }
 
