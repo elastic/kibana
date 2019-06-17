@@ -37,7 +37,7 @@ image::siem/images/network-ui.png[]
 [[timelines-ui]]
 === Timeline
 
-Timeline is your workspace for threat hunting and investigation alerts. 
+Timeline is your workspace for threat hunting and alert investigations. 
 
 [role="screenshot"]
 image::siem/images/timeline-ui.png[SIEM Timeline]
