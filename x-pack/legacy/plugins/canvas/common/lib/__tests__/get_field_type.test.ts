@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { getFieldType } from '../get_field_type';
 import {
   emptyTable,
@@ -13,14 +12,14 @@ import {
 
 describe('getFieldType', () => {
   it('returns type of a field in a datatable', () => {
-    expect(getFieldType(testTable.columns, 'name')).to.be('string');
-    expect(getFieldType(testTable.columns, 'time')).to.be('date');
-    expect(getFieldType(testTable.columns, 'price')).to.be('number');
-    expect(getFieldType(testTable.columns, 'quantity')).to.be('number');
-    expect(getFieldType(testTable.columns, 'in_stock')).to.be('boolean');
+    expect(getFieldType(testTable.columns, 'name')).toBe('string');
+    expect(getFieldType(testTable.columns, 'time')).toBe('date');
+    expect(getFieldType(testTable.columns, 'price')).toBe('number');
+    expect(getFieldType(testTable.columns, 'quantity')).toBe('number');
+    expect(getFieldType(testTable.columns, 'in_stock')).toBe('boolean');
   });
   it(`returns 'null' if field does not exist in datatable`, () => {
-    expect(getFieldType(testTable.columns, 'foo')).to.be('null');
-    expect(getFieldType(emptyTable.columns, 'foo')).to.be('null');
+    expect(getFieldType(testTable.columns, 'foo')).toBe('null');
+    expect(getFieldType(emptyTable.columns, 'foo')).toBe('null');
   });
 });

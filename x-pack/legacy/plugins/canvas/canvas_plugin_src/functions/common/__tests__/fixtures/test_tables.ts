@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const emptyTable = {
+import { Datatable } from '../../../types';
+
+const emptyTable: Datatable = {
   type: 'datatable',
   columns: [],
   rows: [],
 };
 
-const testTable = {
+const testTable: Datatable = {
   type: 'datatable',
   columns: [
     {
@@ -101,7 +103,7 @@ const testTable = {
   ],
 };
 
-const stringTable = {
+const stringTable: Datatable = {
   type: 'datatable',
   columns: [
     {

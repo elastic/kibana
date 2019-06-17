@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const unquoteString = str => {
-  if (/^"/.test(str)) {
-    return str.replace(/^"(.+(?="$))"$/, '$1');
-  }
-  if (/^'/.test(str)) {
-    return str.replace(/^'(.+(?='$))'$/, '$1');
-  }
-  return str;
-};
+// A cheap regex to distinguish an HTTP URL string from a data URL string
+const httpurlRegex = /^https?:\/\/\S+(?:[0-9]+)?\/\S{1,}/;
+
+export function isValidHttpUrl(str: string): boolean {
+  return httpurlRegex.test(str);
+}
