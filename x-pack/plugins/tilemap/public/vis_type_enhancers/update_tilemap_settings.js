@@ -5,13 +5,11 @@
  */
 
 import uiRoutes from 'ui/routes';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/vis/map/service_settings';
 
-uiRoutes.addSetupWork(function (Private, serviceSettings) {
-
-  const xpackInfo = Private(XPackInfoProvider);
-  const tileMapPluginInfo = xpackInfo.get('features.tilemap');
+uiRoutes.addSetupWork(function ($http, serviceSettings) {
+  const tileMapPluginInfo = xpackInfoService($http).get('features.tilemap');
 
   if (!tileMapPluginInfo) {
     return;

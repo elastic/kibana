@@ -6,7 +6,7 @@
 
 
 import React from 'react';
-import { XPackInfoProvider } from '../../../xpack_main/public/services/xpack_info';
+import { xpackInfoService } from '../../../xpack_main/public/services/xpack_info';
 import { banners, addAppRedirectMessageToUrl } from 'ui/notify';
 import { LICENSE_TYPE } from '../../common/constants/license';
 
@@ -17,8 +17,8 @@ let licenseHasExpired = true;
 let licenseType = null;
 let expiredLicenseBannerId;
 
-export function checkFullLicense(Private, kbnBaseUrl, kbnUrl) {
-  const features = getFeatures(Private);
+export function checkFullLicense($http, kbnBaseUrl, kbnUrl) {
+  const features = getFeatures($http);
   licenseType = features.licenseType;
 
   if (features.isAvailable === false) {
@@ -38,8 +38,8 @@ export function checkFullLicense(Private, kbnBaseUrl, kbnUrl) {
   }
 }
 
-export function checkBasicLicense(Private, kbnBaseUrl) {
-  const features = getFeatures(Private);
+export function checkBasicLicense($http, kbnBaseUrl) {
+  const features = getFeatures($http);
   licenseType = features.licenseType;
 
   if (features.isAvailable === false) {
@@ -57,8 +57,8 @@ export function checkBasicLicense(Private, kbnBaseUrl) {
 // a wrapper for checkFullLicense which doesn't resolve if the license has expired.
 // this is used by all create jobs pages to redirect back to the jobs list
 // if the user's license has expired.
-export function checkLicenseExpired(Private, kbnBaseUrl, kbnUrl) {
-  return checkFullLicense(Private, kbnBaseUrl, kbnUrl)
+export function checkLicenseExpired($http, kbnBaseUrl, kbnUrl) {
+  return checkFullLicense($http, kbnBaseUrl, kbnUrl)
     .then((features) => {
       if (features.hasExpired) {
         kbnUrl.redirect('/jobs');
@@ -94,9 +94,8 @@ function setLicenseExpired(features) {
   }
 }
 
-function getFeatures(Private) {
-  const xpackInfo = Private(XPackInfoProvider);
-  return xpackInfo.get('features.ml');
+function getFeatures($http) {
+  return xpackInfoService($http).get('features.ml');
 }
 
 function redirectToKibana(features, kbnBaseUrl) {
@@ -119,8 +118,8 @@ export function isFullLicense() {
   return (licenseType === LICENSE_TYPE.FULL);
 }
 
-export function xpackFeatureProvider(Private) {
-  const xpackInfo = Private(XPackInfoProvider);
+export function xpackFeature($http) {
+  const xpackInfo = xpackInfoService($http);
 
   return {
     isAvailable(feature) {

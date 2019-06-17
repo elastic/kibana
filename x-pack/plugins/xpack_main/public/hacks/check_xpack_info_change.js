@@ -12,14 +12,14 @@ import chrome from 'ui/chrome';
 import { banners } from 'ui/notify';
 import { DebounceProvider } from 'ui/debounce';
 import { Path } from 'plugins/xpack_main/services/path';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
 import { xpackInfoSignature } from 'plugins/xpack_main/services/xpack_info_signature';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const module = uiModules.get('xpack_main', []);
 
-module.factory('checkXPackInfoChange', ($q, Private) => {
-  const xpackInfo = Private(XPackInfoProvider);
+module.factory('checkXPackInfoChange', ($q, Private, $http) => {
+  const xpackInfo = xpackInfoService($http);
   const debounce = Private(DebounceProvider);
   const isUnauthenticated = Path.isUnauthenticated();
   let isLicenseExpirationBannerShown = false;
