@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { idx } from '@kbn/elastic-idx';
-import { identity } from 'lodash';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
@@ -129,7 +128,7 @@ export function StickyTransactionProperties({
       label: i18n.translate('xpack.apm.transactionDetails.browserLabel', {
         defaultMessage: 'Browser'
       }),
-      val: [userAgent.name, userAgent.version].filter(identity).join(' '),
+      val: [userAgent.name, userAgent.version].filter(Boolean).join(' '),
       truncated: true,
       width
     });
