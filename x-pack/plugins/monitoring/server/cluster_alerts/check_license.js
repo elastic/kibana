@@ -39,7 +39,7 @@ export function checkLicense(type, active, clusterSource, watcher = true) {
     return  Object.assign(licenseInfo, {
       message: i18n.translate('xpack.monitoring.clusterAlerts.checkLicense.licenseIsBasicDescription', {
         defaultMessage:
-          `Cluster Alerts are not displayed if Watcher is disabled or the [{clusterSource}] cluster's current license is basic.`,
+          `Cluster Alerts are not displayed if Watcher is disabled or the [{clusterSource}] cluster's current license is Basic.`,
         values: {
           clusterSource
         }
@@ -64,7 +64,7 @@ export function checkLicense(type, active, clusterSource, watcher = true) {
   if (!watcher) {
     return Object.assign(licenseInfo, {
       message: i18n.translate('xpack.monitoring.clusterAlerts.checkLicense.watcherIsDisabledDescription', {
-        defaultMessage: 'Cluster alerts is not enabled because Watcher is disabled.' })
+        defaultMessage: 'Cluster Alerts are not enabled because Watcher is disabled.' })
     });
   }
 

@@ -28,7 +28,7 @@ export function pct(value: number): string {
 }
 
 // Styling
-export const borderRadius = '5px';
+export const borderRadius = '4px';
 
 // Fonts
 export const fontFamily = '"Open Sans", Helvetica, Arial, sans-serif';

@@ -5,10 +5,6 @@
  */
 
 import { EuiButton, EuiFlexGroup } from '@elastic/eui';
-// @ts-ignore
-import { renderMarkdown } from 'monaco-editor/esm/vs/base/browser/htmlContentRenderer';
-// @ts-ignore
-import { tokenizeToString } from 'monaco-editor/esm/vs/editor/common/modes/textToHtmlTokenizer';
 import React from 'react';
 import { HoverState } from './hover_widget';
 

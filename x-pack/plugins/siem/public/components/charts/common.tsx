@@ -12,8 +12,11 @@ import {
   getSpecId,
   mergeWithDefaultTheme,
   PartialTheme,
+  LIGHT_THEME,
+  DARK_THEME,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
 const chartHeight = 74;
 const FlexGroup = styled(EuiFlexGroup)`
@@ -102,5 +105,7 @@ export const getTheme = () => {
       barsPadding: 0.5,
     },
   };
-  return mergeWithDefaultTheme(theme);
+  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+  const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
+  return mergeWithDefaultTheme(theme, defaultTheme);
 };
