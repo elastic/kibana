@@ -62,6 +62,7 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
   operationType: 'date_histogram';
   params: {
     interval: string;
+    timeZone?: string;
   };
 }
 

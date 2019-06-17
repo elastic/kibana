@@ -11,6 +11,7 @@ import { IndexPatternField, DateHistogramIndexPatternColumn } from '../indexpatt
 import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
+import { parseEsInterval } from './utils/parse_es_interval';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -47,16 +48,27 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     suggestedOrder?: DimensionPriority,
     field?: IndexPatternField
   ): DateHistogramIndexPatternColumn {
+    if (!field) {
+      throw new Error('Invariant error: date histogram operation requires field');
+    }
+    let interval = 'h';
+    let timeZone: string | undefined;
+    if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
+      interval = (field.aggregationRestrictions.date_histogram.calendar_interval ||
+        field.aggregationRestrictions.date_histogram.fixed_interval) as string;
+      timeZone = field.aggregationRestrictions.date_histogram.time_zone;
+    }
     return {
       operationId,
-      label: ofName(field ? field.name : ''),
+      label: ofName(field.name),
       dataType: 'date',
       operationType: 'date_histogram',
       suggestedOrder,
-      sourceField: field ? field.name : '',
+      sourceField: field.name,
       isBucketed: true,
       params: {
-        interval: 'h',
+        interval,
+        timeZone,
       },
     };
   },
@@ -72,6 +84,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
         from: 'now-1d',
         to: 'now',
       },
+      time_zone: column.params.timeZone,
       useNormalizedEsInterval: true,
       interval: column.params.interval,
       drop_partials: false,
@@ -81,15 +94,37 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   }),
   inlineOptions: ({ state, setState, columnId }) => {
     const column = state.columns[columnId] as DateHistogramIndexPatternColumn;
-    const intervals = ['M', 'w', 'd', 'h'];
+
+    const field =
+      column &&
+      state.indexPatterns[state.currentIndexPatternId].fields.find(
+        currentField => currentField.name === column.sourceField
+      );
+    const aggregationRestrictions =
+      field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
+
+    const intervals = ['M', 'w', 'd', 'h'].filter(interval => {
+      if (!aggregationRestrictions) {
+        return true;
+      }
+
+      if (!aggregationRestrictions.calendar_interval) {
+        return true;
+      }
+
+      const restrictedInterval = parseEsInterval(aggregationRestrictions.calendar_interval);
+      return restrictedInterval.unit === interval && restrictedInterval.value === 1;
+    });
 
     function intervalToNumeric(interval: string) {
-      return intervals.indexOf(interval);
+      const parsedInterval = parseEsInterval(interval);
+      return intervals.indexOf(parsedInterval.unit);
     }
 
     function numericToInterval(i: number) {
       return intervals[i];
     }
+
     return (
       <EuiForm>
         <EuiFormRow
@@ -97,27 +132,31 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
             defaultMessage: 'Level of detail',
           })}
         >
-          <FixedEuiRange
-            min={0}
-            max={intervals.length - 1}
-            step={1}
-            value={intervalToNumeric(column.params.interval)}
-            showTicks
-            ticks={intervals.map((interval, index) => ({ label: interval, value: index }))}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setState(
-                updateColumnParam(
-                  state,
-                  column,
-                  'interval',
-                  numericToInterval(Number(e.target.value))
+          {intervals.length > 1 ? (
+            <FixedEuiRange
+              min={0}
+              max={intervals.length - 1}
+              step={1}
+              value={intervalToNumeric(column.params.interval)}
+              showTicks
+              ticks={intervals.map((interval, index) => ({ label: interval, value: index }))}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setState(
+                  updateColumnParam(
+                    state,
+                    column,
+                    'interval',
+                    numericToInterval(Number(e.target.value))
+                  )
                 )
-              )
-            }
-            aria-label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-              defaultMessage: 'Level of detail',
-            })}
-          />
+              }
+              aria-label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
+                defaultMessage: 'Level of detail',
+              })}
+            />
+          ) : (
+            <>Interval fixed to {column.params.interval} due to aggregation restrictions.</>
+          )}
         </EuiFormRow>
       </EuiForm>
     );
