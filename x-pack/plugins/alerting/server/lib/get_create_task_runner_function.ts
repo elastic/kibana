@@ -70,20 +70,22 @@ export function getCreateTaskRunnerFunction({
           previousScheduledRunAt: taskInstance.state.previousScheduledRunAt,
         });
 
-        for (const alertInstanceId of Object.keys(alertInstances)) {
-          const alertInstance = alertInstances[alertInstanceId];
+        await Promise.all(
+          Object.keys(alertInstances).map(alertInstanceId => {
+            const alertInstance = alertInstances[alertInstanceId];
 
-          // Unpersist any alert instances that were not explicitly fired in this alert execution
-          if (!alertInstance.shouldFire()) {
-            delete alertInstances[alertInstanceId];
-            continue;
-          }
+            // Unpersist any alert instances that were not explicitly fired in this alert execution
+            if (!alertInstance.shouldFire()) {
+              delete alertInstances[alertInstanceId];
+              return;
+            }
 
-          const { actionGroup, context, state } = alertInstance.getFireOptions()!;
-          await fireHandler(actionGroup, context, state);
-          alertInstance.replaceMeta({ lastFired: Date.now() });
-          alertInstance.resetFire();
-        }
+            const { actionGroup, context, state } = alertInstance.getFireOptions()!;
+            alertInstance.replaceMeta({ lastFired: Date.now() });
+            alertInstance.resetFire();
+            return fireHandler(actionGroup, context, state);
+          })
+        );
 
         const nextRunAt = getNextRunAt(
           new Date(taskInstance.state.scheduledRunAt),
