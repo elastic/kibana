@@ -82,9 +82,9 @@ life-cycle of a PR looks like the following:
 2. **Label the PR**: To ensure that a newly created PR gets the attention of
    the @elastic/infra-logs-ui team, the following label should be applied to
    PRs:
-   * `Infrastructure`
-   * `Infra UI` if it relates to the *Intrastructure UI*
-   * `Logs UI` if it relates to the *Logs UI*
+   * `Team:infra-logs-ui`
+   * `Feature:Infra UI` if it relates to the *Intrastructure UI*
+   * `Feature:Logs UI` if it relates to the *Logs UI*
    * `[zube]: In Progress` to track the stage of the PR
    * Version labels for merge and backport targets (see [Kibana's contribution
      procedures]), usually:
