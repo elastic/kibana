@@ -146,9 +146,9 @@ Maps app now fully respects dark mode.
 * *Collapsible map legends.* Use this feature to get an unobstructed 
 view of a map in a dashboard.  
 
-* *Class styling.* Use this style to symbolize map features by class. 
+* *Class styling.* With this style, you can symbolize map features by class. 
+Use layer filtering to define the class for each layer, and static styling to symbolize each class.  
 See {kibana-ref}/vector-style.html#maps-vector-style-class[Class styling] for an example.
-
 
 [float]
 === {kib} in Japanese
