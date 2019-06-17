@@ -44,7 +44,7 @@ To enable data driven styling, click image:maps/images/gs_link_icon.png[] next t
 
 NOTE: The image:maps/images/gs_link_icon.png[] button is only available for vector features that contain numeric properties.
 
-NOTE: *Fill color* and *Border color* style properties are set to transparent and are not visible
+NOTE: *The Fill color* and *Border color* style properties are set to transparent and are not visible
 when the property value is undefined for a feature.
 *Border width* and *Symbol size* style properties are set to the minimum size
 when the property value is undefined for a feature.
