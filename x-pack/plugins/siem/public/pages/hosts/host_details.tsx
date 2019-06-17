@@ -35,7 +35,6 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
-import { UrlStateContainer } from '../../components/url_state';
 
 const type = hostsModel.HostsType.details;
 
@@ -63,7 +62,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
           <StickyContainer>
             <FiltersGlobal>
               <HostsKql indexPattern={indexPattern} type={type} />
-              <UrlStateContainer indexPattern={indexPattern} />
             </FiltersGlobal>
 
             <HeaderPage
