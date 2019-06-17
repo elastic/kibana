@@ -26,6 +26,7 @@ import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
 import { Timelines } from '../timelines';
 import { WithSource } from '../../containers/source';
+import { UrlStateContainer } from '../../components/url_state';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -71,7 +72,7 @@ export const HomePage = pure(() => (
           <HelpMenu />
 
           <WithSource sourceId="default">
-            {({ browserFields }) => (
+            {({ browserFields, indexPattern }) => (
               <DragDropContextWrapper browserFields={browserFields}>
                 <AutoSaveWarningMsg />
                 <Flyout
@@ -98,6 +99,7 @@ export const HomePage = pure(() => (
                     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
                       <EuiFlexItem>
                         <SiemNavigation />
+                        <UrlStateContainer indexPattern={indexPattern} />
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>

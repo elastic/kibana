@@ -7,8 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiColorPicker,
-  EuiFormControlLayout
+  EuiColorPicker
 } from '@elastic/eui';
 import { staticColorShape } from '../style_option_shapes';
 
@@ -18,13 +17,10 @@ export function StaticColorSelection({ onChange, styleOptions }) {
   };
 
   return (
-    <EuiFormControlLayout>
-      <EuiColorPicker
-        onChange={onColorChange}
-        color={styleOptions.color}
-        className="mapColorPicker euiFieldText"
-      />
-    </EuiFormControlLayout>
+    <EuiColorPicker
+      onChange={onColorChange}
+      color={styleOptions.color}
+    />
   );
 }
 

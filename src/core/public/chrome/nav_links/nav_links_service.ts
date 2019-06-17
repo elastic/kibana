@@ -42,7 +42,7 @@ export class NavLinksService {
               new NavLinkWrapper({
                 ...app,
                 // Either rootRoute or appUrl must be defined.
-                baseUrl: relativeToAbsolute(http.prependBasePath((app.rootRoute || app.appUrl)!)),
+                baseUrl: relativeToAbsolute(http.basePath.prepend((app.rootRoute || app.appUrl)!)),
               }),
             ] as [string, NavLinkWrapper]
         )
