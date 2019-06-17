@@ -78,17 +78,19 @@ export class FilterUtils {
   /**
    * Converts the time to a utc formatted string. If the time is not valid (e.g. it might be in a relative format like
    * 'now-15m', then it just returns what it was passed).
-   * Note** Changing these moment objects to a utc string will actually cause a bug because it'll be in a format not
-   * expected by the time picker.  This should get cleaned up and we should pick a single format to use everywhere.
    * @param time {string|Moment}
-   * @returns {string} the time represented in utc format, or if the time range was not able to be parsed into a moment
+   * @returns the time represented in utc format, or if the time range was not able to be parsed into a moment
    * object, it returns the same object it was given.
    */
-  public static convertTimeToUTCString(time?: string | Moment): undefined | string | moment.Moment {
+  public static convertTimeToUTCString(time?: string | Moment): undefined | string {
     if (moment(time).isValid()) {
-      return moment(time).utc();
+      return moment(time)
+        .utc()
+        .format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
     } else {
-      return time;
+      // If it's not a valid moment date, then it should be a string representing a relative time
+      // like 'now' or 'now-15m'.
+      return time as string;
     }
   }
 

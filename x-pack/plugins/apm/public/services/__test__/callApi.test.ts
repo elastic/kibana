@@ -9,6 +9,8 @@ import { mockNow } from '../../utils/testHelpers';
 import { _clearCache, callApi } from '../rest/callApi';
 import { SessionStorageMock } from './SessionStorageMock';
 
+jest.mock('ui/kfetch');
+
 describe('callApi', () => {
   let kfetchSpy: jest.Mock;
 
