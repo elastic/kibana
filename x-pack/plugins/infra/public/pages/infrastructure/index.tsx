@@ -55,7 +55,7 @@ export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePag
             {
               title: intl.formatMessage({
                 id: 'xpack.infra.homePage.metricsExplorerTabTitle',
-                defaultMessage: 'Metrics explorer',
+                defaultMessage: 'Metrics Explorer',
               }),
               path: `${match.path}/metrics-explorer`,
             },
