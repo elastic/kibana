@@ -13,7 +13,7 @@
     root.ElasticsearchShield = factory();
   }
 }(this, function () {
-  return function addShieldApi(Client, config, components) { // eslint-disable-line no-unused-vars
+  return function addShieldApi(Client, config, components) {
     const ca = components.clientAction.factory;
 
     Client.prototype.shield = components.clientAction.namespaceFactory();
@@ -275,9 +275,11 @@
      * Asks Elasticsearch to prepare SAML authentication request to be sent to
      * the 3rd-party SAML identity provider.
      *
-     * @param {string} acs Assertion consumer service URL to use for SAML request or URL in the
-     * Kibana to which identity provider will post SAML response. Based on the ACS Elasticsearch
+     * @param {string} [acs] Optional assertion consumer service URL to use for SAML request or URL
+     * in the Kibana to which identity provider will post SAML response. Based on the ACS Elasticsearch
      * will choose the right SAML realm.
+     *
+     * @param {string} [realm] Optional name of the Elasticsearch SAML realm to use to handle request.
      *
      * @returns {{realm: string, id: string, redirect: string}} Object that includes identifier
      * of the SAML realm used to prepare authentication request, encrypted request token to be
@@ -330,9 +332,10 @@
      * Invalidates SAML session based on Logout Request received from the Identity Provider.
      *
      * @param {string} queryString URL encoded query string provided by Identity Provider.
-     * @param {string} acs Assertion consumer service URL to use for SAML request or URL in the
+     * @param {string} [acs] Optional assertion consumer service URL to use for SAML request or URL in the
      * Kibana to which identity provider will post SAML response. Based on the ACS Elasticsearch
      * will choose the right SAML realm to invalidate session.
+     * @param {string} [realm] Optional name of the Elasticsearch SAML realm to use to handle request.
      *
      * @returns {{redirect?: string}}
      */

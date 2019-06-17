@@ -42,6 +42,4 @@ export function stdSibling(bucket, panel, series) {
 
     return next(results);
   };
-
-
 }

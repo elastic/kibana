@@ -6,8 +6,7 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import d3 from 'd3';
-import { difference, memoize, zipObject } from 'lodash';
+import { difference, zipObject } from 'lodash';
 import mean from 'lodash.mean';
 import { rgba } from 'polished';
 import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
@@ -16,32 +15,6 @@ import { StringMap } from '../../typings/common';
 import { Coordinate, RectCoordinate } from '../../typings/timeseries';
 import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
-
-export const getEmptySerie = memoize(
-  (
-    start: string | number = Date.now() - 3600000,
-    end: string | number = Date.now()
-  ) => {
-    const dates = d3.time
-      .scale()
-      .domain([new Date(start), new Date(end)])
-      .ticks();
-
-    return [
-      {
-        data: dates.map(x => ({
-          x: x.getTime(),
-          y: 1
-        }))
-      }
-    ];
-  },
-  (start: string, end: string) => [start, end].join('_')
-);
-
-interface IEmptySeries {
-  data: Coordinate[];
-}
 
 export interface ITpmBucket {
   title: string;
@@ -53,8 +26,8 @@ export interface ITpmBucket {
 
 export interface ITransactionChartData {
   noHits: boolean;
-  tpmSeries: ITpmBucket[] | IEmptySeries[];
-  responseTimeSeries: TimeSerie[] | IEmptySeries[];
+  tpmSeries: ITpmBucket[];
+  responseTimeSeries: TimeSerie[];
 }
 
 const INITIAL_DATA = {
@@ -72,17 +45,16 @@ const INITIAL_DATA = {
 };
 
 export function getTransactionCharts(
-  { start, end, transactionType }: IUrlParams,
+  { transactionType }: IUrlParams,
   { apmTimeseries, anomalyTimeseries }: TimeSeriesAPIResponse = INITIAL_DATA
 ): ITransactionChartData {
   const noHits = apmTimeseries.totalHits === 0;
-  const tpmSeries = noHits
-    ? getEmptySerie(start, end)
-    : getTpmSeries(apmTimeseries, transactionType);
+  const tpmSeries = getTpmSeries(apmTimeseries, transactionType);
 
-  const responseTimeSeries = noHits
-    ? getEmptySerie(start, end)
-    : getResponseTimeSeries({ apmTimeseries, anomalyTimeseries });
+  const responseTimeSeries = getResponseTimeSeries({
+    apmTimeseries,
+    anomalyTimeseries
+  });
 
   return {
     noHits,

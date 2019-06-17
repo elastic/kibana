@@ -19,15 +19,15 @@ import { getPivotPreviewDevConsoleStatement, getPivotDropdownOptions } from './c
 
 describe('Data Frame: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {
-    // The field name includes the characters []> which cannot be used for aggregation names.
-    // The test results verifies that the characters should still be present in field and dropDownName values,
-    // but should be stripped for aggName values.
+    // The field name includes the characters []> as well as a leading and ending space charcter
+    // which cannot be used for aggregation names. The test results verifies that the characters
+    // should still be present in field and dropDownName values, but should be stripped for aggName values.
     const indexPattern: IndexPattern = {
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [
         {
-          name: 'the-f[i]e>ld',
+          name: ' the-f[i]e>ld ',
           type: 'number',
           aggregatable: true,
           filterable: true,
@@ -41,62 +41,62 @@ describe('Data Frame: Define Pivot Common', () => {
     expect(options).toEqual({
       aggOptions: [
         {
-          label: 'the-f[i]e>ld',
+          label: ' the-f[i]e>ld ',
           options: [
-            { label: 'avg(the-f[i]e>ld)' },
-            { label: 'cardinality(the-f[i]e>ld)' },
-            { label: 'max(the-f[i]e>ld)' },
-            { label: 'min(the-f[i]e>ld)' },
-            { label: 'sum(the-f[i]e>ld)' },
-            { label: 'value_count(the-f[i]e>ld)' },
+            { label: 'avg( the-f[i]e>ld )' },
+            { label: 'cardinality( the-f[i]e>ld )' },
+            { label: 'max( the-f[i]e>ld )' },
+            { label: 'min( the-f[i]e>ld )' },
+            { label: 'sum( the-f[i]e>ld )' },
+            { label: 'value_count( the-f[i]e>ld )' },
           ],
         },
       ],
       aggOptionsData: {
-        'avg(the-f[i]e>ld)': {
+        'avg( the-f[i]e>ld )': {
           agg: 'avg',
-          field: 'the-f[i]e>ld',
+          field: ' the-f[i]e>ld ',
           aggName: 'the-field.avg',
-          dropDownName: 'avg(the-f[i]e>ld)',
+          dropDownName: 'avg( the-f[i]e>ld )',
         },
-        'cardinality(the-f[i]e>ld)': {
+        'cardinality( the-f[i]e>ld )': {
           agg: 'cardinality',
-          field: 'the-f[i]e>ld',
+          field: ' the-f[i]e>ld ',
           aggName: 'the-field.cardinality',
-          dropDownName: 'cardinality(the-f[i]e>ld)',
+          dropDownName: 'cardinality( the-f[i]e>ld )',
         },
-        'max(the-f[i]e>ld)': {
+        'max( the-f[i]e>ld )': {
           agg: 'max',
-          field: 'the-f[i]e>ld',
+          field: ' the-f[i]e>ld ',
           aggName: 'the-field.max',
-          dropDownName: 'max(the-f[i]e>ld)',
+          dropDownName: 'max( the-f[i]e>ld )',
         },
-        'min(the-f[i]e>ld)': {
+        'min( the-f[i]e>ld )': {
           agg: 'min',
-          field: 'the-f[i]e>ld',
+          field: ' the-f[i]e>ld ',
           aggName: 'the-field.min',
-          dropDownName: 'min(the-f[i]e>ld)',
+          dropDownName: 'min( the-f[i]e>ld )',
         },
-        'sum(the-f[i]e>ld)': {
+        'sum( the-f[i]e>ld )': {
           agg: 'sum',
-          field: 'the-f[i]e>ld',
+          field: ' the-f[i]e>ld ',
           aggName: 'the-field.sum',
-          dropDownName: 'sum(the-f[i]e>ld)',
+          dropDownName: 'sum( the-f[i]e>ld )',
         },
-        'value_count(the-f[i]e>ld)': {
+        'value_count( the-f[i]e>ld )': {
           agg: 'value_count',
-          field: 'the-f[i]e>ld',
+          field: ' the-f[i]e>ld ',
           aggName: 'the-field.value_count',
-          dropDownName: 'value_count(the-f[i]e>ld)',
+          dropDownName: 'value_count( the-f[i]e>ld )',
         },
       },
-      groupByOptions: [{ label: 'histogram(the-f[i]e>ld)' }],
+      groupByOptions: [{ label: 'histogram( the-f[i]e>ld )' }],
       groupByOptionsData: {
-        'histogram(the-f[i]e>ld)': {
+        'histogram( the-f[i]e>ld )': {
           agg: 'histogram',
-          field: 'the-f[i]e>ld',
+          field: ' the-f[i]e>ld ',
           aggName: 'the-field',
-          dropDownName: 'histogram(the-f[i]e>ld)',
+          dropDownName: 'histogram( the-f[i]e>ld )',
           interval: '10',
         },
       },

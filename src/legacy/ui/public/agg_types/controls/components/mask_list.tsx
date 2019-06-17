@@ -21,7 +21,7 @@ import React from 'react';
 import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CidrMask } from '../../../utils/cidr_mask';
-import { InputList, InputListConfig, InputObject } from './input_list';
+import { InputList, InputListConfig, InputObject, InputModel, InputItem } from './input_list';
 
 const EMPTY_STRING = '';
 
@@ -29,12 +29,9 @@ export interface MaskObject extends InputObject {
   mask?: string;
 }
 
-interface MaskModel {
-  id: string;
-  model: string;
-  value: string;
-  isInvalid: boolean;
-}
+type MaskModel = InputModel & {
+  mask: InputItem;
+};
 
 interface MaskListProps {
   list: MaskObject[];
@@ -47,54 +44,55 @@ interface MaskListProps {
 function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
   const maskListConfig: InputListConfig = {
     defaultValue: {
-      model: '0.0.0.0/1',
-      value: '0.0.0.0/1',
-      isInvalid: false,
+      mask: { model: '0.0.0.0/1', value: '0.0.0.0/1', isInvalid: false },
     },
     defaultEmptyValue: {
-      model: EMPTY_STRING,
-      value: EMPTY_STRING,
-      isInvalid: false,
+      mask: { model: EMPTY_STRING, value: EMPTY_STRING, isInvalid: false },
     },
     validateClass: CidrMask,
     getModelValue: (item: MaskObject) => ({
-      model: item.mask || EMPTY_STRING,
-      value: item.mask || EMPTY_STRING,
-      isInvalid: false,
+      mask: {
+        model: item.mask || EMPTY_STRING,
+        value: item.mask || EMPTY_STRING,
+        isInvalid: false,
+      },
     }),
-    getModel: (models: MaskModel[], index) => models[index],
     getRemoveBtnAriaLabel: (item: MaskModel) =>
-      i18n.translate('common.ui.aggTypes.ipRanges.removeCidrMaskButtonAriaLabel', {
-        defaultMessage: 'Remove the CIDR mask value of {mask}',
-        values: { mask: item.value },
-      }),
-    onChangeFn: ({ model }: MaskModel) => {
-      if (model) {
-        return { mask: model };
+      item.mask.value
+        ? i18n.translate('common.ui.aggTypes.ipRanges.removeCidrMaskButtonAriaLabel', {
+            defaultMessage: 'Remove the CIDR mask value of {mask}',
+            values: { mask: item.mask.value },
+          })
+        : i18n.translate('common.ui.aggTypes.ipRanges.removeEmptyCidrMaskButtonAriaLabel', {
+            defaultMessage: 'Remove the CIDR mask default value',
+          }),
+    onChangeFn: ({ mask }: MaskModel) => {
+      if (mask.model) {
+        return { mask: mask.model };
       }
       return {};
     },
-    hasInvalidValuesFn: ({ isInvalid }) => isInvalid,
-    renderInputRow: (item: MaskModel, index, onChangeValue) => (
+    hasInvalidValuesFn: ({ mask }) => mask.isInvalid,
+    renderInputRow: ({ mask }: MaskModel, index, onChangeValue) => (
       <EuiFlexItem>
         <EuiFieldText
           aria-label={i18n.translate('common.ui.aggTypes.ipRanges.cidrMaskAriaLabel', {
             defaultMessage: 'CIDR mask: {mask}',
-            values: { mask: item.value },
+            values: { mask: mask.value || '*' },
           })}
           compressed
-          isInvalid={showValidation ? item.isInvalid : false}
+          isInvalid={showValidation ? mask.isInvalid : false}
           placeholder="*"
           onChange={ev => {
-            onChangeValue(index, ev.target.value);
+            onChangeValue(index, ev.target.value, 'mask');
           }}
-          value={item.value}
+          value={mask.value}
           onBlur={onBlur}
         />
       </EuiFlexItem>
     ),
     validateModel: (validateFn, object: MaskObject, model: MaskModel) => {
-      validateFn(object.mask, model);
+      validateFn(object.mask, model.mask);
     },
   };
 

@@ -26,6 +26,8 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('runPipeline', function () {
+    this.tags(['skipFirefox']);
+
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('../functional/fixtures/es_archiver/visualize_embedding');

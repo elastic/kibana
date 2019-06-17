@@ -9,26 +9,14 @@ jest.mock('uuid', () => ({ v4: jest.fn().mockReturnValue('uuid-v4-id') }));
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { createEncryptedSavedObjectsServiceMock } from './encrypted_saved_objects_service.mock';
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects/service/saved_objects_client';
-
-function createSavedObjectsClientMock(): jest.Mocked<SavedObjectsClient> {
-  return {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
-}
+import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
+import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
 
 let wrapper: EncryptedSavedObjectsClientWrapper;
-let mockBaseClient: jest.Mocked<SavedObjectsClient>;
+let mockBaseClient: jest.Mocked<SavedObjectsClientContract>;
 let encryptedSavedObjectsServiceMock: jest.Mocked<EncryptedSavedObjectsService>;
 beforeEach(() => {
-  mockBaseClient = createSavedObjectsClientMock();
+  mockBaseClient = SavedObjectsClientMock.create();
   encryptedSavedObjectsServiceMock = createEncryptedSavedObjectsServiceMock([
     {
       type: 'known-type',

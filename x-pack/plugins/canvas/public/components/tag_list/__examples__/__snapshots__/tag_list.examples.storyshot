@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/TagList empty list 1`] = `null`;
+exports[`Storyshots components/Tags/TagList empty list 1`] = `null`;
 
-exports[`Storyshots components/TagList with badge tags 1`] = `
+exports[`Storyshots components/Tags/TagList with badge tags 1`] = `
 Array [
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#cc3b54",
@@ -24,7 +24,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#5bc149",
@@ -43,7 +43,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#fbc545",
@@ -64,7 +64,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/TagList with health tags 1`] = `
+exports[`Storyshots components/Tags/TagList with health tags 1`] = `
 Array [
   <div
     className="euiHealth"
@@ -76,31 +76,18 @@ Array [
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <svg
-          className="euiIcon euiIcon--medium"
+          className="euiIcon euiIcon--medium euiIcon-isLoading"
           focusable="false"
-          height="16"
+          height={16}
           style={
             Object {
               "fill": "#cc3b54",
             }
           }
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-          xmlnsXlink="http://www.w3.org/1999/xlink"
-        >
-          <defs>
-            <circle
-              cx="8"
-              cy="8"
-              id="dot-a"
-              r="4"
-            />
-          </defs>
-          <use
-            xlinkHref="#dot-a"
-          />
-        </svg>
+        />
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -119,31 +106,18 @@ Array [
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <svg
-          className="euiIcon euiIcon--medium"
+          className="euiIcon euiIcon--medium euiIcon-isLoading"
           focusable="false"
-          height="16"
+          height={16}
           style={
             Object {
               "fill": "#9b3067",
             }
           }
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-          xmlnsXlink="http://www.w3.org/1999/xlink"
-        >
-          <defs>
-            <circle
-              cx="8"
-              cy="8"
-              id="dot-a"
-              r="4"
-            />
-          </defs>
-          <use
-            xlinkHref="#dot-a"
-          />
-        </svg>
+        />
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -162,31 +136,18 @@ Array [
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <svg
-          className="euiIcon euiIcon--medium"
+          className="euiIcon euiIcon--medium euiIcon-isLoading"
           focusable="false"
-          height="16"
+          height={16}
           style={
             Object {
               "fill": "#d41e93",
             }
           }
           viewBox="0 0 16 16"
-          width="16"
+          width={16}
           xmlns="http://www.w3.org/2000/svg"
-          xmlnsXlink="http://www.w3.org/1999/xlink"
-        >
-          <defs>
-            <circle
-              cx="8"
-              cy="8"
-              id="dot-a"
-              r="4"
-            />
-          </defs>
-          <use
-            xlinkHref="#dot-a"
-          />
-        </svg>
+        />
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -198,10 +159,10 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/TagList with lots of tags 1`] = `
+exports[`Storyshots components/Tags/TagList with lots of tags 1`] = `
 Array [
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#cc3b54",
@@ -220,7 +181,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#5bc149",
@@ -239,7 +200,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#fbc545",
@@ -258,7 +219,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#9b3067",
@@ -277,7 +238,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#1819bd",
@@ -296,7 +257,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#d41e93",
@@ -315,7 +276,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#3486d2",
@@ -334,7 +295,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#b870d8",
@@ -353,7 +314,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#f4a4a7",
@@ -372,7 +333,7 @@ Array [
     </span>
   </span>,
   <span
-    className="euiBadge"
+    className="euiBadge euiBadge--iconLeft"
     style={
       Object {
         "backgroundColor": "#072d6d",

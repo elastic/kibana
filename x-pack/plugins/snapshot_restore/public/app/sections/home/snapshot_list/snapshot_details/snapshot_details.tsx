@@ -53,10 +53,9 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   onClose,
 }) => {
   const {
-    core: {
-      i18n: { FormattedMessage, translate },
-    },
+    core: { i18n },
   } = useAppDependencies();
+  const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
   const { error, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
 
@@ -85,7 +84,6 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
             defaultMessage="Summary"
           />
         ),
-        testSubj: 'srSnapshotDetailsSummaryTab',
       },
       {
         id: TAB_FAILURES,
@@ -96,7 +94,6 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
             values={{ failuresCount: indexFailures.length }}
           />
         ),
-        testSubj: 'srSnapshotDetailsFailuresTab',
       },
     ];
 
@@ -112,7 +109,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
               }}
               isSelected={tab.id === activeTab}
               key={tab.id}
-              data-test-subject={tab.testSubj}
+              data-test-subj="tab"
             >
               {tab.name}
             </EuiTab>
@@ -131,7 +128,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     const errorObject = notFound
       ? {
           data: {
-            error: translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
+            error: i18n.translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
               defaultMessage: `Either the snapshot '{snapshotId}' doesn't exist in the repository '{repositoryName}' or the repository doesn't exist.`,
               values: {
                 snapshotId,
@@ -173,7 +170,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
             iconType="cross"
             flush="left"
             onClick={onClose}
-            data-test-subj="srSnapshotDetailsFlyoutCloseButton"
+            data-test-subj="closeButton"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotDetails.closeButtonLabel"
@@ -188,7 +185,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   return (
     <EuiFlyout
       onClose={onClose}
-      data-test-subj="srSnapshotDetailsFlyout"
+      data-test-subj="snapshotDetail"
       aria-labelledby="srSnapshotDetailsFlyoutTitle"
       size="m"
       maxWidth={400}
@@ -197,7 +194,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="srSnapshotDetailsFlyoutTitle">
+              <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="detailTitle">
                 {snapshotId}
               </h2>
             </EuiTitle>
@@ -206,7 +203,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
           <EuiFlexItem>
             <EuiText size="s">
               <p>
-                <EuiLink href={linkToRepository(repositoryName)}>
+                <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
                   <FormattedMessage
                     id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
                     defaultMessage="'{repositoryName}' repository"
@@ -221,7 +218,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
         {tabs}
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody data-test-subj="srSnapshotDetailsContent">{content}</EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="content">{content}</EuiFlyoutBody>
       <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
     </EuiFlyout>
   );

@@ -24,6 +24,7 @@
     "kbnESQuery": "packages/kbn-es-query",
     "xpack.apm": "x-pack/plugins/apm",
     "xpack.beatsManagement": "x-pack/plugins/beats_management",
+    "xpack.canvas": "x-pack/plugins/canvas",
     "xpack.crossClusterReplication": "x-pack/plugins/cross_cluster_replication",
     "xpack.dashboardMode": "x-pack/plugins/dashboard_mode",
     "xpack.graph": "x-pack/plugins/graph",
@@ -37,6 +38,7 @@
     "xpack.ml": "x-pack/plugins/ml",
     "xpack.logstash": "x-pack/plugins/logstash",
     "xpack.main": "x-pack/plugins/xpack_main",
+    "xpack.telemetry": "x-pack/plugins/telemetry",
     "xpack.monitoring": "x-pack/plugins/monitoring",
     "xpack.remoteClusters": "x-pack/plugins/remote_clusters",
     "xpack.reporting": "x-pack/plugins/reporting",
@@ -51,9 +53,7 @@
     "xpack.uptime": "x-pack/plugins/uptime",
     "xpack.watcher": "x-pack/plugins/watcher"
   },
-  "exclude": [
-    "src/legacy/ui/ui_render/ui_render_mixin.js"
-  ],
+  "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
   "translations": [
     "x-pack/plugins/translations/translations/zh-CN.json",
     "x-pack/plugins/translations/translations/ja-JP.json"

@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
-import { ContextFunction, Render } from '../types';
+import { Render } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   image: string | null;
   size: number;
-  max: number | null;
+  max: number;
   emptyImage: string | null;
 }
 
-export function repeatImage(): ContextFunction<
+export function repeatImage(): ExpressionFunction<
   'repeatImage',
   number,
   Arguments,
@@ -46,7 +47,7 @@ export function repeatImage(): ContextFunction<
         help: argHelp.size,
       },
       max: {
-        types: ['number', 'null'],
+        types: ['number'],
         help: argHelp.max,
         default: 1000,
       },

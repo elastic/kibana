@@ -6,39 +6,22 @@
 
 import React from 'react';
 
-import {
-  Chart,
-  BarSeries,
-  Axis,
-  Position,
-  getSpecId,
-  ScaleType,
-  Settings,
-  mergeWithDefaultTheme,
-  PartialTheme,
-} from '@elastic/charts';
+import { Chart, BarSeries, Axis, Position, getSpecId, ScaleType, Settings } from '@elastic/charts';
 import { getAxisId } from '@elastic/charts';
 import {
-  BarChartData,
+  ChartConfigsData,
   WrappedByAutoSizer,
   ChartHolder,
   numberFormatter,
   SeriesType,
   getSeriesStyle,
+  getTheme,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
-const getTheme = () => {
-  const theme: PartialTheme = {
-    scales: {
-      barsPadding: 0.5,
-    },
-  };
-  return mergeWithDefaultTheme(theme);
-};
-
+// Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = React.memo<{
-  data: BarChartData[];
+  data: ChartConfigsData[];
   width: number | null | undefined;
   height: number | null | undefined;
 }>(({ data, ...chartConfigs }) => {
@@ -82,7 +65,7 @@ export const BarChartBaseComponent = React.memo<{
 });
 
 export const BarChartWithCustomPrompt = React.memo<{
-  data: BarChartData[] | null | undefined;
+  data: ChartConfigsData[] | null | undefined;
   height: number | null | undefined;
   width: number | null | undefined;
 }>(({ data, height, width }) => {
@@ -98,7 +81,7 @@ export const BarChartWithCustomPrompt = React.memo<{
   );
 });
 
-export const BarChart = React.memo<{ barChart: BarChartData[] | null | undefined }>(
+export const BarChart = React.memo<{ barChart: ChartConfigsData[] | null | undefined }>(
   ({ barChart }) => (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
