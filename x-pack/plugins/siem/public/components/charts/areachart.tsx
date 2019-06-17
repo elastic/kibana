@@ -15,7 +15,6 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import '@elastic/charts/dist/style.css';
 import { getOr, get } from 'lodash/fp';
 import {
   ChartConfigsData,

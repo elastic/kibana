@@ -12,6 +12,8 @@ import {
   getSpecId,
   mergeWithDefaultTheme,
   PartialTheme,
+  LIGHT_THEME,
+  DARK_THEME,
   ScaleType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
@@ -115,7 +117,9 @@ export const getTheme = () => {
       barsPadding: 0.5,
     },
   };
-  return mergeWithDefaultTheme(theme);
+  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+  const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
+  return mergeWithDefaultTheme(theme, defaultTheme);
 };
 
 const kibanaTimezone = chrome.getUiSettingsClient().get('dateFormat:tz');
