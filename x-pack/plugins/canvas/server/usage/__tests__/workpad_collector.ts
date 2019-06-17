@@ -5,22 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { handleResponse } from '../collector';
+import { summarizeWorkpads } from '../workpad_collector';
+// @ts-ignore Missing local definition
 import { workpads } from '../../../__tests__/fixtures/workpads';
-
-const getMockResponse = (mocks = workpads) => ({
-  hits: {
-    hits: mocks.map(workpad => ({
-      _source: {
-        'canvas-workpad': workpad,
-      },
-    })),
-  },
-});
 
 describe('usage collector handle es response data', () => {
   it('should summarize workpads, pages, and elements', () => {
-    const usage = handleResponse(getMockResponse());
+    const usage = summarizeWorkpads(workpads);
     expect(usage).to.eql({
       workpads: {
         total: 6, // num workpad documents in .kibana index
@@ -63,7 +54,7 @@ describe('usage collector handle es response data', () => {
   });
 
   it('should collect correctly if an expression has null as an argument (possible sub-expression)', () => {
-    const mockEsResponse = getMockResponse([
+    const mockWorkpads = [
       {
         name: 'Tweet Data Workpad 1',
         id: 'workpad-ae00567f-5510-4d68-b07f-6b1661948e03',
@@ -83,8 +74,8 @@ describe('usage collector handle es response data', () => {
         '@created': '2018-07-25T22:56:31.460Z',
         assets: {},
       },
-    ]);
-    const usage = handleResponse(mockEsResponse);
+    ];
+    const usage = summarizeWorkpads(mockWorkpads);
     expect(usage).to.eql({
       workpads: { total: 1 },
       pages: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
@@ -94,7 +85,7 @@ describe('usage collector handle es response data', () => {
   });
 
   it('should fail gracefully if workpad has 0 pages (corrupted workpad)', () => {
-    const mockEsResponseCorrupted = getMockResponse([
+    const mockWorkpadsCorrupted = [
       {
         name: 'Tweet Data Workpad 2',
         id: 'workpad-ae00567f-5510-4d68-b07f-6b1661948e03',
@@ -106,8 +97,8 @@ describe('usage collector handle es response data', () => {
         '@created': '2018-07-25T22:56:31.460Z',
         assets: {},
       },
-    ]);
-    const usage = handleResponse(mockEsResponseCorrupted);
+    ];
+    const usage = summarizeWorkpads(mockWorkpadsCorrupted);
     expect(usage).to.eql({
       workpads: { total: 1 },
       pages: { total: 0, per_workpad: { avg: 0, min: 0, max: 0 } },
@@ -117,7 +108,7 @@ describe('usage collector handle es response data', () => {
   });
 
   it('should fail gracefully in general', () => {
-    const usage = handleResponse({ hits: { total: 0 } });
-    expect(usage).to.eql(undefined);
+    const usage = summarizeWorkpads([]);
+    expect(usage).to.eql({});
   });
 });
