@@ -8,9 +8,10 @@
 
 import expect from '@kbn/expect';
 import {
-  xpackFeatureProvider,
+  xpackFeature,
 } from '../check_license';
 
+// todo fix this
 function Private() {
   return {
     get(str) {
@@ -27,14 +28,14 @@ describe('ML - check license', () => {
 
   describe('xpackFeatureProvider', () => {
     it('returns true for enabled feature', () => {
-      const xpackFeature = xpackFeatureProvider(Private);
-      const result = xpackFeature.isAvailable('watcher');
+      const xpackFeatureService = xpackFeature($http);
+      const result = xpackFeatureService.isAvailable('watcher');
       expect(result).to.be(true);
     });
 
     it('returns false for disabled feature', () => {
-      const xpackFeature = xpackFeatureProvider(Private);
-      const result = xpackFeature.isAvailable('noSuchFeature');
+      const xpackFeatureService = xpackFeature($http);
+      const result = xpackFeatureService.isAvailable('noSuchFeature');
       expect(result).to.be(false);
     });
   });

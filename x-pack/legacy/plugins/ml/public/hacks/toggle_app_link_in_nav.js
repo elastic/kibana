@@ -6,12 +6,12 @@
 
 
 
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
 
-uiModules.get('xpack/ml').run((Private) => {
-  const xpackInfo = Private(XPackInfoProvider);
+uiModules.get('xpack/ml').run(($http) => {
+  const xpackInfo = xpackInfoService($http);
 
   const showAppLink = xpackInfo.get('features.ml.showLinks', false);
 
