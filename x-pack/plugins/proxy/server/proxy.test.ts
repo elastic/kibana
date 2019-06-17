@@ -80,6 +80,34 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+test('no ssl, no server', async () => {
+  const clusterDocClient = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: noop,
+  };
+
+  mockClusterDocClient.mockImplementation(() => clusterDocClient);
+  const elasticClient = elasticsearchServiceMock.createSetupContract();
+  const httpService = httpServiceMock.createSetupContract();
+
+  const core = {
+    elasticsearch: elasticClient,
+    http: httpService,
+  };
+
+  mockReadFile.mockImplementation((x, cb) => cb(new Error('foo')));
+
+  const proxy = new ProxyService({ config: configService({}), env, logger });
+  try {
+    await proxy.setup(core, {});
+  } catch (err) {
+    expect(err.message).toBe('You must provide valid paths for cert, key and ca');
+  }
+
+  await proxy.stop();
+});
+
 test('creates and sets up proxy server', async () => {
   const clusterDocClient = {
     setup: jest.fn(),

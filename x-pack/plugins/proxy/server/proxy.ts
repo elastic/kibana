@@ -126,11 +126,20 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   }
 
   private async configureSSL(config: ProxyPluginType) {
-    const [tlsCert, tlsKey, tlsCa] = await Promise.all([
-      readFileAsync(config.cert),
-      readFileAsync(config.key),
-      readFileAsync(config.ca),
-    ]);
+    let tlsCert;
+    let tlsKey;
+    let tlsCa;
+
+    try {
+      [tlsCert, tlsKey, tlsCa] = await Promise.all([
+        readFileAsync(config.cert),
+        readFileAsync(config.key),
+        readFileAsync(config.ca),
+      ]);
+    } catch (err) {
+      this.log.fatal('Unable to read SSL cerificate information', err);
+      throw new Error('You must provide valid paths for cert, key and ca');
+    }
 
     this.httpsAgent = new HTTPSAgent({
       keepAlive: true,
