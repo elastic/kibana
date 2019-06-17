@@ -7,8 +7,6 @@
 import {
   // @ts-ignore No typings for EuiSpacer
   EuiSpacer,
-  // @ts-ignore No typings for EuiSuperSelect
-  EuiSuperSelect,
 } from '@elastic/eui';
 import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
 import gql from 'graphql-tag';
