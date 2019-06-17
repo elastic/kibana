@@ -111,7 +111,7 @@ Array [
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"actionTypeConfig invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+      `"The following actionTypeConfig attributes are invalid: param1 [any.required]"`
     );
   });
 
@@ -362,7 +362,7 @@ Array [
         options: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"actionTypeConfig invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+      `"The following actionTypeConfig attributes are invalid: param1 [any.required]"`
     );
   });
 

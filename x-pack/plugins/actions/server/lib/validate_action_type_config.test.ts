@@ -53,15 +53,21 @@ test('should validate and throw error when actionTypeConfig is invalid', () => {
         validate: {
           config: Joi.object()
             .keys({
-              param1: Joi.string().required(),
+              obj: Joi.object()
+                .keys({
+                  param1: Joi.string().required(),
+                })
+                .required(),
             })
             .required(),
         },
         async executor() {},
       },
-      {}
+      {
+        obj: {},
+      }
     )
   ).toThrowErrorMatchingInlineSnapshot(
-    `"actionTypeConfig invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+    `"The following actionTypeConfig attributes are invalid: obj.param1 [any.required]"`
   );
 });

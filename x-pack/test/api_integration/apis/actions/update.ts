@@ -185,7 +185,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'actionTypeConfig invalid: child "encrypted" fails because ["encrypted" is required]',
+              'The following actionTypeConfig attributes are invalid: encrypted [any.required]',
           });
         });
     });

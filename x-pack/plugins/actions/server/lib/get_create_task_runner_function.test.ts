@@ -135,6 +135,6 @@ test('validates config before executing the task', async () => {
     },
   });
   await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"actionTypeConfig invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+    `"The following actionTypeConfig attributes are invalid: param1 [any.required]"`
   );
 });
