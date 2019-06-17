@@ -218,7 +218,7 @@ describe('#normalizeTimeRange', () => {
       };
       expect(normalizeTimeRange<RelativeTimeRange>(dateTimeRange)).toEqual(expected);
     } else {
-      throw new Error('Was expecting date time range to be a AbsoluteTimeRange');
+      throw new Error('Was expecting date time range to be a RelativeTimeRange');
     }
   });
 
