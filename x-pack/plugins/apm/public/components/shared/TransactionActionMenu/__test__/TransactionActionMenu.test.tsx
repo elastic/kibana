@@ -13,6 +13,8 @@ import * as Transactions from './mockData';
 import * as hooks from '../../../../hooks/useAPMIndexPattern';
 import { ISavedObject } from '../../../../services/rest/savedObjects';
 
+jest.mock('ui/kfetch');
+
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
     <TransactionActionMenu transaction={transaction as Transaction} />
