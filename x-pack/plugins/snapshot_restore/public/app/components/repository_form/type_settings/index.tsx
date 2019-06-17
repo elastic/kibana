@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { REPOSITORY_TYPES } from '../../../../../common/constants';
 import { Repository, RepositoryType, EmptyRepository } from '../../../../../common/types';
-import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { SectionError } from '../../index';
 
@@ -29,10 +30,6 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
   updateRepository,
   settingErrors,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
   const { type, settings } = repository;
   const updateRepositorySettings = (
     updatedSettings: Partial<Repository['settings']>,

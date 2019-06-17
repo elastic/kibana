@@ -5,22 +5,16 @@
  */
 
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { AzureRepository } from '../../../../../../../common/types';
-import { useAppDependencies } from '../../../../../index';
 
 interface Props {
   repository: AzureRepository;
 }
 
 export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   const {
     settings: {
       client,

@@ -5,22 +5,16 @@
  */
 
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { S3Repository } from '../../../../../../../common/types';
-import { useAppDependencies } from '../../../../../index';
 
 interface Props {
   repository: S3Repository;
 }
 
 export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   const {
     settings: {
       bucket,

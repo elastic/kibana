@@ -9,11 +9,6 @@ import { RepositoryType } from './types';
 export const PLUGIN = {
   ID: 'snapshot_restore',
   MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType,
-  getI18nName: (i18n: any): string => {
-    return i18n.translate('xpack.snapshotRestore.appName', {
-      defaultMessage: 'Snapshot Repositories',
-    });
-  },
 };
 
 export const API_BASE_PATH = '/api/snapshot_restore/';

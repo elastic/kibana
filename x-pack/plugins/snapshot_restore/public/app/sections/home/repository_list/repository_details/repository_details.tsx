@@ -5,6 +5,8 @@
  */
 import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -25,7 +27,6 @@ import {
 
 import 'brace/theme/textmate';
 
-import { useAppDependencies } from '../../../../index';
 import { documentationLinksService } from '../../../../services/documentation';
 import {
   loadRepository,
@@ -57,11 +58,6 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   onRepositoryDeleted,
   history,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-
-  const { FormattedMessage } = i18n;
   const { error, data: repositoryDetails } = loadRepository(repositoryName);
   const [verification, setVerification] = useState<RepositoryVerification | undefined>(undefined);
   const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false);
@@ -363,7 +359,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
                                   defaultMessage: 'You cannot delete a managed repository.',
                                 }
                               )
-                            : null
+                            : undefined
                         }
                       >
                         <FormattedMessage

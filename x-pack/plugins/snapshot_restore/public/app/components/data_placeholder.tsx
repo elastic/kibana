@@ -4,25 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
-import { useAppDependencies } from '../index';
+import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   data: any;
   children: React.ReactNode;
 }
 
-export const DataPlaceholder: React.SFC<Props> = ({ data, children }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-
+export const DataPlaceholder: React.FunctionComponent<Props> = ({ data, children }) => {
   if (data != null) {
-    return children;
+    return <Fragment>{children}</Fragment>;
   }
 
-  return i18n.translate('xpack.snapshotRestore.dataPlaceholderLabel', {
+  const label = i18n.translate('xpack.snapshotRestore.dataPlaceholderLabel', {
     defaultMessage: '-',
   });
+
+  return <span>{label}</span>;
 };

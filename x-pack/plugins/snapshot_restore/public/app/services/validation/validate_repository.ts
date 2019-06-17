@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { textService } from '../text';
+import { i18n } from '@kbn/i18n';
 import {
   Repository,
   RepositoryType,
@@ -57,7 +57,6 @@ export const validateRepository = (
   validateSettings: boolean = true
 ): RepositoryValidation => {
   const { name, type, settings } = repository;
-  const { i18n } = textService;
   const validation: RepositoryValidation = {
     isValid: true,
     errors: {},
@@ -142,7 +141,6 @@ const validateRepositorySettings = (
 const validateFSRepositorySettings = (
   settings: FSRepository['settings']
 ): RepositorySettingsValidation => {
-  const i18n = textService.i18n;
   const validation: RepositorySettingsValidation = {};
   const { location } = settings;
   if (isStringEmpty(location)) {
@@ -158,7 +156,6 @@ const validateFSRepositorySettings = (
 const validateReadonlyRepositorySettings = (
   settings: ReadonlyRepository['settings']
 ): RepositorySettingsValidation => {
-  const i18n = textService.i18n;
   const validation: RepositorySettingsValidation = {};
   const { url } = settings;
   if (isStringEmpty(url)) {
@@ -174,7 +171,6 @@ const validateReadonlyRepositorySettings = (
 const validateS3RepositorySettings = (
   settings: S3Repository['settings']
 ): RepositorySettingsValidation => {
-  const i18n = textService.i18n;
   const validation: RepositorySettingsValidation = {};
   const { bucket } = settings;
   if (isStringEmpty(bucket)) {
@@ -190,7 +186,6 @@ const validateS3RepositorySettings = (
 const validateGCSRepositorySettings = (
   settings: GCSRepository['settings']
 ): RepositorySettingsValidation => {
-  const i18n = textService.i18n;
   const validation: RepositorySettingsValidation = {};
   const { bucket } = settings;
   if (isStringEmpty(bucket)) {
@@ -206,7 +201,6 @@ const validateGCSRepositorySettings = (
 const validateHDFSRepositorySettings = (
   settings: HDFSRepository['settings']
 ): RepositorySettingsValidation => {
-  const i18n = textService.i18n;
   const validation: RepositorySettingsValidation = {};
   const { uri, path } = settings;
   if (isStringEmpty(uri)) {

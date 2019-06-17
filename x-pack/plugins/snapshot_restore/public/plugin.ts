@@ -5,6 +5,7 @@
  */
 import { unmountComponentAtNode } from 'react-dom';
 
+import { i18n } from '@kbn/i18n';
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH, renderReact } from './app';
 import { AppCore, AppPlugins } from './app/types';
@@ -21,7 +22,7 @@ const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {
-    const { i18n, routing, http, chrome, notification, documentation } = core;
+    const { routing, http, chrome, notification, documentation } = core;
     const { management, uiMetric } = plugins;
 
     // Register management section
@@ -36,7 +37,7 @@ export class Plugin {
     });
 
     // Initialize services
-    textService.init(i18n);
+    textService.init();
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
     documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
     uiMetricService.init(uiMetric.track);
@@ -85,7 +86,7 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { i18n, notification } as AppCore,
+              { notification } as AppCore,
               { management: { sections: management.sections } } as AppPlugins
             );
           }

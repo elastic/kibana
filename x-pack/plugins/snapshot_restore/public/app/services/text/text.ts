@@ -3,15 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
 
 class TextService {
   public breadcrumbs: { [key: string]: string } = {};
-  public i18n: any;
   private repositoryTypeNames: { [key: string]: string } = {};
 
-  public init(i18n: any): void {
-    this.i18n = i18n;
+  public init(): void {
     this.repositoryTypeNames = {
       [REPOSITORY_TYPES.fs]: i18n.translate(
         'xpack.snapshotRestore.repositoryType.fileSystemTypeName',
@@ -66,22 +65,19 @@ class TextService {
     };
 
     if (type === REPOSITORY_TYPES.source && delegateType) {
-      return this.i18n.translate(
-        'xpack.snapshotRestore.repositoryType.sourceTypeWithDelegateName',
-        {
-          defaultMessage: '{delegateType} (Source-only)',
-          values: {
-            delegateType: getTypeName(delegateType),
-          },
-        }
-      );
+      return i18n.translate('xpack.snapshotRestore.repositoryType.sourceTypeWithDelegateName', {
+        defaultMessage: '{delegateType} (Source-only)',
+        values: {
+          delegateType: getTypeName(delegateType),
+        },
+      });
     }
 
     return getTypeName(type);
   }
 
   public getSizeNotationHelpText() {
-    return this.i18n.translate('xpack.snapshotRestore.repositoryForm.sizeNotationPlaceholder', {
+    return i18n.translate('xpack.snapshotRestore.repositoryForm.sizeNotationPlaceholder', {
       defaultMessage: 'Examples: {example1}, {example2}, {example3}, {example4}',
       values: {
         example1: '1g',

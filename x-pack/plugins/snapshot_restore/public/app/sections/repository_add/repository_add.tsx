@@ -5,22 +5,16 @@
  */
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { Repository, EmptyRepository } from '../../../../common/types';
 
+import { Repository, EmptyRepository } from '../../../../common/types';
 import { RepositoryForm, SectionError } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
-import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/navigation';
 import { addRepository } from '../../services/http';
 
 export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
   const section = 'repositories' as Section;
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);

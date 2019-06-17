@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 
 import { BASE_PATH, Section } from '../../constants';
-import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
@@ -38,12 +37,6 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   const tabs = [
     {
       id: 'snapshots' as Section,

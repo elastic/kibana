@@ -3,7 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React, { Fragment, useState, useEffect } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -19,11 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-
 import { SectionError, SectionLoading } from '../../../../components';
-import { useAppDependencies } from '../../../../index';
 import {
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
   UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
@@ -52,10 +51,6 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   snapshotId,
   onClose,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
   const { error, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
 

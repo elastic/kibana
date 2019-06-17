@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHealth } from '@elastic/eui';
 import { RepositoryVerification } from '../../../common/types';
-import { useAppDependencies } from '../index';
 
 interface Props {
   verificationResults: RepositoryVerification | null;
@@ -16,12 +16,6 @@ interface Props {
 export const RepositoryVerificationBadge: React.FunctionComponent<Props> = ({
   verificationResults,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   if (!verificationResults) {
     return (
       <EuiHealth color="subdued">

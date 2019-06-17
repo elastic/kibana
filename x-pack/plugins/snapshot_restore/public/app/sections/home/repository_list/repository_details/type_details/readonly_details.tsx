@@ -5,21 +5,16 @@
  */
 
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { ReadonlyRepository } from '../../../../../../../common/types';
-import { useAppDependencies } from '../../../../../index';
 
 interface Props {
   repository: ReadonlyRepository;
 }
 
 export const ReadonlyDetails: React.FunctionComponent<Props> = ({ repository }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
   const {
     settings: { url },
   } = repository;

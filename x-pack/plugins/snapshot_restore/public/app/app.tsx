@@ -7,20 +7,14 @@
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION, Section } from './constants';
 import { RepositoryAdd, RepositoryEdit, SnapshotRestoreHome } from './sections';
 import { loadPermissions } from './services/http';
-import { useAppDependencies } from './index';
 
 export const App: React.FunctionComponent = () => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   // Load permissions
   const {
     error: permissionsError,

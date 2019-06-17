@@ -7,12 +7,11 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { parse } from 'querystring';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiCallOut, EuiIcon, EuiLink, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
-import { useAppDependencies } from '../../../index';
 import { documentationLinksService } from '../../../services/documentation';
 import { loadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
@@ -33,12 +32,6 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   location: { search },
   history,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   const {
     error,
     loading,

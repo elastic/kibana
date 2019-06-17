@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiInMemoryTable, EuiLink, Query, EuiLoadingSpinner } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
-import { useAppDependencies } from '../../../../index';
 import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
@@ -30,10 +31,6 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   openSnapshotDetailsUrl,
   repositoryFilter,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
 
   const columns = [

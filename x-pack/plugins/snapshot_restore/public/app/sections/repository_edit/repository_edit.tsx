@@ -5,13 +5,13 @@
  */
 import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { Repository, EmptyRepository } from '../../../../common/types';
 
+import { Repository, EmptyRepository } from '../../../../common/types';
 import { RepositoryForm, SectionError, SectionLoading } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
-import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/navigation';
 import { editRepository, loadRepository } from '../../services/http';
 
@@ -25,10 +25,6 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   },
   history,
 }) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
   const section = 'repositories' as Section;
 
   // Set breadcrumb

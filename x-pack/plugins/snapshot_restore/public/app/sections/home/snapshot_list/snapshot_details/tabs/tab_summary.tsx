@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 
 import { SNAPSHOT_STATE } from '../../../../../constants';
-import { useAppDependencies } from '../../../../../index';
 import { formatDate } from '../../../../../services/text';
 import { DataPlaceholder } from '../../../../../components';
 import { SnapshotState } from './snapshot_state';
@@ -28,12 +27,6 @@ interface Props {
 }
 
 export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   const includeGlobalStateToHumanizedMap: Record<string, any> = {
     0: (
       <FormattedMessage

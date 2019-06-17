@@ -5,6 +5,8 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { Repository } from '../../../common/types';
 import { useAppDependencies } from '../index';
@@ -24,11 +26,9 @@ type OnSuccessCallback = (repositoriesDeleted: Array<Repository['name']>) => voi
 export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
   const {
     core: {
-      i18n,
       notification: { toastNotifications },
     },
   } = useAppDependencies();
-  const { FormattedMessage } = i18n;
   const [repositoryNames, setRepositoryNames] = useState<Array<Repository['name']>>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);

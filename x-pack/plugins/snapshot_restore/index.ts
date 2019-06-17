@@ -6,6 +6,7 @@
 
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
+import { i18n } from '@kbn/i18n';
 import { PLUGIN } from './common/constants';
 import { Plugin as SnapshotRestorePlugin } from './plugin';
 import { createShim } from './shim';
@@ -21,7 +22,6 @@ export function snapshotRestore(kibana: any) {
     },
     init(server: Legacy.Server) {
       const { core, plugins } = createShim(server, PLUGIN.ID);
-      const { i18n } = core;
       const snapshotRestorePlugin = new SnapshotRestorePlugin();
 
       // Start plugin
@@ -31,7 +31,9 @@ export function snapshotRestore(kibana: any) {
       plugins.license.registerLicenseChecker(
         server,
         PLUGIN.ID,
-        PLUGIN.getI18nName(i18n),
+        i18n.translate('xpack.snapshotRestore.appName', {
+          defaultMessage: 'Snapshot Repositories',
+        }),
         PLUGIN.MINIMUM_LICENSE_REQUIRED
       );
     },

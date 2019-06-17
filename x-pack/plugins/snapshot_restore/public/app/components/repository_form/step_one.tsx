@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -25,7 +26,6 @@ import {
 import { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
 
-import { useAppDependencies } from '../../index';
 import { documentationLinksService } from '../../services/documentation';
 import { loadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
@@ -45,12 +45,6 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
   updateRepository,
   validation,
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   // Load repository types
   const {
     error: repositoryTypesError,

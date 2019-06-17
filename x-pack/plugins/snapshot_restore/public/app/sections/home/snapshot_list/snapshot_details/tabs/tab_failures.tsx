@@ -5,11 +5,10 @@
  */
 
 import React from 'react';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { SNAPSHOT_STATE } from '../../../../../constants';
-import { useAppDependencies } from '../../../../../index';
 
 interface Props {
   indexFailures: any;
@@ -17,12 +16,6 @@ interface Props {
 }
 
 export const TabFailures: React.SFC<Props> = ({ indexFailures, snapshotState }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   if (!indexFailures.length) {
     // If the snapshot is in progress then we still might encounter errors later.
     if (snapshotState === SNAPSHOT_STATE.IN_PROGRESS) {

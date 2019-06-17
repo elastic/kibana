@@ -3,10 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { I18nContext } from 'ui/i18n';
-
 import chrome from 'ui/chrome';
 import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
@@ -19,11 +15,6 @@ import { HashRouter } from 'react-router-dom';
 import { trackUiMetric as track } from '../../../../src/legacy/core_plugins/ui_metric/public';
 
 export interface AppCore {
-  i18n: {
-    [i18nPackage: string]: any;
-    Context: typeof I18nContext;
-    FormattedMessage: typeof FormattedMessage;
-  };
   notification: {
     fatalError: typeof fatalError;
     toastNotifications: typeof toastNotifications;
@@ -74,11 +65,6 @@ export function createShim(): { core: Core; plugins: Plugins } {
 
   return {
     core: {
-      i18n: {
-        ...i18n,
-        Context: I18nContext,
-        FormattedMessage,
-      },
       routing: {
         registerAngularRoute: (path: string, config: object): void => {
           routes.when(path, config);

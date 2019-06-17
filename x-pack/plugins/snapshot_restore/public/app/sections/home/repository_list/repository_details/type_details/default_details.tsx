@@ -5,10 +5,10 @@
  */
 
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiCodeEditor, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Repository } from '../../../../../../../common/types';
-import { useAppDependencies } from '../../../../../index';
 
 import 'brace/theme/textmate';
 
@@ -19,12 +19,6 @@ interface Props {
 export const DefaultDetails: React.FunctionComponent<Props> = ({
   repository: { name, settings },
 }) => {
-  const {
-    core: {
-      i18n: { FormattedMessage },
-    },
-  } = useAppDependencies();
-
   return (
     <Fragment>
       <EuiTitle size="s">
