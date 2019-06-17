@@ -104,5 +104,9 @@ export const Directory = withRouter((props: Props) => {
       {folders.length > 0 && folderList}
     </React.Fragment>
   );
-  return <EuiFlexGroup direction="column">{children}</EuiFlexGroup>;
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      {children}
+    </EuiFlexGroup>
+  );
 });

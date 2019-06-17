@@ -24,7 +24,7 @@ import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 const { QueryBarInput } = data.query.ui;
 import { Storage } from 'ui/storage';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';

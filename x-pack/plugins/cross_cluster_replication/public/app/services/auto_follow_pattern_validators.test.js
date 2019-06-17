@@ -8,11 +8,11 @@
 import { validateAutoFollowPattern } from './auto_follow_pattern_validators';
 
 jest.mock('ui/index_patterns/index_patterns.js', () => ({
-  IndexPatternsProvider: jest.fn(),
+  IndexPatterns: jest.fn(),
 }));
 
-jest.mock('ui/index_patterns/index_patterns_api_client_provider.js', () => ({
-  IndexPatternsApiClientProvider: jest.fn(),
+jest.mock('ui/index_patterns/index_patterns_api_client.js', () => ({
+  IndexPatternsApiClient: jest.fn(),
 }));
 
 describe('Auto-follow pattern validators', () => {

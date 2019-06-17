@@ -60,7 +60,7 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
           Object {
             "mlJobTipsLink": <EuiLink
               color="primary"
-              href="https://www.elastic.co/guide/en/kibana/my-metadata-branch/job-tips.html"
+              href="https://www.elastic.co/guide/en/kibana/jest-metadata-mock-branch/job-tips.html"
               target="_blank"
               type="button"
             >
@@ -148,7 +148,7 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
           Object {
             "mlJobTipsLink": <EuiLink
               color="primary"
-              href="https://www.elastic.co/guide/en/kibana/my-metadata-branch/job-tips.html"
+              href="https://www.elastic.co/guide/en/kibana/jest-metadata-mock-branch/job-tips.html"
               target="_blank"
               type="button"
             >
