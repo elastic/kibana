@@ -17,7 +17,15 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import { listControlFactory } from './list_control_factory';
+
+chrome.getInjected.mockImplementation((key) => {
+  switch(key) {
+    case 'autocompleteTimeout': return 1000;
+    case 'autocompleteTerminateAfter': return 100000;
+  }
+});
 
 const mockField = {
   name: 'myField',
