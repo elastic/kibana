@@ -58,7 +58,6 @@ let startDeps: {
 
 const logger = loggingServiceMock.create();
 let configService: ReturnType<typeof configServiceMock.create>;
-const shouldListenMock = jest.fn(() => true);
 
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
@@ -72,7 +71,6 @@ beforeEach(() => {
       http: {
         options: { someOption: 'foo', someAnotherOption: 'bar' },
         server: { listener: { addListener: jest.fn() }, route: jest.fn() },
-        shouldListen: shouldListenMock,
       },
       plugins: {
         contracts: new Map([['plugin-id', 'plugin-value']]),
@@ -236,16 +234,10 @@ describe('once LegacyService is set up with connection info', () => {
 describe('once LegacyService is set up without connection info', () => {
   let legacyService: LegacyService;
   beforeEach(async () => {
-    shouldListenMock.mockReturnValue(false);
-
     legacyService = new LegacyService({ env, logger, configService: configService as any });
 
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
-  });
-
-  afterEach(() => {
-    shouldListenMock.mockReset();
   });
 
   test('creates legacy kbnServer with `autoListen: false`.', () => {
@@ -276,15 +268,11 @@ describe('once LegacyService is set up without connection info', () => {
 
 describe('once LegacyService is set up in `devClusterMaster` mode', () => {
   beforeEach(() => {
-    shouldListenMock.mockReturnValue(false);
     configService.atPath.mockImplementation(path => {
       return new BehaviorSubject(
         path === 'dev' ? { basePathProxyTargetPort: 100500 } : { basePath: '/abc' }
       );
     });
-  });
-  beforeEach(() => {
-    shouldListenMock.mockReset();
   });
 
   test('creates ClusterManager without base path proxy.', async () => {

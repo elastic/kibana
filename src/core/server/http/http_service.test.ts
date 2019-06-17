@@ -193,9 +193,8 @@ test('returns http server contract on setup', async () => {
   }));
 
   const service = new HttpService({ configService, env, logger });
-  const { createNewServer, shouldListen, ...setupHttpServer } = await service.setup();
+  const { createNewServer, ...setupHttpServer } = await service.setup();
   expect(createNewServer).toBeDefined();
-  expect(shouldListen).toBeDefined();
   expect(setupHttpServer).toEqual(httpServer);
 });
 

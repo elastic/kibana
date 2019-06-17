@@ -140,7 +140,6 @@ export interface HttpServiceSetup extends HttpServerSetup {
     // 
     // (undocumented)
     createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
-    shouldListen: () => boolean;
 }
 
 // @public (undocumented)

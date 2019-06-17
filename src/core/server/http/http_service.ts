@@ -31,8 +31,6 @@ import { HttpsRedirectServer } from './https_redirect_server';
 /** @public */
 export interface HttpServiceSetup extends HttpServerSetup {
   createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
-  /** Indicates if http server has configured to start listening on a configured port */
-  shouldListen: () => boolean;
 }
 /** @public */
 export interface HttpServiceStart {
@@ -82,7 +80,6 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
       ...httpSetup,
       ...{
         createNewServer: this.createServer.bind(this),
-        shouldListen: this.shouldListen.bind(this, config),
       },
     };
     return setup;
@@ -110,11 +107,15 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     };
   }
 
+  /**
+   * Indicates if http server has configured to start listening on a configured port.
+   * We shouldn't start http service in two cases:
+   * 1. If `server.autoListen` is explicitly set to `false`.
+   * 2. When the process is run as dev cluster master in which case cluster manager
+   * will fork a dedicated process where http service will be set up instead.
+   * @internal
+   * */
   private shouldListen(config: HttpConfig) {
-    // We shouldn't start http service in two cases:`
-    // 1. If `server.autoListen` is explicitly set to `false`.
-    // 2. When the process is run as dev cluster master in which case cluster manager
-    // will fork a dedicated process where http service will be set up instead.
     return !this.coreContext.env.isDevClusterMaster && config.autoListen;
   }
 
