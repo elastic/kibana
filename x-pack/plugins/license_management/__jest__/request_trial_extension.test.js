@@ -19,8 +19,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    const html = rendered.html();
-    expect(html).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
   test('should display when license is active and trial has been used', () => {
     const rendered = getComponent(
@@ -46,8 +45,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    const html = rendered.html();
-    expect(html).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
   test('should display when license is not active and trial has been used', () => {
     const rendered = getComponent(
@@ -87,7 +85,6 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    const html = rendered.html();
-    expect(html).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
 });
