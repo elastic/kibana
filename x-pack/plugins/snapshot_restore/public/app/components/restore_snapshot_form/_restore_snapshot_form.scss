@@ -1,0 +1,9 @@
+/*
+ * Prevent switch controls from moving around when toggling content
+ */
+.snapshotRestore__restoreForm__stepGeneral {
+  .euiFormRow--hasEmptyLabelSpace {
+    min-height: auto;
+    margin-top: $euiFontSizeXS + $euiSizeS + ($euiSizeXXL / 4);
+  }
+}

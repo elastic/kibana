@@ -3,3 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
+import { StepProps } from './';
+
+export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = () => {
+  return <div>Settings step</div>;
+};

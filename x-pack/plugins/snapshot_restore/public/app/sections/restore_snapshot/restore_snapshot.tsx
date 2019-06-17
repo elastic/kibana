@@ -36,7 +36,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   }, []);
 
   // Snapshot details state with default empty snapshot
-  const [snapshotDetails, setSnapshotDetails] = useState<Partial<SnapshotDetails>>({});
+  const [snapshotDetails, setSnapshotDetails] = useState<SnapshotDetails | {}>({});
 
   // Load snapshot
   const { error: snapshotError, loading: loadingSnapshot, data: snapshotData } = loadSnapshot(
@@ -139,13 +139,13 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
       return renderError();
     }
 
-    return <RestoreSnapshotForm />;
+    return <RestoreSnapshotForm snapshotDetails={snapshotDetails as SnapshotDetails} />;
   };
 
   return (
     <EuiPageBody>
       <EuiPageContent>
-        <EuiTitle size="l">
+        <EuiTitle size="m">
           <h1>
             <FormattedMessage
               id="xpack.snapshotRestore.restoreSnapshotTitle"
