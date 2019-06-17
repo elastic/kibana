@@ -19,7 +19,9 @@
 
 import Boom from 'boom';
 
-import {
+import { SavedObjectsErrorHelpers } from './errors';
+
+const {
   createBadRequestError,
   createEsAutoCreateIndexError,
   createGenericNotFoundError,
@@ -37,7 +39,7 @@ import {
   isForbiddenError,
   isNotAuthorizedError,
   isNotFoundError,
-} from './errors';
+} = SavedObjectsErrorHelpers;
 
 describe('savedObjectsClient/errorTypes', () => {
   describe('BadRequest error', () => {

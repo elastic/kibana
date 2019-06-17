@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createInvalidVersionError } from '../service/lib/errors';
+import { SavedObjectsErrorHelpers } from '../service/lib/errors';
 import { decodeBase64 } from './base64';
 
 /**
@@ -46,6 +46,6 @@ export function decodeVersion(version?: string) {
       _primary_term: seqParams[1],
     };
   } catch (_) {
-    throw createInvalidVersionError(version);
+    throw SavedObjectsErrorHelpers.createInvalidVersionError(version);
   }
 }

@@ -86,6 +86,7 @@ export {
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
+  SavedObjectsErrorHelpers,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsMigrationVersion,

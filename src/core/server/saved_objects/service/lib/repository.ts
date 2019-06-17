@@ -23,7 +23,7 @@ import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
-import * as errors from './errors';
+import { SavedObjectsErrorHelpers } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
@@ -146,7 +146,7 @@ export class SavedObjectsRepository {
     const { id, migrationVersion, overwrite, namespace, references } = options;
 
     if (!this._allowedTypes.includes(type)) {
-      throw errors.createUnsupportedTypeError(type);
+      throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
     const method = id && !overwrite ? 'create' : 'index';
@@ -177,9 +177,9 @@ export class SavedObjectsRepository {
         ...response,
       });
     } catch (error) {
-      if (errors.isNotFoundError(error)) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         // See "503s from missing index" above
-        throw errors.createEsAutoCreateIndexError();
+        throw SavedObjectsErrorHelpers.createEsAutoCreateIndexError();
       }
 
       throw error;
@@ -211,7 +211,7 @@ export class SavedObjectsRepository {
           error: {
             id: object.id,
             type: object.type,
-            error: errors.createUnsupportedTypeError(object.type).output.payload,
+            error: SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type).output.payload,
           },
         };
       }
@@ -309,7 +309,7 @@ export class SavedObjectsRepository {
    */
   async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}): Promise<{}> {
     if (!this._allowedTypes.includes(type)) {
-      throw errors.createGenericNotFoundError();
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
     }
 
     const { namespace } = options;
@@ -330,7 +330,7 @@ export class SavedObjectsRepository {
     const indexNotFound = response.error && response.error.type === 'index_not_found_exception';
     if (docNotFound || indexNotFound) {
       // see "404s from missing index" above
-      throw errors.createGenericNotFoundError(type, id);
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
     throw new Error(
@@ -494,7 +494,7 @@ export class SavedObjectsRepository {
         return ({
           id,
           type,
-          error: errors.createUnsupportedTypeError(type).output.payload,
+          error: SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload,
         } as any) as SavedObject<T>;
       });
 
@@ -555,7 +555,7 @@ export class SavedObjectsRepository {
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {
     if (!this._allowedTypes.includes(type)) {
-      throw errors.createGenericNotFoundError(type, id);
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
     const { namespace } = options;
@@ -570,7 +570,7 @@ export class SavedObjectsRepository {
     const indexNotFound = response.status === 404;
     if (docNotFound || indexNotFound) {
       // see "404s from missing index" above
-      throw errors.createGenericNotFoundError(type, id);
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
     const { updated_at: updatedAt } = response._source;
@@ -604,7 +604,7 @@ export class SavedObjectsRepository {
     options: SavedObjectsUpdateOptions = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     if (!this._allowedTypes.includes(type)) {
-      throw errors.createGenericNotFoundError(type, id);
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
     const { version, namespace, references = [] } = options;
@@ -627,7 +627,7 @@ export class SavedObjectsRepository {
 
     if (response.status === 404) {
       // see "404s from missing index" above
-      throw errors.createGenericNotFoundError(type, id);
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
     return {
@@ -663,7 +663,7 @@ export class SavedObjectsRepository {
       throw new Error('"counterFieldName" argument must be a string');
     }
     if (!this._allowedTypes.includes(type)) {
-      throw errors.createUnsupportedTypeError(type);
+      throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
     const { migrationVersion, namespace } = options;

@@ -38,6 +38,7 @@ export {
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
   SavedObjectsClientWrapperFactory,
+  SavedObjectsErrorHelpers,
 } from './lib';
 
 export * from './saved_objects_client';

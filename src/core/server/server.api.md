@@ -4,6 +4,7 @@
 
 ```ts
 
+import Boom from 'boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
@@ -470,54 +471,9 @@ export class SavedObjectsClient {
     create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
     // (undocumented)
-    errors: {
-        isSavedObjectsClientError: typeof import("./lib/errors").isSavedObjectsClientError;
-        decorateBadRequestError: typeof import("./lib/errors").decorateBadRequestError;
-        createBadRequestError: typeof import("./lib/errors").createBadRequestError;
-        createUnsupportedTypeError: typeof import("./lib/errors").createUnsupportedTypeError;
-        isBadRequestError: typeof import("./lib/errors").isBadRequestError;
-        createInvalidVersionError: typeof import("./lib/errors").createInvalidVersionError;
-        isInvalidVersionError: typeof import("./lib/errors").isInvalidVersionError;
-        decorateNotAuthorizedError: typeof import("./lib/errors").decorateNotAuthorizedError;
-        isNotAuthorizedError: typeof import("./lib/errors").isNotAuthorizedError;
-        decorateForbiddenError: typeof import("./lib/errors").decorateForbiddenError;
-        isForbiddenError: typeof import("./lib/errors").isForbiddenError;
-        decorateRequestEntityTooLargeError: typeof import("./lib/errors").decorateRequestEntityTooLargeError;
-        isRequestEntityTooLargeError: typeof import("./lib/errors").isRequestEntityTooLargeError;
-        createGenericNotFoundError: typeof import("./lib/errors").createGenericNotFoundError;
-        isNotFoundError: typeof import("./lib/errors").isNotFoundError;
-        decorateConflictError: typeof import("./lib/errors").decorateConflictError;
-        isConflictError: typeof import("./lib/errors").isConflictError;
-        decorateEsUnavailableError: typeof import("./lib/errors").decorateEsUnavailableError;
-        isEsUnavailableError: typeof import("./lib/errors").isEsUnavailableError;
-        createEsAutoCreateIndexError: typeof import("./lib/errors").createEsAutoCreateIndexError;
-        isEsAutoCreateIndexError: typeof import("./lib/errors").isEsAutoCreateIndexError;
-        decorateGeneralError: typeof import("./lib/errors").decorateGeneralError;
-    };
-    static errors: {
-        isSavedObjectsClientError: typeof import("./lib/errors").isSavedObjectsClientError;
-        decorateBadRequestError: typeof import("./lib/errors").decorateBadRequestError;
-        createBadRequestError: typeof import("./lib/errors").createBadRequestError;
-        createUnsupportedTypeError: typeof import("./lib/errors").createUnsupportedTypeError;
-        isBadRequestError: typeof import("./lib/errors").isBadRequestError;
-        createInvalidVersionError: typeof import("./lib/errors").createInvalidVersionError;
-        isInvalidVersionError: typeof import("./lib/errors").isInvalidVersionError;
-        decorateNotAuthorizedError: typeof import("./lib/errors").decorateNotAuthorizedError;
-        isNotAuthorizedError: typeof import("./lib/errors").isNotAuthorizedError;
-        decorateForbiddenError: typeof import("./lib/errors").decorateForbiddenError;
-        isForbiddenError: typeof import("./lib/errors").isForbiddenError;
-        decorateRequestEntityTooLargeError: typeof import("./lib/errors").decorateRequestEntityTooLargeError;
-        isRequestEntityTooLargeError: typeof import("./lib/errors").isRequestEntityTooLargeError;
-        createGenericNotFoundError: typeof import("./lib/errors").createGenericNotFoundError;
-        isNotFoundError: typeof import("./lib/errors").isNotFoundError;
-        decorateConflictError: typeof import("./lib/errors").decorateConflictError;
-        isConflictError: typeof import("./lib/errors").isConflictError;
-        decorateEsUnavailableError: typeof import("./lib/errors").decorateEsUnavailableError;
-        isEsUnavailableError: typeof import("./lib/errors").isEsUnavailableError;
-        createEsAutoCreateIndexError: typeof import("./lib/errors").createEsAutoCreateIndexError;
-        isEsAutoCreateIndexError: typeof import("./lib/errors").isEsAutoCreateIndexError;
-        decorateGeneralError: typeof import("./lib/errors").decorateGeneralError;
-    };
+    errors: typeof SavedObjectsErrorHelpers;
+    // (undocumented)
+    static errors: typeof SavedObjectsErrorHelpers;
     find<T extends SavedObjectAttributes = any>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T extends SavedObjectAttributes = any>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     update<T extends SavedObjectAttributes = any>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
@@ -525,7 +481,7 @@ export class SavedObjectsClient {
 
 // Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClientContract" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
 // 
-// @public (undocumented)
+// @public
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 // @public (undocumented)
@@ -536,6 +492,56 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     overwrite?: boolean;
     // (undocumented)
     references?: SavedObjectReference[];
+}
+
+// @public (undocumented)
+export class SavedObjectsErrorHelpers {
+    // (undocumented)
+    static createBadRequestError(reason?: string): DecoratedError;
+    // (undocumented)
+    static createEsAutoCreateIndexError(): DecoratedError;
+    // (undocumented)
+    static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
+    // (undocumented)
+    static createInvalidVersionError(versionInput?: string): DecoratedError;
+    // (undocumented)
+    static createUnsupportedTypeError(type: string): DecoratedError;
+    // (undocumented)
+    static decorateBadRequestError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateConflictError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateEsUnavailableError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateForbiddenError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateGeneralError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateNotAuthorizedError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateRequestEntityTooLargeError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static isBadRequestError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isConflictError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isEsAutoCreateIndexError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isEsUnavailableError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isForbiddenError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isInvalidVersionError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isNotAuthorizedError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isNotFoundError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isRequestEntityTooLargeError(error: Error | DecoratedError): boolean;
+    // Warning: (ae-forgotten-export) The symbol "DecoratedError" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    static isSavedObjectsClientError(error: any): error is DecoratedError;
 }
 
 // @public (undocumented)

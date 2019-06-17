@@ -18,10 +18,10 @@
  */
 
 import { SavedObjectsClientContract } from './saved_objects_client';
-import * as errors from './lib/errors';
+import { SavedObjectsErrorHelpers } from './lib/errors';
 
 const create = (): jest.Mocked<SavedObjectsClientContract> => ({
-  errors,
+  errors: SavedObjectsErrorHelpers,
   create: jest.fn(),
   bulkCreate: jest.fn(),
   delete: jest.fn(),

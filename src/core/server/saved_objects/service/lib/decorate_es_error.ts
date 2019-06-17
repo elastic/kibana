@@ -36,16 +36,7 @@ const {
   BadRequest,
 } = elasticsearch.errors;
 
-import {
-  createGenericNotFoundError,
-  decorateBadRequestError,
-  decorateConflictError,
-  decorateEsUnavailableError,
-  decorateForbiddenError,
-  decorateGeneralError,
-  decorateNotAuthorizedError,
-  decorateRequestEntityTooLargeError,
-} from './errors';
+import { SavedObjectsErrorHelpers } from './errors';
 
 export function decorateEsError(error: Error) {
   if (!(error instanceof Error)) {
@@ -59,32 +50,32 @@ export function decorateEsError(error: Error) {
     error instanceof NoConnections ||
     error instanceof RequestTimeout
   ) {
-    return decorateEsUnavailableError(error, reason);
+    return SavedObjectsErrorHelpers.decorateEsUnavailableError(error, reason);
   }
 
   if (error instanceof Conflict) {
-    return decorateConflictError(error, reason);
+    return SavedObjectsErrorHelpers.decorateConflictError(error, reason);
   }
 
   if (error instanceof NotAuthorized) {
-    return decorateNotAuthorizedError(error, reason);
+    return SavedObjectsErrorHelpers.decorateNotAuthorizedError(error, reason);
   }
 
   if (error instanceof Forbidden) {
-    return decorateForbiddenError(error, reason);
+    return SavedObjectsErrorHelpers.decorateForbiddenError(error, reason);
   }
 
   if (error instanceof RequestEntityTooLarge) {
-    return decorateRequestEntityTooLargeError(error, reason);
+    return SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError(error, reason);
   }
 
   if (error instanceof NotFound) {
-    return createGenericNotFoundError();
+    return SavedObjectsErrorHelpers.createGenericNotFoundError();
   }
 
   if (error instanceof BadRequest) {
-    return decorateBadRequestError(error, reason);
+    return SavedObjectsErrorHelpers.decorateBadRequestError(error, reason);
   }
 
-  return decorateGeneralError(error, reason);
+  return SavedObjectsErrorHelpers.decorateGeneralError(error, reason);
 }
