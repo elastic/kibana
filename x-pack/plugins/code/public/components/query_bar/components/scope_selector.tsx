@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiIcon,
-  // @ts-ignore
-  EuiSuperSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiIcon, EuiSuperSelect, EuiText } from '@elastic/eui';
 import React, { Component } from 'react';
 
 import { SearchScope } from '../../../../model';
