@@ -10,6 +10,7 @@ pipeline {
     stage('Kickoff') {
       steps {
         dir("${env.BASE_DIR}"){
+ 	    sh 'whoami'
             sh './.ci/run.sh'
         }
       }
