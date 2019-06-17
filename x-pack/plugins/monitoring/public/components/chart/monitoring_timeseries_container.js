@@ -12,12 +12,32 @@ import { MonitoringTimeseries } from './monitoring_timeseries';
 import { InfoTooltip } from './info_tooltip';
 
 import {
-  EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiScreenReaderOnly
+  EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiScreenReaderOnly, EuiTextAlign, EuiButtonEmpty
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-export function MonitoringTimeseriesContainer({ series, onBrush }) {
+const zoomOutBtn = (zoomInfo) => {
+  if (!zoomInfo || !zoomInfo.showZoomOutBtn()) {
+    return null;
+  }
+
+  return (
+    <EuiFlexItem>
+      <EuiTextAlign textAlign="right">
+        <EuiButtonEmpty
+          color="text"
+          size="xs"
+          onClick={zoomInfo.zoomOutHandler}
+        >
+          <i className="fa fa-search-minus" /> Zoom Out
+        </EuiButtonEmpty>
+      </EuiTextAlign>
+    </EuiFlexItem>
+  );
+};
+
+export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
   if (series === undefined) {
     return null; // still loading
   }
@@ -71,6 +91,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
               </EuiScreenReaderOnly>
             </Fragment>
           </EuiFlexItem>
+          { zoomOutBtn(zoomInfo) }
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem style={{ minHeight: '200px' }}>

@@ -73,12 +73,34 @@ export class MonitoringViewBaseController {
   }) {
     const titleService = $injector.get('title');
     const $executor = $injector.get('$executor');
+    const $window = $injector.get('$window');
 
     titleService($scope.cluster, title);
 
     $scope.pageData = this.data = { ...defaultData };
     this._isDataInitialized = false;
     this.reactNodeId = reactNodeId;
+
+    const initialHash = $window.location.hash;
+    let lastHash = initialHash;
+    let deferTimer;
+    let zoomInLevel = 0;
+    const isInitialHash = () => $window.location.hash === initialHash;
+
+    const popstateHandler = () => {
+      const newHash = $window.location.hash;
+      if (newHash !== lastHash && zoomInLevel > 0 && !isInitialHash()) {
+        --zoomInLevel;
+      }
+      lastHash = initialHash;
+    };
+    const removePopstateHandler = () => $window.removeEventListener('popstate', popstateHandler);
+    const addPopstateHandler = () => $window.addEventListener('popstate', popstateHandler);
+
+    this.zoomInfo = {
+      zoomOutHandler: () => $window.history.back(),
+      showZoomOutBtn: () => zoomInLevel > 0 && !isInitialHash()
+    };
 
     const {
       enableTimeFilter = true,
@@ -120,6 +142,8 @@ export class MonitoringViewBaseController {
     });
     $executor.start($scope);
     $scope.$on('$destroy', () => {
+      clearTimeout(deferTimer);
+      removePopstateHandler();
       if (this.reactNodeId) { // WIP https://github.com/elastic/x-pack-kibana/issues/5198
         unmountComponentAtNode(document.getElementById(this.reactNodeId));
       }
@@ -129,11 +153,21 @@ export class MonitoringViewBaseController {
     // needed for chart pages
     this.onBrush = ({ xaxis }) => {
       const { to, from } = xaxis;
+      const fromTime = moment(from);
+      let toTime = moment(to);
+      if (toTime.unix() - fromTime.unix() < 40) {
+        toTime = fromTime.clone().add(40, 'seconds');
+      }
+
+      removePopstateHandler();
       timefilter.setTime({
-        from: moment(from),
-        to: moment(to),
+        from: fromTime,
+        to: toTime,
         mode: 'absolute'
       });
+      ++zoomInLevel;
+      clearTimeout(deferTimer);
+      setTimeout(() => addPopstateHandler(), 10);
     };
 
     this.setTitle = title => titleService($scope.cluster, title);
