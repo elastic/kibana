@@ -12,3 +12,4 @@ export const UnknownFileLanguage: number = -42404;
 export const LanguageServerNotInstalled: number = -42403;
 export const LanguageDisabled: number = -42402;
 export const LanguageServerStartFailed: number = -42405;
+export const WorkspaceUnloaded: number = -42406;

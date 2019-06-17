@@ -11,10 +11,11 @@ import { pathToFileURL } from 'url';
 import { ResponseError, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { DidChangeWorkspaceFoldersParams, InitializeResult } from 'vscode-languageserver-protocol';
 
-import { ServerNotInitialized } from '../../common/lsp_error_codes';
+import { ServerNotInitialized, WorkspaceUnloaded } from '../../common/lsp_error_codes';
 import { LspRequest } from '../../model';
 import { ServerOptions } from '../server_options';
 import { promiseTimeout } from '../utils/timeout';
+import { Cancelable } from '../utils/cancelable';
 import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
 
 interface Job {
@@ -33,10 +34,11 @@ enum WorkspaceStatus {
 interface Workspace {
   lastAccess: number;
   status: WorkspaceStatus;
-  initPromise?: Promise<any>;
+  initPromise?: Cancelable<any>;
 }
 
 export const InitializingError = new ResponseError(ServerNotInitialized, 'Server is initializing');
+export const WorkspaceUnloadedError = new ResponseError(WorkspaceUnloaded, 'Workspace unloaded');
 
 export class RequestExpander implements ILanguageServerHandler {
   public lastAccess: number = 0;
@@ -89,8 +91,11 @@ export class RequestExpander implements ILanguageServerHandler {
 
   public async unloadWorkspace(workspacePath: string) {
     if (this.hasWorkspacePath(workspacePath)) {
+      const ws = this.getWorkspace(workspacePath);
+      if (ws.initPromise) {
+        ws.initPromise.cancel(WorkspaceUnloadedError);
+      }
       if (this.builtinWorkspace) {
-        this.removeWorkspace(workspacePath);
         const params: DidChangeWorkspaceFoldersParams = {
           event: {
             removed: [
@@ -111,6 +116,16 @@ export class RequestExpander implements ILanguageServerHandler {
         await this.exit();
       }
     }
+    this.removeWorkspace(workspacePath);
+    const newJobQueue: Job[] = [];
+    this.jobQueue.forEach(job => {
+      if (job.request.workspacePath === workspacePath) {
+        job.reject(WorkspaceUnloadedError);
+      } else {
+        newJobQueue.push(job);
+      }
+    });
+    this.jobQueue = newJobQueue;
   }
 
   public async initialize(workspacePath: string): Promise<void | InitializeResult> {
@@ -191,7 +206,7 @@ export class RequestExpander implements ILanguageServerHandler {
     if (request.workspacePath) {
       const ws = this.getWorkspace(request.workspacePath);
       if (ws.status === WorkspaceStatus.Uninitialized) {
-        ws.initPromise = this.initialize(request.workspacePath);
+        ws.initPromise = Cancelable.fromPromise(this.initialize(request.workspacePath));
       }
       // Uninitialized or initializing
       if (ws.status !== WorkspaceStatus.Initialized) {
@@ -200,7 +215,7 @@ export class RequestExpander implements ILanguageServerHandler {
         if (timeout > 0 && ws.initPromise) {
           try {
             const elapsed = Date.now() - startTime;
-            await promiseTimeout(timeout - elapsed, ws.initPromise);
+            await promiseTimeout(timeout - elapsed, ws.initPromise.promise);
           } catch (e) {
             if (e.isTimeout) {
               throw InitializingError;
@@ -208,7 +223,7 @@ export class RequestExpander implements ILanguageServerHandler {
             throw e;
           }
         } else if (ws.initPromise) {
-          await ws.initPromise;
+          await ws.initPromise.promise;
         } else {
           throw InitializingError;
         }

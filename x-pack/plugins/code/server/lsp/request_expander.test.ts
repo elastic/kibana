@@ -12,7 +12,7 @@ import { pathToFileURL } from 'url';
 
 import { ServerOptions } from '../server_options';
 import { LanguageServerProxy } from './proxy';
-import { InitializingError, RequestExpander } from './request_expander';
+import { InitializingError, RequestExpander, WorkspaceUnloadedError } from './request_expander';
 
 // @ts-ignore
 const options: ServerOptions = {
@@ -204,4 +204,40 @@ test('be able to swap workspace', async () => {
       isNotification: true,
     })
   ).toBeTruthy();
+});
+
+test('requests should be cancelled if workspace is unloaded', async () => {
+  // @ts-ignore
+  const clock = sinon.useFakeTimers();
+  // @ts-ignore
+  const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
+    handleRequest: sinon.stub().callsFake(() => {
+      Promise.resolve('ok');
+    }),
+    initialize: sinon.stub().callsFake(
+      () =>
+        new Promise(resolve => {
+          setTimeout(() => {
+            resolve();
+          }, 300);
+        })
+    ),
+  });
+  const expander = new RequestExpander(proxyStub, true, 1, options);
+  const request = {
+    method: 'request1',
+    params: [],
+    workspacePath: '/tmp/test/workspace/1',
+    timeoutForInitializeMs: 500,
+  };
+  mkdirp.sync(request.workspacePath);
+  const promise1 = expander.handleRequest(request);
+  clock.tick(100);
+  const promise2 = expander.handleRequest(request);
+  await expander.unloadWorkspace('/tmp/test/workspace/1');
+  clock.tick(400);
+  process.nextTick(() => clock.runAll());
+  await expect(promise1).rejects.toEqual(WorkspaceUnloadedError);
+  await expect(promise2).rejects.toEqual(WorkspaceUnloadedError);
+  clock.restore();
 });
