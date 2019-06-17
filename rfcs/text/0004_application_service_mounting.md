@@ -9,9 +9,29 @@ first-class applications.
 
 # Basic example
 
+
 ```tsx
+// my_plugin/public/application.js
+
 import React from 'react';
 import ReactDOM from 'react-dom';
+
+import { MyApp } from './componnets';
+
+export function renderApp(context, targetDomElement) {
+  ReactDOM.render(
+    <MyApp mountContext={context} deps={pluginStart} />,
+    targetDomElement
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(targetDomElement);
+  };
+}
+```
+
+```tsx
+// my_plugin/public/plugin.js
 
 class MyPlugin {
   setup({ application }) {
@@ -19,16 +39,8 @@ class MyPlugin {
       id: 'my-app',
       title: 'My Application',
       async mount(context, targetDomElement) {
-        const { MyApp } = await import('./components');
-
-        ReactDOM.render(
-          <MyApp mountContext={context} deps={pluginStart} />,
-          targetDomElement
-        );
-
-        return () => {
-          ReactDOM.unmountComponentAtNode(targetDomElement);
-        };
+        const { renderApp } = await import('./applcation');
+        return renderApp(context, targetDomElement);
       }
     });
   }
@@ -47,12 +59,6 @@ lock-in.
 
 # Detailed design
 
-This is the bulk of the RFC. Explain the design in enough detail for somebody
-familiar with Kibana to understand, and for somebody familiar with the
-implementation to implement. This should get into specifics and corner-cases,
-and include examples of how the feature is used. Any new terminology should be
-defined here.
-
 ## Interface
 
 ```ts
@@ -60,15 +66,30 @@ defined here.
 export interface MountContext {
   /** This is the base path for setting up your router. */
   basename: string;
+  /** These services serve as an example, but are subject to change. */
   core: {
-    chrome: ChromeStart;
-    http: HttpStart;
-    i18n: I18nStart;
-    notifications: NotificationStart;
-    overlays: OverlayStart;
-    uiSettings: UISettingsStart;
+    http: {
+      fetch(...): Promise<any>;
+    };
+    i18n: {
+      translate(
+        id: string,
+        defaultMessage: string,
+        values?: Record<string, string>
+      ): string;
+    };
+    notifications: {
+      toasts: {
+        add(...): void;
+      };
+    };
+    overlays: {
+      showFlyout(render: (domElement) => () => void): Flyout;
+      showModal(render: (domElement) => () => void): Modal;
+    };
+    uiSettings: { ... };
   };
-  // Other plugins can inject context by registering additional context providers
+  /** Other plugins can inject context by registering additional context providers */
   [contextName: string]: unknown;
 }
 
@@ -87,7 +108,7 @@ export interface AppSpec {
   title: string;
 
   /**
-   * A mount function called when the user navigates to this app's `rootRoute`.
+   * A mount function called when the user navigates to this app's route.
    * @param context the `MountContext generated for this app
    * @param targetDomElement An HTMLElement to mount the application onto.
    * @returns An unmounting function that will be called to unmount the application.
@@ -190,9 +211,10 @@ a full-featured router and code-splitting. Note that using React or any other
 3rd party tools featured here is not required to build a Kibana Application.
 
 ```tsx
-// my_plugin/public/components/index.ts
+// my_plugin/public/application.ts
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { BrowserRouter, Route } from 'react-router-dom';
 import loadable from '@loadable/component';
 
@@ -201,7 +223,7 @@ import loadable from '@loadable/component';
 import { HomePage } from './pages';
 const LazyDashboard = loadable(() => import('./pages/dashboard'));
 
-export const MyApp = ({ basename }) => (
+const MyApp = ({ basename }) => (
   // Setup router's basename from the basename provided from MountContext
   <BrowserRouter basename={basename}>
 
@@ -216,30 +238,30 @@ export const MyApp = ({ basename }) => (
 
   </BrowserRouter>,
 );
+
+export function renderApp(context, targetDomElement) {
+  ReactDOM.render(
+    // `context.basename` would be `/app/my-app` in this example.
+    // This exact string is not guaranteed to be stable, always reference
+    // `context.basename`.
+    <MyApp basename={context.basename} />,
+    targetDomElem
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(targetDomElem);
+}
 ```
 
 ```tsx
 // my_plugin/public/plugin.tsx
-
-import React from 'react';
-import ReactDOM from 'react-dom';
 
 export class MyPlugin {
   setup({ application }) {
     application.register({
       id: 'my-app',
       async mount(context, targetDomElem) {
-        const { MyApp } = await import('./components');
-
-        ReactDOM.render(
-          // `context.basename` would be `/app/my-app` in this example.
-          // This exact string is not guaranteed to be stable, always reference
-          // `context.basename`.
-          <MyApp basename={context.basename} />,
-          targetDomElem
-        );
-
-        return () => ReactDOM.unmountComponentAtNode(targetDomElem);
+        const { renderApp } = await import('./applcation');
+        return renderApp(context, targetDomElement);
       }
     });
   }
