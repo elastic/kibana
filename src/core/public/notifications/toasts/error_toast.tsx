@@ -31,14 +31,12 @@ import {
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { I18nSetup } from '../../i18n';
 import { OverlayStart } from '../../overlays';
 
 interface ErrorToastProps {
   title: string;
   error: Error;
   toastMessage: string;
-  i18nContext: I18nSetup['Context'];
   openModal: OverlayStart['openModal'];
 }
 
@@ -51,9 +49,8 @@ interface ErrorToastProps {
 function showErrorDialog({
   title,
   error,
-  i18nContext: I18nContext,
   openModal,
-}: Pick<ErrorToastProps, 'error' | 'title' | 'i18nContext' | 'openModal'>) {
+}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal'>) {
   const modal = openModal(
     <React.Fragment>
       <EuiModalHeader>
@@ -79,13 +76,7 @@ function showErrorDialog({
   );
 }
 
-export function ErrorToast({
-  title,
-  error,
-  toastMessage,
-  i18nContext,
-  openModal,
-}: ErrorToastProps) {
+export function ErrorToast({ title, error, toastMessage, openModal }: ErrorToastProps) {
   return (
     <React.Fragment>
       <p data-test-subj="errorToastMessage">{toastMessage}</p>
@@ -93,7 +84,7 @@ export function ErrorToast({
         <EuiButton
           size="s"
           color="danger"
-          onClick={() => showErrorDialog({ title, error, openModal, i18nContext })}
+          onClick={() => showErrorDialog({ title, error, openModal })}
         >
           <FormattedMessage
             id="core.toasts.errorToast.seeFullError"

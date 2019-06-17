@@ -142,7 +142,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
       className="euiCard__footer"
     >
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
@@ -161,7 +161,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         </span>
       </span>
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
@@ -180,7 +180,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         </span>
       </span>
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
@@ -199,7 +199,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         </span>
       </span>
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
@@ -218,7 +218,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         </span>
       </span>
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
@@ -237,7 +237,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         </span>
       </span>
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
