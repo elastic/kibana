@@ -32,8 +32,6 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { HttpConfig, Router } from '.';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
-import { KibanaRequest } from './router';
-import { httpServerMock } from './http_server.mocks';
 
 const chance = new Chance();
 
@@ -603,85 +601,6 @@ test('throws an error if starts without set up', async () => {
   );
 });
 
-test('#getBasePathFor() returns base path associated with an incoming request', async () => {
-  const {
-    getBasePathFor,
-    setBasePathFor,
-    registerRouter,
-    server: innerServer,
-    registerOnPostAuth,
-  } = await server.setup(config);
-
-  const path = '/base-path';
-  registerOnPostAuth((req, t) => {
-    setBasePathFor(req, path);
-    return t.next();
-  });
-
-  const router = new Router('/');
-  router.get({ path: '/', validate: false }, (req, res) => res.ok({ key: getBasePathFor(req) }));
-  registerRouter(router);
-
-  await server.start();
-  await supertest(innerServer.listener)
-    .get('/')
-    .expect(200)
-    .then(res => {
-      expect(res.body).toEqual({ key: path });
-    });
-});
-
-test('#getBasePathFor() is based on server base path', async () => {
-  const configWithBasePath = {
-    ...config,
-    basePath: '/bar',
-  };
-  const {
-    getBasePathFor,
-    setBasePathFor,
-    registerRouter,
-    server: innerServer,
-    registerOnPostAuth,
-  } = await server.setup(configWithBasePath);
-
-  const path = '/base-path';
-  registerOnPostAuth((req, t) => {
-    setBasePathFor(req, path);
-    return t.next();
-  });
-
-  const router = new Router('/');
-  router.get({ path: '/', validate: false }, (req, res) => res.ok({ key: getBasePathFor(req) }));
-  registerRouter(router);
-
-  await server.start();
-  await supertest(innerServer.listener)
-    .get('/')
-    .expect(200)
-    .then(res => {
-      expect(res.body).toEqual({ key: `${configWithBasePath.basePath}${path}` });
-    });
-});
-
-test('#setBasePathFor() cannot be set twice for one request', async () => {
-  const kibanaRequestFactory = {
-    from() {
-      return KibanaRequest.from(httpServerMock.createRawRequest());
-    },
-  };
-  jest.doMock('./router/request', () => ({
-    KibanaRequest: jest.fn(() => kibanaRequestFactory),
-  }));
-
-  const { setBasePathFor } = await server.setup(config);
-  const req = kibanaRequestFactory.from();
-  const setPath = () => setBasePathFor(req, '/path');
-
-  setPath();
-  expect(setPath).toThrowErrorMatchingInlineSnapshot(
-    `"Request basePath was previously set. Setting multiple times is not supported."`
-  );
-});
 const cookieOptions = {
   name: 'sid',
   encryptionKey: 'something_at_least_32_characters',

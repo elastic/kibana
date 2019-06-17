@@ -32,14 +32,14 @@ exports[`renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
+      isInvalid={false}
       label="Color"
       labelType="label"
     >
       <EuiColorPicker
-        aria-label="Select a color"
         color="#BFA180"
+        isInvalid={false}
         onChange={[Function]}
-        showColorLabel={true}
       />
     </EuiFormRow>
   </EuiFlexItem>

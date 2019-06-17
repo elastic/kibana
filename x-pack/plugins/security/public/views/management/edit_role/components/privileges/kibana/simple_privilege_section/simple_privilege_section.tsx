@@ -9,7 +9,6 @@ import {
   // @ts-ignore
   EuiDescribedFormGroup,
   EuiFormRow,
-  // @ts-ignore
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
