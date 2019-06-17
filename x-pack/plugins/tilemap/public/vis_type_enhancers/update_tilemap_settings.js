@@ -8,8 +8,8 @@ import uiRoutes from 'ui/routes';
 import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/vis/map/service_settings';
 
-uiRoutes.addSetupWork(function ($http, serviceSettings) {
-  const tileMapPluginInfo = xpackInfoService($http).get('features.tilemap');
+uiRoutes.addSetupWork(function ($injector, serviceSettings) {
+  const tileMapPluginInfo = xpackInfoService($injector).get('features.tilemap');
 
   if (!tileMapPluginInfo) {
     return;

@@ -58,8 +58,8 @@ import settingsTemplate from './templates/settings.html';
 
 const app = uiModules.get('app/graph');
 
-function checkLicense($http, Promise, kbnBaseUrl) {
-  const xpackInfo = xpackInfoService($http);
+function checkLicense($injector, Promise, kbnBaseUrl) {
+  const xpackInfo = xpackInfoService($injector);
   const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') && xpackInfo.get('features.graph.enableAppLink');
   if (!licenseAllowsToShowThisPage) {
     const message = xpackInfo.get('features.graph.message');

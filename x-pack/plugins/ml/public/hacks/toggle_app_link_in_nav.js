@@ -10,8 +10,8 @@ import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
 
-uiModules.get('xpack/ml').run(($http) => {
-  const xpackInfo = xpackInfoService($http);
+uiModules.get('xpack/ml').run($injector => {
+  const xpackInfo = xpackInfoService($injector);
 
   const showAppLink = xpackInfo.get('features.ml.showLinks', false);
 

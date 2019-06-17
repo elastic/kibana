@@ -8,8 +8,8 @@ import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
 import { i18n } from '@kbn/i18n';
 import { xpackInfoService } from 'plugins/xpack_main/services/xpack_info';
 
-DevToolsRegistryProvider.register($http => {
-  const xpackInfo = xpackInfoService($http);
+DevToolsRegistryProvider.register($injector => {
+  const xpackInfo = xpackInfoService($injector);
   return {
     order: 6,
     name: 'grokdebugger',

@@ -10,10 +10,9 @@ import 'ui/url';
 import { LicenseService } from './license_service';
 
 uiModules.get('xpack/watcher')
-  .factory('xpackWatcherLicenseService', ($injector) => {
-    const $http = $injector.get('$http');
+  .factory('xpackWatcherLicenseService', ($injector, $http) => {
     const kbnUrlService = $injector.get('kbnUrl');
     const $timeout = $injector.get('$timeout');
 
-    return new LicenseService(xpackInfoService($http), kbnUrlService, $timeout, $http);
+    return new LicenseService(xpackInfoService($injector), kbnUrlService, $timeout, $http);
   });

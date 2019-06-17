@@ -18,8 +18,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 const module = uiModules.get('xpack_main', []);
 
-module.factory('checkXPackInfoChange', ($q, Private, $http) => {
-  const xpackInfo = xpackInfoService($http);
+module.factory('checkXPackInfoChange', ($q, Private, $injector) => {
+  const xpackInfo = xpackInfoService($injector);
   const debounce = Private(DebounceProvider);
   const isUnauthenticated = Path.isUnauthenticated();
   let isLicenseExpirationBannerShown = false;
