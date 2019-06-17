@@ -20,6 +20,9 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { WizardNav } from '../../../../../data_frame/components/wizard_nav';
+import { JobIdInput } from './job_id_input';
+import { JobDescriptionInput } from './job_description_input';
+import { GroupsInput } from './groups_input';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
@@ -33,26 +36,31 @@ export const JobDetailsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
 
   const [jobId, setJobId] = useState(jobCreator.jobId);
+  const [jobDescription, setJobDescription] = useState(jobCreator.description);
+  const [selectedGroups, setSelectedGroups] = useState(jobCreator.groups);
 
-  // const [start, setStart] = useState(jobCreator.start);
-  // const [end, setEnd] = useState(jobCreator.end);
-  // const [detectors, setDetectors] = useState(jobCreator.detectors);
-
-  // useEffect(
-  //   () => {
-  //     setStart(jobCreator.start);
-  //     setEnd(jobCreator.end);
-  //     setDetectors(jobCreator.detectors);
-  //     console.log(jobCreator);
-  //   },
-  //   [jobCreatorUpdated]
-  // );
   useEffect(
     () => {
       jobCreator.jobId = jobId;
       jobCreatorUpdate();
     },
     [jobId]
+  );
+
+  useEffect(
+    () => {
+      jobCreator.description = jobDescription;
+      jobCreatorUpdate();
+    },
+    [jobDescription]
+  );
+
+  useEffect(
+    () => {
+      jobCreator.groups = selectedGroups;
+      jobCreatorUpdate();
+    },
+    [selectedGroups.join()]
   );
 
   function nextActive(): boolean {
@@ -63,11 +71,21 @@ export const JobDetailsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
     <Fragment>
       {isCurrentStep && (
         <Fragment>
-          <EuiFieldText
-            placeholder="Job ID"
-            value={jobId}
-            onChange={e => setJobId(e.target.value)}
-          />
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem>
+              <JobIdInput jobId={jobId} setJobId={setJobId} />
+              <GroupsInput
+                selectedGroupNames={selectedGroups}
+                setSelectedGroupNames={setSelectedGroups}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <JobDescriptionInput
+                jobDescription={jobDescription}
+                setJobDescription={setJobDescription}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <WizardNav
             previous={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)}
             next={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}

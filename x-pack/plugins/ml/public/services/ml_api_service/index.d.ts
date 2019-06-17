@@ -61,6 +61,7 @@ declare interface Ml {
       field: string | null,
       aggName: DslName
     ): Promise<any>;
+    getAllJobAndGroupIds(): Promise<any>;
   };
 }
 

@@ -67,38 +67,18 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     [jobCreatorUpdated]
   );
 
-  function timefilterChangeHandler(setStartIn: any, setEndIn: any) {
-    return () => {
-      const { to, from } = getTimeFilterRange();
-      if (to >= from) {
-        if (from !== start) {
-          setStartIn(from);
-        }
-        if (to !== end) {
-          setEndIn(to);
-        }
-      }
-    };
-  }
-  let timefilterChange: (() => void) | undefined = timefilterChangeHandler(setStart, setEnd);
-
-  function listenToTimefilter() {
-    if (timefilterChange !== undefined) {
-      timefilter.on('timeUpdate', timefilterChange);
+  const timefilterChange = () => {
+    const { to, from } = getTimeFilterRange();
+    if (to >= from) {
+      setStart(from);
+      setEnd(to);
     }
-  }
-
-  function unListenToTimefilter() {
-    if (timefilterChange !== undefined) {
-      timefilter.off('timeUpdate', timefilterChange);
-    }
-    timefilterChange = undefined;
-  }
+  };
 
   useEffect(() => {
-    listenToTimefilter();
+    timefilter.on('timeUpdate', timefilterChange);
     return () => {
-      unListenToTimefilter();
+      timefilter.off('timeUpdate', timefilterChange);
     };
   }, []);
 
@@ -133,7 +113,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
 
       {isCurrentStep && (
         <Fragment>
-          <TestInputs start={start} end={end} setStart={v => setStart(v)} setEnd={v => setEnd(v)} />
+          {/* <TestInputs start={start} end={end} setStart={v => setStart(v)} setEnd={v => setEnd(v)} /> */}
           <FullTimeRangeSelector
             indexPattern={kibanaContext.currentIndexPattern}
             query={kibanaContext.combinedQuery}

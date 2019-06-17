@@ -27,7 +27,11 @@ import { JobDetailsStep } from '../components/job_details_step';
 import { SummaryStep } from '../components/summary_step';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 
-import { JobCreatorContext, JobCreatorContextValue } from '../components/job_creator_context';
+import {
+  JobCreatorContext,
+  JobCreatorContextValue,
+  ExistingJobsAndGroups,
+} from '../components/job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../data_frame/common/kibana_context';
 
 import { SingleMetricJobCreator, MultiMetricJobCreator } from '../../common/job_creator';
@@ -40,9 +44,16 @@ interface Props {
   chartLoader: ChartLoader;
   resultsLoader: ResultsLoader;
   chartInterval: MlTimeBuckets;
+  existingJobsAndGroups: ExistingJobsAndGroups;
 }
 
-export const Wizard: FC<Props> = ({ jobCreator, chartLoader, resultsLoader, chartInterval }) => {
+export const Wizard: FC<Props> = ({
+  jobCreator,
+  chartLoader,
+  resultsLoader,
+  chartInterval,
+  existingJobsAndGroups,
+}) => {
   const kibanaContext = useContext(KibanaContext);
   if (!isKibanaContext(kibanaContext)) {
     return null;
@@ -59,6 +70,7 @@ export const Wizard: FC<Props> = ({ jobCreator, chartLoader, resultsLoader, char
     chartInterval,
     fields: newJobCapsService.fields,
     aggs: newJobCapsService.aggs,
+    existingJobsAndGroups,
   };
 
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.TIME_RANGE);

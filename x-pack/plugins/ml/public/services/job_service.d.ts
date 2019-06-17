@@ -9,6 +9,7 @@ declare interface JobService {
   openJob(jobId: string): Promise<any>;
   saveNewDatafeed(datafeedConfig: any, jobId: string): Promise<any>;
   startDatafeed(datafeedId: string, jobId: string, start: number, end: number): Promise<any>;
+  createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
 }
 
 export const mlJobService: JobService;

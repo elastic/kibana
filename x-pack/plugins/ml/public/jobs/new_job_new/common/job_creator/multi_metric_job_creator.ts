@@ -8,13 +8,13 @@ import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
 import { Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE } from './util/contants';
+import { JOB_TYPE } from './util/constants';
 
 export class MultiMetricJobCreator extends JobCreator {
   // a multi metric job has one optional overall partition field
   // which is the same for all detectors.
   private _splitField: SplitField = null;
-  private _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
+  private _type: JOB_TYPE = JOB_TYPE.MULTI_METRIC;
 
   public get type(): JOB_TYPE {
     return this._type;

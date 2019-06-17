@@ -8,14 +8,14 @@ import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
 import { Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE } from './util/contants';
+import { JOB_TYPE } from './util/constants';
 
 export class PopulationJobCreator extends JobCreator {
   // a population job has one overall over (split) field, which is the same for all detectors
   // each detector has an optional by field
   private _splitField: SplitField = null;
   private _byFields: SplitField[] = [];
-  private _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
+  private _type: JOB_TYPE = JOB_TYPE.POPULATION;
 
   public get type(): JOB_TYPE {
     return this._type;

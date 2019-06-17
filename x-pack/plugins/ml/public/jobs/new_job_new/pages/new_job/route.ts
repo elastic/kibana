@@ -17,9 +17,26 @@ import { getCreateSingleMetricJobBreadcrumbs } from '../../../breadcrumbs';
 
 import { loadNewJobCapabilities } from '../../../../services/new_job_capabilities_service';
 
+import { ml } from '../../../../services/ml_api_service';
+
 const template = `<ml-nav-menu name="new_job_single_metric" /><ml-new-job-page />`;
 
-uiRoutes.when('/jobs/new_job/new_new_job/?', {
+async function getJobsAndGroups() {
+  const existingJobsAndGroups = {
+    jobs: [],
+    groups: [],
+  };
+  try {
+    const { jobs, groups } = await ml.jobs.getAllJobAndGroupIds();
+    existingJobsAndGroups.jobs = jobs;
+    existingJobsAndGroups.groups = groups;
+    return existingJobsAndGroups;
+  } catch (error) {
+    return existingJobsAndGroups;
+  }
+}
+
+uiRoutes.when('/jobs/new_job/new_new_job/:jobType', {
   template,
   k7Breadcrumbs: getCreateSingleMetricJobBreadcrumbs,
   resolve: {
@@ -28,5 +45,6 @@ uiRoutes.when('/jobs/new_job/new_new_job/?', {
     indexPattern: loadCurrentIndexPattern,
     savedSearch: loadCurrentSavedSearch,
     loadNewJobCapabilities,
+    existingJobsAndGroups: getJobsAndGroups,
   },
 });

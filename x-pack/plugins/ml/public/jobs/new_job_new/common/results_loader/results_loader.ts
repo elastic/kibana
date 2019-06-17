@@ -38,6 +38,8 @@ const emptyModelItem = {
   modelLower: 0,
 };
 
+const LAST_UPDATE_DELAY_MS = 500;
+
 export type ResultsSubscriber = (results: Results) => void;
 
 export class ResultsLoader {
@@ -46,6 +48,7 @@ export class ResultsLoader {
   private _jobCreator: JobCreator;
   private _chartInterval: MlTimeBuckets;
   private _lastModelTimeStamp: number = 0;
+  private _lastResultsTimeout: any = null;
 
   private _results: Results = {
     progress: 0,
@@ -64,24 +67,40 @@ export class ResultsLoader {
   progressSubscriber = async (progress: number) => {
     if (this._resultsSearchRunning === false) {
       if (progress - this._results.progress > 5 || progress === 100) {
-        this._resultsSearchRunning = true;
-        // this._checkModelReset(progress);
-        this._results.progress = progress;
+        this._updateData(progress, false);
 
-        const [model, anomalies] = await Promise.all([
-          this._loadModelData(0),
-          this._loadAnomalyData(0),
-        ]);
-        this._results.model = model;
-        this._results.anomalies = anomalies;
-
-        this._resultsSearchRunning = false;
-        this._results$.next(this._results);
+        if (progress === 100) {
+          // after the job has finished, do one final update
+          // a while after the last 100% has been received.
+          // note, there may be multiple 100% progresses sent as they will only stop once the
+          // datafeed has stopped.
+          clearTimeout(this._lastResultsTimeout);
+          this._lastResultsTimeout = setTimeout(() => {
+            this._updateData(progress, true);
+          }, LAST_UPDATE_DELAY_MS);
+        }
       }
-    } else {
-      // console.log('results search already running');
     }
   };
+
+  private async _updateData(progress: number, fullRefresh: boolean) {
+    this._resultsSearchRunning = true;
+
+    if (fullRefresh === true) {
+      this._clearResults();
+    }
+    this._results.progress = progress;
+
+    const [model, anomalies] = await Promise.all([
+      this._loadModelData(0),
+      this._loadAnomalyData(0),
+    ]);
+    this._results.model = model;
+    this._results.anomalies = anomalies;
+
+    this._resultsSearchRunning = false;
+    this._results$.next(this._results);
+  }
 
   public subscribeToResults(func: ResultsSubscriber) {
     this._results$.subscribe(func);
@@ -109,12 +128,11 @@ export class ResultsLoader {
     return this._createModel(resp);
   }
 
-  private _checkModelReset(progress: number) {
-    if (progress === 100) {
-      this._results.model.length = 0;
-      this._lastModelTimeStamp = 0;
-      // console.log('reseting model');
-    }
+  private _clearResults() {
+    this._results.model.length = 0;
+    this._results.anomalies.length = 0;
+    this._results.progress = 0;
+    this._lastModelTimeStamp = 0;
   }
 
   private _createModel(resp: any): ModelItem[] {

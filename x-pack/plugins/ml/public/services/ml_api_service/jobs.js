@@ -159,4 +159,11 @@ export const jobs = {
       }
     });
   },
+
+  getAllJobAndGroupIds() {
+    return http({
+      url: `${basePath}/jobs/all_jobs_and_group_ids`,
+      method: 'GET',
+    });
+  },
 };

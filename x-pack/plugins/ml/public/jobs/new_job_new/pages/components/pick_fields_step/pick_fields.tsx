@@ -17,10 +17,12 @@ import {
   // EuiSelect,
   // EuiComboBox,
   // EuiComboBoxOptionProps,
-  EuiFieldText,
+  EuiHorizontalRule,
+  // EuiFieldText,
 } from '@elastic/eui';
 
 import { WizardNav } from '../../../../../data_frame/components/wizard_nav';
+import { BucketSpanInput } from './bucket_span_input';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { isSingleMetricJobCreator } from '../../../common/job_creator';
@@ -172,20 +174,19 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
             selectedOptions={selectedOptions}
           />
           {lineChartData.length > 0 && (
-            <AnomalyChart
-              lineChartData={lineChartData}
-              modelData={modelData}
-              anomalyData={anomalyData}
-              progress={progress}
-              height="400px"
-              width="100%"
-            />
+            <Fragment>
+              <AnomalyChart
+                lineChartData={lineChartData}
+                modelData={modelData}
+                anomalyData={anomalyData}
+                progress={progress}
+                height="300px"
+                width="100%"
+              />
+              <EuiHorizontalRule margin="l" />
+              <BucketSpanInput setBucketSpan={setBucketSpan} bucketSpan={bucketSpan} />
+            </Fragment>
           )}
-          <EuiFieldText
-            placeholder="Bucket span"
-            value={bucketSpan}
-            onChange={e => setBucketSpan(e.target.value)}
-          />
           <WizardNav
             previous={() => setCurrentStep(WIZARD_STEPS.TIME_RANGE)}
             next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
@@ -201,7 +202,7 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
               modelData={modelData}
               anomalyData={anomalyData}
               progress={progress}
-              height="400px"
+              height="300px"
               width="100%"
             />
           )}

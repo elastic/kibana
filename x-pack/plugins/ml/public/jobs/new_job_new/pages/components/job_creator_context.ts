@@ -15,6 +15,11 @@ import {
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
 
+export interface ExistingJobsAndGroups {
+  jobs: string[];
+  groups: string[];
+}
+
 export interface JobCreatorContextValue {
   jobCreatorUpdated: number;
   jobCreatorUpdate: Dispatch<void>;
@@ -24,6 +29,7 @@ export interface JobCreatorContextValue {
   chartInterval: MlTimeBuckets;
   fields: Field[];
   aggs: Aggregation[];
+  existingJobsAndGroups: ExistingJobsAndGroups;
 }
 
 export const JobCreatorContext = createContext<JobCreatorContextValue>({
@@ -35,4 +41,5 @@ export const JobCreatorContext = createContext<JobCreatorContextValue>({
   chartInterval: {} as MlTimeBuckets,
   fields: [],
   aggs: [],
+  existingJobsAndGroups: {} as ExistingJobsAndGroups,
 });

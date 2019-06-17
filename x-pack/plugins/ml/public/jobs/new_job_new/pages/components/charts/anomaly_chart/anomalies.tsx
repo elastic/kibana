@@ -62,10 +62,10 @@ export const Anomalies: FC<Props> = ({ anomalyData }) => {
   return (
     <Fragment>
       <LineAnnotation
-        annotationId={getAnnotationId('critical')}
+        annotationId={getAnnotationId('low')}
         domainType={AnnotationDomainTypes.XDomain}
-        dataValues={severities.critical}
-        style={getAnomalyStyle(ANOMALY_THRESHOLD.CRITICAL)}
+        dataValues={severities.low}
+        style={getAnomalyStyle(ANOMALY_THRESHOLD.LOW)}
       />
       <LineAnnotation
         annotationId={getAnnotationId('warning')}
@@ -74,22 +74,22 @@ export const Anomalies: FC<Props> = ({ anomalyData }) => {
         style={getAnomalyStyle(ANOMALY_THRESHOLD.WARNING)}
       />
       <LineAnnotation
-        annotationId={getAnnotationId('major')}
-        domainType={AnnotationDomainTypes.XDomain}
-        dataValues={severities.major}
-        style={getAnomalyStyle(ANOMALY_THRESHOLD.MAJOR)}
-      />
-      <LineAnnotation
         annotationId={getAnnotationId('minor')}
         domainType={AnnotationDomainTypes.XDomain}
         dataValues={severities.minor}
         style={getAnomalyStyle(ANOMALY_THRESHOLD.MINOR)}
       />
       <LineAnnotation
-        annotationId={getAnnotationId('low')}
+        annotationId={getAnnotationId('major')}
         domainType={AnnotationDomainTypes.XDomain}
-        dataValues={severities.low}
-        style={getAnomalyStyle(ANOMALY_THRESHOLD.LOW)}
+        dataValues={severities.major}
+        style={getAnomalyStyle(ANOMALY_THRESHOLD.MAJOR)}
+      />
+      <LineAnnotation
+        annotationId={getAnnotationId('critical')}
+        domainType={AnnotationDomainTypes.XDomain}
+        dataValues={severities.critical}
+        style={getAnomalyStyle(ANOMALY_THRESHOLD.CRITICAL)}
       />
     </Fragment>
   );

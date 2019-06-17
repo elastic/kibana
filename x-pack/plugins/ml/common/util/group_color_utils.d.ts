@@ -3,9 +3,4 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export enum JOB_TYPE {
-  SINGLE_METRIC,
-  MULTI_METRIC,
-  POPULATION,
-}
+export function tabColor(name: string): string;

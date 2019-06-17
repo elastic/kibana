@@ -227,4 +227,18 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     }
   });
 
+  server.route({
+    method: 'GET',
+    path: '/api/ml/jobs/all_jobs_and_group_ids',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { getAllJobAndGroupIds } = jobServiceProvider(callWithRequest);
+      return getAllJobAndGroupIds()
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

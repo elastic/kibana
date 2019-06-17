@@ -26,7 +26,7 @@ const areaSeriesStyle = {
   line: {
     ...seriesStyle.line,
     strokeWidth: 1,
-    opacity: 0.25,
+    opacity: 0.4,
   },
 };
 

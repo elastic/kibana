@@ -7,7 +7,7 @@
 import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
-import { JOB_TYPE } from './util/contants';
+import { JOB_TYPE } from './util/constants';
 
 export function isSingleMetricJobCreator(
   jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator

@@ -10,7 +10,7 @@ import { Field, Aggregation } from '../../../../../common/types/fields';
 import { Detector, BucketSpan } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { KIBANA_AGGREGATION } from '../../../../../common/constants/aggregation_types';
-import { JOB_TYPE } from './util/contants';
+import { JOB_TYPE } from './util/constants';
 
 export class SingleMetricJobCreator extends JobCreator {
   private _field: Field | null = null;

@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './default_configs';
+export function renderTemplate(str: string, data: string): string;
+export function stringHash(str: string): string;

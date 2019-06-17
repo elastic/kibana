@@ -8,7 +8,7 @@ import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kib
 import { IndexPatternWithType, IndexPatternTitle } from '../../../../../common/types/kibana';
 import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
 import { Aggregation } from '../../../../../common/types/fields';
-import { createEmptyJob, createEmptyDatafeed } from './util';
+import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
 
@@ -126,6 +126,10 @@ export class JobCreator {
 
   public get groups(): string[] {
     return this._job_config.groups;
+  }
+
+  public set groups(groups: string[]) {
+    this._job_config.groups = groups;
   }
 
   public set modelPlot(enable: boolean) {

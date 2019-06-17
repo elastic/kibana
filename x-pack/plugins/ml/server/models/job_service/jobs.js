@@ -12,6 +12,7 @@ import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
+import { groupsProvider } from './groups';
 import moment from 'moment';
 import { uniq } from 'lodash';
 
@@ -349,6 +350,19 @@ export function jobsProvider(callWithRequest) {
     return results;
   }
 
+  async function getAllJobAndGroupIds() {
+    const { getAllGroups } = groupsProvider(callWithRequest);
+    const jobs = await callWithRequest('ml.jobs');
+    const allJobIds = jobs.jobs.map(job => job.job_id);
+    const groups = await getAllGroups();
+    const allGroupIds = groups.map(group => group.id);
+
+    return {
+      jobs: allJobIds,
+      groups: allGroupIds,
+    };
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
@@ -358,5 +372,6 @@ export function jobsProvider(callWithRequest) {
     createFullJobsList,
     deletingJobTasks,
     jobsExist,
+    getAllJobAndGroupIds,
   };
 }

@@ -20,11 +20,13 @@ import {
   EuiFieldText,
   EuiButton,
   EuiProgress,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { WizardNav } from '../../../../../data_frame/components/wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
+import { mlJobService } from '../../../../../services/job_service';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const kibanaContext = useContext(KibanaContext);
@@ -49,36 +51,54 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     jobCreator.createAndStartJob();
   }
 
+  function viewResults() {
+    const url = mlJobService.createResultsUrl(
+      [jobCreator.jobId],
+      jobCreator.start,
+      jobCreator.end,
+      'timeseriesexplorer'
+    );
+    window.open(url, '_blank');
+  }
+
   return (
     <Fragment>
       {isCurrentStep && (
         <Fragment>
           <Fragment>
-            {jobCreator.jobId}
+            {/* {jobCreator.jobId}
             <br />
             {jobCreator.start} : {jobCreator.end}
             <br />
             {JSON.stringify(jobCreator.detectors, null, 2)}
             <br />
-            {jobCreator.bucketSpan}
+            {jobCreator.bucketSpan} */}
           </Fragment>
-          <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)} />
-          <EuiButton onClick={start} disabled={progress > 0}>
-            Create job
-          </EuiButton>
-          {/* {progress > 0 && <EuiProgress value={progress} size="m" max={100} />} */}
-          {progress === 100 && 'Job created'}
+          {progress === 0 && (
+            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)} />
+          )}
+          <EuiHorizontalRule />
+          {progress < 100 && (
+            <EuiButton onClick={start} isDisabled={progress > 0}>
+              Create job
+            </EuiButton>
+          )}
+          {progress === 100 && (
+            <Fragment>
+              <EuiButton onClick={viewResults}>View results</EuiButton>
+            </Fragment>
+          )}
         </Fragment>
       )}
       {isCurrentStep === false && (
         <Fragment>
-          {jobCreator.jobId}
+          {/* {jobCreator.jobId}
           <br />
           {jobCreator.start} : {jobCreator.end}
           <br />
           {JSON.stringify(jobCreator.detectors, null, 2)}
           <br />
-          {jobCreator.bucketSpan}
+          {jobCreator.bucketSpan} */}
         </Fragment>
       )}
     </Fragment>
