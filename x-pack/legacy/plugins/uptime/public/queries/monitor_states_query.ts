@@ -7,8 +7,18 @@
 import gql from 'graphql-tag';
 
 export const monitorStatesQuery = gql`
-  query MonitorStates($pageIndex: Int!, $pageSize: Int!) {
-    monitorStates: getMonitorStates(pageIndex: $pageIndex, pageSize: $pageSize) {
+  query MonitorStates(
+    $pageIndex: Int!
+    $pageSize: Int!
+    $sortDirection: String
+    $sortField: String
+  ) {
+    monitorStates: getMonitorStates(
+      pageIndex: $pageIndex
+      pageSize: $pageSize
+      sortDirection: $sortDirection
+      sortField: $sortField
+    ) {
       totalSummaryCount {
         count
       }

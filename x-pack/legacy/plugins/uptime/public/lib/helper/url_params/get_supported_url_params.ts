@@ -15,6 +15,8 @@ export interface UptimeUrlParams {
   dateRangeEnd: string;
   monitorListPageIndex: number;
   monitorListPageSize: number;
+  monitorListSortDirection: string;
+  monitorListSortField: string;
   search: string;
   selectedPingStatus: string;
 }
@@ -26,6 +28,8 @@ const {
   DATE_RANGE_END,
   MONITOR_LIST_PAGE_INDEX,
   MONITOR_LIST_PAGE_SIZE,
+  MONITOR_LIST_SORT_DIRECTION,
+  MONITOR_LIST_SORT_FIELD,
   SEARCH,
   SELECTED_PING_LIST_STATUS,
 } = CLIENT_DEFAULTS;
@@ -40,6 +44,8 @@ export const getSupportedUrlParams = (params: {
     dateRangeEnd,
     monitorListPageIndex,
     monitorListPageSize,
+    monitorListSortDirection,
+    monitorListSortField,
     search,
     selectedPingStatus,
   } = params;
@@ -51,6 +57,8 @@ export const getSupportedUrlParams = (params: {
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
     monitorListPageIndex: parseUrlInt(monitorListPageIndex, MONITOR_LIST_PAGE_INDEX),
     monitorListPageSize: parseUrlInt(monitorListPageSize, MONITOR_LIST_PAGE_SIZE),
+    monitorListSortDirection: monitorListSortDirection || MONITOR_LIST_SORT_DIRECTION,
+    monitorListSortField: monitorListSortField || MONITOR_LIST_SORT_FIELD,
     search: search || SEARCH,
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,

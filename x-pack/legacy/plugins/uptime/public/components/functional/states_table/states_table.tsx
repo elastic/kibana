@@ -36,6 +36,8 @@ interface StatesTableProps {
   pageIndex: number;
   pageSize: number;
   onChange: (criteria: Criteria) => void;
+  sortField: string;
+  sortDirection: string;
 }
 
 type Props = UptimeGraphQLQueryProps<StatesTableQueryResult> & StatesTableProps;
@@ -102,7 +104,7 @@ export interface Criteria {
 }
 
 export const StatesTableComponent = (props: Props) => {
-  const { data, errors, loading, onChange, pageIndex, pageSize } = props;
+  const { data, errors, loading, onChange, pageIndex, pageSize, sortDirection, sortField } = props;
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: JSX.Element | null }>({});
   if (!data || !data.monitorStates) return null;
   const {
@@ -116,6 +118,13 @@ export const StatesTableComponent = (props: Props) => {
     pageSizeOptions: [5, 10, 20],
     totalItemCount: count,
     hidePerPageOptions: false,
+  };
+
+  const sorting = {
+    sort: {
+      field: sortField,
+      direction: sortDirection,
+    },
   };
 
   return (
@@ -137,10 +146,12 @@ export const StatesTableComponent = (props: Props) => {
         items={items || []}
         onChange={onChange}
         pagination={pagination}
+        sorting={sorting}
         columns={[
           {
             field: 'monitor_id',
             name: '',
+            sortable: true,
             width: '40px',
             render: (id: string) => {
               return (
@@ -160,9 +171,9 @@ export const StatesTableComponent = (props: Props) => {
             },
           },
           {
-            field: 'state',
+            field: 'state.monitor.status',
             name: 'Status',
-            render: ({ timestamp, summary }: State) => {
+            render: (status: string, { state: { timestamp, summary } }: MonitorSummary) => {
               const wrappedTimestamp = moment(timestamp);
               return (
                 <MonitorListStatusColumn
@@ -176,6 +187,7 @@ export const StatesTableComponent = (props: Props) => {
           {
             field: 'monitor_id',
             name: 'ID',
+            sortable: true,
           },
           // {
           //   field: 'state.timestamp',
@@ -192,6 +204,7 @@ export const StatesTableComponent = (props: Props) => {
           {
             field: 'state.url.full',
             name: 'URL',
+            sortable: true,
           },
           {
             field: 'state.url.scheme',

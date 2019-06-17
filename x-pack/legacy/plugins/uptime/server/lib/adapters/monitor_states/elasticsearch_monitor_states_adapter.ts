@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get, set } from 'lodash';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorStatesAdapter } from './adapter_types';
 import { MonitorSummary, DocCount } from '../../../../common/graphql/types';
@@ -17,22 +17,27 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
   public async getMonitorStates(
     request: any,
     pageIndex: number,
-    pageSize: number
+    pageSize: number,
+    sortField?: string | null,
+    sortDirection?: string | null
   ): Promise<MonitorSummary[]> {
     const params = {
       index: 'heartbeat-states-8.0.0',
       body: {
-        sort: [
-          {
-            monitor_id: {
-              order: 'asc',
-            },
-          },
-        ],
         from: pageIndex * pageSize,
         size: pageSize,
       },
     };
+
+    if (sortField) {
+      set(params, 'body.sort', [
+        {
+          [sortField]: {
+            order: sortDirection || 'asc',
+          },
+        },
+      ]);
+    }
 
     const result = await this.database.search(request, params);
     const hits = get(result, 'hits.hits', []);

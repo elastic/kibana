@@ -366,6 +366,18 @@
                   "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "sortField",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "sortDirection",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": { "kind": "OBJECT", "name": "MonitorSummaryResult", "ofType": null },
@@ -2599,7 +2611,11 @@
             "name": "state",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "State", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "State", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }

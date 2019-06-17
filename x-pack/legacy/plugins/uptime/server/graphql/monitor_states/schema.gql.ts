@@ -93,7 +93,7 @@ export const monitorStatesSchema = gql`
 
   type MonitorSummary {
     monitor_id: String!
-    state: State
+    state: State!
   }
 
   type MonitorSummaryResult {
@@ -102,6 +102,11 @@ export const monitorStatesSchema = gql`
   }
 
   extend type Query {
-    getMonitorStates(pageIndex: Int!, pageSize: Int!): MonitorSummaryResult
+    getMonitorStates(
+      pageIndex: Int!
+      pageSize: Int!
+      sortField: String
+      sortDirection: String
+    ): MonitorSummaryResult
   }
 `;

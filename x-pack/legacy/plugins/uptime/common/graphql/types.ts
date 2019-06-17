@@ -504,7 +504,7 @@ export interface MonitorSummaryResult {
 export interface MonitorSummary {
   monitor_id: string;
 
-  state?: State | null;
+  state: State;
 }
 
 export interface State {
@@ -681,6 +681,10 @@ export interface GetMonitorStatesQueryArgs {
   pageIndex: number;
 
   pageSize: number;
+
+  sortField?: string | null;
+
+  sortDirection?: string | null;
 }
 
 // ====================================================

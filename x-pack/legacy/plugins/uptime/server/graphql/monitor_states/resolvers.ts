@@ -25,12 +25,12 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
     Query: {
       async getMonitorStates(
         resolver,
-        { pageIndex, pageSize },
+        { pageIndex, pageSize, sortField, sortDirection },
         { req }
       ): Promise<MonitorSummaryResult> {
-        const [totalSummaryCount, summaries] = await Promise.all([
+        const [summaries, totalSummaryCount] = await Promise.all([
+          libs.monitorStates.getMonitorStates(req, pageIndex, pageSize, sortField, sortDirection),
           libs.monitorStates.getSummaryCount(req),
-          libs.monitorStates.getMonitorStates(req, pageIndex, pageSize),
         ]);
         return {
           summaries,

@@ -49,6 +49,8 @@ export const OverviewPage = ({
     dateRangeEnd,
     monitorListPageIndex,
     monitorListPageSize,
+    monitorListSortDirection,
+    monitorListSortField,
     search,
   } = params;
 
@@ -87,10 +89,12 @@ export const OverviewPage = ({
     refreshApp();
   };
 
-  const onMonitorListChange = ({ page: { index, size } }: Criteria) => {
+  const onMonitorListChange = ({ page: { index, size }, sort: { field, direction } }: Criteria) => {
     updateUrl({
       monitorListPageIndex: index,
       monitorListPageSize: size,
+      monitorListSortDirection: direction,
+      monitorListSortField: field,
     });
   };
 
@@ -116,8 +120,15 @@ export const OverviewPage = ({
         <StatesTable
           pageIndex={monitorListPageIndex}
           pageSize={monitorListPageSize}
+          sortDirection={monitorListSortDirection}
+          sortField={monitorListSortField}
           onChange={onMonitorListChange}
-          variables={{ pageIndex: monitorListPageIndex, pageSize: monitorListPageSize }}
+          variables={{
+            pageIndex: monitorListPageIndex,
+            pageSize: monitorListPageSize,
+            sortField: monitorListSortField,
+            sortDirection: monitorListSortDirection,
+          }}
         />
         <MonitorList
           absoluteStartDate={absoluteStartDate}

@@ -7,6 +7,12 @@
 import { MonitorSummary, DocCount } from '../../../../common/graphql/types';
 
 export interface UMMonitorStatesAdapter {
-  getMonitorStates(request: any, pageIndex: number, pageSize: number): Promise<MonitorSummary[]>;
+  getMonitorStates(
+    request: any,
+    pageIndex: number,
+    pageSize: number,
+    sortField?: string | null,
+    sortDirection?: string | null
+  ): Promise<MonitorSummary[]>;
   getSummaryCount(request: any): Promise<DocCount>;
 }

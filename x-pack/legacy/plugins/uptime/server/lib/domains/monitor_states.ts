@@ -12,8 +12,14 @@ export class UMMonitorStatesDomain {
     this.adapter = adapter;
   }
 
-  public async getMonitorStates(request: any, pageIndex: number, pageSize: number): Promise<any> {
-    return this.adapter.getMonitorStates(request, pageIndex, pageSize);
+  public async getMonitorStates(
+    request: any,
+    pageIndex: number,
+    pageSize: number,
+    sortField?: string,
+    sortDirection?: string
+  ): Promise<any> {
+    return this.adapter.getMonitorStates(request, pageIndex, pageSize, sortField, sortDirection);
   }
 
   public async getSummaryCount(request: any): Promise<DocCount> {
