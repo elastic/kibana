@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EventEmitter } from 'events';
 import Boom from 'boom';
 import { v4 } from 'uuid';
 import { Observable, Subscription, pairs } from 'rxjs';
@@ -51,7 +52,7 @@ function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (min - max) + min);
 }
 
-export class ClusterDocClient {
+export class ClusterDocClient extends EventEmitter {
   public nodeName: string;
   private readonly updateFloor = 30 * 1000; // 30 seconds is the fastest you can update
   private routingTable: RoutingTable = {};
@@ -71,6 +72,7 @@ export class ClusterDocClient {
   private readonly config$: Observable<ProxyPluginType>;
 
   constructor(initializerContext: PluginInitializerContext) {
+    super();
     this.nodeName = v4();
     this.config$ = initializerContext.config.create<ProxyPluginType>();
     this.log = initializerContext.logger.get('proxy');
@@ -251,7 +253,8 @@ export class ClusterDocClient {
     } catch (err) {
       // on conflict, skip until next loop
       if (err.output.statusCode !== 409) {
-        throw err;
+        this.emit('error', err);
+        return;
       }
     }
     this.setTimer();

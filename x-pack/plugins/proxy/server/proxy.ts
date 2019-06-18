@@ -39,6 +39,10 @@ export interface ProxyServiceSetup {
 }
 
 export interface ProxyServiceStart {
+  on: (event: string | symbol, listener: (...args: any[]) => void) => ClusterDocClient;
+  off: (event: string | symbol, listener: (...args: any[]) => void) => ClusterDocClient;
+  once: (event: string | symbol, listener: (...args: any[]) => void) => ClusterDocClient;
+  removeAllListeners: (event?: string | symbol) => ClusterDocClient;
   assignResource: (
     resource: string,
     type: string,
@@ -171,6 +175,10 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   public async start() {
     await this.clusterDocClient.start();
     const start: ProxyServiceStart = {
+      on: this.clusterDocClient.on.bind(this.clusterDocClient),
+      off: this.clusterDocClient.off.bind(this.clusterDocClient),
+      once: this.clusterDocClient.once.bind(this.clusterDocClient),
+      removeAllListeners: this.clusterDocClient.removeAllListeners.bind(this.clusterDocClient),
       assignResource: this.assignResource.bind(this),
       unassignResource: this.unassignResource.bind(this),
       proxyResource: this.proxyResource.bind(this),
@@ -213,7 +221,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   public async proxyRequest(req: KibanaRequest, resource?: string, retryCount = 0): Promise<any> {
     const method = req.route.method;
     const url = new URL(req.url.toString());
-    const headers = req.headers;
+    const headers = req.getFilteredHeaders([]);
     const body = req.body;
     resource = resource || url.pathname;
     const node = this.clusterDocClient.getNodeForResource(resource);
