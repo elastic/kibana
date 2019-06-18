@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../test_utils';
+import { registerTestBed } from '../../../../../../test_utils';
 import { FollowerIndexAdd } from '../../../public/app/sections/follower_index_add';
 import { ccrStore } from '../../../public/app/store';
 import routing from '../../../public/app/services/routing';

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { boomify, forbidden } from 'boom';
-import { renderWithIntl } from '../../../../../../test_utils/enzyme_helpers';
+import { renderWithIntl } from '../../../../../../../test_utils/enzyme_helpers';
 import { CheckerErrors } from '../checker_errors';
 
 describe('CheckerErrors', () => {

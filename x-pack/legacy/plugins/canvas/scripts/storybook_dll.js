@@ -24,7 +24,7 @@ if (fs.existsSync(DLL_OUTPUT)) {
     [
       'webpack',
       '--config',
-      'x-pack/plugins/canvas/.storybook/webpack.dll.config.js',
+      'x-pack/legacy/plugins/canvas/.storybook/webpack.dll.config.js',
       '--progress',
       '--hide-modules',
       '--display-entrypoints',

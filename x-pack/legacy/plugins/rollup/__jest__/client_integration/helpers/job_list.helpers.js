@@ -5,7 +5,7 @@
  */
 
 
-import { registerTestBed } from '../../../../../test_utils';
+import { registerTestBed } from '../../../../../../test_utils';
 import { registerRouter } from '../../../public/crud_app/services';
 import { createRollupJobsStore } from '../../../public/crud_app/store';
 import { JobList } from '../../../public/crud_app/sections/job_list';

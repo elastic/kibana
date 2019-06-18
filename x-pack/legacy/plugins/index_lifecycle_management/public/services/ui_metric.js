@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 
-import { trackUiMetric as track } from '../../../../../src/legacy/core_plugins/ui_metric/public';
+import { trackUiMetric as track } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 import {
   UIM_APP_NAME,

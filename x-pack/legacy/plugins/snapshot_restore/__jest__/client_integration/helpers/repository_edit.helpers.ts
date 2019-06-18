@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig } from '../../../../../../test_utils';
 import { RepositoryEdit } from '../../../public/app/sections/repository_edit';
 import { WithProviders } from './providers';
 import { REPOSITORY_NAME } from './constant';

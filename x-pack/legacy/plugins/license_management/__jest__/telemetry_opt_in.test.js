@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { TelemetryOptIn } from '../public/components/telemetry_opt_in';
-import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
+import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 
 jest.mock('ui/capabilities', () => ({
   get: jest.fn(),

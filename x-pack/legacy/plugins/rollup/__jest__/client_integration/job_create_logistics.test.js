@@ -5,11 +5,11 @@
  */
 
 import { MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from '../../public/crud_app/services';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/legacy/ui/public/index_patterns';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
 import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 

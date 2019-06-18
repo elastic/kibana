@@ -13,7 +13,7 @@ import {
   getKbnServer,
   request,
   startTestServers,
-} from '../../../../../src/test_utils/kbn_server';
+} from '../../../../../../src/test_utils/kbn_server';
 
 const xpackOption = {
   upgrade_assistant: {

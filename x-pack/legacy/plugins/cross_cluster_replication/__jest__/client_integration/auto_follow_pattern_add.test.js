@@ -5,7 +5,7 @@
  */
 
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/legacy/ui/public/index_patterns';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
 
 jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path || 'api/cross_cluster_replication',
@@ -23,9 +23,9 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
-    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants');
+    jest.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants');
   const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } =
-    jest.requireActual('../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern');
+    jest.requireActual('../../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern');
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
 });
 

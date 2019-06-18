@@ -7,7 +7,7 @@
 import { Provider } from 'react-redux';
 import { licenseManagementStore } from '../../public/store/store';
 import React from 'react';
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
+import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
 
 const highExpirationMillis = new Date('October 13, 2099 00:00:00Z').getTime();
 

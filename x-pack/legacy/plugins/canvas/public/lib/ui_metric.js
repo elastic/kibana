@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { trackUiMetric } from '../../../../../src/legacy/core_plugins/ui_metric/public';
+import { trackUiMetric } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 const APP = 'canvas';
 export const trackCanvasUiMetric = uiMetrics => {
