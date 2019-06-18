@@ -17,19 +17,20 @@
  * under the License.
  */
 
-import clone from 'lodash.clone';
-import { each, keys, last, mapValues, reduce, zipObject } from 'lodash';
-import { getType, fromExpression, getByAlias, castProvider } from '@kbn/interpreter/common';
-import { createError } from './create_error';
+import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
+import { fromExpression } from '@kbn/interpreter/common';
+export { createError } from './create_error';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { getType, getByAlias, castProvider } = require('@kbn/interpreter/common');
 
-export function interpreterProvider(config) {
+export function interpreterProvider(config: any) {
   const { functions, types } = config;
   const handlers = { ...config.handlers, types };
   const cast = castProvider(types);
 
   return interpret;
 
-  async function interpret(node, context = null) {
+  async function interpret(node: any, context = null) {
     switch (getType(node)) {
       case 'expression':
         return invokeChain(node.chain, context);
@@ -43,7 +44,7 @@ export function interpreterProvider(config) {
     }
   }
 
-  async function invokeChain(chainArr, context) {
+  async function invokeChain(chainArr: any, context: any): Promise<any> {
     if (!chainArr.length) return Promise.resolve(context);
 
     const chain = clone(chainArr);
@@ -75,7 +76,7 @@ export function interpreterProvider(config) {
     }
   }
 
-  async function invokeFunction(fnDef, context, args) {
+  async function invokeFunction(fnDef: any, context: any, args: any): Promise<any> {
     // Check function input.
     const acceptableContext = cast(context, fnDef.context.types);
     const fnOutput = await fnDef.fn(acceptableContext, args, handlers);
@@ -105,23 +106,23 @@ export function interpreterProvider(config) {
   }
 
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
-  async function resolveArgs(fnDef, context, argAsts) {
+  async function resolveArgs(fnDef: any, context: any, argAsts: any): Promise<any> {
     const argDefs = fnDef.args;
 
     // Use the non-alias name from the argument definition
     const dealiasedArgAsts = reduce(
       argAsts,
-      (argAsts, argAst, argName) => {
+      (acc, argAst, argName) => {
         const argDef = getByAlias(argDefs, argName);
         // TODO: Implement a system to allow for undeclared arguments
         if (!argDef) {
           throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
         }
 
-        argAsts[argDef.name] = (argAsts[argDef.name] || []).concat(argAst);
-        return argAsts;
+        acc[argDef.name] = (acc[argDef.name] || []).concat(argAst);
+        return acc;
       },
-      {}
+      {} as any
     );
 
     // Check for missing required arguments
@@ -144,25 +145,25 @@ export function interpreterProvider(config) {
     // Fill in default values from argument definition
     const argAstsWithDefaults = reduce(
       argDefs,
-      (argAsts, argDef, argName) => {
-        if (typeof argAsts[argName] === 'undefined' && typeof argDef.default !== 'undefined') {
-          argAsts[argName] = [fromExpression(argDef.default, 'argument')];
+      (acc: any, argDef: any, argName: any) => {
+        if (typeof acc[argName] === 'undefined' && typeof argDef.default !== 'undefined') {
+          acc[argName] = [(fromExpression as any)(argDef.default, 'argument')];
         }
 
-        return argAsts;
+        return acc;
       },
       dealiasedArgAsts
     );
 
     // Create the functions to resolve the argument ASTs into values
     // These are what are passed to the actual functions if you opt out of resolving
-    const resolveArgFns = mapValues(argAstsWithDefaults, (argAsts, argName) => {
-      return argAsts.map(argAst => {
+    const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
+      return asts.map((item: any) => {
         return async (ctx = context) => {
-          const newContext = await interpret(argAst, ctx);
+          const newContext = await interpret(item, ctx);
           // This is why when any sub-expression errors, the entire thing errors
           if (getType(newContext) === 'error') throw newContext.error;
-          return cast(newContext, argDefs[argName].types);
+          return cast(newContext, argDefs[argName as any].types);
         };
       });
     });
@@ -182,8 +183,8 @@ export function interpreterProvider(config) {
 
     // Just return the last unless the argument definition allows multiple
     const resolvedArgs = mapValues(resolvedMultiArgs, (argValues, argName) => {
-      if (argDefs[argName].multi) return argValues;
-      return last(argValues);
+      if (argDefs[argName as any].multi) return argValues;
+      return last(argValues as any);
     });
 
     // Return an object here because the arguments themselves might actually have a 'then'

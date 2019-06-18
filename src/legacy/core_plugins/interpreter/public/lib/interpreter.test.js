@@ -20,11 +20,11 @@
 import { FUNCTIONS_URL } from './consts';
 import { initializeInterpreter } from './interpreter';
 
-jest.mock('../../common/interpreter/interpret', () => ({
+jest.mock('../../common', () => ({
   interpreterProvider: () => () => ({}),
 }));
 
-jest.mock('../../common/serialize', () => ({
+jest.mock('../../common', () => ({
   serializeProvider: () => ({ serialize: () => ({}) }),
 }));
 

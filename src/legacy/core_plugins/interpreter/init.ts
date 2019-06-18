@@ -32,7 +32,7 @@ import { Legacy } from '../../../../kibana';
 import { typeSpecs as types } from '../../../plugins/data/common/interpreter/expression_types';
 
 // @ts-ignore
-import { TypesRegistry } from './common/types_registry';
+import { TypesRegistry } from './common';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { Fn } = require('@kbn/interpreter/common');

@@ -17,4 +17,22 @@
  * under the License.
  */
 
-export const API_ROUTE = '/api/interpreter';
+import { get, identity } from 'lodash';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { getType } = require('@kbn/interpreter/common');
+
+export function serializeProvider(types: any) {
+  return {
+    serialize: provider('serialize'),
+    deserialize: provider('deserialize'),
+  };
+
+  function provider(key: any) {
+    return (context: any) => {
+      const type = getType(context);
+      const typeDef = types[type];
+      const fn: any = get(typeDef, key) || identity;
+      return fn(context);
+    };
+  }
+}
