@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export const createError = err => ({
+export const createError = (err: any) => ({
   type: 'error',
   error: {
     stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,

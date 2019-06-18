@@ -35,3 +35,9 @@ export {
   Render,
   Style,
 } from '../../../../plugins/data/common/interpreter/expression_types';
+export const API_ROUTE = '/api/interpreter';
+export * from '../../../../plugins/data/common/interpreter/serialize_provider';
+export { TypesRegistry } from '../../../../plugins/data/common/interpreter/registries';
+export {
+  interpreterProvider,
+} from '../../../../plugins/data/common/interpreter/interpreter_provider';
