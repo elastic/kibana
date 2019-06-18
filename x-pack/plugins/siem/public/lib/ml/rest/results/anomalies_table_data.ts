@@ -6,31 +6,48 @@
 
 import chrome from 'ui/chrome';
 
-const payload = {
-  jobIds: ['derivative-auth-rare-username-by-source-ip'],
+export interface PayLoad {
+  jobIds: string[];
+  criteriaFields: string[];
+  influencers: Array<{}>;
+  aggregationInterval: string;
+  threshold: number;
+  earliestMs: number;
+  latestMs: number;
+  dateFormatTz: string;
+  maxRecords: number;
+  maxExamples: number;
+}
+
+const payload: PayLoad = {
+  jobIds: [],
   criteriaFields: [],
   influencers: [],
   aggregationInterval: 'auto',
   threshold: 0,
-  earliestMs: 1554099916000,
-  latestMs: 1560541690000,
+  earliestMs: 0,
+  latestMs: 1560607707000,
   dateFormatTz: 'America/Denver',
   maxRecords: 500,
   maxExamples: 10,
 };
 
-// const anomaliesTable;
+type Args = Partial<PayLoad>;
 
-export const anomaliesTableData = async (jobIds = payload) => {
-  console.log('getting jobs');
+export const anomaliesTableData = async (customPayLoad: Args = payload) => {
+  const body = { ...payload, ...customPayLoad };
+  console.log('getting jobs with body of:', customPayLoad);
   const response = await fetch('/api/ml/results/anomalies_table_data', {
     method: 'POST',
     credentials: 'same-origin',
-    body: JSON.stringify(jobIds),
+    body: JSON.stringify(body),
     headers: {
+      'kbn-system-api': 'true',
+      'Content-Type': 'application/json',
       'kbn-xsrf': chrome.getXsrfToken(),
     },
   });
   const json = await response.json();
-  console.log('my jobs are -->', json);
+  console.log('my anomalies are -->', json);
+  return json;
 };

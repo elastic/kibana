@@ -25,6 +25,8 @@ function getAnomaliesTableData(callWithRequest, payload) {
     maxRecords,
     maxExamples,
     influencersFilterQuery } = payload;
+  console.log('payload is raw:', payload, typeof payload);
+  console.log('jobIds are:', jobIds);
   return rs.getAnomaliesTableData(
     jobIds,
     criteriaFields,

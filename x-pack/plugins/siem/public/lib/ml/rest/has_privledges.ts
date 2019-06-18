@@ -56,5 +56,5 @@ export const hasPrivileges = async () => {
     },
   });
   const json = await response.json();
-  console.log('my body is yo -->', json);
+  console.log('my has privleges is yo -->', json);
 };
