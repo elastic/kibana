@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chrome from 'ui/chrome';
+
 const payload = {
   jobIds: ['derivative-auth-rare-username-by-source-ip'],
   criteriaFields: [],
@@ -17,9 +19,9 @@ const payload = {
   maxExamples: 10,
 };
 
-const anomaliesTable;
+// const anomaliesTable;
 
-export const anomaliesTable = async (jobIds = payload) => {
+export const anomaliesTableData = async (jobIds = payload) => {
   console.log('getting jobs');
   const response = await fetch('/api/ml/results/anomalies_table_data', {
     method: 'POST',

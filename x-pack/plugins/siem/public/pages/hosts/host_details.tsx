@@ -35,11 +35,11 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
-import { hasPrivileges } from '../../lib/ml/has_privledges';
-import { getJobs } from '../../lib/ml/get_jobs';
+import { hasPrivileges } from '../../lib/ml/rest/has_privledges';
+import { jobsSummary } from '../../lib/ml/rest/jobs/jobs_summary';
 
 hasPrivileges();
-getJobs();
+jobsSummary();
 
 const type = hostsModel.HostsType.details;
 
