@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from '../../../../plugins/data/common/types/index';
+export * from '../../../../plugins/data/common/interpreter/types/index';
