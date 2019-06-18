@@ -167,7 +167,7 @@ export class MonitoringViewBaseController {
       });
       ++zoomInLevel;
       clearTimeout(deferTimer);
-      setTimeout(() => addPopstateHandler(), 10);
+      deferTimer = setTimeout(() => addPopstateHandler(), 10);
     };
 
     this.setTitle = title => titleService($scope.cluster, title);
