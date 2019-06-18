@@ -12,11 +12,11 @@ The Kibana alerting plugin provides a common place to setup alerts. It supports:
 
 **Alert**: A configuration that defines a schedule, an alert type w/ parameters, state information and actions.
 
-**Alert Instance**: The instances created from the an alert type execution.
+**Alert Instance**: The instance(s) created from an alert type execution.
 
 ## Usage
 
-1. Create an alert type (see alert types -> example).
+1. Develop and register an alert type (see alert types -> example).
 2. Create an alert using the RESTful API (see alerts -> create).
 
 ## Alert types
@@ -29,10 +29,10 @@ The following table describes the properties of the `options` object.
 
 |Property|Description|Type|
 |---|---|---|
-|id|Unique identifier for the alert type.|string|
-|name|A user friendly name for the alert type.|string|
-|validate.params|Joi object validation for the parameters the executor receives.|Joi schema|
-|execute|A function to be called when executing an alert. See executor below.|Function|
+|id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
+|name|A user friendly name for the alert type. These will be displayed in dropdowns when chosing alert types.|string|
+|validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `execute` function or created as an alert saved object. In order to do this, provide a joi schema that we will use to validate the `params` attribute.|Joi schema|
+|execute|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 
 ### Executor
 
@@ -42,13 +42,13 @@ This is the primary function for an alert type, whenever the alert needs to exec
 
 |Property|Description|
 |---|---|
-|services.callCluster|Use this to do elasticsearch queries on the cluster Kibana connects to. NOTE: This currently authenticates as the Kibana internal user, this will change in a future PR.|
-|services.savedObjectsClient|Use this to manipulate saved objects. NOTE: This currently only works when security is disabled. A future PR will add support for enabled security using Elasticsearch API tokens.|
-|services.log|Use this to create server logs. (This is the same function as server.log)|
-|scheduledRunAt|The date and time the alert type was supposed to be called.|
-|previousScheduledRunAt|The previous date and time the alert type was supposed to be called.|
-|params|Parameters for the execution.|
-|state|State returned from previous execution.|
+|services.callCluster(path, opts)|Use this to do elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, this will change in a future PR.|
+|services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>**NOTE**: This currently only works when security is disabled. A future PR will add support for enabled security using Elasticsearch API tokens.|
+|services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
+|scheduledRunAt|The date and time the alert type execution was scheduled to be called.|
+|previousScheduledRunAt|The previous date and time the alert type was scheduled to be called.|
+|params|Parameters for the execution. This is where the parameters you require will be passed in. (example threshold). Use alert type validation to ensure values are set before execution.|
+|state|State returned from previous execution. This is the alert level state, what is returned by the executor will be serialized and provided here at the next execution.|
 
 ### Example
 
@@ -69,21 +69,8 @@ server.plugins.alerting.registerType({
     services,
     params,
     state,
-  }: AlertExecuteOptions) {
-    // Pass in parameters, also validated
-    const {
-      myParam
-    } = params;
-
-    // Available services
-    const {
-      log,
-      callCluster,
-      savedObjectsClient,
-      alertInstanceFactory,
-    } = services;
-  
-    // Firing actions
+  }: AlertExecuteOptions) {  
+    // Use this example to fire a single action
     alertInstanceFactory('server_1')
       .replaceState({
         // Alert instance level state, use getState() for
@@ -93,6 +80,17 @@ server.plugins.alerting.registerType({
       .fire('default', {
         server: 'server_1',
       });
+    
+    // Use this example to fire multiple actions
+    // This scenario allows a single query and "fan-off" zero, one or many alerts based on the results
+    for (const server of ['server_1', 'server_2', 'server_3']) {
+      alertInstanceFactory(server)
+      	 .replaceState({
+      	 	// State specific to "server_x"
+      	 	...
+      	 })
+      	 .fire('default', { server });
+    }
     
     // Returning updated alert type level state
     return {
@@ -106,7 +104,7 @@ server.plugins.alerting.registerType({
 
 Using an alert type requires an alert to be created which will contain parameters and actions for a given alert type.
 
-The alerting plugin exposes the following APIs:
+### RESTful API
 
 #### `POST /api/alert`: Create alert
 
@@ -116,8 +114,8 @@ Payload:
 |---|---|---|
 |alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
 |interval|The interval in milliseconds the alert should execute.|number|
-|alertTypeParams|The parameters to pass in to the alert type executor `params` value.|object|
-|action|An array of `group` (string), `id` (string) and params (object) to fire whenever the alert fires. The group allows the alert type fire fire different groups of actions. For example `warning` and `severe`. The id is the id of the action saved object to use. The params are the `params` value the action type expects. This uses mustache templates recursively on strings, see templating actions section for more details.|array|
+|alertTypeParams|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
+|actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to fire.<br>- `params` (object): There map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
 #### `DELETE /api/alert/{id}`: Delete alert
 
@@ -158,33 +156,28 @@ Payload:
 |Property|Description|Type|
 |---|---|---|
 |interval|The interval in milliseconds the alert should execute.|number|
-|alertTypeParams|The parameters to pass in to the alert type executor `params` value.|object|
-|action|An array of `group` (string), `id` (string) and params (object) to fire whenever the alert fires. The group allows the alert type fire fire different groups of actions. For example `warning` and `severe`. The id is the id of the action saved object to use. The params are the `params` value the action type expects. This uses mustache templates recursively on strings. The templates have access to `context` and `state` objects.|array|
+|alertTypeParams|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
+|actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to fire.<br>- `params` (object): There map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
 ## Alert instance factory
 
 **alertInstanceFactory(id)**
 
-One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and lookups of previous instances with the same id to gather previous state.
+One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to fire actions. These instances support state persisting between alert type execution but will clear out once the alert instance stops firing.
 
-This returns an instance of `AlertInstance`. The alert instance class has the following methods, note that most of these are for internal use but they work as they are described:
+This factory returns an instance of `AlertInstance`. The alert instance class has the following methods, note that we have removed the methods that you shouldn't touch.
 
 |Method|Description|
 |---|---|
-|shouldFire()|Function returns `true` or `false` whether the alert instance should fire or not. This value turns to true when `.fire(...)` is called.|
-|getFireOptions()|Function returns an object of `actionGroup`, `context` and `state` to use for firing the actions.|
-|resetFire()|Reverts a `.fire(...)` call and makes the instance no longer fire.|
 |getState()|Get the current state of the alert instance.|
-|getMeta()|Get the internal set meta attributes for the alert instance.|
-|fire(actionGroup, context)|Called to fire actions.|
-|replaceState(state)|Used to replace the current state of the alert instance.|
-|replaceMeta(meta)|Function to replace internal meta attributes.|
+|fire(actionGroup, context)|Called to fire actions. The group relates to the group of alert `actions` to fire and the context will be used for templating purposes.|
+|replaceState(state)|Used to replace the current state of the alert instance. This doesn't work like react, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between alert type executions whenever you re-create an alert instance with the same id. The instance state will be erased when fire isn't called during an execution.|
 
 ## Templating actions
 
-Each action within an alert contains its mapping of parameters to give an action type. To facilitate the mapping and to avoid having to make alert types aware of the actions, we added a templating system to allow converting content and state into parameters for an action type.
+There needs to be a way to map alert context into action parameters. For this, we started off by adding template support. Any string within the `params` of an alert saved object's `actions` will be processed as a template and can inject context or state values. 
 
-When an alert instance fires, the first argument is the `group` of actions to fire and the second is the context the alert exposes to templates. We iterate through each action attributes recursively and render templates if they are a string. Templates have access to the `context` and the alert instance's `state`.
+When an alert instance fires, the first argument is the `group` of actions to fire and the second is the context the alert exposes to templates. We iterate through each action attributes recursively and render templates if they are a string. Templates have access to the `context` (provided by second argument of `.fire(...)` on an alert instance) and the alert instance's `state` (provided by the most recent `replaceState` call on an alert instance).
 
 ### Examples
 
@@ -230,3 +223,5 @@ The templating system will take the alert and alert type as described above and 
   "body": "The server server_1 has a CPU usage of 80%"
 }
 ```
+
+There are limitations that we are aware of using only templates, we are gathering feedback and use cases for these. (for example passing an array of strings to an action).

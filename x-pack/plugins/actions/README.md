@@ -15,7 +15,7 @@ The Kibana actions plugin provides a common place to execute actions. It support
 
 ## Usage
 
-1. Create an action type (see action types -> example).
+1. Develop and register an action type (see action types -> example).
 2. Create an action by using the RESTful API (see actions -> create action).
 3. Use alerts to fire actions or fire manually (see firing actions).
 
@@ -29,12 +29,12 @@ The following table describes the properties of the `options` object.
 
 |Property|Description|Type|
 |---|---|---|
-|id|Unique identifier for the action type.|string|
-|name|A user friendly name for the action type.|string|
-|unencryptedAttributes|A list of opt-out attributes that don't need to be encrypted, these attributes won't need to be re-entered on import / export when the feature becomes available.|array of strings|
-|validate.params|Joi object validation for the parameters the executor receives.|Joi schema|
-|validate.config|Joi object validation for the configuration the executor receives.|Joi schema|
-|executor|A function to be called for executing an action. See executor below.|Function|
+|id|Unique identifier for the action type. For convention, ids starting with `.` are reserved for built in action types. We recommend using a convention like `<plugin_id>.mySpecialAction` for your action types.|string|
+|name|A user friendly name for the action type. These will be displayed in dropdowns when chosing action types.|string|
+|unencryptedAttributes|A list of opt-out attributes that don't need to be encrypted, these attributes won't need to be re-entered on import / export when the feature becomes available. These attributes will also be readable / displayed when it comes to a table / edit screen.|array of strings|
+|validate.params|When developing an action type, it needs to accept parameters to know what to do with the action. (Example to, from, subject, body of an email). Use joi object validation if you would like `params` to be validated before being passed to the executor.|Joi schema|
+|validate.config|Similar to params, a config is required when creating an action. (for example host, port, username, password of an email server). Use the joi object validation if you would like the config to be validated before being passed to the executor.|Joi schema|
+|executor|This is where the code of an action type lives. This is a function to be called for executing an action by either alerting or manually by using the exposed function by the plugin (see firing actions). For full details, see executor section below.|Function|
 
 ### Executor
 
@@ -44,11 +44,11 @@ This is the primary function for an action type, whenever the action needs to ex
 
 |Property|Description|
 |---|---|
-|config|The decrypted configuration given to an action.|
-|params|Parameters for the execution.|
-|services.callCluster|Use this to do elasticsearch queries on the cluster Kibana connects to. NOTE: This currently authenticates as the Kibana internal user, this will change in a future PR.|
-|services.savedObjectsClient|Use this to manipulate saved objects. NOTE: This currently only works when security is disabled. A future PR will add support for enabled security using Elasticsearch API tokens.|
-|services.log|Use this to create server logs. (This is the same function as server.log)|
+|config|The decrypted configuration given to an action. This comes from the action saved object which is partially or fully encrypted within the data store. If you would like to validate the config before being passed to the executor, define `validate.config` within the action type.|
+|params|Parameters for the execution. These will be given at fire time by either an alert or manually provided when calling the plugin provided fire function.|
+|services.callCluster(path, opts)|Use this to do elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, this will change in a future PR.|
+|services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>**NOTE**: This currently only works when security is disabled. A future PR will add support for enabled security using Elasticsearch API tokens.|
+|services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 
 ### Example
 
@@ -94,11 +94,11 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|attributes.description|A description to reference and search in the future.|string|
+|attributes.description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
 |attributes.actionTypeId|The id value of the action type you want to call when the action executes.|string|
-|attributes.actionTypeConfig|The configuration the action type expects.|object|
-|references|An array of `name`, `type` and `id`. This is the same as `references` in the saved objects API, see saved objects API documentation.|Array|
-|migrationVersion|The version of the most recent migrations. This is the same as `migrationVersion` in the saved objects API, see saved objects API documentation.|object|
+|attributes.actionTypeConfig|The configuration the action type expects. See related action type to see what attributes is expected. This will also validate agains the action type if config validation is defined.|object|
+|references|An array of `name`, `type` and `id`. This is the same as `references` in the saved objects API, see saved objects API documentation.<br><br>In most cases you can leave this empty.|Array|
+|migrationVersion|The version of the most recent migrations. This is the same as `migrationVersion` in the saved objects API, see saved objects API documentation.<br><br>In most cases you can leave this empty.|object|
 
 #### `DELETE /api/action/{id}`: Delete action
 
@@ -138,9 +138,9 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|attributes.description|The action description to reference and search in the future.|string|
-|attributes.actionTypeConfig|The configuration the action type expects.|object|
-|references|An array of `name`, `type` and `id`. This is the same as `references` in the saved objects API, see saved objects API documentation.|Array|
+|attributes.description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
+|attributes.actionTypeConfig|The configuration the action type expects. See related action type to see what attributes is expected. This will also validate agains the action type if config validation is defined.|object|
+|references|An array of `name`, `type` and `id`. This is the same as `references` in the saved objects API, see saved objects API documentation.<br><br>In most cases you can leave this empty.|Array|
 |version|The document version when read|string|
 
 ## Firing actions
@@ -154,9 +154,9 @@ The following table describes the properties of the `options` object.
 |Property|Description|Type|
 |---|---|---|
 |id|The id of the action you want to fire.|string|
-|params|The `params` value to give the action type executor|object|
-|namespace|The namespace the action exists within|string|
-|basePath|The request's basePath value, usually `request.getBasePath()`|string|
+|params|The `params` value to give the action type executor.|object|
+|namespace|The saved object namespace the action exists within.|string|
+|basePath|This is a temporary parameter, but we need to capture and track the value of `request.getBasePath()` until future changes are made.<br><br>In most cases this can be `undefined` unless you need cross spaces support.|string|
 
 ### Example
 
@@ -172,6 +172,6 @@ server.plugins.actions.fire({
     body: 'My email body',
   },
   namespace: undefined, // The namespace the action exists within
-  basePath: undefined, // Usually `request.getBasePath();`
+  basePath: undefined, // Usually `request.getBasePath();` or `undefined`
 });
 ```
