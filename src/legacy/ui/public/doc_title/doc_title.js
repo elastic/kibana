@@ -20,6 +20,41 @@
 import _ from 'lodash';
 import { uiModules } from '../modules';
 
+const baseTitle = document.title;
+let lastChange;
+
+function render() {
+  lastChange = lastChange || [];
+
+  const parts = [lastChange[0]];
+
+  if (!lastChange[1]) parts.push(baseTitle);
+
+  return _(parts).flattenDeep().compact().join(' - ');
+}
+
+function change(title, complete) {
+  lastChange = [title, complete];
+  this.update();
+}
+
+function reset() {
+  lastChange = null;
+}
+
+function update() {
+  document.title = render();
+}
+
+const docTitleService = function () {
+  return {
+    render,
+    change,
+    reset,
+    update,
+  };
+};
+
 uiModules.get('kibana')
   .run(function ($rootScope, docTitle) {
   // always bind to the route events
@@ -27,35 +62,7 @@ uiModules.get('kibana')
     $rootScope.$on('$routeChangeError', docTitle.update);
     $rootScope.$on('$routeChangeSuccess', docTitle.update);
   })
-  .service('docTitle', function () {
-    const baseTitle = document.title;
-    const self = this;
-
-    let lastChange;
-
-    function render() {
-      lastChange = lastChange || [];
-
-      const parts = [lastChange[0]];
-
-      if (!lastChange[1]) parts.push(baseTitle);
-
-      return _(parts).flattenDeep().compact().join(' - ');
-    }
-
-    self.change = function (title, complete) {
-      lastChange = [title, complete];
-      self.update();
-    };
-
-    self.reset = function () {
-      lastChange = null;
-    };
-
-    self.update = function () {
-      document.title = render();
-    };
-  });
+  .factory('docTitle', docTitleService);
 
 // return a "private module" so that it can be used both ways
 export function DocTitleProvider(docTitle) {
