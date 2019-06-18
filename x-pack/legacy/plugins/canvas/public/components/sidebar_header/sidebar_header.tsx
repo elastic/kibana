@@ -92,35 +92,35 @@ interface Props {
   /**
    * left align selected elements
    */
-  leftAlign: () => void;
+  alignLeft: () => void;
   /**
    * center align selected elements
    */
-  centerAlign: () => void;
+  alignCenter: () => void;
   /**
    * right align selected elements
    */
-  rightAlign: () => void;
+  alignRight: () => void;
   /**
    * top align selected elements
    */
-  topAlign: () => void;
+  alignTop: () => void;
   /**
    * middle align selected elements
    */
-  middleAlign: () => void;
+  alignMiddle: () => void;
   /**
    * bottom align selected elements
    */
-  bottomAlign: () => void;
+  alignBottom: () => void;
   /**
    * horizontally distribute selected elements
    */
-  horizontalDistribution: () => void;
+  distributeHorizontally: () => void;
   /**
    * vertically distribute selected elements
    */
-  verticalDistribution: () => void;
+  distributeVertically: () => void;
 }
 
 interface State {
@@ -162,14 +162,14 @@ export class SidebarHeader extends Component<Props, State> {
     selectedNodes: PropTypes.array,
     groupNodes: PropTypes.func.isRequired,
     ungroupNodes: PropTypes.func.isRequired,
-    leftAlign: PropTypes.func.isRequired,
-    centerAlign: PropTypes.func.isRequired,
-    rightAlign: PropTypes.func.isRequired,
-    topAlign: PropTypes.func.isRequired,
-    middleAlign: PropTypes.func.isRequired,
-    bottomAlign: PropTypes.func.isRequired,
-    horizontalDistribution: PropTypes.func.isRequired,
-    verticalDistribution: PropTypes.func.isRequired,
+    alignLeft: PropTypes.func.isRequired,
+    alignCenter: PropTypes.func.isRequired,
+    alignRight: PropTypes.func.isRequired,
+    alignTop: PropTypes.func.isRequired,
+    alignMiddle: PropTypes.func.isRequired,
+    alignBottom: PropTypes.func.isRequired,
+    distributeHorizontally: PropTypes.func.isRequired,
+    distributeVertically: PropTypes.func.isRequired,
   };
 
   public static defaultProps = {
@@ -310,12 +310,12 @@ export class SidebarHeader extends Component<Props, State> {
 
   private _getAlignmentMenuItems = (close: (fn: () => void) => () => void): MenuTuple[] => {
     const {
-      leftAlign,
-      centerAlign,
-      rightAlign,
-      topAlign,
-      middleAlign,
-      bottomAlign,
+      alignLeft,
+      alignCenter,
+      alignRight,
+      alignTop,
+      alignMiddle,
+      alignBottom,
       selectedNodes,
     } = this.props;
 
@@ -331,32 +331,32 @@ export class SidebarHeader extends Component<Props, State> {
                 {
                   name: 'Left',
                   icon: 'arrowLeft',
-                  onClick: close(leftAlign),
+                  onClick: close(alignLeft),
                 },
                 {
                   name: 'Center',
                   icon: 'sortDown',
-                  onClick: close(centerAlign),
+                  onClick: close(alignCenter),
                 },
                 {
                   name: 'Right',
                   icon: 'arrowRight',
-                  onClick: close(rightAlign),
+                  onClick: close(alignRight),
                 },
                 {
                   name: 'Top',
                   icon: 'arrowUp',
-                  onClick: close(topAlign),
+                  onClick: close(alignTop),
                 },
                 {
                   name: 'Middle',
                   icon: 'indexOpen',
-                  onClick: close(middleAlign),
+                  onClick: close(alignMiddle),
                 },
                 {
                   name: 'Bottom',
                   icon: 'arrowDown',
-                  onClick: close(bottomAlign),
+                  onClick: close(alignBottom),
                 },
               ],
             },
@@ -365,7 +365,7 @@ export class SidebarHeader extends Component<Props, State> {
   };
 
   private _getDistributionMenuItems = (close: (fn: () => void) => () => void): MenuTuple[] => {
-    const { horizontalDistribution, verticalDistribution, selectedNodes } = this.props;
+    const { distributeHorizontally, distributeVertically, selectedNodes } = this.props;
 
     return selectedNodes.length < 2
       ? []
@@ -376,8 +376,8 @@ export class SidebarHeader extends Component<Props, State> {
               id: 3,
               title: 'Distribution',
               items: [
-                { name: 'Horizontal', icon: 'arrowLeft', onClick: close(horizontalDistribution) },
-                { name: 'Vertical', icon: 'arrowUp', onClick: close(verticalDistribution) },
+                { name: 'Horizontal', icon: 'arrowLeft', onClick: close(distributeHorizontally) },
+                { name: 'Vertical', icon: 'arrowUp', onClick: close(distributeVertically) },
               ],
             },
           },

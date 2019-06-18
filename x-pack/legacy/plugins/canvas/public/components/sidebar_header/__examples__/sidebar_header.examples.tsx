@@ -22,14 +22,14 @@ const handlers = {
   createCustomElement: action('createCustomElement'),
   groupNodes: action('groupNodes'),
   ungroupNodes: action('ungroupNodes'),
-  leftAlign: action('leftAlign'),
-  middleAlign: action('middleAlign'),
-  rightAlign: action('rightAlign'),
-  topAlign: action('topAlign'),
-  centerAlign: action('centerAlign'),
-  bottomAlign: action('bottomAlign'),
-  horizontalDistribution: action('horizontalDistribution'),
-  verticalDistribution: action('verticalDistribution'),
+  alignLeft: action('alignLeft'),
+  alignMiddle: action('alignMiddle'),
+  alignRight: action('alignRight'),
+  alignTop: action('alignTop'),
+  alignCenter: action('alignCenter'),
+  alignBottom: action('alignBottom'),
+  distributeHorizontally: action('distributeHorizontally'),
+  distributeVertically: action('distributeVertically'),
 };
 
 storiesOf('components/Sidebar/SidebarHeader', module)

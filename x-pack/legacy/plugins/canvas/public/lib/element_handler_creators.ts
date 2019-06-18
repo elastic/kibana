@@ -104,14 +104,14 @@ export const basicHandlerCreators = {
 export const alignmentDistributionHandlerCreators = Object.assign(
   {},
   ...[
-    'leftAlign',
-    'centerAlign',
-    'rightAlign',
-    'topAlign',
-    'middleAlign',
-    'bottomAlign',
-    'horizontalDistribution',
-    'verticalDistribution',
+    'alignLeft',
+    'alignCenter',
+    'alignRight',
+    'alignTop',
+    'alignMiddle',
+    'alignBottom',
+    'distributeHorizontally',
+    'distributeVertically',
   ].map((event: string) => ({
     [event]: ({ commit }: Props) => (): void => {
       commit('actionEvent', { event });
