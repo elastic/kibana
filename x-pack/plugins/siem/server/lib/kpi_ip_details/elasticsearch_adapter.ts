@@ -16,12 +16,12 @@ import { KpiIpDetailsAdapter, KpiIpDetailsESMSearchBody, KpiIpDetailsHit } from 
 import { IpOverviewRequestOptions } from '../ip_details';
 
 const formatHistogramData = (
-  data: Array<{ key_as_string: string; count: { value: number } }>
+  data: Array<{ key: string; count: { value: number } }>
 ): KpiIpDetailsHistogramData[] | null => {
   return data && data.length > 0
-    ? data.map<KpiIpDetailsHistogramData>(({ key_as_string, count }) => {
+    ? data.map<KpiIpDetailsHistogramData>(({ key, count }) => {
         return {
-          x: key_as_string,
+          x: key,
           y: getOr(null, 'value', count),
         };
       })

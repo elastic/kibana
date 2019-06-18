@@ -5,7 +5,7 @@
  */
 
 import { KpiNetworkData } from '../../../../graphql/types';
-import { StatItems } from '../../../stat_items';
+import { StatItems, KpiValue } from '../../../stat_items';
 
 export const mockData: { KpiNetwork: KpiNetworkData } = {
   KpiNetwork: {
@@ -38,7 +38,7 @@ export const mockData: { KpiNetwork: KpiNetworkData } = {
   },
 };
 
-const mockMappingItems: StatItems = {
+const mockMappingItems: Readonly<StatItems<KpiValue>> = {
   key: 'UniqueIps',
   fields: [
     {
@@ -64,7 +64,7 @@ const mockMappingItems: StatItems = {
   grow: 2,
 };
 
-export const mockNoChartMappings: Readonly<StatItems[]> = [
+export const mockNoChartMappings: Readonly<Array<StatItems<KpiValue>>> = [
   {
     ...mockMappingItems,
     enableAreaChart: false,

@@ -16,10 +16,12 @@ import {
   StatItemsProps,
   useKpiMatrixStatus,
   StatItems,
+  KpiValue,
 } from '../../../../components/stat_items';
 import { KpiNetworkData } from '../../../../graphql/types';
 
 import * as i18n from './translations';
+import { getEmptyTagValue } from '../../../empty_value';
 
 const kipsPerRow = 2;
 const kpiWidgetHeight = 228;
@@ -33,7 +35,7 @@ interface KpiNetworkProps {
   loading: boolean;
 }
 
-export const fieldTitleChartMapping: Readonly<StatItems[]> = [
+export const fieldTitleChartMapping: Readonly<Array<StatItems<KpiValue>>> = [
   {
     key: 'UniqueIps',
     fields: [
@@ -44,6 +46,9 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
         description: i18n.SOURCE,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
       {
         key: 'uniqueDestinationPrivateIps',
@@ -52,6 +57,9 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
         description: i18n.DESTINATION,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
     ],
     description: i18n.UNIQUE_PRIVATE_IPS,
@@ -61,7 +69,7 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
+const fieldTitleMatrixMapping: Readonly<Array<StatItems<KpiValue>>> = [
   {
     key: 'networkEvents',
     fields: [
@@ -69,6 +77,9 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
         key: 'networkEvents',
         value: null,
         color: euiColorVis1,
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
     ],
     description: i18n.NETWORK_EVENTS,
@@ -80,6 +91,9 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
       {
         key: 'dnsQueries',
         value: null,
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
     ],
     description: i18n.DNS_QUERIES,
@@ -90,6 +104,9 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
       {
         key: 'uniqueFlowId',
         value: null,
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
     ],
     description: i18n.UNIQUE_FLOW_IDS,
@@ -100,6 +117,9 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
       {
         key: 'tlsHandshakes',
         value: null,
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
     ],
     description: i18n.TLS_HANDSHAKES,
@@ -114,10 +134,13 @@ export const KpiNetworkBaseComponent = ({
   fieldsMapping,
   data,
 }: {
-  fieldsMapping: Readonly<StatItems[]>;
+  fieldsMapping: Readonly<Array<StatItems<KpiValue>>>;
   data: KpiNetworkData;
 }) => {
-  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, data);
+  const statItemsProps: Readonly<Array<StatItemsProps<KpiValue>>> = useKpiMatrixStatus(
+    fieldsMapping,
+    data
+  );
 
   return (
     <EuiFlexGroup wrap>

@@ -16,6 +16,7 @@ import {
   addValueToBarChart,
   useKpiMatrixStatus,
   StatItems,
+  KpiValue,
 } from '.';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
@@ -90,7 +91,7 @@ describe('Stat Items Component', () => {
   });
 
   describe('rendering kpis with charts', () => {
-    const mockStatItemsData: StatItemsProps = {
+    const mockStatItemsData: StatItemsProps<KpiValue> = {
       fields: [
         {
           key: 'uniqueSourceIps',

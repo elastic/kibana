@@ -13,13 +13,16 @@ import { EuiSpacer } from '@elastic/eui';
 import { chunk as _chunk } from 'lodash/fp';
 import {
   StatItemsComponent,
-  StatItemsProps,
   useKpiMatrixStatus,
   StatItems,
+  StatItemsProps,
+  KpiValue,
 } from '../../../../components/stat_items';
 import { KpiIpDetailsData } from '../../../../graphql/types';
 
 import * as i18n from './translations';
+import { PreferenceFormattedBytes } from '../../../formatted_bytes';
+import { getEmptyTagValue } from '../../../empty_value';
 
 const kipsPerRow = 1;
 const kpiWidgetHeight = 228;
@@ -33,7 +36,7 @@ interface KpiIpDetailsProps {
   loading: boolean;
 }
 
-export const fieldTitleChartMapping: Readonly<StatItems[]> = [
+export const fieldTitleChartMapping: Readonly<Array<StatItems<KpiValue>>> = [
   {
     key: 'packets',
     fields: [
@@ -44,6 +47,9 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
         description: i18n.OUT,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
       {
         key: 'destinationPackets',
@@ -52,6 +58,9 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
         description: i18n.IN,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
     ],
     description: i18n.PACKETS,
@@ -69,6 +78,13 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
         description: i18n.OUT,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
+        render: bytes => {
+          if (bytes != null) {
+            return <PreferenceFormattedBytes value={bytes} />;
+          } else {
+            return getEmptyTagValue();
+          }
+        },
       },
       {
         key: 'destinationByte',
@@ -77,6 +93,13 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
         description: i18n.IN,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
+        render: bytes => {
+          if (bytes != null) {
+            return <PreferenceFormattedBytes value={bytes} />;
+          } else {
+            return getEmptyTagValue();
+          }
+        },
       },
     ],
     description: i18n.BYTES,
@@ -86,7 +109,7 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
+const fieldTitleMatrixMapping: Readonly<Array<StatItems<KpiValue>>> = [
   {
     key: 'connections',
     fields: [
@@ -94,6 +117,9 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
         key: 'connections',
         value: null,
         color: euiColorVis1,
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
     ],
     description: i18n.CONNECTIONS,
@@ -105,6 +131,9 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
       {
         key: 'hosts',
         value: null,
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
     ],
     description: i18n.HOSTS,
@@ -119,10 +148,13 @@ export const KpiIpDetailsBaseComponent = ({
   fieldsMapping,
   data,
 }: {
-  fieldsMapping: Readonly<StatItems[]>;
+  fieldsMapping: Readonly<Array<StatItems<KpiValue>>>;
   data: KpiIpDetailsData;
 }) => {
-  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, data);
+  const statItemsProps: Readonly<Array<StatItemsProps<KpiValue>>> = useKpiMatrixStatus(
+    fieldsMapping,
+    data
+  );
 
   return (
     <EuiFlexGroup wrap>

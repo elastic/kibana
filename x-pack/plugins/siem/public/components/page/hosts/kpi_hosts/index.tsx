@@ -15,8 +15,10 @@ import {
   StatItemsProps,
   useKpiMatrixStatus,
   StatItems,
+  KpiValue,
 } from '../../../stat_items';
 import * as i18n from './translations';
+import { getEmptyTagValue } from '../../../empty_value';
 
 const kpiWidgetHeight = 247;
 
@@ -31,7 +33,7 @@ interface KpiHostsProps {
   loading: boolean;
 }
 
-const fieldTitleMapping: Readonly<StatItems[]> = [
+const fieldTitleMapping: Readonly<Array<StatItems<KpiValue>>> = [
   {
     key: 'hosts',
     fields: [
@@ -40,6 +42,9 @@ const fieldTitleMapping: Readonly<StatItems[]> = [
         value: null,
         color: euiColorVis1,
         icon: 'storage',
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
     ],
     enableAreaChart: true,
@@ -55,6 +60,9 @@ const fieldTitleMapping: Readonly<StatItems[]> = [
         value: null,
         color: euiColorVis0,
         icon: 'check',
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
       {
         key: 'authFailure',
@@ -62,6 +70,9 @@ const fieldTitleMapping: Readonly<StatItems[]> = [
         value: null,
         color: euiColorVis9,
         icon: 'cross',
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
     ],
     enableAreaChart: true,
@@ -79,6 +90,9 @@ const fieldTitleMapping: Readonly<StatItems[]> = [
         value: null,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
       {
         key: 'uniqueDestinationIps',
@@ -86,6 +100,9 @@ const fieldTitleMapping: Readonly<StatItems[]> = [
         value: null,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
+        render: value => {
+          return value != null ? value.toLocaleString() : getEmptyTagValue();
+        },
       },
     ],
     enableAreaChart: true,
@@ -102,7 +119,10 @@ const FlexGroupSpinner = styled(EuiFlexGroup)`
 `;
 
 export const KpiHostsComponent = ({ data, loading }: KpiHostsProps) => {
-  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldTitleMapping, data);
+  const statItemsProps: Readonly<Array<StatItemsProps<KpiValue>>> = useKpiMatrixStatus(
+    fieldTitleMapping,
+    data
+  );
   return loading ? (
     <FlexGroupSpinner justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
