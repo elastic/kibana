@@ -51,7 +51,7 @@ export function isFileAccessible(path) {
   assertAbsolute(path);
 
   try {
-    isFileAccessible(path);
+    fs.accessSync(path);
     return true;
   } catch (e) {
     return false;
