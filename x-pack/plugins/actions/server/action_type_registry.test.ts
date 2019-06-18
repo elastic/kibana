@@ -11,7 +11,7 @@ jest.mock('./lib/get_create_task_runner_function', () => ({
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
 import { ActionTypeRegistry } from './action_type_registry';
-import { SavedObjectsClientMock } from '../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { SavedObjectsClientMock } from '../../../../src/core/server/mocks';
 
 const mockTaskManager = taskManagerMock.create();
 

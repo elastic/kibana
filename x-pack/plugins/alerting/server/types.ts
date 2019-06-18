@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
+import { SavedObjectAttributes, SavedObjectsClientContract } from 'src/core/server';
 import { AlertInstance } from './lib';
 import { AlertTypeRegistry } from './alert_type_registry';
 

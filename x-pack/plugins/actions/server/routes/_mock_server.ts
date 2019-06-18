@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../actions_client.mock';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 

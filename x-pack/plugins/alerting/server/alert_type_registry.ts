@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { AlertType, Services } from './types';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';

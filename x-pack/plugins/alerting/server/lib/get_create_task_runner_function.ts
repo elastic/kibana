@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionsPlugin } from '../../../actions';
 import { AlertType, Services, AlertServices } from '../types';
 import { TaskInstance } from '../../../task_manager';

@@ -5,7 +5,7 @@
  */
 
 import { omit } from 'lodash';
-import { SavedObjectsClientContract, SavedObjectReference } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
 import { TaskManager } from '../../task_manager';
 import { validateAlertTypeParams } from './lib';

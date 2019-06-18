@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { AlertsClient } from './alerts_client';
-import { SavedObjectsClientMock } from '../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { SavedObjectsClientMock } from '../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 
