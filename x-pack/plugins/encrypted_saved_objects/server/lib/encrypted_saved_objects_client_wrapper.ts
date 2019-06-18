@@ -6,19 +6,19 @@
 
 import uuid from 'uuid';
 import {
-  BaseOptions,
-  BulkCreateObject,
-  BulkGetObject,
-  BulkResponse,
-  CreateOptions,
-  FindOptions,
-  FindResponse,
-  SavedObjectAttributes,
-  SavedObjectsClientContract,
-  UpdateOptions,
-  UpdateResponse,
   SavedObject,
-} from 'src/legacy/server/saved_objects';
+  SavedObjectAttributes,
+  SavedObjectsBaseOptions,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
+  SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+} from 'src/core/server';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 
 interface EncryptedSavedObjectsClientOptions {
@@ -43,7 +43,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   public async create<T extends SavedObjectAttributes>(
     type: string,
     attributes: T = {} as T,
-    options: CreateOptions = {}
+    options: SavedObjectsCreateOptions = {}
   ) {
     if (!this.options.service.isRegistered(type)) {
       return await this.options.baseClient.create(type, attributes, options);
@@ -71,7 +71,10 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
-  public async bulkCreate(objects: BulkCreateObject[], options?: BaseOptions) {
+  public async bulkCreate(
+    objects: SavedObjectsBulkCreateObject[],
+    options?: SavedObjectsBaseOptions
+  ) {
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
     // sequential processing.
@@ -111,23 +114,26 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
-  public async delete(type: string, id: string, options?: BaseOptions) {
+  public async delete(type: string, id: string, options?: SavedObjectsBaseOptions) {
     return await this.options.baseClient.delete(type, id, options);
   }
 
-  public async find(options: FindOptions = {}) {
+  public async find(options: SavedObjectsFindOptions = {}) {
     return this.stripEncryptedAttributesFromBulkResponse(
       await this.options.baseClient.find(options)
     );
   }
 
-  public async bulkGet(objects: BulkGetObject[] = [], options?: BaseOptions) {
+  public async bulkGet(
+    objects: SavedObjectsBulkGetObject[] = [],
+    options?: SavedObjectsBaseOptions
+  ) {
     return this.stripEncryptedAttributesFromBulkResponse(
       await this.options.baseClient.bulkGet(objects, options)
     );
   }
 
-  public async get(type: string, id: string, options?: BaseOptions) {
+  public async get(type: string, id: string, options?: SavedObjectsBaseOptions) {
     return this.stripEncryptedAttributesFromResponse(
       await this.options.baseClient.get(type, id, options)
     );
@@ -137,7 +143,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     type: string,
     id: string,
     attributes: Partial<T>,
-    options?: UpdateOptions
+    options?: SavedObjectsUpdateOptions
   ) {
     if (!this.options.service.isRegistered(type)) {
       return await this.options.baseClient.update(type, id, attributes, options);
@@ -161,7 +167,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
    * registered, response is returned as is.
    * @param response Raw response returned by the underlying base client.
    */
-  private stripEncryptedAttributesFromResponse<T extends UpdateResponse | SavedObject>(
+  private stripEncryptedAttributesFromResponse<T extends SavedObjectsUpdateResponse | SavedObject>(
     response: T
   ): T {
     if (this.options.service.isRegistered(response.type)) {
@@ -179,9 +185,9 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
    * response portion isn't registered, it is returned as is.
    * @param response Raw response returned by the underlying base client.
    */
-  private stripEncryptedAttributesFromBulkResponse<T extends BulkResponse | FindResponse>(
-    response: T
-  ): T {
+  private stripEncryptedAttributesFromBulkResponse<
+    T extends SavedObjectsBulkResponse | SavedObjectsFindResponse
+  >(response: T): T {
     for (const savedObject of response.saved_objects) {
       if (this.options.service.isRegistered(savedObject.type)) {
         savedObject.attributes = this.options.service.stripEncryptedAttributes(

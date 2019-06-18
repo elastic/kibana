@@ -19,12 +19,12 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectsClient } from '../';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { Prerequisites, WithoutQueryAndParams } from './types';
 
 interface FindRequest extends WithoutQueryAndParams<Hapi.Request> {
   pre: {
-    savedObjectsClient: SavedObjectsClient;
+    savedObjectsClient: SavedObjectsClientContract;
   };
   query: {
     per_page: number;

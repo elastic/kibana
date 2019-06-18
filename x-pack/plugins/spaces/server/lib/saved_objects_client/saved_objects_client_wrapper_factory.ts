@@ -7,7 +7,7 @@
 import {
   SavedObjectsClientWrapperFactory,
   SavedObjectsService,
-} from 'src/legacy/server/saved_objects';
+} from 'src/core/server/saved_objects';
 import { SpacesService } from '../create_spaces_service';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 import { createGetNamespace } from './get_namespace';

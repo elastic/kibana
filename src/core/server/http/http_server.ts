@@ -32,6 +32,7 @@ import {
 } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
 import { AuthStateStorage } from './auth_state_storage';
+import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 
 export interface HttpServerSetup {
@@ -73,6 +74,7 @@ export interface HttpServerSetup {
   auth: {
     get: AuthStateStorage['get'];
     isAuthenticated: AuthStateStorage['isAuthenticated'];
+    getAuthHeaders: AuthHeadersStorage['get'];
   };
 }
 
@@ -83,9 +85,11 @@ export class HttpServer {
   private authRegistered = false;
 
   private readonly authState: AuthStateStorage;
+  private readonly authHeaders: AuthHeadersStorage;
 
   constructor(private readonly log: Logger) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
+    this.authHeaders = new AuthHeadersStorage();
   }
 
   public isListening() {
@@ -120,6 +124,7 @@ export class HttpServer {
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
+        getAuthHeaders: this.authHeaders.get,
       },
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
@@ -223,7 +228,10 @@ export class HttpServer {
     );
 
     this.server.auth.scheme('login', () => ({
-      authenticate: adoptToHapiAuthFormat(fn, this.authState.set),
+      authenticate: adoptToHapiAuthFormat(fn, (req, { state, headers }) => {
+        this.authState.set(req, state);
+        this.authHeaders.set(req, headers);
+      }),
     }));
     this.server.auth.strategy('session', 'login');
 

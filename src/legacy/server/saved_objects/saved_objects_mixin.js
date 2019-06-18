@@ -17,17 +17,20 @@
  * under the License.
  */
 
-import { KibanaMigrator } from './migrations';
-import { SavedObjectsSchema } from './schema';
-import { SavedObjectsSerializer } from './serialization';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+
+import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
+import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
+import { SavedObjectsSerializer } from '../../../core/server/saved_objects/serialization';
 import {
-  Namespace,
+  SavedObjectsNamespace,
   SavedObjectsClient,
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
-} from './service';
-import { getRootPropertiesObjects } from '../mappings';
-import { SavedObjectsManagement } from './management';
+} from '../../../core/server/saved_objects/service';
+import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
+import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
 import {
   createBulkCreateRoute,
@@ -137,7 +140,7 @@ export function savedObjectsMixin(kbnServer, server) {
     types: visibleTypes,
     SavedObjectsClient,
     SavedObjectsRepository,
-    createNamespace: id => new Namespace(id),
+    createNamespace: id => new SavedObjectsNamespace(id),
     getSavedObjectsRepository: createRepository,
     getScopedSavedObjectsClient: (...args) => provider.getClient(...args),
     setScopedSavedObjectsClientFactory: (...args) => provider.setClientFactory(...args),

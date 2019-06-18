@@ -23,12 +23,12 @@ function getAnnotationsFeatureUnavailableErrorMessage() {
     })
   );
 }
-export function annotationRoutes(server, commonRouteConfig) {
-  server.route({
+export function annotationRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
+  route({
     method: 'POST',
     path: '/api/ml/annotations',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { getAnnotations } = annotationServiceProvider(callWithRequest);
       return getAnnotations(request.payload)
         .catch(resp => wrapError(resp));
@@ -38,11 +38,11 @@ export function annotationRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'PUT',
     path: '/api/ml/annotations/index',
     async handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(callWithRequest);
       if (annotationsFeatureAvailable === false) {
         return getAnnotationsFeatureUnavailableErrorMessage();
@@ -58,11 +58,11 @@ export function annotationRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'DELETE',
     path: '/api/ml/annotations/delete/{annotationId}',
     async handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(callWithRequest);
       if (annotationsFeatureAvailable === false) {
         return getAnnotationsFeatureUnavailableErrorMessage();

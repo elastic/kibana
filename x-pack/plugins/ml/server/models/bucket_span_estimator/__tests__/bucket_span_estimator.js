@@ -38,25 +38,22 @@ const callWithRequest = (method) => {
 // we replace the return value of the factory with the above mocked callWithRequest
 import * as mockModule from '../../../client/call_with_internal_user_factory';
 
-// mock server
-function mockServerFactory(isEnabled = false, licenseType = 'platinum') {
+// mock xpack_main plugin
+function mockXpackMainPluginFactory(isEnabled = false, licenseType = 'platinum') {
   return {
-    plugins: {
-      xpack_main: {
-        info: {
-          isAvailable: () => true,
-          feature: () => ({
-            isEnabled: () => isEnabled
-          }),
-          license: {
-            getType: () => licenseType
-          }
-        }
+    info: {
+      isAvailable: () => true,
+      feature: () => ({
+        isEnabled: () => isEnabled
+      }),
+      license: {
+        getType: () => licenseType
       }
     }
   };
 }
 
+const mockElasticsearchPlugin = {};
 // mock configuration to be passed to the estimator
 const formConfig = {
   aggTypes: ['count'],
@@ -91,7 +88,7 @@ describe('ML - BucketSpanEstimator', () => {
 
   it('call factory and estimator with security disabled', (done) => {
     expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockServerFactory());
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockElasticsearchPlugin, mockXpackMainPluginFactory());
 
       estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
@@ -104,8 +101,7 @@ describe('ML - BucketSpanEstimator', () => {
 
   it('call factory and estimator with security enabled and sufficient permissions.', (done) => {
     expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockServerFactory(true));
-
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockElasticsearchPlugin, mockXpackMainPluginFactory(true));
       estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
         mockCallWithInternalUserFactory.verify();
@@ -117,7 +113,7 @@ describe('ML - BucketSpanEstimator', () => {
 
   it('call factory and estimator with security enabled and insufficient permissions.', (done) => {
     expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockServerFactory(true));
+      const estimateBucketSpan = estimateBucketSpanFactory(callWithRequest, mockElasticsearchPlugin, mockXpackMainPluginFactory(true));
 
       estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData).to.be('Insufficient permissions to call bucket span estimation.');
