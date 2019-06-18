@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { StatusIcon } from 'plugins/monitoring/components/status_icon';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-export function MachineLearningJobStatusIconUI({ status, intl }) {
+export function MachineLearningJobStatusIcon({ status }) {
   const type = (() => {
     const statusKey = status.toUpperCase();
 
@@ -27,12 +27,10 @@ export function MachineLearningJobStatusIconUI({ status, intl }) {
   return (
     <StatusIcon
       type={type}
-      label={intl.formatMessage({
-        id: 'xpack.monitoring.elasticsearch.mlJobListing.statusIconLabel',
-        defaultMessage: 'Job Status: {status}' }, { status }
-      )}
+      label={i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.statusIconLabel', {
+        defaultMessage: 'Job Status: {status}',
+        values: { status }
+      })}
     />
   );
 }
-
-export const MachineLearningJobStatusIcon = injectI18n(MachineLearningJobStatusIconUI);

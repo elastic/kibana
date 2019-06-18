@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/ElementTypes/ElementGrid with controls 1`] = `
+exports[`Storyshots components/Elements/ElementGrid with controls 1`] = `
 <div
   style={
     Object {
@@ -324,7 +324,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid with controls 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ElementTypes/ElementGrid with controls and filter 1`] = `
+exports[`Storyshots components/Elements/ElementGrid with controls and filter 1`] = `
 <div
   style={
     Object {
@@ -442,7 +442,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid with controls and filter
 </div>
 `;
 
-exports[`Storyshots components/ElementTypes/ElementGrid with tags filter 1`] = `
+exports[`Storyshots components/Elements/ElementGrid with tags filter 1`] = `
 <div
   style={
     Object {
@@ -491,7 +491,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid with tags filter 1`] = `
           className="euiCard__footer"
         >
           <span
-            className="euiBadge"
+            className="euiBadge euiBadge--iconLeft"
             style={
               Object {
                 "backgroundColor": "#666666",
@@ -516,7 +516,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid with tags filter 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ElementTypes/ElementGrid with text filter 1`] = `
+exports[`Storyshots components/Elements/ElementGrid with text filter 1`] = `
 <div
   style={
     Object {
@@ -565,7 +565,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid with text filter 1`] = `
           className="euiCard__footer"
         >
           <span
-            className="euiBadge"
+            className="euiBadge euiBadge--iconLeft"
             style={
               Object {
                 "backgroundColor": "#666666",
@@ -590,7 +590,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid with text filter 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
+exports[`Storyshots components/Elements/ElementGrid without controls 1`] = `
 <div
   style={
     Object {
@@ -639,7 +639,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
           className="euiCard__footer"
         >
           <span
-            className="euiBadge"
+            className="euiBadge euiBadge--iconLeft"
             style={
               Object {
                 "backgroundColor": "#666666",
@@ -698,7 +698,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
           className="euiCard__footer"
         >
           <span
-            className="euiBadge"
+            className="euiBadge euiBadge--iconLeft"
             style={
               Object {
                 "backgroundColor": "#666666",
@@ -757,7 +757,7 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
           className="euiCard__footer"
         >
           <span
-            className="euiBadge"
+            className="euiBadge euiBadge--iconLeft"
             style={
               Object {
                 "backgroundColor": "#666666",

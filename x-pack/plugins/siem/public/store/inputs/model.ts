@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Omit } from '../../../common/utility_types';
+import { InputsModelId } from './constants';
 import { CONSTANTS } from '../../components/url_state/constants';
 
 export interface AbsoluteTimeRange {
@@ -22,11 +24,20 @@ export interface RelativeTimeRange {
   to: number;
 }
 
-export type InputsModelId = 'global' | 'timeline';
+export const isRelativeTimeRange = (
+  timeRange: RelativeTimeRange | AbsoluteTimeRange | URLTimeRange
+): timeRange is RelativeTimeRange => timeRange.kind === 'relative';
 
-export type TimeRangeKinds = 'absolute' | 'relative';
+export const isAbsoluteTimeRange = (
+  timeRange: RelativeTimeRange | AbsoluteTimeRange | URLTimeRange
+): timeRange is AbsoluteTimeRange => timeRange.kind === 'absolute';
 
 export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
+
+export type URLTimeRange = Omit<TimeRange, 'from' | 'to'> & {
+  from: string | TimeRange['from'];
+  to: string | TimeRange['to'];
+};
 
 export interface Policy {
   kind: 'manual' | 'interval';

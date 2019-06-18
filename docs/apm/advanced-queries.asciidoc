@@ -1,0 +1,23 @@
+[[advanced-queries]]
+=== Advanced queries
+
+When querying, you're simply searching and selecting data from fields in Elasticsearch documents.
+It may be helpful to view some of your documents in {kibana-ref}/discover.html[Discover] to better understand how APM data is stored in Elasticsearch. 
+
+Queries entered into the query bar are also added as parameters to the URL,
+so it's easy to share a specific query or view with others.
+
+In the screenshot below, you can begin to see some of the transaction fields available for filtering on:  
+
+[role="screenshot"]
+image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM UI in Kibana]
+
+[float]
+==== Example queries
+
+* Exclude response times slower than 2000 ms: `transaction.duration.us > 2000000`
+* Filter by response status code: `context.response.status_code >= 400`
+* Filter by single user ID: `context.user.id : 12`
+* View _all_ transactions for an endpoint, instead of just a sample - `processor.event: "transaction" AND transaction.name: "<TRANSACTION_NAME_HERE>"`
+
+TIP: Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] documentation to learn more about the capabilities of the {kib} query language.

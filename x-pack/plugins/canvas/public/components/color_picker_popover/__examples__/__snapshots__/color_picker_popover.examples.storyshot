@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/ColorPickerPopover interactive 1`] = `
+exports[`Storyshots components/Color/ColorPickerPopover interactive 1`] = `
 <div>
   <div
     className="euiPopover euiPopover--anchorDownCenter"
@@ -62,7 +62,7 @@ exports[`Storyshots components/ColorPickerPopover interactive 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ColorPickerPopover six colors 1`] = `
+exports[`Storyshots components/Color/ColorPickerPopover six colors 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
   container={null}
@@ -106,7 +106,7 @@ exports[`Storyshots components/ColorPickerPopover six colors 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ColorPickerPopover six colors, value missing 1`] = `
+exports[`Storyshots components/Color/ColorPickerPopover six colors, value missing 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
   container={null}
@@ -150,7 +150,7 @@ exports[`Storyshots components/ColorPickerPopover six colors, value missing 1`] 
 </div>
 `;
 
-exports[`Storyshots components/ColorPickerPopover three colors 1`] = `
+exports[`Storyshots components/Color/ColorPickerPopover three colors 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
   container={null}

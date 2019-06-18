@@ -57,7 +57,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
   toExpression: (state: T) => Ast | string | null;
 
-  getDatasourceSuggestionsForField: (state: T) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (state: T, setState: (newState: T) => void) => DatasourcePublicAPI;
@@ -158,7 +158,7 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface Visualization<T = unknown, P = unknown> {
   // For initializing from saved object
-  initialize: (state?: P) => T;
+  initialize: (datasource: DatasourcePublicAPI, state?: P) => T;
 
   getPersistableState: (state: T) => P;
 

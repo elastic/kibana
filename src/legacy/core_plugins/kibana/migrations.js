@@ -163,13 +163,13 @@ function removeDateHistogramTimeZones(doc) {
 
 // migrate gauge verticalSplit to alignment
 // https://github.com/elastic/kibana/issues/34636
-function migrateGaugeVerticalSplitToAlignment(doc)  {
+function migrateGaugeVerticalSplitToAlignment(doc, logger)  {
   const visStateJSON = get(doc, 'attributes.visState');
 
   if (visStateJSON) {
     try {
       const visState = JSON.parse(visStateJSON);
-      if (visState && visState.type === 'gauge') {
+      if (visState && visState.type === 'gauge' && !visState.params.gauge.alignment) {
 
         visState.params.gauge.alignment = visState.params.gauge.verticalSplit ? 'vertical' : 'horizontal';
         delete visState.params.gauge.verticalSplit;
@@ -182,7 +182,8 @@ function migrateGaugeVerticalSplitToAlignment(doc)  {
         };
       }
     } catch (e) {
-      // Let it go, the data is invalid and we'll leave it as is
+      logger.warning(`Exception @ migrateGaugeVerticalSplitToAlignment! ${e}`);
+      logger.warning(`Exception @ migrateGaugeVerticalSplitToAlignment! Payload: ${visStateJSON}`);
     }
   }
   return doc;
@@ -278,8 +279,40 @@ function transformFilterStringToQueryObject(doc) {
   }
   return newDoc;
 }
+
+function migrateFiltersAggQuery(doc) {
+  const visStateJSON = get(doc, 'attributes.visState');
+
+  if (visStateJSON) {
+    try {
+      const visState = JSON.parse(visStateJSON);
+      if (visState && visState.aggs) {
+        visState.aggs.forEach((agg) => {
+          if (agg.type !== 'filters') return;
+
+          agg.params.filters.forEach((filter) => {
+            if (filter.input.language) return filter;
+            filter.input.language = 'lucene';
+          });
+        });
+
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            visState: JSON.stringify(visState),
+          },
+        };
+      }
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+  }
+  return doc;
+}
+
 const executeMigrations720 = flow(migratePercentileRankAggregation, migrateDateHistogramAggregation);
-const executeMigrations730 = flow(migrateGaugeVerticalSplitToAlignment, transformFilterStringToQueryObject);
+const executeMigrations730 = flow(migrateGaugeVerticalSplitToAlignment, transformFilterStringToQueryObject, migrateFiltersAggQuery);
 
 export const migrations = {
   'index-pattern': {

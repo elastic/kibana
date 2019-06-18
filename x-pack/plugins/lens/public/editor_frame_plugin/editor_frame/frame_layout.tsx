@@ -20,9 +20,9 @@ export function FrameLayout(props: FrameLayoutProps) {
     <RootDragDropProvider>
       <EuiFlexGroup>
         {/* TODO style this and add workspace prop and loading flags */}
-        <EuiFlexItem>{props.dataPanel}</EuiFlexItem>
-        <EuiFlexItem>{props.workspacePanel}</EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={null}>{props.dataPanel}</EuiFlexItem>
+        <EuiFlexItem grow={5}>{props.workspacePanel}</EuiFlexItem>
+        <EuiFlexItem grow={null}>
           {props.configPanel}
           {props.suggestionsPanel}
         </EuiFlexItem>

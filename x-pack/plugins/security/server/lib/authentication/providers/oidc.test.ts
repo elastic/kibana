@@ -26,6 +26,20 @@ describe('OIDCAuthenticationProvider', () => {
     provider = new OIDCAuthenticationProvider(providerOptions, providerSpecificOptions);
   });
 
+  it('throws if `realm` option is not specified', () => {
+    const providerOptions = mockAuthenticationProviderOptions({ basePath: '/test-base-path' });
+
+    expect(() => new OIDCAuthenticationProvider(providerOptions)).toThrowError(
+      'Realm name must be specified'
+    );
+    expect(() => new OIDCAuthenticationProvider(providerOptions, {})).toThrowError(
+      'Realm name must be specified'
+    );
+    expect(() => new OIDCAuthenticationProvider(providerOptions, { realm: '' })).toThrowError(
+      'Realm name must be specified'
+    );
+  });
+
   describe('`authenticate` method', () => {
     it('does not handle AJAX request that can not be authenticated.', async () => {
       const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });

@@ -10,8 +10,8 @@ import { Datatable, DatatableColumn } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
-  include: string | null;
-  exclude: string | null;
+  include: string;
+  exclude: string;
 }
 
 export function columns(): ExpressionFunction<'columns', Datatable, Arguments, Datatable> {
@@ -28,12 +28,10 @@ export function columns(): ExpressionFunction<'columns', Datatable, Arguments, D
       include: {
         types: ['string'],
         help: argHelp.include,
-        default: null,
       },
       exclude: {
         types: ['string'],
         help: argHelp.exclude,
-        default: null,
       },
     },
     fn: (context, args) => {

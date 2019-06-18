@@ -39,6 +39,7 @@ import { translations } from './plugins/translations';
 import { upgradeAssistant } from './plugins/upgrade_assistant';
 import { uptime } from './plugins/uptime';
 import { ossTelemetry } from './plugins/oss_telemetry';
+import { telemetry } from './plugins/telemetry';
 import { encryptedSavedObjects } from './plugins/encrypted_saved_objects';
 import { lens } from './plugins/lens';
 import { snapshotRestore } from './plugins/snapshot_restore';
@@ -46,6 +47,7 @@ import { snapshotRestore } from './plugins/snapshot_restore';
 module.exports = function (kibana) {
   return [
     xpackMain(kibana),
+    telemetry(kibana),
     graph(kibana),
     monitoring(kibana),
     reporting(kibana),

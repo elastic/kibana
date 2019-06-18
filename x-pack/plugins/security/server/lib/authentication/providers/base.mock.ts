@@ -11,9 +11,6 @@ export function mockAuthenticationProviderOptions(
   providerOptions: Partial<AuthenticationProviderOptions> = {}
 ) {
   return {
-    hostname: 'test-hostname',
-    port: 1234,
-    protocol: 'test-protocol',
     client: { callWithRequest: stub(), callWithInternalUser: stub() },
     log: stub(),
     basePath: '/base-path',

@@ -31,7 +31,7 @@ import { TransactionSelect } from './TransactionSelect';
 interface Props {
   hasIndexPattern: boolean;
   isCreatingJob: boolean;
-  onClickCreate: () => void;
+  onClickCreate: ({ transactionType }: { transactionType: string }) => void;
   onClose: () => void;
   serviceName: string;
   serviceTransactionTypes: string[];
@@ -212,7 +212,7 @@ export function MachineLearningFlyoutView({
           <EuiFlexItem grow={false}>
             <EuiFormRow>
               <EuiButton
-                onClick={onClickCreate}
+                onClick={() => onClickCreate({ transactionType })}
                 fill
                 disabled={
                   isCreatingJob ||
