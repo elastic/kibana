@@ -11,7 +11,12 @@ import { updater } from '../../../lib/aeroelastic/layout';
 import { getNodes, getPageById, isWriteable } from '../../../state/selectors/workpad';
 import { flatten } from '../../../lib/aeroelastic/functional';
 import { canUserWrite, getFullscreen } from '../../../state/selectors/app';
-import { elementLayer, insertNodes, removeElements } from '../../../state/actions/elements';
+import {
+  elementLayer,
+  insertNodes,
+  removeElements,
+  setMultiplePositions,
+} from '../../../state/actions/elements';
 import { selectToplevelNodes } from '../../../state/actions/transient';
 import { crawlTree, globalStateUpdater, shapesForNodes } from '../integration_utils';
 import { InteractiveWorkpadPage as InteractiveComponent } from './interactive_workpad_page';
@@ -117,21 +122,24 @@ const mapDispatchToProps = dispatch => ({
   removeNodes: (nodeIds, pageId) => dispatch(removeElements(nodeIds, pageId)),
   selectToplevelNodes: nodes =>
     dispatch(selectToplevelNodes(nodes.filter(e => !e.position.parent).map(e => e.id))),
-  // TODO: Abstract this out, this is similar to layering code in sidebar/index.js:
-  elementLayer: (pageId, elementId, movement) => {
-    dispatch(elementLayer({ pageId, elementId, movement }));
-  },
+  elementLayer: (pageId, elementId, movement) =>
+    dispatch(elementLayer({ pageId, elementId, movement })),
+  setMultiplePositions: pageId => repositionedNodes =>
+    dispatch(
+      setMultiplePositions(repositionedNodes.map(node => ({ ...node, pageId, elementId: node.id })))
+    ),
 });
 
 const mergeProps = (
   { state, ...restStateProps },
-  { dispatch, ...restDispatchProps },
+  { dispatch, setMultiplePositions, ...restDispatchProps },
   ownProps
 ) => ({
   ...ownProps,
   ...restDispatchProps,
   ...restStateProps,
   updateGlobalState: globalStateUpdater(dispatch, state),
+  setMultiplePositions: setMultiplePositions(restStateProps.pageId),
 });
 
 export const InteractivePage = compose(

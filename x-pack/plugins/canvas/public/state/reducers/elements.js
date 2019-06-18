@@ -98,10 +98,12 @@ export const elementsReducer = handleActions(
     },
     [actions.setMultiplePositions]: (workpadState, { payload }) =>
       payload.repositionedElements.reduce(
-        (previousWorkpadState, { position, pageId, elementId }) =>
-          assignNodeProperties(previousWorkpadState, pageId, elementId, {
+        (previousWorkpadState, { position, pageId, elementId }) => {
+          console.log(trimPosition(position));
+          return assignNodeProperties(previousWorkpadState, pageId, elementId, {
             position: trimPosition(position),
-          }),
+          });
+        },
         workpadState
       ),
     [actions.elementLayer]: (workpadState, { payload: { pageId, elementId, movement } }) => {
