@@ -2,7 +2,7 @@
 
 set -e
 
-BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+BRANCH=${GIT_BRANCH/origin\/} # Maybe using `sed` is a better idea
 targetBranch="${PR_TARGET_BRANCH:-${BRANCH#*/}}"
 bootstrapCache="$JENKINS_HOME/.kibana/bootstrap_cache/$targetBranch.tar"
 
