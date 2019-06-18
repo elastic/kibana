@@ -32,7 +32,6 @@ export function formatHitProvider(indexPattern, defaultFormat) {
     const parsedUrl = {
       origin: window.location.origin,
       pathname: window.location.pathname,
-      basePath: indexPattern.fieldsFetcher.apiClient.basePath,
     };
     return field.format.getConverterFor('html')(val, field, hit, parsedUrl);
   }
