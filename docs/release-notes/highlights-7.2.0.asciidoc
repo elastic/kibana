@@ -190,7 +190,7 @@ The query bar suggests influencer field names and values for the selected jobs
 as you type.
 
 [float]
-=== View recent logs alongside your monitoring data
+=== View recent log entries alongside your monitoring data
 
 You can now see your cluster's recent log entries within the *Stack Monitoring*
 application:
@@ -198,9 +198,9 @@ application:
 [role="screenshot"]
 image::release-notes/images/7.2-monitoring-logs.png["Monitoring recent {es} logs"]
 
-See <<elasticsearch-metrics>>. If these recent log entries are not sufficient to
-diagnose problems, you can follow a link to the <<xpack-logs,Logs UI>> and
-continue your investigation there.
+See <<elasticsearch-metrics>>. If you want to see earlier log entries, you can
+follow a link to the <<xpack-logs,Logs UI>> and continue your investigation
+there.
 
 TIP: You must use {filebeat} to collect the logs.
 
