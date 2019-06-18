@@ -16,31 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Request } from 'hapi';
+import { KibanaRequest, getIncomingMessage } from './router';
+import { AuthHeaders } from './lifecycle/auth';
 
-import { KibanaRequest } from './router';
 /**
- * Provides an interface to store and retrieve data across requests.
+ * Get headers to authenticate a user against Elasticsearch.
  * @public
- */
-export interface SessionStorage<T> {
-  /**
-   * Retrieves session value from the session storage.
-   */
-  get(): Promise<T | null>;
-  /**
-   * Puts current session value into the session storage.
-   * @param sessionValue - value to put
-   */
-  set(sessionValue: T): void;
-  /**
-   * Clears current session.
-   */
-  clear(): void;
-}
+ * */
+export type GetAuthHeaders = (request: KibanaRequest | Request) => AuthHeaders | undefined;
 
-/**
- * SessionStorage factory to bind one to an incoming request
- * @public */
-export interface SessionStorageFactory<T> {
-  asScoped: (request: KibanaRequest) => SessionStorage<T>;
+export class AuthHeadersStorage {
+  private authHeadersCache = new WeakMap<ReturnType<typeof getIncomingMessage>, AuthHeaders>();
+  public set = (request: KibanaRequest | Request, headers: AuthHeaders) => {
+    this.authHeadersCache.set(getIncomingMessage(request), headers);
+  };
+  public get: GetAuthHeaders = request => {
+    return this.authHeadersCache.get(getIncomingMessage(request));
+  };
 }
