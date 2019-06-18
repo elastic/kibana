@@ -95,11 +95,6 @@ about configuring {kib}, see
 Specifies the number of logs to display in the Monitoring UI. Defaults to `10`.
 The maximum value is `50`.
 
-`xpack.monitoring.ui.enabled`::
-Set to `false` to hide the Monitoring UI in {kib}. The monitoring back-end
-continues to run as an agent for sending {kib} stats to the monitoring
-cluster. Defaults to `true`.
-
 `xpack.monitoring.max_bucket_size`::
 Specifies the number of term buckets to return out of the overall terms list when
 performing terms aggregations to retrieve index and node metrics. For more
@@ -112,6 +107,11 @@ Specifies the minimum number of seconds that a time bucket in a chart can
 represent. Defaults to 10. If you modify the
 `xpack.monitoring.collection.interval` in `elasticsearch.yml`, use the same
 value in this setting.
+
+`xpack.monitoring.ui.enabled`::
+Set to `false` to hide the Monitoring UI in {kib}. The monitoring back-end
+continues to run as an agent for sending {kib} stats to the monitoring
+cluster. Defaults to `true`.
 
 [float]
 [[monitoring-ui-cgroup-settings]]
