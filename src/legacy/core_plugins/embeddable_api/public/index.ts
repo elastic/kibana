@@ -29,7 +29,7 @@ export {
   isErrorEmbeddable,
 } from './embeddables';
 
-export { Query, TimeRange, ViewMode, QueryLanguageType, Trigger, IRegistry } from './types';
+export { ViewMode, Trigger, IRegistry } from './types';
 
 export { actionRegistry, Action, ActionContext, IncompatibleActionError } from './actions';
 

@@ -9,16 +9,14 @@ Creates an instance of `ScopedClusterClient` based on the configuration the curr
 <b>Signature:</b>
 
 ```typescript
-asScoped(req?: {
-        headers?: Headers;
-    }): ScopedClusterClient;
+asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): ScopedClusterClient;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  req | <code>{</code><br/><code>        headers?: Headers;</code><br/><code>    }</code> | Request the <code>ScopedClusterClient</code> instance will be scoped to. |
+|  request | <code>KibanaRequest &#124; LegacyRequest &#124; FakeRequest</code> | Request the <code>ScopedClusterClient</code> instance will be scoped to. Supports request optionality, Legacy.Request &amp; FakeRequest for BWC with LegacyPlatform |
 
 <b>Returns:</b>
 
