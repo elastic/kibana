@@ -316,7 +316,6 @@ class DashboardAppController {
     };
     dashboardStateManager.handleTimeChange(timefilter.getTime());
     dashboardStateManager.handleRefreshConfigChange(timefilter.getRefreshInterval());
-    $scope.dashboardViewMode = dashboardStateManager.getViewMode();
 
     const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
 
@@ -423,7 +422,6 @@ class DashboardAppController {
         dashboardConfig.getHideWriteControls()
       ); // eslint-disable-line no-use-before-define
       dashboardStateManager.switchViewMode(newMode);
-      $scope.dashboardViewMode = newMode;
     }
 
     const onChangeViewMode = (newMode: DashboardViewMode) => {
