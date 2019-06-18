@@ -54,14 +54,11 @@ export class PersistedLog<T = any> {
       return this.items$.value;
     }
 
-    let nextItems = [...this.items$.value]
+    const nextItems = [
+      val,
       // remove any duplicate items
-      .filter(item => {
-        return !this.isEqual(item, val);
-      });
-
-    // Prepend the new item and truncate to max length
-    nextItems = [val, ...nextItems].slice(0, this.maxLength);
+      ...[...this.items$.value].filter(item => !this.isEqual(item, val)),
+    ].slice(0, this.maxLength); // truncate
 
     // Persist the stack to storage
     this.storage.setItem(this.name, JSON.stringify(nextItems));
@@ -80,13 +77,8 @@ export class PersistedLog<T = any> {
   }
 
   private loadItems() {
-    const itemsString = this.storage.getItem(this.name);
-    if (!itemsString) {
-      return [];
-    }
-
     try {
-      return JSON.parse(this.storage.getItem(this.name)!);
+      return JSON.parse(this.storage.getItem(this.name) || '[]');
     } catch {
       return [];
     }

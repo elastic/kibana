@@ -39,9 +39,7 @@ export class RecentlyAccessedService {
     const logKey = await createLogKey('recentlyAccessed', http.basePath.get());
     const history = new PersistedLog<ChromeRecentlyAccessedHistoryItem>(logKey, {
       maxLength: 20,
-      isEqual: (oldItem, newItem) => {
-        return oldItem.id === newItem.id;
-      },
+      isEqual: (oldItem, newItem) => oldItem.id === newItem.id,
     });
 
     return {
@@ -55,14 +53,10 @@ export class RecentlyAccessedService {
       },
 
       /** Gets the current array of history items. */
-      get: () => {
-        return history.get();
-      },
+      get: () => history.get(),
 
       /** Gets an observable of the current array of history items. */
-      get$: () => {
-        return history.get$();
-      },
+      get$: () => history.get$(),
     };
   }
 }

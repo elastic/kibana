@@ -27,7 +27,7 @@ class LocalStorageMock implements Storage {
   private store = new Map<string, string>();
 
   clear() {
-    this.store = new Map<string, string>();
+    this.store.clear();
   }
 
   getItem(key: string) {
@@ -52,11 +52,15 @@ class LocalStorageMock implements Storage {
 }
 
 describe('RecentlyAccessed#start()', () => {
-  // @ts-ignore
-  beforeAll(() => (global.localStorage = new LocalStorageMock()));
+  let originalLocalStorage: Storage;
+  beforeAll(() => {
+    originalLocalStorage = window.localStorage;
+    // @ts-ignore
+    window.localStorage = new LocalStorageMock();
+  });
   beforeEach(() => localStorage.clear());
   // @ts-ignore
-  afterAll(() => (global.localStorage = undefined));
+  afterAll(() => (window.localStorage = originalLocalStorage));
 
   const getStart = async () => {
     const http = httpServiceMock.createStartContract();
