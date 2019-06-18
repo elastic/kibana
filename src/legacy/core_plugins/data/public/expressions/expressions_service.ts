@@ -24,13 +24,15 @@ import { Ast } from '@kbn/interpreter/common';
 // the interpreter plugin itself once they are ready
 import { Registry } from '@kbn/interpreter/common';
 import { Adapters } from 'ui/inspector';
-import { Query, Filters, TimeRange } from 'ui/embeddable';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Filter } from '@kbn/es-query';
 import { createRenderer } from './expression_renderer';
 import { createRunFn } from './expression_runner';
+import { Query } from '../query';
 
 export interface InitialContextObject {
   timeRange?: TimeRange;
-  filters?: Filters;
+  filters?: Filter[];
   query?: Query;
 }
 

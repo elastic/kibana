@@ -60,6 +60,7 @@ class UsersComponentQuery extends QueryTemplate<
       usersSortField,
       filterQuery,
       ip,
+      skip,
       sourceId,
       startDate,
       endDate,
@@ -71,6 +72,7 @@ class UsersComponentQuery extends QueryTemplate<
         query={usersQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
+        skip={skip}
         variables={{
           sourceId,
           timerange: {
