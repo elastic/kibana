@@ -127,6 +127,8 @@ export interface CoreStart {
     notifications: NotificationsStart;
     // (undocumented)
     overlays: OverlayStart;
+    // (undocumented)
+    uiSettings: UiSettingsStart;
 }
 
 // @internal
@@ -394,6 +396,9 @@ export class UiSettingsClient {
 
 // @public (undocumented)
 export type UiSettingsSetup = UiSettingsClient;
+
+// @public (undocumented)
+export type UiSettingsStart = UiSettingsClient;
 
 // @public (undocumented)
 export interface UiSettingsState {

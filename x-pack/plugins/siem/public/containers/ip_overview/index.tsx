@@ -31,11 +31,12 @@ export interface IpOverviewProps extends QueryTemplateProps {
 }
 
 export const IpOverviewQuery = pure<IpOverviewProps>(
-  ({ id = 'ipOverviewQuery', children, filterQuery, sourceId, ip }) => (
+  ({ id = 'ipOverviewQuery', children, filterQuery, skip, sourceId, ip }) => (
     <Query<GetIpOverviewQuery.Query, GetIpOverviewQuery.Variables>
       query={ipOverviewQuery}
       fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
+      skip={skip}
       variables={{
         sourceId,
         filterQuery: createFilter(filterQuery),

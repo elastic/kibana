@@ -7,9 +7,8 @@
 import React, { useCallback } from 'react';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Chart, Axis, Position, timeFormatter, getAxisId, Settings } from '@elastic/charts';
-import { first } from 'lodash';
-import { niceTimeFormatByDay } from '@elastic/charts/dist/utils/data/formatters';
+import { Axis, Chart, getAxisId, niceTimeFormatter, Position, Settings } from '@elastic/charts';
+import { first, last } from 'lodash';
 import moment from 'moment';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
@@ -38,8 +37,6 @@ interface Props {
   onTimeChange: (start: string, end: string) => void;
 }
 
-const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
-
 export const MetricsExplorerChart = injectI18n(
   ({
     source,
@@ -56,6 +53,10 @@ export const MetricsExplorerChart = injectI18n(
     const handleTimeChange = (from: number, to: number) => {
       onTimeChange(moment(from).toISOString(), moment(to).toISOString());
     };
+    const dateFormatter = useCallback(
+      niceTimeFormatter([first(series.rows).timestamp, last(series.rows).timestamp]),
+      [series, series.rows]
+    );
     const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
     return (
       <React.Fragment>

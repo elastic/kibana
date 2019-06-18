@@ -20,6 +20,8 @@
 import _ from 'lodash';
 import { pushFilterBarFilters } from '../../filter_manager/push_filters';
 import { onBrushEvent } from './brush_event';
+import { uniqFilters } from '../../filter_manager/lib/uniq_filters';
+import { toggleFilterNegated } from '@kbn/es-query';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -93,7 +95,7 @@ const createFiltersFromEvent = (event) => {
     if (filter) {
       filter.forEach(f => {
         if (event.negate) {
-          f.meta.negate = !f.meta.negate;
+          f = toggleFilterNegated(f);
         }
         filters.push(f);
       });
@@ -108,11 +110,7 @@ const VisFiltersProvider = (getAppState, $timeout) => {
   const pushFilters = (filters, simulate) => {
     const appState = getAppState();
     if (filters.length && !simulate) {
-      const flatFilters = _.flatten(filters);
-      const deduplicatedFilters = flatFilters.filter((v, i) => {
-        return i === flatFilters.findIndex(f => _.isEqual(v, f));
-      });
-      pushFilterBarFilters(appState, deduplicatedFilters);
+      pushFilterBarFilters(appState, uniqFilters(filters));
       // to trigger angular digest cycle, we can get rid of this once we have either new filterManager or actions API
       $timeout(_.noop, 0);
     }

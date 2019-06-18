@@ -75,6 +75,9 @@ beforeEach(() => {
       http: {
         options: { someOption: 'foo', someAnotherOption: 'bar' },
         server: { listener: { addListener: jest.fn() }, route: jest.fn() },
+        auth: {
+          getAuthHeaders: () => undefined,
+        },
       },
       plugins: {
         contracts: new Map([['plugin-id', 'plugin-value']]),
