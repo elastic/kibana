@@ -92,8 +92,8 @@ about configuring {kib}, see
 {kibana-ref}/settings.html[Setting Kibana Server Properties].
 
 `xpack.monitoring.elasticsearch.logFetchCount`::
-Specifies the number of logs to display in the Monitoring UI. Defaults to `10`.
-The maximum value is `50`.
+Specifies the number of log entries to display in the Monitoring UI. Defaults to
+`10`. The maximum value is `50`.
 
 `xpack.monitoring.max_bucket_size`::
 Specifies the number of term buckets to return out of the overall terms list when
