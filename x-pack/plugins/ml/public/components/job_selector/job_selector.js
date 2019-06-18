@@ -14,7 +14,7 @@ import { ml } from '../../services/ml_api_service';
 import { JobSelectorTable } from './job_selector_table/';
 import { IdBadges } from './id_badges';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../common/timefilter';
 import { getGroupsFromJobs, normalizeTimes, setGlobalState } from './job_select_service_utils';
 import { toastNotifications } from 'ui/notify';
 import {

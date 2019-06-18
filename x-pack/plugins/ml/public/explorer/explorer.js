@@ -91,7 +91,7 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 
 // Anomalies Table
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../common/timefilter';
 import { toastNotifications } from 'ui/notify';
 
 function getExplorerDefaultState() {

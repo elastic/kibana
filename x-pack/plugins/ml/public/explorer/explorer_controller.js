@@ -33,7 +33,7 @@ import { explorer$ } from './explorer_dashboard_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
 import { refreshIntervalWatcher } from '../util/refresh_interval_watcher';
-import { timefilter } from 'ui/timefilter';
+import { timefilter$, timefilter, TIMEFILTER } from '../../common/timefilter';
 
 import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
 
@@ -192,6 +192,15 @@ module.controller('MlExplorerController', function (
   }
 
   const explorerSubscriber = explorer$.subscribe(loadJobsListener);
+  // Refresh all the data when the time range is altered. Replaces listen for 'fetch' emitted by legacy timefilter
+  // which would occur on setTime or setRefreshInterval
+  const timefilterSubscriber = timefilter$.subscribe(({ action }) => {
+    if (action === TIMEFILTER.SET_TIME || action === TIMEFILTER.SET_REFRESH_INTERVAL) {
+      if ($scope.jobSelectionUpdateInProgress === false) {
+        explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+      }
+    }
+  });
 
   // Listen for changes to job selection.
   $scope.jobSelectionUpdateInProgress = false;
@@ -200,13 +209,6 @@ module.controller('MlExplorerController', function (
     if (selection !== undefined) {
       $scope.jobSelectionUpdateInProgress = true;
       jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds: selection });
-    }
-  });
-
-  // Refresh all the data when the time range is altered.
-  $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-    if ($scope.jobSelectionUpdateInProgress === false) {
-      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     }
   });
 
@@ -287,6 +289,7 @@ module.controller('MlExplorerController', function (
   $scope.$on('$destroy', () => {
     explorerSubscriber.unsubscribe();
     jobSelectServiceSub.unsubscribe();
+    timefilterSubscriber.unsubscribe();
     refreshWatcher.cancel();
     $(window).off('resize', jqueryRedrawOnResize);
     // Cancel listening for updates to the global nav state.
