@@ -57,4 +57,5 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) |  |
 |  [UiSettingsSetup](./kibana-plugin-public.uisettingssetup.md) |  |
+|  [UiSettingsStart](./kibana-plugin-public.uisettingsstart.md) |  |
 
