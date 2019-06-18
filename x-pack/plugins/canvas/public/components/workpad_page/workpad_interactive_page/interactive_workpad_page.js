@@ -60,7 +60,6 @@ export class InteractiveWorkpadPage extends PureComponent {
       selectedNodes,
       selectToplevelNodes,
       commit,
-      pageId,
       setMultiplePositions,
     };
     shortcuts = <WorkpadShortcuts {...shortcutProps} />;

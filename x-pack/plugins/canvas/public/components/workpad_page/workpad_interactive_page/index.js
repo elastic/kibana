@@ -132,14 +132,14 @@ const mapDispatchToProps = dispatch => ({
 
 const mergeProps = (
   { state, ...restStateProps },
-  { dispatch, setMultiplePositions, ...restDispatchProps },
+  { dispatch, ...restDispatchProps },
   ownProps
 ) => ({
   ...ownProps,
   ...restDispatchProps,
   ...restStateProps,
   updateGlobalState: globalStateUpdater(dispatch, state),
-  setMultiplePositions: setMultiplePositions(restStateProps.pageId),
+  setMultiplePositions: restDispatchProps.setMultiplePositions(ownProps.pageId),
 });
 
 export const InteractivePage = compose(
