@@ -69,8 +69,6 @@ beforeEach(() => {
     core: {
       elasticsearch: { legacy: {} } as any,
       http: {
-        options: { someOption: 'foo', someAnotherOption: 'bar' },
-        server: { listener: { addListener: jest.fn() }, route: jest.fn() },
         auth: {
           getAuthHeaders: () => undefined,
         },
@@ -244,7 +242,6 @@ describe('once LegacyService is set up without connection info', () => {
   });
 
   test('creates legacy kbnServer with `autoListen: false`.', () => {
-    expect(setupDeps.core.http.server.route).not.toHaveBeenCalled();
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },

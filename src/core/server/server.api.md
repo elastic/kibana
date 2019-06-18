@@ -14,7 +14,6 @@ import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
 import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
-import { ServerOptions } from 'hapi';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { Url } from 'url';

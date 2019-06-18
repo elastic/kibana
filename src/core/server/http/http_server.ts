@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request, Server, ServerOptions } from 'hapi';
+import { Request, Server } from 'hapi';
 
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
@@ -37,7 +37,6 @@ import { BasePath } from './base_path_service';
 
 export interface HttpServerSetup {
   server: Server;
-  options: ServerOptions;
   registerRouter: (router: Router) => void;
   /**
    * To define custom authentication and/or authorization mechanism for incoming requests.
@@ -114,7 +113,6 @@ export class HttpServer {
     this.setupBasePathRewrite(config, basePathService);
 
     return {
-      options: serverOptions,
       registerRouter: this.registerRouter.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),

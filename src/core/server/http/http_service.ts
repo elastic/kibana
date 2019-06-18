@@ -19,6 +19,7 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
+import { Server } from 'hapi';
 
 import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';
@@ -48,6 +49,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
   private readonly logger: LoggerFactory;
   private readonly log: Logger;
+  private notReadyServer?: Server;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger;
@@ -82,12 +84,20 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
         createNewServer: this.createServer.bind(this),
       },
     };
+
+    if (this.shouldListen(config)) {
+      await this.runNotReadyServer(config);
+    }
+
     return setup;
   }
 
   public async start() {
     const config = await this.config$.pipe(first()).toPromise();
     if (this.shouldListen(config)) {
+      if (this.notReadyServer) {
+        await this.notReadyServer.stop();
+      }
       // If a redirect port is specified, we start an HTTP server at this port and
       // redirect all requests to the SSL port.
       if (config.ssl.enabled && config.ssl.redirectHttpFromPort !== undefined) {
@@ -158,5 +168,29 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     await this.httpsRedirectServer.stop();
     await Promise.all([...this.secondaryServers.values()].map(s => s.stop()));
     this.secondaryServers.clear();
+  }
+
+  private async runNotReadyServer(config: HttpConfig) {
+    const httpServer = new HttpServer(this.log);
+    const { server } = await httpServer.setup(config);
+    this.notReadyServer = server;
+    // use hapi server while Kibana ResponseFactory doesn't allow specifying custom headers
+    // https://github.com/elastic/kibana/issues/33779
+    this.notReadyServer.route({
+      path: '/{p*}',
+      method: '*',
+      handler: (req, responseToolkit) => {
+        this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url}.`);
+
+        // If server is not ready yet, because plugins or core can perform
+        // long running tasks (build assets, saved objects migrations etc.)
+        // we should let client know that and ask to retry after 30 seconds.
+        return responseToolkit
+          .response('Kibana server is not ready yet')
+          .code(503)
+          .header('Retry-After', '30');
+      },
+    });
+    await this.notReadyServer.start();
   }
 }
