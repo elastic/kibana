@@ -164,7 +164,7 @@ describe('http service', () => {
           return t.authenticated({ headers: authHeaders });
         }, cookieOptions);
 
-        const router = new Router('');
+        const router = new Router('/new-platform');
         router.get({ path: '/', validate: false }, async (req, res) => {
           const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
           client.asScoped(req);
@@ -174,7 +174,7 @@ describe('http service', () => {
 
         await root.start();
 
-        await kbnTestServer.request.get(root, '/').expect(200);
+        await kbnTestServer.request.get(root, '/new-platform/').expect(200);
         expect(clusterClientMock).toBeCalledTimes(1);
         const [firstCall] = clusterClientMock.mock.calls;
         const [, , headers] = firstCall;
@@ -186,7 +186,7 @@ describe('http service', () => {
         const { http, elasticsearch } = await root.setup();
         const { registerRouter } = http;
 
-        const router = new Router('');
+        const router = new Router('/new-platform');
         router.get({ path: '/', validate: false }, async (req, res) => {
           const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
           client.asScoped(req);
@@ -197,7 +197,7 @@ describe('http service', () => {
         await root.start();
 
         await kbnTestServer.request
-          .get(root, '/')
+          .get(root, '/new-platform/')
           .set('Authorization', authorizationHeader)
           .expect(200);
 

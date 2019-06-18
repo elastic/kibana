@@ -232,6 +232,9 @@ export class HttpServer {
       authenticate: adoptToHapiAuthFormat(fn, (req, { state, headers }) => {
         this.authState.set(req, state);
         this.authHeaders.set(req, headers);
+        // we mutate headers only for the backward compatibility with the legacy platform.
+        // where some plugin read directly from headers to identify whether a user is authenticated.
+        Object.assign(req.headers, headers);
       }),
     }));
     this.server.auth.strategy('session', 'login');
