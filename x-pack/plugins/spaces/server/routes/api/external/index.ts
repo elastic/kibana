@@ -5,8 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { Logger } from 'src/core/server';
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { Logger, SavedObjectsService } from 'src/core/server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { initDeleteSpacesApi } from './delete';

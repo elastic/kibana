@@ -10,7 +10,7 @@ import * as Rx from 'rxjs';
 import Boom from 'boom';
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { createDefaultSpace } from './create_default_space';
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { SavedObjectsService } from 'src/core/server';
 import { ElasticsearchServiceSetup } from 'src/core/server';
 
 let mockCallWithRequest;

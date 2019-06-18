@@ -91,6 +91,7 @@ export {
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
+  SavedObjectsClientWrapperFactory,
   SavedObjectsErrorHelpers,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,

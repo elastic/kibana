@@ -6,7 +6,8 @@
 
 import { ServerRoute } from 'hapi';
 import { Observable } from 'rxjs';
-import { KibanaConfig, SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { SavedObjectsService } from 'src/core/server';
 import {
   Logger,
   HttpServiceSetup,

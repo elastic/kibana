@@ -5,16 +5,15 @@
  */
 import Boom from 'boom';
 import { omit } from 'lodash';
-import { Headers } from 'src/core/server';
+import { Legacy } from 'kibana';
+import { KibanaRequest } from 'src/core/server';
 import { AuthorizationService } from '../../../../security/server/lib/authorization/service';
 import { isReservedSpace } from '../../../common/is_reserved_space';
 import { Space } from '../../../common/model/space';
 import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesConfigType } from '../../new_platform/config';
 
-interface SpacesClientRequestFacade {
-  headers?: Headers;
-}
+type SpacesClientRequestFacade = Legacy.Request | KibanaRequest;
 export class SpacesClient {
   constructor(
     private readonly auditLogger: SpacesAuditLogger,

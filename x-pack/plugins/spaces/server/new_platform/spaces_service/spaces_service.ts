@@ -7,12 +7,12 @@
 import { map, take } from 'rxjs/operators';
 import { Observable, Subscription, combineLatest } from 'rxjs';
 import { Legacy } from 'kibana';
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 import {
   Logger,
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   KibanaRequest,
+  SavedObjectsService,
 } from 'src/core/server';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';

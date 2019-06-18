@@ -8,7 +8,7 @@ import * as Rx from 'rxjs';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { SpacesService } from '../new_platform/spaces_service';
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { SavedObjectsService } from 'src/core/server';
 import { SpacesAuditLogger } from './audit_logger';
 import { elasticsearchServiceMock, httpServiceMock } from '../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../new_platform/spaces_service/spaces_service.mock';
