@@ -451,13 +451,7 @@ describe('onPostAuthRequestInterceptor', () => {
 
       const getHiddenUiAppHandler = jest.fn(() => '<div>space selector</div>');
 
-      const response = await request('/', spaces, function setupFn() {
-        // server.decorate('server', 'getHiddenUiAppById', getHiddenUiAppHandler);
-        // server.decorate('toolkit', 'renderApp', function renderAppHandler(app: any) {
-        //   // @ts-ignore
-        //   return this.response(app);
-        // });
-      });
+      const response = await request('/', spaces);
 
       expect(response.statusCode).toEqual(200);
       expect(response.payload).toEqual('<div>space selector</div>');
