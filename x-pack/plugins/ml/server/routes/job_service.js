@@ -180,11 +180,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/jobs/new_job_caps/{indexPattern}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { indexPattern } = request.params;
       const isRollup = (request.query.rollup === 'true');
       const { newJobCaps } = jobServiceProvider(callWithRequest, request);
@@ -196,11 +196,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/jobs/new_job_line_chart',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const {
         indexPatternTitle,
         timeField,
@@ -227,11 +227,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/jobs/all_jobs_and_group_ids',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { getAllJobAndGroupIds } = jobServiceProvider(callWithRequest);
       return getAllJobAndGroupIds()
         .catch(resp => wrapError(resp));
