@@ -42,6 +42,7 @@ export class HostOverviewByNameQuery extends QueryTemplate<
       id = 'hostOverviewQuery',
       children,
       hostName,
+      skip,
       sourceId,
       startDate,
       endDate,
@@ -51,6 +52,7 @@ export class HostOverviewByNameQuery extends QueryTemplate<
         query={HostOverviewQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
+        skip={skip}
         variables={{
           sourceId,
           hostName,
