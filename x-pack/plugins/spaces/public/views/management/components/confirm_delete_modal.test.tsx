@@ -3,17 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
-
-const buildMockChrome = () => {
-  return {
-    addBasePath: (path: string) => path,
-  };
-};
+import { spacesManagerMock } from '../../../lib/mocks';
 
 describe('ConfirmDeleteModal', () => {
   it('renders as expected', () => {
@@ -23,12 +18,7 @@ describe('ConfirmDeleteModal', () => {
       disabledFeatures: [],
     };
 
-    const mockHttp = {
-      delete: jest.fn(() => Promise.resolve()),
-    };
-    const mockChrome = buildMockChrome();
-
-    const spacesManager = new SpacesManager(mockHttp, mockChrome, '/');
+    const spacesManager = spacesManagerMock.create();
 
     const spacesNavState: SpacesNavState = {
       getActiveSpace: () => space,
@@ -59,12 +49,7 @@ describe('ConfirmDeleteModal', () => {
       disabledFeatures: [],
     };
 
-    const mockHttp = {
-      delete: jest.fn(() => Promise.resolve()),
-    };
-    const mockChrome = buildMockChrome();
-
-    const spacesManager = new SpacesManager(mockHttp, mockChrome, '/');
+    const spacesManager = spacesManagerMock.create();
 
     const spacesNavState: SpacesNavState = {
       getActiveSpace: () => space,

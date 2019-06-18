@@ -5,7 +5,7 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
-import { ESBucket, ESResponse } from './fetcher';
+import { ESResponse } from './fetcher';
 import { mlAnomalyResponse } from './mock-responses/mlAnomalyResponse';
 import { anomalySeriesTransform, replaceFirstAndLastBucket } from './transform';
 
@@ -46,7 +46,7 @@ describe('anomalySeriesTransform', () => {
           key: 20000,
           anomaly_score: { value: 90 }
         }
-      ] as ESBucket[]);
+      ]);
 
       const getMlBucketSize = 5;
       const bucketSize = 5;
@@ -72,7 +72,7 @@ describe('anomalySeriesTransform', () => {
           key: 5000,
           anomaly_score: { value: 90 }
         }
-      ] as ESBucket[]);
+      ]);
 
       const getMlBucketSize = 10;
       const bucketSize = 5;
@@ -112,7 +112,7 @@ describe('anomalySeriesTransform', () => {
           upper: { value: 45 },
           lower: { value: 40 }
         }
-      ] as ESBucket[]);
+      ]);
 
       const mlBucketSize = 10;
       const bucketSize = 5;
@@ -151,7 +151,7 @@ describe('anomalySeriesTransform', () => {
           upper: { value: 25 },
           lower: { value: 20 }
         }
-      ] as ESBucket[]);
+      ]);
 
       const getMlBucketSize = 10;
       const bucketSize = 5;
@@ -190,7 +190,7 @@ describe('anomalySeriesTransform', () => {
           upper: { value: null },
           lower: { value: null }
         }
-      ] as ESBucket[]);
+      ]);
 
       const getMlBucketSize = 10;
       const bucketSize = 5;
@@ -234,10 +234,10 @@ describe('replaceFirstAndLastBucket', () => {
         lower: 30,
         upper: 40
       }
-    ] as any;
+    ];
 
     const timeSeriesDates = [10, 15];
-    expect(replaceFirstAndLastBucket(buckets, timeSeriesDates)).toEqual([
+    expect(replaceFirstAndLastBucket(buckets as any, timeSeriesDates)).toEqual([
       { x: 10, lower: 10, upper: 20 },
       { x: 15, lower: 30, upper: 40 }
     ]);
@@ -271,8 +271,8 @@ describe('replaceFirstAndLastBucket', () => {
   });
 });
 
-function getESResponse(buckets: ESBucket[]): ESResponse {
-  return {
+function getESResponse(buckets: any): ESResponse {
+  return ({
     took: 3,
     timed_out: false,
     _shards: {
@@ -288,7 +288,7 @@ function getESResponse(buckets: ESBucket[]): ESResponse {
     },
     aggregations: {
       ml_avg_response_times: {
-        buckets: buckets.map(bucket => {
+        buckets: buckets.map((bucket: any) => {
           return {
             ...bucket,
             lower: { value: idx(bucket, _ => _.lower.value) || null },
@@ -300,5 +300,5 @@ function getESResponse(buckets: ESBucket[]): ESResponse {
         })
       }
     }
-  };
+  } as unknown) as ESResponse;
 }

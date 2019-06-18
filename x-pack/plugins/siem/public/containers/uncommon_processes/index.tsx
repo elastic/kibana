@@ -49,6 +49,7 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
       id = 'uncommonProcessesQuery',
       children,
       filterQuery,
+      skip,
       sourceId,
       startDate,
       endDate,
@@ -59,6 +60,7 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
         query={uncommonProcessesQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
+        skip={skip}
         variables={{
           sourceId,
           timerange: {
