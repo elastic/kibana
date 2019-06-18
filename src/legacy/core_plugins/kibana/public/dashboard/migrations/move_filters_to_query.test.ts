@@ -35,27 +35,23 @@ test('Migrates an old filter query into the query field', () => {
     filter: [filter, queryFilter],
   });
 
-  expect(newSearchSource).toMatchInlineSnapshot(`
-Object {
-  "filter": Array [
-    Object {
-      "$state": Object {
-        "store": "appState",
+  expect(newSearchSource).toEqual({
+    filter: [
+      {
+        $state: { store: FilterStateStore.APP_STATE },
+        meta: {
+          alias: '',
+          disabled: false,
+          negate: false,
+        },
+        query: {},
       },
-      "meta": Object {
-        "alias": "",
-        "disabled": false,
-        "negate": false,
-      },
-      "query": Object {},
+    ],
+    query: {
+      language: 'lucene',
+      query: 'hi!',
     },
-  ],
-  "query": Object {
-    "language": "lucene",
-    "query": "hi!",
-  },
-}
-`);
+  });
 });
 
 test('Preserves query if search source is new', () => {
