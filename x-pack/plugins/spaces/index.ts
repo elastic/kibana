@@ -86,7 +86,7 @@ export const spaces = (kibana: Record<string, any>) =>
         request: Record<string, any>,
         server: Record<string, any>
       ) {
-        const spacesClient = await server.plugins.spaces.spacesClient.scopedClient(request);
+        const spacesClient = await server.plugins.spaces.getScopedSpacesClient(request);
         try {
           vars.activeSpace = {
             valid: true,
@@ -174,6 +174,6 @@ export const spaces = (kibana: Record<string, any>) =>
       });
 
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
-      server.expose('spacesClient', spacesService);
+      server.expose('getScopedSpacesClient', spacesService.scopedClient);
     },
   });
