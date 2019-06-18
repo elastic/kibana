@@ -1,38 +1,31 @@
 # Integrations Manager
 
-## Directory overview
-```
-x-pack/plugins/integrations_manager/
-├── common 
-│   ├── constants.ts        # common strings, mostly. id, paths, etc
-│   └── types.ts            # as we find common types
-├── index.ts                # legacy plugin definition
-├── kibana.json             # new platform style shown in MIGRATION.md
-├── public
-│   ├── components          # plugin-specific components (used by screens/*)
-│   ├── data.ts             # all client-side data fetching
-│   ├── index.tsx           # React root. Client-side routes applied
-│   ├── register_feature.ts # add to registry for /#/home/feature_directory
-│   ├── routes.tsx          # every re: client-side routes. paths, mappings
-│   └── screens             # typically a view for a client-side route
-│       ├── detail.tsx      # integration detail view i.e. '/detail/:pkgkey'
-│       └── home.tsx        # integration list view i.e. '/'
-└── server            
-    ├── index.ts            # new platform style shown in MIGRATION.md 
-    ├── plugin.ts           # new platform style shown in MIGRATION.md
-    ├── registry.ts         # anything registry-related
-    ├── routes.ts           # every re: server-side routes. paths, mappings
-    └── saved_objects.ts    # anything saved objects-related
-```
-
 ## Development
 ### Branch
-We're using a long-running feature branch [`feature-integrations-manager`](https://github.com/elastic/kibana/tree/feature-integrations-manager). [jfsiii](http://github.com/jfsiii) will keep the branch up-to-date with `master` by periodically running `git merge master` locally and pushing. We use this workflow because the `kibana` repo only allows "squash and merge" commits (some background at https://github.com/elastic/kibana/pull/38255#issuecomment-499839073).
+We're using a long-running feature branch [`feature-integrations-manager`](https://github.com/elastic/kibana/tree/feature-integrations-manager). 
+
+[jfsiii](http://github.com/jfsiii) will keep the branch up-to-date with `master` by periodically running `git merge master` locally and pushing. [This PR](https://github.com/elastic/kibana/pull/38255#issuecomment-499839073) has more information.
 
 ### Feature development
-Develop new features under branches in your own fork of `elastic/kibana`, then make PR's against [`elastic:feature-integrations-manager`](https://github.com/elastic/kibana/tree/feature-integrations-manager). e.g. work in `yourname:123456-feature-description` and create a PR to merge that into `elastic:feature-integrations-manager`. See https://github.com/elastic/kibana/pull/37950 for an example.
+In your own fork of `elastic/kibana`, create a feature branch based on `feature-integrations-manager`.
+
+```
+git checkout -b 1234-feature-description feature-integrations-manager
+# ... git commits for feature
+open https://github.com/elastic/kibana/compare/feature-integrations-manager...yourgithubname:1234-feature-description
+```
+
+See https://github.com/elastic/kibana/pull/37950 for an example.
 
 ### Getting started
- 1. In another shell: `yarn es snapshot`
+See the Kibana docs for [how to set up your dev environment](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#setting-up-your-development-environment), [run Elasticsearch](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#running-elasticsearch), and [start Kibana](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#running-kibana).
+
+One common workflow is:
+ 1. `yarn es snapshot`
  1. In another shell: `yarn start --no-base-path`
  
+### Plugin architecture
+Follows the `common`, `server`, `public` structure from the [Architecture Style Guide
+](https://github.com/elastic/kibana/blob/master/style_guides/architecture_style_guide.md#file-and-folder-structure).
+
+We use New Platform approach (structure, APIs, etc) where possible. There's a `kibana.json` manifest, and the server uses the `server/{index,plugin}.ts` approach from [`MIGRATION.md`](https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#architecture). The client code we author is using New Platform shape & APIs, but the Manager deals with external systems which are at their own stages of migration.
