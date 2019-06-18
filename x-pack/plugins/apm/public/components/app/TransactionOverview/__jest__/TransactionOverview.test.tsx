@@ -10,6 +10,8 @@ import { TransactionOverview } from '..';
 import * as hooks from '../../../../hooks/useLocation';
 import { history } from '../../../../utils/history';
 
+jest.mock('ui/kfetch');
+
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
 /* eslint-disable no-console */
 const originalError = console.error;
