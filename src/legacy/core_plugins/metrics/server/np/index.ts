@@ -17,26 +17,9 @@
  * under the License.
  */
 
-import { getFields } from '../lib/get_fields';
-import { getIndexPatternService } from '../lib/get_index_pattern_service';
+import { PluginInitializerContext } from 'src/core/server';
+import { MetricsPlugin } from './plugin';
 
-export const fieldsRoutes = ({ http: { server } }) => {
-  server.route({
-    config: {
-      pre: [getIndexPatternService],
-    },
-    path: '/api/metrics/fields',
-    method: 'GET',
-    handler: async req => {
-      try {
-        return await getFields(req);
-      } catch (err) {
-        if (err.isBoom && err.status === 401) {
-          return err;
-        }
-
-        return [];
-      }
-    },
-  });
-};
+export function metricPlugin(initializerContext: PluginInitializerContext) {
+  return new MetricsPlugin();
+}

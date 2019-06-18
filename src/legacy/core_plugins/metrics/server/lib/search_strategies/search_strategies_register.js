@@ -33,7 +33,7 @@ const addStrategy = searchStrategy => {
 };
 
 export class SearchStrategiesRegister {
-  static init(server) {
+  static init({ http: { server } }) {
     server.expose('AbstractSearchStrategy', AbstractSearchStrategy);
     server.expose('AbstractSearchRequest', AbstractSearchRequest);
     server.expose('DefaultSearchCapabilities', DefaultSearchCapabilities);

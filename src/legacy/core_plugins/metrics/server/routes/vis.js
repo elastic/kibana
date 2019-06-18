@@ -20,7 +20,7 @@
 import { getVisData } from '../lib/get_vis_data';
 import Boom from 'boom';
 
-export const visDataRoutes = server => {
+export const visDataRoutes = ({ http: { server } }) => {
   server.route({
     path: '/api/metrics/vis/data',
     method: 'POST',

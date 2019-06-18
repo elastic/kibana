@@ -18,13 +18,16 @@
  */
 
 import { resolve } from 'path';
+import { Legacy } from 'kibana';
+import { PluginInitializerContext } from 'src/core/server';
+import { InternalCoreSetup } from 'src/core/server';
+import { metricPlugin } from './server/np/';
 
-import { fieldsRoutes } from './server/routes/fields';
-import { visDataRoutes } from './server/routes/vis';
-import { SearchStrategiesRegister } from './server/lib/search_strategies/search_strategies_register';
-
-export default function(kibana) {
+// eslint-disable-next-line import/no-default-export
+export default function(kibana: any) {
   return new kibana.Plugin({
+    id: 'metrics',
+
     require: ['kibana', 'elasticsearch'],
 
     uiExports: {
@@ -33,7 +36,7 @@ export default function(kibana) {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
 
-    config(Joi) {
+    config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         chartResolution: Joi.number().default(150),
@@ -41,11 +44,11 @@ export default function(kibana) {
       }).default();
     },
 
-    init(server) {
-      fieldsRoutes(server);
-      visDataRoutes(server);
+    init(server: Legacy.Server) {
+      const initializerContext = {} as PluginInitializerContext;
+      const core = { http: { server } } as InternalCoreSetup;
 
-      SearchStrategiesRegister.init(server);
+      metricPlugin(initializerContext).setup(core);
     },
   });
 }

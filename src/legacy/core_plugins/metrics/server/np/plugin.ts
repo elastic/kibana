@@ -17,26 +17,19 @@
  * under the License.
  */
 
-import { getFields } from '../lib/get_fields';
-import { getIndexPatternService } from '../lib/get_index_pattern_service';
+import { InternalCoreSetup } from 'kibana/server';
+// @ts-ignore
+import { fieldsRoutes } from '../routes/fields';
+// @ts-ignore
+import { visDataRoutes } from '../routes/vis';
+// @ts-ignore
+import { SearchStrategiesRegister } from '../lib/search_strategies/search_strategies_register';
 
-export const fieldsRoutes = ({ http: { server } }) => {
-  server.route({
-    config: {
-      pre: [getIndexPatternService],
-    },
-    path: '/api/metrics/fields',
-    method: 'GET',
-    handler: async req => {
-      try {
-        return await getFields(req);
-      } catch (err) {
-        if (err.isBoom && err.status === 401) {
-          return err;
-        }
+export class MetricsPlugin {
+  public setup(core: InternalCoreSetup) {
+    fieldsRoutes(core);
+    visDataRoutes(core);
 
-        return [];
-      }
-    },
-  });
-};
+    SearchStrategiesRegister.init(core);
+  }
+}
