@@ -210,6 +210,11 @@ describe('#start()', () => {
     expect(MockApplicationService.start).toHaveBeenCalledTimes(1);
   });
 
+  it('calls uiSettings#start()', async () => {
+    await startCore();
+    expect(MockUiSettingsService.start).toHaveBeenCalledTimes(1);
+  });
+
   it('calls i18n#start()', async () => {
     await startCore();
     expect(MockI18nService.start).toHaveBeenCalledTimes(1);
