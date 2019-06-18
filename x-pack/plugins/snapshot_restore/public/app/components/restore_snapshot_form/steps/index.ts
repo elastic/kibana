@@ -11,6 +11,6 @@ export interface StepProps {
   updateRestoreSettings: (updatedSettings: Partial<RestoreSettings>) => void;
 }
 
-export { RestoreSnapshotStepGeneral } from './step_general';
+export { RestoreSnapshotStepLogistics } from './step_logistics';
 export { RestoreSnapshotStepSettings } from './step_settings';
 export { RestoreSnapshotStepReview } from './step_review';

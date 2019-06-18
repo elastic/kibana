@@ -20,8 +20,8 @@ export const RestoreSnapshotNavigation: React.FunctionComponent<Props> = ({
 }) => {
   const steps = [
     {
-      title: i18n.translate('xpack.snapshotRestore.restoreForm.navigation.stepGeneralName', {
-        defaultMessage: 'General',
+      title: i18n.translate('xpack.snapshotRestore.restoreForm.navigation.stepLogisticsName', {
+        defaultMessage: 'Logistics',
       }),
       isComplete: maxCompletedStep >= 1,
       isSelected: currentStep === 1,

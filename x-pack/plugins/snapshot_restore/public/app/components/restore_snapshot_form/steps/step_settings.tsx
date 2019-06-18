@@ -7,17 +7,22 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButtonEmpty,
   EuiCode,
   EuiCodeEditor,
   EuiComboBox,
   EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { RestoreSettings } from '../../../../../common/types';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
+import { documentationLinksService } from '../../../services/documentation';
 import { StepProps } from './';
 
 export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
@@ -57,6 +62,45 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
 
   return (
     <div className="snapshotRestore__restoreForm__stepSettings">
+      {/* Step title and doc link */}
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepSettingsTitle"
+                defaultMessage="Index settings (optional)"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepSettingsDescription"
+                defaultMessage="Change index settings during the restore process."
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            flush="right"
+            href={documentationLinksService.getRestoreIndexSettingsUrl()}
+            target="_blank"
+            iconType="help"
+          >
+            <FormattedMessage
+              id="xpack.rollupJobs.create.stepSettings.docsButtonLabel"
+              defaultMessage="Index settings docs"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+
       <EuiDescribedFormGroup
         title={
           <EuiTitle size="s">

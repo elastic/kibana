@@ -8,7 +8,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
 import {
-  RestoreSnapshotStepGeneral,
+  RestoreSnapshotStepLogistics,
   RestoreSnapshotStepSettings,
   RestoreSnapshotStepReview,
 } from './steps';
@@ -23,7 +23,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({ snapshotDe
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [maxCompletedStep, setMaxCompletedStep] = useState<number>(0);
   const stepMap: { [key: number]: any } = {
-    1: RestoreSnapshotStepGeneral,
+    1: RestoreSnapshotStepLogistics,
     2: RestoreSnapshotStepSettings,
     3: RestoreSnapshotStepReview,
   };
