@@ -33,9 +33,11 @@ export interface Timefilter {
   setTime: (timeRange: TimeRange) => void;
   setRefreshInterval: (refreshInterval: RefreshInterval) => void;
   getRefreshInterval: () => RefreshInterval;
+  getActiveBounds: () => void;
   disableAutoRefreshSelector: () => void;
   disableTimeRangeSelector: () => void;
   enableAutoRefreshSelector: () => void;
+  enableTimeRangeSelector: () => void;
   off: (event: string, reload: () => void) => void;
   on: (event: string, reload: () => void) => void;
 }
