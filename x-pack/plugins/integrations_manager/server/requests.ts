@@ -29,9 +29,3 @@ export async function getResponseStream(url: string): Promise<NodeJS.ReadableStr
 export async function fetchUrl(url: string): Promise<string> {
   return getResponseStream(url).then(streamToString);
 }
-
-export async function fetchJson(url: string): Promise<object> {
-  const json = await fetchUrl(url);
-  const data = JSON.parse(json);
-  return data;
-}
