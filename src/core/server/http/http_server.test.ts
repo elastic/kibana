@@ -62,6 +62,13 @@ test('listening after started', async () => {
   await server.start();
 
   expect(server.isListening()).toBe(true);
+  expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "http server running",
+  ],
+]
+`);
 });
 
 test('200 OK with body', async () => {

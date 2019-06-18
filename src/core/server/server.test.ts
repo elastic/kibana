@@ -115,20 +115,3 @@ test(`doesn't setup core services if config validation fails`, async () => {
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
 });
-
-test('logs the message if core starts', async () => {
-  const server = new Server(config$, env, logger);
-
-  await server.setup();
-  expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`Array []`);
-
-  await server.start();
-
-  expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "The core is running",
-  ],
-]
-`);
-});

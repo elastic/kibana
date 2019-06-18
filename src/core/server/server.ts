@@ -95,7 +95,6 @@ export class Server {
     });
 
     await this.http.start();
-    this.log.info('The core is running');
     return coreStart;
   }
 

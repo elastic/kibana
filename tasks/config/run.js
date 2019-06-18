@@ -29,7 +29,7 @@ module.exports = function (grunt) {
     return {
       options: {
         wait: false,
-        ready: /The core is running/,
+        ready: /http server running/,
         quiet: false,
         failOnError: false
       },
