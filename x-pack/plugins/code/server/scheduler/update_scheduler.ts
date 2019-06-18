@@ -67,7 +67,12 @@ export class UpdateScheduler extends AbstractScheduler {
           nextUpdateTimestamp: nextRepoUpdateTimestamp,
         });
 
-        await this.updateWorker.enqueueJob(payload, {});
+        // If the `nextUpdateTimestamp` does *not* exist, then do not submit an update
+        // job, since this only happens right after a clone, which we can assume the
+        // repository is up-to-date.
+        if (repo.nextUpdateTimestamp) {
+          await this.updateWorker.enqueueJob(payload, {});
+        }
       } else {
         this.log.info(
           `Repo ${repo.uri} has not been fully cloned yet or in update/delete. Skip update.`

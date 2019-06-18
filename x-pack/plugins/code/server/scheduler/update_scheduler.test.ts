@@ -39,15 +39,17 @@ const updateWorker = {
   enqueueJob: emptyAsyncFunc,
 };
 
-const createSearchSpy = (nextUpdateTimestamp: number): sinon.SinonSpy => {
+const createSearchSpy = (nextUpdateTimestamp: number | undefined): sinon.SinonSpy => {
   const repo: Repository = {
     uri: 'github.com/elastic/code',
     url: 'https://github.com/elastic/code.git',
     org: 'elastic',
     name: 'code',
-    nextUpdateTimestamp: moment()
-      .add(nextUpdateTimestamp, 'ms')
-      .toDate(),
+    nextUpdateTimestamp: nextUpdateTimestamp
+      ? moment()
+          .add(nextUpdateTimestamp, 'ms')
+          .toDate()
+      : undefined,
   };
   return sinon.fake.returns(
     Promise.resolve({
@@ -160,6 +162,55 @@ test('Next job should not execute when repo is still in clone.', done => {
       // Expect no update on anything regarding the update task scheduling.
       expect(enqueueJobSpy.notCalled).toBeTruthy();
       expect(updateSpy.notCalled).toBeTruthy();
+      done();
+    } catch (err) {
+      done.fail(err);
+    }
+  };
+
+  // Start the scheduler.
+  const updateScheduler = new UpdateScheduler(
+    (updateWorker as any) as UpdateWorker,
+    serverOpts as ServerOptions,
+    esClient as EsClient,
+    log,
+    onScheduleFinished
+  );
+  updateScheduler.start();
+
+  // Roll the clock to the time when the first scheduled update task
+  // is executed.
+  clock.tick(UPDATE_FREQUENCY_MS);
+});
+
+test('Next update job should be submitted if nextUpdateTimestamp does not exist.', done => {
+  const clock = sinon.useFakeTimers();
+
+  // Setup the UpdateWorker spy.
+  const enqueueJobSpy = sinon.stub(updateWorker, 'enqueueJob');
+
+  // Setup the search stub to mock loading all repositories from ES.
+  // Set the `nextUpdateTimestamp` to be undefined to mimic the repo status
+  // right after a successfully clone but before an update.
+  const searchSpy = createSearchSpy(undefined /* nextUpdateTimestamp */);
+  esClient.search = searchSpy;
+
+  // Set up the update and get spies of esClient
+  const getSpy = createGetSpy(WorkerReservedProgress.COMPLETED);
+  esClient.get = getSpy;
+  const updateSpy = sinon.spy();
+  esClient.update = updateSpy;
+
+  const onScheduleFinished = () => {
+    try {
+      // Expect the search stub to be called to pull all repositories.
+      expect(searchSpy.calledOnce).toBeTruthy();
+      // Expect the get stub to be called to pull git status and delete status.
+      expect(getSpy.calledTwice).toBeTruthy();
+      // Expect the update stub to be called to update next schedule timestamp.
+      expect(updateSpy.calledOnce).toBeTruthy();
+      // Expect the enqueue job stub should not be called
+      expect(enqueueJobSpy.notCalled).toBeTruthy();
       done();
     } catch (err) {
       done.fail(err);
