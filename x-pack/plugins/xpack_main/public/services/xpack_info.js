@@ -11,9 +11,17 @@ import { convertKeysToCamelCaseDeep } from '../../../../server/lib/key_case_conv
 
 const XPACK_INFO_KEY = 'xpackMain.info';
 
+let inProgressRefreshPromise = null;
+const setAll = (updatedXPackInfo) => {
+  // The decision to convert kebab-case/snake-case keys to camel-case keys stemmed from an old
+  // convention of using kebabe-case/snake-case in API response bodies but camel-case in JS
+  // objects. See pull #29304 for more info.
+  const camelCasedXPackInfo = convertKeysToCamelCaseDeep(updatedXPackInfo);
+  sessionStorage.setItem(XPACK_INFO_KEY, JSON.stringify(camelCasedXPackInfo));
+};
+
 export function xpackInfoService($injector) {
-  this.inProgressRefreshPromise = null;
-  this.setAll(chrome.getInjected('xpackInitialInfo') || {});
+  setAll(chrome.getInjected('xpackInitialInfo') || {});
 
   return {
     get: (path, defaultValue = undefined) => {
@@ -22,27 +30,21 @@ export function xpackInfoService($injector) {
       return get(xpackInfoValues, path, defaultValue);
     },
 
-    setAll: (updatedXPackInfo) => {
-      // The decision to convert kebab-case/snake-case keys to camel-case keys stemmed from an old
-      // convention of using kebabe-case/snake-case in API response bodies but camel-case in JS
-      // objects. See pull #29304 for more info.
-      const camelCasedXPackInfo = convertKeysToCamelCaseDeep(updatedXPackInfo);
-      sessionStorage.setItem(XPACK_INFO_KEY, JSON.stringify(camelCasedXPackInfo));
-    },
+    setAll,
 
     clear: () => {
       sessionStorage.removeItem(XPACK_INFO_KEY);
     },
 
     refresh: () => {
-      if (this.inProgressRefreshPromise) {
-        return this.inProgressRefreshPromise;
+      if (inProgressRefreshPromise) {
+        return inProgressRefreshPromise;
       }
 
       // store the promise in a shared location so that calls to
       // refresh() before this is complete will get the same promise
       const $http = $injector.get('$http');
-      this.inProgressRefreshPromise = (
+      inProgressRefreshPromise = (
         $http.get(chrome.addBasePath('/api/xpack/v1/info'))
           .catch((err) => {
           // if we are unable to fetch the updated info, we should
@@ -59,7 +61,7 @@ export function xpackInfoService($injector) {
             this.inProgressRefreshPromise = null;
           })
       );
-      return this.inProgressRefreshPromise;
+      return inProgressRefreshPromise;
     },
 
     getLicense: () => {
