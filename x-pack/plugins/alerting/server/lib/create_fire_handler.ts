@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'src/legacy/server/saved_objects';
+import { SavedObject } from 'src/core/server';
 import { RawAlertAction, State, Context } from '../types';
 import { ActionsPlugin } from '../../../actions';
 import { transformActionParams } from './transform_action_params';

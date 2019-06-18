@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { SavedObjectReference } from './types';
 import { validateActionTypeConfig } from './lib';

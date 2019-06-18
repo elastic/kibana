@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export let mlLog = () => {};
-
-export function initMlServerLog(log) {
-  mlLog = (level, message) => log(['ml', level], message);
+interface Global extends NodeJS.Global {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  window?: any;
 }
+
+export const globalNode: Global = global;

@@ -6,7 +6,7 @@
 
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { createFireFunction } from './create_fire_function';
-import { SavedObjectsClientMock } from '../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
+import { SavedObjectsClientMock } from '../../../../src/core/server/mocks';
 
 const mockTaskManager = taskManagerMock.create();
 const savedObjectsClient = SavedObjectsClientMock.create();

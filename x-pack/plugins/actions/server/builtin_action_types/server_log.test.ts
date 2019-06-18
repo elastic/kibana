@@ -9,7 +9,7 @@ import { ActionTypeRegistry } from '../action_type_registry';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 import { validateActionTypeParams } from '../lib';
-import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
+import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
 import { registerBuiltInActionTypes } from './index';
 

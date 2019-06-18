@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
