@@ -7,6 +7,8 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
+jest.mock('ui/kfetch');
+
 jest.mock('axios', () => ({
   get: jest.fn(),
   create: jest.fn(),

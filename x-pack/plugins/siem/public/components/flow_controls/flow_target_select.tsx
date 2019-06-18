@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore
-  EuiSuperSelect,
-} from '@elastic/eui';
+import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';

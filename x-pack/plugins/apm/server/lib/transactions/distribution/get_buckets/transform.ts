@@ -6,7 +6,11 @@
 
 import { isEmpty } from 'lodash';
 import { idx } from '@kbn/elastic-idx';
-import { ESResponse } from './fetcher';
+import { PromiseReturnType } from '../../../../../typings/common';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { bucketFetcher } from './fetcher';
+
+type DistributionBucketResponse = PromiseReturnType<typeof bucketFetcher>;
 
 function getDefaultSample(buckets: IBucket[]) {
   const samples = buckets
@@ -23,9 +27,12 @@ function getDefaultSample(buckets: IBucket[]) {
 
 export type IBucket = ReturnType<typeof getBucket>;
 function getBucket(
-  bucket: ESResponse['aggregations']['distribution']['buckets'][0]
+  bucket: DistributionBucketResponse['aggregations']['distribution']['buckets'][0]
 ) {
-  const sampleSource = idx(bucket, _ => _.sample.hits.hits[0]._source);
+  const sampleSource = idx(bucket, _ => _.sample.hits.hits[0]._source) as
+    | Transaction
+    | undefined;
+
   const isSampled = idx(sampleSource, _ => _.transaction.sampled);
   const sample = {
     traceId: idx(sampleSource, _ => _.trace.id),
@@ -39,7 +46,7 @@ function getBucket(
   };
 }
 
-export function bucketTransformer(response: ESResponse) {
+export function bucketTransformer(response: DistributionBucketResponse) {
   const buckets = response.aggregations.distribution.buckets.map(getBucket);
 
   return {

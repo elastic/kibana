@@ -71,7 +71,7 @@ describe('ZeekSignature', () => {
   describe('#TotalVirusLinkSha', () => {
     test('should return null if value is null', () => {
       const wrapper = mountWithIntl(<TotalVirusLinkSha value={null} />);
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('should render value', () => {
@@ -88,7 +88,7 @@ describe('ZeekSignature', () => {
   describe('#Link', () => {
     test('should return null if value is null', () => {
       const wrapper = mountWithIntl(<Link value={null} />);
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('should render value', () => {
@@ -111,7 +111,7 @@ describe('ZeekSignature', () => {
           <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it renders the default ZeekSignature', () => {

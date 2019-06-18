@@ -18,6 +18,7 @@ exports[`FeatureTooltip should show both filter buttons and close button 1`] = `
     <EuiButtonIcon
       aria-label="Close tooltip"
       color="primary"
+      data-test-subj="mapTooltipCloseButton"
       iconSize="m"
       iconType="cross"
       onClick={[Function]}
@@ -49,6 +50,7 @@ exports[`FeatureTooltip should show both filter buttons and close button 1`] = `
             aria-label="Filter on property"
             className="mapFeatureTooltip__filterButton"
             color="primary"
+            data-test-subj="mapTooltipCreateFilterButton"
             iconSize="m"
             iconType="plusInCircle"
             onClick={[Function]}
@@ -87,6 +89,7 @@ exports[`FeatureTooltip should show close button, but not filter button 1`] = `
     <EuiButtonIcon
       aria-label="Close tooltip"
       color="primary"
+      data-test-subj="mapTooltipCloseButton"
       iconSize="m"
       iconType="cross"
       onClick={[Function]}
@@ -141,6 +144,7 @@ exports[`FeatureTooltip should show only filter button for filterable properties
             aria-label="Filter on property"
             className="mapFeatureTooltip__filterButton"
             color="primary"
+            data-test-subj="mapTooltipCreateFilterButton"
             iconSize="m"
             iconType="plusInCircle"
             onClick={[Function]}
