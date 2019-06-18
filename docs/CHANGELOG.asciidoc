@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.1>>
 * <<release-notes-6.8.0>>
 * <<release-notes-6.7.2>>
 * <<release-notes-6.7.1>>
@@ -86,6 +87,27 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+ 
+[[release-notes-6.8.1]]
+== {kib} 6.8.1
+
+
+Before you migrate your application from one version of Kibana to another, review the <<breaking-changes, breaking changes>>.
+
+[float]
+[[bug-6.8.1]]
+=== Bug fixes
+Monitoring::
+* Fixes the inability to use GET /api/stats API when you use query string parameters {pull}36986[#36986]
+* Fixes the inability to view the `Completed recoveries` on the Elasticsearch overview page {pull}38543[#38543]
+* Removes the use of the `terminate_after` flag for monitoring queries due to overuse {pull}37099[#37099]
+* Updates the *Shard Activity* table to display `60 seconds` instead of `1 minute` {pull}38065[#38065]
+Machine Learning::
+* Fixes the constant polling to `deleting` job tasks {pull}38013[#38013]
+
+
+
+
 
 [[release-notes-6.8.0]]
 == {kib} 6.8.0
