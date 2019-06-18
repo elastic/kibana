@@ -230,7 +230,9 @@ test('honeybadgers on conflicts', async () => {
   try {
     await clusterDoc.setup(elasticClient);
     await clusterDoc.start();
-  } catch (err) {}
+  } catch (err) {
+    expect(err).toBeFalsy();
+  }
 
   expect(setTimeout).toHaveBeenCalledTimes(1);
   try {
