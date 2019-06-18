@@ -25,6 +25,7 @@ import {
   EuiFieldText,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiFormErrorText,
   EuiIcon,
   EuiLink,
   EuiSpacer,
@@ -37,15 +38,16 @@ import { isEqual, omit } from 'lodash';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { getDocLink } from '../../documentation_links';
 
+const FROM_PLACEHOLDER = '\u2212\u221E';
+const TO_PLACEHOLDER = '+\u221E';
 const generateId = htmlIdGenerator();
-const isEmpty = (value: any) => value === undefined || value === null || value === '';
 const validateDateMath = (value: string = '') => {
-  if (isEmpty(value)) {
+  if (!value) {
     return true;
   }
 
   const moment = dateMath.parse(value);
-  return moment != null && moment.isValid();
+  return moment && moment.isValid();
 };
 
 interface DateRangeValues {
@@ -63,6 +65,9 @@ function DateRangesParamEditor({
   setValidity,
 }: AggParamEditorProps<DateRangeValues[]>) {
   const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
+  const hasInvalidRange = value.some(
+    ({ from, to }) => (!from && !to) || !validateDateMath(from) || !validateDateMath(to)
+  );
 
   // set up an initial range when there is no default range
   useEffect(() => {
@@ -80,10 +85,15 @@ function DateRangesParamEditor({
       ) {
         setRanges(value.map(range => ({ ...range, id: generateId() })));
       }
-
-      setValidity(value.every(({ from, to }) => validateDateMath(from) && validateDateMath(to)));
     },
     [value]
+  );
+
+  useEffect(
+    () => {
+      setValidity(!hasInvalidRange);
+    },
+    [hasInvalidRange]
   );
 
   const updateRanges = (rangeValues: DateRangeValuesModel[]) => {
@@ -122,9 +132,10 @@ function DateRangesParamEditor({
           'common.ui.aggTypes.dateRanges.removeRangeButtonAriaLabel',
           {
             defaultMessage: 'Remove the range of {from} to {to}',
-            values: { from, to },
+            values: { from: from || FROM_PLACEHOLDER, to: to || TO_PLACEHOLDER },
           }
         );
+        const areBothEmpty = !from && !to;
 
         return (
           <Fragment key={id}>
@@ -135,10 +146,12 @@ function DateRangesParamEditor({
                     defaultMessage: 'From',
                     description: 'Beginning of a date range, e.g. *From* 2018-02-26 To 2018-02-28',
                   })}
-                  value={isEmpty(from) ? '' : from}
-                  onChange={ev => onChangeRange(id, 'from', ev.target.value)}
+                  compressed
                   fullWidth={true}
-                  isInvalid={!validateDateMath(from)}
+                  isInvalid={areBothEmpty || !validateDateMath(from)}
+                  placeholder={FROM_PLACEHOLDER}
+                  value={from || ''}
+                  onChange={ev => onChangeRange(id, 'from', ev.target.value)}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -150,9 +163,12 @@ function DateRangesParamEditor({
                     defaultMessage: 'To',
                     description: 'End of a date range, e.g. From 2018-02-26 *To* 2018-02-28',
                   })}
-                  value={isEmpty(to) ? '' : to}
-                  onChange={ev => onChangeRange(id, 'to', ev.target.value)}
+                  compressed
                   fullWidth={true}
+                  isInvalid={areBothEmpty || !validateDateMath(to)}
+                  placeholder={TO_PLACEHOLDER}
+                  value={to || ''}
+                  onChange={ev => onChangeRange(id, 'to', ev.target.value)}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -170,6 +186,15 @@ function DateRangesParamEditor({
           </Fragment>
         );
       })}
+
+      {hasInvalidRange && (
+        <EuiFormErrorText>
+          <FormattedMessage
+            id="common.ui.aggTypes.dateRanges.errorMessage"
+            defaultMessage="Every range should have at least one valid date"
+          />
+        </EuiFormErrorText>
+      )}
 
       <EuiSpacer size="s" />
       <EuiFlexItem>
