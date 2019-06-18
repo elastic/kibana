@@ -18,15 +18,12 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-import { typesRegistry } from './type_registry';
 
-const functionsRegistry = npSetup.plugins.data.interpreter.functionsRegistry;
-const renderersRegistry = npSetup.plugins.data.interpreter.renderersRegistry;
-
-const registries = {
+export const functionsRegistry = npSetup.plugins.data.interpreter.functionsRegistry;
+export const renderersRegistry = npSetup.plugins.data.interpreter.renderersRegistry;
+export const typesRegistry = npSetup.plugins.data.interpreter.typesRegistry;
+export const registries = {
   browserFunctions: functionsRegistry,
   renderers: renderersRegistry,
   types: typesRegistry,
 };
-
-export { registries, typesRegistry, functionsRegistry, renderersRegistry };

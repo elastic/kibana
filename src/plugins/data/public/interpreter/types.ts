@@ -22,4 +22,5 @@ import { Registry } from '@kbn/interpreter/common';
 export interface InterpreterSetup {
   functionsRegistry: Registry<any, any>;
   renderersRegistry: Registry<any, any>;
+  typesRegistry: Registry<any, any>;
 }
