@@ -62,6 +62,7 @@ class DomainsComponentQuery extends QueryTemplate<
       domainsSortField,
       filterQuery,
       ip,
+      skip,
       sourceId,
       startDate,
       endDate,
@@ -74,6 +75,7 @@ class DomainsComponentQuery extends QueryTemplate<
         query={domainsQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
+        skip={skip}
         variables={{
           sourceId,
           timerange: {
