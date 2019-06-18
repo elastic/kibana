@@ -149,7 +149,7 @@ export class WebhookAction extends BaseAction {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonWebhookHostPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonWebhookHost} property',
+          defaultMessage: 'JSON argument must contain an {actionJsonWebhookHost} property',
           values: {
             actionJsonWebhookHost: 'actionJson.webhook.host'
           }
@@ -162,7 +162,7 @@ export class WebhookAction extends BaseAction {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonWebhookPortPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonWebhookPort} property',
+          defaultMessage: 'JSON argument must contain an {actionJsonWebhookPort} property',
           values: {
             actionJsonWebhookPort: 'actionJson.webhook.port'
           }

@@ -98,9 +98,9 @@ export class JiraAction extends BaseAction {
   });
   static iconClass = 'apps';
   static selectMessage = i18n.translate('xpack.watcher.models.jiraAction.selectMessageText', {
-    defaultMessage: 'Create issues in Atlassian’s Jira Software.',
+    defaultMessage: 'Create an issue in Atlassian’s Jira Software.',
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.jiraAction.simulateButtonLabel', {
-    defaultMessage: 'Create a sample Jira issue now'
+    defaultMessage: 'Create a sample Jira issue'
   });
 }

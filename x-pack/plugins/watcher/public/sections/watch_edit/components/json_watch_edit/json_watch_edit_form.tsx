@@ -130,7 +130,7 @@ export const JsonWatchEditForm = () => {
               (
               <EuiLink href={putWatchApiUrl} target="_blank">
                 {i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchJsonDocLink', {
-                  defaultMessage: 'Syntax',
+                  defaultMessage: 'API syntax',
                 })}
               </EuiLink>
               )
@@ -189,12 +189,12 @@ export const JsonWatchEditForm = () => {
               {watch.isNew ? (
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.json.createButtonLabel"
-                  defaultMessage="Create"
+                  defaultMessage="Create watch"
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.json.saveButtonLabel"
-                  defaultMessage="Save"
+                  defaultMessage="Save watch"
                 />
               )}
             </EuiButton>

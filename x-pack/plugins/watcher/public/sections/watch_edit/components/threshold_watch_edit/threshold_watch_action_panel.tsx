@@ -32,7 +32,7 @@ export const WatchActionsPanel: React.FunctionComponent<Props> = ({ actionErrors
             <h3>
               {i18n.translate('xpack.watcher.sections.watchEdit.actions.title', {
                 defaultMessage:
-                  'Will perform {watchActionsCount, plural, one{# action} other {# actions}} once met',
+                  'Perform {watchActionsCount, plural, one{# action} other {# actions}} when condition is met',
                 values: {
                   watchActionsCount: watch.actions.length,
                 },

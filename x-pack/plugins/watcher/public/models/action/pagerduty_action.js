@@ -71,10 +71,10 @@ export class PagerDutyAction extends BaseAction {
   });
   static iconClass = 'apps';
   static selectMessage = i18n.translate('xpack.watcher.models.pagerDutyAction.selectMessageText', {
-    defaultMessage: 'Create events in PagerDuty.',
+    defaultMessage: 'Create an event in PagerDuty.',
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.pagerDutyAction.simulateButtonLabel', {
-    defaultMessage: 'Test fire a PagerDuty event'
+    defaultMessage: 'Send a PagerDuty event'
   });
 }
 

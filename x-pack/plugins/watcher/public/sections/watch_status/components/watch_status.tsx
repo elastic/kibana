@@ -189,7 +189,7 @@ export const WatchStatus = ({
                   content={
                     <FormattedMessage
                       id="xpack.watcher.sections.watchDetail.headerBadgeToolipText"
-                      defaultMessage="System watches cannot be deactivated or deleted."
+                      defaultMessage="You cannot deactivate or delete a system watch."
                     />
                   }
                 >

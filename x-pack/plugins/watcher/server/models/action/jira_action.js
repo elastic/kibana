@@ -89,7 +89,7 @@ export class JiraAction extends BaseAction {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonJira} property',
+          defaultMessage: 'JSON argument must contain an {actionJsonJira} property',
           values: {
             actionJsonJira: 'actionJson.jira'
           }
@@ -103,7 +103,7 @@ export class JiraAction extends BaseAction {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraProjectKeyPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonJiraProjectKey} property',
+          defaultMessage: 'JSON argument must contain an {actionJsonJiraProjectKey} property',
           values: {
             actionJsonJiraProjectKey: 'actionJson.jira.fields.project.key'
           }
@@ -115,7 +115,7 @@ export class JiraAction extends BaseAction {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraIssueTypePropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonJiraIssueType} property',
+          defaultMessage: 'JSON argument must contain an {actionJsonJiraIssueType} property',
           values: {
             actionJsonJiraIssueType: 'actionJson.jira.fields.issuetype.name'
           }
@@ -127,7 +127,7 @@ export class JiraAction extends BaseAction {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.jiraAction.actionJsonJiraSummaryPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonJiraSummary} property',
+          defaultMessage: 'JSON argument must contain an {actionJsonJiraSummary} property',
           values: {
             actionJsonJiraSummary: 'actionJson.jira.fields.summary'
           }

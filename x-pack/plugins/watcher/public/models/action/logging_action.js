@@ -70,9 +70,9 @@ export class LoggingAction extends BaseAction {
   });
   static iconClass = 'loggingApp';
   static selectMessage = i18n.translate('xpack.watcher.models.loggingAction.selectMessageText', {
-    defaultMessage: 'Add a new item to the logs.',
+    defaultMessage: 'Add an item to the logs.',
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.loggingAction.simulateButtonLabel', {
-    defaultMessage: 'Log a sample message now',
+    defaultMessage: 'Log a sample message',
   });
 }

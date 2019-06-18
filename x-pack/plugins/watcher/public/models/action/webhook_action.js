@@ -135,9 +135,9 @@ export class WebhookAction extends BaseAction {
   });
   static iconClass = 'logoWebhook';
   static selectMessage = i18n.translate('xpack.watcher.models.webhookAction.selectMessageText', {
-    defaultMessage: 'Send a request to any web service.',
+    defaultMessage: 'Send a request to a web service.',
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.webhookAction.simulateButtonLabel', {
-    defaultMessage: 'Send request now',
+    defaultMessage: 'Send request',
   });
 }

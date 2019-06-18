@@ -101,9 +101,9 @@ export class EmailAction extends BaseAction {
   });
   static iconClass = 'email';
   static selectMessage = i18n.translate('xpack.watcher.models.emailAction.selectMessageText', {
-    defaultMessage: 'Send out an email from your server.',
+    defaultMessage: 'Send an email from your server.',
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.emailAction.simulateButtonLabel', {
-    defaultMessage: 'Test fire an email now'
+    defaultMessage: 'Send test email'
   });
 }

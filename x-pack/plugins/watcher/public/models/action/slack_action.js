@@ -85,6 +85,6 @@ export class SlackAction extends BaseAction {
     defaultMessage: 'Send a message to a Slack user or channel.'
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.slackAction.simulateButtonLabel', {
-    defaultMessage: 'Send a sample message now'
+    defaultMessage: 'Send a sample message'
   });
 }

@@ -68,14 +68,10 @@ const WatchListUi = () => {
   );
 
   const watcherDescriptionText = (
-    <EuiText color="subdued">
-      <p>
-        <FormattedMessage
-          id="xpack.watcher.sections.watchList.subhead"
-          defaultMessage="Use Watcher to watch for changes or anomalies in your data and perform the necessary actions in response."
-        />
-      </p>
-    </EuiText>
+    <FormattedMessage
+      id="xpack.watcher.sections.watchList.subhead"
+      defaultMessage="Watch for changes or anomalies in your data and take action if needed."
+    />
   );
 
   const createWatchContextMenu = (
@@ -129,7 +125,7 @@ const WatchListUi = () => {
                     <span>
                       <FormattedMessage
                         id="xpack.watcher.sections.watchList.createThresholdAlertButtonTooltip"
-                        defaultMessage="Send an alert on a specific condition"
+                        defaultMessage="Send an alert on a specified condition."
                       />
                     </span>
                   </EuiText>
@@ -148,7 +144,7 @@ const WatchListUi = () => {
                     <span>
                       <FormattedMessage
                         id="xpack.watcher.sections.watchList.createAdvancedWatchTooltip"
-                        defaultMessage="Set up a custom watch in raw JSON"
+                        defaultMessage="Set up a custom watch in JSON."
                       />
                     </span>
                   </EuiText>
@@ -171,16 +167,17 @@ const WatchListUi = () => {
 
   if (availableWatches && availableWatches.length === 0) {
     const emptyPromptBody = (
-      <Fragment>
-        {watcherDescriptionText}
-        {''}
-        <EuiLink href={watcherGettingStartedUrl} target="_blank">
-          <FormattedMessage
-            id="xpack.watcher.sections.watchList.watcherLearnMoreLinkText"
-            defaultMessage="Learn more."
-          />
-        </EuiLink>
-      </Fragment>
+      <EuiText color="subdued">
+        <p>
+          {watcherDescriptionText}{' '}
+          <EuiLink href={watcherGettingStartedUrl} target="_blank">
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.watcherLearnMoreLinkText"
+              defaultMessage="Learn more."
+            />
+          </EuiLink>
+        </p>
+      </EuiText>
     );
 
     return (
@@ -191,7 +188,7 @@ const WatchListUi = () => {
             <h1>
               <FormattedMessage
                 id="xpack.watcher.sections.watchList.emptyPromptTitle"
-                defaultMessage="You don't have any watches yet"
+                defaultMessage="You don’t have any watches yet"
               />
             </h1>
           }
@@ -446,7 +443,9 @@ const WatchListUi = () => {
 
       <EuiSpacer size="s" />
 
-      {watcherDescriptionText}
+      <EuiText color="subdued">
+        <p>{watcherDescriptionText}</p>
+      </EuiText>
 
       <EuiSpacer size="xl" />
 

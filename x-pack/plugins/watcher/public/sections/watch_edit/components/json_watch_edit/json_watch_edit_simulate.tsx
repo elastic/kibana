@@ -153,7 +153,7 @@ export const JsonWatchEditSimulate = ({
         <p>
           {i18n.translate('xpack.watcher.sections.watchEdit.simulate.pageDescription', {
             defaultMessage:
-              'Use the simulator to override the watch schedule, input results, conditions, and actions.',
+              'Use the simulator to override the watch schedule, condition, actions, and input results.',
           })}
         </p>
       </EuiText>
@@ -172,7 +172,7 @@ export const JsonWatchEditSimulate = ({
           description={i18n.translate(
             'xpack.watcher.sections.watchEdit.simulate.form.triggerOverridesDescription',
             {
-              defaultMessage: 'Schedule the time and date for starting the watch.',
+              defaultMessage: 'Set the time and date for starting the watch.',
             }
           )}
         >
