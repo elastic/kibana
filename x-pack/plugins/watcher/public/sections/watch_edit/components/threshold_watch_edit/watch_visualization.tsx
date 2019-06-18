@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import '@elastic/charts/dist/style.css';
 import {
   AnnotationDomainTypes,
   Axis,
