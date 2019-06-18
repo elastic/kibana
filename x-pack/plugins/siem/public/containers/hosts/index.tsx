@@ -78,6 +78,7 @@ class HostsComponentQuery extends QueryTemplate<
       endDate,
       limit,
       startDate,
+      skip,
       sourceId,
       sortField,
     } = this.props;
@@ -106,6 +107,7 @@ class HostsComponentQuery extends QueryTemplate<
         fetchPolicy="cache-first"
         notifyOnNetworkStatusChange
         variables={variables}
+        skip={skip}
       >
         {({ data, loading, fetchMore, refetch }) => {
           this.setFetchMore(fetchMore);

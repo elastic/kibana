@@ -50,6 +50,7 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
       tlsSortField,
       filterQuery,
       ip,
+      skip,
       sourceId,
       startDate,
       endDate,
@@ -61,6 +62,7 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
         query={tlsQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
+        skip={skip}
         variables={{
           sourceId,
           timerange: {
