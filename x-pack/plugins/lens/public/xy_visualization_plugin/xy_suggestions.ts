@@ -74,7 +74,7 @@ function getSuggestion(
 
   // TODO: Localize the title, label, etc
   const preposition = isDate ? 'over' : 'of';
-  const title = `${yTitle} ${preposition} ${xTitle}`;
+  const title = `${isDate ? 'Line:' : 'Bar:'} ${yTitle} ${preposition} ${xTitle}`;
   return {
     title,
     score: 1,

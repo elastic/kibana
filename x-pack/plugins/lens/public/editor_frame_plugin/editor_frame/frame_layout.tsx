@@ -22,7 +22,7 @@ export function FrameLayout(props: FrameLayoutProps) {
         {/* TODO style this and add workspace prop and loading flags */}
         <EuiFlexItem grow={null}>{props.dataPanel}</EuiFlexItem>
         <EuiFlexItem grow={5}>{props.workspacePanel}</EuiFlexItem>
-        <EuiFlexItem grow={null}>
+        <EuiFlexItem grow={2}>
           {props.configPanel}
           {props.suggestionsPanel}
         </EuiFlexItem>

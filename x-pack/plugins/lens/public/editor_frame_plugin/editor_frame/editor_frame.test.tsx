@@ -520,7 +520,7 @@ Object {
       expect(mockVisualization2.initialize).toHaveBeenCalled();
     });
 
-    it('should call visualization render with new state on switch', async () => {
+    it('should use suggestions to switch to new visualization', async () => {
       const initialState = {};
       mockVisualization2.initialize = () => initialState;
 
@@ -530,6 +530,8 @@ Object {
           .simulate('change', { target: { value: 'testVis2' } });
       });
 
+      expect(mockDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
+      expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({ state: initialState })
