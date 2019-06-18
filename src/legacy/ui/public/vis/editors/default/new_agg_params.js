@@ -26,6 +26,8 @@ uiModules
   .directive('visAggParamsReactWrapper', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggParams), [
     ['agg', { watchDepth: 'collection' }],
     ['aggType', { watchDepth: 'reference' }],
+    ['aggParams', { watchDepth: 'collection' }],
+    ['config', { watchDepth: 'reference' }],
     ['indexPattern', { watchDepth: 'reference' }],
     ['responseValueAggs', { watchDepth: 'reference' }],
     ['vis', { watchDepth: 'reference' }],
@@ -50,7 +52,9 @@ uiModules
             agg="agg"
             agg-index="aggIndex"
             agg-is-too-low="aggIsTooLow"
+            agg-params="agg.params"
             agg-type="agg.type"
+            config="config"
             form-is-touched="formIsTouched"
             group-name="groupName"
             index-pattern="indexPattern"

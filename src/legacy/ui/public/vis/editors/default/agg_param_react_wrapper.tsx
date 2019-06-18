@@ -47,7 +47,7 @@ function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
       agg={agg}
       aggParam={aggParam}
       setValidity={setValidity}
-      setValue={onChange}
+      setValue={(value: T) => onChange(agg, aggParam.name, value)}
       {...rest}
     />
   );

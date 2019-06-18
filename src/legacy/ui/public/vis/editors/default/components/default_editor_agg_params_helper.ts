@@ -20,16 +20,18 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AggConfig, Vis } from 'ui/vis';
-import { aggTypeFieldFilters } from '../../../../agg_types/param_types/filter';
+import { aggTypeFilters } from 'ui/agg_types/filter';
+// @ts-ignore
+import { aggTypes } from 'ui/agg_types';
+import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 import { groupAggregationsBy } from '../default_editor_utils';
 
 function getAggParamsToRender(
   agg: AggConfig,
   editorConfig: any,
+  config: any,
   vis: Vis,
-  responseValueAggs: any,
-  aggParams: any,
-  onChangeAggParams: any
+  responseValueAggs: any
 ) {
   const params = {
     basic: [] as any,
@@ -63,24 +65,16 @@ function getAggParamsToRender(
     const type = param.advanced ? 'advanced' : 'basic';
 
     if (param.editorComponent) {
-      const aggParam = aggParams[param.name] || {};
       params[type].push({
-        aggParam: param,
-        paramEditor: param.editorComponent,
-        indexedFields,
-        onChange: (value: any) =>
-          onChangeAggParams({ type: 'agg_params_value', paramName: param.name, value }),
-        setValidity: (validity: boolean) =>
-          onChangeAggParams({ type: 'agg_params_validity', paramName: param.name, validity }),
-        setTouched: () =>
-          onChangeAggParams({ type: 'agg_params_touched', paramName: param.name, touched: true }),
         agg,
-        config: {},
+        aggParam: param,
+        config,
         editorConfig,
-        showValidation: aggParam.touched ? !aggParam.validity : false,
-        value: aggParam.value,
-        visName: vis.type.name,
+        indexedFields,
+        paramEditor: param.editorComponent,
         responseValueAggs,
+        value: agg.params[param.name],
+        visName: vis.type.name,
       } as any);
     }
   });
@@ -115,4 +109,9 @@ function getError(agg: AggConfig, aggIsTooLow: boolean) {
   return errors;
 }
 
-export { getAggParamsToRender, getError };
+function getAggTypeOptions(agg: AggConfig, indexPattern: any, groupName: string) {
+  const aggTypeOptions = aggTypeFilters.filter(aggTypes.byType[groupName], indexPattern, agg);
+  return groupAggregationsBy(aggTypeOptions, 'subtype');
+}
+
+export { getAggParamsToRender, getError, getAggTypeOptions };
