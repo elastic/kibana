@@ -10,6 +10,7 @@ import ReactDOM from 'react-dom';
 import { NavigationMenu } from './navigation_menu';
 import { isFullLicense } from '../../license/check_license';
 import { timefilter } from 'ui/timefilter';
+// import { timefilter } from '../../../common/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');

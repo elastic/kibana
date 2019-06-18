@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useState } from 'react';
+import React, { SFC, useState, useEffect } from 'react';
+// import { Subscription } from 'rxjs';
 import { EuiSuperDatePicker } from '@elastic/eui';
 // import { i18n } from '@kbn/i18n';
+import { Timefilter } from 'src/legacy/ui/public/timefilter';
+import { timefilter$, TIMEFILTER, Action } from '../../../../common/timefilter';
 
 interface Props {
   timefilter: any;
@@ -29,11 +32,38 @@ export const TopNav: SFC<Props> = ({ timefilter, timeHistory }) => {
   // isAutoRefreshSelectorEnabled: timefilter.isAutoRefreshSelectorEnabled,
   // isTimeRangeSelectorEnabled: timefilter.isTimeRangeSelectorEnabled,
 
+  useEffect(() => {
+    const subscription = timefilter$.subscribe(timefilterUpdateListener);
+
+    return function cleanup() {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  function timefilterUpdateListener({
+    action,
+    payload,
+  }: {
+    action: Action;
+    payload: Timefilter['time'];
+  }) {
+    switch (action) {
+      case TIMEFILTER.SET_REFRESH_INTERVAL:
+      case TIMEFILTER.SET_TIME:
+        setTime(payload);
+      default:
+        return;
+    }
+  }
+
   function updateFilter({ start, end }: { start: string; end: string }) {
+    const newTime = { from: start, to: end };
     // Update timefilter for controllers listening for changes
-    timefilter.setTime({ from: start, to: end });
+    timefilter.setTime(newTime);
+    // TODO: topNav will eventually depend on the timefilter wrapper so this will be removed
+    timefilter$.next({ action: TIMEFILTER.SET_TIME, payload: newTime });
     // Update state
-    setTime({ from: start, to: end });
+    setTime(newTime);
     setRecentlyUsedRanges(getRecentlyUsedRanges(timeHistory));
   }
 
@@ -44,18 +74,22 @@ export const TopNav: SFC<Props> = ({ timefilter, timeHistory }) => {
     isPaused: boolean;
     refreshInterval: number;
   }) {
-    // Update timefilter for controllers listening for changes
-    timefilter.setRefreshInterval({
+    const newInterval = {
       pause: isPaused,
       value: interval,
+    };
+    // Update timefilter for controllers listening for changes
+    timefilter.setRefreshInterval(newInterval);
+    // TODO: topNav will eventually depend on the timefilter wrapper so this will be removed
+    timefilter$.next({
+      action: TIMEFILTER.SET_REFRESH_INTERVAL,
+      payload: newInterval,
     });
     // Update state
-    setRefreshInterval({
-      pause: isPaused,
-      value: interval,
-    });
+    setRefreshInterval(newInterval);
   }
-
+  // TODO: ng-if="timefilterValues.isAutoRefreshSelectorEnabled || timefilterValues.isTimeRangeSelectorEnabled"
+  // duplicate this behavior of conditional display from kbn_global_timepicker.html
   return (
     <EuiSuperDatePicker
       start={time.from}
@@ -67,6 +101,7 @@ export const TopNav: SFC<Props> = ({ timefilter, timeHistory }) => {
       onRefresh={updateFilter}
       onRefreshChange={updateInterval}
       recentlyUsedRanges={recentlyUsedRanges}
+      // date-format="dateFormat"
       // showUpdateButton={true}
     />
   );
