@@ -90,10 +90,10 @@ export function getESClient(req: Legacy.Request) {
   const query = (req.query as unknown) as APMRequestQuery;
 
   return {
-    search: async <Hits = unknown, Aggs = unknown>(
-      params: SearchParams,
+    search: async <Hits = unknown, U extends SearchParams = {}>(
+      params: U,
       apmOptions?: APMOptions
-    ): Promise<AggregationSearchResponse<Hits, Aggs>> => {
+    ): Promise<AggregationSearchResponse<Hits, U>> => {
       const nextParams = await getParamsForSearchRequest(
         req,
         params,
@@ -112,7 +112,7 @@ export function getESClient(req: Legacy.Request) {
       }
 
       return cluster.callWithRequest(req, 'search', nextParams) as Promise<
-        AggregationSearchResponse<Hits, Aggs>
+        AggregationSearchResponse<Hits, U>
       >;
     },
     index: <Body>(params: IndexDocumentParams<Body>) => {

@@ -6,6 +6,6 @@
 
 export let mlLog = () => {};
 
-export function initMlServerLog(server) {
-  mlLog = (level, message) => server.log(['ml', level], message);
+export function initMlServerLog(log) {
+  mlLog = (level, message) => log(['ml', level], message);
 }

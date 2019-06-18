@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientWrapperFactory } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientWrapperFactory } from 'src/core/server';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 
