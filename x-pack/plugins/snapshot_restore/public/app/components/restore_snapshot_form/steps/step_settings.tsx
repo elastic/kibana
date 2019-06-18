@@ -7,18 +7,17 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiCode,
+  EuiCodeEditor,
   EuiComboBox,
   EuiDescribedFormGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldText,
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import { RestoreSettings } from '../../../../../common/types';
-import { ALLOWED_INDEX_SETTINGS } from '../../../constants';
+import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
 import { StepProps } from './';
 
 export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
@@ -39,15 +38,21 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
     ignoreIndexSettings: ignoreIndexSettings ? [...ignoreIndexSettings] : [],
   });
 
-  // Settings for ignore settings combobox suggestions, using a state because users can add custom settings
+  // State for raw (string) input for modify index settings
+  const [rawIndexSettings, setRawIndexSettings] = useState<string>(
+    JSON.stringify(cachedRestoreSettings.indexSettings, null, 2)
+  );
+  const [isRawIndexSettingsValid, setIsRawIndexSettingsValid] = useState<boolean>(true);
+
+  // List of settings for ignore settings combobox suggestions, using a state because users can add custom settings
   const [ignoreIndexSettingsOptions, setIgnoreIndexSettingsOptions] = useState<
     Array<{ label: string }>
   >(
-    [...new Set((ignoreIndexSettings || []).concat([...ALLOWED_INDEX_SETTINGS].sort()))].map(
-      setting => ({
-        label: setting,
-      })
-    )
+    [
+      ...new Set((ignoreIndexSettings || []).concat([...REMOVE_INDEX_SETTINGS_SUGGESTIONS].sort())),
+    ].map(setting => ({
+      label: setting,
+    }))
   );
 
   return (
@@ -58,7 +63,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsTitle"
-                defaultMessage="Index settings"
+                defaultMessage="Modify index settings"
               />
             </h3>
           </EuiTitle>
@@ -66,7 +71,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsDescription"
-            defaultMessage="Override some index settings during the restore process."
+            defaultMessage="Modify some index settings during the restore process."
           />
         }
         idAria="stepSettingsIndexSettingsDescription"
@@ -83,7 +88,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
               label={
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsLabel"
-                  defaultMessage="Override index settings"
+                  defaultMessage="Modify index settings"
                 />
               }
               checked={isUsingIndexSettings}
@@ -100,7 +105,77 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                 }
               }}
             />
-            {!isUsingIndexSettings ? null : <Fragment>settings thing here</Fragment>}
+            {!isUsingIndexSettings ? null : (
+              <Fragment>
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsEditorLabel"
+                      defaultMessage="Index settings"
+                    />
+                  }
+                  fullWidth
+                  describedByIds={['stepSettingsIndexSettingsDescription']}
+                  isInvalid={!isRawIndexSettingsValid}
+                  error={
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsEditorFormatError"
+                      defaultMessage="Invalid JSON format"
+                    />
+                  }
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsEditorDescription"
+                      defaultMessage="Use JSON format: {format}"
+                      values={{
+                        format: <EuiCode>{'{ "index.number_of_replicas": 0 }'}</EuiCode>,
+                      }}
+                    />
+                  }
+                >
+                  <EuiCodeEditor
+                    mode="json"
+                    theme="textmate"
+                    width="100%"
+                    value={rawIndexSettings}
+                    setOptions={{
+                      showLineNumbers: false,
+                      tabSize: 2,
+                      maxLines: Infinity,
+                    }}
+                    editorProps={{
+                      $blockScrolling: Infinity,
+                    }}
+                    showGutter={false}
+                    minLines={6}
+                    maxLines={15}
+                    aria-label={
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsAriaLabel"
+                        defaultMessage="Index settings to modify"
+                      />
+                    }
+                    onChange={(value: string) => {
+                      setRawIndexSettings(value);
+                      try {
+                        const parsedSettings = JSON.parse(value);
+                        setIsRawIndexSettingsValid(true);
+                        updateRestoreSettings({
+                          indexSettings: parsedSettings,
+                        });
+                        setCachedRestoreSettings({
+                          ...cachedRestoreSettings,
+                          indexSettings: parsedSettings,
+                        });
+                      } catch (e) {
+                        setIsRawIndexSettingsValid(false);
+                      }
+                    }}
+                  />
+                </EuiFormRow>
+              </Fragment>
+            )}
           </Fragment>
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -111,7 +186,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepSettings.ignoreIndexSettingsTitle"
-                defaultMessage="Ignore index settings"
+                defaultMessage="Reset index settings"
               />
             </h3>
           </EuiTitle>
@@ -119,7 +194,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepSettings.ignoreIndexSettingsDescription"
-            defaultMessage="Set some index settings back to default during the restore process."
+            defaultMessage="Reset some index settings back to default during the restore process."
           />
         }
         idAria="stepSettingsIgnoreIndexSettingsDescription"
@@ -136,7 +211,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
               label={
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.stepSettings.ignoreIndexSettingsLabel"
-                  defaultMessage="Ignore index settings"
+                  defaultMessage="Reset index settings"
                 />
               }
               checked={isUsingIgnoreIndexSettings}
@@ -182,7 +257,10 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                     onChange={selectedOptions => {
                       const newIgnoreIndexSettings = selectedOptions.map(({ label }) => label);
                       updateRestoreSettings({ ignoreIndexSettings: newIgnoreIndexSettings });
-                      setCachedRestoreSettings({ ignoreIndexSettings: newIgnoreIndexSettings });
+                      setCachedRestoreSettings({
+                        ...cachedRestoreSettings,
+                        ignoreIndexSettings: newIgnoreIndexSettings,
+                      });
                     }}
                     onCreateOption={(
                       newIndexSetting: string,
@@ -209,6 +287,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                         ],
                       });
                       setCachedRestoreSettings({
+                        ...cachedRestoreSettings,
                         ignoreIndexSettings: [
                           ...(ignoreIndexSettings || []),
                           normalizedSettingName,

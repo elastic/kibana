@@ -31,7 +31,8 @@ export enum SNAPSHOT_STATE {
   INCOMPATIBLE = 'INCOMPATIBLE',
 }
 
-export const ALLOWED_INDEX_SETTINGS: string[] = [
+const INDEX_SETTING_SUGGESTIONS: string[] = [
+  'index.number_of_shards',
   'index.shard.check_on_startup',
   'index.codec',
   'index.routing_partition_size',
@@ -62,6 +63,28 @@ export const ALLOWED_INDEX_SETTINGS: string[] = [
   'index.gc_deletes',
   'index.default_pipeline',
 ];
+
+export const UNMODIFIABLE_INDEX_SETTINGS: string[] = [
+  'index.number_of_shards',
+  'index.version.created',
+  'index.uuid',
+  'index.creation_date',
+];
+
+export const UNREMOVABLE_INDEX_SETTINGS: string[] = [
+  ...UNMODIFIABLE_INDEX_SETTINGS,
+  'index.number_of_replicas',
+  'index.auto_expand_replicas',
+  'index.version.upgraded',
+];
+
+export const MODIFY_INDEX_SETTINGS_SUGGESTIONS: string[] = INDEX_SETTING_SUGGESTIONS.filter(
+  setting => !UNMODIFIABLE_INDEX_SETTINGS.includes(setting)
+);
+
+export const REMOVE_INDEX_SETTINGS_SUGGESTIONS: string[] = INDEX_SETTING_SUGGESTIONS.filter(
+  setting => !UNREMOVABLE_INDEX_SETTINGS.includes(setting)
+);
 
 // UI Metric constants
 export const UIM_APP_NAME = 'snapshot_restore';
