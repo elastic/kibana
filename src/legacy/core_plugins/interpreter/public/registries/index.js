@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { npSetup } from 'ui/new_platform';
 import { typesRegistry } from './type_registry';
-import { functionsRegistry } from './functions_registry';
 import { renderersRegistry } from './renderer_registry';
+
+const functionsRegistry = npSetup.plugins.data.interpreter.functionsRegistry;
 
 const registries = {
   browserFunctions: functionsRegistry,

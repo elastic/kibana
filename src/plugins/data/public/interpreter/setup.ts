@@ -22,11 +22,8 @@ import { InterpreterSetup } from './types';
 
 export const setup = (): InterpreterSetup => {
   const functionsRegistry = new FunctionsRegistry();
-
-  const addFunction: InterpreterSetup['addFunction'] = func => functionsRegistry.register(func);
-
   const api: InterpreterSetup = {
-    addFunction,
+    functionsRegistry,
   };
 
   return api;
