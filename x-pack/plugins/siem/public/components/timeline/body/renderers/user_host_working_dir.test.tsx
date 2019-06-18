@@ -39,7 +39,7 @@ describe('UserHostWorkingDir', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if userName, hostName, and workingDirectory are all undefined', () => {
@@ -54,7 +54,7 @@ describe('UserHostWorkingDir', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toBeNull();
+      expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns userName if that is the only attribute defined', () => {
