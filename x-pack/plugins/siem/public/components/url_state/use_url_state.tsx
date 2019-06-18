@@ -5,7 +5,7 @@
  */
 
 import { Location } from 'history';
-import { throttle, get } from 'lodash/fp';
+import { throttle, get, isEqual } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
 
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
@@ -197,18 +197,17 @@ export const useUrlStateHooks = ({
     if (isInitializing) {
       setIsInitializing(false);
       handleInitialize(initializeLocation(location));
-    } else if (JSON.stringify(urlState) !== JSON.stringify(prevProps.urlState)) {
+    } else if (!isEqual(urlState, prevProps.urlState)) {
       URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
-        if (
-          urlState[urlKey] &&
-          JSON.stringify(urlState[urlKey]) !== JSON.stringify(prevProps.urlState[urlKey])
-        ) {
+        if (urlState[urlKey] && !isEqual(urlState[urlKey], prevProps.urlState[urlKey])) {
           if (urlKey === CONSTANTS.kqlQuery) {
             LOCATION_KEYS.forEach((queryLocation: LocationKeysType) => {
               if (
                 !!urlState[CONSTANTS.kqlQuery][queryLocation] &&
-                JSON.stringify(urlState[CONSTANTS.kqlQuery][queryLocation]) !==
-                  JSON.stringify(prevProps.urlState[CONSTANTS.kqlQuery][queryLocation])
+                !isEqual(
+                  urlState[CONSTANTS.kqlQuery][queryLocation],
+                  prevProps.urlState[CONSTANTS.kqlQuery][queryLocation]
+                )
               ) {
                 replaceStateInLocation(
                   urlState[CONSTANTS.kqlQuery][queryLocation],
