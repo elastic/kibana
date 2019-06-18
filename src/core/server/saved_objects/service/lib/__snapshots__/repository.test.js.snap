@@ -1,5 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be defined 1`] = `"namespace is required, and must be of type Namespace"`;
+exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be defined 1`] = `"namespace is required, and must be of type SavedObjectsNamespace"`;
 
-exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be of type Namespace 1`] = `"namespace is required, and must be of type Namespace"`;
+exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be of type Namespace 1`] = `"namespace is required, and must be of type SavedObjectsNamespace"`;

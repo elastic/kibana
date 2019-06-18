@@ -147,6 +147,23 @@ describe('searchDsl/queryParams', () => {
         },
       });
     });
+
+    it('includes a terms filter for type and empty namespace', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, new SavedObjectsNamespace(), 'saved')).toEqual({
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [createTypeClause('saved')],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
   });
 
   describe('type (singular, global)', () => {
@@ -166,11 +183,47 @@ describe('searchDsl/queryParams', () => {
         },
       });
     });
+
+    it('includes a terms filter for type and empty namespace', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, new SavedObjectsNamespace(), 'global')).toEqual({
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [createTypeClause('global')],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
   });
 
   describe('type (plural, namespaced and global)', () => {
     it('includes term filters for types and namespace not being specified', () => {
       expect(getQueryParams(MAPPINGS, SCHEMA, undefined, ['saved', 'global'])).toEqual({
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [createTypeClause('saved'), createTypeClause('global')],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('includes term filters for types and empty namespace', () => {
+      expect(
+        getQueryParams(MAPPINGS, SCHEMA, new SavedObjectsNamespace(), ['saved', 'global'])
+      ).toEqual({
         query: {
           bool: {
             filter: [
