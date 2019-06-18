@@ -10,7 +10,7 @@ import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper'
 import { getFunctionErrors } from '../../../strings/functions';
 import { testTable } from './fixtures/test_tables';
 
-const errors = getFunctionErrors().getCell;
+const errors = getFunctionErrors().joinRows;
 
 describe('joinRows', () => {
   const fn = functionWrapper(joinRows);
