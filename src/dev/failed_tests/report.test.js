@@ -76,7 +76,7 @@ Array [
 Array [
   Array [
     "Ignoring likely irrelevant failure: Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps - maps app \\"after all\\" hook
-
+    
           { NoSuchSessionError: This driver instance does not have a valid session ID (did you call WebDriver.quit()?) and may no longer be used.
       at promise.finally (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/webdriver.js:726:38)
       at Object.thenFinally [as finally] (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/promise.js:124:12)
@@ -121,7 +121,7 @@ Wait timed out after 10055ms
 Array [
   Array [
     "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"before all\\" hook
-
+    
           Error: Unable to read artifact info from https://artifacts-api.elastic.co/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
     <html>
   <head><title>503 Service Temporarily Unavailable</title></head>
@@ -130,14 +130,14 @@ Array [
   <hr><center>nginx/1.13.7</center>
   </body>
   </html>
-
+  
       at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/packages/kbn-es/src/artifact.js:95:13)
       at process._tickCallback (internal/process/next_tick.js:68:7)
         ",
   ],
   Array [
     "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"after all\\" hook
-
+    
           TypeError: Cannot read property 'shutdown' of undefined
       at Context.shutdown (plugins/code/server/__tests__/multi_node.ts:125:23)
       at process.topLevelDomainCallback (domain.js:120:23)
