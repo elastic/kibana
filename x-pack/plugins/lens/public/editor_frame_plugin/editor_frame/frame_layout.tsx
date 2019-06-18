@@ -13,11 +13,13 @@ export interface FrameLayoutProps {
   configPanel?: React.ReactNode;
   suggestionsPanel?: React.ReactNode;
   workspacePanel?: React.ReactNode;
+  navPanel?: React.ReactNode;
 }
 
 export function FrameLayout(props: FrameLayoutProps) {
   return (
     <RootDragDropProvider>
+      {props.navPanel}
       <EuiFlexGroup>
         {/* TODO style this and add workspace prop and loading flags */}
         <EuiFlexItem grow={null}>{props.dataPanel}</EuiFlexItem>
