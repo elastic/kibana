@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get as lodashGet } from 'lodash';
 import chrome from 'ui/chrome';
 import { xpackInfoSignature } from './xpack_info_signature';
 import { convertKeysToCamelCaseDeep } from '../../../../server/lib/key_case_converter';
@@ -20,18 +20,18 @@ const setAll = (updatedXPackInfo) => {
   sessionStorage.setItem(XPACK_INFO_KEY, JSON.stringify(camelCasedXPackInfo));
 };
 
+const get = (path, defaultValue = undefined) => {
+  const xpackInfoValuesJson = sessionStorage.getItem(XPACK_INFO_KEY);
+  const xpackInfoValues = xpackInfoValuesJson ? JSON.parse(xpackInfoValuesJson) : {};
+  return lodashGet(xpackInfoValues, path, defaultValue);
+};
+
 export function xpackInfoService($injector) {
   setAll(chrome.getInjected('xpackInitialInfo') || {});
 
   return {
-    get: (path, defaultValue = undefined) => {
-      const xpackInfoValuesJson = sessionStorage.getItem(XPACK_INFO_KEY);
-      const xpackInfoValues = xpackInfoValuesJson ? JSON.parse(xpackInfoValuesJson) : {};
-      return get(xpackInfoValues, path, defaultValue);
-    },
-
+    get,
     setAll,
-
     clear: () => {
       sessionStorage.removeItem(XPACK_INFO_KEY);
     },
@@ -65,7 +65,7 @@ export function xpackInfoService($injector) {
     },
 
     getLicense: () => {
-      return this.get('license', {
+      return get('license', {
         isActive: false,
         type: undefined,
         expiryDateInMillis: undefined,
