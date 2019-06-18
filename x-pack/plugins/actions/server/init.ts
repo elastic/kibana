@@ -8,7 +8,7 @@ import { Legacy } from 'kibana';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createFireFunction } from './create_fire_function';
-import { ActionsPlugin } from './types';
+import { ActionsPlugin, Services } from './types';
 import {
   createRoute,
   deleteRoute,
@@ -21,23 +21,38 @@ import {
 import { registerBuiltInActionTypes } from './builtin_action_types';
 
 export function init(server: Legacy.Server) {
-  const actionsEnabled = server.config().get('xpack.actions.enabled');
-
-  if (!actionsEnabled) {
-    server.log(['info', 'actions'], 'Actions app disabled by configuration');
-    return;
-  }
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
+    callWithInternalUser
+  );
 
   // Encrypted attributes
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'action',
     attributesToEncrypt: new Set(['actionTypeConfigSecrets']),
+    attributesToExcludeFromAAD: new Set(['description']),
   });
 
-  const actionTypeRegistry = new ActionTypeRegistry({
-    services: {
+  function getServices(basePath: string): Services {
+    // Fake request is here to allow creating a scoped saved objects client
+    // and use it when security is disabled. This will be replaced when the
+    // future phase of API tokens is complete.
+    const fakeRequest: any = {
+      headers: {},
+      getBasePath: () => basePath,
+    };
+    return {
       log: server.log,
-    },
+      callCluster: callWithInternalUser,
+      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
+    };
+  }
+
+  const { taskManager } = server;
+  const actionTypeRegistry = new ActionTypeRegistry({
+    getServices,
+    taskManager: taskManager!,
+    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
   });
 
   registerBuiltInActionTypes(actionTypeRegistry);
@@ -51,8 +66,8 @@ export function init(server: Legacy.Server) {
   listActionTypesRoute(server);
 
   const fireFn = createFireFunction({
-    actionTypeRegistry,
-    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
+    taskManager: taskManager!,
+    internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
   });
 
   // Expose functions to server

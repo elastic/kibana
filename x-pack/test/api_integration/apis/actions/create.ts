@@ -15,46 +15,17 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
   describe('create', () => {
     after(() => esArchiver.unload('empty_kibana'));
 
-    it('should return 200 when creating an action', async () => {
+    it('should return 200 when creating an action and not return encrypted attributes', async () => {
       await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
             description: 'My action',
-            actionTypeId: 'test',
-            actionTypeConfig: {},
-          },
-        })
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            type: 'action',
-            id: resp.body.id,
-            attributes: {
-              description: 'My action',
-              actionTypeId: 'test',
-              actionTypeConfig: {},
-            },
-            references: [],
-            updated_at: resp.body.updated_at,
-            version: resp.body.version,
-          });
-          expect(typeof resp.body.id).to.be('string');
-        });
-    });
-
-    it('should not return encrypted attributes', async () => {
-      await supertest
-        .post('/api/action')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            description: 'My action',
-            actionTypeId: 'test',
+            actionTypeId: 'test.index-record',
             actionTypeConfig: {
-              unencrypted: 'unencrypted text',
-              encrypted: 'something encrypted',
+              unencrypted: `This value shouldn't get encrypted`,
+              encrypted: 'This value should be encrypted',
             },
           },
         })
@@ -65,9 +36,9 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
             id: resp.body.id,
             attributes: {
               description: 'My action',
-              actionTypeId: 'test',
+              actionTypeId: 'test.index-record',
               actionTypeConfig: {
-                unencrypted: 'unencrypted text',
+                unencrypted: `This value shouldn't get encrypted`,
               },
             },
             references: [],
@@ -85,7 +56,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .send({
           attributes: {
             description: 'My action',
-            actionTypeId: 'unregistered-action-type',
+            actionTypeId: 'test.unregistered-action-type',
             actionTypeConfig: {},
           },
         })
@@ -94,7 +65,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Action type "unregistered-action-type" is not registered.',
+            message: 'Action type "test.unregistered-action-type" is not registered.',
           });
         });
     });
@@ -131,11 +102,39 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'child "attributes" fails because [child "description" fails because ["description" is required], child "actionTypeId" fails because ["actionTypeId" is required]]',
+              'child "attributes" fails because [child "description" fails because ["description" is required], child "actionTypeId" fails because ["actionTypeId" is required], child "actionTypeConfig" fails because ["actionTypeConfig" is required]]',
             validation: {
               source: 'payload',
-              keys: ['attributes.description', 'attributes.actionTypeId'],
+              keys: [
+                'attributes.description',
+                'attributes.actionTypeId',
+                'attributes.actionTypeConfig',
+              ],
             },
+          });
+        });
+    });
+
+    it(`should return 400 when actionTypeConfig isn't valid`, async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'my description',
+            actionTypeId: 'test.index-record',
+            actionTypeConfig: {
+              unencrypted: 'my unencrypted text',
+            },
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'The following actionTypeConfig attributes are invalid: encrypted [any.required]',
           });
         });
     });

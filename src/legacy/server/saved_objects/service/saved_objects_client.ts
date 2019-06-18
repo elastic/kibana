@@ -98,8 +98,17 @@ export interface MigrationVersion {
   [pluginName: string]: string;
 }
 
+export type SavedObjectAttribute =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | SavedObjectAttributes
+  | SavedObjectAttributes[];
+
 export interface SavedObjectAttributes {
-  [key: string]: SavedObjectAttributes | string | number | boolean | null;
+  [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
 }
 
 export interface VisualizationAttributes extends SavedObjectAttributes {

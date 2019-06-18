@@ -42,6 +42,7 @@ import { ossTelemetry } from './plugins/oss_telemetry';
 import { encryptedSavedObjects } from './plugins/encrypted_saved_objects';
 import { snapshotRestore } from './plugins/snapshot_restore';
 import { actions } from './plugins/actions';
+import { alerting } from './plugins/alerting';
 
 module.exports = function (kibana) {
   return [
@@ -83,5 +84,6 @@ module.exports = function (kibana) {
     encryptedSavedObjects(kibana),
     snapshotRestore(kibana),
     actions(kibana),
+    alerting(kibana),
   ];
 };

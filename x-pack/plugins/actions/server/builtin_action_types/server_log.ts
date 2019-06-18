@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 
-import { ActionType, ExecutorOptions } from '../action_type_registry';
+import { ActionType, ActionTypeExecutorOptions } from '../types';
 
 const DEFAULT_TAGS = ['info', 'alerting'];
 
@@ -27,7 +27,7 @@ export const actionType: ActionType = {
   executor,
 };
 
-async function executor({ params, services }: ExecutorOptions): Promise<any> {
+async function executor({ params, services }: ActionTypeExecutorOptions): Promise<any> {
   const { message, tags } = params;
 
   services.log(tags, message);

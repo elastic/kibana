@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/legacy/server/saved_objects';
 import { ActionTypeRegistry } from './action_type_registry';
 import { SavedObjectReference } from './types';
+import { validateActionTypeConfig } from './lib';
 
-interface Action {
+interface Action extends SavedObjectAttributes {
   description: string;
   actionTypeId: string;
-  actionTypeConfig: Record<string, any>;
+  actionTypeConfig: SavedObjectAttributes;
 }
 
 interface CreateOptions {
@@ -40,18 +41,21 @@ interface FindOptions {
 
 interface ConstructorOptions {
   actionTypeRegistry: ActionTypeRegistry;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface UpdateOptions {
   id: string;
-  data: Action;
+  data: {
+    description: string;
+    actionTypeConfig: SavedObjectAttributes;
+  };
   options: { version?: string; references?: SavedObjectReference[] };
 }
 
 export class ActionsClient {
-  private savedObjectsClient: SavedObjectsClient;
-  private actionTypeRegistry: ActionTypeRegistry;
+  private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly actionTypeRegistry: ActionTypeRegistry;
 
   constructor({ actionTypeRegistry, savedObjectsClient }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
@@ -63,8 +67,15 @@ export class ActionsClient {
    */
   public async create({ data, options }: CreateOptions) {
     const { actionTypeId } = data;
-    this.actionTypeRegistry.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
-    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(data);
+    const actionType = this.actionTypeRegistry.get(actionTypeId);
+    const validatedActionTypeConfig = validateActionTypeConfig(actionType, data.actionTypeConfig);
+    const actionWithSplitActionTypeConfig = this.moveEncryptedAttributesToSecrets(
+      actionType.unencryptedAttributes,
+      {
+        ...data,
+        actionTypeConfig: validatedActionTypeConfig,
+      }
+    );
     return await this.savedObjectsClient.create('action', actionWithSplitActionTypeConfig, options);
   }
 
@@ -96,37 +107,37 @@ export class ActionsClient {
    * Update action
    */
   public async update({ id, data, options = {} }: UpdateOptions) {
-    const { actionTypeId } = data;
-    // Throws an error if action type is invalid
-    this.actionTypeRegistry.get(actionTypeId);
-    if (data.actionTypeConfig) {
-      this.actionTypeRegistry.validateActionTypeConfig(actionTypeId, data.actionTypeConfig);
-      data = this.moveEncryptedAttributesToSecrets(data);
-    }
-    return await this.savedObjectsClient.update<any>('action', id, data, options);
+    const existingObject = await this.savedObjectsClient.get('action', id);
+    const { actionTypeId } = existingObject.attributes;
+    const actionType = this.actionTypeRegistry.get(actionTypeId);
+
+    const validatedActionTypeConfig = validateActionTypeConfig(actionType, data.actionTypeConfig);
+    data = this.moveEncryptedAttributesToSecrets(actionType.unencryptedAttributes, {
+      ...data,
+      actionTypeConfig: validatedActionTypeConfig,
+    });
+    return await this.savedObjectsClient.update('action', id, { ...data, actionTypeId }, options);
   }
 
   /**
    * Set actionTypeConfigSecrets values on a given action
    */
-  private moveEncryptedAttributesToSecrets(action: Action) {
-    const unencryptedAttributes = this.actionTypeRegistry.getUnencryptedAttributes(
-      action.actionTypeId
-    );
-    const config = { ...action.actionTypeConfig };
-    const configSecrets: Record<string, any> = {};
-    for (const key of Object.keys(config)) {
-      if (unencryptedAttributes.includes(key)) {
-        continue;
-      }
-      configSecrets[key] = config[key];
-      delete config[key];
+  private moveEncryptedAttributesToSecrets(
+    unencryptedAttributes: string[] = [],
+    action: Action | UpdateOptions['data']
+  ) {
+    const actionTypeConfig: Record<string, any> = {};
+    const actionTypeConfigSecrets = { ...action.actionTypeConfig };
+    for (const attributeKey of unencryptedAttributes) {
+      actionTypeConfig[attributeKey] = actionTypeConfigSecrets[attributeKey];
+      delete actionTypeConfigSecrets[attributeKey];
     }
+
     return {
       ...action,
       // Important these overwrite attributes in data for encryption purposes
-      actionTypeConfig: config,
-      actionTypeConfigSecrets: configSecrets,
+      actionTypeConfig,
+      actionTypeConfigSecrets,
     };
   }
 }

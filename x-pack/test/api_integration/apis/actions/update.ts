@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
@@ -18,58 +19,30 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should return 200 when updating a document', async () => {
       await supertest
-        .put('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test',
             description: 'My action updated',
-            actionTypeConfig: {},
-          },
-        })
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            id: '8978428d-6890-43f7-b4a6-e7a4064c33f7',
-            type: 'action',
-            references: [],
-            version: resp.body.version,
-            updated_at: resp.body.updated_at,
-            attributes: {
-              actionTypeId: 'test',
-              description: 'My action updated',
-              actionTypeConfig: {},
+            actionTypeConfig: {
+              unencrypted: `This value shouldn't get encrypted`,
+              encrypted: 'This value should be encrypted',
             },
-          });
-        });
-    });
-
-    it('should support partial updates', async () => {
-      await supertest
-        .put('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            actionTypeId: 'test',
-            description: 'My action updated again',
           },
         })
-        .expect(200);
-      await supertest
-        .get('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
-            id: '8978428d-6890-43f7-b4a6-e7a4064c33f7',
+            id: ES_ARCHIVER_ACTION_ID,
             type: 'action',
             references: [],
             version: resp.body.version,
             updated_at: resp.body.updated_at,
             attributes: {
-              actionTypeId: 'test',
-              description: 'My action updated again',
+              actionTypeId: 'test.index-record',
+              description: 'My action updated',
               actionTypeConfig: {
-                unencrypted: 'unencrypted text',
+                unencrypted: `This value shouldn't get encrypted`,
               },
             },
           });
@@ -78,11 +51,10 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should not be able to pass null to actionTypeConfig', async () => {
       await supertest
-        .put('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test',
             description: 'My action updated',
             actionTypeConfig: null,
           },
@@ -104,31 +76,30 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should not return encrypted attributes', async () => {
       await supertest
-        .put('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test',
             description: 'My action updated',
             actionTypeConfig: {
-              unencrypted: 'unencrypted text',
-              encrypted: 'something encrypted',
+              unencrypted: `This value shouldn't get encrypted`,
+              encrypted: 'This value should be encrypted',
             },
           },
         })
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
-            id: '8978428d-6890-43f7-b4a6-e7a4064c33f7',
+            id: ES_ARCHIVER_ACTION_ID,
             type: 'action',
             references: [],
             version: resp.body.version,
             updated_at: resp.body.updated_at,
             attributes: {
-              actionTypeId: 'test',
+              actionTypeId: 'test.index-record',
               description: 'My action updated',
               actionTypeConfig: {
-                unencrypted: 'unencrypted text',
+                unencrypted: `This value shouldn't get encrypted`,
               },
             },
           });
@@ -141,9 +112,11 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {
-            actionTypeId: 'test',
             description: 'My action updated',
-            actionTypeConfig: {},
+            actionTypeConfig: {
+              unencrypted: `This value shouldn't get encrypted`,
+              encrypted: 'This value should be encrypted',
+            },
           },
         })
         .expect(404)
@@ -158,7 +131,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should return 400 when payload is empty and invalid', async () => {
       await supertest
-        .put('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({})
         .expect(400)
@@ -174,7 +147,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should return 400 when payload attributes are empty and invalid', async () => {
       await supertest
-        .put('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
           attributes: {},
@@ -185,11 +158,34 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'child "attributes" fails because [child "description" fails because ["description" is required], child "actionTypeId" fails because ["actionTypeId" is required]]',
+              'child "attributes" fails because [child "description" fails because ["description" is required], child "actionTypeConfig" fails because ["actionTypeConfig" is required]]',
             validation: {
               source: 'payload',
-              keys: ['attributes.description', 'attributes.actionTypeId'],
+              keys: ['attributes.description', 'attributes.actionTypeConfig'],
             },
+          });
+        });
+    });
+
+    it(`should return 400 when actionTypeConfig isn't valid`, async () => {
+      await supertest
+        .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'My action updated',
+            actionTypeConfig: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'The following actionTypeConfig attributes are invalid: encrypted [any.required]',
           });
         });
     });

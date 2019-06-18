@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 
+import { ES_ARCHIVER_ACTION_ID } from './constants';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
@@ -19,7 +20,7 @@ export default function deleteActionTests({ getService }: KibanaFunctionalTestDe
 
     it('should return 200 when deleting an action', async () => {
       await supertest
-        .delete('/api/action/8978428d-6890-43f7-b4a6-e7a4064c33f7')
+        .delete(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .expect(200)
         .then((resp: any) => {

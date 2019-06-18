@@ -4,36 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionTypeRegistry } from './action_type_registry';
-import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
+import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
+import { TaskManager } from '../../task_manager';
 
 interface CreateFireFunctionOptions {
-  actionTypeRegistry: ActionTypeRegistry;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  taskManager: TaskManager;
+  internalSavedObjectsRepository: SavedObjectsClientContract;
 }
 
 interface FireOptions {
   id: string;
   params: Record<string, any>;
   namespace?: string;
+  basePath: string;
 }
 
 export function createFireFunction({
-  actionTypeRegistry,
-  encryptedSavedObjectsPlugin,
+  taskManager,
+  internalSavedObjectsRepository,
 }: CreateFireFunctionOptions) {
-  return async function fire({ id, params, namespace }: FireOptions) {
-    const action = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser('action', id, {
-      namespace,
-    });
-    const mergedActionTypeConfig = {
-      ...action.attributes.actionTypeConfig,
-      ...action.attributes.actionTypeConfigSecrets,
-    };
-    return await actionTypeRegistry.execute({
-      id: action.attributes.actionTypeId,
-      actionTypeConfig: mergedActionTypeConfig,
-      params,
+  return async function fire({ id, params, namespace, basePath }: FireOptions) {
+    const actionSavedObject = await internalSavedObjectsRepository.get('action', id, { namespace });
+    await taskManager.schedule({
+      taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
+      params: {
+        id,
+        basePath,
+        namespace,
+        actionTypeParams: params,
+      },
+      state: {},
+      scope: ['actions'],
     });
   };
 }

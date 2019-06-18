@@ -24,7 +24,9 @@ export default function listActionTypesTests({ getService }: KibanaFunctionalTes
           }
           // Check for values explicitly in order to avoid this test failing each time plugins register
           // a new action type
-          expect(resp.body.some(createActionTypeMatcher('test', 'Test'))).to.be(true);
+          expect(
+            resp.body.some(createActionTypeMatcher('test.index-record', 'Test: Index Record'))
+          ).to.be(true);
         });
     });
   });
