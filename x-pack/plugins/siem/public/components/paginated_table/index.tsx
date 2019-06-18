@@ -88,6 +88,7 @@ interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, A
   totalCount: number;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateProps?: { [key: string]: any };
 }
 
@@ -102,6 +103,7 @@ export interface Columns<T> {
   width?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const PaginatedTable = memo<BasicTableProps<any>>(
   ({
     columns,
@@ -172,7 +174,7 @@ export const PaginatedTable = memo<BasicTableProps<any>>(
         iconSide="right"
         onClick={onButtonClick}
       >
-        Rows: {limit}
+        {`${i18n.ROWS}: ${limit}`}
       </EuiButtonEmpty>
     );
 
