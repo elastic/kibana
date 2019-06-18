@@ -17,12 +17,63 @@
  * under the License.
  */
 
+/* eslint-disable max-classes-per-file */
+import { get } from 'lodash';
 import { Registry } from '@kbn/interpreter/common';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Fn } = require('@kbn/interpreter/common');
+const { Fn, getType } = require('@kbn/interpreter/common');
 
 export class FunctionsRegistry extends Registry<any, any> {
   wrapper(obj: any) {
     return new Fn(obj);
+  }
+}
+
+function Type(this: any, config: any) {
+  // Required
+  this.name = config.name;
+
+  // Optional
+  this.help = config.help || ''; // A short help text
+
+  // Optional type validation, useful for checking function output
+  this.validate = config.validate || function validate() {};
+
+  // Optional
+  this.create = config.create;
+
+  // Optional serialization (used when passing context around client/server)
+  this.serialize = config.serialize;
+  this.deserialize = config.deserialize;
+
+  const getToFn = (type: any) => get(config, ['to', type]) || get(config, ['to', '*']);
+  const getFromFn = (type: any) => get(config, ['from', type]) || get(config, ['from', '*']);
+
+  this.castsTo = (type: any) => typeof getToFn(type) === 'function';
+  this.castsFrom = (type: any) => typeof getFromFn(type) === 'function';
+
+  this.to = (node: any, toTypeName: any, types: any) => {
+    const typeName = getType(node);
+    if (typeName !== this.name) {
+      throw new Error(`Can not cast object of type '${typeName}' using '${this.name}'`);
+    } else if (!this.castsTo(toTypeName)) {
+      throw new Error(`Can not cast '${typeName}' to '${toTypeName}'`);
+    }
+
+    return (getToFn(toTypeName) as any)(node, types);
+  };
+
+  this.from = (node: any, types: any) => {
+    const typeName = getType(node);
+    if (!this.castsFrom(typeName)) throw new Error(`Can not cast '${this.name}' from ${typeName}`);
+
+    return (getFromFn(typeName) as any)(node, types);
+  };
+}
+
+export class TypesRegistry extends Registry<any, any> {
+  wrapper(obj: any) {
+    return new (Type as any)(obj);
   }
 }

@@ -17,17 +17,19 @@
  * under the License.
  */
 
-import { FunctionsRegistry } from '../../common/interpreter/registries';
+import { FunctionsRegistry, TypesRegistry } from '../../common/interpreter/registries';
 import { InterpreterSetup } from './types';
 import { RenderFunctionsRegistry } from './util/render_function';
 
 export const setup = (): InterpreterSetup => {
   const functionsRegistry = new FunctionsRegistry();
   const renderersRegistry = new RenderFunctionsRegistry();
+  const typesRegistry = new TypesRegistry();
 
   const api: InterpreterSetup = {
     functionsRegistry,
     renderersRegistry,
+    typesRegistry,
   };
 
   return api;
