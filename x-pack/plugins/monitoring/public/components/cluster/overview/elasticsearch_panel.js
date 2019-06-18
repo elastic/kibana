@@ -26,7 +26,6 @@ import { LicenseText } from './license_text';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from '../../logs/reason';
-import chrome from 'ui/chrome';
 
 const calculateShards = shards => {
   const total = get(shards, 'total', 0);
@@ -154,7 +153,7 @@ export function ElasticsearchPanel(props) {
   const showMlJobs = () => {
     // if license doesn't support ML, then `ml === null`
     if (props.ml) {
-      const gotoURL = `${chrome.getBasePath()}/app/ml#/jobs`;
+      const gotoURL = '#/elasticsearch/ml_jobs';
       return (
         <>
           <EuiDescriptionListTitle>
