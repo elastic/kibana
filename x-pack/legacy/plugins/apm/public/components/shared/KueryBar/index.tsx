@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { uniqueId, startsWith, find } from 'lodash';
+import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import chrome from 'ui/chrome';
 import styled from 'styled-components';
@@ -61,18 +61,15 @@ export function KueryBar() {
     !state.isLoadingIndexPattern && !state.indexPattern;
   let currentRequestCheck;
 
-  let queryExample;
+  const exampleMap: { [key: string]: string } = {
+    [TRANSACTIONS]: 'transaction.duration.us > 300000',
+    [ERRORS]: 'http.response.status_code >= 400',
+    [METRICS]: 'process.pid = "1234"'
+  };
 
-  if (find(matchedRoutes, { name: TRANSACTIONS })) {
-    queryExample = 'transaction.duration.us > 300000';
-  } else if (find(matchedRoutes, { name: ERRORS })) {
-    queryExample = 'http.response.status_code >= 400';
-  } else if (find(matchedRoutes, { name: METRICS })) {
-    queryExample = 'process.pid = "1234"';
-  } else {
-    queryExample =
-      'transaction.duration.us > 300000 AND http.response.status_code >= 400';
-  }
+  const queryExample =
+    matchedRoutes.map(({ name }) => exampleMap[name]).find(Boolean) ||
+    'transaction.duration.us > 300000 AND http.response.status_code >= 400';
 
   useEffect(() => {
     let didCancel = false;

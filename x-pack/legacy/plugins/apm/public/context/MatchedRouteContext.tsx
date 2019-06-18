@@ -8,11 +8,11 @@ import { matchPath } from 'react-router-dom';
 import { routes } from '../components/app/Main/route_config';
 import { useLocation } from '../hooks/useLocation';
 
-export const MatchedRouteContext = React.createContext([] as Array<
-  typeof routes[0]
->);
+export const MatchedRouteContext = React.createContext<Array<typeof routes[0]>>(
+  []
+);
 
-export const MatchedRouteProvider: React.FC<{}> = ({ children }) => {
+export const MatchedRouteProvider: React.FC = ({ children }) => {
   const { pathname } = useLocation();
 
   const contextValue = useMemo(
