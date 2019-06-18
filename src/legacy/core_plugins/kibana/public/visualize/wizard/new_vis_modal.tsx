@@ -33,6 +33,7 @@ interface TypeSelectionProps {
   isOpen: boolean;
   onClose: () => void;
   visTypesRegistry: VisType[];
+  visTypeAliases: any[];
   editorParams?: string[];
 }
 
@@ -88,6 +89,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             showExperimental={this.isLabsEnabled}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
+            visTypeAliases={this.props.visTypeAliases}
           />
         </EuiModal>
       );

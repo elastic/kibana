@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { sortByOrder } from 'lodash';
 import React, { ChangeEvent } from 'react';
+import chrome from 'ui/chrome';
 
 import {
   EuiFieldSearch,
@@ -44,9 +45,20 @@ interface VisTypeListEntry extends VisType {
   highlighted: boolean;
 }
 
+interface VisTypeAliasListEntry {
+  url: string;
+  name: string;
+  title: string;
+  icon: string;
+  description: string;
+  stage?: string;
+  highlighted: boolean;
+}
+
 interface TypeSelectionProps {
   onVisTypeSelected: (visType: VisType) => void;
   visTypesRegistry: VisType[];
+  visTypeAliases: any[];
   showExperimental: boolean;
 }
 
@@ -65,7 +77,10 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
 
   public render() {
     const { query, highlightedType } = this.state;
-    const visTypes = this.getFilteredVisTypes(this.props.visTypesRegistry, query);
+    const visTypes = this.getFilteredVisTypes(
+      this.props.visTypesRegistry,
+      this.props.visTypeAliases,
+      query);
     return (
       <React.Fragment>
         <EuiModalHeader>
@@ -148,7 +163,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     );
   }
 
-  private filteredVisTypes(visTypes: VisType[], query: string): VisTypeListEntry[] {
+  private filteredVisTypes(visTypes: VisType[], visTypeAliases: any[], query: string): (VisTypeListEntry | VisTypeAliasListEntry)[] {
     const types = visTypes.filter(type => {
       // Filter out all lab visualizations if lab mode is not enabled
       if (!this.props.showExperimental && type.stage === 'experimental') {
@@ -163,12 +178,14 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       return true;
     });
 
-    let entries: VisTypeListEntry[];
+    const allTypes = [...types, ...visTypeAliases];
+
+    let entries: (VisTypeListEntry | VisTypeAliasListEntry)[];
     if (!query) {
-      entries = types.map(type => ({ ...type, highlighted: false }));
+      entries = allTypes.map(type => ({ ...type, highlighted: false }));
     } else {
       const q = query.toLowerCase();
-      entries = types.map(type => {
+      entries = allTypes.map(type => {
         const matchesQuery =
           type.name.toLowerCase().includes(q) ||
           type.title.toLowerCase().includes(q) ||
@@ -180,7 +197,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     return sortByOrder(entries, ['highlighted', 'title'], ['desc', 'asc']);
   }
 
-  private renderVisType = (visType: VisTypeListEntry) => {
+  private renderVisType = (visType: (VisTypeListEntry | VisTypeAliasListEntry)) => {
     let stage = {};
     if (visType.stage === 'experimental') {
       stage = {
@@ -194,11 +211,16 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       };
     }
     const isDisabled = this.state.query !== '' && !visType.highlighted;
+    const isVisTypeAlias = !!visType.url;
+    const onClick = isVisTypeAlias
+      ? () => { window.location = chrome.addBasePath(visType.url); }
+      : () => this.props.onVisTypeSelected(visType);
+
     return (
       <EuiKeyPadMenuItemButton
         key={visType.name}
         label={<span data-test-subj="visTypeTitle">{visType.title}</span>}
-        onClick={() => this.props.onVisTypeSelected(visType)}
+        onClick={onClick}
         onFocus={() => this.highlightType(visType)}
         onMouseEnter={() => this.highlightType(visType)}
         onMouseLeave={() => this.highlightType(null)}
