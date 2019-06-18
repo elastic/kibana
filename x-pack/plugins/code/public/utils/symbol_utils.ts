@@ -5,4 +5,4 @@
  */
 
 export const matchContainerName = (containerName: string, symbolName: string) =>
-  new RegExp(`^${containerName}[[<(].*[>)]]?$`).test(symbolName);
+  new RegExp(`^${containerName}([<(].*[>)])?$`).test(symbolName);

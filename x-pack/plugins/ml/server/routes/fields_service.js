@@ -41,13 +41,13 @@ function getTimeFieldRange(callWithRequest, payload) {
     query);
 }
 
-export function fieldsService(server, commonRouteConfig) {
+export function fieldsService({ commonRouteConfig, elasticsearchPlugin, route }) {
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/fields_service/field_cardinality',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return getCardinalityOfFields(callWithRequest, request.payload)
         .catch(resp => wrapError(resp));
     },
@@ -56,11 +56,11 @@ export function fieldsService(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/fields_service/time_field_range',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return getTimeFieldRange(callWithRequest, request.payload)
         .catch(resp => wrapError(resp));
     },

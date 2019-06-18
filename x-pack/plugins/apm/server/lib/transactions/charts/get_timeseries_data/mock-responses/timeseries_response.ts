@@ -6,7 +6,7 @@
 
 import { ESResponse } from '../fetcher';
 
-export const timeseriesResponse: ESResponse = {
+export const timeseriesResponse = ({
   took: 368,
   timed_out: false,
   _shards: {
@@ -2826,4 +2826,4 @@ export const timeseriesResponse: ESResponse = {
       value: 32861.15660262639
     }
   }
-};
+} as unknown) as ESResponse;
