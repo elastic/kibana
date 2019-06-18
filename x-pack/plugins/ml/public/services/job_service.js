@@ -742,6 +742,20 @@ class JobService {
   }
 
 
+  async getJobAndGroupIds() {
+    const existingJobsAndGroups = {
+      jobs: [],
+      groups: [],
+    };
+    try {
+      const { jobs: tempJobs, groups } = await ml.jobs.getAllJobAndGroupIds();
+      existingJobsAndGroups.jobs = tempJobs;
+      existingJobsAndGroups.groups = groups;
+      return existingJobsAndGroups;
+    } catch (error) {
+      return existingJobsAndGroups;
+    }
+  }
 }
 
 // private function used to check the job saving response

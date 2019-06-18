@@ -4,18 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, useContext, Fragment } from 'react';
 
-// import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContentBody,
-  // EuiPageContentHeader,
-  // EuiPageContentHeaderSection,
-  EuiSpacer,
-  // EuiTitle,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContentBody, EuiSpacer } from '@elastic/eui';
 import { Wizard } from './wizard';
 import { jobCreatorFactory } from '../../common/job_creator';
 import { JOB_TYPE } from '../../common/job_creator/util/constants';
@@ -49,6 +40,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
 
+  // console.log('creating job type:', jobCreator.type);
+
   if (jobType === JOB_TYPE.SINGLE_METRIC) {
     jobCreator.modelPlot = true;
   }
@@ -66,34 +59,22 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   const resultsLoader = new ResultsLoader(jobCreator, chartInterval);
 
-  // console.log('Page rendering');
-
   return (
-    <EuiPage>
-      <EuiPageBody>
-        {/* <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-        <EuiTitle>
-        <h1>
-        <FormattedMessage
-        id="xpack.ml.newJob.wizard.jobType.newJob"
-        defaultMessage="New job"
-        />
-        </h1>
-        </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader> */}
-        <EuiPageContentBody>
-          <EuiSpacer size="l" />
-          <Wizard
-            jobCreator={jobCreator}
-            chartLoader={chartLoader}
-            resultsLoader={resultsLoader}
-            chartInterval={chartInterval}
-            existingJobsAndGroups={existingJobsAndGroups}
-          />
-        </EuiPageContentBody>
-      </EuiPageBody>
-    </EuiPage>
+    <Fragment>
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageContentBody>
+            <EuiSpacer size="l" />
+            <Wizard
+              jobCreator={jobCreator}
+              chartLoader={chartLoader}
+              resultsLoader={resultsLoader}
+              chartInterval={chartInterval}
+              existingJobsAndGroups={existingJobsAndGroups}
+            />
+          </EuiPageContentBody>
+        </EuiPageBody>
+      </EuiPage>
+    </Fragment>
   );
 };

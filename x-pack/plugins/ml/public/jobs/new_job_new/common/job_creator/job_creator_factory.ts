@@ -21,12 +21,16 @@ export const jobCreatorFactory = (jobType: JOB_TYPE) => (
   switch (jobType) {
     case JOB_TYPE.SINGLE_METRIC:
       jc = SingleMetricJobCreator;
+      break;
     case JOB_TYPE.MULTI_METRIC:
       jc = MultiMetricJobCreator;
+      break;
     case JOB_TYPE.POPULATION:
       jc = PopulationJobCreator;
+      break;
     default:
       jc = SingleMetricJobCreator;
+      break;
   }
   return new jc(indexPattern, savedSearch, query);
 };

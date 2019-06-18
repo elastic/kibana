@@ -36,7 +36,7 @@ export const AnomalyChart: FC<Props> = ({
   return (
     <div style={{ width, height }}>
       <Chart>
-        <Settings xDomain={xDomain} tooltipType={TooltipType.None} />
+        <Settings xDomain={xDomain} tooltip={TooltipType.None} />
         <Axes chartData={lineChartData} />
         <Anomalies anomalyData={anomalyData} />
         <ModelBounds modelData={modelData} />

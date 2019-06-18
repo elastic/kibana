@@ -18,7 +18,7 @@ import { InjectorService } from '../../../../../common/types/angular';
 
 import { SearchItemsProvider } from '../../../new_job/utils/new_job_utils';
 import { Page, PageProps } from './page';
-import { getJobTypeFromUrlParam } from '../../common/job_creator/util/constants';
+import { JOB_TYPE } from '../../common/job_creator/util/constants';
 
 import { KibanaContext } from '../../../../data_frame/common/kibana_context';
 
@@ -27,7 +27,7 @@ module.directive('mlNewJobPage', ($injector: InjectorService) => {
     scope: {},
     restrict: 'E',
     link: async (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
-      timefilter.enableTimeRangeSelector();
+      // timefilter.enableTimeRangeSelector();
       timefilter.disableAutoRefreshSelector();
 
       const indexPatterns = $injector.get('indexPatterns');
@@ -36,10 +36,11 @@ module.directive('mlNewJobPage', ($injector: InjectorService) => {
       const Private: IPrivate = $injector.get('Private');
       const $route = $injector.get<any>('$route');
       const existingJobsAndGroups = $route.current.locals.existingJobsAndGroups;
-      if ($route.current.pathParams.jobType === undefined) {
+
+      if ($route.current.locals.jobType === undefined) {
         return;
       }
-      const jobType = getJobTypeFromUrlParam($route.current.pathParams.jobType);
+      const jobType: JOB_TYPE = $route.current.locals.jobType;
 
       const createSearchItems = Private(SearchItemsProvider);
       const { indexPattern, savedSearch, combinedQuery } = createSearchItems();

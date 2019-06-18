@@ -25,7 +25,7 @@ export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width, s
       <Chart>
         {showAxis === true && <Axes />}
 
-        <Settings tooltipType={TooltipType.None} />
+        <Settings tooltip={TooltipType.None} />
         <BarSeries
           id={getSpecId('event_rate')}
           xScaleType={ScaleType.Time}

@@ -4,16 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {
-  Fragment,
-  FC,
-  createContext,
-  useContext,
-  useReducer,
-  useRef,
-  useState,
-  useEffect,
-} from 'react';
+import React, { FC, useContext, useReducer, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -34,13 +25,17 @@ import {
 } from '../components/job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../data_frame/common/kibana_context';
 
-import { SingleMetricJobCreator, MultiMetricJobCreator } from '../../common/job_creator';
+import {
+  SingleMetricJobCreator,
+  MultiMetricJobCreator,
+  PopulationJobCreator,
+} from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 
 interface Props {
-  jobCreator: SingleMetricJobCreator;
+  jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator;
   chartLoader: ChartLoader;
   resultsLoader: ResultsLoader;
   chartInterval: MlTimeBuckets;
