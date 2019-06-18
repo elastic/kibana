@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Registry } from '@kbn/interpreter/common';
+
 export interface InterpreterSetup {
-  addFunction: (func: any) => void;
+  functionsRegistry: Registry<any, any>;
 }
