@@ -28,17 +28,21 @@ export const getFilteredIds = (state) => state.indices.filteredIds;
 export const getRowStatuses = (state) => state.rowStatus;
 export const getTableState = (state) => state.tableState;
 export const getAllIds = (state) => state.indices.allIds;
-export const getKbnIndex = (state, indexNames, kbnIndexName) => {
-  const indices = getIndicesByName(state, indexNames);
-  return indices && indices.find(index =>
-    index.name === kbnIndexName || (index.aliases && index.aliases.includes(kbnIndexName))
-  );
-};
 export const getIndexStatusByIndexName = (state, indexName) => {
   const indices = getIndices(state);
   const { status } = indices[indexName] || {};
   return status;
 };
+export const getIsSystemIndexByName = (indexNames) => {
+  return indexNames.reduce((obj, indexName) => {
+    obj[indexName] = indexName.startsWith('.');
+    return obj;
+  }, {});
+};
+export const hasSystemIndex = (indexNames) => {
+  return Boolean(indexNames.find(indexName => indexName.startsWith('.')));
+};
+
 const defaultFilterFields = ['name'];
 
 const filterByToggles = (indices, toggleNameToVisibleMap) => {

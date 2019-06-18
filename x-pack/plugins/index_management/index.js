@@ -25,12 +25,6 @@ export function indexManagement(kibana)  {
       managementSections: [
         'plugins/index_management',
       ],
-      injectDefaultVars(server) {
-        const config = server.config();
-        return {
-          kbnIndex: config.get('kibana.index'),
-        };
-      },
     },
     init: function (server) {
       const router = createRouter(server, PLUGIN.ID, '/api/index_management/');
