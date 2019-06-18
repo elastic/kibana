@@ -35,7 +35,6 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({ snapshotDe
   const updateRestoreSettings = (updatedSettings: Partial<RestoreSettings>): void => {
     const newRestoreSettings = { ...restoreSettings, ...updatedSettings };
     setRestoreSettings(newRestoreSettings);
-    // console.log('jen restore settings updated', newRestoreSettings);
   };
 
   const updateCurrentStep = (step: number) => {

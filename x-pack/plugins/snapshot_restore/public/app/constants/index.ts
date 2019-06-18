@@ -31,6 +31,38 @@ export enum SNAPSHOT_STATE {
   INCOMPATIBLE = 'INCOMPATIBLE',
 }
 
+export const ALLOWED_INDEX_SETTINGS: string[] = [
+  'index.shard.check_on_startup',
+  'index.codec',
+  'index.routing_partition_size',
+  'index.load_fixed_bitset_filters_eagerly',
+  'index.number_of_replicas',
+  'index.auto_expand_replicas',
+  'index.search.idle.after',
+  'index.refresh_interval',
+  'index.max_result_window',
+  'index.max_inner_result_window',
+  'index.max_rescore_window',
+  'index.max_docvalue_fields_search',
+  'index.max_script_fields',
+  'index.max_ngram_diff',
+  'index.max_shingle_diff',
+  'index.blocks.read_only',
+  'index.blocks.read_only_allow_delete',
+  'index.blocks.read',
+  'index.blocks.write',
+  'index.blocks.metadata',
+  'index.max_refresh_listeners',
+  'index.analyze.max_token_count',
+  'index.highlight.max_analyzed_offset',
+  'index.max_terms_count',
+  'index.max_regex_length',
+  'index.routing.allocation.enable',
+  'index.routing.rebalance.enable',
+  'index.gc_deletes',
+  'index.default_pipeline',
+];
+
 // UI Metric constants
 export const UIM_APP_NAME = 'snapshot_restore';
 export const UIM_REPOSITORY_LIST_LOAD = 'repository_list_load';
