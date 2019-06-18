@@ -41,7 +41,7 @@ export interface Criteria {
 }
 
 // Using telescoping templates to remove 'any' that was polluting downstream column type checks
-interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, AB = T> {
+export interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, AB = T> {
   columns:
     | [Columns<T>]
     | [Columns<T>, Columns<U>]
