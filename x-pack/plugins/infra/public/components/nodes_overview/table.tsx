@@ -61,21 +61,26 @@ export const TableView = injectI18n(
           sortable: true,
           truncateText: true,
           textOnly: true,
-          render: (value: string, item: { node: InfraWaffleMapNode }) => (
-            <NodeContextMenu
-              node={item.node}
-              nodeType={nodeType}
-              closePopover={this.closePopoverFor(item.node.pathId)}
-              timeRange={timeRange}
-              isPopoverOpen={this.state.isPopoverOpen.includes(item.node.pathId)}
-              options={options}
-              popoverPosition="rightCenter"
-            >
-              <EuiButtonEmpty onClick={this.openPopoverFor(item.node.pathId)}>
-                {value}
-              </EuiButtonEmpty>
-            </NodeContextMenu>
-          ),
+          render: (value: string, item: { node: InfraWaffleMapNode }) => {
+            const tooltipText = item.node.id === value ? `${value}` : `${value} (${item.node.id})`;
+            return (
+              <NodeContextMenu
+                node={item.node}
+                nodeType={nodeType}
+                closePopover={this.closePopoverFor(item.node.pathId)}
+                timeRange={timeRange}
+                isPopoverOpen={this.state.isPopoverOpen.includes(item.node.pathId)}
+                options={options}
+                popoverPosition="rightCenter"
+              >
+                <EuiToolTip content={tooltipText}>
+                  <EuiButtonEmpty onClick={this.openPopoverFor(item.node.pathId)}>
+                    {value}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </NodeContextMenu>
+            );
+          },
         },
         ...options.groupBy.map((grouping, index) => ({
           field: `group_${index}`,

@@ -88,7 +88,7 @@ export class SearchOptions extends Component<Props, State> {
     let optionsFlyout;
     const repoScope =
       this.state.defaultRepoScopeOn && this.props.defaultSearchScope
-        ? unique([...this.state.repoScope, this.props.defaultSearchScope], r => r.uri)
+        ? unique([...this.state.repoScope, this.props.defaultSearchScope], (r: Repository) => r.uri)
         : this.state.repoScope;
     if (this.state.isFlyoutOpen) {
       const selectedRepos = repoScope.map(r => {
@@ -197,14 +197,17 @@ export class SearchOptions extends Component<Props, State> {
 
   private onRepoChange = (repos: any) => {
     this.setState(prevState => ({
-      repoScope: unique([
-        ...prevState.repoScope,
-        ...repos.map((r: any) =>
-          [...this.props.repoSearchResults, ...this.props.defaultRepoOptions].find(
-            rs => rs.name === r.label
-          )
-        ),
-      ]),
+      repoScope: unique(
+        [
+          ...prevState.repoScope,
+          ...repos.map((r: any) =>
+            [...this.props.repoSearchResults, ...this.props.defaultRepoOptions].find(
+              rs => rs.name === r.label
+            )
+          ),
+        ],
+        (r: Repository) => r.uri
+      ),
     }));
   };
 

@@ -74,6 +74,20 @@ exports[`Overrides render overrides 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <EuiLink
+          color="primary"
+          href="https://www.elastic.co/guide/en/elasticsearch/reference/jest-metadata-mock-branch/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern"
+          target="_blank"
+          type="button"
+        >
+          See more on accepted formats
+        </EuiLink>
+      </EuiText>
+    }
     label={
       <FormattedMessage
         defaultMessage="Timestamp format"
