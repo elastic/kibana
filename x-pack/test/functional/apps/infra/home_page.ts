@@ -15,7 +15,8 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'infraHome']);
 
-  describe('Home page', () => {
+  describe('Home page', function() {
+    this.tags('smoke');
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

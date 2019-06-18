@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiCheckbox,
-  // @ts-ignore
-  EuiSuperSelect,
-} from '@elastic/eui';
+import { EuiCheckbox, EuiSuperSelect } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -60,7 +56,6 @@ export const EventsSelect = pure<Props>(({ checkState, timelineId }) => {
         itemClassName="eventsSelectItem"
         onChange={noop}
         options={getEventsSelectOptions()}
-        valueOfSelected={''}
       />
       <CheckboxContainer data-test-subj="timeline-events-select-checkbox-container">
         <PositionedCheckbox data-test-subj="timeline-events-select-positioned-checkbox">

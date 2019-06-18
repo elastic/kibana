@@ -9,13 +9,13 @@
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 
-export function indicesRoutes(server, commonRouteConfig) {
+export function indicesRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/indices/field_caps',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const index = request.payload.index;
       let fields = '*';
       if (request.payload.fields !== undefined && Array.isArray(request.payload.fields)) {

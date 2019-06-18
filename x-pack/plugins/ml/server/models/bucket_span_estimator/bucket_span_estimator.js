@@ -15,8 +15,8 @@ import { polledDataCheckerFactory } from './polled_data_checker';
 import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
 import { isSecurityDisabled } from '../../lib/security_utils';
 
-export function estimateBucketSpanFactory(callWithRequest, server) {
-  const callWithInternalUser = callWithInternalUserFactory(server);
+export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, xpackMainPlugin) {
+  const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
   const PolledDataChecker = polledDataCheckerFactory(callWithRequest);
   const SingleSeriesChecker = singleSeriesCheckerFactory(callWithRequest);
 
@@ -372,7 +372,7 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
           });
       }
 
-      if (isSecurityDisabled(server)) {
+      if (isSecurityDisabled(xpackMainPlugin)) {
         getBucketSpanEstimation();
       } else {
         // if security is enabled, check that the user has permission to
