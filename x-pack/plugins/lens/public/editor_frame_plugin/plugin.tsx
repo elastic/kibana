@@ -8,10 +8,14 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup } from 'src/core/public';
+import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
+import chrome from 'ui/chrome';
 import { DataSetup, ExpressionRenderer } from '../../../../../src/legacy/core_plugins/data/public';
 import { data } from '../../../../../src/legacy/core_plugins/data/public/setup';
 import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from '../types';
 import { EditorFrame } from './editor_frame';
+import { LensSavedObjectStore } from '../persistence/lens_store';
+import { InitializableComponent } from './initializable_component';
 
 export interface EditorFrameSetupPlugins {
   data: DataSetup;
@@ -27,6 +31,8 @@ export class EditorFramePlugin {
   private createInstance(): EditorFrameInstance {
     let domElement: Element;
 
+    const store = new LensSavedObjectStore(chrome.getSavedObjectsClient());
+
     function unmount() {
       if (domElement) {
         unmountComponentAtNode(domElement);
@@ -35,22 +41,55 @@ export class EditorFramePlugin {
 
     return {
       mount: element => {
-        unmount();
         domElement = element;
 
-        const firstDatasourceId = Object.keys(this.datasources)[0];
-        const firstVisualizationId = Object.keys(this.visualizations)[0];
+        const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
+          const firstDatasourceId = Object.keys(this.datasources)[0];
+          const firstVisualizationId = Object.keys(this.visualizations)[0];
+          const persistedId = routeProps.match.params.id;
+
+          return (
+            <I18nProvider>
+              <InitializableComponent
+                watch={[persistedId]}
+                init={async () => {
+                  if (!persistedId) {
+                    return { doc: undefined };
+                  } else {
+                    return store.load(persistedId).then(doc => ({ doc }));
+                  }
+                }}
+                render={({ doc }) => {
+                  if (!this.ExpressionRenderer) {
+                    return null;
+                  }
+
+                  return (
+                    <EditorFrame
+                      store={store}
+                      datasourceMap={this.datasources}
+                      visualizationMap={this.visualizations}
+                      initialDatasourceId={firstDatasourceId || null}
+                      initialVisualizationId={firstVisualizationId || null}
+                      ExpressionRenderer={this.ExpressionRenderer}
+                      redirectTo={path => routeProps.history.push(path)}
+                      doc={doc}
+                    />
+                  );
+                }}
+              />
+            </I18nProvider>
+          );
+        };
 
         render(
-          <I18nProvider>
-            <EditorFrame
-              datasourceMap={this.datasources}
-              visualizationMap={this.visualizations}
-              initialDatasourceId={firstDatasourceId || null}
-              initialVisualizationId={firstVisualizationId || null}
-              ExpressionRenderer={this.ExpressionRenderer!}
-            />
-          </I18nProvider>,
+          <HashRouter>
+            <Switch>
+              <Route exact path="/edit/:id" render={renderEditor} />
+              <Route exact path="/" render={renderEditor} />
+              <Route component={NotFound} />
+            </Switch>
+          </HashRouter>,
           domElement
         );
       },
@@ -82,4 +121,9 @@ export const editorFrameSetup = () =>
   editorFrame.setup(null, {
     data,
   });
+
 export const editorFrameStop = () => editorFrame.stop();
+
+function NotFound() {
+  return <h1>TODO: 404 Page</h1>;
+}

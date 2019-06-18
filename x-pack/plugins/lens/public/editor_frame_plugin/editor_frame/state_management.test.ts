@@ -15,6 +15,11 @@ describe('editor_frame state management', () => {
 
     beforeEach(() => {
       props = {
+        redirectTo: jest.fn(),
+        store: {
+          load: jest.fn(),
+          save: jest.fn(),
+        },
         datasourceMap: { testDatasource: ({} as unknown) as Datasource },
         visualizationMap: { testVis: ({ initialize: jest.fn() } as unknown) as Visualization },
         initialDatasourceId: 'testDatasource',
@@ -51,6 +56,8 @@ describe('editor_frame state management', () => {
       const newVisState = {};
       const newState = reducer(
         {
+          saving: false,
+          title: 'Stingray',
           datasource: {
             activeId: 'testDatasource',
             state: {},
@@ -74,6 +81,8 @@ describe('editor_frame state management', () => {
       const newDatasourceState = {};
       const newState = reducer(
         {
+          saving: false,
+          title: 'Dolphin',
           datasource: {
             activeId: 'testDatasource',
             state: {},
@@ -98,6 +107,8 @@ describe('editor_frame state management', () => {
       const newVisState = {};
       const newState = reducer(
         {
+          saving: false,
+          title: 'Yellowtail',
           datasource: {
             activeId: 'testDatasource',
             state: {},
@@ -124,6 +135,8 @@ describe('editor_frame state management', () => {
       const newDatasourceState = {};
       const newState = reducer(
         {
+          saving: false,
+          title: 'Unagi',
           datasource: {
             activeId: 'testDatasource',
             state: {},
@@ -149,6 +162,8 @@ describe('editor_frame state management', () => {
     it('should should switch active datasource and purge visualization state', () => {
       const newState = reducer(
         {
+          saving: false,
+          title: 'Angler',
           datasource: {
             activeId: 'testDatasource',
             state: {},
@@ -169,6 +184,201 @@ describe('editor_frame state management', () => {
       expect(newState.visualization.activeId).toBe(null);
       expect(newState.datasource.activeId).toBe('testDatasource2');
       expect(newState.datasource.state).toBe(null);
+    });
+
+    it('should mark as saving', () => {
+      const newState = reducer(
+        {
+          saving: false,
+          title: 'Sea Bass',
+          datasource: {
+            activeId: 'a',
+            state: {},
+            isLoading: false,
+          },
+          visualization: {
+            activeId: 'b',
+            state: {},
+          },
+        },
+        {
+          type: 'SAVING',
+        }
+      );
+
+      expect(newState.saving).toBeTruthy();
+    });
+
+    it('should mark as saved', () => {
+      const newState = reducer(
+        {
+          saving: true,
+          title: 'Orka',
+          datasource: {
+            activeId: 'a',
+            state: {},
+            isLoading: false,
+          },
+          visualization: {
+            activeId: 'b',
+            state: {},
+          },
+        },
+        {
+          type: 'SAVED',
+        }
+      );
+
+      expect(newState.saving).toBeFalsy();
+    });
+
+    it('should change the title', () => {
+      const newState = reducer(
+        {
+          saving: true,
+          title: 'Anemone',
+          datasource: {
+            activeId: 'a',
+            state: {},
+            isLoading: false,
+          },
+          visualization: {
+            activeId: 'b',
+            state: {},
+          },
+        },
+        {
+          type: 'UPDATE_TITLE',
+          title: 'Sea Anemone',
+        }
+      );
+
+      expect(newState.title).toEqual('Sea Anemone');
+    });
+
+    it('should change the persisted id', () => {
+      const newState = reducer(
+        {
+          saving: true,
+          title: 'Anemone',
+          datasource: {
+            activeId: 'a',
+            state: {},
+            isLoading: false,
+          },
+          visualization: {
+            activeId: 'b',
+            state: {},
+          },
+        },
+        {
+          type: 'UPDATE_PERSISTED_ID',
+          id: 'baz',
+        }
+      );
+
+      expect(newState.persistedId).toEqual('baz');
+    });
+
+    it('should reset the state', () => {
+      const newState = reducer(
+        {
+          datasource: {
+            activeId: 'a',
+            state: {},
+            isLoading: false,
+          },
+          saving: true,
+          title: 'Octopus',
+          visualization: {
+            activeId: 'b',
+            state: {},
+          },
+        },
+        {
+          type: 'RESET',
+          state: {
+            datasource: {
+              activeId: 'z',
+              isLoading: false,
+              state: { hola: 'muchacho' },
+            },
+            persistedId: 'bar',
+            saving: false,
+            title: 'Octopi',
+            visualization: {
+              activeId: 'q',
+              state: { my: 'viz' },
+            },
+          },
+        }
+      );
+
+      expect(newState).toMatchObject({
+        datasource: {
+          activeId: 'z',
+          isLoading: false,
+          state: { hola: 'muchacho' },
+        },
+        persistedId: 'bar',
+        saving: false,
+        title: 'Octopi',
+        visualization: {
+          activeId: 'q',
+          state: { my: 'viz' },
+        },
+      });
+    });
+
+    it('should load the state from the doc', () => {
+      const newState = reducer(
+        {
+          datasource: {
+            activeId: 'a',
+            state: {},
+            isLoading: false,
+          },
+          saving: false,
+          title: 'Jelly',
+          visualization: {
+            activeId: 'b',
+            state: {},
+          },
+        },
+        {
+          type: 'VISUALIZATION_LOADED',
+          doc: {
+            datasourceType: 'a',
+            id: 'b',
+            lensState: {
+              datasource: { foo: 'c' },
+              visualization: { bar: 'd' },
+            },
+            title: 'Jellies',
+            type: 'lens',
+            visualizationType: 'line',
+          },
+        }
+      );
+
+      expect(newState).toEqual({
+        datasource: {
+          activeId: 'a',
+          isLoading: true,
+          state: {
+            foo: 'c',
+          },
+        },
+        persistedId: 'b',
+        saving: false,
+        title: 'Jellies',
+        visualization: {
+          activeId: 'line',
+          state: {
+            bar: 'd',
+          },
+        },
+      });
     });
   });
 });
