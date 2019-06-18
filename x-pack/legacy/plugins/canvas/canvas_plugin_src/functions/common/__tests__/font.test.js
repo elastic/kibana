@@ -7,6 +7,9 @@
 import { openSans } from '../../../../common/lib/fonts';
 import { font } from '../font';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { getFunctionErrors } from '../../../strings';
+
+const errors = getFunctionErrors().font;
 
 describe('font', () => {
   const fn = functionWrapper(font);
@@ -102,7 +105,9 @@ describe('font', () => {
       });
 
       it('throws when provided an invalid weight', () => {
-        expect(() => fn(null, { weight: 'foo' })).toThrow(`Invalid font weight: 'foo'`);
+        expect(() => fn(null, { weight: 'foo' })).toThrow(
+          new RegExp(errors.invalidFontWeight('foo').message)
+        );
       });
     });
 
@@ -168,9 +173,9 @@ describe('font', () => {
       });
 
       it('throws when provided an invalid alignment', () => {
-        expect(() => {
-          fn(null, { align: 'foo' });
-        }).toThrow(`Invalid text alignment: 'foo'`);
+        expect(() => fn(null, { align: 'foo' })).toThrow(
+          errors.invalidTextAlignment('foo').message
+        );
       });
     });
   });
