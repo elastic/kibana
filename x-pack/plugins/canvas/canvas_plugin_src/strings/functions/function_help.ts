@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { AvailableFunctions } from '../../functions/types';
+import { CanvasFunction } from '../../functions/types';
 import { UnionToIntersection } from '../../functions/types';
 
 import { help as all } from './all';
@@ -13,7 +13,6 @@ import { help as alterColumn } from './alterColumn';
 import { help as any } from './any';
 import { help as asFn } from './as';
 import { help as axisConfig } from './axisConfig';
-import { help as browser } from './browser';
 import { help as caseFn } from './case';
 import { help as clear } from './clear';
 import { help as columns } from './columns';
@@ -61,7 +60,6 @@ import { help as revealImage } from './revealImage';
 import { help as rounddate } from './rounddate';
 import { help as rowCount } from './rowCount';
 import { help as seriesStyle } from './seriesStyle';
-import { help as server } from './server';
 import { help as shape } from './shape';
 import { help as sort } from './sort';
 import { help as staticColumn } from './staticColumn';
@@ -74,8 +72,33 @@ import { help as timefilterControl } from './timefilterControl';
 import { help as urlparam } from './urlparam';
 
 /**
- * This type infers Function argument types.  This allows for validation that every
- * function argument has the correct help strings.
+ * This type defines an entry in the `FunctionHelpMap`.  It uses 
+ * an `ExpressionFunction` to infer its `Arguments` in order to strongly-type that 
+ * entry.
+ * 
+ * For example:
+ * 
+```
+   interface Arguments {
+     bar: string;
+     baz: number;
+   }
+
+   function foo(): ExpressionFunction<'foo', Context, Arguments, Return> {
+     // ...
+   }
+
+   const help: FunctionHelp<typeof foo> = {
+     help: 'Some help for foo',
+     args: {
+       bar: 'Help for bar.',   // pass; error if missing
+       baz: 'Help for baz.',   // pass; error if missing
+       zap: 'Help for zap.`,   // error: zap doesn't exist
+     }
+   };
+```
+ * This allows one to ensure each argument is present, and no extraneous arguments
+ * remain.
  */
 export type FunctionHelp<T> = T extends ExpressionFunction<
   infer Name,
@@ -89,8 +112,22 @@ export type FunctionHelp<T> = T extends ExpressionFunction<
     }
   : never;
 
-// This type infers a Function name and Arguments to ensure every Function is defined
-// in the `dict` and all Arguments have help strings.
+// This internal type infers a Function name and uses `FunctionHelp` above to build
+// a dictionary entry.  This can be used to ensure every Function is defined and all
+// Arguments have help strings.
+//
+// For example:
+//
+// function foo(): ExpressionFunction<'foo', Context, Arguments, Return> {
+//   // ...
+// }
+//
+// const map: FunctionHelpMap<typeof foo> = {
+//   foo: FunctionHelp<typeof foo>,
+// }
+//
+// Given a collection of functions, the map would contain each entry.
+//
 type FunctionHelpMap<T> = T extends ExpressionFunction<
   infer Name,
   infer Context,
@@ -100,17 +137,17 @@ type FunctionHelpMap<T> = T extends ExpressionFunction<
   ? { [key in Name]: FunctionHelp<T> }
   : never;
 
-// This type represents an exhaustive dictionary of Function help strings,
-// organized by Function and then Function Argument.
+// This internal type represents an exhaustive dictionary of `FunctionHelp` types,
+// organized by Function Name and then Function Argument.
 //
 // This type indexes the existing function factories, reverses the union to an
 // intersection, and produces the dictionary of strings.
-type FunctionHelpDict = UnionToIntersection<FunctionHelpMap<AvailableFunctions>>;
+type FunctionHelpDict = UnionToIntersection<FunctionHelpMap<CanvasFunction>>;
 
 /**
  * Help text for Canvas Functions should be properly localized. This function will
- * return a dictionary of help strings, organized by Canvas Function specification
- * and then by available arguments.
+ * return a dictionary of help strings, organized by `CanvasFunction` specification
+ * and then by available arguments within each `CanvasFunction`.
  *
  * This a function, rather than an object, to future-proof string initialization,
  * if ever necessary.
@@ -121,7 +158,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   any,
   as: asFn,
   axisConfig,
-  browser,
   case: caseFn,
   clear,
   columns,
@@ -169,7 +205,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   rounddate,
   rowCount,
   seriesStyle,
-  server,
   shape,
   sort,
   staticColumn,

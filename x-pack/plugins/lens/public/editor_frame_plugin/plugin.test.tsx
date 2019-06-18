@@ -17,7 +17,7 @@ import {
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
 // mock away actual data plugin to prevent all of it being loaded
-jest.mock('../../../../../src/legacy/core_plugins/data/public', () => {});
+jest.mock('../../../../../src/legacy/core_plugins/data/public/setup', () => {});
 
 describe('editor_frame plugin', () => {
   let pluginInstance: EditorFramePlugin;

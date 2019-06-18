@@ -27,6 +27,7 @@ export function createMockDatasource(): DatasourceMock {
   const publicAPIMock: jest.Mocked<DatasourcePublicAPI> = {
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
+    generateColumnId: jest.fn(),
     renderDimensionPanel: jest.fn(),
     removeColumnInTableSpec: jest.fn(),
     moveColumnTo: jest.fn(),
@@ -34,7 +35,7 @@ export function createMockDatasource(): DatasourceMock {
   };
 
   return {
-    getDatasourceSuggestionsForField: jest.fn(_state => []),
+    getDatasourceSuggestionsForField: jest.fn((_state, item) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
     getPersistableState: jest.fn(),
     getPublicAPI: jest.fn((_state, _setState) => publicAPIMock),

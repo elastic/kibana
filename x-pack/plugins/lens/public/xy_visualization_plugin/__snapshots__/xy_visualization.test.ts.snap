@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`xy_visualization #toExpression should map to a valid AST 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "legend": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "isVisible": Array [
+                    true,
+                  ],
+                  "position": Array [
+                    "bottom",
+                  ],
+                },
+                "function": "lens_xy_legendConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "seriesType": Array [
+          "area",
+        ],
+        "splitSeriesAccessors": Array [],
+        "stackAccessors": Array [],
+        "title": Array [
+          "Foo",
+        ],
+        "x": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    "a",
+                  ],
+                  "position": Array [
+                    "bottom",
+                  ],
+                  "showGridlines": Array [
+                    true,
+                  ],
+                  "title": Array [
+                    "Baz",
+                  ],
+                },
+                "function": "lens_xy_xConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "y": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessors": Array [
+                    "b",
+                    "c",
+                  ],
+                  "position": Array [
+                    "left",
+                  ],
+                  "showGridlines": Array [
+                    true,
+                  ],
+                  "title": Array [
+                    "Bar",
+                  ],
+                },
+                "function": "lens_xy_yConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+      },
+      "function": "lens_xy_chart",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

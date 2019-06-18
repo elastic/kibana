@@ -6,7 +6,7 @@
 
 import { getSuggestions } from './xy_suggestions';
 import { TableColumn, VisualizationSuggestion } from '../types';
-import { XYArgs } from './xy_expression';
+import { State } from './types';
 
 describe('xy_suggestions', () => {
   function numCol(columnId: string): TableColumn {
@@ -47,7 +47,7 @@ describe('xy_suggestions', () => {
 
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
-  function suggestionSubset(suggestion: VisualizationSuggestion<XYArgs>) {
+  function suggestionSubset(suggestion: VisualizationSuggestion<State>) {
     const { seriesType, splitSeriesAccessors, stackAccessors, x, y } = suggestion.state;
 
     return {
@@ -89,7 +89,7 @@ describe('xy_suggestions', () => {
       ],
     });
 
-    expect(rest.length).toEqual(0);
+    expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
 Object {
   "seriesType": "line",
@@ -114,7 +114,7 @@ Object {
       ],
     });
 
-    expect(rest.length).toEqual(0);
+    expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
 Object {
   "seriesType": "line",
@@ -147,7 +147,7 @@ Object {
       ],
     });
 
-    expect(rest.length).toEqual(0);
+    expect(rest).toHaveLength(0);
     expect([suggestionSubset(s1), suggestionSubset(s2)]).toMatchInlineSnapshot(`
 Array [
   Object {

@@ -6,8 +6,8 @@
 
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { XYArgs } from './xy_expression';
 import { SuggestionRequest, VisualizationSuggestion, TableColumn, TableSuggestion } from '../types';
+import { State } from './types';
 
 const columnSortOrder = {
   date: 0,
@@ -22,8 +22,8 @@ const columnSortOrder = {
  * @param opts
  */
 export function getSuggestions(
-  opts: SuggestionRequest<XYArgs>
-): Array<VisualizationSuggestion<XYArgs>> {
+  opts: SuggestionRequest<State>
+): Array<VisualizationSuggestion<State>> {
   return opts.tables
     .filter(
       ({ isMultiRow, columns }) =>
@@ -38,7 +38,7 @@ export function getSuggestions(
     .map(table => getSuggestionForColumns(table));
 }
 
-function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestion<XYArgs> {
+function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestion<State> {
   const [buckets, values] = partition(
     prioritizeColumns(table.columns),
     col => col.operation.isBucketed
@@ -67,7 +67,7 @@ function getSuggestion(
   xValue: TableColumn,
   yValues: TableColumn[],
   splitBy?: TableColumn
-): VisualizationSuggestion<XYArgs> {
+): VisualizationSuggestion<State> {
   const yTitle = yValues.map(col => col.operation.label).join(' & ');
   const xTitle = xValue.operation.label;
   const isDate = xValue.operation.dataType === 'date';

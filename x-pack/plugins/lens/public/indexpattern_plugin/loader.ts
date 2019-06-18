@@ -9,30 +9,54 @@ import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import { IndexPatternField } from './indexpattern';
 
-interface IndexPatternAttributes extends SavedObjectAttributes {
+interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
   timeFieldName: string | null;
   fields: string;
   fieldFormatMap: string;
+  typeMeta: string;
 }
+
+interface SavedRestrictionsObject {
+  aggs: Record<
+    string,
+    Record<
+      string,
+      {
+        agg: string;
+        fixed_interval?: string;
+        calendar_interval?: string;
+        delay?: string;
+        time_zone?: string;
+      }
+    >
+  >;
+}
+type SavedRestrictionsInfo = SavedRestrictionsObject | undefined;
 
 export const getIndexPatterns = (chrome: Chrome, toastNotifications: ToastNotifications) => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
   return savedObjectsClient
-    .find<IndexPatternAttributes>({
+    .find<SavedIndexPatternAttributes>({
       type: 'index-pattern',
       perPage: 1000, // TODO: Paginate index patterns
     })
     .then(resp => {
       return resp.savedObjects.map(savedObject => {
-        const { id, attributes } = savedObject;
-        return Object.assign(attributes, {
+        const { id, attributes, type } = savedObject;
+        return {
+          ...attributes,
           id,
+          type,
           title: attributes.title,
           fields: (JSON.parse(attributes.fields) as IndexPatternField[]).filter(
-            ({ type, esTypes }) => type !== 'string' || (esTypes && esTypes.includes('keyword'))
+            ({ type: fieldType, esTypes }) =>
+              fieldType !== 'string' || (esTypes && esTypes.includes('keyword'))
           ),
-        });
+          typeMeta: attributes.typeMeta
+            ? (JSON.parse(attributes.typeMeta) as SavedRestrictionsInfo)
+            : undefined,
+        };
       });
     })
     .catch(err => {

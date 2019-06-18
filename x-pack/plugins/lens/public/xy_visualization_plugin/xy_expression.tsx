@@ -7,7 +7,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {
-  Position,
   Chart,
   Settings,
   Axis,
@@ -17,151 +16,10 @@ import {
   AreaSeries,
   BarSeries,
 } from '@elastic/charts';
-import {
-  ExpressionFunction,
-  ArgumentType,
-} from '../../../../../src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
+import { XYArgs } from './types';
 import { KibanaDatatable } from '../types';
 import { RenderFunction } from './plugin';
-
-/**
- * This file contains TypeScript type definitions and their equivalent expression
- * definitions, for configuring and rendering an XY chart. The XY chart serves
- * triple duty as a bar, line, or area chart.
- *
- * The xy_chart expression function serves mostly as a passthrough to the xy_chart_renderer
- * which does the heavy-lifting.
- */
-
-export interface LegendConfig {
-  isVisible: boolean;
-  position: Position;
-}
-
-type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
-
-export const legendConfig: ExpressionFunction<
-  'lens_xy_legendConfig',
-  null,
-  LegendConfig,
-  LegendConfigResult
-> = {
-  name: 'lens_xy_legendConfig',
-  aliases: [],
-  type: 'lens_xy_legendConfig',
-  help: `Configure the xy chart's legend`,
-  context: {
-    types: ['null'],
-  },
-  args: {
-    isVisible: {
-      types: ['boolean'],
-      help: 'Specifies whether or not the legend is visible.',
-    },
-    position: {
-      types: ['string'],
-      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-      help: 'Specifies the legend position.',
-    },
-  },
-  fn: function fn(_context: unknown, args: LegendConfig) {
-    return {
-      type: 'lens_xy_legendConfig',
-      ...args,
-    };
-  },
-};
-
-interface AxisConfig {
-  title: string;
-  showGridlines: boolean;
-  position: Position;
-}
-
-const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } = {
-  title: {
-    types: ['string'],
-    help: 'The axis title',
-  },
-  showGridlines: {
-    types: ['boolean'],
-    help: 'Show / hide axis grid lines.',
-  },
-  position: {
-    types: ['string'],
-    options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-    help: 'The position of the axis',
-  },
-};
-
-export interface YConfig extends AxisConfig {
-  accessors: string[];
-}
-
-type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
-
-export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConfigResult> = {
-  name: 'lens_xy_yConfig',
-  aliases: [],
-  type: 'lens_xy_yConfig',
-  help: `Configure the xy chart's y axis`,
-  context: {
-    types: ['null'],
-  },
-  args: {
-    ...axisConfig,
-    accessors: {
-      types: ['string'],
-      help: 'The columns to display on the y axis.',
-      multi: true,
-    },
-  },
-  fn: function fn(_context: unknown, args: YConfig) {
-    return {
-      type: 'lens_xy_yConfig',
-      ...args,
-    };
-  },
-};
-
-export interface XConfig extends AxisConfig {
-  accessor: string;
-}
-
-type XConfigResult = XConfig & { type: 'lens_xy_xConfig' };
-
-export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConfigResult> = {
-  name: 'lens_xy_xConfig',
-  aliases: [],
-  type: 'lens_xy_xConfig',
-  help: `Configure the xy chart's x axis`,
-  context: {
-    types: ['null'],
-  },
-  args: {
-    ...axisConfig,
-    accessor: {
-      types: ['string'],
-      help: 'The column to display on the x axis.',
-    },
-  },
-  fn: function fn(_context: unknown, args: XConfig) {
-    return {
-      type: 'lens_xy_xConfig',
-      ...args,
-    };
-  },
-};
-
-export interface XYArgs {
-  seriesType: 'bar' | 'line' | 'area';
-  title: string;
-  legend: LegendConfig;
-  y: YConfig;
-  x: XConfig;
-  splitSeriesAccessors: string[];
-  stackAccessors: string[];
-}
 
 export interface XYChartProps {
   data: KibanaDatatable;
@@ -226,6 +84,11 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
   },
   // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
 } as unknown) as ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender>;
+
+export interface XYChartProps {
+  data: KibanaDatatable;
+  args: XYArgs;
+}
 
 export const xyChartRenderer: RenderFunction<XYChartProps> = {
   name: 'lens_xy_chart_renderer',

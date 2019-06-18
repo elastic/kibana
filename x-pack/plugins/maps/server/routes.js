@@ -5,10 +5,18 @@
  */
 
 
-import { EMS_DATA_FILE_PATH, EMS_DATA_TMS_PATH, EMS_META_PATH, GIS_API_PATH } from '../common/constants';
+import {
+  EMS_DATA_FILE_PATH,
+  EMS_DATA_TMS_PATH,
+  EMS_META_PATH,
+  GIS_API_PATH,
+  SPRITE_PATH,
+} from '../common/constants';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
 import { getEMSResources } from '../common/ems_util';
+import path from 'path';
+
 import Boom from 'boom';
 
 const ROOT = `/${GIS_API_PATH}`;
@@ -152,6 +160,16 @@ export function initRoutes(server, licenseUid) {
         return { count };
       } catch (error) {
         return h.response().code(400);
+      }
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: `${SPRITE_PATH}/{path*}`,
+    handler: {
+      directory: {
+        path: path.join(__dirname, './sprites')
       }
     }
   });

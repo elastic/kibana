@@ -6,13 +6,10 @@
 
 import React, { useCallback } from 'react';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Chart, Axis, Position, timeFormatter, getAxisId, Settings } from '@elastic/charts';
-import '@elastic/charts/dist/style.css';
 import { first } from 'lodash';
 import { niceTimeFormatByDay } from '@elastic/charts/dist/utils/data/formatters';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
 import moment from 'moment';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
@@ -26,6 +23,7 @@ import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { SourceQuery } from '../../graphql/types';
 import { MetricsExplorerEmptyChart } from './empty_chart';
 import { MetricsExplorerNoMetrics } from './no_metrics';
+import { getChartTheme } from './helpers/get_chart_theme';
 
 interface Props {
   intl: InjectedIntl;
@@ -63,10 +61,12 @@ export const MetricsExplorerChart = injectI18n(
       <React.Fragment>
         {options.groupBy ? (
           <EuiTitle size="xs">
-            <EuiFlexGroup>
-              <EuiFlexItem grow={1}>
-                <ChartTitle>{title}</ChartTitle>
-              </EuiFlexItem>
+            <EuiFlexGroup alignItems="center">
+              <ChartTitle>
+                <EuiToolTip content={title}>
+                  <span>{title}</span>
+                </EuiToolTip>
+              </ChartTitle>
               <EuiFlexItem grow={false}>
                 <MetricsExplorerChartContextMenu
                   timeRange={timeRange}
@@ -103,7 +103,7 @@ export const MetricsExplorerChart = injectI18n(
                 tickFormat={dateFormatter}
               />
               <Axis id={getAxisId('values')} position={Position.Left} tickFormat={yAxisFormater} />
-              <Settings onBrushEnd={handleTimeChange} />
+              <Settings onBrushEnd={handleTimeChange} theme={getChartTheme()} />
             </Chart>
           ) : options.metrics.length > 0 ? (
             <MetricsExplorerEmptyChart />
@@ -122,4 +122,6 @@ const ChartTitle = euiStyled.div`
             text-overflow: ellipsis;
             white-space: nowrap;
             text-align: left;
+            flex: 1 1 auto;
+            margin: 12px;
           `;

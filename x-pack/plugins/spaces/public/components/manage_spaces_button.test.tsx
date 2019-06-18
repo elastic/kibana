@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { setMockCapabilities } from '../__mocks__/ui_capabilities';
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { setMockCapabilities } from '../../../__mocks__/ui/capabilities';
 import { ManageSpacesButton } from './manage_spaces_button';
 
 describe('ManageSpacesButton', () => {

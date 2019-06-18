@@ -21,7 +21,7 @@ import { ReactWrapper } from 'enzyme';
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
 describe('workspace_panel', () => {
-  let mockVisualization: Visualization;
+  let mockVisualization: jest.Mocked<Visualization>;
   let mockDatasource: DatasourceMock;
 
   let expressionRendererMock: jest.Mock<React.ReactElement, [ExpressionRendererProps]>;
@@ -56,8 +56,8 @@ describe('workspace_panel', () => {
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]').length).toBe(1);
-    expect(instance.find(expressionRendererMock).length).toBe(0);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
   it('should render an explanatory text if the visualization does not produce an expression', () => {
@@ -76,8 +76,8 @@ describe('workspace_panel', () => {
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]').length).toBe(1);
-    expect(instance.find(expressionRendererMock).length).toBe(0);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
   it('should render an explanatory text if the datasource does not produce an expression', () => {
@@ -96,8 +96,8 @@ describe('workspace_panel', () => {
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]').length).toBe(1);
-    expect(instance.find(expressionRendererMock).length).toBe(0);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
   it('should render the resulting expression using the expression renderer', () => {
@@ -158,8 +158,8 @@ Object {
         />
       );
 
-      expect(instance.find('[data-test-subj="expression-failure"]').length).toBe(1);
-      expect(instance.find(expressionRendererMock).length).toBe(0);
+      expect(instance.find('[data-test-subj="expression-failure"]')).toHaveLength(1);
+      expect(instance.find(expressionRendererMock)).toHaveLength(0);
     });
 
     it('should show an error message if the expression fails to render', async () => {
@@ -191,8 +191,8 @@ Object {
 
       instance.update();
 
-      expect(instance.find('[data-test-subj="expression-failure"]').length).toBe(1);
-      expect(instance.find(expressionRendererMock).length).toBe(0);
+      expect(instance.find('[data-test-subj="expression-failure"]')).toHaveLength(1);
+      expect(instance.find(expressionRendererMock)).toHaveLength(0);
     });
 
     it('should not attempt to run the expression again if it does not change', async () => {
@@ -271,7 +271,137 @@ Object {
 
       expect(expressionRendererMock).toHaveBeenCalledTimes(2);
 
-      expect(instance.find(expressionRendererMock).length).toBe(1);
+      expect(instance.find(expressionRendererMock)).toHaveLength(1);
+    });
+  });
+
+  describe('suggestions from dropping in workspace panel', () => {
+    let mockDispatch: jest.Mock;
+
+    beforeEach(() => {
+      mockDispatch = jest.fn();
+      instance = mount(
+        <WorkspacePanel
+          activeDatasource={mockDatasource}
+          datasourceState={{}}
+          activeVisualizationId={null}
+          visualizationMap={{
+            vis: mockVisualization,
+          }}
+          visualizationState={{}}
+          datasourcePublicAPI={mockDatasource.publicAPIMock}
+          dispatch={mockDispatch}
+          ExpressionRenderer={expressionRendererMock}
+        />
+      );
+    });
+
+    it('should immediately transition if exactly one suggestion is returned', () => {
+      const expectedTable = {
+        datasourceSuggestionId: 0,
+        isMultiRow: true,
+        columns: [],
+      };
+      mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
+        {
+          state: {},
+          table: expectedTable,
+        },
+      ]);
+      mockVisualization.getSuggestions.mockReturnValueOnce([
+        {
+          score: 0.5,
+          title: 'my title',
+          state: {},
+          datasourceSuggestionId: 0,
+        },
+      ]);
+
+      instance.childAt(0).prop('onDrop')({
+        name: '@timestamp',
+        type: 'date',
+        searchable: false,
+        aggregatable: false,
+      });
+
+      expect(mockDatasource.getDatasourceSuggestionsForField).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.getSuggestions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tables: [expectedTable],
+        })
+      );
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'SWITCH_VISUALIZATION',
+        newVisualizationId: 'vis',
+        initialState: {},
+        datasourceState: {},
+      });
+    });
+
+    it('should immediately transition to the first suggestion if there are multiple', () => {
+      mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
+        {
+          state: {},
+          table: {
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            columns: [],
+          },
+        },
+        {
+          state: {},
+          table: {
+            datasourceSuggestionId: 1,
+            isMultiRow: true,
+            columns: [],
+          },
+        },
+      ]);
+      mockVisualization.getSuggestions.mockReturnValueOnce([
+        {
+          score: 0.8,
+          title: 'first suggestion',
+          state: {
+            isFirst: true,
+          },
+          datasourceSuggestionId: 1,
+        },
+        {
+          score: 0.5,
+          title: 'second suggestion',
+          state: {},
+          datasourceSuggestionId: 0,
+        },
+      ]);
+
+      instance.childAt(0).prop('onDrop')({
+        name: '@timestamp',
+        type: 'date',
+        searchable: false,
+        aggregatable: false,
+      });
+
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'SWITCH_VISUALIZATION',
+        newVisualizationId: 'vis',
+        initialState: {
+          isFirst: true,
+        },
+        datasourceState: {},
+      });
+    });
+
+    it("should do nothing when the visualization can't use the suggestions", () => {
+      instance.childAt(0).prop('onDrop')({
+        name: '@timestamp',
+        type: 'date',
+        searchable: false,
+        aggregatable: false,
+      });
+
+      expect(mockDatasource.getDatasourceSuggestionsForField).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.getSuggestions).toHaveBeenCalledTimes(1);
+      expect(mockDispatch).not.toHaveBeenCalled();
     });
   });
 });

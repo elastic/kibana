@@ -1,0 +1,22 @@
+{
+  "name": "kbn_tp_embeddable_explorer",
+  "version": "1.0.0",
+  "main":"target/test/plugin_functional/plugins/kbn_tp_embeddable_explorer",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@elastic/eui": "11.3.2",
+    "react": "^16.8.0"
+  },
+  "scripts": {
+    "kbn": "node ../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && tsc"
+  },
+  "devDependencies": {
+    "@kbn/plugin-helpers" : "9.0.2",
+    "typescript": "^3.3.3333"
+  }
+}

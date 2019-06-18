@@ -49,16 +49,26 @@ export {
   ScopedClusterClient,
   ElasticsearchClientConfig,
   APICaller,
+  FakeRequest,
+  LegacyRequest,
 } from './elasticsearch';
 export {
   AuthenticationHandler,
+  AuthHeaders,
+  AuthResultData,
   AuthToolkit,
+  GetAuthHeaders,
   KibanaRequest,
+  KibanaRequestRoute,
   OnPreAuthHandler,
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
   Router,
+  RouteMethod,
+  RouteConfigOptions,
+  SessionStorageFactory,
+  SessionStorage,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
@@ -69,6 +79,8 @@ export {
   PluginInitializerContext,
   PluginName,
 } from './plugins';
+
+export { RecursiveReadonly } from '../utils';
 
 /**
  * Context passed to the plugins `setup` method.
@@ -84,8 +96,7 @@ export interface CoreSetup {
     registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-    getBasePathFor: HttpServiceSetup['getBasePathFor'];
-    setBasePathFor: HttpServiceSetup['setBasePathFor'];
+    basePath: HttpServiceSetup['basePath'];
     createNewServer: HttpServiceSetup['createNewServer'];
   };
 }

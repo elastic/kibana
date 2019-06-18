@@ -13,7 +13,7 @@ type DroppableEvent = React.DragEvent<HTMLElement>;
 /**
  * A function that handles a drop event.
  */
-type DropHandler = (item: unknown) => void;
+export type DropHandler = (item: unknown) => void;
 
 /**
  * The argument to the DragDrop component.

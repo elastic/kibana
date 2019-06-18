@@ -94,7 +94,7 @@ You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
               "br": <br />,
               "learnMoreLink": <EuiLink
                 color="primary"
-                href="https://www.elastic.co/guide/en/elastic-stack-overview/my-metadata-branch/ml-rules.html"
+                href="https://www.elastic.co/guide/en/elastic-stack-overview/jest-metadata-mock-branch/ml-rules.html"
                 target="_blank"
                 type="button"
               >

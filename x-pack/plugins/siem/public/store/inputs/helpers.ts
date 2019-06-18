@@ -6,7 +6,8 @@
 
 import { get } from 'lodash/fp';
 
-import { InputsModel, InputsModelId, TimeRange } from './model';
+import { InputsModel, TimeRange } from './model';
+import { InputsModelId } from './constants';
 
 export const updateInputTimerange = (
   inputId: InputsModelId,

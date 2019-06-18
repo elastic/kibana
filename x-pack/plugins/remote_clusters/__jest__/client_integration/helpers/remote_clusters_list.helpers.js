@@ -5,9 +5,9 @@
  */
 
 import { registerTestBed, findTestSubject } from '../../../../../test_utils';
-import { RemoteClusterList } from '../../../public/sections/remote_cluster_list';
-import { createRemoteClustersStore } from '../../../public/store';
-import { registerRouter } from '../../../public/services/routing';
+import { RemoteClusterList } from '../../../public/app/sections/remote_cluster_list';
+import { createRemoteClustersStore } from '../../../public/app/store';
+import { registerRouter } from '../../../public/app/services/routing';
 
 const testBedConfig = {
   store: createRemoteClustersStore,
