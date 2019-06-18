@@ -8,6 +8,7 @@ import * as Joi from 'joi';
 import { Server } from 'hapi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
+import mappings from './mappings.json';
 
 import { PLUGIN_ID } from './common';
 
@@ -27,6 +28,7 @@ export const lens: LegacyPluginInitializer = kibana => {
         main: `plugins/${PLUGIN_ID}/index`,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      mappings,
     },
 
     config: () => {
