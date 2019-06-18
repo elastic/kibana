@@ -2,7 +2,8 @@
 
 set -e
 
-targetBranch="${PR_TARGET_BRANCH:-${GIT_BRANCH#*/}}"
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+targetBranch="${PR_TARGET_BRANCH:-${BRANCH#*/}}"
 bootstrapCache="$JENKINS_HOME/.kibana/bootstrap_cache/$targetBranch.tar"
 
 ###
