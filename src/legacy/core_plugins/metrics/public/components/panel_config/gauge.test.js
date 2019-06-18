@@ -19,15 +19,28 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+jest.mock('plugins/data/setup', () => ({
+  data: {
+    query: {
+      ui: jest.fn(),
+    },
+  },
+}));
 import { GaugePanelConfig } from './gauge';
 
 describe('GaugePanelConfig', () => {
   it('call switch tab onChange={handleChange}', () => {
-    const fields = {};
-    const wrapper = shallowWithIntl(<GaugePanelConfig fields={fields} />);
+    const props = {
+      fields: {},
+      model: {},
+      onChange: jest.fn(),
+    };
+    const wrapper = shallowWithIntl(<GaugePanelConfig.WrappedComponent {...props} />);
+
     wrapper
       .find('EuiTab')
       .first()
       .simulate('onClick');
+    expect(props.onChange).toBeCalled();
   });
 });
