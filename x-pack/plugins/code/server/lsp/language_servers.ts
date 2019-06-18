@@ -27,7 +27,7 @@ export const TYPESCRIPT: LanguageServerDefinition = {
   languages: ['typescript', 'javascript'],
   launcher: TypescriptServerLauncher,
   installationType: InstallationType.Embed,
-  embedPath: require.resolve('@elastic/javascript-typescript-langserver/lib/language-server.js'),
+  embedPath: require.resolve('@elastic/typescript-langserver/lib/cli.js'),
 };
 export const JAVA: LanguageServerDefinition = {
   name: 'Java',
