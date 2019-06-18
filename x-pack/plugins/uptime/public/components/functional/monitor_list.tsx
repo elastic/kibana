@@ -142,7 +142,7 @@ export const MonitorListComponent = ({
                 locationName
               ) : (
                 <EuiLink
-                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/add-host-metadata.html#add-host-metadata"
+                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-observer-options.html"
                   target="_blank"
                 >
                   {i18n.translate('xpack.uptime.monitorList.geoName.helpLinkAnnotation', {

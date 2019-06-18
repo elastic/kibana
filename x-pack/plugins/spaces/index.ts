@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 
-import { SavedObjectsService } from 'src/legacy/server/saved_objects';
+import { SavedObjectsService } from 'src/core/server';
 import { Request, Server } from 'hapi';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
@@ -48,6 +48,11 @@ export const spaces = (kibana: Record<string, any>) =>
       return {
         spaces: {
           manage: true,
+        },
+        management: {
+          kibana: {
+            spaces: true,
+          },
         },
       };
     },

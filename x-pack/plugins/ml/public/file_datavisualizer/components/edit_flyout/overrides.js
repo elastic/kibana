@@ -10,17 +10,20 @@ import { i18n } from '@kbn/i18n';
 import React, {
   Component,
 } from 'react';
+import { metadata } from 'ui/metadata';
 
 import {
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
   EuiComboBox,
   EuiCheckbox,
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiLink,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiTextArea,
-  EuiFieldNumber,
 } from '@elastic/eui';
 
 import {
@@ -30,6 +33,9 @@ import {
   getQuoteOptions,
   // getCharsetOptions,
 } from './options';
+import { isTimestampFormatValid } from './overrides_validation';
+
+import { TIMESTAMP_OPTIONS, CUSTOM_DROPDOWN_OPTION } from './options/option_lists';
 
 const formatOptions = getFormatOptions();
 const timestampFormatOptions = getTimestampFormatOptions();
@@ -53,6 +59,11 @@ export class Overrides extends Component {
       min: LINES_TO_SAMPLE_VALUE_MIN,
       max: LINES_TO_SAMPLE_VALUE_MAX,
     }
+  });
+
+  customTimestampFormatErrors = i18n.translate('xpack.ml.fileDatavisualizer.editFlyout.overrides.customTimestampFormatErrorMessage', {
+    defaultMessage: `Timestamp format must be a combination of these Java date/time formats:
+      yy, yyyy, M, MM, MMM, MMMM, d, dd, EEE, EEEE, H, HH, h, mm, ss, S through SSSSSSSSS, a, XX, XXX, zzz`
   });
 
   static getDerivedStateFromProps(props, state) {
@@ -99,15 +110,30 @@ export class Overrides extends Component {
     return {
       originalColumnNames,
       customDelimiter: (customD === undefined) ? '' : customD,
+      customTimestampFormat: '',
       linesToSampleValid: true,
+      timestampFormatValid: true,
+      timestampFormatError: null,
       overrides,
       ...state,
     };
   }
 
   componentDidMount() {
+    const originalTimestampFormat = (this.props && this.props.originalSettings && this.props.originalSettings.timestampFormat);
+
     if (typeof this.props.setApplyOverrides === 'function') {
       this.props.setApplyOverrides(this.applyOverrides);
+    }
+
+    if (originalTimestampFormat !== undefined) {
+      const optionExists = (TIMESTAMP_OPTIONS.some(option => option === originalTimestampFormat));
+      if (optionExists === false) {
+        // Incoming format does not exist in dropdown. Display custom input with incoming format as default value.
+        const overrides = { ...this.state.overrides };
+        overrides.timestampFormat = CUSTOM_DROPDOWN_OPTION;
+        this.setState({ customTimestampFormat: originalTimestampFormat, overrides });
+      }
     }
   }
 
@@ -120,6 +146,9 @@ export class Overrides extends Component {
   applyOverrides = () => {
     const overrides = { ...this.state.overrides };
     overrides.delimiter = convertDelimiterBack(overrides.delimiter, this.state.customDelimiter);
+    if (overrides.timestampFormat === CUSTOM_DROPDOWN_OPTION && this.state.customTimestampFormat !== '') {
+      overrides.timestampFormat = this.state.customTimestampFormat;
+    }
 
     this.props.setOverrides(overrides);
   }
@@ -137,6 +166,17 @@ export class Overrides extends Component {
   onTimestampFormatChange = ([opt]) => {
     const timestampFormat = opt ? opt.label : '';
     this.setOverride({ timestampFormat });
+    if (opt !== CUSTOM_DROPDOWN_OPTION) {
+      this.props.setOverridesValid(true);
+    }
+  }
+
+  onCustomTimestampFormatChange = (e) => {
+    this.setState({ customTimestampFormat: e.target.value });
+    // check whether the value is valid and set that to state.
+    const { isValid, errorMessage } = isTimestampFormatValid(e.target.value);
+    this.setState({ timestampFormatValid: isValid, timestampFormatError: errorMessage });
+    this.props.setOverridesValid(isValid);
   }
 
   onTimestampFieldChange = ([opt]) => {
@@ -199,8 +239,11 @@ export class Overrides extends Component {
     const { fields } = this.props;
     const {
       customDelimiter,
+      customTimestampFormat,
       originalColumnNames,
       linesToSampleValid,
+      timestampFormatError,
+      timestampFormatValid,
       overrides,
     } = this.state;
 
@@ -219,6 +262,19 @@ export class Overrides extends Component {
     } = overrides;
 
     const fieldOptions = getSortedFields(fields);
+    const timestampFormatErrorsList = [this.customTimestampFormatErrors, timestampFormatError];
+    // metadata.branch corresponds to the version used in documentation links.
+    const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern`;
+
+    const timestampFormatHelp = (
+      <EuiText size="xs">
+        <EuiLink href={docsUrl} target="_blank">
+          {i18n.translate('xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampFormatHelpText', {
+            defaultMessage: 'See more on accepted formats'
+          })}
+        </EuiLink>
+      </EuiText>
+    );
 
     return (
 
@@ -276,7 +332,7 @@ export class Overrides extends Component {
               />
             </EuiFormRow>
             {
-              (delimiter === 'other') &&
+              (delimiter === CUSTOM_DROPDOWN_OPTION) &&
               <EuiFormRow
                 label={
                   <FormattedMessage
@@ -360,6 +416,7 @@ export class Overrides extends Component {
           </React.Fragment>
         }
         <EuiFormRow
+          helpText={timestampFormatHelp}
           label={
             <FormattedMessage
               id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampFormatFormRowLabel"
@@ -375,6 +432,25 @@ export class Overrides extends Component {
             isClearable={false}
           />
         </EuiFormRow>
+        {
+          (timestampFormat === CUSTOM_DROPDOWN_OPTION) &&
+          <EuiFormRow
+            error={timestampFormatErrorsList}
+            isInvalid={(timestampFormatValid === false)}
+            label={
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.editFlyout.overrides.customTimestampFormatFormRowLabel"
+                defaultMessage="Custom timestamp format"
+              />
+            }
+          >
+            <EuiFieldText
+              value={customTimestampFormat}
+              onChange={this.onCustomTimestampFormatChange}
+              isInvalid={(timestampFormatValid === false)}
+            />
+          </EuiFormRow>
+        }
 
         <EuiFormRow
           label={
@@ -476,7 +552,7 @@ function convertDelimiter(d) {
 
     default:
       return {
-        delimiter: 'other',
+        delimiter: CUSTOM_DROPDOWN_OPTION,
         customDelimiter: d,
       };
   }
@@ -495,7 +571,7 @@ function convertDelimiterBack(delimiter, customDelimiter) {
       return '|';
     case 'space':
       return ' ';
-    case 'other':
+    case CUSTOM_DROPDOWN_OPTION:
       return customDelimiter;
 
     default:

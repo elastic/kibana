@@ -34,7 +34,7 @@ describe('app initialization', () => {
     ajaxDoneStub = sinon.stub();
     sandbox.stub($, 'ajax').returns({ done: ajaxDoneStub });
     sandbox.stub(history, 'getSavedEditorState');
-    sandbox.stub(mappings, 'startRetrievingAutoCompleteInfo');
+    sandbox.stub(mappings, 'startPolling');
 
     inputMock = {
       update: sinon.stub(),

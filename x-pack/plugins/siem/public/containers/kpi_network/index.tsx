@@ -29,11 +29,12 @@ export interface KpiNetworkProps extends QueryTemplateProps {
 }
 
 export const KpiNetworkQuery = React.memo<KpiNetworkProps>(
-  ({ id = 'kpiNetworkQuery', children, filterQuery, sourceId, startDate, endDate }) => (
+  ({ id = 'kpiNetworkQuery', children, filterQuery, skip, sourceId, startDate, endDate }) => (
     <Query<GetKpiNetworkQuery.Query, GetKpiNetworkQuery.Variables>
       query={kpiNetworkQuery}
       fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
+      skip={skip}
       variables={{
         sourceId,
         timerange: {

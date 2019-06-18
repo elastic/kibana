@@ -13,6 +13,7 @@ import rimraf from 'rimraf';
 import sinon from 'sinon';
 
 import { Repository } from '../../model';
+import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { CloneWorker, IndexWorker } from '../queue';
@@ -26,6 +27,7 @@ const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 const esQueue = {};
 
 const serverOptions = createTestServerOption();
+const gitOps = new GitOperations(serverOptions.repoPath);
 
 function prepareProject(url: string, p: string) {
   return new Promise(resolve => {
@@ -108,6 +110,7 @@ describe('clone_worker_tests', () => {
       log,
       {} as EsClient,
       serverOptions,
+      gitOps,
       {} as IndexWorker,
       (repoServiceFactory as any) as RepositoryServiceFactory,
       cancellationService as CancellationSerivce
@@ -155,6 +158,7 @@ describe('clone_worker_tests', () => {
       log,
       esClient as EsClient,
       serverOptions,
+      gitOps,
       (indexWorker as any) as IndexWorker,
       {} as RepositoryServiceFactory,
       cancellationService as CancellationSerivce
@@ -217,6 +221,7 @@ describe('clone_worker_tests', () => {
       log,
       esClient as EsClient,
       serverOptions,
+      gitOps,
       (indexWorker as any) as IndexWorker,
       {} as RepositoryServiceFactory,
       cancellationService as CancellationSerivce
@@ -271,6 +276,7 @@ describe('clone_worker_tests', () => {
       log,
       (esClient as any) as EsClient,
       serverOptions,
+      gitOps,
       {} as IndexWorker,
       {} as RepositoryServiceFactory,
       cancellationService as CancellationSerivce
@@ -318,6 +324,7 @@ describe('clone_worker_tests', () => {
       log,
       {} as EsClient,
       serverOptions,
+      gitOps,
       {} as IndexWorker,
       (repoServiceFactory as any) as RepositoryServiceFactory,
       cancellationService as CancellationSerivce

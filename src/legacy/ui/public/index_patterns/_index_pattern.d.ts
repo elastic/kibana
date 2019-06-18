@@ -29,6 +29,16 @@ export interface IndexPattern {
   title: string;
   timeFieldName?: string;
 }
+// 'enhanced' IndexPattern returned by IndexPatternProvider
+// reason for having this seperate interface are several tests
+// that currently depend on an interface without methods to succeed
+export interface IndexPatternEnhanced extends IndexPattern {
+  isTimeNanosBased: () => boolean;
+}
+
+export interface IndexPatternGetProvider {
+  get: (id: string) => IndexPatternEnhanced;
+}
 
 export interface StaticIndexPatternField {
   name: string;
