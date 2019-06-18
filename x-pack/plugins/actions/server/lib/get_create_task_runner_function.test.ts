@@ -7,7 +7,7 @@
 import Joi from 'joi';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
-import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
+import { SavedObjectsClientMock } from '../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
 
 const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 

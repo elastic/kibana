@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { AlertExecuteOptions } from '../types';
-import { SavedObjectsClientMock } from '../../../../../src/legacy/server/saved_objects/service/saved_objects_client.mock';
+import { SavedObjectsClientMock } from '../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 
 const mockedNow = new Date('2019-06-03T18:55:25.982Z');
