@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IntegrationInfo, IntegrationList } from '../common/types';
 import { cacheGet, cacheSet, cacheHas } from './cache';
-import { fetchJson, getResponseStream } from './requests';
+import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 
 const REGISTRY = process.env.REGISTRY || 'http://integrations-registry.app.elstc.co';
 
-export async function fetchList() {
-  return fetchJson(`${REGISTRY}/list`);
+export async function fetchList(): Promise<IntegrationList> {
+  return fetchUrl(`${REGISTRY}/list`).then(JSON.parse);
 }
 
-export async function fetchInfo(key: string) {
-  return fetchJson(`${REGISTRY}/package/${key}`);
+export async function fetchInfo(key: string): Promise<IntegrationInfo> {
+  return fetchUrl(`${REGISTRY}/package/${key}`).then(JSON.parse);
 }
 
 export async function getArchiveInfo(
