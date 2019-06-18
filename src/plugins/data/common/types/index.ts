@@ -17,4 +17,13 @@
  * under the License.
  */
 
-export * from '../../../../plugins/data/common/types/types';
+export { ArgumentType } from './arguments';
+export {
+  TypeToString,
+  KnownTypeToString,
+  TypeString,
+  UnmappedTypeStrings,
+  UnwrapPromise,
+} from './common';
+export { ExpressionFunction } from './functions';
+export { ExpressionType } from './types';
