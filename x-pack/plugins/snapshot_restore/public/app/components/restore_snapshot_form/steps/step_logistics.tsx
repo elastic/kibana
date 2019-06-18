@@ -32,6 +32,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     indices: snapshotIndices,
     includeGlobalState: snapshotIncludeGlobalState,
   } = snapshotDetails;
+
   const {
     indices: restoreIndices,
     renamePattern,
@@ -45,7 +46,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   const [indicesOptions, setIndicesOptions] = useState<Option[]>(
     snapshotIndices.map(index => ({
       label: index,
-      checked: 'on',
+      checked:
+        isAllIndices || (restoreIndices && restoreIndices.includes(index)) ? 'on' : undefined,
     }))
   );
 

@@ -101,6 +101,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
       </EuiFlexGroup>
       <EuiSpacer size="l" />
 
+      {/* Modify index settings */}
       <EuiDescribedFormGroup
         title={
           <EuiTitle size="s">
@@ -224,6 +225,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
+      {/* Ignore index settings */}
       <EuiDescribedFormGroup
         title={
           <EuiTitle size="s">
