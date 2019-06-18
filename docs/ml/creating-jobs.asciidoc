@@ -47,14 +47,21 @@ appear:
 [role="screenshot"]
 image::ml/images/ml-data-recognizer-filebeat.jpg[A screenshot of the {filebeat} job creation wizards]
 
-Likewise, if you use {auditbeat-ref}/index.html[{auditbeat}] to audit process
+If you use {auditbeat-ref}/index.html[{auditbeat}] to audit process
 activity on your systems, the following wizards appear:
 
 [role="screenshot"]
-image::ml/images/ml-data-recognizer-auditbeat.jpg[A screenshot of the {auditbeat} job creation wizards] 
+image::ml/images/ml-data-recognizer-auditbeat.jpg[A screenshot of the {auditbeat} job creation wizards]
+
+Likewise, if you use the {metricbeat-ref}/metricbeat-module-system.html[{metricbeat} system module] to monitor your servers, the following
+wizards appear:
+
+[role="screenshot"]
+image::ml/images/ml-data-recognizer-metricbeat.jpg[A screenshot of the {metricbeat} job creation wizards]
 
 These wizards create {ml} jobs, dashboards, searches, and visualizations that
-are customized to help you analyze your {auditbeat} and {filebeat} data.
+are customized to help you analyze your {auditbeat}, {filebeat}, and
+{metrecbeat} data.
 
 If you are not certain which type of job to create, you can use the
 *Data Visualizer* to learn more about your data. If your index pattern contains
