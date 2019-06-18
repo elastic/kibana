@@ -111,7 +111,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             </WithStreamItems>
           )}
         </WithLogPosition>
-        <AutoSizer content bounds detectAnyWindowResize>
+        <AutoSizer content bounds detectAnyWindowResize="height">
           {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => {
             return (
               <LogPageMinimapColumn innerRef={measureRef}>

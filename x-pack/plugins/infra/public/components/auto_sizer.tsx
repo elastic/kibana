@@ -5,7 +5,6 @@
  */
 
 import isEqual from 'lodash/fp/isEqual';
-import debounce from 'lodash/debounce';
 import React from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 
@@ -20,7 +19,7 @@ interface Measurements {
 }
 
 interface AutoSizerProps {
-  detectAnyWindowResize?: boolean;
+  detectAnyWindowResize?: boolean | 'height' | 'width';
   bounds?: boolean;
   content?: boolean;
   onResize?: (size: Measurements) => void;
@@ -75,7 +74,7 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
     }
   }
 
-  public measure = debounce((entry: ResizeObserverEntry | null) => {
+  public measure = (entry: ResizeObserverEntry | null) => {
     if (!this.element) {
       return;
     }
@@ -143,7 +142,7 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
         });
       }
     });
-  }, 250);
+  };
 
   public render() {
     const { children } = this.props;
@@ -155,11 +154,25 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
     });
   }
 
-  private updateMeasurement = () => {
-    window.setTimeout(() => {
-      this.measure(null);
-    }, 0);
-  };
+  private updateMeasurement = () =>
+    requestAnimationFrame(() => {
+      const { detectAnyWindowResize } = this.props;
+      if (!detectAnyWindowResize) return;
+      switch (detectAnyWindowResize) {
+        case 'height':
+          if (this.windowHeight !== window.innerHeight) {
+            this.measure(null);
+          }
+          break;
+        case 'width':
+          if (this.windowWidth !== window.innerWidth) {
+            this.measure(null);
+          }
+          break;
+        default:
+          this.measure(null);
+      }
+    });
 
   private storeRef = (element: HTMLElement | null) => {
     if (this.element && this.resizeObserver) {

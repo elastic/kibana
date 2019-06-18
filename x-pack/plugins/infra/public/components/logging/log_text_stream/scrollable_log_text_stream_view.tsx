@@ -155,7 +155,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                   columnWidths={columnWidths}
                   showColumnConfiguration={showColumnConfiguration}
                 />
-                <AutoSizer bounds content detectAnyWindowResize>
+                <AutoSizer bounds content detectAnyWindowResize="height">
                   {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => (
                     <ScrollPanelSizeProbe innerRef={measureRef}>
                       <VerticalScrollPanel
