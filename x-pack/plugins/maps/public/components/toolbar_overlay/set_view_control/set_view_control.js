@@ -22,12 +22,7 @@ function getViewString(lat, lon, zoom) {
 
 export class SetViewControl extends Component {
 
-  state = {
-    lat: this.props.center.lat,
-    lon: this.props.center.lon,
-    zoom: this.props.zoom,
-    prevView: getViewString(this.props.center.lat, this.props.center.lon, this.props.zoom)
-  }
+  state = {}
 
   static getDerivedStateFromProps(nextProps, prevState) {
     const nextView = getViewString(nextProps.center.lat, nextProps.center.lon, nextProps.zoom);
