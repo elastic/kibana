@@ -117,7 +117,7 @@ Payload:
 |alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
 |interval|The interval in milliseconds the alert should execute.|number|
 |alertTypeParams|The parameters to pass in to the alert type executor `params` value.|object|
-|action|An array of `group` (string), `id` (string) and params (object) to fire whenever the alert fires. The group allows the alert type fire fire different groups of actions. For example `warning` and `severe`. The id is the id of the action saved object to use. The params are the `params` value the action type expects. This uses mustache templates recursively on strings. The templates have access to `context` and `state` objects.|array|
+|action|An array of `group` (string), `id` (string) and params (object) to fire whenever the alert fires. The group allows the alert type fire fire different groups of actions. For example `warning` and `severe`. The id is the id of the action saved object to use. The params are the `params` value the action type expects. This uses mustache templates recursively on strings, see templating actions section for more details.|array|
 
 #### `DELETE /api/alert/{id}`: Delete alert
 
@@ -160,3 +160,73 @@ Payload:
 |interval|The interval in milliseconds the alert should execute.|number|
 |alertTypeParams|The parameters to pass in to the alert type executor `params` value.|object|
 |action|An array of `group` (string), `id` (string) and params (object) to fire whenever the alert fires. The group allows the alert type fire fire different groups of actions. For example `warning` and `severe`. The id is the id of the action saved object to use. The params are the `params` value the action type expects. This uses mustache templates recursively on strings. The templates have access to `context` and `state` objects.|array|
+
+## Alert instance factory
+
+**alertInstanceFactory(id)**
+
+One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and lookups of previous instances with the same id to gather previous state.
+
+This returns an instance of `AlertInstance`. The alert instance class has the following methods, note that most of these are for internal use but they work as they are described:
+
+|Method|Description|
+|---|---|
+|shouldFire()|Function returns `true` or `false` whether the alert instance should fire or not. This value turns to true when `.fire(...)` is called.|
+|getFireOptions()|Function returns an object of `actionGroup`, `context` and `state` to use for firing the actions.|
+|resetFire()|Reverts a `.fire(...)` call and makes the instance no longer fire.|
+|getState()|Get the current state of the alert instance.|
+|getMeta()|Get the internal set meta attributes for the alert instance.|
+|fire(actionGroup, context)|Called to fire actions.|
+|replaceState(state)|Used to replace the current state of the alert instance.|
+|replaceMeta(meta)|Function to replace internal meta attributes.|
+
+## Templating actions
+
+Each action within an alert contains its mapping of parameters to give an action type. To facilitate the mapping and to avoid having to make alert types aware of the actions, we added a templating system to allow converting content and state into parameters for an action type.
+
+When an alert instance fires, the first argument is the `group` of actions to fire and the second is the context the alert exposes to templates. We iterate through each action attributes recursively and render templates if they are a string. Templates have access to the `context` and the alert instance's `state`.
+
+### Examples
+
+The following code would be within an alert type. As you can see `cpuUsage ` will replace the state of the alert instance and `server` is the context for the alert instance to fire. The difference between the two is `cpuUsage ` will be accessible at the next execution.
+
+```
+alertInstanceFactory('server_1')
+  .replaceState({
+    cpuUsage: 80,
+  })
+  .fire('default', {
+    server: 'server_1',
+  });
+```
+
+Below is an example of an alert that takes advantage of templating:
+
+```
+{
+  ...
+  actions: [
+    {
+      "group": "default",
+      "id": "3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5",
+      "params": {
+        "from": "example@elastic.co",
+        "to": "destination@elastic.co",
+        "subject": "A notification about {{context.server}}"
+        "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%"
+      }
+    }
+  ]
+}
+```
+
+The templating system will take the alert and alert type as described above and convert the action parameters to the following:
+
+```
+{
+  "from": "example@elastic.co",
+  "to": "destination@elastic.co",
+  "subject": "A notification about server_1"
+  "body": "The server server_1 has a CPU usage of 80%"
+}
+```
