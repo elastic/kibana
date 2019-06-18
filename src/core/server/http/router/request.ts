@@ -23,7 +23,7 @@ import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { filterHeaders } from './headers';
+import { filterHeaders, Headers } from './headers';
 import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
 
 const requestSymbol = Symbol('request');
@@ -97,6 +97,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
 
   public readonly url: Url;
   public readonly route: RecursiveReadonly<KibanaRequestRoute>;
+  public readonly headers: Headers;
 
   /** @internal */
   protected readonly [requestSymbol]: Request;
@@ -109,6 +110,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     private readonly withoutSecretHeaders: boolean
   ) {
     this.url = request.url;
+    this.headers = request.headers;
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
