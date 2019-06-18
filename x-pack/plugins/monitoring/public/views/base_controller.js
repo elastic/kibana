@@ -81,25 +81,16 @@ export class MonitoringViewBaseController {
     this._isDataInitialized = false;
     this.reactNodeId = reactNodeId;
 
-    const initialHash = $window.location.hash;
-    let lastHash = initialHash;
     let deferTimer;
     let zoomInLevel = 0;
-    const isInitialHash = () => $window.location.hash === initialHash;
 
-    const popstateHandler = () => {
-      const newHash = $window.location.hash;
-      if (newHash !== lastHash && zoomInLevel > 0 && !isInitialHash()) {
-        --zoomInLevel;
-      }
-      lastHash = initialHash;
-    };
+    const popstateHandler = () => (zoomInLevel > 0) && --zoomInLevel;
     const removePopstateHandler = () => $window.removeEventListener('popstate', popstateHandler);
     const addPopstateHandler = () => $window.addEventListener('popstate', popstateHandler);
 
     this.zoomInfo = {
       zoomOutHandler: () => $window.history.back(),
-      showZoomOutBtn: () => zoomInLevel > 0 && !isInitialHash()
+      showZoomOutBtn: () => zoomInLevel > 0
     };
 
     const {
@@ -154,9 +145,12 @@ export class MonitoringViewBaseController {
     this.onBrush = ({ xaxis }) => {
       const { to, from } = xaxis;
       const fromTime = moment(from);
+      const minSecondsRange = 40;
       let toTime = moment(to);
-      if (toTime.unix() - fromTime.unix() < 40) {
-        toTime = fromTime.clone().add(40, 'seconds');
+
+      //Limit range to no less than 40 seconds, because of: https://github.com/elastic/kibana/issues/36738
+      if (toTime.unix() - fromTime.unix() < minSecondsRange) {
+        toTime = fromTime.clone().add(minSecondsRange, 'seconds');
       }
 
       removePopstateHandler();
