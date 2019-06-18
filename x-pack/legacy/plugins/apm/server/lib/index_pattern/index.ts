@@ -5,7 +5,7 @@
  */
 import { InternalCoreSetup } from 'src/core/server';
 import { getSavedObjectsClient } from '../helpers/saved_objects_client';
-import apmIndexPattern from '../../../../../../src/legacy/core_plugins/kibana/server/tutorials/apm/index_pattern.json';
+import apmIndexPattern from '../../../../../../../src/legacy/core_plugins/kibana/server/tutorials/apm/index_pattern.json';
 
 export async function getIndexPattern(core: InternalCoreSetup) {
   const { server } = core.http;

@@ -38,7 +38,7 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   urlState: UrlState | undefined
 ) => (queryString: string) => {
   const previousQueryValues = QueryString.decode(queryString);
-  // ಠ_ಠ Code was copied from x-pack/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
+  // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
   // Remove this if these utilities are promoted to kibana core
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;

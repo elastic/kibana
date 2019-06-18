@@ -78,7 +78,7 @@ export interface SavedObject {
 
 /* This object is passed to different helpers in different parts of the code
    - packages/kbn-es-query/src/es_query/build_es_query
-   - x-pack/plugins/reporting/export_types/csv/server/lib/field_format_map
+   - x-pack/legacy/plugins/reporting/export_types/csv/server/lib/field_format_map
    The structure has redundant parts and json-parsed / json-unparsed versions of the same data
  */
 export interface IndexPatternSavedObject {

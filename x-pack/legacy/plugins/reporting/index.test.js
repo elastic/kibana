@@ -5,7 +5,7 @@
  */
 
 import { reporting } from './index';
-import { getConfigSchema } from '../../test_utils';
+import { getConfigSchema } from '../../../test_utils';
 
 // The snapshot records the number of cpus available
 // to make the snapshot deterministic `os.cpus` needs to be mocked

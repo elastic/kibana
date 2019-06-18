@@ -6,7 +6,7 @@
 
 const Chance = require('chance'); // eslint-disable-line import/no-extraneous-dependencies
 const chance = new Chance();
-import { getRandomString } from '../../../test_utils';
+import { getRandomString } from '../../../../test_utils';
 
 const serializeShard = ({
   id,

@@ -6,10 +6,10 @@
 
 import { Legacy } from 'kibana';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
-import { HttpServiceSetup, Router, KibanaRequest } from '../../../../../../src/core/server';
+import { HttpServiceSetup, Router, KibanaRequest } from '../../../../../../../src/core/server';
 
-import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
-import { KibanaConfig } from '../../../../../../src/legacy/server/kbn_server';
+import * as kbnTestServer from '../../../../../../../src/test_utils/kbn_server';
+import { KibanaConfig } from '../../../../../../../src/legacy/server/kbn_server';
 
 describe('onRequestInterceptor', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;

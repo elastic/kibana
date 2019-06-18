@@ -16,7 +16,7 @@ import routes from 'ui/routes';
 import { HashRouter } from 'react-router-dom';
 
 // @ts-ignore: allow traversal to fail on x-pack build
-import { trackUiMetric as track } from '../../../../src/legacy/core_plugins/ui_metric/public';
+import { trackUiMetric as track } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export interface AppCore {
   i18n: {
