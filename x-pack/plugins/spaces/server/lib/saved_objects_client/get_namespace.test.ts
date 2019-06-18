@@ -6,22 +6,29 @@
 
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { createGetNamespace } from './get_namespace';
-import { Namespace, SavedObjectsService, BaseOptions } from 'src/legacy/server/saved_objects';
+import {
+  SavedObjectsNamespace,
+  SavedObjectsService,
+  SavedObjectsBaseOptions,
+} from 'src/core/server';
 
 describe('getNamespace', () => {
-  let getNamespace: (options: BaseOptions, spaceId: string) => Namespace | undefined;
+  let getNamespace: (
+    options: SavedObjectsBaseOptions,
+    spaceId: string
+  ) => SavedObjectsNamespace | undefined;
 
   beforeEach(() => {
     const savedObjectsService = {
-      createNamespace: (id?: string) => ({ id } as Namespace),
+      createNamespace: (id?: string) => ({ id } as SavedObjectsNamespace),
     } as SavedObjectsService;
 
     getNamespace = createGetNamespace(savedObjectsService);
   });
 
   describe(`without specifying 'options.namespace'`, () => {
-    it(`returns 'undefined' for the default space`, () => {
-      expect(getNamespace({}, DEFAULT_SPACE_ID)).toBeUndefined();
+    it(`returns an empty namespace for the default space`, () => {
+      expect(getNamespace({}, DEFAULT_SPACE_ID)).toEqual({});
     });
 
     it(`returns the space id for non-default spaces`, () => {

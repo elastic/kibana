@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsService } from 'src/legacy/server/saved_objects';
-import { SavedObjectsClientWrapperOptions } from 'src/legacy/server/saved_objects/service/lib';
+import { SavedObjectsService } from 'src/core/server';
 import { Legacy } from 'kibana';
+import { SavedObjectsClientWrapperOptions } from 'src/core/server/saved_objects/service/lib';
 import { SpacesPlugin } from '../../../../../spaces/types';
 import { AuthorizationService } from '../service';
 import { OptionalPlugin } from '../../optional_plugin';

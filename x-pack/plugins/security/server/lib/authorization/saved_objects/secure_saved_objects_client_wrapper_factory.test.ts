@@ -8,7 +8,7 @@ import { SpacesPlugin } from '../../../../../spaces/types';
 import { createOptionalPlugin } from '../../optional_plugin';
 import { createSecureSavedObjectsWrapperFactory } from './secure_saved_objects_client_wrapper_factory';
 import { actionsFactory } from '../actions';
-import { SavedObjectsClientContract } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { Legacy } from 'kibana';
 
 const config = {

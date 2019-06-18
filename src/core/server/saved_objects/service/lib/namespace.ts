@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export class Namespace {
+export class SavedObjectsNamespace {
   constructor(public readonly id?: string) {}
 }

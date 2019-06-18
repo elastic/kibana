@@ -13,16 +13,18 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
+  SavedObjectsNamespace,
 } from 'src/core/server';
-import { Namespace } from 'src/core/server/saved_objects';
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SpacesService } from '../create_spaces_service';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
   request: any;
   spacesService: SpacesService;
-  getNamespace: (options: SavedObjectsBaseOptions, currentSpaceId: string) => Namespace | undefined;
+  getNamespace: (
+    options: SavedObjectsBaseOptions,
+    currentSpaceId: string
+  ) => SavedObjectsNamespace | undefined;
   types: string[];
 }
 
@@ -53,7 +55,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly getNamespace: (
     options: SavedObjectsBaseOptions,
     currentSpaceId: string
-  ) => Namespace | undefined;
+  ) => SavedObjectsNamespace | undefined;
 
   public readonly errors: SavedObjectsClientContract['errors'];
 

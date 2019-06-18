@@ -7,17 +7,17 @@
 import { uniq } from 'lodash';
 import {
   SavedObjectsClientContract,
-  CreateOptions,
+  SavedObjectsCreateOptions,
   SavedObjectAttributes,
-  BulkCreateObject,
-  BaseOptions,
-  FindOptions,
-  BulkGetObject,
-  FindResponse,
-  BulkResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsBulkGetObject,
+  SavedObjectsFindResponse,
+  SavedObjectsBulkResponse,
   SavedObject,
-  UpdateOptions,
-} from 'src/legacy/server/saved_objects';
+  SavedObjectsUpdateOptions,
+} from 'src/core/server';
 import { EnsureSavedObjectsPrivileges } from './ensure_saved_objects_privileges';
 
 export interface SecureSavedObjectsClientWrapperDeps {
@@ -43,7 +43,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   public async create<T extends SavedObjectAttributes = any>(
     type: string,
     attributes: T,
-    options: CreateOptions = {}
+    options: SavedObjectsCreateOptions = {}
   ) {
     await this.ensureSavedObjectsPrivileges(type, 'create', options.namespace, {
       type,
@@ -55,8 +55,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   public async bulkCreate<T extends SavedObjectAttributes = any>(
-    objects: Array<BulkCreateObject<T>>,
-    options: CreateOptions = {}
+    objects: Array<SavedObjectsBulkCreateObject<T>>,
+    options: SavedObjectsCreateOptions = {}
   ) {
     const types = uniq(objects.map(o => o.type));
     await this.ensureSavedObjectsPrivileges(types, 'bulk_create', options.namespace, {
@@ -67,7 +67,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.bulkCreate(objects, options);
   }
 
-  public async delete(type: string, id: string, options: BaseOptions = {}) {
+  public async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     await this.ensureSavedObjectsPrivileges(type, 'delete', options.namespace, {
       type,
       id,
@@ -78,17 +78,17 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   public async find<T extends SavedObjectAttributes = any>(
-    options: FindOptions = {}
-  ): Promise<FindResponse<T>> {
+    options: SavedObjectsFindOptions = {}
+  ): Promise<SavedObjectsFindResponse<T>> {
     await this.ensureSavedObjectsPrivileges(options.type, 'find', options.namespace, { options });
 
     return this.baseClient.find(options);
   }
 
   public async bulkGet<T extends SavedObjectAttributes = any>(
-    objects: BulkGetObject[] = [],
-    options: BaseOptions = {}
-  ): Promise<BulkResponse<T>> {
+    objects: SavedObjectsBulkGetObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsBulkResponse<T>> {
     const types = uniq(objects.map(o => o.type));
     await this.ensureSavedObjectsPrivileges(types, 'bulk_get', options.namespace, {
       objects,
@@ -101,7 +101,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   public async get<T extends SavedObjectAttributes = any>(
     type: string,
     id: string,
-    options: BaseOptions = {}
+    options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {
     await this.ensureSavedObjectsPrivileges(type, 'get', options.namespace, { type, id, options });
 
@@ -112,7 +112,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: UpdateOptions = {}
+    options: SavedObjectsUpdateOptions = {}
   ) {
     await this.ensureSavedObjectsPrivileges(type, 'update', options.namespace, {
       type,

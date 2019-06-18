@@ -9,5 +9,5 @@ Specify the namespace for this operation
 <b>Signature:</b>
 
 ```typescript
-namespace?: string;
+namespace?: SavedObjectsNamespace;
 ```

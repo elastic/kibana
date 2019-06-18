@@ -8,7 +8,7 @@ import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
 import { createSpacesService } from '../create_spaces_service';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-import { Namespace, SavedObjectsService } from 'src/legacy/server/saved_objects';
+import { SavedObjectsNamespace, SavedObjectsService } from 'src/core/server';
 import { createGetNamespace } from './get_namespace';
 
 const config: any = {
@@ -31,7 +31,9 @@ const createMockRequest = (space: Partial<Space>) => ({
 
 const createMockSavedObjectsService = () =>
   (({
-    createNamespace: jest.fn().mockImplementation((id?: string) => ({ id } as Namespace)),
+    createNamespace: jest
+      .fn()
+      .mockImplementation((id?: string) => ({ id } as SavedObjectsNamespace)),
   } as unknown) as SavedObjectsService);
 
 const createMockClient = () => {
@@ -50,7 +52,7 @@ const createMockClient = () => {
 };
 
 [
-  { id: DEFAULT_SPACE_ID, expectedNamespace: undefined },
+  { id: DEFAULT_SPACE_ID, expectedNamespace: {} },
   { id: 'space_1', expectedNamespace: { id: 'space_1' } },
 ].forEach(currentSpace => {
   describe(`${currentSpace.id} space`, () => {

@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { Namespace } from 'src/legacy/server/saved_objects';
+import { SavedObjectsNamespace } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 import { CheckPrivileges, CheckPrivilegesAtResourceResponse } from '../check_privileges';
 import { Actions } from '../actions';
@@ -33,7 +33,7 @@ interface Deps {
 export type EnsureSavedObjectsPrivileges = (
   typeOrTypes: string | string[] | undefined,
   operation: SavedObjectsOperation,
-  namespace: Namespace | undefined,
+  namespace: SavedObjectsNamespace | undefined,
   args: any
 ) => Promise<void>;
 
@@ -43,7 +43,7 @@ export function ensureSavedObjectsPrivilegesFactory(deps: Deps) {
   const ensureSavedObjectsPrivileges: EnsureSavedObjectsPrivileges = async (
     typeOrTypes: string | string[] | undefined,
     operation: SavedObjectsOperation,
-    namespace: Namespace | undefined,
+    namespace: SavedObjectsNamespace | undefined,
     args: any
   ) => {
     const types = normalizeTypes(typeOrTypes);
@@ -100,7 +100,7 @@ function normalizeTypes(typeOrTypes: string | string[] | undefined): string[] {
   return [typeOrTypes];
 }
 
-function namespaceToSpaceId(namespace: Namespace | undefined) {
+function namespaceToSpaceId(namespace: SavedObjectsNamespace | undefined) {
   if (!namespace || !namespace.id) {
     return DEFAULT_SPACE_ID;
   }

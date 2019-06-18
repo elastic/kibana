@@ -439,7 +439,7 @@ export interface SavedObjectReference {
 
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
-    namespace?: string;
+    namespace?: SavedObjectsNamespace;
 }
 
 // @public (undocumented)
@@ -603,12 +603,23 @@ export interface SavedObjectsMigrationVersion {
     [pluginName: string]: string;
 }
 
+// Warning: (ae-missing-release-tag) "SavedObjectsNamespace" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export class SavedObjectsNamespace {
+    constructor(id?: string | undefined);
+    // (undocumented)
+    readonly id?: string | undefined;
+}
+
 // @public (undocumented)
 export interface SavedObjectsService<Request = any> {
     // Warning: (ae-forgotten-export) The symbol "ScopedSavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
     addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<Request>['addClientWrapperFactory'];
+    // (undocumented)
+    createNamespace: (id?: string) => SavedObjectsNamespace;
     // (undocumented)
     getSavedObjectsRepository(...rest: any[]): any;
     // (undocumented)
