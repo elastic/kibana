@@ -17,32 +17,20 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
-import { Datatable } from './datatable';
+import { ExpressionType } from '../types';
 import { Render } from './render';
 
-const name = 'boolean';
+const name = 'shape';
 
-export const boolean = (): ExpressionType<typeof name, boolean> => ({
+export const shape = (): ExpressionType<typeof name, undefined> => ({
   name,
-  from: {
-    null: () => false,
-    number: n => Boolean(n),
-    string: s => Boolean(s),
-  },
   to: {
-    render: (value): Render<{ text: string }> => {
-      const text = `${value}`;
+    render: <T>(input: T): Render<T> => {
       return {
         type: 'render',
-        as: 'text',
-        value: { text },
+        as: name,
+        value: input,
       };
     },
-    datatable: (value): Datatable => ({
-      type: 'datatable',
-      columns: [{ name: 'value', type: name }],
-      rows: [{ value }],
-    }),
   },
 });

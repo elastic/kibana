@@ -34,4 +34,4 @@ export {
   PointSeriesColumnName,
   Render,
   Style,
-} from './types';
+} from '../../../../plugins/data/common/interpreter/expression_types';

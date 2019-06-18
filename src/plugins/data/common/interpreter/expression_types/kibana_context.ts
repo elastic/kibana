@@ -17,31 +17,31 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
-import { Datatable } from './datatable';
-import { Render } from './render';
+import { Filter } from '@kbn/es-query';
 
-const name = 'string';
+const name = 'kibana_context';
 
-export const string = (): ExpressionType<typeof name, string> => ({
+export interface KibanaContext {
+  type: typeof name;
+  query?: any; // any -> import { Query } from 'src/legacy/core_plugins/data/public';
+  filters?: Filter[];
+  timeRange?: any; // any -> import { TimeRange } from 'ui/timefilter/time_history';
+}
+
+export const kibanaContext = () => ({
   name,
   from: {
-    null: () => '',
-    boolean: b => String(b),
-    number: n => String(n),
-  },
-  to: {
-    render: <T>(text: T): Render<{ text: T }> => {
+    null: () => {
       return {
-        type: 'render',
-        as: 'text',
-        value: { text },
+        type: name,
       };
     },
-    datatable: (value): Datatable => ({
-      type: 'datatable',
-      columns: [{ name: 'value', type: 'string' }],
-      rows: [{ value }],
-    }),
+  },
+  to: {
+    null: () => {
+      return {
+        type: 'null',
+      };
+    },
   },
 });
