@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { idx } from '@kbn/elastic-idx';
+import { EuiToolTip } from '@elastic/eui';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
@@ -79,7 +80,22 @@ export function StickyTransactionProperties({
           defaultMessage: '% of trace'
         }
       ),
-      val: asPercent(duration, totalDuration, NOT_AVAILABLE_LABEL),
+      val:
+        totalDuration !== undefined && duration > totalDuration ? (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.apm.transactionDetails.percentOfTraceLabel',
+              {
+                defaultMessage:
+                  'The % of trace exceeds 100% due to asynchronous transactions exceeding the root transaction duration.'
+              }
+            )}
+          >
+            <span>&gt;100%</span>
+          </EuiToolTip>
+        ) : (
+          asPercent(duration, totalDuration, NOT_AVAILABLE_LABEL)
+        ),
       width: '25%'
     },
     {
