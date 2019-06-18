@@ -5,7 +5,7 @@
  */
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
 import { Datatable } from '../types';
-import { getFunctionErrors } from '../../strings/functions';
+import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {
   column: string;
@@ -24,11 +24,12 @@ const escapeString = (data: string, quotechar: string): string => {
 };
 
 export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments, string> {
+  const { help, argHelp } = getFunctionHelp().joinRows;
   const errors = getFunctionErrors().joinRows;
   return {
     name: 'joinRows',
     type: 'string',
-    help: 'Join values from rows in a datatable into a string',
+    help,
     context: {
       types: ['datatable'],
     },
@@ -37,30 +38,32 @@ export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments,
         aliases: ['_'],
         types: ['string'],
         required: true,
-        help: 'Column to join values from',
+        help: argHelp.column,
       },
       separator: {
         aliases: ['sep'],
         types: ['string'],
         default: ',',
-        help: 'Separator to use between row values',
+        help: argHelp.separator,
       },
       quote: {
         types: ['string'],
         default: `"'"`,
-        help: 'Quote character around values',
+        help: argHelp.quote,
       },
       distinct: {
         types: ['boolean'],
         default: true,
-        help: 'Extract unique values from the column',
+        help: argHelp.distinct,
       },
     },
     fn: (context, { column, separator, quote, distinct }) => {
       const columnMatch = context.columns.find(col => col.name === column);
+
       if (!columnMatch) {
         throw errors.columnNotFound(column);
       }
+
       return context.rows
         .reduce((acc, row) => {
           const value = row[column];
