@@ -210,18 +210,18 @@ export class ColumnChart extends PointSeries {
     if (isLabels) {
       const colorFunc = this.handler.data.getColorFunc();
       const d3Color = d3.rgb(colorFunc(chartData.label));
-      const labelColor = isColorDark(d3Color.r, d3Color.g, d3Color.b) ? 'white' : 'black';
+      const labelClass = isColorDark(d3Color.r, d3Color.g, d3Color.b) ? 'bar-label--light' : 'bar-label--dark';
 
       barLabels
         .enter()
         .append('text')
         .text(formatValue)
+        .attr('class', `${labelClass} bar-label--stack`)
         .attr('x', isHorizontal ? labelX : labelY)
         .attr('y', isHorizontal ? labelY : labelX)
-        .attr('dominant-baseline', 'central')
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '8pt')
-        .attr('fill', labelColor)
+
+        // display must apply last, because labelDisplay decision it based
+        // on text bounding box which depends on actual applied style.
         .attr('display', labelDisplay);
     }
 
@@ -331,12 +331,15 @@ export class ColumnChart extends PointSeries {
         .enter()
         .append('text')
         .text(formatValue)
-        .attr('font-size', '8pt')
+        .attr('class', 'bar-label--normal')
         .attr('x', isHorizontal ? labelX : labelY)
         .attr('y', isHorizontal ? labelY : labelX)
         .attr('dominant-baseline', isHorizontal ? 'auto' : 'central')
         .attr('text-anchor', isHorizontal ? 'middle' : 'start')
         .attr('fill', labelColor)
+
+        // display must apply last, because labelDisplay decision it based
+        // on text bounding box which depends on actual applied style.
         .attr('display', labelDisplay);
     }
     return bars;
