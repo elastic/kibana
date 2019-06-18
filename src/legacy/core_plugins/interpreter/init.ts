@@ -29,7 +29,7 @@ import { routes } from './server/routes';
 import { Legacy } from '../../../../kibana';
 
 // @ts-ignore
-import { typeSpecs as types } from './common/types';
+import { typeSpecs as types } from '../../../plugins/data/common/interpreter/expression_types';
 
 // @ts-ignore
 import { TypesRegistry } from './common/types_registry';

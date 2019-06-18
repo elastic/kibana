@@ -17,26 +17,13 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
+import { ExpressionType } from '../types';
 
-const name = 'render';
+const name = 'null';
 
-/**
- * Represents an object that is intended to be rendered.
- */
-export interface Render<T> {
-  type: typeof name;
-  as: string;
-  value: T;
-}
-
-export const render = (): ExpressionType<typeof name, Render<unknown>> => ({
+export const nullType = (): ExpressionType<typeof name, null> => ({
   name,
   from: {
-    '*': <T>(v: T): Render<T> => ({
-      type: name,
-      as: 'debug',
-      value: v,
-    }),
+    '*': () => null,
   },
 });

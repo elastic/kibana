@@ -17,30 +17,31 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
+import { ExpressionType } from '../types';
+import { Datatable } from './datatable';
 import { Render } from './render';
 
-const name = 'error';
+const name = 'string';
 
-// TODO: Improve typings on this interface [#38553]
-export interface InterpreterErrorType {
-  type: typeof name;
-  error: unknown;
-  info: unknown;
-}
-
-export const error = (): ExpressionType<typeof name, InterpreterErrorType> => ({
+export const string = (): ExpressionType<typeof name, string> => ({
   name,
+  from: {
+    null: () => '',
+    boolean: b => String(b),
+    number: n => String(n),
+  },
   to: {
-    render: (input): Render<Pick<InterpreterErrorType, 'error' | 'info'>> => {
+    render: <T>(text: T): Render<{ text: T }> => {
       return {
         type: 'render',
-        as: name,
-        value: {
-          error: input.error,
-          info: input.info,
-        },
+        as: 'text',
+        value: { text },
       };
     },
+    datatable: (value): Datatable => ({
+      type: 'datatable',
+      columns: [{ name: 'value', type: 'string' }],
+      rows: [{ value }],
+    }),
   },
 });

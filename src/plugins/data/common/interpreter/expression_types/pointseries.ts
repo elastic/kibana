@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
+import { ExpressionType } from '../types';
 import { Datatable } from './datatable';
 import { Render } from './render';
 

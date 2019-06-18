@@ -17,32 +17,26 @@
  * under the License.
  */
 
-import { ExpressionType } from '../../types';
-import { Datatable } from './datatable';
+import { ExpressionType } from '../types';
 import { Render } from './render';
 
-const name = 'number';
+const name = 'image';
 
-export const number = (): ExpressionType<typeof name, number> => ({
+export interface ExpressionImage {
+  type: 'image';
+  mode: string;
+  dataurl: string;
+}
+
+export const image = (): ExpressionType<typeof name, ExpressionImage> => ({
   name,
-  from: {
-    null: () => 0,
-    boolean: b => Number(b),
-    string: n => Number(n),
-  },
   to: {
-    render: (value: number): Render<{ text: string }> => {
-      const text = `${value}`;
+    render: (input): Render<Pick<ExpressionImage, 'mode' | 'dataurl'>> => {
       return {
         type: 'render',
-        as: 'text',
-        value: { text },
+        as: 'image',
+        value: input,
       };
     },
-    datatable: (value): Datatable => ({
-      type: 'datatable',
-      columns: [{ name: 'value', type: 'number' }],
-      rows: [{ value }],
-    }),
   },
 });
