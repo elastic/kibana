@@ -6,11 +6,9 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-
-import { Query } from 'ui/embeddable';
-import { QueryLanguageType } from 'ui/embeddable/types';
 import { IndexPattern } from 'ui/index_patterns';
 import { FullTimeRangeSelector } from './index';
+import { Query } from 'src/legacy/core_plugins/data/public';
 
 // Create a mock for the setFullTimeRange function in the service.
 // The mock is hoisted to the top, so need to prefix the mock function
@@ -30,7 +28,7 @@ describe('FullTimeRangeSelector', () => {
   };
 
   const query: Query = {
-    language: QueryLanguageType.KUERY,
+    language: 'kuery',
     query: 'region:us-east-1',
   };
 
