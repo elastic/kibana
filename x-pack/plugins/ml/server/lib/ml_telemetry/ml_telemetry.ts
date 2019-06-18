@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
 
 export interface MlTelemetry {
@@ -26,24 +27,34 @@ export function createMlTelemetry(count: number = 0): MlTelemetry {
     },
   };
 }
-
-export function storeMlTelemetry(server: Server, mlTelemetry: MlTelemetry): void {
-  const savedObjectsClient = getSavedObjectsClient(server);
+// savedObjects
+export function storeMlTelemetry(
+  elasticsearchPlugin: ElasticsearchPlugin,
+  savedObjects: SavedObjectsService,
+  mlTelemetry: MlTelemetry
+): void {
+  const savedObjectsClient = getSavedObjectsClient(elasticsearchPlugin, savedObjects);
   savedObjectsClient.create('ml-telemetry', mlTelemetry, {
     id: ML_TELEMETRY_DOC_ID,
     overwrite: true,
   });
 }
-
-export function getSavedObjectsClient(server: Server): any {
-  const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
-  const callWithInternalUser = callWithInternalUserFactory(server);
+// needs savedObjects and elasticsearchPlugin
+export function getSavedObjectsClient(
+  elasticsearchPlugin: ElasticsearchPlugin,
+  savedObjects: SavedObjectsService
+): any {
+  const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
+  const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
   return new SavedObjectsClient(internalRepository);
 }
 
-export async function incrementFileDataVisualizerIndexCreationCount(server: Server): Promise<void> {
-  const savedObjectsClient = getSavedObjectsClient(server);
+export async function incrementFileDataVisualizerIndexCreationCount(
+  elasticsearchPlugin: ElasticsearchPlugin,
+  savedObjects: SavedObjectsService
+): Promise<void> {
+  const savedObjectsClient = getSavedObjectsClient(elasticsearchPlugin, savedObjects);
 
   try {
     const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
@@ -69,5 +80,5 @@ export async function incrementFileDataVisualizerIndexCreationCount(server: Serv
   }
 
   const mlTelemetry = createMlTelemetry(indicesCount);
-  storeMlTelemetry(server, mlTelemetry);
+  storeMlTelemetry(elasticsearchPlugin, savedObjects, mlTelemetry);
 }

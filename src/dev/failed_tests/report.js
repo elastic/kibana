@@ -33,12 +33,20 @@ const indent = text => (
   `  ${text.split('\n').map(l => `  ${l}`).join('\n')}`
 );
 
-const isLikelyIrrelevant = ({ failure }) => {
+const isLikelyIrrelevant = ({ name, failure }) => {
   if (failure.includes('NoSuchSessionError: This driver instance does not have a valid session ID')) {
     return true;
   }
 
   if (failure.includes('Error: No Living connections')) {
+    return true;
+  }
+
+  if (name.includes('"after all" hook') && failure.includes(`Cannot read property 'shutdown' of undefined`)) {
+    return true;
+  }
+
+  if (failure.includes('Unable to read artifact info') && failure.includes('Service Temporarily Unavailable')) {
     return true;
   }
 
