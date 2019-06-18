@@ -67,7 +67,7 @@ export function getUrlForRecord(urlConfig, record) {
 // fullUrl is the complete URL, including the base path, with any dollar delimited tokens
 // from the urlConfig having been substituted with values from an anomaly record.
 export function openCustomUrlWindow(fullUrl, urlConfig) {
-  if (isKibanaUrl(urlConfig) === true) {
+  if (/^(?:[a-z]+:)?\/\//i.test(urlConfig.url_value) === false) {
     window.open(fullUrl, '_blank');
   } else {
     const newWindow = window.open(fullUrl, '_blank', 'noopener,noreferrer');
@@ -79,7 +79,7 @@ export function openCustomUrlWindow(fullUrl, urlConfig) {
 }
 
 // Returns whether the url_value of the supplied config is for
-// a Kibana page running on the same server as this ML plugin.
+// a Kibana Discover or Dashboard page running on the same server as this ML plugin.
 function isKibanaUrl(urlConfig) {
   const urlValue = urlConfig.url_value;
   return urlValue.startsWith('kibana#/discover') || urlValue.startsWith('kibana#/dashboard');
