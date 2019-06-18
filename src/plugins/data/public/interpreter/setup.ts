@@ -19,11 +19,15 @@
 
 import { FunctionsRegistry } from '../../common/interpreter/registries';
 import { InterpreterSetup } from './types';
+import { RenderFunctionsRegistry } from './util/render_function';
 
 export const setup = (): InterpreterSetup => {
   const functionsRegistry = new FunctionsRegistry();
+  const renderersRegistry = new RenderFunctionsRegistry();
+
   const api: InterpreterSetup = {
     functionsRegistry,
+    renderersRegistry,
   };
 
   return api;
