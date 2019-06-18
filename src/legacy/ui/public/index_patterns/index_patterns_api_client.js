@@ -45,8 +45,8 @@ function request(method, url, query, body) {
 }
 
 export class IndexPatternsApiClient {
-  constructor(basePath) {
-    this.apiBaseUrl = `${basePath}/api/index_patterns/`;
+  constructor() {
+    this.apiBaseUrl = `/api/index_patterns/`;
   }
 
   _getUrl(path) {

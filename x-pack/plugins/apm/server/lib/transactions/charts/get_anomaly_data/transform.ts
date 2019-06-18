@@ -7,10 +7,12 @@
 import { first, last } from 'lodash';
 import { idx } from '@kbn/elastic-idx';
 import { Coordinate, RectCoordinate } from '../../../../../typings/timeseries';
-import { ESBucket, ESResponse } from './fetcher';
+import { ESResponse } from './fetcher';
 
 type IBucket = ReturnType<typeof getBucket>;
-function getBucket(bucket: ESBucket) {
+function getBucket(
+  bucket: ESResponse['aggregations']['ml_avg_response_times']['buckets'][0]
+) {
   return {
     x: bucket.key,
     anomalyScore: bucket.anomaly_score.value,
@@ -28,10 +30,6 @@ export function anomalySeriesTransform(
   bucketSize: number,
   timeSeriesDates: number[]
 ) {
-  if (!response) {
-    return;
-  }
-
   const buckets = (
     idx(response, _ => _.aggregations.ml_avg_response_times.buckets) || []
   ).map(getBucket);

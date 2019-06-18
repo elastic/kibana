@@ -32,6 +32,8 @@ export const getGroupings = async (
   }
   const limit = options.limit || 9;
   const params = {
+    allowNoIndices: true,
+    ignoreUnavailable: true,
     index: options.indexPattern,
     body: {
       size: 0,

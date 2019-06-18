@@ -54,6 +54,15 @@ describe('#setup', () => {
   });
 });
 
+describe('#start', () => {
+  it('returns an instance of UiSettingsClient', () => {
+    const uiSettings = new UiSettingsService();
+    uiSettings.setup(defaultDeps);
+    const start = uiSettings.start();
+    expect(start).toBeInstanceOf(MockUiSettingsClient);
+  });
+});
+
 describe('#stop', () => {
   it('runs fine if service never set up', () => {
     const service = new UiSettingsService();
