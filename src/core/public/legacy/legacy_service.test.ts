@@ -59,10 +59,8 @@ import { LegacyPlatformService } from './legacy_service';
 import { applicationServiceMock } from '../application/application_service.mock';
 
 const applicationSetup = applicationServiceMock.createSetupContract();
-const chromeSetup = chromeServiceMock.createSetupContract();
 const fatalErrorsSetup = fatalErrorsServiceMock.createSetupContract();
 const httpSetup = httpServiceMock.createSetupContract();
-const i18nSetup = i18nServiceMock.createSetupContract();
 const injectedMetadataSetup = injectedMetadataServiceMock.createSetupContract();
 const notificationsSetup = notificationServiceMock.createSetupContract();
 const uiSettingsSetup = uiSettingsServiceMock.createSetupContract();
@@ -76,13 +74,11 @@ const defaultParams = {
 const defaultSetupDeps = {
   core: {
     application: applicationSetup,
-    i18n: i18nSetup,
     fatalErrors: fatalErrorsSetup,
     injectedMetadata: injectedMetadataSetup,
     notifications: notificationsSetup,
     http: httpSetup,
     uiSettings: uiSettingsSetup,
-    chrome: chromeSetup,
   },
   plugins: {},
 };
@@ -94,6 +90,7 @@ const i18nStart = i18nServiceMock.createStartContract();
 const injectedMetadataStart = injectedMetadataServiceMock.createStartContract();
 const notificationsStart = notificationServiceMock.createStartContract();
 const overlayStart = overlayServiceMock.createStartContract();
+const uiSettingsStart = uiSettingsServiceMock.createStartContract();
 
 const defaultStartDeps = {
   core: {
@@ -104,6 +101,7 @@ const defaultStartDeps = {
     injectedMetadata: injectedMetadataStart,
     notifications: notificationsStart,
     overlays: overlayStart,
+    uiSettings: uiSettingsStart,
   },
   targetDomElement: document.createElement('div'),
   plugins: {},

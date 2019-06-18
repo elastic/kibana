@@ -102,6 +102,7 @@ export class FeatureTooltip extends React.Component {
           aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
             defaultMessage: 'Filter on property'
           })}
+          data-test-subj="mapTooltipCreateFilterButton"
         />
       </td>
     );
@@ -151,6 +152,7 @@ export class FeatureTooltip extends React.Component {
           aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
             defaultMessage: 'Close tooltip'
           })}
+          data-test-subj="mapTooltipCloseButton"
         />
       </EuiTextAlign>
     );

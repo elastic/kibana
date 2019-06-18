@@ -23,6 +23,8 @@ function getConfirmPasswordField(wrapper: ReactWrapper<any>) {
   return wrapper.find(EuiFieldText).filter('[data-test-subj="confirmNewPassword"]');
 }
 
+jest.mock('ui/kfetch');
+
 describe('<ChangePasswordForm>', () => {
   describe('for the current user', () => {
     it('shows fields for current and new passwords', () => {

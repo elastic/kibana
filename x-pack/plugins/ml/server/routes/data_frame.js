@@ -7,13 +7,13 @@
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 
-export function dataFrameRoutes(server, commonRouteConfig) {
+export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/_data_frame/transforms',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return callWithRequest('ml.getDataFrameTransforms')
         .catch(resp => wrapError(resp));
     },
@@ -22,11 +22,11 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/_data_frame/transforms/_stats',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return callWithRequest('ml.getDataFrameTransformsStats')
         .catch(resp => wrapError(resp));
     },
@@ -35,11 +35,11 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/_data_frame/transforms/{jobId}/_stats',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { jobId } = request.params;
       return callWithRequest('ml.getDataFrameTransformsStats', { jobId })
         .catch(resp => wrapError(resp));
@@ -49,11 +49,11 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'PUT',
     path: '/api/ml/_data_frame/transforms/{jobId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { jobId } = request.params;
       return callWithRequest('ml.createDataFrameTransformsJob', { body: request.payload, jobId })
         .catch(resp => wrapError(resp));
@@ -63,11 +63,11 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'DELETE',
     path: '/api/ml/_data_frame/transforms/{jobId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { jobId } = request.params;
       return callWithRequest('ml.deleteDataFrameTransformsJob', { jobId })
         .catch(resp => wrapError(resp));
@@ -77,11 +77,11 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/_data_frame/transforms/_preview',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return callWithRequest('ml.getDataFrameTransformsPreview', { body: request.payload })
         .catch(resp => wrapError(resp));
     },
@@ -90,11 +90,11 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/_data_frame/transforms/{jobId}/_start',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { jobId } = request.params;
       return callWithRequest('ml.startDataFrameTransformsJob', { jobId })
         .catch(resp => wrapError(resp));
@@ -104,11 +104,11 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/_data_frame/transforms/{jobId}/_stop',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const options = {
         jobId: request.params.jobId
       };

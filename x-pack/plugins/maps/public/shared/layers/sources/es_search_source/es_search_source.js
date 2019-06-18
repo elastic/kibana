@@ -56,6 +56,10 @@ export class ESSearchSource extends AbstractESSource {
       geoField: descriptor.geoField,
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
+      useTopHits: _.get(descriptor, 'useTopHits', false),
+      topHitsSplitField: descriptor.topHitsSplitField,
+      topHitsTimeField: descriptor.topHitsTimeField,
+      topHitsSize: _.get(descriptor, 'topHitsSize', 1),
     }, inspectorAdapters);
   }
 
@@ -66,6 +70,10 @@ export class ESSearchSource extends AbstractESSource {
         onChange={onChange}
         filterByMapBounds={this._descriptor.filterByMapBounds}
         tooltipProperties={this._descriptor.tooltipProperties}
+        useTopHits={this._descriptor.useTopHits}
+        topHitsSplitField={this._descriptor.topHitsSplitField}
+        topHitsTimeField={this._descriptor.topHitsTimeField}
+        topHitsSize={this._descriptor.topHitsSize}
       />
     );
   }
@@ -127,7 +135,65 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
+  async _getTopHits(layerName, searchFilters) {
+    const {
+      topHitsSplitField,
+      topHitsTimeField,
+      topHitsSize,
+    } = this._descriptor;
+
+    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    searchSource.setField('aggs', {
+      entitySplit: {
+        terms: {
+          field: topHitsSplitField,
+          size: 10000
+        },
+        aggs: {
+          entityHits: {
+            top_hits: {
+              sort: [
+                {
+                  [topHitsTimeField]: {
+                    order: 'desc'
+                  }
+                }
+              ],
+              _source: {
+                includes: searchFilters.fieldNames
+              },
+              size: topHitsSize
+            }
+          }
+        }
+      }
+    });
+
+    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document top hits request');
+
+    let hasTrimmedResults = false;
+    const allHits = [];
+    const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
+    entityBuckets.forEach(entityBucket => {
+      const total = _.get(entityBucket, 'entityHits.hits.total', 0);
+      const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
+      // Reverse hits list so they are drawn from oldest to newest (per entity) so newest events are on top
+      allHits.push(...hits.reverse());
+      if (total > hits.length) {
+        hasTrimmedResults = true;
+      }
+    });
+
+    return {
+      hits: allHits,
+      meta: {
+        areResultsTrimmed: hasTrimmedResults,
+        entityCount: entityBuckets.length,
+      }
+    };
+  }
+
+  async _getSearchHits(layerName, searchFilters) {
     const searchSource = await this._makeSearchSource(searchFilters, DEFAULT_ES_DOC_LIMIT);
     // Setting "fields" instead of "source: { includes: []}"
     // because SearchSource automatically adds the following by default
@@ -136,7 +202,26 @@ export class ESSearchSource extends AbstractESSource {
     // By setting "fields", SearchSource removes all of defaults
     searchSource.setField('fields', searchFilters.fieldNames);
 
-    let featureCollection;
+    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document request');
+
+    return {
+      hits: resp.hits.hits,
+      meta: {
+        areResultsTrimmed: resp.hits.total > resp.hits.hits.length
+      }
+    };
+  }
+
+  _isTopHits() {
+    const { useTopHits, topHitsSplitField, topHitsTimeField } = this._descriptor;
+    return !!(useTopHits && topHitsSplitField && topHitsTimeField);
+  }
+
+  async getGeoJsonWithMeta(layerName, searchFilters) {
+    const { hits, meta } = this._isTopHits()
+      ? await this._getTopHits(layerName, searchFilters)
+      : await this._getSearchHits(layerName, searchFilters);
+
     const indexPattern = await this._getIndexPattern();
     const unusedMetaFields = indexPattern.metaFields.filter(metaField => {
       return metaField !== '_id';
@@ -150,10 +235,10 @@ export class ESSearchSource extends AbstractESSource {
       return properties;
     };
 
-    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document request');
+    let featureCollection;
     try {
       const geoField = await this._getGeoField();
-      featureCollection = hitsToGeoJson(resp.hits.hits, flattenHit, geoField.name, geoField.type);
+      featureCollection = hitsToGeoJson(hits, flattenHit, geoField.name, geoField.type);
     } catch(error) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.convertToGeoJsonErrorMsg', {
@@ -165,9 +250,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       data: featureCollection,
-      meta: {
-        areResultsTrimmed: resp.hits.total > resp.hits.hits.length
-      }
+      meta
     };
   }
 
@@ -252,11 +335,31 @@ export class ESSearchSource extends AbstractESSource {
 
   getSourceTooltipContent(sourceDataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
-    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
+    if (!featureCollection || !meta) {
+      // no tooltip content needed when there is no feature collection or meta
+      return null;
+    }
+
+    if (this._isTopHits()) {
+      const entitiesFoundMsg = i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
+        defaultMessage: `Found {entityCount} entities.`,
+        values: { entityCount: meta.entityCount }
+      });
+      if (meta.areResultsTrimmed) {
+        const trimmedMsg = i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
+          defaultMessage: `Results limited to most recent {topHitsSize} documents per entity.`,
+          values: { topHitsSize: this._descriptor.topHitsSize }
+        });
+        return `${entitiesFoundMsg} ${trimmedMsg}`;
+      }
+
+      return entitiesFoundMsg;
+    }
 
     if (meta.areResultsTrimmed) {
       return i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
-        defaultMessage: `Results limited to first {count} matching documents.`,
+        defaultMessage: `Results limited to first {count} documents.`,
         values: { count: featureCollection.features.length }
       });
     }
@@ -265,5 +368,14 @@ export class ESSearchSource extends AbstractESSource {
       defaultMessage: `Found {count} documents.`,
       values: { count: featureCollection.features.length }
     });
+  }
+
+  getSyncMeta() {
+    return {
+      useTopHits: this._descriptor.useTopHits,
+      topHitsSplitField: this._descriptor.topHitsSplitField,
+      topHitsTimeField: this._descriptor.topHitsTimeField,
+      topHitsSize: this._descriptor.topHitsSize,
+    };
   }
 }

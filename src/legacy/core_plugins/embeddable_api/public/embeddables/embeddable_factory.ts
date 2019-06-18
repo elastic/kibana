@@ -18,7 +18,7 @@
  */
 
 import { SavedObjectMetaData } from 'ui/saved_objects/components/saved_object_finder';
-import { SavedObjectAttributes } from '../../../../server/saved_objects';
+import { SavedObjectAttributes } from 'src/core/server';
 import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';
