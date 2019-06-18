@@ -21,30 +21,10 @@ import Boom from 'boom';
 
 import { SavedObjectsErrorHelpers } from './errors';
 
-const {
-  createBadRequestError,
-  createEsAutoCreateIndexError,
-  createGenericNotFoundError,
-  createUnsupportedTypeError,
-  decorateBadRequestError,
-  decorateConflictError,
-  decorateEsUnavailableError,
-  decorateForbiddenError,
-  decorateGeneralError,
-  decorateNotAuthorizedError,
-  isBadRequestError,
-  isConflictError,
-  isEsAutoCreateIndexError,
-  isEsUnavailableError,
-  isForbiddenError,
-  isNotAuthorizedError,
-  isNotFoundError,
-} = SavedObjectsErrorHelpers;
-
 describe('savedObjectsClient/errorTypes', () => {
   describe('BadRequest error', () => {
     describe('createUnsupportedTypeError', () => {
-      const errorObj = createUnsupportedTypeError('someType');
+      const errorObj = SavedObjectsErrorHelpers.createUnsupportedTypeError('someType');
 
       it('should have the unsupported type message', () => {
         expect(errorObj).toHaveProperty(
@@ -62,18 +42,18 @@ describe('savedObjectsClient/errorTypes', () => {
       });
 
       it("should be identified by 'isBadRequestError' method", () => {
-        expect(isBadRequestError(errorObj)).toBeTruthy();
+        expect(SavedObjectsErrorHelpers.isBadRequestError(errorObj)).toBeTruthy();
       });
     });
 
     describe('createBadRequestError', () => {
-      const errorObj = createBadRequestError('test reason message');
+      const errorObj = SavedObjectsErrorHelpers.createBadRequestError('test reason message');
       it('should create an appropriately structured error object', () => {
         expect(errorObj.message).toEqual('test reason message: Bad Request');
       });
 
       it("should be identified by 'isBadRequestError' method", () => {
-        expect(isBadRequestError(errorObj)).toBeTruthy();
+        expect(SavedObjectsErrorHelpers.isBadRequestError(errorObj)).toBeTruthy();
       });
 
       it('has boom properties', () => {
@@ -88,39 +68,42 @@ describe('savedObjectsClient/errorTypes', () => {
     describe('decorateBadRequestError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(decorateBadRequestError(error)).toBe(error);
+        expect(SavedObjectsErrorHelpers.decorateBadRequestError(error)).toBe(error);
       });
 
       it('makes the error identifiable as a BadRequest error', () => {
         const error = new Error();
-        expect(isBadRequestError(error)).toBe(false);
-        decorateBadRequestError(error);
-        expect(isBadRequestError(error)).toBe(true);
+        expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(false);
+        SavedObjectsErrorHelpers.decorateBadRequestError(error);
+        expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(true);
       });
 
       it('adds boom properties', () => {
-        const error = decorateBadRequestError(new Error());
+        const error = SavedObjectsErrorHelpers.decorateBadRequestError(new Error());
         expect(typeof error.output).toBe('object');
         expect(error.output.statusCode).toBe(400);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        decorateBadRequestError(error);
+        SavedObjectsErrorHelpers.decorateBadRequestError(error);
         expect(error.output.statusCode).toBe(404);
       });
 
       describe('error.output', () => {
         it('defaults to message of error', () => {
-          const error = decorateBadRequestError(new Error('foobar'));
+          const error = SavedObjectsErrorHelpers.decorateBadRequestError(new Error('foobar'));
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = decorateBadRequestError(new Error('foobar'), 'biz');
+          const error = SavedObjectsErrorHelpers.decorateBadRequestError(
+            new Error('foobar'),
+            'biz'
+          );
           expect(error.output.payload).toHaveProperty('message', 'biz: foobar');
         });
         it('sets statusCode to 400', () => {
-          const error = decorateBadRequestError(new Error('foo'));
+          const error = SavedObjectsErrorHelpers.decorateBadRequestError(new Error('foo'));
           expect(error.output).toHaveProperty('statusCode', 400);
         });
       });
@@ -130,39 +113,42 @@ describe('savedObjectsClient/errorTypes', () => {
     describe('decorateNotAuthorizedError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(decorateNotAuthorizedError(error)).toBe(error);
+        expect(SavedObjectsErrorHelpers.decorateNotAuthorizedError(error)).toBe(error);
       });
 
       it('makes the error identifiable as a NotAuthorized error', () => {
         const error = new Error();
-        expect(isNotAuthorizedError(error)).toBe(false);
-        decorateNotAuthorizedError(error);
-        expect(isNotAuthorizedError(error)).toBe(true);
+        expect(SavedObjectsErrorHelpers.isNotAuthorizedError(error)).toBe(false);
+        SavedObjectsErrorHelpers.decorateNotAuthorizedError(error);
+        expect(SavedObjectsErrorHelpers.isNotAuthorizedError(error)).toBe(true);
       });
 
       it('adds boom properties', () => {
-        const error = decorateNotAuthorizedError(new Error());
+        const error = SavedObjectsErrorHelpers.decorateNotAuthorizedError(new Error());
         expect(typeof error.output).toBe('object');
         expect(error.output.statusCode).toBe(401);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        decorateNotAuthorizedError(error);
+        SavedObjectsErrorHelpers.decorateNotAuthorizedError(error);
         expect(error.output.statusCode).toBe(404);
       });
 
       describe('error.output', () => {
         it('defaults to message of error', () => {
-          const error = decorateNotAuthorizedError(new Error('foobar'));
+          const error = SavedObjectsErrorHelpers.decorateNotAuthorizedError(new Error('foobar'));
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = decorateNotAuthorizedError(new Error('foobar'), 'biz');
+          const error = SavedObjectsErrorHelpers.decorateNotAuthorizedError(
+            new Error('foobar'),
+            'biz'
+          );
           expect(error.output.payload).toHaveProperty('message', 'biz: foobar');
         });
         it('sets statusCode to 401', () => {
-          const error = decorateNotAuthorizedError(new Error('foo'));
+          const error = SavedObjectsErrorHelpers.decorateNotAuthorizedError(new Error('foo'));
           expect(error.output).toHaveProperty('statusCode', 401);
         });
       });
@@ -172,39 +158,39 @@ describe('savedObjectsClient/errorTypes', () => {
     describe('decorateForbiddenError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(decorateForbiddenError(error)).toBe(error);
+        expect(SavedObjectsErrorHelpers.decorateForbiddenError(error)).toBe(error);
       });
 
       it('makes the error identifiable as a Forbidden error', () => {
         const error = new Error();
-        expect(isForbiddenError(error)).toBe(false);
-        decorateForbiddenError(error);
-        expect(isForbiddenError(error)).toBe(true);
+        expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(false);
+        SavedObjectsErrorHelpers.decorateForbiddenError(error);
+        expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
       });
 
       it('adds boom properties', () => {
-        const error = decorateForbiddenError(new Error());
+        const error = SavedObjectsErrorHelpers.decorateForbiddenError(new Error());
         expect(typeof error.output).toBe('object');
         expect(error.output.statusCode).toBe(403);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        decorateForbiddenError(error);
+        SavedObjectsErrorHelpers.decorateForbiddenError(error);
         expect(error.output.statusCode).toBe(404);
       });
 
       describe('error.output', () => {
         it('defaults to message of error', () => {
-          const error = decorateForbiddenError(new Error('foobar'));
+          const error = SavedObjectsErrorHelpers.decorateForbiddenError(new Error('foobar'));
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = decorateForbiddenError(new Error('foobar'), 'biz');
+          const error = SavedObjectsErrorHelpers.decorateForbiddenError(new Error('foobar'), 'biz');
           expect(error.output.payload).toHaveProperty('message', 'biz: foobar');
         });
         it('sets statusCode to 403', () => {
-          const error = decorateForbiddenError(new Error('foo'));
+          const error = SavedObjectsErrorHelpers.decorateForbiddenError(new Error('foo'));
           expect(error.output).toHaveProperty('statusCode', 403);
         });
       });
@@ -213,12 +199,12 @@ describe('savedObjectsClient/errorTypes', () => {
   describe('NotFound error', () => {
     describe('createGenericNotFoundError', () => {
       it('makes an error identifiable as a NotFound error', () => {
-        const error = createGenericNotFoundError();
-        expect(isNotFoundError(error)).toBe(true);
+        const error = SavedObjectsErrorHelpers.createGenericNotFoundError();
+        expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(true);
       });
 
       it('is a boom error, has boom properties', () => {
-        const error = createGenericNotFoundError();
+        const error = SavedObjectsErrorHelpers.createGenericNotFoundError();
         expect(error).toHaveProperty('isBoom');
         expect(typeof error.output).toBe('object');
         expect(error.output.statusCode).toBe(404);
@@ -226,11 +212,11 @@ describe('savedObjectsClient/errorTypes', () => {
 
       describe('error.output', () => {
         it('Uses "Not Found" message', () => {
-          const error = createGenericNotFoundError();
+          const error = SavedObjectsErrorHelpers.createGenericNotFoundError();
           expect(error.output.payload).toHaveProperty('message', 'Not Found');
         });
         it('sets statusCode to 404', () => {
-          const error = createGenericNotFoundError();
+          const error = SavedObjectsErrorHelpers.createGenericNotFoundError();
           expect(error.output).toHaveProperty('statusCode', 404);
         });
       });
@@ -240,39 +226,39 @@ describe('savedObjectsClient/errorTypes', () => {
     describe('decorateConflictError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(decorateConflictError(error)).toBe(error);
+        expect(SavedObjectsErrorHelpers.decorateConflictError(error)).toBe(error);
       });
 
       it('makes the error identifiable as a Conflict error', () => {
         const error = new Error();
-        expect(isConflictError(error)).toBe(false);
-        decorateConflictError(error);
-        expect(isConflictError(error)).toBe(true);
+        expect(SavedObjectsErrorHelpers.isConflictError(error)).toBe(false);
+        SavedObjectsErrorHelpers.decorateConflictError(error);
+        expect(SavedObjectsErrorHelpers.isConflictError(error)).toBe(true);
       });
 
       it('adds boom properties', () => {
-        const error = decorateConflictError(new Error());
+        const error = SavedObjectsErrorHelpers.decorateConflictError(new Error());
         expect(typeof error.output).toBe('object');
         expect(error.output.statusCode).toBe(409);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        decorateConflictError(error);
+        SavedObjectsErrorHelpers.decorateConflictError(error);
         expect(error.output.statusCode).toBe(404);
       });
 
       describe('error.output', () => {
         it('defaults to message of error', () => {
-          const error = decorateConflictError(new Error('foobar'));
+          const error = SavedObjectsErrorHelpers.decorateConflictError(new Error('foobar'));
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = decorateConflictError(new Error('foobar'), 'biz');
+          const error = SavedObjectsErrorHelpers.decorateConflictError(new Error('foobar'), 'biz');
           expect(error.output.payload).toHaveProperty('message', 'biz: foobar');
         });
         it('sets statusCode to 409', () => {
-          const error = decorateConflictError(new Error('foo'));
+          const error = SavedObjectsErrorHelpers.decorateConflictError(new Error('foo'));
           expect(error.output).toHaveProperty('statusCode', 409);
         });
       });
@@ -282,39 +268,42 @@ describe('savedObjectsClient/errorTypes', () => {
     describe('decorateEsUnavailableError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(decorateEsUnavailableError(error)).toBe(error);
+        expect(SavedObjectsErrorHelpers.decorateEsUnavailableError(error)).toBe(error);
       });
 
       it('makes the error identifiable as a EsUnavailable error', () => {
         const error = new Error();
-        expect(isEsUnavailableError(error)).toBe(false);
-        decorateEsUnavailableError(error);
-        expect(isEsUnavailableError(error)).toBe(true);
+        expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(false);
+        SavedObjectsErrorHelpers.decorateEsUnavailableError(error);
+        expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
       });
 
       it('adds boom properties', () => {
-        const error = decorateEsUnavailableError(new Error());
+        const error = SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error());
         expect(typeof error.output).toBe('object');
         expect(error.output.statusCode).toBe(503);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        decorateEsUnavailableError(error);
+        SavedObjectsErrorHelpers.decorateEsUnavailableError(error);
         expect(error.output.statusCode).toBe(404);
       });
 
       describe('error.output', () => {
         it('defaults to message of error', () => {
-          const error = decorateEsUnavailableError(new Error('foobar'));
+          const error = SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('foobar'));
           expect(error.output.payload).toHaveProperty('message', 'foobar');
         });
         it('prefixes message with passed reason', () => {
-          const error = decorateEsUnavailableError(new Error('foobar'), 'biz');
+          const error = SavedObjectsErrorHelpers.decorateEsUnavailableError(
+            new Error('foobar'),
+            'biz'
+          );
           expect(error.output.payload).toHaveProperty('message', 'biz: foobar');
         });
         it('sets statusCode to 503', () => {
-          const error = decorateEsUnavailableError(new Error('foo'));
+          const error = SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('foo'));
           expect(error.output).toHaveProperty('statusCode', 503);
         });
       });
@@ -324,28 +313,28 @@ describe('savedObjectsClient/errorTypes', () => {
     describe('decorateGeneralError', () => {
       it('returns original object', () => {
         const error = new Error();
-        expect(decorateGeneralError(error)).toBe(error);
+        expect(SavedObjectsErrorHelpers.decorateGeneralError(error)).toBe(error);
       });
 
       it('adds boom properties', () => {
-        const error = decorateGeneralError(new Error());
+        const error = SavedObjectsErrorHelpers.decorateGeneralError(new Error());
         expect(typeof error.output).toBe('object');
         expect(error.output.statusCode).toBe(500);
       });
 
       it('preserves boom properties of input', () => {
         const error = Boom.notFound();
-        decorateGeneralError(error);
+        SavedObjectsErrorHelpers.decorateGeneralError(error);
         expect(error.output.statusCode).toBe(404);
       });
 
       describe('error.output', () => {
         it('ignores error message', () => {
-          const error = decorateGeneralError(new Error('foobar'));
+          const error = SavedObjectsErrorHelpers.decorateGeneralError(new Error('foobar'));
           expect(error.output.payload.message).toMatch(/internal server error/i);
         });
         it('sets statusCode to 500', () => {
-          const error = decorateGeneralError(new Error('foo'));
+          const error = SavedObjectsErrorHelpers.decorateGeneralError(new Error('foo'));
           expect(error.output).toHaveProperty('statusCode', 500);
         });
       });
@@ -357,19 +346,23 @@ describe('savedObjectsClient/errorTypes', () => {
       it('does not take an error argument', () => {
         const error = new Error();
         // @ts-ignore
-        expect(createEsAutoCreateIndexError(error)).not.toBe(error);
+        expect(SavedObjectsErrorHelpers.createEsAutoCreateIndexError(error)).not.toBe(error);
       });
 
       it('returns a new Error', () => {
-        expect(createEsAutoCreateIndexError()).toBeInstanceOf(Error);
+        expect(SavedObjectsErrorHelpers.createEsAutoCreateIndexError()).toBeInstanceOf(Error);
       });
 
       it('makes errors identifiable as EsAutoCreateIndex errors', () => {
-        expect(isEsAutoCreateIndexError(createEsAutoCreateIndexError())).toBe(true);
+        expect(
+          SavedObjectsErrorHelpers.isEsAutoCreateIndexError(
+            SavedObjectsErrorHelpers.createEsAutoCreateIndexError()
+          )
+        ).toBe(true);
       });
 
       it('returns a boom error', () => {
-        const error = createEsAutoCreateIndexError();
+        const error = SavedObjectsErrorHelpers.createEsAutoCreateIndexError();
         expect(error).toHaveProperty('isBoom');
         expect(typeof error.output).toBe('object');
         expect(error.output.statusCode).toBe(503);
@@ -377,11 +370,11 @@ describe('savedObjectsClient/errorTypes', () => {
 
       describe('error.output', () => {
         it('uses "Automatic index creation failed" message', () => {
-          const error = createEsAutoCreateIndexError();
+          const error = SavedObjectsErrorHelpers.createEsAutoCreateIndexError();
           expect(error.output.payload).toHaveProperty('message', 'Automatic index creation failed');
         });
         it('sets statusCode to 503', () => {
-          const error = createEsAutoCreateIndexError();
+          const error = SavedObjectsErrorHelpers.createEsAutoCreateIndexError();
           expect(error.output).toHaveProperty('statusCode', 503);
         });
       });

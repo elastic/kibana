@@ -67,8 +67,12 @@ function decorate(
   return boom;
 }
 
-export function isSavedObjectsClientError(error: any): error is DecoratedError {
+function isSavedObjectsClientError(error: any): error is DecoratedError {
   return Boolean(error && error[code]);
+}
+
+function decorateBadRequestError(error: Error, reason?: string) {
+  return decorate(error, CODE_BAD_REQUEST, 400, reason);
 }
 
 /**
@@ -80,15 +84,18 @@ export class SavedObjectsErrorHelpers {
   }
 
   public static decorateBadRequestError(error: Error, reason?: string) {
-    return decorate(error, CODE_BAD_REQUEST, 400, reason);
+    return decorateBadRequestError(error, reason);
   }
 
   public static createBadRequestError(reason?: string) {
-    return this.decorateBadRequestError(new Error('Bad Request'), reason);
+    return decorateBadRequestError(new Error('Bad Request'), reason);
   }
 
   public static createUnsupportedTypeError(type: string) {
-    return this.createBadRequestError(`Unsupported saved object type: '${type}'`);
+    return decorateBadRequestError(
+      new Error('Bad Request'),
+      `Unsupported saved object type: '${type}'`
+    );
   }
 
   public static isBadRequestError(error: Error | DecoratedError) {
@@ -173,7 +180,3 @@ export class SavedObjectsErrorHelpers {
     return decorate(error, CODE_GENERAL_ERROR, 500, reason);
   }
 }
-
-// export const decorateBadRequestError = SavedObjectsErrors.decorateBadRequestError;
-
-// export const createBadRequestError = SavedObjectsErrors.createBadRequestError;

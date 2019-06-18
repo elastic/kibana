@@ -20,7 +20,7 @@
 import { delay } from 'bluebird';
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
-import * as errors from './errors';
+import { SavedObjectsErrorHelpers } from './errors';
 import elasticsearch from 'elasticsearch';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
@@ -2073,7 +2073,7 @@ describe('SavedObjectsRepository', () => {
       expect.assertions(4);
 
       const es401 = new elasticsearch.errors[401]();
-      expect(errors.isNotAuthorizedError(es401)).toBe(false);
+      expect(SavedObjectsErrorHelpers.isNotAuthorizedError(es401)).toBe(false);
       onBeforeWrite.mockImplementation(() => {
         throw es401;
       });
@@ -2083,7 +2083,7 @@ describe('SavedObjectsRepository', () => {
       } catch (error) {
         expect(onBeforeWrite).toHaveBeenCalledTimes(1);
         expect(error).toBe(es401);
-        expect(errors.isNotAuthorizedError(error)).toBe(true);
+        expect(SavedObjectsErrorHelpers.isNotAuthorizedError(error)).toBe(true);
       }
     });
   });
