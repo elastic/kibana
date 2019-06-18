@@ -15,6 +15,8 @@ import { EnrichedDeprecationInfo } from '../../../../../server/lib/es_migration_
 import { GroupByOption, LevelFilterOption } from '../../../types';
 import { DeprecationAccordion, filterDeps, GroupedDeprecations } from './grouped';
 
+jest.mock('ui/kfetch');
+
 describe('filterDeps', () => {
   test('filters on levels', () => {
     const fd = filterDeps(LevelFilterOption.critical);

@@ -9,13 +9,13 @@
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 
-export function jobRoutes(server, commonRouteConfig) {
+export function jobRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/anomaly_detectors',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return callWithRequest('ml.jobs')
         .catch(resp => wrapError(resp));
     },
@@ -24,11 +24,11 @@ export function jobRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/anomaly_detectors/{jobId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const jobId = request.params.jobId;
       return callWithRequest('ml.jobs', { jobId })
         .catch(resp => wrapError(resp));
@@ -38,11 +38,11 @@ export function jobRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/anomaly_detectors/_stats',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return callWithRequest('ml.jobStats')
         .catch(resp => wrapError(resp));
     },
@@ -51,11 +51,11 @@ export function jobRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/anomaly_detectors/{jobId}/_stats',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const jobId = request.params.jobId;
       return callWithRequest('ml.jobStats', { jobId })
         .catch(resp => wrapError(resp));
@@ -65,11 +65,11 @@ export function jobRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'PUT',
     path: '/api/ml/anomaly_detectors/{jobId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const jobId = request.params.jobId;
       const body = request.payload;
       return callWithRequest('ml.addJob', { jobId, body })
@@ -80,11 +80,11 @@ export function jobRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/anomaly_detectors/{jobId}/_update',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const jobId = request.params.jobId;
       const body = request.payload;
       return callWithRequest('ml.updateJob', { jobId, body })
@@ -95,11 +95,11 @@ export function jobRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/anomaly_detectors/{jobId}/_open',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const jobId = request.params.jobId;
       return callWithRequest('ml.openJob', { jobId })
         .catch(resp => wrapError(resp));
@@ -109,11 +109,11 @@ export function jobRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/anomaly_detectors/{jobId}/_close',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const options = {
         jobId: request.params.jobId
       };
@@ -129,11 +129,11 @@ export function jobRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'DELETE',
     path: '/api/ml/anomaly_detectors/{jobId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const options = {
         jobId: request.params.jobId
       };
@@ -149,11 +149,11 @@ export function jobRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/anomaly_detectors/_validate/detector',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const body = request.payload;
       return callWithRequest('ml.validateDetector', { body })
         .catch(resp => wrapError(resp));
@@ -163,11 +163,11 @@ export function jobRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/anomaly_detectors/{jobId}/_forecast',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const jobId = request.params.jobId;
       const duration = request.payload.duration;
       return callWithRequest('ml.forecast', { jobId, duration })
@@ -178,11 +178,11 @@ export function jobRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/anomaly_detectors/{jobId}/results/overall_buckets',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return callWithRequest('ml.overallBuckets', {
         jobId: request.params.jobId,
         top_n: request.payload.topN,

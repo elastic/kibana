@@ -4,78 +4,84 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ArgumentType, TypeToCanvasArgument } from './arguments';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { functions as commonFunctions } from '../../functions/common';
 import { functions as browserFunctions } from '../../functions/browser';
 import { functions as serverFunctions } from '../../functions/server';
 
 /**
- * A Function type which represents a Function in Canvas.  This type assumes
- * any Context can be provided and used by the Function implementation.
+ * A `ExpressionFunctionFactory` is a powerful type used for any function that produces
+ * an `ExpressionFunction`. If it does not meet the signature for such a function,
+ * or if it does not produce an `ExpressionFunction`, it will be typed as
+ * returning `never`.
+ *
+ * This type will, in turn, strongly-type both a factory that produces an
+ * `ExpressionFunction`, *and* the `ExpressionFunction` itself.  This means one can
+ * effectively introspect properties from the factory in other places.
+ *
+ * As an example, given the following:
+ * 
+```
+   function foo(): ExpressionFunction<'foo', Context, Arguments, Return> {
+     // ...
+   }
+```
+ *
+ * `foo` would be an `ExpressionFunctionFactory`.  Using the `FunctionFactory` type allows one to
+ * introspect the generics from the `ExpressionFunction` without needing to access it
+ * directly:
+ * 
+```
+    type Baz = FunctionFactory<typeof foo>;
+```
+ *
+ * Thus, in reality, and in a Typescript-enabled IDE, one would see the following definition 
+ * for `Baz`:
+ * 
+```
+    type Baz = ExpressionFunction<"foo", Context, Arguments, Return>
+```
+ *
+ * Why is this useful?  Given a collection of `ExpressionFunctions` that have been registered
+ * with the `Interpreter`, you could take that collection and do any number of other
+ * introspected, strongly-typed operations.
+ *
+ * One example would to create a dictionary of all of the names of the `ExpressionFunctions`
+ * that have been registered:
+ *
+ ```
+    const someFunctions = [
+      functionOne: ExpressionFunction<'functionOne', Context, Arguments, Return>,
+      functionTwo: ExpressionFunction<'functionTwo', Context, Arguments, Return>,
+      functionThree: ExpressionFunction<'functionThree', Context, Arguments, Return>,
+    ];
+
+    export type FunctionName = FunctionFactory<typeof someFunctions[number]>['name'];
+    
+    const name: FunctionName = 'functionOne';  // passes
+    const nonName: FunctionName = 'elastic`;  // fails
+```
+ *
+ * A more practical example would be to use the introspected generics to create dictionaries, 
+ * like of help strings or documentation, that would contain only valid functions and their 
+ * generics, but nothing extraneous.  This is actually used in a number of built-in functions 
+ * in Kibana and Canvas.
  */
-export interface Function<Name extends string, Arguments, Return> {
-  /** Arguments for the Function */
-  args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
-  aliases?: string[];
-  /** Help text displayed in the Expression editor */
-  help: string;
-  /** The name of the Function */
-  name: Name;
-  /** The type of the Function */
-  type?: CanvasFunctionType | Name;
-  /** The implementation of the Function */
-  fn(context: any, args: Arguments, handlers: FunctionHandlers): Return;
-}
+// prettier-ignore
+export type ExpressionFunctionFactory<Name extends string, Context, Arguments, Return> = 
+() => ExpressionFunction<Name, Context, Arguments, Return>;
 
 /**
- * A Function type which restricts the incoming Context to a specific type.
+ * `FunctionFactory` exists as a name shim between the `ExpressionFunction` type and
+ * the functions that already existed in Canvas.  This type can likely be removed, and
+ * callsites converted, if `ExpressionFunctionFactory` is moved into the Interpreter, (perhaps
+ * with a shorter name).
  */
-export interface ContextFunction<Name extends string, Context, Arguments, Return>
-  extends Function<Name, Arguments, Return> {
-  /** The incoming Context provided to the Function; the information piped in. */
-  context?: {
-    types: Array<TypeToCanvasArgument<Context>>;
-  };
-  /** The implementation of the Function */
-  fn(context: Context, args: Arguments, handlers: FunctionHandlers): Return;
-}
-
-/**
- * A Function type which restricts the incoming Context specifically to `null`.
- */
-export interface NullContextFunction<Name extends string, Arguments, Return>
-  extends ContextFunction<Name, null, Arguments, Return> {
-  /** The incoming Context provided to the Function; the information piped in. */
-  context?: {
-    types: ['null'];
-  };
-  /** The implementation of the Function */
-  fn(context: null, args: Arguments, handlers: FunctionHandlers): Return;
-}
-
-// A reducing type for Function Factories to a base `Function`.
-// This is useful for collecting all of the Functions and the concepts they share as
-// one useable type.
 // prettier-ignore
 export type FunctionFactory<FnFactory> = 
-  FnFactory extends ContextFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
-    Function<Name, Arguments, Return> :
-  FnFactory extends NullContextFunctionFactory<infer Name, infer Arguments, infer Return> ?
-    Function<Name, Arguments, Return> :
-  FnFactory extends BasicFunctionFactory<infer Name, infer Arguments, infer Return> ?
-    Function<Name, Arguments, Return> :
-  never;
-
-/**
- * A type containing all available Functions.
- */
-export type AvailableFunctions = FunctionFactory<Functions>;
-
-/**
- * A type containing all of the Function names available to Canvas, formally exported.
- */
-// prettier-ignore
-export type AvailableFunctionNames = AvailableFunctions['name'];
+  FnFactory extends ExpressionFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
+    ExpressionFunction<Name, Context, Arguments, Return> :
+    never;
 
 // A type containing all of the raw Function definitions in Canvas.
 // prettier-ignore
@@ -84,38 +90,12 @@ type Functions =
   typeof serverFunctions[number] &
   typeof browserFunctions[number];
 
-// A union of strings representing Canvas Function "types". This is used in the `type` field
-// of the Function specification.  We may refactor this to be a known type, rather than a
-// union of strings.
-type CanvasFunctionType =
-  | 'boolean'
-  | 'datatable'
-  | 'filter'
-  | 'null'
-  | 'number'
-  | 'render'
-  | 'string'
-  | 'style';
+/**
+ * A union type of all Canvas Functions.
+ */
+export type CanvasFunction = FunctionFactory<Functions>;
 
-// Handlers can be passed to the `fn` property of the Function.  At the moment, these Functions
-// are not strongly defined.
-interface FunctionHandlers {
-  [key: string]: (...args: any) => any;
-}
-
-// A `FunctionFactory` defines the function that produces a named FunctionSpec.
-// prettier-ignore
-type BasicFunctionFactory<Name extends string, Arguments, Return> = 
-  () => Function<Name, Arguments, Return>;
-
-// A `ContextFunctionFactory` defines the function that produces a named FunctionSpec
-// which includes a Context.
-// prettier-ignore
-type ContextFunctionFactory<Name extends string, Context, Arguments, Return> = 
-    () => ContextFunction<Name, Context, Arguments, Return>;
-
-// A `NullContextualFunctionFactory` defines the function that produces a named FunctionSpec
-// which includes an always-null Context.
-// prettier-ignore
-type NullContextFunctionFactory<Name extends string, Arguments, Return> = 
-    () => ContextFunction<Name, null, Arguments, Return>;
+/**
+ * A union type of all Canvas Function names.
+ */
+export type CanvasFunctionName = CanvasFunction['name'];

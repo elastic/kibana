@@ -72,6 +72,7 @@ export enum FileTreeItemType {
 
 export interface WorkerResult {
   uri: string;
+  cancelled?: boolean;
 }
 
 // TODO(mengwei): create a AbstractGitWorkerResult since we now have an

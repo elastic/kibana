@@ -7,6 +7,8 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { AccountManagementPage } from './account_management_page';
 
+jest.mock('ui/kfetch');
+
 interface Options {
   withFullName?: boolean;
   withEmail?: boolean;

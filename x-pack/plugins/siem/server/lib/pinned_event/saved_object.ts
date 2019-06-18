@@ -9,7 +9,7 @@ import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 
-import { FindOptions } from 'src/legacy/server/saved_objects/service';
+import { SavedObjectsFindOptions } from 'src/core/server';
 
 import { Pick3 } from '../../../common/utility_types';
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
@@ -18,13 +18,10 @@ import {
   PinnedEventSavedObjectRuntimeType,
   SavedPinnedEvent,
 } from './types';
-import { pinnedEventSavedObjectType } from '.';
 import { PageInfoNote, SortNote } from '../../graphql/types';
-import {
-  convertSavedObjectToSavedTimeline,
-  timelineSavedObjectType,
-  pickSavedTimeline,
-} from '../timeline';
+import { pinnedEventSavedObjectType, timelineSavedObjectType } from '../../saved_objects';
+import { pickSavedTimeline } from '../timeline/pick_saved_timeline';
+import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_object_to_savedtimeline';
 
 export class PinnedEvent {
   constructor(
@@ -45,7 +42,7 @@ export class PinnedEvent {
   }
 
   public async deleteAllPinnedEventsOnTimeline(request: FrameworkRequest, timelineId: string) {
-    const options: FindOptions = {
+    const options: SavedObjectsFindOptions = {
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -70,7 +67,7 @@ export class PinnedEvent {
     request: FrameworkRequest,
     timelineId: string
   ): Promise<PinnedEventSavedObject[]> {
-    const options: FindOptions = {
+    const options: SavedObjectsFindOptions = {
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -83,7 +80,7 @@ export class PinnedEvent {
     search: string | null,
     sort: SortNote | null
   ): Promise<PinnedEventSavedObject[]> {
-    const options: FindOptions = {
+    const options: SavedObjectsFindOptions = {
       perPage: pageInfo != null ? pageInfo.pageSize : undefined,
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
@@ -159,7 +156,10 @@ export class PinnedEvent {
     return convertSavedObjectToSavedPinnedEvent(savedObject);
   }
 
-  private async getAllSavedPinnedEvents(request: FrameworkRequest, options: FindOptions) {
+  private async getAllSavedPinnedEvents(
+    request: FrameworkRequest,
+    options: SavedObjectsFindOptions
+  ) {
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
       request[internalFrameworkRequest]
     );

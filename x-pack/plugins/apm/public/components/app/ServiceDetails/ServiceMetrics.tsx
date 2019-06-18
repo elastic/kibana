@@ -18,6 +18,7 @@ interface ServiceMetricsProps {
 
 export function ServiceMetrics({ urlParams, agentName }: ServiceMetricsProps) {
   const { data } = useServiceMetricCharts(urlParams, agentName);
+  const { start, end } = urlParams;
   return (
     <React.Fragment>
       <SyncChartGroup
@@ -26,7 +27,12 @@ export function ServiceMetrics({ urlParams, agentName }: ServiceMetricsProps) {
             {data.charts.map(chart => (
               <EuiFlexItem key={chart.key}>
                 <EuiPanel>
-                  <MetricsChart chart={chart} hoverXHandlers={hoverXHandlers} />
+                  <MetricsChart
+                    start={start}
+                    end={end}
+                    chart={chart}
+                    hoverXHandlers={hoverXHandlers}
+                  />
                 </EuiPanel>
               </EuiFlexItem>
             ))}

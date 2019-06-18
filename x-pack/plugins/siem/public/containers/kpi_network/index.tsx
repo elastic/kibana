@@ -7,7 +7,6 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { pure } from 'recompose';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -29,12 +28,13 @@ export interface KpiNetworkProps extends QueryTemplateProps {
   children: (args: KpiNetworkArgs) => React.ReactNode;
 }
 
-export const KpiNetworkQuery = pure<KpiNetworkProps>(
-  ({ id = 'kpiNetworkQuery', children, filterQuery, sourceId, startDate, endDate }) => (
+export const KpiNetworkQuery = React.memo<KpiNetworkProps>(
+  ({ id = 'kpiNetworkQuery', children, filterQuery, skip, sourceId, startDate, endDate }) => (
     <Query<GetKpiNetworkQuery.Query, GetKpiNetworkQuery.Variables>
       query={kpiNetworkQuery}
       fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
+      skip={skip}
       variables={{
         sourceId,
         timerange: {

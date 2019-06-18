@@ -5,21 +5,22 @@
  */
 
 import squel from 'squel';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
-import { ContextFunction, Filter } from '../types';
+import { Filter } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
-  index: string | null;
+  index: string;
   query: string;
-  sort: string | null;
-  fields: string | null;
-  metaFields: string | null;
+  sort: string;
+  fields: string;
+  metaFields: string;
   count: number;
 }
 
-export function esdocs(): ContextFunction<'esdocs', Filter, Arguments, any> {
+export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().esdocs;
 
   return {
@@ -31,7 +32,7 @@ export function esdocs(): ContextFunction<'esdocs', Filter, Arguments, any> {
     },
     args: {
       index: {
-        types: ['string', 'null'],
+        types: ['string'],
         default: '_all',
         help: argHelp.index,
       },
@@ -42,16 +43,16 @@ export function esdocs(): ContextFunction<'esdocs', Filter, Arguments, any> {
         default: '-_index:.kibana',
       },
       sort: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.sort,
       },
       fields: {
         help: argHelp.fields,
-        types: ['string', 'null'],
+        types: ['string'],
       },
       metaFields: {
         help: argHelp.metaFields,
-        types: ['string', 'null'],
+        types: ['string'],
       },
       count: {
         types: ['number'],

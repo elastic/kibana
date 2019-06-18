@@ -43,6 +43,11 @@ import 'ui/listen';
 import 'ui/kbn_top_nav';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
 
+import rootTemplate from 'plugins/timelion/index.html';
+import saveTemplate from 'plugins/timelion/partials/save_sheet.html';
+import loadTemplate from 'plugins/timelion/partials/load_sheet.html';
+import sheetTemplate from 'plugins/timelion/partials/sheet_options.html';
+
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
 require('plugins/timelion/directives/fullscreen/fullscreen');
@@ -67,7 +72,7 @@ require('ui/routes').enable();
 
 require('ui/routes')
   .when('/:id?', {
-    template: require('plugins/timelion/index.html'),
+    template: rootTemplate,
     reloadOnSearch: false,
     k7Breadcrumbs: ($injector, $route) => $injector.invoke(
       $route.current.params.id
@@ -120,7 +125,6 @@ app.controller('timelion', function (
   config,
   confirmModal,
   kbnUrl,
-  Notifier,
   Private
 ) {
 
@@ -131,10 +135,6 @@ app.controller('timelion', function (
 
   timefilter.enableAutoRefreshSelector();
   timefilter.enableTimeRangeSelector();
-
-  const notify = new Notifier({
-    location
-  });
 
   const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
   const timezone = Private(timezoneProvider)();
@@ -197,7 +197,7 @@ app.controller('timelion', function (
       description: i18n.translate('timelion.topNavMenu.saveSheetButtonAriaLabel', {
         defaultMessage: 'Save Sheet',
       }),
-      template: require('plugins/timelion/partials/save_sheet.html'),
+      template: saveTemplate,
       testId: 'timelionSaveButton',
     };
 
@@ -256,7 +256,7 @@ app.controller('timelion', function (
       description: i18n.translate('timelion.topNavMenu.openSheetButtonAriaLabel', {
         defaultMessage: 'Open Sheet',
       }),
-      template: require('plugins/timelion/partials/load_sheet.html'),
+      template: loadTemplate,
       testId: 'timelionOpenButton',
     };
 
@@ -268,7 +268,7 @@ app.controller('timelion', function (
       description: i18n.translate('timelion.topNavMenu.optionsButtonAriaLabel', {
         defaultMessage: 'Options',
       }),
-      template: require('plugins/timelion/partials/sheet_options.html'),
+      template: sheetTemplate,
       testId: 'timelionOptionsButton',
     };
 
@@ -380,8 +380,11 @@ app.controller('timelion', function (
 
         const err = new Error(resp.message);
         err.stack = resp.stack;
-        notify.error(err);
-
+        toastNotifications.addError(err, {
+          title: i18n.translate('timelion.searchErrorTitle', {
+            defaultMessage: 'Timelion request error',
+          }),
+        });
       });
   };
 

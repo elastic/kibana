@@ -13,8 +13,9 @@ import { PolicyTable } from '../../public/sections/policy_table';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { setHttpClient } from '../../public/services/api';
-setHttpClient(axios.create());
+setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 import sinon from 'sinon';
 let server = null;
 

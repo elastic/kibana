@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import { editor as editorInterfaces } from 'monaco-editor';
+import { editor as editorInterfaces, IDisposable } from 'monaco-editor';
 import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -50,20 +50,47 @@ export class EditorComponent extends React.Component<IProps> {
   private monaco: MonacoHelper | undefined;
   private editor: editorInterfaces.IStandaloneCodeEditor | undefined;
   private lineDecorations: string[] | null = null;
+  private gutterClickHandler: IDisposable | undefined;
 
   constructor(props: IProps, context: any) {
     super(props, context);
   }
 
+  updateGutterClickHandler = (
+    repoUri: string,
+    revision: string,
+    path: string,
+    queryString: string
+  ) => {
+    if (this.monaco && this.editor) {
+      if (this.gutterClickHandler) {
+        this.gutterClickHandler.dispose();
+      }
+      this.gutterClickHandler = this.editor!.onMouseDown(
+        (e: editorInterfaces.IEditorMouseEvent) => {
+          if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
+            const url = `${repoUri}/blob/${encodeRevisionString(revision)}/${path}`;
+            const position = e.target.position || { lineNumber: 0, column: 0 };
+            history.push(`/${url}!L${position.lineNumber}:0${queryString}`);
+          }
+          this.monaco!.container.focus();
+        }
+      );
+    }
+  };
+
   public componentDidMount(): void {
     this.container = document.getElementById('mainEditor') as HTMLElement;
     this.monaco = new MonacoHelper(this.container, this.props, this.props.location.search);
-
+    if (!this.props.revealPosition) {
+      this.monaco.clearLineSelection();
+    }
     const { file } = this.props;
     if (file && file.content) {
       const { uri, path, revision } = file.payload;
       const qs = this.props.location.search;
-      this.loadText(file.content, uri, path, file.lang!, revision, qs).then(() => {
+      this.loadText(file.content, uri, path, file.lang!, revision).then(() => {
+        this.updateGutterClickHandler(uri, revision, path, qs);
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
@@ -86,8 +113,17 @@ export class EditorComponent extends React.Component<IProps> {
     } = this.props.match.params;
     const prevContent = prevProps.file && prevProps.file.content;
     const qs = this.props.location.search;
-    if (prevContent !== file.content || qs !== prevProps.location.search) {
-      this.loadText(file.content!, uri, path, file.lang!, revision, qs).then(() => {
+    if (this.editor && qs !== prevProps.location.search) {
+      this.updateGutterClickHandler(uri, revision, path, qs);
+    }
+    if (!this.props.revealPosition && this.monaco) {
+      this.monaco.clearLineSelection();
+    }
+    if (prevContent !== file.content) {
+      this.loadText(file.content!, uri, path, file.lang!, revision).then(() => {
+        if (this.editor && qs !== prevProps.location.search) {
+          this.updateGutterClickHandler(uri, revision, path, qs);
+        }
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
@@ -119,6 +155,9 @@ export class EditorComponent extends React.Component<IProps> {
   }
 
   public componentWillUnmount() {
+    if (this.gutterClickHandler) {
+      this.gutterClickHandler.dispose();
+    }
     this.monaco!.destroy();
   }
   public render() {
@@ -168,23 +207,9 @@ export class EditorComponent extends React.Component<IProps> {
     this.blameWidgets = null;
   }
 
-  private async loadText(
-    text: string,
-    repo: string,
-    file: string,
-    lang: string,
-    revision: string,
-    qs: string
-  ) {
+  private async loadText(text: string, repo: string, file: string, lang: string, revision: string) {
     if (this.monaco) {
       this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
-      this.editor.onMouseDown((e: editorInterfaces.IEditorMouseEvent) => {
-        if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
-          const uri = `${repo}/blob/${encodeRevisionString(revision)}/${file}`;
-          history.push(`/${uri}!L${e.target.position.lineNumber}:0${qs}`);
-        }
-        this.monaco!.container.focus();
-      });
     }
   }
 

@@ -5,15 +5,16 @@
  */
 
 import { omit, pick, find } from 'lodash';
-import { ContextFunction, Datatable, DatatableColumn } from '../types';
+import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { Datatable, DatatableColumn } from '../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
-  include: string | null;
-  exclude: string | null;
+  include: string;
+  exclude: string;
 }
 
-export function columns(): ContextFunction<'columns', Datatable, Arguments, Datatable> {
+export function columns(): ExpressionFunction<'columns', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().columns;
 
   return {
@@ -27,12 +28,10 @@ export function columns(): ContextFunction<'columns', Datatable, Arguments, Data
       include: {
         types: ['string'],
         help: argHelp.include,
-        default: null,
       },
       exclude: {
         types: ['string'],
         help: argHelp.exclude,
-        default: null,
       },
     },
     fn: (context, args) => {

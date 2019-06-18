@@ -12,10 +12,9 @@ import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
 import { EuiMonitoringTable } from '../../table';
-import { injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-class PipelineListingUI extends Component {
+export class PipelineListing extends Component {
   tooltipXValueFormatter(xValue, dateFormat) {
     return moment(xValue).format(dateFormat);
   }
@@ -139,8 +138,7 @@ class PipelineListingUI extends Component {
       pagination,
       onTableChange,
       upgradeMessage,
-      className,
-      intl
+      className
     } = this.props;
 
     const columns = this.getColumns();
@@ -169,8 +167,7 @@ class PipelineListingUI extends Component {
               search={{
                 box: {
                   incremental: true,
-                  placeholder: intl.formatMessage({
-                    id: 'xpack.monitoring.logstash.filterPipelinesPlaceholder',
+                  placeholder: i18n.translate('xpack.monitoring.logstash.filterPipelinesPlaceholder', {
                     defaultMessage: 'Filter Pipelines…'
                   })
                 },
@@ -186,5 +183,3 @@ class PipelineListingUI extends Component {
     );
   }
 }
-
-export const PipelineListing = injectI18n(PipelineListingUI);

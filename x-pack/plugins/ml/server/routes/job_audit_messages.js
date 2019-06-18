@@ -10,12 +10,12 @@ import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { jobAuditMessagesProvider } from '../models/job_audit_messages';
 
-export function jobAuditMessagesRoutes(server, commonRouteConfig) {
-  server.route({
+export function jobAuditMessagesRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
+  route({
     method: 'GET',
     path: '/api/ml/job_audit_messages/messages/{jobId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { getJobAuditMessages } = jobAuditMessagesProvider(callWithRequest);
       const { jobId } = request.params;
       const from = request.query.from;
@@ -27,11 +27,11 @@ export function jobAuditMessagesRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/job_audit_messages/messages',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { getJobAuditMessages } = jobAuditMessagesProvider(callWithRequest);
       const from = request.query.from;
       return getJobAuditMessages(undefined, from)

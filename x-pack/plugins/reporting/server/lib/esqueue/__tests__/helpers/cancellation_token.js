@@ -17,14 +17,12 @@ describe('CancellationToken', function () {
   describe('on', function () {
     [true, null, undefined, 1, 'string', {}, []].forEach(function (value) {
       it(`should throw an Error if value is ${value}`, function () {
-        const boundOn = cancellationToken.on.bind(cancellationToken);
-        expect(boundOn).withArgs(value).to.throwError();
+        expect(cancellationToken.on).withArgs(value).to.throwError();
       });
     });
 
     it('accepts a function', function () {
-      const boundOn = cancellationToken.on.bind(cancellationToken);
-      expect(boundOn).withArgs(function () {}).not.to.throwError();
+      expect(cancellationToken.on).withArgs(function () {}).not.to.throwError();
     });
 
     it(`calls function if cancel has previously been called`, function () {
@@ -37,8 +35,7 @@ describe('CancellationToken', function () {
 
   describe('cancel', function () {
     it('should be a function accepting no parameters', function () {
-      const boundCancel = cancellationToken.cancel.bind(cancellationToken);
-      expect(boundCancel).withArgs().to.not.throwError();
+      expect(cancellationToken.cancel).withArgs().to.not.throwError();
     });
 
     it('should call a single callback', function () {

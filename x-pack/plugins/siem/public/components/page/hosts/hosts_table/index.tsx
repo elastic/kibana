@@ -62,10 +62,6 @@ type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps
 
 const rowItems: ItemsPerRow[] = [
   {
-    text: i18n.ROWS_2,
-    numberOfRow: 2,
-  },
-  {
     text: i18n.ROWS_5,
     numberOfRow: 5,
   },
@@ -123,7 +119,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerTitle={i18n.HOSTS}
-        headerTooltip={i18n.TOOLTIP}
         headerUnit={i18n.UNIT(totalCount)}
         itemsPerRow={rowItems}
         limit={limit}

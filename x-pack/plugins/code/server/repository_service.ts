@@ -8,7 +8,9 @@ import Git, { RemoteCallbacks } from '@elastic/nodegit';
 import del from 'del';
 import fs from 'fs';
 import mkdirp from 'mkdirp';
+import moment from 'moment';
 import path from 'path';
+
 import { RepositoryUtils } from '../common/repository_utils';
 import {
   CloneProgress,
@@ -19,9 +21,23 @@ import {
 } from '../model';
 import { Logger } from './log';
 
-export type CloneProgressHandler = (progress: number, cloneProgress?: CloneProgress) => void;
+// Return false to stop the clone progress. Return true to keep going;
+export type CloneProgressHandler = (progress: number, cloneProgress?: CloneProgress) => boolean;
+export type UpdateProgressHandler = () => boolean;
 
+const GIT_FETCH_PROGRESS_CANCEL = -1;
+// TODO: Cannot directly access Git.Error.CODE.EUSER (-7). Investigate why.
+const NODEGIT_CALLBACK_RETURN_VALUE_ERROR = -7;
+const GIT_INDEXER_PROGRESS_CALLBACK_RETURN_VALUE_ERROR_MSG = `indexer progress callback returned ${GIT_FETCH_PROGRESS_CANCEL}`;
 const SSH_AUTH_ERROR = new Error('Failed to authenticate SSH session');
+
+function isCancelled(error: any) {
+  return (
+    error &&
+    (error.message.includes(GIT_INDEXER_PROGRESS_CALLBACK_RETURN_VALUE_ERROR_MSG) ||
+      error.errno === NODEGIT_CALLBACK_RETURN_VALUE_ERROR)
+  );
+}
 
 // This is the service for any kind of repository handling, e.g. clone, update, delete, etc.
 export class RepositoryService {
@@ -92,18 +108,35 @@ export class RepositoryService {
       throw error;
     }
   }
-  public async update(repo: Repository): Promise<UpdateWorkerResult> {
+  public async update(
+    repo: Repository,
+    handler?: UpdateProgressHandler
+  ): Promise<UpdateWorkerResult> {
     if (repo.protocol === 'ssh') {
-      return await this.tryWithKeys(key => this.doUpdate(repo.uri, key));
+      return await this.tryWithKeys(key => this.doUpdate(repo.uri, key, handler));
     } else {
-      return await this.doUpdate(repo.uri);
+      return await this.doUpdate(repo.uri, /* key */ undefined, handler);
     }
   }
-  public async doUpdate(uri: string, key?: string): Promise<UpdateWorkerResult> {
+  public async doUpdate(
+    uri: string,
+    key?: string,
+    handler?: UpdateProgressHandler
+  ): Promise<UpdateWorkerResult> {
     const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
+    let repo: Git.Repository | undefined;
     try {
-      const repo = await Git.Repository.open(localPath);
+      repo = await Git.Repository.open(localPath);
       const cbs: RemoteCallbacks = {
+        transferProgress: (_: any) => {
+          if (handler) {
+            const resumeUpdate = handler();
+            if (!resumeUpdate) {
+              return GIT_FETCH_PROGRESS_CANCEL;
+            }
+          }
+          return 0;
+        },
         credentials: this.credentialFunc(key),
       };
       // Ignore cert check on testing environment.
@@ -133,12 +166,28 @@ export class RepositoryService {
         revision: headCommit.sha(),
       };
     } catch (error) {
-      if (error.message && error.message.startsWith(SSH_AUTH_ERROR.message)) {
+      if (isCancelled(error)) {
+        // Update job was cancelled intentionally. Do not throw this error.
+        this.log.info(`Update repository job for ${uri} was cancelled.`);
+        this.log.debug(
+          `Update repository job cancellation error: ${JSON.stringify(error, null, 2)}`
+        );
+        return {
+          uri,
+          branch: '',
+          revision: '',
+          cancelled: true,
+        };
+      } else if (error.message && error.message.startsWith(SSH_AUTH_ERROR.message)) {
         throw SSH_AUTH_ERROR;
       } else {
         const msg = `update repository ${uri} error: ${error}`;
         this.log.error(msg);
         throw new Error(msg);
+      }
+    } finally {
+      if (repo) {
+        repo.cleanup();
       }
     }
   }
@@ -150,7 +199,7 @@ export class RepositoryService {
   private async tryWithKeys<R>(action: (key: string) => Promise<R>): Promise<R> {
     const files = fs.existsSync(this.credsPath)
       ? new Set(fs.readdirSync(this.credsPath))
-      : new Set();
+      : new Set([]);
     for (const f of files) {
       if (f.endsWith('.pub')) {
         const privateKey = f.slice(0, f.length - 4);
@@ -177,30 +226,37 @@ export class RepositoryService {
     keyFile?: string
   ) {
     try {
+      let lastProgressUpdate = moment();
       const cbs: RemoteCallbacks = {
-        transferProgress: {
-          // Make the progress update less frequent to avoid too many
-          // concurrently update of git status in elasticsearch.
-          throttle: 1000,
-          callback: (stats: any) => {
-            if (handler) {
-              const progress =
-                (100 * (stats.receivedObjects() + stats.indexedObjects())) /
-                (stats.totalObjects() * 2);
-              const cloneProgress = {
-                isCloned: false,
-                receivedObjects: stats.receivedObjects(),
-                indexedObjects: stats.indexedObjects(),
-                totalObjects: stats.totalObjects(),
-                localObjects: stats.localObjects(),
-                totalDeltas: stats.totalDeltas(),
-                indexedDeltas: stats.indexedDeltas(),
-                receivedBytes: stats.receivedBytes(),
-              };
-              handler(progress, cloneProgress);
+        transferProgress: (stats: any) => {
+          // Clone progress update throttling.
+          const now = moment();
+          if (now.diff(lastProgressUpdate) < 1000) {
+            return 0;
+          }
+          lastProgressUpdate = now;
+
+          if (handler) {
+            const progress =
+              (100 * (stats.receivedObjects() + stats.indexedObjects())) /
+              (stats.totalObjects() * 2);
+            const cloneProgress = {
+              isCloned: false,
+              receivedObjects: stats.receivedObjects(),
+              indexedObjects: stats.indexedObjects(),
+              totalObjects: stats.totalObjects(),
+              localObjects: stats.localObjects(),
+              totalDeltas: stats.totalDeltas(),
+              indexedDeltas: stats.indexedDeltas(),
+              receivedBytes: stats.receivedBytes(),
+            };
+            const resumeClone = handler(progress, cloneProgress);
+            if (!resumeClone) {
+              return GIT_FETCH_PROGRESS_CANCEL;
             }
-          },
-        } as any,
+          }
+          return 0;
+        },
         credentials: this.credentialFunc(keyFile),
       };
       // Ignore cert check on testing environment.
@@ -210,31 +266,50 @@ export class RepositoryService {
           return 0;
         };
       }
-      const gitRepo = await Git.Clone.clone(repo.url, localPath, {
-        bare: 1,
-        fetchOpts: {
-          callbacks: cbs,
-        },
-      });
-      const headCommit = await gitRepo.getHeadCommit();
-      const headRevision = headCommit.sha();
-      const currentBranch = await gitRepo.getCurrentBranch();
-      const currentBranchName = currentBranch.shorthand();
-      this.log.info(
-        `Clone repository from ${
-          repo.url
-        } done with head revision ${headRevision} and default branch ${currentBranchName}`
-      );
-      return {
-        uri: repo.uri,
-        repo: {
-          ...repo,
-          defaultBranch: currentBranchName,
-          revision: headRevision,
-        },
-      };
+      let gitRepo: Git.Repository | undefined;
+
+      try {
+        gitRepo = await Git.Clone.clone(repo.url, localPath, {
+          bare: 1,
+          fetchOpts: {
+            callbacks: cbs,
+          },
+        });
+        const headCommit = await gitRepo.getHeadCommit();
+        const headRevision = headCommit.sha();
+        const currentBranch = await gitRepo.getCurrentBranch();
+        const currentBranchName = currentBranch.shorthand();
+        this.log.info(
+          `Clone repository from ${
+            repo.url
+          } done with head revision ${headRevision} and default branch ${currentBranchName}`
+        );
+        return {
+          uri: repo.uri,
+          repo: {
+            ...repo,
+            defaultBranch: currentBranchName,
+            revision: headRevision,
+          },
+        };
+      } finally {
+        if (gitRepo) {
+          gitRepo.cleanup();
+        }
+      }
     } catch (error) {
-      if (error.message && error.message.startsWith(SSH_AUTH_ERROR.message)) {
+      if (isCancelled(error)) {
+        // Clone job was cancelled intentionally. Do not throw this error.
+        this.log.info(`Clone repository job for ${repo.uri} was cancelled.`);
+        this.log.debug(
+          `Clone repository job cancellation error: ${JSON.stringify(error, null, 2)}`
+        );
+        return {
+          uri: repo.uri,
+          repo,
+          cancelled: true,
+        };
+      } else if (error.message && error.message.startsWith(SSH_AUTH_ERROR.message)) {
         throw SSH_AUTH_ERROR;
       } else {
         const msg = `Clone repository from ${repo.url} error.`;

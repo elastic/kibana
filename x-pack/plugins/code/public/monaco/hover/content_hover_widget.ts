@@ -62,7 +62,7 @@ export class ContentHoverWidget extends ContentWidget {
       return;
     }
     this.hoverOperation.cancel();
-    const url = this.editor.getModel().uri.toString();
+    const url = this.editor.getModel()!.uri.toString();
     if (this.isVisible) {
       this.hide();
     }
@@ -160,7 +160,7 @@ export class ContentHoverWidget extends ContentWidget {
         lineNumber: this.lastRange.startLineNumber,
         column: this.lastRange.startColumn,
       });
-      const action = this.editor.getAction('editor.action.goToDeclaration');
+      const action = this.editor.getAction('editor.action.revealDefinition');
       action.run().then(() => this.hide());
     }
   }

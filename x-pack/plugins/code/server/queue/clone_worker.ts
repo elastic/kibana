@@ -14,11 +14,13 @@ import {
   CloneWorkerResult,
   WorkerReservedProgress,
 } from '../../model';
+import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
 import { AbstractGitWorker } from './abstract_git_worker';
+import { CancellationSerivce } from './cancellation_service';
 import { IndexWorker } from './index_worker';
 import { Job } from './job';
 
@@ -30,14 +32,17 @@ export class CloneWorker extends AbstractGitWorker {
     protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions,
+    protected readonly gitOps: GitOperations,
     private readonly indexWorker: IndexWorker,
-    private readonly repoServiceFactory: RepositoryServiceFactory
+    private readonly repoServiceFactory: RepositoryServiceFactory,
+    private readonly cancellationService: CancellationSerivce
   ) {
-    super(queue, log, client, serverOptions);
+    super(queue, log, client, serverOptions, gitOps);
   }
 
   public async executeJob(job: Job) {
-    const { url } = job.payload;
+    const { payload, cancellationToken } = job;
+    const { url } = payload;
     try {
       validateGitUrl(
         url,
@@ -62,15 +67,36 @@ export class CloneWorker extends AbstractGitWorker {
       this.serverOptions.security.enableGitCertCheck
     );
     const repo = RepositoryUtils.buildRepository(url);
+
+    // Try to cancel any existing clone job for this repository.
+    this.cancellationService.cancelCloneJob(repo.uri);
+
+    let cancelled = false;
+    if (cancellationToken) {
+      cancellationToken.on(() => {
+        cancelled = true;
+      });
+      this.cancellationService.registerCloneJobToken(repo.uri, cancellationToken);
+    }
+
     return await repoService.clone(repo, (progress: number, cloneProgress?: CloneProgress) => {
+      if (cancelled) {
+        // return false to stop the clone progress
+        return false;
+      }
       // For clone job payload, it only has the url. Populate back the
       // repository uri before update progress.
       job.payload.uri = repo.uri;
       this.updateProgress(job, progress, undefined, cloneProgress);
+      return true;
     });
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
+    if (res.cancelled) {
+      // Skip updating job progress if the job is done because of cancellation.
+      return;
+    }
     this.log.info(`Clone job done for ${res.repo.uri}`);
     // For clone job payload, it only has the url. Populate back the
     // repository uri.

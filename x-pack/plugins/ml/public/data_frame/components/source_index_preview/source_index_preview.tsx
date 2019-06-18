@@ -47,7 +47,6 @@ import {
   EsDoc,
   EsFieldName,
   getSourceIndexDevConsoleStatement,
-  getSelectableFields,
   MAX_COLUMNS,
   toggleSelectedField,
 } from './common';
@@ -202,14 +201,14 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
   let docFields: EsFieldName[] = [];
   let docFieldsCount = 0;
   if (tableItems.length > 0) {
-    docFields = getSelectableFields(tableItems);
+    docFields = Object.keys(tableItems[0]._source);
     docFields.sort();
     docFieldsCount = docFields.length;
   }
 
   const columns = selectedFields.map(k => {
     const column = {
-      field: `_source.${k}`,
+      field: `_source["${k}"]`,
       name: k,
       sortable: true,
       truncateText: true,
@@ -246,28 +245,26 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     };
   }
 
-  if (docFieldsCount > MAX_COLUMNS || docFieldsCount > selectedFields.length) {
-    columns.unshift({
-      align: RIGHT_ALIGNMENT,
-      width: '40px',
-      isExpander: true,
-      render: (item: EsDoc) => (
-        <EuiButtonIcon
-          onClick={() => toggleDetails(item)}
-          aria-label={
-            itemIdToExpandedRowMap[item._id]
-              ? i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowCollapse', {
-                  defaultMessage: 'Collapse',
-                })
-              : i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowExpand', {
-                  defaultMessage: 'Expand',
-                })
-          }
-          iconType={itemIdToExpandedRowMap[item._id] ? 'arrowUp' : 'arrowDown'}
-        />
-      ),
-    });
-  }
+  columns.unshift({
+    align: RIGHT_ALIGNMENT,
+    width: '40px',
+    isExpander: true,
+    render: (item: EsDoc) => (
+      <EuiButtonIcon
+        onClick={() => toggleDetails(item)}
+        aria-label={
+          itemIdToExpandedRowMap[item._id]
+            ? i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowCollapse', {
+                defaultMessage: 'Collapse',
+              })
+            : i18n.translate('xpack.ml.dataframe.sourceIndexPreview.rowExpand', {
+                defaultMessage: 'Expand',
+              })
+        }
+        iconType={itemIdToExpandedRowMap[item._id] ? 'arrowUp' : 'arrowDown'}
+      />
+    ),
+  });
 
   const euiCopyText = i18n.translate('xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip', {
     defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
