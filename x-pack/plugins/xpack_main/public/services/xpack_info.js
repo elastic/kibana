@@ -11,8 +11,7 @@ import { convertKeysToCamelCaseDeep } from '../../../../server/lib/key_case_conv
 
 const XPACK_INFO_KEY = 'xpackMain.info';
 
-export function xpackInfoService($http) {
-  this.httpService = $http;
+export function xpackInfoService($injector) {
   this.inProgressRefreshPromise = null;
   this.setAll(chrome.getInjected('xpackInitialInfo') || {});
 
@@ -42,8 +41,9 @@ export function xpackInfoService($http) {
 
       // store the promise in a shared location so that calls to
       // refresh() before this is complete will get the same promise
+      const $http = $injector.get('$http');
       this.inProgressRefreshPromise = (
-        this.httpService.get(chrome.addBasePath('/api/xpack/v1/info'))
+        $http.get(chrome.addBasePath('/api/xpack/v1/info'))
           .catch((err) => {
           // if we are unable to fetch the updated info, we should
           // prevent reusing stale info
@@ -72,7 +72,7 @@ export function xpackInfoService($http) {
   };
 }
 
-export function XPackInfoProvider($http) {
-  return xpackInfoService($http);
+export function XPackInfoProvider($injector) {
+  return xpackInfoService($injector);
 }
 
