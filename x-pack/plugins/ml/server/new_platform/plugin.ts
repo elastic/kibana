@@ -57,7 +57,7 @@ import { jobAuditMessagesRoutes } from '../routes/job_audit_messages';
 // @ts-ignore: could not find declaration file for module
 import { fileDataVisualizerRoutes } from '../routes/file_data_visualizer';
 // @ts-ignore: could not find declaration file for module
-import { initMlServerLog } from '../client/log';
+import { initMlServerLog, LogInitialization } from '../client/log';
 
 export interface MlHttpServiceSetup extends HttpServiceSetup {
   route(route: ServerRoute | ServerRoute[]): void;
@@ -108,9 +108,7 @@ export interface UsageInitialization {
   };
   savedObjects: SavedObjectsService;
 }
-export interface LogInitialization {
-  log: Logger;
-}
+
 export class Plugin {
   private readonly pluginId: string = 'ml';
   private config: any;
