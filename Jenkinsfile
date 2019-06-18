@@ -5,13 +5,15 @@ pipeline {
   agent { label 'linux || immutable' }
   environment {
     BASE_DIR = "."
-    GIT_BRANCH = "master"
   }
   stages {
     stage('Kickoff') {
       steps {
+        sh 'env > env.txt' 
+        for (String x: readFile('env.txt').split("\r?\n")) {
+            println "# ENV VAR: ${x}"
+        }
         dir("${env.BASE_DIR}"){
- 	    sh 'whoami'
             sh './.ci/run.sh'
         }
       }
