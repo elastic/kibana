@@ -17,11 +17,4 @@
  * under the License.
  */
 
-import { Registry } from '@kbn/interpreter/common';
-import { Type } from './type';
-
-export class TypesRegistry extends Registry {
-  wrapper(obj) {
-    return new Type(obj);
-  }
-}
+export { TypesRegistry } from '../../../../plugins/data/common/interpreter/registries';
