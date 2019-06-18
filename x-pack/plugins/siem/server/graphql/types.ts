@@ -1155,7 +1155,7 @@ export interface KpiIpDetailsData {
 }
 
 export interface KpiIpDetailsHistogramData {
-  x?: string | null;
+  x?: number | null;
 
   y?: number | null;
 }
@@ -6154,13 +6154,13 @@ export namespace KpiIpDetailsDataResolvers {
 
 export namespace KpiIpDetailsHistogramDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = KpiIpDetailsHistogramData> {
-    x?: XResolver<string | null, TypeParent, Context>;
+    x?: XResolver<number | null, TypeParent, Context>;
 
     y?: YResolver<number | null, TypeParent, Context>;
   }
 
   export type XResolver<
-    R = string | null,
+    R = number | null,
     Parent = KpiIpDetailsHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

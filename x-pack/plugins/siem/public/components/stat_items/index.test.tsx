@@ -205,15 +205,18 @@ describe('addValueToBarChart', () => {
 describe('useKpiMatrixStatus', () => {
   const mockNetworkMappings = fieldTitleChartMapping;
   const mockKpiNetworkData = mockData.KpiNetwork;
-  const MockChildComponent = (mappedStatItemProps: StatItemsProps) => <span />;
+  const MockChildComponent = (mappedStatItemProps: StatItemsProps<KpiValue>) => <span />;
   const MockHookWrapperComponent = ({
     fieldsMapping,
     data,
   }: {
-    fieldsMapping: Readonly<StatItems[]>;
+    fieldsMapping: Readonly<Array<StatItems<KpiValue>>>;
     data: KpiNetworkData | KpiHostsData;
   }) => {
-    const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, data);
+    const statItemsProps: Readonly<Array<StatItemsProps<KpiValue>>> = useKpiMatrixStatus(
+      fieldsMapping,
+      data
+    );
 
     return (
       <div>

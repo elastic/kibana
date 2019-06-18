@@ -1126,7 +1126,7 @@ export interface KpiIpDetailsData {
 }
 
 export interface KpiIpDetailsHistogramData {
-  x?: string | null;
+  x?: number | null;
 
   y?: number | null;
 }
@@ -5148,7 +5148,7 @@ export namespace KpiIpDetailsChartFields {
   export type Fragment = {
     __typename?: 'KpiIpDetailsHistogramData';
 
-    x?: string | null;
+    x?: number | null;
 
     y?: number | null;
   };
