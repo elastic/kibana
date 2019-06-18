@@ -12,7 +12,7 @@ import {
   TestBed,
   TestBedConfig,
   nextTick,
-} from '../../../../../test_utils';
+} from '../../../../../../test_utils';
 import { SnapshotRestoreHome } from '../../../public/app/sections/home/home';
 import { BASE_PATH } from '../../../public/app/constants';
 import { WithProviders } from './providers';

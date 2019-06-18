@@ -5,7 +5,7 @@
  */
 
 import { security } from './index';
-import { getConfigSchema } from '../../test_utils';
+import { getConfigSchema } from '../../../test_utils';
 
 const describeWithContext = describe.each([[{ dist: false }], [{ dist: true }]]);
 

@@ -4,7 +4,7 @@ This "faux" plugin serves as a place to statically share resources, helpers, and
 
 Files found here can be imported from any other x-pack plugin, with the caveat that these shared components should all be exposed from either `public/index` or `server/index` so that the platform can attempt to monitor breaking changes in this shared API.
 
-# for a file found at `x-pack/plugins/infra/public/components/Example.tsx`
+# for a file found at `x-pack/legacy/plugins/infra/public/components/Example.tsx`
 
 ```ts
 import { ExampleSharedComponent } from '../../../observability/public';

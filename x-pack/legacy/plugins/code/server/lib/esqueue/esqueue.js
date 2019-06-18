@@ -5,7 +5,7 @@
  */
 
 /*
- * Borrowed from https://github.com/elastic/kibana/tree/master/x-pack/plugins/reporting/server/lib/esqueue
+ * Borrowed from https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/reporting/server/lib/esqueue
  * TODO(mengwei): need to abstract this esqueue as a common library when merging into kibana's main repo.
  */
 

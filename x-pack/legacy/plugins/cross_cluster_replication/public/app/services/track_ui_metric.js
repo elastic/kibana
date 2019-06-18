@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { trackUiMetric as track } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { trackUiMetric as track } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { UIM_APP_NAME } from '../constants';
 
 export function trackUiMetric(actionType) {

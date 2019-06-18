@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../test_utils';
+import { registerTestBed } from '../../../../../../test_utils';
 import { rollupJobsStore } from '../../../public/crud_app/store';
 import { JobCreate } from '../../../public/crud_app/sections';
 

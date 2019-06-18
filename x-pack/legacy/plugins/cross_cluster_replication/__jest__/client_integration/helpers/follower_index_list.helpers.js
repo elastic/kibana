@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, findTestSubject } from '../../../../../test_utils';
+import { registerTestBed, findTestSubject } from '../../../../../../test_utils';
 import { FollowerIndicesList } from '../../../public/app/sections/home/follower_indices_list';
 import { ccrStore } from '../../../public/app/store';
 import routing from '../../../public/app/services/routing';

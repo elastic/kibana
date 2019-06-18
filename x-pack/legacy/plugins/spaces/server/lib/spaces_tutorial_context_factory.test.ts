@@ -10,7 +10,7 @@ import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_fa
 import { SpacesService } from '../new_platform/spaces_service';
 import { SavedObjectsService } from 'src/core/server';
 import { SpacesAuditLogger } from './audit_logger';
-import { elasticsearchServiceMock, httpServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, httpServiceMock } from '../../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../new_platform/spaces_service/spaces_service.mock';
 import { createOptionalPlugin } from '../../../../server/lib/optional_plugin';
 

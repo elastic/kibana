@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, findTestSubject } from '../../../../../test_utils';
+import { registerTestBed, findTestSubject } from '../../../../../../test_utils';
 import { RemoteClusterList } from '../../../public/app/sections/remote_cluster_list';
 import { createRemoteClustersStore } from '../../../public/app/store';
 import { registerRouter } from '../../../public/app/services/routing';

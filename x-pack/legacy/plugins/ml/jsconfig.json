@@ -8,7 +8,7 @@
         "src/legacy/ui/public/*"
       ],
       "plugins/ml/*": [
-        "x-pack/plugins/ml/public/*"
+        "x-pack/legacy/plugins/ml/public/*"
       ]
     }
   },

@@ -39,7 +39,7 @@ function loadStories() {
   // Only gather and require CSS files related to Canvas.  The other CSS files
   // are built into the DLL.
   const css = require.context(
-    '../../../../built_assets/css',
+    '../../../../../built_assets/css',
     true,
     /plugins\/(?=canvas).*light\.css/
   );
@@ -56,7 +56,7 @@ addParameters({
     theme: create({
       base: 'light',
       brandTitle: 'Canvas Storybook',
-      brandUrl: 'https://github.com/elastic/kibana/tree/master/x-pack/plugins/canvas',
+      brandUrl: 'https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/canvas',
     }),
     showPanel: true,
     isFullscreen: false,

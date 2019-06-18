@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('./_helpers').runKibanaScript('eslint', ['x-pack/plugins/code/**/*.{js,jsx,ts,tsx}', '--fix']);
+require('./_helpers').runKibanaScript('eslint', ['x-pack/legacy/plugins/code/**/*.{js,jsx,ts,tsx}', '--fix']);
