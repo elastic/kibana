@@ -38,7 +38,7 @@ describe('StartTrial component when trial is allowed', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
   test('should not display for active platinum license', () => {
     const rendered = getComponent(
@@ -48,7 +48,7 @@ describe('StartTrial component when trial is allowed', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
   test('should display for expired platinum license', () => {
     const rendered = getComponent(
@@ -71,7 +71,7 @@ describe('StartTrial component when trial is not available', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
   test('should not display for gold license', () => {
     const rendered = getComponent(
@@ -81,7 +81,7 @@ describe('StartTrial component when trial is not available', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
   test('should not display for platinum license', () => {
     const rendered = getComponent(
@@ -91,7 +91,7 @@ describe('StartTrial component when trial is not available', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
 
   test('should not display for trial license', () => {
@@ -102,6 +102,6 @@ describe('StartTrial component when trial is not available', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
 });

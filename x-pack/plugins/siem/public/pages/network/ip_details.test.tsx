@@ -11,6 +11,7 @@ import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../mock/match_media';
+import '../../mock/ui_settings';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
 import { IPDetailsComponent, IPDetails } from './ip_details';
 import { FlowTarget } from '../../graphql/types';

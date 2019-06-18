@@ -49,10 +49,15 @@ export {
   ScopedClusterClient,
   ElasticsearchClientConfig,
   APICaller,
+  FakeRequest,
+  LegacyRequest,
 } from './elasticsearch';
 export {
   AuthenticationHandler,
+  AuthHeaders,
+  AuthResultData,
   AuthToolkit,
+  GetAuthHeaders,
   KibanaRequest,
   KibanaRequestRoute,
   OnPreAuthHandler,
@@ -75,6 +80,26 @@ export {
   PluginName,
 } from './plugins';
 
+export {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
+  SavedObjectsErrorHelpers,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsMigrationVersion,
+  SavedObjectsService,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+} from './saved_objects';
+
 export { RecursiveReadonly } from '../utils';
 
 /**
@@ -91,8 +116,7 @@ export interface CoreSetup {
     registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-    getBasePathFor: HttpServiceSetup['getBasePathFor'];
-    setBasePathFor: HttpServiceSetup['setBasePathFor'];
+    basePath: HttpServiceSetup['basePath'];
     createNewServer: HttpServiceSetup['createNewServer'];
   };
 }

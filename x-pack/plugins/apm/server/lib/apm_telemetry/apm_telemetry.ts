@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 import { countBy } from 'lodash';
-import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
+import { SavedObjectAttributes } from 'src/core/server';
 import { isAgentName } from '../../../common/agent_name';
 import { getSavedObjectsClient } from '../helpers/saved_objects_client';
 

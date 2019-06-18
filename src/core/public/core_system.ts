@@ -176,6 +176,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
       });
+      const uiSettings = await this.uiSettings.start();
 
       const core: InternalCoreStart = {
         application,
@@ -185,6 +186,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         overlays,
+        uiSettings,
       };
 
       const plugins = await this.plugins.start(core);
