@@ -20,6 +20,7 @@ import { HttpServiceSetup } from 'src/core/server';
 import { KibanaConfig, Server } from 'src/legacy/server/kbn_server';
 import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { parse } from 'url';
+import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 
 // TODO: re-implement on NP
 describe('onPostAuthRequestInterceptor', () => {
@@ -198,7 +199,7 @@ describe('onPostAuthRequestInterceptor', () => {
         http: httpMock,
         elasticsearch: elasticsearchServiceMock.createSetupContract(),
         savedObjects: (savedObjectsService as unknown) as SavedObjectsService,
-        getSecurity: () => ({} as SecurityPlugin),
+        security: {} as OptionalPlugin<SecurityPlugin>,
         spacesAuditLogger: {} as SpacesAuditLogger,
         config$: Rx.of({ maxSpaces: 1000 }),
       });

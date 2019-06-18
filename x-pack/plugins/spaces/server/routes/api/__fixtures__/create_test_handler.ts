@@ -9,7 +9,7 @@ import { Server } from 'hapi';
 import { Legacy } from 'kibana';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { httpServiceMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { SecurityPlugin } from '../../../../../security';
+import { createOptionalPlugin } from '../../../../../../server/lib/optional_plugin';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
 import { ExternalRouteDeps } from '../external';
@@ -161,7 +161,7 @@ export function createTestHandler(
       http: httpServiceMock.createSetupContract(),
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
       savedObjects: server.savedObjects,
-      getSecurity: () => ({} as SecurityPlugin),
+      security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
       spacesAuditLogger: {} as SpacesAuditLogger,
       config$: Rx.of({ maxSpaces: 1000 }),
     });

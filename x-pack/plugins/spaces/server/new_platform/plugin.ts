@@ -14,6 +14,7 @@ import {
   ElasticsearchServiceSetup,
 } from 'src/core/server';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
+import { OptionalPlugin } from '../../../../server/lib/optional_plugin';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { createDefaultSpace } from '../lib/create_default_space';
 // @ts-ignore
@@ -59,8 +60,8 @@ export interface SpacesCoreSetup {
 
 export interface PluginsSetup {
   // TODO: Spaces has a circular dependency with Security right now.
-  // Security is not yet available when init runs, so this is wrapped in a function for the time being.
-  getSecurity: () => SecurityPlugin | undefined;
+  // Security is not yet available when init runs, so this is wrapped in an optional plugin for the time being.
+  security: OptionalPlugin<SecurityPlugin>;
   xpackMain: XPackMainPlugin;
   // TODO: this is temporary for `watchLicenseAndStatusToInitialize`
   spaces: any;
@@ -110,7 +111,7 @@ export class Plugin {
       http: core.http,
       elasticsearch: core.elasticsearch,
       savedObjects: core.savedObjects,
-      getSecurity: plugins.getSecurity,
+      security: plugins.security,
       spacesAuditLogger,
       config$: this.config$,
     });

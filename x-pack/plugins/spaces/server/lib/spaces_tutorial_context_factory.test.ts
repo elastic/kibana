@@ -9,10 +9,10 @@ import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { SpacesService } from '../new_platform/spaces_service';
 import { SavedObjectsService } from 'src/legacy/server/kbn_server';
-import { SecurityPlugin } from '../../../security';
 import { SpacesAuditLogger } from './audit_logger';
 import { elasticsearchServiceMock, httpServiceMock } from '../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../new_platform/spaces_service/spaces_service.mock';
+import { createOptionalPlugin } from '../../../../server/lib/optional_plugin';
 
 const server = {
   config: () => {
@@ -62,7 +62,7 @@ describe('createSpacesTutorialContextFactory', () => {
       http: httpServiceMock.createSetupContract(),
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
       savedObjects: {} as SavedObjectsService,
-      getSecurity: () => ({} as SecurityPlugin),
+      security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
       spacesAuditLogger: {} as SpacesAuditLogger,
       config$: Rx.of({ maxSpaces: 1000 }),
     });

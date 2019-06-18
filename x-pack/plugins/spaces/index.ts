@@ -7,6 +7,7 @@
 import * as Rx from 'rxjs';
 import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import { createOptionalPlugin } from '../../server/lib/optional_plugin';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
@@ -21,6 +22,7 @@ import {
   SpacesHttpServiceSetup,
 } from './server/new_platform/plugin';
 import { initSpacesRequestInterceptors } from './server/lib/request_interceptors';
+import { SecurityPlugin } from '../security';
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
     id: 'spaces',
@@ -154,8 +156,13 @@ export const spaces = (kibana: Record<string, any>) =>
       const plugins = {
         xpackMain: server.plugins.xpack_main,
         // TODO: Spaces has a circular dependency with Security right now.
-        // Security is not yet available when init runs, so this is wrapped in a function for the time being.
-        getSecurity: () => server.plugins.security,
+        // Security is not yet available when init runs, so this is wrapped in an optional function for the time being.
+        security: createOptionalPlugin<SecurityPlugin>(
+          server.config(),
+          'xpack.security',
+          server.plugins,
+          'security'
+        ),
         spaces: this,
       };
 

@@ -14,6 +14,7 @@ import {
   HttpServiceSetup,
   KibanaRequest,
 } from 'src/core/server';
+import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';
@@ -34,7 +35,7 @@ interface SpacesServiceDeps {
   http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
   savedObjects: SavedObjectsService;
-  getSecurity: () => SecurityPlugin | undefined;
+  security: OptionalPlugin<SecurityPlugin>;
   config$: Observable<SpacesConfigType>;
   spacesAuditLogger: any;
 }
@@ -48,7 +49,7 @@ export class SpacesService {
     http,
     elasticsearch,
     savedObjects,
-    getSecurity,
+    security,
     config$,
     spacesAuditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
@@ -84,8 +85,7 @@ export class SpacesService {
 
               const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
 
-              const security = getSecurity();
-              const authorization = security ? security.authorization : null;
+              const authorization = security.isEnabled ? security.authorization : null;
 
               return new SpacesClient(
                 spacesAuditLogger,

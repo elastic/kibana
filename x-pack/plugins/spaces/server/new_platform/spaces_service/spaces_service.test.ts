@@ -11,6 +11,7 @@ import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 import { KibanaRequest } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
+import { createOptionalPlugin } from '../../../../../server/lib/optional_plugin';
 
 const mockLogger = {
   trace: jest.fn(),
@@ -39,7 +40,7 @@ const createService = async () => {
     http: httpSetup,
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     config$: Rx.of({ maxSpaces: 10 }),
-    getSecurity: () => undefined,
+    security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
     savedObjects: ({
       getSavedObjectsRepository: jest.fn().mockReturnValue(null),
     } as unknown) as SavedObjectsService,
