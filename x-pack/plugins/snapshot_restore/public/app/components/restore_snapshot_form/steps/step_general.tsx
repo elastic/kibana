@@ -25,7 +25,10 @@ export const RestoreSnapshotStepGeneral: React.FunctionComponent<StepProps> = ({
   restoreSettings,
   updateRestoreSettings,
 }) => {
-  const { indices: snapshotIndices } = snapshotDetails;
+  const {
+    indices: snapshotIndices,
+    includeGlobalState: snapshotIncludeGlobalState,
+  } = snapshotDetails;
   const {
     indices: restoreIndices,
     renamePattern,
@@ -327,6 +330,14 @@ export const RestoreSnapshotStepGeneral: React.FunctionComponent<StepProps> = ({
           hasEmptyLabelSpace={true}
           fullWidth
           describedByIds={['stepGeneralIncludeGlobalStateDescription']}
+          helpText={
+            snapshotIncludeGlobalState ? null : (
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepGeneral.includeGlobalStateDisabledDescription"
+                defaultMessage="Global state is not available in this snapshot"
+              />
+            )
+          }
         >
           <EuiSwitch
             label={
@@ -337,6 +348,7 @@ export const RestoreSnapshotStepGeneral: React.FunctionComponent<StepProps> = ({
             }
             checked={includeGlobalState === undefined ? false : includeGlobalState}
             onChange={e => updateRestoreSettings({ includeGlobalState: e.target.checked })}
+            disabled={!snapshotIncludeGlobalState}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
