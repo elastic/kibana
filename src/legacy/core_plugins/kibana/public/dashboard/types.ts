@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { Query, EmbeddableFactory } from 'ui/embeddable';
+import { EmbeddableFactory } from 'ui/embeddable';
 import { AppState } from 'ui/state_management/app_state';
 import { UIRegistry } from 'ui/registry/_registry';
 import { Filter } from '@kbn/es-query';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { DashboardViewMode } from './dashboard_view_mode';
 
 export interface EmbeddableFactoryRegistry extends UIRegistry<EmbeddableFactory> {
