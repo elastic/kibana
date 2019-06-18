@@ -60,13 +60,13 @@ function getCategoryExamples(callWithRequest, payload) {
     maxExamples);
 }
 
-export function resultsServiceRoutes(server, commonRouteConfig) {
+export function resultsServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/results/anomalies_table_data',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return getAnomaliesTableData(callWithRequest, request.payload)
         .catch(resp => wrapError(resp));
     },
@@ -75,11 +75,11 @@ export function resultsServiceRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/results/category_definition',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return getCategoryDefinition(callWithRequest, request.payload)
         .catch(resp => wrapError(resp));
     },
@@ -88,11 +88,11 @@ export function resultsServiceRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/results/category_examples',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return getCategoryExamples(callWithRequest, request.payload)
         .catch(resp => wrapError(resp));
     },

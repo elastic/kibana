@@ -20,3 +20,9 @@ export type PromiseReturnType<Func> = Func extends (
 ) => Promise<infer Value>
   ? Value
   : Func;
+
+export type IndexAsString<Map> = {
+  [k: string]: Map[keyof Map];
+} & Map;
+
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
