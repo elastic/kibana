@@ -30,6 +30,17 @@ export const sharedSchema = gql`
     tiebreaker: String
   }
 
+  input PaginationInputPaginated {
+    "The active page parameter defines the page of results you want to fetch"
+    activePage: Float
+    "The limit parameter allows you to configure the maximum amount of items to be returned"
+    limit: Float!
+    "The cursor parameter defines the next result you want to fetch"
+    cursor: String
+    "The tiebreaker parameter allow to be more precise to fetch the next item"
+    tiebreaker: String
+  }
+
   enum Direction {
     asc
     desc
@@ -53,6 +64,12 @@ export const sharedSchema = gql`
   }
 
   type PageInfo {
+    endCursor: CursorType
+    hasNextPage: Boolean
+  }
+
+  type PageInfoPaginated {
+    activePage: Float
     endCursor: CursorType
     hasNextPage: Boolean
   }

@@ -200,7 +200,7 @@ export interface AuthenticationsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 }
 
 export interface AuthenticationsEdges {
@@ -317,7 +317,9 @@ export interface CursorType {
   tiebreaker?: string | null;
 }
 
-export interface PageInfo {
+export interface PageInfoPaginated {
+  activePage?: number | null;
+
   endCursor?: CursorType | null;
 
   hasNextPage?: boolean | null;
@@ -795,6 +797,12 @@ export interface SshEcsFields {
   method?: ToStringArray | null;
 
   signature?: ToStringArray | null;
+}
+
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
 }
 
 export interface TimelineData {
@@ -1484,6 +1492,17 @@ export interface TimerangeInput {
   from: number;
 }
 
+export interface PaginationInputPaginated {
+  /** The active page parameter defines the page of results you want to fetch */
+  activePage?: number | null;
+  /** The limit parameter allows you to configure the maximum amount of items to be returned */
+  limit: number;
+  /** The cursor parameter defines the next result you want to fetch */
+  cursor?: string | null;
+  /** The tiebreaker parameter allow to be more precise to fetch the next item */
+  tiebreaker?: string | null;
+}
+
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1709,7 +1728,7 @@ export interface GetAllTimelineQueryArgs {
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   filterQuery?: string | null;
 
@@ -2083,7 +2102,7 @@ export namespace GetAuthenticationsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
     filterQuery?: string | null;
     defaultIndex: string[];
   };
@@ -2197,7 +2216,9 @@ export namespace GetAuthenticationsQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfo';
+    __typename?: 'PageInfoPaginated';
+
+    activePage?: number | null;
 
     endCursor?: EndCursor | null;
 

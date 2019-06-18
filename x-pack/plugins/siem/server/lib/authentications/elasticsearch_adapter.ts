@@ -31,7 +31,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       'search',
       buildQuery(options)
     );
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response);
     const hits: AuthenticationHit[] = getOr(
       [],
@@ -60,6 +60,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       edges,
       totalCount,
       pageInfo: {
+        activePage: activePage ? activePage : 0,
         hasNextPage,
         endCursor: {
           value: String(limit),

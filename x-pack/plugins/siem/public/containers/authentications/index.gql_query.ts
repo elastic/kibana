@@ -10,7 +10,7 @@ export const authenticationsQuery = gql`
   query GetAuthenticationsQuery(
     $sourceId: ID!
     $timerange: TimerangeInput!
-    $pagination: PaginationInput!
+    $pagination: PaginationInputPaginated!
     $filterQuery: String
     $defaultIndex: [String!]!
   ) {
@@ -57,6 +57,7 @@ export const authenticationsQuery = gql`
           }
         }
         pageInfo {
+          activePage
           endCursor {
             value
           }
