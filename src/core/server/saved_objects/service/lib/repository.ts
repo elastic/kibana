@@ -346,8 +346,8 @@ export class SavedObjectsRepository {
    * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
    */
   async deleteByNamespace(namespace: SavedObjectsNamespace): Promise<any> {
-    if (!namespace || !namespace.id) {
-      throw new TypeError(`namespace is required, and must be of type SavedObjectsNamespace`);
+    if (!namespace || !namespace.hasOwnProperty('id')) {
+      throw new TypeError(`namespace is required`);
     }
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
