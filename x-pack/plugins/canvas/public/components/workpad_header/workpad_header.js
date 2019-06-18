@@ -20,11 +20,11 @@ import {
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
-import { MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL } from '../../../common/lib/constants';
 import { ControlSettings } from './control_settings';
 import { RefreshControl } from './refresh_control';
 import { FullscreenControl } from './fullscreen_control';
 import { WorkpadExport } from './workpad_export';
+import { WorkpadZoom } from './workpad_zoom';
 
 export class WorkpadHeader extends React.PureComponent {
   static propTypes = {
@@ -92,7 +92,7 @@ export class WorkpadHeader extends React.PureComponent {
   };
 
   render() {
-    const { isWriteable, canUserWrite, toggleWriteable, zoomScale, zoomIn, zoomOut } = this.props;
+    const { isWriteable, canUserWrite, toggleWriteable } = this.props;
     const { isModalVisible } = this.state;
 
     return (
@@ -133,38 +133,7 @@ export class WorkpadHeader extends React.PureComponent {
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiToolTip
-                  position="bottom"
-                  content={
-                    <span>
-                      Zoom Out <ToolTipShortcut namespace="EDITOR" action="ZOOM_OUT" />
-                    </span>
-                  }
-                >
-                  <EuiButtonIcon
-                    iconType="starMinusFilled"
-                    onClick={zoomOut}
-                    disabled={zoomScale === MIN_ZOOM_LEVEL}
-                    aria-label="Zoom out"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiToolTip
-                  position="bottom"
-                  content={
-                    <span>
-                      Zoom In <ToolTipShortcut namespace="EDITOR" action="ZOOM_IN" />
-                    </span>
-                  }
-                >
-                  <EuiButtonIcon
-                    iconType="starPlusFilled"
-                    onClick={zoomIn}
-                    disabled={zoomScale === MAX_ZOOM_LEVEL}
-                    aria-label="Zoom in"
-                  />
-                </EuiToolTip>
+                <WorkpadZoom />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
