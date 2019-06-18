@@ -21,9 +21,10 @@ import sinon from 'sinon';
 import $ from 'jquery';
 
 import history from '../history';
+import mappings from '../mappings';
 import init from '../app';
 
-describe('app initialization', () => {
+describe('console app initialization', () => {
   const sandbox = sinon.createSandbox();
 
   let inputMock;
@@ -33,6 +34,7 @@ describe('app initialization', () => {
     ajaxDoneStub = sinon.stub();
     sandbox.stub($, 'ajax').returns({ done: ajaxDoneStub });
     sandbox.stub(history, 'getSavedEditorState');
+    sandbox.stub(mappings, 'retrieveAutoCompleteInfo');
 
     inputMock = {
       update: sinon.stub(),
