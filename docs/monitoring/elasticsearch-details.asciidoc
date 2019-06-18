@@ -114,8 +114,6 @@ image::monitoring/images/monitoring-jobs.png["Machine learning jobs",link="image
 [[ccr-overview-page]]
 ==== CCR
 
-beta[]
-
 To view {ccr} metrics, click **CCR**. For each follower index on the cluster, it 
 shows information such as the leader index, an indication of how much the
 follower index is lagging behind the leader index, the last fetch time, the
