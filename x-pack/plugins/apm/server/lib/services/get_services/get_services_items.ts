@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BucketAgg } from 'elasticsearch';
 import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
@@ -65,33 +64,14 @@ export async function getServicesItems(setup: Setup) {
     }
   };
 
-  interface ServiceBucket extends BucketAgg {
-    avg: {
-      value: number;
-    };
-    agents: {
-      buckets: BucketAgg[];
-    };
-    events: {
-      buckets: BucketAgg[];
-    };
-    environments: {
-      buckets: BucketAgg[];
-    };
-  }
-
-  interface Aggs extends BucketAgg {
-    services: {
-      buckets: ServiceBucket[];
-    };
-  }
-
-  const resp = await client.search<void, Aggs>(params);
+  const resp = await client.search(params);
   const aggs = resp.aggregations;
+
   const serviceBuckets = idx(aggs, _ => _.services.buckets) || [];
 
   const items = serviceBuckets.map(bucket => {
     const eventTypes = bucket.events.buckets;
+
     const transactions = eventTypes.find(e => e.key === 'transaction');
     const totalTransactions = idx(transactions, _ => _.doc_count) || 0;
 
