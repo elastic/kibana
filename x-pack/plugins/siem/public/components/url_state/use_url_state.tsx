@@ -230,7 +230,7 @@ export const useUrlStateHooks = ({
 };
 
 /*
- * Why are we doing that, it is because angular-ui router is encoding the `+` back to `2%0` after
+ * Why are we doing that, it is because angular-ui router is encoding the `+` back to `2%B` after
  * that react router is getting the data with the `+` and convert to `2%B`
  * so we need to get back the value from the window location at initialization to avoid
  * to bring back the `+` in the kql
