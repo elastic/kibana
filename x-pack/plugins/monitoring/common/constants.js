@@ -165,6 +165,8 @@ export const INDEX_PATTERN_FILEBEAT = 'filebeat-*';
 // This is the unique token that exists in monitoring indices collected by metricbeat
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
 
+// We use this for metricbeat migration to identify specific products that we do not have constants for
+export const ELASTICSEARCH_CUSTOM_ID = 'elasticsearch';
 /**
  * The id of the infra source owned by the monitoring plugin.
  */

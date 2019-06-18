@@ -15,8 +15,8 @@ import Boom from 'boom';
 
 import { isSecurityDisabled } from '../lib/security_utils';
 
-export function systemRoutes(server, commonRouteConfig) {
-  const callWithInternalUser = callWithInternalUserFactory(server);
+export function systemRoutes({ commonRouteConfig, elasticsearchPlugin, route, xpackMainPlugin }) {
+  const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
 
   function getNodeCount() {
     const filterPath = 'nodes.*.attributes';
@@ -37,11 +37,11 @@ export function systemRoutes(server, commonRouteConfig) {
       });
   }
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/_has_privileges',
     async handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       try {
         let upgradeInProgress = false;
         try {
@@ -60,7 +60,7 @@ export function systemRoutes(server, commonRouteConfig) {
           }
         }
 
-        if (isSecurityDisabled(server)) {
+        if (isSecurityDisabled(xpackMainPlugin)) {
           // if xpack.security.enabled has been explicitly set to false
           // return that security is disabled and don't call the privilegeCheck endpoint
           return {
@@ -82,15 +82,15 @@ export function systemRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/ml_node_count',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return new Promise((resolve, reject) => {
         // check for basic license first for consistency with other
         // security disabled checks
-        if (isSecurityDisabled(server)) {
+        if (isSecurityDisabled(xpackMainPlugin)) {
           getNodeCount()
             .then(resolve)
             .catch(reject);
@@ -133,11 +133,11 @@ export function systemRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/info',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return callWithRequest('ml.info')
         .catch(resp => wrapError(resp));
     },
@@ -146,11 +146,11 @@ export function systemRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/es_search',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return callWithRequest('search', request.payload)
         .catch(resp => wrapError(resp));
     },
