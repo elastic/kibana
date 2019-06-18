@@ -16,31 +16,39 @@ The Kibana alerting plugin provides a common place to setup alerts. It supports:
 
 ## Usage
 
-Before using alerts, there needs to be an alert type that can execute the alert on an interval basis. For example, beofre being able to check CPU usage, there needs to be a check CPU usage type of alert. (See Alert types -> Example)
-
-Once the alert type exists, the RESTful API can be used to create alerts. (See Alerts -> Create)
+1. Create an alert type (see alert types -> example).
+2. Create an alert using the RESTful API (see alerts -> create).
 
 ## Alert types
 
-Defining an alert type contains the following attributes:
+### Methods
 
-- `id` (string): Unique identifier for the alert type.
-- `name` (string): A user friendly name for the alert type.
-- `validate` (optional)
-  - `params` (optional): Joi object validation
-- `execute` (function): A function to be called for executing an alert.
+**server.plugins.alerting.registerType(options)**
 
-Alert type executors are provided the following as the first argument object:
+The following table describes the properties of the `options` object.
 
-- `services`:
-  - `callCluster`: use this to do elasticsearch queries on the cluster Kibana connects to. NOTE: This currently authenticates as the Kibana internal user, this will change in a future PR.
-  - `savedObjectsClient`: use this to manipulate saved objects. NOTE: This currently uses the saved objects repository which bypasses security and user authorization.
-  - `log`: use this to create server logs.
-  - `alertInstanceFactory`: Use to create instances of alert and fire them
-- `scheduledRunAt`: The date and time the alert type was supposed to be called
-- `previousScheduledRunAt`: The previous date and time the alert type was supposed to be called
-- `params`: Parameters for the execution
-- `state`: State returned from previous execution
+|Property|Description|Type|
+|---|---|---|
+|id|Unique identifier for the alert type.|string|
+|name|A user friendly name for the alert type.|string|
+|validate.params|Joi object validation for the parameters the executor receives.|Joi schema|
+|execute|A function to be called when executing an alert. See executor below.|Function|
+
+### Executor
+
+This is the primary function for an alert type, whenever the alert needs to execute, this function will perform the execution. It receives a variety of parameters, the following table describes the properties the executor receives.
+
+**execute(options)**
+
+|Property|Description|
+|---|---|
+|services.callCluster|Use this to do elasticsearch queries on the cluster Kibana connects to. NOTE: This currently authenticates as the Kibana internal user, this will change in a future PR.|
+|services.savedObjectsClient|Use this to manipulate saved objects. NOTE: This currently only works when security is disabled. A future PR will add support for enabled security using Elasticsearch API tokens.|
+|services.log|Use this to create server logs. (This is the same function as server.log)|
+|scheduledRunAt|The date and time the alert type was supposed to be called.|
+|previousScheduledRunAt|The previous date and time the alert type was supposed to be called.|
+|params|Parameters for the execution.|
+|state|State returned from previous execution.|
 
 ### Example
 
@@ -104,54 +112,51 @@ The alerting plugin exposes the following APIs:
 
 Payload:
 
-- `alertTypeId` (string)
-- `interval` (number)
-- `alertTypeParams` (object)
-- `actions` (array)
-  - `group` (string)
-  - `id` (string)
-  - `params` (object)
+|Property|Description|Type|
+|---|---|---|
+|alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
+|interval|The interval in milliseconds the alert should execute.|number|
+|alertTypeParams|The parameters to pass in to the alert type executor `params` value.|object|
+|action|An array of `group` (string), `id` (string) and params (object) to fire whenever the alert fires. The group allows the alert type fire fire different groups of actions. For example `warning` and `severe`. The id is the id of the action saved object to use. The params are the `params` value the action type expects. This uses mustache templates recursively on strings. The templates have access to `context` and `state` objects.|array|
 
 #### `DELETE /api/alert/{id}`: Delete alert
 
 Params:
 
-- `id` (string)
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to delete.|string|
 
 #### `GET /api/alert/_find`: Find alerts
 
 Params:
 
-- `per_page` (optional) (number)
-- `page` (optional) (number)
-- `search` (optional) (string)
-- `default_search_operator` (optional) (string)
-- `search_fields` (optional) (array<string>)
-- `sort_field` (optional) (string)
-- `has_reference` (optional)
-  - `type` (string)
-  - `id` (string)
-- `fields` (optional) (array<string>)
+See saved objects API documentation for find, all the properties are the same except you cannot pass in `type`.
 
 #### `GET /api/alert/{id}`: Get alert
 
 Params:
 
-- `id` (string)
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to get.|string|
 
 #### `GET /api/alert/types`: List alert types
+
+No parameters.
 
 #### `PUT /api/alert/{id}`: Update alert
 
 Params:
 
-- `id` (string)
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to update.|string|
 
 Payload:
 
-- `interval` (number)
-- `alertTypeParams` (object)
-- `actions` (array)
-  - `group` (string)
-  - `id` (string)
-  - `params` (object)
+|Property|Description|Type|
+|---|---|---|
+|interval|The interval in milliseconds the alert should execute.|number|
+|alertTypeParams|The parameters to pass in to the alert type executor `params` value.|object|
+|action|An array of `group` (string), `id` (string) and params (object) to fire whenever the alert fires. The group allows the alert type fire fire different groups of actions. For example `warning` and `severe`. The id is the id of the action saved object to use. The params are the `params` value the action type expects. This uses mustache templates recursively on strings. The templates have access to `context` and `state` objects.|array|

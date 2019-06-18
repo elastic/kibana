@@ -15,32 +15,40 @@ The Kibana actions plugin provides a common place to execute actions. It support
 
 ## Usage
 
-Before using actions, there needs to be an action type that can handle the type of action you're looking for. For example, before being able to send emails, an email action type must be registered. (see Action types -> Example)
-
-Once the action type exists, an action saved object must be created before firing. The action saved object will contain which action type to use as well as what configuration to pass in at execution time. These actions are created via the RESTful API. (See Actions -> Create action)
-
-Once the action saved object exists, it can now be fired as many times as you like. (See Firing actions)
+1. Create an action type (see action types -> example).
+2. Create an action by using the RESTful API (see actions -> create action).
+3. Use alerts to fire actions or fire manually (see firing actions).
 
 ## Action types
 
-Defining an action type contains the following attributes:
+### Methods
 
-- `id` (string): Unique identifyer for the action type.
-- `name` (string): A user friendly name for the action type.
-- `unencryptedAttributes` (array<string>): A list of opt-out attributes that don't need to be encrypted, these attributes won't need to be re-entered on import / export when the feature becomes available.
-- `validate` (optional)
-  - `params`: (optional) Joi object validation
-  - `config` (optional) Joi object validation
-- `executor` (function): A function to be called for executing an action.
+**server.plugins.actions.registerType(options)**
 
-Action type executors are provided the following as the first argument object:
+The following table describes the properties of the `options` object.
 
-- `services`:
-  - `callCluster`: use this to do elasticsearch queries on the cluster Kibana connects to. NOTE: This currently authenticates as the Kibana internal user, this will change in a future PR.
-  - `savedObjectsClient`: use this to manipulate saved objects. NOTE: This currently only works when security is disabled. A future PR will add support for enabled security using Elasticsearch API tokens.
-  - `log`: use this to create server logs. (This is the same function as server.log)
-- `config`: The decrypted configuration given to an action
-- `params`: Parameters for the execution
+|Property|Description|Type|
+|---|---|---|
+|id|Unique identifier for the action type.|string|
+|name|A user friendly name for the action type.|string|
+|unencryptedAttributes|A list of opt-out attributes that don't need to be encrypted, these attributes won't need to be re-entered on import / export when the feature becomes available.|array of strings|
+|validate.params|Joi object validation for the parameters the executor receives.|Joi schema|
+|validate.config|Joi object validation for the configuration the executor receives.|Joi schema|
+|executor|A function to be called for executing an action. See executor below.|Function|
+
+### Executor
+
+This is the primary function for an action type, whenever the action needs to execute, this function will perform the action. It receives a variety of parameters, the following table describes the properties the executor receives.
+
+**executor(options)**
+
+|Property|Description|
+|---|---|
+|config|The decrypted configuration given to an action.|
+|params|Parameters for the execution.|
+|services.callCluster|Use this to do elasticsearch queries on the cluster Kibana connects to. NOTE: This currently authenticates as the Kibana internal user, this will change in a future PR.|
+|services.savedObjectsClient|Use this to manipulate saved objects. NOTE: This currently only works when security is disabled. A future PR will add support for enabled security using Elasticsearch API tokens.|
+|services.log|Use this to create server logs. (This is the same function as server.log)|
 
 ### Example
 
@@ -84,65 +92,71 @@ Using an action type requires an action to be created which will contain and enc
 
 Payload:
 
-- `attributes` (object)
-  - `description` (string)
-  - `actionTypeId` (string)
-  - `actionTypeConfig` (object)
-- `references` (optional) (array)
-  - `name` (string)
-  - `type` (string)
-  - `id` (string)
-- `migrationVersion` (optional) (object)
+|Property|Description|Type|
+|---|---|---|
+|attributes.description|A description to reference and search in the future.|string|
+|attributes.actionTypeId|The id value of the action type you want to call when the action executes.|string|
+|attributes.actionTypeConfig|The configuration the action type expects.|object|
+|references|An array of `name`, `type` and `id`. This is the same as `references` in the saved objects API, see saved objects API documentation.|Array|
+|migrationVersion|The version of the most recent migrations. This is the same as `migrationVersion` in the saved objects API, see saved objects API documentation.|object|
 
 #### `DELETE /api/action/{id}`: Delete action
 
 Params:
 
-- `id` (string)
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the action you're trying to delete.|string|
 
 #### `GET /api/action/_find`: Find actions
 
 Params:
 
-- `per_page` (optional) (number)
-- `page` (optional) (number)
-- `search` (optional) (string)
-- `default_search_operator` (optional) (string)
-- `search_fields` (optional) (array<string>)
-- `sort_field` (optional) (string)
-- `has_reference` (optional)
-  - `type` (string)
-  - `id` (string)
-- `fields` (optional) (array<string>)
+See saved objects API documentation for find, all the properties are the same except you cannot pass in `type`.
 
 #### `GET /api/action/{id}`: Get action
 
 Params:
 
-- `id` (string)
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the action you're trying to get.|string|
 
 #### `GET /api/action/types` List action types
+
+No parameters.
 
 #### `PUT /api/action/{id}`: Update action
 
 Params:
 
-- `id` (string)
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the action you're trying to update.|string|
 
 Payload:
 
-- `attributes` (object)
-  - `description` (string)
-  - `actionTypeConfig` (object)
-- `version` (string)
-- `references` (optional) (array)
-  - `name` (string)
-  - `type` (string)
-  - `id` (string)
+|Property|Description|Type|
+|---|---|---|
+|attributes.description|The action description to reference and search in the future.|string|
+|attributes.actionTypeConfig|The configuration the action type expects.|object|
+|references|An array of `name`, `type` and `id`. This is the same as `references` in the saved objects API, see saved objects API documentation.|Array|
+|version|The document version when read|string|
 
 ## Firing actions
 
 The plugin exposes a fire function that can be used to fire actions.
+
+**server.plugins.actions.fire(options)**
+
+The following table describes the properties of the `options` object.
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the action you want to fire.|string|
+|params|The `params` value to give the action type executor|object|
+|namespace|The namespace the action exists within|string|
+|basePath|The request's basePath value, usually `request.getBasePath()`|string|
 
 ### Example
 
