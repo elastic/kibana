@@ -6,14 +6,16 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { EuiComboBox } from '@elastic/eui';
-import { IndexPatternPrivateState } from './indexpattern';
-import { getColumnOrder, getPotentialColumns } from './operations';
+import { EuiComboBox, EuiContextMenuItem } from '@elastic/eui';
+import { IndexPatternPrivateState } from '../indexpattern';
+import { changeColumn } from '../state_helpers';
+import { getPotentialColumns, operationDefinitionMap } from '../operations';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { DragContextState, DropHandler } from '../drag_drop';
-import { createMockedDragDropContext } from './mocks';
+import { DropHandler, DragContextState } from '../../drag_drop';
+import { createMockedDragDropContext } from '../mocks';
 
-jest.mock('./operations');
+jest.mock('../state_helpers');
+jest.mock('../operations');
 
 const expectedIndexPatterns = {
   1: {
@@ -61,6 +63,9 @@ describe('IndexPatternDimensionPanel', () => {
 
           // Private
           operationType: 'date_histogram',
+          params: {
+            interval: '1d',
+          },
           sourceField: 'timestamp',
         },
       },
@@ -71,7 +76,7 @@ describe('IndexPatternDimensionPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('should display a call to action in the popover button', () => {
+  it('should display a configure button if dimension has no column yet', () => {
     const wrapper = mount(
       <IndexPatternDimensionPanel
         dragDropContext={dragDropContext}
@@ -83,7 +88,7 @@ describe('IndexPatternDimensionPanel', () => {
     );
     expect(
       wrapper
-        .find('[data-test-subj="indexPattern-dimensionPopover-button"]')
+        .find('[data-test-subj="indexPattern-configure-dimension"]')
         .first()
         .text()
     ).toEqual('Configure dimension');
@@ -120,8 +125,27 @@ describe('IndexPatternDimensionPanel', () => {
     expect(filterOperations).toBeCalled();
   });
 
+  it('should show field select combo box on click', () => {
+    const wrapper = mount(
+      <IndexPatternDimensionPanel
+        dragDropContext={dragDropContext}
+        state={state}
+        setState={() => {}}
+        columnId={'col2'}
+        filterOperations={() => true}
+      />
+    );
+
+    wrapper
+      .find('[data-test-subj="indexPattern-configure-dimension"]')
+      .first()
+      .simulate('click');
+
+    expect(wrapper.find(EuiComboBox)).toHaveLength(1);
+  });
+
   it('should not show any choices if the filter returns false', () => {
-    const wrapper = shallow(
+    const wrapper = mount(
       <IndexPatternDimensionPanel
         dragDropContext={dragDropContext}
         state={state}
@@ -131,11 +155,80 @@ describe('IndexPatternDimensionPanel', () => {
       />
     );
 
-    expect(wrapper.find(EuiComboBox)!.prop('options')!.length).toEqual(0);
+    wrapper
+      .find('[data-test-subj="indexPattern-configure-dimension"]')
+      .first()
+      .simulate('click');
+
+    expect(wrapper.find(EuiComboBox)!.prop('options')!).toHaveLength(0);
   });
 
-  it('should list all field names in sorted order', () => {
-    const wrapper = shallow(
+  it('should render the inline options directly', () => {
+    mount(
+      <IndexPatternDimensionPanel
+        dragDropContext={dragDropContext}
+        state={state}
+        setState={() => {}}
+        columnId={'col1'}
+        filterOperations={() => false}
+      />
+    );
+
+    expect(operationDefinitionMap.date_histogram.inlineOptions as jest.Mock).toHaveBeenCalledTimes(
+      1
+    );
+  });
+
+  it('should not render the settings button if there are no settings or options', () => {
+    const wrapper = mount(
+      <IndexPatternDimensionPanel
+        dragDropContext={dragDropContext}
+        state={state}
+        setState={() => {}}
+        columnId={'col1'}
+        filterOperations={() => false}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="indexPattern-dimensionPopover-button"]')).toHaveLength(0);
+  });
+
+  it('should render the settings button if there are settings', () => {
+    const wrapper = mount(
+      <IndexPatternDimensionPanel
+        dragDropContext={dragDropContext}
+        state={{
+          ...state,
+          columns: {
+            col1: {
+              operationId: 'op1',
+              label: 'Values of category',
+              dataType: 'string',
+              isBucketed: true,
+
+              // Private
+              operationType: 'terms',
+              params: {
+                orderBy: { type: 'alphabetical' },
+                size: 5,
+              },
+              sourceField: 'category',
+            },
+          },
+        }}
+        setState={() => {}}
+        columnId={'col1'}
+        filterOperations={() => false}
+      />
+    );
+
+    expect(
+      wrapper.find('EuiButtonIcon[data-test-subj="indexPattern-dimensionPopover-button"]').length
+    ).toBe(1);
+  });
+
+  it('should list all field names and document as a whole in sorted order', () => {
+    const wrapper = mount(
       <IndexPatternDimensionPanel
         dragDropContext={dragDropContext}
         state={state}
@@ -145,53 +238,156 @@ describe('IndexPatternDimensionPanel', () => {
       />
     );
 
+    wrapper
+      .find('[data-test-subj="indexPattern-configure-dimension"]')
+      .first()
+      .simulate('click');
+
     const options = wrapper.find(EuiComboBox).prop('options');
 
-    expect(options!.map(({ label }) => label)).toEqual([
+    expect(options![0].label).toEqual('Document');
+
+    expect(options![1].options!.map(({ label }) => label)).toEqual([
       'bytes',
-      'documents',
       'source',
       'timestamp',
     ]);
   });
 
-  it("should disable functions that won't work with the current column", () => {
+  it('should show all functions that work with the current column', () => {
     const setState = jest.fn();
 
-    const wrapper = shallow(
+    const wrapper = mount(
       <IndexPatternDimensionPanel
         dragDropContext={dragDropContext}
-        state={state}
+        state={{
+          ...state,
+          columns: {
+            ...state.columns,
+            col1: {
+              operationId: 'op1',
+              label: 'Max of bytes',
+              dataType: 'number',
+              isBucketed: false,
+
+              // Private
+              operationType: 'max',
+              sourceField: 'bytes',
+            },
+          },
+        }}
         setState={setState}
         columnId={'col1'}
         filterOperations={() => true}
       />
     );
 
-    expect(
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-date_histogram"]').prop('color')
-    ).toEqual('primary');
-    expect(
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-date_histogram"]').prop('isDisabled')
-    ).toEqual(false);
-    expect(
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-terms"]').prop('isDisabled')
-    ).toEqual(true);
-    expect(
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-sum"]').prop('isDisabled')
-    ).toEqual(true);
-    expect(
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-avg"]').prop('isDisabled')
-    ).toEqual(true);
-    expect(
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-count"]').prop('isDisabled')
-    ).toEqual(true);
+    wrapper
+      .find('[data-test-subj="indexPattern-dimensionPopover-button"]')
+      .first()
+      .simulate('click');
+
+    expect(wrapper.find(EuiContextMenuItem).map(instance => instance.text())).toEqual([
+      'Minimum',
+      'Maximum',
+      'Average',
+      'Sum',
+    ]);
   });
 
-  it('should update the datasource state on selection of a value operation', () => {
+  it('should update the datasource state on selection of an operation', () => {
     const setState = jest.fn();
 
-    const wrapper = shallow(
+    const wrapper = mount(
+      <IndexPatternDimensionPanel
+        dragDropContext={dragDropContext}
+        state={{
+          ...state,
+          columns: {
+            ...state.columns,
+            col1: {
+              operationId: 'op1',
+              label: 'Max of bytes',
+              dataType: 'number',
+              isBucketed: false,
+
+              // Private
+              operationType: 'max',
+              sourceField: 'bytes',
+            },
+          },
+        }}
+        setState={setState}
+        columnId={'col1'}
+        filterOperations={() => true}
+        suggestedPriority={1}
+      />
+    );
+
+    wrapper
+      .find('[data-test-subj="indexPattern-dimensionPopover-button"]')
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find('[data-test-subj="lns-indexPatternDimension-min"]')
+      .first()
+      .simulate('click');
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      columns: {
+        ...state.columns,
+        col1: expect.objectContaining({
+          operationType: 'min',
+          sourceField: 'bytes',
+          // Other parts of this don't matter for this test
+        }),
+      },
+    });
+  });
+
+  it('should update the datasource state on selection of a field', () => {
+    const setState = jest.fn();
+
+    const wrapper = mount(
+      <IndexPatternDimensionPanel
+        dragDropContext={dragDropContext}
+        state={state}
+        setState={setState}
+        columnId={'col1'}
+        filterOperations={() => true}
+        suggestedPriority={1}
+      />
+    );
+
+    wrapper
+      .find('[data-test-subj="indexPattern-configure-dimension"]')
+      .first()
+      .simulate('click');
+
+    const comboBox = wrapper.find(EuiComboBox)!;
+    const option = comboBox.prop('options')![1].options![1];
+
+    comboBox.prop('onChange')!([option]);
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      columns: {
+        ...state.columns,
+        col1: expect.objectContaining({
+          operationType: 'terms',
+          sourceField: 'source',
+          // Other parts of this don't matter for this test
+        }),
+      },
+    });
+  });
+
+  it('should add a column on selection of a field', () => {
+    const setState = jest.fn();
+
+    const wrapper = mount(
       <IndexPatternDimensionPanel
         dragDropContext={dragDropContext}
         state={state}
@@ -202,17 +398,22 @@ describe('IndexPatternDimensionPanel', () => {
       />
     );
 
-    const comboBox = wrapper.find(EuiComboBox)!;
-    const firstOption = comboBox.prop('options')![0];
+    wrapper
+      .find('[data-test-subj="indexPattern-configure-dimension"]')
+      .first()
+      .simulate('click');
 
-    comboBox.prop('onChange')!([firstOption]);
+    const comboBox = wrapper.find(EuiComboBox)!;
+    const option = comboBox.prop('options')![1].options![0];
+
+    comboBox.prop('onChange')!([option]);
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
       columns: {
         ...state.columns,
         col2: expect.objectContaining({
-          sourceField: firstOption.label,
+          sourceField: 'bytes',
           // Other parts of this don't matter for this test
         }),
       },
@@ -220,13 +421,28 @@ describe('IndexPatternDimensionPanel', () => {
     });
   });
 
-  it('should always request the new sort order when changing the function', () => {
+  it('should use helper function when changing the function', () => {
     const setState = jest.fn();
 
-    const wrapper = shallow(
+    const wrapper = mount(
       <IndexPatternDimensionPanel
         dragDropContext={dragDropContext}
-        state={state}
+        state={{
+          ...state,
+          columns: {
+            ...state.columns,
+            col1: {
+              operationId: 'op1',
+              label: 'Max of bytes',
+              dataType: 'number',
+              isBucketed: false,
+
+              // Private
+              operationType: 'max',
+              sourceField: 'bytes',
+            },
+          },
+        }}
         setState={setState}
         columnId={'col1'}
         filterOperations={() => true}
@@ -234,50 +450,30 @@ describe('IndexPatternDimensionPanel', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="lns-indexPatternDimension-date_histogram"]').simulate('click');
+    wrapper
+      .find('[data-test-subj="indexPattern-dimensionPopover-button"]')
+      .first()
+      .simulate('click');
 
-    expect(getColumnOrder).toHaveBeenCalledWith({
-      col1: expect.objectContaining({
-        sourceField: 'timestamp',
-        operationType: 'date_histogram',
-      }),
-    });
-  });
+    wrapper
+      .find('[data-test-subj="lns-indexPatternDimension-min"]')
+      .first()
+      .simulate('click');
 
-  it('should update the datasource state when the user makes a selection', () => {
-    const setState = jest.fn();
-
-    const wrapper = shallow(
-      <IndexPatternDimensionPanel
-        dragDropContext={dragDropContext}
-        state={state}
-        setState={setState}
-        columnId={'col2'}
-        filterOperations={op => op.dataType === 'number'}
-      />
+    expect(changeColumn).toHaveBeenCalledWith(
+      expect.anything(),
+      'col1',
+      expect.objectContaining({
+        sourceField: 'bytes',
+        operationType: 'min',
+      })
     );
-
-    const comboBox = wrapper.find(EuiComboBox)!;
-    const firstField = comboBox.prop('options')![0];
-
-    comboBox.prop('onChange')!([firstField]);
-
-    expect(setState).toHaveBeenCalledWith({
-      ...state,
-      columns: {
-        ...state.columns,
-        col2: expect.objectContaining({
-          operationId: firstField.value,
-        }),
-      },
-      columnOrder: ['col1', 'col2'],
-    });
   });
 
   it('should clear the dimension with the clear button', () => {
     const setState = jest.fn();
 
-    const wrapper = shallow(
+    const wrapper = mount(
       <IndexPatternDimensionPanel
         dragDropContext={dragDropContext}
         state={state}
@@ -287,7 +483,9 @@ describe('IndexPatternDimensionPanel', () => {
       />
     );
 
-    const clearButton = wrapper.find('[data-test-subj="indexPattern-dimensionPopover-remove"]');
+    const clearButton = wrapper.find(
+      'EuiButtonIcon[data-test-subj="indexPattern-dimensionPopover-remove"]'
+    );
 
     clearButton.simulate('click');
 

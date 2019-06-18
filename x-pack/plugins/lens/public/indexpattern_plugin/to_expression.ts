@@ -6,7 +6,8 @@
 
 import _ from 'lodash';
 
-import { IndexPatternPrivateState } from './indexpattern';
+import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
+import { operationDefinitionMap, OperationDefinition } from './operations';
 
 export function toExpression(state: IndexPatternPrivateState) {
   if (state.columnOrder.length === 0) {
@@ -15,65 +16,18 @@ export function toExpression(state: IndexPatternPrivateState) {
 
   const sortedColumns = state.columnOrder.map(col => state.columns[col]);
 
+  function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
+    // Typescript is not smart enough to infer that definitionMap[C['operationType']] is always OperationDefinition<C>,
+    // but this is made sure by the typing of the operation map
+    const operationDefinition = (operationDefinitionMap[
+      column.operationType
+    ] as unknown) as OperationDefinition<C>;
+    return operationDefinition.toEsAggsConfig(column, columnId);
+  }
+
   if (sortedColumns.length) {
-    const firstMetric = sortedColumns.findIndex(({ isBucketed }) => !isBucketed);
     const aggs = sortedColumns.map((col, index) => {
-      if (col.operationType === 'date_histogram') {
-        return {
-          id: state.columnOrder[index],
-          enabled: true,
-          type: 'date_histogram',
-          schema: 'segment',
-          params: {
-            field: col.sourceField,
-            // TODO: This range should be passed in from somewhere else
-            timeRange: {
-              from: 'now-1d',
-              to: 'now',
-            },
-            useNormalizedEsInterval: true,
-            interval: '1h',
-            drop_partials: false,
-            min_doc_count: 1,
-            extended_bounds: {},
-          },
-        };
-      } else if (col.operationType === 'terms') {
-        return {
-          id: state.columnOrder[index],
-          enabled: true,
-          type: 'terms',
-          schema: 'segment',
-          params: {
-            field: col.sourceField,
-            orderBy: state.columnOrder[firstMetric] || undefined,
-            order: 'desc',
-            size: 5,
-            otherBucket: false,
-            otherBucketLabel: 'Other',
-            missingBucket: false,
-            missingBucketLabel: 'Missing',
-          },
-        };
-      } else if (col.operationType === 'count') {
-        return {
-          id: state.columnOrder[index],
-          enabled: true,
-          type: 'count',
-          schema: 'metric',
-          params: {},
-        };
-      } else {
-        return {
-          id: state.columnOrder[index],
-          enabled: true,
-          type: col.operationType,
-          schema: 'metric',
-          params: {
-            field: col.sourceField,
-          },
-        };
-      }
+      return getEsAggsConfig(col, state.columnOrder[index]);
     });
 
     const idMap = state.columnOrder.reduce(

@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
-import { i18n } from '@kbn/i18n';
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
@@ -23,11 +22,20 @@ import { getIndexPatterns } from './loader';
 import { ChildDragDropProvider, DragDrop } from '../drag_drop';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { makeOperation, getOperationTypesForField } from './operations';
+import { buildColumnForOperationType, getOperationTypesForField } from './operations';
 
-export type OperationType = 'terms' | 'date_histogram' | 'sum' | 'avg' | 'min' | 'max' | 'count';
+export type OperationType = IndexPatternColumn['operationType'];
 
-export interface IndexPatternColumn {
+export type IndexPatternColumn =
+  | DateHistogramIndexPatternColumn
+  | TermsIndexPatternColumn
+  | SumIndexPatternColumn
+  | AvgIndexPatternColumn
+  | MinIndexPatternColumn
+  | MaxIndexPatternColumn
+  | CountIndexPatternColumn;
+
+export interface BaseIndexPatternColumn {
   // Public
   operationId: string;
   label: string;
@@ -36,9 +44,44 @@ export interface IndexPatternColumn {
 
   // Private
   operationType: OperationType;
+  suggestedOrder?: DimensionPriority;
+}
+
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
+type ParameterlessIndexPatternColumn<
+  TOperationType extends OperationType,
+  TBase extends BaseIndexPatternColumn = FieldBasedIndexPatternColumn
+> = Omit<TBase, 'operationType'> & { operationType: TOperationType };
+
+export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
   suggestedOrder?: DimensionPriority;
 }
+
+export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
+  operationType: 'date_histogram';
+  params: {
+    interval: string;
+    timeZone?: string;
+  };
+}
+
+export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
+  operationType: 'terms';
+  params: {
+    size: number;
+    orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+  };
+}
+
+export type CountIndexPatternColumn = ParameterlessIndexPatternColumn<
+  'count',
+  BaseIndexPatternColumn
+>;
+export type SumIndexPatternColumn = ParameterlessIndexPatternColumn<'sum'>;
+export type AvgIndexPatternColumn = ParameterlessIndexPatternColumn<'avg'>;
+export type MinIndexPatternColumn = ParameterlessIndexPatternColumn<'min'>;
+export type MaxIndexPatternColumn = ParameterlessIndexPatternColumn<'max'>;
 
 export interface IndexPattern {
   id: string;
@@ -253,19 +296,9 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
 
       if (hasBucket) {
-        const column = makeOperation(0, hasBucket, field);
+        const column = buildColumnForOperationType(0, hasBucket, undefined, field);
 
-        const countColumn: IndexPatternColumn = {
-          operationId: 'count',
-          label: i18n.translate('xpack.lens.indexPatternOperations.countOfDocuments', {
-            defaultMessage: 'Count of Documents',
-          }),
-          dataType: 'number',
-          isBucketed: false,
-
-          operationType: 'count',
-          sourceField: 'documents',
-        };
+        const countColumn = buildColumnForOperationType(1, 'count');
 
         const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
           state: {
@@ -300,9 +333,9 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
           f => f.name === currentIndexPattern.timeFieldName
         )!;
 
-        const column = makeOperation(0, operations[0], field);
+        const column = buildColumnForOperationType(0, operations[0], undefined, field);
 
-        const dateColumn = makeOperation(1, 'date_histogram', dateField);
+        const dateColumn = buildColumnForOperationType(1, 'date_histogram', undefined, dateField);
 
         const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
           state: {
