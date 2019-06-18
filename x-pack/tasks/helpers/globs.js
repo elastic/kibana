@@ -16,6 +16,10 @@ function getPluginPaths(plugins, opts = {}) {
 
   return plugins.reduce((paths, pluginName) => {
     const plugin = pluginName.trim();
+
+    if (plugin !== 'canvas') {
+      return paths;
+    }
     const commonPath = `${plugin}/common`;
     const serverPath = `${plugin}/**/server`;
     const publicPath = `${plugin}/**/public`;
@@ -26,8 +30,12 @@ function getPluginPaths(plugins, opts = {}) {
     const publicPaths = `plugins/${publicPath}/**/${testPath}/*.js`;
 
     paths = paths.concat([indexPaths, commonPaths, serverPaths]);
-    if(plugin === 'code') {
+
+    if (plugin === 'code') {
       paths.push(`plugins/${serverPath}/**/${testPath}/*.ts`);
+    }
+    if (plugin === 'canvas') {
+      paths.push(`!${serverPaths}`);
     }
     if (opts.browser) {
       paths = paths.concat(publicPaths);
