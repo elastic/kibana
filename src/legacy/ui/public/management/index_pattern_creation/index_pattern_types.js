@@ -18,3 +18,4 @@
  */
 
 export const indexPatternTypes = [];
+export const addIndexPatternType = (type) => indexPatternTypes.push(type);

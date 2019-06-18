@@ -20,4 +20,4 @@
 import './register';
 export { IndexPatternCreationFactory } from './index_pattern_creation';
 export { IndexPatternCreationConfig } from './index_pattern_creation_config';
-export { indexPatternTypes } from './index_pattern_types';
+export { indexPatternTypes, addIndexPatternType } from './index_pattern_types';
