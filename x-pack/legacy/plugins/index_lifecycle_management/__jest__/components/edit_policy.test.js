@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { Provider } from 'react-redux';
 import { fetchedPolicies, fetchedNodes } from '../../public/store/actions';
 import { indexLifecycleManagementStore } from '../../public/store';
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
+import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
 import { EditPolicy } from '../../public/sections/edit_policy';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';

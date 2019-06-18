@@ -11,7 +11,7 @@
 // Pull in the built CSS produced by the Kibana server, but not
 // the Canvas CSS-- we want that in the HMR service.
 const css = require.context(
-  '../../../../built_assets/css',
+  '../../../../../built_assets/css',
   true,
   /\.\/plugins\/(?!canvas).*light\.css/
 );
@@ -21,7 +21,7 @@ css.keys().forEach(filename => {
 
 // Include Legacy styles
 const uiStyles = require.context(
-  '../../../../src/legacy/ui/public/styles',
+  '../../../../../src/legacy/ui/public/styles',
   false,
   /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/
 );

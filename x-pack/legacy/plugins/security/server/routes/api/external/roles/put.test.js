@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import Boom from 'boom';
 import { initPutRolesApi } from './put';
-import { defaultValidationErrorHandler } from '../../../../../../../../src/core/server/http/http_tools';
+import { defaultValidationErrorHandler } from '../../../../../../../../../src/core/server/http/http_tools';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 
 const application = 'kibana-.kibana';

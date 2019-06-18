@@ -9,7 +9,7 @@ import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { JOBS } from './helpers/constants';
 
 jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
@@ -28,7 +28,7 @@ jest.mock('ui/chrome', () => ({
   }
 }));
 
-jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
+jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
   trackUiMetric: jest.fn(),
 }));
 

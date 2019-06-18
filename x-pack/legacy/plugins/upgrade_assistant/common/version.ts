@@ -5,7 +5,7 @@
  */
 
 import { SemVer } from 'semver';
-import pkg from '../../../package.json';
+import pkg from '../../../../package.json';
 
 export const CURRENT_VERSION = new SemVer(pkg.version as string);
 export const CURRENT_MAJOR_VERSION = CURRENT_VERSION.major;

@@ -8,7 +8,7 @@ import { setup as homeSetup } from './home.helpers';
 import { setup as repositoryAddSetup } from './repository_add.helpers';
 import { setup as repositoryEditSetup } from './repository_edit.helpers';
 
-export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../../test_utils';
 
 export { setupEnvironment } from './setup_environment';
 

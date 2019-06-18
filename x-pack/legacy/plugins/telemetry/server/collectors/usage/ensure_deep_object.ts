@@ -6,7 +6,7 @@
 
 //
 // THIS IS A DIRECT COPY OF
-// '../../../../../../../src/core/server/config/ensure_deep_object'
+// '../../../../../../../../src/core/server/config/ensure_deep_object'
 // BECAUSE THAT IS BLOCKED FOR IMPORTING BY OUR LINTER.
 //
 // IF THAT IS EXPOSED, WE SHOULD USE IT RATHER THAN CLONE IT.

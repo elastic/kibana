@@ -5,7 +5,7 @@
  */
 
 /*
- * Borrowed from https://github.com/elastic/kibana/blob/master/x-pack/common/poller.js
+ * Borrowed from https://github.com/elastic/kibana/blob/master/x-pack/legacy/common/poller.js
  */
 
 // Because the timers lib is global for Nodejs, it's not necessary to explicit import it.

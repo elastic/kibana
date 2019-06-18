@@ -9,7 +9,7 @@ import { resolve } from 'path';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import madge from 'madge';
 
-import { run, createFailError } from '../../../../../src/dev/run';
+import { run, createFailError } from '../../../../../../src/dev/run';
 
 run(
   async ({ log }) => {

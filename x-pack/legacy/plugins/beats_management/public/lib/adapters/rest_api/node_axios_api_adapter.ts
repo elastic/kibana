@@ -10,7 +10,7 @@ import { join, resolve } from 'path';
 import { FlatObject } from '../../../frontend_types';
 import { RestAPIAdapter } from './adapter_types';
 const pkg = JSON.parse(
-  fs.readFileSync(resolve(join(__dirname, '../../../../../../../package.json'))).toString()
+  fs.readFileSync(resolve(join(__dirname, '../../../../../../../../package.json'))).toString()
 );
 
 let globalAPI: AxiosInstance;
