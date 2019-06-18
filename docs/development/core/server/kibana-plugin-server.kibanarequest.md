@@ -16,14 +16,13 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(request, params, query, body)](./kibana-plugin-server.kibanarequest.(constructor).md) |  | Constructs a new instance of the <code>KibanaRequest</code> class |
+|  [(constructor)(request, params, query, body, withoutSecretHeaders)](./kibana-plugin-server.kibanarequest.(constructor).md) |  | Constructs a new instance of the <code>KibanaRequest</code> class |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [body](./kibana-plugin-server.kibanarequest.body.md) |  | <code>Body</code> |  |
-|  [headers](./kibana-plugin-server.kibanarequest.headers.md) |  | <code>Headers</code> |  |
 |  [params](./kibana-plugin-server.kibanarequest.params.md) |  | <code>Params</code> |  |
 |  [query](./kibana-plugin-server.kibanarequest.query.md) |  | <code>Query</code> |  |
 |  [route](./kibana-plugin-server.kibanarequest.route.md) |  | <code>RecursiveReadonly&lt;KibanaRequestRoute&gt;</code> |  |
@@ -33,7 +32,5 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [from(req, routeSchemas)](./kibana-plugin-server.kibanarequest.from.md) | <code>static</code> | Factory for creating requests. Validates the request before creating an instance of a KibanaRequest. |
 |  [getFilteredHeaders(headersToKeep)](./kibana-plugin-server.kibanarequest.getfilteredheaders.md) |  |  |
-|  [unstable\_getIncomingMessage()](./kibana-plugin-server.kibanarequest.unstable_getincomingmessage.md) |  |  |
 

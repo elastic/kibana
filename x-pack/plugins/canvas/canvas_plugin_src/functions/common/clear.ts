@@ -13,6 +13,9 @@ export function clear(): ExpressionFunction<'clear', any, {}, null> {
     name: 'clear',
     type: 'null',
     help,
+    context: {
+      types: ['null'],
+    },
     args: {},
     fn: () => null,
   };

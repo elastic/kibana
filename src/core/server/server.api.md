@@ -22,15 +22,23 @@ import { Url } from 'url';
 // @public (undocumented)
 export type APICaller = (endpoint: string, clientParams: Record<string, unknown>, options?: CallAPIOptions) => Promise<unknown>;
 
-// Warning: (ae-forgotten-export) The symbol "SessionStorage" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export type AuthenticationHandler<T> = (request: Readonly<Request>, sessionStorage: SessionStorage<T>, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
+export type AuthenticationHandler = (request: KibanaRequest, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
+
+// @public
+export type AuthHeaders = Record<string, string>;
+
+// @public
+export interface AuthResultData {
+    headers: AuthHeaders;
+    state: Record<string, unknown>;
+}
 
 // @public
 export interface AuthToolkit {
-    authenticated: (state: object) => AuthResult;
+    authenticated: (data?: Partial<AuthResultData>) => AuthResult;
     redirected: (url: string) => AuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
@@ -44,15 +52,14 @@ export function bootstrap({ configs, cliArgs, applyConfigOverrides, features, }:
 
 // @public
 export interface CallAPIOptions {
+    signal?: AbortSignal;
     wrap401Errors: boolean;
 }
 
 // @public
 export class ClusterClient {
-    constructor(config: ElasticsearchClientConfig, log: Logger);
-    asScoped(req?: {
-        headers?: Headers;
-    }): ScopedClusterClient;
+    constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
+    asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): ScopedClusterClient;
     callAsInternalUser: (endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
     close(): void;
     }
@@ -87,8 +94,7 @@ export interface CoreSetup {
         registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-        getBasePathFor: HttpServiceSetup['getBasePathFor'];
-        setBasePathFor: HttpServiceSetup['setBasePathFor'];
+        basePath: HttpServiceSetup['basePath'];
         createNewServer: HttpServiceSetup['createNewServer'];
     };
 }
@@ -129,6 +135,14 @@ export interface ElasticsearchServiceSetup {
     };
 }
 
+// @public
+export interface FakeRequest {
+    headers: Record<string, string>;
+}
+
+// @public
+export type GetAuthHeaders = (request: KibanaRequest | Request) => AuthHeaders | undefined;
+
 // @public (undocumented)
 export type Headers = Record<string, string | string[] | undefined>;
 
@@ -167,23 +181,23 @@ export interface InternalCoreStart {
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
-    constructor(request: Request, params: Params, query: Query, body: Body);
+    // @internal (undocumented)
+    protected readonly [requestSymbol]: Request;
+    constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
     // Warning: (ae-forgotten-export) The symbol "RouteSchemas" needs to be exported by the entry point index.d.ts
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>): KibanaRequest<P["type"], Q["type"], B["type"]>;
+    // 
+    // @internal
+    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
     // (undocumented)
     getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
-    // (undocumented)
-    readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
     // (undocumented)
     readonly query: Query;
     // (undocumented)
     readonly route: RecursiveReadonly<KibanaRequestRoute>;
-    // (undocumented)
-    unstable_getIncomingMessage(): import("http").IncomingMessage;
     // (undocumented)
     readonly url: Url;
     }
@@ -197,6 +211,9 @@ export interface KibanaRequestRoute {
     // (undocumented)
     path: string;
 }
+
+// @public
+export type LegacyRequest = Request;
 
 // @public
 export interface Logger {
@@ -385,6 +402,19 @@ export class ScopedClusterClient {
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
     callAsInternalUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
     }
+
+// @public
+export interface SessionStorage<T> {
+    clear(): void;
+    get(): Promise<T | null>;
+    set(sessionValue: T): void;
+}
+
+// @public
+export interface SessionStorageFactory<T> {
+    // (undocumented)
+    asScoped: (request: KibanaRequest) => SessionStorage<T>;
+}
 
 
 // Warnings were encountered during analysis:

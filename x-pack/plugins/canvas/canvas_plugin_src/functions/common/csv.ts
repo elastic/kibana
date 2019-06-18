@@ -30,6 +30,7 @@ export function csv(): ExpressionFunction<'csv', null, Arguments, Datatable> {
       data: {
         aliases: ['_'],
         types: ['string'],
+        required: true,
         help: argHelp.data,
       },
       delimiter: {

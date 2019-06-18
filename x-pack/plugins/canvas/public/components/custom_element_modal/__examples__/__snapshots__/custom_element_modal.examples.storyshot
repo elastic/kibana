@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/CustomElementModal with description 1`] = `
+exports[`Storyshots components/Elements/CustomElementModal with description 1`] = `
 Array [
   <div
     data-focus-guard={true}
@@ -338,7 +338,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/CustomElementModal with image 1`] = `
+exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
 Array [
   <div
     data-focus-guard={true}
@@ -672,7 +672,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/CustomElementModal with name 1`] = `
+exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
 Array [
   <div
     data-focus-guard={true}
@@ -1011,7 +1011,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots components/CustomElementModal with title 1`] = `
+exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
 Array [
   <div
     data-focus-guard={true}

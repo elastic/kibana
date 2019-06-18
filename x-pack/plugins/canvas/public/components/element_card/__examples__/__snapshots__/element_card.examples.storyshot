@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots components/ElementCard with click handler 1`] = `
+exports[`Storyshots components/Elements/ElementCard with click handler 1`] = `
 <div
   style={
     Object {
@@ -50,7 +50,7 @@ exports[`Storyshots components/ElementCard with click handler 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ElementCard with image 1`] = `
+exports[`Storyshots components/Elements/ElementCard with image 1`] = `
 <div
   style={
     Object {
@@ -95,7 +95,7 @@ exports[`Storyshots components/ElementCard with image 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ElementCard with tags 1`] = `
+exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
 <div
   style={
     Object {
@@ -142,7 +142,7 @@ exports[`Storyshots components/ElementCard with tags 1`] = `
       className="euiCard__footer"
     >
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
@@ -161,7 +161,7 @@ exports[`Storyshots components/ElementCard with tags 1`] = `
         </span>
       </span>
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
@@ -180,7 +180,7 @@ exports[`Storyshots components/ElementCard with tags 1`] = `
         </span>
       </span>
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
@@ -199,7 +199,7 @@ exports[`Storyshots components/ElementCard with tags 1`] = `
         </span>
       </span>
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
@@ -218,7 +218,7 @@ exports[`Storyshots components/ElementCard with tags 1`] = `
         </span>
       </span>
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
@@ -237,7 +237,7 @@ exports[`Storyshots components/ElementCard with tags 1`] = `
         </span>
       </span>
       <span
-        className="euiBadge"
+        className="euiBadge euiBadge--iconLeft"
         style={
           Object {
             "backgroundColor": "#666666",
@@ -260,7 +260,7 @@ exports[`Storyshots components/ElementCard with tags 1`] = `
 </div>
 `;
 
-exports[`Storyshots components/ElementCard with title and description 1`] = `
+exports[`Storyshots components/Elements/ElementCard with title and description 1`] = `
 <div
   style={
     Object {

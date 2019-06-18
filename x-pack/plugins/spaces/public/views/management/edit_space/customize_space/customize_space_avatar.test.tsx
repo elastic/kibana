@@ -25,7 +25,7 @@ test('shows customization fields', () => {
   const wrapper = mountWithIntl(<CustomizeSpaceAvatar space={space} onChange={jest.fn()} />);
 
   expect(wrapper.find(EuiLink)).toHaveLength(0);
-  expect(wrapper.find(EuiFieldText)).toHaveLength(1);
+  expect(wrapper.find(EuiFieldText)).toHaveLength(2); // EuiColorPicker contains an EuiFieldText element
   expect(wrapper.find(EuiColorPicker)).toHaveLength(1);
 });
 
@@ -45,6 +45,7 @@ test('invokes onChange callback when avatar is customized', () => {
 
   wrapper
     .find(EuiFieldText)
+    .first()
     .find('input')
     .simulate('change', { target: { value: 'NV' } });
 
