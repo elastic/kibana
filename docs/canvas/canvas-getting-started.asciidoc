@@ -88,7 +88,7 @@ TIP: Want to delete an element? Click the back button on your browser.
 [float]
 === Show off your data
 
-To show what your data can do, add and customize charts, graphs, progress monitors, and more.
+To show what your data can do, add charts, graphs, progress monitors, and more.
 
 . Click *Add element*, then click *Area chart*. 
 
@@ -133,11 +133,13 @@ image::images/canvas-time-filter.png[]
 
 Your workpad is now complete! Use the icons in the upper left corner to:
 
-* Share your workpad
-
 * Display your workpad in fullscreen mode
 
 * Download your workpad as a PDF report or JSON object
+
+* Configure the refresh rate for your data
+
+* Share your workpad
 
 [float]
 === Next steps
