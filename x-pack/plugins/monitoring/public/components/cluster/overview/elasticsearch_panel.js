@@ -26,6 +26,7 @@ import { LicenseText } from './license_text';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from '../../logs/reason';
+import chrome from 'ui/chrome';
 
 const calculateShards = shards => {
   const total = get(shards, 'total', 0);
@@ -153,15 +154,22 @@ export function ElasticsearchPanel(props) {
   const showMlJobs = () => {
     // if license doesn't support ML, then `ml === null`
     if (props.ml) {
-      return [
-        <EuiDescriptionListTitle key="mlJobsListTitle">
-          <FormattedMessage
-            id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
-            defaultMessage="Jobs"
-          />
-        </EuiDescriptionListTitle>,
-        <EuiDescriptionListDescription key="mlJobsCount" data-test-subj="esMlJobs">{ props.ml.jobs }</EuiDescriptionListDescription>
-      ];
+      const gotoURL = `${chrome.getBasePath()}/app/ml#/jobs`;
+      return (
+        <>
+          <EuiDescriptionListTitle>
+            <EuiLink href={gotoURL} >
+              <FormattedMessage
+                id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
+                defaultMessage="Jobs"
+              />
+            </EuiLink>
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription data-test-subj="esMlJobs">
+            <EuiLink href={gotoURL} >{props.ml.jobs}</EuiLink>
+          </EuiDescriptionListDescription>
+        </>
+      );
     }
     return null;
   };
