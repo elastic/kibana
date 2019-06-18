@@ -44,7 +44,7 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   configService.setSchema(config.path, config.schema);
   return configService;
 };
-const dummyHapiServer = {
+const fakeHapiServer = {
   start: noop,
   stop: noop,
   route: noop,
@@ -62,7 +62,7 @@ test('creates and sets up http server', async () => {
 
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({ server: dummyHapiServer }),
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
     start: jest.fn(),
     stop: jest.fn(),
   };
@@ -178,7 +178,7 @@ test('logs error if already set up', async () => {
 
   const httpServer = {
     isListening: () => true,
-    setup: jest.fn().mockReturnValue({ server: dummyHapiServer }),
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
     start: noop,
     stop: noop,
   };
@@ -196,7 +196,7 @@ test('stops http server', async () => {
 
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({ server: dummyHapiServer }),
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
     start: noop,
     stop: jest.fn(),
   };
@@ -222,7 +222,7 @@ test('register route handler', async () => {
     isListening: () => false,
     setup: jest
       .fn()
-      .mockReturnValue({ server: dummyHapiServer, registerRouter: registerRouterMock }),
+      .mockReturnValue({ server: fakeHapiServer, registerRouter: registerRouterMock }),
     start: noop,
     stop: noop,
   };
@@ -240,7 +240,7 @@ test('register route handler', async () => {
 
 test('returns http server contract on setup', async () => {
   const configService = createConfigService();
-  const httpServer = { server: dummyHapiServer, options: { someOption: true } };
+  const httpServer = { server: fakeHapiServer, options: { someOption: true } };
 
   mockHttpServer.mockImplementation(() => ({
     isListening: () => false,

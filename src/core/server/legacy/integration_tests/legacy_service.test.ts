@@ -22,7 +22,7 @@ import * as kbnTestServer from '../../../../test_utils/kbn_server';
 describe('legacy service', () => {
   describe('http server', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
-    beforeEach(async () => {
+    beforeEach(() => {
       root = kbnTestServer.createRoot();
     }, 30000);
 
@@ -31,7 +31,7 @@ describe('legacy service', () => {
     it("handles http request in Legacy platform if New platform doesn't handle it", async () => {
       const rootUrl = '/route';
       const router = new Router(rootUrl);
-      router.get({ path: '/new-platform', validate: false }, async (req, res) =>
+      router.get({ path: '/new-platform', validate: false }, (req, res) =>
         res.ok({ content: 'from-new-platform' })
       );
 
@@ -48,7 +48,7 @@ describe('legacy service', () => {
       });
 
       await kbnTestServer.request
-        .get(root, `/route/new-platform`)
+        .get(root, '/route/new-platform')
         .expect(200, { content: 'from-new-platform' });
 
       await kbnTestServer.request.get(root, legacyPlatformUrl).expect(200, 'ok from legacy server');
@@ -56,7 +56,7 @@ describe('legacy service', () => {
     it('throws error if Legacy and New platforms register handler for the same route', async () => {
       const rootUrl = '/route';
       const router = new Router(rootUrl);
-      router.get({ path: '', validate: false }, async (req, res) =>
+      router.get({ path: '', validate: false }, (req, res) =>
         res.ok({ content: 'from-new-platform' })
       );
 

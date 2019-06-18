@@ -80,9 +80,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     const httpSetup = (this.httpServer.setup(config) || {}) as HttpServiceSetup;
     const setup = {
       ...httpSetup,
-      ...{
-        createNewServer: this.createServer.bind(this),
-      },
+      createNewServer: this.createServer.bind(this),
     };
 
     if (this.shouldListen(config)) {
