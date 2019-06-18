@@ -16,5 +16,5 @@ export interface SessionStorageFactory<T>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [asScoped](./kibana-plugin-server.sessionstoragefactory.asscoped.md) | <code>(request: Readonly&lt;Request&gt; &#124; KibanaRequest) =&gt; SessionStorage&lt;T&gt;</code> |  |
+|  [asScoped](./kibana-plugin-server.sessionstoragefactory.asscoped.md) | <code>(request: KibanaRequest) =&gt; SessionStorage&lt;T&gt;</code> |  |
 
