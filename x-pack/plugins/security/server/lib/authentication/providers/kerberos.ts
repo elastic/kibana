@@ -68,7 +68,10 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     this.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
     const authenticationScheme = getRequestAuthenticationScheme(request);
-    if (authenticationScheme && authenticationScheme !== 'negotiate') {
+    if (
+      authenticationScheme &&
+      (authenticationScheme !== 'negotiate' && authenticationScheme !== 'bearer')
+    ) {
       this.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
       return AuthenticationResult.notHandled();
     }
@@ -78,7 +81,15 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    let authenticationResult = await this.authenticateViaHeader(request);
+    let authenticationResult = AuthenticationResult.notHandled();
+    if (authenticationScheme) {
+      // We should get rid of `Bearer` scheme support as soon as Reporting doesn't need it anymore.
+      authenticationResult =
+        authenticationScheme === 'bearer'
+          ? await this.authenticateWithBearerScheme(request)
+          : await this.authenticateWithNegotiateScheme(request);
+    }
+
     if (state && authenticationResult.notHandled()) {
       authenticationResult = await this.authenticateViaState(request, state);
       if (authenticationResult.failed() && isAccessTokenExpiredError(authenticationResult.error)) {
@@ -131,18 +142,12 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Validates whether request contains `Negotiate ***` Authorization header and just passes it
-   * forward to Elasticsearch backend.
+   * Tries to authenticate request with `Negotiate ***` Authorization header by passing it to the Elasticsearch backend to
+   * get an access token in exchange.
    * @param request Request instance.
    */
-  private async authenticateViaHeader(request: RequestWithLoginAttempt) {
-    this.debug('Trying to authenticate via header.');
-
-    const authorization = request.headers.authorization;
-    if (!authorization) {
-      this.debug('Authorization header is not presented.');
-      return AuthenticationResult.notHandled();
-    }
+  private async authenticateWithNegotiateScheme(request: RequestWithLoginAttempt) {
+    this.debug('Trying to authenticate request using "Negotiate" authentication scheme.');
 
     // First attempt to exchange SPNEGO token for an access token.
     let accessToken: string;
@@ -175,6 +180,28 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       // keep it in the request object since it can confuse other consumers of the request down the
       // line (e.g. in the next authentication provider).
       request.headers.authorization = originalAuthorizationHeader;
+
+      return AuthenticationResult.failed(err);
+    }
+  }
+
+  /**
+   * Tries to authenticate request with `Bearer ***` Authorization header by passing it to the Elasticsearch backend.
+   * @param request Request instance.
+   */
+  private async authenticateWithBearerScheme(request: RequestWithLoginAttempt) {
+    this.debug('Trying to authenticate request using "Bearer" authentication scheme.');
+
+    try {
+      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
+
+      this.debug('Request has been authenticated using "Bearer" authentication scheme.');
+
+      return AuthenticationResult.succeeded(user);
+    } catch (err) {
+      this.debug(
+        `Failed to authenticate request using "Bearer" authentication scheme: ${err.message}`
+      );
 
       return AuthenticationResult.failed(err);
     }

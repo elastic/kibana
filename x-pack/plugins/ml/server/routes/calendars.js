@@ -36,13 +36,13 @@ function deleteCalendar(callWithRequest, calendarId) {
   return cal.deleteCalendar(calendarId);
 }
 
-export function calendars(server, commonRouteConfig) {
+export function calendars({ commonRouteConfig, elasticsearchPlugin, route }) {
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/calendars',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return getAllCalendars(callWithRequest)
         .catch(resp => wrapError(resp));
     },
@@ -51,11 +51,11 @@ export function calendars(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/calendars/{calendarId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const calendarId = request.params.calendarId;
       return getCalendar(callWithRequest, calendarId)
         .catch(resp => wrapError(resp));
@@ -65,11 +65,11 @@ export function calendars(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'PUT',
     path: '/api/ml/calendars',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const body = request.payload;
       return newCalendar(callWithRequest, body)
         .catch(resp => wrapError(resp));
@@ -79,11 +79,11 @@ export function calendars(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'PUT',
     path: '/api/ml/calendars/{calendarId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const calendarId = request.params.calendarId;
       const body = request.payload;
       return updateCalendar(callWithRequest, calendarId, body)
@@ -94,11 +94,11 @@ export function calendars(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'DELETE',
     path: '/api/ml/calendars/{calendarId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const calendarId = request.params.calendarId;
       return deleteCalendar(callWithRequest, calendarId)
         .catch(resp => wrapError(resp));

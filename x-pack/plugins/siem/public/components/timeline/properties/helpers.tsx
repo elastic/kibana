@@ -154,7 +154,7 @@ const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNote
     <EuiButton
       data-test-subj="timeline-notes-button-large"
       onClick={() => toggleShowNotes()}
-      size="l"
+      size="m"
     >
       <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
         <EuiFlexItem grow={false}>

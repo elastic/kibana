@@ -49,6 +49,7 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
         <EuiButtonEmpty
           onClick={cancelLayerPanel}
           flush="left"
+          data-test-subj="layerPanelCancelButton"
         >
           {cancelButtonLabel}
         </EuiButtonEmpty>

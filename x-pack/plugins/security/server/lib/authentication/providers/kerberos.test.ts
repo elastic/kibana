@@ -266,6 +266,51 @@ describe('KerberosAuthenticationProvider', () => {
       expect(authenticationResult.error).toHaveProperty('output.statusCode', 401);
       expect(authenticationResult.challenges).toEqual(['Negotiate']);
     });
+
+    it('succeeds if `authorization` contains a valid token.', async () => {
+      const user = { username: 'user' };
+      const request = requestFixture({ headers: { authorization: 'Bearer some-valid-token' } });
+
+      callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
+
+      const authenticationResult = await provider.authenticate(request);
+
+      expect(request.headers.authorization).toBe('Bearer some-valid-token');
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.state).toBeUndefined();
+    });
+
+    it('fails if token from `authorization` header is rejected.', async () => {
+      const request = requestFixture({ headers: { authorization: 'Bearer some-invalid-token' } });
+
+      const failureReason = { statusCode: 401 };
+      callWithRequest.withArgs(request, 'shield.authenticate').rejects(failureReason);
+
+      const authenticationResult = await provider.authenticate(request);
+
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.error).toBe(failureReason);
+    });
+
+    it('fails if token from `authorization` header is rejected even if state contains a valid one.', async () => {
+      const user = { username: 'user' };
+      const request = requestFixture({ headers: { authorization: 'Bearer some-invalid-token' } });
+
+      const failureReason = { statusCode: 401 };
+      callWithRequest.withArgs(request, 'shield.authenticate').rejects(failureReason);
+
+      callWithRequest
+        .withArgs(sinon.match({ headers: { authorization: 'Bearer some-valid-token' } }))
+        .resolves(user);
+
+      const authenticationResult = await provider.authenticate(request, {
+        accessToken: 'some-valid-token',
+      });
+
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.error).toBe(failureReason);
+    });
   });
 
   describe('`deauthenticate` method', () => {

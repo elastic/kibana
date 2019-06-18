@@ -59,6 +59,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
           />
         }
         error={saveError}
+        data-test-subj="saveRepositoryApiError"
       />
     ) : null;
   };
@@ -71,7 +72,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
     <EuiPageBody>
       <EuiPageContent>
         <EuiTitle size="l">
-          <h1>
+          <h1 data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.snapshotRestore.addRepositoryTitle"
               defaultMessage="Register repository"

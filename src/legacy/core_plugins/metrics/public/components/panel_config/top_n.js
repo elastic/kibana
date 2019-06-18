@@ -43,13 +43,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 
 export class TopNPanelConfig extends Component {
-
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -70,7 +69,10 @@ export class TopNPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { drilldown_url: '', filter: { query: '', language: getDefaultQueryLanguage() } };
+    const defaults = {
+      drilldown_url: '',
+      filter: { query: '', language: getDefaultQueryLanguage() },
+    };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
     const handleTextChange = createTextHandler(this.props.onChange);
@@ -92,25 +94,24 @@ export class TopNPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.topN.optionsTab.dataLabel"
-                  defaultMessage="Data"
-                />
+                <FormattedMessage id="tsvb.topN.optionsTab.dataLabel" defaultMessage="Data" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiFormRow
               id={htmlId('itemUrl')}
-              label={(<FormattedMessage
-                id="tsvb.topN.optionsTab.itemUrlLabel"
-                defaultMessage="Item url"
-              />)}
+              label={
+                <FormattedMessage
+                  id="tsvb.topN.optionsTab.itemUrlLabel"
+                  defaultMessage="Item url"
+                />
+              }
               helpText={
                 <span>
                   <FormattedMessage
                     id="tsvb.topN.optionsTab.itemUrlDescription"
                     defaultMessage="This supports mustache templating. {key} is set to the term."
-                    values={{ key: (<EuiCode>{'{{key}}'}</EuiCode>) }}
+                    values={{ key: <EuiCode>{'{{key}}'}</EuiCode> }}
                   />
                 </span>
               }
@@ -135,15 +136,19 @@ export class TopNPanelConfig extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label={(<FormattedMessage
-                    id="tsvb.topN.optionsTab.panelFilterLabel"
-                    defaultMessage="Panel filter"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.topN.optionsTab.panelFilterLabel"
+                      defaultMessage="Panel filter"
+                    />
+                  }
                   fullWidth
                 >
                   <QueryBarInput
                     query={{
-                      language: model.filter.language ? model.filter.language : getDefaultQueryLanguage(),
+                      language: model.filter.language
+                        ? model.filter.language
+                        : getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
                     onChange={filter => this.props.onChange({ filter })}
@@ -175,10 +180,7 @@ export class TopNPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.topN.optionsTab.styleLabel"
-                  defaultMessage="Style"
-                />
+                <FormattedMessage id="tsvb.topN.optionsTab.styleLabel" defaultMessage="Style" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -227,19 +229,10 @@ export class TopNPanelConfig extends Component {
     return (
       <div>
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'data'}
-            onClick={() => this.switchTab('data')}
-          >
-            <FormattedMessage
-              id="tsvb.topN.dataTab.dataButtonLabel"
-              defaultMessage="Data"
-            />
+          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+            <FormattedMessage id="tsvb.topN.dataTab.dataButtonLabel" defaultMessage="Data" />
           </EuiTab>
-          <EuiTab
-            isSelected={selectedTab === 'options'}
-            onClick={() => this.switchTab('options')}
-          >
+          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
             <FormattedMessage
               id="tsvb.topN.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
@@ -250,7 +243,6 @@ export class TopNPanelConfig extends Component {
       </div>
     );
   }
-
 }
 
 TopNPanelConfig.propTypes = {

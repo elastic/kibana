@@ -7,7 +7,7 @@
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 
-import { FindOptions } from 'src/legacy/server/saved_objects/service';
+import { SavedObjectsFindOptions } from 'src/core/server';
 
 import { Pick3 } from '../../../common/utility_types';
 import {
@@ -59,12 +59,12 @@ export class Timeline {
     search: string | null,
     sort: SortTimeline | null
   ): Promise<ResponseTimelines> {
-    const options: FindOptions = {
+    const options: SavedObjectsFindOptions = {
       perPage: pageInfo != null ? pageInfo.pageSize : undefined,
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
       searchFields: onlyUserFavorite
-        ? ['title', 'description', 'favorite.userName']
+        ? ['title', 'description', 'favorite.keySearch']
         : ['title', 'description'],
       sortField: sort != null ? sort.sortField : undefined,
       sortOrder: sort != null ? sort.sortOrder : undefined,
@@ -95,9 +95,10 @@ export class Timeline {
     const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
     const fullName = getOr(null, 'credentials.fullname', request[internalFrameworkRequest].auth);
     const userFavoriteTimeline = {
+      keySearch: userName != null ? convertStringToBase64(userName) : null,
+      favoriteDate: new Date().valueOf(),
       fullName,
       userName,
-      favoriteDate: new Date().valueOf(),
     };
     if (timeline.favorite != null) {
       const alreadyExistsTimelineFavoriteByUser = timeline.favorite.findIndex(
@@ -119,7 +120,10 @@ export class Timeline {
     return {
       savedObjectId: persistResponse.timeline.savedObjectId,
       version: persistResponse.timeline.version,
-      favorite: persistResponse.timeline.favorite != null ? persistResponse.timeline.favorite : [],
+      favorite:
+        persistResponse.timeline.favorite != null
+          ? persistResponse.timeline.favorite.filter(fav => fav.userName === userName)
+          : [],
     };
   }
 
@@ -203,6 +207,8 @@ export class Timeline {
   }
 
   private async getSavedTimeline(request: FrameworkRequest, timelineId: string) {
+    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
+
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
       request[internalFrameworkRequest]
     );
@@ -217,19 +223,19 @@ export class Timeline {
 
     const [notes, pinnedEvents, timeline] = timelineWithNotesAndPinnedEvents;
 
-    return timelineWithReduxProperties(notes, pinnedEvents, timeline);
+    return timelineWithReduxProperties(notes, pinnedEvents, timeline, userName);
   }
 
-  private async getAllSavedTimeline(request: FrameworkRequest, options: FindOptions) {
+  private async getAllSavedTimeline(request: FrameworkRequest, options: SavedObjectsFindOptions) {
+    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
+
     const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
       request[internalFrameworkRequest]
     );
-    if (options.searchFields != null && options.searchFields.includes('favorite.userName')) {
-      options.search = `${options.search != null ? options.search : ''} ${getOr(
-        null,
-        'credentials.username',
-        request[internalFrameworkRequest].auth
-      )}`;
+    if (options.searchFields != null && options.searchFields.includes('favorite.keySearch')) {
+      options.search = `${options.search != null ? options.search : ''} ${
+        userName != null ? convertStringToBase64(userName) : null
+      }`;
     }
 
     const savedObjects = await savedObjectsClient.find({
@@ -254,11 +260,13 @@ export class Timeline {
     return {
       totalCount: savedObjects.total,
       timeline: timelinesWithNotesAndPinnedEvents.map(([notes, pinnedEvents, timeline]) =>
-        timelineWithReduxProperties(notes, pinnedEvents, timeline)
+        timelineWithReduxProperties(notes, pinnedEvents, timeline, userName)
       ),
     };
   }
 }
+
+export const convertStringToBase64 = (text: string): string => Buffer.from(text).toString('base64');
 
 // we have to use any here because the SavedObjectAttributes interface is like below
 // export interface SavedObjectAttributes {
@@ -270,9 +278,12 @@ export class Timeline {
 const timelineWithReduxProperties = (
   notes: NoteSavedObject[],
   pinnedEvents: PinnedEventSavedObject[],
-  timeline: TimelineSavedObject
+  timeline: TimelineSavedObject,
+  userName: string
 ): TimelineSavedObject => ({
   ...timeline,
+  favorite:
+    timeline.favorite != null ? timeline.favorite.filter(fav => fav.userName === userName) : [],
   eventIdToNoteIds: notes.filter(note => note.eventId != null),
   noteIds: notes
     .filter(note => note.eventId == null && note.noteId != null)

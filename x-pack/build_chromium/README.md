@@ -27,6 +27,8 @@ The various build flags are not well documented. Some are documented [here](http
 
 As of this writing, there is an officially supported headless Chromium build args file for Linux: `build/args/headless.gn`. This does not work on Windows or Mac, so we have taken that as our starting point, and modified it until the Windows / Mac builds succeeded.
 
+**NOTE:** Please, make sure you consult @elastic/kibana-security before you change, remove or add any of the build flags.
+
 ## VMs
 
 I ran Linux and Windows VMs in GCP with the following specs:
