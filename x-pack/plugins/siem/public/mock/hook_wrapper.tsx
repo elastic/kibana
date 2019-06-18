@@ -12,5 +12,5 @@ interface HookWrapperProps {
 }
 export const HookWrapper = (props: HookWrapperProps) => {
   const myHook = props.hook ? props.hook() : null;
-  return <div>{myHook}</div>;
+  return <div>{JSON.stringify(myHook)}</div>;
 };

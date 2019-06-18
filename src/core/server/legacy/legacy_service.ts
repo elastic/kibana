@@ -190,6 +190,11 @@ export class LegacyService implements CoreService {
   }
 
   private setupProxyListener(server: HapiServer) {
+    const { setupDeps } = this;
+    if (!setupDeps) {
+      throw new Error('Legacy service is not setup yet.');
+    }
+
     const legacyProxy = new LegacyPlatformProxy(
       this.coreContext.logger.get('legacy-proxy'),
       server.listener
@@ -211,7 +216,13 @@ export class LegacyService implements CoreService {
           maxBytes: Number.MAX_SAFE_INTEGER,
         },
       },
-      handler: async ({ raw: { req, res } }, responseToolkit) => {
+      handler: async (request, responseToolkit) => {
+        const { req, res } = request.raw;
+        const authHeaders = setupDeps.core.http.auth.getAuthHeaders(request);
+        if (authHeaders) {
+          // some plugins in Legacy relay on headers.authorization presence
+          req.headers = Object.assign(req.headers, authHeaders);
+        }
         if (this.kbnServer === undefined) {
           this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url}.`);
 
