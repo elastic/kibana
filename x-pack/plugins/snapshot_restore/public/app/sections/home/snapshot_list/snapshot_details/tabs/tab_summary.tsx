@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiDescriptionList,
@@ -12,6 +12,7 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
@@ -63,15 +64,31 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
     uuid,
   } = snapshotDetails;
 
-  const indicesList = indices.length ? (
+  // Only show 10 indices initially
+  const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
+  const hiddenIndicesCount = indices.length > 10 ? indices.length - 10 : 0;
+  const shortIndicesList = indices.length ? (
     <ul>
-      {indices.map((index: string) => (
+      {[...indices].splice(0, 10).map((index: string) => (
         <li key={index}>
           <EuiTitle size="xs">
             <span>{index}</span>
           </EuiTitle>
         </li>
       ))}
+      {hiddenIndicesCount ? (
+        <li key="hiddenIndicesCount">
+          <EuiTitle size="xs">
+            <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemIndicesShowAllLink"
+                defaultMessage="Show {count} more indices"
+                values={{ count: hiddenIndicesCount }}
+              />
+            </EuiLink>
+          </EuiTitle>
+        </li>
+      ) : null}
     </ul>
   ) : (
     <FormattedMessage
@@ -79,6 +96,18 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
       defaultMessage="-"
     />
   );
+  const fullIndicesList =
+    indices.length && indices.length > 10 ? (
+      <ul>
+        {indices.map((index: string) => (
+          <li key={index}>
+            <EuiTitle size="xs">
+              <span>{index}</span>
+            </EuiTitle>
+          </li>
+        ))}
+      </ul>
+    ) : null;
 
   return (
     <EuiDescriptionList textStyle="reverse">
@@ -149,7 +178,7 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            <EuiText>{indicesList}</EuiText>
+            <EuiText>{isShowingFullIndicesList ? fullIndicesList : shortIndicesList}</EuiText>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>
