@@ -4,30 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { AreaChartBaseComponent, AreaChartWithCustomPrompt } from './areachart';
-import { ChartConfigsData } from './common';
+import { ChartConfigsData, ChartHolder } from './common';
+import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
+
+jest.mock('@elastic/charts');
 
 describe('AreaChartBaseComponent', () => {
-  let wrapper: ReactWrapper;
+  let shallowWrapper: ShallowWrapper;
   const mockAreaChartData: ChartConfigsData[] = [
     {
       key: 'uniqueSourceIpsHistogram',
       value: [
-        { x: 1556686800000, y: 580213 },
-        { x: 1556730000000, y: 1096175 },
-        { x: 1556773200000, y: 12382 },
+        { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
+        { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1096175 },
+        { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
       ],
       color: '#DB1374',
     },
     {
       key: 'uniqueDestinationIpsHistogram',
       value: [
-        { x: 1556686800000, y: 565975 },
-        { x: 1556730000000, y: 1084366 },
-        { x: 1556773200000, y: 12280 },
+        { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+        { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+        { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
       ],
       color: '#490092',
     },
@@ -35,47 +38,165 @@ describe('AreaChartBaseComponent', () => {
 
   describe('render', () => {
     beforeAll(() => {
-      wrapper = mount(<AreaChartBaseComponent height={100} width={120} data={mockAreaChartData} />);
+      shallowWrapper = shallow(
+        <AreaChartBaseComponent height={100} width={120} data={mockAreaChartData} />
+      );
     });
 
     it('should render Chart', () => {
-      expect(wrapper.find('Chart')).toHaveLength(1);
+      expect(shallowWrapper.find('Chart')).toHaveLength(1);
+    });
+  });
+
+  describe('render with customized configs', () => {
+    const mockTimeFormatter = jest.fn();
+    const mockNumberFormatter = jest.fn();
+    const configs = {
+      series: {
+        xScaleType: ScaleType.Time,
+        yScaleType: ScaleType.Linear,
+      },
+      axis: {
+        xTickFormatter: mockTimeFormatter,
+        yTickFormatter: mockNumberFormatter,
+      },
+    };
+
+    beforeAll(() => {
+      shallowWrapper = shallow(
+        <AreaChartBaseComponent
+          height={100}
+          width={120}
+          data={mockAreaChartData}
+          configs={configs}
+        />
+      );
+    });
+
+    it(`should ${mockAreaChartData.length} render AreaSeries`, () => {
+      expect(shallow).toMatchSnapshot();
+      expect(shallowWrapper.find(AreaSeries)).toHaveLength(mockAreaChartData.length);
+    });
+
+    it('should render AreaSeries with given xScaleType', () => {
+      expect(
+        shallowWrapper
+          .find(AreaSeries)
+          .first()
+          .prop('xScaleType')
+      ).toEqual(configs.series.xScaleType);
+    });
+
+    it('should render AreaSeries with given yScaleType', () => {
+      expect(
+        shallowWrapper
+          .find(AreaSeries)
+          .first()
+          .prop('yScaleType')
+      ).toEqual(configs.series.yScaleType);
+    });
+
+    it('should render xAxis with given tick formatter', () => {
+      expect(
+        shallowWrapper
+          .find(Axis)
+          .first()
+          .prop('tickFormat')
+      ).toEqual(mockTimeFormatter);
+    });
+
+    it('should render yAxis with given tick formatter', () => {
+      expect(
+        shallowWrapper
+          .find(Axis)
+          .last()
+          .prop('tickFormat')
+      ).toEqual(mockNumberFormatter);
+    });
+  });
+
+  describe('render with default configs if no customized configs given', () => {
+    beforeAll(() => {
+      shallowWrapper = shallow(
+        <AreaChartBaseComponent height={100} width={120} data={mockAreaChartData} />
+      );
+    });
+
+    it(`should ${mockAreaChartData.length} render AreaSeries`, () => {
+      expect(shallow).toMatchSnapshot();
+      expect(shallowWrapper.find(AreaSeries)).toHaveLength(mockAreaChartData.length);
+    });
+
+    it('should render AreaSeries with default xScaleType: Linear', () => {
+      expect(
+        shallowWrapper
+          .find(AreaSeries)
+          .first()
+          .prop('xScaleType')
+      ).toEqual(ScaleType.Linear);
+    });
+
+    it('should render AreaSeries with default yScaleType: Linear', () => {
+      expect(
+        shallowWrapper
+          .find(AreaSeries)
+          .first()
+          .prop('yScaleType')
+      ).toEqual(ScaleType.Linear);
+    });
+
+    it('should not format xTicks value', () => {
+      expect(
+        shallowWrapper
+          .find(Axis)
+          .last()
+          .prop('tickFormat')
+      ).toBeUndefined();
+    });
+
+    it('should not format yTicks value', () => {
+      expect(
+        shallowWrapper
+          .find(Axis)
+          .last()
+          .prop('tickFormat')
+      ).toBeUndefined();
     });
   });
 
   describe('no render', () => {
     beforeAll(() => {
-      wrapper = mount(
+      shallowWrapper = shallow(
         <AreaChartBaseComponent height={null} width={null} data={mockAreaChartData} />
       );
     });
 
     it('should not render without height and width', () => {
-      expect(wrapper.find('Chart')).toHaveLength(0);
+      expect(shallowWrapper.find('Chart')).toHaveLength(0);
     });
   });
 });
 
 describe('AreaChartWithCustomPrompt', () => {
-  let wrapper: ReactWrapper;
+  let shallowWrapper: ShallowWrapper;
   describe.each([
     [
       [
         {
           key: 'uniqueSourceIpsHistogram',
           value: [
-            { x: 1556686800000, y: 580213 },
-            { x: 1556730000000, y: 1096175 },
-            { x: 1556773200000, y: 12382 },
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1096175 },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
           ],
           color: '#DB1374',
         },
         {
           key: 'uniqueDestinationIpsHistogram',
           value: [
-            { x: 1556686800000, y: 565975 },
-            { x: 1556730000000, y: 1084366 },
-            { x: 1556773200000, y: 12280 },
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
           ],
           color: '#490092',
         },
@@ -90,9 +211,9 @@ describe('AreaChartWithCustomPrompt', () => {
           {
             key: 'uniqueDestinationIpsHistogram',
             value: [
-              { x: 1556686800000, y: 565975 },
-              { x: 1556730000000, y: 1084366 },
-              { x: 1556773200000, y: 12280 },
+              { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+              { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+              { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
             ],
             color: '#490092',
           },
@@ -101,12 +222,12 @@ describe('AreaChartWithCustomPrompt', () => {
     ],
   ])('renders areachart', (data: ChartConfigsData[] | [] | null | undefined) => {
     beforeAll(() => {
-      wrapper = mount(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
+      shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
     });
 
     it('render AreaChartBaseComponent', () => {
-      expect(wrapper.find('Chart')).toHaveLength(1);
-      expect(wrapper.find('ChartHolder')).toHaveLength(0);
+      expect(shallowWrapper.find(AreaChartBaseComponent)).toHaveLength(1);
+      expect(shallowWrapper.find(ChartHolder)).toHaveLength(0);
     });
   });
 
@@ -128,12 +249,20 @@ describe('AreaChartWithCustomPrompt', () => {
     [
       {
         key: 'uniqueSourceIpsHistogram',
-        value: [{ x: 1556686800000 }, { x: 1556730000000 }, { x: 1556773200000 }],
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
+        ],
         color: '#DB1374',
       },
       {
         key: 'uniqueDestinationIpsHistogram',
-        value: [{ x: 1556686800000 }, { x: 1556730000000 }, { x: 1556773200000 }],
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
+        ],
         color: '#490092',
       },
     ],
@@ -142,18 +271,18 @@ describe('AreaChartWithCustomPrompt', () => {
         {
           key: 'uniqueSourceIpsHistogram',
           value: [
-            { x: 1556686800000, y: 580213 },
-            { x: 1556730000000, y: null },
-            { x: 1556773200000, y: 12382 },
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: null },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
           ],
           color: '#DB1374',
         },
         {
           key: 'uniqueDestinationIpsHistogram',
           value: [
-            { x: 1556686800000, y: 565975 },
-            { x: 1556730000000, y: 1084366 },
-            { x: 1556773200000, y: 12280 },
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
           ],
           color: '#490092',
         },
@@ -164,18 +293,18 @@ describe('AreaChartWithCustomPrompt', () => {
         {
           key: 'uniqueSourceIpsHistogram',
           value: [
-            { x: 1556686800000, y: 580213 },
-            { x: 1556730000000, y: {} },
-            { x: 1556773200000, y: 12382 },
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: {} },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
           ],
           color: '#DB1374',
         },
         {
           key: 'uniqueDestinationIpsHistogram',
           value: [
-            { x: 1556686800000, y: 565975 },
-            { x: 1556730000000, y: 1084366 },
-            { x: 1556773200000, y: 12280 },
+            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
           ],
           color: '#490092',
         },
@@ -183,12 +312,12 @@ describe('AreaChartWithCustomPrompt', () => {
     ],
   ])('renders prompt', (data: ChartConfigsData[] | [] | null | undefined) => {
     beforeAll(() => {
-      wrapper = mount(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
+      shallowWrapper = shallow(<AreaChartWithCustomPrompt height={100} width={120} data={data} />);
     });
 
     it('render Chart Holder', () => {
-      expect(wrapper.find('Chart')).toHaveLength(0);
-      expect(wrapper.find('ChartHolder')).toHaveLength(1);
+      expect(shallowWrapper.find(AreaChartBaseComponent)).toHaveLength(0);
+      expect(shallowWrapper.find(ChartHolder)).toHaveLength(1);
     });
   });
 });

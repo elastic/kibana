@@ -1097,7 +1097,7 @@ export interface KpiNetworkData {
 }
 
 export interface KpiNetworkHistogramData {
-  x?: string | null;
+  x?: number | null;
 
   y?: number | null;
 }
@@ -1125,7 +1125,7 @@ export interface KpiHostsData {
 }
 
 export interface KpiHostHistogramData {
-  x?: string | null;
+  x?: number | null;
 
   y?: number | null;
 }
@@ -5874,13 +5874,13 @@ export namespace KpiNetworkDataResolvers {
 
 export namespace KpiNetworkHistogramDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = KpiNetworkHistogramData> {
-    x?: XResolver<string | null, TypeParent, Context>;
+    x?: XResolver<number | null, TypeParent, Context>;
 
     y?: YResolver<number | null, TypeParent, Context>;
   }
 
   export type XResolver<
-    R = string | null,
+    R = number | null,
     Parent = KpiNetworkHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5984,13 +5984,13 @@ export namespace KpiHostsDataResolvers {
 
 export namespace KpiHostHistogramDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = KpiHostHistogramData> {
-    x?: XResolver<string | null, TypeParent, Context>;
+    x?: XResolver<number | null, TypeParent, Context>;
 
     y?: YResolver<number | null, TypeParent, Context>;
   }
 
   export type XResolver<
-    R = string | null,
+    R = number | null,
     Parent = KpiHostHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

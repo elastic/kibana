@@ -10,11 +10,11 @@ exports[`KpiNetwork Component rendering it renders loading icons 1`] = `
       "uniqueDestinationPrivateIps": 18,
       "uniqueDestinationPrivateIpsHistogram": Array [
         Object {
-          "x": "2019-02-09T16:00:00.000Z",
+          "x": 1549728000000,
           "y": 8,
         },
         Object {
-          "x": "2019-02-09T19:00:00.000Z",
+          "x": 1549738800000,
           "y": 0,
         },
       ],
@@ -22,11 +22,11 @@ exports[`KpiNetwork Component rendering it renders loading icons 1`] = `
       "uniqueSourcePrivateIps": 383,
       "uniqueSourcePrivateIpsHistogram": Array [
         Object {
-          "x": "2019-02-09T16:00:00.000Z",
+          "x": 1549728000000,
           "y": 8,
         },
         Object {
-          "x": "2019-02-09T19:00:00.000Z",
+          "x": 1549738800000,
           "y": 0,
         },
       ],
@@ -46,11 +46,11 @@ exports[`KpiNetwork Component rendering it renders the default widget 1`] = `
       "uniqueDestinationPrivateIps": 18,
       "uniqueDestinationPrivateIpsHistogram": Array [
         Object {
-          "x": "2019-02-09T16:00:00.000Z",
+          "x": 1549728000000,
           "y": 8,
         },
         Object {
-          "x": "2019-02-09T19:00:00.000Z",
+          "x": 1549738800000,
           "y": 0,
         },
       ],
@@ -58,11 +58,11 @@ exports[`KpiNetwork Component rendering it renders the default widget 1`] = `
       "uniqueSourcePrivateIps": 383,
       "uniqueSourcePrivateIpsHistogram": Array [
         Object {
-          "x": "2019-02-09T16:00:00.000Z",
+          "x": 1549728000000,
           "y": 8,
         },
         Object {
-          "x": "2019-02-09T19:00:00.000Z",
+          "x": 1549738800000,
           "y": 0,
         },
       ],
