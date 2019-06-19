@@ -14,6 +14,10 @@ chrome.getUiSettingsClient().get.mockImplementation((key: string) => {
       return { pause: false, value: 0 };
     case 'siem:defaultIndex':
       return ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
+    case 'dateFormat:tz':
+      return 'Asia/Taipei';
+    case 'theme:darkMode':
+      return false;
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }

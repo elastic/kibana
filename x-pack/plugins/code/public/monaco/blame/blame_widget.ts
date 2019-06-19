@@ -56,6 +56,7 @@ export class BlameWidget implements Editor.IContentWidget {
   }
 
   private update() {
+    this.containerNode.style.width = '0px';
     const { fontSize, lineHeight } = this.editor.getConfiguration().fontInfo;
     this.domNode.style.position = 'relative';
     this.domNode.style.left = '-332px';

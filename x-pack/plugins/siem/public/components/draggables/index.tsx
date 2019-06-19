@@ -9,6 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { Omit } from '../../../common/utility_types';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getEmptyStringTag } from '../empty_value';
@@ -119,8 +120,6 @@ export const DefaultDraggable = pure<DefaultDraggableType>(
 const Badge = styled(EuiBadge)`
   vertical-align: top;
 `;
-
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
   contextId: string;
