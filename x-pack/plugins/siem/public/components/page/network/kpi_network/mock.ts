@@ -14,22 +14,22 @@ export const mockData: { KpiNetwork: KpiNetworkData } = {
     uniqueSourcePrivateIps: 383,
     uniqueSourcePrivateIpsHistogram: [
       {
-        x: '2019-02-09T16:00:00.000Z',
+        x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
         y: 8,
       },
       {
-        x: '2019-02-09T19:00:00.000Z',
+        x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
         y: 0,
       },
     ],
     uniqueDestinationPrivateIps: 18,
     uniqueDestinationPrivateIpsHistogram: [
       {
-        x: '2019-02-09T16:00:00.000Z',
+        x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
         y: 8,
       },
       {
-        x: '2019-02-09T19:00:00.000Z',
+        x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
         y: 0,
       },
     ],
@@ -176,9 +176,9 @@ export const mockEnableChartsData = {
     {
       key: 'uniqueSourcePrivateIpsHistogram',
       value: [
-        { x: '2019-02-09T16:00:00.000Z', y: 8 },
+        { x: new Date('2019-02-09T16:00:00.000Z').valueOf(), y: 8 },
         {
-          x: '2019-02-09T19:00:00.000Z',
+          x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
           y: 0,
         },
       ],
@@ -189,7 +189,10 @@ export const mockEnableChartsData = {
     },
     {
       key: 'uniqueDestinationPrivateIpsHistogram',
-      value: [{ x: '2019-02-09T16:00:00.000Z', y: 8 }, { x: '2019-02-09T19:00:00.000Z', y: 0 }],
+      value: [
+        { x: new Date('2019-02-09T16:00:00.000Z').valueOf(), y: 8 },
+        { x: new Date('2019-02-09T19:00:00.000Z').valueOf(), y: 0 },
+      ],
       name: 'Dist.',
       description: 'Destination',
       color: '#490092',
