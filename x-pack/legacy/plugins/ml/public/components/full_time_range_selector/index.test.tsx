@@ -20,7 +20,7 @@ jest.mock('./full_time_range_selector_service', () => ({
 }));
 
 describe('FullTimeRangeSelector', () => {
-  const indexPattern: IndexPattern = {
+  const indexPattern: any = {
     id: '0844fc70-5ab5-11e9-935e-836737467b0f',
     fields: [],
     title: 'test-index-pattern',

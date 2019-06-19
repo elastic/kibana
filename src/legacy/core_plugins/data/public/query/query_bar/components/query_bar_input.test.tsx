@@ -73,7 +73,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-};
+} as any;
 
 describe('QueryBarInput', () => {
   beforeEach(() => {

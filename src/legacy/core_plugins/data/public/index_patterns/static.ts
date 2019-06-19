@@ -16,8 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Field, StaticIndexPattern } from 'ui/index_patterns';
-
-export function isFilterable(field: Field): boolean;
-export function getFromSavedObject(savedObject: any): StaticIndexPattern;
+export const foo = () => false;
+export {
+  // types
+  IndexPatternsSetup,
+  StaticIndexPattern,
+  StaticIndexPatternField,
+  Field,
+} from './index_patterns_service';

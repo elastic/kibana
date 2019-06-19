@@ -19,37 +19,26 @@
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
 
-export const ILLEGAL_CHARACTERS = 'ILLEGAL_CHARACTERS';
-export const CONTAINS_SPACES = 'CONTAINS_SPACES';
+import {
+  ILLEGAL_CHARACTERS,
+  CONTAINS_SPACES,
+  validateIndexPattern,
+} from './validate_index_pattern';
 
-function findIllegalCharacters(indexPattern) {
-  const illegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
-    if (indexPattern.includes(char)) {
-      chars.push(char);
-    }
+describe('Index Pattern Validation', () => {
+  it('should not allow space in the pattern', () => {
+    const errors = validateIndexPattern('my pattern');
+    expect(errors[CONTAINS_SPACES]).toBe(true);
+  });
 
-    return chars;
-  }, []);
+  it('should not allow illegal characters', () => {
+    INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.forEach(char => {
+      const errors = validateIndexPattern(`pattern${char}`);
+      expect(errors[ILLEGAL_CHARACTERS]).toEqual([char]);
+    });
+  });
 
-  return illegalCharacters;
-}
-
-function indexPatternContainsSpaces(indexPattern) {
-  return indexPattern.includes(' ');
-}
-
-export function validateIndexPattern(indexPattern) {
-  const errors = {};
-
-  const illegalCharacters = findIllegalCharacters(indexPattern);
-
-  if (illegalCharacters.length) {
-    errors[ILLEGAL_CHARACTERS] = illegalCharacters;
-  }
-
-  if (indexPatternContainsSpaces(indexPattern)) {
-    errors[CONTAINS_SPACES] = true;
-  }
-
-  return errors;
-}
+  it('should return empty object when there are no errors', () => {
+    expect(validateIndexPattern('my-pattern-*')).toEqual({});
+  });
+});

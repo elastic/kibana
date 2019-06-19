@@ -28,7 +28,7 @@ describe('Data Frame: <DefinePivotForm />', () => {
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
-    };
+    } as any;
 
     // Using a wrapping <div> element because shallow() would fail
     // with the Provider being the outer most component.

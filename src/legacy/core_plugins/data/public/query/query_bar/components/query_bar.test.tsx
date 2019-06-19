@@ -63,7 +63,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-};
+} as any;
 
 describe('QueryBar', () => {
   const QUERY_INPUT_SELECTOR = 'InjectIntl(QueryBarInputUI)';

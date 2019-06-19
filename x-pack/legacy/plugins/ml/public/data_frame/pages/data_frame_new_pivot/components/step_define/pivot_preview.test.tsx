@@ -30,7 +30,7 @@ describe('Data Frame: <PivotPreview />', () => {
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
-    };
+    } as any;
 
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,

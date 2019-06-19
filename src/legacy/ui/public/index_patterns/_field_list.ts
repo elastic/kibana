@@ -18,16 +18,21 @@
  */
 
 import { IndexedArray } from 'ui/indexed_array';
-import { Field } from './_field';
+import { IndexPattern } from 'ui/index_patterns/_index_pattern';
+import { Field, FieldSpec } from './_field';
 
-export class FieldList extends IndexedArray {
-  constructor(indexPattern, specs) {
+export class FieldList extends IndexedArray<Field> {
+  // makes typescript work, but breaks kibana
+  //public byType: Record<string, Field[]> = {};
+  //public byName: Record<string, Field> = {};
+
+  constructor(indexPattern: IndexPattern, specs: FieldSpec[], shortDotsEnable: boolean = false) {
     super({
       index: ['name'],
       group: ['type'],
-      initialSet: specs.map(function (field) {
-        return new Field(indexPattern, field);
-      })
+      initialSet: specs.map(function(field) {
+        return new Field(indexPattern, field, shortDotsEnable);
+      }),
     });
   }
 }

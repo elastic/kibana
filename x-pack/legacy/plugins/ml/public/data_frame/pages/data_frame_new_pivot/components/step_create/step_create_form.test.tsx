@@ -10,6 +10,7 @@ import React from 'react';
 import { KibanaContext } from '../../../../common';
 
 import { StepCreateForm } from './step_create_form';
+import { IndexPattern } from 'ui/index_patterns';
 
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
@@ -27,11 +28,11 @@ describe('Data Frame: <StepCreateForm />', () => {
       onChange() {},
     };
 
-    const currentIndexPattern = {
+    const currentIndexPattern = ({
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [],
-    };
+    } as any) as IndexPattern;
 
     // Using a wrapping <div> element because shallow() would fail
     // with the Provider being the outer most component.

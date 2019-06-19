@@ -46,7 +46,7 @@ describe('usePivotPreviewData', () => {
   test('indexPattern not defined', () => {
     testHook(() => {
       pivotPreviewObj = usePivotPreviewData(
-        { id: 'the-id', title: 'the-title', fields: [] },
+        { id: 'the-id', title: 'the-title', fields: [] } as any,
         query,
         {},
         {}
@@ -62,7 +62,7 @@ describe('usePivotPreviewData', () => {
   test('indexPattern set triggers loading', () => {
     testHook(() => {
       pivotPreviewObj = usePivotPreviewData(
-        { id: 'the-id', title: 'the-title', fields: [] },
+        { id: 'the-id', title: 'the-title', fields: [] } as any,
         query,
         {},
         {}

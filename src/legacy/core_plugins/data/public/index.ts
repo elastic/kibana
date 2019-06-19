@@ -82,7 +82,7 @@ export interface DataSetup {
 export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
 
 /** @public types */
-export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
+export { IndexPattern, StaticIndexPattern, Field } from './index_patterns';
 export { Query, QueryBar } from './query';
 export { FilterBar } from './filter';
 export { FilterManager, FilterStateManager, uniqFilters } from './filter/filter_manager';

@@ -20,9 +20,7 @@
 import sinon from 'sinon';
 import { IndexPattern } from 'ui/index_patterns/_index_pattern';
 import { getRoutes } from 'ui/index_patterns/get_routes';
-import { formatHitProvider } from 'ui/index_patterns/_format_hit';
-import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
-import { fieldFormats } from 'ui/registry/field_formats';
+import { formatHitProvider } from 'ui/index_patterns/_format_hit'; import { fieldFormats } from 'ui/registry/field_formats';
 import { flattenHitWrapper } from 'ui/index_patterns/_flatten_hit';
 import { FieldList } from 'ui/index_patterns/_field_list';
 
@@ -42,7 +40,7 @@ export default function () {
     this.fieldFormatMap = {};
     this.routes = getRoutes();
 
-    this.getComputedFields = getComputedFields.bind(this);
+    this.getComputedFields = sinon.spy(IndexPattern.prototype.getComputedFields);
     this.flattenHit = flattenHitWrapper(this, this.metaFields);
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
     this.fieldsFetcher = { apiClient: { baseUrl: '' } };

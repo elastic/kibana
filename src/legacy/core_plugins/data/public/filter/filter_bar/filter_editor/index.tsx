@@ -449,7 +449,7 @@ class FilterEditorUI extends Component<Props, State> {
 
     if (isCustomEditorOpen) {
       const { index, disabled, negate } = this.props.filter.meta;
-      const newIndex = index || this.props.indexPatterns[0].id;
+      const newIndex = index || (this.props.indexPatterns[0].id as string);
       const body = JSON.parse(queryDsl);
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
       this.props.onSubmit(filter);

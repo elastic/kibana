@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
-
 import {
   getPreviewRequestBody,
   PivotAggsConfig,
@@ -22,7 +20,7 @@ describe('Data Frame: Define Pivot Common', () => {
     // The field name includes the characters []> as well as a leading and ending space charcter
     // which cannot be used for aggregation names. The test results verifies that the characters
     // should still be present in field and dropDownName values, but should be stripped for aggName values.
-    const indexPattern: IndexPattern = {
+    const indexPattern: any = {
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [

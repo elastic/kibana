@@ -17,15 +17,30 @@
  * under the License.
  */
 
-export interface Field {
-  name: string;
-  type: string;
-  // esTypes might be undefined on old index patterns that have not been refreshed since we added
-  // this prop. It is also undefined on scripted fields.
-  esTypes?: string[];
-  aggregatable: boolean;
-  filterable: boolean;
-  searchable: boolean;
-  parent?: string;
-  subType?: string;
+export function createIndexPatternCache() {
+  const vals: any = {};
+  const cache: any = {};
+
+  cache.get = function(id: string) {
+    return vals[id];
+  };
+
+  cache.set = function(id: string, prom: any) {
+    vals[id] = prom;
+    return prom;
+  };
+
+  cache.clear = cache.delete = function(id: string) {
+    delete vals[id];
+  };
+
+  cache.clearAll = function() {
+    for (const id in vals) {
+      if (vals.hasOwnProperty(id)) {
+        delete vals[id];
+      }
+    }
+  };
+
+  return cache;
 }

@@ -106,7 +106,7 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
                     groupBy={groupBy}
                     nodeType={nodeType}
                     onChange={changeGroupBy}
-                    fields={derivedIndexPattern.fields}
+                    fields={derivedIndexPattern.fields as any}
                     onChangeCustomOptions={changeCustomOptions}
                     customOptions={customOptions}
                   />

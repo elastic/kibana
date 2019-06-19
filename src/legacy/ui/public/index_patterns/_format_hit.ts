@@ -18,26 +18,25 @@
  */
 
 import _ from 'lodash';
+import { IndexPattern } from './_index_pattern';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version
-export function formatHitProvider(indexPattern, defaultFormat) {
-
-  function convert(hit, val, fieldName) {
+export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any) {
+  function convert(hit: any, val: any, fieldName: string) {
     const field = indexPattern.fields.byName[fieldName];
     if (!field) return defaultFormat.convert(val, 'html');
     const parsedUrl = {
       origin: window.location.origin,
       pathname: window.location.pathname,
-      basePath: indexPattern.fieldsFetcher.apiClient.basePath,
     };
     return field.format.getConverterFor('html')(val, field, hit, parsedUrl);
   }
 
-  function formatHit(hit) {
+  function formatHit(hit: any) {
     const cached = formattedCache.get(hit);
     if (cached) {
       return cached;
@@ -48,19 +47,23 @@ export function formatHitProvider(indexPattern, defaultFormat) {
     const partials = partialFormattedCache.get(hit) || {};
     partialFormattedCache.set(hit, partials);
 
-    const cache = {};
+    const cache = {} as any;
     formattedCache.set(hit, cache);
 
-    _.forOwn(indexPattern.flattenHit(hit), function (val, fieldName) {
+    _.forOwn(indexPattern.flattenHit(hit), function(val: any, fieldName: any) {
       // sync the formatted and partial cache
-      const formatted = partials[fieldName] == null ? convert(hit, val, fieldName) : partials[fieldName];
+      if (!fieldName) {
+        return;
+      }
+      const formatted =
+        partials[fieldName] == null ? convert(hit, val, fieldName) : partials[fieldName];
       cache[fieldName] = partials[fieldName] = formatted;
     });
 
     return cache;
   }
 
-  formatHit.formatField = function (hit, fieldName) {
+  formatHit.formatField = function(hit: any, fieldName: string) {
     let partials = partialFormattedCache.get(hit);
     if (partials && partials[fieldName] != null) {
       return partials[fieldName];
@@ -71,7 +74,8 @@ export function formatHitProvider(indexPattern, defaultFormat) {
       partialFormattedCache.set(hit, partials);
     }
 
-    const val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
+    const val: any =
+      fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
     return convert(hit, val, fieldName);
   };
 
