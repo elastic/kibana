@@ -8,8 +8,11 @@ import gql from 'graphql-tag';
 
 export const docCountQueryString = `
 {
-  getDocCount {
-    count
+  getStatesIndexStatus {
+    docCount {
+      count
+    }
+    indexExists
   }
 }
 `;

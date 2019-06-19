@@ -5,17 +5,17 @@
  */
 
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { docCountQuery } from '../../../queries';
-import { EmptyIndex } from './empty_index';
 import { EmptyStateError } from './empty_state_error';
 import { EmptyStateLoading } from './empty_state_loading';
+import { StatesIndexStatus } from '../../../../common/graphql/types';
+import { DataMissing } from './data_missing';
 
 interface EmptyStateQueryResult {
-  getDocCount?: {
-    count: number;
-  };
+  getStatesIndexStatus?: StatesIndexStatus;
 }
 
 interface EmptyStateProps {
@@ -29,8 +29,18 @@ export const EmptyStateComponent = ({ basePath, children, data, errors }: Props)
   if (errors) {
     return <EmptyStateError errorMessage={formatUptimeGraphQLErrorList(errors)} />;
   }
-  if (data && data.getDocCount) {
-    const { count } = data.getDocCount;
+  if (data && data.getStatesIndexStatus) {
+    const { docCount, indexExists } = data.getStatesIndexStatus;
+    if (!indexExists) {
+      return (
+        <DataMissing
+          basePath={basePath}
+          headingMessage={i18n.translate('xpack.uptime.emptyState.noIndexTitle', {
+            defaultMessage: 'Uptime index not found',
+          })}
+        />
+      );
+    }
     /**
      * We choose to render the children any time the count > 0, even if
      * the component is loading. If we render the loading state for this component,
@@ -38,11 +48,18 @@ export const EmptyStateComponent = ({ basePath, children, data, errors }: Props)
      * jittery UX any time the components refresh. This way we'll keep the stale
      * state displayed during the fetching process.
      */
-    if (count) {
+    if (docCount && docCount.count) {
       return <Fragment>{children}</Fragment>;
     }
-    if (count === 0) {
-      return <EmptyIndex basePath={basePath} />;
+    if (docCount && docCount.count === 0) {
+      return (
+        <DataMissing
+          basePath={basePath}
+          headingMessage={i18n.translate('xpack.uptime.emptyState.noDataTitle', {
+            defaultMessage: 'No uptime data available',
+          })}
+        />
+      );
     }
   }
   return <EmptyStateLoading />;
