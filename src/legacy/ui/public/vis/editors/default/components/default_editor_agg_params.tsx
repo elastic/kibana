@@ -179,7 +179,7 @@ function DefaultEditorAggParams({
     () => {
       setValidity(isFormValid);
     },
-    [isFormValid]
+    [isFormValid, agg.type]
   );
 
   useEffect(

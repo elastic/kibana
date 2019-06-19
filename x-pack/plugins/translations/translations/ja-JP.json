@@ -322,7 +322,6 @@
     "common.ui.exitFullScreenButton.exitFullScreenModeButtonAreaLabel": "全画面モードを終了",
     "common.ui.exitFullScreenButton.exitFullScreenModeButtonLabel": "全画面を終了",
     "common.ui.exitFullScreenButton.fullScreenModeDescription": "ESC キーで全画面モードを修了します。",
-    "common.ui.fancyForm.errorDescription": "{count, plural, one {# エラー} other {# エラー}}",
     "common.ui.fieldEditor.actions.cancelButton": "キャンセル",
     "common.ui.fieldEditor.actions.createButton": "フィールドを作成",
     "common.ui.fieldEditor.actions.deleteButton": "削除",

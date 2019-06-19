@@ -280,7 +280,6 @@
     "common.ui.errorUrlOverflow.howTofixError.removeStuffFromDashboardText": "从您的仪表板中删除一些内容。这回减小 URL 的长度，使 IE 能够处理它。",
     "common.ui.errorUrlOverflow.howTofixErrorDescription": "通常只有较大的、复杂的仪表板会发生此问题，因此您会有一些选项：",
     "common.ui.errorUrlOverflow.howTofixErrorTitle": "那么，我如何解决此问题？",
-    "common.ui.fancyForm.errorDescription": "{count, plural, one {# 个错误} other {# 个错误}}",
     "common.ui.fieldEditor.actions.cancelButton": "取消",
     "common.ui.fieldEditor.actions.createButton": "创建字段",
     "common.ui.fieldEditor.actions.deleteButton": "删除",

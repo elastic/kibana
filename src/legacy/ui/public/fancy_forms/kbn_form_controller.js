@@ -54,11 +54,9 @@ export function decorateFormController($delegate, $injector) {
     }
 
     describeErrors() {
-      const count = this.softErrorCount();
       return i18n.translate('common.ui.fancyForm.errorDescription',
         {
-          defaultMessage: '{count, plural, one {# Error} other {# Errors}}',
-          values: { count }
+          defaultMessage: 'Errors'
         });
     }
 
