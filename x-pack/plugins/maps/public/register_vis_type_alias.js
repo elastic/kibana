@@ -16,7 +16,7 @@ visualizations.types.visTypeAliasRegistry.add({
   url: MAP_BASE_URL,
   name: APP_ID,
   title: i18n.translate('xpack.maps.visTypeAlias.title', {
-    defaultMessage: 'Maps app'
+    defaultMessage: 'Maps'
   }),
   description: i18n.translate('xpack.maps.visTypeAlias.description', {
     defaultMessage: VIS_TYPE_DESCRIPTION
