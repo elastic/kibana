@@ -36,12 +36,13 @@ import { networkModel, networkSelectors, State } from '../../store';
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
-import { KpiIpDetailsQuery } from '../../containers/kpi_ip_detail';
+import { KpiIpDetailsQuery } from '../../containers/kpi_ip_details';
 import { KpiIpDetailsComponent } from '../../components/page/network/kpi_ip_details';
 
 const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);
 const UsersTableManage = manageQuery(UsersTable);
+const KpiIpDetailsManage = manageQuery(KpiIpDetailsComponent);
 
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
@@ -108,8 +109,14 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         filterQuery={filterQuery}
                         ip={decodeIpv6(ip)}
                       >
-                        {({ kpiIpDetails, loading }) => (
-                          <KpiIpDetailsComponent data={kpiIpDetails} loading={loading} />
+                        {({ kpiIpDetails, loading, id, refetch }) => (
+                          <KpiIpDetailsManage
+                            id={id}
+                            refetch={refetch}
+                            data={kpiIpDetails}
+                            loading={loading}
+                            setQuery={setQuery}
+                          />
                         )}
                       </KpiIpDetailsQuery>
 

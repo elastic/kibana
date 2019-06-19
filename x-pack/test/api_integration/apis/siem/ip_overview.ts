@@ -17,7 +17,7 @@ const ipOverviewTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
 
-      it('Make sure that we get KpiNetwork data', () => {
+      it('Make sure that we get IpOverview data', () => {
         return client
           .query<GetIpOverviewQuery.Query>({
             query: ipOverviewQuery,
@@ -43,7 +43,7 @@ const ipOverviewTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('packetbeat/default'));
       after(() => esArchiver.unload('packetbeat/default'));
 
-      it('Make sure that we get KpiNetwork data', () => {
+      it('Make sure that we get IpOverview data', () => {
         return client
           .query<GetIpOverviewQuery.Query>({
             query: ipOverviewQuery,
