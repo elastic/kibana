@@ -6,28 +6,31 @@
 import { getRollupSearchStrategy } from './rollup_search_strategy';
 import { getRollupSearchRequest } from './rollup_search_request';
 import { getRollupSearchCapabilities } from './rollup_search_capabilities';
-import { PLUGIN } from '../../../common';
 import { callWithRequestFactory } from '../call_with_request_factory';
+import { licensePreRoutingFactory } from '../license_pre_routing_factory';
 
 export const registerRollupSearchStrategy = (kbnServer, server) => kbnServer.afterPluginsInit(() => {
+  const licensePreRouting = licensePreRoutingFactory(server);
   server.plugins.data.registerSearchStrategy({
-    isViable: async (server, request, index) => {
-      const licenseCheckResults = server.plugins.xpack_main.info.feature(PLUGIN.ID).getLicenseCheckResults();
-      if (!licenseCheckResults.isAvailable) return false;
+    priority: 15, // Just needs to be above the default search strategy (10) so it takes precedence
+    isViable: async (request, index) => {
+      if (licensePreRouting() !== null) return false;
       const indexPattern = await server.plugins.data.getIndexPattern(request, index);
-      console.log(indexPattern.type);
-      return indexPattern.type === 'rollup';
+      return indexPattern && indexPattern.type === 'rollup';
     },
-    search: (server, request, index, body) => {
-      const controller = new AbortController();
-      const { signal } = controller;
-      request.events.once('disconnect', () => controller.abort());
+    search: async (request, index, body, { signal, onProgress = () => {} } = {}) => {
       const callWithRequest = callWithRequestFactory(server, request);
-      return callWithRequest('rollup.search', {
-        index,
-        rest_total_hits_as_int: true,
-        body,
-      }, { signal });
+      try {
+        const response = await callWithRequest('rollup.search', {
+          index,
+          rest_total_hits_as_int: true,
+          body,
+        }, { signal });
+        onProgress(response._shards);
+        return response;
+      } catch (e) {
+        return server.plugins.kibana.handleEsError(e);
+      }
     }
   });
 

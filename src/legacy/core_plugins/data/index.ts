@@ -20,7 +20,12 @@
 import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
 import { registerSearchApi } from './server/routes/search';
-import { getIndexPattern, registerSearchStrategy } from './server/lib';
+import {
+  getIndexPattern,
+  registerDefaultSearchStrategy,
+  registerSearchStrategy,
+  search,
+} from './server/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function DataPlugin(kibana: any) {
@@ -35,8 +40,10 @@ export default function DataPlugin(kibana: any) {
     },
     init: (server: Legacy.Server) => {
       registerSearchApi(server);
+      registerDefaultSearchStrategy(server);
       server.expose('registerSearchStrategy', registerSearchStrategy);
       server.expose('getIndexPattern', getIndexPattern);
+      server.expose('search', search);
     },
     uiExports: {
       injectDefaultVars: () => ({}),

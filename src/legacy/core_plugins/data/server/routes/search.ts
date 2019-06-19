@@ -19,43 +19,19 @@
 
 import 'abortcontroller-polyfill';
 import { Legacy } from 'kibana';
-import { SearchOptions } from '../../common';
-import { Request } from '../../../elasticsearch';
-import { getSearchStrategy } from '../lib';
+import { search } from '../lib/search';
 
 export function registerSearchApi(server: Legacy.Server): void {
   server.route({
     path: '/api/search/{index}',
     method: 'POST',
-    handler: async req => {
-      const body = req.payload;
-      const { index } = req.params;
-      const searchStrategy = await getSearchStrategy(server, req, index, body);
-      return searchStrategy.search(server, req, index, body);
+    handler: async request => {
+      const body = request.payload;
+      const { index } = request.params;
+      const controller = new AbortController();
+      const { signal } = controller;
+      request.events.once('disconnect', () => controller.abort());
+      return search(request, index, body, { signal });
     },
-  });
-
-  /**
-   * The server-side API for making requests to Elasticsearch using raw Elasticsearch query DSL.
-   *
-   * @param req The original request the client made (used to forward user credentials to Elasticsearch)
-   * @param index The name of the index (or title of the index pattern) to search
-   * @param body The search body (Elasticsearch query DSL)
-   * @param options Options for handling progress and aborting
-   *
-   * @example
-   * const controller = new AbortController();
-   * const onProgress = ({ successful, total }) => console.log(successful / total);
-   * setTimeout(() => controller.abort(), 1000);
-   * const body = { query: { match_all: {} } };
-   * const options = { signal: controller.signal, onProgress };
-   * const response = await server.plugins.data.search(request, 'twitter', body, options);
-   */
-  server.expose('search', (req: Request, index: string, body: any, options: SearchOptions = {}) => {
-    const { signal, onProgress = () => {} } = options;
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-    const promise = callWithRequest(req, 'search', { index, body }, { signal });
-    promise.then(response => onProgress(response._shards));
-    return promise;
   });
 }

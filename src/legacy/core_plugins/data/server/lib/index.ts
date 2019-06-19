@@ -19,3 +19,4 @@
 
 export * from './get_index_pattern';
 export * from './search_strategy_registry';
+export * from './search';
