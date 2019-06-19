@@ -55,7 +55,6 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
   snapshotId,
   onClose,
   onSnapshotDeleted,
-  history,
 }) => {
   const {
     core: { i18n },

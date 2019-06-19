@@ -79,6 +79,36 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       ),
     },
     {
+      field: 'indices',
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.indicesColumnTitle', {
+        defaultMessage: 'Indices',
+      }),
+      truncateText: true,
+      sortable: true,
+      width: '100px',
+      render: (indices: string[]) => indices.length,
+    },
+    {
+      field: 'shards.total',
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.shardsColumnTitle', {
+        defaultMessage: 'Shards',
+      }),
+      truncateText: true,
+      sortable: true,
+      width: '100px',
+      render: (totalShards: number) => totalShards,
+    },
+    {
+      field: 'shards.failed',
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.failedShardsColumnTitle', {
+        defaultMessage: 'Failed shards',
+      }),
+      truncateText: true,
+      sortable: true,
+      width: '100px',
+      render: (failedShards: number) => failedShards,
+    },
+    {
       field: 'startTimeInMillis',
       name: i18n.translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
         defaultMessage: 'Date created',
@@ -111,36 +141,6 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           </DataPlaceholder>
         );
       },
-    },
-    {
-      field: 'indices',
-      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.indicesColumnTitle', {
-        defaultMessage: 'Indices',
-      }),
-      truncateText: true,
-      sortable: true,
-      width: '100px',
-      render: (indices: string[]) => indices.length,
-    },
-    {
-      field: 'shards.total',
-      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.shardsColumnTitle', {
-        defaultMessage: 'Shards',
-      }),
-      truncateText: true,
-      sortable: true,
-      width: '100px',
-      render: (totalShards: number) => totalShards,
-    },
-    {
-      field: 'shards.failed',
-      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.failedShardsColumnTitle', {
-        defaultMessage: 'Failed shards',
-      }),
-      truncateText: true,
-      sortable: true,
-      width: '100px',
-      render: (failedShards: number) => failedShards,
     },
     {
       name: i18n.translate('xpack.snapshotRestore.snapshotList.table.actionsColumnTitle', {

@@ -102,3 +102,4 @@ export const UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB =
   'snapshot_detail_panel_failed_indices_tab';
 export const UIM_SNAPSHOT_DELETE = 'snapshot_delete';
 export const UIM_SNAPSHOT_DELETE_MANY = 'snapshot_delete_many';
+export const UIM_RESTORE_CREATE = 'restore_create';

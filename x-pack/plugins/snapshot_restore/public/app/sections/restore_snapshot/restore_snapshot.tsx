@@ -5,14 +5,14 @@
  */
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { SnapshotDetails } from '../../../../common/types';
 
+import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
+import { BASE_PATH, Section } from '../../constants';
 import { SectionError, SectionLoading, RestoreSnapshotForm } from '../../components';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/navigation';
-import { loadSnapshot } from '../../services/http';
+import { loadSnapshot, executeRestore } from '../../services/http';
 
 interface MatchParams {
   repositoryName: string;
@@ -29,6 +29,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
+  const section = 'snapshots' as Section;
 
   // Set breadcrumb
   useEffect(() => {
@@ -55,21 +56,25 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   );
 
   // Saving repository states
-  // const [isSaving, setIsSaving] = useState<boolean>(false);
-  // const [saveError, setSaveError] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [saveError, setSaveError] = useState<any>(null);
 
-  // Save repository
-  // const onSave = async (editedRepository: Repository | EmptyRepository) => {
-  //   setIsSaving(true);
-  //   setSaveError(null);
-  //   const { error } = await editRepository(editedRepository);
-  //   setIsSaving(false);
-  //   if (error) {
-  //     setSaveError(error);
-  //   } else {
-  //     history.push(`${BASE_PATH}/${section}/${name}`);
-  //   }
-  // };
+  // Execute restore
+  const onSave = async (restoreSettings: RestoreSettings) => {
+    setIsSaving(true);
+    setSaveError(null);
+    const { error } = await executeRestore(repositoryName, snapshotId, restoreSettings);
+    setIsSaving(false);
+    if (error) {
+      setSaveError(error);
+    } else {
+      history.push(
+        `${BASE_PATH}/${section}/${encodeURIComponent(repositoryName)}/${encodeURIComponent(
+          snapshotId
+        )}`
+      );
+    }
+  };
 
   const renderLoading = () => {
     return (
@@ -113,23 +118,23 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
     );
   };
 
-  // const renderSaveError = () => {
-  //   return saveError ? (
-  //     <SectionError
-  //       title={
-  //         <FormattedMessage
-  //           id="xpack.snapshotRestore.editRepository.savingRepositoryErrorTitle"
-  //           defaultMessage="Cannot save repository"
-  //         />
-  //       }
-  //       error={saveError}
-  //     />
-  //   ) : null;
-  // };
+  const renderSaveError = () => {
+    return saveError ? (
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.restoreSnapshot.executeRestoreErrorTitle"
+            defaultMessage="Unable to execute restore"
+          />
+        }
+        error={saveError}
+      />
+    ) : null;
+  };
 
-  // const clearSaveError = () => {
-  //   setSaveError(null);
-  // };
+  const clearSaveError = () => {
+    setSaveError(null);
+  };
 
   const renderContent = () => {
     if (loadingSnapshot) {
@@ -139,7 +144,15 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
       return renderError();
     }
 
-    return <RestoreSnapshotForm snapshotDetails={snapshotDetails as SnapshotDetails} />;
+    return (
+      <RestoreSnapshotForm
+        snapshotDetails={snapshotDetails as SnapshotDetails}
+        isSaving={isSaving}
+        saveError={renderSaveError()}
+        clearSaveError={clearSaveError}
+        onSave={onSave}
+      />
+    );
   };
 
   return (

@@ -24,9 +24,19 @@ import { RestoreSnapshotNavigation } from './navigation';
 
 interface Props {
   snapshotDetails: SnapshotDetails;
+  isSaving: boolean;
+  saveError?: React.ReactNode;
+  clearSaveError: () => void;
+  onSave: (repository: RestoreSettings) => void;
 }
 
-export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({ snapshotDetails }) => {
+export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
+  snapshotDetails,
+  isSaving,
+  saveError,
+  clearSaveError,
+  onSave,
+}) => {
   // Step state
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [maxCompletedStep, setMaxCompletedStep] = useState<number>(0);
@@ -66,6 +76,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({ snapshotDe
     }
     const previousStep = currentStep - 1;
     setCurrentStep(previousStep);
+    clearSaveError();
   };
 
   const onNext = () => {
@@ -77,7 +88,11 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({ snapshotDe
     setMaxCompletedStep(nextStep > maxCompletedStep ? nextStep : maxCompletedStep);
   };
 
-  const onSubmit = () => {};
+  const executeRestore = () => {
+    if (validation.isValid) {
+      onSave(restoreSettings);
+    }
+  };
 
   return (
     <Fragment>
@@ -95,6 +110,14 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({ snapshotDe
           errors={validation.errors}
         />
         <EuiSpacer size="l" />
+
+        {saveError ? (
+          <Fragment>
+            {saveError}
+            <EuiSpacer size="m" />
+          </Fragment>
+        ) : null}
+
         <EuiFlexGroup>
           {currentStep > 1 ? (
             <EuiFlexItem grow={false}>
@@ -127,11 +150,24 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({ snapshotDe
           ) : null}
           {currentStep === 3 ? (
             <EuiFlexItem grow={false}>
-              <EuiButton fill color="secondary" iconType="check" onClick={() => onSubmit()}>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.restoreForm.submitButtonLabel"
-                  defaultMessage="Execute restore"
-                />
+              <EuiButton
+                fill
+                color="secondary"
+                iconType="check"
+                onClick={() => executeRestore()}
+                isLoading={isSaving}
+              >
+                {isSaving ? (
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.restoreForm.savingButtonLabel"
+                    defaultMessage="Executing…"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.restoreForm.submitButtonLabel"
+                    defaultMessage="Execute restore"
+                  />
+                )}
               </EuiButton>
             </EuiFlexItem>
           ) : null}
