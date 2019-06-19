@@ -119,6 +119,7 @@ $kbnTypeaheadTypes: (
 
 .kbnSuggestionItem__type {
   flex-grow: 0;
+  flex-shrink: 0;
   flex-basis: auto;
   width: $euiSizeXL;
   height: $euiSizeXL;
@@ -134,7 +135,6 @@ $kbnTypeaheadTypes: (
   flex-grow: 0; /* 2 */
   flex-basis: auto; /* 2 */
   font-family: $euiCodeFontFamily;
-  margin-right: $euiSizeXL;
   width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -142,15 +142,17 @@ $kbnTypeaheadTypes: (
   color: $euiTextColor;
 }
 
-//https://github.com/elastic/kibana/issues/34971
-.kbnSuggestionItem--value .kbnSuggestionItem__text {
-  width: auto;
-}
 
 .kbnSuggestionItem__description {
   color: $euiColorDarkShade;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-left: $euiSizeXL;
+  
+  &:empty {
+    flex-grow: 0;
+    margin-left:0;
+  }
 }
 
 .kbnSuggestionItem__callout {
@@ -159,4 +161,9 @@ $kbnTypeaheadTypes: (
   color: $euiColorFullShade;
   padding: 0 $euiSizeXS;
   display: inline-block;
+}
+
+.kbnSuggestionItem--value .kbnSuggestionItem__text {
+  flex-basis: 50%;
+  flex-grow: 1;
 }
