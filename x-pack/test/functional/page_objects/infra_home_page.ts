@@ -5,7 +5,7 @@
  */
 
 import testSubjSelector from '@kbn/test-subj-selector';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
