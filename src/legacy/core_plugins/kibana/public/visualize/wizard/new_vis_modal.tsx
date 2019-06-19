@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
 import { VisType } from 'ui/vis';
+import { VisTypeAlias } from 'plugins/visualizations';
 import { VisualizeConstants } from '../visualize_constants';
 
 import { SearchSelection } from './search_selection';
@@ -33,7 +34,7 @@ interface TypeSelectionProps {
   isOpen: boolean;
   onClose: () => void;
   visTypesRegistry: VisType[];
-  visTypeAliases: any[];
+  visTypeAliases: VisTypeAlias[];
   editorParams?: string[];
 }
 
