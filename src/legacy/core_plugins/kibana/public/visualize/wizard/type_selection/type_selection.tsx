@@ -228,13 +228,12 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       const aliasDescription = i18n.translate(
         'kbn.visualize.newVisWizard.visTypeAliasDescription',
         {
-          defaultMessage:
-            'This item will lead to a separate application within Kibana, but outside of Visualize.',
+          defaultMessage: 'Opens a Kibana application that is outside of Visualize.',
         }
       );
       stage = {
         betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.visTypeAliasTitle', {
-          defaultMessage: 'External application',
+          defaultMessage: 'Kibana application',
         }),
         betaBadgeTooltipContent: aliasDescription,
         betaBadgeIconType: 'popout',

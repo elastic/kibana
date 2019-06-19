@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_BASE_URL } from '../common/constants';
 
 const VIS_TYPE_DESCRIPTION = `Create and style maps with multiple layers and indices.
-Use the Maps app instead of Coordinate Map visualizations and Region Map visualizations.
+Use the Maps app instead of Coordinate Map and Region Map.
 The Maps app offers more functionality and is easier to use.`;
 
 visualizations.types.visTypeAliasRegistry.add({
