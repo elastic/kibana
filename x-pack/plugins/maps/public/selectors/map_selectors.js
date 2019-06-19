@@ -187,7 +187,7 @@ export const getUniqueIndexPatternIds = createSelector(
     layerList.forEach(layer => {
       indexPatternIds.push(...layer.getIndexPatternIds());
     });
-    return _.uniq(indexPatternIds);
+    return _.uniq(indexPatternIds).sort();
   }
 );
 
