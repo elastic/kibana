@@ -104,7 +104,6 @@ export default class KbnServer {
     };
     stop: null;
     params: {
-      serverOptions: ElasticsearchServiceSetup;
       handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
     };
   };
