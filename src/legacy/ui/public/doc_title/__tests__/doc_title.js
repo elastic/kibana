@@ -31,14 +31,11 @@ describe('docTitle Service', function () {
   let $rootScope;
 
   beforeEach(function () {
-    // DEBUG
     initialDocTitle = document.title;
-    // kibana 4
     document.title = MAIN_TITLE;
     setBaseTitle(MAIN_TITLE);
   });
   afterEach(function () {
-    // DEBUG
     document.title = initialDocTitle;
     setBaseTitle(initialDocTitle);
   });

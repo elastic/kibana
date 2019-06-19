@@ -41,7 +41,7 @@ function render() {
 
 function change(title, complete) {
   lastChange = [title, complete];
-  this.update();
+  update();
 }
 
 function reset() {
