@@ -23,7 +23,7 @@ describe('InitializableComponent', () => {
       <InitializableComponent
         watch={[true]}
         init={() => Promise.resolve({ hello: 'world' })}
-        render={({ hello }) => <div>{hello}</div>}
+        render={props => <div>{props!.hello}</div>}
       />
     );
 
@@ -38,6 +38,16 @@ describe('InitializableComponent', () => {
 
     await initPromise;
     expect(mockRender).toHaveBeenCalledWith({ test: 'props' });
+  });
+
+  test('allows an undefined resolve', async () => {
+    const initPromise = Promise.resolve();
+    const mockRender = jest.fn(() => <div />);
+
+    mount(<InitializableComponent watch={[true]} init={() => initPromise} render={mockRender} />);
+
+    await initPromise;
+    expect(mockRender).toHaveBeenCalledWith(undefined);
   });
 
   test('ignores stale promise results', async () => {

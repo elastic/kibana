@@ -33,10 +33,10 @@ export function InitializableComponent<T>(props: Props<T>) {
     };
   }, props.watch);
 
-  if (state.isLoading || !state.result) {
+  if (state.isLoading) {
     // TODO: Handle the loading / undefined result case
     return null;
   }
 
-  return props.render(state.result);
+  return props.render(state.result!);
 }
