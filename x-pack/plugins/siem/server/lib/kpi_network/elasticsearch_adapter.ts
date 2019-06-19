@@ -23,12 +23,12 @@ import { TermAggregation } from '../types';
 import { KpiNetworkHistogramData, KpiNetworkData } from '../../graphql/types';
 
 const formatHistogramData = (
-  data: Array<{ key_as_string: string; count: { value: number } }>
+  data: Array<{ key: number; count: { value: number } }>
 ): KpiNetworkHistogramData[] | null => {
   return data && data.length > 0
-    ? data.map<KpiNetworkHistogramData>(({ key_as_string, count }) => {
+    ? data.map<KpiNetworkHistogramData>(({ key, count }) => {
         return {
-          x: key_as_string,
+          x: key,
           y: getOr(null, 'value', count),
         };
       })

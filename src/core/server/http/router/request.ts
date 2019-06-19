@@ -23,7 +23,7 @@ import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { filterHeaders } from './headers';
+import { filterHeaders, Headers } from './headers';
 import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
 
 const requestSymbol = Symbol('request');
@@ -41,6 +41,12 @@ export interface KibanaRequestRoute {
 const secretHeaders = ['authorization'];
 /**
  * Kibana specific abstraction for an incoming request.
+ *
+ * @remarks
+ * The `headers` property will be deprecated and removed in future versions
+ * of this class. Please use the `getFilteredHeaders` method to acesss the
+ * list of headers available
+ *
  * @public
  * */
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
@@ -48,6 +54,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
    * @internal
+   *
    */
   public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     req: Request,
@@ -97,6 +104,11 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
 
   public readonly url: Url;
   public readonly route: RecursiveReadonly<KibanaRequestRoute>;
+  /**
+   * This property will be removed in future version of this class, please
+   * use the `getFilteredHeaders` method instead
+   */
+  public readonly headers: Headers;
 
   /** @internal */
   protected readonly [requestSymbol]: Request;
@@ -109,6 +121,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     private readonly withoutSecretHeaders: boolean
   ) {
     this.url = request.url;
+    this.headers = request.headers;
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
