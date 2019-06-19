@@ -21,6 +21,11 @@ import { KbnTopNavControllerProvider } from 'ui/kbn_top_nav/kbn_top_nav_controll
 import { i18n } from '@kbn/i18n';
 import storage from '../storage';
 
+// settings
+import { getCurrentSettings, updateSettings } from '../settings';
+import { showSettingsModal } from '../components/show_settings_modal';
+
+
 export function SenseTopNavController(Private) {
   const KbnTopNavController = Private(KbnTopNavControllerProvider);
 
@@ -53,7 +58,10 @@ export function SenseTopNavController(Private) {
       description: i18n.translate('console.topNav.settingsTabDescription', {
         defaultMessage: 'Settings',
       }),
-      template: `<sense-settings></sense-settings>`,
+      run: () => {
+        const curSettings = getCurrentSettings();
+        showSettingsModal(curSettings, updateSettings);
+      },
       testId: 'consoleSettingsButton',
     },
     {
