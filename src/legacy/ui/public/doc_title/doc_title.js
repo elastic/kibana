@@ -20,7 +20,13 @@
 import _ from 'lodash';
 import { uiModules } from '../modules';
 
-const baseTitle = document.title;
+let baseTitle = document.title;
+
+// for karma test
+export function setBaseTitle(str) {
+  baseTitle = str;
+}
+
 let lastChange;
 
 function render() {
@@ -46,14 +52,13 @@ function update() {
   document.title = render();
 }
 
-const docTitleService = function () {
-  return {
-    render,
-    change,
-    reset,
-    update,
-  };
+const docTitleService = {
+  render,
+  change,
+  reset,
+  update,
 };
+
 
 uiModules.get('kibana')
   .run(function ($rootScope, docTitle) {
@@ -62,7 +67,7 @@ uiModules.get('kibana')
     $rootScope.$on('$routeChangeError', docTitle.update);
     $rootScope.$on('$routeChangeSuccess', docTitle.update);
   })
-  .factory('docTitle', docTitleService);
+  .factory('docTitle', () => docTitleService);
 
 // return a "private module" so that it can be used both ways
 export function DocTitleProvider(docTitle) {

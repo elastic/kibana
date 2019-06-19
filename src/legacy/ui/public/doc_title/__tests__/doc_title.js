@@ -21,7 +21,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { DocTitleProvider } from '..';
+import { DocTitleProvider, setBaseTitle } from '../doc_title';
 
 describe('docTitle Service', function () {
   let initialDocTitle;
@@ -31,15 +31,19 @@ describe('docTitle Service', function () {
   let $rootScope;
 
   beforeEach(function () {
+    // DEBUG
     initialDocTitle = document.title;
+    // kibana 4
     document.title = MAIN_TITLE;
+    setBaseTitle(MAIN_TITLE);
   });
   afterEach(function () {
+    // DEBUG
     document.title = initialDocTitle;
+    setBaseTitle(initialDocTitle);
   });
 
   beforeEach(ngMock.module('kibana', function ($provide) {
-    $provide.decorator('docTitle', decorateWithSpy('update'));
     $provide.decorator('$rootScope', decorateWithSpy('$on'));
   }));
 
