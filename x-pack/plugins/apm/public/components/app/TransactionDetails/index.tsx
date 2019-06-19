@@ -16,11 +16,15 @@ import { TransactionDistribution } from './Distribution';
 import { Transaction } from './Transaction';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
 
 export function TransactionDetails() {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { data: distributionData } = useTransactionDistribution(urlParams);
+  const {
+    data: distributionData,
+    status: distributionStatus
+  } = useTransactionDistribution(urlParams);
   const { data: transactionDetailsChartsData } = useTransactionDetailsCharts(
     urlParams
   );
@@ -49,6 +53,10 @@ export function TransactionDetails() {
       <EuiPanel>
         <TransactionDistribution
           distribution={distributionData}
+          loading={
+            distributionStatus === FETCH_STATUS.LOADING ||
+            distributionStatus === undefined
+          }
           urlParams={urlParams}
         />
       </EuiPanel>
