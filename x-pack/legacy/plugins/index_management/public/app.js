@@ -8,6 +8,7 @@ import React, { useEffect } from 'react';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { BASE_PATH, UIM_APP_LOAD } from '../common/constants';
 import { IndexList } from './sections/index_list';
+import { HookFormPOC } from './sections/create_index/hook_form_poc';
 import { trackUiMetric } from './services';
 
 export const App = () => {
@@ -25,6 +26,7 @@ export const AppWithoutRouter = () => (
   <Switch>
     <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}indices`}/>
     <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
+    <Route exact path={`${BASE_PATH}create-index`} component={HookFormPOC} />
     <Route path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList}/>
   </Switch>
 );

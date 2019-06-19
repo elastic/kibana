@@ -16,31 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
-// TODO: Remove once typescript definitions are in EUI
+export * from './string';
 
-declare module '@elastic/eui' {
-  export const EuiWrappingPopover: React.SFC<any>;
-  export const EuiOutsideClickDetector: React.SFC<any>;
-  export const EuiSideNav: React.SFC<any>;
-
-  export interface EuiTableCriteria {
-    page: { index: number; size: number };
-    sort?: {
-      field?: string;
-      direction?: Direction;
-    };
-  }
-  export const EuiBasicTable: React.ComponentClass<{
-    onTableChange?: (criteria: EuiTableCriteria) => void;
-    sorting: { sort?: EuiTableCriteria['sort'] };
-    [key: string]: any;
-  }>;
-
-  export const EuiDescribedFormGroup: React.ComponentClass<{
-    title?: string;
-    description?: string;
-    [key: string]: any;
-  }>;
-}
+export { isUrl } from './is_url';

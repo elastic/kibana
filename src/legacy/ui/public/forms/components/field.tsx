@@ -16,31 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
-// TODO: Remove once typescript definitions are in EUI
+import React from 'react';
+// import { EuiFormRow } from '@elastic/eui';
 
-declare module '@elastic/eui' {
-  export const EuiWrappingPopover: React.SFC<any>;
-  export const EuiOutsideClickDetector: React.SFC<any>;
-  export const EuiSideNav: React.SFC<any>;
-
-  export interface EuiTableCriteria {
-    page: { index: number; size: number };
-    sort?: {
-      field?: string;
-      direction?: Direction;
-    };
-  }
-  export const EuiBasicTable: React.ComponentClass<{
-    onTableChange?: (criteria: EuiTableCriteria) => void;
-    sorting: { sort?: EuiTableCriteria['sort'] };
-    [key: string]: any;
-  }>;
-
-  export const EuiDescribedFormGroup: React.ComponentClass<{
-    title?: string;
-    description?: string;
-    [key: string]: any;
-  }>;
+interface Props {
+  label?: string;
+  helpText?: string;
+  error?: string;
+  isInvalid?: boolean;
 }
+
+export const Field = ({ label = '', helpText = '', error = '', isInvalid = false }: Props) => {
+  return <h4>here...</h4>;
+  // return (
+  //   <EuiFormRow label={label} helpText={helpText} error={error} isInvalid={isInvalid} fullWidth>
+  //     <p>Field component...</p>
+  //   </EuiFormRow>
+  // );
+};
