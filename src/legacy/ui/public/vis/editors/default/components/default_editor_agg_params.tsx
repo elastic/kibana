@@ -31,50 +31,14 @@ import {
   getError,
   getAggTypeOptions,
 } from './default_editor_agg_params_helper';
+import {
+  aggTypeReducer,
+  AGG_TYPE_ACTION_KEYS,
+  aggParamsReducer,
+  AGG_PARAMS_ACTION_KEYS,
+} from './default_editor_agg_params_state';
 
 import { editorConfigProviders } from '../../config/editor_config_providers';
-
-function reducer(state: any, action: any) {
-  switch (action.type) {
-    case 'agg_selector_touched':
-      return { ...state, touched: action.touched };
-    case 'agg_selector_validity':
-      return { ...state, validity: action.validity };
-    case 'agg_type_reset':
-      return { validity: true, touched: false };
-    default:
-      throw new Error();
-  }
-}
-
-const aggParamsReducer = (state: any, action: any) => {
-  const targetParam = state[action.paramName] || {
-    validity: true,
-    touched: false,
-  };
-  switch (action.type) {
-    case 'agg_params_touched':
-      return {
-        ...state,
-        [action.paramName]: {
-          ...targetParam,
-          touched: action.touched,
-        },
-      };
-    case 'agg_params_validity':
-      return {
-        ...state,
-        [action.paramName]: {
-          ...targetParam,
-          validity: action.validity,
-        },
-      };
-    case 'agg_params_reset':
-      return {};
-    default:
-      throw new Error();
-  }
-};
 
 const initaggParams = (params: object[]) => {
   const state: any = {};
@@ -125,7 +89,7 @@ function DefaultEditorAggParams({
   const errors = getError(agg, aggIsTooLow);
   const SchemaEditorComponent = agg.schema.editorComponent;
 
-  const [aggType, onChangeAggType] = useReducer(reducer, { touched: false });
+  const [aggType, onChangeAggType] = useReducer(aggTypeReducer, { touched: false, validity: true });
 
   const editorConfig = editorConfigProviders.getConfigForAgg(
     aggTypes.byType[groupName],
@@ -204,12 +168,12 @@ function DefaultEditorAggParams({
         setValue={value => {
           onAggTypeChange(agg, value);
           // reset touched and validity of params
-          onChangeAggParams({ type: 'agg_params_reset' });
+          onChangeAggParams({ type: AGG_PARAMS_ACTION_KEYS.RESET });
           // resent form validity
           setValidity(true);
         }}
-        setTouched={() => onChangeAggType({ type: 'agg_selector_touched', touched: true })}
-        setValidity={validity => onChangeAggType({ type: 'agg_selector_validity', validity })}
+        setTouched={() => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.TOUCHED, touched: true })}
+        setValidity={validity => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.VALIDITY, validity })}
       />
 
       {params.basic.map((param: any) => {
@@ -225,14 +189,14 @@ function DefaultEditorAggParams({
             onChange={onAggParamsChange}
             setValidity={validity => {
               onChangeAggParams({
-                type: 'agg_params_validity',
+                type: AGG_PARAMS_ACTION_KEYS.VALIDITY,
                 paramName: param.aggParam.name,
                 validity,
               });
             }}
             setTouched={() => {
               onChangeAggParams({
-                type: 'agg_params_touched',
+                type: AGG_PARAMS_ACTION_KEYS.TOUCHED,
                 paramName: param.aggParam.name,
                 touched: true,
               });
@@ -266,14 +230,14 @@ function DefaultEditorAggParams({
                   onChange={onAggParamsChange}
                   setValidity={validity => {
                     onChangeAggParams({
-                      type: 'agg_params_validity',
+                      type: AGG_PARAMS_ACTION_KEYS.VALIDITY,
                       paramName: param.aggParam.name,
                       validity,
                     });
                   }}
                   setTouched={() => {
                     onChangeAggParams({
-                      type: 'agg_params_touched',
+                      type: AGG_PARAMS_ACTION_KEYS.TOUCHED,
                       paramName: param.aggParam.name,
                       touched: true,
                     });
