@@ -38,7 +38,7 @@ const StatValue = styled(EuiTitle)`
 export interface StatItem<T> {
   key: string;
   description?: string;
-  value: number | undefined | null;
+  value?: number | undefined | null;
   color?: string;
   icon?: IconType;
   name?: string;
@@ -94,11 +94,14 @@ export const addValueToAreaChart = (
 ): ChartConfigsData[] =>
   fields
     .filter(field => get(`${field.key}Histogram`, data) != null)
-    .map(field => ({
-      ...field,
-      value: get(`${field.key}Histogram`, data),
-      key: `${field.key}Histogram`,
-    }));
+    .map(field => {
+      const { render, ...areaChartFields } = field;
+      return {
+        ...areaChartFields,
+        value: get(`${field.key}Histogram`, data),
+        key: `${field.key}Histogram`,
+      };
+    });
 
 export const addValueToBarChart = (
   fields: Array<StatItem<KpiValue>>,
@@ -164,6 +167,7 @@ export const StatItemsComponent = React.memo<StatItemsProps<KpiValue>>(
       areaChart &&
       areaChart.length &&
       areaChart.every(item => item.value != null && item.value.length > 0);
+
     return (
       <FlexItem grow={grow}>
         <EuiPanel>
@@ -190,7 +194,11 @@ export const StatItemsComponent = React.memo<StatItemsProps<KpiValue>>(
                     <FlexItem>
                       <StatValue>
                         <p data-test-subj="stat-title">
-                          {field.render != null ? field.render(field.value) : getEmptyTagValue()}{' '}
+                          {field.render && field.value != null
+                            ? field.render(field.value)
+                            : !field.render && field.value != null
+                            ? field.value
+                            : getEmptyTagValue()}{' '}
                           {field.description}
                         </p>
                       </StatValue>

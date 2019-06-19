@@ -21,30 +21,30 @@ import {
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { fieldTitleChartMapping } from '../page/network/kpi_network';
-import {
-  mockData,
-  mockEnableChartsData,
-  mockNoChartMappings,
-} from '../page/network/kpi_network/mock';
+import { mockData, mockEnableChartsData, mockNoChartMappings, mockMappings } from './mock';
 import { mockGlobalState, apolloClientObservable } from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { KpiNetworkData, KpiHostsData } from '../../graphql/types';
+import { getEmptyTagValue } from '../empty_value';
 jest.mock('../charts/barchart');
 jest.mock('../charts/areachart');
+jest.mock('../empty_value', () => ({
+  getEmptyTagValue: jest.fn().mockReturnValue('--'),
+}));
 
 describe('Stat Items Component', () => {
   const state: State = mockGlobalState;
 
   const store = createStore(state, apolloClientObservable);
+  const mockHostsValue = null;
 
   describe.each([
     [
       mount(
         <ReduxStoreProvider store={store}>
           <StatItemsComponent
-            fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+            fields={[{ key: 'hosts', value: mockHostsValue, color: '#3185FC', icon: 'cross' }]}
             description="HOSTS"
             key="mock-keys"
           />
@@ -55,7 +55,7 @@ describe('Stat Items Component', () => {
       mount(
         <ReduxStoreProvider store={store}>
           <StatItemsComponent
-            fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+            fields={[{ key: 'hosts', value: mockHostsValue, color: '#3185FC', icon: 'cross' }]}
             description="HOSTS"
             areaChart={[]}
             barChart={[]}
@@ -70,7 +70,16 @@ describe('Stat Items Component', () => {
     });
 
     test('should render titles', () => {
-      expect(wrapper.find('[data-test-subj="stat-title"]')).toBeTruthy();
+      expect(
+        wrapper
+          .find('[data-test-subj="stat-title"]')
+          .at(0)
+          .text()
+      ).toEqual(`-- `);
+    });
+
+    test('should display titles with getEmptyTagValue if is null', () => {
+      expect(getEmptyTagValue).toHaveBeenCalled();
     });
 
     test('should not render icons', () => {
@@ -91,6 +100,10 @@ describe('Stat Items Component', () => {
   });
 
   describe('rendering kpis with charts', () => {
+    const mockUniqueDestinationIps = 2359;
+    const mockUniqueDestinationIpsRenderer = jest
+      .fn()
+      .mockReturnValue(mockUniqueDestinationIps.toLocaleString());
     const mockStatItemsData: StatItemsProps<KpiValue> = {
       fields: [
         {
@@ -103,9 +116,10 @@ describe('Stat Items Component', () => {
         {
           key: 'uniqueDestinationIps',
           description: 'Dest.',
-          value: 2359,
+          value: mockUniqueDestinationIps,
           color: '#490092',
           icon: 'cross',
+          render: mockUniqueDestinationIpsRenderer,
         },
       ],
       enableAreaChart: true,
@@ -149,12 +163,36 @@ describe('Stat Items Component', () => {
         </ReduxStoreProvider>
       );
     });
+
+    afterAll(() => {
+      mockUniqueDestinationIpsRenderer.mockClear();
+    });
+
     test('it renders the default widget', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('should handle multiple titles', () => {
       expect(wrapper.find('[data-test-subj="stat-title"]')).toHaveLength(2);
+    });
+
+    test('should render titles with default renderer', () => {
+      expect(
+        wrapper
+          .find('[data-test-subj="stat-title"]')
+          .at(0)
+          .text()
+      ).toEqual('1714 Source');
+    });
+
+    test('should render titles with given renderer', () => {
+      expect(mockUniqueDestinationIpsRenderer).toHaveBeenCalledWith(mockUniqueDestinationIps);
+      expect(
+        wrapper
+          .find('[data-test-subj="stat-title"]')
+          .at(1)
+          .text()
+      ).toEqual('2,359 Dest.');
     });
 
     test('should render kpi icons', () => {
@@ -176,7 +214,7 @@ describe('Stat Items Component', () => {
 });
 
 describe('addValueToFields', () => {
-  const mockNetworkMappings = fieldTitleChartMapping[0];
+  const mockNetworkMappings = mockMappings[0];
   const mockKpiNetworkData = mockData.KpiNetwork;
   test('should update value from data', () => {
     const result = addValueToFields(mockNetworkMappings.fields, mockKpiNetworkData);
@@ -185,7 +223,7 @@ describe('addValueToFields', () => {
 });
 
 describe('addValueToAreaChart', () => {
-  const mockNetworkMappings = fieldTitleChartMapping[0];
+  const mockNetworkMappings = mockMappings[0];
   const mockKpiNetworkData = mockData.KpiNetwork;
   test('should add areaChart from data', () => {
     const result = addValueToAreaChart(mockNetworkMappings.fields, mockKpiNetworkData);
@@ -194,7 +232,7 @@ describe('addValueToAreaChart', () => {
 });
 
 describe('addValueToBarChart', () => {
-  const mockNetworkMappings = fieldTitleChartMapping[0];
+  const mockNetworkMappings = mockMappings[0];
   const mockKpiNetworkData = mockData.KpiNetwork;
   test('should add areaChart from data', () => {
     const result = addValueToBarChart(mockNetworkMappings.fields, mockKpiNetworkData);
@@ -203,7 +241,7 @@ describe('addValueToBarChart', () => {
 });
 
 describe('useKpiMatrixStatus', () => {
-  const mockNetworkMappings = fieldTitleChartMapping;
+  const mockNetworkMappings = mockMappings;
   const mockKpiNetworkData = mockData.KpiNetwork;
   const MockChildComponent = (mappedStatItemProps: StatItemsProps<KpiValue>) => <span />;
   const MockHookWrapperComponent = ({

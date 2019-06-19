@@ -5,7 +5,7 @@
  */
 
 import { KpiIpDetailsESMSearchBody } from './types';
-import { IpOverviewRequestOptions } from '../ip_details';
+import { KpiIpDetailsRequestOptions } from './elasticsearch_adapter';
 
 const getAggs = (type: string, ip: string) => {
   return {
@@ -65,7 +65,7 @@ export const buildGeneralQuery = ({
   defaultIndex,
   ip,
   timerange: { from, to },
-}: IpOverviewRequestOptions): KpiIpDetailsESMSearchBody[] => {
+}: KpiIpDetailsRequestOptions): KpiIpDetailsESMSearchBody[] => {
   const dslQuery = [
     {
       allowNoIndices: true,

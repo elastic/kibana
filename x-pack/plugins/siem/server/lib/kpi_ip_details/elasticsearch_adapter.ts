@@ -7,16 +7,19 @@
 import { getOr } from 'lodash/fp';
 
 import { KpiIpDetailsData, KpiIpDetailsHistogramData } from '../../graphql/types';
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 import { TermAggregation } from '../types';
 
 import { buildGeneralQuery } from './query_general.dsl';
 
-import { KpiIpDetailsAdapter, KpiIpDetailsESMSearchBody, KpiIpDetailsHit } from './types';
-import { IpOverviewRequestOptions } from '../ip_details';
+import { KpiIpDetailsAdapter, KpiIpDetailsHit, KpiIpDetailsESMSearchBody } from './types';
+
+export interface KpiIpDetailsRequestOptions extends RequestBasicOptions {
+  ip: string;
+}
 
 const formatHistogramData = (
-  data: Array<{ key: string; count: { value: number } }>
+  data: Array<{ key: number; count: { value: number } }>
 ): KpiIpDetailsHistogramData[] | null => {
   return data && data.length > 0
     ? data.map<KpiIpDetailsHistogramData>(({ key, count }) => {
@@ -33,7 +36,7 @@ export class ElasticsearchKpiIpDetailsAdapter implements KpiIpDetailsAdapter {
 
   public async getKpiIpDetails(
     request: FrameworkRequest,
-    options: IpOverviewRequestOptions
+    options: KpiIpDetailsRequestOptions
   ): Promise<KpiIpDetailsData> {
     const generalQuery: KpiIpDetailsESMSearchBody[] = buildGeneralQuery(options);
     const response = await this.framework.callWithRequest<KpiIpDetailsHit, TermAggregation>(

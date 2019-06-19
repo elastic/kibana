@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KpiIpDetails Component rendering it renders loading icons 1`] = `
+<Memo()
+  data={
+    Object {
+      "connections": 246511947,
+      "destinationByte": 0,
+      "destinationByteHistogram": Array [
+        Object {
+          "x": 1560470400000,
+          "y": 0,
+        },
+        Object {
+          "x": 1560556800000,
+          "y": 0,
+        },
+      ],
+      "destinationPackets": 0,
+      "destinationPacketsHistogram": Array [
+        Object {
+          "x": 1560470400000,
+          "y": 0,
+        },
+        Object {
+          "x": 1560556800000,
+          "y": 0,
+        },
+      ],
+      "hosts": 3,
+      "sourceByte": 81325168682,
+      "sourceByteHistogram": Array [
+        Object {
+          "x": 1560470400000,
+          "y": 11592691523,
+        },
+        Object {
+          "x": 1560556800000,
+          "y": 25511969914,
+        },
+      ],
+      "sourcePackets": 12927108,
+      "sourcePacketsHistogram": Array [
+        Object {
+          "x": 1560470400000,
+          "y": 1811625,
+        },
+        Object {
+          "x": 1560556800000,
+          "y": 4041503,
+        },
+      ],
+    }
+  }
+  loading={true}
+/>
+`;
+
+exports[`KpiIpDetails Component rendering it renders the default widget 1`] = `
+<Memo()
+  data={
+    Object {
+      "connections": 246511947,
+      "destinationByte": 0,
+      "destinationByteHistogram": Array [
+        Object {
+          "x": 1560470400000,
+          "y": 0,
+        },
+        Object {
+          "x": 1560556800000,
+          "y": 0,
+        },
+      ],
+      "destinationPackets": 0,
+      "destinationPacketsHistogram": Array [
+        Object {
+          "x": 1560470400000,
+          "y": 0,
+        },
+        Object {
+          "x": 1560556800000,
+          "y": 0,
+        },
+      ],
+      "hosts": 3,
+      "sourceByte": 81325168682,
+      "sourceByteHistogram": Array [
+        Object {
+          "x": 1560470400000,
+          "y": 11592691523,
+        },
+        Object {
+          "x": 1560556800000,
+          "y": 25511969914,
+        },
+      ],
+      "sourcePackets": 12927108,
+      "sourcePacketsHistogram": Array [
+        Object {
+          "x": 1560470400000,
+          "y": 1811625,
+        },
+        Object {
+          "x": 1560556800000,
+          "y": 4041503,
+        },
+      ],
+    }
+  }
+  loading={false}
+/>
+`;
