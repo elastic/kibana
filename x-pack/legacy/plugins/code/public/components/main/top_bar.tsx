@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import React, { ChangeEvent } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
+import React from 'react';
 import { SearchOptions, SearchScope } from '../../../model';
 import { ReferenceInfo } from '../../../model/commit';
 import { MainRouteParams } from '../../common/types';
-import { encodeRevisionString } from '../../utils/url';
+import { encodeRevisionString, decodeRevisionString } from '../../../common/uri_util';
 import { history } from '../../utils/url';
 import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from '../search_bar';
@@ -24,22 +24,54 @@ interface Props {
 }
 
 export class TopBar extends React.Component<Props, { value: string }> {
+  static getDerivedStateFromProps(props: Props) {
+    return { value: decodeRevisionString(props.routeParams.revision) };
+  }
   public state = {
-    value: 'master',
+    value: decodeRevisionString(this.props.routeParams.revision),
   };
 
-  public onChange = (e: ChangeEvent<HTMLSelectElement>) => {
+  get branch() {
+    return this.getBranch(this.state.value);
+  }
+
+  getBranch = (revision: string) => {
+    const r = decodeRevisionString(revision);
+    const branch = this.props.branches.find(b => b.name === r);
+    const sameCommitBranch = this.props.branches.find(b => b.commit.id.startsWith(r));
+    if (branch) {
+      return branch.name;
+    } else if (sameCommitBranch) {
+      return sameCommitBranch.commit.id;
+    } else {
+      return '';
+    }
+  };
+
+  get branchOptions() {
+    return this.props.branches.map(b => ({
+      value: b.name,
+      inputDisplay: b.name,
+      dropdownDisplay: <div className="codeContainer__selectOption">{b.name}</div>,
+      ['data-test-subj']: `codeBranchSelectOption-${b.name}${
+        this.branch === b.name ? 'Active' : ''
+      }`,
+    }));
+  }
+
+  public onChange = (value: string) => {
     const { resource, org, repo, path = '', pathType } = this.props.routeParams;
     this.setState({
-      value: e.target.value,
+      value,
     });
-    const revision = this.props.branches.find(b => b.name === e.target.value)!.commit.id;
+    const revision = this.props.branches.find(b => b.name === value)!.name;
     history.push(
       `/${resource}/${org}/${repo}/${pathType}/${encodeRevisionString(revision)}/${path}`
     );
   };
 
   public render() {
+    const { branch } = this;
     return (
       <div className="code-top-bar__container">
         <SearchBar
@@ -55,14 +87,15 @@ export class TopBar extends React.Component<Props, { value: string }> {
         >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem
-                className="codeContainer__select"
-                grow={false}
-                style={{ display: 'none' }}
-              >
-                <EuiSelect
-                  options={this.props.branches.map(b => ({ value: b.name, text: b.name }))}
+              <EuiFlexItem className="codeContainer__select" grow={false}>
+                <EuiSuperSelect
+                  options={this.branchOptions}
+                  valueOfSelected={branch}
                   onChange={this.onChange}
+                  itemClassName="codeContainer__selectOptionItem"
+                  className="codeContainer__superSelect"
+                  popoverClassName="codeContainer__superSelectPopover"
+                  data-test-subj="codeBranchSelector"
                 />
               </EuiFlexItem>
               <Breadcrumb routeParams={this.props.routeParams} />

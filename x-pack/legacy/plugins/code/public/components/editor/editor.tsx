@@ -21,7 +21,7 @@ import { refUrlSelector } from '../../selectors';
 import { history } from '../../utils/url';
 import { Modifier, Shortcut } from '../shortcuts';
 import { ReferencesPanel } from './references_panel';
-import { encodeRevisionString } from '../../utils/url';
+import { encodeRevisionString } from '../../../common/uri_util';
 
 export interface EditorActions {
   closeReferences(changeUrl: boolean): void;

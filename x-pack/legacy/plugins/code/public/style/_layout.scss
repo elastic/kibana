@@ -72,6 +72,36 @@
 
 .codeContainer__select {
   margin-right: $euiSizeS;
+  min-width: 12rem;
+}
+
+.codeContainer__selectOption {
+  color: $euiColorPrimary;
+  font-size: $euiFontSizeS;
+  padding-top: $euiSize;
+  padding-bottom: $euiSize;
+  padding-right: $euiSize;
+}
+
+.codeContainer__selectOptionItem {
+  overflow: auto;
+  white-space: nowrap;
+}
+
+// for eui 11.3.2
+.euiSuperSelect__popoverPanel {
+  position: absolute;
+  max-height: calc(100vh - 12rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+// for eui 12.0 +
+.codeContainer__superSelectPopover__popoverPanel {
+  position: absolute;
+  max-height: calc(100vh - 12rem);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .codeContainer__tabs {

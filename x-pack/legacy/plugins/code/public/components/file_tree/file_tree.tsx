@@ -14,7 +14,7 @@ import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { closeTreePath, openTreePath } from '../../actions';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
-import { encodeRevisionString } from '../../utils/url';
+import { encodeRevisionString } from '../../../common/uri_util';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   node?: Tree;
