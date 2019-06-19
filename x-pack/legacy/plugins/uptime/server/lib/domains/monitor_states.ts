@@ -25,4 +25,8 @@ export class UMMonitorStatesDomain {
   public async getSummaryCount(request: any): Promise<DocCount> {
     return this.adapter.getSummaryCount(request);
   }
+
+  public async statesIndexExists(request: any): Promise<boolean> {
+    return this.adapter.statesIndexExists(request);
+  }
 }

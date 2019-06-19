@@ -101,6 +101,11 @@ export const monitorStatesSchema = gql`
     totalSummaryCount: DocCount!
   }
 
+  type StatesIndexStatus {
+    indexExists: Boolean!
+    docCount: DocCount
+  }
+
   extend type Query {
     getMonitorStates(
       pageIndex: Int!
@@ -108,5 +113,7 @@ export const monitorStatesSchema = gql`
       sortField: String
       sortDirection: String
     ): MonitorSummaryResult
+
+    getStatesIndexStatus: StatesIndexStatus!
   }
 `;

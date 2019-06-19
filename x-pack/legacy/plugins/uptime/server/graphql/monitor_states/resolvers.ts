@@ -7,7 +7,12 @@
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
 import { UMServerLibs } from '../../lib/lib';
 import { UMResolver } from '../../../common/graphql/resolver_types';
-import { GetMonitorStatesQueryArgs, MonitorSummaryResult } from '../../../common/graphql/types';
+import {
+  GetMonitorStatesQueryArgs,
+  MonitorSummaryResult,
+  DocCount,
+  StatesIndexStatus,
+} from '../../../common/graphql/types';
 
 export type UMGetMonitorStatesResolver = UMResolver<
   MonitorSummaryResult | Promise<MonitorSummaryResult>,
@@ -16,10 +21,20 @@ export type UMGetMonitorStatesResolver = UMResolver<
   UMContext
 >;
 
+export type UMStatesIndexExistsResolver = UMResolver<
+  StatesIndexStatus | Promise<StatesIndexStatus>,
+  any,
+  undefined,
+  UMContext
+>;
+
 export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
-  Query: { getMonitorStates: UMGetMonitorStatesResolver };
+  Query: {
+    getMonitorStates: UMGetMonitorStatesResolver;
+    getStatesIndexStatus: UMStatesIndexExistsResolver;
+  };
 } => {
   return {
     Query: {
@@ -35,6 +50,17 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
         return {
           summaries,
           totalSummaryCount,
+        };
+      },
+      async getStatesIndexStatus(resolver, params, { req }): Promise<StatesIndexStatus> {
+        const indexExists = await libs.monitorStates.statesIndexExists(req);
+        let docCount: DocCount | undefined;
+        if (indexExists) {
+          docCount = await libs.monitorStates.getSummaryCount(req);
+        }
+        return {
+          indexExists,
+          docCount,
         };
       },
     },

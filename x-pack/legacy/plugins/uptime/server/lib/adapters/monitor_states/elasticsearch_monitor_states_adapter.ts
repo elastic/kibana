@@ -76,4 +76,8 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
 
     return { count };
   }
+
+  public async statesIndexExists(request: any): Promise<boolean> {
+    return await this.database.head(request, { index: 'heartbeat-states-8.0.0' });
+  }
 }

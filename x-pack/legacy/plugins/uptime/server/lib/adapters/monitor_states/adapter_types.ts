@@ -15,4 +15,5 @@ export interface UMMonitorStatesAdapter {
     sortDirection?: string | null
   ): Promise<MonitorSummary[]>;
   getSummaryCount(request: any): Promise<DocCount>;
+  statesIndexExists(request: any): Promise<boolean>;
 }
