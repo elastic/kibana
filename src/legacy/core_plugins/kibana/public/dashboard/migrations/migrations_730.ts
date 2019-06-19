@@ -16,30 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { DashboardDoc } from './types';
+import { isDashboardDoc } from './is_dashboard_doc';
+import { moveFiltersToQuery } from './move_filters_to_query';
 
-import { SearchSource } from 'ui/courier';
-import { SavedObject } from 'ui/saved_objects/saved_object';
-import moment from 'moment';
-import { RefreshInterval } from 'ui/timefilter/timefilter';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
+export function migrations730(
+  doc:
+    | {
+        [key: string]: unknown;
+      }
+    | DashboardDoc
+): DashboardDoc | { [key: string]: unknown } {
+  if (!isDashboardDoc(doc)) {
+    // NOTE: we should probably throw an error here... but for now following suit and in the
+    // case of errors, just returning the same document.
+    return doc;
+  }
 
-export interface SavedObjectDashboard extends SavedObject {
-  id?: string;
-  copyOnSave: boolean;
-  timeRestore: boolean;
-  timeTo?: string;
-  timeFrom?: string;
-  title: string;
-  description?: string;
-  panelsJSON: string;
-  optionsJSON?: string;
-  // TODO: write a migration to rid of this, it's only around for bwc.
-  uiStateJSON?: string;
-  lastSavedTitle: string;
-  searchSource: SearchSource;
-  destroy: () => void;
-  refreshInterval?: RefreshInterval;
-  getQuery(): Query;
-  getFilters(): Filter[];
+  try {
+    const searchSource = JSON.parse(doc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+    doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
+      moveFiltersToQuery(searchSource)
+    );
+    return doc;
+  } catch (e) {
+    return doc;
+  }
 }
