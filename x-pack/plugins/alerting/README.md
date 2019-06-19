@@ -70,13 +70,15 @@ server.plugins.alerting.registerType({
     params,
     state,
   }: AlertExecuteOptions) {  
-    // Use this example to fire a single action
-    alertInstanceFactory('server_1')
+    // Use this example to fire a single action, server_1 is a unique identifier of the server
+    // the instance is about. This will be used to make `getState()` return previous state on matching identifiers.
+    services.alertInstanceFactory('server_1')
       .replaceState({
         // Alert instance level state, use getState() for
         // previous and persisted values
         ...
       })
+      // 'default' refers to a group of actions to fire, see 'actions' in create alert section
       .fire('default', {
         server: 'server_1',
       });
@@ -84,7 +86,7 @@ server.plugins.alerting.registerType({
     // Use this example to fire multiple actions
     // This scenario allows a single query and "fan-off" zero, one or many alerts based on the results
     for (const server of ['server_1', 'server_2', 'server_3']) {
-      alertInstanceFactory(server)
+      services.alertInstanceFactory(server)
       	 .replaceState({
       	 	// State specific to "server_x"
       	 	...
@@ -163,7 +165,7 @@ Payload:
 
 **alertInstanceFactory(id)**
 
-One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to fire actions. These instances support state persisting between alert type execution but will clear out once the alert instance stops firing.
+One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to fire actions. The id you give to the alert instance factory is a unique identifyer to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve state of previous instances with the same id. These instances support state persisting between alert type execution but will clear out once the alert instance stops firing.
 
 This factory returns an instance of `AlertInstance`. The alert instance class has the following methods, note that we have removed the methods that you shouldn't touch.
 
@@ -204,7 +206,7 @@ Below is an example of an alert that takes advantage of templating:
       "id": "3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5",
       "params": {
         "from": "example@elastic.co",
-        "to": "destination@elastic.co",
+        "to": ["destination@elastic.co"],
         "subject": "A notification about {{context.server}}"
         "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%"
       }
@@ -218,7 +220,7 @@ The templating system will take the alert and alert type as described above and 
 ```
 {
   "from": "example@elastic.co",
-  "to": "destination@elastic.co",
+  "to": ["destination@elastic.co"],
   "subject": "A notification about server_1"
   "body": "The server server_1 has a CPU usage of 80%"
 }

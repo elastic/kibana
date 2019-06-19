@@ -167,7 +167,7 @@ server.plugins.actions.fire({
   id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
   params: {
     from: 'example@elastic.co',
-    to: 'destination@elastic.co',
+    to: ['destination@elastic.co'],
     subject: 'My email subject',
     body: 'My email body',
   },
