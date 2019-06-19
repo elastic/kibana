@@ -5,7 +5,7 @@
  */
 import { CallCluster, CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
 import { Request, Server } from 'src/legacy/server/kbn_server';
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { SavedObjectsClientContract } from 'src/core/server';
 
 import moment from 'moment';
 import { XPackInfo } from '../../../../xpack_main/server/lib/xpack_info';
@@ -43,7 +43,7 @@ export class ReindexWorker {
   private readonly reindexService: ReindexService;
 
   constructor(
-    private client: SavedObjectsClient,
+    private client: SavedObjectsClientContract,
     private credentialStore: CredentialStore,
     private callWithRequest: CallClusterWithRequest,
     private callWithInternalUser: CallCluster,
