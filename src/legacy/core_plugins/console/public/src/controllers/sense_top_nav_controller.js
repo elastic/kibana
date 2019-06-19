@@ -25,6 +25,10 @@ import storage from '../storage';
 import { getCurrentSettings, updateSettings } from '../settings';
 import { showSettingsModal } from '../components/show_settings_modal';
 
+// help
+
+import { showHelpPanel } from '../components/show_help_panel';
+
 
 export function SenseTopNavController(Private) {
   const KbnTopNavController = Private(KbnTopNavControllerProvider);
@@ -72,7 +76,9 @@ export function SenseTopNavController(Private) {
       description: i18n.translate('console.topNav.helpTabDescription', {
         defaultMessage: 'Help',
       }),
-      template: `<sense-help></sense-help>`,
+      run: () => {
+        showHelpPanel();
+      },
       testId: 'consoleHelpButton',
     },
   ]);

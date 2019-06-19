@@ -17,8 +17,6 @@
  * under the License.
  */
 
-require('./sense_help_example');
-
 import { i18n } from '@kbn/i18n';
 import template from './welcome.html';
 

@@ -17,25 +17,23 @@
  * under the License.
  */
 
-const SenseEditor = require('../sense_editor/editor');
+import React, { useEffect } from 'react';
 import exampleText from 'raw-loader!./helpExample.txt';
-import { applyResizeCheckerToEditors } from '../sense_editor_resize';
+const SenseEditor = require('../sense_editor/editor');
+import $ from 'jquery';
 
-require('ui/modules')
-  .get('app/sense')
-  .directive('senseHelpExample', function () {
-    return {
-      restrict: 'E',
-      link: function ($scope, $el) {
-        $el.text(exampleText.trim());
-        $scope.editor = new SenseEditor($el);
-        applyResizeCheckerToEditors($scope, $el, $scope.editor);
-        $scope.editor.setReadOnly(true);
-        $scope.editor.$blockScrolling = Infinity;
+export function EditorExample() {
+  useEffect(() => {
+    const el = $('#help-example');
+    el.text(exampleText.trim());
+    const editor = new SenseEditor(el);
+    editor.setReadOnly(true);
+    editor.$blockScrolling = Infinity;
 
-        $scope.$on('$destroy', function () {
-          if ($scope.editor) $scope.editor.destroy();
-        });
-      }
+    return () => {
+      editor.destroy();
     };
-  });
+  }, []);
+
+  return (<div id="help-example" className="conHelp__example"/>);
+}

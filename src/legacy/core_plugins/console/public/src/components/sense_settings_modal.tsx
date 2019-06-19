@@ -18,7 +18,7 @@
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
-import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -43,7 +43,6 @@ interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => Promise<void>;
   onClose: () => void;
   settings: DevToolsSettings;
-  intl: InjectedIntl;
 }
 
 export function DevToolsSettingsModal(props: Props) {
