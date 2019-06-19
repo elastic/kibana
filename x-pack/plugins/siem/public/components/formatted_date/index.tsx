@@ -9,13 +9,13 @@ import * as React from 'react';
 import { useContext } from 'react';
 import { pure } from 'recompose';
 
-import { isString } from 'lodash/fp';
 import {
   AppKibanaFrameworkAdapter,
   KibanaConfigContext,
 } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
+import { getMaybeDate } from './maybe_date';
 
 export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => {
   const config: Partial<AppKibanaFrameworkAdapter> = useContext(KibanaConfigContext);
@@ -29,19 +29,6 @@ export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => {
     </>
   );
 });
-
-export const getMaybeDate = (value: string | number): moment.Moment => {
-  if (isString(value) && value.trim() !== '') {
-    const maybeDate = moment(new Date(value));
-    if (maybeDate.isValid() || isNaN(+value)) {
-      return maybeDate;
-    } else {
-      return moment(new Date(+value));
-    }
-  } else {
-    return moment(new Date(value));
-  }
-};
 
 /**
  * Renders the specified date value in a format determined by the user's preferences,
