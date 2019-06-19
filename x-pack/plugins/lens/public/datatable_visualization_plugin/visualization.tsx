@@ -38,71 +38,78 @@ export function DatatableConfigPanel(props: VisualizationProps<DatatableVisualiz
   return (
     <div>
       <EuiForm className="lnsConfigPanel">
-        {state.columns.map(({ id, label }, index) => (
-          <>
-            <EuiFormRow
-              key={id}
-              label={i18n.translate('xpack.lens.datatable.columnLabel', {
-                defaultMessage: 'Column',
-              })}
-            >
-              <EuiFieldText
-                value={label || ''}
-                onChange={e => {
-                  const newColumns = [...state.columns];
-                  newColumns[index] = { ...newColumns[index], label: e.target.value };
-                  setState({
-                    ...state,
-                    columns: newColumns,
-                  });
-                }}
-                placeholder={i18n.translate('xpack.lens.datatable.columnTitlePlaceholder', {
-                  defaultMessage: 'Title',
+        {state.columns.map(({ id, label }, index) => {
+          const operation = datasource.getOperationForColumnId(id);
+          return (
+            <>
+              <EuiFormRow
+                key={id}
+                label={i18n.translate('xpack.lens.datatable.columnLabel', {
+                  defaultMessage: 'Column',
                 })}
-                aria-label={i18n.translate('xpack.lens.datatable.columnTitlePlaceholder', {
-                  defaultMessage: 'Title',
-                })}
-              />
-            </EuiFormRow>
+              >
+                <EuiFieldText
+                  value={label || ''}
+                  onChange={e => {
+                    const newColumns = [...state.columns];
+                    newColumns[index] = { ...newColumns[index], label: e.target.value };
+                    setState({
+                      ...state,
+                      columns: newColumns,
+                    });
+                  }}
+                  placeholder={
+                    operation
+                      ? operation.label
+                      : i18n.translate('xpack.lens.datatable.columnTitlePlaceholder', {
+                          defaultMessage: 'Title',
+                        })
+                  }
+                  aria-label={i18n.translate('xpack.lens.datatable.columnTitlePlaceholder', {
+                    defaultMessage: 'Title',
+                  })}
+                />
+              </EuiFormRow>
 
-            <EuiFormRow>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={true}>
-                  <NativeRenderer
-                    data-test-subj="lnsDatatable_xDimensionPanel"
-                    render={datasource.renderDimensionPanel}
-                    nativeProps={{
-                      columnId: id,
-                      dragDropContext: props.dragDropContext,
-                      filterOperations: () => true,
-                    }}
-                  />
-                </EuiFlexItem>
+              <EuiFormRow>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={true}>
+                    <NativeRenderer
+                      data-test-subj="lnsDatatable_xDimensionPanel"
+                      render={datasource.renderDimensionPanel}
+                      nativeProps={{
+                        columnId: id,
+                        dragDropContext: props.dragDropContext,
+                        filterOperations: () => true,
+                      }}
+                    />
+                  </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    size="s"
-                    color="warning"
-                    data-test-subj={`lns_datasourceDimensionPanel_remove_${id}`}
-                    iconType="trash"
-                    onClick={() => {
-                      datasource.removeColumnInTableSpec(id);
-                      const newColumns = [...state.columns];
-                      newColumns.splice(index);
-                      setState({
-                        ...state,
-                        columns: newColumns,
-                      });
-                    }}
-                    aria-label={i18n.translate('xpack.lens.datasource.removeColumnAriaLabel', {
-                      defaultMessage: 'Remove',
-                    })}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFormRow>
-          </>
-        ))}
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      size="s"
+                      color="warning"
+                      data-test-subj={`lns_datasourceDimensionPanel_remove_${id}`}
+                      iconType="trash"
+                      onClick={() => {
+                        datasource.removeColumnInTableSpec(id);
+                        const newColumns = [...state.columns];
+                        newColumns.splice(index);
+                        setState({
+                          ...state,
+                          columns: newColumns,
+                        });
+                      }}
+                      aria-label={i18n.translate('xpack.lens.datasource.removeColumnAriaLabel', {
+                        defaultMessage: 'Remove',
+                      })}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+            </>
+          );
+        })}
 
         <div>
           <EuiButton
@@ -175,7 +182,7 @@ export const datatableVisualization: Visualization<
       domElement
     ),
 
-  toExpression: state => ({
+  toExpression: (state, datasource) => ({
     type: 'expression',
     chain: [
       {
@@ -191,7 +198,11 @@ export const datatableVisualization: Visualization<
                   function: 'lens_datatable_columns',
                   arguments: {
                     columnIds: state.columns.map(({ id }) => id),
-                    labels: state.columns.map(({ label }) => label),
+                    labels: state.columns.map(({ id, label }) =>
+                      label || datasource.getOperationForColumnId(id)
+                        ? datasource.getOperationForColumnId(id)!.label
+                        : ''
+                    ),
                   },
                 },
               ],

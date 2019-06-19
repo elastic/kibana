@@ -6,9 +6,10 @@
 
 import { xyVisualization } from './xy_visualization';
 import { Position } from '@elastic/charts';
-import { DatasourcePublicAPI } from '../types';
+import { DatasourcePublicAPI, Operation } from '../types';
 import { State } from './types';
 import { createMockDatasource } from '../editor_frame_plugin/mocks';
+import { Ast, ExpressionArgAST } from '@kbn/interpreter/target/common';
 
 function exampleState(): State {
   return {
@@ -25,6 +26,7 @@ function exampleState(): State {
     },
     y: {
       accessors: ['b', 'c'],
+      labels: ['', ''],
       position: Position.Left,
       showGridlines: true,
       title: 'Bar',
@@ -65,6 +67,9 @@ Object {
     "accessors": Array [
       "test-id1",
     ],
+    "labels": Array [
+      "",
+    ],
     "position": "left",
     "showGridlines": false,
     "title": "Y",
@@ -89,8 +94,34 @@ Object {
   describe('#toExpression', () => {
     it('should map to a valid AST', () => {
       expect(
-        xyVisualization.toExpression(exampleState(), {} as DatasourcePublicAPI)
+        xyVisualization.toExpression(exampleState(), createMockDatasource().publicAPIMock)
       ).toMatchSnapshot();
+    });
+
+    it('should default to labeling all columns with their column label', () => {
+      const mockDatasource = createMockDatasource();
+
+      mockDatasource.publicAPIMock.getOperationForColumnId
+        .mockReturnValueOnce({
+          label: 'First',
+        } as Operation)
+        .mockReturnValueOnce({
+          label: 'Second',
+        } as Operation);
+
+      const expression = xyVisualization.toExpression(
+        exampleState(),
+        mockDatasource.publicAPIMock
+      )! as Ast;
+
+      expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledTimes(2);
+      expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
+      expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');
+
+      expect((expression.chain[0].arguments.y[0] as Ast).chain[0].arguments.labels).toEqual([
+        'First',
+        'Second',
+      ]);
     });
   });
 });

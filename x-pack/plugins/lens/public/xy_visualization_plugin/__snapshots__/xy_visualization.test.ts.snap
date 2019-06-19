@@ -66,6 +66,10 @@ Object {
                     "b",
                     "c",
                   ],
+                  "labels": Array [
+                    "",
+                    "",
+                  ],
                   "position": Array [
                     "left",
                   ],

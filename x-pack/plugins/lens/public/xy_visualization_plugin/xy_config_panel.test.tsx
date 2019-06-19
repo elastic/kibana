@@ -43,6 +43,7 @@ describe('XYConfigPanel', () => {
       },
       y: {
         accessors: ['bar'],
+        labels: [''],
         position: Position.Left,
         showGridlines: true,
         title: 'Y',
@@ -270,8 +271,8 @@ describe('XYConfigPanel', () => {
     });
   });
 
-  test('allows editing the y axis title', () => {
-    const testSetTitle = (title: string) => {
+  test('allows editing each y axis label', () => {
+    const testSetLabel = (title: string) => {
       const setState = jest.fn();
       const component = mount(
         <XYConfigPanel
@@ -282,17 +283,17 @@ describe('XYConfigPanel', () => {
         />
       );
 
-      (testSubj(component, 'lnsXY_yTitle').onChange as Function)({ target: { value: title } });
+      (testSubj(component, 'lnsXY_yLabel').onChange as Function)({ target: { value: title } });
 
       expect(setState).toHaveBeenCalledTimes(1);
       return setState.mock.calls[0][0];
     };
 
-    expect(testSetTitle('Hoi')).toMatchObject({
-      y: { title: 'Hoi' },
+    expect(testSetLabel('Hoi')).toMatchObject({
+      y: { labels: ['Hoi'] },
     });
-    expect(testSetTitle('There!')).toMatchObject({
-      y: { title: 'There!' },
+    expect(testSetLabel('There!')).toMatchObject({
+      y: { labels: ['There!'] },
     });
   });
 
@@ -364,7 +365,10 @@ describe('XYConfigPanel', () => {
         dragDropContext={dragDropContext}
         datasource={{ ...mockDatasource(), generateColumnId: () => 'zed' }}
         setState={setState}
-        state={{ ...state, y: { ...state.y, accessors: ['a', 'b', 'c'] } }}
+        state={{
+          ...state,
+          y: { ...state.y, accessors: ['a', 'b', 'c'], labels: ['', '', ''] },
+        }}
       />
     );
 
@@ -372,7 +376,7 @@ describe('XYConfigPanel', () => {
 
     expect(setState).toHaveBeenCalledTimes(1);
     expect(setState.mock.calls[0][0]).toMatchObject({
-      y: { accessors: ['a', 'b', 'c', 'zed'] },
+      y: { accessors: ['a', 'b', 'c', 'zed'], labels: ['', '', '', ''] },
     });
   });
 

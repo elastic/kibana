@@ -73,6 +73,7 @@ const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } =
 
 export interface YConfig extends AxisConfig {
   accessors: string[];
+  labels: string[];
 }
 
 type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
@@ -90,6 +91,11 @@ export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConf
     accessors: {
       types: ['string'],
       help: 'The columns to display on the y axis.',
+      multi: true,
+    },
+    labels: {
+      types: ['string'],
+      help: '',
       multi: true,
     },
   },

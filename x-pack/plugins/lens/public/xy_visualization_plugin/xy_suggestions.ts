@@ -93,6 +93,7 @@ function getSuggestion(
       },
       y: {
         accessors: yValues.map(col => col.columnId),
+        labels: yValues.map(col => col.operation.label),
         position: Position.Left,
         showGridlines: false,
         title: yTitle,

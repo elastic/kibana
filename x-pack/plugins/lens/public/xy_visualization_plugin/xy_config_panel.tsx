@@ -18,7 +18,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import { State, SeriesType } from './types';
-import { VisualizationProps, Operation } from '../types';
+import { DatasourcePublicAPI, VisualizationProps, Operation } from '../types';
 import { NativeRenderer } from '../native_renderer';
 
 const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType }> = [
@@ -66,6 +66,12 @@ const positionIcons = [
     iconType: 'arrowRight',
   },
 ];
+
+function getColumnLabel(datasource: DatasourcePublicAPI, columnId: string, defaultLabel: string) {
+  const operation = datasource.getOperationForColumnId(columnId);
+
+  return operation ? operation.label : defaultLabel;
+}
 
 export function XYConfigPanel(props: VisualizationProps<State>) {
   const { state, datasource, setState } = props;
@@ -173,9 +179,13 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             })}
           >
             <EuiFieldText
-              placeholder={i18n.translate('xpack.lens.xyChart.xTitlePlaceholder', {
-                defaultMessage: 'Title',
-              })}
+              placeholder={getColumnLabel(
+                datasource,
+                state.x.accessor,
+                i18n.translate('xpack.lens.xyChart.xTitlePlaceholder', {
+                  defaultMessage: 'Title',
+                })
+              )}
               data-test-subj="lnsXY_xTitle"
               value={state.x.title}
               onChange={e => setState({ ...state, x: { ...state.x, title: e.target.value } })}
@@ -224,31 +234,34 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
       >
         <>
           <EuiFormRow
-            label={i18n.translate('xpack.lens.xyChart.yTitleLabel', {
-              defaultMessage: 'Title',
-            })}
-          >
-            <EuiFieldText
-              placeholder={i18n.translate('xpack.lens.xyChart.yTitlePlaceholder', {
-                defaultMessage: 'Title',
-              })}
-              data-test-subj="lnsXY_yTitle"
-              value={state.y.title}
-              onChange={e => setState({ ...state, y: { ...state.y, title: e.target.value } })}
-              aria-label={i18n.translate('xpack.lens.xyChart.yTitleAriaLabel', {
-                defaultMessage: 'Title',
-              })}
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
             label={i18n.translate('xpack.lens.xyChart.yValueLabel', {
               defaultMessage: 'Value',
             })}
           >
             <>
-              {state.y.accessors.map(accessor => (
+              {state.y.accessors.map((accessor, yIndex) => (
                 <div key={accessor}>
+                  <EuiFormRow>
+                    <EuiFieldText
+                      placeholder={getColumnLabel(
+                        datasource,
+                        accessor,
+                        i18n.translate('xpack.lens.xyChart.yLabelPlaceholder', {
+                          defaultMessage: 'Label',
+                        })
+                      )}
+                      data-test-subj="lnsXY_yLabel"
+                      value={state.y.labels[yIndex]}
+                      onChange={e => {
+                        const newLabels = [...state.y.labels];
+                        newLabels[yIndex] = e.target.value;
+                        setState({ ...state, y: { ...state.y, labels: newLabels } });
+                      }}
+                      aria-label={i18n.translate('xpack.lens.xyChart.yLabelAriaLabel', {
+                        defaultMessage: 'Label',
+                      })}
+                    />
+                  </EuiFormRow>
                   <NativeRenderer
                     data-test-subj={`lnsXY_yDimensionPanel_${accessor}`}
                     render={datasource.renderDimensionPanel}
@@ -266,11 +279,14 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     iconType="trash"
                     onClick={() => {
                       datasource.removeColumnInTableSpec(accessor);
+                      const newLabels = [...state.y.labels];
+                      newLabels.splice(yIndex);
                       setState({
                         ...state,
                         y: {
                           ...state.y,
                           accessors: state.y.accessors.filter(col => col !== accessor),
+                          labels: newLabels,
                         },
                       });
                     }}
@@ -288,6 +304,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     y: {
                       ...state.y,
                       accessors: [...state.y.accessors, datasource.generateColumnId()],
+                      labels: [...state.y.labels, ''],
                     },
                   })
                 }

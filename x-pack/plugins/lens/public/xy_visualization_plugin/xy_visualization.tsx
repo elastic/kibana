@@ -30,6 +30,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
         },
         y: {
           accessors: [datasource.generateColumnId()],
+          labels: [''],
           position: Position.Left,
           showGridlines: false,
           title: 'Y',
@@ -50,7 +51,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
       domElement
     ),
 
-  toExpression: state => ({
+  toExpression: (state, datasource) => ({
     type: 'expression',
     chain: [
       {
@@ -103,6 +104,15 @@ export const xyVisualization: Visualization<State, PersistableState> = {
                     showGridlines: [state.y.showGridlines],
                     position: [state.y.position],
                     accessors: state.y.accessors,
+                    labels: state.y.labels.map((label, index) => {
+                      if (label) {
+                        return label;
+                      }
+                      const operation = datasource.getOperationForColumnId(
+                        state.y.accessors[index]
+                      );
+                      return operation ? operation.label : '';
+                    }),
                   },
                 },
               ],

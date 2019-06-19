@@ -125,17 +125,12 @@ export const datatableRenderer: RenderFunction<DatatableProps> = {
 };
 
 function DatatableComponent(props: DatatableProps) {
-  const dataFields = props.data.columns.map(col => col.id);
-
   return (
     <EuiBasicTable
       columns={props.args.columns.columnIds
         .map((id, index) => {
-          const reverseTabifyField = dataFields.find(
-            field => field.indexOf(id) === field.length - id.length
-          );
           return {
-            field: reverseTabifyField,
+            field: props.args.columns.columnIds[index],
             name: props.args.columns.labels[index],
           };
         })
