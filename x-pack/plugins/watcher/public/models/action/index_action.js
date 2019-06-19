@@ -76,6 +76,6 @@ export class IndexAction extends BaseAction {
     defaultMessage: 'Index data into Elasticsearch.',
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.indexAction.simulateButtonLabel', {
-    defaultMessage: 'Index data now',
+    defaultMessage: 'Index data',
   });
 }

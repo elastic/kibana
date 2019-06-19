@@ -38,7 +38,7 @@ export class Action {
     if (!json.id) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.actionStatus.idPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {id} property',
+          defaultMessage: 'JSON argument must contain an {id} property',
           values: {
             id: 'id'
           }
@@ -49,7 +49,7 @@ export class Action {
     if (!json.actionJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.action.actionJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJson} property',
+          defaultMessage: 'JSON argument must contain an {actionJson} property',
           values: {
             actionJson: 'actionJson'
           }

@@ -24,7 +24,7 @@ import { WatchContext } from '../../watch_context';
 const disabledMessage = i18n.translate(
   'xpack.watcher.sections.watchEdit.actions.disabledOptionLabel',
   {
-    defaultMessage: 'Disabled. Configure elasticsearch.yml.',
+    defaultMessage: 'Disabled. Configure your elasticsearch.yml.',
   }
 );
 

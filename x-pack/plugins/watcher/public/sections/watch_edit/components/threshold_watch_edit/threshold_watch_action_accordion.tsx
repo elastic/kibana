@@ -161,7 +161,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                     title={i18n.translate(
                       'xpack.watcher.sections.watchEdit.threshold.actions.actionConfigurationWarningTitleText',
                       {
-                        defaultMessage: 'Account may not be configured.',
+                        defaultMessage: 'Account may not be configured',
                       }
                     )}
                     color="warning"
@@ -171,7 +171,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                       <p>
                         <FormattedMessage
                           id="xpack.watcher.sections.watchEdit.threshold.actions.actionConfigurationWarningDescriptionText"
-                          defaultMessage="To create this action, at least one {accountType} account must be configured. {docLink}"
+                          defaultMessage="To create this action, you must configure at least one {accountType} account. {docLink}"
                           values={{
                             accountType: action.typeName,
                             docLink: (

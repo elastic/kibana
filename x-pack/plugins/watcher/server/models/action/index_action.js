@@ -69,7 +69,7 @@ export class IndexAction extends BaseAction {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.indexAction.actionJsonIndexPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonIndex} property',
+          defaultMessage: 'JSON argument must contain an {actionJsonIndex} property',
           values: {
             actionJsonIndex: 'actionJson.index'
           }
@@ -83,7 +83,7 @@ export class IndexAction extends BaseAction {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonIndexNamePropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonIndexName} property',
+          defaultMessage: 'JSON argument must contain an {actionJsonIndexName} property',
           values: {
             actionJsonIndexName: 'actionJson.index.index'
           }

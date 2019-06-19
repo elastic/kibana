@@ -24,7 +24,7 @@ export const DeleteWatchesModal = ({
     'xpack.watcher.deleteSelectedWatchesConfirmModal.descriptionText',
     {
       defaultMessage:
-        'This will permanently delete {numWatchesToDelete, plural, one {a watch} other {# watches}}. You can’t recover a deleted watch.',
+        "You can't recover {numWatchesToDelete, plural, one {a deleted watch} other {deleted watches}}.",
       values: { numWatchesToDelete },
     }
   );

@@ -179,7 +179,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
   const expressionErrorMessage = i18n.translate(
     'xpack.watcher.thresholdWatchExpression.fixErrorInExpressionBelowValidationMessage',
     {
-      defaultMessage: 'Your expression has errors.',
+      defaultMessage: 'Expression contains errors.',
     }
   );
   const expressionFields = [
@@ -269,7 +269,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
               helpText={
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.titlePanel.howToBroadenSearchQueryDescription"
-                  defaultMessage="Use * to broaden your search query"
+                  defaultMessage="Use * to broaden your query."
                 />
               }
             >
@@ -396,7 +396,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
               <h3>
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.watchConditionSectionTitle"
-                  defaultMessage="Matching the following condition"
+                  defaultMessage="Match the following condition"
                 />
               </h3>
             </EuiTitle>
@@ -851,12 +851,12 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
               {watch.isNew ? (
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.threshold.createButtonLabel"
-                  defaultMessage="Create"
+                  defaultMessage="Create alert"
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.threshold.saveButtonLabel"
-                  defaultMessage="Save"
+                  defaultMessage="Save alert"
                 />
               )}
             </EuiButton>

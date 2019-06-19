@@ -75,7 +75,7 @@ export class ThresholdWatch extends BaseWatch {
     const staticPart = i18n.translate(
       'xpack.watcher.models.thresholdWatch.sendAlertOnSpecificConditionTitleDescription',
       {
-        defaultMessage: 'Send an alert when a specific condition is met.',
+        defaultMessage: 'Send an alert when your specified condition is met.',
       }
     );
     if (isNaN(this.triggerIntervalSize)) {
@@ -86,7 +86,7 @@ export class ThresholdWatch extends BaseWatch {
     const dynamicPartText = i18n.translate(
       'xpack.watcher.models.thresholdWatch.thresholdWatchIntervalTitleDescription',
       {
-        defaultMessage: 'This will run every {triggerIntervalSize} {timeUnitLabel}.',
+        defaultMessage: 'Your watch will run every {triggerIntervalSize} {timeUnitLabel}.',
         values: {
           triggerIntervalSize: this.triggerIntervalSize,
           timeUnitLabel,
@@ -111,7 +111,7 @@ export class ThresholdWatch extends BaseWatch {
     if (!this.name) {
       errors.name.push(
         i18n.translate('xpack.watcher.sections.watchEdit.threshold.error.requiredNameText', {
-          defaultMessage: 'Name is required',
+          defaultMessage: 'Name is required.',
         })
       );
     }
@@ -120,7 +120,7 @@ export class ThresholdWatch extends BaseWatch {
         i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.enterOneOrMoreIndicesValidationMessage',
           {
-            defaultMessage: 'Enter one or more indices',
+            defaultMessage: 'Enter one or more indices.',
           }
         )
       );
@@ -134,7 +134,7 @@ export class ThresholdWatch extends BaseWatch {
         i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.invalidIndexValidationMessage',
           {
-            defaultMessage: 'Your index query does not have an associated time field',
+            defaultMessage: 'Index does not have a time field.',
           }
         )
       );
@@ -174,7 +174,7 @@ export class ThresholdWatch extends BaseWatch {
         i18n.translate(
           'xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage',
           {
-            defaultMessage: 'Please select a field',
+            defaultMessage: 'This field is required.',
           }
         )
       );
@@ -196,7 +196,7 @@ export class ThresholdWatch extends BaseWatch {
           i18n.translate(
             'xpack.watcher.thresholdWatchExpression.groupBy.requiredFieldValidationMessage',
             {
-              defaultMessage: 'Please select a field.',
+              defaultMessage: 'This field is required.',
             }
           )
         );
@@ -219,7 +219,7 @@ export class ThresholdWatch extends BaseWatch {
       errors.threshold1.push(i18n.translate(
         'xpack.watcher.thresholdWatchExpression.thresholdLevel.secondValueMustBeGreaterMessage',
         {
-          defaultMessage: 'This value must be greater than {lowerBound}.',
+          defaultMessage: 'Value must be greater than {lowerBound}.',
           values: {
             lowerBound: this.threshold[0]
           }

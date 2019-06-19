@@ -122,7 +122,7 @@ const WatchDetailUi = () => {
               content={i18n.translate(
                 'xpack.watcher.sections.watchDetail.watchTable.ackActionCellTooltipTitle',
                 {
-                  defaultMessage: 'Acknowledge this watch action',
+                  defaultMessage: 'Acknowledge watch action.',
                 }
               )}
             >
@@ -192,7 +192,7 @@ const WatchDetailUi = () => {
           <EuiFlyoutBody>
             <EuiCallOut
               title={i18n.translate('xpack.watcher.sections.watchDetail.actionErrorsCalloutTitle', {
-                defaultMessage: 'This action contains errors.',
+                defaultMessage: 'This action contains errors',
               })}
               color="danger"
               iconType="cross"
