@@ -55,7 +55,8 @@ describe('kbn-pm production', () => {
     }
   }, timeout);
 
-  test(
+  // FLAKY: https://github.com/elastic/kibana/issues/39205
+  test.skip(
     'builds and copies projects for production',
     async () => {
       await buildProductionProjects({ kibanaRoot: tmpDir, buildRoot });
@@ -75,7 +76,8 @@ describe('kbn-pm production', () => {
     timeout
   );
 
-  test(
+  // FLAKY: https://github.com/elastic/kibana/issues/36579
+  test.skip(
     'builds and copies only OSS projects for production',
     async () => {
       await buildProductionProjects({ kibanaRoot: tmpDir, buildRoot, onlyOSS: true });
