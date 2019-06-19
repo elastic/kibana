@@ -33,7 +33,7 @@ import { explorer$ } from './explorer_dashboard_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
 import { refreshIntervalWatcher } from '../util/refresh_interval_watcher';
-import { timefilter$, timefilter, TIMEFILTER } from '../../common/timefilter';
+import { timefilter } from '../../common/timefilter';
 
 import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
 
@@ -194,11 +194,9 @@ module.controller('MlExplorerController', function (
   const explorerSubscriber = explorer$.subscribe(loadJobsListener);
   // Refresh all the data when the time range is altered. Replaces listen for 'fetch' emitted by legacy timefilter
   // which would occur on setTime or setRefreshInterval
-  const timefilterSubscriber = timefilter$.subscribe(({ action }) => {
-    if (action === TIMEFILTER.SET_TIME || action === TIMEFILTER.SET_REFRESH_INTERVAL) {
-      if ($scope.jobSelectionUpdateInProgress === false) {
-        explorer$.next({ action: EXPLORER_ACTION.RELOAD });
-      }
+  const timefilterSubscriber = timefilter.subscribeToUpdates(function triggerRelad() {
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     }
   });
 

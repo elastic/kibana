@@ -47,7 +47,7 @@ uiRoutes
     }
   });
 
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../common/timefilter';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
@@ -144,9 +144,9 @@ module
       .value();
     $scope.indexedFieldTypes = indexedFieldTypes.sort();
 
-
-    // Refresh the data when the time range is altered.
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', function () {
+    // Refresh all the data when the time range is altered. Replaces listen for 'fetch' emitted by legacy timefilter
+    // which would occur on setTime or setRefreshInterval
+    const timefilterSubscriber = timefilter.subscribeToUpdates(function triggerRelad() {
       $scope.earliest = timefilter.getActiveBounds().min.valueOf();
       $scope.latest = timefilter.getActiveBounds().max.valueOf();
       loadOverallStats();
@@ -675,4 +675,7 @@ module
 
     loadOverallStats();
 
+    $scope.$on('$destroy', () => {
+      timefilterSubscriber.unsubscribe();
+    });
   });

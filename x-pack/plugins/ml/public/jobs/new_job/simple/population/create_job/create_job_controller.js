@@ -42,7 +42,7 @@ import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prep
 import { PopulationJobServiceProvider } from './create_job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import template from './create_job.html';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../../../../common/timefilter';
 
 uiRoutes
   .when('/jobs/new_job/simple/population', {
@@ -737,10 +737,13 @@ module
       preLoadJob($scope, appState);
     });
 
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.loadVis);
+    const timefilterSubscriber = timefilter.subscribeToUpdates(function triggerRelad() {
+      $scope.loadVis();
+    });
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;
+      timefilterSubscriber.unsubscribe();
       angular.element(window).off('resize');
     });
   });

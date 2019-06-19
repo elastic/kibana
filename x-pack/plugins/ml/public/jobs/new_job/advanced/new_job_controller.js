@@ -14,7 +14,7 @@ import 'ui/angular_ui_select';
 import 'ui/directives/input_focus';
 
 import { parseInterval } from 'ui/utils/parse_interval';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../../common/timefilter';
 
 import uiRoutes from 'ui/routes';
 import { checkFullLicense } from 'plugins/ml/license/check_license';

@@ -28,7 +28,7 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
 import { toastNotifications } from 'ui/notify';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../../../../common/timefilter';
 
 uiRoutes
   .when('/jobs/new_job/simple/recognize', {

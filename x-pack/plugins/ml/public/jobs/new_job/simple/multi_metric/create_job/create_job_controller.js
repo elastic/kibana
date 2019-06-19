@@ -43,7 +43,7 @@ import { MultiMetricJobServiceProvider } from './create_job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../../../../common/timefilter';
 
 uiRoutes
   .when('/jobs/new_job/simple/multi_metric', {
@@ -757,7 +757,7 @@ module
       preLoadJob($scope, appState);
     });
 
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
+    const timefilterSubscriber = timefilter.subscribeToUpdates(function triggerRelad() {
       $scope.loadVis();
       if ($scope.formConfig.splitField !== undefined) {
         $scope.setModelMemoryLimit();
@@ -766,6 +766,7 @@ module
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;
+      timefilterSubscriber.unsubscribe();
       angular.element(window).off('resize');
     });
   });

@@ -23,7 +23,7 @@ import 'plugins/ml/components/controls';
 
 import { toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
-import { timefilter, timefilter$ } from '../../common/timefilter';
+import { timefilter } from '../../common/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
@@ -694,7 +694,9 @@ module.controller('MlTimeSeriesExplorerController', function (
   const intervalSub = interval$.subscribe(tableControlsListener);
   const severitySub = severity$.subscribe(tableControlsListener);
   const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
-  const timefilterSubscription = timefilter$.subscribe($scope.refresh);
+  const timefilterSubscriber = timefilter.subscribeToUpdates(function triggerRelad() {
+    $scope.refresh();
+  });
   // Listen for changes to job selection.
   const jobSelectServiceSub = mlJobSelectService.subscribe(({ selection }) => {
     // Clear the detectorIndex, entities and forecast info.
@@ -715,7 +717,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     severitySub.unsubscribe();
     annotationsRefreshSub.unsubscribe();
     jobSelectServiceSub.unsubscribe();
-    timefilterSubscription.unsubscribe();
+    timefilterSubscriber.unsubscribe();
   });
 
   $scope.$on('contextChartSelected', function (event, selection) {

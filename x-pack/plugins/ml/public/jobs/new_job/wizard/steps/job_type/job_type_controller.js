@@ -21,7 +21,7 @@ import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } 
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import template from './job_type.html';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../../../../common/timefilter';
 
 uiRoutes
   .when('/jobs/new_job/step/job_type', {
