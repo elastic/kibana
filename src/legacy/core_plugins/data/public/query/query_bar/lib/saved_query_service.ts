@@ -18,7 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
+import { SavedObjectAttributes } from 'src/core/server';
 import { SavedQueryAttributes, SavedQuery } from '../../../search/search_bar';
 
 interface SerializedSavedQueryAttributes extends SavedObjectAttributes {
@@ -104,30 +104,42 @@ export const findSavedQueries = async (searchText: string = ''): Promise<SavedQu
     sortField: '_score',
   });
 
-  return response.savedObjects.map(savedObject => {
-    let queryString;
-    try {
-      queryString = JSON.parse(savedObject.attributes.query.query);
-    } catch (error) {
-      queryString = savedObject.attributes.query.query;
-    }
-    const savedQuery: SavedQueryAttributes = {
-      title: savedObject.attributes.title || '',
-      description: savedObject.attributes.description || '',
-      query: {
-        query: queryString,
-        language: savedObject.attributes.query.language,
-      },
-    };
-    if (savedObject.attributes.filters) {
-      savedQuery.filters = JSON.parse(savedObject.attributes.filters);
-    }
-    if (savedObject.attributes.timefilter) {
-      savedQuery.timefilter = JSON.parse(savedObject.attributes.timefilter);
-    }
-    return {
-      id: savedObject.id,
-      attributes: savedQuery,
-    };
-  });
+  return response.savedObjects.map(savedObject => parseSavedQueryObject(savedObject));
+};
+
+export const getSavedQuery = async (id: string): Promise<SavedQuery> => {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+
+  const response = await savedObjectsClient.get<SerializedSavedQueryAttributes>('query', id);
+  return parseSavedQueryObject(response);
+};
+
+const parseSavedQueryObject = (savedQuery: {
+  id: string;
+  attributes: SerializedSavedQueryAttributes;
+}) => {
+  let queryString;
+  try {
+    queryString = JSON.parse(savedQuery.attributes.query.query);
+  } catch (error) {
+    queryString = savedQuery.attributes.query.query;
+  }
+  const savedQueryItems: SavedQueryAttributes = {
+    title: savedQuery.attributes.title || '',
+    description: savedQuery.attributes.description || '',
+    query: {
+      query: queryString,
+      language: savedQuery.attributes.query.language,
+    },
+  };
+  if (savedQuery.attributes.filters) {
+    savedQueryItems.filters = JSON.parse(savedQuery.attributes.filters);
+  }
+  if (savedQuery.attributes.timefilter) {
+    savedQueryItems.timefilter = JSON.parse(savedQuery.attributes.timefilter);
+  }
+  return {
+    id: savedQuery.id,
+    attributes: savedQueryItems,
+  };
 };

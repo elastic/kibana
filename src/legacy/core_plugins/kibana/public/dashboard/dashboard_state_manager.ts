@@ -418,6 +418,9 @@ export class DashboardStateManager {
     return this.appState.query;
   }
 
+  public getSavedQuery() {
+    return this.appState.savedQuery;
+  }
   public getUseMargins() {
     // Existing dashboards that don't define this should default to false.
     return this.appState.options.useMargins === undefined

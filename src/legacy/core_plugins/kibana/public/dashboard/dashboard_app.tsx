@@ -63,7 +63,7 @@ import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'ui/timefilter/time_history';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { StaticIndexPattern, Query } from 'src/legacy/core_plugins/data/public';
+import { StaticIndexPattern, Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import moment from 'moment';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
@@ -124,6 +124,7 @@ interface DashboardAppScope extends ng.IScope {
   screenTitle: string;
   model: {
     query: Query | string;
+    savedQuery: SavedQuery;
     filters: Filter[];
     timeRestore: boolean;
     title: string;
@@ -264,6 +265,7 @@ class DashboardAppController {
       // https://github.com/angular/angular.js/wiki/Understanding-Scopes
       $scope.model = {
         query: dashboardStateManager.getQuery(),
+        savedQuery: dashboardStateManager.getSavedQuery(),
         filters: queryFilter.getFilters(),
         timeRestore: dashboardStateManager.getTimeRestore(),
         title: dashboardStateManager.getTitle(),
@@ -284,6 +286,47 @@ class DashboardAppController {
           });
         });
       }
+      const savedQuery = dashboardStateManager.getSavedQuery();
+      if (savedQuery) {
+        $scope.savedQuery = savedQuery;
+      }
+      // savedQuery: function (AppState, Private) {
+      //   const appState = new AppState();
+      //   const savedQueryId = appState.savedQuery;
+      //   const savedObjectsClient = Private(SavedObjectsClientProvider);
+
+      //   if (savedQueryId) {
+      //     return savedObjectsClient.get('query', savedQueryId).then(savedQuery => {
+      //       if (savedQuery.error) return;
+      //       let filters = savedQuery.attributes.filters;
+      //       if (filters) {
+      //         filters = JSON.parse(filters);
+      //       }
+      //       let time = savedQuery.attributes.timefilter;
+      //       if (time) {
+      //         time = JSON.parse(savedQuery.attributes.timefilter);
+
+      //         timefilter.setTime({
+      //           from: time.timeFrom,
+      //           to: time.timeTo,
+      //         });
+
+      //         if (time.refreshInterval) {
+      //           timefilter.setRefreshInterval(time.refreshInterval);
+      //         }
+      //       }
+
+      //       return {
+      //         id: savedQuery.id,
+      //         attributes: {
+      //           ...savedQuery.attributes,
+      //           filters: filters,
+      //           timefilter: time,
+      //         }
+      //       };
+      //     });
+      //   }
+      // }
     };
 
     // Part of the exposed plugin API - do not remove without careful consideration.
