@@ -7,39 +7,9 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { SpaceAvatar } from '../../components';
-import { SpacesManager } from '../../lib/spaces_manager';
+import { spacesManagerMock } from '../../lib/mocks';
 import { SpacesGlobalNavButton } from './components/spaces_global_nav_button';
 import { NavControlPopover } from './nav_control_popover';
-
-const mockChrome = {
-  addBasePath: jest.fn((a: string) => a),
-};
-
-const createMockHttpAgent = (withSpaces = false) => {
-  const spaces = [
-    {
-      id: '',
-      name: 'space 1',
-      disabledFeatures: [],
-    },
-    {
-      id: '',
-      name: 'space 2',
-      disabledFeatures: [],
-    },
-  ];
-
-  const mockHttpAgent = {
-    get: async () => {
-      const result = withSpaces ? spaces : [];
-
-      return {
-        data: result,
-      };
-    },
-  };
-  return mockHttpAgent;
-};
 
 describe('NavControlPopover', () => {
   it('renders without crashing', () => {
@@ -48,7 +18,7 @@ describe('NavControlPopover', () => {
       valid: true,
     };
 
-    const spacesManager = new SpacesManager(createMockHttpAgent(), mockChrome, '/');
+    const spacesManager = spacesManagerMock.create();
 
     const wrapper = shallow(
       <NavControlPopover
@@ -63,13 +33,23 @@ describe('NavControlPopover', () => {
 
   it('renders a SpaceAvatar with the active space', async () => {
     const activeSpace = {
-      space: { id: '', name: 'foo', disabledFeatures: [] },
+      space: { id: 'foo-space', name: 'foo', disabledFeatures: [] },
       valid: true,
     };
 
-    const mockAgent = createMockHttpAgent(true);
-
-    const spacesManager = new SpacesManager(mockAgent, mockChrome, '/');
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.getSpaces = jest.fn().mockResolvedValue([
+      {
+        id: 'foo-space',
+        name: 'foo',
+        disabledFeatures: [],
+      },
+      {
+        id: 'bar-space',
+        name: 'bar',
+        disabledFeatures: [],
+      },
+    ]);
 
     const wrapper = mount<any, any>(
       <NavControlPopover
