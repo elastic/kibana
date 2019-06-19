@@ -21,38 +21,54 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AggConfig, Vis } from 'ui/vis';
 import { aggTypeFilters } from 'ui/agg_types/filter';
+import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
-import { aggTypes } from 'ui/agg_types';
+import { aggTypes, AggParam, FieldParamType } from 'ui/agg_types';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 import { groupAggregationsBy } from '../default_editor_utils';
+import { EditorConfig } from '../../config/types';
+
+interface ParamInstanceBase {
+  agg: AggConfig;
+  config: any;
+  editorConfig: EditorConfig;
+  responseValueAggs: AggConfig[] | null;
+}
+
+export interface ParamInstance extends ParamInstanceBase {
+  aggParam: AggParam;
+  indexedFields: FieldParamType[];
+  paramEditor: React.FunctionComponent;
+  value: any;
+  visName: string;
+}
 
 function getAggParamsToRender(
-  agg: AggConfig,
-  editorConfig: any,
-  config: any,
-  vis: Vis,
-  responseValueAggs: any
+  { agg, config, editorConfig, responseValueAggs }: ParamInstanceBase,
+  vis: Vis
 ) {
   const params = {
-    basic: [] as any,
-    advanced: [] as any,
+    basic: [] as ParamInstance[],
+    advanced: [] as ParamInstance[],
   };
 
   const paramsToRender =
     (agg.type &&
       agg.type.params
         // Filter out, i.e. don't render, any parameter that is hidden via the editor config.
-        .filter((param: any) => !get(editorConfig, [param.name, 'hidden'], false))) ||
+        .filter((param: AggParam) => !get(editorConfig, [param.name, 'hidden'], false))) ||
     [];
-  paramsToRender.forEach((param: any, i: number) => {
-    let indexedFields: any = [];
+  paramsToRender.forEach((param: AggParam, i: number) => {
+    let indexedFields: FieldParamType[] = [];
 
     if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
       return;
     }
     // if field param exists, compute allowed fields
     if (param.type === 'field') {
-      const availableFields = param.getAvailableFields(agg.getIndexPattern().fields);
+      const availableFields = (param as FieldParamType).getAvailableFields(
+        agg.getIndexPattern().fields
+      );
       const fields = aggTypeFieldFilters.filter(availableFields, param.type, agg, vis);
       indexedFields = groupAggregationsBy(fields, 'type', 'displayName');
     }
@@ -75,7 +91,7 @@ function getAggParamsToRender(
         responseValueAggs,
         value: agg.params[param.name],
         visName: vis.type.name,
-      } as any);
+      } as ParamInstance);
     }
   });
 
@@ -109,7 +125,7 @@ function getError(agg: AggConfig, aggIsTooLow: boolean) {
   return errors;
 }
 
-function getAggTypeOptions(agg: AggConfig, indexPattern: any, groupName: string) {
+function getAggTypeOptions(agg: AggConfig, indexPattern: IndexPattern, groupName: string) {
   const aggTypeOptions = aggTypeFilters.filter(aggTypes.byType[groupName], indexPattern, agg);
   return groupAggregationsBy(aggTypeOptions, 'subtype');
 }

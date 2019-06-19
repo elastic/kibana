@@ -30,6 +30,7 @@ import {
   getAggParamsToRender,
   getError,
   getAggTypeOptions,
+  ParamInstance,
 } from './default_editor_agg_params_helper';
 import {
   aggTypeReducer,
@@ -41,6 +42,7 @@ import {
 } from './default_editor_agg_params_state';
 
 import { editorConfigProviders } from '../../config/editor_config_providers';
+import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/types';
 
 interface DefaultEditorAggParamsProps {
   id: string;
@@ -92,15 +94,27 @@ function DefaultEditorAggParams({
       Object.keys(editorConfig).forEach(param => {
         const paramConfig = editorConfig[param];
         const paramOptions = agg.type.params.find((paramOption: any) => paramOption.name === param);
-        const property = 'fixedValue';
+
+        const hasFixedValue = paramConfig.hasOwnProperty('fixedValue');
+        const hasDefault = paramConfig.hasOwnProperty('default');
         // If the parameter has a fixed value in the config, set this value.
         // Also for all supported configs we should freeze the editor for this param.
-        if (paramConfig.hasOwnProperty('fixedValue')) {
+        if (hasFixedValue || hasDefault) {
           let newValue;
+          let property = 'fixedValue';
+          let typedParamConfig: EditorParamConfig = paramConfig as FixedParam;
+
+          if (hasDefault) {
+            property = 'default';
+            typedParamConfig = paramConfig as TimeIntervalParam;
+          }
+
           if (paramOptions && paramOptions.deserialize) {
-            newValue = paramOptions.deserialize(paramConfig[property]);
+            // @ts-ignore
+            newValue = paramOptions.deserialize(typedParamConfig[property]);
           } else {
-            newValue = paramConfig[property];
+            // @ts-ignore
+            newValue = typedParamConfig[property];
           }
           onAggParamsChange(agg, param, newValue);
         }
@@ -109,7 +123,7 @@ function DefaultEditorAggParams({
     [editorConfig]
   );
 
-  const params = getAggParamsToRender(agg, editorConfig, config, vis, responseValueAggs);
+  const params = getAggParamsToRender({ agg, config, editorConfig, responseValueAggs }, vis);
   const allParams = [...params.basic, ...params.advanced];
   const [aggParams, onChangeAggParams] = useReducer(
     aggParamsReducer,
@@ -150,7 +164,7 @@ function DefaultEditorAggParams({
     [isReactFormTouched]
   );
 
-  const renderParam = (paramInstance, model: AggParamsItem) => {
+  const renderParam = (paramInstance: ParamInstance, model: AggParamsItem) => {
     return (
       <DefaultEditorAggParam
         key={`${paramInstance.aggParam.name}${agg.type ? agg.type.name : ''}`}
@@ -160,14 +174,14 @@ function DefaultEditorAggParams({
           onChangeAggParams({
             type: AGG_PARAMS_ACTION_KEYS.VALIDITY,
             paramName: paramInstance.aggParam.name,
-            validity,
+            payload: validity,
           });
         }}
         setTouched={() => {
           onChangeAggParams({
             type: AGG_PARAMS_ACTION_KEYS.TOUCHED,
             paramName: paramInstance.aggParam.name,
-            touched: true,
+            payload: true,
           });
         }}
         {...paramInstance}
@@ -191,8 +205,10 @@ function DefaultEditorAggParams({
           // resent form validity
           setValidity(true);
         }}
-        setTouched={() => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.TOUCHED, touched: true })}
-        setValidity={validity => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.VALIDITY, validity })}
+        setTouched={() => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.TOUCHED, payload: true })}
+        setValidity={validity =>
+          onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.VALIDITY, payload: validity })
+        }
       />
 
       {params.basic.map((param: any) => {

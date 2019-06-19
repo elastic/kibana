@@ -20,8 +20,10 @@
 import { AggConfig } from '../vis';
 
 interface AggParam {
+  editorComponent: React.FunctionComponent;
   type: string;
   name: string;
+  advanced?: boolean;
   options?: AggParamOption[];
   required?: boolean;
   displayName?: string;
