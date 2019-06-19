@@ -17,29 +17,15 @@
  * under the License.
  */
 
-import { SearchSource } from 'ui/courier';
-import { SavedObject } from 'ui/saved_objects/saved_object';
-import moment from 'moment';
-import { RefreshInterval } from 'ui/timefilter/timefilter';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
+import { Doc } from './types';
 
-export interface SavedObjectDashboard extends SavedObject {
-  id?: string;
-  copyOnSave: boolean;
-  timeRestore: boolean;
-  timeTo?: string;
-  timeFrom?: string;
-  title: string;
-  description?: string;
-  panelsJSON: string;
-  optionsJSON?: string;
-  // TODO: write a migration to rid of this, it's only around for bwc.
-  uiStateJSON?: string;
-  lastSavedTitle: string;
-  searchSource: SearchSource;
-  destroy: () => void;
-  refreshInterval?: RefreshInterval;
-  getQuery(): Query;
-  getFilters(): Filter[];
+export function isDoc(doc: { [key: string]: unknown } | Doc): doc is Doc {
+  return (
+    typeof doc.id === 'string' &&
+    typeof doc.type === 'string' &&
+    doc.attributes !== null &&
+    typeof doc.attributes === 'object' &&
+    doc.references !== null &&
+    typeof doc.references === 'object'
+  );
 }

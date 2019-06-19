@@ -17,31 +17,5 @@
  * under the License.
  */
 
-import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
-
-export function getSavedDashboardMock(
-  config?: Partial<SavedObjectDashboard>
-): SavedObjectDashboard {
-  return {
-    id: '123',
-    title: 'my dashboard',
-    panelsJSON: '[]',
-    searchSource: {
-      getOwnField: (param: any) => param,
-      setField: () => {},
-    },
-    copyOnSave: false,
-    timeRestore: false,
-    timeTo: 'now',
-    timeFrom: 'now-15m',
-    optionsJSON: '',
-    lastSavedTitle: '',
-    destroy: () => {},
-    save: () => {
-      return Promise.resolve('123');
-    },
-    getQuery: () => ({ query: '', language: 'kuery' }),
-    getFilters: () => [],
-    ...config,
-  };
-}
+// @ts-ignore
+export { migrations } from './migrations';
