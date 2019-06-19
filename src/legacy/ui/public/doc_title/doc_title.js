@@ -52,7 +52,7 @@ function update() {
   document.title = render();
 }
 
-export const docTitleService = {
+export const docTitle = {
   render,
   change,
   reset,
@@ -62,8 +62,8 @@ export const docTitleService = {
 uiModules.get('kibana')
   .run(function ($rootScope) {
   // always bind to the route events
-    $rootScope.$on('$routeChangeStart', docTitleService.reset);
-    $rootScope.$on('$routeChangeError', docTitleService.update);
-    $rootScope.$on('$routeChangeSuccess', docTitleService.update);
+    $rootScope.$on('$routeChangeStart', docTitle.reset);
+    $rootScope.$on('$routeChangeError', docTitle.update);
+    $rootScope.$on('$routeChangeSuccess', docTitle.update);
   });
 

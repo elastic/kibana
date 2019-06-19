@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import './index_header';
 import './create_edit_field';
-import { docTitleService } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import { fatalError, toastNotifications } from 'ui/notify';
@@ -182,7 +182,7 @@ uiModules.get('apps/management')
     $scope.indexPatternListProvider = indexPatternListProvider;
     $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags($scope.indexPattern);
     $scope.getFieldInfo = indexPatternListProvider.getFieldInfo;
-    docTitleService.change($scope.indexPattern.title);
+    docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
       return pattern.id !== $scope.indexPattern.id;

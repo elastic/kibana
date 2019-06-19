@@ -17,17 +17,14 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { setBaseTitle, docTitleService } from '../doc_title';
+import { setBaseTitle, docTitle } from '../doc_title';
 
 describe('docTitle Service', function () {
   let initialDocTitle;
   const MAIN_TITLE = 'Kibana 4';
-
-  let docTitle;
   let $rootScope;
 
   beforeEach(function () {
@@ -45,12 +42,6 @@ describe('docTitle Service', function () {
   }));
 
   beforeEach(ngMock.inject(function ($injector) {
-    if (_.random(0, 1)) {
-      docTitle = $injector.get('docTitle');
-    } else {
-      docTitle = docTitleService;
-    }
-
     $rootScope = $injector.get('$rootScope');
   }));
 

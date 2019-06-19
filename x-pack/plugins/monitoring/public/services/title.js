@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
-import { docTitleService } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 
 const uiModule = uiModules.get('monitoring/title', []);
 uiModule.service('title', () => {
@@ -15,7 +15,7 @@ uiModule.service('title', () => {
     let clusterName = _.get(cluster, 'cluster_name');
     clusterName = (clusterName) ? `- ${clusterName}` : '';
     suffix = (suffix) ? `- ${suffix}` : '';
-    docTitleService.change(
+    docTitle.change(
       i18n.translate('xpack.monitoring.stackMonitoringDocTitle', {
         defaultMessage: 'Stack Monitoring {clusterName} {suffix}',
         values: { clusterName, suffix }

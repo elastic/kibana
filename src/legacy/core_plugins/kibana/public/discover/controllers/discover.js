@@ -41,7 +41,7 @@ import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/c
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-import { docTitleService } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
@@ -384,7 +384,7 @@ function discoverController(
   $scope.searchSource.setParent(timeRangeSearchSource);
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
-  docTitleService.change(`Discover${pageTitleSuffix}`);
+  docTitle.change(`Discover${pageTitleSuffix}`);
   const discoverBreadcrumbsTitle = i18n.translate('kbn.discover.discoverBreadcrumbTitle', {
     defaultMessage: 'Discover',
   });
@@ -678,7 +678,7 @@ function discoverController(
           } else {
             // Update defaults so that "reload saved query" functions correctly
             $state.setDefaults(getStateDefaults());
-            docTitleService.change(savedSearch.lastSavedTitle);
+            docTitle.change(savedSearch.lastSavedTitle);
           }
         }
       });

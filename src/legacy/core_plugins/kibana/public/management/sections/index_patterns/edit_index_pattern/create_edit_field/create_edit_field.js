@@ -19,7 +19,7 @@
 
 import { Field } from 'ui/index_patterns/_field';
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
-import { docTitleService } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
@@ -145,7 +145,7 @@ uiRoutes
 
       const fieldName = this.field.name || i18n.translate('kbn.management.editIndexPattern.scripted.newFieldPlaceholder',
         { defaultMessage: 'New Scripted Field' });
-      docTitleService.change([fieldName, this.indexPattern.title]);
+      docTitle.change([fieldName, this.indexPattern.title]);
 
       renderFieldEditor($scope, this.indexPattern, this.field, {
         Field,

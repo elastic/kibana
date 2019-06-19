@@ -33,7 +33,7 @@ import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 // @ts-ignore
-import { docTitleService } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 
 // @ts-ignore
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
@@ -230,7 +230,7 @@ class DashboardAppController {
 
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
-      docTitleService.change(dash.title);
+      docTitle.change(dash.title);
     }
 
     const dashboardStateManager = new DashboardStateManager({
@@ -501,7 +501,7 @@ class DashboardAppController {
             if (dash.id !== $routeParams.id) {
               kbnUrl.change(createDashboardEditUrl(dash.id));
             } else {
-              docTitleService.change(dash.lastSavedTitle);
+              docTitle.change(dash.lastSavedTitle);
               updateViewMode(DashboardViewMode.VIEW);
             }
           }

@@ -22,7 +22,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { capabilities } from 'ui/capabilities';
-import { docTitleService } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
@@ -326,7 +326,7 @@ app.controller('timelion', function (
   });
 
   $scope.$watch(function () { return savedSheet.lastSavedTitle; }, function (newTitle) {
-    docTitleService.change(savedSheet.id ? newTitle : undefined);
+    docTitle.change(savedSheet.id ? newTitle : undefined);
   });
 
   $scope.toggle = function (property) {

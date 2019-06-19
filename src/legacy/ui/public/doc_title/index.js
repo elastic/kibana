@@ -19,4 +19,4 @@
 
 import './doc_title';
 
-export { docTitleService } from './doc_title';
+export { docTitle } from './doc_title';

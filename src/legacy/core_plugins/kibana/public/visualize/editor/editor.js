@@ -32,7 +32,7 @@ import angular from 'angular';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { docTitleService } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { migrateAppState } from './lib';
@@ -261,7 +261,7 @@ function VisEditor(
   let stateMonitor;
 
   if (savedVis.id) {
-    docTitleService.change(savedVis.title);
+    docTitle.change(savedVis.title);
   }
 
   // Extract visualization state with filtered aggs. You can see these filtered aggs in the URL.
@@ -509,7 +509,7 @@ function VisEditor(
               dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
               kbnUrl.change(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
-              docTitleService.change(savedVis.lastSavedTitle);
+              docTitle.change(savedVis.lastSavedTitle);
               chrome.breadcrumbs.set($injector.invoke(getEditBreadcrumbs));
             } else {
               kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });

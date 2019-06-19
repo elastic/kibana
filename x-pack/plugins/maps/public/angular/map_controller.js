@@ -39,7 +39,7 @@ import {
 import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
-import { docTitleService } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
@@ -239,7 +239,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
     try {
       id = await savedMap.save(saveOptions);
-      docTitleService.change(savedMap.title);
+      docTitle.change(savedMap.title);
     } catch(err) {
       toastNotifications.addDanger({
         title: i18n.translate('xpack.maps.mapController.saveErrorMessage', {

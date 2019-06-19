@@ -21,7 +21,7 @@ import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import 'ui/kbn_top_nav';
 import { uiModules } from 'ui/modules';
-import { docTitleService } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import 'ui/autoload/styles';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
@@ -108,7 +108,7 @@ routes
         return gisMapSavedObjectLoader.get(id)
           .then((savedMap) => {
             recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
-            docTitleService.change(savedMap.title);
+            docTitle.change(savedMap.title);
             return savedMap;
           })
           .catch(redirectWhenMissing({
