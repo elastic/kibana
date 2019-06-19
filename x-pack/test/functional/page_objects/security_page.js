@@ -141,6 +141,10 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await retry.try(() => testSubjects.click('createRoleButton'));
     }
 
+    async clickCloneRole(roleName) {
+      await retry.try(() => testSubjects.click(`clone-role-action-${roleName}`));
+    }
+
     async getCreateIndexPatternInputFieldExists() {
       return await testSubjects.exists('createIndexPatternNameInput');
     }

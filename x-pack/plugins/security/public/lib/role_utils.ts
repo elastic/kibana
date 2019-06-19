@@ -43,3 +43,18 @@ export function isReadOnlyRole(role: Partial<Role>): boolean {
 export function copyRole(role: Role) {
   return cloneDeep(role);
 }
+
+/**
+ * Creates a deep copy of the role suitable for cloning.
+ *
+ * @param role the Role to clone.
+ * @param namingFunction a function responsible for creating the new role name.
+ */
+export function prepareRoleClone(role: Role, namingFunction: (name: string) => string): Role {
+  const clone = copyRole(role);
+  delete clone.metadata;
+  delete clone.transient_metadata;
+  clone.name = namingFunction(clone.name);
+
+  return clone;
+}

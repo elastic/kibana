@@ -26,7 +26,12 @@ import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../../xpack_main/types';
 import { KibanaPrivileges, RawKibanaPrivileges, Role } from '../../../../../common/model';
-import { isReadOnlyRole, isReservedRole } from '../../../../lib/role_utils';
+import {
+  isReadOnlyRole,
+  isReservedRole,
+  copyRole,
+  prepareRoleClone,
+} from '../../../../lib/role_utils';
 import { deleteRole, saveRole } from '../../../../objects';
 import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from '../lib/validate_role';
@@ -35,6 +40,7 @@ import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 
 interface Props {
+  action: 'edit' | 'clone';
   role: Role;
   runAsUsers: string[];
   indexPatterns: string[];
@@ -59,8 +65,27 @@ class EditRolePageUI extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
+
+    let role: Role;
+    if (props.action === 'clone') {
+      role = prepareRoleClone(props.role, (name: string) =>
+        props.intl.formatMessage(
+          {
+            id: 'xpack.security.management.editRole.defaultCloneRoleName',
+            defaultMessage: 'copy_of_{roleName}',
+            description: 'Role name with a "copy_of_" prefix. Must not include spaces.',
+          },
+          {
+            roleName: name,
+          }
+        )
+      );
+    } else {
+      role = copyRole(props.role);
+    }
+
     this.state = {
-      role: props.role,
+      role,
       formError: null,
     };
     this.validator = new RoleValidator({ shouldValidate: false });
@@ -88,7 +113,7 @@ class EditRolePageUI extends Component<Props, State> {
 
           <EuiText size="s">{description}</EuiText>
 
-          {isReservedRole(this.props.role) && (
+          {isReservedRole(this.state.role) && (
             <Fragment>
               <EuiSpacer size="s" />
               <EuiText size="s" color="subdued">
@@ -123,7 +148,7 @@ class EditRolePageUI extends Component<Props, State> {
     const props: HTMLProps<HTMLDivElement> = {
       tabIndex: 0,
     };
-    if (isReservedRole(this.props.role)) {
+    if (isReservedRole(this.state.role)) {
       titleText = (
         <FormattedMessage
           id="xpack.security.management.editRole.viewingRoleTitle"
@@ -150,14 +175,14 @@ class EditRolePageUI extends Component<Props, State> {
     return (
       <EuiTitle size="l">
         <h1 {...props}>
-          {titleText} <ReservedRoleBadge role={this.props.role} />
+          {titleText} <ReservedRoleBadge role={this.state.role} />
         </h1>
       </EuiTitle>
     );
   };
 
   private getActionButton = () => {
-    if (this.editingExistingRole() && !isReadOnlyRole(this.props.role)) {
+    if (this.editingExistingRole() && !isReadOnlyRole(this.state.role)) {
       return (
         <EuiFlexItem grow={false}>
           <DeleteRoleButton canDelete={true} onDelete={this.handleDeleteRole} />
@@ -179,7 +204,7 @@ class EditRolePageUI extends Component<Props, State> {
             />
           }
           helpText={
-            !isReservedRole(this.props.role) && this.editingExistingRole() ? (
+            !isReservedRole(this.state.role) && this.editingExistingRole() ? (
               <FormattedMessage
                 id="xpack.security.management.editRole.roleNameFormRowHelpText"
                 defaultMessage="A role's name cannot be changed once it has been created."
@@ -195,7 +220,7 @@ class EditRolePageUI extends Component<Props, State> {
             value={this.state.role.name || ''}
             onChange={this.onNameChange}
             data-test-subj={'roleFormNameInput'}
-            readOnly={isReservedRole(this.props.role) || this.editingExistingRole()}
+            readOnly={isReservedRole(this.state.role) || this.editingExistingRole()}
           />
         </EuiFormRow>
       </EuiPanel>
@@ -260,7 +285,7 @@ class EditRolePageUI extends Component<Props, State> {
   };
 
   private getFormButtons = () => {
-    if (isReadOnlyRole(this.props.role)) {
+    if (isReadOnlyRole(this.state.role)) {
       return this.getReturnToRoleListButton();
     }
 
@@ -303,7 +328,7 @@ class EditRolePageUI extends Component<Props, State> {
         data-test-subj={`roleFormSaveButton`}
         fill
         onClick={this.saveRole}
-        disabled={isReservedRole(this.props.role)}
+        disabled={isReservedRole(this.state.role)}
       >
         {saveText}
       </EuiButton>
@@ -322,7 +347,7 @@ class EditRolePageUI extends Component<Props, State> {
   };
 
   private editingExistingRole = () => {
-    return !!this.props.role.name;
+    return !!this.props.role.name && this.props.action === 'edit';
   };
 
   private saveRole = () => {

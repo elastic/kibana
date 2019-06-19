@@ -10,6 +10,7 @@ import {
   EDIT_USERS_PATH,
   ROLES_PATH,
   EDIT_ROLES_PATH,
+  CLONE_ROLES_PATH,
 } from '../../../../plugins/security/public/views/management/management_urls';
 
 export default function ({ getService, getPageObjects }) {
@@ -122,6 +123,14 @@ export default function ({ getService, getPageObjects }) {
           const userNameInput = await testSubjects.find('roleFormNameInput');
           const userName = await userNameInput.getProperty('value');
           expect(userName).to.equal('my-new-role');
+        });
+
+        it('Can navigate to clone role section', async () => {
+          await PageObjects.settings.navigateTo();
+          await PageObjects.security.clickElasticsearchRoles();
+          await PageObjects.security.clickCloneRole('kibana_user');
+          const currentUrl = await browser.getCurrentUrl();
+          expect(currentUrl).to.contain(CLONE_ROLES_PATH);
         });
 
         it('Can navigate to edit role section from users page', async () => {

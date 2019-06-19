@@ -5,7 +5,13 @@
  */
 
 import { Role } from '../../common/model';
-import { copyRole, isReadOnlyRole, isReservedRole, isRoleEnabled } from './role_utils';
+import {
+  copyRole,
+  isReadOnlyRole,
+  isReservedRole,
+  isRoleEnabled,
+  prepareRoleClone,
+} from './role_utils';
 
 describe('role', () => {
   describe('isRoleEnabled', () => {
@@ -124,6 +130,73 @@ describe('role', () => {
       role.elasticsearch.indices[0].names = ['something else'];
 
       expect(result).not.toEqual(role);
+    });
+  });
+
+  describe('prepareRoleClone', () => {
+    it('should return a copy of the role with metadata and transient_metadata removed, using the provided naming function for the new name', () => {
+      const role: Role = {
+        name: 'my_role',
+        elasticsearch: {
+          cluster: ['all'],
+          indices: [{ names: ['index*'], privileges: ['all'] }],
+          run_as: ['user'],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: ['all'],
+            feature: {},
+          },
+          {
+            spaces: ['default'],
+            base: ['foo'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            base: ['read'],
+            feature: {},
+          },
+        ],
+        metadata: {
+          _reserved: true,
+        },
+        transient_metadata: {
+          enabled: false,
+        },
+      };
+
+      const result = prepareRoleClone(role, jest.fn().mockReturnValue('new_role_name'));
+      expect(result.name).toEqual('new_role_name');
+      expect(role.name).toEqual('my_role');
+
+      expect(result.elasticsearch).toEqual({
+        cluster: ['all'],
+        indices: [{ names: ['index*'], privileges: ['all'] }],
+        run_as: ['user'],
+      });
+
+      expect(result.kibana).toEqual([
+        {
+          spaces: ['*'],
+          base: ['all'],
+          feature: {},
+        },
+        {
+          spaces: ['default'],
+          base: ['foo'],
+          feature: {},
+        },
+        {
+          spaces: ['marketing'],
+          base: ['read'],
+          feature: {},
+        },
+      ]);
+
+      expect(result.metadata).toBeUndefined();
+      expect(result.transient_metadata).toBeUndefined();
     });
   });
 });
