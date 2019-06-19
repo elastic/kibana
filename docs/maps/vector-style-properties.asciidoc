@@ -1,0 +1,44 @@
+[role="xpack"]
+[[maps-vector-style-properties]]
+=== Vector style properties
+
+Point, polygon, and line features support different styling properties.
+
+[float]
+[[point-style-properties]]
+==== Point style properties
+
+*Fill color*:: The fill color of the point features.
+
+*Border color*:: The border color of the point features.
+Only applies when the point feature is symbolized as a circle.
+
+*Border width*:: The border width of the point features.
+Only applies when the point feature is symbolized as a circle.
+
+*Symbol*:: Specify whether to symbolize the point as a circle or icon.
+
+*Symbol orientation*:: The symbol orientation rotating the icon clockwise.
+Only applies when the point feature is symbolized as an icon.
+
+*Symbol size*:: The radius of the symbol size, in pixels.
+
+
+[float]
+[[polygon-style-properties]]
+==== Polygon style properties
+
+*Fill color*:: The fill color of the polygon features.
+
+*Border color*:: The border color of the polygon features.
+
+*Border width*:: The border width of the polygon features.
+
+
+[float]
+[[line-style-properties]]
+==== Line style properties
+
+*Border color*:: The color of the line features.
+
+*Border width*:: The width of the line features.

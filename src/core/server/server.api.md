@@ -4,7 +4,9 @@
 
 ```ts
 
+import Boom from 'boom';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
 import { ObjectType } from '@kbn/config-schema';
@@ -14,7 +16,6 @@ import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
 import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
-import { ServerOptions } from 'hapi';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { Url } from 'url';
@@ -158,7 +159,7 @@ export interface HttpServiceSetup extends HttpServerSetup {
 
 // @public (undocumented)
 export interface HttpServiceStart {
-    isListening: () => boolean;
+    isListening: (port: number) => boolean;
 }
 
 // @internal (undocumented)
@@ -173,8 +174,6 @@ export interface InternalCoreSetup {
 
 // @public (undocumented)
 export interface InternalCoreStart {
-    // (undocumented)
-    http: HttpServiceStart;
     // (undocumented)
     plugins: PluginsServiceStart;
 }
@@ -192,6 +191,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
     // (undocumented)
     getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
+    readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
     // (undocumented)
@@ -395,6 +395,244 @@ export class Router {
     // (undocumented)
     routes: Array<Readonly<RouterRoute>>;
     }
+
+// @public (undocumented)
+export interface SavedObject<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    attributes: T;
+    // (undocumented)
+    error?: {
+        message: string;
+        statusCode: number;
+    };
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    migrationVersion?: SavedObjectsMigrationVersion;
+    // (undocumented)
+    references: SavedObjectReference[];
+    // (undocumented)
+    type: string;
+    // (undocumented)
+    updated_at?: string;
+    // (undocumented)
+    version?: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectAttributes {
+    // (undocumented)
+    [key: string]: SavedObjectAttributes | string | number | boolean | null;
+}
+
+// @public
+export interface SavedObjectReference {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    name: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBaseOptions {
+    namespace?: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    attributes: T;
+    // (undocumented)
+    id?: string;
+    // (undocumented)
+    migrationVersion?: SavedObjectsMigrationVersion;
+    // (undocumented)
+    references?: SavedObjectReference[];
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkGetObject {
+    fields?: string[];
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    saved_objects: Array<SavedObject<T>>;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    saved_objects: Array<SavedObject<T>>;
+}
+
+// @internal (undocumented)
+export class SavedObjectsClient {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepository" needs to be exported by the entry point index.d.ts
+    constructor(repository: SavedObjectsRepository);
+    bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
+    create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+    delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
+    // (undocumented)
+    errors: typeof SavedObjectsErrorHelpers;
+    // (undocumented)
+    static errors: typeof SavedObjectsErrorHelpers;
+    find<T extends SavedObjectAttributes = any>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    get<T extends SavedObjectAttributes = any>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
+    update<T extends SavedObjectAttributes = any>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
+}
+
+// Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClientContract" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
+// 
+// @public
+export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
+
+// @public (undocumented)
+export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
+    id?: string;
+    // (undocumented)
+    migrationVersion?: SavedObjectsMigrationVersion;
+    overwrite?: boolean;
+    // (undocumented)
+    references?: SavedObjectReference[];
+}
+
+// @public (undocumented)
+export class SavedObjectsErrorHelpers {
+    // (undocumented)
+    static createBadRequestError(reason?: string): DecoratedError;
+    // (undocumented)
+    static createEsAutoCreateIndexError(): DecoratedError;
+    // (undocumented)
+    static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
+    // (undocumented)
+    static createInvalidVersionError(versionInput?: string): DecoratedError;
+    // (undocumented)
+    static createUnsupportedTypeError(type: string): DecoratedError;
+    // (undocumented)
+    static decorateBadRequestError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateConflictError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateEsUnavailableError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateForbiddenError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateGeneralError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateNotAuthorizedError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateRequestEntityTooLargeError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static isBadRequestError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isConflictError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isEsAutoCreateIndexError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isEsUnavailableError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isForbiddenError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isInvalidVersionError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isNotAuthorizedError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isNotFoundError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isRequestEntityTooLargeError(error: Error | DecoratedError): boolean;
+    // Warning: (ae-forgotten-export) The symbol "DecoratedError" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    static isSavedObjectsClientError(error: any): error is DecoratedError;
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+    // (undocumented)
+    defaultSearchOperator?: 'AND' | 'OR';
+    // (undocumented)
+    fields?: string[];
+    // (undocumented)
+    hasReference?: {
+        type: string;
+        id: string;
+    };
+    // (undocumented)
+    page?: number;
+    // (undocumented)
+    perPage?: number;
+    // (undocumented)
+    search?: string;
+    searchFields?: string[];
+    // (undocumented)
+    sortField?: string;
+    // (undocumented)
+    sortOrder?: string;
+    // (undocumented)
+    type?: string | string[];
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any> {
+    // (undocumented)
+    page: number;
+    // (undocumented)
+    per_page: number;
+    // (undocumented)
+    saved_objects: Array<SavedObject<T>>;
+    // (undocumented)
+    total: number;
+}
+
+// @public
+export interface SavedObjectsMigrationVersion {
+    // (undocumented)
+    [pluginName: string]: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsService<Request = any> {
+    // Warning: (ae-forgotten-export) The symbol "ScopedSavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<Request>['addClientWrapperFactory'];
+    // (undocumented)
+    getSavedObjectsRepository(...rest: any[]): any;
+    // (undocumented)
+    getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+    // Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClient" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
+    // 
+    // (undocumented)
+    SavedObjectsClient: typeof SavedObjectsClient;
+    // (undocumented)
+    types: string[];
+}
+
+// @public (undocumented)
+export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
+    // (undocumented)
+    references?: SavedObjectReference[];
+    version?: string;
+}
+
+// Warning: (ae-forgotten-export) The symbol "Omit" needs to be exported by the entry point index.d.ts
+// 
+// @public (undocumented)
+export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes'> {
+    // (undocumented)
+    attributes: Partial<T>;
+}
 
 // @public
 export class ScopedClusterClient {

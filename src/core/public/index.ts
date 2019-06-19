@@ -57,7 +57,7 @@ import {
 } from './notifications';
 import { OverlayRef, OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
-import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
+import { UiSettingsClient, UiSettingsSetup, UiSettingsStart, UiSettingsState } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 
 /** @interal */
@@ -106,6 +106,8 @@ export interface CoreStart {
   notifications: NotificationsStart;
   /** {@link OverlayStart} */
   overlays: OverlayStart;
+  /** {@link UiSettingsStart} */
+  uiSettings: UiSettingsStart;
 }
 
 /** @internal */
@@ -152,4 +154,5 @@ export {
   UiSettingsClient,
   UiSettingsState,
   UiSettingsSetup,
+  UiSettingsStart,
 };

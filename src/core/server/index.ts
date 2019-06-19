@@ -80,6 +80,26 @@ export {
   PluginName,
 } from './plugins';
 
+export {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
+  SavedObjectsErrorHelpers,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsMigrationVersion,
+  SavedObjectsService,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+} from './saved_objects';
+
 export { RecursiveReadonly } from '../utils';
 
 /**
@@ -119,7 +139,6 @@ export interface InternalCoreSetup {
  * @public
  */
 export interface InternalCoreStart {
-  http: HttpServiceStart;
   plugins: PluginsServiceStart;
 }
 
