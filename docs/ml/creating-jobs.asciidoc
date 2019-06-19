@@ -33,9 +33,7 @@ appears:
 [role="screenshot"]
 image::ml/images/ml-data-recognizer-sample.jpg[A screenshot of the {kib} sample data web log job creation wizard]
 
-TIP: Alternatively, after you load a sample data set you can click
-*View data* > *ML jobs*. There are {ml} jobs for both the sample eCommerce
-orders data set and the sample web logs data set.
+TIP: Alternatively, after you load a sample data set on the {kib} home page, you can click *View data* > *ML jobs*. There are {ml} jobs for both the sample eCommerce orders data set and the sample web logs data set.
 
 If you use {filebeat-ref}/index.html[{filebeat}]
 to ship access logs from your
@@ -62,10 +60,6 @@ image::ml/images/ml-data-recognizer-metricbeat.jpg[A screenshot of the {metricbe
 These wizards create {ml} jobs, dashboards, searches, and visualizations that
 are customized to help you analyze your {auditbeat}, {filebeat}, and
 {metrecbeat} data.
-
-If you are not certain which type of job to create, you can use the
-*Data Visualizer* to learn more about your data. If your index pattern contains
-a time field, it can identify possible fields for {ml} analysis. 
 
 [NOTE] 
 ===============================
