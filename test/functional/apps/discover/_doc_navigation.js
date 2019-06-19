@@ -54,8 +54,8 @@ export default function ({ getService, getPageObjects }) {
       const firstDetailsRow = (await docTable.getDetailsRows(discoverDocTable))[0];
       await (await docTable.getRowActions(firstDetailsRow))[1].click();
 
-      const hasBreadcrumbLast = await testSubjects.exists('doc-hit');
-      expect(hasBreadcrumbLast).to.be(true);
+      const hasDocHit = await testSubjects.exists('doc-hit');
+      expect(hasDocHit).to.be(true);
     });
   });
 }
