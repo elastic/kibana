@@ -66,26 +66,29 @@ export interface AggParamsState {
   [key: string]: AggParamsItem;
 }
 
-function aggParamsReducer(state: AggParamsState, action: AggParamsAction): AggParamsState {
-  const targetParam = state[action.paramName] || {
+function aggParamsReducer(
+  state: AggParamsState,
+  { type, paramName = '', touched, validity }: AggParamsAction
+): AggParamsState {
+  const targetParam = state[paramName] || {
     validity: true,
     touched: false,
   };
-  switch (action.type) {
+  switch (type) {
     case AGG_PARAMS_ACTION_KEYS.TOUCHED:
       return {
         ...state,
-        [action.paramName]: {
+        [paramName]: {
           ...targetParam,
-          touched: action.touched,
+          touched,
         },
       } as AggParamsState;
     case AGG_PARAMS_ACTION_KEYS.VALIDITY:
       return {
         ...state,
-        [action.paramName]: {
+        [paramName]: {
           ...targetParam,
-          validity: action.validity,
+          validity,
         },
       } as AggParamsState;
     case AGG_PARAMS_ACTION_KEYS.RESET:
@@ -95,4 +98,16 @@ function aggParamsReducer(state: AggParamsState, action: AggParamsAction): AggPa
   }
 }
 
-export { aggTypeReducer, aggParamsReducer };
+function initAggParamsState(params: object[]): AggParamsState {
+  const state = {};
+  params.forEach((param: any) => {
+    state[param.aggParam.name] = {
+      validity: true,
+      touched: false,
+    } as AggParamsItem;
+  });
+
+  return state;
+}
+
+export { aggTypeReducer, aggParamsReducer, initAggParamsState };

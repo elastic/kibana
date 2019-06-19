@@ -24,7 +24,7 @@ import { AggType } from 'ui/agg_types';
 import { AggConfig, Vis } from 'ui/vis';
 import { DefaultEditorAggSelect } from './default_editor_agg_select';
 // @ts-ignore
-import { aggTypes } from '../../../../agg_types';
+import { aggTypes, AggParam } from '../../../../agg_types';
 import { AggParamReactWrapper } from '../agg_param_react_wrapper';
 import {
   getAggParamsToRender,
@@ -36,21 +36,11 @@ import {
   AGG_TYPE_ACTION_KEYS,
   aggParamsReducer,
   AGG_PARAMS_ACTION_KEYS,
+  initAggParamsState,
+  AggParamsItem,
 } from './default_editor_agg_params_state';
 
 import { editorConfigProviders } from '../../config/editor_config_providers';
-
-const initaggParams = (params: object[]) => {
-  const state: any = {};
-  params.forEach((param: any) => {
-    state[param.aggParam.name] = {
-      validity: true,
-      touched: false,
-    };
-  });
-
-  return state;
-};
 
 interface DefaultEditorAggParamsProps {
   id: string;
@@ -121,7 +111,11 @@ function DefaultEditorAggParams({
 
   const params = getAggParamsToRender(agg, editorConfig, config, vis, responseValueAggs);
   const allParams = [...params.basic, ...params.advanced];
-  const [aggParams, onChangeAggParams] = useReducer(aggParamsReducer, allParams, initaggParams);
+  const [aggParams, onChangeAggParams] = useReducer(
+    aggParamsReducer,
+    allParams,
+    initAggParamsState
+  );
 
   useEffect(
     () => {
@@ -156,6 +150,31 @@ function DefaultEditorAggParams({
     [isReactFormTouched]
   );
 
+  const renderParam = (paramInstance, model: AggParamsItem) => {
+    return (
+      <AggParamReactWrapper
+        key={`${paramInstance.aggParam.name}${agg.type ? agg.type.name : ''}`}
+        showValidation={formIsTouched || model.touched ? !model.validity : false}
+        onChange={onAggParamsChange}
+        setValidity={validity => {
+          onChangeAggParams({
+            type: AGG_PARAMS_ACTION_KEYS.VALIDITY,
+            paramName: paramInstance.aggParam.name,
+            validity,
+          });
+        }}
+        setTouched={() => {
+          onChangeAggParams({
+            type: AGG_PARAMS_ACTION_KEYS.TOUCHED,
+            paramName: paramInstance.aggParam.name,
+            touched: true,
+          });
+        }}
+        {...paramInstance}
+      />
+    );
+  };
+
   return (
     <EuiForm isInvalid={!!errors.length} error={errors}>
       {SchemaEditorComponent && <SchemaEditorComponent />}
@@ -182,28 +201,7 @@ function DefaultEditorAggParams({
           validity: true,
         };
 
-        return (
-          <AggParamReactWrapper
-            key={`${param.aggParam.name}${agg.type ? agg.type.name : ''}`}
-            showValidation={formIsTouched || model.touched ? !model.validity : false}
-            onChange={onAggParamsChange}
-            setValidity={validity => {
-              onChangeAggParams({
-                type: AGG_PARAMS_ACTION_KEYS.VALIDITY,
-                paramName: param.aggParam.name,
-                validity,
-              });
-            }}
-            setTouched={() => {
-              onChangeAggParams({
-                type: AGG_PARAMS_ACTION_KEYS.TOUCHED,
-                paramName: param.aggParam.name,
-                touched: true,
-              });
-            }}
-            {...param}
-          />
-        );
+        return renderParam(param, model);
       })}
 
       {params.advanced.length ? (
@@ -223,28 +221,7 @@ function DefaultEditorAggParams({
                 touched: false,
                 validity: true,
               };
-              return (
-                <AggParamReactWrapper
-                  key={`${param.aggParam.name}${agg.type ? agg.type.name : ''}`}
-                  showValidation={formIsTouched || model.touched ? !model.validity : false}
-                  onChange={onAggParamsChange}
-                  setValidity={validity => {
-                    onChangeAggParams({
-                      type: AGG_PARAMS_ACTION_KEYS.VALIDITY,
-                      paramName: param.aggParam.name,
-                      validity,
-                    });
-                  }}
-                  setTouched={() => {
-                    onChangeAggParams({
-                      type: AGG_PARAMS_ACTION_KEYS.TOUCHED,
-                      paramName: param.aggParam.name,
-                      touched: true,
-                    });
-                  }}
-                  {...param}
-                />
-              );
+              return renderParam(param, model);
             })}
           </EuiAccordion>
           <EuiSpacer size="m" />
