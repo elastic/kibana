@@ -5468,7 +5468,6 @@
     "xpack.maps.toolbarOverlay.drawShapeLabel": "シェイプを描いてデータをフィルタリング",
     "xpack.maps.toolbarOverlay.geofield.toolbarTitle": "ジオフィールドを選択",
     "xpack.maps.toolbarOverlay.indexPattern.filterListTitle": "フィルターリスト",
-    "xpack.maps.toolbarOverlay.toolbarIconTitle": "ツール",
     "xpack.maps.toolbarOverlay.tools.toolbarTitle": "ツール",
     "xpack.maps.tooltip.closeAriaLabel": "ツールヒントを閉じる",
     "xpack.maps.tooltip.filterOnPropertyAriaLabel": "プロパティのフィルター",
