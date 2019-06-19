@@ -53,7 +53,7 @@ export function decorateFormController($delegate, $injector) {
     }
 
     describeErrors() {
-      const count = this.softErrorCount();
+      const count = Object.keys(this.$error).length;
       return i18n.translate('common.ui.fancyForm.errorDescription',
         {
           defaultMessage: '{count, plural, one {# Error} other {# Errors}}',
@@ -69,7 +69,7 @@ export function decorateFormController($delegate, $injector) {
     _markInvalidTouched(event) {
       if (this.errorCount()) {
         event.preventDefault();
-        //event.stopImmediatePropagation();
+        event.stopImmediatePropagation();
         this.$setTouched();
       }
     }

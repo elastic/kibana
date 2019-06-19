@@ -123,10 +123,19 @@ uiModules
           return $scope.$index > firstDifferentSchema;
         }
 
+        $scope.$watch(() => {
+          // The model can become touched either onBlur event or when the form is submitted.
+          return visualizeEditorForm.$submitted;
+        }, (value) => {
+          $scope.formIsTouched = value;
+          if (true) {
+            kbnForm.$setDirty();
+          }
+        }, true);
+
         $scope.onAggTypeChange = (agg, value) => {
           if (agg.type !== value) {
             agg.type = value;
-            $scope.updateParamModels(value ? value.params : []);
           }
         };
 
@@ -136,50 +145,17 @@ uiModules
           }
         };
 
-        $scope.formIsTouched = false;
+        $scope.setValidity = (isValid) => {
+          kbnForm.$setValidity(`aggParams${$scope.agg.id}`, isValid);
+        };
 
-        $scope.$watch(() => {
-          // The model can become touched either onBlur event or when the form is submitted.
-          return visualizeEditorForm.$submitted;
-        }, (value) => {
-          if (value) {
-            $scope.formIsTouched = true;
+        $scope.setTouched = (isTouched) => {
+          if (isTouched) {
+            kbnForm.$setDirty();
+          } else {
+            kbnForm.$setPristine();
           }
-        }, true);
-
-        visualizeEditorForm.$$element.on('submit', function () {
-          debugger;
-          console.log('ON SUBMIT');
-        });
-
-        $scope.setValidity = (paramName, isValid) => {
-          const modelName = normalizeModelName(`_internalNgModelState${$scope.agg.id}${paramName}`);
-          const modelCtrl = kbnForm.$$controls.find(ctrl => ctrl.$$attr.ngModel === modelName);
-          modelCtrl && modelCtrl.$setValidity(`aggParams${$scope.agg.id}${paramName}`, isValid);
-          console.log(`setValidity ${modelName} - ${isValid}, ctlr - ${modelCtrl}`);
         };
-
-        $scope.setTouched = (paramName) => {
-          const modelName = normalizeModelName(`_internalNgModelState${$scope.agg.id}${paramName}`);
-          const modelCtrl = kbnForm.$$controls.find(ctrl => ctrl.$$attr.ngModel === modelName);
-          modelCtrl && modelCtrl.$setTouched();
-        };
-
-        const $aggParamModelsTmpl = $('<div>').addClass('ng-hide').appendTo($el);
-        $scope.updateParamModels = (params) => {
-          $aggParamModelsTmpl.empty();
-          params.map(param => {
-            const modelName = normalizeModelName(`_internalNgModelState${$scope.agg.id}${param.name}`);
-            console.log(`create model - ${modelName}`);
-            $aggParamModelsTmpl
-              .append(`<div ng-model="${modelName}"></div>`);
-          });
-          $compile($aggParamModelsTmpl)($scope.$new());
-        };
-
-        function normalizeModelName(modelName = '') {
-          return modelName.replace(/-/g, '_');
-        }
       }
     };
   });

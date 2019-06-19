@@ -103,7 +103,6 @@ interface DefaultEditorAggParamsProps {
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   setTouched: () => void;
   setValidity: (isValid: boolean) => void;
-  updateParamModels: (params: any) => void;
 }
 
 function DefaultEditorAggParams({
@@ -120,7 +119,6 @@ function DefaultEditorAggParams({
   onAggTypeChange,
   setTouched,
   setValidity,
-  updateParamModels,
 }: DefaultEditorAggParamsProps) {
   const groupedAggTypeOptions = getAggTypeOptions(agg, indexPattern, groupName);
   const isSubAggregation = aggIndex >= 1 && groupName === 'buckets';
@@ -157,25 +155,28 @@ function DefaultEditorAggParams({
   useEffect(
     () => {
       console.log('agg.type changed - ' + allParams);
-      //updateParamModels(allParams);
+      setValidity(true);
     },
     [agg.type]
   );
 
-  // const isFormValid =
-  //   aggType.validity &&
-  //   Object.keys(aggParams).every((paramsName: string) => aggParams[paramsName].validity);
-  // const isReactFormTouched =
-  //   aggType.touched ||
-  //   Object.keys(aggParams).every((paramsName: string) => aggParams[paramsName].touched);
+  const isFormValid =
+    aggType.validity &&
+    Object.keys(aggParams).every((paramsName: string) => aggParams[paramsName].validity);
+  const isReactFormTouched =
+    (agg.type ? false : aggType.touched) &&
+    Object.keys(aggParams).every((paramsName: string) =>
+      aggParams[paramsName].validity ? true : aggParams[paramsName].touched
+    );
 
-  // useEffect(
-  //   () => {
-  //     // when validity was changed
-  //     setValidity(isFormValid);
-  //   },
-  //   [isFormValid]
-  // );
+  useEffect(
+    () => {
+      // when validity was changed
+      setValidity(isFormValid);
+      setTouched(false);
+    },
+    [isFormValid]
+  );
 
   // useEffect(
   //   () => {
@@ -185,15 +186,15 @@ function DefaultEditorAggParams({
   //   [formIsTouched]
   // );
 
-  // useEffect(
-  //   () => {
-  //     // when a form were touched
-  //     if (isReactFormTouched) {
-  //       setTouched();
-  //     }
-  //   },
-  //   [isReactFormTouched]
-  // );
+  useEffect(
+    () => {
+      // when a form were touched
+      if (isReactFormTouched) {
+        setTouched(true);
+      }
+    },
+    [isReactFormTouched]
+  );
   console.log(`field - ${JSON.stringify(aggParams)}`);
 
   return (
@@ -204,11 +205,13 @@ function DefaultEditorAggParams({
         value={agg.type}
         aggTypeOptions={groupedAggTypeOptions}
         isSubAggregation={isSubAggregation}
-        showValidation={aggType.touched ? !aggType.validity : false}
+        showValidation={formIsTouched || aggType.touched ? !aggType.validity : false}
         setValue={value => {
           onAggTypeChange(agg, value);
           // reset touched and validity of params
           onChangeAggParams({ type: 'agg_params_reset' });
+          // resent form validity
+          setValidity(true);
         }}
         setTouched={() => onChangeAggType({ type: 'agg_selector_touched', touched: true })}
         setValidity={validity => onChangeAggType({ type: 'agg_selector_validity', validity })}
@@ -226,7 +229,6 @@ function DefaultEditorAggParams({
             showValidation={formIsTouched || model.touched ? !model.validity : false}
             onChange={onAggParamsChange}
             setValidity={validity => {
-              setValidity(param.aggParam.name, validity);
               onChangeAggParams({
                 type: 'agg_params_validity',
                 paramName: param.aggParam.name,
@@ -234,7 +236,6 @@ function DefaultEditorAggParams({
               });
             }}
             setTouched={() => {
-              setTouched(param.aggParam.name);
               onChangeAggParams({
                 type: 'agg_params_touched',
                 paramName: param.aggParam.name,
@@ -274,7 +275,6 @@ function DefaultEditorAggParams({
                       paramName: param.aggParam.name,
                       validity,
                     });
-                    setValidity(param.aggParam.name, validity);
                   }}
                   setTouched={() => {
                     onChangeAggParams({
@@ -282,7 +282,6 @@ function DefaultEditorAggParams({
                       paramName: param.aggParam.name,
                       touched: true,
                     });
-                    setTouched(param.aggParam.name);
                   }}
                   {...param}
                 />

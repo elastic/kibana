@@ -35,7 +35,6 @@ uiModules
     ['onAggParamsChange', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
-    ['updateParamModels', { watchDepth: 'reference' }],
     'id',
     'aggIndex',
     'groupName',
