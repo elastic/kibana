@@ -6,30 +6,14 @@
 
 import { connect } from 'react-redux';
 import { ViewControl } from './view_control';
-import { getMouseCoordinates } from '../../../selectors/map_selectors';
-import {
-  getIsSetViewOpen,
-  closeSetView,
-  openSetView,
-} from '../../../store/ui';
+import { getMouseCoordinates, getMapZoom } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {
-    isSetViewOpen: getIsSetViewOpen(state),
     mouseCoordinates: getMouseCoordinates(state),
+    zoom: getMapZoom(state),
   };
 }
 
-function mapDispatchToProps(dispatch) {
-  return {
-    closeSetView: () => {
-      dispatch(closeSetView());
-    },
-    openSetView: () => {
-      dispatch(openSetView());
-    }
-  };
-}
-
-const connectedViewControl = connect(mapStateToProps, mapDispatchToProps)(ViewControl);
+const connectedViewControl = connect(mapStateToProps, null)(ViewControl);
 export { connectedViewControl as ViewControl };

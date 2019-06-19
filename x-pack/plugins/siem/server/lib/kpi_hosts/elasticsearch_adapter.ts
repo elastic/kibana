@@ -27,8 +27,8 @@ const formatGeneralHistogramData = (
   data: Array<KpiHostHistogram<KpiHostGeneralHistogramCount>>
 ): KpiHostHistogramData[] | null => {
   return data && data.length > 0
-    ? data.map<KpiHostHistogramData>(({ key_as_string, count }) => ({
-        x: key_as_string,
+    ? data.map<KpiHostHistogramData>(({ key, count }) => ({
+        x: key,
         y: count.value,
       }))
     : null;
@@ -38,8 +38,8 @@ const formatAuthHistogramData = (
   data: Array<KpiHostHistogram<KpiHostAuthHistogramCount>>
 ): KpiHostHistogramData[] | null => {
   return data && data.length > 0
-    ? data.map<KpiHostHistogramData>(({ key_as_string, count }) => ({
-        x: key_as_string,
+    ? data.map<KpiHostHistogramData>(({ key, count }) => ({
+        x: key,
         y: count.doc_count,
       }))
     : null;
