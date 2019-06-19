@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../common/timefilter';
 
 /*
  * Watches for changes to the refresh interval of the page time filter,
@@ -15,6 +15,7 @@ export function refreshIntervalWatcher($timeout) {
 
   let refresher;
   let listener;
+  let timefilterSubscriber;
 
   const onRefreshIntervalChange = () => {
     if (refresher) {
@@ -34,11 +35,14 @@ export function refreshIntervalWatcher($timeout) {
 
   function init(listenerCallback) {
     listener = listenerCallback;
-    timefilter.on('refreshIntervalUpdate', onRefreshIntervalChange);
+    timefilterSubscriber = timefilter.subscribeToRefreshIntervalUpdate(function triggerUpdate() {
+      onRefreshIntervalChange();
+    });
   }
 
   function cancel() {
     $timeout.cancel(refresher);
+    timefilterSubscriber.unsubscribe();
     timefilter.off('refreshIntervalUpdate', onRefreshIntervalChange);
   }
 

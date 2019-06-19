@@ -5,7 +5,7 @@
  */
 
 
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../../../common/timefilter';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { loadFullJob, filterJobs, checkForAutoStartDatafeed } from '../utils';
@@ -68,6 +68,7 @@ export class JobsListView extends Component {
     this.showCreateWatchFlyout = () => {};
 
     this.blockRefresh = false;
+    this.timefilterSubscriber = null;
   }
 
   componentDidMount() {
@@ -95,6 +96,9 @@ export class JobsListView extends Component {
 
   componentWillUnmount() {
     timefilter.off('refreshIntervalUpdate');
+    if (this.timefilterSubscriber !== null) {
+      this.timefilterSubscriber.unsubscribe();
+    }
     deletingJobsRefreshTimeout = null;
     this.clearRefreshInterval();
   }
@@ -115,8 +119,9 @@ export class JobsListView extends Component {
 
   initAutoRefreshUpdate() {
     // update the interval if it changes
-    timefilter.on('refreshIntervalUpdate', () => {
-      this.setAutoRefresh();
+    const self = this;
+    this.timefilterSubscriber = timefilter.subscribeToRefreshIntervalUpdate(function triggerUpdate() {
+      self.setAutoRefresh();
     });
   }
 

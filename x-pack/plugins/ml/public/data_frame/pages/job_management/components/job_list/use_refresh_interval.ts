@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from '../../../../../../common/timefilter';
 
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
@@ -21,6 +21,7 @@ export const useRefreshInterval = (
 ) => {
   useEffect(() => {
     let jobsRefreshInterval: null | number = null;
+    let timefilterSubscriber: { unsubscribe: () => void };
 
     timefilter.disableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
@@ -44,7 +45,7 @@ export const useRefreshInterval = (
 
     function initAutoRefreshUpdate() {
       // update the interval if it changes
-      timefilter.on('refreshIntervalUpdate', () => {
+      timefilterSubscriber = timefilter.subscribeToRefreshIntervalUpdate(function triggerUpdate() {
         setAutoRefresh();
       });
     }
@@ -80,6 +81,8 @@ export const useRefreshInterval = (
     // useEffect cleanup
     return () => {
       clearRefreshInterval();
+      timefilterSubscriber.unsubscribe();
+      timefilter.off('refreshIntervalUpdate');
     };
   }, []); // [] as comparator makes sure this only runs once
 };
