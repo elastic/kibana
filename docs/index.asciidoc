@@ -44,15 +44,8 @@ include::ml/index.asciidoc[]
 
 include::maps/index.asciidoc[]
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 include::code/index.asciidoc[]
 
-=======
-//Infrastructure
->>>>>>> 8333132b74... [DOCS] Add brew install instructions. Closes #38220
-=======
->>>>>>> 60ece06107... Removed inline notes from index
 include::infrastructure/index.asciidoc[]
 
 include::logs/index.asciidoc[]
@@ -61,15 +54,8 @@ include::apm/index.asciidoc[]
 
 include::uptime/index.asciidoc[]
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 include::siem/index.asciidoc[]
 
-=======
-//Graphing connections in your data
->>>>>>> 8333132b74... [DOCS] Add brew install instructions. Closes #38220
-=======
->>>>>>> 60ece06107... Removed inline notes from index
 include::graph/index.asciidoc[]
 
 include::dev-tools.asciidoc[]
