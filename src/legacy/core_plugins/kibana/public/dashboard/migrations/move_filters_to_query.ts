@@ -50,7 +50,7 @@ export function moveFiltersToQuery(
     filter: [],
     query: (searchSource as SearchSource730).query || {
       query: '',
-      language: 'lucene',
+      language: 'kuery',
     },
   };
 
