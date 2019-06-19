@@ -11,7 +11,7 @@ Point, polygon, and line features support different styling properties.
 *Fill color*:: The fill color of the point features.
 
 *Border color*:: The border color of the point features.
-Only applies when point feature is symbolized as a circle.
+Only applies when the point feature is symbolized as a circle.
 
 *Border width*:: The border width of the point features.
 Only applies when point feature is symbolized as a circle.
