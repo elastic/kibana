@@ -49,6 +49,7 @@ interface VisTypeListEntry extends VisType {
 interface VisTypeAliasListEntry extends VisTypeAlias {
   highlighted: boolean;
   stage?: string; // never used, just make typescript happy
+  image?: any; // never used, just make typescript happy
 }
 
 interface TypeSelectionProps {
@@ -277,7 +278,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     );
   };
 
-  private setHighlightType(highlightedType: HighlightType | null) {
+  private setHighlightType(highlightedType: HighlightedType | null) {
     this.setState({
       highlightedType,
     });

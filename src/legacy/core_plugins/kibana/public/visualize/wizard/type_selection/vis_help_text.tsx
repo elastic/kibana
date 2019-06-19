@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
