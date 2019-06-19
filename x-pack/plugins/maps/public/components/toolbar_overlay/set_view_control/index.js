@@ -37,5 +37,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedSetViewControl = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(SetViewControl);
+const connectedSetViewControl = connect(mapStateToProps, mapDispatchToProps)(SetViewControl);
 export { connectedSetViewControl as SetViewControl };
