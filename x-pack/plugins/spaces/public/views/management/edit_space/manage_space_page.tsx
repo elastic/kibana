@@ -50,6 +50,7 @@ interface State {
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
   isLoading: boolean;
+  saveInProgress: boolean;
   formError?: {
     isInvalid: boolean;
     error?: string;
@@ -65,6 +66,7 @@ class ManageSpacePageUI extends Component<Props, State> {
     this.state = {
       isLoading: true,
       showAlteringActiveSpaceDialog: false,
+      saveInProgress: false,
       space: {},
       features: [],
     };
@@ -239,7 +241,12 @@ class ManageSpacePageUI extends Component<Props, State> {
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={this.saveSpace} data-test-subj="save-space-button">
+          <EuiButton
+            fill
+            onClick={this.saveSpace}
+            data-test-subj="save-space-button"
+            isLoading={this.state.saveInProgress}
+          >
             {saveText}
           </EuiButton>
         </EuiFlexItem>
@@ -345,6 +352,8 @@ class ManageSpacePageUI extends Component<Props, State> {
       action = this.props.spacesManager.createSpace(params);
     }
 
+    this.setState({ saveInProgress: true });
+
     action
       .then(() => {
         this.props.spacesNavState.refreshSpacesList();
@@ -369,6 +378,8 @@ class ManageSpacePageUI extends Component<Props, State> {
       })
       .catch(error => {
         const { message = '' } = error.data || {};
+
+        this.setState({ saveInProgress: false });
 
         toastNotifications.addDanger(
           intl.formatMessage(

@@ -60,13 +60,13 @@ function getStatsForFields(
 }
 
 
-export function dataVisualizerRoutes(server, commonRouteConfig) {
+export function dataVisualizerRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/data_visualizer/get_field_stats/{indexPatternTitle}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const indexPatternTitle = request.params.indexPatternTitle;
       const payload = request.payload;
       return getStatsForFields(
@@ -87,11 +87,11 @@ export function dataVisualizerRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/data_visualizer/get_overall_stats/{indexPatternTitle}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const indexPatternTitle = request.params.indexPatternTitle;
       const payload = request.payload;
       return getOverallStats(
