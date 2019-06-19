@@ -18,13 +18,13 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiConfirmModal,
-  EuiOverlayMask
+  EuiOverlayMask,
+  EuiCheckbox
 } from '@elastic/eui';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../common/constants';
 import { getActionExtensions } from '../../../../index_management_extensions';
 import { getHttpClient } from '../../../../services/api';
-
 export class IndexActionsContextMenu extends Component {
   constructor(props) {
     super(props);
@@ -32,6 +32,7 @@ export class IndexActionsContextMenu extends Component {
     this.state = {
       isPopoverOpen: false,
       renderConfirmModal: null,
+      isActionConfirmed: false,
     };
   }
   closeConfirmModal = () => {
@@ -39,6 +40,9 @@ export class IndexActionsContextMenu extends Component {
       renderConfirmModal: null
     });
     this.props.resetSelection && this.props.resetSelection();
+  }
+  confirmAction = isActionConfirmed => {
+    this.setState({ isActionConfirmed });
   }
   panels() {
     const {
@@ -377,6 +381,7 @@ export class IndexActionsContextMenu extends Component {
 
   renderConfirmDeleteModal = () => {
     const { deleteIndices, indexNames, hasSystemIndex, isSystemIndexByName } = this.props;
+    const { isActionConfirmed } = this.state;
     const selectedIndexCount = indexNames.length;
 
     const standardIndexModalBody = (
@@ -450,6 +455,17 @@ export class IndexActionsContextMenu extends Component {
             </li>
           ))}
         </ul>
+        <EuiCheckbox
+          id="confirmDeleteIndicesCheckbox"
+          label={
+            <FormattedMessage
+              id="xpack.idxMgmt.indexActionsMenu.deleteIndex.checkboxLabel"
+              defaultMessage="I understand the consequences of deleting a system index"
+            />
+          }
+          checked={isActionConfirmed}
+          onChange={e => this.confirmAction(e.target.checked)}
+        />
       </div>
     );
 
@@ -462,9 +478,13 @@ export class IndexActionsContextMenu extends Component {
               values: { selectedIndexCount }
             })
           }
-          onCancel={this.closeConfirmModal}
+          onCancel={() => {
+            this.confirmAction(false);
+            this.closeConfirmModal();
+          }}
           onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
           buttonColor="danger"
+          confirmButtonDisabled={hasSystemIndex ? !isActionConfirmed : false}
           cancelButtonText={
             i18n.translate(
               'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
@@ -473,26 +493,13 @@ export class IndexActionsContextMenu extends Component {
               }
             )
           }
-          confirmButtonText={
-            hasSystemIndex ? (
-              i18n.translate(
-                'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
-                {
-                  defaultMessage:
-                    'I understand the consequences of deleting {selectedIndexCount, plural, one {this index} other {indices} }',
-                  values: { selectedIndexCount }
-                }
-              )
-            ) : (
-              i18n.translate(
-                'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
-                {
-                  defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
-                  values: { selectedIndexCount }
-                }
-              )
-            )
-          }
+          confirmButtonText={i18n.translate(
+            'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
+            {
+              defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
+              values: { selectedIndexCount }
+            }
+          )}
         >
           {hasSystemIndex ? systemIndexModalBody : standardIndexModalBody}
         </EuiConfirmModal>
@@ -502,6 +509,7 @@ export class IndexActionsContextMenu extends Component {
 
   renderConfirmCloseModal = () => {
     const { closeIndices, indexNames, isSystemIndexByName } = this.props;
+    const { isActionConfirmed } = this.state;
     const selectedIndexCount = indexNames.length;
 
     return (
@@ -513,9 +521,13 @@ export class IndexActionsContextMenu extends Component {
               values: { selectedIndexCount }
             })
           }
-          onCancel={this.closeConfirmModal}
+          onCancel={() => {
+            this.confirmAction(false);
+            this.closeConfirmModal();
+          }}
           onConfirm={() => this.closePopoverAndExecute(closeIndices)}
           buttonColor="danger"
+          confirmButtonDisabled={!isActionConfirmed}
           cancelButtonText={
             i18n.translate(
               'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
@@ -528,8 +540,7 @@ export class IndexActionsContextMenu extends Component {
             i18n.translate(
               'xpack.idxMgmt.indexActionsMenu.closeIndex.confirmModal.confirmButtonText',
               {
-                defaultMessage:
-                'I understand the consequences of closing {selectedIndexCount, plural, one {this index} other {indices} }',
+                defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {indices} }',
                 values: { selectedIndexCount }
               }
             )
@@ -580,6 +591,17 @@ export class IndexActionsContextMenu extends Component {
                 </li>
               ))}
             </ul>
+            <EuiCheckbox
+              id="confirmCloseIndicesCheckbox"
+              label={
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexActionsMenu.deleteIndex.checkboxLabel"
+                  defaultMessage="I understand the consequences of closing a system index"
+                />
+              }
+              checked={isActionConfirmed}
+              onChange={e => this.confirmAction(e.target.checked)}
+            />
           </div>
         </EuiConfirmModal>
       </EuiOverlayMask>
