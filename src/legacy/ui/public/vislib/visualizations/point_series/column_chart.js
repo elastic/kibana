@@ -210,13 +210,18 @@ export class ColumnChart extends PointSeries {
     if (isLabels) {
       const colorFunc = this.handler.data.getColorFunc();
       const d3Color = d3.rgb(colorFunc(chartData.label));
-      const labelClass = isColorDark(d3Color.r, d3Color.g, d3Color.b) ? 'bar-label--light' : 'bar-label--dark';
+      let labelClass;
+      if (isColorDark(d3Color.r, d3Color.g, d3Color.b)) {
+        labelClass = 'visColumnChart__bar-label--light';
+      } else {
+        labelClass = 'visColumnChart__bar-label--dark';
+      }
 
       barLabels
         .enter()
         .append('text')
         .text(formatValue)
-        .attr('class', `${labelClass} bar-label--stack`)
+        .attr('class', `visColumnChart__barLabel visColumnChart__barLabel--stack ${labelClass}`)
         .attr('x', isHorizontal ? labelX : labelY)
         .attr('y', isHorizontal ? labelY : labelX)
 
@@ -331,7 +336,7 @@ export class ColumnChart extends PointSeries {
         .enter()
         .append('text')
         .text(formatValue)
-        .attr('class', 'bar-label--normal')
+        .attr('class', 'visColumnChart__barLabel')
         .attr('x', isHorizontal ? labelX : labelY)
         .attr('y', isHorizontal ? labelY : labelX)
         .attr('dominant-baseline', isHorizontal ? 'auto' : 'central')
