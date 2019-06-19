@@ -84,7 +84,7 @@ export function StickyTransactionProperties({
         totalDuration !== undefined && duration > totalDuration ? (
           <EuiToolTip
             content={i18n.translate(
-              'xpack.apm.transactionDetails.percentOfTraceLabel',
+              'xpack.apm.transactionDetails.percentOfTraceLabelExplanation',
               {
                 defaultMessage:
                   'The % of trace exceeds 100% due to asynchronous transactions exceeding the root transaction duration.'
