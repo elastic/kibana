@@ -9,16 +9,23 @@ import { BreadcrumbRoute, getBreadcrumbs } from '../ProvideBreadcrumbs';
 
 describe('getBreadcrumbs', () => {
   const getTestRoutes = (): BreadcrumbRoute[] => [
-    { path: '/a', exact: true, breadcrumb: 'A' },
-    { path: '/a/ignored', exact: true, breadcrumb: 'Ignored Route' },
+    { path: '/a', exact: true, breadcrumb: 'A', name: 'foo' },
+    {
+      path: '/a/ignored',
+      exact: true,
+      breadcrumb: 'Ignored Route',
+      name: 'bar'
+    },
     {
       path: '/a/:letter',
       exact: true,
+      name: 'baz',
       breadcrumb: ({ match }) => `Second level: ${match.params.letter}`
     },
     {
       path: '/a/:letter/c',
       exact: true,
+      name: 'qux',
       breadcrumb: ({ match }) => `Third level: ${match.params.letter}`
     }
   ];
