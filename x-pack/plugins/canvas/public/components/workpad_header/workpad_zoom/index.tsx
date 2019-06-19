@@ -7,7 +7,9 @@
 import { compose, withHandlers } from 'recompose';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
+// @ts-ignore unconverted local file
 import { getZoomScale } from '../../../state/selectors/app';
+// @ts-ignore unconverted local file
 import { setZoomScale } from '../../../state/actions/transient';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
 import { WorkpadZoom as Component, Props as ComponentProps } from './workpad_zoom';

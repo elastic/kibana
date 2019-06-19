@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+// @ts-ignore unconverted local component
 import { Popover } from '../../popover';
 import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL } from '../../../../common/lib/constants';
 

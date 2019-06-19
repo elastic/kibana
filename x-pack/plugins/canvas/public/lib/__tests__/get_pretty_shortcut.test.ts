@@ -59,8 +59,8 @@ describe('getPrettyShortcut', () => {
     expect(getPrettyShortcut('command shift down')).toBe('⌘ SHIFT ↓');
     expect(getPrettyShortcut('command option shift down')).toBe('⌘ ⌥ SHIFT ↓');
   });
-  test(`replaces 'plus' with  `, () => {
-    expect(getPrettyShortcut('plus')).toBe(' ');
+  test(`replaces 'plus' with +`, () => {
+    expect(getPrettyShortcut('plus')).toBe('+');
     expect(getPrettyShortcut('command plus')).toBe('⌘ +');
     expect(getPrettyShortcut('option plus')).toBe('⌥ +');
     expect(getPrettyShortcut('option shift plus')).toBe('⌥ SHIFT +');
