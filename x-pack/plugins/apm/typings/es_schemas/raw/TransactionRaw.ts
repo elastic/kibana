@@ -14,6 +14,7 @@ import { Process } from './fields/Process';
 import { Service } from './fields/Service';
 import { Url } from './fields/Url';
 import { User } from './fields/User';
+import { UserAgent } from './fields/UserAgent';
 
 interface Processor {
   name: 'transaction';
@@ -55,4 +56,5 @@ export interface TransactionRaw extends APMBaseDoc {
   service: Service;
   url?: Url;
   user?: User;
+  user_agent?: UserAgent;
 }
