@@ -210,6 +210,22 @@ image::release-notes/images/7.2-metricbeat-ml-modules.png[Embedded map in dark m
 These wizards expedite the creation of pre-configured jobs, dashboards, searches,
 and visualizations. For more information, see <<ml-jobs>>.
 
+[float]
+=== View recent log entries alongside your monitoring data
+
+You can now see your cluster's recent log entries within the *Stack Monitoring*
+application:
+
+[role="screenshot"]
+image::release-notes/images/7.2-monitoring-logs.png["Monitoring recent {es} logs"]
+
+See <<elasticsearch-metrics>>. If you want to see earlier log entries, you can
+follow a link to the <<xpack-logs,Logs UI>> and continue your investigation
+there.
+
+TIP: You must use {filebeat} to collect the logs.
+
+//See {ref}/configuring-filebeat.html[Collecting {es} log data with {filebeat}].
 
 [float]
 === Give us your feedback
