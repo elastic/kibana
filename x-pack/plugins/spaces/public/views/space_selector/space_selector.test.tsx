@@ -6,26 +6,13 @@
 
 import React from 'react';
 import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import chrome from 'ui/chrome';
 import { Space } from '../../../common/model/space';
-import { SpacesManager } from '../../lib/spaces_manager';
+import { spacesManagerMock } from '../../lib/mocks';
 import { SpaceSelector } from './space_selector';
 
-function getHttpAgent(spaces: Space[] = []) {
-  const httpAgent: any = () => {
-    return;
-  };
-  httpAgent.get = jest.fn(() => Promise.resolve({ data: spaces }));
-
-  return httpAgent;
-}
-
 function getSpacesManager(spaces: Space[] = []) {
-  const manager = new SpacesManager(getHttpAgent(spaces), chrome, '/');
-
-  const origGet = manager.getSpaces;
-  manager.getSpaces = jest.fn(origGet);
-
+  const manager = spacesManagerMock.create();
+  manager.getSpaces = jest.fn().mockResolvedValue(spaces);
   return manager;
 }
 
