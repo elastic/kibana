@@ -365,13 +365,15 @@ const fromScreen = currentTransform => transform => {
   }
 };
 
+const horizontalToIndex = horizontal => (horizontal ? 0 : 1);
+
 const anchorAABB = (aabb, anchorDirection, horizontal) => {
-  const direction = horizontal ? 0 : 1;
+  const dimension = horizontalToIndex(horizontal);
   if (anchorDirection === 0) {
-    return (aabb[0][direction] + aabb[1][direction]) / 2; // midpoint
+    return (aabb[0][dimension] + aabb[1][dimension]) / 2; // midpoint
   } else {
     const index = (anchorDirection + 1) / 2; // {-1, 1} -> {0, 1} for array lookup
-    return aabb[index][direction];
+    return aabb[index][dimension];
   }
 };
 
@@ -385,12 +387,11 @@ export const getAlignDistributeTransformIntents = (
   if (selectedShapes.length !== 1 || selectedShapes[0].subtype !== 'adHocGroup') {
     return [];
   }
+
   const group = selectedShapes[0];
   const children = shapes.filter(s => s.parent === group.id && s.type !== 'annotation');
-  if (children.length < 2) {
-    return [];
-  }
-  if (alignAction) {
+
+  if (alignAction && children.length > 1) {
     const { controlledAnchor, horizontal } = alignAction;
     const groupBoundingBox = shapeAABB(group, identityAABB());
     const groupAnchor = anchorAABB(groupBoundingBox, controlledAnchor, horizontal);
@@ -401,6 +402,53 @@ export const getAlignDistributeTransformIntents = (
       return {
         cumulativeTransforms: [translate(horizontal ? delta : 0, horizontal ? 0 : delta, 0)],
         shapes: [c.id],
+      };
+    });
+    return results;
+  } else if (distributeAction && children.length > 2) {
+    const { horizontal } = distributeAction;
+    const { a: A, b: B } = group;
+    const groupBoundingBox = shapeAABB(group, identityAABB());
+    const groupAnchor = anchorAABB(groupBoundingBox, -1, horizontal);
+    const dimension = horizontalToIndex(horizontal);
+    const childrenBoxes2D = children.map(c => shapeAABB(c, identityAABB()));
+    const childrenAnchors = childrenBoxes2D.map(childBoundingBox =>
+      anchorAABB(childBoundingBox, -1, horizontal)
+    );
+    const childrenBoxes1D = childrenBoxes2D.map(box2D => [
+      box2D[0][dimension],
+      box2D[1][dimension],
+    ]);
+    const childrenCenters = childrenBoxes1D.map(box1D => (box1D[1] + box1D[0]) / 2);
+    const childrenSizes = childrenBoxes1D.map(box1D => box1D[1] - box1D[0]);
+    const totalChildrenSize = childrenSizes.reduce((a, b) => a + b, 0);
+    const groupSize = horizontal ? 2 * A : 2 * B;
+    const totalFreeSpace = groupSize - totalChildrenSize;
+    const gapCount = children.length - 1;
+    const gap = totalFreeSpace / gapCount;
+    const childrenIndex = [...Array(children.length)].map((_, i) => i);
+    const sortedChildrenIndex = childrenIndex.sort(
+      (i, j) => childrenCenters[i] - childrenCenters[j]
+    );
+    const reduction = sortedChildrenIndex.reduce(
+      ({ cursor, deltas }, i) => {
+        const size = childrenSizes[i];
+        const originalLeft = childrenAnchors[i];
+        const desiredLeft = cursor;
+        const delta = desiredLeft - originalLeft;
+        const nextLeft = cursor + size + gap;
+        return {
+          cursor: nextLeft,
+          deltas: [...deltas, delta],
+        };
+      },
+      { cursor: groupAnchor, deltas: [] }
+    );
+    const results = reduction.deltas.map((delta, ii) => {
+      const i = sortedChildrenIndex[ii];
+      return {
+        cumulativeTransforms: [translate(horizontal ? delta : 0, horizontal ? 0 : delta, 0)],
+        shapes: [children[i].id],
       };
     });
     return results;
