@@ -5,7 +5,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext } from 'react';
+import React, { useContext } from 'react';
 import { loadSettings } from '../../../../lib/api';
 import { WatchActionsDropdown } from './threshold_watch_action_dropdown';
 import { WatchActionsAccordion } from './threshold_watch_action_accordion';
@@ -25,7 +25,7 @@ export const WatchActionsPanel: React.FunctionComponent<Props> = ({ actionErrors
   const { data: settings, isLoading } = loadSettings();
 
   return (
-    <Fragment>
+    <div data-test-subj="watchActionsPanel">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="s">
@@ -46,6 +46,6 @@ export const WatchActionsPanel: React.FunctionComponent<Props> = ({ actionErrors
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <WatchActionsAccordion settings={settings} actionErrors={actionErrors} />
-    </Fragment>
+    </div>
   );
 };

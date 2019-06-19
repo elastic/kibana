@@ -48,6 +48,7 @@ export const JiraActionFields: React.FunctionComponent<Props> = ({
           fullWidth
           name="projectKey"
           value={projectKey || ''}
+          data-test-subj="jiraProjectKeyInput"
           onChange={e => {
             editAction({ key: 'projectKey', value: e.target.value });
           }}
@@ -76,6 +77,7 @@ export const JiraActionFields: React.FunctionComponent<Props> = ({
           fullWidth
           value={issueType || ''}
           name="issueType"
+          data-test-subj="jiraIssueTypeInput"
           onChange={e => {
             editAction({ key: 'issueType', value: e.target.value });
           }}
@@ -104,6 +106,7 @@ export const JiraActionFields: React.FunctionComponent<Props> = ({
           fullWidth
           value={summary || ''}
           name="summary"
+          data-test-subj="jiraSummaryInput"
           onChange={e => {
             editAction({ key: 'summary', value: e.target.value });
           }}

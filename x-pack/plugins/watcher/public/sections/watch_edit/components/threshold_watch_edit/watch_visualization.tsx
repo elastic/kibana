@@ -218,7 +218,7 @@ const WatchVisualizationUi = () => {
     };
     const aggLabel = aggTypes[watch.aggType].text;
     return (
-      <Fragment>
+      <div data-test-subj="watchVisualizationChart">
         <EuiSpacer size="l" />
         {watchVisualizationDataKeys.length ? (
           <Chart size={[800, 300]} renderer="canvas">
@@ -283,7 +283,7 @@ const WatchVisualizationUi = () => {
           </EuiCallOut>
         )}
         <EuiSpacer size="l" />
-      </Fragment>
+      </div>
     );
   }
   return null;

@@ -203,7 +203,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
-            <h1>{pageTitle}</h1>
+            <h1 data-test-subj="pageTitle">{pageTitle}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
@@ -212,7 +212,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiForm>
+      <EuiForm data-test-subj="thresholdWatchForm">
         {serverError && (
           <Fragment>
             <SectionError
@@ -241,6 +241,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
         >
           <EuiFieldText
             name="name"
+            data-test-subj="nameInput"
             value={watch.name || ''}
             onChange={e => {
               setWatchProperty('name', e.target.value);
@@ -277,6 +278,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                 fullWidth
                 noSuggestions={!indexOptions.length}
                 options={indexOptions}
+                data-test-subj="indicesComboBox"
                 selectedOptions={(watch.index || []).map((anIndex: string) => {
                   return {
                     label: anIndex,
@@ -329,6 +331,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                 options={timeFieldOptions}
                 fullWidth
                 name="watchTimeField"
+                data-test-subj="watchTimeFieldSelect"
                 value={watch.timeField}
                 onChange={e => {
                   setWatchProperty('timeField', e.target.value);
@@ -359,6 +362,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                     fullWidth
                     min={1}
                     value={watch.triggerIntervalSize}
+                    data-test-subj="triggerIntervalSizeInput"
                     onChange={e => {
                       const { value } = e.target;
                       const triggerIntervalSize = value !== '' ? parseInt(value, 10) : value;
@@ -393,7 +397,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
         {shouldShowThresholdExpression ? (
           <Fragment>
             <EuiTitle size="s">
-              <h3>
+              <h3 data-test-subj="watchConditionTitle">
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.watchConditionSectionTitle"
                   defaultMessage="Match the following condition"
@@ -835,6 +839,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
             <EuiButton
               fill
               color="secondary"
+              data-test-subj="saveWatchButton"
               type="submit"
               iconType="check"
               isDisabled={hasErrors || hasActionErrors}

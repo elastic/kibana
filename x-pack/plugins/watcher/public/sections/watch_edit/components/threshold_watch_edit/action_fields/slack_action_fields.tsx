@@ -38,6 +38,7 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({
           noSuggestions
           fullWidth
           selectedOptions={toOptions}
+          data-test-subj="slackRecipientComboBox"
           onCreateOption={(searchValue: string) => {
             const newOptions = [...toOptions, { label: searchValue }];
             editAction({ key: 'to', value: newOptions.map(newOption => newOption.label) });
@@ -64,6 +65,7 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({
           fullWidth
           name="text"
           value={text}
+          data-test-subj="slackMessageTextarea"
           onChange={e => {
             editAction({ key: 'text', value: e.target.value });
           }}

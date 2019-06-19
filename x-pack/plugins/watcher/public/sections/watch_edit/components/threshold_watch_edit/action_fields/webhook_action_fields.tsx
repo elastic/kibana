@@ -57,6 +57,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             <EuiSelect
               name="method"
               value={method || 'get'}
+              data-test-subj="webhookMethodSelect"
               options={HTTP_VERBS.map(verb => ({ text: verb.toUpperCase(), value: verb }))}
               onChange={e => {
                 editAction({ key: 'method', value: e.target.value });
@@ -83,6 +84,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               fullWidth
               name="host"
               value={host || ''}
+              data-test-subj="webhookHostInput"
               onChange={e => {
                 editAction({ key: 'host', value: e.target.value });
               }}
@@ -118,6 +120,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               fullWidth
               name="port"
               value={port || ''}
+              data-test-subj="webhookPortInput"
               onChange={e => {
                 editAction({ key: 'port', value: parseInt(e.target.value, 10) });
               }}
@@ -149,6 +152,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               fullWidth
               name="path"
               value={path || ''}
+              data-test-subj="webhookPathInput"
               onChange={e => {
                 editAction({ key: 'path', value: e.target.value });
               }}
@@ -174,6 +178,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             <EuiFieldText
               name="username"
               value={username || ''}
+              data-test-subj="webhookUsernameInput"
               onChange={e => {
                 editAction({ key: 'username', value: e.target.value });
               }}
@@ -197,6 +202,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
             <EuiFieldPassword
               name="password"
               value={password || ''}
+              data-test-subj="webhookPasswordInput"
               onChange={e => {
                 editAction({ key: 'password', value: e.target.value });
               }}
@@ -226,6 +232,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
           width="100%"
           height="200px"
           theme="github"
+          data-test-subj="webhookBodyEditor"
           aria-label={i18n.translate(
             'xpack.watcher.sections.watchEdit.threshold.webhookAction.bodyCodeEditorAriaLabel',
             {

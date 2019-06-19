@@ -117,7 +117,7 @@ export const JsonWatchEditSimulateResults = ({
 
   const flyoutTitle = (
     <EuiTitle size="s">
-      <h2 id="simulateResultsFlyOutTitle">
+      <h2 id="simulateResultsFlyOutTitle" data-test-subj="simulateResultsFlyoutTitle">
         {i18n.translate('xpack.watcher.sections.watchEdit.simulateResults.title', {
           defaultMessage: 'Simulation results',
         })}
@@ -163,6 +163,7 @@ export const JsonWatchEditSimulateResults = ({
       onClose={() => {
         onCloseFlyout();
       }}
+      data-test-subj="simulateResultsFlyout"
       aria-labelledby="simulateResultsFlyOutTitle"
     >
       <EuiFlyoutHeader hasBorder>

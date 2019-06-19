@@ -78,7 +78,7 @@ export async function saveWatch(watch: BaseWatch): Promise<any> {
     );
     goToWatchList();
   } catch (error) {
-    return { error };
+    return error.response ? { error: error.response } : { error };
   }
 }
 

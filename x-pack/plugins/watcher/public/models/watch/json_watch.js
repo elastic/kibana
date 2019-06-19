@@ -7,7 +7,7 @@
 import uuid from 'uuid';
 import { get } from 'lodash';
 import { BaseWatch } from './base_watch';
-import { ACTION_TYPES, WATCH_TYPES } from 'plugins/watcher/../common/constants';
+import { ACTION_TYPES, WATCH_TYPES } from '../../../common/constants';
 import defaultWatchJson from './default_watch.json';
 import { i18n } from '@kbn/i18n';
 

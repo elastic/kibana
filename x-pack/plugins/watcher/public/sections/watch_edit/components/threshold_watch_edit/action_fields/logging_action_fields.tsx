@@ -41,6 +41,7 @@ export const LoggingActionFields: React.FunctionComponent<Props> = ({
         fullWidth
         name="text"
         value={text || ''}
+        data-test-subj="loggingTextInput"
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           editAction({ key: 'text', value: e.target.value });
         }}

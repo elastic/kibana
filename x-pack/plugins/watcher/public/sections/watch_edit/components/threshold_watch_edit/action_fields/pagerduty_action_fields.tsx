@@ -45,6 +45,7 @@ export const PagerDutyActionFields: React.FunctionComponent<Props> = ({
           fullWidth
           name="description"
           value={description || ''}
+          data-test-subj="pagerdutyDescriptionInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             editAction({ key: 'description', value: e.target.value });
           }}

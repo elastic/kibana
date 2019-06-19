@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSearchValue } from 'plugins/watcher/lib/get_search_value';
+import { getSearchValue } from '../../lib/get_search_value';
 import { get, isEqual, remove, map } from 'lodash';
 import { Action } from '../action';
 import { WatchStatus } from '../watch_status';

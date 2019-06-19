@@ -41,8 +41,9 @@ export const loadWatches = (interval: number) => {
     path: `${basePath}/watches`,
     method: 'get',
     interval,
-    processData: ({ watches }: { watches: any }) =>
-      watches.map((watch: any) => Watch.fromUpstreamJson(watch)),
+    processData: ({ watches = [] }: { watches: any[] }) => {
+      return watches.map((watch: any) => Watch.fromUpstreamJson(watch));
+    },
   });
 };
 
@@ -50,7 +51,7 @@ export const loadWatchDetail = (id: string) => {
   return useRequest({
     path: `${basePath}/watch/${id}`,
     method: 'get',
-    processData: ({ watch }: { watch: any }) => Watch.fromUpstreamJson(watch),
+    processData: ({ watch = {} }: { watch: any }) => Watch.fromUpstreamJson(watch),
   });
 };
 
@@ -64,8 +65,11 @@ export const loadWatchHistory = (id: string, startTime: string) => {
   return useRequest({
     path,
     method: 'get',
-    processData: ({ watchHistoryItems: items }: { watchHistoryItems: any }) =>
-      items.map((historyItem: any) => WatchHistoryItem.fromUpstreamJson(historyItem)),
+    processData: ({ watchHistoryItems = [] }: { watchHistoryItems: any }) => {
+      return watchHistoryItems.map((historyItem: any) =>
+        WatchHistoryItem.fromUpstreamJson(historyItem)
+      );
+    },
   });
 };
 
@@ -169,7 +173,7 @@ export const loadSettings = () => {
     path: `${basePath}/settings`,
     method: 'get',
     processData: (data: {
-      actionTypes: {
+      action_types: {
         [key: string]: {
           enabled: boolean;
         };

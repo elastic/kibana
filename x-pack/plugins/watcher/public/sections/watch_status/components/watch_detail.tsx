@@ -40,15 +40,12 @@ const WatchDetailUi = () => {
 
   const [actionStatuses, setActionStatuses] = useState<ActionStatus[]>([]);
   const [isActionStatusLoading, setIsActionStatusLoading] = useState<boolean>(false);
-
   const [selectedErrorAction, setSelectedErrorAction] = useState<string | null>(null);
 
-  const {
-    id: watchId,
-    watchErrors: { actionErrors },
-    watchStatus: { actionStatuses: currentActionStatuses },
-    isSystemWatch,
-  } = watchDetail;
+  const { id: watchId, watchErrors, watchStatus, isSystemWatch } = watchDetail;
+
+  const actionErrors = watchErrors && watchErrors.actionErrors;
+  const currentActionStatuses = watchStatus && watchStatus.actionStatuses;
 
   const hasActionErrors = actionErrors && Object.keys(actionErrors).length > 0;
 
@@ -97,7 +94,10 @@ const WatchDetailUi = () => {
       const { id: actionId } = action;
       if (errors && errors.length > 0) {
         return (
-          <EuiButtonEmpty onClick={() => setSelectedErrorAction(actionId)}>
+          <EuiButtonEmpty
+            onClick={() => setSelectedErrorAction(actionId)}
+            data-test-subj="actionErrorsButton"
+          >
             {i18n.translate('xpack.watcher.sections.watchDetail.watchTable.errorsCellText', {
               defaultMessage: '{total, number} {total, plural, one {error} other {errors}}',
               values: {
@@ -129,11 +129,12 @@ const WatchDetailUi = () => {
               <EuiButtonEmpty
                 iconType="check"
                 isLoading={isActionStatusLoading}
+                data-test-subj="acknowledgeWatchButton"
                 onClick={async () => {
                   setIsActionStatusLoading(true);
                   try {
-                    const watchStatus = await ackWatchAction(watchId, actionId);
-                    const newActionStatusesWithErrors = watchStatus.actionStatuses.map(
+                    const newWatchStatus = await ackWatchAction(watchId, actionId);
+                    const newActionStatusesWithErrors = newWatchStatus.actionStatuses.map(
                       (newActionStatus: ActionStatus) => {
                         const errors = actionErrors && actionErrors[newActionStatus.id];
                         return {
@@ -182,11 +183,14 @@ const WatchDetailUi = () => {
         <EuiFlyout
           size="s"
           aria-labelledby="flyoutActionErrorTitle"
+          data-test-subj="actionErrorsFlyout"
           onClose={() => setSelectedErrorAction(null)}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
-              <h2 id="flyoutActionErrorTitle">{selectedErrorAction}</h2>
+              <h2 id="flyoutActionErrorTitle" data-test-subj="title">
+                {selectedErrorAction}
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -196,6 +200,7 @@ const WatchDetailUi = () => {
               })}
               color="danger"
               iconType="cross"
+              data-test-subj="errorMessage"
             >
               {actionErrors[selectedErrorAction].length > 1 ? (
                 <ul>

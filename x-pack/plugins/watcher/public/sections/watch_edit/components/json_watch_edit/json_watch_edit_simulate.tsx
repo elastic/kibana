@@ -119,6 +119,7 @@ export const JsonWatchEditSimulate = ({
         <EuiSelect
           options={actionModeOptions}
           value={actionModes[row.actionId]}
+          data-test-subj="actionModesSelect"
           onChange={e => {
             setExecuteDetails(
               new ExecuteDetails({
@@ -158,7 +159,7 @@ export const JsonWatchEditSimulate = ({
         </p>
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiForm>
+      <EuiForm data-test-subj="jsonWatchSimulateForm">
         <EuiDescribedFormGroup
           fullWidth
           title={
@@ -189,6 +190,7 @@ export const JsonWatchEditSimulate = ({
                 <EuiFieldNumber
                   value={scheduledTimeValue}
                   min={0}
+                  data-test-subj="scheduledTimeInput"
                   onChange={e => {
                     const value = e.target.value;
                     setExecuteDetails(
@@ -227,6 +229,7 @@ export const JsonWatchEditSimulate = ({
             <EuiFieldNumber
               value={triggeredTimeValue}
               min={0}
+              data-test-subj="triggeredTimeInput"
               append={<EuiText size="s">{timeUnits[TIME_UNITS.SECOND].labelPlural}</EuiText>}
               onChange={e => {
                 const value = e.target.value;
@@ -268,6 +271,7 @@ export const JsonWatchEditSimulate = ({
               }
             )}
             checked={ignoreCondition}
+            data-test-subj="ignoreConditionSwitch"
             onChange={e => {
               setExecuteDetails(
                 new ExecuteDetails({ ...executeDetails, ignoreCondition: e.target.checked })
@@ -383,6 +387,7 @@ export const JsonWatchEditSimulate = ({
         </EuiDescribedFormGroup>
         <EuiButton
           iconType="play"
+          data-test-subj="simulateWatchButton"
           fill
           type="submit"
           isLoading={isExecuting}

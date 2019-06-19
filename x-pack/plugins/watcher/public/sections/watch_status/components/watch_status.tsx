@@ -113,7 +113,7 @@ export const WatchStatus = ({
 
     if (isActivated === undefined) {
       // Set initial value for isActivated based on the watch we just loaded.
-      setIsActivated(watchStatus.isActive);
+      setIsActivated(typeof watchStatus.isActive !== 'undefined' ? watchStatus.isActive : false);
     }
 
     const activationButtonText = isActivated ? (
@@ -172,7 +172,7 @@ export const WatchStatus = ({
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiTitle size="m">
-                <h1>
+                <h1 data-test-subj="pageTitle">
                   <FormattedMessage
                     id="xpack.watcher.sections.watchDetail.header"
                     defaultMessage="Current status for '{watch}'"
@@ -206,6 +206,7 @@ export const WatchStatus = ({
                 <EuiFlexGroup justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="toggleWatchActivationButton"
                       onClick={() => toggleWatchActivation()}
                       isLoading={isTogglingActivation}
                     >
@@ -214,7 +215,7 @@ export const WatchStatus = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      data-test-subj="btnDeleteWatch"
+                      data-test-subj="deleteWatchButton"
                       onClick={() => {
                         setWatchesToDelete([watchId]);
                       }}
