@@ -32,6 +32,7 @@ export interface ChromeStart
 |  [getIsCollapsed$()](./kibana-plugin-public.chromestart.getiscollapsed$.md) | Get an observable of the current collapsed state of the chrome. |
 |  [getIsVisible$()](./kibana-plugin-public.chromestart.getisvisible$.md) | Get an observable of the current visibility state of the chrome. |
 |  [removeApplicationClass(className)](./kibana-plugin-public.chromestart.removeapplicationclass.md) | Remove a className added with <code>addApplicationClass()</code>. If className is unknown it is ignored. |
+|  [setAppTitle(appTitle)](./kibana-plugin-public.chromestart.setapptitle.md) | Sets the current app's title |
 |  [setBadge(badge)](./kibana-plugin-public.chromestart.setbadge.md) | Override the current badge |
 |  [setBrand(brand)](./kibana-plugin-public.chromestart.setbrand.md) | Set the brand configuration. |
 |  [setBreadcrumbs(newBreadcrumbs)](./kibana-plugin-public.chromestart.setbreadcrumbs.md) | Override the current set of breadcrumbs |

@@ -33,6 +33,7 @@ import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
 import { mapToObject } from '../utils/';
 import { DocLinksService } from './doc_links';
+import { RenderingService } from './rendering';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -67,6 +68,7 @@ export class CoreSystem {
   private readonly plugins: PluginsService;
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
+  private readonly rendering: RenderingService;
 
   private readonly rootDomElement: HTMLElement;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
@@ -100,6 +102,7 @@ export class CoreSystem {
     this.application = new ApplicationService();
     this.chrome = new ChromeService({ browserSupportsCsp });
     this.docLinks = new DocLinksService();
+    this.rendering = new RenderingService();
 
     const core: CoreContext = {};
     this.plugins = new PluginsService(core);
@@ -157,15 +160,15 @@ export class CoreSystem {
       const i18n = await this.i18n.start();
       const application = await this.application.start({ injectedMetadata });
 
+      const coreUiTargetDomElement = document.createElement('div');
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
-      const legacyPlatformTargetDomElement = document.createElement('div');
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
+      this.rootDomElement.appendChild(coreUiTargetDomElement);
       this.rootDomElement.appendChild(notificationsTargetDomElement);
-      this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
       const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
@@ -176,6 +179,7 @@ export class CoreSystem {
       });
       const chrome = await this.chrome.start({
         application,
+        docLinks,
         http,
         injectedMetadata,
         notifications,
@@ -195,10 +199,14 @@ export class CoreSystem {
       };
 
       const plugins = await this.plugins.start(core);
+      const rendering = this.rendering.start({
+        chrome,
+        targetDomElement: coreUiTargetDomElement,
+      });
       await this.legacyPlatform.start({
         core,
         plugins: mapToObject(plugins.contracts),
-        targetDomElement: legacyPlatformTargetDomElement,
+        targetDomElement: rendering.legacyTargetDomElement,
       });
     } catch (error) {
       if (this.fatalErrorsSetup) {

@@ -20,9 +20,8 @@ import '../account/account';
 import { Path } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
-import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
+import { chromeHeaderNavControlsRegistry, NavControlSide } from 'ui/registry/chrome_header_nav_controls';
 import { SecurityNavControl } from './nav_control_component';
-import { NavControlSide } from 'ui/chrome/directives/header_global_nav';
 
 chromeNavControlsRegistry.register(constant({
   name: 'security',

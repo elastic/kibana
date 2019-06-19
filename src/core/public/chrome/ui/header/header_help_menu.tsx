@@ -38,22 +38,21 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { HelpExtension } from 'ui/chrome';
-import { metadata } from '../../../../metadata';
-import { documentationLinks } from '../../../../documentation_links';
 
 import { HeaderExtension } from './header_extension';
+import { ChromeHelpExtension } from '../../chrome_service';
 
 interface Props {
-  helpExtension$: Rx.Observable<HelpExtension>;
+  helpExtension$: Rx.Observable<ChromeHelpExtension>;
   intl: InjectedIntl;
+  kibanaVersion: string;
   useDefaultContent?: boolean;
-  documentationLink?: string;
+  kibanaDocLink: string;
 }
 
 interface State {
   isOpen: boolean;
-  helpExtension?: HelpExtension;
+  helpExtension?: ChromeHelpExtension;
 }
 
 class HeaderHelpMenuUI extends Component<Props, State> {
@@ -86,7 +85,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
   }
 
   public render() {
-    const { intl, useDefaultContent, documentationLink } = this.props;
+    const { intl, kibanaVersion, useDefaultContent, kibanaDocLink } = this.props;
     const { helpExtension } = this.state;
 
     const defaultContent = useDefaultContent ? (
@@ -94,7 +93,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="common.ui.chrome.headerGlobalNav.helpMenuHelpDescription"
+              id="core.ui.chrome.headerGlobalNav.helpMenuHelpDescription"
               defaultMessage="Get updates, information, and answers in our documentation."
             />
           </p>
@@ -102,9 +101,9 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
         <EuiSpacer />
 
-        <EuiButton iconType="popout" href={documentationLink} target="_blank">
+        <EuiButton iconType="popout" href={kibanaDocLink} target="_blank">
           <FormattedMessage
-            id="common.ui.chrome.headerGlobalNav.helpMenuGoToDocumentation"
+            id="core.ui.chrome.headerGlobalNav.helpMenuGoToDocumentation"
             defaultMessage="Go to documentation"
           />
         </EuiButton>
@@ -116,7 +115,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         aria-expanded={this.state.isOpen}
         aria-haspopup="true"
         aria-label={intl.formatMessage({
-          id: 'common.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel',
+          id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel',
           defaultMessage: 'Help menu',
         })}
         onClick={this.onMenuButtonClick}
@@ -140,15 +139,15 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem>
               <FormattedMessage
-                id="common.ui.chrome.headerGlobalNav.helpMenuTitle"
+                id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
                 defaultMessage="Help"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="chrHeaderHelpMenu__version">
               <FormattedMessage
-                id="common.ui.chrome.headerGlobalNav.helpMenuVersion"
+                id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
                 defaultMessage="v {version}"
-                values={{ version: metadata.version }}
+                values={{ version: kibanaVersion }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -179,6 +178,5 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 export const HeaderHelpMenu = injectI18n(HeaderHelpMenuUI);
 
 HeaderHelpMenu.defaultProps = {
-  documentationLink: documentationLinks.kibana,
   useDefaultContent: true,
 };

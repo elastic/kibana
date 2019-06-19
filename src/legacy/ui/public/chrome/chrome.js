@@ -47,6 +47,7 @@ import { initSavedObjectClient } from './api/saved_object_client';
 import { initChromeBasePathApi } from './api/base_path';
 import { initChromeInjectedVarsApi } from './api/injected_vars';
 import { initHelpExtensionApi } from './api/help_extension';
+import { npStart } from '../new_platform';
 
 export const chrome = {};
 const internals = _.defaults(
@@ -79,6 +80,8 @@ initAngularApi(chrome, internals);
 initChromeControlsApi(chrome);
 templateApi(chrome, internals);
 initChromeThemeApi(chrome);
+
+npStart.core.chrome.setAppTitle(chrome.getAppTitle());
 
 const waitForBootstrap = new Promise(resolve => {
   chrome.bootstrap = function (targetDomElement) {

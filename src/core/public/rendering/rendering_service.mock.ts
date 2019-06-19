@@ -17,8 +17,25 @@
  * under the License.
  */
 
-import { kbnChromeProvider } from './kbn_chrome';
+import { RenderingStart, RenderingService } from './rendering_service';
 
-export function directivesProvider(chrome, internals) {
-  kbnChromeProvider(chrome, internals);
-}
+const createStartContractMock = () => {
+  const setupContract: jest.Mocked<RenderingStart> = {
+    legacyTargetDomElement: document.createElement('div'),
+  };
+  return setupContract;
+};
+
+type RenderingServiceContract = PublicMethodsOf<RenderingService>;
+const createMock = () => {
+  const mocked: jest.Mocked<RenderingServiceContract> = {
+    start: jest.fn(),
+  };
+  mocked.start.mockReturnValue(createStartContractMock());
+  return mocked;
+};
+
+export const renderingServiceMock = {
+  create: createMock,
+  createStartContract: createStartContractMock,
+};

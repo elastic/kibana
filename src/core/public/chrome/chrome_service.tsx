@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import React from 'react';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import * as Url from 'url';
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
 import { IconType } from '@elastic/eui';
 
 import { InjectedMetadataStart } from '../injected_metadata';
@@ -32,6 +33,8 @@ import { HttpStart } from '../http';
 import { ChromeNavLinks, NavLinksService } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { NavControlsService, ChromeNavControls } from './nav_controls';
+import { LoadingIndicator, Header } from './ui';
+import { DocLinksStart } from '../doc_links';
 
 export { ChromeNavControls, ChromeRecentlyAccessed };
 
@@ -71,6 +74,7 @@ interface ConstructorParams {
 
 interface StartDeps {
   application: ApplicationStart;
+  docLinks: DocLinksStart;
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
@@ -90,12 +94,14 @@ export class ChromeService {
 
   public async start({
     application,
+    docLinks,
     http,
     injectedMetadata,
     notifications,
-  }: StartDeps): Promise<ChromeStart> {
+  }: StartDeps): Promise<InternalChromeStart> {
     const FORCE_HIDDEN = isEmbedParamInHash();
 
+    const appTitle$ = new BehaviorSubject<string>('Kibana');
     const brand$ = new BehaviorSubject<ChromeBrand>({});
     const isVisible$ = new BehaviorSubject(true);
     const isCollapsed$ = new BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
@@ -103,6 +109,10 @@ export class ChromeService {
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
+
+    const navControls = this.navControls.start();
+    const navLinks = this.navLinks.start({ application, http });
+    const recentlyAccessed = await this.recentlyAccessed.start({ http });
 
     if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -113,9 +123,39 @@ export class ChromeService {
     }
 
     return {
-      navControls: this.navControls.start(),
-      navLinks: this.navLinks.start({ application, http }),
-      recentlyAccessed: await this.recentlyAccessed.start({ http }),
+      navControls,
+      navLinks,
+      recentlyAccessed,
+
+      getComponent: () => (
+        <React.Fragment>
+          <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
+
+          <div className="header-global-wrapper hide-for-sharing" data-test-subj="headerGlobalNav">
+            <Header
+              appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
+              badge$={badge$.pipe(takeUntil(this.stop$))}
+              basePath={http.basePath}
+              breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+              kibanaDocLink={docLinks.links.kibana}
+              forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
+              helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+              homeHref={http.basePath.prepend('/app/kibana#/home')}
+              isVisible$={isVisible$.pipe(
+                map(visibility => (FORCE_HIDDEN ? false : visibility)),
+                takeUntil(this.stop$)
+              )}
+              kibanaVersion={injectedMetadata.getKibanaVersion()}
+              navLinks$={navLinks.getNavLinks$()}
+              recentlyAccessed$={recentlyAccessed.get$()}
+              navControlsLeft$={navControls.getLeft$()}
+              navControlsRight$={navControls.getRight$()}
+            />
+          </div>
+        </React.Fragment>
+      ),
+
+      setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
 
       getBrand$: () => brand$.pipe(takeUntil(this.stop$)),
 
@@ -201,6 +241,15 @@ export interface ChromeStart {
   navControls: ChromeNavControls;
   /** {@inheritdoc ChromeRecentlyAccessed} */
   recentlyAccessed: ChromeRecentlyAccessed;
+
+  /**
+   * Sets the current app's title
+   *
+   * @internalRemarks
+   * This should be handled by the application service once it is in charge
+   * of mounting applications.
+   */
+  setAppTitle(appTitle: string): void;
 
   /**
    * Get an observable of the current brand information.
@@ -293,4 +342,13 @@ export interface ChromeStart {
    * Override the current set of custom help content
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
+}
+
+/** @internal */
+export interface InternalChromeStart extends ChromeStart {
+  /**
+   * Used only by MountingService to render the header UI
+   * @internal
+   */
+  getComponent(): JSX.Element;
 }

@@ -96,6 +96,7 @@ beforeEach(() => {
     application: {
       capabilities: mockStartDeps.application.capabilities,
     },
+    chrome: omit(mockStartDeps.chrome, 'getComponent'),
   };
 
   // Reset these for each test.
