@@ -16,11 +16,16 @@ import {
   EuiComboBox,
   EuiCallOut,
 } from '@elastic/eui';
-import { IndexPatternColumn, OperationType, FieldBasedIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
+import classNames from 'classnames';
+import {
+  IndexPatternColumn,
+  OperationType,
+  FieldBasedIndexPatternColumn,
+  IndexPatternPrivateState,
+} from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
 import { operationDefinitionMap, getOperations, getOperationDisplay } from '../operations';
 import { hasField, getColumnOrder } from '../state_helpers';
-import classNames from 'classnames';
 
 export interface SettingsProps extends IndexPatternDimensionPanelProps {
   selectedColumn: IndexPatternColumn;
