@@ -11,7 +11,6 @@ declare module '@elastic/eui' {
   export const EuiCodeEditor: React.SFC<any>;
   export const Query: any;
   export const EuiCard: any;
-  export const EuiSuperSelect: React.SFC<any>;
 }
 
 declare module '@elastic/eui/lib/services/format' {
