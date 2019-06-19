@@ -27,7 +27,7 @@ const module = uiModules.get('kibana');
 module.directive('kbnTopNav2', (reactDirective) => {
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
-    ['config'],
+    undefined,
     {},
     {}
   );
