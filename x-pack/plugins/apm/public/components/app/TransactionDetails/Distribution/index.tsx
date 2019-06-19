@@ -90,6 +90,7 @@ const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
 interface Props {
   distribution?: ITransactionDistributionAPIResponse;
   urlParams: IUrlParams;
+  loading: boolean;
 }
 
 export const TransactionDistribution: FunctionComponent<Props> = (
@@ -97,7 +98,8 @@ export const TransactionDistribution: FunctionComponent<Props> = (
 ) => {
   const {
     distribution,
-    urlParams: { transactionId, traceId, transactionType }
+    urlParams: { transactionId, traceId, transactionType },
+    loading
   } = props;
 
   const formatYShort = useCallback(getFormatYShort(transactionType), [
@@ -125,11 +127,14 @@ export const TransactionDistribution: FunctionComponent<Props> = (
         })
       });
     },
-    [distribution]
+    [distribution, loading]
   );
 
   useEffect(
     () => {
+      if (loading) {
+        return;
+      }
       const selectedSampleIsAvailable = distribution
         ? !!distribution.buckets.find(
             bucket =>
@@ -145,7 +150,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
         redirectToDefaultSample();
       }
     },
-    [distribution, transactionId, traceId, redirectToDefaultSample]
+    [distribution, transactionId, traceId, redirectToDefaultSample, loading]
   );
 
   if (!distribution || !distribution.totalHits || !traceId || !transactionId) {

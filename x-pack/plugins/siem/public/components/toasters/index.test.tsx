@@ -59,7 +59,7 @@ describe('Toaster', () => {
           if (toasts.length === 0) {
             dispatch({ type: 'addToaster', toast: mockToast });
           }
-        });
+        }, []);
         return (
           <>
             <button

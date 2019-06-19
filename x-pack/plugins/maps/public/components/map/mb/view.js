@@ -508,7 +508,14 @@ export class MBMapContainer extends React.Component {
   };
 
   render() {
-    return (<div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>);
+    return (
+      <div
+        id="mapContainer"
+        className="mapContainer"
+        ref="mapContainer"
+        data-test-subj="mapContainer"
+      />
+    );
   }
 }
 

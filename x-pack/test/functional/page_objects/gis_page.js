@@ -16,6 +16,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
 
   function escapeLayerName(layerName) {
     return layerName.split(' ').join('_');
@@ -436,6 +437,19 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
       await PageObjects.timePicker.pauseAutoRefresh();
       await this.waitForLayersToLoad();
+    }
+
+    async lockTooltipAtPosition(xOffset, yOffset) {
+      await retry.try(async () => {
+        const mapContainerElement = await testSubjects.find('mapContainer');
+        await browser.moveMouseTo(mapContainerElement, xOffset, yOffset);
+        await browser.clickMouseButton(mapContainerElement, xOffset, yOffset);
+        // Close button is only displayed with tooltip is locked
+        const hasCloseButton = await testSubjects.exists('mapTooltipCloseButton');
+        if (!hasCloseButton) {
+          throw new Error('Tooltip is not locked at position');
+        }
+      });
     }
   }
   return new GisPage();
