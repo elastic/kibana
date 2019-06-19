@@ -17,5 +17,4 @@
  * under the License.
  */
 
-import './kbn_top_nav';
-import './kbn_top_nav2';
+export { TopNavMenu } from './top_nav_menu';

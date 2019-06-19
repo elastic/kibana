@@ -17,5 +17,37 @@
  * under the License.
  */
 
-import './kbn_top_nav';
-import './kbn_top_nav2';
+import React, { Component } from 'react';
+
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { SearchBar } from 'plugins/data';
+import { TopNavMenuData, TopNavMenuItem } from './top_nav_menu_item';
+
+interface Props {
+  config: TopNavMenuData[];
+  name: string;
+  searchBarOptions?: any;
+}
+
+interface State {
+  isVisible: boolean;
+}
+
+export class TopNavMenu extends Component<Props, State> {
+  public render() {
+    return (
+      <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
+        {this.renderItems()}
+      </EuiFlexGroup>
+    );
+  }
+
+  private renderItems() {
+    return this.props.config.map((menuItem, i) => (
+      <EuiFlexItem grow={false} key={i}>
+        <TopNavMenuItem data={menuItem} />
+      </EuiFlexItem>
+    ));
+  }
+}

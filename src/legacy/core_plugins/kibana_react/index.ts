@@ -17,5 +17,26 @@
  * under the License.
  */
 
-import './kbn_top_nav';
-import './kbn_top_nav2';
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
+
+// eslint-disable-next-line import/no-default-export
+export default function DataPlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'kibana_react',
+    require: [],
+    publicDir: resolve(__dirname, 'public'),
+    config: (Joi: any) => {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+    init: (server: Legacy.Server) => ({}),
+    uiExports: {
+      injectDefaultVars: () => ({}),
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+    },
+  };
+
+  return new kibana.Plugin(config);
+}

@@ -18,3 +18,5 @@
  */
 
 export { SearchService, SearchSetup } from './search_service';
+
+export { SearchBar } from './search_bar';

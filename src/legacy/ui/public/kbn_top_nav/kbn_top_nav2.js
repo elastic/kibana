@@ -17,5 +17,18 @@
  * under the License.
  */
 
-import './kbn_top_nav';
-import './kbn_top_nav2';
+import 'ngreact';
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
+
+const module = uiModules.get('kibana');
+
+module.directive('kbnTopNav2', (reactDirective) => {
+  return reactDirective(
+    wrapInI18nContext(TopNavMenu),
+    undefined,
+    {},
+    {}
+  );
+});

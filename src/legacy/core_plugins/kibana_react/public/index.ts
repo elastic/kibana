@@ -17,5 +17,10 @@
  * under the License.
  */
 
-import './kbn_top_nav';
-import './kbn_top_nav2';
+// TODO these are imports from the old plugin world.
+// Once the new platform is ready, they can get removed
+// and handled by the platform itself in the setup method
+// of the ExpressionExectorService
+
+/** @public types */
+export { TopNavMenu } from './kbn_top_nav';
