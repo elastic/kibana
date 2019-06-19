@@ -28,7 +28,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 
 // @ts-ignore
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 
 // @ts-ignore
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';

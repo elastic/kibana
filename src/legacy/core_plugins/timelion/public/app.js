@@ -22,7 +22,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { capabilities } from 'ui/capabilities';
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
@@ -138,7 +138,6 @@ app.controller('timelion', function (
 
   const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
   const timezone = Private(timezoneProvider)();
-  const docTitle = Private(DocTitleProvider);
 
   const defaultExpression = '.es(*)';
   const savedSheet = $route.current.locals.savedSheet;

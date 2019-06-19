@@ -18,6 +18,7 @@
  */
 
 import { cloneDeep, get, omit, has, flow } from 'lodash';
+import { migrations730 as dashboardMigrations730 } from '../public/dashboard/migrations';
 
 function migrateIndexPattern(doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -422,6 +423,7 @@ export const migrations = {
     '7.0.0': (doc) => {
       // Set new "references" attribute
       doc.references = doc.references || [];
+
       // Migrate index pattern
       migrateIndexPattern(doc);
       // Migrate panels
@@ -455,6 +457,7 @@ export const migrations = {
       doc.attributes.panelsJSON = JSON.stringify(panels);
       return doc;
     },
+    '7.3.0': dashboardMigrations730
   },
   search: {
     '7.0.0': (doc) => {
