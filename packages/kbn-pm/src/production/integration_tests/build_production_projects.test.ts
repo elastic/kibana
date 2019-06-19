@@ -55,7 +55,7 @@ describe('kbn-pm production', () => {
     }
   }, timeout);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/39205
+  // FLAKY: https://github.com/elastic/kibana/issues/25077
   test.skip(
     'builds and copies projects for production',
     async () => {
