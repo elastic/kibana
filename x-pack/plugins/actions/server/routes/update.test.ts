@@ -59,7 +59,7 @@ it('calls the update function with proper parameters', async () => {
   expect(actionsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
   Object {
-    "data": Object {
+    "attributes": Object {
       "actionTypeConfig": Object {
         "foo": true,
       },

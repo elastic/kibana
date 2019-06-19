@@ -55,7 +55,7 @@ describe('create()', () => {
     });
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.create({
-      data: {
+      attributes: {
         description: 'my description',
         actionTypeId: 'my-action-type',
         actionTypeConfig: {},
@@ -104,7 +104,7 @@ Array [
     });
     await expect(
       actionsClient.create({
-        data: {
+        attributes: {
           description: 'my description',
           actionTypeId: 'my-action-type',
           actionTypeConfig: {},
@@ -123,7 +123,7 @@ Array [
     });
     await expect(
       actionsClient.create({
-        data: {
+        attributes: {
           description: 'my description',
           actionTypeId: 'unregistered-action-type',
           actionTypeConfig: {},
@@ -154,7 +154,7 @@ Array [
     });
     savedObjectsClient.create.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.create({
-      data: {
+      attributes: {
         description: 'my description',
         actionTypeId: 'my-action-type',
         actionTypeConfig: {
@@ -296,7 +296,7 @@ describe('update()', () => {
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.update({
       id: 'my-action',
-      data: {
+      attributes: {
         description: 'my description',
         actionTypeConfig: {},
       },
@@ -355,7 +355,7 @@ Array [
     await expect(
       actionsClient.update({
         id: 'my-action',
-        data: {
+        attributes: {
           description: 'my description',
           actionTypeConfig: {},
         },
@@ -395,7 +395,7 @@ Array [
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.update({
       id: 'my-action',
-      data: {
+      attributes: {
         description: 'my description',
         actionTypeConfig: {
           a: true,
