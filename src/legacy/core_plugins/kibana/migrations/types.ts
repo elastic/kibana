@@ -17,29 +17,23 @@
  * under the License.
  */
 
-import { SearchSource } from 'ui/courier';
-import { SavedObject } from 'ui/saved_objects/saved_object';
-import moment from 'moment';
-import { RefreshInterval } from 'ui/timefilter/timefilter';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
+import { SavedObjectReference } from '../../../../legacy/server/saved_objects/routes/types';
 
-export interface SavedObjectDashboard extends SavedObject {
-  id?: string;
-  copyOnSave: boolean;
-  timeRestore: boolean;
-  timeTo?: string;
-  timeFrom?: string;
-  title: string;
-  description?: string;
-  panelsJSON: string;
-  optionsJSON?: string;
-  // TODO: write a migration to rid of this, it's only around for bwc.
-  uiStateJSON?: string;
-  lastSavedTitle: string;
-  searchSource: SearchSource;
-  destroy: () => void;
-  refreshInterval?: RefreshInterval;
-  getQuery(): Query;
-  getFilters(): Filter[];
+export interface SavedObjectAttributes {
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: string;
+  };
+}
+
+export interface Doc<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+  references: SavedObjectReference[];
+  attributes: Attributes;
+  id: string;
+  type: string;
+}
+
+export interface DocPre700<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+  attributes: Attributes;
+  id: string;
+  type: string;
 }
