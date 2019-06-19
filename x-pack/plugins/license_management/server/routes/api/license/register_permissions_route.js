@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { BASE_PATH } from './base_path';
-export { EXTERNAL_LINKS } from './external_links';
-export { APP_PERMISSION } from './permissions';
+import { getPermissions } from '../../../lib/permissions';
+
+export function registerPermissionsRoute(router, xpackInfo) {
+  router.post('/permissions', (request) => {
+    return getPermissions(request, xpackInfo);
+  });
+}
