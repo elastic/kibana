@@ -235,7 +235,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const users = await testSubjects.findAll('roleRow');
       return mapAsync(users, async role => {
         const rolenameElement = await role.findByCssSelector('[data-test-subj="roleRowName"]');
-        const reservedRoleRow = await role.findByCssSelector('td:last-child');
+        const reservedRoleRow = await role.findByCssSelector('td:nth-last-child(2)');
 
         return {
           rolename: await rolenameElement.getVisibleText(),
