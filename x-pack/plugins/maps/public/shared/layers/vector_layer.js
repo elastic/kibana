@@ -441,12 +441,12 @@ export class VectorLayer extends AbstractLayer {
       mbGeoJSONSource.setData(featureCollection);
     }
 
-    const hasScaledGeoJsonProperties = this._style.setFeatureState(featureCollection, mbMap, this.getId());
+    const hasGeoJsonProperties = this._style.setFeatureState(featureCollection, mbMap, this.getId());
 
     // "feature-state" data expressions are not supported with layout properties.
     // To work around this limitation,
     // scaled layout properties (like icon-size) must fall back to geojson property values :(
-    if (hasScaledGeoJsonProperties) {
+    if (hasGeoJsonProperties) {
       mbGeoJSONSource.setData(featureCollection);
     }
   }

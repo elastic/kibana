@@ -314,21 +314,26 @@ export class VectorStyle extends AbstractStyle {
     return (<VectorStyleLegend styleProperties={styleProperties}/>);
   }
 
-  _getScaledFields() {
+  _getStyleFields() {
     return this.getDynamicPropertiesArray()
       .map(({ styleName, options }) => {
         const name = options.field.name;
 
         // "feature-state" data expressions are not supported with layout properties.
-        // To work around this limitation, some scaled values must fall back to geojson property values.
+        // To work around this limitation, some styling values must fall back to geojson property values.
         let supportsFeatureState = true;
+        let isScaled = true;
         if (styleName === 'iconSize'
           && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
           supportsFeatureState = false;
+        } else if (styleName === 'iconOrientation') {
+          supportsFeatureState = false;
+          isScaled = false;
         }
 
         return {
           supportsFeatureState,
+          isScaled,
           name,
           range: this._getFieldRange(name),
           computedName: VectorStyle.getComputedFieldName(name),
@@ -355,8 +360,8 @@ export class VectorStyle extends AbstractStyle {
       return;
     }
 
-    const scaledFields  = this._getScaledFields();
-    if (scaledFields.length === 0) {
+    const styleFields  = this._getStyleFields();
+    if (styleFields.length === 0) {
       return;
     }
 
@@ -370,21 +375,30 @@ export class VectorStyle extends AbstractStyle {
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
 
-      for (let j = 0; j < scaledFields.length; j++) {
-        const { supportsFeatureState, name, range, computedName } = scaledFields[j];
-        const unscaledValue = parseFloat(feature.properties[name]);
-        let scaledValue;
-        if (isNaN(unscaledValue) || !range) {//cannot scale
-          scaledValue = -1;//put outside range
-        } else if (range.delta === 0) {//values are identical
-          scaledValue = 1;//snap to end of color range
+      for (let j = 0; j < styleFields.length; j++) {
+        const { supportsFeatureState, isScaled, name, range, computedName } = styleFields[j];
+        const value = parseFloat(feature.properties[name]);
+        let styleValue;
+        if (isScaled) {
+          if (isNaN(value) || !range) {//cannot scale
+            styleValue = -1;//put outside range
+          } else if (range.delta === 0) {//values are identical
+            styleValue = 1;//snap to end of color range
+          } else {
+            styleValue = (feature.properties[name] - range.min) / range.delta;
+          }
         } else {
-          scaledValue = (feature.properties[name] - range.min) / range.delta;
+          if (isNaN(value)) {
+            styleValue = 0;
+          } else {
+            styleValue = value;
+          }
         }
+
         if (supportsFeatureState) {
-          tmpFeatureState[computedName] = scaledValue;
+          tmpFeatureState[computedName] = styleValue;
         } else {
-          feature.properties[computedName] = scaledValue;
+          feature.properties[computedName] = styleValue;
         }
       }
       tmpFeatureIdentifier.source = sourceId;
@@ -392,10 +406,10 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setFeatureState(tmpFeatureIdentifier, tmpFeatureState);
     }
 
-    const hasScaledGeoJsonProperties = scaledFields.some(({ supportsFeatureState }) => {
+    const hasGeoJsonProperties = styleFields.some(({ supportsFeatureState }) => {
       return !supportsFeatureState;
     });
-    return hasScaledGeoJsonProperties;
+    return hasGeoJsonProperties;
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {
@@ -557,6 +571,17 @@ export class VectorStyle extends AbstractStyle {
         ['coalesce', ['get', targetName], 0],
         0, iconSize.options.minSize / halfIconPixels,
         1, iconSize.options.maxSize / halfIconPixels
+      ]);
+    }
+
+    const iconOrientation = this._descriptor.properties.iconOrientation;
+    if (iconOrientation.type === VectorStyle.STYLE_TYPE.STATIC) {
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', iconOrientation.options.orientation);
+    } else if (_.has(iconOrientation, 'options.field.name')) {
+      const targetName = VectorStyle.getComputedFieldName(iconOrientation.options.field.name);
+      // Using property state instead of feature-state because layout properties do not support feature-state
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
+        'coalesce', ['get', targetName], 0
       ]);
     }
   }
