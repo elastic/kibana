@@ -19,7 +19,6 @@ interface Tab {
 interface Props {
   disableLinks: boolean;
   tabId: string;
-  timefilter: any;
   timeHistory: any;
 }
 
@@ -74,7 +73,7 @@ function getTabs(disableLinks: boolean): Tab[] {
   ];
 }
 
-export const NavigationMenu: SFC<Props> = ({ disableLinks, tabId, timefilter, timeHistory }) => {
+export const NavigationMenu: SFC<Props> = ({ disableLinks, tabId, timeHistory }) => {
   const [tabs] = useState(getTabs(disableLinks));
   const [selectedTabId, setSelectedTabId] = useState(tabId);
 
@@ -102,7 +101,7 @@ export const NavigationMenu: SFC<Props> = ({ disableLinks, tabId, timefilter, ti
     <Fragment>
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" className="MlNavigationMenu__topNav">
         <EuiFlexItem grow={false}>
-          <TopNav timefilter={timefilter} timeHistory={timeHistory} />
+          <TopNav timeHistory={timeHistory} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiTabs>{renderTabs()}</EuiTabs>
