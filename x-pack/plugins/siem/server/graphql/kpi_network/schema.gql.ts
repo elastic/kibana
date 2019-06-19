@@ -8,7 +8,7 @@ import gql from 'graphql-tag';
 
 export const kpiNetworkSchema = gql`
   type KpiNetworkHistogramData {
-    x: String
+    x: Float
     y: Float
   }
 
