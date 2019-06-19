@@ -19,7 +19,9 @@
 
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
-export { createError } from './create_error';
+import { createError } from './create_error';
+
+export { createError };
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { getType, getByAlias, castProvider } = require('@kbn/interpreter/common');
 
@@ -175,7 +177,7 @@ export function interpreterProvider(config: any) {
       argNames.map(argName => {
         const interpretFns = resolveArgFns[argName];
         if (!argDefs[argName].resolve) return interpretFns;
-        return Promise.all(interpretFns.map(fn => fn()));
+        return Promise.all(interpretFns.map((fn: any) => fn()));
       })
     );
 
