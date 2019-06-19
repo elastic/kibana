@@ -8,6 +8,7 @@ import React from 'react';
 import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { xyVisualizationSetup, xyVisualizationStop } from '../xy_visualization_plugin';
+import { metricVisualizationSetup, metricVisualizationStop } from '../metric_visualization_plugin';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
 
@@ -21,10 +22,12 @@ export class AppPlugin {
     // entry point to the app we have no choice until the new platform is ready
     const indexPattern = indexPatternDatasourceSetup();
     const xyVisualization = xyVisualizationSetup();
+    const metricVisualization = metricVisualizationSetup();
     const editorFrame = editorFrameSetup();
 
     editorFrame.registerDatasource('indexpattern', indexPattern);
     editorFrame.registerVisualization('xy', xyVisualization);
+    editorFrame.registerVisualization('metric', metricVisualization);
 
     this.instance = editorFrame.createInstance({});
 
@@ -39,6 +42,7 @@ export class AppPlugin {
     // TODO this will be handled by the plugin platform itself
     indexPatternDatasourceStop();
     xyVisualizationStop();
+    metricVisualizationStop();
     editorFrameStop();
   }
 }
