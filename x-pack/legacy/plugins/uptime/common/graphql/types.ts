@@ -35,6 +35,8 @@ export interface Query {
   getMonitorPageTitle?: MonitorPageTitle | null;
 
   getMonitorStates?: MonitorSummaryResult | null;
+
+  getStatesIndexStatus: StatesIndexStatus;
 }
 
 export interface PingResults {
@@ -579,6 +581,12 @@ export interface StateUrl {
   port?: number | null;
 
   scheme?: string | null;
+}
+
+export interface StatesIndexStatus {
+  indexExists: boolean;
+
+  docCount?: DocCount | null;
 }
 
 export interface DataPoint {
