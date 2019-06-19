@@ -76,7 +76,9 @@ export const getColumns = (
     },
     {
       field: DataFrameJobListColumn.configDestIndex,
-      name: i18n.translate('xpack.ml.dataframe.targetIndex', { defaultMessage: 'Target index' }),
+      name: i18n.translate('xpack.ml.dataframe.destinationIndex', {
+        defaultMessage: 'Destination index',
+      }),
       sortable: true,
       truncateText: true,
     },
