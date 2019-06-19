@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { AggParamEditorProps } from './agg_param_editor_props';
+export { AggParamEditorProps } from './components/default_editor_agg_param_props';

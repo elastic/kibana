@@ -19,11 +19,11 @@
 
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
-import { AggParamReactWrapper } from './agg_param_react_wrapper';
+import { DefaultEditorAggParam } from './components/default_editor_agg_param';
 
 uiModules
   .get('app/visualize')
-  .directive('visAggParamReactWrapper', reactDirective => reactDirective(wrapInI18nContext(AggParamReactWrapper), [
+  .directive('visAggParamReactWrapper', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggParam), [
     ['agg', { watchDepth: 'collection' }],
     ['aggParam', { watchDepth: 'reference' }],
     ['aggParams', { watchDepth: 'collection' }],

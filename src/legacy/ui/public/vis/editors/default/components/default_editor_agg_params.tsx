@@ -25,7 +25,7 @@ import { AggConfig, Vis } from 'ui/vis';
 import { DefaultEditorAggSelect } from './default_editor_agg_select';
 // @ts-ignore
 import { aggTypes, AggParam } from '../../../../agg_types';
-import { AggParamReactWrapper } from '../agg_param_react_wrapper';
+import { DefaultEditorAggParam } from './default_editor_agg_param';
 import {
   getAggParamsToRender,
   getError,
@@ -152,7 +152,7 @@ function DefaultEditorAggParams({
 
   const renderParam = (paramInstance, model: AggParamsItem) => {
     return (
-      <AggParamReactWrapper
+      <DefaultEditorAggParam
         key={`${paramInstance.aggParam.name}${agg.type ? agg.type.name : ''}`}
         showValidation={formIsTouched || model.touched ? !model.validity : false}
         onChange={onAggParamsChange}
