@@ -989,6 +989,51 @@ Array [
         });
       });
     });
+
+    describe('replaceMovAvgToMovFn()', () => {
+      let doc;
+
+      beforeEach(() => {
+        doc = {
+          attributes: {
+            title: 'VIS',
+            visState: `{"title":"VIS","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417",
+            "type":"timeseries","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(0,156,224,1)",
+            "split_mode":"terms","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"count",
+            "numerator":"FlightDelay:true"},{"settings":"","minimize":0,"window":5,"model":
+            "holt_winters","id":"23054fe0-8915-11e9-9b86-d3f94982620f","type":"moving_average","field":
+            "61ca57f2-469d-11e7-af02-69e470af7417","predict":1}],"separate_axis":0,"axis_position":"right",
+            "formatter":"number","chart_type":"line","line_width":"2","point_size":"0","fill":0.5,"stacked":"none",
+            "label":"Percent Delays","terms_size":"2","terms_field":"OriginCityName"}],"time_field":"timestamp",
+            "index_pattern":"kibana_sample_data_flights","interval":">=12h","axis_position":"left","axis_formatter":
+            "number","show_legend":1,"show_grid":1,"annotations":[{"fields":"FlightDelay,Cancelled,Carrier",
+            "template":"{{Carrier}}: Flight Delayed and Cancelled!","index_pattern":"kibana_sample_data_flights",
+            "query_string":"FlightDelay:true AND Cancelled:true","id":"53b7dff0-4c89-11e8-a66a-6989ad5a0a39",
+            "color":"rgba(0,98,177,1)","time_field":"timestamp","icon":"fa-exclamation-triangle",
+            "ignore_global_filters":1,"ignore_panel_filters":1,"hidden":true}],"legend_position":"bottom",
+            "axis_scale":"normal","default_index_pattern":"kibana_sample_data_flights","default_timefield":"timestamp"},
+            "aggs":[]}`,
+          },
+          migrationVersion: {
+            visualization: '7.2.0',
+          },
+          type: 'visualization',
+        };
+      });
+
+      test('should add some necessary moving_fn fields', () => {
+        const migratedDoc = migrate(doc);
+        const visState = JSON.parse(migratedDoc.attributes.visState);
+        const metric = visState.params.series[0].metrics[1];
+
+        expect(metric).toHaveProperty('model_type');
+        expect(metric).toHaveProperty('alpha');
+        expect(metric).toHaveProperty('beta');
+        expect(metric).toHaveProperty('gamma');
+        expect(metric).toHaveProperty('period');
+        expect(metric).toHaveProperty('multiplicative');
+      });
+    });
   });
   describe('7.3.0 tsvb', () => {
     const migrate = doc => migrations.visualization['7.3.0'](doc);
@@ -1019,15 +1064,18 @@ Array [
           {
             filter: 'Filter Bytes Test:>1000',
             split_filters: [{ filter: 'bytes:>1000' }],
-          }
-        ]
+          },
+        ],
       };
       const markdownDoc = generateDoc({ params: markdownParams });
       const migratedMarkdownDoc = migrate(markdownDoc);
       const markdownSeries = JSON.parse(migratedMarkdownDoc.attributes.visState).params.series;
-      expect(markdownSeries[0].filter.query).toBe(JSON.parse(markdownDoc.attributes.visState).params.series[0].filter);
-      expect(markdownSeries[0].split_filters[0].filter.query)
-        .toBe(JSON.parse(markdownDoc.attributes.visState).params.series[0].split_filters[0].filter);
+      expect(markdownSeries[0].filter.query).toBe(
+        JSON.parse(markdownDoc.attributes.visState).params.series[0].filter
+      );
+      expect(markdownSeries[0].split_filters[0].filter.query).toBe(
+        JSON.parse(markdownDoc.attributes.visState).params.series[0].split_filters[0].filter
+      );
     });
     it('should change series item filters from a string into an object for all filters', () => {
       const params = {
@@ -1037,16 +1085,22 @@ Array [
           {
             filter: 'Filter Bytes Test:>1000',
             split_filters: [{ filter: 'bytes:>1000' }],
-          }
+          },
         ],
         annotations: [{ query_string: 'bytes:>1000' }],
       };
       const timeSeriesDoc = generateDoc({ params: params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       const timeSeriesParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
-      expect(Object.keys(timeSeriesParams.series[0].filter)).toEqual(expect.arrayContaining(['query', 'language']));
-      expect(Object.keys(timeSeriesParams.series[0].split_filters[0].filter)).toEqual(expect.arrayContaining(['query', 'language']));
-      expect(Object.keys(timeSeriesParams.annotations[0].query_string)).toEqual(expect.arrayContaining(['query', 'language']));
+      expect(Object.keys(timeSeriesParams.series[0].filter)).toEqual(
+        expect.arrayContaining(['query', 'language'])
+      );
+      expect(Object.keys(timeSeriesParams.series[0].split_filters[0].filter)).toEqual(
+        expect.arrayContaining(['query', 'language'])
+      );
+      expect(Object.keys(timeSeriesParams.annotations[0].query_string)).toEqual(
+        expect.arrayContaining(['query', 'language'])
+      );
     });
     it('should not fail on a metric visualization without a filter in a series item', () => {
       const params = { type: 'metric', series: [{}, {}, {}] };
