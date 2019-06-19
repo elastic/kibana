@@ -46,15 +46,50 @@ export function getMakiSymbolSvg(symbolId) {
 
 export function getMakiSymbolAnchor(symbolId) {
   switch (symbolId) {
-    case 'embassy-11':
-    case 'embassy-15':
-    case 'marker-11':
-    case 'marker-15':
-    case 'marker-stroked-11':
-    case 'marker-stroked-15':
+    case 'embassy':
+    case 'marker':
+    case 'marker-stroked':
       return 'bottom';
     default:
       return 'center';
+  }
+}
+
+export function getMakiSymbolRotationOffset(symbolId) {
+  switch (symbolId) {
+    case 'american-football':
+    case 'aquarium':
+    case 'pitch':
+    case 'snowmobile':
+      return 90;
+    case 'bicycle':
+    case 'bicycle-share':
+    case 'cinema':
+    case 'dog-park':
+    case 'heliport':
+    case 'horse-riding':
+    case 'scooter':
+    case 'shoe':
+    case 'skateboard':
+    case 'slaughterhouse':
+    case 'swimming':
+    case 'wheelchair':
+    case 'zoo':
+      return -90;
+    case 'confectionery':
+    case 'hardware':
+    case 'karaoke':
+    case 'logging':
+    case 'rocket':
+    case 'table-tennis':
+    case 'telephone':
+    case 'tennis':
+      return -45;
+    case 'restaurant-pizza':
+    case 'skiing':
+      return -135;
+    default:
+      return 0;
   }
 }
 

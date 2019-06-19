@@ -18,6 +18,7 @@ import { VECTOR_SHAPE_TYPES } from '../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
 import {
   getMakiSymbolAnchor,
+  getMakiSymbolRotationOffset,
   LARGE_MAKI_ICON_SIZE,
   SMALL_MAKI_ICON_SIZE,
   HALF_LARGE_MAKI_ICON_SIZE
@@ -575,13 +576,19 @@ export class VectorStyle extends AbstractStyle {
     }
 
     const iconOrientation = this._descriptor.properties.iconOrientation;
+    const rotationOffset = getMakiSymbolRotationOffset(symbolId);
     if (iconOrientation.type === VectorStyle.STYLE_TYPE.STATIC) {
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', iconOrientation.options.orientation);
+      mbMap.setLayoutProperty(
+        symbolLayerId,
+        'icon-rotate',
+        rotationOffset + iconOrientation.options.orientation);
     } else if (_.has(iconOrientation, 'options.field.name')) {
       const targetName = VectorStyle.getComputedFieldName(iconOrientation.options.field.name);
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
-        'coalesce', ['get', targetName], 0
+        '+',
+        rotationOffset,
+        ['coalesce', ['get', targetName], 0]
       ]);
     }
   }
