@@ -5,7 +5,7 @@
  */
 
 import { SpacesPlugin } from '../../../../spaces/types';
-import { OptionalPlugin } from '../optional_plugin';
+import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 
 test(`checkPrivileges.atSpace when spaces is enabled`, async () => {

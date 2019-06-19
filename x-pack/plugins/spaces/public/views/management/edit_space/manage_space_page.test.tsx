@@ -4,35 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 jest.mock('ui/kfetch', () => ({
-  kfetch: () => Promise.resolve([{ id: 'foo', name: 'foo', app: [], privileges: {} }]),
+  kfetch: () => Promise.resolve([{ id: 'feature-1', name: 'feature 1' }]),
 }));
+import '../../../__mocks__/ui_capabilities';
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';
 import { SectionPanel } from './section_panel';
+import { spacesManagerMock } from '../../../lib/mocks';
 
 const space = {
   id: 'my-space',
   name: 'My Space',
   disabledFeatures: [],
 };
-const buildMockChrome = () => ({
-  addBasePath: (path: string) => path,
-});
 
 describe('ManageSpacePage', () => {
   it('allows a space to be created', async () => {
-    const mockHttp = {
-      delete: jest.fn(() => Promise.resolve()),
-    };
-    const mockChrome = buildMockChrome();
-
-    const spacesManager = new SpacesManager(mockHttp, mockChrome, '/');
+    const spacesManager = spacesManagerMock.create();
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
 
     const spacesNavState: SpacesNavState = {
@@ -71,26 +64,15 @@ describe('ManageSpacePage', () => {
   });
 
   it('allows a space to be updated', async () => {
-    const mockHttp = {
-      get: jest.fn(async () =>
-        Promise.resolve({
-          data: {
-            id: 'existing-space',
-            name: 'Existing Space',
-            description: 'hey an existing space',
-            color: '#aabbcc',
-            initials: 'AB',
-            disabledFeatures: [],
-          },
-        })
-      ),
-      delete: jest.fn(() => Promise.resolve()),
-    };
-    const mockChrome = buildMockChrome();
-
-    const spacesManager = new SpacesManager(mockHttp, mockChrome, '/');
-    spacesManager.getSpace = jest.fn(spacesManager.getSpace);
-    spacesManager.updateSpace = jest.fn(spacesManager.updateSpace);
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.getSpace = jest.fn().mockResolvedValue({
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+    });
 
     const spacesNavState: SpacesNavState = {
       getActiveSpace: () => space,
@@ -107,7 +89,7 @@ describe('ManageSpacePage', () => {
 
     await waitForDataLoad(wrapper);
 
-    expect(mockHttp.get).toHaveBeenCalledWith('/api/spaces/space/existing-space');
+    expect(spacesManager.getSpace).toHaveBeenCalledWith('existing-space');
 
     await Promise.resolve();
 
@@ -123,31 +105,20 @@ describe('ManageSpacePage', () => {
       description: 'some description',
       color: '#aabbcc',
       initials: 'AB',
-      disabledFeatures: ['foo'],
+      disabledFeatures: ['feature-1'],
     });
   });
 
   it('warns when updating features in the active space', async () => {
-    const mockHttp = {
-      get: jest.fn(async () =>
-        Promise.resolve({
-          data: {
-            id: 'my-space',
-            name: 'Existing Space',
-            description: 'hey an existing space',
-            color: '#aabbcc',
-            initials: 'AB',
-            disabledFeatures: [],
-          },
-        })
-      ),
-      delete: jest.fn(() => Promise.resolve()),
-    };
-    const mockChrome = buildMockChrome();
-
-    const spacesManager = new SpacesManager(mockHttp, mockChrome, '/');
-    spacesManager.getSpace = jest.fn(spacesManager.getSpace);
-    spacesManager.updateSpace = jest.fn(spacesManager.updateSpace);
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.getSpace = jest.fn().mockResolvedValue({
+      id: 'my-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+    });
 
     const spacesNavState: SpacesNavState = {
       getActiveSpace: () => space,
@@ -164,7 +135,7 @@ describe('ManageSpacePage', () => {
 
     await waitForDataLoad(wrapper);
 
-    expect(mockHttp.get).toHaveBeenCalledWith('/api/spaces/space/my-space');
+    expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
 
     await Promise.resolve();
 
@@ -194,26 +165,15 @@ describe('ManageSpacePage', () => {
   });
 
   it('does not warn when features are left alone in the active space', async () => {
-    const mockHttp = {
-      get: jest.fn(async () =>
-        Promise.resolve({
-          data: {
-            id: 'my-space',
-            name: 'Existing Space',
-            description: 'hey an existing space',
-            color: '#aabbcc',
-            initials: 'AB',
-            disabledFeatures: [],
-          },
-        })
-      ),
-      delete: jest.fn(() => Promise.resolve()),
-    };
-    const mockChrome = buildMockChrome();
-
-    const spacesManager = new SpacesManager(mockHttp, mockChrome, '/');
-    spacesManager.getSpace = jest.fn(spacesManager.getSpace);
-    spacesManager.updateSpace = jest.fn(spacesManager.updateSpace);
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.getSpace = jest.fn().mockResolvedValue({
+      id: 'my-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+    });
 
     const spacesNavState: SpacesNavState = {
       getActiveSpace: () => space,
@@ -230,7 +190,7 @@ describe('ManageSpacePage', () => {
 
     await waitForDataLoad(wrapper);
 
-    expect(mockHttp.get).toHaveBeenCalledWith('/api/spaces/space/my-space');
+    expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
 
     await Promise.resolve();
 

@@ -1068,7 +1068,7 @@ export interface KpiNetworkData {
 }
 
 export interface KpiNetworkHistogramData {
-  x?: string | null;
+  x?: number | null;
 
   y?: number | null;
 }
@@ -1096,7 +1096,7 @@ export interface KpiHostsData {
 }
 
 export interface KpiHostHistogramData {
-  x?: string | null;
+  x?: number | null;
 
   y?: number | null;
 }
@@ -5041,7 +5041,7 @@ export namespace KpiHostChartFields {
   export type Fragment = {
     __typename?: 'KpiHostHistogramData';
 
-    x?: string | null;
+    x?: number | null;
 
     y?: number | null;
   };
@@ -5051,7 +5051,7 @@ export namespace KpiNetworkChartFields {
   export type Fragment = {
     __typename?: 'KpiNetworkHistogramData';
 
-    x?: string | null;
+    x?: number | null;
 
     y?: number | null;
   };

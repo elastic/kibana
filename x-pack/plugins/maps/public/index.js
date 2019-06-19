@@ -21,7 +21,7 @@ import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import 'ui/kbn_top_nav';
 import { uiModules } from 'ui/modules';
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import 'ui/autoload/styles';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
@@ -33,7 +33,7 @@ import mapTemplate from './angular/map.html';
 import { MapListing } from './shared/components/map_listing';
 import { recentlyAccessed } from 'ui/persisted_log';
 
-import { data } from 'plugins/data';
+import { data } from 'plugins/data/setup';
 data.query.loadLegacyDirectives();
 
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
@@ -103,10 +103,8 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function (gisMapSavedObjectLoader, redirectWhenMissing, $route,
-        Private) {
+      map: function (gisMapSavedObjectLoader, redirectWhenMissing, $route) {
         const id = $route.current.params.id;
-        const docTitle = Private(DocTitleProvider);
         return gisMapSavedObjectLoader.get(id)
           .then((savedMap) => {
             recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);

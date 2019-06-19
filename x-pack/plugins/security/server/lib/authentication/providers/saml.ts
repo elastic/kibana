@@ -121,6 +121,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
     this.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
+    // We should get rid of `Bearer` scheme support as soon as Reporting doesn't need it anymore.
     let {
       authenticationResult,
       // eslint-disable-next-line prefer-const

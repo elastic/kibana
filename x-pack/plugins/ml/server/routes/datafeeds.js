@@ -9,13 +9,13 @@
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 
-export function dataFeedRoutes(server, commonRouteConfig) {
+export function dataFeedRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/datafeeds',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return callWithRequest('ml.datafeeds')
         .catch(resp => wrapError(resp));
     },
@@ -24,11 +24,11 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/datafeeds/{datafeedId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const datafeedId = request.params.datafeedId;
       return callWithRequest('ml.datafeeds', { datafeedId })
         .catch(resp => wrapError(resp));
@@ -38,11 +38,11 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/datafeeds/_stats',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return callWithRequest('ml.datafeedStats')
         .catch(resp => wrapError(resp));
     },
@@ -51,11 +51,11 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/datafeeds/{datafeedId}/_stats',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const datafeedId = request.params.datafeedId;
       return callWithRequest('ml.datafeedStats', { datafeedId })
         .catch(resp => wrapError(resp));
@@ -65,11 +65,11 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'PUT',
     path: '/api/ml/datafeeds/{datafeedId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const datafeedId = request.params.datafeedId;
       const body = request.payload;
       return callWithRequest('ml.addDatafeed', { datafeedId, body })
@@ -80,11 +80,11 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/datafeeds/{datafeedId}/_update',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const datafeedId = request.params.datafeedId;
       const body = request.payload;
       return callWithRequest('ml.updateDatafeed', { datafeedId, body })
@@ -95,11 +95,11 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'DELETE',
     path: '/api/ml/datafeeds/{datafeedId}',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const options = {
         datafeedId: request.params.datafeedId
       };
@@ -115,11 +115,11 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/datafeeds/{datafeedId}/_start',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const datafeedId = request.params.datafeedId;
       const start = request.payload.start;
       const end = request.payload.end;
@@ -131,11 +131,11 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'POST',
     path: '/api/ml/datafeeds/{datafeedId}/_stop',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const datafeedId = request.params.datafeedId;
       return callWithRequest('ml.stopDatafeed', { datafeedId })
         .catch(resp => wrapError(resp));
@@ -145,11 +145,11 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
+  route({
     method: 'GET',
     path: '/api/ml/datafeeds/{datafeedId}/_preview',
     handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const datafeedId = request.params.datafeedId;
       return callWithRequest('ml.datafeedPreview', { datafeedId })
         .catch(resp => wrapError(resp));

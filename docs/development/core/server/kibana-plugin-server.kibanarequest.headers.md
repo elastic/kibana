@@ -4,6 +4,8 @@
 
 ## KibanaRequest.headers property
 
+This property will be removed in future version of this class, please use the `getFilteredHeaders` method instead
+
 <b>Signature:</b>
 
 ```typescript
